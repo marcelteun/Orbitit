@@ -1,0 +1,23 @@
+# .gitignore file for PolyhedronBrowser
+#
+
+# DIRs
+attic
+logs
+polyhEqlHept
+tstThis
+
+# general files
+*.pyc
+.*
+*.tgz
+*.gz
+*.tar
+*org
+*bac
+!.gitignore
+
+# Files:
+# not a part of the browser, used to calculate special positions that will be
+# available in the browser.
+roots.py
