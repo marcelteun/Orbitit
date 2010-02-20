@@ -136,6 +136,9 @@ def readOffFile(fd, recreateEdges = True):
     return: an object of the SimpleShape class.
     """
     states = {'checkOff': 0, 'readSizes': 1, 'readVs': 2, 'readFs': 3, 'readOk': 4}
+    nrOfVs = 0
+    nrOfFs = 0
+    i = 0
     # A dictionary where the key and value pairs are exchanged, for debugging
     # purposes:
     statesRev   = {}
@@ -166,7 +169,6 @@ def readOffFile(fd, recreateEdges = True):
                 #assert nrOfEs + 2 == nrOfFs + nrOfVs
                 state = states['readVs']
                 Vs = []
-                i = 0
                 if debug: print 'will read', nrOfVs, 'Vs', nrOfFs, 'Fs (', nrOfEs, 'edges)'
             elif state == states['readVs']:
                 # the function assumes: no comments in beween (x, y, z) of Vs
@@ -1176,14 +1178,19 @@ class SimpleShape:
                 #print this.name, 'g:', g
                 Vs = [this.scalingFactor * (cgtypes.vec3(v) - g) + g for v in this.Vs]
 
-            # I am not sure if this is typical for windows, but I have seen that
-            # on windows the Vs cannot be an array of vec3...
-            if os.name == 'nt':
+            # At least on Ubuntu 8.04 conversion is not needed
+            # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
+            try:
+                glVertexPointerf(Vs)
+                Ns = this.Ns
+            except TypeError:
                 Vs = [ [v[0], v[1], v[2]] for v in Vs ]
-            glVertexPointerf(Vs)
-            if this.Ns != []:
-                assert len(this.Ns) == len(this.Vs), 'the normal vector array Ns should have as many normals as  vertices.'
-                glNormalPointerf(this.Ns)
+                print "glDraw: converting Vs(Ns); vec3 type not accepted"
+                glVertexPointerf(Vs)
+                Ns = [ [v[0], v[1], v[2]] for v in this.Ns ]
+            if Ns != []:
+                assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
+                glNormalPointerf(Ns)
             else:
                 glNormalPointerf(Vs)
             this.gl.updateVs = False
@@ -1384,10 +1391,7 @@ class SimpleShape:
         str = w('# file generated with python script by Marcel Tunnissen')
         str = w('# Vertices Faces Edges')
         nrOfFaces = len(this.Fs)
-        nrOfEdges = 0
-        for face in this.Fs:
-            nrOfEdges = nrOfEdges + len(face)
-        nrOfEdges = nrOfEdges/2
+        nrOfEdges = len(this.Es)/2
         str = w('%d %d %d' % (len(this.Vs), nrOfFaces, nrOfEdges))
         str = w('# Vertices')
         formatStr = '%%0.%df %%0.%df %%0.%df' % (precision, precision, precision)
@@ -1424,6 +1428,8 @@ class SimpleShape:
                 str = w(' %d %d %d' % (
                         color[0] * 255, color[1]*255, color[2]*255
                     ))
+        for i in range(nrOfEdges):
+            str = w('# edge: %d %d' % (this.Es[2*i], this.Es[2*i + 1]))
         str = w('# END')
         return str
 

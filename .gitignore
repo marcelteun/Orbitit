@@ -21,3 +21,5 @@ tstThis
 # not a part of the browser, used to calculate special positions that will be
 # available in the browser.
 roots.py
+filelist
+dirlist

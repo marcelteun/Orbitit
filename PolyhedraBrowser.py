@@ -37,6 +37,12 @@ from OpenGL.GLU import *
 from OpenGL.GL import *
 
 # TODO
+# 20100121
+# - SimpleShape should have a function that creates the normals: each face
+# should have a real normal. As a consequence the vertex array needs to be
+# expanded. When importing an off file, this should be done on default, and
+# perhaps a option is needed. In that case the GL_NORMALIZE should be disbaled.
+# - groups the scenes: heptagons, polychora, etc.
 # 20090111
 # class PolyhderaBrowser.FloatInput should set some default pars if not set by creator.
 # 20090911:
