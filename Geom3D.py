@@ -616,9 +616,11 @@ class Triangle:
             ]
         this.N = None
 
-    def normal(this):
+    def normal(this, normalise = False):
         if this.N == None:
             n = (this.v[1] - this.v[0]).cross(this.v[2] - this.v[0])
+            if normalise:
+                n = n.normalize()
             this.N = [n[0], n[1], n[2]]
             return this.N
         else:
@@ -735,6 +737,7 @@ class SimpleShape:
             print '%s.__init__(%s,..):' % (this, __class__, name)
         this.dimension = 3
         #print 'SimpleShape.Fs', Fs
+        this.fNs = []
         this.name = name
         this.glInitialised = False
         this.gl = Fields()
@@ -998,6 +1001,8 @@ class SimpleShape:
         """
         if this.dbgTrace:
             print '%s.setFs(%s,..):' % (this.__class__, this.name)
+        for f in Fs:
+            assert (len(f) > 2), "A face should have at least 3 vertices"
         this.Fs = Fs
         this.TriangulatedFs = this.triangulate(Fs)
         #print 'Fs', Fs
@@ -1053,6 +1058,11 @@ class SimpleShape:
         if this.dbgTrace:
             print '%s.setEnableDrawFaces(%s,..):' % (this.__class__, this.name)
         this.gl.drawFaces = draw
+
+    def createFaceNormals(this, normalise):
+        this.fNs = [Triangle(
+                this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
+            ).normal(normalise) for f in this.Fs]
 
     def divideColorWrapper(this):
         """
@@ -1408,26 +1418,29 @@ class SimpleShape:
         else:
             oneColor = False
             assert len(this.colorData[1]) == len(this.colorData[1])
+        def faceStr(face):
+            s = ('%d  ' % (len(face)))
+            for fi in face:
+                s = ('%s%d ' % (s, fi))
+            s = '%s %d %d %d' % (
+                    s, color[0] * 255, color[1]*255, color[2]*255
+                )
+            return s
         if oneColor:
             for face in this.Fs:
-                # N.B. same code as below
-                str = ('%s%d  ' % (str, len(face)))
-                for fi in face:
-                    str = ('%s%d ' % (str, fi))
-                str = w(' %d %d %d' % (
-                        color[0] * 255, color[1]*255, color[2]*255
-                    ))
+                # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
+                str = '%s%s\n' % (str, faceStr(face))
         else:
+            this.createFaceNormals(normalise = True)
             for i in range(nrOfFaces):
                 face = this.Fs[i]
                 color = this.colorData[0][this.colorData[1][i]]
-                # N.B. same code as above
-                str = ('%s%d  ' % (str, len(face)))
-                for fi in face:
-                    str = ('%s%d ' % (str, fi))
-                str = w(' %d %d %d' % (
-                        color[0] * 255, color[1]*255, color[2]*255
-                    ))
+                # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
+                str = '%s%s\n' % (str, faceStr(face))
+                fnStr = formatStr % (
+                        this.fNs[i][0], this.fNs[i][1], this.fNs[i][2]
+                    )
+                str = w('# face normal: %s' % fnStr)
         for i in range(nrOfEdges):
             str = w('# edge: %d %d' % (this.Es[2*i], this.Es[2*i + 1]))
         str = w('# END')
