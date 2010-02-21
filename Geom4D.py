@@ -517,6 +517,7 @@ class SimpleShape:
         if this.dbgTrace:
             print '%s.SimpleShape.__init__(%s,..):' % (this.__class__name)
         this.dimension = 4
+        this.generateNormals = False
         this.v = Geom3D.Fields()
         this.e = Geom3D.Fields()
         this.f = Geom3D.Fields()
@@ -994,10 +995,12 @@ class SimpleShape:
             this.glInit()
         if this.mapToSingeShape:
             this.glDrawSingleRemoveUnscaledEdges()
+            this.cell.generateNormals = this.generateNormals
             this.cell.glDraw()
         else:
             this.glDrawSplit()
             for cell in this.cells:
+                cell.generateNormals = this.generateNormals
                 cell.glDraw()
 
     def glDrawSingleRemoveUnscaledEdges(this):

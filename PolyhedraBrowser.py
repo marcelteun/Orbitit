@@ -37,12 +37,6 @@ from OpenGL.GLU import *
 from OpenGL.GL import *
 
 # TODO
-# 20100121
-# - SimpleShape should have a function that creates the normals: each face
-# should have a real normal. As a consequence the vertex array needs to be
-# expanded. When importing an off file, this should be done on default, and
-# perhaps a option is needed. In that case the GL_NORMALIZE should be disbaled.
-# - groups the scenes: heptagons, polychora, etc.
 # 20090111
 # class PolyhderaBrowser.FloatInput should set some default pars if not set by creator.
 # 20090911:
@@ -286,7 +280,6 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
-        glEnable(GL_NORMALIZE)
         glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
 
     def onPaint(this):
@@ -636,6 +629,12 @@ class MainPanel(wx.Panel):
                 'drawFaces': oldShape.getFaceProperties()['drawFaces']
             }
         this.canvas.shape.setFaceProperties(oldFSettings)
+        # if the shape generates the normals itself:
+        # TODO: handle that this.Ns is set correctly, i.e. normalised
+        if shape.generateNormals:
+            glDisable(GL_NORMALIZE)
+        else:
+            glEnable(GL_NORMALIZE)
         this.canvas.paint()
         del oldShape
 

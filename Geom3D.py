@@ -187,9 +187,14 @@ def readOffFile(fd, recreateEdges = True):
                 # the function assumes: no comments in beween "q i0 .. iq-1 r g b"
                 assert words[0].isdigit()
                 lenF = int(words[0])
-                assert len(words) >= lenF + 4
+                assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
                 Fs.append(  [  int(words[j])     for j in range(1,      lenF+1)])
-                cols.append([float(words[j])/255 for j in range(lenF+1, lenF+4)])
+                if len(words) == lenF + 1:
+                    cols.append([0.8, 0.8, 0.8])
+                else:
+                    cols.append(
+                        [float(words[j])/255 for j in range(lenF+1, lenF+4)]
+                    )
                 if debug: print 'F[', i, '] =',  Fs[-1]
                 if debug: print 'col[', i, '] =',  cols[-1]
                 i = i + 1
@@ -738,6 +743,7 @@ class SimpleShape:
         this.dimension = 3
         #print 'SimpleShape.Fs', Fs
         this.fNs = []
+        this.generateNormals = True
         this.name = name
         this.glInitialised = False
         this.gl = Fields()
@@ -792,6 +798,7 @@ class SimpleShape:
                 this.Vs = dict['Vs']
                 this.VsRange = xrange(len(dict['Vs']))
                 this.gl.updateVs = True
+                this.fNsUp2date = False
             if 'Ns' in dict and dict['Ns'] != None:
                 this.Ns = dict['Ns']
             if 'radius' in dict and dict['radius'] != None:
@@ -1008,6 +1015,7 @@ class SimpleShape:
         #print 'Fs', Fs
         this.FsLen = len(this.Fs)
         this.FsRange = xrange(this.FsLen)
+        this.fNsUp2date = False
 
     def setFaceColors(this, colors):
         """
@@ -1060,9 +1068,48 @@ class SimpleShape:
         this.gl.drawFaces = draw
 
     def createFaceNormals(this, normalise):
-        this.fNs = [Triangle(
-                this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
-            ).normal(normalise) for f in this.Fs]
+        if not this.fNsUp2date or this.fNsNormalised != normalise:
+            this.fNs = [Triangle(
+                    this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
+                ).normal(normalise) for f in this.Fs]
+            this.fNsUp2date = True
+            this.fNsNormalised = normalise
+
+    def createVertexNormals(this, normalise, Vs = None):
+        if Vs == None: Vs = this.Vs
+        this.createFaceNormals(normalise)
+        # only use a vertex once, since the normal can be different
+        this.nVs = []
+        this.vNs = []
+        for face, normal in zip(this.Fs, this.fNs):
+            this.vNs.extend([normal for vi in face])
+            this.nVs.extend([[Vs[vi][0], Vs[vi][1], Vs[vi][2]] for vi in face])
+        this.createVertexNormals_vi = -1
+        def inc():
+            this.createVertexNormals_vi += 1
+            return this.createVertexNormals_vi
+        this.nFs = [[inc() for i in face] for face in this.Fs]
+        this.TriangulatedFs = this.triangulate(this.nFs)
+        # TODO handle the case where there are vertices in this.Vs that are not
+        # indexed by this.Fs. These are lost now. You can also add an option
+        # whether this should be handled.
+        # I think that this might be the reason that it doesn't work so well for
+        # Polychora, though it is not so important, since for Geom4D.SimpleShape
+        # this will decrease performance too much anyway.
+        mapVi = [-1 for v in this.Vs]
+        nrOfOldVs = len(mapVi)
+        this.createVertexNormals_vi = 0
+        for oldFace, newFace in zip(this.Fs, this.nFs):
+            for oldVi, newVi in zip(oldFace, newFace):
+                if (mapVi[oldVi] == -1):
+                    mapVi[oldVi] = newVi
+                    if inc() >= nrOfOldVs:
+                        break
+            if this.createVertexNormals_vi >= nrOfOldVs: break
+        this.nEs = [mapVi[oldVi] for oldVi in this.Es]
+
+    def createDihedralAngles(this, normalise):
+        None
 
     def divideColorWrapper(this):
         """
@@ -1165,6 +1212,7 @@ class SimpleShape:
             for v in this.Vs: print v
             #print "glDraw this.Fs:", this.Fs
             #print "glDraw this.Es:", this.Es
+        Es = this.Es
         if not this.glInitialised:
             this.glInit()
         # have this one here and not in glDraw, so that a client can call this
@@ -1190,19 +1238,34 @@ class SimpleShape:
 
             # At least on Ubuntu 8.04 conversion is not needed
             # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
-            try:
-                glVertexPointerf(Vs)
-                Ns = this.Ns
-            except TypeError:
-                Vs = [ [v[0], v[1], v[2]] for v in Vs ]
-                print "glDraw: converting Vs(Ns); vec3 type not accepted"
-                glVertexPointerf(Vs)
-                Ns = [ [v[0], v[1], v[2]] for v in this.Ns ]
-            if Ns != []:
-                assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
+            if not this.generateNormals:
+                try:
+                    glVertexPointerf(Vs)
+                    Ns = this.Ns
+                except TypeError:
+                    Vs = [ [v[0], v[1], v[2]] for v in Vs ]
+                    print "glDraw: converting Vs(Ns); vec3 type not accepted"
+                    glVertexPointerf(Vs)
+                    Ns = [ [v[0], v[1], v[2]] for v in this.Ns ]
+                if Ns != []:
+                    assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
+                    glNormalPointerf(Ns)
+                else:
+                    glNormalPointerf(Vs)
+            elif this.Ns != [] and len(Ns) == len(Vs):
+                try:
+                    glVertexPointerf(Vs)
+                    Ns = this.Ns
+                except TypeError:
+                    Vs = [ [v[0], v[1], v[2]] for v in Vs ]
+                    print "glDraw: converting Vs(Ns); vec3 type not accepted"
+                    glVertexPointerf(Vs)
+                    Ns = [ [n[0], n[1], n[2]] for n in this.Ns ]
                 glNormalPointerf(Ns)
             else:
-                glNormalPointerf(Vs)
+                this.createVertexNormals(True, Vs)
+                glVertexPointerf(this.nVs)
+                glNormalPointerf(this.vNs)
             this.gl.updateVs = False
             this.VsSaved = Vs
         else:
@@ -1215,19 +1278,24 @@ class SimpleShape:
                 this.gl.sphere.draw(this.Vs[i])
         # EDGES
         if this.gl.drawEdges:
+            if this.generateNormals and (
+                this.Ns == [] or len(Ns) != len(Vs)):
+                Es = this.nEs
+            else:
+                Es = this.Es
             glColor(this.gl.eCol[0], this.gl.eCol[1], this.gl.eCol[2])
             if this.gl.useCylinderEs:
                 # draw edges as cylinders
                 for i in this.EsRange:
                     this.gl.cyl.draw(
-                            v0 = this.Vs[this.Es[i]],
-                            v1 = this.Vs[this.Es[i+1]]
+                            v0 = this.Vs[Es[i]],
+                            v1 = this.Vs[Es[i+1]]
                         )
             else:
                 # draw edges as lines
                 glPolygonOffset(1.0, 3.)
                 glDisable(GL_POLYGON_OFFSET_FILL)
-                glDrawElementsui(GL_LINES, this.Es)
+                glDrawElementsui(GL_LINES, Es)
                 glEnable(GL_POLYGON_OFFSET_FILL)
 
         # FACES
