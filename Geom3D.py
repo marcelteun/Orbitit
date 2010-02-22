@@ -911,7 +911,7 @@ class SimpleShape:
             if   i < j: edge = [i, j]
             elif i > j: edge = [j, i]
             else: return
-            if not edge in this.Es:
+            if not edge in Es2D:
                 Es2D.append(edge)
                 Es.extend(edge)
         for face in this.Fs:
@@ -1175,6 +1175,36 @@ class SimpleShape:
     def scale(this, scale):
         this.scalingFactor = scale
         this.gl.updateVs = True
+
+    def calculateSphereRadii(this, precision=12):
+        """Calculate the radii for the circumscribed, inscribed and mid sphere(s)
+        """
+        # calculate the circumscribed spheres:
+        this.spheresRadii = Fields()
+        this.spheresRadii.precision = precision
+        s = {}
+        for v in this.Vs:
+            r = round(v.length(), precision)
+            try: cnt = s[r]
+            except KeyError: cnt = 0
+            s[r] = cnt + 1
+        this.spheresRadii.circumscribed = s
+        s = {}
+        for i in this.EsRange:
+            v = (this.Vs[this.Es[i]] +  this.Vs[this.Es[i+1]]) / 2
+            r = round(v.length(), precision)
+            try: cnt = s[r]
+            except KeyError: cnt = 0
+            s[r] = cnt + 1
+        this.spheresRadii.mid = s
+        s = {}
+        for f in this.Fs:
+            v = reduce(lambda t, i: t + this.Vs[i], f, cgtypes.vec3(0)) / len(f)
+            r = round(v.length(), precision)
+            try: cnt = s[r]
+            except KeyError: cnt = 0
+            s[r] = cnt + 1
+        this.spheresRadii.inscribed = s
 
     def glInit(this):
         """
