@@ -213,6 +213,10 @@ def readOffFile(fd, recreateEdges = True):
     shape = SimpleShape(Vs, Fs, [], colors = (cols, fColors))
     if recreateEdges:
         shape.recreateEdges()
+    shape.calculateSphereRadii()
+    print 'inscribed sphere(s)    :', shape.spheresRadii.inscribed
+    print 'mid sphere(s)          :', shape.spheresRadii.mid
+    print 'circumscribed sphere(s):', shape.spheresRadii.circumscribed
     return shape
 
 class Fields:
@@ -1176,6 +1180,12 @@ class SimpleShape:
         this.scalingFactor = scale
         this.gl.updateVs = True
 
+    def calculateFacesG(this):
+        this.fGs = [
+            reduce(lambda t, i: t + this.Vs[i], f, cgtypes.vec3(0)) / len(f)
+            for f in this.Fs
+        ]
+
     def calculateSphereRadii(this, precision=12):
         """Calculate the radii for the circumscribed, inscribed and mid sphere(s)
         """
@@ -1198,9 +1208,11 @@ class SimpleShape:
             s[r] = cnt + 1
         this.spheresRadii.mid = s
         s = {}
-        for f in this.Fs:
-            v = reduce(lambda t, i: t + this.Vs[i], f, cgtypes.vec3(0)) / len(f)
-            r = round(v.length(), precision)
+        try: G = this.fGs
+        except AttributeError:
+            this.calculateFacesG()
+        for g in this.fGs:
+            r = round(g.length(), precision)
             try: cnt = s[r]
             except KeyError: cnt = 0
             s[r] = cnt + 1
@@ -2034,6 +2046,37 @@ class SimpleShape:
                         yOffset, precision = precision
                     )
                 )
+
+    mthPrjG = 0
+    def getDome(this, method = None, level = 1):
+        if method == None: method = this.mthPrjG
+        if method == this.mthPrjG:
+            Vs = this.Vs[:]
+            offset = len(this.Vs)
+            try: G = this.fGs
+            except AttributeError:
+                this.calculateFacesG()
+            r = reduce(max, this.spheresRadii.circumscribed.iterkeys())
+            Vs.extend([r * g.normalize() for g in this.fGs])
+            Fs = []
+            for f, i in zip(this.Fs, this.FsRange):
+                l = len(f)
+                Fs.extend(
+                    [[i+offset, f[j], f[(j+1) % l]] for j in range(l)]
+                )
+            vprop = this.getVertexProperties()
+            # TODO: keep/copy original properties:
+            del vprop['Vs']
+            del vprop['Ns']
+            eprop = this.getEdgeProperties()
+            del eprop['Es']
+            fprop = this.getFaceProperties()
+            del fprop['Fs']
+            col = fprop['colors']
+            del fprop['colors']
+            shape = SimpleShape(Vs, Fs, [])#, colors = (cols, fColors))
+            shape.recreateEdges()
+            print shape.toOffStr()
 
 class CompoundShape(SimpleShape):
     className = "CompoundShape"

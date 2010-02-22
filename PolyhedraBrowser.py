@@ -401,6 +401,7 @@ class MainWindow(wx.Frame):
             this.closeCurrentScene()
             this.filename = dlg.GetFilename()
             this.importDirName  = dlg.GetDirectory()
+            print "opening file:", this.filename
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
             # Create a compound shape to be able to add shapes later.
             newShape = Geom3D.CompoundShape(
@@ -416,6 +417,7 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
             this.importDirName  = dlg.GetDirectory()
+            print "opening file:", this.filename
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
             try:
                 # Create a compound shape to be able to add shapes later.
