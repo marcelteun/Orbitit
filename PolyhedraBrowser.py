@@ -303,6 +303,7 @@ class MainWindow(wx.Frame):
         menuBar = wx.MenuBar()
         menuBar.Append(this.createFileMenu(), '&File')
         menuBar.Append(this.createEditMenu(), '&Edit')
+        menuBar.Append(this.createToolsMenu(), '&Tools')
         menuBar.Append(this.createViewMenu(), '&View')
         this.SetMenuBar(menuBar)
 
@@ -372,6 +373,17 @@ class MainWindow(wx.Frame):
         menu.AppendItem(viewSettings)
         return menu
 
+    def createToolsMenu(this):
+        menu = wx.Menu()
+        tool = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                text = "&Dome\tCtrl+D"
+            )
+        this.Bind(wx.EVT_MENU, this.onDome, id = tool.GetId())
+        menu.AppendItem(tool)
+        return menu
+
     def createViewMenu(this):
         menu = wx.Menu()
         reset = wx.MenuItem(
@@ -417,7 +429,7 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
             this.importDirName  = dlg.GetDirectory()
-            print "opening file:", this.filename
+            print "adding file:", this.filename
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
             try:
                 # Create a compound shape to be able to add shapes later.
@@ -528,6 +540,12 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.SetFocus()
             this.viewSettingsWindow.Raise()
 
+    def onDome(this, e):
+        shape = this.panel.getShape().getDome()
+        if shape != None:
+            this.panel.setShape(shape)
+            this.SetTitle("Dome %s" % this.GetTitle())
+
     def onScene(this, e):
         id = e.GetId()
         thisScene = None
@@ -547,6 +565,7 @@ class MainWindow(wx.Frame):
         canvas = this.panel.getCanvas()
         this.scene = scene['class'](this, canvas)
         this.panel.setShape(this.scene.shape)
+        this.SetTitle(scene['lab'])
         canvas.resetOrientation()
 
     def onResetView(this, e):

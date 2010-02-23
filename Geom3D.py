@@ -213,10 +213,6 @@ def readOffFile(fd, recreateEdges = True):
     shape = SimpleShape(Vs, Fs, [], colors = (cols, fColors))
     if recreateEdges:
         shape.recreateEdges()
-    shape.calculateSphereRadii()
-    print 'inscribed sphere(s)    :', shape.spheresRadii.inscribed
-    print 'mid sphere(s)          :', shape.spheresRadii.mid
-    print 'circumscribed sphere(s):', shape.spheresRadii.circumscribed
     return shape
 
 class Fields:
@@ -629,7 +625,8 @@ class Triangle:
         if this.N == None:
             n = (this.v[1] - this.v[0]).cross(this.v[2] - this.v[0])
             if normalise:
-                n = n.normalize()
+                try: n = n.normalize()
+                except ZeroDivisionError: pass
             this.N = [n[0], n[1], n[2]]
             return this.N
         else:
@@ -1294,7 +1291,7 @@ class SimpleShape:
                     glNormalPointerf(Ns)
                 else:
                     glNormalPointerf(Vs)
-            elif this.Ns != [] and len(Ns) == len(Vs):
+            elif this.Ns != [] and len(this.Ns) == len(Vs):
                 try:
                     glVertexPointerf(Vs)
                     Ns = this.Ns
@@ -1321,7 +1318,7 @@ class SimpleShape:
         # EDGES
         if this.gl.drawEdges:
             if this.generateNormals and (
-                this.Ns == [] or len(Ns) != len(Vs)):
+                this.Ns == [] or len(this.Ns) != len(this.Vs)):
                 Es = this.nEs
             else:
                 Es = this.Es
@@ -1489,7 +1486,7 @@ class SimpleShape:
         return doc
 
 
-    def toOffStr(this, precision=15):
+    def toOffStr(this, precision=15, info = False):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
@@ -1502,22 +1499,27 @@ class SimpleShape:
         #print len(this.colorData[1]), len(this.Fs)
         #for face in this.Fs:
         #    print face
-        w = lambda s: '%s%s\n' % (str, s)
-        str = ''
-        str = w('OFF')
-        str = w('#')
-        str = w('# %s' % this.name)
-        str = w('#')
-        str = w('# file generated with python script by Marcel Tunnissen')
-        str = w('# Vertices Faces Edges')
+        w = lambda a: '%s%s\n' % (s, a)
+        s = ''
+        s = w('OFF')
+        s = w('#')
+        s = w('# %s' % this.name)
+        s = w('#')
+        s = w('# file generated with python script by Marcel Tunnissen')
+        if info:
+            this.calculateSphereRadii()
+            s = w('# inscribed sphere(s)    : %s' % str(this.spheresRadii.inscribed))
+            s = w('# mid sphere(s)          : %s' % str(this.spheresRadii.mid))
+            s = w('# circumscribed sphere(s): %s' % str(this.spheresRadii.circumscribed))
+        s = w('# Vertices Faces Edges')
         nrOfFaces = len(this.Fs)
         nrOfEdges = len(this.Es)/2
-        str = w('%d %d %d' % (len(this.Vs), nrOfFaces, nrOfEdges))
-        str = w('# Vertices')
+        s = w('%d %d %d' % (len(this.Vs), nrOfFaces, nrOfEdges))
+        s = w('# Vertices')
         formatStr = '%%0.%df %%0.%df %%0.%df' % (precision, precision, precision)
         for V in this.Vs:
-            str = w(formatStr % (V[0], V[1], V[2]))
-        str = w('# Sides and colours')
+            s = w(formatStr % (V[0], V[1], V[2]))
+        s = w('# Sides and colours')
         # this.colorData[1] = [] : use this.colorData[0][0]
         # this.colorData[1] = [c0, c1, .. cn] where ci is an index i
         #                     this.colorData[0]
@@ -1539,22 +1541,23 @@ class SimpleShape:
         if oneColor:
             for face in this.Fs:
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
-                str = '%s%s\n' % (str, faceStr(face))
+                s = '%s%s\n' % (s, faceStr(face))
         else:
             this.createFaceNormals(normalise = True)
             for i in range(nrOfFaces):
                 face = this.Fs[i]
                 color = this.colorData[0][this.colorData[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
-                str = '%s%s\n' % (str, faceStr(face))
+                s = '%s%s\n' % (s, faceStr(face))
                 fnStr = formatStr % (
                         this.fNs[i][0], this.fNs[i][1], this.fNs[i][2]
                     )
-                str = w('# face normal: %s' % fnStr)
-        for i in range(nrOfEdges):
-            str = w('# edge: %d %d' % (this.Es[2*i], this.Es[2*i + 1]))
-        str = w('# END')
-        return str
+                s = w('# face normal: %s' % fnStr)
+        if info:
+            for i in range(nrOfEdges):
+                s = w('# edge: %d %d' % (this.Es[2*i], this.Es[2*i + 1]))
+        s = w('# END')
+        return s
 
     def toPsPiecesStr(this,
             faceIndices = [],
@@ -2049,34 +2052,41 @@ class SimpleShape:
 
     mthPrjG = 0
     def getDome(this, method = None, level = 1):
+        shape = None
         if method == None: method = this.mthPrjG
+        fprop = this.getFaceProperties()
+        del fprop['Fs']
+        cols = fprop['colors']
+        del fprop['colors']
+        vprop = this.getVertexProperties()
+        # TODO: keep/copy original properties:
+        del vprop['Vs']
+        del vprop['Ns']
+        eprop = this.getEdgeProperties()
+        del eprop['Es']
         if method == this.mthPrjG:
             Vs = this.Vs[:]
             offset = len(this.Vs)
             try: G = this.fGs
             except AttributeError:
                 this.calculateFacesG()
-            r = reduce(max, this.spheresRadii.circumscribed.iterkeys())
+            try: outSphere = this.spheresRadii.circumscribed
+            except AttributeError:
+                this.calculateSphereRadii()
+                outSphere = this.spheresRadii.circumscribed
+            r = reduce(max, outSphere.iterkeys())
             Vs.extend([r * g.normalize() for g in this.fGs])
             Fs = []
+            colIndices = []
             for f, i in zip(this.Fs, this.FsRange):
                 l = len(f)
                 Fs.extend(
                     [[i+offset, f[j], f[(j+1) % l]] for j in range(l)]
                 )
-            vprop = this.getVertexProperties()
-            # TODO: keep/copy original properties:
-            del vprop['Vs']
-            del vprop['Ns']
-            eprop = this.getEdgeProperties()
-            del eprop['Es']
-            fprop = this.getFaceProperties()
-            del fprop['Fs']
-            col = fprop['colors']
-            del fprop['colors']
-            shape = SimpleShape(Vs, Fs, [])#, colors = (cols, fColors))
+                colIndices.extend([cols[1][i] for j in range(l)])
+            shape = SimpleShape(Vs, Fs, [], colors = (cols[0], colIndices))
             shape.recreateEdges()
-            print shape.toOffStr()
+        return shape
 
 class CompoundShape(SimpleShape):
     className = "CompoundShape"
