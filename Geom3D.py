@@ -1320,15 +1320,18 @@ class SimpleShape:
             if this.generateNormals and (
                 this.Ns == [] or len(this.Ns) != len(this.Vs)):
                 Es = this.nEs
+                Vs = this.nVs
             else:
                 Es = this.Es
+                Vs = this.Vs
             glColor(this.gl.eCol[0], this.gl.eCol[1], this.gl.eCol[2])
             if this.gl.useCylinderEs:
                 # draw edges as cylinders
+                #for i in range(0, len(this.Es), 2):
                 for i in this.EsRange:
                     this.gl.cyl.draw(
-                            v0 = this.Vs[Es[i]],
-                            v1 = this.Vs[Es[i+1]]
+                            v0 = Vs[Es[i]],
+                            v1 = Vs[Es[i+1]]
                         )
             else:
                 # draw edges as lines
@@ -2050,42 +2053,72 @@ class SimpleShape:
                     )
                 )
 
-    mthPrjG = 0
-    def getDome(this, method = None, level = 1):
+    def getDome(this, level = 2):
         shape = None
-        if method == None: method = this.mthPrjG
+        # check if level is in supported domain
+        if level < 1 or level > 2: return shape
         fprop = this.getFaceProperties()
-        del fprop['Fs']
         cols = fprop['colors']
-        del fprop['colors']
-        vprop = this.getVertexProperties()
-        # TODO: keep/copy original properties:
-        del vprop['Vs']
-        del vprop['Ns']
-        eprop = this.getEdgeProperties()
-        del eprop['Es']
-        if method == this.mthPrjG:
-            Vs = this.Vs[:]
-            offset = len(this.Vs)
-            try: G = this.fGs
-            except AttributeError:
-                this.calculateFacesG()
-            try: outSphere = this.spheresRadii.circumscribed
-            except AttributeError:
-                this.calculateSphereRadii()
-                outSphere = this.spheresRadii.circumscribed
-            r = reduce(max, outSphere.iterkeys())
-            Vs.extend([r * g.normalize() for g in this.fGs])
-            Fs = []
-            colIndices = []
-            for f, i in zip(this.Fs, this.FsRange):
+        Vs = this.Vs[:]
+        nrOrgVs = len(this.Vs)
+        try: G = this.fGs
+        except AttributeError:
+            this.calculateFacesG()
+        try: outSphere = this.spheresRadii.circumscribed
+        except AttributeError:
+            this.calculateSphereRadii()
+            outSphere = this.spheresRadii.circumscribed
+        R = reduce(max, outSphere.iterkeys())
+        Fs = []
+        colIndices = []
+        def addPrjVs(xVs):
+            # func global Vs, R
+            Vs.extend([R * x.normalize() for x in xVs])
+        def domiseLevel1(f, i):
+            # return xFs
+            # func global nrOrgVs, cols
+            # assumes that the gravity centres will be added to Vs in face order
+            # independently.
+            l = len(f)
+            return [[i+nrOrgVs, f[j], f[(j+1) % l]] for j in range(l)]
+        def domiseLevel2(f):
+            # f can only be a triangle: no check
+            # return (xVs, xFs) tuple
+            # func global: Vs
+            xVs = []
+            xVs = [(Vs[f[i]] + Vs[f[(i+1) % 3]]) / 2  for i in range(3)]
+            vOffset = len(Vs)
+            xFs = [
+                [vOffset, vOffset + 1, vOffset + 2],
+                [f[0]   , vOffset    , vOffset + 2],
+                [f[1]   , vOffset + 1, vOffset    ],
+                [f[2]   , vOffset + 2, vOffset + 1]
+            ]
+            return (xVs, xFs)
+
+        for f, i in zip(this.Fs, this.FsRange):
+            if level == 1:
+                xFs = domiseLevel1(f, i)
+                # add the gravity centres as assumed by domiseLevel1:
+                addPrjVs(this.fGs)
+            else:
                 l = len(f)
-                Fs.extend(
-                    [[i+offset, f[j], f[(j+1) % l]] for j in range(l)]
-                )
-                colIndices.extend([cols[1][i] for j in range(l)])
-            shape = SimpleShape(Vs, Fs, [], colors = (cols[0], colIndices))
-            shape.recreateEdges()
+                if l == 3:
+                    xVs, xFs = domiseLevel2(f)
+                    addPrjVs(xVs)
+                elif l > 3:
+                    tmpFs = domiseLevel1(f, i)
+                    # add the gravity centres as assumed by domiseLevel1:
+                    addPrjVs(this.fGs)
+                    xFs   = []
+                    for sf in tmpFs:
+                        xVs, sxFs = domiseLevel2(sf)
+                        addPrjVs(xVs)
+                        xFs.extend(sxFs)
+            Fs.extend(xFs)
+            colIndices.extend([cols[1][i] for j in range(len(xFs))])
+        shape = SimpleShape(Vs, Fs, [], colors = (cols[0], colIndices))
+        shape.recreateEdges()
         return shape
 
 class CompoundShape(SimpleShape):
