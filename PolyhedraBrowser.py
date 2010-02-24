@@ -303,8 +303,8 @@ class MainWindow(wx.Frame):
         menuBar = wx.MenuBar()
         menuBar.Append(this.createFileMenu(), '&File')
         menuBar.Append(this.createEditMenu(), '&Edit')
-        menuBar.Append(this.createToolsMenu(), '&Tools')
         menuBar.Append(this.createViewMenu(), '&View')
+        menuBar.Append(this.createToolsMenu(), '&Tools')
         this.SetMenuBar(menuBar)
 
     def createFileMenu(this):
@@ -378,10 +378,19 @@ class MainWindow(wx.Frame):
         tool = wx.MenuItem(
                 menu,
                 wx.ID_ANY,
-                text = "&Dome\tCtrl+D"
+                text = "&Dome Level 1\td"
             )
         this.Bind(wx.EVT_MENU, this.onDome, id = tool.GetId())
         menu.AppendItem(tool)
+        this.dome1 = tool
+        tool = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                text = "&Dome Level 2\tShift+D"
+            )
+        this.Bind(wx.EVT_MENU, this.onDome, id = tool.GetId())
+        menu.AppendItem(tool)
+        this.dome2 = tool
         return menu
 
     def createViewMenu(this):
@@ -540,8 +549,10 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.SetFocus()
             this.viewSettingsWindow.Raise()
 
-    def onDome(this, e):
-        shape = this.panel.getShape().getDome()
+    def onDome(this, event):
+        if this.dome1.GetId() == event.GetId(): level = 1
+        else: level = 2
+        shape = this.panel.getShape().getDome(level)
         if shape != None:
             this.panel.setShape(shape)
             this.SetTitle("Dome %s" % this.GetTitle())
