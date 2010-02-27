@@ -168,6 +168,8 @@ import Scene_24Cell
 import Scene_Rectified8Cell
 import Scene_Rectified24Cell
 
+#import tr_icosa
+
 SceneList = [
         {'lab': Scene_EqlHeptFromKite.Title, 'class': Scene_EqlHeptFromKite.Scene},
         {'lab': Scene_EqlHeptS4A4.Title,     'class': Scene_EqlHeptS4A4.Scene},
@@ -181,6 +183,7 @@ SceneList = [
         {'lab': Scene_24Cell.Title,  'class': Scene_24Cell.Scene},
         {'lab': Scene_Rectified8Cell.Title,  'class': Scene_Rectified8Cell.Scene},
         {'lab': Scene_Rectified24Cell.Title,  'class': Scene_Rectified24Cell.Scene},
+#        {'lab': tr_icosa.Title,  'class': tr_icosa.Scene},
     ]
 
 DefaultScene = 8 # Start with this scene

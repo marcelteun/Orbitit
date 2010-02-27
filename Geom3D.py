@@ -623,11 +623,10 @@ class Triangle:
 
     def normal(this, normalise = False):
         if this.N == None:
-            n = (this.v[1] - this.v[0]).cross(this.v[2] - this.v[0])
+            this.N = (this.v[1] - this.v[0]).cross(this.v[2] - this.v[0])
             if normalise:
-                try: n = n.normalize()
+                try: this.N = this.N.normalize()
                 except ZeroDivisionError: pass
-            this.N = [n[0], n[1], n[2]]
             return this.N
         else:
             return this.N
@@ -1069,6 +1068,9 @@ class SimpleShape:
         this.gl.drawFaces = draw
 
     def createFaceNormals(this, normalise):
+        # TODO use smarter sol than this.fNsNormalised != normalise:
+        # if already normalised, you never need to recalc
+        # if not yet normalised, but required, just normalise.
         if not this.fNsUp2date or this.fNsNormalised != normalise:
             this.fNs = [Triangle(
                     this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
@@ -1109,8 +1111,60 @@ class SimpleShape:
             if this.createVertexNormals_vi >= nrOfOldVs: break
         this.nEs = [mapVi[oldVi] for oldVi in this.Es]
 
-    def createDihedralAngles(this, normalise):
-        None
+    def createDihedralAngles(this, precision = 12):
+        this.createFaceNormals(normalise = False)
+        e2d = {}
+        d2e = {}
+        lFs = len(this.Fs)
+        def addDihedralAngle(fi, cFace, cfi, vi, i, viRef, e2d, d2e):
+            # fi: face index of face under investigation
+            # cFace: the face we are checking against.
+            # cfi: index of face we are checking against
+            # vi: vertex index we are looking at (which is part of the face
+            #     under investigation and of cFace)
+            # i: index of vi in cFace.
+            # viRef: the vertex that we are check for in cFace.
+            # e2d: dictionary mapping edges on dihedral angles, using index
+            #      tuples as keys
+            # d2e: dictionary mapping dihedral angles on edges, using angles as
+            #      tuples
+            _i = i - 1
+            if _i < 0: _i = len(cFace) - 1
+            i_ = i + 1
+            if i_ >= len(cFace): i_ = 0
+            # if the vertex vi - viRef is part of cFace
+            if (cFace[_i] == viRef or cFace[i_] == viRef):
+                # add the angle to d array.
+                if vi < viRef: t = (vi, viRef)
+                else:          t = (viRef, vi)
+                angle = math.pi - this.fNs[fi].angle(this.fNs[cfi])
+                angle = round(angle, precision)
+                try: e2d[t].append(angle)
+                except KeyError: e2d[t] = [angle]
+                try: d2e[angle].append(t)
+                except KeyError: d2e[angle] = [t]
+        for face, fi in zip(this.Fs, this.FsRange):
+            f_ = face[:]
+            f_.append(face[0])
+            l = len(f_)
+            for fii in range(1, l, 2):
+                vi = f_[fii]
+                vip = f_[fii-1] # previous x
+                #print fii, f_, '@', vi
+                if fii >= l-1:
+                    vin = -1 # no next
+                else:
+                    vin = f_[fii+1] # next
+                for nfi in range(fi+1, lFs):
+                    nFace = this.Fs[nfi]
+                    try: i = nFace.index(vi)
+                    except ValueError: i = -1
+                    if i >= 0:
+                        addDihedralAngle(fi, nFace, nfi, vi, i, vip, e2d, d2e)
+                        addDihedralAngle(fi, nFace, nfi, vi, i, vin, e2d, d2e)
+        this.e2d = e2d
+        this.d2e = d2e
+        return d2e
 
     def divideColorWrapper(this):
         """
@@ -1514,6 +1568,14 @@ class SimpleShape:
             s = w('# inscribed sphere(s)    : %s' % str(this.spheresRadii.inscribed))
             s = w('# mid sphere(s)          : %s' % str(this.spheresRadii.mid))
             s = w('# circumscribed sphere(s): %s' % str(this.spheresRadii.circumscribed))
+            d = this.createDihedralAngles()
+            for a, Es in d.iteritems():
+                s = w('#Dihedral angle: %0.12f rad (%0.12f degrees) for %d edges'
+                            % (a, a*Rad2Deg, len(Es))
+                        )
+                s = w('#             E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
+                #print 'Dihedral angle:', a, 'rad (', a*Rad2Deg, ' degrees ) found for', len(Es), 'edges'
+                #print '             E.g.', Es[0], Es[1], Es[2], 'etc'
         s = w('# Vertices Faces Edges')
         nrOfFaces = len(this.Fs)
         nrOfEdges = len(this.Es)/2
@@ -1555,7 +1617,8 @@ class SimpleShape:
                 fnStr = formatStr % (
                         this.fNs[i][0], this.fNs[i][1], this.fNs[i][2]
                     )
-                s = w('# face normal: %s' % fnStr)
+                if info:
+                    s = w('# face normal: %s' % fnStr)
         if info:
             for i in range(nrOfEdges):
                 s = w('# edge: %d %d' % (this.Es[2*i], this.Es[2*i + 1]))
