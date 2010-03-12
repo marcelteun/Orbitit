@@ -1111,6 +1111,24 @@ class SimpleShape:
             if this.createVertexNormals_vi >= nrOfOldVs: break
         this.nEs = [mapVi[oldVi] for oldVi in this.Es]
 
+    def createEdgeLengths(this, precision = 12):
+        e2l = {}
+        l2e = {}
+        for ei in this.EsRange:
+            vi0 = this.Es[ei]
+            vi1 = this.Es[ei+1]
+            if vi0 < vi1: t = (vi0, vi1)
+            else:         t = (vi1, vi0)
+            l = (cgtypes.vec3(this.Vs[vi1]) - cgtypes.vec3(this.Vs[vi0])
+                ).length()
+            e2l[t] = l
+            l = round(l, precision)
+            try: l2e[l].append(t)
+            except KeyError: l2e[l] = [t]
+        this.e2l = e2l
+        this.l2e = l2e
+        return l2e
+
     def createDihedralAngles(this, precision = 12):
         this.createFaceNormals(normalise = False)
         e2d = {}
@@ -1118,12 +1136,12 @@ class SimpleShape:
         lFs = len(this.Fs)
         def addDihedralAngle(fi, cFace, cfi, vi, i, viRef, e2d, d2e):
             # fi: face index of face under investigation
-            # cFace: the face we are checking against.
+            # cFace: the face we are checking against (a list of vertex indices)
             # cfi: index of face we are checking against
             # vi: vertex index we are looking at (which is part of the face
             #     under investigation and of cFace)
             # i: index of vi in cFace.
-            # viRef: the vertex that we are check for in cFace.
+            # viRef: the vertex that will be checked for in cFace.
             # e2d: dictionary mapping edges on dihedral angles, using index
             #      tuples as keys
             # d2e: dictionary mapping dihedral angles on edges, using angles as
@@ -1570,12 +1588,17 @@ class SimpleShape:
             s = w('# circumscribed sphere(s): %s' % str(this.spheresRadii.circumscribed))
             d = this.createDihedralAngles()
             for a, Es in d.iteritems():
-                s = w('#Dihedral angle: %0.12f rad (%0.12f degrees) for %d edges'
+                s = w('# Dihedral angle: %0.12f rad (%0.12f degrees) for %d edges'
                             % (a, a*Rad2Deg, len(Es))
                         )
-                s = w('#             E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
-                #print 'Dihedral angle:', a, 'rad (', a*Rad2Deg, ' degrees ) found for', len(Es), 'edges'
-                #print '             E.g.', Es[0], Es[1], Es[2], 'etc'
+                if len(Es) > 2:
+                    s = w('#                 E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
+            l2e = this.createEdgeLengths()
+            for l, Es in l2e.iteritems():
+                s = w('# Length: %0.12f for %d edges' % (l, len(Es))
+                        )
+                if len(Es) > 2:
+                    s = w('#         E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
         s = w('# Vertices Faces Edges')
         nrOfFaces = len(this.Fs)
         nrOfEdges = len(this.Es)/2

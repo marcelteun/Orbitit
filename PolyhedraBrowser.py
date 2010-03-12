@@ -466,10 +466,9 @@ class MainWindow(wx.Frame):
                     this.filename = '%s.off' % this.filename
                 else:
                     this.filename = '%soff' % this.filename
-            # TODO: check if file exists... do not overwrite on default
             fd = open(os.path.join(this.exportDirName, this.filename), 'w')
             # TODO precision through setting:
-            fd.write(this.panel.getShape().toOffStr())
+            fd.write(this.panel.getShape().toOffStr(info = False))
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
