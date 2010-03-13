@@ -94,6 +94,8 @@ V5 = math.sqrt(5)
 
 defaultFloatMargin = 1.0e-15
 
+vec = cgtypes.vec3
+
 def eq(a, b, margin = defaultFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
