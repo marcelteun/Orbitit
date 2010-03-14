@@ -39,6 +39,7 @@ Title = 'Create Polyhedron by Orbiting'
 class Shape(Geom3D.SimpleShape):
     def __init__(this):
         Geom3D.SimpleShape.__init__(this, [], [])
+        #this.dbgTrace = True
 
     def glInit(this):
         #Geom4D.SimpleShape.glInit(this)
@@ -90,26 +91,22 @@ class CtrlWin(wx.Frame):
         someSizer.Add(this.showGui[-1], 0, wx.EXPAND)
         this.__FsGuiIndex = len(this.showGui) - 1
 
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Print Vs"))
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Set Vs & Fs"))
         this.panel.Bind(
-            wx.EVT_BUTTON, this.onPrintVs, id = this.showGui[-1].GetId())
-        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Print Fs"))
-        this.panel.Bind(
-            wx.EVT_BUTTON, this.onPrintFs, id = this.showGui[-1].GetId())
+            wx.EVT_BUTTON, this.onSetVsFs, id = this.showGui[-1].GetId())
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         return ctrlSizer
 
-    def onPrintFs(this, e):
-        Fs = this.showGui[this.__FsGuiIndex].GetFs()
-        for f in Fs: print f
-        e.Skip()
-
-    def onPrintVs(this, e):
-        Vs = this.showGui[this.__VsGuiIndex].GetVs()
-        for v in Vs: print v
+    def onSetVsFs(this, e):
+        this.shape.setVs(this.showGui[this.__VsGuiIndex].GetVs())
+        this.shape.setFaceProperties(Fs = this.showGui[this.__FsGuiIndex].GetFs())
+        this.canvas.paint()
+        print 'Vs = ['
+        for v in this.shape.Vs: print v
+        print ']\n Fs = ['
+        for f in this.shape.Fs: print f
+        print ']'
         e.Skip()
 
     # move to general class

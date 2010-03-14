@@ -193,52 +193,6 @@ SceneList = [
 DefaultScene = 8 # Start with this scene
 DefaultScene = -1 # Start with this scene
 
-cubeVs = [
-        cgtypes.vec3(Geom3D.V2, 0, 1),
-        cgtypes.vec3(Geom3D.V2, 0, -1),
-        cgtypes.vec3(0, Geom3D.V2, 1),
-        cgtypes.vec3(0, Geom3D.V2, -1),
-        cgtypes.vec3(-Geom3D.V2, 0, 1),
-        cgtypes.vec3(-Geom3D.V2, 0, -1),
-        cgtypes.vec3(0, -Geom3D.V2, 1),
-        cgtypes.vec3(0, -Geom3D.V2, -1),
-    ]
-cubeFs = [
-        [0, 1, 3, 2],     # 0
-        [2, 3, 5, 4],     # 1
-        [4, 5, 7, 6],     # 2
-        [6, 7, 1, 0],     # 3
-        [0, 2, 4, 6],     # 4
-        [7, 5, 3, 1],     # 5
-    ]
-cubeEs = [
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 2, 2, 4, 4, 6, 6, 0,
-        1, 3, 3, 5, 5, 7, 7, 1,
-    ]
-
-simpleCube = Geom3D.SimpleShape(
-    Vs = cubeVs,
-    Fs = cubeFs,
-    Es = cubeEs,
-    colors = ([rgb.red], [0]),
-)
-
-classicCompoundOf3Cubes = Geom3D.SymmetricShape(
-    Vs = cubeVs,
-    Fs = cubeFs,
-    Es = cubeEs,
-    colors = [
-            ([rgb.red],    [0]),
-            ([rgb.yellow], [0]),
-            ([rgb.blue],   [0]),
-        ],
-    directIsometries = [
-            E,
-            cgtypes.quat(Geom3D.R1_4, cgtypes.vec3(1, 0, 0)),
-            cgtypes.quat(Geom3D.R1_4, cgtypes.vec3(0, 1, 0))
-        ]
-)
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def __init__(this, shape, *args, **kwargs):
         this.shape = shape
@@ -1312,7 +1266,7 @@ class ExportPsDialog(wx.Dialog):
 app = wx.PySimpleApp()
 frame = MainWindow(
         Canvas3DScene,
-        classicCompoundOf3Cubes,
+        Geom3D.SimpleShape([], []),
         None, wx.ID_ANY, "test",
         size = (430, 482),
         pos = wx.Point(980, 0)

@@ -31,6 +31,10 @@ import Geom3D
 #import os
 #from cgkit import cgtypes
 
+# TODO:
+# - add scroll bar for FacesInput and Vector3DSetInput
+# - filter Fs for FacesInput.GetFace (negative nrs, length 2, etc)
+
 class DisabledDropTarget(wx.TextDropTarget):
     def __init__(this, reason = 'for some reason', enableReason = True):
         this.reason = reason
@@ -83,7 +87,8 @@ class IntInput(wx.TextCtrl):
             # only allow one +, -, or .
             if not c in s:
                 # only allow + and - in the beginning
-                if this.GetInsertionPoint() == 0: 
+                print ' not c in s:', this.GetInsertionPoint()
+                if this.GetInsertionPoint() == 0:
                     # don't allow - if there's already a + and the other way
                     # around:
                     if c == '+':
@@ -92,6 +97,11 @@ class IntInput(wx.TextCtrl):
                     else:
                         if not '+' in s:
                             e.Skip()
+                else:
+                    # allow selected whole string start with -
+                    if this.GetSelection()[0] == 0 and c == '-':
+                        this.Replace(0, 1, '-0')
+                        this.SetSelection(1, 2)
         elif k in [
                 wx.WXK_BACK, wx.WXK_DELETE,
             ]:

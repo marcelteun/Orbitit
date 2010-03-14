@@ -772,6 +772,9 @@ class SimpleShape:
                 assert this.colorData[0][1] != [0]
             print this.colorData[1]
 
+    def setVs(this, Vs):
+        this.setVertexProperties(Vs = Vs)
+
     def setVertexProperties(this, dictPar = None, **kwargs):
         """
         Set the vertices and how/whether vertices are drawn in OpenGL.
@@ -925,6 +928,9 @@ class SimpleShape:
             addEdge(face[lastIndex], face[0])
         this.setEdgeProperties(Es = Es)
 
+    def setFs(this, Fs):
+        this.setFaceProperties(Fs = Fs)
+
     def setFaceProperties(this, dictPar = None, **kwargs):
         """
         Define the properties of the faces.
@@ -949,7 +955,7 @@ class SimpleShape:
             else: 
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
-                this.setFs(dict['Fs'])
+                this.__setFs(dict['Fs'])
             if 'colors' in dict and dict['colors'] != None:
                 this.setFaceColors(dict['colors'])
             this.divideColorWrapper()
@@ -1002,7 +1008,7 @@ class SimpleShape:
             ts.append(triF)
         return ts
 
-    def setFs(this, Fs):
+    def __setFs(this, Fs):
         """
         Define the shape faces
 
@@ -1018,6 +1024,9 @@ class SimpleShape:
         this.FsLen = len(this.Fs)
         this.FsRange = xrange(this.FsLen)
         this.fNsUp2date = False
+        # if you autogenerate the vertex normal, using the faces, you need to
+        # regenerate by setting this.gl.updateVs
+        this.gl.updateVs = this.generateNormals
 
     def setFaceColors(this, colors):
         """
@@ -1377,7 +1386,8 @@ class SimpleShape:
                 glNormalPointerf(Ns)
             else:
                 this.createVertexNormals(True, Vs)
-                glVertexPointerf(this.nVs)
+                if this.nVs != []:
+                    glVertexPointerf(this.nVs)
                 glNormalPointerf(this.vNs)
             this.gl.updateVs = False
             this.VsSaved = Vs
