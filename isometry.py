@@ -95,6 +95,7 @@ Hz = Rz(hTurn)
 
 # Identity 
 E =  Rx(0)
+E.__name__ = 'E'
 
 # central inversion
 # TODO Hmm now I is no object.. (class)

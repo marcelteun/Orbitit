@@ -573,6 +573,7 @@ class MainPanel(wx.Panel):
         this.Bind(wx.EVT_SIZE, this.onSize)
 
         this.canvas = TstScene(shape, this)
+        this.canvas.panel = this
         this.canvas.SetMinSize((300, 300))
         this.canvasSizer = wx.BoxSizer(wx.HORIZONTAL)
         this.canvasSizer.Add(this.canvas)

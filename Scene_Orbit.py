@@ -31,6 +31,7 @@ import Geom3D
 import Geom4D
 import GeomGui
 import Scenes3D
+import isometry
 from cgkit import cgtypes
 from OpenGL.GL import *
 
@@ -70,17 +71,17 @@ class CtrlWin(wx.Frame):
 
         this.showGui = []
 
-        someSizer = wx.StaticBoxSizer(
+        facesSizer = wx.StaticBoxSizer(
             wx.StaticBox(this.panel, label = 'Face(s) Definition'),
             wx.HORIZONTAL
         )
-        ctrlSizer.Add(someSizer, 0, wx.EXPAND)
+        ctrlSizer.Add(facesSizer, 0, wx.EXPAND)
 
         #VERTICES
         this.showGui.append(
             GeomGui.Vector3DSetInput(this.panel, label = 'Vertices'))
-        someSizer.Add(this.showGui[-1], 0, wx.EXPAND)
         this.__VsGuiIndex = len(this.showGui) - 1
+        facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         # FACES
         this.showGui.append(
@@ -88,25 +89,61 @@ class CtrlWin(wx.Frame):
                 this.panel, label = 'Faces', faceLen = 3, width = 40
             )
         )
-        someSizer.Add(this.showGui[-1], 0, wx.EXPAND)
         this.__FsGuiIndex = len(this.showGui) - 1
+        facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Set Vs & Fs"))
         this.panel.Bind(
             wx.EVT_BUTTON, this.onSetVsFs, id = this.showGui[-1].GetId())
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
+        # SYMMETRY
+        isomSizer = wx.StaticBoxSizer(
+            wx.StaticBox(this.panel, label = 'Final Symmetry'),
+            wx.VERTICAL
+        )
+        ctrlSizer.Add(isomSizer, 0, wx.EXPAND)
+        this.groupsList = [isometry.E, isometry.A4]
+        this.groupsStrList = [c.__name__ for c in this.groupsList]
+        this.showGui.append(
+            wx.ListBox(this.panel, wx.ID_ANY,
+                choices = this.groupsStrList,
+                style = wx.LB_SINGLE)
+        )
+        this.__SymmetryGuiIndex = len(this.showGui) - 1
+        this.panel.Bind(wx.EVT_LISTBOX_DCLICK,
+            this.onApplySymmetry, id = this.showGui[-1].GetId())
+        isomSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Apply"))
+        this.panel.Bind(
+            wx.EVT_BUTTON, this.onApplySymmetry, id = this.showGui[-1].GetId())
+        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+
         return ctrlSizer
 
     def onSetVsFs(this, e):
         this.shape.setVs(this.showGui[this.__VsGuiIndex].GetVs())
-        this.shape.setFaceProperties(Fs = this.showGui[this.__FsGuiIndex].GetFs())
+        this.shape.setFs(this.showGui[this.__FsGuiIndex].GetFs())
         this.canvas.paint()
         print 'Vs = ['
         for v in this.shape.Vs: print v
         print ']\n Fs = ['
         for f in this.shape.Fs: print f
         print ']'
+        e.Skip()
+
+    def onApplySymmetry(this, e):
+        Vs = this.showGui[this.__VsGuiIndex].GetVs()
+        Fs = this.showGui[this.__FsGuiIndex].GetFs()
+        Id = this.showGui[this.__SymmetryGuiIndex].GetSelection()
+        sym = this.groupsList[Id]
+        if Id == 0:
+            sym = [sym]
+        else:
+            sym = sym()
+        this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = sym)
+        this.canvas.panel.setShape(this.shape)
         e.Skip()
 
     # move to general class
