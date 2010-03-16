@@ -98,11 +98,14 @@ class CtrlWin(wx.Frame):
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         # SYMMETRY
+        this.symSizer = wx.BoxSizer(wx.VERTICAL)
+        ctrlSizer.Add(this.symSizer, 0, wx.EXPAND)
+
         isomSizer = wx.StaticBoxSizer(
             wx.StaticBox(this.panel, label = 'Final Symmetry'),
             wx.VERTICAL
         )
-        ctrlSizer.Add(isomSizer, 0, wx.EXPAND)
+        this.symSizer.Add(isomSizer, 1, wx.ALIGN_LEFT | wx.EXPAND)
         this.groupsList = [isometry.E, isometry.A4]
         this.groupsStrList = [c.__name__ for c in this.groupsList]
         this.showGui.append(
@@ -113,7 +116,12 @@ class CtrlWin(wx.Frame):
         this.__SymmetryGuiIndex = len(this.showGui) - 1
         this.panel.Bind(wx.EVT_LISTBOX_DCLICK,
             this.onApplySymmetry, id = this.showGui[-1].GetId())
+        this.panel.Bind(wx.EVT_LISTBOX,
+            this.onChooseSymmetry, id = this.showGui[-1].GetId())
+        this.showGui[-1].SetSelection(0)
         isomSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+
+        this.setOrientationOption()
 
         this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Apply"))
         this.panel.Bind(
@@ -133,15 +141,50 @@ class CtrlWin(wx.Frame):
         print ']'
         e.Skip()
 
-    def onApplySymmetry(this, e):
-        Vs = this.showGui[this.__VsGuiIndex].GetVs()
-        Fs = this.showGui[this.__FsGuiIndex].GetFs()
+    def getSymmetry(this):
         Id = this.showGui[this.__SymmetryGuiIndex].GetSelection()
         sym = this.groupsList[Id]
         if Id == 0:
-            sym = [sym]
+            sym = isometry.Egroup
         else:
-            sym = sym()
+            sym = sym
+        return sym
+
+    def setOrientationOption(this):
+        # TODO: save initial values and reapply if selected again...
+        try:
+                for gui in this.oriGuis:
+                    gui.Destroy()
+                this.oriGuiBox.Destroy()
+                this.symSizer.Remove(this.oriSizer)
+        except AttributeError: pass
+        this.oriGuiBox = wx.StaticBox(this.panel, label = 'Symmetry Orientation')
+        this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
+        this.oriGuis = []
+        sym = this.getSymmetry()
+        if sym != isometry.Egroup:
+            for init in sym.initPars:
+                this.oriGuis.append(
+                    GeomGui.Vector3DInput(this.panel, init['lab'])
+                )
+                this.oriSizer.Add(this.oriGuis[-1], 1, wx.EXPAND)
+        this.symSizer.Add(this.oriSizer, 1, wx.EXPAND)
+
+    def onChooseSymmetry(this, e):
+        this.setOrientationOption()
+        this.panel.Layout()
+
+    def onApplySymmetry(this, e):
+        Vs = this.showGui[this.__VsGuiIndex].GetVs()
+        Fs = this.showGui[this.__FsGuiIndex].GetFs()
+        sym = this.getSymmetry()
+        if sym != isometry.Egroup:
+            orientation = {}
+            for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+                v = gui.GetVertex()
+                if v != Geom3D.vec(0, 0, 0):
+                    orientation[sym.initPars[i]['par']] = v
+            sym = sym(orientation = orientation)
         this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = sym)
         this.canvas.panel.setShape(this.shape)
         e.Skip()

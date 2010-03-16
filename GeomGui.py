@@ -343,6 +343,56 @@ class FacesInput(wx.StaticBoxSizer):
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         #wx.StaticBoxSizer.Destroy(this)
 
+class Vector3DInput(wx.StaticBoxSizer):
+    def __init__(this,
+        panel,
+        label = '',
+        orientation = wx.HORIZONTAL,
+    ):
+        """
+        Create a control embedded in a sizer for defining a 3D vector
+
+        panel: the panel the input will be a part of.
+        label: the label to be used for the box, default ''
+        length: initialise the input with length amount of 3D vectors.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
+                     default. Defines the orientation of the separate vector
+                     items.
+        elementLabels: option labels for the vector items. It is an array
+                       consisting of 4 strings On default
+                       ['index', 'x', 'y', 'z'] is used.
+        """
+        this.panel = panel
+        this.Boxes = []
+        wx.BoxSizer.__init__(this, orientation)
+        this.Boxes.append(
+            wx.StaticText(this.panel, wx.ID_ANY, label + ' ',
+                style = wx.ALIGN_RIGHT
+            )
+        )
+        this.Add(this.Boxes[-1], 1, wx.EXPAND)
+        this.__v = []
+        for i in range(3):
+            this.__v.append(FloatInput(this.panel, wx.ID_ANY, "0"))
+            this.Add(this.__v[-1], 0, wx.EXPAND)
+
+    def GetVertex(this):
+        return Geom3D.vec(
+                float(this.__v[0].GetValue()),
+                float(this.__v[1].GetValue()),
+                float(this.__v[2].GetValue()),
+            )
+
+    def Destroy(this):
+        for ctrl in this.__v: ctrl.Destroy()
+        for box in this.Boxes:
+            try:
+                box.Destroy()
+            except wx._core.PyDeadObjectError: pass
+        # Segmentation fault in Hardy Heron (with python 2.5.2):
+        #wx.StaticBoxSizer.Destroy(this)
+
+# TODO: use Vector3DInput
 class Vector3DSetInput(wx.StaticBoxSizer):
     __defaultLabels = ['index', 'x', 'y', 'z']
     __nrOfColumns = 4

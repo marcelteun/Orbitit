@@ -37,6 +37,9 @@ class Rot(quat):
             )
         )
 
+    def __ne__(this, o):
+        return not this.__eq__(o)
+
     def __str__(this):
         return 'axis %s angle %f' % (this.axis(), this.angle())
 
@@ -223,11 +226,19 @@ class Set(set):
         this.clear()
         this.update(result)
 
+Egroup = Set([E])
+
 class A4(Set):
-    def __init__(this, isometries = None, o2axis0 = X[:], o2axis1 = Y[:]):
+    initPars = [
+        {'par': 'o2axis0', 'lab': "half turn axis"},
+        {'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
+    ]
+    def __init__(this, isometries = None, orientation = {}):
         """
         The algebraic group A4, consisting of 12 rotations
 
+        either provide the complete set or provide orientation that generates
+        the complete group. For the latter see the class initPars argument.
         Contains:
         - the identity E, and 3 orthogonal halfturns
         - 4 order 3 isometries.
@@ -239,11 +250,18 @@ class A4(Set):
         """
         # A4 consists of:
         # 1. A subgroup D2: E, and half turns H0, H1, H2
+        #print 'isometries', isometries, 'orientation', orientation
         if isometries != None:
             assert len(isometries) == 12, "12 != %d" % (len(isometries))
             # TODO: more asserts?
             Set.__init__(this, isometries)
         else:
+            axes = orientation.keys()
+            if 'o2axis0' in axes: o2axis0 = orientation['o2axis0']
+            else:                 o2axis0 = X[:]
+            if 'o2axis1' in axes: o2axis1 = orientation['o2axis1']
+            else:                 o2axis1 = Y[:]
+            assert vec3(o2axis0) * vec3(o2axis1) == 0, "Error: axes not orthogonal"
             try:   H0 = Rot(o2axis0, hTurn)
             except TypeError: H0 = Rot(o2axis0.toAngleAxis()[1], hTurn)
             try:   H1 = Rot(o2axis1, hTurn)
