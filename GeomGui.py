@@ -27,6 +27,7 @@ import wx
 import re
 import Geom4D
 import Geom3D
+import isometry
 
 #import os
 #from cgkit import cgtypes
@@ -596,6 +597,93 @@ class Vector4DInput(wx.StaticBoxSizer):
     def Destroy(this):
         for ctrl in this.__vLabel: ctrl.Destroy()
         for ctrl in this.__v: ctrl.Destroy()
+        for box in this.Boxes:
+            try:
+                box.Destroy()
+            except wx._core.PyDeadObjectError: pass
+        # Segmentation fault in Hardy Heron (with python 2.5.2):
+        #wx.StaticBoxSizer.Destroy(this)
+
+class SymmetrySelect(wx.StaticBoxSizer):
+    def __init__(this,
+        panel,
+        label = '',
+        # TODO: proper init: all
+        groupsList = [isometry.E, isometry.A4]
+    ):
+        """
+        Create a control embedded in a sizer for defining a symmetry.
+
+        panel: the panel the input will be a part of.
+        label: the label to be used for the box, default ''
+        groupsList: the list of symmetries that one can choose from.
+        """
+        this.groupsList = groupsList
+        this.panel      = panel
+        this.Boxes      = [wx.StaticBox(panel, label = label)]
+        wx.StaticBoxSizer.__init__(this, this.Boxes[-1], wx.VERTICAL)
+
+        this.groupsStrList = [c.__name__ for c in this.groupsList]
+        this.Boxes.append(
+            wx.ListBox(this.panel, wx.ID_ANY,
+                choices = this.groupsStrList,
+                style = wx.LB_SINGLE)
+        )
+        this.Boxes[-1].SetSelection(0)
+        this.__SymmetryGuiIndex = len(this.Boxes) - 1
+        #this.panel.Bind(wx.EVT_LISTBOX_DCLICK,
+        #    this.onApplySymmetry, id = this.Boxes[-1].GetId())
+        this.panel.Bind(wx.EVT_LISTBOX,
+            this.onSetSymmetry, id = this.Boxes[-1].GetId())
+        this.Add(this.Boxes[-1], 0, wx.EXPAND)
+
+        this.addSetupGui()
+
+    def getSymmetry(this):
+        Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
+        sym = this.groupsList[Id]
+        if Id == 0:
+            sym = isometry.Egroup
+        else:
+            sym = sym
+        return sym
+
+    def addSetupGui(this):
+        # TODO: save initial values and reapply if selected again...
+        try:
+                for gui in this.oriGuis:
+                    gui.Destroy()
+                this.oriGuiBox.Destroy()
+                this.Remove(this.oriSizer)
+        except AttributeError: pass
+        this.oriGuiBox = wx.StaticBox(this.panel, label = 'Symmetry Setup')
+        this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
+        this.oriGuis = []
+        sym = this.getSymmetry()
+        if sym != isometry.Egroup:
+            for init in sym.initPars:
+                this.oriGuis.append(
+                    Vector3DInput(this.panel, init['lab'])
+                )
+                this.oriSizer.Add(this.oriGuis[-1], 1, wx.EXPAND)
+        this.Add(this.oriSizer, 1, wx.EXPAND)
+
+    def onSetSymmetry(this, e):
+        this.addSetupGui()
+        this.panel.Layout()
+
+    def GetSelected(this):
+        sym = this.getSymmetry()
+        if sym != isometry.Egroup:
+            setup = {}
+            for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+                v = gui.GetVertex()
+                if v != Geom3D.vec(0, 0, 0):
+                    setup[sym.initPars[i]['par']] = v
+            sym = sym(setup = setup)
+        return sym
+
+    def Destroy(this):
         for box in this.Boxes:
             try:
                 box.Destroy()

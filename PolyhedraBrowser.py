@@ -208,9 +208,9 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY)
 
-        matAmbient    = [0.4, 0.4, 0.4, 1.]
-        matDiffuse    = [0.3, 0.3, 0.3, 1.]
-        matSpecular   = [0.3, 0.3, 0.3, 1.]
+        matAmbient    = [0.3, 0.3, 0.3, 1.]
+        matDiffuse    = [0.2, 0.2, 0.2, 1.]
+        matSpecular   = [0.2, 0.2, 0.2, 1.]
         matShininess  = 0.0
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient)
         glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse)
@@ -218,8 +218,8 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess)
 
         lightPosition = [-4., 5., 20., 0.]
-        lightAmbient  = [0.6, 0.6, 0.6, 1.]
-        lightDiffuse  = [.3, .3, .3, .3]
+        lightAmbient  = [0.5, 0.5, 0.5, 1.]
+        lightDiffuse  = [.2, .2, .2, .2]
         # disable specular part:
         lightSpecular = [0., 0., 0., 1.]
         glLightfv(GL_LIGHT0, GL_POSITION, lightPosition)
