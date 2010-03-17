@@ -136,7 +136,7 @@ class IntInput(wx.TextCtrl):
     def GetValue(this):
         v = wx.TextCtrl.GetValue(this)
         if v == '': v = '0'
-        return v
+        return int(v)
 
 class FloatInput(wx.TextCtrl):
     # don't except an empty string: [0-9.]
@@ -228,7 +228,49 @@ class FloatInput(wx.TextCtrl):
     def GetValue(this):
         v = wx.TextCtrl.GetValue(this)
         if v == '': v = '0'
-        return v
+        return float(v)
+
+class LabeledIntInput(wx.StaticBoxSizer):
+    def __init__(this,
+        panel,
+        label = '',
+        init = "0",
+        width = -1,
+        orientation = wx.HORIZONTAL,
+    ):
+        """
+        Create a control embedded in a sizer for defining an int.
+
+        panel: the panel the input will be a part of.
+        label: the label to be used for the box, default ''
+        init: initial value used in input
+        width: width of the face index fields.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
+                     default. Defines the orientation of the label - int input.
+        """
+        this.Boxes = []
+        wx.BoxSizer.__init__(this, orientation)
+        this.Boxes.append(
+            wx.StaticText(panel, wx.ID_ANY, label + ' ',
+                style = wx.ALIGN_RIGHT
+            )
+        )
+        this.Add(this.Boxes[-1], 1, wx.EXPAND)
+        this.Boxes.append(IntInput(
+                panel, wx.ID_ANY, init, size = (width, -1)
+            ))
+        this.Add(this.Boxes[-1], 0, wx.EXPAND)
+
+    def GetValue(this):
+        return this.Boxes[-1].GetValue()
+
+    def Destroy(this):
+        for box in this.Boxes:
+            try:
+                box.Destroy()
+            except wx._core.PyDeadObjectError: pass
+        # Segmentation fault in Hardy Heron (with python 2.5.2):
+        #wx.StaticBoxSizer.Destroy(this)
 
 class FacesInput(wx.StaticBoxSizer):
     def __init__(this,
@@ -258,8 +300,10 @@ class FacesInput(wx.StaticBoxSizer):
         this.faceLen = faceLen
         if orientation == wx.HORIZONTAL:
             oppositeOr = wx.VERTICAL
+            oriTxt = 'Row'
         else:
             oppositeOr = wx.HORIZONTAL
+            oriTxt = 'Column'
         this.Boxes = [wx.StaticBox(panel, label = label)]
         wx.StaticBoxSizer.__init__(this, this.Boxes[-1], oppositeOr)
         this.facesSizer = wx.BoxSizer(oppositeOr)
@@ -276,12 +320,12 @@ class FacesInput(wx.StaticBoxSizer):
             ))
         this.__faceLenIndex = len(this.Boxes) - 1
         addSizer.Add(this.Boxes[-1], 0, wx.EXPAND)
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Add"))
+        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Add %s" % oriTxt))
         addSizer.Add(this.Boxes[-1], 1, wx.EXPAND)
         this.Add(addSizer, 0, wx.EXPAND)
         panel.Bind(wx.EVT_BUTTON, this.onAdd, id = this.Boxes[-1].GetId())
         # Delete button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete"))
+        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete %s" % oriTxt))
         panel.Bind(wx.EVT_BUTTON, this.onRm, id = this.Boxes[-1].GetId())
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
@@ -303,7 +347,7 @@ class FacesInput(wx.StaticBoxSizer):
         this.facesSizer.Add(faceSizer, 0, wx.EXPAND)
 
     def onAdd(this, e):
-        l = int(this.Boxes[this.__faceLenIndex].GetValue())
+        l = this.Boxes[this.__faceLenIndex].GetValue()
         if l < 1:
             l = this.faceLen
             if l < 1: l = 3
@@ -326,7 +370,7 @@ class FacesInput(wx.StaticBoxSizer):
 
     def GetFace(this, index):
         return [
-                int(this.__f[index][i].GetValue())
+                this.__f[index][i].GetValue()
                     for i in range(len(this.__f[index]))
             ]
 
@@ -379,9 +423,9 @@ class Vector3DInput(wx.StaticBoxSizer):
 
     def GetVertex(this):
         return Geom3D.vec(
-                float(this.__v[0].GetValue()),
-                float(this.__v[1].GetValue()),
-                float(this.__v[2].GetValue()),
+                this.__v[0].GetValue(),
+                this.__v[1].GetValue(),
+                this.__v[2].GetValue(),
             )
 
     def Destroy(this):
@@ -420,8 +464,10 @@ class Vector3DSetInput(wx.StaticBoxSizer):
         this.panel = panel
         if orientation == wx.HORIZONTAL:
             oppositeOr = wx.VERTICAL
+            oriTxt = 'Row'
         else:
             oppositeOr = wx.HORIZONTAL
+            oriTxt = 'Column'
         this.Boxes = [wx.StaticBox(panel, label = label)]
         wx.StaticBoxSizer.__init__(this, this.Boxes[-1], oppositeOr)
         vectorsSizer = wx.BoxSizer(orientation)
@@ -447,11 +493,11 @@ class Vector3DSetInput(wx.StaticBoxSizer):
         this.Add(vectorsSizer, 0, wx.EXPAND)
         this.Add(wx.BoxSizer(orientation), 1, wx.EXPAND) # stretchable glue
         # Add button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Add"))
+        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Add %s" % oriTxt))
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
         panel.Bind(wx.EVT_BUTTON, this.onAdd, id = this.Boxes[-1].GetId())
         # Delete button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete"))
+        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete %s" % oriTxt))
         panel.Bind(wx.EVT_BUTTON, this.onRm, id = this.Boxes[-1].GetId())
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
@@ -488,9 +534,9 @@ class Vector3DSetInput(wx.StaticBoxSizer):
 
     def GetVertex(this, index):
         return Geom3D.vec(
-                float(this.__v[index][0].GetValue()),
-                float(this.__v[index][1].GetValue()),
-                float(this.__v[index][2].GetValue()),
+                this.__v[index][0].GetValue(),
+                this.__v[index][1].GetValue(),
+                this.__v[index][2].GetValue(),
             )
 
     def GetVs(this):
@@ -579,19 +625,19 @@ class Vector4DInput(wx.StaticBoxSizer):
         vEvent = VectorUpdatedEvent(myEVT_VECTOR_UPDATED, this.GetId())
         vEvent.SetEventObject(this)
         vEvent.SetVector(Geom4D.vec(
-                float(this.__v[0].GetValue()),
-                float(this.__v[1].GetValue()),
-                float(this.__v[2].GetValue()),
-                float(this.__v[3].GetValue())
+                this.__v[0].GetValue(),
+                this.__v[1].GetValue(),
+                this.__v[2].GetValue(),
+                this.__v[3].GetValue()
             ))
         this.__v[this.__ctrlIdIndex].GetEventHandler().ProcessEvent(vEvent)
 
     def GetValue(this):
         return Geom4D.vec(
-                float(this.__v[0].GetValue()),
-                float(this.__v[1].GetValue()),
-                float(this.__v[2].GetValue()),
-                float(this.__v[3].GetValue())
+                this.__v[0].GetValue(),
+                this.__v[1].GetValue(),
+                this.__v[2].GetValue(),
+                this.__v[3].GetValue()
             )
 
     def Destroy(this):
@@ -609,7 +655,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
         panel,
         label = '',
         # TODO: proper init: all
-        groupsList = [isometry.E, isometry.A4]
+        groupsList = [
+            isometry.Identity,
+            isometry.Cn,
+            isometry.A4,
+        ]
     ):
         """
         Create a control embedded in a sizer for defining a symmetry.
@@ -641,12 +691,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def getSymmetry(this):
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
-        sym = this.groupsList[Id]
-        if Id == 0:
-            sym = isometry.Egroup
-        else:
-            sym = sym
-        return sym
+        return this.groupsList[Id]
 
     def addSetupGui(this):
         # TODO: save initial values and reapply if selected again...
@@ -660,12 +705,16 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
         this.oriGuis = []
         sym = this.getSymmetry()
-        if sym != isometry.Egroup:
-            for init in sym.initPars:
-                this.oriGuis.append(
-                    Vector3DInput(this.panel, init['lab'])
-                )
-                this.oriSizer.Add(this.oriGuis[-1], 1, wx.EXPAND)
+        for init in sym.initPars:
+            inputType = init['type']
+            if inputType == 'vec3':
+                gui = Vector3DInput(this.panel, init['lab'])
+            elif inputType == 'int':
+                gui = LabeledIntInput(this.panel, init['lab'])
+            else:
+                assert False, "oops unimplemented input type"
+            this.oriGuis.append(gui)
+            this.oriSizer.Add(this.oriGuis[-1], 1, wx.EXPAND)
         this.Add(this.oriSizer, 1, wx.EXPAND)
 
     def onSetSymmetry(this, e):
@@ -674,13 +723,18 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def GetSelected(this):
         sym = this.getSymmetry()
-        if sym != isometry.Egroup:
-            setup = {}
-            for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+        setup = {}
+        for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+            inputType = sym.initPars[i]['type']
+            if inputType == 'vec3':
                 v = gui.GetVertex()
                 if v != Geom3D.vec(0, 0, 0):
                     setup[sym.initPars[i]['par']] = v
-            sym = sym(setup = setup)
+            elif inputType == 'int':
+                v = gui.GetValue()
+                setup[sym.initPars[i]['par']] = v
+        sym = sym(setup = setup)
+
         return sym
 
     def Destroy(this):

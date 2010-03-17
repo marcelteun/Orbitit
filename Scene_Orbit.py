@@ -92,11 +92,6 @@ class CtrlWin(wx.Frame):
         this.__FsGuiIndex = len(this.showGui) - 1
         facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Set Vs & Fs"))
-        this.panel.Bind(
-            wx.EVT_BUTTON, this.onSetVsFs, id = this.showGui[-1].GetId())
-        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-
         # SYMMETRY
         this.symSizer = wx.BoxSizer(wx.VERTICAL)
         this.showGui.append(
@@ -111,17 +106,6 @@ class CtrlWin(wx.Frame):
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         return ctrlSizer
-
-    def onSetVsFs(this, e):
-        this.shape.setVs(this.showGui[this.__VsGuiIndex].GetVs())
-        this.shape.setFs(this.showGui[this.__FsGuiIndex].GetFs())
-        this.canvas.paint()
-        print 'Vs = ['
-        for v in this.shape.Vs: print v
-        print ']\n Fs = ['
-        for f in this.shape.Fs: print f
-        print ']'
-        e.Skip()
 
     def onApplySymmetry(this, e):
         Vs = this.showGui[this.__VsGuiIndex].GetVs()

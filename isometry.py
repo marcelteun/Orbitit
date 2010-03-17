@@ -98,7 +98,6 @@ Hz = Rz(hTurn)
 
 # Identity 
 E =  Rx(0)
-E.__name__ = 'E'
 
 # central inversion
 # TODO Hmm now I is no object.. (class)
@@ -226,12 +225,53 @@ class Set(set):
         this.clear()
         this.update(result)
 
-Egroup = Set([E])
+class Identity(Set):
+    initPars = []
+    order    = 1
+    def __init__(this, isometries = None, setup = {}):
+        Set.__init__(this, [E])
+
+C1 = Identity
+
+class Cn(Set):
+    initPars = [
+        {'type': 'int', 'par': 'n',    'lab': "order"},
+        {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
+    ]
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group Cn, consisting of n rotations
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            keys = setup.keys()
+            if 'axis' in keys: axis = setup['axis']
+            else:              axis = Z[:]
+            if 'n' in keys: n = setup['n']
+            else:           n = 2
+            if n == 0: n = 1
+
+            angle = 2 * math.pi / n
+            try:   r = Rot(axis, angle)
+            except TypeError: r = Rot(axis.toAngleAxis()[1], angle)
+
+            isometries = [r]
+            for i in range(n-1):
+                isometries.append(r * isometries[-1])
+            Set.__init__(this, isometries)
 
 class A4(Set):
     initPars = [
-        {'par': 'o2axis0', 'lab': "half turn axis"},
-        {'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
+        {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
+        {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
     ]
     def __init__(this, isometries = None, setup = {}):
         """
