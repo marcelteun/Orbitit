@@ -29,10 +29,8 @@ import Geom3D
 import Geom4D
 import GeomGui
 import wx
-import re
 import pprint
 import wx.lib.intctrl
-from cgkit import cgtypes
 
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -143,8 +141,6 @@ from OpenGL.GL import *
 #             assert: assert len(pOnLineAtEdges) % 2 == 0, "The nr of
 #             intersections should be even, are all edges unique and do they
 #             form one closed face?"
-
-E = cgtypes.quat(0, cgtypes.vec3(1, 0, 0))
 
 import os
 

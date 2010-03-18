@@ -27,7 +27,6 @@ import wx
 import math
 import rgb
 import Geom3D
-from cgkit import cgtypes
 from OpenGL.GL import *
 
 V3 = math.sqrt(3)
@@ -56,13 +55,13 @@ class RegularHeptagon:
         #          
         #
         this.VsOrg = [
-                cgtypes.vec3(     0.0,            0.0, 0.0),
-                cgtypes.vec3(   Rho/2,             -h, 0.0),
-                cgtypes.vec3( Sigma/2, -(1 + Sigma)*h, 0.0),
-                cgtypes.vec3(     0.5,             -H, 0.0),
-                cgtypes.vec3(    -0.5,             -H, 0.0),
-                cgtypes.vec3(-Sigma/2, -(1 + Sigma)*h, 0.0),
-                cgtypes.vec3(  -Rho/2,             -h, 0.0)
+                Geom3D.vec(     0.0,            0.0, 0.0),
+                Geom3D.vec(   Rho/2,             -h, 0.0),
+                Geom3D.vec( Sigma/2, -(1 + Sigma)*h, 0.0),
+                Geom3D.vec(     0.5,             -H, 0.0),
+                Geom3D.vec(    -0.5,             -H, 0.0),
+                Geom3D.vec(-Sigma/2, -(1 + Sigma)*h, 0.0),
+                Geom3D.vec(  -Rho/2,             -h, 0.0)
             ]
         this.Vs = this.VsOrg[:]     # the vertex aray to use.
         this.Fs = [[0, 1, 2, 3, 4, 5, 6]]
@@ -112,7 +111,7 @@ class RegularHeptagon:
                     this.VsOrg[2][1] - this.VsOrg[1][1],
                     this.VsOrg[2][2] - this.VsOrg[1][2]
                 ]
-            V2 = cgtypes.vec3(
+            V2 = Geom3D.vec(
                     this.VsOrg[2][0],
                     this.VsOrg[1][1] + cosa * dV2[0] - sina * dV2[1],
                     this.VsOrg[1][2] + cosa * dV2[1] + sina * dV2[0]
@@ -131,7 +130,7 @@ class RegularHeptagon:
                     V3_[0] - V2[1],
                     V3_[1] - V2[2]
                 ]
-            V3 = cgtypes.vec3(
+            V3 = Geom3D.vec(
                     this.VsOrg[3][0],
                     V2[1] + cosb * dV3[0] - sinb * dV3[1],
                     V2[2] + cosb * dV3[1] + sinb * dV3[0]
@@ -141,8 +140,8 @@ class RegularHeptagon:
                     this.VsOrg[1],
                     V2,
                     V3,
-                    cgtypes.vec3(-V3[0], V3[1], V3[2]),
-                    cgtypes.vec3(-V2[0], V2[1], V2[2]),
+                    Geom3D.vec(-V3[0], V3[1], V3[2]),
+                    Geom3D.vec(-V2[0], V2[1], V2[2]),
                     this.VsOrg[6]
                 ]
         else:
@@ -151,7 +150,7 @@ class RegularHeptagon:
                     this.VsOrg[1][1] - this.VsOrg[2][1],
                     this.VsOrg[1][2] - this.VsOrg[2][2]
                 ]
-            V1 = cgtypes.vec3(
+            V1 = Geom3D.vec(
                     this.VsOrg[1][0],
                     this.VsOrg[2][1] + cosa * dV1[0] - sina * dV1[1],
                     this.VsOrg[2][2] + cosa * dV1[1] + sina * dV1[0]
@@ -170,7 +169,7 @@ class RegularHeptagon:
                     V0_[0] - V1[1],
                     V0_[1] - V1[2]
                 ]
-            V0 = cgtypes.vec3(
+            V0 = Geom3D.vec(
                     this.VsOrg[0][0],
                     V1[1] + cosb * dV0[0] - sinb * dV0[1],
                     V1[2] + cosb * dV0[1] + sinb * dV0[0]
@@ -182,7 +181,7 @@ class RegularHeptagon:
                     this.VsOrg[3],
                     this.VsOrg[4],
                     this.VsOrg[5],
-                    cgtypes.vec3(-V1[0], V1[1], V1[2])
+                    Geom3D.vec(-V1[0], V1[1], V1[2])
                 ]
 
     def foldTrapezium(this, a, b, keepV0 = True):
@@ -216,7 +215,7 @@ class RegularHeptagon:
                     this.VsOrg[2][1] - this.VsOrg[1][1],
                     this.VsOrg[2][2] - this.VsOrg[1][2]
                 ]
-            V2_ = cgtypes.vec3(
+            V2_ = Geom3D.vec(
                     this.VsOrg[2][0],
                     this.VsOrg[1][1] + cosa * dV2_[0] - sina * dV2_[1],
                     this.VsOrg[1][2] + cosa * dV2_[1] + sina * dV2_[0]
@@ -225,22 +224,22 @@ class RegularHeptagon:
                     this.VsOrg[3][1] - this.VsOrg[1][1],
                     this.VsOrg[3][2] - this.VsOrg[1][2]
                 ]
-            V3 = cgtypes.vec3(
+            V3 = Geom3D.vec(
                     this.VsOrg[3][0],
                     this.VsOrg[1][1] + cosa * dV3[0] - sina * dV3[1],
                     this.VsOrg[1][2] + cosa * dV3[1] + sina * dV3[0]
                 )
             V1V3 = (this.VsOrg[1] + V3)/2
-            V1V3axis = cgtypes.vec3(V3 - this.VsOrg[1])
-            M = cgtypes.quat(b, V1V3axis).toMat3()
+            V1V3axis = Geom3D.vec(V3 - this.VsOrg[1])
+            M = Geom3D.quat(b, V1V3axis).toMat3()
             V2 = V1V3 + M * (V2_ - V1V3)
             this.Vs = [
                     this.VsOrg[0],
                     this.VsOrg[1],
                     V2,
                     V3,
-                    cgtypes.vec3(-V3[0], V3[1], V3[2]),
-                    cgtypes.vec3(-V2[0], V2[1], V2[2]),
+                    Geom3D.vec(-V3[0], V3[1], V3[2]),
+                    Geom3D.vec(-V2[0], V2[1], V2[2]),
                     this.VsOrg[6]
                 ]
         else:
@@ -248,14 +247,14 @@ class RegularHeptagon:
                     this.VsOrg[0][1] - this.VsOrg[1][1],
                     this.VsOrg[0][2] - this.VsOrg[1][2]
                 ]
-            V0 = cgtypes.vec3(
+            V0 = Geom3D.vec(
                     this.VsOrg[0][0],
                     this.VsOrg[1][1] + cosa * dV0[0] - sina * dV0[1],
                     this.VsOrg[1][2] + cosa * dV0[1] + sina * dV0[0]
                 )
             V1V3 = (this.VsOrg[1] + this.VsOrg[3])/2
-            V1V3axis = cgtypes.vec3(this.VsOrg[3] - this.VsOrg[1])
-            M = cgtypes.quat(b, V1V3axis).toMat3()
+            V1V3axis = Geom3D.vec(this.VsOrg[3] - this.VsOrg[1])
+            M = Geom3D.quat(b, V1V3axis).toMat3()
             V2 = V1V3 + M * (this.VsOrg[2] - V1V3)
             this.Vs = [
                     V0, 
@@ -263,7 +262,7 @@ class RegularHeptagon:
                     V2,
                     this.VsOrg[3],
                     this.VsOrg[4],
-                    cgtypes.vec3(-V2[0], V2[1], V2[2]),
+                    Geom3D.vec(-V2[0], V2[1], V2[2]),
                     this.VsOrg[6]
                 ]
 
@@ -352,7 +351,7 @@ class RegularHeptagon:
 #        print (math.acos(cosa))
 #        sina = math.sin(math.acos(cosa))
 #        for i in range(len(this.Vs)):
-#            this.Vs[i] = cgtypes(
+#            this.Vs[i] = Geom3D.vec(
 #                    this.Vs[i][0],
 #                    cosa*this.Vs[i][1] - sina*this.Vs[i][2],
 #                    sina*this.Vs[i][1] + cosa*this.Vs[i][2]
@@ -363,7 +362,7 @@ class RegularHeptagon:
             this.Vs[i] = T + this.Vs[i]
 
     def rotate(this, axis, angle):
-        this.transform(cgtypes.quat(angle, axis).toMat3())
+        this.transform(Geom3D.Rot(angle, axis).toMat3())
 
     def transform(this, M):
         for i in range(len(this.Vs)):
@@ -382,7 +381,7 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
                 the preferred position is returned, otherwise the heptagon will
                 be 'upside down'.
     """
-    vec = lambda v: cgtypes.vec3(v[0], v[1], v[2])
+    vec = lambda v: Geom3D.vec(v[0], v[1], v[2])
     #print 'heptPosAlt', heptPosAlt
     if not heptPosAlt:
         Vl = vec(Left)

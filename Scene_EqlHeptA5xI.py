@@ -55,11 +55,11 @@ halfTurn = cgtypes.mat3(
     )
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
-        t1 = cgtypes.quat(Geom3D.R1_5, cgtypes.vec3(0, 0, 1))
-        t2 = cgtypes.quat(Geom3D.R2_5, cgtypes.vec3(0, 0, 1))
-        t3 = cgtypes.quat(Geom3D.R3_5, cgtypes.vec3(0, 0, 1))
-        t4 = cgtypes.quat(Geom3D.R4_5, cgtypes.vec3(0, 0, 1))
-        h0 = cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(1, 0, tau))
+        t1 = Geom3D.Rot(Geom3D.R1_5, Geom3D.vec(0, 0, 1))
+        t2 = Geom3D.Rot(Geom3D.R2_5, Geom3D.vec(0, 0, 1))
+        t3 = Geom3D.Rot(Geom3D.R3_5, Geom3D.vec(0, 0, 1))
+        t4 = Geom3D.Rot(Geom3D.R4_5, Geom3D.vec(0, 0, 1))
+        h0 = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 0, tau))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     Geom3D.E, t1, t2, t3, t4,
@@ -123,9 +123,9 @@ class Shape(Heptagons.EqlHeptagonShape):
         if this.heptPosAlt:
             heptN = Heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None: return
-            Mr = cgtypes.quat(Geom3D.R1_3, Vs[2]).toMat3()
+            Mr = Geom3D.Rot(Geom3D.R1_3, Vs[2]).toMat3()
 
-            v = Mr*cgtypes.vec3(heptN[0][4])
+            v = Mr*Geom3D.vec(heptN[0][4])
             if this.triangleAlt:
                 vt = heptN[0][6]
                 xtraEdgeIndex = 15
@@ -173,8 +173,8 @@ class Shape(Heptagons.EqlHeptagonShape):
             return
         else:
             this.errorStr = ''
-        H = cgtypes.quat(Geom3D.R1_2, Vs[3]).toMat3()
-        vt = H * cgtypes.vec3(vt)
+        H = Geom3D.Rot(Geom3D.R1_2, Vs[3]).toMat3()
+        vt = H * Geom3D.vec(vt)
         IsoscelesTriangleV[2] = [vt[0], vt[1], vt[2]]
         Vs.extend(heptN[0]) # V4 - V10
         Vs.extend(RegularTrianglePartV) # V11 - V13
@@ -258,13 +258,13 @@ class Shape(Heptagons.EqlHeptagonShape):
             if this.updateV:
                 this.setV()
             # reference vector, a side of the heptagon:
-            r0 = cgtypes.vec3(this.Vs[4])
-            r1 = cgtypes.vec3(this.Vs[5])
-            r2 = cgtypes.vec3(this.Vs[6])
+            r0 = Geom3D.vec(this.Vs[4])
+            r1 = Geom3D.vec(this.Vs[5])
+            r2 = Geom3D.vec(this.Vs[6])
             r = r0 - r1
             # the extra edge
-            v0 = cgtypes.vec3(this.Vs[this.xtraEs[0]])
-            v1 = cgtypes.vec3(this.Vs[this.xtraEs[1]])
+            v0 = Geom3D.vec(this.Vs[this.xtraEs[0]])
+            v1 = Geom3D.vec(this.Vs[this.xtraEs[1]])
             #print this.xtraEs[0], this.xtraEs[1]
             v = v0 - v1
             #print r.length(), (r1-r2).length(), v.length()

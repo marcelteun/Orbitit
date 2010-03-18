@@ -31,6 +31,7 @@ import Scenes3D
 import wx
 import os
 from cgkit import cgtypes
+import isometry
 
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -64,7 +65,10 @@ from OpenGL.GL import *
 # - edges after reading off file
 
 # Identity isometry:
-E = cgtypes.quat(0, cgtypes.vec3(1, 0, 0))
+vec = isometry.vec3
+Rot = isometry.quat
+
+E = Rot(0, vec(1, 0, 0))
 # central inversion:
 I = cgtypes.mat3(
         -1.0,  0.0,  0.0,
@@ -93,8 +97,6 @@ V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 
 defaultFloatMargin = 1.0e-15
-
-vec = cgtypes.vec3
 
 def eq(a, b, margin = defaultFloatMargin):
     """
@@ -175,7 +177,7 @@ def readOffFile(fd, recreateEdges = True):
             elif state == states['readVs']:
                 # the function assumes: no comments in beween (x, y, z) of Vs
                 Vs.append(
-                    cgtypes.vec3(float(words[0]), float(words[1]), float(words[2]))
+                    vec(float(words[0]), float(words[1]), float(words[2]))
                 )
                 if debug: print 'V[', i, '] =',  Vs[-1]
                 i = i + 1
@@ -379,8 +381,8 @@ class Line2D(Line):
         for vertexNr in range(nrOfVs):
             v0 = FacetVs[iFacet[vertexNr]]
             v1 = FacetVs[iFacet[(vertexNr + 1) % nrOfVs]]
-            v0 = cgtypes.vec3(v0)
-            v1 = cgtypes.vec3(v1)
+            v0 = vec(v0)
+            v1 = vec(v1)
             if this.debug:
                 print '==> intersect line with edge nr', vertexNr, '=', v0, '->', v1
                 print '(with this current line obect: {', this.p, ' + t*', this.v, ')'
@@ -547,17 +549,17 @@ class Line3D(Line):
 
         Either specify two distinctive points p0 and p1 on the line or specify
         a base point p0 and directional vector v. Points p0 and p1 should have
-        a length of 3 and may be cgtypes.vec3.
+        a length of 3 and may be vec.
         """
-        # make sure to have cgtypes.vec3 types internally
-        p0 = cgtypes.vec3(p0)
+        # make sure to have vec types internally
+        p0 = vec(p0)
         if p1 == None:
             assert v != None
-            v = cgtypes.vec3(v)
+            v = vec(v)
             Line.__init__(this, p0, v = v, d = 3, isSegment = isSegment)
         else:
             assert v == None
-            p1 = cgtypes.vec3(p1)
+            p1 = vec(p1)
             Line.__init__(this, p0, p1, d = 3, isSegment = isSegment)
 
     # redefine to get vec3 types:
@@ -572,7 +574,7 @@ class Line3D(Line):
 
     def squareDistance2Point(this, P):
         # p81 of E.Lengyel
-        q = cgtypes.vec3(P)
+        q = vec(P)
         hyp = q - this.p
         prjQ = hyp*this.v
         return (hyp*hyp) - ((prjQ*prjQ) / (this.v*this.v))
@@ -617,9 +619,9 @@ class Line3D(Line):
 class Triangle:
     def __init__(this, v0, v1, v2):
         this.v = [
-                cgtypes.vec3(v0[0], v0[1], v0[2]),
-                cgtypes.vec3(v1[0], v1[1], v1[2]),
-                cgtypes.vec3(v2[0], v2[1], v2[2])
+                vec(v0[0], v0[1], v0[2]),
+                vec(v1[0], v1[1], v1[2]),
+                vec(v2[0], v2[1], v2[2])
             ]
         this.N = None
 
@@ -646,13 +648,13 @@ class Plane:
         assert(not P0 == P2)
         assert(not P1 == P2)
         this.N = this.norm(P0, P1, P2)
-        this.D = -this.N * cgtypes.vec3(P0)
+        this.D = -this.N * vec(P0)
 
     def norm(this, P0, P1, P2):
         """calculate the norm for the plane
         """
-        v1 = cgtypes.vec3(P0) - cgtypes.vec3(P1)
-        v2 = cgtypes.vec3(P0) - cgtypes.vec3(P2)
+        v1 = vec(P0) - vec(P1)
+        v2 = vec(P0) - vec(P2)
         return v1.cross(v2).normalize()
 
     def intersectWithPlane(this, plane, margin = defaultFloatMargin):
@@ -668,7 +670,7 @@ class Plane:
             return None
         V = N0.cross(N1)
         M = cgtypes.mat3(N0[0], N0[1], N0[2], N1[0], N1[1], N1[2], V[0], V[1], V[2])
-        Q = M.inverse() * cgtypes.vec3(-this.D, -plane.D, 0)
+        Q = M.inverse() * vec(-this.D, -plane.D, 0)
         return Line3D(Q, v = V)
 
     def toStr(this, precision = 2):
@@ -1130,7 +1132,7 @@ class SimpleShape:
             vi1 = this.Es[ei+1]
             if vi0 < vi1: t = (vi0, vi1)
             else:         t = (vi1, vi0)
-            l = (cgtypes.vec3(this.Vs[vi1]) - cgtypes.vec3(this.Vs[vi0])
+            l = (vec(this.Vs[vi1]) - vec(this.Vs[vi0])
                 ).length()
             e2l[t] = l
             l = round(l, precision)
@@ -1262,7 +1264,7 @@ class SimpleShape:
 
     def calculateFacesG(this):
         this.fGs = [
-            reduce(lambda t, i: t + this.Vs[i], f, cgtypes.vec3(0)) / len(f)
+            reduce(lambda t, i: t + this.Vs[i], f, vec(0)) / len(f)
             for f in this.Fs
         ]
 
@@ -1348,15 +1350,15 @@ class SimpleShape:
             else:
                 nrUsed = glue.getVUsageIn1D(this.Vs, this.Es)
                 nrUsed = glue.getVUsageIn2D(this.Vs, this.Fs, nrUsed)
-                g = cgtypes.vec3(0, 0, 0)
+                g = vec(0, 0, 0)
                 sum = 0
                 for vIndex in this.VsRange:
-                    g = g + nrUsed[vIndex] * cgtypes.vec3(this.Vs[vIndex])
+                    g = g + nrUsed[vIndex] * vec(this.Vs[vIndex])
                     sum = sum + nrUsed[vIndex]
                 if sum != 0:
                     g = g / sum
                 #print this.name, 'g:', g
-                Vs = [this.scalingFactor * (cgtypes.vec3(v) - g) + g for v in this.Vs]
+                Vs = [this.scalingFactor * (vec(v) - g) + g for v in this.Vs]
 
             # At least on Ubuntu 8.04 conversion is not needed
             # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
@@ -1710,15 +1712,15 @@ class SimpleShape:
             # is parallel to the z-axis to work with a 2D situation:
             # Rotate around the cross product of z-axis and norm
             # with an angle equal to the dot product of the normalised vectors.
-            zAxis = cgtypes.vec3(0, 0, 1)
+            zAxis = vec(0, 0, 1)
             to2DAngle = math.acos(zAxis * norm)
             PsPoints = []
             if not to2DAngle == 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = cgtypes.quat(to2DAngle, to2Daxis).toMat3()
+                Mrot = Rot(to2DAngle, to2Daxis).toMat3()
                 # add vertices to vertex array
                 for v in this.Vs:
-                    Vs.append(Mrot*cgtypes.vec3(v))
+                    Vs.append(Mrot*vec(v))
                     pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
                     #if debug: print 'added to Vs', Vs[-1]
             else:
@@ -1953,15 +1955,15 @@ class SimpleShape:
             # is parallel to the z-axis to work with a 2D situation:
             # Rotate around the cross product of z-axis and norm
             # with an angle equal to the dot product of the normalised vectors.
-            zAxis = cgtypes.vec3(0, 0, 1)
+            zAxis = vec(0, 0, 1)
             to2DAngle = math.acos(zAxis * norm)
             PsPoints = []
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = cgtypes.quat(to2DAngle, to2Daxis).toMat3()
+                Mrot = Rot(to2DAngle, to2Daxis).toMat3()
                 # add vertices to vertex array
                 for v in this.Vs:
-                    Vs.append(Mrot*cgtypes.vec3(v))
+                    Vs.append(Mrot*vec(v))
                     pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
                     #if debug: print 'added to Vs', Vs[-1]
             else:
@@ -2356,7 +2358,7 @@ class SymmetricShape(CompoundShape):
         It is recommended to set the isometry operations at initialisation
         only, otherwise you might break other properties, like the face colours.
         directIsometries: specifies an array of direct isometries. Each isometry
-                          is a cgtypes.quat.
+                          is a Geom3D.Rot.
         oppositeIsometry: specifies a cgtypes.mat3 that represents an opposite
                           isometry, e.g. the central inversion or a reflection.
                           The set of opposite isometries is defined by this
@@ -2409,8 +2411,8 @@ class SymmetricShape(CompoundShape):
         i = 0
         for dirIsom in this.isometryOperations['direct']:
             MdirIsom = dirIsom.toMat3()
-            Vs = [MdirIsom*cgtypes.vec3(v) for v in this.baseShape.Vs]
-            Ns = [MdirIsom*cgtypes.vec3(v) for v in this.baseShape.Ns]
+            Vs = [MdirIsom*vec(v) for v in this.baseShape.Vs]
+            Ns = [MdirIsom*vec(v) for v in this.baseShape.Ns]
             orbits.append(
                 SimpleShape(
                     Vs, this.baseShape.Fs, this.baseShape.Es,
@@ -2423,8 +2425,8 @@ class SymmetricShape(CompoundShape):
         if MoppIsom != None:
             for dirIsom in this.isometryOperations['direct']:
                 MdirIsom = dirIsom.toMat3()
-                Vs = [MoppIsom*MdirIsom*cgtypes.vec3(v) for v in this.baseShape.Vs]
-                Ns = [MoppIsom*MdirIsom*cgtypes.vec3(v) for v in this.baseShape.Ns]
+                Vs = [MoppIsom*MdirIsom*vec(v) for v in this.baseShape.Vs]
+                Ns = [MoppIsom*MdirIsom*vec(v) for v in this.baseShape.Ns]
                 orbits.append(
                     SimpleShape(
                         Vs, this.baseShape.Fs, this.baseShape.Es,
@@ -3334,32 +3336,32 @@ if __name__ == '__main__':
                 assert False, "Cannot handle this nr of colours"
             SimpleShape.__init__(this,
                     Vs = [
-                        cgtypes.vec3(V2, 0, 1),
-                        cgtypes.vec3(V2, 0, -1),
-                        cgtypes.vec3(0, V2, 1),
-                        cgtypes.vec3(0, V2, -1),
-                        cgtypes.vec3(-V2, 0, 1),
-                        cgtypes.vec3(-V2, 0, -1),
-                        cgtypes.vec3(0, -V2, 1),
-                        cgtypes.vec3(0, -V2, -1),
+                        vec(V2, 0, 1),
+                        vec(V2, 0, -1),
+                        vec(0, V2, 1),
+                        vec(0, V2, -1),
+                        vec(-V2, 0, 1),
+                        vec(-V2, 0, -1),
+                        vec(0, -V2, 1),
+                        vec(0, -V2, -1),
 
-                        cgtypes.vec3(0, 1, V2),
-                        cgtypes.vec3(0, -1, V2),
-                        cgtypes.vec3(V2, 1, 0),
-                        cgtypes.vec3(V2, -1, 0),
-                        cgtypes.vec3(0, 1, -V2),
-                        cgtypes.vec3(0, -1, -V2),
-                        cgtypes.vec3(-V2, 1, 0),
-                        cgtypes.vec3(-V2, -1, 0),
+                        vec(0, 1, V2),
+                        vec(0, -1, V2),
+                        vec(V2, 1, 0),
+                        vec(V2, -1, 0),
+                        vec(0, 1, -V2),
+                        vec(0, -1, -V2),
+                        vec(-V2, 1, 0),
+                        vec(-V2, -1, 0),
 
-                        cgtypes.vec3(1, 0, V2),
-                        cgtypes.vec3(-1, 0, V2),
-                        cgtypes.vec3(1, -V2, 0),
-                        cgtypes.vec3(-1, -V2, 0),
-                        cgtypes.vec3(1, 0, -V2),
-                        cgtypes.vec3(-1, 0, -V2),
-                        cgtypes.vec3(1, V2, 0),
-                        cgtypes.vec3(-1, V2, 0)
+                        vec(1, 0, V2),
+                        vec(-1, 0, V2),
+                        vec(1, -V2, 0),
+                        vec(-1, -V2, 0),
+                        vec(1, 0, -V2),
+                        vec(-1, 0, -V2),
+                        vec(1, V2, 0),
+                        vec(-1, V2, 0)
                     ],
                     Fs = [
                             [0, 1, 3, 2],     # 0
@@ -3414,14 +3416,14 @@ if __name__ == '__main__':
     import wx
 
     cubeVs = [
-            cgtypes.vec3(V2, 0, 1),
-            cgtypes.vec3(V2, 0, -1),
-            cgtypes.vec3(0, V2, 1),
-            cgtypes.vec3(0, V2, -1),
-            cgtypes.vec3(-V2, 0, 1),
-            cgtypes.vec3(-V2, 0, -1),
-            cgtypes.vec3(0, -V2, 1),
-            cgtypes.vec3(0, -V2, -1),
+            vec(V2, 0, 1),
+            vec(V2, 0, -1),
+            vec(0, V2, 1),
+            vec(0, V2, -1),
+            vec(-V2, 0, 1),
+            vec(-V2, 0, -1),
+            vec(0, -V2, 1),
+            vec(0, -V2, -1),
         ]
     cubeFs = [
             [0, 1, 3, 2],     # 0
@@ -3453,8 +3455,8 @@ if __name__ == '__main__':
             ],
         directIsometries = [
                 E,
-                cgtypes.quat(math.pi/2, cgtypes.vec3(1, 0, 0)),
-                cgtypes.quat(math.pi/2, cgtypes.vec3(0, 1, 0))
+                Rot(math.pi/2, vec(1, 0, 0)),
+                Rot(math.pi/2, vec(0, 1, 0))
             ]
     )
     class TestCanvas(Scenes3D.Interactive3DCanvas):

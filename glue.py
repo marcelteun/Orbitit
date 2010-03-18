@@ -24,10 +24,10 @@
 # I am not sure where to put these functions. These convert objects from A to
 # B. Should they be in A or in B?
 
-from cgkit import cgtypes
 import math
 import X3D
 import PS
+import Geom3D
 
 X3D_DEFAULT_V_NAME     = 'coords'
 X3D_DEFAULT_PROTO_NAME = 'proto'
@@ -101,7 +101,7 @@ def cylinderEdgeToX3d(
         radius = 0.1,
         precision = 5
     ):
-    vz = cgtypes.vec3(0, 1, 0)
+    vz = Geom3D.vec(0, 1, 0)
     dv = v1 - v0
     l = dv.length()
     if l == 0:

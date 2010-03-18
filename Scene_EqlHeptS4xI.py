@@ -57,9 +57,9 @@ class Shape(Heptagons.EqlHeptagonShape):
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     Geom3D.E,
-                    cgtypes.quat(Geom3D.R1_4, cgtypes.vec3(0, 0, 1)),
-                    cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(0, 0, 1)),
-                    cgtypes.quat(Geom3D.R3_4, cgtypes.vec3(0, 0, 1))
+                    Geom3D.Rot(Geom3D.R1_4, Geom3D.vec(0, 0, 1)),
+                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(0, 0, 1)),
+                    Geom3D.Rot(Geom3D.R3_4, Geom3D.vec(0, 0, 1))
                 ],
             # abuse the opposite isometry (even though this is not an opposite
             # isometry really) But for historical reasons I used a half turn

@@ -32,7 +32,6 @@ import Geom4D
 import GeomGui
 import Scenes3D
 import isometry
-from cgkit import cgtypes
 from OpenGL.GL import *
 
 Title = 'Create Polyhedron by Orbiting'

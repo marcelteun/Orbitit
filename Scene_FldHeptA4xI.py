@@ -43,7 +43,6 @@ import rgb
 import Heptagons
 import Geom3D
 import Scenes3D
-from cgkit import cgtypes
 from OpenGL.GL import *
 
 Title = 'Polyhedra with Folded Regular Heptagons A4xI'
@@ -58,16 +57,16 @@ def Vlen(v0, v1):
 
 class Shape(Geom3D.SymmetricShape):
     def __init__(this, *args, **kwargs):
-        R0 = cgtypes.quat(Geom3D.R1_2, cgtypes.vec3( 0, 0, 1))
-        R1 = cgtypes.quat(
-                Geom3D.R1_4, cgtypes.vec3(-1, 0, 0)
-            ) * cgtypes.quat(
-                Geom3D.R1_4, cgtypes.vec3( 0, 0, 1)
+        R0 = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec( 0, 0, 1))
+        R1 = Geom3D.Rot(
+                Geom3D.R1_4, Geom3D.vec(-1, 0, 0)
+            ) * Geom3D.Rot(
+                Geom3D.R1_4, Geom3D.vec( 0, 0, 1)
             )
-        R2 = cgtypes.quat(
-                Geom3D.R1_4, cgtypes.vec3( 0, 1, 0)
-            ) * cgtypes.quat(
-                Geom3D.R1_4, cgtypes.vec3( 0, 0, 1)
+        R2 = Geom3D.Rot(
+                Geom3D.R1_4, Geom3D.vec( 0, 1, 0)
+            ) * Geom3D.Rot(
+                Geom3D.R1_4, Geom3D.vec( 0, 0, 1)
             )
         Geom3D.SymmetricShape.__init__(this,
             Vs = [], Fs = [],
@@ -221,10 +220,10 @@ class Shape(Geom3D.SymmetricShape):
         # The angle has to be adjusted for historical reasons...
         this.heptagon.foldParallel(-this.fold1, -this.fold2, keepV0 = False)
         #this.heptagon.foldTrapezium(this.fold1, this.fold2, keepV0 = False)
-        this.heptagon.translate(Heptagons.H*cgtypes.vec3(0, 1, 0))
+        this.heptagon.translate(Heptagons.H*Geom3D.vec(0, 1, 0))
         # The angle has to be adjusted for historical reasons...
-        this.heptagon.rotate(cgtypes.vec3(-1, 0, 0), Geom3D.R1_4 - this.angle)
-        this.heptagon.translate(this.translation*cgtypes.vec3(0, 0, 1))
+        this.heptagon.rotate(Geom3D.vec(-1, 0, 0), Geom3D.R1_4 - this.angle)
+        this.heptagon.translate(this.translation*Geom3D.vec(0, 0, 1))
         Vs = this.heptagon.Vs[:]
         #                0
         #   13                      12
@@ -243,7 +242,7 @@ class Shape(Geom3D.SymmetricShape):
 
         Rr = this.isometryOperations['direct'][4].toMat3()
         Rl = this.isometryOperations['opposite'] * this.isometryOperations['direct'][5].toMat3()
-        Vs.append(cgtypes.vec3(Vs[2][0], -Vs[2][1], Vs[2][2])) # Vs[7]
+        Vs.append(Geom3D.vec(Vs[2][0], -Vs[2][1], Vs[2][2])) # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]
         Vs.append(Rl * Vs[0])                                  # Vs[10]
@@ -252,9 +251,9 @@ class Shape(Geom3D.SymmetricShape):
         # for V12 the O3 axis is (1, 1, 1). So we need to find the n*(1, 1, 1)
         # that lies in the face. This can found by projecting V12 straight onto
         # this axis, or we can rotate 180 degrees and take the average:
-        halfTurn = cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(1, 1, 1)).toMat3()
+        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 1, 1)).toMat3()
         Vs.append((Vs[1] + halfTurn*Vs[1]) / 2)                # Vs[12]
-        halfTurn = cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(-1, 1, 1)).toMat3()
+        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(-1, 1, 1)).toMat3()
         Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[12]
         this.setBaseVertexProperties(Vs = Vs)
         Es = []

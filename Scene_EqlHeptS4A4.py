@@ -38,7 +38,6 @@ import rgb
 import Heptagons
 import Geom3D
 import Scenes3D
-from cgkit import cgtypes
 
 Title = 'Equilateral Heptagons Tetrahedron'
 
@@ -51,9 +50,9 @@ class Shape(Heptagons.EqlHeptagonShape):
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     Geom3D.E,
-                    cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(1, 0, 0)),
-                    cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(0, 1, 0)),
-                    cgtypes.quat(Geom3D.R1_2, cgtypes.vec3(0, 0, 1))
+                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 0, 0)),
+                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(0, 1, 0)),
+                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(0, 0, 1))
                 ],
             name = 'EglHeptS4A4'
         )

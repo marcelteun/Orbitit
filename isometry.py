@@ -2,8 +2,12 @@
 
 import math
 import Geom3D
-from cgkit.cgtypes import quat, vec3
+from cgkit import cgtypes
 from copy import copy
+
+quat = cgtypes.quat
+vec3 = cgtypes.vec3
+mat3 = cgtypes.mat3
 
 class Rot(quat):
     def __init__(this, axis, angle):
