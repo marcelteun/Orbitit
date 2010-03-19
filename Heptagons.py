@@ -231,7 +231,7 @@ class RegularHeptagon:
                 )
             V1V3 = (this.VsOrg[1] + V3)/2
             V1V3axis = Geom3D.vec(V3 - this.VsOrg[1])
-            M = Geom3D.quat(b, V1V3axis).toMat3()
+            M = Geom3D.Rot(b, V1V3axis)
             V2 = V1V3 + M * (V2_ - V1V3)
             this.Vs = [
                     this.VsOrg[0],
@@ -254,7 +254,7 @@ class RegularHeptagon:
                 )
             V1V3 = (this.VsOrg[1] + this.VsOrg[3])/2
             V1V3axis = Geom3D.vec(this.VsOrg[3] - this.VsOrg[1])
-            M = Geom3D.quat(b, V1V3axis).toMat3()
+            M = Geom3D.Rot(b, V1V3axis)
             V2 = V1V3 + M * (this.VsOrg[2] - V1V3)
             this.Vs = [
                     V0, 
@@ -362,7 +362,7 @@ class RegularHeptagon:
             this.Vs[i] = T + this.Vs[i]
 
     def rotate(this, axis, angle):
-        this.transform(Geom3D.Rot(angle, axis).toMat3())
+        this.transform(Geom3D.Rot(angle, axis))
 
     def transform(this, M):
         for i in range(len(this.Vs)):

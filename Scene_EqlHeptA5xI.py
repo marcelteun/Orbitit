@@ -123,7 +123,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         if this.heptPosAlt:
             heptN = Heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None: return
-            Mr = Geom3D.Rot(Geom3D.R1_3, Vs[2]).toMat3()
+            Mr = Geom3D.Rot(Geom3D.R1_3, Vs[2])
 
             v = Mr*Geom3D.vec(heptN[0][4])
             if this.triangleAlt:
@@ -173,7 +173,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             return
         else:
             this.errorStr = ''
-        H = Geom3D.Rot(Geom3D.R1_2, Vs[3]).toMat3()
+        H = Geom3D.Rot(Geom3D.R1_2, Vs[3])
         vt = H * Geom3D.vec(vt)
         IsoscelesTriangleV[2] = [vt[0], vt[1], vt[2]]
         Vs.extend(heptN[0]) # V4 - V10

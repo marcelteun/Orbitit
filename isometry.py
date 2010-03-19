@@ -4,10 +4,50 @@ import math
 import Geom3D
 from cgkit import cgtypes
 from copy import copy
+import cgkit
 
-quat = cgtypes.quat
 vec3 = cgtypes.vec3
 mat3 = cgtypes.mat3
+
+class Quat(cgtypes.quat):
+    def __init__(this, *a, **b):
+        cgtypes.quat.__init__(this, *a, **b)
+
+    def __add__(this, o):
+        v = cgtypes.quat.__add__(this, o)
+        return Quat(v.w, v.x, v.y, v.z)
+
+    def __sub__(this, o):
+        v = cgtypes.quat.__add__(this, o)
+        return Quat(v.w, v.x, v.y, v.z)
+
+    def __mul__(this, o):
+        if (isinstance(o, list) and len(o) == 3) or (
+                isinstance(o, vec3) or
+                isinstance(o, cgtypes.vec3) or
+                isinstance(o, cgkit._core.vec3)
+            ):
+            # use the quaternion product a'ya, where
+            # - y is the pure quaternion constructed from o
+            # - a is the quaternion that deinfes the rotation
+            # - a' is conjugate(a)
+            # TODO: fix, the conjugate is at the wrong side
+            #new = this.conjugate() * quat(0, o[0], o[1], o[2]) * this
+            new = this * quat(0, o[0], o[1], o[2]) * this.conjugate()
+            if isinstance(o, vec3):
+                return vec3(new.x, new.y, new.z)
+            else:
+                return [new.x, new.y, new.z]
+        else:
+            v = cgtypes.quat.__mul__(this, o)
+            return Quat(v.w, v.x, v.y, v.z)
+
+quat = Quat
+
+# TODO:
+# define my own quat and vec3 based on list
+# this should also remove the need of conversion in glDraw
+# this should also remove the need for 2 check in Rot.__mul__
 
 class Rot(quat):
     def __init__(this, axis, angle):
@@ -55,7 +95,20 @@ class Rot(quat):
             # try rotation between Rots and Set
             # nodate rmul is important, since the mul is not commutative.
             return o.__rmul__(this)
-        #else
+        elif (isinstance(o, list) and len(o) == 3) or (
+                isinstance(o, vec3) or
+                isinstance(o, cgtypes.vec3) or
+                isinstance(o, cgkit._core.vec3)
+            ):
+            # use the quaternion product a'ya, where
+            # - y is the pure quaternion constructed from o
+            # - a is the quaternion that deinfes the rotation
+            # - a' is conjugate(a)
+            new = this.conjugate() * quat(0, o[0], o[1], o[2]) * this
+            if isinstance(o, vec3):
+                return vec3(new.x, new.y, new.z)
+            else:
+                return [new.x, new.y, new.z]
         try:
             # try rotation between 2 Rots (or Rot and quat)
             #print 'Rot * rot:', this, '*', o

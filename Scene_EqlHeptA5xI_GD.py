@@ -127,7 +127,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             ]
 
         # add heptagons
-        H = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(Vs[3])).toMat3()
+        H = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(Vs[3]))
         this.errorStr = ''
         if this.heptPosAlt:
             Ns = Vs
@@ -135,7 +135,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             if heptN == None:
               this.errorStr = 'No valid equilateral heptagon for this position'
               return
-            Mr = Geom3D.Rot(Geom3D.R1_5, Geom3D.vec(Vs[2])).toMat3()
+            Mr = Geom3D.Rot(Geom3D.R1_5, Geom3D.vec(Vs[2]))
 
             # p is a corner of the pentagon inside the pentagram
             # p is rotated 1/5th turn to form a triangle 

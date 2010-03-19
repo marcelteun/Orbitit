@@ -1717,7 +1717,7 @@ class SimpleShape:
             PsPoints = []
             if not to2DAngle == 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = Rot(to2DAngle, to2Daxis).toMat3()
+                Mrot = Rot(to2DAngle, to2Daxis)
                 # add vertices to vertex array
                 for v in this.Vs:
                     Vs.append(Mrot*vec(v))
@@ -1960,7 +1960,7 @@ class SimpleShape:
             PsPoints = []
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = Rot(to2DAngle, to2Daxis).toMat3()
+                Mrot = Rot(to2DAngle, to2Daxis)
                 # add vertices to vertex array
                 for v in this.Vs:
                     Vs.append(Mrot*vec(v))
@@ -2410,9 +2410,8 @@ class SymmetricShape(CompoundShape):
         orbits = []
         i = 0
         for dirIsom in this.isometryOperations['direct']:
-            MdirIsom = dirIsom.toMat3()
-            Vs = [MdirIsom*vec(v) for v in this.baseShape.Vs]
-            Ns = [MdirIsom*vec(v) for v in this.baseShape.Ns]
+            Vs = [dirIsom*vec(v) for v in this.baseShape.Vs]
+            Ns = [dirIsom*vec(v) for v in this.baseShape.Ns]
             orbits.append(
                 SimpleShape(
                     Vs, this.baseShape.Fs, this.baseShape.Es,

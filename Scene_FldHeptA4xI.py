@@ -251,9 +251,9 @@ class Shape(Geom3D.SymmetricShape):
         # for V12 the O3 axis is (1, 1, 1). So we need to find the n*(1, 1, 1)
         # that lies in the face. This can found by projecting V12 straight onto
         # this axis, or we can rotate 180 degrees and take the average:
-        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 1, 1)).toMat3()
+        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 1, 1))
         Vs.append((Vs[1] + halfTurn*Vs[1]) / 2)                # Vs[12]
-        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(-1, 1, 1)).toMat3()
+        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(-1, 1, 1))
         Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[12]
         this.setBaseVertexProperties(Vs = Vs)
         Es = []
