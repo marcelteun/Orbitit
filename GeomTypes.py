@@ -167,9 +167,9 @@ class Transform3():
             return Transform3(v.left * w.left, w.right * v.right)
         elif isinstance(w, Vec) and len(w) == 3:
             # TODO: check kind of Transform3
-            return Vec3((v.left * Quat([0, w[0], w[1], w[2]]) * v.right)[1:])
+            return (v.left * Quat([0, w[0], w[1], w[2]]) * v.right).V()
         elif isinstance(w, Quat):
-            assert False, 'TODO'
+            return (v.left * w                           * v.right).V()
         else:
             raise TypeError, "unsupported op type(s) for *: '%s' and '%s'" % (
                     v.__class__.__name__, w.__class__.__name__
@@ -223,7 +223,22 @@ class Rot3(Transform3):
                 axis = axis.N()
             v = math.sin(alpha) * axis
             v = Quat([math.cos(alpha), v[0], v[1], v[2]])
+            #print 'cos =', math.cos(alpha)
+            #print 'sin =', math.sin(alpha)
             Transform3.__init__(this, v, v.conjugate())
+
+    def __str__(v):
+        return 'Rotation of %s rad around %s' % (v.angle(), v.axis())
+
+    def angle(v):
+            cos = v.left[0]
+            sin = v.left[1] / v.left.V().N()[0]
+            #print 'reconstructed cos =', cos
+            #print 'reconstructed sin =', sin
+            return 2 * math.atan2(sin, cos)
+
+    def axis(v):
+            return v.left.V().N()
 
 class HalfTurn3(Rot3):
     def __init__(this, axis):
@@ -627,6 +642,138 @@ if __name__ == '__main__':
     q = Rot3(axis = -Vec3([1, -1, 1]), angle = 2 * math.pi/3)
     r = q*v
     assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+
+    # test quat mul from above (instead of Vec3):
+    # 3D Quadrant IV: rotation around (-1, 1, 1): don't specify normalise axis
+    q = Rot3(axis = Vec3([1, -1, 1]), angle = 2 * math.pi/3)
+    v = Quat([0, 1, 1, 1])
+    r = q*v
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    # neg angle
+    q = Rot3(axis = Vec3([1, -1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    # neg axis, neg angle
+    q = Rot3(axis = -Vec3([1, -1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    # neg axis
+    q = Rot3(axis = -Vec3([1, -1, 1]), angle = 2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+
+    # Axis Angle:
+    v = Vec3([1, -1, 1])
+    a = 2 * math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # neg angle
+    v = Vec3([1, -1, 1])
+    a = -2 * math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # neg angle, neg axis
+    v = Vec3([-1, 1, -1])
+    a = -2 * math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # neg axis
+    v = Vec3([-1, 1, -1])
+    a = 2 * math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # Q I
+    v = Vec3([-1, 1, -1])
+    a = math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # Q II
+    v = Vec3([-1, 1, -1])
+    a = math.pi - math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # Q III
+    v = Vec3([-1, 1, -1])
+    a = math.pi + math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
+    # Q IV
+    v = Vec3([-1, 1, -1])
+    a = - math.pi/3
+    t = Rot3(axis = v, angle = a)
+    rx = t.axis()
+    x = v.N()
+    ra = t.angle()
+    assert (
+            (eq(ra, a) and rx == x)
+            or
+            (eq(ra, -a) and rx == -x)
+        ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
+            ra, rx, a, x, -a, -x
+        )
 
     print 'succes'
 
