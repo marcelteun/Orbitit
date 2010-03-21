@@ -46,7 +46,11 @@ class Vec(list):
         return v.__class__([b-a for a, b in zip(v, w)])
 
     def __eq__(v, w):
-        r = len(v) == len(w)
+        try:
+            r = len(v) == len(w)
+        except TypeError:
+            print 'info: comparing different types in Vec (%s)' % v.__class__.__name__
+            return False
         for a, b in zip(v, w): 
             if not r: break
             r = r and eq(a, b, v.eqMargin)
@@ -110,8 +114,14 @@ class Vec3(Vec):
 
     # TODO implement Scenes3D.getAxis2AxisRotation here
 
+ux = Vec3([1, 0, 0])
+uy = Vec3([0, 1, 0])
+uz = Vec3([0, 0, 1])
+
 class Quat(Vec):
     def __init__(this, v = None):
+        # if 3D vector, use it to set vector part only and use 0 for scalar part
+        if len(v) == 3: v.insert(0, 0)
         Vec.__init__(this, [float(v[i]) for i in range(4)])
 
     def conjugate(v):
@@ -140,7 +150,7 @@ class Quat(Vec):
     S = scalar
     V = vector
 
-class Transform():
+class Transform3():
     def __init__(this, qLeft, qRight):
         this.left = qLeft
         this.right = qRight
@@ -152,12 +162,14 @@ class Transform():
         return '%s * .. * %s' % (v.left, v.right)
 
     def __mul__(v, w):
-        if isinstance(w, Transform):
+        if isinstance(w, Transform3):
             # v * w =  vLeft * wLeft .. wRight * vRight
-            return Transform(v.left * w.left, w.right * v.right)
+            return Transform3(v.left * w.left, w.right * v.right)
         elif isinstance(w, Vec) and len(w) == 3:
-            # TODO: check kind of Transform
-            return Vec3(v.left * Quat([0, w[0], w[1], w[2]]) * v.right)
+            # TODO: check kind of Transform3
+            return Vec3((v.left * Quat([0, w[0], w[1], w[2]]) * v.right)[1:])
+        elif isinstance(w, Quat):
+            assert False, 'TODO'
         else:
             raise TypeError, "unsupported op type(s) for *: '%s' and '%s'" % (
                     v.__class__.__name__, w.__class__.__name__
@@ -188,24 +200,40 @@ class Transform():
         )
 
     def isRotInv(this):
-        pass
+        return (
+            -v.right.conjugate() == v.left
+            and
+            v.right.N() == 1
+        )
 
     isRotRefl = isRotInv
 
-class Rot(Transform):
-    def __init__(this, v = None, axis = None, angle = None):
-        # TODO: normalise
-        Transform.__init__(this, v.conjugate(), v)
+class Rot3(Transform3):
+    def __init__(this, v = None, axis = Vec3([1, 0, 0]), angle = 0):
+        """
+        Initialise a 3D rotation
+        """
+        if v != None:
+            v = v.N()
+            Transform3.__init__(this, v, v.conjugate())
+        else:
+            # v = cos(angle) + y sin(angle)
+            alpha = angle / 2
+            if axis != Vec3([0, 0, 0]):
+                axis = axis.N()
+            v = math.sin(alpha) * axis
+            v = Quat([math.cos(alpha), v[0], v[1], v[2]])
+            Transform3.__init__(this, v, v.conjugate())
 
-class HalfTurn(Rot):
+class HalfTurn3(Rot3):
     def __init__(this, axis):
-        Rot.__init__(this, axis = axis, angle = math.pi)
+        Rot3.__init__(this, axis = axis, angle = math.pi)
 
-class Refl(Transform):
+class Refl3(Transform3):
     def __init__(this, q = None, normal = None):
-        Transform.__init__(this, v)
+        Transform3.__init__(this, v)
 
-class RotInv(Transform):
+class RotInv3(Transform3):
     def __init__(this, q = None, axis = None, angle = None):
         try:
             qLeft = -q.conjugate()
@@ -213,7 +241,7 @@ class RotInv(Transform):
             # in case q is a Vec
             q = Quat(q)
             qLeft = -q.conjugate()
-        Transform.__init__(this, qLeft, q)
+        Transform3.__init__(this, qLeft, q)
 
     def __str__(q):
         return '%s * .. * %s' % (q.left, q.right)
@@ -221,16 +249,15 @@ class RotInv(Transform):
     def __repr__(q):
         return '%s(%s, %s)' % (q.__class__.__name__, q.left, q.right)
 
-RotRefl = RotInv
-I = RotInv(Quat([1, 0, 0, 0]))
-E = Rot(Quat([1, 0, 0, 0]))
+RotRefl = RotInv3
+I = RotInv3(Quat([1, 0, 0, 0]))
+E = Rot3(Quat([1, 0, 0, 0]))
 
 # TODO implement Geom3D.Line3D here (in this file)
 
 if __name__ == '__main__':
 
-    assert I.__repr__() == 'RotInv([-1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])'
-
+    # Vec
     r = Vec([])
     assert(r == []), 'got %s instead' % r
 
@@ -330,6 +357,7 @@ if __name__ == '__main__':
     r = v.angle(w)
     assert(r == math.pi), 'got %s instead' % r
 
+    # Vec3
     v = Vec3([1,  2, 3])
     w = Vec3([2, -3, 4])
     r = v.cross(w)
@@ -360,6 +388,7 @@ if __name__ == '__main__':
     assert(r == Vec3([0, 0, 0])), 'got %s instead' % r
     assert(type(r) == type(v))
 
+    # Quat
     q0 = Quat([1, 2, 3, 5])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
@@ -419,9 +448,185 @@ if __name__ == '__main__':
     assert(r == q), 'got %s instead' % r
     assert(type(r) == type(q))
 
+    # Transform
+    assert I.__repr__() == 'RotInv3([-1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])'
+
     r = I * I
     assert(I != E), "This shouldn't hold %s != %s" % (I, E)
     assert(r == E), 'got %s instead' % r
+
+    r = Rot3(axis = Vec3([0, 0, 0]), angle = 0)
+    assert(r.right == Quat([1, 0, 0, 0])), 'got %s instead' % r.right
+    assert(r.left == Quat([1, 0, 0, 0])), 'got %s instead' % r.left
+
+    #for a, b, in zip(r.right, Quat([1, 0, 0, 0])):
+    #    print '%0.15f' % (a - b)
+
+    # rotation around z -axis
+    # 0 degrees (+/- 360)
+    q = Rot3(axis = uz, angle = 0)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == ux), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = 2*math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == ux), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = -2*math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == ux), 'got %s instead' % r
+
+    # 90 degrees (+/- 360)
+    q = Rot3(axis = uz, angle = math.pi/2)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == uy), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = math.pi/2 + 2 * math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == uy), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = math.pi/2 - 2 * math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == uy), 'got %s instead' % r
+
+    # 180 degrees (+/- 360)
+    q = Rot3(axis = uz, angle = math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == -ux), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = math.pi + 2 * math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == -ux), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = math.pi - 2 * math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == -ux), 'got %s instead' % r
+
+    # -90 degrees (+/- 360)
+    q = Rot3(axis = uz, angle = -math.pi/2)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == -uy), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = -math.pi/2 + 2 * math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == -uy), 'got %s instead' % r
+
+    q = Rot3(axis = uz, angle = -math.pi/2 - 2 * math.pi)
+    v = Vec3(ux)
+    r = q*v
+    assert(r == -uy), 'got %s instead' % r
+
+    # Quadrant I
+    hV3 = math.sqrt(3) / 2
+    q = Rot3(axis = uz, angle = math.pi/3)
+    v = Vec3(ux)
+    v[2] = 3
+    r = q*v
+    assert(r == Vec3([0.5, hV3, 3])), 'got %s instead' % r
+
+    # Quadrant II
+    q = Rot3(axis = uz, angle = math.pi - math.pi/3)
+    v = Vec3(ux)
+    v[2] = 3
+    r = q*v
+    assert(r == Vec3([-0.5, hV3, 3])), 'got %s instead' % r
+
+    # Quadrant III
+    q = Rot3(axis = uz, angle = math.pi + math.pi/3)
+    v = Vec3(ux)
+    v[2] = 3
+    r = q*v
+    assert(r == Vec3([-0.5, -hV3, 3])), 'got %s instead' % r
+
+    # Quadrant IV
+    q = Rot3(axis = uz, angle = - math.pi/3)
+    v = Vec3(ux)
+    v[2] = 3
+    r = q*v
+    assert(r == Vec3([0.5, -hV3, 3])), 'got %s instead' % r
+
+    # 3D Quadrant I: rotation around (1, 1, 1): don't specify normalise axis
+    q = Rot3(axis = Vec3([1, 1, 1]), angle = 2 * math.pi/3)
+    v = Vec3([-1, 1, 1])
+    r = q*v
+    assert(r == Vec3([1, -1, 1])), 'got %s instead' % r
+    # neg angle
+    q = Rot3(axis = Vec3([1, 1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, 1, -1])), 'got %s instead' % r
+    # neg axis, neg angle
+    q = Rot3(axis = -Vec3([1, 1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, 1])), 'got %s instead' % r
+    # neg axis
+    q = Rot3(axis = -Vec3([1, 1, 1]), angle = 2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, 1, -1])), 'got %s instead' % r
+
+    # 3D Quadrant II: rotation around (-1, 1, 1): don't specify normalise axis
+    q = Rot3(axis = Vec3([-1, 1, 1]), angle = 2 * math.pi/3)
+    v = Vec3([1, 1, 1])
+    r = q*v
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    # neg angle
+    q = Rot3(axis = Vec3([-1, 1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    # neg axis, neg angle
+    q = Rot3(axis = -Vec3([-1, 1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    # neg axis
+    q = Rot3(axis = -Vec3([-1, 1, 1]), angle = 2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+
+    # 3D Quadrant III: rotation around (-1, 1, 1): don't specify normalise axis
+    q = Rot3(axis = Vec3([-1, -1, 1]), angle = 2 * math.pi/3)
+    v = Vec3([1, 1, 1])
+    r = q*v
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    # neg angle
+    q = Rot3(axis = Vec3([-1, -1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    # neg axis, neg angle
+    q = Rot3(axis = -Vec3([-1, -1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    # neg axis
+    q = Rot3(axis = -Vec3([-1, -1, 1]), angle = 2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+
+    # 3D Quadrant IV: rotation around (-1, 1, 1): don't specify normalise axis
+    q = Rot3(axis = Vec3([1, -1, 1]), angle = 2 * math.pi/3)
+    v = Vec3([1, 1, 1])
+    r = q*v
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    # neg angle
+    q = Rot3(axis = Vec3([1, -1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    # neg axis, neg angle
+    q = Rot3(axis = -Vec3([1, -1, 1]), angle = -2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    # neg axis
+    q = Rot3(axis = -Vec3([1, -1, 1]), angle = 2 * math.pi/3)
+    r = q*v
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
 
     print 'succes'
 
