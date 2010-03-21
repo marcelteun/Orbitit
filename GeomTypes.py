@@ -181,25 +181,31 @@ class Transform3():
     def __ne__(v, w):
         return not(v == w)
 
-    def isRot(this):
+    def isRot(v):
+        #print 'v.right.conjugate() == v.left', v.right.conjugate() == v.left
+        #print '%s = v.right.conjugate() == v.left %s ' % (
+        #        v.right.conjugate(), v.left
+        #    )
+        #print '1 ?= v.right.N() =', v.right.norm()
+        #print '-1 ?<= v.S() = %s ?<= 1', v.right.S()
         return (
             v.right.conjugate() == v.left
             and
-            v.right.N() == 1
+            v.right.norm() == 1
             and
-            v.S <= 1 and v.S >= -1
+            v.right.S() <= 1 and v.right.S() >= -1
         )
 
-    def isRefl(this):
+    def isRefl(v):
         return (
-            v.right.conjugate() == v.left
+            v.right == v.left
             and
-            v.right.N() == 1
+            v.right.norm == 1
             and
-            v.S == 0
+            v.right.S == 0
         )
 
-    def isRotInv(this):
+    def isRotInv(v):
         return (
             -v.right.conjugate() == v.left
             and
@@ -246,7 +252,17 @@ class HalfTurn3(Rot3):
 
 class Refl3(Transform3):
     def __init__(this, q = None, normal = None):
-        Transform3.__init__(this, v)
+        if v != None:
+            v = v.N()
+            Transform3.__init__(this, v, v)
+        else:
+            if normal != Vec3([0, 0, 0]):
+                normal = axis.N()
+            q = Quat(normal)
+            Transform3.__init__(this, q, q)
+
+    def __str__(v):
+        return 'Reflection in plane with normal %s' % (v.V())
 
 class RotInv3(Transform3):
     def __init__(this, q = None, axis = None, angle = None):
@@ -676,6 +692,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # neg angle
     v = Vec3([1, -1, 1])
     a = -2 * math.pi/3
@@ -690,6 +709,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # neg angle, neg axis
     v = Vec3([-1, 1, -1])
     a = -2 * math.pi/3
@@ -704,6 +726,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # neg axis
     v = Vec3([-1, 1, -1])
     a = 2 * math.pi/3
@@ -718,6 +743,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # Q I
     v = Vec3([-1, 1, -1])
     a = math.pi/3
@@ -732,6 +760,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # Q II
     v = Vec3([-1, 1, -1])
     a = math.pi - math.pi/3
@@ -746,6 +777,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # Q III
     v = Vec3([-1, 1, -1])
     a = math.pi + math.pi/3
@@ -760,6 +794,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
     # Q IV
     v = Vec3([-1, 1, -1])
     a = - math.pi/3
@@ -774,6 +811,9 @@ if __name__ == '__main__':
         ), 'got (%s, %s) instead of (%s, %s) or (%s, %s)' % (
             ra, rx, a, x, -a, -x
         )
+    assert t.isRot()
+    assert not t.isRefl()
+    assert not t.isRotInv()
 
     print 'succes'
 
