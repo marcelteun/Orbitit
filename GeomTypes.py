@@ -2,8 +2,9 @@
 
 import math
 
-turn    = lambda r: r * 2 * math.pi
-degrees = lambda r: math.pi * r / 180
+turn      = lambda r: r * 2 * math.pi
+degrees   = lambda r: math.pi * r / 180
+toDegrees = lambda r: 180.0 * r   / math.pi
 
 fullTurn = turn(1)
 hTurn    = turn(0.5)
@@ -158,18 +159,24 @@ class Quat(Vec):
     S = scalar
     V = vector
 
+def transform3TypeStr(i):
+    if i == Transform3.Rot:    return 'Rot3'
+    if i == Transform3.Refl:   return 'Refl3'
+    if i == Transform3.RotInv: return 'RotInv3'
+    else:                      return 'Transform3'
+
 class Transform3():
     def __init__(this, qLeft, qRight):
         this.left = qLeft
         this.right = qRight
 
     def __repr__(t):
-        return '%s(%s, %s)' % (t.__class__.__name__, t.left, t.right)
+        return '%s(%s, %s)' % (transform3TypeStr(t.type()), t.left, t.right)
 
     def __str__(t):
         if t.isRot(): return t.__strRot()
         elif t.isRefl(): return t.__strRefl()
-        # elif t.isRotInv(): return t.eqRotInv(w)
+        elif t.isRotInv(): return t.__strRotInv()
         else:
             return '%s * .. * %s' % (t.left, t.right)
 
@@ -190,8 +197,7 @@ class Transform3():
     def __eq__(t, u):
         if t.isRot() and t.isRot: return t.__eqRot(u)
         elif t.isRefl() and t.isRefl: return t.__eqRefl(u)
-        # TODO check is specials are needed for:
-        # elif t.isRotInv() and t.isRotInv: return t.eqRotInv(u)
+        elif t.isRotInv() and t.isRotInv: return t.__eqRotInv(u)
         else:
             return (t.left == u.left and t.right == u.right)
 
@@ -316,28 +322,48 @@ class Transform3():
     def planeN(s):
         return s.left.V()
 
-    ## ROTARY INVERSION or ROTARY RELECTION specific functions:
-    def isRotInv(t):
-        #print '-t.right.conjugate() == t.left', -t.right.conjugate() == t.left
-        #print '1 ?= t.right.norm() = %0.17f' % t.right.norm()
-        return (
-            -t.right.conjugate() == t.left
-            and
-            eq(t.right.norm(), 1)
-        )
+    ## ROTARY INVERSION (= ROTARY RELECTION) specific functions:
+    def I(t):
+        """
+        Apply a central inversion
+        """
+        return Transform3(-t.left, t.right)
 
-    isRotRefl = isRotInv
+    def isRotInv(t):
+        return t.I().isRot()
+
+    def __eqRotInv(t, u):
+        return t.I().isRot() == u.I().isRot()
+
+    def __strRotInv(t):
+        r = t.I()
+        str = 'Rotary inversion of %s rad around %s' % (
+                r.angleRot(), r.axisRot()
+            )
+        return str
+
+    def angleRotInv(t):
+        return t.I().angleRot()
+
+    def axisRotInv(t):
+        return t.I().axisRot()
+
+    isRotRefl   = isRotInv
+    axisRotRefl = axisRotInv
+
+    def angleRotRefl(t):
+        return (t.angleRotInv() - hTurn)
 
 class Rot3(Transform3):
-    def __init__(this, q = None, axis = Vec3([1, 0, 0]), angle = 0):
+    def __init__(this, qLeft = None, axis = Vec3([1, 0, 0]), angle = 0):
         """
         Initialise a 3D rotation
         """
-        if isinstance(q, Quat):
-            try: q = q.N()
+        if isinstance(qLeft, Quat):
+            try: qLeft = qLeft.N()
             except ZeroDivisionError: pass # will fail on assert below:
-            Transform3.__init__(this, q, q.conjugate())
-            assert this.isRot(), "%s doesn't represent a rotation" % q
+            Transform3.__init__(this, qLeft, qLeft.conjugate())
+            assert this.isRot(), "%s doesn't represent a rotation" % qLeft
         else:
             # q = cos(angle) + y sin(angle)
             alpha = angle / 2
@@ -380,14 +406,14 @@ class Refl3(Transform3):
             )
 
 class RotInv3(Transform3):
-    def __init__(this, q = None, axis = None, angle = None):
-        try:
-            qLeft = -q.conjugate()
-        except AttributeError:
-            # in case q is a Vec
-            q = Quat(q)
-            qLeft = -q.conjugate()
-        Transform3.__init__(this, qLeft, q)
+    def __init__(this, qLeft = None, axis = None, angle = None):
+        """
+        Initialise a 3D rotation
+        """
+        # Do not inherit from Rot3 (and then apply inversion):
+        # a rotary inversion is not a rotation.
+        ri = Rot3(qLeft, axis, angle).I()
+        Transform3.__init__(this, ri.left, ri.right)
 
 RotRefl = RotInv3
 I = RotInv3(Quat([1, 0, 0, 0]))
@@ -595,7 +621,6 @@ if __name__ == '__main__':
     #####################
     # Transform: Rot3
     #####################
-    assert I.__repr__() == 'RotInv3([-1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0])'
 
     r = I * I
     assert(I != E), "This shouldn't hold %s != %s" % (I, E)
@@ -1096,5 +1121,11 @@ if __name__ == '__main__':
         assert s0 == s1, '%s should == %s (i=%d)' % (s0, s1, i)
         r = s0 * s1
         assert r == E, 'refl*refl: %s should == %s (i=%d)' % (r, E, i)
+
+    #####################
+    # Transform: Rotary inversion
+    #####################
+
+    # type: r*I == I*r and gives a rotary inversion (random)
 
     print 'succes'
