@@ -31,6 +31,7 @@ import Scenes3D
 import wx
 import os
 from cgkit import cgtypes
+import GeomTypes
 import isometry
 
 from OpenGL.GLU import *
@@ -2374,8 +2375,10 @@ class SymmetricShape(CompoundShape):
                 'direct': directIsometries,
                 'opposite': oppositeIsometry
             }
-        assert oppositeIsometry == None or (
-                isinstance(oppositeIsometry, cgtypes.mat3)
+        assert (
+                oppositeIsometry == None or
+                isinstance(oppositeIsometry, cgtypes.mat3) or
+                isinstance(oppositeIsometry, GeomTypes.Transform3)
             ), 'Either oppositeIsometry should be None or it should have be of type cgtype.mat3'
         this.order = len(directIsometries)
         if oppositeIsometry != None:
@@ -2410,26 +2413,30 @@ class SymmetricShape(CompoundShape):
         orbits = []
         i = 0
         for dirIsom in this.isometryOperations['direct']:
-            Vs = [dirIsom*vec(v) for v in this.baseShape.Vs]
-            Ns = [dirIsom*vec(v) for v in this.baseShape.Ns]
+            if isinstance(dirIsom, GeomTypes.Transform3):
+                Vs = [dirIsom*v for v in this.baseShape.Vs]
+            else:
+                # legacy code: to be removed (incl if statement):
+                Vs = [dirIsom*vec(v) for v in this.baseShape.Vs]
             orbits.append(
                 SimpleShape(
                     Vs, this.baseShape.Fs, this.baseShape.Es,
-                    Ns = Ns,
                     colors = this.shapeColors[i]
                 )
             )
             i += 1
-        MoppIsom = this.isometryOperations['opposite']
-        if MoppIsom != None:
+        oppIsom = this.isometryOperations['opposite']
+        if oppIsom != None:
             for dirIsom in this.isometryOperations['direct']:
-                MdirIsom = dirIsom.toMat3()
-                Vs = [MoppIsom*MdirIsom*vec(v) for v in this.baseShape.Vs]
-                Ns = [MoppIsom*MdirIsom*vec(v) for v in this.baseShape.Ns]
+                if isinstance(oppIsom, GeomTypes.Transform3):
+                    Vs = [oppIsom*dirIsom*v for v in this.baseShape.Vs]
+                else:
+                    # legacy code: to be removed (incl if statement):
+                    MdirIsom = dirIsom.toMat3()
+                    Vs = [oppIsom*MdirIsom*vec(v) for v in this.baseShape.Vs]
                 orbits.append(
                     SimpleShape(
                         Vs, this.baseShape.Fs, this.baseShape.Es,
-                        Ns = Ns,
                         colors = this.shapeColors[i]
                     )
                 )

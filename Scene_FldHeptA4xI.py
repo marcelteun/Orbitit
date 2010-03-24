@@ -45,6 +45,11 @@ import Geom3D
 import Scenes3D
 from OpenGL.GL import *
 
+import GeomTypes
+from GeomTypes import Rot3      as Rot
+from GeomTypes import HalfTurn3 as HalfTurn
+from GeomTypes import Vec3      as Vec
+
 Title = 'Polyhedra with Folded Regular Heptagons A4xI'
 
 V2 = math.sqrt(2)
@@ -57,25 +62,23 @@ def Vlen(v0, v1):
 
 class Shape(Geom3D.SymmetricShape):
     def __init__(this, *args, **kwargs):
-        R0 = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec( 0, 0, 1))
-        R1 = Geom3D.Rot(
-                Geom3D.R1_4, Geom3D.vec(-1, 0, 0)
-            ) * Geom3D.Rot(
-                Geom3D.R1_4, Geom3D.vec( 0, 0, 1)
-            )
-        R2 = Geom3D.Rot(
-                Geom3D.R1_4, Geom3D.vec( 0, 1, 0)
-            ) * Geom3D.Rot(
-                Geom3D.R1_4, Geom3D.vec( 0, 0, 1)
-            )
+        R0   = HalfTurn(GeomTypes.uz)
+        R1   = Rot(axis = Vec([ 1,  1,  1]), angle =    GeomTypes.tTurn)
+        R1_2 = Rot(axis = Vec([ 1,  1,  1]), angle = 2 * GeomTypes.tTurn)
+        R2   = Rot(axis = Vec([-1, -1,  1]), angle =    GeomTypes.tTurn)
+        R2_2 = Rot(axis = Vec([-1, -1,  1]), angle = 2* GeomTypes.tTurn)
+        R3   = HalfTurn(GeomTypes.uy);
         Geom3D.SymmetricShape.__init__(this,
             Vs = [], Fs = [],
             directIsometries = [
-                    Geom3D.E,      R0,
-                    R1,       R1 * R0,
-                    R2,       R2 * R0
+                    GeomTypes.E, R0,
+                    R1,          R1_2,
+                    R1*R0,       R1_2 * R0,
+                    R2,          R2_2,
+                    R2*R0,       R2_2 * R0,
+                    R3,          R3 * R0
                 ],
-            oppositeIsometry = Geom3D.I,
+#            oppositeIsometry = GeomTypes.I,
             name = 'FoldedRegHeptS4xI'
         )
         this.heptagon = Heptagons.RegularHeptagon()
@@ -116,10 +119,10 @@ class Shape(Geom3D.SymmetricShape):
                 'Triangle Star, 1 Loose'
             ]
 
-        this.lightPosition = [-50., 50., 200., 0.]
-        this.lightAmbient  = [0.25, 0.25, 0.25, 1.]
-        this.lightDiffuse  = [1., 1., 1., 1.]
-        this.materialSpec  = [0., 0., 0., 0.]
+        #this.lightPosition = [-50., 50., 200., 0.]
+        #this.lightAmbient  = [0.25, 0.25, 0.25, 1.]
+        #this.lightDiffuse  = [1., 1., 1., 1.]
+        #this.materialSpec  = [0., 0., 0., 0.]
         #this.showBaseOnly  = True
         this.initArrs()
         this.setV()
@@ -220,10 +223,10 @@ class Shape(Geom3D.SymmetricShape):
         # The angle has to be adjusted for historical reasons...
         this.heptagon.foldParallel(-this.fold1, -this.fold2, keepV0 = False)
         #this.heptagon.foldTrapezium(this.fold1, this.fold2, keepV0 = False)
-        this.heptagon.translate(Heptagons.H*Geom3D.vec(0, 1, 0))
+        this.heptagon.translate(Heptagons.H*GeomTypes.uy)
         # The angle has to be adjusted for historical reasons...
-        this.heptagon.rotate(Geom3D.vec(-1, 0, 0), Geom3D.R1_4 - this.angle)
-        this.heptagon.translate(this.translation*Geom3D.vec(0, 0, 1))
+        this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.angle)
+        this.heptagon.translate(this.translation*GeomTypes.uz)
         Vs = this.heptagon.Vs[:]
         #                0
         #   13                      12
@@ -240,21 +243,21 @@ class Shape(Geom3D.SymmetricShape):
         #                         7
         #
 
-        Rr = this.isometryOperations['direct'][4].toMat3()
-        Rl = this.isometryOperations['opposite'] * this.isometryOperations['direct'][5].toMat3()
-        Vs.append(Geom3D.vec(Vs[2][0], -Vs[2][1], Vs[2][2])) # Vs[7]
+        Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
+        Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
+        Vs.append(Vec([Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]
         Vs.append(Rl * Vs[0])                                  # Vs[10]
-        Vs.append(Rl * Vs[1])                                  # Vs[11]
+        Vs.append(Rl * Vs[6])                                  # Vs[11]
         # V12 and V13 are the centres of the triangle on the O3 axis.
         # for V12 the O3 axis is (1, 1, 1). So we need to find the n*(1, 1, 1)
         # that lies in the face. This can found by projecting V12 straight onto
         # this axis, or we can rotate 180 degrees and take the average:
-        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 1, 1))
+        halfTurn = HalfTurn(Vec([1, 1, 1]))
         Vs.append((Vs[1] + halfTurn*Vs[1]) / 2)                # Vs[12]
-        halfTurn = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(-1, 1, 1))
-        Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[12]
+        halfTurn = HalfTurn(Vec([-1, 1, 1]))
+        Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[13]
         this.setBaseVertexProperties(Vs = Vs)
         Es = []
         Fs = []

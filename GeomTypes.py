@@ -15,7 +15,7 @@ defaultFloatMargin = 1.0e-15
 def eq(a, b, margin = defaultFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
-    
+
     a: a floating point number.
     b: a floating point number.
     margin: if |a - b| < margin then the floats will be considered equal and
@@ -55,14 +55,16 @@ class Vec(list):
         return v.__class__([b-a for a, b in zip(v, w)])
 
     def __eq__(v, w):
+        #print '%s ?= %s' % (v, w)
         try:
             r = len(v) == len(w)
         except TypeError:
             print 'info: comparing different types in Vec (%s)' % v.__class__.__name__
             return False
-        for a, b in zip(v, w): 
+        for a, b in zip(v, w):
             if not r: break
             r = r and eq(a, b, v.eqMargin)
+            #print '%s ?= %s : %s' % (a, b, eq(a, b, v.eqMargin))
         return r
 
     def __ne__(v, w):
@@ -195,9 +197,10 @@ class Transform3():
                 )
 
     def __eq__(t, u):
-        if t.isRot() and t.isRot: return t.__eqRot(u)
-        elif t.isRefl() and t.isRefl: return t.__eqRefl(u)
-        elif t.isRotInv() and t.isRotInv: return t.__eqRotInv(u)
+        if not isinstance(u, Transform3): return False
+        if t.isRot() and u.isRot: return t.__eqRot(u)
+        elif t.isRefl() and u.isRefl: return t.__eqRefl(u)
+        elif t.isRotInv() and u.isRotInv: return t.__eqRotInv(u)
         else:
             return (t.left == u.left and t.right == u.right)
 
@@ -226,6 +229,12 @@ class Transform3():
         assert False, (
             'oops, unknown angle; transform %s\n' +
             'neither a rotation, nor a rotary-inversion (-reflection)' % t)
+
+    def matrix(t):
+        if t.isRot(): return t.matrixRot()
+        assert False, (
+            'oops, unknown matrix; transform %s\n' +
+            'not a rotation' % t)
 
     ## ROTATION specific functions:
     def isRot(t):
@@ -290,6 +299,17 @@ class Transform3():
                     "%s doesn't represent a rotation" % t.__repr__()
                 )
             return t.left.V()
+
+    def matrixRot(t):
+        w, x, y, z = t.left
+        dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
+        dxw, dyw, dzw = 2*x*w, 2*y*w, 2*z*w
+        dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
+        return [
+            Vec([1-dy2-dz2,     dxy-dzw,        dxz+dyw]),
+            Vec([dxy+dzw,       1-dx2-dz2,      dyz-dxw]),
+            Vec([dxz-dyw,       dyz+dxw,        1-dx2-dy2]),
+        ]
 
     ## REFLECTION specific functions:
     def isRefl(t):
@@ -1001,6 +1021,103 @@ if __name__ == '__main__':
     x = Rot3(axis = Vec3([1, 1, 1]), angle = tTurn)
     assert r == x, 'Expected: %s, got %s' % (x, r)
 
+    # test conversion to Mat
+    # x-axis
+    r = Rot3(axis = uz, angle = qTurn).matrix()
+    # 0  -1  0
+    # 1   0  0
+    # 0   0  1
+    x = Vec3([0, -1, 0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([1, 0, 0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([0, 0, 1])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+    r = Rot3(axis = uz, angle = hTurn).matrix()
+    # -1   0  0
+    #  0  -1  0
+    #  0   0  1
+    x = Vec3([-1, 0, 0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([0, -1, 0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([0, 0, 1])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+    r = Rot3(axis = uz, angle = -qTurn).matrix()
+    #  0   1  0
+    # -1   0  0
+    #  0   0  1
+    x = Vec3([ 0, 1, 0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([-1, 0, 0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([0, 0, 1])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+
+    # y-axis
+    r = Rot3(axis = uy, angle = qTurn).matrix()
+    #  0   0   1
+    #  0   1   0
+    # -1   0   0
+    x = Vec3([ 0, 0,  1])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([ 0, 1, 0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([-1, 0, 0])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+    r = Rot3(axis = uy, angle = hTurn).matrix()
+    # -1   0   0
+    #  0   1   0
+    #  0   0  -1
+    x = Vec3([-1, 0, 0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([0,  1, 0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([0, 0, -1])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+    r = Rot3(axis = uy, angle = -qTurn).matrix()
+    #  0   0  -1
+    #  0   1   0
+    #  1   0   0
+    x = Vec3([ 0, 0, -1])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([ 0, 1,  0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([ 1, 0,  0])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+
+    # x-axis
+    r = Rot3(axis = ux, angle = qTurn).matrix()
+    # 1  0  0
+    # 0  0 -1
+    # 0  1  0
+    x = Vec3([1,  0, 0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([0,  0, -1])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([0,  1,  0])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+    r = Rot3(axis = ux, angle = hTurn).matrix()
+    #  1  0  0
+    #  0 -1  0
+    #  0  0 -1
+    x = Vec3([1,  0,  0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([0, -1,  0])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([0,  0, -1])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+    r = Rot3(axis = ux, angle = -qTurn).matrix()
+    #  1  0  0
+    #  0  0  1
+    #  0 -1  0
+    x = Vec3([ 1,  0,  0])
+    assert r[0] == x, 'Expected: %s, got %s' % (x, r[0])
+    x = Vec3([ 0,  0,  1])
+    assert r[1] == x, 'Expected: %s, got %s' % (x, r[1])
+    x = Vec3([ 0, -1,  0])
+    assert r[2] == x, 'Expected: %s, got %s' % (x, r[2])
+
     #####################
     # Transform: Refl3
     #####################
@@ -1093,7 +1210,7 @@ if __name__ == '__main__':
     assert r.isRotInv()
     assert r == I
 
-    # test order: 2 refl planes with 45 degrees in between: 90 rotation 
+    # test order: 2 refl planes with 45 degrees in between: 90 rotation
     s0 = Refl3(planeN = Vec3([0, 3, 0]))
     s1 = Refl3(planeN = Vec3([-1, 1, 0]))
     r = (s1 * s0)
