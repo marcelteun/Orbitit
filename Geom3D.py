@@ -71,11 +71,7 @@ Rot = isometry.quat
 
 E = Rot(0, vec(1, 0, 0))
 # central inversion:
-I = cgtypes.mat3(
-        -1.0,  0.0,  0.0,
-         0.0, -1.0,  0.0,
-         0.0,  0.0, -1.0
-    )
+I = GeomTypes.I
 
 # constant that have deal with angles
 Rad2Deg = 180.0/math.pi
@@ -2379,7 +2375,7 @@ class SymmetricShape(CompoundShape):
                 oppositeIsometry == None or
                 isinstance(oppositeIsometry, cgtypes.mat3) or
                 isinstance(oppositeIsometry, GeomTypes.Transform3)
-            ), 'Either oppositeIsometry should be None or it should have be of type cgtype.mat3'
+            ), 'Either oppositeIsometry should be None or it should have be of type GeomTypes.Transform3'
         this.order = len(directIsometries)
         if oppositeIsometry != None:
             this.order = 2*this.order
@@ -2418,6 +2414,7 @@ class SymmetricShape(CompoundShape):
             else:
                 # legacy code: to be removed (incl if statement):
                 Vs = [dirIsom*vec(v) for v in this.baseShape.Vs]
+#            Vs = [dirIsom*v for v in this.baseShape.Vs]
             orbits.append(
                 SimpleShape(
                     Vs, this.baseShape.Fs, this.baseShape.Es,
@@ -2434,6 +2431,7 @@ class SymmetricShape(CompoundShape):
                     # legacy code: to be removed (incl if statement):
                     MdirIsom = dirIsom.toMat3()
                     Vs = [oppIsom*MdirIsom*vec(v) for v in this.baseShape.Vs]
+#                Vs = [oppIsom*dirIsom*v for v in this.baseShape.Vs]
                 orbits.append(
                     SimpleShape(
                         Vs, this.baseShape.Fs, this.baseShape.Es,

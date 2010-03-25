@@ -38,7 +38,12 @@ import rgb
 import Heptagons
 import Geom3D
 import Scenes3D
-from cgkit import cgtypes
+import GeomTypes
+
+from GeomTypes import HalfTurn3 as HalfTurn
+from GeomTypes import Rot3      as Rot
+
+vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
 
 Title = 'Equilateral Heptagons from Cube - Octahedron'
 
@@ -46,25 +51,22 @@ V2  = math.sqrt(2)
 hV2 = 1.0/V2
 tV3 = 1.0/math.sqrt(3)
 
-halfTurn = cgtypes.mat3(
-        1.0,  0.0,  0.0,
-        0.0, -1.0,  0.0,
-        0.0,  0.0, -1.0,
-    )
+halfTurn = HalfTurn(GeomTypes.ux)
+
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
         this.atanHV2 = Geom3D.Rad2Deg * math.atan(1/V2)
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
-                    Geom3D.E,
-                    Geom3D.Rot(Geom3D.R1_4, Geom3D.vec(0, 0, 1)),
-                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(0, 0, 1)),
-                    Geom3D.Rot(Geom3D.R3_4, Geom3D.vec(0, 0, 1))
+                    GeomTypes.E,
+                    Rot(angle = GeomTypes.turn(0.25), axis = GeomTypes.uz),
+                    Rot(angle = GeomTypes.turn(0.50), axis = GeomTypes.uz),
+                    Rot(angle = GeomTypes.turn(0.75), axis = GeomTypes.uz)
                 ],
             # abuse the opposite isometry (even though this is not an opposite
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
-            #oppositeIsometry = Geom3D.I,
+            #oppositeIsometry = GeomTypes.I,
             oppositeIsometry = halfTurn,
             name = 'EglHeptS4xI'
         )
@@ -112,20 +114,20 @@ class Shape(Heptagons.EqlHeptagonShape):
             #    '------------'                       
             #                                         
             Vs = [
-                    [St,     St,      St],    # 0
-                    [0.0,    1.0,    1.0],
-                    [0.0,    0.0,    this.h],
-                    [1.0,    0.0,    1.0],    # 3
+                    vec(St,     St,      St),    # 0
+                    vec(0.0,    1.0,    1.0),
+                    vec(0.0,    0.0,    this.h),
+                    vec(1.0,    0.0,    1.0),    # 3
 
-                    [St,     St,      St],    # 4
-                    [1.0,    0.0,    1.0],
-                    [this.h, 0.0,    0.0],
-                    [1.0,    1.0,    0.0],    # 7
+                    vec(St,     St,      St),    # 4
+                    vec(1.0,    0.0,    1.0),
+                    vec(this.h, 0.0,    0.0),
+                    vec(1.0,    1.0,    0.0),    # 7
 
-                    [St,     St,      St],    # 8
-                    [1.0,    1.0,    0.0],
-                    [0.0,    this.h, 0.0],
-                    [0.0,    1.0,    1.0]     # 11
+                    vec(St,     St,      St),    # 8
+                    vec(1.0,    1.0,    0.0),
+                    vec(0.0,    this.h, 0.0),
+                    vec(0.0,    1.0,    1.0)     # 11
                 ]
         else:
             #                                         
@@ -149,20 +151,20 @@ class Shape(Heptagons.EqlHeptagonShape):
             #    '------------'                       
             #                                         
             Vs = [
-                    [0.0,    0.0,    this.h], # 0
-                    [1.0,    0.0,    1.0],
-                    [St,     St,      St],
-                    [0.0,    1.0,    1.0],    # 3
+                    vec(0.0,    0.0,    this.h), # 0
+                    vec(1.0,    0.0,    1.0),
+                    vec(St,     St,      St),
+                    vec(0.0,    1.0,    1.0),    # 3
 
-                    [this.h, 0.0,    0.0],    # 4
-                    [1.0,    1.0,    0.0],
-                    [St,     St,      St],
-                    [1.0,    0.0,    1.0],    # 7
+                    vec(this.h, 0.0,    0.0),    # 4
+                    vec(1.0,    1.0,    0.0),
+                    vec(St,     St,      St),
+                    vec(1.0,    0.0,    1.0),    # 7
 
-                    [0.0,    this.h, 0.0],    # 8
-                    [0.0,    1.0,    1.0],
-                    [St,     St,      St],
-                    [1.0,    1.0,    0.0],    # 11
+                    vec(0.0,    this.h, 0.0),    # 8
+                    vec(0.0,    1.0,    1.0),
+                    vec(St,     St,      St),
+                    vec(1.0,    1.0,    0.0),    # 11
                 ]
 
         # add heptagons
@@ -196,20 +198,18 @@ class Shape(Heptagons.EqlHeptagonShape):
         if this.heptPosAlt:
             # Eql triangle
             Vs.extend([Vs[15], Vs[22], Vs[29]])         # V33 - V35
-            v = Vs[14]
             # Isosceles triangles
             if this.triangleAlt:
                 Vs.extend([Vs[13], Vs[14], Vs[32]]) # V36 - V38
-                v = Vs[21]
                 Vs.extend([Vs[20], Vs[21], Vs[18]]) # V39 - V41
-                v = Vs[28]
                 Vs.extend([Vs[27], Vs[28], Vs[25]]) # V42 - V44
             else:
-                Vs.extend([Vs[13], Vs[14], [-v[0],  v[1],  v[2]]]) # V36 - V38
+                v = Vs[14]
+                Vs.extend([Vs[13], Vs[14], vec(-v[0],  v[1],  v[2])]) # V36 - V38
                 v = Vs[21]
-                Vs.extend([Vs[20], Vs[21], [ v[0], -v[1],  v[2]]]) # V39 - V41
+                Vs.extend([Vs[20], Vs[21], vec( v[0], -v[1],  v[2])]) # V39 - V41
                 v = Vs[28]
-                Vs.extend([Vs[27], Vs[28], [ v[0],  v[1], -v[2]]]) # V42 - V44
+                Vs.extend([Vs[27], Vs[28], vec( v[0],  v[1], -v[2])]) # V42 - V44
 
             for i in range(3):
                 Ns.append(Vs[0]) # N33 - N35
@@ -241,23 +241,20 @@ class Shape(Heptagons.EqlHeptagonShape):
         else:
             # The Squares, divided into rectangular isosceles triangles,
             # because of the sym-op
-            Vs.extend([Vs[15], Vs[16], [0, 0, Vs[15][2]]]) # V33 - V35
-            Vs.extend([Vs[22], Vs[23], [Vs[22][0], 0, 0]]) # V36 - V38
-            Vs.extend([Vs[29], Vs[30], [0, Vs[29][1], 0]]) # V39 - V41
+            Vs.extend([Vs[15], Vs[16], vec(0, 0, Vs[15][2])]) # V33 - V35
+            Vs.extend([Vs[22], Vs[23], vec(Vs[22][0], 0, 0)]) # V36 - V38
+            Vs.extend([Vs[29], Vs[30], vec(0, Vs[29][1], 0)]) # V39 - V41
             # add isosceles triangles:
             if this.triangleAlt:
                 v = Vs[13]
-                Vs.extend([Vs[13], Vs[14], [v[0], -v[1], v[2]]]) # V42 - V44
+                Vs.extend([Vs[13], Vs[14], vec(v[0], -v[1], v[2])]) # V42 - V44
                 v = Vs[20]
-                Vs.extend([Vs[20], Vs[21], [v[0], v[1], -v[2]]]) # V45 - V47
+                Vs.extend([Vs[20], Vs[21], vec(v[0], v[1], -v[2])]) # V45 - V47
                 v = Vs[27]
-                Vs.extend([Vs[27], Vs[28], [-v[0], v[1], v[2]]]) # V48 - V50
+                Vs.extend([Vs[27], Vs[28], vec(-v[0], v[1], v[2])]) # V48 - V50
             else:
-                v = Vs[13]
                 Vs.extend([Vs[13], Vs[14], Vs[24]]) # V42 - V44
-                v = Vs[20]
                 Vs.extend([Vs[20], Vs[21], Vs[31]]) # V45 - V47
-                v = Vs[27]
                 Vs.extend([Vs[27], Vs[28], Vs[17]]) # V48 - V50
 
             # normals for the equilateral triangles:

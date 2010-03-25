@@ -30,7 +30,6 @@ import rgb
 import Geom3D
 import Geom4D
 import Scenes3D
-from cgkit import cgtypes
 from OpenGL.GL import *
 
 Title = 'Rectified 24-Cell'

@@ -29,9 +29,6 @@ import Geom4D
 import Geom3D
 import isometry
 
-#import os
-#from cgkit import cgtypes
-
 # TODO:
 # - add scroll bar for FacesInput and Vector3DSetInput
 # - filter Fs for FacesInput.GetFace (negative nrs, length 2, etc)

@@ -400,9 +400,9 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     Vo = (Vl + Vr) /2
     Dr = Vo - Vr
     Du = Vo - Vt
-    w = Dr.length()
-    f = Du.length()
-    g = (Vo - Vb).length()
+    w = Dr.norm()
+    f = Du.norm()
+    g = (Vo - Vb).norm()
     #print 'f', f, 'g', g
 
     if f == 0:
@@ -461,15 +461,15 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     # OS.
     return (
             [
-                [Vt[0], Vt[1], Vt[2]],
-                [h1[0], h1[1], h1[2]],
-                [h2[0], h2[1], h2[2]],
-                [h3[0], h3[1], h3[2]],
-                [h4[0], h4[1], h4[2]],
-                [h5[0], h5[1], h5[2]],
-                [h6[0], h6[1], h6[2]]
+                Vec([Vt[0], Vt[1], Vt[2]]),
+                Vec([h1[0], h1[1], h1[2]]),
+                Vec([h2[0], h2[1], h2[2]]),
+                Vec([h3[0], h3[1], h3[2]]),
+                Vec([h4[0], h4[1], h4[2]]),
+                Vec([h5[0], h5[1], h5[2]]),
+                Vec([h6[0], h6[1], h6[2]])
             ],
-            [N[0], N[1], N[2]]
+            [Vec(N)]
         )
 
 class EqlHeptagonShape(Geom3D.SymmetricShape):

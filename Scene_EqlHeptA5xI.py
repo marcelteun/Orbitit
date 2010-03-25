@@ -38,7 +38,12 @@ import rgb
 import Heptagons
 import Geom3D
 import Scenes3D
-from cgkit import cgtypes
+import GeomTypes
+
+from GeomTypes import HalfTurn3 as HalfTurn
+from GeomTypes import Rot3      as Rot
+
+vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
 
 Title = 'Equilateral Heptagons from Dodecahedron - Icosahedron'
 
@@ -48,21 +53,18 @@ tau2 = tau + 1.0
 w    = math.sqrt(tau2 + 1.0)/2
 
 atanH0d2 = Geom3D.Rad2Deg * math.atan(tau2/2)
-halfTurn = cgtypes.mat3(
-        -1.0, 0.0,  0.0,
-        0.0,  1.0,  0.0,
-        0.0,  0.0, -1.0,
-    )
+halfTurn = HalfTurn(GeomTypes.uy)
+
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
-        t1 = Geom3D.Rot(Geom3D.R1_5, Geom3D.vec(0, 0, 1))
-        t2 = Geom3D.Rot(Geom3D.R2_5, Geom3D.vec(0, 0, 1))
-        t3 = Geom3D.Rot(Geom3D.R3_5, Geom3D.vec(0, 0, 1))
-        t4 = Geom3D.Rot(Geom3D.R4_5, Geom3D.vec(0, 0, 1))
-        h0 = Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 0, tau))
+        t1 = Rot(angle = GeomTypes.turn(0.2), axis = GeomTypes.uz)
+        t2 = Rot(angle = GeomTypes.turn(0.4), axis = GeomTypes.uz)
+        t3 = Rot(angle = GeomTypes.turn(0.6), axis = GeomTypes.uz)
+        t4 = Rot(angle = GeomTypes.turn(0.8), axis = GeomTypes.uz)
+        h0 = HalfTurn(vec(1, 0, tau))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
-                    Geom3D.E, t1, t2, t3, t4,
+                    GeomTypes.E, t1, t2, t3, t4,
                     h0, h0*t1, h0*t2, h0*t3, h0*t4,
                     t1*h0, t1*h0*t1, t1*h0*t2, t1*h0*t3, t1*h0*t4,
                     t2*h0, t2*h0*t1, t2*h0*t2, t2*h0*t3, t2*h0*t4,
@@ -72,7 +74,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             # abuse the opposite isometry (even though this is not an opposite
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
-            #oppositeIsometry = Geom3D.I,
+            #oppositeIsometry = GeomTypes.I,
             oppositeIsometry = halfTurn,
             name = 'EglHeptA5xI'
         )
@@ -112,10 +114,10 @@ class Shape(Heptagons.EqlHeptagonShape):
         # and 0 a face centre.
         #                                         
         Vs = [
-                [0.0,      0.0,    this.h],   # 0
-                [-tau2/2, -w,      tau2],
-                [2.0*St,   0.0,   -tau2*St],
-                [-tau2/2,  w,      tau2]      # 3
+                vec(0.0,      0.0,    this.h),   # 0
+                vec(-tau2/2, -w,      tau2),
+                vec(2.0*St,   0.0,   -tau2*St),
+                vec(-tau2/2,  w,      tau2)      # 3
             ]
 
         # add heptagons
@@ -123,9 +125,9 @@ class Shape(Heptagons.EqlHeptagonShape):
         if this.heptPosAlt:
             heptN = Heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None: return
-            Mr = Geom3D.Rot(Geom3D.R1_3, Vs[2])
+            Mr = Rot(angle = GeomTypes.tTurn, axis = Vs[2])
 
-            v = Mr*Geom3D.vec(heptN[0][4])
+            v = Mr*heptN[0][4]
             if this.triangleAlt:
                 vt = heptN[0][6]
                 xtraEdgeIndex = 15
@@ -137,7 +139,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             RegularTrianglePartV = [
                         heptN[0][3],
                         heptN[0][4],
-                        [v[0], v[1], v[2]],
+                        vec(v[0], v[1], v[2]),
                     ]
             # vt is the vertex that will be projected by a half turn on the
             # third vertex of the isosceles triangle.
@@ -159,7 +161,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             RegularTrianglePartV = [
                         heptN[0][3],
                         heptN[0][4],
-                        [0, 0, heptN[0][3][2]],
+                        vec(0, 0, heptN[0][3][2]),
                     ]
             # vt is the vertex that will be projected by a half turn on the
             # third vertex of the isosceles triangle.
@@ -173,9 +175,9 @@ class Shape(Heptagons.EqlHeptagonShape):
             return
         else:
             this.errorStr = ''
-        H = Geom3D.Rot(Geom3D.R1_2, Vs[3])
-        vt = H * Geom3D.vec(vt)
-        IsoscelesTriangleV[2] = [vt[0], vt[1], vt[2]]
+        H = HalfTurn(Vs[3])
+        vt = H * vt
+        IsoscelesTriangleV[2] = vt
         Vs.extend(heptN[0]) # V4 - V10
         Vs.extend(RegularTrianglePartV) # V11 - V13
         Vs.extend(IsoscelesTriangleV) # V14 - V16
@@ -239,11 +241,11 @@ class Shape(Heptagons.EqlHeptagonShape):
         )
 
     def initArrs(this):
-        this.kiteFs = [[0, 1, 2, 3]]
+        this.kiteFs = [[3, 2, 1, 0]]
         this.kiteColIds = [0 for i in range(1)]
         # TODO probably only half is needed, e.g. only right (left) edges
         this.kiteEs = [0, 1, 1, 2, 2, 3, 3, 0]
-        this.heptFs = [[4, 5, 6, 7, 8, 9, 10]]
+        this.heptFs = [[10, 9, 8, 7, 6, 5, 4]]
         this.heptColIds = [1 for i in range(1)]
         this.heptEs = [
                 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 4
@@ -258,17 +260,17 @@ class Shape(Heptagons.EqlHeptagonShape):
             if this.updateV:
                 this.setV()
             # reference vector, a side of the heptagon:
-            r0 = Geom3D.vec(this.Vs[4])
-            r1 = Geom3D.vec(this.Vs[5])
-            r2 = Geom3D.vec(this.Vs[6])
+            r0 = this.Vs[4]
+            r1 = this.Vs[5]
+            r2 = this.Vs[6]
             r = r0 - r1
             # the extra edge
-            v0 = Geom3D.vec(this.Vs[this.xtraEs[0]])
-            v1 = Geom3D.vec(this.Vs[this.xtraEs[1]])
+            v0 = this.Vs[this.xtraEs[0]]
+            v1 = this.Vs[this.xtraEs[1]]
             #print this.xtraEs[0], this.xtraEs[1]
             v = v0 - v1
-            #print r.length(), (r1-r2).length(), v.length()
-            return '%s, extra edge length: %02.2f' % (stdStr, v.length()/r.length())
+            #print r.norm(), (r1-r2).norm(), v.norm()
+            return '%s, extra edge length: %02.2f' % (stdStr, v.norm()/r.norm())
         # TODO: if not addXtraEdge: print diff in norms (or both edge lengths)
         else:
             return stdStr
