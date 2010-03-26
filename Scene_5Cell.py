@@ -123,7 +123,7 @@ class Shape(Geom4D.SimpleShape):
         for i in range(len(Cells)):
             this.showWhichCells.append([True for j in range(len(Cells[i]))])
         # On default, don't draw the outer cell:
-        this.showWhichCells[-1][-1] = False
+        this.showWhichCells[-1][0] = False
         this.showFs()
         this.setProjectionProperties(wCameraDistance = 3.76, wProjVolume = 0.25)
 
