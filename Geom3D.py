@@ -65,10 +65,10 @@ from OpenGL.GL import *
 # Done
 # - edges after reading off file
 
-# Identity isometry:
 vec = isometry.vec3
 Rot = isometry.quat
 
+# Identity isometry:
 E = Rot(0, vec(1, 0, 0))
 # central inversion:
 I = GeomTypes.I

@@ -44,29 +44,27 @@
 import wx
 import math
 import Geom3D
+import GeomTypes
 from wx import glcanvas
 from OpenGL.GLU import *
 from OpenGL.GL import *
-from cgkit import cgtypes
 
 def getAxis2AxisRotation(a0, a1):
     """Given 2 vectors return the rotation that is needed to transfer 1 into the other.
     """
     # TODO: how to know which angle is taken (if you switch the axes, will you
     # still have to correct angle and axis?)
-    vec3Type = type(Geom3D.vec())
-    altVec3Type = type(cgtypes.mat3()*Geom3D.vec())
-    assert (type(a0) == vec3Type or type(a0) == altVec3Type) and (type(a1) == vec3Type or type(a1) == altVec3Type)
-    #assert (type(a0) == vec3Type) and (type(a1) == vec3Type)
-    if Geom3D.Veq(a0, a1):
+    vec3Type = type(GeomTypes.Vec3([0, 0, 0]))
+    assert (type(a0) == vec3Type) and (type(a1) == vec3Type)
+    if a0 == a1:
         # if both axis are in fact the same no roation is needed
-        axis = Geom3D.vec(0, 0, 0)
+        axis = GeomTypes.uz
         angle = 0
-    if Geom3D.Veq(a0, -a1):
+    if a0 == -a1:
         # if one axis should be rotated in its opposite axis, handle
         # separately, since the cross product will not work.
         # rotate pi around any vector that makes a straight angle with a0
-        a2 = Geom3D.vec([i+0.5 for i in a1])
+        a2 = GeomTypes.Vec3([i+0.5 for i in a1])
         angle = math.pi
         axis = a2.cross(a0)
     else:
@@ -78,15 +76,11 @@ def getAxis2AxisRotation(a0, a1):
         n = max(n, -1.0)
         angle = math.acos(n)
         axis = a_0.cross(a_1)
-    return {'axis': axis, 'angle': angle}
+    return axis, angle
 
 class Triangle:
     def __init__(this, v0, v1, v2):
-        this.v = [
-                Geom3D.vec(v0[0], v0[1], v0[2]),
-                Geom3D.vec(v1[0], v1[1], v1[2]),
-                Geom3D.vec(v2[0], v2[1], v2[2])
-            ]
+        this.v = [GeomTypes.Vec3(v0), GeomTypes.Vec3(v1), GeomTypes.Vec3(v2)]
         this.N = None
 
     def normal(this):
@@ -166,10 +160,10 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.zScaleFactor  = 1.0/100
         this.currentScale  = 1.0
         this.rScale = 0.8
-        this.modelRepos = Geom3D.E
-        this.movingRepos = Geom3D.E
-        this.xAxis = Geom3D.vec([1.0, 0.0, 0.0])
-        this.yAxis = Geom3D.vec([0.0, 1.0, 0.0])
+        this.modelRepos = GeomTypes.E
+        this.movingRepos = GeomTypes.E
+        this.xAxis = GeomTypes.ux
+        this.yAxis = GeomTypes.uy
         this.angleAroundYaxis = 0
         this.angleAroundXaxis = 0
         this.bgCol = [0.097656, 0.097656, 0.437500] # midnightBlue 
@@ -234,12 +228,12 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             x, y = x - width/2, height/2 - y
             l2 = x * x + y * y
             if l2 < R2:
-                spherePos = Geom3D.vec(x, y, math.sqrt(R2 - l2))
+                spherePos = GeomTypes.Vec3([x, y, math.sqrt(R2 - l2)])
             elif l2 > R2:
                 scale = math.sqrt(R2/l2)
-                spherePos = Geom3D.vec(scale*x, scale*y, 0)
+                spherePos = GeomTypes.Vec3([scale*x, scale*y, 0])
             else: # probably never happens (floats)
-                spherePos = Geom3D.vec(x, y, 0)
+                spherePos = GeomTypes.Vec3([x, y, 0])
             return spherePos
         dc = wx.PaintDC(this)
         this.SetCurrent()
@@ -258,17 +252,15 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             D = min(width, height)
             R2 = float(D*D)/4
             R2 = this.rScale*this.rScale*R2
-            newSpherePos = xy2SphereV(this.x,    this.y,    width, height, R2)
+            newSpherePos = xy2SphereV(this.x, this.y,    width, height, R2)
             orgSphere = xy2SphereV(this.xOrg, this.yOrg, width, height, R2)
-            rotAA = getAxis2AxisRotation(orgSphere, newSpherePos)
-            angle = rotAA['angle']
-            axis = rotAA['axis']
-            this.movingRepos = cgtypes.quat(angle, axis) * this.modelRepos
+            ax, an = getAxis2AxisRotation(orgSphere, newSpherePos)
+            this.movingRepos = GeomTypes.Rot3(axis = ax, angle = an
+                ) * this.modelRepos
             glLoadMatrixd(this.Moriginal)
             glScalef(this.currentScale, this.currentScale, this.currentScale)
-            angleAxis = this.movingRepos.toAngleAxis()
-            angle = Geom3D.Rad2Deg*angleAxis[0]
-            axis = angleAxis[1]
+            angle = Geom3D.Rad2Deg*this.movingRepos.angle()
+            axis  = this.movingRepos.axis()
             #print 'rotate', angle, axis
             glRotatef(angle, axis[0], axis[1], axis[2])
 
@@ -292,8 +284,8 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             glLoadMatrixd(this.Moriginal)
         except AttributeError:
             pass
-        this.modelRepos = Geom3D.E
-        this.movingRepos = Geom3D.E
+        this.modelRepos = GeomTypes.E
+        this.movingRepos = GeomTypes.E
         this.currentScale = 1.0
         this.paint()
 
