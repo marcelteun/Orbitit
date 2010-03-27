@@ -23,11 +23,13 @@ def eq(a, b, margin = defaultFloatMargin):
     """
     return abs(a - b) < margin
 
-class Vec(list):
+# Use tuples instead of lists to enable building sets used for isometries
+
+class Vec(tuple):
     eqMargin = defaultFloatMargin
 
-    def __init__(this, v):
-        list.__init__(this, [float(a) for a in v])
+    def __new__(this, v):
+        return tuple.__new__(this, [float(a) for a in v])
 
     def __repr__(v):
         return '%s(%s)' % (v.__class__.__name__, str(v))
@@ -59,7 +61,9 @@ class Vec(list):
         try:
             r = len(v) == len(w)
         except TypeError:
-            print 'info: comparing different types in Vec (%s)' % v.__class__.__name__
+            print 'info: comparing different types in Vec (%s and %s)' % (
+                    v.__class__.__name__, w.__class__.__name__
+                )
             return False
         for a, b in zip(v, w):
             if not r: break
@@ -74,7 +78,7 @@ class Vec(list):
         return v.__class__([-a for a in v])
 
     def __mul__(v, w):
-        if isinstance(w, list):
+        if isinstance(w, tuple):
             # dot product
             r = 0
             for a, b in zip(v, w): r += a*b
@@ -83,7 +87,7 @@ class Vec(list):
             return v.__class__([w*a for a in v])
 
     def __rmul__(v, w):
-        if isinstance(w, list):
+        if isinstance(w, tuple):
             # provide __rmul__ for [..] + Vec([..])
             # dot product
             r = 0
@@ -113,8 +117,8 @@ class Vec(list):
     # TODO cross product from GA?
 
 class Vec3(Vec):
-    def __init__(this, v):
-        Vec.__init__(this, [float(v[i]) for i in range(3)])
+    def __new__(this, v):
+        return Vec.__new__(this, [float(v[i]) for i in range(3)])
 
     def cross(v, w):
         return v.__class__([
@@ -130,10 +134,10 @@ uy = Vec3([0, 1, 0])
 uz = Vec3([0, 0, 1])
 
 class Quat(Vec):
-    def __init__(this, v = None):
+    def __new__(this, v = None):
         # if 3D vector, use it to set vector part only and use 0 for scalar part
-        if len(v) == 3: v.insert(0, 0)
-        Vec.__init__(this, [float(v[i]) for i in range(4)])
+        if len(v) == 3: v = [0, v[0], v[1], v[2]]
+        return Vec.__new__(this, [float(v[i]) for i in range(4)])
 
     def conjugate(v):
         return v.__class__([v[0], -v[1], -v[2], -v[3]])
@@ -383,7 +387,7 @@ class Rot3(Transform3):
             try: qLeft = qLeft.N()
             except ZeroDivisionError: pass # will fail on assert below:
             Transform3.__init__(this, qLeft, qLeft.conjugate())
-            assert this.isRot(), "%s doesn't represent a rotation" % qLeft
+            assert this.isRot(), "%s doesn't represent a rotation" % str(qLeft)
         else:
             # q = cos(angle) + y sin(angle)
             alpha = angle / 2
@@ -399,6 +403,18 @@ class HalfTurn3(Rot3):
     def __init__(this, axis):
         Rot3.__init__(this, axis = axis, angle = hTurn)
 
+class Rotx(Rot3):
+    def __init__(this, angle):
+        Rot3.__init__(this, axis = ux, angle = angle)
+
+class Roty(Rot3):
+    def __init__(this, angle):
+        Rot3.__init__(this, axis = uy, angle = angle)
+
+class Rotz(Rot3):
+    def __init__(this, angle):
+        Rot3.__init__(this, axis = uz, angle = angle)
+
 class Refl3(Transform3):
     def __init__(this, q = None, planeN = None):
         """Define a 3D reflection is a plane
@@ -413,7 +429,7 @@ class Refl3(Transform3):
             try: q = q.N()
             except ZeroDivisionError: pass # will fail on assert below:
             Transform3.__init__(this, q, q)
-            assert this.isRefl(), "%s doesn't represent a reflection" % q
+            assert this.isRefl(), "%s doesn't represent a reflection" % str(q)
         else:
             try:
                 normal = planeN.N()
@@ -422,7 +438,7 @@ class Refl3(Transform3):
                 q = Quat(planeN) # will fail on assert below:
             Transform3.__init__(this, q, q)
             assert this.isRefl(), (
-                "normal %s doesn't define a valid 3D plane normal" % planeN
+                "normal %s doesn't define a valid 3D plane normal" % str(planeN)
             )
 
 class RotInv3(Transform3):
@@ -438,6 +454,9 @@ class RotInv3(Transform3):
 RotRefl = RotInv3
 I = RotInv3(Quat([1, 0, 0, 0]))
 E = Rot3(Quat([1, 0, 0, 0]))
+Hx = HalfTurn3(ux)
+Hy = HalfTurn3(uy)
+Hz = HalfTurn3(uz)
 
 # TODO implement Geom3D.Line3D here (in this file)
 
@@ -447,41 +466,42 @@ if __name__ == '__main__':
     # Vec
     #####################
     r = Vec([])
-    assert(r == []), 'got %s instead' % r
+    assert(r == []), 'got %s instead' % str(r)
 
-    v =Vec([1, 2, 4])
+    v = Vec([1, 2, 4])
     w = Vec([2, 3, 5, 6])
 
     r = -v
-    assert(r == Vec([-1.0, -2.0, -4.0])), 'got %s instead' % r
+    assert(r == Vec([-1.0, -2.0, -4.0])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     r = v+w
-    assert(r == Vec([3.0, 5.0, 9.0])), 'got %s instead' % r
+    assert(r == Vec([3.0, 5.0, 9.0])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     r = w-v
-    assert(r == Vec([1.0, 1.0, 1.0])), 'got %s instead' % r
+    assert(r == Vec([1.0, 1.0, 1.0])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     r = v*2
-    assert(r == Vec([2.0, 4.0, 8.0])), 'got %s instead' % r
+    assert(r == Vec([2.0, 4.0, 8.0])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     r = 2*v
-    assert(r == Vec([2.0, 4.0, 8.0])), 'got %s instead' % r
+    assert(r == Vec([2.0, 4.0, 8.0])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     r = v/2
-    assert(r == Vec([0.5, 1.0, 2.0])), 'got %s instead' % r
+    assert(r == Vec([0.5, 1.0, 2.0])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
-    v[1] = 5.0
-    assert(v == Vec([1.0, 5.0, 4.0])), 'got %s instead' % v
-    assert(type(v) == type(Vec([])))
+    #v[1] = 5.0
+    #assert(v == Vec([1.0, 5.0, 4.0])), 'got %s instead' % v
+    #assert(type(v) == type(Vec([])))
 
+    v = Vec([1.0, 5.0, 4.0])
     r = v[1:]
-    assert(r == Vec([5.0, 4.0])), 'got %s instead' % r
+    assert(r == Vec([5.0, 4.0])), 'got %s instead' % str(r)
     # TODO: howto without using deprecated __setslice__ ?
     # currently no problem, since r + w becomes a Vec anyway,
     # though 3 * r gives unexpected result
@@ -489,23 +509,23 @@ if __name__ == '__main__':
 
     v =Vec([1, 2, 4])
     r = v.norm()
-    assert(r == math.sqrt(1+4+16)), 'got %s instead' % r
+    assert(r == math.sqrt(1+4+16)), 'got %s instead' % str(r)
 
     v = Vec([3, 4, 5])
     n = v.norm()
     r = v.normalize()
-    assert(r == Vec([v[0]/n, v[1]/n, v[2]/n])), 'got %s instead' % r
+    assert(r == Vec([v[0]/n, v[1]/n, v[2]/n])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     r = v.normalise()
-    assert(r == Vec([v[0]/n, v[1]/n, v[2]/n])), 'got %s instead' % r
+    assert(r == Vec([v[0]/n, v[1]/n, v[2]/n])), 'got %s instead' % str(r)
     assert(type(r) == type(Vec([])))
 
     v = Vec([0, 0, 0])
     w = Vec([10, 0, 0])
     try:
         r = v.angle(w)
-        assert False, 'exptected ZeroDivisionError: got %s instead' % r
+        assert False, 'exptected ZeroDivisionError: got %s instead' % str(r)
     except ZeroDivisionError:
         pass
 
@@ -513,7 +533,7 @@ if __name__ == '__main__':
     w = Vec([0, 0, 0])
     try:
         r = v.angle(w)
-        assert False, 'exptected ZeroDivisionError: got %s instead' % r
+        assert False, 'exptected ZeroDivisionError: got %s instead' % str(r)
     except ZeroDivisionError:
         pass
 
@@ -521,59 +541,59 @@ if __name__ == '__main__':
     w = Vec([0, 0, 0])
     try:
         r = v.angle(w)
-        assert False, 'exptected ZeroDivisionError: got %s instead' % r
+        assert False, 'exptected ZeroDivisionError: got %s instead' % str(r)
     except ZeroDivisionError:
         pass
 
     v = Vec([4, 0, 0])
     w = Vec([10, 0, 0])
     r = v.angle(w)
-    assert(r == 0), 'got %s instead' % r
+    assert(r == 0), 'got %s instead' % str(r)
 
     v = Vec([10, 0, 0])
     w = Vec([0, 3, 0])
     r = v.angle(w)
-    assert(r == qTurn), 'got %s instead' % r
+    assert(r == qTurn), 'got %s instead' % str(r)
 
     v = Vec([0, 10, 0])
     w = Vec([0, 3, 3])
     r = v.angle(w)
-    assert(r == math.pi/4), 'got %s instead' % r
+    assert(r == math.pi/4), 'got %s instead' % str(r)
 
     v = Vec([0, 10, 0])
     w = Vec([0, -3, 0])
     r = v.angle(w)
-    assert(r == hTurn), 'got %s instead' % r
+    assert(r == hTurn), 'got %s instead' % str(r)
 
     # Vec3
     v = Vec3([1,  2, 3])
     w = Vec3([2, -3, 4])
     r = v.cross(w)
-    assert(r == Vec3([17, 2, -7])), 'got %s instead' % r
+    assert(r == Vec3([17, 2, -7])), 'got %s instead' % str(r)
     assert(type(r) == type(v))
 
     v = Vec3([1, 0, 0])
     w = Vec3([1, 0, 0])
     r = v.cross(w)
-    assert(r == Vec3([0, 0, 0])), 'got %s instead' % r
+    assert(r == Vec3([0, 0, 0])), 'got %s instead' % str(r)
     assert(type(r) == type(v))
 
     v = Vec3([0, 0, 0])
     w = Vec3([1, 0, 0])
     r = v.cross(w)
-    assert(r == Vec3([0, 0, 0])), 'got %s instead' % r
+    assert(r == Vec3([0, 0, 0])), 'got %s instead' % str(r)
     assert(type(r) == type(v))
 
     v = Vec3([1, 0, 0])
     w = Vec3([0, 0, 0])
     r = v.cross(w)
-    assert(r == Vec3([0, 0, 0])), 'got %s instead' % r
+    assert(r == Vec3([0, 0, 0])), 'got %s instead' % str(r)
     assert(type(r) == type(v))
 
     v = Vec3([0, 0, 0])
     w = Vec3([0, 0, 0])
     r = v.cross(w)
-    assert(r == Vec3([0, 0, 0])), 'got %s instead' % r
+    assert(r == Vec3([0, 0, 0])), 'got %s instead' % str(r)
     assert(type(r) == type(v))
 
     #####################
@@ -582,60 +602,60 @@ if __name__ == '__main__':
     q0 = Quat([1, 2, 3, 5])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
-    assert(r == Quat([-40, 8, 19, 9])), 'got %s instead' % r
+    assert(r == Quat([-40, 8, 19, 9])), 'got %s instead' % str(r)
     assert(type(r) == type(q0))
 
     q0 = Quat([0, 0, 0, 0])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
-    assert(r == Quat([0, 0, 0, 0])), 'got %s instead' % r
+    assert(r == Quat([0, 0, 0, 0])), 'got %s instead' % str(r)
     assert(type(r) == type(q0))
 
     q0 = Quat([1, 0, 0, 0])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
-    assert(r == Quat([2, 4, 3, 5])), 'got %s instead' % r
+    assert(r == Quat([2, 4, 3, 5])), 'got %s instead' % str(r)
     assert(type(r) == type(q0))
 
     q0 = Quat([0, 1, 0, 0])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
-    assert(r == Quat([-4, 2, -5, 3])), 'got %s instead' % r
+    assert(r == Quat([-4, 2, -5, 3])), 'got %s instead' % str(r)
     assert(type(r) == type(q0))
 
     q0 = Quat([0, 0, 1, 0])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
-    assert(r == Quat([-3, 5, 2, -4])), 'got %s instead' % r
+    assert(r == Quat([-3, 5, 2, -4])), 'got %s instead' % str(r)
     assert(type(r) == type(q0))
 
     q0 = Quat([0, 0, 0, 1])
     q1 = Quat([2, 4, 3, 5])
     r = q0 * q1
-    assert(r == Quat([-5, -3, 4, 2])), 'got %s instead' % r
+    assert(r == Quat([-5, -3, 4, 2])), 'got %s instead' % str(r)
     assert(type(r) == type(q0))
 
     q = Quat([2, 4, 3, 5])
     r = q.S()
-    assert(r == 2), 'got %s instead' % r
+    assert(r == 2), 'got %s instead' % str(r)
     assert(type(r) == float)
     r = q.V()
-    assert (r == Vec3([4, 3, 5])), 'got %s instead' % r
+    assert (r == Vec3([4, 3, 5])), 'got %s instead' % str(r)
     assert isinstance(r, Vec)
 
     q = Quat([2, 4, 3, 5])
     r = q.conjugate()
-    assert(r == Quat([2, -4, -3, -5])), 'got %s instead' % r
+    assert(r == Quat([2, -4, -3, -5])), 'got %s instead' % str(r)
     assert(type(r) == type(q))
 
     q = Quat([2, 0, 0, 5])
     r = q.conjugate()
-    assert(r == Quat([2, 0, 0, -5])), 'got %s instead' % r
+    assert(r == Quat([2, 0, 0, -5])), 'got %s instead' % str(r)
     assert(type(r) == type(q))
 
     q = Quat([0, 0, 0, 0])
     r = q.conjugate()
-    assert(r == q), 'got %s instead' % r
+    assert(r == q), 'got %s instead' % str(r)
     assert(type(r) == type(q))
 
     #####################
@@ -644,7 +664,7 @@ if __name__ == '__main__':
 
     r = I * I
     assert(I != E), "This shouldn't hold %s != %s" % (I, E)
-    assert(r == E), 'got %s instead' % r
+    assert(r == E), 'got %s instead' % str(r)
 
     r = Rot3(axis = Vec3([0, 0, 0]), angle = 0)
     assert(r.right == Quat([1, 0, 0, 0])), 'got %s instead' % r.right
@@ -658,185 +678,181 @@ if __name__ == '__main__':
     q = Rot3(axis = uz, angle = 0)
     v = Vec3(ux)
     r = q*v
-    assert(r == ux), 'got %s instead' % r
+    assert(r == ux), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == ux), 'got %s instead' % r
+    assert(r == ux), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = -fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == ux), 'got %s instead' % r
+    assert(r == ux), 'got %s instead' % str(r)
 
     # 90 degrees (+/- 360)
     q = Rot3(axis = uz, angle = qTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == uy), 'got %s instead' % r
+    assert(r == uy), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = qTurn + fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == uy), 'got %s instead' % r
+    assert(r == uy), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = qTurn - fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == uy), 'got %s instead' % r
+    assert(r == uy), 'got %s instead' % str(r)
 
     # 180 degrees (+/- 360)
     q = Rot3(axis = uz, angle = hTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == -ux), 'got %s instead' % r
+    assert(r == -ux), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = hTurn + fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == -ux), 'got %s instead' % r
+    assert(r == -ux), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = hTurn - fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == -ux), 'got %s instead' % r
+    assert(r == -ux), 'got %s instead' % str(r)
 
     # -90 degrees (+/- 360)
     q = Rot3(axis = uz, angle = -qTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == -uy), 'got %s instead' % r
+    assert(r == -uy), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = -qTurn + fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == -uy), 'got %s instead' % r
+    assert(r == -uy), 'got %s instead' % str(r)
 
     q = Rot3(axis = uz, angle = -qTurn - fullTurn)
     v = Vec3(ux)
     r = q*v
-    assert(r == -uy), 'got %s instead' % r
+    assert(r == -uy), 'got %s instead' % str(r)
 
     # Quadrant I
     hV3 = math.sqrt(3) / 2
     q = Rot3(axis = uz, angle = math.pi/3)
-    v = Vec3(ux)
-    v[2] = 3
+    v = ux + 3*uz
     r = q*v
-    assert(r == Vec3([0.5, hV3, 3])), 'got %s instead' % r
+    assert(r == Vec3([0.5, hV3, 3])), 'got %s instead' % str(r)
 
     # Quadrant II
     q = Rot3(axis = uz, angle = hTurn - math.pi/3)
-    v = Vec3(ux)
-    v[2] = 3
+    v = ux + 3*uz
     r = q*v
-    assert(r == Vec3([-0.5, hV3, 3])), 'got %s instead' % r
+    assert(r == Vec3([-0.5, hV3, 3])), 'got %s instead' % str(r)
 
     # Quadrant III
     q = Rot3(axis = uz, angle = math.pi + math.pi/3)
-    v = Vec3(ux)
-    v[2] = 3
+    v = ux + 3*uz
     r = q*v
-    assert(r == Vec3([-0.5, -hV3, 3])), 'got %s instead' % r
+    assert(r == Vec3([-0.5, -hV3, 3])), 'got %s instead' % str(r)
 
     # Quadrant IV
     q = Rot3(axis = uz, angle = - math.pi/3)
-    v = Vec3(ux)
-    v[2] = 3
+    v = ux + 3*uz
     r = q*v
-    assert(r == Vec3([0.5, -hV3, 3])), 'got %s instead' % r
+    assert(r == Vec3([0.5, -hV3, 3])), 'got %s instead' % str(r)
 
     # 3D Quadrant I: rotation around (1, 1, 1): don't specify normalise axis
     q = Rot3(axis = Vec3([1, 1, 1]), angle = tTurn)
     v = Vec3([-1, 1, 1])
     r = q*v
-    assert(r == Vec3([1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, 1])), 'got %s instead' % str(r)
     # neg angle
     q = Rot3(axis = Vec3([1, 1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([1, 1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, 1, -1])), 'got %s instead' % str(r)
     # neg axis, neg angle
     q = Rot3(axis = -Vec3([1, 1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, 1])), 'got %s instead' % str(r)
     # neg axis
     q = Rot3(axis = -Vec3([1, 1, 1]), angle = tTurn)
     r = q*v
-    assert(r == Vec3([1, 1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, 1, -1])), 'got %s instead' % str(r)
 
     # 3D Quadrant II: rotation around (-1, 1, 1): don't specify normalise axis
     q = Rot3(axis = Vec3([-1, 1, 1]), angle = tTurn)
     v = Vec3([1, 1, 1])
     r = q*v
-    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % str(r)
     # neg angle
     q = Rot3(axis = Vec3([-1, 1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % str(r)
     # neg axis, neg angle
     q = Rot3(axis = -Vec3([-1, 1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % str(r)
     # neg axis
     q = Rot3(axis = -Vec3([-1, 1, 1]), angle = tTurn)
     r = q*v
-    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % str(r)
 
     # 3D Quadrant III: rotation around (-1, 1, 1): don't specify normalise axis
     q = Rot3(axis = Vec3([-1, -1, 1]), angle = tTurn)
     v = Vec3([1, 1, 1])
     r = q*v
-    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % str(r)
     # neg angle
     q = Rot3(axis = Vec3([-1, -1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % str(r)
     # neg axis, neg angle
     q = Rot3(axis = -Vec3([-1, -1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % r
+    assert(r == Vec3([-1, 1, -1])), 'got %s instead' % str(r)
     # neg axis
     q = Rot3(axis = -Vec3([-1, -1, 1]), angle = tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % str(r)
 
     # 3D Quadrant IV: rotation around (-1, 1, 1): don't specify normalise axis
     q = Rot3(axis = Vec3([1, -1, 1]), angle = tTurn)
     v = Vec3([1, 1, 1])
     r = q*v
-    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % str(r)
     # neg angle
     q = Rot3(axis = Vec3([1, -1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % str(r)
     # neg axis, neg angle
     q = Rot3(axis = -Vec3([1, -1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % str(r)
     # neg axis
     q = Rot3(axis = -Vec3([1, -1, 1]), angle = tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % str(r)
 
     # test quat mul from above (instead of Vec3):
     # 3D Quadrant IV: rotation around (-1, 1, 1): don't specify normalise axis
     q = Rot3(axis = Vec3([1, -1, 1]), angle = tTurn)
     v = Quat([0, 1, 1, 1])
     r = q*v
-    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % str(r)
     # neg angle
     q = Rot3(axis = Vec3([1, -1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % str(r)
     # neg axis, neg angle
     q = Rot3(axis = -Vec3([1, -1, 1]), angle = -tTurn)
     r = q*v
-    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % r
+    assert(r == Vec3([-1, -1, 1])), 'got %s instead' % str(r)
     # neg axis
     q = Rot3(axis = -Vec3([1, -1, 1]), angle = tTurn)
     r = q*v
-    assert(r == Vec3([1, -1, -1])), 'got %s instead' % r
+    assert(r == Vec3([1, -1, -1])), 'got %s instead' % str(r)
 
     # Axis Angle:
     v = Vec3([1, -1, 1])
