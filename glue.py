@@ -27,7 +27,7 @@
 import math
 import X3D
 import PS
-import Geom3D
+import GeomTypes
 
 X3D_DEFAULT_V_NAME     = 'coords'
 X3D_DEFAULT_PROTO_NAME = 'proto'
@@ -101,9 +101,9 @@ def cylinderEdgeToX3d(
         radius = 0.1,
         precision = 5
     ):
-    vz = Geom3D.vec(0, 1, 0)
+    vz = GeomTypes.uy
     dv = v1 - v0
-    l = dv.length()
+    l = dv.norm()
     if l == 0:
         print 'warning, edge length 0'
         return
@@ -126,7 +126,7 @@ def cylinderEdgeToX3d(
                             ),
                             geometry = X3D.Node('Cylinder',
                                 radius = radius,
-                                height = dv.length(),
+                                height = dv.norm(),
                                 bottom = False,
                                 top = False
                             )

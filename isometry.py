@@ -1,131 +1,16 @@
 #! /usr/bin/python
 
 import math
-import Geom3D
-from cgkit import cgtypes
+import GeomTypes
 from copy import copy
-import cgkit
 
-vec3 = cgtypes.vec3
-mat3 = cgtypes.mat3
-
-class Quat(cgtypes.quat):
-    def __init__(this, *a, **b):
-        cgtypes.quat.__init__(this, *a, **b)
-
-    def __add__(this, o):
-        v = cgtypes.quat.__add__(this, o)
-        return Quat(v.w, v.x, v.y, v.z)
-
-    def __sub__(this, o):
-        v = cgtypes.quat.__add__(this, o)
-        return Quat(v.w, v.x, v.y, v.z)
-
-    def __mul__(this, o):
-        if (isinstance(o, list) and len(o) == 3) or (
-                isinstance(o, vec3) or
-                isinstance(o, cgtypes.vec3) or
-                isinstance(o, cgkit._core.vec3)
-            ):
-            # use the quaternion product a'ya, where
-            # - y is the pure quaternion constructed from o
-            # - a is the quaternion that deinfes the rotation
-            # - a' is conjugate(a)
-            # TODO: fix, the conjugate is at the wrong side
-            #new = this.conjugate() * quat(0, o[0], o[1], o[2]) * this
-            new = this * quat(0, o[0], o[1], o[2]) * this.conjugate()
-            if isinstance(o, vec3):
-                return vec3(new.x, new.y, new.z)
-            else:
-                return [new.x, new.y, new.z]
-        else:
-            v = cgtypes.quat.__mul__(this, o)
-            return Quat(v.w, v.x, v.y, v.z)
-
-quat = Quat
-
-# TODO:
-# define my own quat and vec3 based on list
-# this should also remove the need of conversion in glDraw
-# this should also remove the need for 2 check in Rot.__mul__
-
-class Rot(quat):
-    def __init__(this, axis, angle):
-        quat.__init__(this, angle, vec3(axis))
-
-    def axis(this):
-        return this.toAngleAxis()[1]
-
-    def angle(this):
-        return this.toAngleAxis()[0]
-
-    def after(this, R):
-        return this.toAngleAxis()[0]
-
-    def inverse(this):
-        return Rot(this.axis(), -this.angle())
-
-    __minMargin = 1.0e-12
-    def __eq__(this, o):
-        a0, x0 = this.toAngleAxis()
-        a1, x1 = o.toAngleAxis()
-        return (
-            (
-                Geom3D.eq(a0, a1, this.__minMargin)
-                and
-                Geom3D.Veq(x0, x1, this.__minMargin)
-            ) or (
-                Geom3D.eq(2*math.pi - a0, a1, this.__minMargin)
-                and
-                Geom3D.Veq(-x0, x1, this.__minMargin)
-            )
-        )
-
-    def __ne__(this, o):
-        return not this.__eq__(o)
-
-    def __str__(this):
-        return 'axis %s angle %f' % (this.axis(), this.angle())
-
-    def __repr__(this):
-        return '(%s, %f)' % (this.axis(), this.angle())
-
-    def __mul__(this, o):
-        if isinstance(o, Set):
-            # try rotation between Rots and Set
-            # nodate rmul is important, since the mul is not commutative.
-            return o.__rmul__(this)
-        elif (isinstance(o, list) and len(o) == 3) or (
-                isinstance(o, vec3) or
-                isinstance(o, cgtypes.vec3) or
-                isinstance(o, cgkit._core.vec3)
-            ):
-            # use the quaternion product a'ya, where
-            # - y is the pure quaternion constructed from o
-            # - a is the quaternion that deinfes the rotation
-            # - a' is conjugate(a)
-            new = this.conjugate() * quat(0, o[0], o[1], o[2]) * this
-            if isinstance(o, vec3):
-                return vec3(new.x, new.y, new.z)
-            else:
-                return [new.x, new.y, new.z]
-        try:
-            # try rotation between 2 Rots (or Rot and quat)
-            #print 'Rot * rot:', this, '*', o
-            a = quat.__mul__(this, o).toAngleAxis()
-            #print '  --->', Rot(a[1], a[0])
-            return Rot(a[1], a[0])
-        except AttributeError:
-            raise TypeError, "unsupported op type(s) for *: '%s' and '%s'" % (
-                    this.__class__.__name__, o.__class__.__name__
-                )
-
-X = [1, 0, 0]
-Y = [0, 1, 0]
-Z = [0, 0, 1]
+X = GeomTypes.ux
+Y = GeomTypes.uy
+Z = GeomTypes.uz
 
 hTurn = math.pi         # half turn
 qTurn = math.pi/2       # quarter turn
+eTurn = qTurn/2         # quarter turn
 tTurn = 2*math.pi/3     # third turn
 
 acos_1_V3  = math.acos(1.0 / math.sqrt(3))
@@ -133,33 +18,12 @@ asin_1_V3  = math.asin(1.0 / math.sqrt(3))
 asin_V2_V3 = acos_1_V3
 acos_V2_V3 = asin_1_V3
 
-# rotation around x-axis
-class Rx(Rot):
-    def __init__(this, angle):
-        Rot.__init__(this, X, angle)
-
-# rotation around y-axis
-class Ry(Rot):
-    def __init__(this, angle):
-        Rot.__init__(this, Y, angle)
-
-# rotation around z-axis
-class Rz(Rot):
-    def __init__(this, angle):
-        Rot.__init__(this, Z, angle)
-
 # halfturn around x-, y-, and z-axis
-Hx = Rx(hTurn)
-Hy = Ry(hTurn)
-Hz = Rz(hTurn)
+Hx = GeomTypes.Hx
+Hy = GeomTypes.Hy
+Hz = GeomTypes.Hz
 
-# Identity 
-E =  Rx(0)
-
-# central inversion
-# TODO Hmm now I is no object.. (class)
-def I(v):
-    return [-x for x in v]
+I  = GeomTypes.I       # central inversion
 
 class Set(set):
 
@@ -177,13 +41,13 @@ class Set(set):
     def __mul__(this, o):
         # print 'isinstance(o, Set)', isinstance(o, Set)
         if isinstance(o, Set):
-            # rotation Set(this) * Set(o)
+            # Set(this) * Set(o)
             new = Set([])
             for d in o:
                 new.update(this * d)
             return new
         else:
-            # rotation Set * Rot
+            # Set * GeomTypes.Transform3
             return Set([e * o for e in this])
 
     def __rmul__(this, o):
@@ -192,7 +56,7 @@ class Set(set):
         return Set([o * e for e in this])
 
     def generateSubgroup(this, o):
-        if isinstance(o, quat):
+        if isinstance(o, GeomTypes.Transform3):
             # generate the quotient set THIS / o
             assert o in this, "Generator of sub-group should be part of group"
             subgroup = Set([o])
@@ -208,12 +72,22 @@ class Set(set):
     def __div__(this, o):
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
-        subgroup = this.generateSubgroup(o)
-        q = [] # initialise quotient set.
-        for e in this:
-            s = e * o
-            if s not in q: q.append(s)
-        return q
+        if (len(o) > len(this)): return o.__div__(this)
+        o = this.generateSubgroup(o)
+        assert len(o) <= len(this)
+        # use a list of sets, since sets are unhashable
+        quotientSet = []
+        # use a big set for all elems found so for
+        foundSoFar = Set([])
+        for te in this:
+            q = te * o
+            # quotientset: either all or no elements in q have been found before
+            # get one element
+            for e in q: break
+            if e not in foundSoFar:
+                quotientSet.append(q)
+                foundSoFar = foundSoFar.union(q)
+        return quotientSet
 
     def __rdiv__(this, o):
         #  subgroup * this: left quotient set
@@ -254,11 +128,11 @@ class Set(set):
         result = copy(this)
         for e in this:
             result.add(e.inverse())
-        result.add(E)
+        result.add(GeomTypes.E)
         this.clear()
-        this.update(result.closed(maxIter))
+        this.update(result.close(maxIter))
 
-    def closed(this, maxIter = 50):
+    def close(this, maxIter = 50):
         """
         Return a set that is closed, if it can be generated within maxIter steps.
         """
@@ -274,21 +148,7 @@ class Set(set):
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
         return result
 
-    def close(this, maxIter = 50):
-        """
-        Closes the current set, if it can be done within maxIter steps.
-        """
-        result = this.closed(maxIter)
-        this.clear()
-        this.update(result)
-
-class Identity(Set):
-    initPars = []
-    order    = 1
-    def __init__(this, isometries = None, setup = {}):
-        Set.__init__(this, [E])
-
-C1 = Identity
+def setup(**kwargs): return kwargs
 
 class Cn(Set):
     initPars = [
@@ -317,13 +177,22 @@ class Cn(Set):
             if n == 0: n = 1
 
             angle = 2 * math.pi / n
-            try:   r = Rot(axis, angle)
-            except TypeError: r = Rot(axis.toAngleAxis()[1], angle)
+            try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
+            except TypeError:
+                # assume axis has Rot3 type
+                r = GeomTypes.Rot3(axis = axis.axis(), angle = angle)
 
             isometries = [r]
             for i in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
+
+class E(Set):
+    initPars = []
+    def __init__(this, isometries = None, setup = {}):
+            Set.__init__(this, [GeomTypes.E])
+
+C1 = E
 
 class A4(Set):
     initPars = [
@@ -358,29 +227,35 @@ class A4(Set):
             else:                 o2axis0 = X[:]
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
             else:                 o2axis1 = Y[:]
-            assert vec3(o2axis0) * vec3(o2axis1) == 0, "Error: axes not orthogonal"
-            try:   H0 = Rot(o2axis0, hTurn)
-            except TypeError: H0 = Rot(o2axis0.toAngleAxis()[1], hTurn)
-            try:   H1 = Rot(o2axis1, hTurn)
-            except TypeError: H1 = Rot(o2axis1.toAngleAxis()[1], hTurn)
+            # if axes is specified as a transform:
+            if isinstance(o2axis0, GeomTypes.Transform3):
+                o2axis0 = o2axis0.axis()
+            if isinstance(o2axis1, GeomTypes.Transform3):
+                o2axis1 = o2axis1.axis()
+            assert GeomTypes.Vec3(o2axis0) * GeomTypes.Vec3(o2axis1) == 0, (
+                    "Error: axes not orthogonal")
+            H0 = GeomTypes.HalfTurn3(o2axis0)
+            H1 = GeomTypes.Rot3(axis = o2axis1, angle = hTurn)
             H2 = H1 * H0
 
             # the one order 3 rotation axis, is obtained as follows:
             # imagine A4 is part of S4 positioned in a cube
             # H0, H1, H2 go through the cube face centres
             # define a quarter turn around H2
-            Q = Rot(H2.axis(), qTurn)
+            Q = GeomTypes.Rot3(axis = H2.axis(), angle = qTurn)
             # h0 and h1 go through cube edge centres
             h0 = Q * H0
             h1 = Q * H1
             # o3axis goes through 1 of the 2 cube vertices that form the edge
             # between the faces which centres are on H0 and H1 
-            o3axis = Rot(h0.axis(), asin_1_V3).toMat4() * h1.axis()
+            o3axis = GeomTypes.Rot3(
+                    axis = h0.axis(), angle = asin_1_V3
+                ) * h1.axis()
 
             # R0_1_3: 1/3 rotation around the first order 3 axis
             # R0_2_3: 2/3 rotation around the first order 3 axis
-            R1_1_3 = Rot(o3axis, tTurn)
-            R1_2_3 = Rot(o3axis, 2*tTurn)
+            R1_1_3 = GeomTypes.Rot3(axis = o3axis, angle = tTurn)
+            R1_2_3 = GeomTypes.Rot3(axis = o3axis, angle = 2*tTurn)
             R4_1_3 = R1_1_3 * H0
             R3_1_3 = R1_1_3 * H1
             R2_1_3 = R1_1_3 * H2
@@ -388,7 +263,7 @@ class A4(Set):
             R2_2_3 = R1_2_3 * H0
             R4_2_3 = R1_2_3 * H1
             R3_2_3 = R1_2_3 * H2
-            # print 'E', E
+            # print 'E', GeomTypes.E
             # print 'H0', H0
             # print 'H1', H1
             # print 'H2', H2
@@ -401,7 +276,7 @@ class A4(Set):
             # print 'R4_1_3', R4_1_3
             # print 'R5_2_3', R4_2_3
             Set.__init__(this, [
-                    E, H0, H1, H2,
+                    GeomTypes.E, H0, H1, H2,
                     R1_1_3, R1_2_3,
                     R2_1_3, R2_2_3,
                     R3_1_3, R3_2_3,
@@ -409,56 +284,136 @@ class A4(Set):
                 ])
 
 if __name__ == '__main__':
-    r = Rot([1, 1, 1], 30)
-    print 'print(Rot([1, 1, 1], 30))', r
-    print 'repr(Rot([1, 1, 1], 30))', repr(r)
 
+    print 'testing creation of set',
     g = Set([Hx, Hy])
-    print 'Initialised set g:', g
-    print 'Rot([1, 0, 0], hTurn) in g:',  Rot([1, 0, 0], hTurn) in g
-    print 'Rot([-1, 0, 0], -hTurn) in g:',  Rot([-1, 0, 0], -hTurn) in g
-    print 'Set g after closing:'
-    g.close()
-    print g
+    print '....ok'
+    #print 'Initialised set g:', g
+    print "testing 'in' relation",
+    assert GeomTypes.Rot3(axis = [1, 0, 0], angle = hTurn) in g
+    assert GeomTypes.Rot3(axis = [-1, 0, 0], angle = -hTurn) in g
+    print '......ok'
+    print "testing 'close' function",
+    cg = g.close()
+    #print 'Set g after closing:'
+    #print cg
+    assert len(cg) == 4
+    assert Hx in cg
+    assert Hy in cg
+    assert Hz in cg
+    assert GeomTypes.E in cg
+    print '...ok'
 
-    g = Set([Rot(X, qTurn)])
-    print 'Initialised set g:', g
-    print 'Rot([1, 0, 0], qTurn) in g:',  Rot(X, qTurn) in g
-    print 'Rot([-1, 0, 0], -qTurn) in g:',  Rot(-vec3(X), -qTurn) in g
-    print 'Set g after closing:'
-    g.close()
-    print g
+    print 'testing creation of set',
+    g = Set([GeomTypes.Rot3(axis = X, angle = qTurn)])
+    print '....ok'
+    print "testing 'in' relation",
+    GeomTypes.Rot3(axis =  X, angle = qTurn)  in g
+    GeomTypes.Rot3(axis = -X, angle = -qTurn) in g
+    print '......ok'
+    print "testing 'close' function",
+    cg = g.close()
+    #print 'Set g after closing:'
+    #print cg
+    assert len(cg) == 4
+    GeomTypes.Rot3(axis =  GeomTypes.Vec3([1, 0, 0]), angle = qTurn)  in cg
+    GeomTypes.Rot3(axis = -GeomTypes.Vec3([1, 0, 0]), angle = -qTurn) in cg
+    assert Hx in cg
+    assert GeomTypes.E in cg
+    print '...ok'
 
-    a4 = A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])
-    print 'A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
-    print a4
+    print 'testing creation of A4',
+    a4 = A4(setup = setup(o2axis0 = X, o2axis1= Y))
+    print '.....ok'
+    print 'checking result',
+    assert len(a4) == 12
+    assert GeomTypes.E in a4
+    assert Hx in a4
+    assert Hy in a4
+    assert Hz in a4
+    t0 = GeomTypes.Rot3(axis = [1,  1,  1], angle =   tTurn)
+    assert t0 in a4
+    t1 = GeomTypes.Rot3(axis = [1,  1,  1], angle = 2*tTurn)
+    assert t1 in a4
+    t2 = GeomTypes.Rot3(axis = [1, -1,  1], angle =   tTurn)
+    assert t2 in a4
+    t3 = GeomTypes.Rot3(axis = [1, -1,  1], angle = 2*tTurn)
+    assert t3 in a4
+    t4 = GeomTypes.Rot3(axis = [1, -1, -1], angle =   tTurn)
+    assert t4 in a4
+    t5 = GeomTypes.Rot3(axis = [1, -1, -1], angle = 2*tTurn)
+    assert t5 in a4
+    t6 = GeomTypes.Rot3(axis = [1,  1, -1], angle =   tTurn)
+    assert t6 in a4
+    t7 = GeomTypes.Rot3(axis = [1,  1, -1], angle = 2*tTurn)
+    assert t7 in a4
+    print '............ok'
+
+    print 'testing creation of A4',
+    a4 = A4(
+            setup = setup(
+                # try list argument
+                o2axis0 = [1, 1, 1],
+                # try Rot3 argument
+                o2axis1 = GeomTypes.HalfTurn3([1, -1, 0])
+            )
+        )
+    #print 'A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
+    print '.....ok'
+    # this a4 is the above a4 repositioned as follows:
+    r0 = GeomTypes.Rot3(axis = Z, angle = eTurn)
+    r1 = GeomTypes.Rot3(axis = [1, -1, 0], angle = math.atan(1/math.sqrt(2)))
+    r = r1 * r0
+    print 'checking result',
+    assert len(a4) == 12
+    assert GeomTypes.E in a4
+    assert GeomTypes.HalfTurn3(r*X) in a4
+    assert GeomTypes.HalfTurn3(r*Y) in a4
+    assert GeomTypes.HalfTurn3(r*Z) in a4
+    assert GeomTypes.Rot3(axis = r * t0.axis(), angle =   tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t1.axis(), angle = 2*tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t2.axis(), angle =   tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t3.axis(), angle = 2*tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t4.axis(), angle =   tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t5.axis(), angle = 2*tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t6.axis(), angle =   tTurn) in a4
+    assert GeomTypes.Rot3(axis = r * t7.axis(), angle = 2*tTurn) in a4
+    print '............ok'
+    #print a4
+    print 'test grouping this',
     ca4 = copy(a4)
     a4.group()
-    print 'making a group out of this, should not change the result:'
-    print a4 == ca4
-
-    a4 = A4(o2axis0 = X, o2axis1 = Y)
-    print a4
-
+    assert a4 == ca4
+    print '.........ok'
 
     ########################################################################
     # Quotient Set:
-    print 'group a4:'
-    a4 = A4(o2axis0 = X, o2axis1= Y)
-    print a4
-    print 'has a subgroup D2:'
-    D2 = Set([Hx, Hy])
-    D2.group()
-    print D2
-    print 'which defines a right quotient set s = ['
-    q = a4 / D2
-    for s in q: print s
-    print ']'
+    a4 = A4(setup = setup(o2axis0 = X, o2axis1= Y))
+    assert len(a4) == 12
+    # print 'group a4:'
+    # print a4
+    d2 = Set([Hx, Hy])
+    d2.group()
+    assert len(d2) == 4
+    # print 'has a subgroup D2:'
+    # print d2
+    print 'test quatient set: A4/D2',
+    q = a4 / d2
+    # print 'which defines a right quotient set s = ['
+    for s in q:
+    #     print '  set('
+    #     for e in s:
+    #         print '    ', e
+    #     print '  )'
+        assert len(s) == 4
+    # print ']'
+    assert len(q) == 3
+    # check if A4 / D2 is a partition of A4:
+    for i in range(len(q)-1):
+        s = q[i]
+        for transform in s:
+            for j in range(i+1, len(q)):
+                assert not transform in q[j]
+    print '...ok'
 
-    # TODO: the result is wrong: you need to multiply all axes, but you need to
-    # keep the angle. However, above you use the multiplucation already to close
-    # the group.
-#    print 'Rot(X, qTurn) * a4:\n', a4 * Rot(X, qTurn)
-    # Note the when printing R4_1_3 it might be expressed as a rotation around
-    # the axis in the opposite direction around - alpha...
-
+    print 'success!'

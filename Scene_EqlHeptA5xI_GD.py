@@ -62,8 +62,6 @@ Rl   = vec(-w, Ch, H0)
 
 atanH0d2 = Geom3D.Rad2Deg * math.atan(tau2/2)
 
-halfTurn = HalfTurn(GeomTypes.ux)
-
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
         t1 = Rot(axis = vec(0, 0, 1), angle = GeomTypes.turn(0.2))
@@ -84,7 +82,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
             #oppositeIsometry = GeomTypes.I,
-            oppositeIsometry = halfTurn,
+            oppositeIsometry = GeomTypes.Hx,
             name = 'EglHeptA5xI_GD'
         )
         this.initArrs()

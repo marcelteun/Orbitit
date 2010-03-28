@@ -62,12 +62,12 @@ def Vlen(v0, v1):
 
 class Shape(Geom3D.SymmetricShape):
     def __init__(this, *args, **kwargs):
-        R0   = HalfTurn(GeomTypes.uz)
-        R1   = Rot(axis = Vec([ 1,  1,  1]), angle =    GeomTypes.tTurn)
+        R0   = GeomTypes.Hz
+        R1   = Rot(axis = Vec([ 1,  1,  1]), angle =     GeomTypes.tTurn)
         R1_2 = Rot(axis = Vec([ 1,  1,  1]), angle = 2 * GeomTypes.tTurn)
-        R2   = Rot(axis = Vec([-1, -1,  1]), angle =    GeomTypes.tTurn)
-        R2_2 = Rot(axis = Vec([-1, -1,  1]), angle = 2* GeomTypes.tTurn)
-        R3   = HalfTurn(GeomTypes.uy);
+        R2   = Rot(axis = Vec([-1, -1,  1]), angle =     GeomTypes.tTurn)
+        R2_2 = Rot(axis = Vec([-1, -1,  1]), angle = 2 * GeomTypes.tTurn)
+        R3   = GeomTypes.Hy;
         Geom3D.SymmetricShape.__init__(this,
             Vs = [], Fs = [],
             directIsometries = [
@@ -265,7 +265,7 @@ class Shape(Geom3D.SymmetricShape):
         Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
         colIds = [0 for f in Fs]
         if this.addTriangles:
-            Fs.extend([[1, 9, 12], [6, 13, 11]])
+            Fs.extend([[1, 9, 12], [6, 13, 11]]) # eql triangles
             Es.extend([1, 9, 6, 11])
             colIds.extend([3, 3])
             Fs.extend(this.triFs[this.edgeAlternative])
@@ -280,7 +280,7 @@ class Shape(Geom3D.SymmetricShape):
         print this.name, "initArrs"
         this.triFs = [
                 [
-                    [2, 3, 7], [2, 8, 7],
+                    [2, 3, 7], [2, 7, 8],
                     [2, 8, 9], [5, 11, 10],
                     [1, 2, 9], [5, 6, 11],
                 ],
@@ -301,7 +301,7 @@ class Shape(Geom3D.SymmetricShape):
                     [1, 8, 9], [6, 11, 10]
                 ],
                 [
-                    [2, 3, 7], [2, 8, 7],
+                    [2, 3, 7], [2, 7, 8],
                     [1, 2, 8], [5, 6, 10],
                     [1, 8, 9], [6, 11, 10]
                 ]

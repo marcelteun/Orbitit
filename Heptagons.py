@@ -69,7 +69,7 @@ class RegularHeptagon:
                 Vec([  -Rho/2,             -h, 0.0])
             ]
         this.Vs = this.VsOrg[:]     # the vertex aray to use.
-        this.Fs = [[0, 1, 2, 3, 4, 5, 6]]
+        this.Fs = [[6, 5, 4, 3, 2, 1, 0]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
     def foldParallel(this, a, b, keepV0 = True):
@@ -94,7 +94,7 @@ class RegularHeptagon:
         #         4       3
         #          
         #
-        this.Fs = [[0, 1, 6], [1, 2, 5, 6], [2, 3, 4, 5]]
+        this.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
         cosa = math.cos(a)
         sina = math.sin(a)
         cosb = math.cos(b)
@@ -211,7 +211,7 @@ class RegularHeptagon:
         #         4       3
         #          
         #
-        this.Fs = [[0, 1, 6], [1, 2, 3], [1, 3, 4, 6], [4, 5, 6]]
+        this.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
         cosa = math.cos(a)
         sina = math.sin(a)
         if (keepV0):

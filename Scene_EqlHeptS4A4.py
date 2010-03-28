@@ -36,10 +36,13 @@ import wx
 import math
 import rgb
 import Heptagons
+import GeomTypes
 import Geom3D
 import Scenes3D
 
 Title = 'Equilateral Heptagons Tetrahedron'
+
+vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
 
 V2  = math.sqrt(2)
 hV2 = 1.0/V2
@@ -49,10 +52,10 @@ class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this):
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
-                    Geom3D.E,
-                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(1, 0, 0)),
-                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(0, 1, 0)),
-                    Geom3D.Rot(Geom3D.R1_2, Geom3D.vec(0, 0, 1))
+                    GeomTypes.E,
+                    GeomTypes.Hx,
+                    GeomTypes.Hy,
+                    GeomTypes.Hz
                 ],
             name = 'EglHeptS4A4'
         )
@@ -100,20 +103,20 @@ class Shape(Heptagons.EqlHeptagonShape):
             # cube and 2, 4, 6, are on the face centres of that cube
             #
             Vs = [
-                    [ St,      St,     -St],        # 0
-                    [ 0.0,     1.0,     0.0],   
-                    [ this.h,  this.h,  this.h],
-                    [ 1.0,     0.0,     0.0],       # 3
+                    vec( St,      St,     -St),        # 0
+                    vec( 0.0,     1.0,     0.0),   
+                    vec( this.h,  this.h,  this.h),
+                    vec( 1.0,     0.0,     0.0),       # 3
 
-                    [ St,      St,     -St],        # 4
-                    [ 1.0,     0.0,     0.0],   
-                    [ this.h, -this.h, -this.h],
-                    [ 0.0,     0.0,    -1.0],       # 7
+                    vec( St,      St,     -St),        # 4
+                    vec( 1.0,     0.0,     0.0),   
+                    vec( this.h, -this.h, -this.h),
+                    vec( 0.0,     0.0,    -1.0),       # 7
 
-                    [ St,      St,     -St],        # 8
-                    [ 0.0,     0.0,    -1.0],
-                    [-this.h,  this.h, -this.h],
-                    [ 0.0,     1.0,     0.0]        # 11
+                    vec( St,      St,     -St),        # 8
+                    vec( 0.0,     0.0,    -1.0),
+                    vec(-this.h,  this.h, -this.h),
+                    vec( 0.0,     1.0,     0.0)        # 11
                 ]
             # Normals are set below, after calculating the heptagons
             #this.Ns = this.NsAlt
@@ -146,20 +149,20 @@ class Shape(Heptagons.EqlHeptagonShape):
             # cube and 2, 4, 6, are on the face centres of that cube
             #
             Vs = [
-                    [ this.h,  this.h,  this.h],    # 0
-                    [ 1.0,     0.0,     0.0],
-                    [ St,      St,     -St],
-                    [ 0.0,     1.0,     0.0],       # 3
+                    vec( this.h,  this.h,  this.h),    # 0
+                    vec( 1.0,     0.0,     0.0),
+                    vec( St,      St,     -St),
+                    vec( 0.0,     1.0,     0.0),       # 3
 
-                    [ this.h,  this.h,  this.h],    # 4
-                    [ 0.0,     1.0,     0.0],
-                    [-St,      St,      St],
-                    [ 0.0,     0.0,     1.0],       # 7
+                    vec( this.h,  this.h,  this.h),    # 4
+                    vec( 0.0,     1.0,     0.0),
+                    vec(-St,      St,      St),
+                    vec( 0.0,     0.0,     1.0),       # 7
 
-                    [ this.h,  this.h,  this.h],    # 8
-                    [ 0.0,     0.0,     1.0],
-                    [ St,     -St,      St],
-                    [ 1.0,     0.0,     0.0]        # 11
+                    vec( this.h,  this.h,  this.h),    # 8
+                    vec( 0.0,     0.0,     1.0),
+                    vec( St,     -St,      St),
+                    vec( 1.0,     0.0,     0.0)        # 11
                 ]
             # Normals are set below, after calculating the heptagons
             #this.Ns = this.NsPref
@@ -206,16 +209,16 @@ class Shape(Heptagons.EqlHeptagonShape):
             Vs.extend([Vs[27], Vs[28], Vs[28]]) # V42 - V44
             if this.heptPosAlt:
                 v = Vs[38]
-                Vs[38] = [-v[0],  v[1], -v[2]]    # Hy * V9
+                Vs[38] = vec(-v[0],  v[1], -v[2])    # Hy * V9
                 v = Vs[41]
-                Vs[41] = [ v[0], -v[1], -v[2]]    # Hx * V23
+                Vs[41] = vec( v[0], -v[1], -v[2])    # Hx * V23
             else:
                 v = Vs[38]
-                Vs[38] = [ v[0], -v[1], -v[2]]    # Hx * V9
+                Vs[38] = vec( v[0], -v[1], -v[2])    # Hx * V9
                 v = Vs[41]
-                Vs[41] = [-v[0],  v[1], -v[2]]    # Hy * V23
+                Vs[41] = vec(-v[0],  v[1], -v[2])    # Hy * V23
             v = Vs[44]
-            Vs[44] = [-v[0], -v[1],  v[2]]    # Hz * V16
+            Vs[44] = vec(-v[0], -v[1],  v[2])    # Hz * V16
             if this.addXtraEdge:
                 this.xtraEs = [37, 38, 40, 41, 43, 44]
 
@@ -293,9 +296,9 @@ class Shape(Heptagons.EqlHeptagonShape):
                 8, 9, 9, 10, 10, 11
             ]
         this.heptFs = [
-                [12, 13, 14, 15, 16, 17, 18],
-                [19, 20, 21, 22, 23, 24, 25],
-                [26, 27, 28, 29, 30, 31, 32]
+                [18, 17, 16, 15, 14, 13, 12],
+                [25, 24, 23, 22, 21, 20, 19],
+                [32, 31, 30, 29, 28, 27, 26]
             ]
         this.heptColIds = [1 for i in range(3)]
         this.heptEs = [

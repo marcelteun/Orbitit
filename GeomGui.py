@@ -25,8 +25,8 @@
 #import math
 import wx
 import re
+import GeomTypes
 import Geom4D
-import Geom3D
 import isometry
 
 # TODO:
@@ -419,11 +419,11 @@ class Vector3DInput(wx.StaticBoxSizer):
             this.Add(this.__v[-1], 0, wx.EXPAND)
 
     def GetVertex(this):
-        return Geom3D.vec(
+        return GeomTypes.Vec3([
                 this.__v[0].GetValue(),
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
-            )
+            ])
 
     def Destroy(this):
         for ctrl in this.__v: ctrl.Destroy()
@@ -530,11 +530,11 @@ class Vector3DSetInput(wx.StaticBoxSizer):
         e.Skip()
 
     def GetVertex(this, index):
-        return Geom3D.vec(
+        return GeomTypes.Vec3([
                 this.__v[index][0].GetValue(),
                 this.__v[index][1].GetValue(),
                 this.__v[index][2].GetValue(),
-            )
+            ])
 
     def GetVs(this):
         return [
@@ -653,7 +653,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         label = '',
         # TODO: proper init: all
         groupsList = [
-            isometry.Identity,
+            isometry.E,
             isometry.Cn,
             isometry.A4,
         ]
@@ -725,7 +725,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             inputType = sym.initPars[i]['type']
             if inputType == 'vec3':
                 v = gui.GetVertex()
-                if v != Geom3D.vec(0, 0, 0):
+                if v != GeomTypes.Vec3([0, 0, 0]):
                     setup[sym.initPars[i]['par']] = v
             elif inputType == 'int':
                 v = gui.GetValue()

@@ -65,13 +65,10 @@ from OpenGL.GL import *
 # Done
 # - edges after reading off file
 
-vec = isometry.vec3
-Rot = isometry.quat
+vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
 
-# Identity isometry:
-E = Rot(0, vec(1, 0, 0))
-# central inversion:
-I = GeomTypes.I
+E = GeomTypes.E     # Identity
+I = GeomTypes.I     # Central inversion
 
 # constant that have deal with angles
 Rad2Deg = 180.0/math.pi
@@ -106,6 +103,7 @@ def eq(a, b, margin = defaultFloatMargin):
     """
     return abs(a - b) < margin
 
+# rm with cgtypes dependency
 def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
     """
     Check if 2 'd' dimensional floating point vectors 'Va' and 'Vb' are close
@@ -173,9 +171,7 @@ def readOffFile(fd, recreateEdges = True):
                 if debug: print 'will read', nrOfVs, 'Vs', nrOfFs, 'Fs (', nrOfEs, 'edges)'
             elif state == states['readVs']:
                 # the function assumes: no comments in beween (x, y, z) of Vs
-                Vs.append(
-                    vec(float(words[0]), float(words[1]), float(words[2]))
-                )
+                Vs.append(GeomTypes.Vec3(words[0:3]))
                 if debug: print 'V[', i, '] =',  Vs[-1]
                 i = i + 1
                 if i == nrOfVs:
@@ -378,8 +374,8 @@ class Line2D(Line):
         for vertexNr in range(nrOfVs):
             v0 = FacetVs[iFacet[vertexNr]]
             v1 = FacetVs[iFacet[(vertexNr + 1) % nrOfVs]]
-            v0 = vec(v0)
-            v1 = vec(v1)
+            v0 = GeomTypes.Vec(v0)
+            v1 = GeomTypes.Vec(v1)
             if this.debug:
                 print '==> intersect line with edge nr', vertexNr, '=', v0, '->', v1
                 print '(with this current line obect: {', this.p, ' + t*', this.v, ')'
@@ -667,7 +663,7 @@ class Plane:
             return None
         V = N0.cross(N1)
         M = cgtypes.mat3(N0[0], N0[1], N0[2], N1[0], N1[1], N1[2], V[0], V[1], V[2])
-        Q = M.inverse() * vec(-this.D, -plane.D, 0)
+        Q = M.inverse() * cgtypes.vec3(-this.D, -plane.D, 0)
         return Line3D(Q, v = V)
 
     def toStr(this, precision = 2):
@@ -1128,8 +1124,8 @@ class SimpleShape:
             vi1 = this.Es[ei+1]
             if vi0 < vi1: t = (vi0, vi1)
             else:         t = (vi1, vi0)
-            l = (vec(this.Vs[vi1]) - vec(this.Vs[vi0])
-                ).length()
+            l = (GeomTypes.Vec3(this.Vs[vi1]) - GeomTypes.Vec3(this.Vs[vi0])
+                ).norm()
             e2l[t] = l
             l = round(l, precision)
             try: l2e[l].append(t)
@@ -1260,7 +1256,7 @@ class SimpleShape:
 
     def calculateFacesG(this):
         this.fGs = [
-            reduce(lambda t, i: t + this.Vs[i], f, vec(0)) / len(f)
+            reduce(lambda t, i: t + this.Vs[i], f, vec(0, 0, 0)) / len(f)
             for f in this.Fs
         ]
 
@@ -1272,7 +1268,7 @@ class SimpleShape:
         this.spheresRadii.precision = precision
         s = {}
         for v in this.Vs:
-            r = round(v.length(), precision)
+            r = round(v.norm(), precision)
             try: cnt = s[r]
             except KeyError: cnt = 0
             s[r] = cnt + 1
@@ -1280,7 +1276,7 @@ class SimpleShape:
         s = {}
         for i in this.EsRange:
             v = (this.Vs[this.Es[i]] +  this.Vs[this.Es[i+1]]) / 2
-            r = round(v.length(), precision)
+            r = round(v.norm(), precision)
             try: cnt = s[r]
             except KeyError: cnt = 0
             s[r] = cnt + 1
@@ -1290,7 +1286,7 @@ class SimpleShape:
         except AttributeError:
             this.calculateFacesG()
         for g in this.fGs:
-            r = round(g.length(), precision)
+            r = round(g.norm(), precision)
             try: cnt = s[r]
             except KeyError: cnt = 0
             s[r] = cnt + 1
@@ -1713,7 +1709,7 @@ class SimpleShape:
             PsPoints = []
             if not to2DAngle == 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = Rot(to2DAngle, to2Daxis)
+                Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
                 # add vertices to vertex array
                 for v in this.Vs:
                     Vs.append(Mrot*vec(v))
@@ -1956,7 +1952,7 @@ class SimpleShape:
             PsPoints = []
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = Rot(to2DAngle, to2Daxis)
+                Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
                 # add vertices to vertex array
                 for v in this.Vs:
                     Vs.append(Mrot*vec(v))
@@ -2354,7 +2350,7 @@ class SymmetricShape(CompoundShape):
         It is recommended to set the isometry operations at initialisation
         only, otherwise you might break other properties, like the face colours.
         directIsometries: specifies an array of direct isometries. Each isometry
-                          is a Geom3D.Rot.
+                          is a GeomTypes.Rot3.
         oppositeIsometry: specifies a GeomTypes.Transform3 that represents an
                           opposite isometry, e.g. the central inversion or a
                           reflection.  The set of opposite isometries is defined
@@ -2638,697 +2634,3 @@ class Scene():
         except wx._core.PyDeadObjectError:
             # The user closed the window already
             pass
-
-# Tests:
-if __name__ == '__main__':
-
-    wDir = 'tstThis'
-    cwd = os.getcwd()
-
-    if not os.path.isdir(wDir):
-        os.mkdir(wDir, 0775)
-    os.chdir(wDir)
-
-    V2 = math.sqrt(2)
-    Es2D = [
-            [0, 1],
-            [2, 3],
-            [4, 5],
-            [6, 7],
-            [0, 2],
-            [2, 4],
-            [4, 6],
-            [6, 0],
-            [1, 3],
-            [3, 5],
-            [5, 7],
-            [7, 1],
-
-            [0+8, 1+8],
-            [2+8, 3+8],
-            [4+8, 5+8],
-            [6+8, 7+8],
-            [0+8, 2+8],
-            [2+8, 4+8],
-            [4+8, 6+8],
-            [6+8, 0+8],
-            [1+8, 3+8],
-            [3+8, 5+8],
-            [5+8, 7+8],
-            [7+8, 1+8],
-
-            [0+16, 1+16],
-            [2+16, 3+16],
-            [4+16, 5+16],
-            [6+16, 7+16],
-            [0+16, 2+16],
-            [2+16, 4+16],
-            [4+16, 6+16],
-            [6+16, 0+16],
-            [1+16, 3+16],
-            [3+16, 5+16],
-            [5+16, 7+16],
-            [7+16, 1+16],
-        ]
-    Es = []
-    for e in Es2D:
-        Es.extend(e)
-    class ClassicCompoundOf3Cubes(SimpleShape):
-        """A simple shape representing a classic compound of 3 cubes.
-        """
-        def __init__(this, cols):
-            qCol = len(cols)
-            if qCol == 3:
-                fColors = [
-                        0, 0, 0, 0, 0, 0,
-                        1, 1, 1, 1, 1, 1,
-                        2, 2, 2, 2, 2, 2,
-                    ]
-            elif qCol == 1:
-                fColors = [0 for i in range(18)]
-            elif qCol == 8:
-                fColors = [i for i in range(18)]
-            else:
-                assert False, "Cannot handle this nr of colours"
-            SimpleShape.__init__(this,
-                    Vs = [
-                        vec(V2, 0, 1),
-                        vec(V2, 0, -1),
-                        vec(0, V2, 1),
-                        vec(0, V2, -1),
-                        vec(-V2, 0, 1),
-                        vec(-V2, 0, -1),
-                        vec(0, -V2, 1),
-                        vec(0, -V2, -1),
-
-                        vec(0, 1, V2),
-                        vec(0, -1, V2),
-                        vec(V2, 1, 0),
-                        vec(V2, -1, 0),
-                        vec(0, 1, -V2),
-                        vec(0, -1, -V2),
-                        vec(-V2, 1, 0),
-                        vec(-V2, -1, 0),
-
-                        vec(1, 0, V2),
-                        vec(-1, 0, V2),
-                        vec(1, -V2, 0),
-                        vec(-1, -V2, 0),
-                        vec(1, 0, -V2),
-                        vec(-1, 0, -V2),
-                        vec(1, V2, 0),
-                        vec(-1, V2, 0)
-                    ],
-                    Fs = [
-                            [0, 1, 3, 2],     # 0
-                            [2, 3, 5, 4],     # 1
-                            [4, 5, 7, 6],     # 2
-                            [6, 7, 1, 0],     # 3
-                            [0, 2, 4, 6],     # 4
-                            [7, 5, 3, 1],     # 5
-
-                            [0+8, 1+8, 3+8, 2+8],     # 6
-                            [2+8, 3+8, 5+8, 4+8],     # 7
-                            [4+8, 5+8, 7+8, 6+8],     # 8
-                            [6+8, 7+8, 1+8, 0+8],     # 9
-                            [0+8, 2+8, 4+8, 6+8],     # 10
-                            [7+8, 5+8, 3+8, 1+8],     # 11
-
-                            [0+16, 1+16, 3+16, 2+16],     # 12
-                            [2+16, 3+16, 5+16, 4+16],     # 13
-                            [4+16, 5+16, 7+16, 6+16],     # 14
-                            [6+16, 7+16, 1+16, 0+16],     # 15
-                            [0+16, 2+16, 4+16, 6+16],     # 16
-                            [7+16, 5+16, 3+16, 1+16]      # 17
-                        ],
-                    Es = Es,
-                    colors = (cols, fColors)
-                )
-
-    cc = ClassicCompoundOf3Cubes([rgb.red, rgb.yellow, rgb.blue])
-    fd = open('classicCompound3Cubes.off', 'w')
-    fd.write(cc.toOffStr())
-    del fd
-
-    fd = open('classicCompound3Cubes.wrl', 'w')
-    x3d = cc.toX3dDoc(edgeRadius = 0.03)
-    x3d.setFormat(X3D.VRML_FMT)
-    fd.write(x3d.toStr())
-    del fd
-
-    fd = open('classicCompound3Cubes.x3d', 'w')
-    x3d.setFormat(X3D.X3D_FMT)
-    fd.write(x3d.toStr())
-    del fd
-    del x3d
-    if True:
-        fd = open('classicCompound3Cubes.ps', 'w')
-        #cc.Fs = [cc.Fs[4], cc.Fs[9], cc.Fs[10]]
-        #fd.write(cc.toPsPiecesStr(faceIndices = [0], scaling = 100))
-        fd.write(cc.toPsPiecesStr(faceIndices = [0, 4], scaling = 100))
-        del fd
-    del cc
-
-    import wx
-
-    cubeVs = [
-            vec(V2, 0, 1),
-            vec(V2, 0, -1),
-            vec(0, V2, 1),
-            vec(0, V2, -1),
-            vec(-V2, 0, 1),
-            vec(-V2, 0, -1),
-            vec(0, -V2, 1),
-            vec(0, -V2, -1),
-        ]
-    cubeFs = [
-            [0, 1, 3, 2],     # 0
-            [2, 3, 5, 4],     # 1
-            [4, 5, 7, 6],     # 2
-            [6, 7, 1, 0],     # 3
-            [0, 2, 4, 6],     # 4
-            [7, 5, 3, 1],     # 5
-        ]
-    cubeEs = [
-            0, 1, 2, 3, 4, 5, 6, 7,
-            0, 2, 2, 4, 4, 6, 6, 0,
-            1, 3, 3, 5, 5, 7, 7, 1,
-        ]
-    simpleCube = SimpleShape(
-        Vs = cubeVs,
-        Fs = cubeFs,
-        Es = cubeEs,
-        colors = ([rgb.red], [0]),
-    )
-    cubes3 = SymmetricShape(
-        Vs = cubeVs,
-        Fs = cubeFs,
-        Es = cubeEs,
-        colors = [
-                ([rgb.red],    [0]),
-                ([rgb.yellow], [0]),
-                ([rgb.blue],   [0]),
-            ],
-        directIsometries = [
-                E,
-                Rot(math.pi/2, vec(1, 0, 0)),
-                Rot(math.pi/2, vec(0, 1, 0))
-            ]
-    )
-    class TestCanvas(Scenes3D.Interactive3DCanvas):
-        def __init__(this, shape, *args, **kwargs):
-            this.shape = shape
-            Scenes3D.Interactive3DCanvas.__init__(this, *args, **kwargs)
-
-        def initGl(this):
-            glMatrixMode(GL_PROJECTION)
-            gluPerspective(45., 1.0, 1., 300.)
-            #TODO: Render_cameraTransform(rctx)
-
-            glMatrixMode(GL_MODELVIEW)
-            glTranslatef(0.0, 0.0, -15.0)
-            
-            #glShadeModel(GL_SMOOTH)
-
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_NORMAL_ARRAY)
-
-            #glLightfv(GL_LIGHT0, GL_POSITION, this.lightPosition)
-            #glLightfv(GL_LIGHT0, GL_AMBIENT, this.lightAmbient)
-            #glLightfv(GL_LIGHT0, GL_DIFFUSE, this.lightDiffuse)
-            #glLightfv(GL_LIGHT0, GL_SPECULAR, this.lightDiffuse)
-            #glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, this.materialSpec)
-            glEnable(GL_LIGHT0)
-
-            glEnable(GL_COLOR_MATERIAL)
-            glEnable(GL_LIGHTING)
-            glEnable(GL_DEPTH_TEST)
-            glEnable(GL_NORMALIZE)
-            glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
-
-        def onPaint(this):
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            this.shape.glDraw()
-
-    class TestWindow(wx.Frame):
-        def __init__(this, TstScene, shape, *args, **kwargs):
-            wx.Frame.__init__(this, *args, **kwargs)
-            this.addMenuBar()
-            this.statusBar = this.CreateStatusBar()
-            this.panel = TestPanel(this, TstScene, shape, wx.ID_ANY)
-            this.Show(True)
-            this.Bind(wx.EVT_CLOSE, this.onClose)
-            this.exportDirName = '.'
-            this.importDirName = '.'
-            this.viewSettingsWindow = None
-
-        def addMenuBar(this):
-            menuBar = wx.MenuBar()
-            menuBar.Append(this.createFileMenu(), '&File')
-            menuBar.Append(this.createEditMenu(), '&Edit')
-            this.SetMenuBar(menuBar)
-
-        def createFileMenu(this):
-            menu = wx.Menu()
-            open = wx.MenuItem(
-                    menu,
-                    wx.ID_ANY,
-                    text = "&Open\tCtrl+O"
-                )
-            this.Bind(wx.EVT_MENU, this.onOpen, id = open.GetId())
-            menu.AppendItem(open)
-            add = wx.MenuItem(
-                    menu,
-                    wx.ID_ANY,
-                    text = "&Add\tCtrl+A"
-                )
-            this.Bind(wx.EVT_MENU, this.onAdd, id = add.GetId())
-            menu.AppendItem(add)
-            export = wx.Menu()
-            saveAsOff = wx.MenuItem(
-                    menu,
-                    wx.ID_ANY,
-                    text = "&Off\tCtrl+E"
-                )
-            this.Bind(wx.EVT_MENU, this.onSaveAsOff, id = saveAsOff.GetId())
-            export.AppendItem(saveAsOff)
-            saveAsPs = wx.MenuItem(
-                    menu,
-                    wx.ID_ANY,
-                    text = "&PS\tCtrl+P"
-                )
-            this.Bind(wx.EVT_MENU, this.onSaveAsPs, id = saveAsPs.GetId())
-            export.AppendItem(saveAsPs)
-            menu.AppendMenu(wx.ID_ANY, "&Export", export)
-            menu.AppendSeparator()
-            exit = wx.MenuItem(
-                    menu,
-                    wx.ID_ANY,
-                    text = "E&xit\tCtrl+X"
-                )
-            this.Bind(wx.EVT_MENU, this.onExit, id = exit.GetId())
-            menu.AppendItem(exit)
-            return menu
-
-        def createEditMenu(this):
-            menu = wx.Menu()
-            viewSettings = wx.MenuItem(
-                    menu,
-                    wx.ID_ANY,
-                    text = "&View Settings\tCtrl+W"
-                )
-            this.Bind(wx.EVT_MENU, this.onViewSettings, id = viewSettings.GetId())
-            menu.AppendItem(viewSettings)
-            return menu
-
-        def onOpen(this, e):
-            dlg = wx.FileDialog(this, 'New: Choose a file', this.importDirName, '', '*.*off', wx.OPEN)
-            if dlg.ShowModal() == wx.ID_OK:
-                this.filename = dlg.GetFilename()
-                this.importDirName  = dlg.GetDirectory()
-                fd = open(os.path.join(this.importDirName, this.filename), 'r')
-                # Create a compound shape to be able to add shapes later.
-                newShape = CompoundShape([readOffFile(fd, recreateEdges = True)])
-                this.panel.setShape(newShape)
-                fd.close()
-                this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
-            dlg.Destroy()
-
-        def onAdd(this, e):
-            dlg = wx.FileDialog(this, 'Add: Choose a file', this.importDirName, '', '*.*off', wx.OPEN)
-            if dlg.ShowModal() == wx.ID_OK:
-                this.filename = dlg.GetFilename()
-                this.importDirName  = dlg.GetDirectory()
-                fd = open(os.path.join(this.importDirName, this.filename), 'r')
-                # Create a compound shape to be able to add shapes later.
-                this.panel.getShape().addShape(readOffFile(fd, recreateEdges = True))
-                fd.close()
-                # TODO: set better title
-                this.SetTitle('Added: %s (%s)' % (this.filename, this.importDirName))
-            dlg.Destroy()
-
-        def onSaveAsOff(this, e):
-            dlg = wx.FileDialog(this, 'Save as .off file', this.exportDirName, '', '*.off', wx.SAVE)
-            if dlg.ShowModal() == wx.ID_OK:
-                this.filename = dlg.GetFilename()
-                this.exportDirName  = dlg.GetDirectory()
-                NameExt = this.filename.split('.')
-                if len(NameExt) == 1:
-                    this.filename = '%s.off' % this.filename
-                elif NameExt[-1].lower() != 'off':
-                    if NameExt[-1] != '':
-                        this.filename = '%s.off' % this.filename
-                    else:
-                        this.filename = '%soff' % this.filename
-                # TODO: check if file exists... do not overwrite on default
-                fd = open(os.path.join(this.exportDirName, this.filename), 'w')
-                # TODO precision through setting:
-                fd.write(this.panel.getShape().toOffStr())
-                fd.close()
-                this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
-            dlg.Destroy()
-
-        def onSaveAsPs(this, e):
-            dlg = wx.FileDialog(this, 'Save as .off file', this.exportDirName, '', '*.ps', wx.SAVE)
-            if dlg.ShowModal() == wx.ID_OK:
-                this.filename = dlg.GetFilename()
-                this.exportDirName  = dlg.GetDirectory()
-                NameExt = this.filename.split('.')
-                if len(NameExt) == 1:
-                    this.filename = '%s.ps' % this.filename
-                elif NameExt[-1].lower() != 'ps':
-                    if NameExt[-1] != '':
-                        this.filename = '%s.ps' % this.filename
-                    else:
-                        this.filename = '%sps' % this.filename
-                # TODO: check if file exists... do not overwrite on default
-                fd = open(os.path.join(this.exportDirName, this.filename), 'w')
-                # TODO precision through setting:
-                # TODO scalingSize through setting:
-                # TODO faceIndices through setting:
-                fd.write(this.panel.getShape().toPsPiecesStr())
-                fd.close()
-                this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
-            dlg.Destroy()
-
-        def onViewSettings(this, e):
-            if this.viewSettingsWindow == None:
-                this.viewSettingsWindow = ViewSettingsWindow(this.panel.getCanvas(),
-                    None, wx.ID_ANY,
-                    title = 'View Settings',
-                    size = (394, 300)
-                )
-                this.viewSettingsWindow.Bind(wx.EVT_CLOSE, this.onViewSettingsClose)
-            else:
-                this.viewSettingsWindow.SetFocus()
-                this.viewSettingsWindow.Raise()
-
-        def setStatusStr(this, str):
-            this.statusBar.SetStatusText(str)
-
-        def onExit(this, e):
-            this.Close(True)
-
-        def onViewSettingsClose(this, event):
-            this.viewSettingsWindow.Destroy()
-            this.viewSettingsWindow = None
-
-        def onClose(this, event):
-            print 'main onclose'
-            this.Destroy()
-            if this.viewSettingsWindow != None:
-                this.viewSettingsWindow.Close()
-
-    class TestPanel(wx.Panel):
-        def __init__(this, parent, TstScene, shape, *args, **kwargs):
-            wx.Panel.__init__(this, parent, *args, **kwargs)
-            this.parent = parent
-            # Note that uncommenting this will override the default size
-            # handler, which resizes the sizers that are part of the Frame.
-            #this.Bind(wx.EVT_SIZE, this.onSize)
-
-            this.canvas = TstScene(shape, this)
-            this.canvas.SetMinSize((300, 300))
-            this.canvasSizer = wx.BoxSizer(wx.HORIZONTAL)
-            this.canvasSizer.Add(this.canvas)
-
-            # Ctrl Panel:
-            #this.ctrlSizer = ViewSettingsSizer(parent, this, this.canvas)
-            mainSizer = wx.BoxSizer(wx.VERTICAL)
-            mainSizer.Add(this.canvas, 3, wx.EXPAND)
-            #mainSizer.Add(this.ctrlSizer, 2, wx.EXPAND)
-            this.SetSizer(mainSizer)
-            this.SetAutoLayout(True)
-            this.Layout()
-
-        def getCanvas(this):
-            return this.canvas
-
-        def onSize(this, event):
-            """Print the size plus an offset for y that includes the title bar.
-
-            This function is used to set the ctrl window size in the interactively.
-            Bind this function, and read and set the correct size in the scene.
-            """
-            s = this.GetClientSize()
-            print 'Window size:', (s[0]+2, s[1]+54)
-            this.Layout()
-
-        def setShape(this, shape):
-            """Set a new shape to be shown with the current viewing settings
-
-            shape: the new shape.
-            """
-            oldShape = this.canvas.shape
-            this.canvas.shape = shape
-            # Use all the vertex settings except for Vs, i.e. keep the view
-            # vertex settings the same.
-            oldVSettings = oldShape.getVertexProperties()
-            del oldVSettings['Vs']
-            this.canvas.shape.setVertexProperties(oldVSettings)
-            # Use all the edge settings except for Es
-            oldESettings = oldShape.getEdgeProperties()
-            del oldESettings['Es']
-            this.canvas.shape.setEdgeProperties(oldESettings)
-            # Use only the 'drawFaces' setting:
-            oldFSettings = {
-                    'drawFaces': oldShape.getFaceProperties()['drawFaces']
-                }
-            this.canvas.shape.setFaceProperties(oldFSettings)
-            this.canvas.paint()
-            del oldShape
-
-        def getShape(this):
-            """Return the current shape object
-            """
-            return this.canvas.shape
-
-    class ViewSettingsWindow(wx.Frame):
-        def __init__(this, canvas, *args, **kwargs):
-            wx.Frame.__init__(this, *args, **kwargs)
-            this.canvas    = canvas
-            this.statusBar = this.CreateStatusBar()
-            this.panel     = wx.Panel(this, wx.ID_ANY)
-            this.ctrlSizer = ViewSettingsSizer(this, this.panel, this.canvas)
-            this.panel.SetMinSize((300, 240))
-            this.panel.SetSizer(this.ctrlSizer)
-            this.panel.SetAutoLayout(True)
-            this.panel.Layout()
-            this.Show(True)
-
-        def setStatusStr(this, str):
-            this.statusBar.SetStatusText(str)
-
-    class ViewSettingsSizer(wx.BoxSizer):
-        def __init__(this, parentWindow, parentPanel, canvas, *args, **kwargs):
-            """
-            Create a sizer with view settings.
-
-            parentWindow: the parentWindow object. This is used to update de
-                          status string in the status bar. The parent window is
-                          supposed to contain a function setStatusStr for this
-                          to work.
-            parentPanel: The panel to add all control widgets to.
-            canvas: 
-            canvas: An interactive 3D canvas object. This object is supposed to
-                    have a shape field that points to the shape object that is
-                    being viewed.
-            """
-
-            wx.BoxSizer.__init__(this, wx.VERTICAL, *args, **kwargs)
-            this.canvas       = canvas
-            this.parentWindow = parentWindow
-            this.parentPanel  = parentPanel
-            # Show / Hide vertices
-            vProps            = canvas.shape.getVertexProperties()
-            this.vR           = vProps['radius']
-            this.vOptionsLst  = ['hide', 'show']
-            if this.vR > 0:
-                default = 1 # key(1) = 'show'
-            else:
-                default = 0 # key(0) = 'hide'
-            this.vOptionsGui  = wx.RadioBox(this.parentPanel,
-                label = 'Vertex Options',
-                style = wx.RA_VERTICAL,
-                choices = this.vOptionsLst
-            )
-            this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onVOption, id = this.vOptionsGui.GetId())
-            this.vOptionsGui.SetSelection(default)
-            # Vertex Radius
-            nrOfSliderSteps   = 40
-            this.vRadiusMin   = 0.01 
-            this.vRadiusMax   = 0.100
-            this.vRadiusScale = 1.0 / this.vRadiusMin
-            s = (this.vRadiusMax - this.vRadiusMin) * this.vRadiusScale
-            if int(s) < nrOfSliderSteps:
-                this.vRadiusScale = (this.vRadiusScale * nrOfSliderSteps) / s
-            this.vRadiusGui = wx.Slider(this.parentPanel,
-                value = this.vRadiusScale * this.vR,
-                minValue = this.vRadiusScale * this.vRadiusMin,
-                maxValue = this.vRadiusScale * this.vRadiusMax,
-                style = wx.SL_HORIZONTAL
-            )
-            this.parentPanel.Bind(wx.EVT_SLIDER, this.onVRadius, id = this.vRadiusGui.GetId())
-            this.vRadiusBox = wx.StaticBox(this.parentPanel, label = 'Vertex radius')
-            # disable if vertices are hidden anyway:
-            if default != 1: 
-                this.vRadiusGui.Disable()
-            # Vertex Colour
-            this.vColorGui = wx.Button(this.parentPanel, wx.ID_ANY, "Colour")
-            this.parentPanel.Bind(wx.EVT_BUTTON, this.onVColor, id = this.vColorGui.GetId())
-            # Show / hide edges
-            eProps           = canvas.shape.getEdgeProperties()
-            this.eR          = eProps['radius']
-            this.eOptionsLst = ['hide', 'as cylinders', 'as lines']
-            if eProps['drawEdges']:
-                if this.vR > 0:
-                    default = 1 # key(1) = 'as cylinders'
-                else:
-                    default = 2 # key(2) = 'as lines'
-            else:
-                default     = 0 # key(0) = 'hide'
-            this.eOptionsGui = wx.RadioBox(this.parentPanel,
-                label = 'Edge Options',
-                style = wx.RA_VERTICAL,
-                choices = this.eOptionsLst
-            )
-            this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onEOption, id = this.eOptionsGui.GetId())
-            this.eOptionsGui.SetSelection(default)
-            # Edge Radius
-            nrOfSliderSteps   = 40
-            this.eRadiusMin   = 0.008 
-            this.eRadiusMax   = 0.08
-            this.eRadiusScale = 1.0 / this.eRadiusMin
-            s = (this.eRadiusMax - this.eRadiusMin) * this.eRadiusScale
-            if int(s) < nrOfSliderSteps:
-                this.eRadiusScale = (this.eRadiusScale * nrOfSliderSteps) / s
-            this.eRadiusGui = wx.Slider(this.parentPanel,
-                value = this.eRadiusScale * this.eR,
-                minValue = this.eRadiusScale * this.eRadiusMin,
-                maxValue = this.eRadiusScale * this.eRadiusMax,
-                style = wx.SL_HORIZONTAL
-            )
-            this.parentPanel.Bind(wx.EVT_SLIDER, this.onERadius, id = this.eRadiusGui.GetId())
-            this.eRadiusBox = wx.StaticBox(this.parentPanel, label = 'Edge radius')
-            # disable if edges are not drawn as scalable items anyway:
-            if default != 1: 
-                this.eRadiusGui.Disable()
-            # Edge Colour
-            this.eColorGui = wx.Button(this.parentPanel, wx.ID_ANY, "Colour")
-            this.parentPanel.Bind(wx.EVT_BUTTON, this.onEColor, id = this.eColorGui.GetId())
-            # Show / hide face
-            default = 1
-            this.fOptionsLst = ['hide', 'show']
-            this.fOptionsGui = wx.RadioBox(this.parentPanel,
-                label = 'Face Options',
-                style = wx.RA_VERTICAL,
-                choices = this.fOptionsLst
-            )
-            this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onFOption, id = this.fOptionsGui.GetId())
-            this.fOptionsGui.SetSelection(default)
-            # Sizers
-            vRadiusSizer = wx.StaticBoxSizer(this.vRadiusBox, wx.VERTICAL)
-            vRadiusSizer.Add(this.vRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
-            vRadiusSizer.Add(this.vColorGui,  1,             wx.BOTTOM | wx.LEFT)
-            eRadiusSizer = wx.StaticBoxSizer(this.eRadiusBox, wx.VERTICAL)
-            eRadiusSizer.Add(this.eRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
-            eRadiusSizer.Add(this.eColorGui,  1,             wx.BOTTOM | wx.LEFT)
-            #sizer = wx.BoxSizer(wx.VERTICAL)
-            vSizer = wx.BoxSizer(wx.HORIZONTAL)
-            vSizer.Add(this.vOptionsGui, 2, wx.EXPAND)
-            vSizer.Add(vRadiusSizer, 5, wx.EXPAND)
-            eSizer = wx.BoxSizer(wx.HORIZONTAL)
-            eSizer.Add(this.eOptionsGui, 2, wx.EXPAND)
-            eSizer.Add(eRadiusSizer, 5, wx.EXPAND)
-            this.Add(vSizer, 5, wx.EXPAND)
-            this.Add(eSizer, 5, wx.EXPAND)
-            this.Add(this.fOptionsGui, 4, wx.EXPAND)
-            this.setStatusStr()
-
-        def setStatusStr(this):
-            try:
-                this.parentWindow.setStatusStr('V-Radius: %0.5f; E-Radius: %0.5f' % (this.vR, this.eR))
-            except AttributeError:
-                print "parentWindow.setStatusStr function undefined"
-
-        def onVOption(this, e):
-            #print 'onVOption'
-            sel = this.vOptionsGui.GetSelection()
-            selStr = this.vOptionsLst[sel]
-            if selStr == 'show':
-                this.vRadiusGui.Enable()
-                this.canvas.shape.setVertexProperties(radius = this.vR)
-            elif selStr == 'hide':
-                this.vRadiusGui.Disable()
-                this.canvas.shape.setVertexProperties(radius = -1.0)
-            this.canvas.paint()
-
-        def onVRadius(this, e):
-            this.vR = (float(this.vRadiusGui.GetValue()) / this.vRadiusScale)
-            this.canvas.shape.setVertexProperties(radius = this.vR)
-            this.canvas.paint()
-            this.setStatusStr()
-
-        def onVColor(this, e):
-            dlg = wx.ColourDialog(this.parentWindow)
-            if dlg.ShowModal() == wx.ID_OK:
-                data = dlg.GetColourData()
-                rgba = data.GetColour()
-                rgb  = rgba.Get()
-                this.canvas.shape.setVertexProperties(
-                    color = [float(i)/256 for i in rgb]
-                )
-                this.canvas.paint()
-            dlg.Destroy()
-
-        def onEOption(this, e):
-            sel = this.eOptionsGui.GetSelection()
-            selStr = this.eOptionsLst[sel]
-            if selStr == 'hide':
-                this.eRadiusGui.Disable()
-                this.canvas.shape.setEdgeProperties(drawEdges = False)
-            elif selStr == 'as cylinders':
-                this.eRadiusGui.Enable()
-                this.canvas.shape.setEdgeProperties(drawEdges = True)
-                this.canvas.shape.setEdgeProperties(radius = this.eR)
-            elif selStr == 'as lines':
-                this.eRadiusGui.Disable()
-                this.canvas.shape.setEdgeProperties(drawEdges = True)
-                this.canvas.shape.setEdgeProperties(radius = 0)
-            this.canvas.paint()
-
-        def onERadius(this, e):
-            this.eR = (float(this.eRadiusGui.GetValue()) / this.eRadiusScale)
-            this.canvas.shape.setEdgeProperties(radius = this.eR)
-            this.canvas.paint()
-            this.setStatusStr()
-
-        def onEColor(this, e):
-            dlg = wx.ColourDialog(this.parentWindow)
-            if dlg.ShowModal() == wx.ID_OK:
-                data = dlg.GetColourData()
-                rgba = data.GetColour()
-                rgb  = rgba.Get()
-                this.canvas.shape.setEdgeProperties(
-                    color = [float(i)/256 for i in rgb]
-                )
-                this.canvas.paint()
-            dlg.Destroy()
-
-        def onFOption(this, e):
-            sel = this.fOptionsGui.GetSelection()
-            selStr = this.fOptionsLst[sel]
-            this.canvas.shape.setFaceProperties(drawFaces = (selStr == 'show'))
-            this.canvas.paint()
-
-    app = wx.PySimpleApp()
-    frame = TestWindow(
-            TestCanvas,
-            #ClassicCompoundOf3Cubes([rgb.red, rgb.yellow, rgb.blue]),
-            #simpleCube,
-            cubes3,
-            None, wx.ID_ANY, "test",
-            size = (430, 482),
-            pos = wx.Point(980, 0)
-        )
-    app.MainLoop()
