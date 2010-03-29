@@ -27,6 +27,7 @@ import glue
 import X3D
 import PS
 import Scenes3D
+import GeomTypes
 import Geom3D
 import wx
 from cgkit import cgtypes
@@ -1067,15 +1068,15 @@ class SimpleShape:
                 cellFs = [[vIndex + offset for vIndex in f] for f in cellFs]
                 # Now scale from gravitation centre:
                 if isScaledDown:
-                    g = cgtypes.vec3(0, 0, 0)
+                    g = GeomTypes.Vec3([0, 0, 0])
                     sum = 0
                     for vIndex in range(len(cellVs)):
-                        g = g + nrUsed[vIndex] * cgtypes.vec3(cellVs[vIndex])
+                        g = g + nrUsed[vIndex] * GeomTypes.Vec3(cellVs[vIndex])
                         sum = sum + nrUsed[vIndex]
                     if sum != 0:
                         g = g / sum
                     #print this.name, 'g:', g
-                    cellVs = [this.c.scale * (cgtypes.vec3(v) - g) + g for v in cellVs]
+                    cellVs = [this.c.scale * (GeomTypes.Vec3(v) - g) + g for v in cellVs]
 
 
                 shapeVs.extend(cellVs)
@@ -1270,13 +1271,3 @@ if __name__ == '__main__':
         print 'test OK'
     else:
         print 'test failed with %d error(s)' % NrOfErrorsOcurred
-
-# >>> from cgkit.cgtypes import vec4
-# >>> print vec4.__dict__
-# {'__module__': 'cgkit.cgtypes', '__doc__': "A 4-dimensional vector of floats.\n\n    This class is derived from the vec4 class in the _core module and\n    adds some missing stuff that's better done in Python.\n    ", '__init__': <function __init__ at 0xb7cd9ca4>}
-# >>> print vec4.__bases__
-# (<class 'cgkit._core.vec4'>,)
-# 
-# >>> from cgkit._core import vec4
-# >>> print vec4.__dict__
-# {'__module__': 'cgkit._core', '__repr__': <Boost.Python.function object at 0x81e4348>, '__ne__': <Boost.Python.function object at 0x81e41f8>, '__str__': <Boost.Python.function object at 0x81e4310>, '__gt__': <Boost.Python.function object at 0x81e42a0>, '__reduce__': <Boost.Python.function object at 0x81e3560>, 'maxAbsIndex': <Boost.Python.function object at 0x81e5000>, 'maxIndex': <Boost.Python.function object at 0x81e4f20>, '__rmul__': <Boost.Python.function object at 0x81e4578>, '__lt__': <Boost.Python.function object at 0x81e4230>, '__imod__': <Boost.Python.function object at 0x81e4498>, '__init__': <Boost.Python.function object at 0x81e3d80>, 'normalize': <Boost.Python.function object at 0x81e4e40>, 'min': <Boost.Python.function object at 0x81e4e78>, 'minAbsIndex': <Boost.Python.function object at 0x81e4fc8>, 'length': <Boost.Python.function object at 0x81e4e08>, '__abs__': <Boost.Python.function object at 0x81e4dd0>, '__pos__': <Boost.Python.function object at 0x81e4d20>, '__safe_for_unpickling__': True, '__getinitargs__': <Boost.Python.function object at 0x81e5038>, '__doc__': None, '__len__': <Boost.Python.function object at 0x81e4d48>, 't': <property object at 0xb7d7066c>, 'minIndex': <Boost.Python.function object at 0x81e4ee8>, '__isub__': <Boost.Python.function object at 0x81e43b8>, '__getitem__': <Boost.Python.function object at 0x81e4d70>, 'maxAbs': <Boost.Python.function object at 0x81e4f90>, 'max': <Boost.Python.function object at 0x81e4eb0>, '__idiv__': <Boost.Python.function object at 0x81e4428>, '__setitem__': <Boost.Python.function object at 0x81e4d98>, '__add__': <Boost.Python.function object at 0x81e44d0>, 'x': <property object at 0xb7d705cc>, 'minAbs': <Boost.Python.function object at 0x81e4f58>, '__eq__': <Boost.Python.function object at 0x81e46c8>, '__imul__': <Boost.Python.function object at 0x81e43f0>, '__mod__': <Boost.Python.function object at 0x81e4690>, '__instance_size__': 40, '__neg__': <Boost.Python.function object at 0x81e4540>, '__iadd__': <Boost.Python.function object at 0x81e4380>, '__div__': <Boost.Python.function object at 0x81e4620>, '__le__': <Boost.Python.function object at 0x81e4268>, '__mul__': <Boost.Python.function object at 0x81e45e8>, 'w': <property object at 0xb7d70644>, 'y': <property object at 0xb7d705f4>, '__sub__': <Boost.Python.function object at 0x81e4508>, 'z': <property object at 0xb7d7061c>, '__ge__': <Boost.Python.function object at 0x81e42d8>}
