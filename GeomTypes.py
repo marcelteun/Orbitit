@@ -45,6 +45,7 @@ class Vec(tuple):
 
     def __radd__(v, w):
         # provide __radd__ for [..] + Vec([..])
+        print 'v', v, 'w', w
         return v.__class__([a+b for a, b in zip(v, w)])
 
     def __sub__(v, w):
@@ -132,6 +133,116 @@ class Vec3(Vec):
 ux = Vec3([1, 0, 0])
 uy = Vec3([0, 1, 0])
 uz = Vec3([0, 0, 1])
+
+class Vec4(Vec):
+    def __new__(this, v):
+        return Vec.__new__(this, [float(v[i]) for i in range(4)])
+
+    def isParallel(u, v):
+        z0 = z1 = z2 = z3 = False # expresses whether u[i] == v[i] == 0
+        q0, q1, q2, q3 = 1, 2, 3, 4 # initialise all differently
+        try:
+            q0 = u[0]/v[0]
+        except ZeroDivisionError:
+            z0 = eq(u[0], 0.0)
+        try:
+            q1 = u[1]/v[1]
+        except ZeroDivisionError:
+            z1 = eq(u[1], 0.0)
+        try:
+            q2 = u[2]/v[2]
+        except ZeroDivisionError:
+            z2 = eq(u[2], 0.0)
+        try:
+            q3 = u[3]/v[3]
+        except ZeroDivisionError:
+            z3 = eq(u[3], 0.0)
+        if (not z0):
+            return (
+                    (z1 or eq(q0, q1))
+                    and
+                    (z2 or eq(q0, q2))
+                    and
+                    (z3 or eq(q0, q3))
+                )
+        elif (not z1):
+            return (
+                    (z0 or eq(q1, q0))
+                    and
+                    (z2 or eq(q1, q2))
+                    and
+                    (z3 or eq(q1, q3))
+                )
+        elif (not z2):
+            return (
+                    (z0 or eq(q2, q0))
+                    and
+                    (z1 or eq(q2, q1))
+                    and
+                    (z3 or eq(q2, q3))
+                )
+        elif (not z3):
+            return (
+                    (z0 or eq(q3, q0))
+                    and
+                    (z1 or eq(q3, q1))
+                    and
+                    (z2 or eq(q3, q2))
+                )
+        else:
+           # else z0 and z1 and z2 and z3, i.e u == v == (0, 0, 0, 0)
+           return True
+
+    def makeOrthogonalTo(w, v):
+        """
+        Returns the modification of this vector orthogonal to v, while keeping them in the same plane.
+        """
+        # say v = [vx, vy, vz, vw]
+        # and w = [wx, wy, wz, ww]
+        # Now we change w into w' by a linear combination of v and w, so that w'
+        # still lies in the plane spanned by v and w:
+        # w' = p*v + q*w  with p,q are reals
+        # i.e. w' = [p*vx + q*wx, p*vy + q*wy, p*vz + q*wz, p*vw + q*ww]
+        #
+        # Then w' and v are orthogonal if the dot product w'.v == 0
+        # i.e.
+        # vx(p*vx + q*wx) + vy(p*vy + q*wy) + vz(p*vz + q*wz) + vw(p*vw + q*ww)
+        #                                                                 == 0
+        # =>
+        #
+        # p(vx*vx + vy*vy + vw*vw + vz*vz) + q(vx*wx + vy*wy + vz*wz + vw*ww)
+        #                                                                 == 0
+        # =>
+        #
+        # p * (v.v) + q (v.w) == 0
+        #
+        # Now this holds if we choose
+        #   p = - (v.w)
+        #   q =   (v.v)
+        p = - w * v  # dot product
+        q = v * v       # dot product
+        assert not w.isParallel(v), 'null vector used or vectors are (too) parallel; this = ' + w.__repr__() + '; v = ' + v.__repr__()
+        # TODO: is there a better way to set,...
+        return Vec4(p * v + q * w)
+
+    def cross(u, v, w):
+        vw_xy = v[0] * w[1] - v[1] * w[0]
+        vw_xz = v[0] * w[2] - v[2] * w[0]
+        vw_xw = v[0] * w[3] - v[3] * w[0]
+        vw_yz = v[1] * w[2] - v[2] * w[1]
+        vw_yw = v[1] * w[3] - v[3] * w[1]
+        vw_zw = v[2] * w[3] - v[3] * w[2]
+        return Vec4([
+            u[1]  * vw_zw -  u[2] * vw_yw  +  u[3] * vw_yz,
+            -u[0] * vw_zw +  u[2] * vw_xw  -  u[3] * vw_xz,
+            u[0]  * vw_yw -  u[1] * vw_xw  +  u[3] * vw_xy,
+            -u[0] * vw_yz +  u[1] * vw_xz  -  u[2] * vw_xy
+        ])
+
+def unitVec4(i):
+    v    = [0, 0, 0, 0]
+    v[i] = 1
+    return Vec4(v)
 
 class Quat(Vec):
     def __new__(this, v = None):
@@ -518,7 +629,7 @@ class Transform4(tuple):
         return tuple.__new__(this, quatPair)
 
     def __mul__(t, u):
-        if isinstance(u, Transform4):
+        if isinstance(u, Transform4) or isinstance(u, Transform3):
             # t * u =  wLeft * vLeft .. vRight * wRight
             return Transform4([t[0] * u[0], u[1] * t[1]])
         # TODO: check kind of Transform4 and optimise
@@ -526,6 +637,8 @@ class Transform4(tuple):
             return t[0] * Quat([0, u[0], u[1], u[2]]) * t[1]
         elif isinstance(u, Quat):
             return t[0] * u                           * t[1]
+        elif isinstance(u, Vec) and len(u) == 4:
+            return t[0] * Quat(u)                     * t[1]
         else:
             return u.__rmul__(t)
             #raise TypeError, "unsupported op type(s) for *: '%s' and '%s'" % (
@@ -581,7 +694,7 @@ class Transform4(tuple):
 
 class Rot4(Transform4):
     def __new__(this, quatPair = None,
-        axialPlane = (Quat([0, 0, 1, 0]), Quat([0, 0, 1, 1])),
+        axialPlane = (Vec4([0, 0, 1, 0]), Vec4([0, 0, 0, 1])),
         angle = 0
     ):
         """
@@ -595,12 +708,13 @@ class Rot4(Transform4):
         #    assert t.isRot(), "%s doesn't represent a rotation" % str(qLeft)
         #    return t
         else:
-            assertStr = "A 4D rotation is represented by 2 orthogonal quaternions: "
+            assertStr = "A 4D rotation is represented by 2 orthogonal axis: "
             assert len(axialPlane) == 2, assertStr + str(axialPlane)
-            assert isinstance(axialPlane[0], Quat), assertStr + str(axialPlane)
-            assert isinstance(axialPlane[1], Quat), assertStr + str(axialPlane)
-            assert eq(axialPlane[0].dot(axialPlane[1]), 0
+            assert eq(axialPlane[0] * axialPlane[1], 0
                 ), assertStr + str(axialPlane)
+            # Do not require Quats for the axial plane: this is a implementation
+            # choice, which should be abstracted from.
+            axialPlane = (Quat(axialPlane[0]), Quat(axialPlane[1]))
             # Coxeter Regular Complex Polytopes, p 71
             #                  _
             # qleft  = cosa + yz sina
@@ -626,6 +740,141 @@ class Rot4(Transform4):
                     Quat([cosa, q1[0], q1[1], q1[2]])
                 ]
             )
+
+def findOrthoPlane(plane):
+    # Initialise v2 so that e0 . v2 = 0 then call v2.makeOrthogonalTo(e1) and
+    # normalise.
+    # if there is an i for which e0[i] == 0 initialising v2 is easy, just
+    # define v2[i] = 1 and v2[j] = 0 for j != i
+    # However v2 may not be parallel to e1.
+    # If this is the case, then we can exchange the roll of e0 and e1:
+    # E.G. e0 = [1/2, 1/2, 1/V2, 0] and e1 = [0, 0, 0, 1]
+    # Then we would initialise v2 = [0, 0, 0, 1]
+    # However v2 == e1 and it will be impossible to call
+    # v2.makeOrthogonalTo(e1)
+    # Instead set e0 = [0, 0, 0, 1] and e1 = [1/2, 1/2, 1/V2, 0]
+    # And initialise v2 = [1, 0, 0, 0] and call v2.makeOrthogonalTo(e1)
+    # If 4 all i e0[i] != 0,
+    # then v2[i] = t . [1/e0[0], 1/e0[1], 1/e0[2], 1/e0[3]]
+    # where t can be any permutation of [1, 1, -1, -1]
+    # Choose that t for which v2 not parallel to e1
+    #
+    # There we go:
+    def getZeroIndex(v, s = 0):
+        """
+        Get the index of the element that equals to 0 in vec v. If there
+        none, -1 is returned.
+
+        s: start with (incl) position s
+        """
+        zeroIndex = -1
+        #print 'getZeroIndex', v, s
+        for i in range(s, 4):
+            if eq(v[i], 0):
+                zeroIndex = i
+                break
+        return zeroIndex
+
+    oopsMsg = "Ooops, this shouldn't happen!!"
+
+    # status: a status dict that expresses the status after previous
+    #         calls. The dict contains the fields:
+    #         sz_e0: Search done for elements equal to 0 in e0 until (incl)
+    #                the specified index. Initialise at -1.
+    #         sz_e1: Search done for elements equal to 0 in e1 until (incl)
+    #                the specified index. Initialise at -1.
+    #         e0_z_e1: Expresses whether e0 and e1 were functionally
+    #                  exchanged.
+    #                  - Initialise at 0, which means they were not
+    #                    exchanged.
+    #                  - 1 means the were exchanged because e1 contains
+    #                    one 1 and 3 0's (even though this might hold for e0
+    #                    too)
+    #                  - 2 means that they were exchanged because e1
+    #                    contained a 0 and e0 didn't.
+    #         sp: start looking in the permutation table at index.
+    #             Initialise at 0.
+    status = { 'sz_e0': -1, 'sz_e1': -1, 'e0_z_e1': 0, 'sp': 0 }
+
+    # define e0 and e1 locally to be able to exchange their roll just for
+    # calculating e2 and e3.
+    e0 = plane[0].normalise()
+    e1 = plane[1].normalise()
+
+    # Now define e2,..
+    zi    = getZeroIndex(e0)
+    if zi > -1: # if e0 contains a 0 (zero)
+        v2 = unitVec4(zi)
+        if v2.isParallel(e1):
+            # exchange e0 and e1 and repeat, since we know that e1 has 3 0's
+            e0, e1 = e1, e0
+            status['e0_z_e1'] = 1
+            zi = getZeroIndex(e0)
+            if zi > -1:
+                v2 = unitVec4(zi)
+                if v2.isParallel(e1):
+                    # ok, e0 had 3 zeros as well,...
+                    zi = getZeroIndex(e0, zi+1)
+                    if zi > -1:
+                        v2 = unitVec4(zi)
+                        assert not v2.isParallel(e1), oopsMsg
+                    else:
+                        assert False, oopsMsg
+            else:
+                assert False, oopsMsg
+        status['sz_e0'] = zi
+    else:
+        status['sz_e0'] = 3
+        zi = getZeroIndex(e1)
+        if zi > -1:  # if e1 contains a 0 (zero)
+            v2 = unitVec4(zi)
+            e0, e1 = e1, e0
+            status['e0_z_e1'] = 2
+            assert not v2.isParallel(e1), "Ooops, this shouldn't happen!!"
+            status['sz_e1'] = zi
+        else:
+            vnIni = Vec4(1/e0[0], 1/e0[1], 1/e0[2], 1/e0[3])
+            possiblePermuations = [
+                Vec4( vnIni[0],  vnIni[1], -vnIni[2], -vnIni[3]),
+                Vec4( vnIni[0], -vnIni[1],  vnIni[2], -vnIni[3]),
+                Vec4(-vnIni[0],  vnIni[1],  vnIni[2], -vnIni[3]),
+                Vec4( vnIni[0], -vnIni[1], -vnIni[2],  vnIni[3]), # this might be used later for e3
+                # I don't think these are necessary:
+                #Vec4(-vnIni[0],  vnIni[1], -vnIni[2],  vnIni[3]),
+                #Vec4(-vnIni[0], -vnIni[1],  vnIni[2],  vnIni[3])
+            ]
+            v2Found = False
+            i = -1
+            while not v2Found:
+                i += 1
+                assert i < len(possiblePermuations), "Oops, more permutations needed"
+                v2 = possiblePermuations[i]
+                v2Found = not v2.isParallel(e1)
+            status['sp'] = i + 1
+
+    # Now the plane spanned by e1 and v2 is orthogonal to e0, as a
+    # consequence the following operation will keep v2 orthogonal to e0:
+    e2 = v2.makeOrthogonalTo(e1).normalise()
+
+    # Use cross product for e3:
+    v3 = e0.cross(e1, e2)
+    # Normalisation should not be needed, but improves precision.
+    #print '__findOrthoPlane: v3', v3
+    # TODO
+    # Prehaps this should only steered by caller by setting high precision.
+    e3 = v3.normalise()
+    #print 'e3', this.e3
+    return (e2, e3)
+
+class DoubleRot4(Transform4):
+    def __new__(this, quatPair = None,
+        axialPlane = (Vec4([0, 0, 1, 0]), Vec4([0, 0, 0, 1])),
+        angle = (0, 0)
+    ):
+        orthoPlane = findOrthoPlane(axialPlane)
+        r0 = Rot4(axialPlane = axialPlane, angle = angle[0])
+        r1 = Rot4(axialPlane = orthoPlane, angle = angle[1])
+        return Transform4.__new__(this, [ r1[0]*r0[0], r0[1]*r1[1] ])
 
 # TODO implement Geom3D.Line3D here (in this file)
 
@@ -1504,8 +1753,8 @@ if __name__ == '__main__':
     #####################
     # Rot4:
     #####################
-    r0 = Rot4(axialPlane = (Quat([1, 0, 0, 0]), Quat([0, 0, 0, 1])), angle = math.pi/3)
-    v = Quat([10, 2, 0, 6])
+    r0 = Rot4(axialPlane = (Vec4([1, 0, 0, 0]), Vec4([0, 0, 0, 1])), angle = math.pi/3)
+    v = Vec4([10, 2, 0, 6])
     r = r0 * v
     x = Quat([v[0], 1, -math.sqrt(3), v[3]])
     eqFloatMargin = 1.0e-14
@@ -1514,17 +1763,17 @@ if __name__ == '__main__':
     from random import seed, random
     seed(700114) # constant seed to be able to catch errors
     for i in range(100):
-        x0 = Quat([2*random()-1, 2*random()-1, 2*random()-1, 2*random()-1])
-        w, x, y = (2*random()-1, 2*random()-1, 2*random()-1)
+        x0 = Vec4([2*random()-1, 2*random()-1, 2*random()-1, 2*random()-1])
         # make sure orthogonal: x0*x1 + y0*y1 + z0*z1 + w0*w1 == 0
+        w, x, y = (2*random()-1, 2*random()-1, 2*random()-1)
         z = (-w*x0[0] - x*x0[1] - y*x0[2])/ x0[3]
-        x1 = Quat([w, x, y, z])
+        x1 = Vec4([w, x, y, z])
         r0 = Rot4(axialPlane = (x0, x1), angle = random() * 2 * math.pi)
-        x0 = Quat([2*random()-1, 2*random()-1, 2*random()-1, 2*random()-1])
+        x0 = Vec4([2*random()-1, 2*random()-1, 2*random()-1, 2*random()-1])
         w, x, y = (2*random()-1, 2*random()-1, 2*random()-1)
         # make sure orthogonal: x0*x1 + y0*y1 + z0*z1 + w0*w1 == 0
         z = (-w*x0[0] - x*x0[1] - y*x0[2])/ x0[3]
-        x1 = Quat([w, x, y, z])
+        x1 = Vec4([w, x, y, z])
         r1 = Rot4(axialPlane = (x0, x1), angle = random() * 2 * math.pi)
         r = r0 * r1
         assert r0.isRot()
@@ -1553,5 +1802,78 @@ if __name__ == '__main__':
                 r = r0 * r
             ra = r.angle()
             assert eq(ra, 0) or eq(ra, 2*math.pi), r.angle()
+
+    #####################
+    # DoubleRot4:
+    #####################
+    r0 = DoubleRot4(
+            axialPlane = (Vec4([1, 0, 0, 0]), Vec4([0, 0, 0, 1])),
+            angle = (math.pi/3, math.pi/4) # 1/6 th and 1/8 th turn
+        )
+    v = Vec4([6, 2, 0, 6])
+    r = r0 * v
+    x = Quat([0, 1, -math.sqrt(3), math.sqrt(72)])
+    eqFloatMargin = 1.0e-14
+    assert r0.isRot()
+    assert r == x, 'Expected: %s, got %s' % (x, r)
+    r = E
+    for i in range(23):
+        r = r0 * r
+        oopsMsg = 'oops for i = %d' %  i
+        assert r.isRot(), oopsMsg
+        ra = r.angle()
+        #print 'angle:', 180*ra / math.pi
+        #print  r * v
+        assert not eq(ra, 0) and not eq(ra, 2*math.pi), ra
+    r = r0 * r
+    assert r.isRot()
+    ra = r.angle()
+    #print 'angle:', 180*ra / math.pi
+    #print  r * v
+    assert eq(ra, 0) or eq(ra, 2*math.pi), r.angle()
+
+    r0 = DoubleRot4(
+            axialPlane = (Vec4([1, 0, 0, 0]), Vec4([0, 0, 0, 1])),
+            angle = (math.pi/4, math.pi/3) # 1/6 th and 1/8 th turn
+        )
+    v = Vec4([6, 2, 2, 0])
+    r = r0 * v
+    x = Quat([3, math.sqrt(8), 0, 3*math.sqrt(3)])
+    eqFloatMargin = 1.0e-14
+    assert r0.isRot()
+    assert r == x, 'Expected: %s, got %s' % (x, r)
+    r = E
+    for i in range(23):
+        r = r0 * r
+        oopsMsg = 'oops for i = %d' %  i
+        assert r.isRot(), oopsMsg
+        ra = r.angle()
+        #print 'angle:', 180*ra / math.pi
+        #print  r * v
+        assert not eq(ra, 0) and not eq(ra, 2*math.pi), ra
+    r = r0 * r
+    assert r.isRot()
+    ra = r.angle()
+    #print 'angle:', 180*ra / math.pi
+    #print  r * v
+    assert eq(ra, 0) or eq(ra, 2*math.pi), r.angle()
+
+    # test if vectors in axial plane are not changed.
+    v0 = Vec4([1, 1, 1, 0])
+    v1 = Vec4([0, 0, 1, 1])
+    v1 = v1.makeOrthogonalTo(v0)
+    r0 = DoubleRot4(
+            axialPlane = (v1, v0),
+            angle = (math.pi/4, math.pi/3) # 1/6 th and 1/8 th turn
+        )
+    for i in range(5):
+        v = v0 + i * v1
+        r = r0 * v
+        x = v
+        assert eq(ra, 0) or eq(ra, 2*math.pi), "%d: expected: %s, got: %s" % (i, x, r)
+        v = i* v0 + v1
+        r = r0 * v
+        x = v
+        assert eq(ra, 0) or eq(ra, 2*math.pi), "%d: expected: %s, got: %s" % (i, x, r)
 
     print 'success!'

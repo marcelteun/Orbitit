@@ -26,7 +26,7 @@ import rgb
 import X3D
 import Scenes3D
 import Geom3D
-import Geom4D
+import GeomTypes
 import GeomGui
 import wx
 import pprint
@@ -897,7 +897,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             # Create a ctrl for specifying a 4D rotation
             this.Boxes.append(wx.StaticBox(parentPanel, label = 'Rotate 4D Object'))
             rotationSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-            this.Boxes.append(wx.StaticBox(parentPanel, label = 'In Plane Spanned by'))
+            this.Boxes.append(wx.StaticBox(parentPanel, label = 'In a Plane Spanned by'))
             planeSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
             this.v0Gui = GeomGui.Vector4DInput(
                     this.parentPanel,
@@ -1154,10 +1154,23 @@ class ViewSettingsSizer(wx.BoxSizer):
                 this.angleScaleOffset,
                 this.angleScaleGui.GetValue()
             )
+        if GeomTypes.eq(angle, 0): return
         try:
-            r = Geom4D.Rotation(v0, v1, alpha = angle, beta = scale*angle)
+            v1 = v1.makeOrthogonalTo(v0)
+            # if vectors are exchange, you actually specify the axial plane
             if this.exchangeGui.IsChecked():
-                r.exchangePlanes()
+                if GeomTypes.eq(scale, 0):
+                    r = GeomTypes.Rot4(axialPlane = (v1, v0), angle = angle)
+                else:
+                    r = GeomTypes.DoubleRot4(
+                            axialPlane = (v1, v0),
+                            angle = (angle, scale*angle)
+                        )
+            else:
+                    r = GeomTypes.DoubleRot4(
+                            axialPlane = (v1, v0),
+                            angle = (scale*angle, angle)
+                        )
             #print r.getMatrix()
             this.canvas.shape.rotate(r)
             this.canvas.paint()
@@ -1169,13 +1182,13 @@ class ViewSettingsSizer(wx.BoxSizer):
             # zero division means 1 of the vectors is (0, 0, 0, 0)
             this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
             pass
-        except AssertionError:
-            zV = Geom4D.vec(0, 0, 0, 0)
-            if v0 == zV or v1 == zV:
-                this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
-            else:
-                this.parentWindow.statusBar.SetStatusText("Error: The specified vectors are (too) parallel")
-            pass
+        #except AssertionError:
+        #    zV = GeomTypes.Vec4([0, 0, 0, 0])
+        #    if v0 == zV or v1 == zV:
+        #        this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
+        #    else:
+        #        this.parentWindow.statusBar.SetStatusText("Error: The specified vectors are (too) parallel")
+        #    pass
 
 class ExportPsDialog(wx.Dialog):
     """

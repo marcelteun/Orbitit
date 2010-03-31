@@ -26,7 +26,6 @@
 import wx
 import re
 import GeomTypes
-import Geom4D
 import isometry
 
 # TODO:
@@ -621,21 +620,21 @@ class Vector4DInput(wx.StaticBoxSizer):
         #ctrlId = e.GetId()
         vEvent = VectorUpdatedEvent(myEVT_VECTOR_UPDATED, this.GetId())
         vEvent.SetEventObject(this)
-        vEvent.SetVector(Geom4D.vec(
+        vEvent.SetVector(GeomTypes.Vec4([
                 this.__v[0].GetValue(),
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
                 this.__v[3].GetValue()
-            ))
+            ]))
         this.__v[this.__ctrlIdIndex].GetEventHandler().ProcessEvent(vEvent)
 
     def GetValue(this):
-        return Geom4D.vec(
+        return GeomTypes.Vec4([
                 this.__v[0].GetValue(),
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
                 this.__v[3].GetValue()
-            )
+            ])
 
     def Destroy(this):
         for ctrl in this.__vLabel: ctrl.Destroy()

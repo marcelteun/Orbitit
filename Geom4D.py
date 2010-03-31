@@ -30,7 +30,6 @@ import Scenes3D
 import GeomTypes
 import Geom3D
 import wx
-from cgkit import cgtypes
 from copy import copy
 
 from OpenGL.GLU import *
@@ -50,463 +49,6 @@ class Plane:
     YW = Axis.Y | Axis.W
     ZW = Axis.Z | Axis.W
 
-class vec(cgtypes.vec4):
-
-    orthogonalMargin = 1.0e-6
-    def __init__(this, *args):
-        cgtypes.vec4.__init__(this, *args)
-
-    def isParallel(this, v, margin = Geom3D.defaultFloatMargin):
-        z0 = z1 = z2 = z3 = False # expresses whether this[i] == v[i] == 0
-        q0, q1, q2, q3 = 1, 2, 3, 4 # initialise all differently
-        try:
-            q0 = this.x/v.x
-        except ZeroDivisionError:
-            z0 = Geom3D.eq(this.x, 0.0, margin)
-        try:
-            q1 = this.y/v.y
-        except ZeroDivisionError:
-            z1 = Geom3D.eq(this.y, 0.0, margin)
-        try:
-            q2 = this.z/v.z
-        except ZeroDivisionError:
-            z2 = Geom3D.eq(this.z, 0.0, margin)
-        try:
-            q3 = this.w/v.w
-        except ZeroDivisionError:
-            z3 = Geom3D.eq(this.w, 0.0, margin)
-        if (not z0):
-            return (
-                    (z1 or Geom3D.eq(q0, q1, margin))
-                    and
-                    (z2 or Geom3D.eq(q0, q2, margin))
-                    and
-                    (z3 or Geom3D.eq(q0, q3, margin))
-                )
-        elif (not z1):
-            return (
-                    (z0 or Geom3D.eq(q1, q0, margin))
-                    and
-                    (z2 or Geom3D.eq(q1, q2, margin))
-                    and
-                    (z3 or Geom3D.eq(q1, q3, margin))
-                )
-        elif (not z2):
-            return (
-                    (z0 or Geom3D.eq(q2, q0, margin))
-                    and
-                    (z1 or Geom3D.eq(q2, q1, margin))
-                    and
-                    (z3 or Geom3D.eq(q2, q3, margin))
-                )
-        elif (not z3):
-            return (
-                    (z0 or Geom3D.eq(q3, q0, margin))
-                    and
-                    (z1 or Geom3D.eq(q3, q1, margin))
-                    and
-                    (z2 or Geom3D.eq(q3, q2, margin))
-                )
-        else:
-           # else z0 and z1 and z2 and z3, i.e this == v == (0, 0, 0, 0)
-           return True
-
-    def makeOrthogonalTo(this, v):
-        """
-        Returns the modification of this vector orthogonal to v, while keeping them in the same plane.
-        """
-        # say        v = [vx, vy, vz, vw]
-        # and this = w = [wx, wy, wz, ww]
-        # Now we change w into w' by a linear combination of v and w, so that w'
-        # still lies in the plane spanned by v and w:
-        # w' = p*v + q*w  with p,q are reals
-        # i.e. w' = [p*vx + q*wx, p*vy + q*wy, p*vz + q*wz, p*vw + q*ww]
-        #
-        # Then w' and v are orthogonal if the dot product w'.v == 0
-        # i.e.
-        # vx(p*vx + q*wx) + vy(p*vy + q*wy) + vz(p*vz + q*wz) + vw(p*vw + q*ww)
-        #                                                                 == 0
-        # =>
-        #
-        # p(vx*vx + vy*vy + vw*vw + vz*vz) + q(vx*wx + vy*wy + vz*wz + vw*ww)
-        #                                                                 == 0
-        # =>
-        #
-        # p * (v.v) + q (v.w) == 0
-        #
-        # Now this holds if we choose
-        #   p = - (v.w)
-        #   q =   (v.v)
-        p = - this * v  # dot product
-        q = v * v       # dot product
-        assert not this.isParallel(v, this.orthogonalMargin), 'null vector used or vectors are (too) parallel; this = ' + this.__repr__() + '; v = ' + v.__repr__()
-        # TODO: is there a better way to set,...
-        return vec(p * v + q * this)
-
-    def cross(u, v, w):
-        vw_xy = v.x * w.y - v.y * w.x
-        vw_xz = v.x * w.z - v.z * w.x
-        vw_xw = v.x * w.w - v.w * w.x
-        vw_yz = v.y * w.z - v.z * w.y
-        vw_yw = v.y * w.w - v.w * w.y
-        vw_zw = v.z * w.w - v.w * w.z
-        return vec(
-            u.y * vw_zw  -  u.z * vw_yw  +  u.w * vw_yz,
-            -u.x * vw_zw +  u.z * vw_xw  -  u.w * vw_xz,
-            u.x * vw_yw  -  u.y * vw_xw  +  u.w * vw_xy,
-            -u.x * vw_yz +  u.y * vw_xz  -  u.z * vw_xy
-        )
-
-    # The following function are needed to ensure the returned vector is of
-    # Geom4d.vec and not cgtypes.vec4 (or cgkit_core.vec4)
-    def __neg__(this, *args):
-        return vec(cgtypes.vec4.__neg__(this, *args))
-
-    def __add__(this, *args):
-        return vec(cgtypes.vec4.__add__(this, *args))
-
-    def __iadd__(this, *args):
-        return vec(cgtypes.vec4.__iadd__(this, *args))
-
-    def __sub__(this, *args):
-        return vec(cgtypes.vec4.__sub__(this, *args))
-
-    def __isub__(this, *args):
-        return vec(cgtypes.vec4.__isub__(this, *args))
-
-    # mul not needed, since the dot product returns a float
-
-    def __imul__(this, *args):
-        return vec(cgtypes.vec4.__imul__(this, *args))
-
-    def __rmul__(this, *args):
-        return vec(cgtypes.vec4.__rmul__(this, *args))
-
-    def __div__(this, *args):
-        return vec(cgtypes.vec4.__div__(this, *args))
-
-    def __idiv__(this, *args):
-        return vec(cgtypes.vec4.__idiv__(this, *args))
-
-    def __mod__(this, *args):
-        return vec(cgtypes.vec4.__mod__(this, *args))
-
-    def __imod__(this, *args):
-        return vec(cgtypes.vec4.__imod__(this, *args))
-
-    def normalize(this, *args):
-        return vec(cgtypes.vec4.normalize(this, *args))
-
-    def normalise(this, *args):
-        return vec(cgtypes.vec4.normalize(this, *args))
-
-class Rotation:
-    def __init__(this, v0, v1, alpha, beta = 0):
-        """
-        Define a rotation of alpha degrees in a plane set up by a span v0 and
-        v1.
-        
-        v0 and v1 should not be parallel and should be of type Geom4D.vec
-        The don't have to be orthogonal and do not have to be normalised.
-        alpha: angle in radials for the rotation in the plane defined by v0 and
-               v1. The rotational direction is ??
-        beta: angle in radials for the rotation in the plane orthogonal to the
-              plane spanned by v0 and v1.
-        """
-        this.setSpan(copy(v0), copy(v1))
-        this.setAngle(alpha, beta)
-
-    def setSpan(this, v0, v1):
-        """Define the vectors that spans the plane
-        """
-        # check if v0 and v1 are parellel:
-        # TODO
-        #if v0
-        # Make v0 and v1 orthogonal.
-        this.v0 = v0
-        this.v1 = v1
-        this.e0 = v0.normalise()
-        this.e1 = v1.makeOrthogonalTo(v0).normalise()
-        this.MoUp2Date = False
-
-    def setAngle(this, alpha, beta = 0):
-        """
-        Set the rotation angles. for the double (or Clifford) rotation.
-
-        alpha: angle in radials for the rotation in the plane defined by v0 and
-               v1. The rotational direction is ??
-        beta: angle in radials for the rotation in the plane orthogonal to the
-              plane spanned by v0 and v1.
-        """
-        this.alphaOrg = alpha
-        this.alpha = alpha
-        this.betaOrg = beta
-        this.beta = beta
-        this.MrUp2Date = False
-
-    def getAngles(this):
-        """
-        Returns the tuple holding the current angles.
-        """
-        return (this.alphaOrg, this.betaOrg)
-
-    def _setOrthoMatrix(this):
-        """Get an orthogonal matrix that transfers the coordinate system to the
-        new coordinate system induces by the span
-
-        The matrix will map
-          - [1, 0, 0, 0] on a normalised v0
-          - [0, 1, 0, 0] on e1 where e1 is an orthogonal unit vector in the
-                         plane spanned by v0 and v1
-          - [0, 0, 1, 0] and [0, 0, 0, 1] on orthogonal unit vectors (i.e. they
-                         are orthogonal to e0 and e1 and orthogonal between
-                         themselves.
-        """
-        # Define 2 more orthogonal unit vectors e2 and e3
-        # Define the matrix [e0 e1 e2 e3]
-        # This matrix A will map
-        # [1, 0, 0, 0] on e0 and
-        # [0, 1, 0, 0] on e1 and
-        # [0, 0, 1, 0] on e2 and
-        # [0, 0, 0, 1] on e3.
-        # 
-        # Now what you want is a matrix A_inverse that maps e0 on the x-axis and
-        # e1 on the y-axis. Then you want to rotate in the XOY plane and then
-        # use A to rotate back again.
-        #
-        # Initialise v2 so that e0 . v2 = 0 then call v2.makeOrthogonalTo(e1) and
-        # normalise.
-        # if there is an i for which e0[i] == 0 initialising v2 is easy, just
-        # define v2[i] = 1 and v2[j] = 0 for j != i
-        # However v2 may not be parallel to e1.
-        # If this is the case, then we can exchange the roll of e0 and e1:
-        # E.G. e0 = [1/2, 1/2, 1/V2, 0] and e1 = [0, 0, 0, 1]
-        # Then we would initialise v2 = [0, 0, 0, 1]
-        # However v2 == e1 and it will be impossible to call
-        # v2.makeOrthogonalTo(e1)
-        # Instead set e0 = [0, 0, 0, 1] and e1 = [1/2, 1/2, 1/V2, 0]
-        # And initialise v2 = [1, 0, 0, 0] and call v2.makeOrthogonalTo(e1)
-        # If 4 all i e0[i] != 0,
-        # then v2[i] = t . [1/e0[0], 1/e0[1], 1/e0[2], 1/e0[3]]
-        # where t can be any permutation of [1, 1, -1, -1]
-        # Choose that t for which v2 not parallel to e1
-        #
-        # There we go:
-        zeroMargin = 1.0e-15
-        def getZeroIndex(v, s = 0):
-            """
-            Get the index of the element that equals to 0 in vec v. If there
-            none, -1 is returned.
-
-            s: start with (incl) position s
-            """
-            zeroIndex = -1
-            #print this.__class__, 'getZeroIndex', v, s
-            for i in range(s, 4):
-                if Geom3D.eq(v[i], 0, zeroMargin):
-                    zeroIndex = i
-                    break
-            return zeroIndex
-        def getUnitVector(i):
-            """
-            Returns a vector v of type vec for which v[i] = 1 and v[j] = 0 for j != i.
-            """
-            v = vec(0)
-            v[i] = 1
-            return v
-
-        oopsMsg = "Ooops, this shouldn't happen!!"
-
-        # status: a status dict that expresses the status after previous
-        #         calls. The dict contains the fields:
-        #         sz_e0: Search done for elements equal to 0 in e0 until (incl)
-        #                the specified index. Initialise at -1.
-        #         sz_e1: Search done for elements equal to 0 in e1 until (incl)
-        #                the specified index. Initialise at -1.
-        #         e0_z_e1: Expresses whether e0 and e1 were functionally
-        #                  exchanged.
-        #                  - Initialise at 0, which means they were not
-        #                    exchanged.
-        #                  - 1 means the were exchanged because e1 contains
-        #                    one 1 and 3 0's (even though this might hold for e0
-        #                    too)
-        #                  - 2 means that they were exchanged because e1
-        #                    contained a 0 and e0 didn't.
-        #         sp: start looking in the permutation table at index.
-        #             Initialise at 0.
-        status = { 'sz_e0': -1, 'sz_e1': -1, 'e0_z_e1': 0, 'sp': 0 }
-
-        # define e0 and e1 locally to be able to exchange their roll just for
-        # calculating e2 and e3.
-        e0, e1 = this.e0, this.e1
-
-        # Now define e2,..
-        zi    = getZeroIndex(e0)
-        if zi > -1: # if e0 contains a 0 (zero)
-            v2 = getUnitVector(zi)
-            if v2.isParallel(e1, zeroMargin):
-                # exchange e0 and e1 and repeat, since we know that e1 has 3 0's
-                e0, e1 = e1, e0
-                status['e0_z_e1'] = 1
-                zi = getZeroIndex(e0)
-                if zi > -1:
-                    v2 = getUnitVector(zi)
-                    if v2.isParallel(e1, zeroMargin):
-                        # ok, e0 had 3 zeros as well,...
-                        zi = getZeroIndex(e0, zi+1)
-                        if zi > -1:
-                            v2 = getUnitVector(zi)
-                            assert not v2.isParallel(e1, zeroMargin), oopsMsg
-                        else:
-                            assert False, oopsMsg
-                else:
-                    assert False, oopsMsg
-            status['sz_e0'] = zi
-        else:
-            status['sz_e0'] = 3
-            zi = getZeroIndex(e1)
-            if zi > -1:  # if e1 contains a 0 (zero)
-                v2 = getUnitVector(zi)
-                e0, e1 = e1, e
-                status['e0_z_e1'] = 2
-                assert not v2.isParallel(e1, zeroMargin), "Ooops, this shouldn't happen!!"
-                status['sz_e1'] = zi
-            else:
-                vnIni = vec(1/e0[0], 1/e0[1], 1/e0[2], 1/e0[3])
-                possiblePermuations = [
-                    vec( vnIni[0],  vnIni[1], -vnIni[2], -vnIni[3]),
-                    vec( vnIni[0], -vnIni[1],  vnIni[2], -vnIni[3]),
-                    vec(-vnIni[0],  vnIni[1],  vnIni[2], -vnIni[3]),
-                    vec( vnIni[0], -vnIni[1], -vnIni[2],  vnIni[3]), # this might be used later for e3
-                    # I don't think these are necessary:
-                    #vec(-vnIni[0],  vnIni[1], -vnIni[2],  vnIni[3]),
-                    #vec(-vnIni[0], -vnIni[1],  vnIni[2],  vnIni[3])
-                ]
-                v2Found = False
-                i = -1
-                while not v2Found:
-                    i += 1
-                    assert i < len(possiblePermuations), "Oops, more permutations needed"
-                    v2 = possiblePermuations[i]
-                    v2Found = not v2.isParallel(e1, zeroMargin)
-                status['sp'] = i + 1
-
-        # Now the plane spanned by e1 and v2 is orthogonal to e0, as a
-        # consequence the following operation will keep v2 orthogonal to e0:
-        this.e2 = v2.makeOrthogonalTo(e1).normalise()
-
-        # Use cross product for e3:
-        v3 = this.e0.cross(this.e1, this.e2)
-        # Normalisation should not be needed, but improves precision.
-        #print this.__class__, '_setOrthoMatrix: v3', v3
-        # TODO
-        # Prehaps this should only steered by caller by setting hjigh precision.
-        this.e3 = v3.normalise()
-        #print 'e3', this.e3
-
-#        # do something similar with e3:
-#        # The code is partly copied and adjusted. No function is used to keep
-#        # the code readable.
-#        found = lambda v3, e1, e2: not (
-#                v3.isParallel(e1, zeroMargin)
-#                or
-#                v3.isParallel(e2, zeroMargin)
-#            )
-#        v3Found = False
-#        zi = status['sz_e0']
-#        while not v3Found and zi < 3:
-#            zi = getZeroIndex(e0, zi + 1)
-#            if zi > -1: # if e0 contains a 0 (zero)
-#                v3 = getUnitVector(zi)
-#                v3Found = found(v3, e1, this.e2)
-#                print 'v3Found:', v3Found, 'e2', this.e2 , 'v3', v3 
-#            else:
-#                zi = 3
-#        if not v3Found:
-#            # even if status['e0_z_e1'] == 1, it has no use to search for more
-#            # 0's in e1 (old e0), since e0 (old e1) already contained 3 which
-#            # are investigated in the loop above.
-#            if status['e0_z_e1'] == 0:
-#                # switch and investigate
-#                e0, e1 = e1, e0
-#                zi = status['sz_e1']
-#                # TODO: reuse, since the above loop is copied here.
-#                while not v3Found and zi < 3:
-#                    zi = getZeroIndex(e0, zi + 1)
-#                    if zi > -1: # if e0 contains a 0 (zero)
-#                        v3 = getUnitVector(zi)
-#                        v3Found = found(v3, e1, this.e2)
-#                    else:
-#                        zi = 3
-#        if not v3Found:
-#            i = status['sp']
-#            while not v3Found:
-#                i += 1
-#                assert i < len(possiblePermuations), "Oops, more permutations needed"
-#                v3 = vnIni * possiblePermuations[i]
-#                v3Found = found(v3, e1, this.e2)
-
-        # Now the plane spanned by e1 and v3 is orthogonal to e0, as a
-        # consequence the following operation will keep v3 orthogonal to e0:
-        v3 = v3.makeOrthogonalTo(e1)
-        # Similarly
-        # Now the plane spanned by e2 and v3 is orthogonal to e0 and e1, as a
-        # consequence the following operation will keep v3 orthogonal to e0 and
-        # e1:
-        this.e3 = v3.makeOrthogonalTo(this.e2).normalise()
-        this._Mo  = cgtypes.mat4(this.e0, this.e1, this.e2, this.e3)
-        if this._Mo.determinant() < 0:
-            # Oops we created a reflection by switching axes, the handedness is
-            # not preserved. Switch the two axes e0 and e1 and rotate in the
-            # opposite direction.
-            #print "fixing handedness"
-            this._Mo  = cgtypes.mat4(this.e1, this.e0, this.e2, this.e3)
-            this.alpha = -this.alphaOrg
-        #print '---vvv---orthoMatrix---vvv---'
-        #print this._Mo, 'with determinant:', this._Mo.determinant()
-        #print '---^^^---orthoMatrix---^^^---'
-        this._MoT = this._Mo.transpose()
-        this.MoUp2Date = True
-
-    def exchangePlanes(this):
-        if not this.MoUp2Date:
-            this._setOrthoMatrix()
-        # exchange planes (e0, e1) and (e2, e3) with keeping the determinant
-        this.e0, this.e1, this.e2, this.e3 = this.e3, this.e2, this.e0, this.e1
-        this._Mo  = cgtypes.mat4(this.e0, this.e1, this.e2, this.e3)
-        this._MoT = this._Mo.transpose()
-
-    def setMatrix(this):
-        """
-        Calculates and sets the rotation matrix for the current settings.
-        """
-        if not this.MoUp2Date:
-            this._setOrthoMatrix()
-        if not this.MrUp2Date:
-            this._Mr = cgtypes.mat4(1.0)
-            cos = math.cos(this.alpha)
-            sin = math.sin(this.alpha)
-            this._Mr[0, 0] = cos
-            this._Mr[0, 1] = -sin
-            this._Mr[1, 0] = sin
-            this._Mr[1, 1] = cos
-            if this.beta != 0:
-                cos = math.cos(this.beta)
-                sin = math.sin(this.beta)
-                this._Mr[2, 2] = cos
-                this._Mr[2, 3] = -sin
-                this._Mr[3, 2] = sin
-                this._Mr[3, 3] = cos
-            this.MrUp2Date = True
-        this.M = this._Mo * this._Mr * this._MoT
-
-    def getMatrix(this):
-        if not this.MrUp2Date or not this.MoUp2Date:
-            this.setMatrix()
-        return this.M
-
-# TODO continue with: make a nice 4D rotation interface and add this to std view
-# settings. Then convert all older 4D scenes and remove old stuff from Geom3D.
 class SimpleShape:
     dbgPrn = False
     dbgTrace = False
@@ -552,7 +94,8 @@ class SimpleShape:
             drawEdges = True, showUnscaled = True
         )
         this.setProjectionProperties(11.0, 10.0)
-        this.M4 = None # expresses whether the 4D coordinates need to be updated
+        # expresses whether the 4D coordinates need to be updated:
+        this.rot4 = None
         this.projectedTo3D = False
         if this.dbgPrn:
             print '%s.__init__(%s,..)' % (this.__class__, this.name)
@@ -588,9 +131,9 @@ class SimpleShape:
             else: 
                 dict = kwargs
             if 'Vs' in dict and dict['Vs'] != None:
-                this.Vs  = [ cgtypes.vec4(v) for v in dict['Vs'] ]
+                this.Vs  = [ GeomTypes.Vec4(v) for v in dict['Vs'] ]
             if 'Ns' in dict and dict['Ns'] != None:
-                this.Ns  = [ cgtypes.vec4(n) for n in dict['Ns'] ]
+                this.Ns  = [ GeomTypes.Vec4(n) for n in dict['Ns'] ]
                 #assert len(this.Ns) == len(this.Vs)
             if 'radius' in dict and dict['radius'] != None:
                 this.v.radius = dict['radius']
@@ -898,13 +441,12 @@ class SimpleShape:
         """
         Rotate the polychoron by the specified rotation.
 
-        rotation: a rotation of type Geom4D.Rotation.
+        rotation: a rotation of type GeomTypes.Rot4.
         successive: specify if this is applied on any previous transform, i.e.
                     if this is not a new transforma.
         """
-        M = rotation.getMatrix()
-        if not successive or this.M4 == None: this.M4 = M
-        else: this.M4 = M * this.M4
+        if not successive or this.rot4 == None: this.rot4 = rotation
+        else: this.rot4 = rotation * this.rot4
         this.projectedTo3D = False
 
     def rotateInStdPlane(this, plane, angle, successive = False):
@@ -919,28 +461,23 @@ class SimpleShape:
         successive: specify if this is applied on any previous transform, i.e.
                     if this is not a new transforma.
         """
-        c =  math.cos(angle)
-        s = -math.sin(angle)
-        M = cgtypes.mat4(1.0)
-        if   Axis.X & plane:
-            i = 0
-            if   Axis.Y & plane: j = 1
-            elif Axis.Z & plane: j = 2
-            else                    : j = 3
-        elif Axis.Y & plane:
-            i = 1
-            if   Axis.Z & plane: j = 2
-            else                    : j = 3
-        else:
-            i = 2
-            j = 3
-
-        M[i, i] = c
-        M[i, j] = -s
-        M[j, i] = s
-        M[j, j] = c
-        if not successive or this.M4 == None: this.M4 = M
-        else: this.M4 = M * this.M4
+        q0 = None
+        if Axis.X & plane: q0 = Vec4([1, 0, 0, 0])
+        if Axis.Y & plane:
+            if q0 == None:
+                q0 = Vec4([0, 1, 0, 0])
+            else:
+                q1 = Vec4([0, 1, 0, 0])
+        if Axis.Z & plane:
+            if q0 == None:
+                q0 = Vec4([0, 0, 1, 0])
+            else:
+                q1 = Vec4([0, 0, 1, 0])
+        if Axis.W & plane:
+            q1 = Vec4([0, 0, 0, 1])
+        r = GeomTypes.Rot4(axialPlane = (q0, q1), angle = angle)
+        if not successive or this.rot4 == None: this.rot4 = r
+        else: this.rot4 = r * this.rot4
         this.projectedTo3D = False
 
     def projectVsTo3D(this, Vs4D):
@@ -1013,11 +550,11 @@ class SimpleShape:
             except AttributeError:
                 pass
             Ns3D = []
-            if this.M4 != None:
-                Vs4D = [this.M4*v for v in this.Vs]
+            if this.rot4 != None:
+                Vs4D = [this.rot4*v for v in this.Vs]
             # TODO fix Ns.. if needed..
             #    if this.Ns != []:cleanUp
-            #        Ns4D = [this.M4*n for n in this.Ns]
+            #        Ns4D = [this.rot4*n for n in this.Ns]
             else:
                 Vs4D = [v for v in this.Vs]
             Vs3D = this.projectVsTo3D(Vs4D)
@@ -1127,11 +664,11 @@ class SimpleShape:
             except AttributeError:
                 pass
             Ns3D = []
-            if this.M4 != None:
-                Vs4D = [this.M4*v for v in this.Vs]
+            if this.rot4 != None:
+                Vs4D = [this.rot4*v for v in this.Vs]
             # TODO fix Ns.. if needed..
             #    if this.Ns != []:
-            #        Ns4D = [this.M4*n for n in this.Ns]
+            #        Ns4D = [this.rot4*n for n in this.Ns]
             else:
                 Vs4D = [v for v in this.Vs]
             Vs3D = this.projectVsTo3D(Vs4D)
@@ -1219,6 +756,8 @@ if __name__ == '__main__':
 
     n = w.normalise()
     
+    # TODO Move some of these tests to GeomTypes, any relevant?
+
     # check if n is still of type vec and not cgtypes.vec4 (which doesn't have
     # a isParallel)
     if not n.isParallel(w):
