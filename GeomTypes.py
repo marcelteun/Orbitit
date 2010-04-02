@@ -60,9 +60,9 @@ class Vec(tuple):
         try:
             r = len(v) == len(w)
         except TypeError:
-            print 'info: comparing different types in Vec (%s and %s)' % (
-                    v.__class__.__name__, w.__class__.__name__
-                )
+            #print 'info: comparing different types in Vec (%s and %s)' % (
+            #        v.__class__.__name__, w.__class__.__name__
+            #    )
             return False
         for a, b in zip(v, w):
             if not r: break
@@ -877,6 +877,130 @@ class DoubleRot4(Transform4):
         return Transform4.__new__(this, [ r1[0]*r0[0], r0[1]*r1[1] ])
 
 # TODO implement Geom3D.Line3D here (in this file)
+
+# forced to use some matrix functions and don't want to add a dependency on a
+# big python package.
+
+class Mat(list):
+    def __init__(this, m = None, id = 3):
+        if m == None:
+            m = []
+            assert id > 0
+            for i in range(id):
+                v = []
+                for j in range(id):
+                    if i == j: v.append(1)
+                    else:      v.append(0)
+                m.append(Vec(v))
+        this.rows = len(m)
+        assert this.rows > 0
+        this.cols = len(m[0])
+        for row in m:
+            assert isinstance(row, Vec)
+            assert len(row) == this.cols
+        list.__init__(this, m)
+
+    def __str__(m):
+        s = ''
+        for row in m: s = '%s\n%s' % (s, str(row))
+        return s
+
+    def row(m, i):
+        return m[i]
+
+    def col(m, i):
+        return Vec([row[i] for row in m])
+
+    def transpose(m):
+        return Mat([m.col(i) for i in range(m.cols)])
+
+    T = transpose
+
+    def deleteRow(m, i):
+        # don't use m.pop(i), it changes m, while the result should be returned
+        # instead.
+        if i < 0: i += m.rows
+        assert i >= 0
+        n = m[0:i]
+        n.extend(m[i+1:])
+        return Mat(n)
+
+    def deleteCol(m, i):
+        if i < 0: i += m.cols
+        assert i >= 0
+        n = []
+        for row in m:
+            r = list(row[0:i])
+            r.extend(list(row[i+1:]))
+            n.append(Vec(r))
+        return Mat(n)
+
+    def replaceCol(m, i, v):
+        assert len(v) == m.rows
+        if i < 0: i += m.cols
+        assert i >= 0
+        n = []
+        for k, row in zip(range(m.rows), m):
+            r = list(row[0:i])
+            r.append(v[k])
+            r.extend(list(row[i+1:]))
+            n.append(Vec(r))
+        return Mat(n)
+
+    def minor(m, i, j):
+        return m.deleteRow(i).deleteCol(j).det()
+
+    def orthogonal(m):
+        return abs(m.det()) == 1
+
+    def det(m):
+        assert m.rows == m.cols
+        if m.rows == 1: return m[0][0]
+        #else:
+        r = 0
+        sign = 1
+        for i, e in zip(range(m.cols), m[0]):
+            r += sign * m[0][i] * m.minor(0, i)
+            sign = -sign
+        return r
+
+    def __mul__(m, n):
+        if isinstance(n, Mat):
+            assert m.rows == n.cols
+            assert n.rows == m.cols
+            nT = n.T()
+            return Mat([ Vec([row * col for col in nT]) for row in m ])
+        elif isinstance(n, Vec):
+            assert m.rows == len(n)
+            return Vec([row * n for row in m])
+        else:
+            assert False, 'oops, unknown type of object to multiply matrix: %s.' % n
+
+    def inverse(m):
+        if m.orthogonal(): return m.T()
+        else:
+            # the hard way:
+            det = m.det()
+            sign = 1
+            n = []
+            for i in range(m.rows):
+                r = []
+                for j in range(m.cols):
+                    r.append(sign * m.minor(i, j) / det)
+                    sign = -sign
+                n.append(Vec(r))
+        return Mat(n).T()
+
+    def solve(m, v):
+        # use Cramer's method
+        assert len(v) == m.rows
+        det = m.det()
+        return Vec([
+                m.replaceCol(i, v).det() / det for i in range(m.cols)
+            ])
+
+    def stdRowShape(m, v):
+        pass
 
 if __name__ == '__main__':
 
@@ -1875,5 +1999,48 @@ if __name__ == '__main__':
         r = r0 * v
         x = v
         assert eq(ra, 0) or eq(ra, 2*math.pi), "%d: expected: %s, got: %s" % (i, x, r)
+
+    #####################
+    # Mat
+    #####################
+    m = Mat([Vec([1, 2, 3]),
+        Vec([0, 2, 1]),
+        Vec([1, -1, 3])
+      ])
+
+    l = m.rows
+    w = m.cols
+
+    assert m.det() == m.T().det()
+    assert m == m.T().T()
+
+    t = m.T()
+
+    for i in range(l):
+        r = m.deleteRow(i)
+        assert r.rows == l-1
+        assert r.cols == w
+        assert r == m.deleteRow(-(l-i))
+        n = t.T()
+        n.pop(i)
+        assert r == n
+
+    for i in range(w):
+        r = m.deleteCol(i)
+        assert r.rows == l
+        assert r.cols == w-1
+        assert r == m.deleteCol(-(w-i))
+        t = m.T()
+        t.pop(i)
+        assert r == t.T()
+
+    # don't want to test an orthogonal matrix,
+    # since then the inverse method calls: det, deleteRow, -Col, and transpose.
+    assert not m.orthogonal()
+    mI = m.inverse()
+    assert m * mI == Mat()
+    assert mI * m == Mat()
+    b = Vec([1, 2, 3])
+    assert m.solve(b) == mI * b
 
     print 'success!'

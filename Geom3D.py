@@ -30,7 +30,6 @@ import PS
 import Scenes3D
 import wx
 import os
-from cgkit import cgtypes
 import GeomTypes
 import isometry
 
@@ -545,14 +544,14 @@ class Line3D(Line):
         a length of 3 and may be vec.
         """
         # make sure to have vec types internally
-        p0 = vec(p0)
+        p0 = GeomTypes.Vec3(p0)
         if p1 == None:
             assert v != None
-            v = vec(v)
+            v = GeomTypes.Vec3(v)
             Line.__init__(this, p0, v = v, d = 3, isSegment = isSegment)
         else:
             assert v == None
-            p1 = vec(p1)
+            p1 = GeomTypes.Vec3(p1)
             Line.__init__(this, p0, p1, d = 3, isSegment = isSegment)
 
     # redefine to get vec3 types:
@@ -641,13 +640,13 @@ class Plane:
         assert(not P0 == P2)
         assert(not P1 == P2)
         this.N = this.norm(P0, P1, P2)
-        this.D = -this.N * vec(P0)
+        this.D = -this.N * GeomTypes.Vec3(P0)
 
     def norm(this, P0, P1, P2):
         """calculate the norm for the plane
         """
-        v1 = vec(P0) - vec(P1)
-        v2 = vec(P0) - vec(P2)
+        v1 = GeomTypes.Vec3(P0) - GeomTypes.Vec3(P1)
+        v2 = GeomTypes.Vec3(P0) - GeomTypes.Vec3(P2)
         return v1.cross(v2).normalize()
 
     def intersectWithPlane(this, plane, margin = defaultFloatMargin):
@@ -662,8 +661,8 @@ class Plane:
         if Veq(N0, N1, margin) or Veq(N0, -N1, margin):
             return None
         V = N0.cross(N1)
-        M = cgtypes.mat3(N0[0], N0[1], N0[2], N1[0], N1[1], N1[2], V[0], V[1], V[2])
-        Q = M.inverse() * cgtypes.vec3(-this.D, -plane.D, 0)
+        M = GeomTypes.Mat([N0, N1, V])
+        Q = M.solve(GeomTypes.Vec([-this.D, -plane.D, 0]))
         return Line3D(Q, v = V)
 
     def toStr(this, precision = 2):
@@ -1712,7 +1711,7 @@ class SimpleShape:
                 Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
                 # add vertices to vertex array
                 for v in this.Vs:
-                    Vs.append(Mrot*vec(v))
+                    Vs.append(Mrot*v)
                     pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
                     #if debug: print 'added to Vs', Vs[-1]
             else:

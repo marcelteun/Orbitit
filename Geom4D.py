@@ -756,7 +756,7 @@ if __name__ == '__main__':
 
     n = w.normalise()
     
-    # TODO Move some of these tests to GeomTypes, any relevant?
+    # TODO Move some of these tests to GeomTypes, after cgtypes rm, any relevant?
 
     # check if n is still of type vec and not cgtypes.vec4 (which doesn't have
     # a isParallel)
