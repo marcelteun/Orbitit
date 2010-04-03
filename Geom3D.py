@@ -661,6 +661,7 @@ class Plane:
         if Veq(N0, N1, margin) or Veq(N0, -N1, margin):
             return None
         V = N0.cross(N1)
+        #V = V.normalise()
         M = GeomTypes.Mat([N0, N1, V])
         Q = M.solve(GeomTypes.Vec([-this.D, -plane.D, 0]))
         return Line3D(Q, v = V)

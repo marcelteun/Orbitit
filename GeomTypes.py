@@ -960,7 +960,8 @@ class Mat(list):
         r = 0
         sign = 1
         for i, e in zip(range(m.cols), m[0]):
-            r += sign * m[0][i] * m.minor(0, i)
+            if not eq(m[0][i], 0):
+                r += sign * m[0][i] * m.minor(0, i)
             sign = -sign
         return r
 
