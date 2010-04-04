@@ -955,6 +955,7 @@ class Mat(list):
 
     def det(m):
         assert m.rows == m.cols
+        if m.rows == 2: return m[0][0] * m[1][1] - m[0][1]*m[1][0]
         if m.rows == 1: return m[0][0]
         #else:
         r = 0

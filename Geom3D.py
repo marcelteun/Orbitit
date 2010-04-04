@@ -649,21 +649,33 @@ class Plane:
         v2 = GeomTypes.Vec3(P0) - GeomTypes.Vec3(P2)
         return v1.cross(v2).normalize()
 
-    def intersectWithPlane(this, plane, margin = defaultFloatMargin):
+    def intersectWithPlane(this, plane):
         """Calculates the intersections of 2 planes.
 
         If the planes are parallel None is returned (even if the planes define
         the same plane) otherwise a line is returned.
         """
-        # See bottom of page 86 of Maths for 3D Game Programming.
         N0 = this.N
         N1 = plane.N
-        if Veq(N0, N1, margin) or Veq(N0, -N1, margin):
+        if N0 == N1 or N0 == -N1:
             return None
         V = N0.cross(N1)
         #V = V.normalise()
-        M = GeomTypes.Mat([N0, N1, V])
-        Q = M.solve(GeomTypes.Vec([-this.D, -plane.D, 0]))
+        # for toPsPiecesStr this.N == [0, 0, 1]; hanlde more efficiently.
+        if N0 == GeomTypes.Vec([0, 0, 1]):
+            # simplified situation from below:
+            z = -this.D
+            M = GeomTypes.Mat([GeomTypes.Vec(N1[0:2]), GeomTypes.Vec(V[0:2])])
+            #print 'M', M
+            #print 'V', GeomTypes.Vec([-plane.D - N1[2]*z, -V[2]*z])
+            Q = M.solve(GeomTypes.Vec([-plane.D - N1[2]*z, -V[2]*z]))
+            Q = GeomTypes.Vec([Q[0], Q[1], z])
+        else:
+            # See bottom of page 86 of Maths for 3D Game Programming.
+            M = GeomTypes.Mat([N0, N1, V])
+            #print 'M', M
+            #print 'V', GeomTypes.Vec([-this.D, -plane.D, 0])
+            Q = M.solve(GeomTypes.Vec([-this.D, -plane.D, 0]))
         return Line3D(Q, v = V)
 
     def toStr(this, precision = 2):
@@ -1690,6 +1702,8 @@ class SimpleShape:
             print '********toPsPiecesStr********'
             for i in range(len(this.Vs)):
                 print 'V[', i, '] =', this.Vs[i]
+        margin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
+        GeomTypes
         for i in faceIndices:
             Vs = []
             pointsIn2D = []
@@ -1759,7 +1773,7 @@ class SimpleShape:
 
                 # line of intersection:
                 if not facesShareAnEdge:
-                    Loi3D = basePlane.intersectWithPlane(intersectingPlane, margin)
+                    Loi3D = basePlane.intersectWithPlane(intersectingPlane)
                 if facesShareAnEdge:
                     if debug: print 'Intersecting face shares an edge'
                     pass
@@ -1776,8 +1790,8 @@ class SimpleShape:
                     if debug:
                         if debug: print 'intersectingPlane', intersectingPlane
                         if debug: print 'Loi3D', Loi3D
-                    assert eq(Loi3D.v[2], 0, margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
-                    assert eq(Loi3D.p[2], zBaseFace, margin), "all intersection lines should ly on z==%f, but z differs %f" % (
+                    assert eq(Loi3D.v[2], 0, 100 * margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
+                    assert eq(Loi3D.p[2], zBaseFace, 100 * margin), "all intersection lines should ly on z==%f, but z differs %f" % (
                                     zBaseFace, zBaseFace-Loi3D.p[2]
                                 )
                     # loi2D = lineofintersection
@@ -1861,6 +1875,9 @@ class SimpleShape:
                             facetSegmentNr += 1
             PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
 
+        # restore margin
+        margin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
+
         return PsDoc.toStr()
 
     def intersectFacets(this,
@@ -1928,6 +1945,7 @@ class SimpleShape:
         debug = True
         debug = False
         if debug: print '********intersectFacets********'
+        margin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
         for i in faceIndices:
             # TODO: problem Vs is calculated per face...
             #       clean up later...?
@@ -2017,7 +2035,7 @@ class SimpleShape:
                 if facesShareAnEdge:
                     if debug: print 'Intersecting face shares an edge'
                 else:
-                    Loi3D = basePlane.intersectWithPlane(intersectingPlane, margin)
+                    Loi3D = basePlane.intersectWithPlane(intersectingPlane)
                     if Loi3D == None:
                         if debug: print 'No intersection for face'
                         # the face is parallel or lies in the plane
