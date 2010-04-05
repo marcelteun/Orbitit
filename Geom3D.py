@@ -1876,7 +1876,7 @@ class SimpleShape:
             PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
 
         # restore margin
-        margin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
+        GeomTypes.eqFloatMargin = margin
 
         return PsDoc.toStr()
 
@@ -2162,6 +2162,9 @@ class SimpleShape:
                         yOffset, precision = precision
                     )
                 )
+
+        # restore margin
+        GeomTypes.eqFloatMargin = margin
 
     def getDome(this, level = 2):
         shape = None

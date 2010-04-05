@@ -323,10 +323,17 @@ class Transform3(tuple):
 
     def __eq__(t, u):
         if not isinstance(u, Transform3): return False
-        if t.isRot() and u.isRot: return t.__eqRot(u)
-        elif t.isRefl() and u.isRefl: return t.__eqRefl(u)
-        elif t.isRotInv() and u.isRotInv: return t.__eqRotInv(u)
+        if t.isRot() and u.isRot:
+            #if t.__eqRot(u): print 'equal Rot:', t, u
+            return t.__eqRot(u)
+        elif t.isRefl() and u.isRefl:
+            #if t.__eqRefl(u): print 'equal Refl:', t, u
+            return t.__eqRefl(u)
+        elif t.isRotInv() and u.isRotInv:
+            #if t.__eqRotInv(u): print 'equal RotInv:', t, u
+            return t.__eqRotInv(u)
         else:
+            #print 'fallback', (t[0] == u[0] and t[1] == u[1])
             return (t[0] == u[0] and t[1] == u[1])
 
     def __ne__(t, u):
@@ -346,15 +353,15 @@ class Transform3(tuple):
         if t.isRot(): return t.angleRot()
         if t.isRotInv(): return t.angleRotInv()
         assert False, (
-            'oops, unknown angle; transform %s\n' +
-            'neither a rotation, nor a rotary-inversion (-reflection)' % t)
+            'oops, unknown angle; transform %s\n' % str(t) +
+            'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def axis(t):
         if t.isRot(): return t.axisRot()
         if t.isRotInv(): return t.axisRotInv()
         assert False, (
-            'oops, unknown angle; transform %s\n' +
-            'neither a rotation, nor a rotary-inversion (-reflection)' % t)
+            'oops, unknown angle; transform %s\n' % str(t) +
+            'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def matrix(t):
         # TODO: test this
@@ -362,16 +369,16 @@ class Transform3(tuple):
         if t.isRot(): return t.matrixRot()
         if t.isRefl(): return t.matrixRefl()
         assert False, (
-            'oops, unknown matrix; transform %s\n' +
-            'not a rotation' % t)
+            'oops, unknown matrix; transform %s\n' % str(t) +
+            'not a rotation')
 
     def inverse(t):
         if t.isRot(): return t.inverseRot()
         if t.isRefl(): return t.inverseRefl()
         if t.isRotInv(): return t.inverseRotInv()
         assert False, (
-            'oops, unknown matrix; transform %s\n' +
-            'not a rotation' % t)
+            'oops, unknown matrix; transform %s\n' % str(t) +
+            'not a rotation')
 
     ## ROTATION specific functions:
     def isRot(t):
@@ -509,7 +516,7 @@ class Transform3(tuple):
         return t.I().isRot() and not t.isRefl()
 
     def __eqRotInv(t, u):
-        return t.I().isRot() == u.I().isRot()
+        return t.I().__eqRot(u.I())
 
     def __strRotInv(t):
         r = t.I()
