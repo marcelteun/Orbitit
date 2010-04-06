@@ -79,6 +79,7 @@ class Shape(Geom3D.SymmetricShape):
                     R3,          R3 * R0
                 ],
 #            oppositeIsometry = GeomTypes.I,
+            unfoldOrbit = True,
             name = 'FoldedRegHeptS4xI'
         )
         this.heptagon = Heptagons.RegularHeptagon()

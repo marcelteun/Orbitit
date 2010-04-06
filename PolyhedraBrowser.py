@@ -36,8 +36,12 @@ from OpenGL.GLU import *
 from OpenGL.GL import *
 
 # TODO
-# 20090111
-# class PolyhderaBrowser.FloatInput should set some default pars if not set by creator.
+# 20100405: clean up: get rid of Geom3D.SymmetricShape.unfoldOrbit parameter
+# introduced for legacy code. The new way by using glMultMatrix is better, since
+# it takes care of the vertex normals in the correct way for opposite
+# isometries. In that case the seperate opposite isometries parameter is not
+# needed anymore either...
+#
 # 20090911:
 # To fix the transparency: order the faces...: it became much better for the 24
 # cell after putting the outer cell last.
@@ -63,6 +67,7 @@ from OpenGL.GL import *
 # TODO: 
 # - 20090302: fix glInit and initGl confusion. Both set lights, one in canvas
 #             one in shape. Be consistent.
+#             20100406: setup through GUI.
 # - 20090222: Shape classes in Geom3D has parameter: colors = [([], [])].
 #             This should be split into 2 separate pars. Sometimes you just want
 #             to change the colours, sometimes you just want to change which

@@ -2317,6 +2317,7 @@ class SymmetricShape(CompoundShape):
         Vs, Fs, Es = [], Ns = [],
         colors = [([], [])],
         directIsometries = [E], oppositeIsometry = None,
+        unfoldOrbit = False,
         name = "SymmetricShape"
     ):
         """
@@ -2342,6 +2343,10 @@ class SymmetricShape(CompoundShape):
         oppositeIsometry: an opposite isometry that together with all the direct
                           isometries map the base element onto all elements.
                           See setIsoOp for more info.
+        unfoldOrbit: if this is set to true, the shape will be unfolded into a
+                     simple shape for each glDraw (if not yet done) instead of
+                     using glPushMatrix-glMultMatrix-glPopMatrix. This option is
+                     provided for legacy scenes.
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
@@ -2356,11 +2361,13 @@ class SymmetricShape(CompoundShape):
             print '  ]'
         # this is before creating the base shape, since it check "colors"
         this.baseShape = SimpleShape(Vs, Fs, Es, Ns = Ns, colors = colors[0])
+        this.baseShape.recreateEdges()
         CompoundShape.__init__(this, [this.baseShape], name = name)
         this.showBaseOnly = False
         this.setIsoOp(directIsometries, oppositeIsometry)
         this.setFaceColorsPerIsometry(colors)
-        this.orbit()
+        this.unfoldOrbit = unfoldOrbit
+        if unfoldOrbit: this.orbit()
 
     def setIsoOp(this,
         directIsometries, oppositeIsometry = None
@@ -2617,9 +2624,16 @@ class SymmetricShape(CompoundShape):
         if this.showBaseOnly:
             this.baseShape.glDraw()
         else:
-            if this.orbitNeeded:
-                this.orbit()
-            CompoundShape.glDraw(this)
+            if this.unfoldOrbit:
+                if this.orbitNeeded:
+                    this.orbit()
+                CompoundShape.glDraw(this)
+            else:
+                for isom in this.isometryOperations['direct']:
+                    glPushMatrix()
+                    glMultMatrixd(isom.matrix4())
+                    this.baseShape.glDraw()
+                    glPopMatrix()
 
 class Scene():
     """

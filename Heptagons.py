@@ -485,6 +485,7 @@ class EqlHeptagonShape(Geom3D.SymmetricShape):
             #colors = [()]
             directIsometries = directIsometries,
             oppositeIsometry = oppositeIsometry,
+            unfoldOrbit = True,
             name = name)
         this.showKite      = True
         this.showHepta     = False
