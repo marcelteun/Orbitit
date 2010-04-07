@@ -686,6 +686,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
         this.addSetupGui()
+        this.addStabiliserGui()
 
     def getSymmetry(this):
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
@@ -715,8 +716,31 @@ class SymmetrySelect(wx.StaticBoxSizer):
             this.oriSizer.Add(this.oriGuis[-1], 1, wx.EXPAND)
         this.Add(this.oriSizer, 1, wx.EXPAND)
 
+    def addStabiliserGui(this):
+        try:
+                for gui in this.stabGuis:
+                    gui.Destroy()
+                this.stabGuiBox.Destroy()
+                this.Remove(this.stabSizer)
+        except AttributeError: pass
+        this.stabGuiBox = wx.StaticBox(this.panel, label = 'Stabiliser Symmetry')
+        this.stabSizer = wx.StaticBoxSizer(this.stabGuiBox, wx.VERTICAL)
+        this.stabGuis = []
+        sym = this.getSymmetry()
+        this.stabStrList = sym.subgroups.keys()
+        # TODO: sort
+        this.stabGuis.append(
+            wx.ListBox(this.panel, wx.ID_ANY,
+                choices = this.stabStrList,
+                style = wx.LB_SINGLE)
+        )
+        this.stabGuis[-1].SetSelection(0)
+        this.stabSizer.Add(this.stabGuis[-1], 1, wx.EXPAND)
+        this.Add(this.stabSizer, 1, wx.EXPAND)
+
     def onSetSymmetry(this, e):
         this.addSetupGui()
+        this.addStabiliserGui()
         this.panel.Layout()
 
     def GetSelected(this):
@@ -736,7 +760,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return sym
 
     def Destroy(this):
-        for box in this.Boxes:
+        for box in this.Boxes + this.oriGuis + this.stabGuis:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError: pass

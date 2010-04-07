@@ -149,6 +149,10 @@ class Set(set):
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
         return result
 
+    def subgroup(this, name):
+        if this.subgroups['E'] == 1: this.genSubgroups()
+        return this.subgroups[name]
+
 def setup(**kwargs): return kwargs
 
 class Cn(Set):
@@ -188,10 +192,21 @@ class Cn(Set):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
 
+    #TODO
+    subgroups = {'E': 1}
+
+    def genSubgroups(this):
+        this.orientedSubgroups = {'E': this}
+
 class E(Set):
     initPars = []
     def __init__(this, isometries = None, setup = {}):
             Set.__init__(this, [GeomTypes.E])
+
+    subgroups = {'E': 1}
+
+    def genSubgroups(this):
+        this.orientedSubgroups = {'E': this}
 
 C1 = E
 
@@ -199,6 +214,17 @@ class ExI(Set):
     initPars = []
     def __init__(this, isometries = None, setup = {}):
             Set.__init__(this, [GeomTypes.E, GeomTypes.I])
+
+    subgroups = {
+                'ExI': 2,
+                'E'  : 1
+            }
+
+    def genSubgroups(this):
+        this.orientedSubgroups = {
+                'ExI': this,
+                'E':   E()
+            }
 
 C1xI = ExI
 
@@ -259,6 +285,10 @@ def generateA4O3(D2HalfTurns):
     # print 'R5_2_3', R4_2_3
     return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
 
+# Note:
+# For the classes below holds that the subgroups func will not work if the class
+# was created with the isometries parameter.
+
 class A4(Set):
     initPars = [
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
@@ -300,6 +330,25 @@ class A4(Set):
                     H0, H1, H2,
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2
                 ])
+            # used for subgroups
+            this.H0, this.H1 = H0, H1
+
+    subgroups = {
+            'A4': 12,
+            'D2':  4,
+            'C3':  3,
+            'D1':  2,
+            'E':   1
+        }
+
+    def genSubgroups(this):
+        this.orientedSubgroups = {
+            'A4':       this,
+            'D2':       'TODO',
+            'C3':       'TODO',
+            'D1':       'TODO',
+            'E':        E()
+        }
 
 class A4xI(A4):
     initPars = [
@@ -325,7 +374,37 @@ class A4xI(A4):
             # TODO: more asserts?
             Set.__init__(this, isometries)
         else:
-            Set.__init__(this, A4(setup = setup) * ExI())
+            a4 = A4(setup = setup)
+            Set.__init__(this, a4 * ExI())
+            this.H0, this.H1 = a4.H0, a4.H1
+
+    subgroups = {
+            'A4xI': 24,
+            'A4':   12,
+            'D2xI':  8,
+            'C3xI':  6,
+            'D2':    4,
+            'D1xI':  4,
+            'C2xI':  4,
+            'C3':    3,
+            'D1':    2,
+            'E':     1
+        }
+
+    def genSubgroups(this):
+        a4 = A4(setup = {'o2axis0': this.H0, 'o2axis1': this.H1})
+        this.orientedSubgroups = {
+            'A4xI':     this,
+            'A4':       a4,
+            'D2xI':     'TODO',
+            'C3xI':     'TODO',
+            'D2':       a4.subgroup['D2'],
+            'D1xI':     'TODO',
+            'C2xI':     'TODO',
+            'C3':       a4.subgroup['C3'],
+            'D1':       a4.subgroup['D1'],
+            'E':        a4.subgroup['E']
+        }
 
 class S4(Set):
     initPars = [
@@ -397,7 +476,38 @@ class S4(Set):
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2,
                     h0, h1, h2, h3, h4, h5
                 ])
+            # used for subgroups
+            this.q0_2, this.q1_2 = q0_2, q1_2
 
+    subgroups = {
+            'S4':   24,
+            'A4':   12,
+            'D4':   8,
+            'D3':   6,
+            'D2h':  4,
+            'D2q':  4,
+            'C4':   4,
+            'C3':   3,
+            'D1':   2,
+            'C2':   2,
+            'E':    1
+        }
+
+    def genSubgroups(this):
+        a4 = A4(setup = {'o2axis0': this.q0_2, 'o2axis1': this.q1_2})
+        this.orientedSubgroups = {
+            'S4':       this,
+            'A4':       a4,
+            'D4':       'TODO',
+            'D3':       'TODO',
+            'D2h':      'TODO',
+            'D2q':      a4.subgroup['D2'],
+            'C4':       'TODO',
+            'C3':       a4.subgroup['C3'],
+            'D1':       a4.subgroup['D1'],
+            'C2':       'TODO',
+            'E':        a4.subgroup['E']
+        }
 
 if __name__ == '__main__':
 
