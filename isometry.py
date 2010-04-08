@@ -54,7 +54,7 @@ class Set(set):
         # rotation Rot * Set
         return Set([o * e for e in this])
 
-    def generateSubgroup(this, o):
+    def subgroup(this, o):
         if isinstance(o, GeomTypes.Transform3):
             # generate the quotient set THIS / o
             assert o in this, "Generator of sub-group should be part of group"
@@ -72,7 +72,7 @@ class Set(set):
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
         if (len(o) > len(this)): return o.__div__(this)
-        o = this.generateSubgroup(o)
+        o = this.subgroup(o)
         assert len(o) <= len(this)
         # use a list of sets, since sets are unhashable
         quotientSet = []
@@ -80,13 +80,12 @@ class Set(set):
         foundSoFar = Set([])
         for te in this:
             q = te * o
-            # quotientset: either all or no elements in q have been found before
-            # get one element
-            for e in q: break
-            if e not in foundSoFar:
+            if q.getOne() not in foundSoFar:
                 quotientSet.append(q)
                 foundSoFar = foundSoFar.union(q)
         return quotientSet
+
+    quotientSet = __div__
 
     def __rdiv__(this, o):
         #  subgroup * this: left quotient set
@@ -98,7 +97,11 @@ class Set(set):
         #print this.__class__.__name__, '__contains__'
         for e in this:
             if e == o:
-                #print 'e == o', e, o
+                #print 'e == o'
+                #print '  - with e:', e
+                #print '           ', e.__repr__()
+                #print '  - with o:', o
+                #print '           ', o.__repr__()
                 return True
         return False
 
@@ -110,6 +113,9 @@ class Set(set):
     def update(this, o):
         for e in o:
             this.add(e)
+
+    def getOne(this):
+        for e in this: return e
 
     def __str__(this):
         s = '%s = {' % this.__class__.__name__
@@ -149,11 +155,22 @@ class Set(set):
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
         return result
 
-    def subgroup(this, name):
-        if this.subgroups['E'] == 1: this.genSubgroups()
-        return this.subgroups[name]
-
 def setup(**kwargs): return kwargs
+
+class E(Set):
+    initPars = []
+    def __init__(this, isometries = None, setup = {}):
+            Set.__init__(this, [GeomTypes.E])
+
+C1 = E
+
+class ExI(Set):
+    initPars = []
+    def __init__(this, isometries = None, setup = {}):
+            Set.__init__(this, [GeomTypes.E, GeomTypes.I])
+
+
+C1xI = ExI
 
 class Cn(Set):
     initPars = [
@@ -191,42 +208,6 @@ class Cn(Set):
             for i in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
-
-    #TODO
-    subgroups = {'E': 1}
-
-    def genSubgroups(this):
-        this.orientedSubgroups = {'E': this}
-
-class E(Set):
-    initPars = []
-    def __init__(this, isometries = None, setup = {}):
-            Set.__init__(this, [GeomTypes.E])
-
-    subgroups = {'E': 1}
-
-    def genSubgroups(this):
-        this.orientedSubgroups = {'E': this}
-
-C1 = E
-
-class ExI(Set):
-    initPars = []
-    def __init__(this, isometries = None, setup = {}):
-            Set.__init__(this, [GeomTypes.E, GeomTypes.I])
-
-    subgroups = {
-                'ExI': 2,
-                'E'  : 1
-            }
-
-    def genSubgroups(this):
-        this.orientedSubgroups = {
-                'ExI': this,
-                'E':   E()
-            }
-
-C1xI = ExI
 
 def generateD2(o2axis0, o2axis1):
     """
@@ -285,10 +266,6 @@ def generateA4O3(D2HalfTurns):
     # print 'R5_2_3', R4_2_3
     return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
 
-# Note:
-# For the classes below holds that the subgroups func will not work if the class
-# was created with the isometries parameter.
-
 class A4(Set):
     initPars = [
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
@@ -330,25 +307,6 @@ class A4(Set):
                     H0, H1, H2,
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2
                 ])
-            # used for subgroups
-            this.H0, this.H1 = H0, H1
-
-    subgroups = {
-            'A4': 12,
-            'D2':  4,
-            'C3':  3,
-            'D1':  2,
-            'E':   1
-        }
-
-    def genSubgroups(this):
-        this.orientedSubgroups = {
-            'A4':       this,
-            'D2':       'TODO',
-            'C3':       'TODO',
-            'D1':       'TODO',
-            'E':        E()
-        }
 
 class A4xI(A4):
     initPars = [
@@ -376,35 +334,6 @@ class A4xI(A4):
         else:
             a4 = A4(setup = setup)
             Set.__init__(this, a4 * ExI())
-            this.H0, this.H1 = a4.H0, a4.H1
-
-    subgroups = {
-            'A4xI': 24,
-            'A4':   12,
-            'D2xI':  8,
-            'C3xI':  6,
-            'D2':    4,
-            'D1xI':  4,
-            'C2xI':  4,
-            'C3':    3,
-            'D1':    2,
-            'E':     1
-        }
-
-    def genSubgroups(this):
-        a4 = A4(setup = {'o2axis0': this.H0, 'o2axis1': this.H1})
-        this.orientedSubgroups = {
-            'A4xI':     this,
-            'A4':       a4,
-            'D2xI':     'TODO',
-            'C3xI':     'TODO',
-            'D2':       a4.subgroup['D2'],
-            'D1xI':     'TODO',
-            'C2xI':     'TODO',
-            'C3':       a4.subgroup['C3'],
-            'D1':       a4.subgroup['D1'],
-            'E':        a4.subgroup['E']
-        }
 
 class S4(Set):
     initPars = [
@@ -476,38 +405,33 @@ class S4(Set):
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2,
                     h0, h1, h2, h3, h4, h5
                 ])
-            # used for subgroups
-            this.q0_2, this.q1_2 = q0_2, q1_2
 
-    subgroups = {
-            'S4':   24,
-            'A4':   12,
-            'D4':   8,
-            'D3':   6,
-            'D2h':  4,
-            'D2q':  4,
-            'C4':   4,
-            'C3':   3,
-            'D1':   2,
-            'C2':   2,
-            'E':    1
-        }
+E.subgroups = [E]
+ExI.subgroups = [ExI, E]
+Cn.subgroups = [Cn, E]
 
-    def genSubgroups(this):
-        a4 = A4(setup = {'o2axis0': this.q0_2, 'o2axis1': this.q1_2})
-        this.orientedSubgroups = {
-            'S4':       this,
-            'A4':       a4,
-            'D4':       'TODO',
-            'D3':       'TODO',
-            'D2h':      'TODO',
-            'D2q':      a4.subgroup['D2'],
-            'C4':       'TODO',
-            'C3':       a4.subgroup['C3'],
-            'D1':       a4.subgroup['D1'],
-            'C2':       'TODO',
-            'E':        a4.subgroup['E']
-        }
+# Dn = D2, D1
+# Cn = C3
+A4.subgroups = [A4,
+        #Dn,
+        Cn, E
+    ]
+
+# DnxI = D2xI, D1xI
+# CnxI = C3xI, C2xI
+# Dn = D2, D1
+# Cn = C3
+A4xI.subgroups = [A4xI, A4,
+        #DnxI, CnxI, Dn,
+        Cn, E
+    ]
+
+# Dn = D4, D3, D2 (2x), D1
+# Cn = C4, C3, C2
+S4.subgroups = [S4, A4,
+        #Dn,
+        Cn, E
+    ]
 
 if __name__ == '__main__':
 
@@ -623,7 +547,7 @@ if __name__ == '__main__':
     assert len(d2) == 4
     # print 'has a subgroup D2:'
     # print d2
-    print 'test quatient set: A4/D2',
+    print 'test quotient set: A4/D2',
     q = a4 / d2
     # print 'which defines a right quotient set s = ['
     for s in q:

@@ -323,18 +323,19 @@ class Transform3(tuple):
 
     def __eq__(t, u):
         if not isinstance(u, Transform3): return False
-        if t.isRot() and u.isRot:
+        if t.isRot() and u.isRot():
             #if t.__eqRot(u): print 'equal Rot:', t, u
             return t.__eqRot(u)
-        elif t.isRefl() and u.isRefl:
+        elif t.isRefl() and u.isRefl():
             #if t.__eqRefl(u): print 'equal Refl:', t, u
             return t.__eqRefl(u)
-        elif t.isRotInv() and u.isRotInv:
+        elif t.isRotInv() and u.isRotInv():
             #if t.__eqRotInv(u): print 'equal RotInv:', t, u
             return t.__eqRotInv(u)
         else:
-            #print 'fallback', (t[0] == u[0] and t[1] == u[1])
-            return (t[0] == u[0] and t[1] == u[1])
+            eq = t[0] == u[0] and t[1] == u[1]
+            if eq: print 'fallback:', t[0], '==', u[0], 'and', t[1], '==', u[1]
+            return eq
 
     def __ne__(t, u):
         return not(t == u)

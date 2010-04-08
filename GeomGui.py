@@ -657,7 +657,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.A4,
             isometry.A4xI,
             isometry.S4,
-        ]
+        ],
+        onSymSelect = None
     ):
         """
         Create a control embedded in a sizer for defining a symmetry.
@@ -666,9 +667,10 @@ class SymmetrySelect(wx.StaticBoxSizer):
         label: the label to be used for the box, default ''
         groupsList: the list of symmetries that one can choose from.
         """
-        this.groupsList = groupsList
-        this.panel      = panel
-        this.Boxes      = [wx.StaticBox(panel, label = label)]
+        this.groupsList  = groupsList
+        this.onSymSelect = onSymSelect
+        this.panel       = panel
+        this.Boxes       = [wx.StaticBox(panel, label = label)]
         wx.StaticBoxSizer.__init__(this, this.Boxes[-1], wx.VERTICAL)
 
         this.groupsStrList = [c.__name__ for c in this.groupsList]
@@ -686,7 +688,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
         this.addSetupGui()
-        this.addStabiliserGui()
+
+    def setList(this, groupsList):
+        this.groupsList  = groupsList
+        Id = this.Boxes[this.__SymmetryGuiIndex].Set(
+            [c.__name__ for c in this.groupsList]
+        )
+        #this.panel.Layout()
 
     def getSymmetry(this):
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
@@ -716,32 +724,10 @@ class SymmetrySelect(wx.StaticBoxSizer):
             this.oriSizer.Add(this.oriGuis[-1], 1, wx.EXPAND)
         this.Add(this.oriSizer, 1, wx.EXPAND)
 
-    def addStabiliserGui(this):
-        try:
-                for gui in this.stabGuis:
-                    gui.Destroy()
-                this.stabGuiBox.Destroy()
-                this.Remove(this.stabSizer)
-        except AttributeError: pass
-        this.stabGuiBox = wx.StaticBox(this.panel, label = 'Stabiliser Symmetry')
-        this.stabSizer = wx.StaticBoxSizer(this.stabGuiBox, wx.VERTICAL)
-        this.stabGuis = []
-        sym = this.getSymmetry()
-        this.stabStrList = sym.subgroups.keys()
-        # TODO: sort
-        this.stabGuis.append(
-            wx.ListBox(this.panel, wx.ID_ANY,
-                choices = this.stabStrList,
-                style = wx.LB_SINGLE)
-        )
-        this.stabGuis[-1].SetSelection(0)
-        this.stabSizer.Add(this.stabGuis[-1], 1, wx.EXPAND)
-        this.Add(this.stabSizer, 1, wx.EXPAND)
-
     def onSetSymmetry(this, e):
         this.addSetupGui()
-        this.addStabiliserGui()
         this.panel.Layout()
+        if this.onSymSelect != None: this.onSymSelect(this.getSymmetry())
 
     def GetSelected(this):
         sym = this.getSymmetry()

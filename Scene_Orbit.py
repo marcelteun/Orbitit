@@ -94,9 +94,23 @@ class CtrlWin(wx.Frame):
         # SYMMETRY
         this.symSizer = wx.BoxSizer(wx.VERTICAL)
         this.showGui.append(
-            GeomGui.SymmetrySelect(this.panel, 'Final Symmetry')
+            GeomGui.SymmetrySelect(this.panel,
+                'Final Symmetry',
+                onSymSelect = lambda a: this.onSymmetrySeleect(a)
+            )
         )
         this.__FinalSymGuiIndex = len(this.showGui) - 1
+        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+
+        # Stabiliser
+        this.symSizer = wx.BoxSizer(wx.VERTICAL)
+        this.showGui.append(
+            GeomGui.SymmetrySelect(this.panel,
+                'Stabiliser Symmetry',
+                this.showGui[this.__FinalSymGuiIndex].getSymmetry().subgroups,
+            )
+        )
+        this.__StabSymGuiIndex = len(this.showGui) - 1
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Apply"))
@@ -106,11 +120,25 @@ class CtrlWin(wx.Frame):
 
         return ctrlSizer
 
+    def onSymmetrySeleect(this, sym):
+        this.showGui[this.__StabSymGuiIndex].setList(
+                this.showGui[this.__FinalSymGuiIndex].getSymmetry().subgroups,
+            )
+
     def onApplySymmetry(this, e):
         Vs = this.showGui[this.__VsGuiIndex].GetVs()
         Fs = this.showGui[this.__FsGuiIndex].GetFs()
-        sym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
-        this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = sym)
+        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
+        stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
+        quotientSet = finalSym  / stabSym
+        print 'quotientSet:'
+        for coset in quotientSet:
+            print '  - len(%d)' % len(coset)
+            for isom in coset: print '   ', isom
+        orbit = [coset.getOne() for coset in quotientSet]
+        print 'orbit (%d):' % len(orbit)
+        for isom in orbit: print isom
+        this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = orbit)
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
         e.Skip()
