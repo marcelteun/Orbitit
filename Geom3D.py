@@ -218,6 +218,9 @@ class Fields:
     """
     pass
 
+class PrecisionError(ValueError):
+    "Possible error caused bby floats not being equals exactly"
+
 class Line:
     def __init__(this, p0, p1 = None, v = None, d = 3, isSegment = False):
         """
@@ -299,7 +302,7 @@ class Line:
             for i in range(1, this.dimension):
                 if not eq(c[i], p[i], margin = margin):
                     print 'The point is not on the line; yDiff =', (c[i]-p[i])
-                    assert False, 'The point is not one the line;'
+                    raise PrecisionError, 'The point is not one the line;'
         if this.isSegment:
             if not (
                 (t >= 0 or eq(t, 0, margin = margin))
@@ -307,7 +310,7 @@ class Line:
                 (t <= 1 or eq(t, 1, margin = margin))
             ):
                 print 'The point is not one the line segment; t =', t
-                assert False, 'The point is not one the line segment;'
+                raise PrecisionError, 'The point is not one the line segment;'
         return t
 
 class Line2D(Line):
@@ -1702,181 +1705,185 @@ class SimpleShape:
             print '********toPsPiecesStr********'
             for i in range(len(this.Vs)):
                 print 'V[', i, '] =', this.Vs[i]
-        margin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
-        GeomTypes
-        for i in faceIndices:
-            Vs = []
-            pointsIn2D = []
-            Es  = []
-            face = this.Fs[i]
-            # find out norm
-            if debug: print 'face idx:', face
-            norm = facePlane(this.Vs, face).N
-            if norm == None: continue # not a face.
-            if debug: print 'norm before', norm
-            # Find out how to rotate the faces such that the norm of the base face
-            # is parallel to the z-axis to work with a 2D situation:
-            # Rotate around the cross product of z-axis and norm
-            # with an angle equal to the dot product of the normalised vectors.
-            zAxis = vec(0, 0, 1)
-            to2DAngle = math.acos(zAxis * norm)
-            PsPoints = []
-            if not to2DAngle == 0:
-                to2Daxis = norm.cross(zAxis)
-                Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
-                # add vertices to vertex array
-                for v in this.Vs:
-                    Vs.append(Mrot*v)
-                    pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
-                    #if debug: print 'added to Vs', Vs[-1]
-            else:
-                Vs = this.Vs[:]
-                pointsIn2D = [[v[0], v[1]] for v in this.Vs]
-            # set z-value for the z-plane, ie plane of intersection
-            zBaseFace = Vs[face[0]][2]
-            if debug: print 'zBaseFace =', zBaseFace
-            # add edges from shares
-            basePlane = facePlane(Vs, face)
-            if debug: print 'basePlane', basePlane
-            # split faces into
-            # 1. facets that ly in the plane: baseFacets, the other facets
-            #    will be intersected with these.
-            # and
-            # 2. facets that share one line (segment) with this plane: intersectingFacets
-            #    Only save the line segment data of these.
-            baseFacets = []
-            Lois = []
-            for intersectingFacet in this.Fs:
-                if debug:
-                    print 'Intersecting face[', this.Fs.index(intersectingFacet), '] =', intersectingFacet
-                    print 'with face[', i, '] =', face
-                intersectingPlane = facePlane(Vs, intersectingFacet)
-                # First check if this facet has an edge in common
-                facesShareAnEdge = False
-                if intersectingFacet == face: 
-                    baseFacets.append(intersectingFacet)
-                    Es.append(intersectingFacet)
-                    facesShareAnEdge = True
+        orgMargin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
+        try:
+            for i in faceIndices:
+                Vs = []
+                pointsIn2D = []
+                Es  = []
+                face = this.Fs[i]
+                # find out norm
+                if debug: print 'face idx:', face
+                norm = facePlane(this.Vs, face).N
+                if norm == None: continue # not a face.
+                if debug: print 'norm before', norm
+                # Find out how to rotate the faces such that the norm of the base face
+                # is parallel to the z-axis to work with a 2D situation:
+                # Rotate around the cross product of z-axis and norm
+                # with an angle equal to the dot product of the normalised vectors.
+                zAxis = vec(0, 0, 1)
+                to2DAngle = math.acos(zAxis * norm)
+                PsPoints = []
+                if not to2DAngle == 0:
+                    to2Daxis = norm.cross(zAxis)
+                    Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
+                    # add vertices to vertex array
+                    for v in this.Vs:
+                        Vs.append(Mrot*v)
+                        pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
+                        #if debug: print 'added to Vs', Vs[-1]
                 else:
-                    l = len(intersectingFacet)
-                    for p in range(l):
-                        if intersectingFacet[p] in face:
-                            q = p+1
-                            if q == l: q = 0
-                            if intersectingFacet[q] in face:
-                                pIndex = face.index(intersectingFacet[p])
-                                qIndex = face.index(intersectingFacet[q])
-                                delta =  abs(pIndex - qIndex)
-                                if (delta == 1) or (delta == len(face) - 1):
-                                    facesShareAnEdge = True
-                                    break
-
-                # line of intersection:
-                if not facesShareAnEdge:
-                    Loi3D = basePlane.intersectWithPlane(intersectingPlane)
-                if facesShareAnEdge:
-                    if debug: print 'Intersecting face shares an edge'
-                    pass
-                elif Loi3D == None:
-                    if debug: print 'No intersection for face'
-                    # the face is parallel or lies in the plane
-                    if zBaseFace == Vs[intersectingFacet[0]][2]:
-                        # the face is lying in the plane, add to baseFacets
-                        baseFacets.append(intersectingFacet)
-                        # also add to PS array of lines.
-                        Es.append(intersectingFacet)
-                        if debug: print 'In Plane: intersectingFacet', intersectingFacet
-                else: # Loi3D != None:
+                    Vs = this.Vs[:]
+                    pointsIn2D = [[v[0], v[1]] for v in this.Vs]
+                # set z-value for the z-plane, ie plane of intersection
+                zBaseFace = Vs[face[0]][2]
+                if debug: print 'zBaseFace =', zBaseFace
+                # add edges from shares
+                basePlane = facePlane(Vs, face)
+                if debug: print 'basePlane', basePlane
+                # split faces into
+                # 1. facets that ly in the plane: baseFacets, the other facets
+                #    will be intersected with these.
+                # and
+                # 2. facets that share one line (segment) with this plane: intersectingFacets
+                #    Only save the line segment data of these.
+                baseFacets = []
+                Lois = []
+                for intersectingFacet in this.Fs:
                     if debug:
-                        if debug: print 'intersectingPlane', intersectingPlane
-                        if debug: print 'Loi3D', Loi3D
-                    assert eq(Loi3D.v[2], 0, 100 * margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
-                    assert eq(Loi3D.p[2], zBaseFace, 100 * margin), "all intersection lines should ly on z==%f, but z differs %f" % (
-                                    zBaseFace, zBaseFace-Loi3D.p[2]
-                                )
-                    # loi2D = lineofintersection
-                    loi2D = Line2D(
-                            [Loi3D.p[0], Loi3D.p[1]],
-                            v = [Loi3D.v[0], Loi3D.v[1]]
-                        )
-                    # now find the segment of loi2D within the intersectingFacet.
-                    # TODO The next call is strange. It is a call to a Line2D
-                    # intersecting a 3D facet. It should be a mode dedicated
-                    # call. The line is in the plane of the facet and we want to
-                    # know where it shares edges.
-                    pInLoiFacet = loi2D.intersectWithFacet(Vs,
-                            intersectingFacet, Loi3D.p[2], margin)
-                    if debug: print 'pInLoiFacet', pInLoiFacet
-                    if pInLoiFacet != []:
-                        Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
-                        if debug: Lois[-1].append(this.Fs.index(intersectingFacet))
-            # for each intersecting line segment:
-            for loiData in Lois:
-                loi2D       = loiData[0]
-                pInLoiFacet = loiData[1]
-                if debug: print 'phase 2: check iFacet nr:', loiData[-1]
-                # Now Intersect loi with the baseFacets.
-                for baseFacet in baseFacets:
-                    pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet,
-                            loiData[2], margin)
-                    if debug: print 'pInLoiBase', pInLoiBase
-                    # Now combine the results of pInLoiFacet and pInLoiBase:
-                    # Only keep intersections that fall within 2 segments for
-                    # both pInLoiFacet and pInLoiBase.
-                    facetSegmentNr = 0
-                    baseSegmentNr = 0
-                    nextBaseSeg = True
-                    nextFacetSeg = True
-                    nrOfVs = len(pointsIn2D)
-                    def addPsLine(t0, t1, loi2D, nrOfVs):
-                        pointsIn2D.append(loi2D.getPoint(t0))
-                        pointsIn2D.append(loi2D.getPoint(t1))
-                        Es.append([nrOfVs, nrOfVs+1])
-                        return nrOfVs + 2
-                    while (baseSegmentNr < len(pInLoiBase)/2) and \
-                        (facetSegmentNr < len(pInLoiFacet)/2):
-                        if nextBaseSeg:
-                            b0 = pInLoiBase[2*baseSegmentNr]
-                            b1 = pInLoiBase[2*baseSegmentNr + 1]
-                            nextBaseSeg = False
-                        if nextFacetSeg:
-                            f0 = pInLoiFacet[2*facetSegmentNr]
-                            f1 = pInLoiFacet[2*facetSegmentNr + 1]
-                            nextFacetSeg = False
-                        # Note that always holds f0 < f1 and b0 < b1
-                        if f1 < b0 or eq(f1, b0):
-                            # f0 - f1  b0 - b1
-                            nextFacetSeg = True
-                        elif b1 < f0 or eq(b1, f0):
-                            # b0 - b1  f0 - f1
-                            nextBaseSeg = True
-                        elif f0 < b0 or eq(f0, b0):
-                            if f1 < b1 or eq(f1, b1):
-                                # f0  b0 - f1  b1
+                        print 'Intersecting face[', this.Fs.index(intersectingFacet), '] =', intersectingFacet
+                        print 'with face[', i, '] =', face
+                    intersectingPlane = facePlane(Vs, intersectingFacet)
+                    # First check if this facet has an edge in common
+                    facesShareAnEdge = False
+                    if intersectingFacet == face: 
+                        baseFacets.append(intersectingFacet)
+                        Es.append(intersectingFacet)
+                        facesShareAnEdge = True
+                    else:
+                        l = len(intersectingFacet)
+                        for p in range(l):
+                            if intersectingFacet[p] in face:
+                                q = p+1
+                                if q == l: q = 0
+                                if intersectingFacet[q] in face:
+                                    pIndex = face.index(intersectingFacet[p])
+                                    qIndex = face.index(intersectingFacet[q])
+                                    delta =  abs(pIndex - qIndex)
+                                    if (delta == 1) or (delta == len(face) - 1):
+                                        facesShareAnEdge = True
+                                        break
+
+                    # line of intersection:
+                    if not facesShareAnEdge:
+                        Loi3D = basePlane.intersectWithPlane(intersectingPlane)
+                    if facesShareAnEdge:
+                        if debug: print 'Intersecting face shares an edge'
+                        pass
+                    elif Loi3D == None:
+                        if debug: print 'No intersection for face'
+                        # the face is parallel or lies in the plane
+                        if zBaseFace == Vs[intersectingFacet[0]][2]:
+                            # the face is lying in the plane, add to baseFacets
+                            baseFacets.append(intersectingFacet)
+                            # also add to PS array of lines.
+                            Es.append(intersectingFacet)
+                            if debug: print 'In Plane: intersectingFacet', intersectingFacet
+                    else: # Loi3D != None:
+                        if debug:
+                            if debug: print 'intersectingPlane', intersectingPlane
+                            if debug: print 'Loi3D', Loi3D
+                        assert eq(Loi3D.v[2], 0, 100 * margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
+                        assert eq(Loi3D.p[2], zBaseFace, 100 * margin), "all intersection lines should ly on z==%f, but z differs %f" % (
+                                        zBaseFace, zBaseFace-Loi3D.p[2]
+                                    )
+                        # loi2D = lineofintersection
+                        loi2D = Line2D(
+                                [Loi3D.p[0], Loi3D.p[1]],
+                                v = [Loi3D.v[0], Loi3D.v[1]]
+                            )
+                        # now find the segment of loi2D within the intersectingFacet.
+                        # TODO The next call is strange. It is a call to a Line2D
+                        # intersecting a 3D facet. It should be a mode dedicated
+                        # call. The line is in the plane of the facet and we want to
+                        # know where it shares edges.
+                        pInLoiFacet = loi2D.intersectWithFacet(Vs,
+                                intersectingFacet, Loi3D.p[2], margin)
+                        if debug: print 'pInLoiFacet', pInLoiFacet
+                        if pInLoiFacet != []:
+                            Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
+                            if debug: Lois[-1].append(this.Fs.index(intersectingFacet))
+                # for each intersecting line segment:
+                for loiData in Lois:
+                    loi2D       = loiData[0]
+                    pInLoiFacet = loiData[1]
+                    if debug: print 'phase 2: check iFacet nr:', loiData[-1]
+                    # Now Intersect loi with the baseFacets.
+                    for baseFacet in baseFacets:
+                        pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet,
+                                loiData[2], margin)
+                        if debug: print 'pInLoiBase', pInLoiBase
+                        # Now combine the results of pInLoiFacet and pInLoiBase:
+                        # Only keep intersections that fall within 2 segments for
+                        # both pInLoiFacet and pInLoiBase.
+                        facetSegmentNr = 0
+                        baseSegmentNr = 0
+                        nextBaseSeg = True
+                        nextFacetSeg = True
+                        nrOfVs = len(pointsIn2D)
+                        def addPsLine(t0, t1, loi2D, nrOfVs):
+                            pointsIn2D.append(loi2D.getPoint(t0))
+                            pointsIn2D.append(loi2D.getPoint(t1))
+                            Es.append([nrOfVs, nrOfVs+1])
+                            return nrOfVs + 2
+                        while (baseSegmentNr < len(pInLoiBase)/2) and \
+                            (facetSegmentNr < len(pInLoiFacet)/2):
+                            if nextBaseSeg:
+                                b0 = pInLoiBase[2*baseSegmentNr]
+                                b1 = pInLoiBase[2*baseSegmentNr + 1]
+                                nextBaseSeg = False
+                            if nextFacetSeg:
+                                f0 = pInLoiFacet[2*facetSegmentNr]
+                                f1 = pInLoiFacet[2*facetSegmentNr + 1]
+                                nextFacetSeg = False
+                            # Note that always holds f0 < f1 and b0 < b1
+                            if f1 < b0 or eq(f1, b0):
+                                # f0 - f1  b0 - b1
                                 nextFacetSeg = True
-                                nrOfVs = addPsLine(b0, f1, loi2D, nrOfVs)
-                            else:
-                                # f0  b0 - b1  f1
+                            elif b1 < f0 or eq(b1, f0):
+                                # b0 - b1  f0 - f1
                                 nextBaseSeg = True
-                                nrOfVs = addPsLine(b0, b1, loi2D, nrOfVs)
-                        else:
-                            # b0<f0<b1 (and b0<f1)
-                            if f1 < b1 or eq(f1, b1):
-                                # b0  f0 - f1  b1
-                                nextFacetSeg = True
-                                nrOfVs = addPsLine(f0, f1, loi2D, nrOfVs)
+                            elif f0 < b0 or eq(f0, b0):
+                                if f1 < b1 or eq(f1, b1):
+                                    # f0  b0 - f1  b1
+                                    nextFacetSeg = True
+                                    nrOfVs = addPsLine(b0, f1, loi2D, nrOfVs)
+                                else:
+                                    # f0  b0 - b1  f1
+                                    nextBaseSeg = True
+                                    nrOfVs = addPsLine(b0, b1, loi2D, nrOfVs)
                             else:
-                                # b0  f0 - b1  f1
-                                nextBaseSeg = True
-                                nrOfVs = addPsLine(f0, b1, loi2D, nrOfVs)
-                        if nextBaseSeg:
-                            baseSegmentNr += 1
-                        if nextFacetSeg:
-                            facetSegmentNr += 1
-            PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
+                                # b0<f0<b1 (and b0<f1)
+                                if f1 < b1 or eq(f1, b1):
+                                    # b0  f0 - f1  b1
+                                    nextFacetSeg = True
+                                    nrOfVs = addPsLine(f0, f1, loi2D, nrOfVs)
+                                else:
+                                    # b0  f0 - b1  f1
+                                    nextBaseSeg = True
+                                    nrOfVs = addPsLine(f0, b1, loi2D, nrOfVs)
+                            if nextBaseSeg:
+                                baseSegmentNr += 1
+                            if nextFacetSeg:
+                                facetSegmentNr += 1
+                PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
+        except AssertionError, PrecisionError:
+            # catching assertion errors, to be able to set back margin
+            GeomTypes.eqFloatMargin = margin
+            raise
 
         # restore margin
-        GeomTypes.eqFloatMargin = margin
+        GeomTypes.eqFloatMargin = orgMargin
 
         return PsDoc.toStr()
 
@@ -2277,7 +2284,6 @@ class CompoundShape(SimpleShape):
         """
         if this.dbgTrace:
             print '%s.mergeShapes(%s,..):' % (this.__class__, this.name)
-        ss = SimpleShape([], [], name = 'simple shape for type checking')
         Vs = []
         Fs = []
         Es = []
@@ -2294,10 +2300,29 @@ class CompoundShape(SimpleShape):
             Es.extend([ i+VsOffset for i in s.Es])
             colorDefs.extend(s.colorData[0])
             colorIndices.extend([ i+colOffset for i in s.colorData[1]])
-        this.setVertexProperties(Vs = Vs, Ns = Ns)
-        this.setEdgeProperties(Es = Es)
-        this.setFaceProperties(Fs = Fs, colors = (colorDefs, colorIndices))
-        del ss
+        this.mergedShape = SimpleShape(
+                Vs = Vs, Fs = Fs, Es = Es, Ns = Ns,
+                colors = (colorDefs, colorIndices)
+            )
+
+    def glDraw(this):
+        this.mergedShape.glDraw()
+
+    def toOffStr(this, precision=15, info = False):
+        return this.mergedShape.toOffStr(precision, info)
+
+    def toPsPiecesStr(this,
+            faceIndices = [],
+            scaling = 1,
+            precision = 7,
+            margin = 1.0e5*defaultFloatMargin,
+            pageSize = PS.PageSizeA4
+        ):
+        return this.mergedShape.toPsPiecesStr(
+            faceIndices, scaling, precision, margin, pageSize)
+
+    def getDome(this, level = 2):
+        return this.mergedShape.getDome(level)
 
 class SymmetricShape(CompoundShape):
     dbgPrn = False
@@ -2634,6 +2659,31 @@ class SymmetricShape(CompoundShape):
                     glMultMatrixd(isom.glMatrix())
                     this.baseShape.glDraw()
                     glPopMatrix()
+
+    def toOffStr(this, precision=15, info = False):
+        if this.orbitNeeded:
+            this.orbit()
+        return CompoundShape.toOffStr(this, precision, info)
+
+    def toPsPiecesStr(this,
+            faceIndices = [],
+            scaling = 1,
+            precision = 7,
+            margin = 1.0e5*defaultFloatMargin,
+            pageSize = PS.PageSizeA4
+        ):
+        if this.orbitNeeded:
+            this.orbit()
+        if faceIndices == []:
+            # no need to print all faces in orbited, because of symmetry
+            faceIndices = range(len(this.baseShape.Fs))
+        return this.mergedShape.toPsPiecesStr(
+            faceIndices, scaling, precision, margin, pageSize)
+
+    def getDome(this, level = 2):
+        if this.orbitNeeded:
+            this.orbit()
+        return CompoundShape.getDome(this, level)
 
 class Scene():
     """

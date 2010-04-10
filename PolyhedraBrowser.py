@@ -393,6 +393,7 @@ class MainWindow(wx.Frame):
                     [Geom3D.readOffFile(fd, recreateEdges = True)]
                 )
             this.panel.setShape(newShape)
+            this.setStatusStr("OFF file opened")
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
         dlg.Destroy()
@@ -409,6 +410,7 @@ class MainWindow(wx.Frame):
                 this.panel.getShape().addShape(Geom3D.readOffFile(fd, recreateEdges = True))
             except AttributeError:
                 print "warning: cannot add a shape to this scene, use 'File->Open' instead"
+            this.setStatusStr("OFF file added")
             fd.close()
             # TODO: set better title
             this.SetTitle('Added: %s (%s)' % (this.filename, this.importDirName))
@@ -430,6 +432,7 @@ class MainWindow(wx.Frame):
             fd = open(os.path.join(this.exportDirName, this.filename), 'w')
             # TODO precision through setting:
             fd.write(this.panel.getShape().toOffStr(info = False))
+            this.setStatusStr("OFF file written")
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
@@ -459,13 +462,19 @@ class MainWindow(wx.Frame):
                     # Note: if file exists is part of file dlg...
                     fd = open(os.path.join(this.exportDirName, this.filename), 'w')
                     #print 'onSaveAsPs: toPsPiecesStr:',  scalingFactor, precision, margin
-                    fd.write(
-                        this.panel.getShape().toPsPiecesStr(
-                            scaling = scalingFactor,
-                            precision = precision,
-                            margin = math.pow(10, -margin)
+                    try:
+                        fd.write(
+                            this.panel.getShape().toPsPiecesStr(
+                                scaling = scalingFactor,
+                                precision = precision,
+                                margin = math.pow(10, -margin)
+                            )
                         )
-                    )
+                        this.setStatusStr("PS file written")
+                    except Geom3D.PrecisionError:
+                        this.setStatusStr(
+                            "Precision error, try to decrease float margin")
+
                     fd.close()
                     this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
                 else:
@@ -496,6 +505,7 @@ class MainWindow(wx.Frame):
             x3dObj = this.panel.getShape().toX3dDoc(edgeRadius = r)
             x3dObj.setFormat(X3D.VRML_FMT)
             fd.write(x3dObj.toStr())
+            this.setStatusStr("VRML file written")
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
@@ -632,6 +642,7 @@ class MainPanel(wx.Panel):
         else:
             glEnable(GL_NORMALIZE)
         this.canvas.paint()
+        this.parent.setStatusStr("Shape Updated")
         del oldShape
 
     def getShape(this):

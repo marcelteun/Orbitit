@@ -25,6 +25,9 @@ Hz = GeomTypes.Hz
 
 I  = GeomTypes.I       # central inversion
 
+class ImproperSubgroup(ValueError):
+    "Raised when subgroup is not really a subgroup"
+
 class Set(set):
 
     def __init__(this, *args):
@@ -55,18 +58,21 @@ class Set(set):
         return Set([o * e for e in this])
 
     def subgroup(this, o):
-        if isinstance(o, GeomTypes.Transform3):
-            # generate the quotient set THIS / o
-            assert o in this, "Generator of sub-group should be part of group"
-            subgroup = Set([o])
-            subgroup.group()
-            return subgroup
-        else:
-            for e in o:
-                assert e in this, "sub-group should be part of group"
-            subgroup = copy(o)
-            subgroup.group()
-            return subgroup
+        try:
+            if isinstance(o, GeomTypes.Transform3):
+                # generate the quotient set THIS / o
+                assert o in this
+                subgroup = Set([o])
+                subgroup.group()
+                return subgroup
+            else:
+                for e in o:
+                    assert e in this
+                subgroup = copy(o)
+                subgroup.group()
+                return subgroup
+        except AssertionError:
+            raise ImproperSubgroup
 
     def __div__(this, o):
         # this * subgroup: right quotient set

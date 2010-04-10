@@ -53,6 +53,7 @@ class CtrlWin(wx.Frame):
         this.canvas = canvas
         kwargs['title'] = Title
         wx.Frame.__init__(this, *args, **kwargs)
+        this.statusBar = this.CreateStatusBar()
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
         this.mainSizer.Add(
@@ -126,9 +127,19 @@ class CtrlWin(wx.Frame):
     def onApplySymmetry(this, e):
         Vs = this.showGui[this.__VsGuiIndex].GetVs()
         Fs = this.showGui[this.__FsGuiIndex].GetFs()
+        if Fs == []:
+            this.statusBar.SetStatusText(
+                "ERROR: No faces defined!"
+            )
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
-        quotientSet = finalSym  / stabSym
+        try: quotientSet = finalSym  / stabSym
+        except isometry.ImproperSubgroup:
+            this.statusBar.SetStatusText(
+                "ERROR: Stabiliser not a subgroup of final symmetry"
+            )
+            raise
+
         #print 'quotientSet:'
         #for coset in quotientSet:
         #    print '  - len(%d)' % len(coset)
