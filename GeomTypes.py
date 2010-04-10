@@ -364,9 +364,20 @@ class Transform3(tuple):
             'oops, unknown angle; transform %s\n' % str(t) +
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
+    def glMatrix(t):
+        if   t.isRot():    m = t.glMatrixRot()
+        elif t.isRefl():   m = t.matrixRefl()
+        elif t.isRotInv(): m = t.glMatrixRotInv()
+        else: raise AssertionError
+        return Mat([
+                Vec([m[0][0], m[0][1], m[0][2], 0]),
+                Vec([m[1][0], m[1][1], m[1][2], 0]),
+                Vec([m[2][0], m[2][1], m[2][2], 0]),
+                Vec([0,       0,       0,       1]),
+            ])
+
     def matrix(t):
         # TODO: test this
-        # TODO: add RotInv
         if t.isRot(): return t.matrixRot()
         if t.isRefl(): return t.matrixRefl()
         if t.isRotInv(): return t.matrixRotInv()
@@ -374,14 +385,14 @@ class Transform3(tuple):
             'oops, unknown matrix; transform %s\n' % str(t) +
             'not a rotation')
 
-    def matrix4(t):
-        m = t.matrix()
-        return Mat([
-                Vec([m[0][0], m[0][1], m[0][2], 0]),
-                Vec([m[1][0], m[1][1], m[1][2], 0]),
-                Vec([m[2][0], m[2][1], m[2][2], 0]),
-                Vec([0,       0,       0,       1]),
-            ])
+#    def matrix4(t):
+#        m = t.matrix()
+#        return Mat([
+#                Vec([m[0][0], m[0][1], m[0][2], 0]),
+#                Vec([m[1][0], m[1][1], m[1][2], 0]),
+#                Vec([m[2][0], m[2][1], m[2][2], 0]),
+#                Vec([0,       0,       0,       1]),
+#            ])
 
     def inverse(t):
         if t.isRot(): return t.inverseRot()
@@ -458,16 +469,23 @@ class Transform3(tuple):
                 )
             return t[0].V()
 
-    def matrixRot(t):
-        w, x, y, z = t[0]
+    def getMatrixRot(this, w, x, y, z, sign = 1):
         dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
         dxw, dyw, dzw = 2*x*w, 2*y*w, 2*z*w
         dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
         return [
-            Vec([1-dy2-dz2,     dxy-dzw,        dxz+dyw]),
-            Vec([dxy+dzw,       1-dx2-dz2,      dyz-dxw]),
-            Vec([dxz-dyw,       dyz+dxw,        1-dx2-dy2]),
+            Vec([sign*(1-dy2-dz2), sign*(dxy-dzw),   sign*(dxz+dyw)]),
+            Vec([sign*(dxy+dzw),   sign*(1-dx2-dz2), sign*(dyz-dxw)]),
+            Vec([sign*(dxz-dyw),   sign*(dyz+dxw),   sign*(1-dx2-dy2)]),
         ]
+
+    def matrixRot(t):
+        w, x, y, z = t[0]
+        return t.getMatrixRot(w, x, y, z)
+
+    def glMatrixRot(t):
+        w, x, y, z = t[0]
+        return t.getMatrixRot(-w, x, y, z)
 
     def inverseRot(t):
         return Rot3(axis = t.axis(), angle = -t.angle())
@@ -544,14 +562,11 @@ class Transform3(tuple):
 
     def matrixRotInv(t):
         w, x, y, z = t[0]
-        dxy, dxz, dyz = -2*x*y, -2*x*z, -2*y*z
-        dxw, dyw, dzw = -2*x*w, -2*y*w, -2*z*w
-        dx2, dy2, dz2 = -2*x*x, -2*y*y, -2*z*z
-        return [
-            Vec([-1-dy2-dz2,     dxy-dzw,        dxz+dyw]),
-            Vec([ dxy+dzw,      -1-dx2-dz2,      dyz-dxw]),
-            Vec([ dxz-dyw,       dyz+dxw,       -1-dx2-dy2]),
-        ]
+        return t.getMatrixRot(w, x, y, z, -1)
+
+    def glMatrixRotInv(t):
+        w, x, y, z = t[0]
+        return t.getMatrixRot(-w, x, y, z, -1)
 
     def inverseRotInv(t):
         return RotInv3(axis = t.axis(), angle = -t.angle())

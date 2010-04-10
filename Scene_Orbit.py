@@ -92,7 +92,6 @@ class CtrlWin(wx.Frame):
         facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         # SYMMETRY
-        this.symSizer = wx.BoxSizer(wx.VERTICAL)
         this.showGui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Final Symmetry',
@@ -103,7 +102,6 @@ class CtrlWin(wx.Frame):
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         # Stabiliser
-        this.symSizer = wx.BoxSizer(wx.VERTICAL)
         this.showGui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Stabiliser Symmetry',
@@ -131,13 +129,13 @@ class CtrlWin(wx.Frame):
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
         quotientSet = finalSym  / stabSym
-        print 'quotientSet:'
-        for coset in quotientSet:
-            print '  - len(%d)' % len(coset)
-            for isom in coset: print '   ', isom
+        #print 'quotientSet:'
+        #for coset in quotientSet:
+        #    print '  - len(%d)' % len(coset)
+        #    for isom in coset: print '   ', isom
         orbit = [coset.getOne() for coset in quotientSet]
-        print 'orbit (%d):' % len(orbit)
-        for isom in orbit: print isom
+        print 'Applying an orbit of order %d' % len(orbit)
+        #for isom in orbit: print isom
         this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = orbit)
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)

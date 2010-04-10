@@ -2631,7 +2631,7 @@ class SymmetricShape(CompoundShape):
             else:
                 for isom in this.isometryOperations['direct']:
                     glPushMatrix()
-                    glMultMatrixd(isom.matrix4())
+                    glMultMatrixd(isom.glMatrix())
                     this.baseShape.glDraw()
                     glPopMatrix()
 

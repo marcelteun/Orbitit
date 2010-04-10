@@ -691,10 +691,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def setList(this, groupsList):
         this.groupsList  = groupsList
-        Id = this.Boxes[this.__SymmetryGuiIndex].Set(
-            [c.__name__ for c in this.groupsList]
+        this.Boxes[this.__SymmetryGuiIndex].Set(
+            [c.__name__ for c in groupsList]
         )
-        #this.panel.Layout()
+        # Not so good: this requires that E should be last...
+        this.Boxes[this.__SymmetryGuiIndex].SetSelection(len(groupsList)-1)
+        this.addSetupGui()
+        this.panel.Layout()
 
     def getSymmetry(this):
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
