@@ -134,7 +134,7 @@ class CtrlWin(wx.Frame):
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
         try: quotientSet = finalSym  / stabSym
-        except isometry.ImproperSubgroup:
+        except isometry.ImproperSubgroupError:
             this.statusBar.SetStatusText(
                 "ERROR: Stabiliser not a subgroup of final symmetry"
             )

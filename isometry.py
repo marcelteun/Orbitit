@@ -25,7 +25,7 @@ Hz = GeomTypes.Hz
 
 I  = GeomTypes.I       # central inversion
 
-class ImproperSubgroup(ValueError):
+class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
 
 class Set(set):
@@ -57,6 +57,31 @@ class Set(set):
         # rotation Rot * Set
         return Set([o * e for e in this])
 
+    def isGroup(this):
+        if len(this) == 0: return False
+        isGroup = True
+        for e in this:
+            # optimised away, done as part of next loop:
+            # if not (e.inverse() in this):
+            thisHasInverse = False
+            for o in this:
+                thisHasInverse  = thisHasInverse | (e.inverse() == o)
+                isClosedForThis = e*o in this and o*e in this
+                if not isClosedForThis:
+                    break;
+            if not thisHasInverse or not isClosedForThis:
+                isGroup = False
+                break;
+
+        return isGroup
+        # the following is not needed to check, is done implicitly:
+        # and (GeomTypes.E in this)
+
+    def isSubgroup(this, o):
+        """returns whether this is a subgroup of o)"""
+        if len(this) > len(o): return False # optimisation
+        return this.isGroup() and this.issubset(o)
+
     def subgroup(this, o):
         try:
             if isinstance(o, GeomTypes.Transform3):
@@ -72,7 +97,7 @@ class Set(set):
                 subgroup.group()
                 return subgroup
         except AssertionError:
-            raise ImproperSubgroup
+            raise ImproperSubgroupError
 
     def __div__(this, o):
         # this * subgroup: right quotient set
@@ -145,19 +170,23 @@ class Set(set):
         this.clear()
         this.update(result.close(maxIter))
 
-    def close(this, maxIter = 50):
+    def close(this, maxIter = 5):
         """
         Return a set that is closed, if it can be generated within maxIter steps.
         """
         result = copy(this)
         for i in range(maxIter):
             lPrev = len(result)
-            # print 'close step', i, 'len:', lPrev
+            #print 'close step', i, 'len:', lPrev
             result.update(result * result)
             l = len(result)
             if l == lPrev:
                 break
             # print '  --> new group with len', l, ':\n', result
+        #if not l == lPrev:
+        #    for i in this: print i
+        #    print '---------------'
+        #    for i in result: print i
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
         return result
 
@@ -538,7 +567,7 @@ if __name__ == '__main__':
     #print a4
     print 'test grouping this',
     ca4 = copy(a4)
-    a4.group()
+    a4.group(2)
     assert a4 == ca4
     print '.........ok'
 
@@ -571,5 +600,16 @@ if __name__ == '__main__':
             for j in range(i+1, len(q)):
                 assert not transform in q[j]
     print '...ok'
+
+    ########################################################################
+    # Quotient Set:
+    print 'test isSubgroup: A4, S4',
+    s4 = S4()
+    a4 = A4()
+    assert a4.isSubgroup(s4)
+    assert not s4.isSubgroup(a4)
+    a4.add(GeomTypes.I)
+    assert not a4.isSubgroup(s4)
+    print '....ok'
 
     print 'success!'

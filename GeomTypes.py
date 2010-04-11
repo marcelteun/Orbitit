@@ -335,6 +335,8 @@ class Transform3(tuple):
         else:
             eq = t[0] == u[0] and t[1] == u[1]
             if eq: print 'fallback:', t[0], '==', u[0], 'and', t[1], '==', u[1]
+            assert not eq, 'oops, fallback: unknown transform \n%s\nor\n%s' % (
+                str(t), str(u))
             return eq
 
     def __ne__(t, u):
@@ -404,16 +406,38 @@ class Transform3(tuple):
 
     ## ROTATION specific functions:
     def isRot(t):
-        #print 't[1].conjugate() == t[0]', t[1].conjugate() == t[0]
+        global eqFloatMargin
+        d = 1 - eqFloatMargin
+        backup, eqFloatMargin = eqFloatMargin, 1 - d * d
+        eqSquareNorm = eq(t[1].squareNorm(), 1)
+        eqFloatMargin = backup
+        #print (
+        #        t[1].conjugate() == t[0]
+        #        and
+        #        eqSquareNorm
+        #        and
+        #        (t[1].S() < 1 or eq(t[1].S(), 1))
+        #        and
+        #        (t[1].S() > -1 or eq(t[1].S(), -1))
+        #    ),
+        #print 'isRot: %s..%s' % (str(t[0]), str(t[1]))
+        #print  t[1].conjugate() == t[0], ': t[1].conjugate() == t[0]'
         #print '%s = t[1].conjugate() == t[0] %s ' % (
         #        t[1].conjugate(), t[0]
         #    )
-        #print '1 ?= t[1].norm() = %0.17f' % t[1].norm()
-        #print '-1 ?<= t.S() = %0.17f ?<= 1' % t[1].S()
+        #print eq(t[1].squareNorm(), 1),
+        #print '    1 ?= t[1].norm() = %0.17f' % t[1].squareNorm(),
+        #print  '(d =', 1 - t[1].squareNorm(), '>', eqFloatMargin, ')'
+        #print (
+        #        (t[1].S() < 1 or eq(t[1].S(), 1))
+        #        and
+        #        (t[1].S() > -1 or eq(t[1].S(), -1))
+        #    ), ':'
+        #print '   -1 ?<= t.S() = %0.17f ?<= 1' % t[1].S()
         return (
             t[1].conjugate() == t[0]
             and
-            eq(t[1].squareNorm(), 1)
+            eqSquareNorm
             and
             (t[1].S() < 1 or eq(t[1].S(), 1))
             and
