@@ -212,6 +212,7 @@ class Cn(Set):
         {'type': 'int', 'par': 'n',    'lab': "order"},
         {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
     ]
+    n = 0
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group Cn, consisting of n rotations
@@ -229,9 +230,12 @@ class Cn(Set):
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
             else:              axis = Z[:]
-            if 'n' in keys: n = setup['n']
-            else:           n = 2
-            if n == 0: n = 1
+            if this.n != 0: n = this.n
+            else:
+                if 'n' in keys: n = setup['n']
+                else:           n = 2
+                if n == 0: n = 1
+                this.n = n
 
             angle = 2 * math.pi / n
             try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
@@ -505,6 +509,22 @@ class S4(Set):
                     h0, h1, h2, h3, h4, h5
                 ])
 
+# dynamically create Cn classes:
+C = lambda n: type('C%d' % n, (Cn,),
+        {
+            'n': n,
+            'initPars': [{
+                    'type': 'vec3',
+                    'par': 'axis',
+                    'lab': "%d-fold axis" % n
+                }]
+        }
+    )
+
+C2 = C(2)
+C3 = C(3)
+C4 = C(4)
+
 __order = {
     E:      1,
     ExI:    2,
@@ -517,36 +537,51 @@ def order(isometry, n = 0):
     try:
         return __order[isometry]
     except KeyError:
-        if isometry == Cn:
-            return n
+        if type(isometry) == type:
+            return isometry.n
         else:
             raise
 
 E.subgroups = [E]
 ExI.subgroups = [ExI, E]
+#TODO:
 Cn.subgroups = [Cn, E]
+C3.subgroups = [C2, E]
+C3.subgroups = [C3, E]
+C4.subgroups = [C4, C2, E]
 
-# Dn = D2, D1
-# Cn = C3
+# Dn = D2, (D1~C2)
+# Cn = C3, C2
 A4.subgroups = [A4,
         #Dn,
-        Cn, E
+        C3, C2, E
     ]
 
 # DnxI = D2xI, D1xI
 # CnxI = C3xI, C2xI
-# Dn = D2, D1
+# Dn = D2, (D1~C2)
 # Cn = C3
 A4xI.subgroups = [A4xI, A4,
         #DnxI, CnxI, Dn,
-        Cn, E
+        C3, C2, E
     ]
 
-# Dn = D4, D3, D2 (2x), D1
-# Cn = C4, C3, C2
+# Dn = D4, D3, D2 (2x), D1 (@ order 4)
+# Cn = C4, C3, C2 (@ order 2)
 S4.subgroups = [S4, A4,
         #Dn,
-        Cn, E
+        C4, C3, C2, E
+    ]
+
+# Dn = D2, (D1~C2)
+# Cn = C3, C2
+# D2nDn = D4D2
+# DnCn  = D3C3, D2C2
+# C2nCn = C4C2, C2C1
+S4A4.subgroups = [A4,
+        #D2nDn, DnCn, C2nCn,
+        #Dn, Cn
+        C3, C2, E
     ]
 
 if __name__ == '__main__':

@@ -676,15 +676,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
         this.groupsStrList = [c.__name__ for c in this.groupsList]
         this.Boxes.append(
-            wx.ListBox(this.panel, wx.ID_ANY,
+            wx.Choice(this.panel, wx.ID_ANY,
                 choices = this.groupsStrList,
                 style = wx.LB_SINGLE)
         )
         this.Boxes[-1].SetSelection(0)
         this.__SymmetryGuiIndex = len(this.Boxes) - 1
-        #this.panel.Bind(wx.EVT_LISTBOX_DCLICK,
-        #    this.onApplySymmetry, id = this.Boxes[-1].GetId())
-        this.panel.Bind(wx.EVT_LISTBOX,
+        this.panel.Bind(wx.EVT_CHOICE,
             this.onSetSymmetry, id = this.Boxes[-1].GetId())
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
@@ -692,15 +690,17 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def setList(this, groupsList):
         this.groupsList  = groupsList
-        this.Boxes[this.__SymmetryGuiIndex].Set(
-            [c.__name__ for c in groupsList]
-        )
+        # would be nice is wx.Choice has a SetItems()
+        this.Boxes[this.__SymmetryGuiIndex].Clear()
+        for c in groupsList:
+            this.Boxes[this.__SymmetryGuiIndex].Append(c.__name__)
         # Not so good: this requires that E should be last...
         this.Boxes[this.__SymmetryGuiIndex].SetSelection(len(groupsList)-1)
         this.addSetupGui()
         this.panel.Layout()
 
-    def getSymmetry(this):
+    def getSymmetryClass(this):
+        """returns a symmetry class"""
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
         return this.groupsList[Id]
 
@@ -715,7 +715,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.oriGuiBox = wx.StaticBox(this.panel, label = 'Symmetry Setup')
         this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
         this.oriGuis = []
-        sym = this.getSymmetry()
+        sym = this.getSymmetryClass()
         for init in sym.initPars:
             inputType = init['type']
             if inputType == 'vec3':
@@ -731,10 +731,18 @@ class SymmetrySelect(wx.StaticBoxSizer):
     def onSetSymmetry(this, e):
         this.addSetupGui()
         this.panel.Layout()
-        if this.onSymSelect != None: this.onSymSelect(this.getSymmetry())
+        if this.onSymSelect != None: this.onSymSelect(this.getSymmetryClass())
+
+    def getNorder(this):
+        sym = this.getSymmetryClass()
+        for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+            inputType = sym.initPars[i]['type']
+            if inputType == 'int': return gui.GetValue()
+        return 0
 
     def GetSelected(this):
-        sym = this.getSymmetry()
+        """returns a symmetry instance"""
+        sym = this.getSymmetryClass()
         setup = {}
         for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
             inputType = sym.initPars[i]['type']

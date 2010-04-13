@@ -60,7 +60,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((475, 550))
+        this.setDefaultSize((437, 550))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -106,31 +106,69 @@ class CtrlWin(wx.Frame):
         this.showGui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Stabiliser Symmetry',
-                this.showGui[this.__FinalSymGuiIndex].getSymmetry().subgroups,
+                this.showGui[this.__FinalSymGuiIndex].getSymmetryClass().subgroups,
             )
         )
         this.__StabSymGuiIndex = len(this.showGui) - 1
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Apply"))
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Apply Symmetry"))
         this.panel.Bind(
             wx.EVT_BUTTON, this.onApplySymmetry, id = this.showGui[-1].GetId())
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
+        this.ctrlSizer = ctrlSizer
         return ctrlSizer
+
+    def addColourGui(this):
+        try:
+            for gui in this.colGuis:
+                gui.Destroy()
+        except AttributeError:
+            this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
+            this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.HORIZONTAL)
+            this.ctrlSizer.Add(this.colSizer, 0, wx.EXPAND)
+        finalSym = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
+        stabSym = this.showGui[this.__StabSymGuiIndex].getSymmetryClass()
+        this.posColStabSym = []
+        nrOfCols           = []
+        for subSymGrp in finalSym.subgroups:
+            if stabSym in subSymGrp.subgroups:
+                print subSymGrp, 'can be used as subgroup for colouring'
+                this.posColStabSym.append(subSymGrp)
+                fo = isometry.order(finalSym)
+                if fo == 0:
+                    fo == isometry.order(finalSym,
+                            this.showGui[this.__FinalSymGuiIndex].getNorder()
+                        )
+                po = isometry.order(subSymGrp)
+                nrOfCols.append('%d' % (fo / po))
+        this.colGuis = []
+        this.colGuis.append(
+            wx.Choice(this.panel, wx.ID_ANY,
+                choices = nrOfCols,
+                style = wx.LB_SINGLE)
+        )
+        this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
+        this.colGuis.append(wx.Button(this.panel, wx.ID_ANY, "Apply Colours"))
+        #this.panel.Bind(
+        #    wx.EVT_BUTTON, this.onApplySymmetry, id = this.showGui[-1].GetId())
+        this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
 
     def onSymmetrySeleect(this, sym):
         this.showGui[this.__StabSymGuiIndex].setList(
-                this.showGui[this.__FinalSymGuiIndex].getSymmetry().subgroups,
+                this.showGui[this.__FinalSymGuiIndex].getSymmetryClass().subgroups,
             )
 
     def onApplySymmetry(this, e):
+        #print this.GetSize()
         Vs = this.showGui[this.__VsGuiIndex].GetVs()
         Fs = this.showGui[this.__FsGuiIndex].GetFs()
         if Fs == []:
             this.statusBar.SetStatusText(
                 "ERROR: No faces defined!"
             )
+            return
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
         try: quotientSet = finalSym  / stabSym
@@ -150,6 +188,9 @@ class CtrlWin(wx.Frame):
         this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = orbit)
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
+        this.addColourGui()
+        this.panel.Layout()
+        this.statusBar.SetStatusText("Symmetry applied: choose colours")
         e.Skip()
 
     # move to general class
