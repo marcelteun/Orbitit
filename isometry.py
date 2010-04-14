@@ -546,7 +546,7 @@ E.subgroups = [E]
 ExI.subgroups = [ExI, E]
 #TODO:
 Cn.subgroups = [Cn, E]
-C3.subgroups = [C2, E]
+C2.subgroups = [C2, E]
 C3.subgroups = [C3, E]
 C4.subgroups = [C4, C2, E]
 
@@ -578,7 +578,7 @@ S4.subgroups = [S4, A4,
 # D2nDn = D4D2
 # DnCn  = D3C3, D2C2
 # C2nCn = C4C2, C2C1
-S4A4.subgroups = [A4,
+S4A4.subgroups = [S4A4, A4,
         #D2nDn, DnCn, C2nCn,
         #Dn, Cn
         C3, C2, E

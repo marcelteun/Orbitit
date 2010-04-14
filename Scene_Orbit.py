@@ -25,6 +25,7 @@
 #
 
 import wx
+import wx.lib.colourselect as wxLibCS
 import math
 import rgb
 import Geom3D
@@ -122,8 +123,7 @@ class CtrlWin(wx.Frame):
 
     def addColourGui(this):
         try:
-            for gui in this.colGuis:
-                gui.Destroy()
+            this.colSizer.Clear(True)
         except AttributeError:
             this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
             this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.HORIZONTAL)
@@ -131,7 +131,7 @@ class CtrlWin(wx.Frame):
         finalSym = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
         stabSym = this.showGui[this.__StabSymGuiIndex].getSymmetryClass()
         this.posColStabSym = []
-        nrOfCols           = []
+        this.nrOfCols      = []
         for subSymGrp in finalSym.subgroups:
             if stabSym in subSymGrp.subgroups:
                 print subSymGrp, 'can be used as subgroup for colouring'
@@ -142,18 +142,16 @@ class CtrlWin(wx.Frame):
                             this.showGui[this.__FinalSymGuiIndex].getNorder()
                         )
                 po = isometry.order(subSymGrp)
-                nrOfCols.append('%d' % (fo / po))
+                this.nrOfCols.append('%d' % (fo / po))
         this.colGuis = []
         this.colGuis.append(
-            wx.Choice(this.panel, wx.ID_ANY,
-                choices = nrOfCols,
-                style = wx.LB_SINGLE)
+            wx.Choice(this.panel, wx.ID_ANY, choices = this.nrOfCols)
         )
         this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
-        this.colGuis.append(wx.Button(this.panel, wx.ID_ANY, "Apply Colours"))
-        #this.panel.Bind(
-        #    wx.EVT_BUTTON, this.onApplySymmetry, id = this.showGui[-1].GetId())
-        this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
+        this.panel.Bind(wx.EVT_CHOICE,
+            this.onNrColsSel, id = this.colGuis[-1].GetId())
+        this.colGuis[-1].SetSelection(0)
+        this.onNrColsSel(this.colGuis[-1])
 
     def onSymmetrySeleect(this, sym):
         this.showGui[this.__StabSymGuiIndex].setList(
@@ -192,6 +190,24 @@ class CtrlWin(wx.Frame):
         this.panel.Layout()
         this.statusBar.SetStatusText("Symmetry applied: choose colours")
         e.Skip()
+
+    def onNrColsSel(this, e):
+        try:
+            this.selColSizer.Clear(True)
+        except AttributeError:
+            this.selColSizer = wx.BoxSizer(wx.HORIZONTAL)
+            this.colSizer.Add(this.selColSizer, 0, wx.EXPAND)
+            pass
+        i = e.GetSelection()
+        colSyms = this.posColStabSym[i]
+        nrOfCols = int(this.nrOfCols[e.GetSelection()])
+        this.selColGuis = []
+        for i in range(nrOfCols):
+            this.selColGuis.append(wxLibCS.ColourSelect(this.panel, wx.ID_ANY))
+            this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
+        this.selColGuis.append(wx.Button(this.panel, wx.ID_ANY, "Apply Colours"))
+        this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
+        this.panel.Layout()
 
     # move to general class
     def setDefaultSize(this, size):

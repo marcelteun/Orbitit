@@ -676,9 +676,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
         this.groupsStrList = [c.__name__ for c in this.groupsList]
         this.Boxes.append(
-            wx.Choice(this.panel, wx.ID_ANY,
-                choices = this.groupsStrList,
-                style = wx.LB_SINGLE)
+            wx.Choice(this.panel, wx.ID_ANY, choices = this.groupsStrList)
         )
         this.Boxes[-1].SetSelection(0)
         this.__SymmetryGuiIndex = len(this.Boxes) - 1
