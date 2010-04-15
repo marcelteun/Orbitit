@@ -169,21 +169,32 @@ class CtrlWin(wx.Frame):
             return
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
-        try: quotientSet = finalSym  / stabSym
+        try: this.FsQuotientSet = finalSym  / stabSym
         except isometry.ImproperSubgroupError:
             this.statusBar.SetStatusText(
                 "ERROR: Stabiliser not a subgroup of final symmetry"
             )
             raise
 
-        #print 'quotientSet:'
-        #for coset in quotientSet:
+        #print 'this.FsQuotientSet:'
+        #for coset in this.FsQuotientSet:
         #    print '  - len(%d)' % len(coset)
         #    for isom in coset: print '   ', isom
-        orbit = [coset.getOne() for coset in quotientSet]
+        orbit = [coset.getOne() for coset in this.FsQuotientSet]
         print 'Applying an orbit of order %d' % len(orbit)
         #for isom in orbit: print isom
-        this.shape = Geom3D.SymmetricShape(Vs, Fs, directIsometries = orbit)
+        try:
+            tst = this.cols
+        except AttributeError:
+            this.cols = [(255, 100, 0)]
+        # prepare colour for SymmetricShape format
+        cols = [
+                ([[float(colCh)/255 for colCh in col]], [])
+                for col in this.cols
+            ]
+        this.shape = Geom3D.SymmetricShape(Vs, Fs,
+                directIsometries = orbit, colors = cols
+            )
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
         this.addColourGui()
@@ -202,12 +213,36 @@ class CtrlWin(wx.Frame):
         colSyms = this.posColStabSym[i]
         nrOfCols = int(this.nrOfCols[e.GetSelection()])
         this.selColGuis = []
+        initColour = (255, 255, 255)
         for i in range(nrOfCols):
-            this.selColGuis.append(wxLibCS.ColourSelect(this.panel, wx.ID_ANY))
+            try:
+                col = this.cols[i]
+            except IndexError:
+                # TODO: init this.cols with some (12?) nice init colours
+                col = initColour
+                this.cols.append(col)
+            this.selColGuis.append(
+                wxLibCS.ColourSelect(this.panel, wx.ID_ANY, colour = col)
+            )
+            this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
         this.selColGuis.append(wx.Button(this.panel, wx.ID_ANY, "Apply Colours"))
         this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
         this.panel.Layout()
+
+    def onColSel(this, e):
+        col = e.GetValue().Get()
+        guiId = e.GetId()
+        for i, gui in zip(range(len(this.selColGuis)), this.selColGuis):
+            if gui.GetId() == guiId:
+                print 'update %d with colour %s.' % (i, col)
+                this.cols[i] = col
+                this.updatShapeColours()
+                break
+
+    def updatShapeColours(this):
+        # apply symmetry on colours:
+        print 'TODO: gen colour quotientset and compare with face quotient set'
 
     # move to general class
     def setDefaultSize(this, size):

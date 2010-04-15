@@ -735,7 +735,7 @@ class SimpleShape:
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
             is used by glDraw
-        colors: A tuple that definEqlHeptCanvases the colour of the faces. The tuple consists
+        colors: A tuple that defines the colour of the faces. The tuple consists
                 of the following two items:
                 0. colour definitions:
                    defines the colours used in the shape. It should contain at
@@ -746,7 +746,7 @@ class SimpleShape:
                    index 'i' in Fs which colour index from the parameter color
                    is used for this face.  If empty then colors[0][0] shall be
                    used for each face.
-        colors: A string expressing the name. This name is used e.g. when
+        name: A string expressing the name. This name is used e.g. when
         exporting to other formats, like PS.
         """
         if this.dbgTrace:
