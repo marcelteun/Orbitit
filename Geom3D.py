@@ -2390,8 +2390,8 @@ class SymmetricShape(CompoundShape):
         CompoundShape.__init__(this, [this.baseShape], name = name)
         this.showBaseOnly = False
         this.setIsoOp(directIsometries, oppositeIsometry)
-        this.setFaceColorsPerIsometry(colors)
         this.unfoldOrbit = unfoldOrbit
+        this.setSymmetricFaceColors(colors)
         if unfoldOrbit: this.orbit()
 
     def setIsoOp(this,
@@ -2478,6 +2478,11 @@ class SymmetricShape(CompoundShape):
         this.setShapes(orbits)
         this.orbitNeeded = False
 
+    def setSymmetricFaceColors(this, colors):
+        this.shapeColors = colors
+        if this.unfoldOrbit:
+            this.setFaceColorsPerIsometry(colors)
+
     def setFaceColorsPerIsometry(this, colors):
         """
         Define the colours of the faces per isometry.
@@ -2490,7 +2495,6 @@ class SymmetricShape(CompoundShape):
         if colors == [([], [])]:
             colors = [([rgb.red[:]], [])]
         this.checkColorsPerIsometry(colors)
-        this.shapeColors = colors
         this.nrOfShapeColorDefs = len(colors)
         this.orbitNeeded = True
 
@@ -2654,11 +2658,18 @@ class SymmetricShape(CompoundShape):
                     this.orbit()
                 CompoundShape.glDraw(this)
             else:
-                for isom in this.isometryOperations['direct']:
+                l = len(this.shapeColors)
+                for i, isom in zip(
+                    range(len(this.isometryOperations['direct'])),
+                    this.isometryOperations['direct']
+                ):
                     glPushMatrix()
+                    #print 'i:', i, isom
                     glMultMatrixd(isom.glMatrix())
+                    this.baseShape.setFaceColors(this.shapeColors[i % l])
                     this.baseShape.glDraw()
                     glPopMatrix()
+                this.baseShape.setFaceColors(this.shapeColors[0])
 
     def toOffStr(this, precision=15, info = False):
         if this.orbitNeeded:

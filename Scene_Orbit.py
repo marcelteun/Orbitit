@@ -61,7 +61,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((437, 550))
+        this.setDefaultSize((437, 580))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -126,7 +126,7 @@ class CtrlWin(wx.Frame):
             this.colSizer.Clear(True)
         except AttributeError:
             this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
-            this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.HORIZONTAL)
+            this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.VERTICAL)
             this.ctrlSizer.Add(this.colSizer, 0, wx.EXPAND)
         finalSym = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
         stabSym = this.showGui[this.__StabSymGuiIndex].getSymmetryClass()
@@ -169,31 +169,26 @@ class CtrlWin(wx.Frame):
             return
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
-        try: this.FsQuotientSet = finalSym  / stabSym
+        try: fsQuotientSet = finalSym  / stabSym
         except isometry.ImproperSubgroupError:
             this.statusBar.SetStatusText(
                 "ERROR: Stabiliser not a subgroup of final symmetry"
             )
             raise
 
-        #print 'this.FsQuotientSet:'
-        #for coset in this.FsQuotientSet:
+        #print 'fsQuotientSet:'
+        #for coset in fsQuotientSet:
         #    print '  - len(%d)' % len(coset)
         #    for isom in coset: print '   ', isom
-        orbit = [coset.getOne() for coset in this.FsQuotientSet]
-        print 'Applying an orbit of order %d' % len(orbit)
-        #for isom in orbit: print isom
+        this.FsOrbit = [coset.getOne() for coset in fsQuotientSet]
+        print 'Applying an orbit of order %d' % len(this.FsOrbit)
+        #for isom in this.FsOrbit: print isom
         try:
             tst = this.cols
         except AttributeError:
             this.cols = [(255, 100, 0)]
-        # prepare colour for SymmetricShape format
-        cols = [
-                ([[float(colCh)/255 for colCh in col]], [])
-                for col in this.cols
-            ]
         this.shape = Geom3D.SymmetricShape(Vs, Fs,
-                directIsometries = orbit, colors = cols
+                directIsometries = this.FsOrbit
             )
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
@@ -208,10 +203,25 @@ class CtrlWin(wx.Frame):
         except AttributeError:
             this.selColSizer = wx.BoxSizer(wx.HORIZONTAL)
             this.colSizer.Add(this.selColSizer, 0, wx.EXPAND)
-            pass
-        i = e.GetSelection()
-        colSyms = this.posColStabSym[i]
-        nrOfCols = int(this.nrOfCols[e.GetSelection()])
+            nextPrevColSizer = wx.BoxSizer(wx.HORIZONTAL)
+            this.colGuis.append(
+                wx.Button(this.panel, wx.ID_ANY, "Previous Alternative"))
+            this.panel.Bind(
+                wx.EVT_BUTTON, this.onPrevColAlt, id = this.colGuis[-1].GetId())
+            nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
+            this.colGuis.append(
+                wx.Button(this.panel, wx.ID_ANY, "Next Alternative"))
+            this.panel.Bind(
+                wx.EVT_BUTTON, this.onNextColAlt, id = this.colGuis[-1].GetId())
+            nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
+            this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
+
+        id = e.GetSelection()
+        colSym = this.posColStabSym[id]
+        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
+        this.colIsom = finalSym.realiseSubgroups(colSym)
+        assert len(this.colIsom) != 0
+        nrOfCols = int(this.nrOfCols[id])
         this.selColGuis = []
         initColour = (255, 255, 255)
         for i in range(nrOfCols):
@@ -226,8 +236,8 @@ class CtrlWin(wx.Frame):
             )
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
-        this.selColGuis.append(wx.Button(this.panel, wx.ID_ANY, "Apply Colours"))
-        this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
+        this.colAlternative = 0
+        this.updatShapeColours()
         this.panel.Layout()
 
     def onColSel(this, e):
@@ -235,14 +245,39 @@ class CtrlWin(wx.Frame):
         guiId = e.GetId()
         for i, gui in zip(range(len(this.selColGuis)), this.selColGuis):
             if gui.GetId() == guiId:
-                print 'update %d with colour %s.' % (i, col)
+                #print 'update %d with colour %s.' % (i, col)
                 this.cols[i] = col
                 this.updatShapeColours()
                 break
 
     def updatShapeColours(this):
         # apply symmetry on colours:
-        print 'TODO: gen colour quotientset and compare with face quotient set'
+        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
+        #print 'finalSym', finalSym
+        #print 'this.colAlternative', this.colAlternative
+        #print 'the colIsom', this.colIsom[this.colAlternative]
+        colQuotientSet = finalSym  / this.colIsom[this.colAlternative]
+        #print 'colQuotientSet'
+        #print '-----colQuotientSet-----------'
+        #for isom in colQuotientSet: print isom
+        #print '------------------------------'
+        #print '--------FsOrbit---------------'
+        #for isom in this.FsOrbit: print isom
+        #print '------------------------------'
+        colPerIsom = []
+        for isom in this.FsOrbit:
+            for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
+                if isom in subSet:
+                    colPerIsom.append(this.cols[i])
+                    break;
+        #print 'colPerIsom', colPerIsom
+        cols = [
+                ([[float(colCh)/255 for colCh in col]], [])
+                for col in colPerIsom
+            ]
+        this.shape.setSymmetricFaceColors(cols)
+        this.canvas.paint()
+        #print 'TODO: gen colour quotientset and compare with face quotient set'
 
     # move to general class
     def setDefaultSize(this, size):
@@ -250,6 +285,18 @@ class CtrlWin(wx.Frame):
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
         this.SetSize(size)
+
+    def onNextColAlt(this, e):
+        this.colAlternative += 1
+        if this.colAlternative >= len(this.colIsom):
+            this.colAlternative -= this.colAlternative
+        this.updatShapeColours()
+
+    def onPrevColAlt(this, e):
+        this.colAlternative -= 1
+        if this.colAlternative < 0:
+            this.colAlternative += this.colAlternative
+        this.updatShapeColours()
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):

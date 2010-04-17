@@ -3,8 +3,8 @@
 import math
 
 turn      = lambda r: r * 2 * math.pi
-degrees   = lambda r: math.pi * r / 180
-toDegrees = lambda r: 180.0 * r   / math.pi
+radials   = lambda r: math.pi * r / 180
+degrees   = lambda r: 180.0 * r   / math.pi
 
 fullTurn = turn(1)
 hTurn    = turn(0.5)
@@ -461,7 +461,9 @@ class Transform3(tuple):
         )
 
     def __strRot(t):
-        str = 'Rotation of %s rad around %s' % (t.angleRot(), t.axisRot())
+        str = 'Rotation of %s degrees around %s' % (
+                degrees(t.angleRot()), t.axisRot()
+            )
         return str
 
     def angleRot(t):
@@ -573,8 +575,8 @@ class Transform3(tuple):
 
     def __strRotInv(t):
         r = t.I()
-        str = 'Rotary inversion of %s rad around %s' % (
-                r.angleRot(), r.axisRot()
+        str = 'Rotary inversion of %s degrees around %s' % (
+                degrees(r.angleRot()), r.axisRot()
             )
         return str
 
