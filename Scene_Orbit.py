@@ -107,7 +107,9 @@ class CtrlWin(wx.Frame):
         this.showGui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Stabiliser Symmetry',
-                this.showGui[this.__FinalSymGuiIndex].getSymmetryClass().subgroups,
+                this.showGui[
+                    this.__FinalSymGuiIndex
+                ].getSymmetryClass(applyOrder = True).subgroups,
             )
         )
         this.__StabSymGuiIndex = len(this.showGui) - 1
@@ -128,8 +130,12 @@ class CtrlWin(wx.Frame):
             this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
             this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.VERTICAL)
             this.ctrlSizer.Add(this.colSizer, 0, wx.EXPAND)
-        finalSym = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
-        stabSym = this.showGui[this.__StabSymGuiIndex].getSymmetryClass()
+        finalSym = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass(
+                applyOrder = True
+            )
+        stabSym = this.showGui[this.__StabSymGuiIndex].getSymmetryClass(
+                applyOrder = True
+            )
         this.posColStabSym = []
         this.nrOfCols      = []
         for subSymGrp in finalSym.subgroups:
@@ -137,10 +143,7 @@ class CtrlWin(wx.Frame):
                 print subSymGrp, 'can be used as subgroup for colouring'
                 this.posColStabSym.append(subSymGrp)
                 fo = isometry.order(finalSym)
-                if fo == 0:
-                    fo == isometry.order(finalSym,
-                            this.showGui[this.__FinalSymGuiIndex].getNorder()
-                        )
+                assert fo != 0
                 po = isometry.order(subSymGrp)
                 this.nrOfCols.append('%d' % (fo / po))
         this.colGuis = []

@@ -697,10 +697,22 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.addSetupGui()
         this.panel.Layout()
 
-    def getSymmetryClass(this):
+    def getSymmetryClass(this, applyOrder = True):
         """returns a symmetry class"""
+        #print 'getSymmetryClass'
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
-        return this.groupsList[Id]
+        selClass = this.groupsList[Id]
+        if applyOrder:
+            if selClass == isometry.Cn:
+                assert selClass.initPars[0]['type'] == 'int', (
+                    'The first index should specify the Cn-order')
+                n = this.oriGuis[0].GetValue()
+                if n > 0:
+                    selClass = isometry.C(this.oriGuis[0].GetValue())
+                elif n == 1:
+                    selClass = C1
+        #print 'return', selClass
+        return selClass
 
     def addSetupGui(this):
         # TODO: save initial values and reapply if selected again...
@@ -713,7 +725,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.oriGuiBox = wx.StaticBox(this.panel, label = 'Symmetry Setup')
         this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
         this.oriGuis = []
-        sym = this.getSymmetryClass()
+        sym = this.getSymmetryClass(applyOrder = False)
         for init in sym.initPars:
             inputType = init['type']
             if inputType == 'vec3':
@@ -729,18 +741,12 @@ class SymmetrySelect(wx.StaticBoxSizer):
     def onSetSymmetry(this, e):
         this.addSetupGui()
         this.panel.Layout()
-        if this.onSymSelect != None: this.onSymSelect(this.getSymmetryClass())
-
-    def getNorder(this):
-        sym = this.getSymmetryClass()
-        for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
-            inputType = sym.initPars[i]['type']
-            if inputType == 'int': return gui.GetValue()
-        return 0
+        if this.onSymSelect != None:
+            this.onSymSelect(this.getSymmetryClass(applyOrder = False))
 
     def GetSelected(this):
         """returns a symmetry instance"""
-        sym = this.getSymmetryClass()
+        sym = this.getSymmetryClass(applyOrder = False)
         setup = {}
         for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
             inputType = sym.initPars[i]['type']

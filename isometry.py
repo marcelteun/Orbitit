@@ -204,6 +204,10 @@ class E(Set):
     def __init__(this, isometries = None, setup = {}):
             Set.__init__(this, [GeomTypes.E])
 
+    def realiseSubgroups(this, sg):
+        assert isinstance(sg, type)
+        return [E()]
+
 C1 = E
 
 class ExI(Set):
@@ -212,6 +216,12 @@ class ExI(Set):
     def __init__(this, isometries = None, setup = {}):
             Set.__init__(this, [GeomTypes.E, GeomTypes.I])
 
+    def realiseSubgroups(this, sg):
+        assert isinstance(sg, type)
+        if sg == ExI:
+            return [this]
+        else: # assume E
+            return [E()]
 
 C1xI = ExI
 
@@ -256,62 +266,58 @@ class Cn(Set):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
 
-def generateD2(o2axis0, o2axis1):
-    """
-    Returns 3 orthogonal halfturns for D2
-    """
-    # if axes is specified as a transform:
-    if isinstance(o2axis0, GeomTypes.Transform3):
-        o2axis0 = o2axis0.axis()
-    if isinstance(o2axis1, GeomTypes.Transform3):
-        o2axis1 = o2axis1.axis()
-    assert GeomTypes.eq(GeomTypes.Vec3(o2axis0) * GeomTypes.Vec3(o2axis1), 0), (
-            "Error: axes not orthogonal")
-    H0 = GeomTypes.HalfTurn3(o2axis0)
-    H1 = GeomTypes.Rot3(axis = o2axis1, angle = hTurn)
-    return (H0, H1, H1 * H0)
+    def realiseSubgroups(this, sg):
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        if sg == Cn:
+            if sg.n == this.n:
+                return [this]
+            elif sg.n > this.n:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif sgName[0] == 'C':
+            try: # Cn
+                n = int(sgName[1:])
+                if n == this.n:
+                    return [this]
+                elif n > this.n:
+                    return []
+                else:
+                    assert False, 'TODO'
+                    return [E()]
+            except ValueError:
+                # try CnxI
+                if sgName[-2:] == 'xI':
+                    try: # CnxI
+                        n = int(sgName[1:-2])
+                    except ValueError:
+                        assert False, 'TODO'
+                        pass #TODO
+                        # try C2nxCn
+        else: # assume E
+            return [E()]
 
-def generateA4O3(D2HalfTurns):
-    """
-    Returns a tuple (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3,
-    R4_2_3)
+# dynamically create Cn classes:
+def C(n):
+    C_n = type('C%d' % n, (Cn,),
+            {
+                'n': n,
+                'initPars': [{
+                        'type': 'vec3',
+                        'par': 'axis',
+                        'lab': "%d-fold axis" % n
+                    }]
+            }
+        )
+    # TODO: fix me:
+    C_n.subgroups = [C_n, E]
+    return C_n
 
-    D2HalfTurns: tuple containing H0, H1, H2
-    """
-    H0, H1, H2 = D2HalfTurns
-
-    # the one order 3 rotation axis, is obtained as follows:
-    # imagine A4 is part of S4 positioned in a cube
-    # H0, H1, H2 go through the cube face centres
-    # define a quarter turn around H2
-    Q = GeomTypes.Rot3(axis = H2.axis(), angle = qTurn)
-    # h0 and h1 go through cube edge centres
-    h0 = Q * H0
-    h1 = Q * H1
-    # o3axis goes through 1 of the 2 cube vertices that form the edge
-    # between the faces which centres are on H0 and H1
-    o3axis = GeomTypes.Rot3(
-            axis = h0.axis(), angle = asin_1_V3
-        ) * h1.axis()
-    # R1_1_3: 1/3 rotation around the first order 3 axis
-    # R1_2_3: 2/3 rotation around the first order 3 axis
-    R1_1_3 = GeomTypes.Rot3(axis = o3axis, angle = tTurn)
-    R1_2_3 = GeomTypes.Rot3(axis = o3axis, angle = 2*tTurn)
-    R4_1_3 = R1_1_3 * H0
-    R3_1_3 = R1_1_3 * H1
-    R2_1_3 = R1_1_3 * H2
-    R2_2_3 = R1_2_3 * H0
-    R4_2_3 = R1_2_3 * H1
-    R3_2_3 = R1_2_3 * H2
-    # print 'R1_1_3', R1_1_3
-    # print 'R1_2_3', R1_2_3
-    # print 'R2_1_3', R2_1_3
-    # print 'R2_2_3', R2_2_3
-    # print 'R3_1_3', R3_1_3
-    # print 'R3_2_3', R3_2_3
-    # print 'R4_1_3', R4_1_3
-    # print 'R5_2_3', R4_2_3
-    return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
+C2 = C(2)
+C3 = C(3)
+C4 = C(4)
 
 class A4(Set):
     initPars = [
@@ -577,21 +583,62 @@ class S4(Set):
                     h0, h1, h2, h3, h4, h5
                 ])
 
-# dynamically create Cn classes:
-C = lambda n: type('C%d' % n, (Cn,),
-        {
-            'n': n,
-            'initPars': [{
-                    'type': 'vec3',
-                    'par': 'axis',
-                    'lab': "%d-fold axis" % n
-                }]
-        }
-    )
+def generateD2(o2axis0, o2axis1):
+    """
+    Returns 3 orthogonal halfturns for D2
+    """
+    # if axes is specified as a transform:
+    if isinstance(o2axis0, GeomTypes.Transform3):
+        o2axis0 = o2axis0.axis()
+    if isinstance(o2axis1, GeomTypes.Transform3):
+        o2axis1 = o2axis1.axis()
+    assert GeomTypes.eq(GeomTypes.Vec3(o2axis0) * GeomTypes.Vec3(o2axis1), 0), (
+            "Error: axes not orthogonal")
+    H0 = GeomTypes.HalfTurn3(o2axis0)
+    H1 = GeomTypes.Rot3(axis = o2axis1, angle = hTurn)
+    return (H0, H1, H1 * H0)
 
-C2 = C(2)
-C3 = C(3)
-C4 = C(4)
+def generateA4O3(D2HalfTurns):
+    """
+    Returns a tuple (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3,
+    R4_2_3)
+
+    D2HalfTurns: tuple containing H0, H1, H2
+    """
+    H0, H1, H2 = D2HalfTurns
+
+    # the one order 3 rotation axis, is obtained as follows:
+    # imagine A4 is part of S4 positioned in a cube
+    # H0, H1, H2 go through the cube face centres
+    # define a quarter turn around H2
+    Q = GeomTypes.Rot3(axis = H2.axis(), angle = qTurn)
+    # h0 and h1 go through cube edge centres
+    h0 = Q * H0
+    h1 = Q * H1
+    # o3axis goes through 1 of the 2 cube vertices that form the edge
+    # between the faces which centres are on H0 and H1
+    o3axis = GeomTypes.Rot3(
+            axis = h0.axis(), angle = asin_1_V3
+        ) * h1.axis()
+    # R1_1_3: 1/3 rotation around the first order 3 axis
+    # R1_2_3: 2/3 rotation around the first order 3 axis
+    R1_1_3 = GeomTypes.Rot3(axis = o3axis, angle = tTurn)
+    R1_2_3 = GeomTypes.Rot3(axis = o3axis, angle = 2*tTurn)
+    R4_1_3 = R1_1_3 * H0
+    R3_1_3 = R1_1_3 * H1
+    R2_1_3 = R1_1_3 * H2
+    R2_2_3 = R1_2_3 * H0
+    R4_2_3 = R1_2_3 * H1
+    R3_2_3 = R1_2_3 * H2
+    # print 'R1_1_3', R1_1_3
+    # print 'R1_2_3', R1_2_3
+    # print 'R2_1_3', R2_1_3
+    # print 'R2_2_3', R2_2_3
+    # print 'R3_1_3', R3_1_3
+    # print 'R3_2_3', R3_2_3
+    # print 'R4_1_3', R4_1_3
+    # print 'R5_2_3', R4_2_3
+    return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
 
 __order = {
     E:      1,
@@ -614,9 +661,6 @@ E.subgroups = [E]
 ExI.subgroups = [ExI, E]
 #TODO:
 Cn.subgroups = [Cn, E]
-C2.subgroups = [C2, E]
-C3.subgroups = [C3, E]
-C4.subgroups = [C4, C2, E]
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
