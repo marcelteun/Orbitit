@@ -260,7 +260,6 @@ class CtrlWin(wx.Frame):
         #print 'this.colAlternative', this.colAlternative
         #print 'the colIsom', this.colIsom[this.colAlternative]
         colQuotientSet = finalSym  / this.colIsom[this.colAlternative]
-        #print 'colQuotientSet'
         #print '-----colQuotientSet-----------'
         #for isom in colQuotientSet: print isom
         #print '------------------------------'

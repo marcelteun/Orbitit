@@ -220,8 +220,9 @@ class ExI(Set):
         assert isinstance(sg, type)
         if sg == ExI:
             return [this]
-        else: # assume E
+        elif sq == E:
             return [E()]
+        else: raise ImproperSubgroupError
 
 C1xI = ExI
 
@@ -296,8 +297,9 @@ class Cn(Set):
                         assert False, 'TODO'
                         pass #TODO
                         # try C2nxCn
-        else: # assume E
+        elif sq == E:
             return [E()]
+        else: raise ImproperSubgroupError
 
 # dynamically create Cn classes:
 def C(n):
@@ -311,7 +313,7 @@ def C(n):
                     }]
             }
         )
-    # TODO: fix me:
+    # TODO: fix subgroups depending on n:
     C_n.subgroups = [C_n, E]
     return C_n
 
@@ -378,8 +380,9 @@ class A4(Set):
             return [C3(setup = {'axis': a}) for a in o3a]
         elif sg == A4:
             return [this]
-        else: # assume E
+        elif sq == E:
             return [E()]
+        else: raise ImproperSubgroupError
 
 class S4A4(A4):
     initPars = [
@@ -478,8 +481,9 @@ class S4A4(A4):
             ]
         elif sg == S4A4:
             return [this]
-        else: # assume E
+        elif sq == E:
             return [E()]
+        else: raise ImproperSubgroupError
 
 class A4xI(A4):
     initPars = [
@@ -509,6 +513,31 @@ class A4xI(A4):
         else:
             a4 = A4(setup = setup)
             Set.__init__(this, a4 * ExI())
+            this.rotAxes = a4.rotAxes
+
+    def realiseSubgroups(this, sg):
+        assert isinstance(sg, type)
+        if sg == C2:
+            o2a = this.rotAxes['2']
+            return [C2(setup = {'axis': a}) for a in o2a]
+        elif sg == C3:
+            o3a = this.rotAxes['3']
+            return [C3(setup = {'axis': a}) for a in o3a]
+        elif sg == A4:
+            # the other ways of orienting A4 into A4xI doesn't give anything new
+            return [
+                A4(
+                    setup = {
+                        'o2axis0': this.rotAxes['2'][0],
+                        'o2axis1': this.rotAxes['2'][1]
+                    }
+                )
+            ]
+        elif sg == A4xI:
+            return [this]
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError
 
 class S4(Set):
     initPars = [
