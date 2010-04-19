@@ -99,11 +99,13 @@ class Set(set):
                 if len(subgroup) < len(this):
                     subgroup.group()
                 elif len(subgroup) > len(this):
-                    raise ImproperSubgroupError
+                    raise ImproperSubgroupError, '%s not <= %s (with this orientation)' % (
+                        o.__class__.__name__, this.__class__.__name__)
                 return subgroup
         #except ImproperSubgroupError:
         except AssertionError:
-            raise ImproperSubgroupError
+            raise ImproperSubgroupError, '%s not <= %s (with this orientation)' % (
+                o.__class__.__name__, this.__class__.__name__)
 
     def __div__(this, o):
         # this * subgroup: right quotient set
@@ -222,7 +224,8 @@ class ExI(Set):
             return [this]
         elif sq == E:
             return [E()]
-        else: raise ImproperSubgroupError
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
 
 C1xI = ExI
 
@@ -299,7 +302,8 @@ class Cn(Set):
                         # try C2nxCn
         elif sq == E:
             return [E()]
-        else: raise ImproperSubgroupError
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create Cn classes:
 def C(n):
@@ -382,7 +386,8 @@ class A4(Set):
             return [this]
         elif sq == E:
             return [E()]
-        else: raise ImproperSubgroupError
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
 
 class S4A4(A4):
     initPars = [
@@ -473,17 +478,13 @@ class S4A4(A4):
             o2a = this.rotAxes['2']
             return [
                 A4(setup = {'o2axis0': o2a[0], 'o2axis1': o2a[1]}),
-                A4(setup = {'o2axis0': o2a[1], 'o2axis1': o2a[0]}),
-                A4(setup = {'o2axis0': o2a[0], 'o2axis1': o2a[2]}),
-                A4(setup = {'o2axis0': o2a[2], 'o2axis1': o2a[0]}),
-                A4(setup = {'o2axis0': o2a[1], 'o2axis1': o2a[2]}),
-                A4(setup = {'o2axis0': o2a[2], 'o2axis1': o2a[1]}),
             ]
         elif sg == S4A4:
             return [this]
         elif sq == E:
             return [E()]
-        else: raise ImproperSubgroupError
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
 
 class A4xI(A4):
     initPars = [
@@ -537,7 +538,8 @@ class A4xI(A4):
             return [this]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
 
 class S4(Set):
     initPars = [
@@ -570,7 +572,7 @@ class S4(Set):
             if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
             else:                 o4axis1 = Y[:]
             d2 = generateD2(o4axis0, o4axis1)
-            R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
+            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
             q0_2, q1_2, q2_2 = d2
             ax0 = q0_2.axis()
             ax1 = q1_2.axis()
@@ -608,9 +610,47 @@ class S4(Set):
             Set.__init__(this, [
                     GeomTypes.E,
                     q0_1, q0_2, q0_3, q1_1, q1_2, q1_3, q2_1, q2_2, q2_3,
-                    R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2,
+                    r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2,
                     h0, h1, h2, h3, h4, h5
                 ])
+            this.rotAxes = {
+                    '2': [h0.axis(), h1.axis(), h2.axis(),
+                            h3.axis(), h4.axis(), h5.axis()
+                        ],
+                    '3': [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
+                    '4': [ax0, ax1, ax2]
+                }
+
+    def realiseSubgroups(this, sg):
+        assert isinstance(sg, type)
+        if sg == C2:
+            o2a = this.rotAxes['2']
+            o4a = this.rotAxes['4']
+            return [C2(setup = {'axis': a}) for a in o2a].extend(
+                    [C2(setup = {'axis': a}) for a in o4a]
+                )
+        elif sg == C3:
+            o3a = this.rotAxes['3']
+            return [C3(setup = {'axis': a}) for a in o3a]
+        elif sg == C4:
+            o4a = this.rotAxes['4']
+            return [C4(setup = {'axis': a}) for a in o4a]
+        elif sg == A4:
+            # the other ways of orienting A4 into A4xI doesn't give anything new
+            return [
+                A4(
+                    setup = {
+                        'o2axis0': this.rotAxes['4'][0],
+                        'o2axis1': this.rotAxes['4'][1]
+                    }
+                )
+            ]
+        elif sg == S4:
+            return [this]
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
 
 def generateD2(o2axis0, o2axis1):
     """
