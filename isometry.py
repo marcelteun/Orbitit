@@ -93,7 +93,8 @@ class Set(set):
             else:
                 # o is already a set
                 for e in o:
-                    assert e in this
+                    assert e in this, '%s not in %s' % (e,
+                        this.__class__.__name__)
                 subgroup = copy(o)
                 # for optimisation: don't call group (slow) for this == o:
                 if len(subgroup) < len(this):
@@ -207,6 +208,9 @@ class E(Set):
             Set.__init__(this, [GeomTypes.E])
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         return [E()]
 
@@ -219,6 +223,9 @@ class ExI(Set):
             Set.__init__(this, [GeomTypes.E, GeomTypes.I])
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         if sg == ExI:
             return [this]
@@ -269,8 +276,12 @@ class Cn(Set):
             for i in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
+            this.axis = axis
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         sgName = sg.__name__
         if sg == Cn:
@@ -291,15 +302,9 @@ class Cn(Set):
                 else:
                     assert False, 'TODO'
                     return [E()]
-            except ValueError:
-                # try CnxI
-                if sgName[-2:] == 'xI':
-                    try: # CnxI
-                        n = int(sgName[1:-2])
-                    except ValueError:
-                        assert False, 'TODO'
-                        pass #TODO
-                        # try C2nxCn
+            except ValueError: # caused by int() function, eg for CnxI
+                raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
         elif sq == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
@@ -324,6 +329,101 @@ def C(n):
 C2 = C(2)
 C3 = C(3)
 C4 = C(4)
+
+class CnxI(Cn):
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group CnxI, consisting of n rotations and of n rotary
+        inversions (reflections)
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with 
+          0 <= i < n)
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            keys = setup.keys()
+            if 'axis' in keys: axis = setup['axis']
+            else:              axis = Z[:]
+            if this.n != 0: n = this.n/2
+            else:
+                if 'n' in keys: n = setup['n']
+                else:           n = 2
+                if n == 0: n = 1
+                this.n = 2*n
+            this.axis = axis
+            cn = Cn(setup = {'axis': axis, 'n': n})
+            Set.__init__(this, cn * ExI())
+            this.axis = cn.axis
+            this.n = 2 * cn.n
+
+    # TODO:
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        if sg == CnxI:
+            if sg.n == this.n:
+                return [this]
+            elif sg.n > this.n:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif sgName[0] == 'C':
+            if sgName[-2:] == 'xI': # CnxI
+                try: # Cn
+                    n = sg.n
+                    if n == this.n:
+                        return [this]
+                    elif n > this.n:
+                        return []
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, n)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+            else: # Cn
+                try: # CnxI
+                    n = int(sgName[1:])
+                except ValueError: # caused by int() function
+                    assert False, 'TODO'
+                    pass #TODO
+                    # try C2nxCn
+
+        elif sq == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
+
+# dynamically create Cn classes:
+def CxI(n):
+    C_nxI = type('C%dxI' % n, (CnxI,),
+            {
+                'n': 2*n,
+                'initPars': [{
+                        'type': 'vec3',
+                        'par': 'axis',
+                        'lab': "%d-fold axis" % n
+                    }]
+            }
+        )
+    # TODO: fix subgroups depending on n:
+    C_nxI.subgroups = [C_nxI, E]
+    return C_nxI
+
+C2xI = CxI(2)
+C3xI = CxI(3)
+C4xI = CxI(4)
 
 class A4(Set):
     initPars = [
@@ -375,6 +475,9 @@ class A4(Set):
                 }
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         if sg == C2:
             o2a = this.rotAxes['2']
@@ -465,6 +568,9 @@ class S4A4(A4):
                 }
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         #S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
         #C3, C2, E
@@ -517,6 +623,9 @@ class A4xI(A4):
             this.rotAxes = a4.rotAxes
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         if sg == C2:
             o2a = this.rotAxes['2']
@@ -524,6 +633,12 @@ class A4xI(A4):
         elif sg == C3:
             o3a = this.rotAxes['3']
             return [C3(setup = {'axis': a}) for a in o3a]
+        if sg == C2xI:
+            o2a = this.rotAxes['2']
+            return [C2xI(setup = {'axis': a}) for a in o2a]
+        elif sg == C3xI:
+            o3a = this.rotAxes['3']
+            return [C3xI(setup = {'axis': a}) for a in o3a]
         elif sg == A4:
             # the other ways of orienting A4 into A4xI doesn't give anything new
             return [
@@ -622,6 +737,9 @@ class S4(Set):
                 }
 
     def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
         assert isinstance(sg, type)
         if sg == C2:
             o2a = this.rotAxes['2']
@@ -717,7 +835,7 @@ __order = {
     S4A4:  24,
     S4:    24,
 }
-def order(isometry, n = 0):
+def order(isometry):
     try:
         return __order[isometry]
     except KeyError:
@@ -730,6 +848,7 @@ E.subgroups = [E]
 ExI.subgroups = [ExI, E]
 #TODO:
 Cn.subgroups = [Cn, E]
+CnxI.subgroups = [CnxI, Cn, E]
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
@@ -743,7 +862,8 @@ A4.subgroups = [A4,
 # Dn = D2, (D1~C2)
 # Cn = C3
 A4xI.subgroups = [A4xI, A4,
-        #DnxI, CnxI, Dn,
+        #TODO: DnxI, Dn,
+        C3xI, C2xI,
         C3, C2, E
     ]
 

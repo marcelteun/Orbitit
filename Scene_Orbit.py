@@ -145,6 +145,7 @@ class CtrlWin(wx.Frame):
                 fo = isometry.order(finalSym)
                 assert fo != 0
                 po = isometry.order(subSymGrp)
+                assert po != 0
                 this.nrOfCols.append('%d' % (fo / po))
         this.colGuis = []
         this.colGuis.append(
