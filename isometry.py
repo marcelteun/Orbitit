@@ -203,7 +203,7 @@ def setup(**kwargs): return kwargs
 
 class E(Set):
     initPars = []
-    n = 1
+    order = 1
     def __init__(this, isometries = None, setup = {}):
             Set.__init__(this, [GeomTypes.E])
 
@@ -218,7 +218,7 @@ C1 = E
 
 class ExI(Set):
     initPars = []
-    n = 2
+    order = 2
     def __init__(this, isometries = None, setup = {}):
             Set.__init__(this, [GeomTypes.E, GeomTypes.I])
 
@@ -229,7 +229,7 @@ class ExI(Set):
         assert isinstance(sg, type)
         if sg == ExI:
             return [this]
-        elif sq == E:
+        elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
@@ -241,7 +241,7 @@ class Cn(Set):
         {'type': 'int', 'par': 'n',    'lab': "order"},
         {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
     ]
-    n = 0
+    order = 0
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group Cn, consisting of n rotations
@@ -259,13 +259,14 @@ class Cn(Set):
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
             else:              axis = Z[:]
-            if this.n != 0: n = this.n
+            if this.order != 0: n = this.order
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
                 if n == 0: n = 1
-                this.n = n
+                this.order = n
 
+            if n == 1: return E()
             angle = 2 * math.pi / n
             try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
             except TypeError:
@@ -276,7 +277,7 @@ class Cn(Set):
             for i in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
-            this.axis = axis
+            this.rotAxes = {'n': axis}
 
     def realiseSubgroups(this, sg):
         """
@@ -285,9 +286,9 @@ class Cn(Set):
         assert isinstance(sg, type)
         sgName = sg.__name__
         if sg == Cn:
-            if sg.n == this.n:
+            if sg.order == this.order:
                 return [this]
-            elif sg.n > this.n:
+            elif sg.order > this.order:
                 return []
             else:
                 assert False, 'TODO'
@@ -295,9 +296,9 @@ class Cn(Set):
         elif sgName[0] == 'C':
             try: # Cn
                 n = int(sgName[1:])
-                if n == this.n:
+                if n == this.order:
                     return [this]
-                elif n > this.n:
+                elif n > this.order:
                     return []
                 else:
                     assert False, 'TODO'
@@ -305,16 +306,17 @@ class Cn(Set):
             except ValueError: # caused by int() function, eg for CnxI
                 raise ImproperSubgroupError, '%s ! <= %s' % (
                         this.__class__.__name__, sg.__class__.__name__)
-        elif sq == E:
+        elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create Cn classes:
 def C(n):
+    if n == 1: return E
     C_n = type('C%d' % n, (Cn,),
             {
-                'n': n,
+                'order': n,
                 'initPars': [{
                         'type': 'vec3',
                         'par': 'axis',
@@ -351,19 +353,17 @@ class CnxI(Cn):
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
             else:              axis = Z[:]
-            if this.n != 0: n = this.n/2
+            if this.order != 0: n = this.order/2
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
                 if n == 0: n = 1
-                this.n = 2*n
-            this.axis = axis
+            if n == 1: return ExI()
             cn = Cn(setup = {'axis': axis, 'n': n})
             Set.__init__(this, cn * ExI())
-            this.axis = cn.axis
-            this.n = 2 * cn.n
+            this.rotAxes = {'n': axis}
+            this.order = 2 * n
 
-    # TODO:
     def realiseSubgroups(this, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
@@ -371,9 +371,9 @@ class CnxI(Cn):
         assert isinstance(sg, type)
         sgName = sg.__name__
         if sg == CnxI:
-            if sg.n == this.n:
+            if sg.order == this.order:
                 return [this]
-            elif sg.n > this.n:
+            elif sg.order > this.order:
                 return []
             else:
                 assert False, 'TODO'
@@ -381,13 +381,13 @@ class CnxI(Cn):
         elif sgName[0] == 'C':
             if sgName[-2:] == 'xI': # CnxI
                 try: # Cn
-                    n = sg.n
-                    if n == this.n:
+                    order = sg.order
+                    if order == this.order:
                         return [this]
-                    elif n > this.n:
+                    elif order > this.order:
                         return []
                     else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, n)
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
                         return [E()]
                 except ValueError: # caused by int() function
                     raise ImproperSubgroupError, '%s ! <= %s' % (
@@ -400,16 +400,17 @@ class CnxI(Cn):
                     pass #TODO
                     # try C2nxCn
 
-        elif sq == E:
+        elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
-# dynamically create Cn classes:
+# dynamically create CnxI classes:
 def CxI(n):
+    if n == 1: return ExI
     C_nxI = type('C%dxI' % n, (CnxI,),
             {
-                'n': 2*n,
+                'order': 2 * n,
                 'initPars': [{
                         'type': 'vec3',
                         'par': 'axis',
@@ -425,12 +426,141 @@ C2xI = CxI(2)
 C3xI = CxI(3)
 C4xI = CxI(4)
 
+class Dn(Set):
+    initPars = [
+        {'type': 'int',  'par': 'n',    'lab': "order"},
+        {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
+        {'type': 'vec3', 'par': 'axis_2', 'lab': "axis of halfturn"}
+    ]
+    order = 0
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group Dn, consisting of 2n rotations
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n halfturns around axes perpendicular to the n-fold axis
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            keys = setup.keys()
+            if 'axis_n' in keys: axis_n = setup['axis_n']
+            else:                axis_n = Z[:]
+            if 'axis_2' in keys: axis_2 = setup['axis_2']
+            else:                axis_2 = X[:]
+            if this.order != 0: n = this.order/2
+            else:
+                if 'n' in keys: n = setup['n']
+                else:           n = 2
+                if n == 0: n = 1
+
+            if n == 1:
+                # D1 ~= C2 : {E, halfturn}
+                return C2(setup = {'axis': axis_2})
+            h = GeomTypes.HalfTurn3(axis_2)
+            cn = Cn(setup = {'axis': axis_n, 'n': n})
+            isometries = [isom for isom in cn]
+            hs = [isom * h for isom in cn]
+            isometries.extend(hs)
+            this.rotAxes = {'n': axis_n, 2: [h.axis() for h in hs]}
+            Set.__init__(this, isometries)
+            this.order = 2 * n
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        if sg == Dn:
+            if sg.order == this.order:
+                return [this]
+            elif sg.order > this.order:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif sgName[0] == 'D':
+            try: # Dn
+                n = int(sgName[1:])
+                if 2*n == this.order:
+                    return [this]
+                elif 2*n > this.order:
+                    return []
+                else:
+                    assert False, 'TODO'
+                    return [E()]
+            except ValueError: # caused by int() function, eg for DnxI
+                raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+        elif sgName[0] == 'C':
+            try: # Cn
+                n = int(sgName[1:])
+                assert n > 1, 'warning'
+                if n == 2: # sg = C2
+                    # only one halfturn needed (other orientation are
+                    # essentialy the same
+                    isoms = [C2(setup = {'axis':this.rotAxes[2][0]})]
+                    if this.order % 4 == 0: # if D2, D4, etc
+                        isoms.append(
+                            Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
+                        )
+                    return isoms
+                elif 2*n == this.order:
+                    # the other orientation is essentialy the same
+                    return [Cn(setup = {'n': n, 'axis': this.rotAxes['n']})]
+                elif 2*n > this.order:
+                    return []
+                else:
+                    assert False, 'TODO'
+                    return [E()]
+            except ValueError: # caused by int() function, eg for CnxI
+                raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+        elif sg == E:
+            return [E()]
+
+# dynamically create Dn classes:
+def D(n):
+    if n == 1: return C2
+    D_n = type('D%d' % n, (Dn,),
+            {
+                'order': 2 * n,
+                'initPars': [
+                        {
+                            'type': 'vec3',
+                            'par': 'axis_n',
+                            'lab': "%d-fold axis" % n
+                        }, {
+                            'type': 'vec3',
+                            'par': 'axis_2',
+                            'lab': "axis of halfturn"
+                        }
+                    ]
+            }
+        )
+    # TODO: fix subgroups depending on n:
+    if n == 2:
+        D_n.subgroups = [D_n, C2, E]
+    else:
+        D_n.subgroups = [D_n, C(n), C2, E]
+    return D_n
+
+D2 = D(2)
+D3 = D(3)
+D4 = D(4)
+
 class A4(Set):
     initPars = [
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
         {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
     ]
-    n = 12
+    order = 12
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 12 rotations
@@ -449,8 +579,8 @@ class A4(Set):
         # 1. A subgroup D2: E, and half turns H0, H1, H2
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
-            assert len(isometries) == this.n, "%d != %d" % (
-                                                this.n, len(isometries))
+            assert len(isometries) == this.order, "%d != %d" % (
+                                                this.order, len(isometries))
             # TODO: more asserts?
             Set.__init__(this, isometries)
         else:
@@ -470,8 +600,8 @@ class A4(Set):
                 ])
 
             this.rotAxes = {
-                    '2': [H0.axis(), H1.axis(), H2.axis()],
-                    '3': [R1_1.axis(), R2_1.axis(), R3_1.axis(), R4_1.axis()],
+                    2: [H0.axis(), H1.axis(), H2.axis()],
+                    3: [R1_1.axis(), R2_1.axis(), R3_1.axis(), R4_1.axis()],
                 }
 
     def realiseSubgroups(this, sg):
@@ -480,14 +610,14 @@ class A4(Set):
         """
         assert isinstance(sg, type)
         if sg == C2:
-            o2a = this.rotAxes['2']
+            o2a = this.rotAxes[2]
             return [C2(setup = {'axis': a}) for a in o2a]
         elif sg == C3:
-            o3a = this.rotAxes['3']
+            o3a = this.rotAxes[3]
             return [C3(setup = {'axis': a}) for a in o3a]
         elif sg == A4:
             return [this]
-        elif sq == E:
+        elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
@@ -497,7 +627,7 @@ class S4A4(A4):
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
         {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
     ]
-    n = 24
+    order = 24
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 24 isometries, 12 direct, 12
@@ -519,8 +649,8 @@ class S4A4(A4):
         # 1. A subgroup D2: E, and half turns H0, H1, H2
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
-            assert len(isometries) == this.n, "%d != %d" % (
-                                                this.n, len(isometries))
+            assert len(isometries) == this.order, "%d != %d" % (
+                                                this.order, len(isometries))
             # TODO: more asserts?
             Set.__init__(this, isometries)
         else:
@@ -563,8 +693,8 @@ class S4A4(A4):
                 ])
 
             this.rotAxes = {
-                    '2': [h0.axis(), h1.axis(), h2.axis()],
-                    '3': [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
+                    2: [h0.axis(), h1.axis(), h2.axis()],
+                    3: [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
                 }
 
     def realiseSubgroups(this, sg):
@@ -575,19 +705,19 @@ class S4A4(A4):
         #S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
         #C3, C2, E
         if sg == C2:
-            o2a = this.rotAxes['2']
+            o2a = this.rotAxes[2]
             return [C2(setup = {'axis': a}) for a in o2a]
         elif sg == C3:
-            o3a = this.rotAxes['3']
+            o3a = this.rotAxes[3]
             return [C3(setup = {'axis': a}) for a in o3a]
         elif sg == A4:
-            o2a = this.rotAxes['2']
+            o2a = this.rotAxes[2]
             return [
                 A4(setup = {'o2axis0': o2a[0], 'o2axis1': o2a[1]}),
             ]
         elif sg == S4A4:
             return [this]
-        elif sq == E:
+        elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
@@ -597,7 +727,7 @@ class A4xI(A4):
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
         {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
     ]
-    n = 24
+    order = 24
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4xI, consisting of 12 rotations and 12 rotary
@@ -613,8 +743,8 @@ class A4xI(A4):
         The group can be generated by the axes of 2 half turns
         """
         if isometries != None:
-            assert len(isometries) == this.n, "%d != %d" % (
-                                                this.n, len(isometries))
+            assert len(isometries) == this.order, "%d != %d" % (
+                                                this.order, len(isometries))
             # TODO: more asserts?
             Set.__init__(this, isometries)
         else:
@@ -628,24 +758,24 @@ class A4xI(A4):
         """
         assert isinstance(sg, type)
         if sg == C2:
-            o2a = this.rotAxes['2']
+            o2a = this.rotAxes[2]
             return [C2(setup = {'axis': a}) for a in o2a]
         elif sg == C3:
-            o3a = this.rotAxes['3']
+            o3a = this.rotAxes[3]
             return [C3(setup = {'axis': a}) for a in o3a]
         if sg == C2xI:
-            o2a = this.rotAxes['2']
+            o2a = this.rotAxes[2]
             return [C2xI(setup = {'axis': a}) for a in o2a]
         elif sg == C3xI:
-            o3a = this.rotAxes['3']
+            o3a = this.rotAxes[3]
             return [C3xI(setup = {'axis': a}) for a in o3a]
         elif sg == A4:
             # the other ways of orienting A4 into A4xI doesn't give anything new
             return [
                 A4(
                     setup = {
-                        'o2axis0': this.rotAxes['2'][0],
-                        'o2axis1': this.rotAxes['2'][1]
+                        'o2axis0': this.rotAxes[2][0],
+                        'o2axis1': this.rotAxes[2][1]
                     }
                 )
             ]
@@ -661,7 +791,7 @@ class S4(Set):
         {'type': 'vec3', 'par': 'o4axis0', 'lab': "half turn axis"},
         {'type': 'vec3', 'par': 'o4axis1', 'lab': "half turn of orthogonal axis"}
     ]
-    n = 24
+    order = 24
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group S4, consisting of 24 rotations
@@ -676,8 +806,8 @@ class S4(Set):
         The group can be generated by the axes of 2 quarter turns,
         """
         if isometries != None:
-            assert len(isometries) == this.n, "%d != %d" % (
-                                                this.n, len(isometries))
+            assert len(isometries) == this.order, "%d != %d" % (
+                                                this.order, len(isometries))
             # TODO: more asserts?
             Set.__init__(this, isometries)
         else:
@@ -729,11 +859,11 @@ class S4(Set):
                     h0, h1, h2, h3, h4, h5
                 ])
             this.rotAxes = {
-                    '2': [h0.axis(), h1.axis(), h2.axis(),
+                    2: [h0.axis(), h1.axis(), h2.axis(),
                             h3.axis(), h4.axis(), h5.axis()
                         ],
-                    '3': [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
-                    '4': [ax0, ax1, ax2]
+                    3: [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
+                    4: [ax0, ax1, ax2]
                 }
 
     def realiseSubgroups(this, sg):
@@ -742,24 +872,24 @@ class S4(Set):
         """
         assert isinstance(sg, type)
         if sg == C2:
-            o2a = this.rotAxes['2']
-            o4a = this.rotAxes['4']
+            o2a = this.rotAxes[2]
+            o4a = this.rotAxes[4]
             return [C2(setup = {'axis': a}) for a in o2a].extend(
                     [C2(setup = {'axis': a}) for a in o4a]
                 )
         elif sg == C3:
-            o3a = this.rotAxes['3']
+            o3a = this.rotAxes[3]
             return [C3(setup = {'axis': a}) for a in o3a]
         elif sg == C4:
-            o4a = this.rotAxes['4']
+            o4a = this.rotAxes[4]
             return [C4(setup = {'axis': a}) for a in o4a]
         elif sg == A4:
             # the other ways of orienting A4 into A4xI doesn't give anything new
             return [
                 A4(
                     setup = {
-                        'o2axis0': this.rotAxes['4'][0],
-                        'o2axis1': this.rotAxes['4'][1]
+                        'o2axis0': this.rotAxes[4][0],
+                        'o2axis1': this.rotAxes[4][1]
                     }
                 )
             ]
@@ -840,7 +970,7 @@ def order(isometry):
         return __order[isometry]
     except KeyError:
         if type(isometry) == type:
-            return isometry.n
+            return isometry.order
         else:
             raise
 
@@ -849,6 +979,7 @@ ExI.subgroups = [ExI, E]
 #TODO:
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, E]
+Dn.subgroups = [Dn, Cn, C2, E]
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2

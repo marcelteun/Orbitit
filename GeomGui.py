@@ -655,6 +655,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.E,
             isometry.Cn,
             isometry.CnxI,
+            isometry.Dn,
             isometry.A4,
             isometry.A4xI,
             isometry.S4A4,
@@ -704,21 +705,18 @@ class SymmetrySelect(wx.StaticBoxSizer):
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
         selClass = this.groupsList[Id]
         if applyOrder:
-            if selClass in [isometry.Cn, isometry.CnxI]:
+            if selClass in [isometry.Cn, isometry.CnxI, isometry.Dn]:
                 assert selClass.initPars[0]['type'] == 'int', (
                     'The first index should specify the n-order')
                 n = this.oriGuis[0].GetValue()
                 if selClass == isometry.Cn:
                     C = isometry.C
-                else:
+                elif selClass == isometry.CnxI:
                     C = isometry.CxI
-                if n > 1:
-                    selClass = C(n)
-                elif n == 1:
-                    if selClass == isometry.Cn:
-                        selClass = C1
-                    else:
-                        selClass = C(n)
+                else: # Dn
+                    C = isometry.D
+                assert n > 0, 'warning'
+                selClass = C(n)
         #print 'selClass', selClass, 'n:', selClass.n
         return selClass
 

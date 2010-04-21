@@ -61,7 +61,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((437, 580))
+        this.setDefaultSize((437, 609))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -155,6 +155,7 @@ class CtrlWin(wx.Frame):
         this.panel.Bind(wx.EVT_CHOICE,
             this.onNrColsSel, id = this.colGuis[-1].GetId())
         this.colGuis[-1].SetSelection(0)
+        this.__nrOfColsGuiId = this.colGuis[-1]
         this.onNrColsSel(this.colGuis[-1])
 
     def onSymmetrySeleect(this, sym):
@@ -259,7 +260,10 @@ class CtrlWin(wx.Frame):
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         #print 'finalSym', finalSym
         #print 'this.colAlternative', this.colAlternative
-        #print 'the colIsom', this.colIsom[this.colAlternative]
+        print 'using subgroup colIsom %s for colouring (alt. %d)' % (
+            this.posColStabSym[this.__nrOfColsGuiId.GetSelection()],
+            this.colAlternative
+        )
         colQuotientSet = finalSym  / this.colIsom[this.colAlternative]
         #print '-----colQuotientSet-----------'
         #for isom in colQuotientSet: print isom
