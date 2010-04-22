@@ -256,9 +256,11 @@ class CtrlWin(wx.Frame):
                 break
 
     def updatShapeColours(this):
-        # apply symmetry on colours:
+        """apply symmetry on colours
+        """
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         #print 'finalSym', finalSym
+        #print 'close finalSym', finalSym.close()
         #print 'this.colAlternative', this.colAlternative
         print 'using subgroup colIsom %s for colouring (alt. %d)' % (
             this.posColStabSym[this.__nrOfColsGuiId.GetSelection()],

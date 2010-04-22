@@ -466,6 +466,7 @@ class Dn(Set):
             cn = Cn(setup = {'axis': axis_n, 'n': n})
             isometries = [isom for isom in cn]
             hs = [isom * h for isom in cn]
+            #for isom in hs: print isom
             isometries.extend(hs)
             this.rotAxes = {'n': axis_n, 2: [h.axis() for h in hs]}
             Set.__init__(this, isometries)
@@ -503,16 +504,16 @@ class Dn(Set):
                 n = int(sgName[1:])
                 assert n > 1, 'warning'
                 if n == 2: # sg = C2
-                    # only one halfturn needed (other orientation are
-                    # essentialy the same
-                    isoms = [C2(setup = {'axis':this.rotAxes[2][0]})]
+                    isoms = [
+                        C2(setup = {'axis':this.rotAxes[2][i]})
+                        for i in range(len(this.rotAxes[2]))
+                    ]
                     if this.order % 4 == 0: # if D2, D4, etc
                         isoms.append(
                             Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
                         )
                     return isoms
                 elif 2*n == this.order:
-                    # the other orientation is essentialy the same
                     return [Cn(setup = {'n': n, 'axis': this.rotAxes['n']})]
                 elif 2*n > this.order:
                     return []
