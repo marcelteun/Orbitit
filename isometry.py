@@ -380,7 +380,8 @@ class CnxI(Cn):
                 return [E()]
         elif sgName[0] == 'C':
             if sgName[-2:] == 'xI': # CnxI
-                try: # Cn
+                try:
+                    n = int(sgName[1:-2])
                     order = sg.order
                     if order == this.order:
                         return [this]
@@ -393,7 +394,7 @@ class CnxI(Cn):
                     raise ImproperSubgroupError, '%s ! <= %s' % (
                         this.__class__.__name__, sg.__class__.__name__)
             else: # Cn
-                try: # CnxI
+                try:
                     n = int(sgName[1:])
                 except ValueError: # caused by int() function
                     assert False, 'TODO'
@@ -555,6 +556,184 @@ def D(n):
 D2 = D(2)
 D3 = D(3)
 D4 = D(4)
+
+class DnxI(Dn):
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group DnxI, of order 4n.
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n halfturns around axes perpendicular to the n-fold axis
+        - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with
+          0 <= i < n). For n even these become n reflections in a plane
+          perpendicular to the n-fold axis.
+        - n reflections in planes that contain the n-fold axis
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            keys = setup.keys()
+            if 'axis' in keys: axis = setup['axis']
+            else:              axis = Z[:]
+            if this.order != 0: n = this.order/4
+            else:
+                if 'n' in keys: n = setup['n']
+                else:           n = 2
+                if n == 0: n = 1
+            if n == 1: return ExI()
+            dn = Dn(setup = {'axis': axis, 'n': n})
+            Set.__init__(this, dn * ExI())
+            this.rotAxes = {'n': axis, 2: dn.rotAxes[2][:]}
+            this.order = 4 * n
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        #print 'realiseSubgroups', sgName
+        if sg == DnxI:
+            if sg.order == this.order:
+                return [this]
+            elif sg.order > this.order:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif sgName[0] == 'D':
+            if sgName[-2:] == 'xI': # DnxI
+                try:
+                    n = int(sgName[1:-2])
+                    order = sg.order
+                    if order == this.order:
+                        return [this]
+                    elif order > this.order:
+                        return []
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+            else: # Dn
+                try:
+                    n = int(sgName[1:])
+                    order = sg.order
+                    if 2 * order == this.order:
+                        return [
+                            sg(setup = {
+                                'axis_n': this.rotAxes['n'],
+                                'axis_2': this.rotAxes[2][0]
+                            })
+                            # choosing other 2-fold axes leads essentially to
+                            # the same.
+                        ]
+                    elif 2 * order > this.order:
+                        return []
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    assert False, 'TODO'
+                    pass #TODO
+                    # try C2nxCn
+        elif sgName[0] == 'C':
+            if sgName[-2:] == 'xI': # CnxI
+                try:
+                    n = int(sgName[1:-2])
+                    print 'n', n
+                    if n == 2: # sg = C2xI
+                        isoms = [
+                            C2xI(setup = {'axis':this.rotAxes[2][i]})
+                            for i in range(len(this.rotAxes[2]))
+                        ]
+                        if this.order % 8 == 0: # if D2xI, D4xI, etc
+                            isoms.append(
+                                CnxI(
+                                    setup = {'n': n, 'axis': this.rotAxes['n']}
+                                )
+                            )
+                        return isoms
+                    order = sg.order
+                    if 2 * order == this.order:
+                        return [
+                            CnxI(setup = {'n': n, 'axis': this.rotAxes['n']})
+                        ]
+                    elif 2 * order > this.order:
+                        return []
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    assert False, 'TODO'
+                    pass #TODO
+            else: # Cn
+                try:
+                    n = int(sgName[1:])
+                    if n == 2: # sg = C2
+                        isoms = [
+                            C2(setup = {'axis':this.rotAxes[2][i]})
+                            for i in range(len(this.rotAxes[2]))
+                        ]
+                        if this.order % 8 == 0: # if D2xI, D4xI, etc
+                            isoms.append(
+                                Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
+                            )
+                        return isoms
+                    order = sg.order
+                    if 4 * order == this.order:
+                        return [
+                            Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
+                        ]
+                    elif 4 * order > this.order:
+                        return []
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+                # try C2nxCn
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s(%s)' % (
+                this.__class__.__name__, sg.__name__, sg.__class__.__name__)
+
+# dynamically create DnxI classes:
+def DxI(n):
+    if n == 1: return C2xI
+    D_nxI = type('D%dxI' % n, (DnxI,),
+            {
+                'order': 4 * n,
+                'initPars': [
+                        {
+                            'type': 'vec3',
+                            'par': 'axis',
+                            'lab': "%d-fold axis" % n
+                        }, {
+                            'type': 'vec3',
+                            'par': 'axis_2',
+                            'lab': "axis of halfturn"
+                        }
+                    ]
+            }
+        )
+    # TODO: fix subgroups depending on n:
+    if n == 2:
+        D_nxI.subgroups = [D_nxI, D(n), CxI(n), C2, E]
+    else:
+        D_nxI.subgroups = [D_nxI, D(n), CxI(n), C(n), C2xI, C2, E]
+    return D_nxI
+
+D2xI = DxI(2)
+D3xI = DxI(3)
+D4xI = DxI(4)
 
 class A4(Set):
     initPars = [
@@ -981,6 +1160,7 @@ ExI.subgroups = [ExI, E]
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, E]
 Dn.subgroups = [Dn, Cn, C2, E]
+DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, E]
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2

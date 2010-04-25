@@ -656,6 +656,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.Cn,
             isometry.CnxI,
             isometry.Dn,
+            isometry.DnxI,
             isometry.A4,
             isometry.A4xI,
             isometry.S4A4,
@@ -705,7 +706,12 @@ class SymmetrySelect(wx.StaticBoxSizer):
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
         selClass = this.groupsList[Id]
         if applyOrder:
-            if selClass in [isometry.Cn, isometry.CnxI, isometry.Dn]:
+            if selClass in [
+                isometry.Cn,
+                isometry.CnxI,
+                isometry.Dn,
+                isometry.DnxI
+            ]:
                 assert selClass.initPars[0]['type'] == 'int', (
                     'The first index should specify the n-order')
                 n = this.oriGuis[0].GetValue()
@@ -713,10 +719,24 @@ class SymmetrySelect(wx.StaticBoxSizer):
                     C = isometry.C
                 elif selClass == isometry.CnxI:
                     C = isometry.CxI
-                else: # Dn
+                elif selClass == isometry.Dn:
                     C = isometry.D
+                elif selClass == isometry.DnxI:
+                    C = isometry.DxI
                 assert n > 0, 'warning'
                 selClass = C(n)
+            elif selClass in [
+                isometry.E,
+                isometry.ExI,
+                isometry.A4,
+                isometry.A4xI,
+                isometry.S4A4,
+                isometry.S4,
+            ]:
+                pass
+            else:
+                assert False, 'unknown class %s' % selClass
+                #print 'warning: unknown class', selClass
         #print 'selClass', selClass, 'n:', selClass.n
         return selClass
 

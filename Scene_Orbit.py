@@ -142,6 +142,7 @@ class CtrlWin(wx.Frame):
             if stabSym in subSymGrp.subgroups:
                 print subSymGrp, 'can be used as subgroup for colouring'
                 this.posColStabSym.append(subSymGrp)
+                #print 'addColourGui, finalSym', finalSym
                 fo = isometry.order(finalSym)
                 assert fo != 0
                 po = isometry.order(subSymGrp)
@@ -298,13 +299,13 @@ class CtrlWin(wx.Frame):
     def onNextColAlt(this, e):
         this.colAlternative += 1
         if this.colAlternative >= len(this.colIsom):
-            this.colAlternative -= this.colAlternative
+            this.colAlternative -= len(this.colIsom)
         this.updatShapeColours()
 
     def onPrevColAlt(this, e):
         this.colAlternative -= 1
         if this.colAlternative < 0:
-            this.colAlternative += this.colAlternative
+            this.colAlternative += len(this.colIsom)
         this.updatShapeColours()
 
 class Scene(Geom3D.Scene):
