@@ -783,6 +783,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
             elif inputType == 'int':
                 v = gui.GetValue()
                 setup[sym.initPars[i]['par']] = v
+        #print 'GetSelected; setup:', setup
+        #print 'class:', sym
         sym = sym(setup = setup)
 
         return sym

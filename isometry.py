@@ -350,19 +350,10 @@ class CnxI(Cn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
-            keys = setup.keys()
-            if 'axis' in keys: axis = setup['axis']
-            else:              axis = Z[:]
-            if this.order != 0: n = this.order/2
-            else:
-                if 'n' in keys: n = setup['n']
-                else:           n = 2
-                if n == 0: n = 1
-            if n == 1: return ExI()
-            cn = Cn(setup = {'axis': axis, 'n': n})
+            cn = Cn(setup = setup)
             Set.__init__(this, cn * ExI())
-            this.rotAxes = {'n': axis}
-            this.order = 2 * n
+            this.rotAxes = {'n': cn.rotAxes['n']}
+            this.order = 2 * cn.order
 
     def realiseSubgroups(this, sg):
         """
@@ -577,19 +568,10 @@ class DnxI(Dn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
-            keys = setup.keys()
-            if 'axis' in keys: axis = setup['axis']
-            else:              axis = Z[:]
-            if this.order != 0: n = this.order/4
-            else:
-                if 'n' in keys: n = setup['n']
-                else:           n = 2
-                if n == 0: n = 1
-            if n == 1: return ExI()
-            dn = Dn(setup = {'axis': axis, 'n': n})
+            dn = Dn(setup = setup)
             Set.__init__(this, dn * ExI())
-            this.rotAxes = {'n': axis, 2: dn.rotAxes[2][:]}
-            this.order = 4 * n
+            this.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
+            this.order = 2 * dn.order
 
     def realiseSubgroups(this, sg):
         """
@@ -647,7 +629,6 @@ class DnxI(Dn):
             if sgName[-2:] == 'xI': # CnxI
                 try:
                     n = int(sgName[1:-2])
-                    print 'n', n
                     if n == 2: # sg = C2xI
                         isoms = [
                             C2xI(setup = {'axis':this.rotAxes[2][i]})
