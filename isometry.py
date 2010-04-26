@@ -392,6 +392,8 @@ class CnxI(Cn):
                     pass #TODO
                     # try C2nxCn
 
+        elif sg == ExI:
+            return [ExI()]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
@@ -411,7 +413,7 @@ def CxI(n):
             }
         )
     # TODO: fix subgroups depending on n:
-    C_nxI.subgroups = [C_nxI, E]
+    C_nxI.subgroups = [C_nxI, ExI, E]
     return C_nxI
 
 C2xI = CxI(2)
@@ -538,10 +540,9 @@ def D(n):
             }
         )
     # TODO: fix subgroups depending on n:
-    if n == 2:
-        D_n.subgroups = [D_n, C2, E]
-    else:
-        D_n.subgroups = [D_n, C(n), C2, E]
+    D_n.subgroups = [D_n, C2, E]
+    if n != 2:
+        D_n.subgroups.insert(-1, C(n))
     return D_n
 
 D2 = D(2)
@@ -681,6 +682,8 @@ class DnxI(Dn):
                     raise ImproperSubgroupError, '%s ! <= %s' % (
                         this.__class__.__name__, sg.__class__.__name__)
                 # try C2nxCn
+        elif sg == ExI:
+            return [ExI()]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s(%s)' % (
@@ -706,10 +709,9 @@ def DxI(n):
             }
         )
     # TODO: fix subgroups depending on n:
-    if n == 2:
-        D_nxI.subgroups = [D_nxI, D(n), CxI(n), C2, E]
-    else:
-        D_nxI.subgroups = [D_nxI, D(n), CxI(n), C(n), C2xI, C2, E]
+    D_nxI.subgroups = [D_nxI, D(n), CxI(n), C2, ExI, E]
+    if n != 2:
+        D_nxI.subgroups.insert(-3, C(n))
     return D_nxI
 
 D2xI = DxI(2)
@@ -942,6 +944,8 @@ class A4xI(A4):
             ]
         elif sg == A4xI:
             return [this]
+        elif sg == ExI:
+            return [ExI()]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
@@ -1139,9 +1143,9 @@ E.subgroups = [E]
 ExI.subgroups = [ExI, E]
 #TODO:
 Cn.subgroups = [Cn, E]
-CnxI.subgroups = [CnxI, Cn, E]
+CnxI.subgroups = [CnxI, Cn, ExI, E]
 Dn.subgroups = [Dn, Cn, C2, E]
-DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, E]
+DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
@@ -1157,7 +1161,7 @@ A4.subgroups = [A4,
 A4xI.subgroups = [A4xI, A4,
         #TODO: DnxI, Dn,
         C3xI, C2xI,
-        C3, C2, E
+        C3, C2, ExI, E
     ]
 
 # Dn = D4, D3, D2 (2x), D1 (@ order 4)

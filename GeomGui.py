@@ -653,6 +653,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         # TODO: proper init: all
         groupsList = [
             isometry.E,
+            isometry.ExI,
             isometry.Cn,
             isometry.CnxI,
             isometry.Dn,
