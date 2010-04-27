@@ -350,6 +350,8 @@ class CnxI(Cn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
+            if 'n' not in setup and this.order != 0:
+                setup['n'] = this.order/2
             cn = Cn(setup = setup)
             Set.__init__(this, cn * ExI())
             this.rotAxes = {'n': cn.rotAxes['n']}
@@ -569,6 +571,8 @@ class DnxI(Dn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
+            if 'n' not in setup and this.order != 0:
+                setup['n'] = this.order/2
             dn = Dn(setup = setup)
             Set.__init__(this, dn * ExI())
             this.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
