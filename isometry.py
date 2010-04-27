@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import math
+import re
 import GeomTypes
 from copy import copy
 
@@ -40,6 +41,19 @@ class Set(set):
                 eq = e in o
                 if not eq: break
         return eq
+
+    def __sub__(this, o):
+        new = Set([])
+        for e in this:
+            if e not in o:
+                set.add(new, e)
+        return new
+
+    def __or__(this, o):
+        new = Set(this)
+        for e in o:
+            new.add(e)
+        return new
 
     def __mul__(this, o):
         if isinstance(o, Set):
@@ -92,6 +106,8 @@ class Set(set):
                 return subgroup
             else:
                 # o is already a set
+                #print 'subgroup: this:', this
+                #print 'subgroup: o:', o
                 for e in o:
                     assert e in this, '%s not in %s' % (e,
                         this.__class__.__name__)
@@ -266,7 +282,6 @@ class Cn(Set):
                 if n == 0: n = 1
                 this.order = n
 
-            if n == 1: return E()
             angle = 2 * math.pi / n
             try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
             except TypeError:
@@ -421,6 +436,117 @@ def CxI(n):
 C2xI = CxI(2)
 C3xI = CxI(3)
 C4xI = CxI(4)
+
+class C2nCn(Cn):
+    reName = re.compile('C([0-9]+)C([0-9]+)$')
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group C2nCn, consisting of n rotations and of n rotary
+        inversions (reflections)
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with 
+          0 <= i < n)
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            if 'n' not in setup and this.order != 0:
+                setup['n'] = this.order/2
+            cn = Cn(setup = setup)
+            setup['n'] = 2 * setup['n']
+            c2n = Cn(setup = setup)
+            Set.__init__(this, cn | ((c2n-cn) * GeomTypes.I))
+            this.rotAxes = {'n': cn.rotAxes['n']}
+            this.order = c2n.order
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        if sg == C2nCn:
+            if sg.order == this.order:
+                return [this]
+            elif sg.order > this.order:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif sgName[0] == 'C': # Cn
+            m = this.reName.match(sgName)
+            if m:
+                try:
+                    n2 = int(m.group(1))
+                    n  = int(m.group(2))
+                    if not n2 == 2 * n: return []
+                    order = sg.order
+                    if order == this.order:
+                        return [this]
+                    elif order > this.order:
+                        return []
+                    elif order == 2: # {E, Reflection}
+                        assert (this.order / 2) % 2 == 1, 'Improper subgroup'
+                        # only one orientation: reflection normal parallel to
+                        # n-fold axis.
+                        return [sg(setup = {'axis': this.rotAxes['n']})]
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+            else:
+                try:
+                    n = int(sgName[1:])
+                    if 2 * n == this.order:
+                        # only one orientation:
+                        return [sg(setup = {'axis': this.rotAxes['n']})]
+                    else:
+                        assert False, 'TODO'
+                except ValueError: # caused by int() function
+                    assert False, 'TODO'
+                    pass #TODO
+                    # try C2nxCn
+
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
+
+# dynamically create CnxI classes:
+def C2nC(n):
+    C_2n_C_n = type('C%dC%d' % (2*n, n), (C2nCn,),
+            {
+                'order': 2 * n,
+                'initPars': [{
+                        'type': 'vec3',
+                        'par': 'axis',
+                        'lab': "%d-fold axis" % n
+                    }]
+            }
+        )
+    C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
+    # Add subgroup {E, reflection}
+    if n % 2 == 1:
+        if n != 1:
+            C_2n_C_n.subgroups.insert(-1, C2nC(1))
+    # TODO: fix more subgroups depending on n, e.g.:
+    #else:
+    #    if n != 2:
+    #        C_2n_C_n.subgroups.insert(-2, C2nC(2))
+    return C_2n_C_n
+
+C2C1 = C2nC(1)
+C4C2 = C2nC(2)
+C6C3 = C2nC(3)
+C8C4 = C2nC(4)
 
 class Dn(Set):
     initPars = [
@@ -1148,6 +1274,7 @@ ExI.subgroups = [ExI, E]
 #TODO:
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, ExI, E]
+C2nCn.subgroups = [C2nCn, Cn, E]
 Dn.subgroups = [Dn, Cn, C2, E]
 DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
 

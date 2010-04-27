@@ -24,7 +24,6 @@
 
 #import math
 import wx
-import re
 import GeomTypes
 import isometry
 
@@ -135,8 +134,6 @@ class IntInput(wx.TextCtrl):
         return int(v)
 
 class FloatInput(wx.TextCtrl):
-    # don't except an empty string: [0-9.]
-    reFloat = re.compile('[+-]?[0-9]*[0-9.][0-9]*$')
     def __init__(this, *args, **kwargs):
         wx.TextCtrl.__init__(this, *args, **kwargs)
         # Set defaults: style and width if not set by caller
@@ -656,6 +653,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.ExI,
             isometry.Cn,
             isometry.CnxI,
+            isometry.C2nCn,
             isometry.Dn,
             isometry.DnxI,
             isometry.A4,
@@ -710,6 +708,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             if selClass in [
                 isometry.Cn,
                 isometry.CnxI,
+                isometry.C2nCn,
                 isometry.Dn,
                 isometry.DnxI
             ]:
@@ -720,6 +719,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
                     C = isometry.C
                 elif selClass == isometry.CnxI:
                     C = isometry.CxI
+                elif selClass == isometry.C2nCn:
+                    C = isometry.C2nC
                 elif selClass == isometry.Dn:
                     C = isometry.D
                 elif selClass == isometry.DnxI:
