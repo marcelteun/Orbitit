@@ -347,6 +347,118 @@ C2 = C(2)
 C3 = C(3)
 C4 = C(4)
 
+reC2nCn = re.compile('C([0-9]+)C([0-9]+)$')
+class C2nCn(Cn):
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group C2nCn, consisting of n rotations and of n rotary
+        inversions (reflections)
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with 
+          0 <= i < n)
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            s = copy(setup)
+            if 'n' not in s and this.order != 0:
+                s['n'] = this.order/2
+            cn = Cn(setup = s)
+            s['n'] = 2 * s['n']
+            c2n = Cn(setup = s)
+            Set.__init__(this, cn | ((c2n-cn) * GeomTypes.I))
+            this.rotAxes = {'n': cn.rotAxes['n']}
+            this.order = c2n.order
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        if sg == C2nCn:
+            if sg.order == this.order:
+                return [this]
+            elif sg.order > this.order:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif sgName[0] == 'C': # Cn
+            m = reC2nCn.match(sgName)
+            if m:
+                try:
+                    n2 = int(m.group(1))
+                    n  = int(m.group(2))
+                    if not n2 == 2 * n: return []
+                    order = sg.order
+                    if order == this.order:
+                        return [this]
+                    elif order > this.order:
+                        return []
+                    elif order == 2: # {E, Reflection}
+                        assert (this.order / 2) % 2 == 1, 'Improper subgroup'
+                        # only one orientation: reflection normal parallel to
+                        # n-fold axis.
+                        return [sg(setup = {'axis': this.rotAxes['n']})]
+                    else:
+                        assert False, 'TODO: %s (order %d)' % (sgName, order)
+                        return [E()]
+                except ValueError: # caused by int() function
+                    raise ImproperSubgroupError, '%s ! <= %s' % (
+                        this.__class__.__name__, sg.__class__.__name__)
+            else:
+                try:
+                    n = int(sgName[1:])
+                    if 2 * n == this.order:
+                        # only one orientation:
+                        return [sg(setup = {'axis': this.rotAxes['n']})]
+                    else:
+                        assert False, 'TODO'
+                except ValueError: # caused by int() function
+                    assert False, 'TODO'
+                    pass #TODO
+                    # try C2nxCn
+
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
+
+# dynamically create CnxI classes:
+def C2nC(n):
+    C_2n_C_n = type('C%dC%d' % (2*n, n), (C2nCn,),
+            {
+                'order': 2 * n,
+                'initPars': [{
+                        'type': 'vec3',
+                        'par': 'axis',
+                        'lab': "%d-fold axis" % n
+                    }]
+            }
+        )
+    C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
+    # Add subgroup {E, reflection}
+    if n % 2 == 1:
+        if n != 1:
+            C_2n_C_n.subgroups.insert(-1, C2C1)
+    # TODO: fix more subgroups depending on n, e.g.:
+    #else:
+    #    if n != 2:
+    #        C_2n_C_n.subgroups.insert(-2, C2nC(2))
+    return C_2n_C_n
+
+C2C1 = C2nC(1)
+C4C2 = C2nC(2)
+C6C3 = C2nC(3)
+C8C4 = C2nC(4)
+
 class CnxI(Cn):
     def __init__(this, isometries = None, setup = {}):
         """
@@ -403,12 +515,29 @@ class CnxI(Cn):
                     raise ImproperSubgroupError, '%s ! <= %s' % (
                         this.__class__.__name__, sg.__class__.__name__)
             else: # Cn
-                try:
-                    n = int(sgName[1:])
-                except ValueError: # caused by int() function
-                    assert False, 'TODO'
-                    pass #TODO
-                    # try C2nxCn
+                m = reC2nCn.match(sgName)
+                if m:
+                    try:
+                        n2 = int(m.group(1))
+                        n  = int(m.group(2))
+                        if not n2 == 2 * n: return []
+                        if n2 ==2 and n == 1:
+                            return [sg(setup = {'axis': this.rotAxes['n']})]
+                    except ValueError: # caused by int() function
+                        assert False, 'TODO'
+                        pass #TODO
+                else:
+                    try:
+                        n = int(sgName[1:])
+                        if 2 * n == this.order:
+                            # only one orientation:
+                            return [sg(setup = {'axis': this.rotAxes['n']})]
+                        else:
+                            assert False, 'TODO'
+                    except ValueError: # caused by int() function
+                        assert False, 'TODO'
+                        pass #TODO
+                        # try C2nxCn
 
         elif sg == ExI:
             return [ExI()]
@@ -431,124 +560,16 @@ def CxI(n):
             }
         )
     # TODO: fix subgroups depending on n:
-    C_nxI.subgroups = [C_nxI, ExI, E]
+    C_nxI.subgroups = [C_nxI, C(n), ExI, E]
+    # Add subgroup {E, reflection}
+    if n % 2 == 0:
+        if n != 0:
+            C_nxI.subgroups.insert(-2, C2C1)
     return C_nxI
 
 C2xI = CxI(2)
 C3xI = CxI(3)
 C4xI = CxI(4)
-
-class C2nCn(Cn):
-    reName = re.compile('C([0-9]+)C([0-9]+)$')
-    def __init__(this, isometries = None, setup = {}):
-        """
-        The algebraic group C2nCn, consisting of n rotations and of n rotary
-        inversions (reflections)
-
-        either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
-        Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
-        - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with 
-          0 <= i < n)
-        """
-        #print 'isometries', isometries, 'setup', setup
-        if isometries != None:
-            # TODO: add some asserts
-            Set.__init__(this, isometries)
-        else:
-            s = copy(setup)
-            if 'n' not in s and this.order != 0:
-                s['n'] = this.order/2
-            cn = Cn(setup = s)
-            s['n'] = 2 * s['n']
-            c2n = Cn(setup = s)
-            Set.__init__(this, cn | ((c2n-cn) * GeomTypes.I))
-            this.rotAxes = {'n': cn.rotAxes['n']}
-            this.order = c2n.order
-
-    def realiseSubgroups(this, sg):
-        """
-        realise an array of possible oriented subgroups for non-oriented sg
-        """
-        assert isinstance(sg, type)
-        sgName = sg.__name__
-        if sg == C2nCn:
-            if sg.order == this.order:
-                return [this]
-            elif sg.order > this.order:
-                return []
-            else:
-                assert False, 'TODO'
-                return [E()]
-        elif sgName[0] == 'C': # Cn
-            m = this.reName.match(sgName)
-            if m:
-                try:
-                    n2 = int(m.group(1))
-                    n  = int(m.group(2))
-                    if not n2 == 2 * n: return []
-                    order = sg.order
-                    if order == this.order:
-                        return [this]
-                    elif order > this.order:
-                        return []
-                    elif order == 2: # {E, Reflection}
-                        assert (this.order / 2) % 2 == 1, 'Improper subgroup'
-                        # only one orientation: reflection normal parallel to
-                        # n-fold axis.
-                        return [sg(setup = {'axis': this.rotAxes['n']})]
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
-            else:
-                try:
-                    n = int(sgName[1:])
-                    if 2 * n == this.order:
-                        # only one orientation:
-                        return [sg(setup = {'axis': this.rotAxes['n']})]
-                    else:
-                        assert False, 'TODO'
-                except ValueError: # caused by int() function
-                    assert False, 'TODO'
-                    pass #TODO
-                    # try C2nxCn
-
-        elif sg == E:
-            return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
-
-# dynamically create CnxI classes:
-def C2nC(n):
-    C_2n_C_n = type('C%dC%d' % (2*n, n), (C2nCn,),
-            {
-                'order': 2 * n,
-                'initPars': [{
-                        'type': 'vec3',
-                        'par': 'axis',
-                        'lab': "%d-fold axis" % n
-                    }]
-            }
-        )
-    C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
-    # Add subgroup {E, reflection}
-    if n % 2 == 1:
-        if n != 1:
-            C_2n_C_n.subgroups.insert(-1, C2nC(1))
-    # TODO: fix more subgroups depending on n, e.g.:
-    #else:
-    #    if n != 2:
-    #        C_2n_C_n.subgroups.insert(-2, C2nC(2))
-    return C_2n_C_n
-
-C2C1 = C2nC(1)
-C4C2 = C2nC(2)
-C6C3 = C2nC(3)
-C8C4 = C2nC(4)
 
 class Dn(Set):
     initPars = [
