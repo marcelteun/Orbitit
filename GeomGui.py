@@ -730,6 +730,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
             elif selClass in [
                 isometry.E,
                 isometry.ExI,
+                isometry.C2C1,
+                isometry.C4C2,
+                isometry.C2,
+                isometry.C3,
+                isometry.C4,
                 isometry.A4,
                 isometry.A4xI,
                 isometry.S4A4,

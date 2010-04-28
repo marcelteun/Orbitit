@@ -393,26 +393,22 @@ class C2nCn(Cn):
         elif sgName[0] == 'C': # Cn
             m = reC2nCn.match(sgName)
             if m:
-                try:
-                    n2 = int(m.group(1))
-                    n  = int(m.group(2))
-                    if not n2 == 2 * n: return []
-                    order = sg.order
-                    if order == this.order:
-                        return [this]
-                    elif order > this.order:
-                        return []
-                    elif order == 2: # {E, Reflection}
-                        assert (this.order / 2) % 2 == 1, 'Improper subgroup'
-                        # only one orientation: reflection normal parallel to
-                        # n-fold axis.
-                        return [sg(setup = {'axis': this.rotAxes['n']})]
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
+                n2 = int(m.group(1))
+                n  = int(m.group(2))
+                if not n2 == 2 * n: return []
+                order = sg.order
+                if order == this.order:
+                    return [this]
+                elif order > this.order:
+                    return []
+                elif order == 2: # {E, Reflection}
+                    assert (this.order / 2) % 2 == 1, 'Improper subgroup'
+                    # only one orientation: reflection normal parallel to
+                    # n-fold axis.
+                    return [sg(setup = {'axis': this.rotAxes['n']})]
+                else:
+                    assert False, 'TODO: %s (order %d)' % (sgName, order)
+                    return [E()]
             else:
                 try:
                     n = int(sgName[1:])
@@ -517,15 +513,11 @@ class CnxI(Cn):
             else: # Cn
                 m = reC2nCn.match(sgName)
                 if m:
-                    try:
-                        n2 = int(m.group(1))
-                        n  = int(m.group(2))
-                        if not n2 == 2 * n: return []
-                        if n2 ==2 and n == 1:
-                            return [sg(setup = {'axis': this.rotAxes['n']})]
-                    except ValueError: # caused by int() function
-                        assert False, 'TODO'
-                        pass #TODO
+                    n2 = int(m.group(1))
+                    n  = int(m.group(2))
+                    if not n2 == 2 * n: return []
+                    if n2 ==2 and n == 1:
+                        return [sg(setup = {'axis': this.rotAxes['n']})]
                 else:
                     try:
                         n = int(sgName[1:])
@@ -945,6 +937,7 @@ class S4A4(A4):
         {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
     ]
     order = 24
+
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 24 isometries, 12 direct, 12
@@ -989,18 +982,18 @@ class S4A4(A4):
             ri1_3 = GeomTypes.RotInv3(axis = ax1, angle = 3*qTurn)
             ri2_1 = GeomTypes.RotInv3(axis = ax2, angle = qTurn)
             ri2_3 = GeomTypes.RotInv3(axis = ax2, angle = 3*qTurn)
-            s0 = GeomTypes.Refl3(
-                    planeN = GeomTypes.Rot3(axis = ax0, angle = eTurn) * ax1)
-            s1 = GeomTypes.Refl3(
-                    planeN = GeomTypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1)
-            s2 = GeomTypes.Refl3(
-                    planeN = GeomTypes.Rot3(axis = ax1, angle = eTurn) * ax0)
-            s3 = GeomTypes.Refl3(
-                    planeN = GeomTypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0)
-            s4 = GeomTypes.Refl3(
-                    planeN = GeomTypes.Rot3(axis = ax2, angle = eTurn) * ax0)
-            s5 = GeomTypes.Refl3(
-                    planeN = GeomTypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0)
+            pn0 = GeomTypes.Rot3(axis = ax0, angle = eTurn) * ax1
+            pn1 = GeomTypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1
+            pn2 = GeomTypes.Rot3(axis = ax1, angle = eTurn) * ax0
+            pn3 = GeomTypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0
+            pn4 = GeomTypes.Rot3(axis = ax2, angle = eTurn) * ax0
+            pn5 = GeomTypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0
+            s0 = GeomTypes.Refl3(planeN = pn0)
+            s1 = GeomTypes.Refl3(planeN = pn1)
+            s2 = GeomTypes.Refl3(planeN = pn2)
+            s3 = GeomTypes.Refl3(planeN = pn3)
+            s4 = GeomTypes.Refl3(planeN = pn4)
+            s5 = GeomTypes.Refl3(planeN = pn5)
             Set.__init__(this, [
                     GeomTypes.E,
                     h0, h1, h2,
@@ -1009,6 +1002,7 @@ class S4A4(A4):
                     ri0_1, ri0_3, ri1_1, ri1_3, ri2_1, ri2_3,
                 ])
 
+            this.reflNormals = [pn0, pn1, pn2, pn3, pn4, pn5]
             this.rotAxes = {
                     2: [h0.axis(), h1.axis(), h2.axis()],
                     3: [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
@@ -1019,14 +1013,13 @@ class S4A4(A4):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
+        sgName = sg.__name__
         #S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
         #C3, C2, E
         if sg == C2:
-            o2a = this.rotAxes[2]
-            return [C2(setup = {'axis': a}) for a in o2a]
+            return [C2(setup = {'axis': a}) for a in this.rotAxes[2]]
         elif sg == C3:
-            o3a = this.rotAxes[3]
-            return [C3(setup = {'axis': a}) for a in o3a]
+            return [C3(setup = {'axis': a}) for a in this.rotAxes[3]]
         elif sg == A4:
             o2a = this.rotAxes[2]
             return [
@@ -1034,10 +1027,30 @@ class S4A4(A4):
             ]
         elif sg == S4A4:
             return [this]
+        elif sg == C4C2:
+            return [C4C2(setup = {'axis': a}) for a in this.rotAxes[2]]
+        elif sg == C2C1:
+            return [
+                C2C1(setup = {'axis': normal}) for normal in this.reflNormals
+            ]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
+
+# Dn = D2, (D1~C2)
+# Cn = C3, C2
+# D2nDn = D4D2
+# DnCn  = D3C3, D2C2
+# C2nCn = C4C2, C2C1
+S4A4.subgroups = [S4A4, A4,
+        #D2nDn, DnCn, C2nCn,
+        #Dn, Cn
+        C4C2,
+        C3,
+        C2C1, C2,
+        E
+    ]
 
 class A4xI(A4):
     initPars = [
@@ -1324,17 +1337,6 @@ A4xI.subgroups = [A4xI, A4,
 S4.subgroups = [S4, A4,
         #Dn,
         C4, C3, C2, E
-    ]
-
-# Dn = D2, (D1~C2)
-# Cn = C3, C2
-# D2nDn = D4D2
-# DnCn  = D3C3, D2C2
-# C2nCn = C4C2, C2C1
-S4A4.subgroups = [S4A4, A4,
-        #D2nDn, DnCn, C2nCn,
-        #Dn, Cn
-        C3, C2, E
     ]
 
 if __name__ == '__main__':
