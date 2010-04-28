@@ -365,9 +365,10 @@ class CnxI(Cn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
-            if 'n' not in setup and this.order != 0:
-                setup['n'] = this.order/2
-            cn = Cn(setup = setup)
+            s = copy(setup)
+            if 'n' not in s and this.order != 0:
+                s['n'] = this.order/2
+            cn = Cn(setup = s)
             Set.__init__(this, cn * ExI())
             this.rotAxes = {'n': cn.rotAxes['n']}
             this.order = 2 * cn.order
@@ -456,11 +457,12 @@ class C2nCn(Cn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
-            if 'n' not in setup and this.order != 0:
-                setup['n'] = this.order/2
-            cn = Cn(setup = setup)
-            setup['n'] = 2 * setup['n']
-            c2n = Cn(setup = setup)
+            s = copy(setup)
+            if 'n' not in s and this.order != 0:
+                s['n'] = this.order/2
+            cn = Cn(setup = s)
+            s['n'] = 2 * s['n']
+            c2n = Cn(setup = s)
             Set.__init__(this, cn | ((c2n-cn) * GeomTypes.I))
             this.rotAxes = {'n': cn.rotAxes['n']}
             this.order = c2n.order
@@ -697,9 +699,10 @@ class DnxI(Dn):
             # TODO: add some asserts
             Set.__init__(this, isometries)
         else:
-            if 'n' not in setup and this.order != 0:
-                setup['n'] = this.order/2
-            dn = Dn(setup = setup)
+            s = copy(setup)
+            if 'n' not in s and this.order != 0:
+                s['n'] = this.order/2
+            dn = Dn(setup = s)
             Set.__init__(this, dn * ExI())
             this.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
             this.order = 2 * dn.order

@@ -11,7 +11,7 @@ hTurn    = turn(0.5)
 qTurn    = turn(0.25)
 tTurn    = turn(1.0/3)
 
-eqFloatMargin = 1.0e-15
+eqFloatMargin = 1.0e-11
 def eq(a, b):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
