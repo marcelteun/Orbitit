@@ -654,6 +654,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.Cn,
             isometry.CnxI,
             isometry.C2nCn,
+            isometry.DnCn,
             isometry.Dn,
             isometry.DnxI,
             isometry.A4,
@@ -709,6 +710,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 isometry.Cn,
                 isometry.CnxI,
                 isometry.C2nCn,
+                isometry.DnCn,
                 isometry.Dn,
                 isometry.DnxI
             ]:
@@ -721,6 +723,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
                     C = isometry.CxI
                 elif selClass == isometry.C2nCn:
                     C = isometry.C2nC
+                elif selClass == isometry.DnCn:
+                    C = isometry.DnC
                 elif selClass == isometry.Dn:
                     C = isometry.D
                 elif selClass == isometry.DnxI:

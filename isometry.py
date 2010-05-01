@@ -552,16 +552,144 @@ def CxI(n):
             }
         )
     # TODO: fix subgroups depending on n:
-    C_nxI.subgroups = [C_nxI, C(n), ExI, E]
+    C_nxI.subgroups = [C_nxI, C(n), C1xI, E]
     # Add subgroup {E, reflection}
     if n % 2 == 0:
         if n != 0:
             C_nxI.subgroups.insert(-2, C2C1)
     return C_nxI
 
+C1xI = CxI(1)
 C2xI = CxI(2)
 C3xI = CxI(3)
 C4xI = CxI(4)
+
+reDnCn = re.compile('D([0-9]+)C([0-9]+)$')
+class DnCn(Cn):
+    initPars = [
+        {'type': 'int',  'par': 'n',    'lab': "order"},
+        {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
+        {'type': 'vec3', 'par': 'normal_r', 'lab': "normal of reflection"}
+    ]
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group DnCn, consisting of n rotations and of n rotary
+        inversions (reflections)
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n reflections in planes that share the n-fold axis.
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            s = {}
+            if 'n' not in setup and this.order != 0:
+                s['n'] = this.order/2
+            else:
+                s['n'] = setup['n']
+            if 'axis_n' in setup:
+                s['axis_n'] = setup['axis_n']
+            cn = Cn(setup = s)
+            if 'normal_r' in setup:
+                s['axis_2'] = setup['normal_r']
+            dn = Dn(setup = s)
+            Set.__init__(this, cn | ((dn-cn) * GeomTypes.I))
+            this.n = s['n']
+            this.rotAxes = {'n': cn.rotAxes['n']}
+            this.reflNormals = dn.rotAxes[2]
+            this.order = dn.order
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        sgName = sg.__name__
+        if sg == DnCn:
+            if sg.order == this.order:
+                return [this]
+            elif sg.order > this.order:
+                return []
+            else:
+                assert False, 'TODO'
+                return [E()]
+        elif isinstance(sg, MetaDnCn):
+            if sg.n == this.n:
+                return [this]
+            else:
+                TODO
+        elif sgName[0] == 'C': # Cn
+            m = reDnCn.match(sgName)
+            if m:
+                n2 = int(m.group(1))
+                n  = int(m.group(2))
+                if not n2 == 2 * n: return []
+                order = sg.order
+                if order == this.order:
+                    return [this]
+                elif order > this.order:
+                    return []
+                elif order == 2: # {E, Reflection}
+                    assert (this.order / 2) % 2 == 1, 'Improper subgroup'
+                    # only one orientation: reflection normal parallel to
+                    # n-fold axis.
+                    return [sg(setup = {'axis': this.rotAxes['n']})]
+                else:
+                    assert False, 'TODO: %s (order %d)' % (sgName, order)
+                    return [E()]
+            else:
+                try:
+                    n = int(sgName[1:])
+                    if 2 * n == this.order:
+                        # only one orientation:
+                        return [sg(setup = {'axis': this.rotAxes['n']})]
+                    else:
+                        assert False, 'TODO'
+                except ValueError: # caused by int() function
+                    assert False, 'TODO'
+                    pass #TODO
+                    # try DnxCn
+
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
+
+# dynamically create CnxI classes:
+class MetaDnCn(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
+
+def DnC(n):
+    if n == 1: return C2C1
+    D_n_C_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
+            {
+                'n'    : n,
+                'order': 2 * n,
+                'initPars': [{
+                        'type': 'vec3',
+                        'par': 'axis',
+                        'lab': "%d-fold axis" % n
+                    }, {
+                        'type': 'vec3',
+                        'par': 'normal_r',
+                        'lab': "normal of reflection"
+                    }]
+            }
+        )
+    D_n_C_n.subgroups = [D_n_C_n, C(n), D1C1, E]
+    # TODO: fix more subgroups depending on n, e.g.:
+    return D_n_C_n
+
+D1C1 = DnC(1)
+D2C2 = DnC(2)
+D3C3 = DnC(3)
+D4C4 = DnC(4)
 
 class Dn(Set):
     initPars = [
@@ -1301,10 +1429,7 @@ def order(isometry):
     try:
         return __order[isometry]
     except KeyError:
-        if type(isometry) == type:
-            return isometry.order
-        else:
-            raise
+        return isometry.order
 
 E.subgroups = [E]
 ExI.subgroups = [ExI, E]
