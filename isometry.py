@@ -252,7 +252,11 @@ class ExI(Set):
 
 C1xI = ExI
 
+class MetaCn(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 class Cn(Set):
+    __metaclass__ = MetaCn
     initPars = [
         {'type': 'int', 'par': 'n',    'lab': "order"},
         {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
@@ -301,37 +305,19 @@ class Cn(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
-        if sg == Cn:
-            if sg.order == this.order:
+        if isinstance(sg, MetaCn):
+            if sg.n == this.n: # Cn
                 return [this]
-            elif sg.order > this.order:
+            elif sg.n > this.n:
                 return []
             else:
-                assert False, 'TODO'
-                return [E()]
-        elif sgName[0] == 'C':
-            try: # Cn
-                n = int(sgName[1:])
-                if n == this.order:
-                    return [this]
-                elif n > this.order:
-                    return []
-                else:
-                    assert False, 'TODO'
-                    return [E()]
-            except ValueError: # caused by int() function, eg for CnxI
-                raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
+                TODO
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create Cn classes:
-class MetaCn(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
 def C(n):
     if n == 1: return E
     C_n = MetaCn('C%d' % n, (Cn,),
@@ -353,8 +339,11 @@ C2 = C(2)
 C3 = C(3)
 C4 = C(4)
 
-reC2nCn = re.compile('C([0-9]+)C([0-9]+)$')
+class MetaC2nCn(MetaCn):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 class C2nCn(Cn):
+    __metaclass__ = MetaC2nCn
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group C2nCn, consisting of n rotations and of n rotary
@@ -388,56 +377,30 @@ class C2nCn(Cn):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
-        if sg == C2nCn:
-            if sg.order == this.order:
+        if isinstance(sg, MetaC2nCn):
+            if sg.n == this.n: # C2cCn
                 return [this]
-            elif sg.order > this.order:
+            elif sg.n == 1: # C2C1 = {E, Reflection}
+                assert this.n % 2 == 1, 'Improper subgroup'
+                # only one orientation: reflection normal parallel to n-fold
+                # axis.
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            elif sg.n > this.n:
                 return []
             else:
-                assert False, 'TODO'
-                return [E()]
-        elif sgName[0] == 'C': # Cn
-            m = reC2nCn.match(sgName)
-            if m:
-                n2 = int(m.group(1))
-                n  = int(m.group(2))
-                if not n2 == 2 * n: return []
-                order = sg.order
-                if order == this.order:
-                    return [this]
-                elif order > this.order:
-                    return []
-                elif order == 2: # {E, Reflection}
-                    assert (this.order / 2) % 2 == 1, 'Improper subgroup'
-                    # only one orientation: reflection normal parallel to
-                    # n-fold axis.
-                    return [sg(setup = {'axis': this.rotAxes['n']})]
-                else:
-                    assert False, 'TODO: %s (order %d)' % (sgName, order)
-                    return [E()]
+                TODO
+        elif isinstance(sg, MetaCn):
+            if sg.n == this.n: # C2cCn
+                # only one orientation:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
             else:
-                try:
-                    n = int(sgName[1:])
-                    if 2 * n == this.order:
-                        # only one orientation:
-                        return [sg(setup = {'axis': this.rotAxes['n']})]
-                    else:
-                        assert False, 'TODO'
-                except ValueError: # caused by int() function
-                    assert False, 'TODO'
-                    pass #TODO
-                    # try C2nxCn
-
+                TODO
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
-# dynamically create CnxI classes:
-class MetaC2nCn(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+# dynamically create C2nCn classes:
 def C2nC(n):
     C_2n_C_n = MetaC2nCn('C%dC%d' % (2*n, n), (C2nCn,),
             {
@@ -466,7 +429,11 @@ C4C2 = C2nC(2)
 C6C3 = C2nC(3)
 C8C4 = C2nC(4)
 
+class MetaCnxI(MetaCn):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 class CnxI(Cn):
+    __metaclass__ = MetaCnxI
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group CnxI, consisting of n rotations and of n rotary
@@ -498,51 +465,26 @@ class CnxI(Cn):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
-        if sg == CnxI:
-            if sg.order == this.order:
+        if isinstance(sg, MetaCnxI):
+            if sg.n == this.n: # CnxI
                 return [this]
-            elif sg.order > this.order:
+            elif sg.n > this.n:
                 return []
             else:
-                assert False, 'TODO'
-                return [E()]
-        elif sgName[0] == 'C':
-            if sgName[-2:] == 'xI': # CnxI
-                try:
-                    n = int(sgName[1:-2])
-                    order = sg.order
-                    if order == this.order:
-                        return [this]
-                    elif order > this.order:
-                        return []
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
-            else: # Cn
-                m = reC2nCn.match(sgName)
-                if m:
-                    n2 = int(m.group(1))
-                    n  = int(m.group(2))
-                    if not n2 == 2 * n: return []
-                    if n2 ==2 and n == 1:
-                        return [sg(setup = {'axis': this.rotAxes['n']})]
-                else:
-                    try:
-                        n = int(sgName[1:])
-                        if 2 * n == this.order:
-                            # only one orientation:
-                            return [sg(setup = {'axis': this.rotAxes['n']})]
-                        else:
-                            assert False, 'TODO'
-                    except ValueError: # caused by int() function
-                        assert False, 'TODO'
-                        pass #TODO
-                        # try C2nxCn
-
+                TODO
+        elif isinstance(sg, MetaC2nCn):
+            if sg.n == 1: # C2C1
+                # only one orientation:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            else:
+                TODO
+        elif isinstance(sg, MetaCn):
+            if sg.n == this.n: # Cn
+                # only one orientation:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            else:
+                print sg, sg.n, this.n
+                TODO
         elif sg == ExI:
             return [ExI()]
         elif sg == E:
@@ -551,9 +493,6 @@ class CnxI(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create CnxI classes:
-class MetaCnxI(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
 def CxI(n):
     if n == 1: return ExI
     C_nxI = MetaCnxI('C%dxI' % n, (CnxI,),
@@ -580,8 +519,11 @@ C2xI = CxI(2)
 C3xI = CxI(3)
 C4xI = CxI(4)
 
-reDnCn = re.compile('D([0-9]+)C([0-9]+)$')
+class MetaDnCn(MetaCn):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 class DnCn(Cn):
+    __metaclass__ = MetaDnCn
     initPars = [
         {'type': 'int',  'par': 'n',    'lab': "order"},
         {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
@@ -627,18 +569,11 @@ class DnCn(Cn):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
-        if sg == DnCn:
-            if sg.order == this.order:
-                return [this]
-            elif sg.order > this.order:
-                return []
-            else:
-                assert False, 'TODO'
-                return [E()]
-        elif isinstance(sg, MetaCn):
+        if isinstance(sg, MetaDnCn):
             if sg.n == this.n:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+                return [this]
+            elif sg.n > this.n:
+                return []
             else:
                 TODO
         elif isinstance(sg, MetaC2nCn):
@@ -646,9 +581,9 @@ class DnCn(Cn):
                 return [sg(setup = {'axis': rn}) for rn in this.reflNormals]
             else:
                 TODO
-        elif isinstance(sg, MetaDnCn):
+        elif isinstance(sg, MetaCn):
             if sg.n == this.n:
-                return [this]
+                return [sg(setup = {'axis': this.rotAxes['n']})]
             else:
                 TODO
         elif sg == E:
@@ -657,10 +592,6 @@ class DnCn(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create DnCn classes:
-class MetaDnCn(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
-
 def DnC(n):
     if n == 1: return C2C1
     D_n_C_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
@@ -687,7 +618,11 @@ D2C2 = DnC(2)
 D3C3 = DnC(3)
 D4C4 = DnC(4)
 
+class MetaDn(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 class Dn(Set):
+    __metaclass__ = MetaDn
     initPars = [
         {'type': 'int',  'par': 'n',    'lab': "order"},
         {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
@@ -715,7 +650,7 @@ class Dn(Set):
             else:                axis_n = Z[:]
             if 'axis_2' in keys: axis_2 = setup['axis_2']
             else:                axis_2 = X[:]
-            if this.n != 0     : n = n
+            if this.n != 0     : n = this.n
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
@@ -737,59 +672,34 @@ class Dn(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
-        if sg == Dn:
-            if sg.order == this.order:
+        if isinstance(sg, MetaDn):
+            if sg.n == this.n:
                 return [this]
-            elif sg.order > this.order:
+            elif sg.n > this.n:
                 return []
             else:
-                assert False, 'TODO'
-                return [E()]
-        elif sgName[0] == 'D':
-            try: # Dn
-                n = int(sgName[1:])
-                if 2*n == this.order:
-                    return [this]
-                elif 2*n > this.order:
-                    return []
-                else:
-                    assert False, 'TODO'
-                    return [E()]
-            except ValueError: # caused by int() function, eg for DnxI
-                raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
-        elif sgName[0] == 'C':
-            try: # Cn
-                n = int(sgName[1:])
-                assert n > 1, 'warning'
-                if n == 2: # sg = C2
-                    isoms = [
-                        C2(setup = {'axis':this.rotAxes[2][i]})
-                        for i in range(len(this.rotAxes[2]))
-                    ]
-                    if this.order % 4 == 0: # if D2, D4, etc
-                        isoms.append(
-                            Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
-                        )
-                    return isoms
-                elif 2*n == this.order:
-                    return [Cn(setup = {'n': n, 'axis': this.rotAxes['n']})]
-                elif 2*n > this.order:
-                    return []
-                else:
-                    assert False, 'TODO'
-                    return [E()]
-            except ValueError: # caused by int() function, eg for CnxI
-                raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
+                TODO
+        elif isinstance(sg, MetaCn):
+            if sg.n == this.n:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            elif sg.n == 2: # sg = C2
+                isoms = [
+                    sg(setup = {'axis':this.rotAxes[2][i]})
+                    for i in range(len(this.rotAxes[2]))
+                ]
+                if this.n % 2 == 0: # if D2, D4, etc
+                    isoms.append(
+                        sg(setup = {'axis': this.rotAxes['n']})
+                    )
+                return isoms
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
         elif sg == E:
             return [E()]
 
 # dynamically create Dn classes:
-class MetaDn(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
 def D(n):
     if n == 1: return C2
     D_n = MetaDn('D%d' % n, (Dn,),
@@ -812,14 +722,18 @@ def D(n):
     # TODO: fix subgroups depending on n:
     D_n.subgroups = [D_n, C2, E]
     if n != 2:
-        D_n.subgroups.insert(-1, C(n))
+        D_n.subgroups.insert(-2, C(n))
     return D_n
 
 D2 = D(2)
 D3 = D(3)
 D4 = D(4)
 
+class MetaDnxI(MetaDn):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 class DnxI(Dn):
+    __metaclass__ = MetaDnxI
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group DnxI, of order 4n.
@@ -853,109 +767,42 @@ class DnxI(Dn):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
         #print 'realiseSubgroups', sgName
-        if sg == DnxI:
-            if sg.order == this.order:
+        if isinstance(sg, MetaDnxI):
+            if sg.n == this.n:
                 return [this]
-            elif sg.order > this.order:
+            elif sg.n > this.n:
                 return []
             else:
-                assert False, 'TODO'
-                return [E()]
-        elif sgName[0] == 'D':
-            if sgName[-2:] == 'xI': # DnxI
-                try:
-                    n = int(sgName[1:-2])
-                    order = sg.order
-                    if order == this.order:
-                        return [this]
-                    elif order > this.order:
-                        return []
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
-            else: # Dn
-                try:
-                    n = int(sgName[1:])
-                    order = sg.order
-                    if 2 * order == this.order:
-                        return [
-                            sg(setup = {
-                                'axis_n': this.rotAxes['n'],
-                                'axis_2': this.rotAxes[2][0]
-                            })
-                            # choosing other 2-fold axes leads essentially to
-                            # the same.
-                        ]
-                    elif 2 * order > this.order:
-                        return []
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    assert False, 'TODO'
-                    pass #TODO
-                    # try C2nxCn
-        elif sgName[0] == 'C':
-            if sgName[-2:] == 'xI': # CnxI
-                try:
-                    n = int(sgName[1:-2])
-                    if n == 2: # sg = C2xI
-                        isoms = [
-                            C2xI(setup = {'axis':this.rotAxes[2][i]})
-                            for i in range(len(this.rotAxes[2]))
-                        ]
-                        if this.order % 8 == 0: # if D2xI, D4xI, etc
-                            isoms.append(
-                                CnxI(
-                                    setup = {'n': n, 'axis': this.rotAxes['n']}
-                                )
-                            )
-                        return isoms
-                    order = sg.order
-                    if 2 * order == this.order:
-                        return [
-                            CnxI(setup = {'n': n, 'axis': this.rotAxes['n']})
-                        ]
-                    elif 2 * order > this.order:
-                        return []
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    assert False, 'TODO'
-                    pass #TODO
-            else: # Cn
-                try:
-                    n = int(sgName[1:])
-                    if n == 2: # sg = C2
-                        isoms = [
-                            C2(setup = {'axis':this.rotAxes[2][i]})
-                            for i in range(len(this.rotAxes[2]))
-                        ]
-                        if this.order % 8 == 0: # if D2xI, D4xI, etc
-                            isoms.append(
-                                Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
-                            )
-                        return isoms
-                    order = sg.order
-                    if 4 * order == this.order:
-                        return [
-                            Cn(setup = {'n': n, 'axis': this.rotAxes['n']})
-                        ]
-                    elif 4 * order > this.order:
-                        return []
-                    else:
-                        assert False, 'TODO: %s (order %d)' % (sgName, order)
-                        return [E()]
-                except ValueError: # caused by int() function
-                    raise ImproperSubgroupError, '%s ! <= %s' % (
-                        this.__class__.__name__, sg.__class__.__name__)
-                # try C2nxCn
+                TODO
+        elif isinstance(sg, MetaDn):
+            if sg.n == this.n:
+                return [
+                    sg(setup = {
+                        'axis_n': this.rotAxes['n'],
+                        'axis_2': this.rotAxes[2][0]
+                    })
+                    # choosing other 2-fold axes leads essentially to the same.
+                ]
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
+        if isinstance(sg, MetaCnxI) or type(sg) == MetaCn:
+            if sg.n == this.n:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            elif sg.n == 2: # C2xI or C2
+                isoms = [
+                    sg(setup = {'axis':this.rotAxes[2][i]})
+                    for i in range(len(this.rotAxes[2]))
+                ]
+                if this.n % 2 == 0: # if D2xI, D4xI, etc
+                    isoms.append(sg(setup = {'axis': this.rotAxes['n']}))
+                return isoms
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
         elif sg == ExI:
             return [ExI()]
         elif sg == E:
@@ -964,9 +811,6 @@ class DnxI(Dn):
                 this.__class__.__name__, sg.__name__, sg.__class__.__name__)
 
 # dynamically create DnxI classes:
-class MetaDnxI(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
 def DxI(n):
     if n == 1: return C2xI
     D_nxI = MetaDnxI('D%dxI' % n, (DnxI,),
@@ -1145,7 +989,6 @@ class S4A4(A4):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        sgName = sg.__name__
         #S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
         #C3, C2, E
         if sg == C2:
