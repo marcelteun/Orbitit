@@ -657,6 +657,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.DnCn,
             isometry.Dn,
             isometry.DnxI,
+            isometry.D2nDn,
             isometry.A4,
             isometry.A4xI,
             isometry.S4A4,
@@ -712,7 +713,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 isometry.C2nCn,
                 isometry.DnCn,
                 isometry.Dn,
-                isometry.DnxI
+                isometry.DnxI,
+                isometry.D2nDn
             ]:
                 assert selClass.initPars[0]['type'] == 'int', (
                     'The first index should specify the n-order')
@@ -727,6 +729,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
                     C = isometry.DnC
                 elif selClass == isometry.Dn:
                     C = isometry.D
+                elif selClass == isometry.D2nDn:
+                    C = isometry.D2nD
                 elif selClass == isometry.DnxI:
                     C = isometry.DxI
                 assert n > 0, 'warning'

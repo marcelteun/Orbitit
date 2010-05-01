@@ -744,9 +744,10 @@ class DnxI(Dn):
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
         - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with
-          0 <= i < n). For n even these become n reflections in a plane
+          0 <= i < n). For n even one of these becomes a reflection in a plane
           perpendicular to the n-fold axis.
-        - n reflections in planes that contain the n-fold axis
+        - n reflections in planes that contain the n-fold axis. The normals of
+          the reflection planes are perpendicular to the halfturn axes.
         """
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
@@ -788,7 +789,30 @@ class DnxI(Dn):
                 return []
             else:
                 TODO
-        if isinstance(sg, MetaCnxI) or type(sg) == MetaCn:
+        elif isinstance(sg, MetaDnCn):
+            if sg.n == this.n and this.n > 1: # DnCn
+                return [
+                    sg(setup = {'axis_n':this.rotAxes['n'],
+                            'normal_r': this.rotAxes[2][0]
+                        }
+                    )
+                ]
+            else:
+                TODO
+        elif isinstance(sg, MetaC2nCn):
+            if sg.n == 1: # C2C1: {E, Reflection}
+                isoms = [
+                    sg(setup = {'axis':this.rotAxes[2][i]})
+                    for i in range(len(this.rotAxes[2]))
+                ]
+                if this.n % 2 == 0: # if D2xI, D4xI, etc
+                    isoms.append(
+                        sg(setup = {'axis': this.rotAxes['n']})
+                    )
+                return isoms
+            else:
+                TODO
+        elif isinstance(sg, MetaCnxI) or type(sg) == MetaCn:
             if sg.n == this.n:
                 return [sg(setup = {'axis': this.rotAxes['n']})]
             elif sg.n == 2: # C2xI or C2
@@ -820,7 +844,7 @@ def DxI(n):
                 'initPars': [
                         {
                             'type': 'vec3',
-                            'par': 'axis',
+                            'par': 'axis_n',
                             'lab': "%d-fold axis" % n
                         }, {
                             'type': 'vec3',
@@ -831,14 +855,139 @@ def DxI(n):
             }
         )
     # TODO: fix subgroups depending on n:
-    D_nxI.subgroups = [D_nxI, D(n), CxI(n), C2, ExI, E]
+    D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
     if n != 2:
-        D_nxI.subgroups.insert(-3, C(n))
+        D_nxI.subgroups.insert(-4, C(n))
     return D_nxI
 
 D2xI = DxI(2)
 D3xI = DxI(3)
 D4xI = DxI(4)
+
+class MetaD2nDn(MetaDn):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
+class D2nDn(Dn):
+    __metaclass__ = MetaD2nDn
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group D2nDn, consisting of n rotations, n half turns, n
+        rotary inversions (reflections) and n reflections.
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n halfturns around axes perpendicular to the n-fold axis
+        - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with
+          0 <= i < n). For n odd one of these becomes a reflection in a plane
+          perpendicular to the n-fold axis.
+        - n reflections in planes that contain the n-fold axis. The normal of
+          the reflection planes lie in the middle between two halfturns.
+        """
+        #print 'isometries', isometries, 'setup', setup
+        if isometries != None:
+            # TODO: add some asserts
+            Set.__init__(this, isometries)
+        else:
+            s = copy(setup)
+            if 'n' not in s and this.n != 0:
+                s['n'] = this.n
+            dn = Dn(setup = s)
+            this.n = dn.n
+            s['n'] = 2 * s['n']
+            d2n = Dn(setup = s)
+            Set.__init__(this, dn | ((d2n-dn) * GeomTypes.I))
+            this.rotAxes = dn.rotAxes
+            this.reflNormals = []
+            for isom in this:
+                if isom.isRefl():
+                    this.reflNormals.append(isom.planeN())
+            this.order = d2n.order
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        if isinstance(sg, MetaD2nDn):
+            if sg.n == this.n: # D2cDn
+                return [this]
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
+        elif isinstance(sg, MetaDn):
+            if sg.n == this.n:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
+        elif isinstance(sg, MetaDnCn):
+            if sg.n == this.n and this.n > 1: # DnCn
+                return [sg(setup = {'axis_n':this.rotAxes['n'],
+                        'normal_r': this.reflNormals[0]
+                    }
+                )]
+            else:
+                TODO
+        elif isinstance(sg, MetaC2nCn):
+            if sg.n == this.n: # D2nDn
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            elif sg.n == 1: # C2C1 = {E, Reflection}
+                isoms = [
+                    sg(setup = {'axis':this.reflNormals[i]})
+                    for i in range(len(this.reflNormals))
+                ]
+                if this.n % 2 == 1 and this.n > 1: # if D3xI, D5xI, etc
+                    isoms.append(
+                        sg(setup = {'axis': this.rotAxes['n']})
+                    )
+                return isoms
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
+        elif isinstance(sg, MetaCn):
+            if sg.n == this.n:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            elif sg.n > this.n:
+                return []
+            else:
+                TODO
+        elif sg == E:
+            return [E()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
+
+# dynamically create C2nCn classes:
+def D2nD(n):
+    D_2n_D_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
+            {
+                'n'    : n,
+                'order': 4 * n,
+                'initPars': [
+                        {
+                            'type': 'vec3',
+                            'par': 'axis_n',
+                            'lab': "%d-fold axis" % n
+                        }, {
+                            'type': 'vec3',
+                            'par': 'axis_2',
+                            'lab': "axis of halfturn"
+                        }
+                    ]
+            }
+        )
+    D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
+    # TODO: fix more subgroups depending on n, e.g.:
+    return D_2n_D_n
+
+D2D1 = D2nD(1)
+D4D2 = D2nD(2)
+D6D3 = D2nD(3)
+D8D4 = D2nD(4)
 
 class A4(Set):
     initPars = [
