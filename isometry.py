@@ -258,6 +258,7 @@ class Cn(Set):
         {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
     ]
     order = 0
+    n = 0
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group Cn, consisting of n rotations
@@ -275,12 +276,12 @@ class Cn(Set):
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
             else:              axis = Z[:]
-            if this.order != 0: n = this.order
+            if this.n != 0   : n = this.n
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
                 if n == 0: n = 1
-                this.order = n
+                this.n = n
 
             angle = 2 * math.pi / n
             try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
@@ -292,6 +293,7 @@ class Cn(Set):
             for i in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(this, isometries)
+            this.order = n
             this.rotAxes = {'n': axis}
 
     def realiseSubgroups(this, sg):
@@ -327,10 +329,14 @@ class Cn(Set):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create Cn classes:
+class MetaCn(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 def C(n):
     if n == 1: return E
-    C_n = type('C%d' % n, (Cn,),
+    C_n = MetaCn('C%d' % n, (Cn,),
             {
+                'n'    : n,
                 'order': n,
                 'initPars': [{
                         'type': 'vec3',
@@ -367,9 +373,10 @@ class C2nCn(Cn):
             Set.__init__(this, isometries)
         else:
             s = copy(setup)
-            if 'n' not in s and this.order != 0:
-                s['n'] = this.order/2
+            if 'n' not in s and this.n != 0:
+                s['n'] = this.n
             cn = Cn(setup = s)
+            this.n = cn.n
             s['n'] = 2 * s['n']
             c2n = Cn(setup = s)
             Set.__init__(this, cn | ((c2n-cn) * GeomTypes.I))
@@ -428,9 +435,13 @@ class C2nCn(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create CnxI classes:
+class MetaC2nCn(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 def C2nC(n):
-    C_2n_C_n = type('C%dC%d' % (2*n, n), (C2nCn,),
+    C_2n_C_n = MetaC2nCn('C%dC%d' % (2*n, n), (C2nCn,),
             {
+                'n'    : n,
                 'order': 2 * n,
                 'initPars': [{
                         'type': 'vec3',
@@ -474,9 +485,10 @@ class CnxI(Cn):
             Set.__init__(this, isometries)
         else:
             s = copy(setup)
-            if 'n' not in s and this.order != 0:
-                s['n'] = this.order/2
+            if 'n' not in s and this.n != 0:
+                s['n'] = this.n
             cn = Cn(setup = s)
+            this.n = cn.n
             Set.__init__(this, cn * ExI())
             this.rotAxes = {'n': cn.rotAxes['n']}
             this.order = 2 * cn.order
@@ -539,10 +551,14 @@ class CnxI(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create CnxI classes:
+class MetaCnxI(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 def CxI(n):
     if n == 1: return ExI
-    C_nxI = type('C%dxI' % n, (CnxI,),
+    C_nxI = MetaCnxI('C%dxI' % n, (CnxI,),
             {
+                'n'    : n,
                 'order': 2 * n,
                 'initPars': [{
                         'type': 'vec3',
@@ -588,13 +604,15 @@ class DnCn(Cn):
             Set.__init__(this, isometries)
         else:
             s = {}
-            if 'n' not in setup and this.order != 0:
-                s['n'] = this.order/2
+            if 'n' not in setup:
+                if this.n != 0:
+                    s['n'] = this.n
             else:
                 s['n'] = setup['n']
             if 'axis_n' in setup:
                 s['axis_n'] = setup['axis_n']
             cn = Cn(setup = s)
+            this.n = cn.n
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
             dn = Dn(setup = s)
@@ -618,49 +636,27 @@ class DnCn(Cn):
             else:
                 assert False, 'TODO'
                 return [E()]
+        elif isinstance(sg, MetaCn):
+            if sg.n == this.n:
+                return [sg(setup = {'axis': this.rotAxes['n']})]
+            else:
+                TODO
+        elif isinstance(sg, MetaC2nCn):
+            if sg.n == 1: # C2C1
+                return [sg(setup = {'axis': rn}) for rn in this.reflNormals]
+            else:
+                TODO
         elif isinstance(sg, MetaDnCn):
             if sg.n == this.n:
                 return [this]
             else:
                 TODO
-        elif sgName[0] == 'C': # Cn
-            m = reDnCn.match(sgName)
-            if m:
-                n2 = int(m.group(1))
-                n  = int(m.group(2))
-                if not n2 == 2 * n: return []
-                order = sg.order
-                if order == this.order:
-                    return [this]
-                elif order > this.order:
-                    return []
-                elif order == 2: # {E, Reflection}
-                    assert (this.order / 2) % 2 == 1, 'Improper subgroup'
-                    # only one orientation: reflection normal parallel to
-                    # n-fold axis.
-                    return [sg(setup = {'axis': this.rotAxes['n']})]
-                else:
-                    assert False, 'TODO: %s (order %d)' % (sgName, order)
-                    return [E()]
-            else:
-                try:
-                    n = int(sgName[1:])
-                    if 2 * n == this.order:
-                        # only one orientation:
-                        return [sg(setup = {'axis': this.rotAxes['n']})]
-                    else:
-                        assert False, 'TODO'
-                except ValueError: # caused by int() function
-                    assert False, 'TODO'
-                    pass #TODO
-                    # try DnxCn
-
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
-# dynamically create CnxI classes:
+# dynamically create DnCn classes:
 class MetaDnCn(type):
     def __init__(this, classname, bases, classdict):
         type.__init__(this, classname, bases, classdict)
@@ -682,7 +678,7 @@ def DnC(n):
                     }]
             }
         )
-    D_n_C_n.subgroups = [D_n_C_n, C(n), D1C1, E]
+    D_n_C_n.subgroups = [D_n_C_n, C(n), C2C1, E]
     # TODO: fix more subgroups depending on n, e.g.:
     return D_n_C_n
 
@@ -698,6 +694,7 @@ class Dn(Set):
         {'type': 'vec3', 'par': 'axis_2', 'lab': "axis of halfturn"}
     ]
     order = 0
+    n = 0
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group Dn, consisting of 2n rotations
@@ -718,15 +715,12 @@ class Dn(Set):
             else:                axis_n = Z[:]
             if 'axis_2' in keys: axis_2 = setup['axis_2']
             else:                axis_2 = X[:]
-            if this.order != 0: n = this.order/2
+            if this.n != 0     : n = n
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
                 if n == 0: n = 1
 
-            if n == 1:
-                # D1 ~= C2 : {E, halfturn}
-                return C2(setup = {'axis': axis_2})
             h = GeomTypes.HalfTurn3(axis_2)
             cn = Cn(setup = {'axis': axis_n, 'n': n})
             isometries = [isom for isom in cn]
@@ -735,6 +729,7 @@ class Dn(Set):
             isometries.extend(hs)
             this.rotAxes = {'n': axis_n, 2: [h.axis() for h in hs]}
             Set.__init__(this, isometries)
+            this.n     = n
             this.order = 2 * n
 
     def realiseSubgroups(this, sg):
@@ -792,10 +787,14 @@ class Dn(Set):
             return [E()]
 
 # dynamically create Dn classes:
+class MetaDn(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 def D(n):
     if n == 1: return C2
-    D_n = type('D%d' % n, (Dn,),
+    D_n = MetaDn('D%d' % n, (Dn,),
             {
+                'n'    : n,
                 'order': 2 * n,
                 'initPars': [
                         {
@@ -841,11 +840,12 @@ class DnxI(Dn):
             Set.__init__(this, isometries)
         else:
             s = copy(setup)
-            if 'n' not in s and this.order != 0:
-                s['n'] = this.order/2
+            if 'n' not in s and this.n != 0:
+                s['n'] = this.n
             dn = Dn(setup = s)
             Set.__init__(this, dn * ExI())
             this.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
+            this.n     = dn.n
             this.order = 2 * dn.order
 
     def realiseSubgroups(this, sg):
@@ -964,10 +964,14 @@ class DnxI(Dn):
                 this.__class__.__name__, sg.__name__, sg.__class__.__name__)
 
 # dynamically create DnxI classes:
+class MetaDnxI(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
 def DxI(n):
     if n == 1: return C2xI
-    D_nxI = type('D%dxI' % n, (DnxI,),
+    D_nxI = MetaDnxI('D%dxI' % n, (DnxI,),
             {
+                'n'    : n,
                 'order': 4 * n,
                 'initPars': [
                         {
