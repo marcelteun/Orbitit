@@ -1073,17 +1073,17 @@ class A4(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        if sg == D2:
+        if sg == A4:
+            return [this]
+        elif sg == D2:
             o2a = this.rotAxes[2]
             return [D2(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
-        if sg == C2:
+        elif sg == C2:
             o2a = this.rotAxes[2]
             return [C2(setup = {'axis': a}) for a in o2a]
         elif sg == C3:
             o3a = this.rotAxes[3]
             return [C3(setup = {'axis': a}) for a in o3a]
-        elif sg == A4:
-            return [this]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
@@ -1216,6 +1216,7 @@ class S4A4(A4):
 # D2nDn = D4D2
 # DnCn  = D3C3, D2C2
 # C2nCn = C4C2, C2C1
+# Diagram 1.
 S4A4.subgroups = [S4A4,
         A4, D4D2, D3C3,
         #D2nDn, DnCn, C2nCn,
@@ -1262,36 +1263,76 @@ class A4xI(A4):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        if sg == C2:
-            o2a = this.rotAxes[2]
-            return [C2(setup = {'axis': a}) for a in o2a]
-        elif sg == C3:
-            o3a = this.rotAxes[3]
-            return [C3(setup = {'axis': a}) for a in o3a]
-        if sg == C2xI:
-            o2a = this.rotAxes[2]
-            return [C2xI(setup = {'axis': a}) for a in o2a]
-        elif sg == C3xI:
-            o3a = this.rotAxes[3]
-            return [C3xI(setup = {'axis': a}) for a in o3a]
+        if sg == A4xI:
+            return [this]
         elif sg == A4:
             # the other ways of orienting A4 into A4xI doesn't give anything new
-            return [
-                A4(
-                    setup = {
+            return [ A4( setup = {
                         'o2axis0': this.rotAxes[2][0],
                         'o2axis1': this.rotAxes[2][1]
                     }
                 )
             ]
-        elif sg == A4xI:
-            return [this]
+        elif sg == D2xI:
+            o2a = this.rotAxes[2]
+            return [sg(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
+        elif sg == C3xI:
+            o3a = this.rotAxes[3]
+            return [sg(setup = {'axis': a}) for a in o3a]
+        elif sg == D2:
+            o2a = this.rotAxes[2]
+            return [sg(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
+        elif sg == D2C2:
+            isoms = []
+            for o2 in this.rotAxes[2]:
+                for rn in this.rotAxes[2]:
+                    if GeomTypes.eq(rn*o2, 0):
+                        isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
+                        break
+            assert len(isoms) == 3, isoms
+            return isoms
+        if sg == C2xI:
+            o2a = this.rotAxes[2]
+            return [sg(setup = {'axis': a}) for a in o2a]
+        elif sg == C3:
+            o3a = this.rotAxes[3]
+            return [sg(setup = {'axis': a}) for a in o3a]
+        elif sg == C2:
+            o2a = this.rotAxes[2]
+            return [sg(setup = {'axis': a}) for a in o2a]
+        elif sg == C2C1:
+            o2a = this.rotAxes[2]
+            return [sg(setup = {'axis': a}) for a in o2a]
         elif sg == ExI:
-            return [ExI()]
+            return [sg()]
         elif sg == E:
-            return [E()]
+            return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
+
+# Diagram 4, 14
+# 24            A4xI
+#            _.-'| |'-._
+#         .-'    | |    '-._
+# 12     A4      |  \       '-.._
+#         |\     |   |           '-._
+#  8      | |    |   |               D2xI
+#         | \    |    \         ____/ |
+#  6      |  |  C3xI   |   to D2      |
+#         |  \   /\    |              |
+#  4     D2   | /  | D2C2      __----C2xI
+#         |   \/  to   |  to C2  _.--'|
+#  3      |   C3  ExI  |     _.-'     |
+#         |   |        | _.-'         |
+#  2     C2   |      C2C1          __ExI
+#         '-._|__..--' ____....''''
+#  1          E----''''
+A4xI.subgroups = [A4xI, A4,
+        D2xI, C3xI,
+        D2, D2C2, C2xI,
+        C3,
+        C2, C2C1, ExI, E
+    ]
 
 class S4(Set):
     initPars = [
@@ -1487,16 +1528,6 @@ CnxI.subgroups = [CnxI, Cn, ExI, E]
 C2nCn.subgroups = [C2nCn, Cn, E]
 Dn.subgroups = [Dn, Cn, C2, E]
 DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
-
-# DnxI = D2xI, D1xI
-# CnxI = C3xI, C2xI
-# Dn = D2, (D1~C2)
-# Cn = C3
-A4xI.subgroups = [A4xI, A4,
-        #TODO: DnxI, Dn,
-        C3xI, C2xI,
-        C3, C2, ExI, E
-    ]
 
 # Dn = D4, D3, D2 (2x), D1 (@ order 4)
 # Cn = C4, C3, C2 (@ order 2)

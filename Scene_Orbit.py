@@ -263,7 +263,7 @@ class CtrlWin(wx.Frame):
         #print 'finalSym', finalSym
         #print 'close finalSym', finalSym.close()
         #print 'this.colAlternative', this.colAlternative
-        print 'using subgroup colIsom %s for colouring (alt. %d)' % (
+        print '1 colour has subgroup %s (alt. %d)' % (
             this.posColStabSym[this.__nrOfColsGuiId.GetSelection()],
             this.colAlternative
         )
