@@ -751,6 +751,7 @@ def D(n):
         D_n.subgroups.insert(-2, C(n))
     return D_n
 
+D1 = D(1)
 D2 = D(2)
 D3 = D(3)
 D4 = D(4)
@@ -1196,7 +1197,7 @@ class S4A4(A4):
                     if GeomTypes.eq(rn*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
                         break
-            assert len(isoms) == 4, isoms
+            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C4C2:
             return [C4C2(setup = {'axis': a}) for a in this.rotAxes[2]]
@@ -1289,7 +1290,7 @@ class A4xI(A4):
                     if GeomTypes.eq(rn*o2, 0):
                         isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
                         break
-            assert len(isoms) == 3, isoms
+            assert len(isoms) == 3, 'len(isoms) == %d != 3' % len(isoms)
             return isoms
         if sg == C2xI:
             o2a = this.rotAxes[2]
@@ -1420,18 +1421,8 @@ class S4(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        if sg == C2:
-            o2a = this.rotAxes[2]
-            o4a = this.rotAxes[4]
-            return [C2(setup = {'axis': a}) for a in o2a].extend(
-                    [C2(setup = {'axis': a}) for a in o4a]
-                )
-        elif sg == C3:
-            o3a = this.rotAxes[3]
-            return [C3(setup = {'axis': a}) for a in o3a]
-        elif sg == C4:
-            o4a = this.rotAxes[4]
-            return [C4(setup = {'axis': a}) for a in o4a]
+        if sg == S4:
+            return [this]
         elif sg == A4:
             # the other ways of orienting A4 into A4xI doesn't give anything new
             return [
@@ -1442,12 +1433,63 @@ class S4(Set):
                     }
                 )
             ]
-        elif sg == S4:
-            return [this]
+        elif sg == D4:
+            o4a = this.rotAxes[4]
+            l = len(o4a)
+            return [sg(
+                    setup = {'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]}
+                ) for i in range(l)
+            ]
+        elif sg == D3:
+            isoms = []
+            for o3 in this.rotAxes[3]:
+                for o2 in this.rotAxes[2]:
+                    if GeomTypes.eq(o2*o3, 0):
+                        isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
+                        break
+            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            return isoms
+        elif sg == D2:
+            isoms = []
+            # There are 2 kinds of D2:
+            # 1. one consisting of the three 4-fold axes
+            # 2. 3 consisting of a 4 fold axis and two 2-fold axes.
+            o4a = this.rotAxes[4]
+            l = len(o4a)
+            isoms = [sg(setup = {'axis_n': o4a[0], 'axis_2': o4a[1]})]
+            for o4 in this.rotAxes[4]:
+                for o2 in this.rotAxes[2]:
+                    if GeomTypes.eq(o2*o4, 0):
+                        isoms.append(sg(setup = {'axis_n': o4, 'axis_2': o2}))
+                        break
+            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            return isoms
+        elif sg == C4:
+            o4a = this.rotAxes[4]
+            return [sg(setup = {'axis': a}) for a in o4a]
+        elif sg == C3:
+            o3a = this.rotAxes[3]
+            return [sg(setup = {'axis': a}) for a in o3a]
+        elif sg == C2:
+            o4a = this.rotAxes[4]
+            isoms = [sg(setup = {'axis': a}) for a in o4a]
+            o2a = this.rotAxes[2]
+            isoms.extend([sg(setup = {'axis': a}) for a in o2a])
+            return isoms
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
+
+# Dn = D4, D3, D2 (2x), D1 (~C2)
+# Cn = C4, C3, C2 (2x @ 2-fold and 4-fold axes)
+S4.subgroups = [S4, A4,
+        D4, D3,
+        D2, C4,
+        C3,
+        C2,
+        E
+    ]
 
 def generateD2(o2axis0, o2axis1):
     """
@@ -1528,13 +1570,6 @@ CnxI.subgroups = [CnxI, Cn, ExI, E]
 C2nCn.subgroups = [C2nCn, Cn, E]
 Dn.subgroups = [Dn, Cn, C2, E]
 DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
-
-# Dn = D4, D3, D2 (2x), D1 (@ order 4)
-# Cn = C4, C3, C2 (@ order 2)
-S4.subgroups = [S4, A4,
-        #Dn,
-        C4, C3, C2, E
-    ]
 
 if __name__ == '__main__':
 

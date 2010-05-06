@@ -263,9 +263,10 @@ class CtrlWin(wx.Frame):
         #print 'finalSym', finalSym
         #print 'close finalSym', finalSym.close()
         #print 'this.colAlternative', this.colAlternative
-        print '1 colour has subgroup %s (alt. %d)' % (
+        print 'elems of 1 colour have subgroup %s (alt. %d of %d)' % (
             this.posColStabSym[this.__nrOfColsGuiId.GetSelection()],
-            this.colAlternative
+            this.colAlternative + 1,
+            len(this.colIsom)
         )
         colQuotientSet = finalSym  / this.colIsom[this.colAlternative]
         #print '-----colQuotientSet-----------'
