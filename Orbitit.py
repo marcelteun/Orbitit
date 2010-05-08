@@ -202,7 +202,6 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         Scenes3D.Interactive3DCanvas.__init__(this, *args, **kwargs)
 
     def initGl(this):
-        print 'PolyhedraBrowser.initGL'
         this.setCameraPosition(15.0)
         Scenes3D.Interactive3DCanvas.initGl(this)
         
