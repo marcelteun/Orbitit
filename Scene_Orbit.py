@@ -54,6 +54,16 @@ class CtrlWin(wx.Frame):
         this.canvas = canvas
         kwargs['title'] = Title
         wx.Frame.__init__(this, *args, **kwargs)
+        # initialise some default colours:
+        c = lambda rgbCol: [c*255 for c in rgbCol]
+        this.cols = [
+                c(rgb.gold),       c(rgb.forestGreen),
+                c(rgb.red4),       c(rgb.deepSkyBlue),
+                c(rgb.khaki4),     c(rgb.midnightBlue),
+                c(rgb.chocolate1), c(rgb.burlywood1),
+                c(rgb.chocolate4), c(rgb.yellow),
+                c(rgb.aquamarine), c(rgb.indianRed1)
+            ]
         this.statusBar = this.CreateStatusBar()
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -207,7 +217,7 @@ class CtrlWin(wx.Frame):
         try:
             this.selColSizer.Clear(True)
         except AttributeError:
-            this.selColSizer = wx.BoxSizer(wx.HORIZONTAL)
+            this.selColSizer = wx.BoxSizer(wx.VERTICAL)
             this.colSizer.Add(this.selColSizer, 0, wx.EXPAND)
             nextPrevColSizer = wx.BoxSizer(wx.HORIZONTAL)
             this.colGuis.append(
@@ -230,18 +240,21 @@ class CtrlWin(wx.Frame):
         nrOfCols = int(this.nrOfCols[id])
         this.selColGuis = []
         initColour = (255, 255, 255)
+        maxColPerRow = 12
         for i in range(nrOfCols):
             try:
                 col = this.cols[i]
             except IndexError:
-                # TODO: init this.cols with some (12?) nice init colours
                 col = initColour
                 this.cols.append(col)
+            if i % maxColPerRow == 0:
+                selColSizerRow = wx.BoxSizer(wx.HORIZONTAL)
+                this.selColSizer.Add(selColSizerRow, 0, wx.EXPAND)
             this.selColGuis.append(
                 wxLibCS.ColourSelect(this.panel, wx.ID_ANY, colour = col)
             )
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
-            this.selColSizer.Add(this.selColGuis[-1], 0, wx.EXPAND)
+            selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
         this.colAlternative = 0
         this.updatShapeColours()
         this.panel.Layout()
