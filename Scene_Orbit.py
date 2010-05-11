@@ -148,19 +148,23 @@ class CtrlWin(wx.Frame):
             )
         this.posColStabSym = []
         this.nrOfCols      = []
+        nrOfColsChoiceList = []
         for subSymGrp in finalSym.subgroups:
             if stabSym in subSymGrp.subgroups:
-                print subSymGrp, 'can be used as subgroup for colouring'
                 this.posColStabSym.append(subSymGrp)
                 #print 'addColourGui, finalSym', finalSym
                 fo = isometry.order(finalSym)
                 assert fo != 0
                 po = isometry.order(subSymGrp)
                 assert po != 0
-                this.nrOfCols.append('%d' % (fo / po))
+                q = fo / po
+                this.nrOfCols.append(q)
+                nrOfColsChoiceList.append(
+                    '%d (based on %s)' % (q, subSymGrp.__name__)
+                )
         this.colGuis = []
         this.colGuis.append(
-            wx.Choice(this.panel, wx.ID_ANY, choices = this.nrOfCols)
+            wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
         )
         this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
         this.panel.Bind(wx.EVT_CHOICE,
@@ -237,7 +241,7 @@ class CtrlWin(wx.Frame):
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         this.colIsom = finalSym.realiseSubgroups(colSym)
         assert len(this.colIsom) != 0
-        nrOfCols = int(this.nrOfCols[id])
+        nrOfCols = this.nrOfCols[id]
         this.selColGuis = []
         initColour = (255, 255, 255)
         maxColPerRow = 12
@@ -276,11 +280,6 @@ class CtrlWin(wx.Frame):
         #print 'finalSym', finalSym
         #print 'close finalSym', finalSym.close()
         #print 'this.colAlternative', this.colAlternative
-        print 'elems of 1 colour have subgroup %s (alt. %d of %d)' % (
-            this.posColStabSym[this.__nrOfColsGuiId.GetSelection()],
-            this.colAlternative + 1,
-            len(this.colIsom)
-        )
         colQuotientSet = finalSym  / this.colIsom[this.colAlternative]
         #print '-----colQuotientSet-----------'
         #for isom in colQuotientSet: print isom
@@ -300,6 +299,11 @@ class CtrlWin(wx.Frame):
                 for col in colPerIsom
             ]
         this.shape.setSymmetricFaceColors(cols)
+        this.statusBar.SetStatusText(
+            "Colour alternative %d of %d applied" % (
+                this.colAlternative + 1, len(this.colIsom)
+            )
+        )
         this.canvas.paint()
         #print 'TODO: gen colour quotientset and compare with face quotient set'
 

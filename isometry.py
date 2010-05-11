@@ -1620,8 +1620,9 @@ class S4xI(S4):
             o2a.extend(this.rotAxes[2])
             return [sg(setup = {'axis': a}) for a in o2a]
         elif sg == C2C1:
-            o2a = this.rotAxes[2]
-            return [sg(setup = {'axis': a}) for a in o2a]
+            isoms = [sg(setup = {'axis': a}) for a in this.rotAxes[2]]
+            isoms.extend([sg(setup = {'axis': a}) for a in this.rotAxes[4]])
+            return isoms
         elif sg == ExI:
             return [sg()]
         elif sg == E:
@@ -1636,8 +1637,8 @@ S4xI.subgroups = [S4xI,
         D4D2, D2xI, D4,                 #  8
         D3, D3C3, C3xI,                 #  6
         D2, D2C2, C2xI, C4, C4C2,       #  4
-        C3, # CONTINUE HERE: but 1st preset colours... and break line at 12 colours
-        C2,
+        C3,                             #  3
+        C2, C2C1, ExI,                  #  2
         E
     ]
 #A4xI.subgroups = [
