@@ -663,6 +663,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.S4A4,
             isometry.S4,
             isometry.S4xI,
+            isometry.A5,
         ],
         onSymSelect = None
     ):
@@ -749,6 +750,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 isometry.S4A4,
                 isometry.S4,
                 isometry.S4xI,
+                isometry.A5,
             ]:
                 pass
             else:
