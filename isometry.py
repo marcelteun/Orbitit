@@ -1772,11 +1772,30 @@ class A5(Set):
                     GeomTypes.Rot3(axis = a, angle = i * turn3)
                     for i in range(1, 3)
                 ])
+
+#        ___---.__
+#      .L     / \_""__
+#     /  \ _14 9  \   "\
+#  10/ 5  4----9___|_13-.
+#   /  5/  \  4    3  8 |
+#   |/"  0  4   3-" \  /
+#   0__     \_-"  3  8 |
+#   \  "0--_5__       \/
+#    \      |  ""2--__2
+#     \_ 1  1   2  _.-" <--- o2_e12
+#    _ 6\_   |  _7" __
+#    /|   "-_1-"    |\
+#   6     ^           7
+#         |
+#       o2_11
+
             transforms.extend([GeomTypes.HalfTurn3(axis = a) for a in o2axes])
             Set.__init__(this, transforms)
             #for i in range(len(transforms)):
             #    print 'transform %d: %s' % (i, transforms[i])
             this.rotAxes = { 2: o2axes, 3: o3axes, 5: o5axes }
+            #for i in range(len(this.rotAxes[2])):
+            #    print i, this.rotAxes[2][i]
 
     def realiseSubgroups(this, sg):
         """
@@ -1785,12 +1804,23 @@ class A5(Set):
         assert isinstance(sg, type)
         if sg == A5:
             return [this]
+        elif sg == A4:
+            return [
+                # Essentially these lead to 2 different colourings, 4 of these
+                # are mirrors images in 2 different ways.
+                sg(setup = {
+                    'o2axis0': this.rotAxes[2][i],
+                    'o2axis1': this.rotAxes[2][((i+3) % 5) + 5]
+                }),
+                for i in range(5)
+            ]
         elif sg == E:
             return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
 A5.subgroups = [A5,
+        A4,
         E
     ]
 
