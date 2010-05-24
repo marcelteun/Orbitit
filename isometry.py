@@ -213,6 +213,8 @@ class Set(set):
         #    print '---------------'
         #    for i in result: print i
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
+        #if (i == maxIter):
+        #    print "close group, warning: maxIter (%d) reached (group closed)"% maxIter
         return result
 
     def checkSetup(this, setup):
@@ -245,6 +247,7 @@ class E(Set):
         assert isinstance(sg, type)
         return [E()]
 
+E.subgroups = [E]
 C1 = E
 
 class ExI(Set):
@@ -265,6 +268,8 @@ class ExI(Set):
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
+
+ExI.subgroups = [ExI, E]
 
 class MetaCn(type):
     def __init__(this, classname, bases, classdict):
@@ -353,6 +358,7 @@ def C(n):
 C2 = C(2)
 C3 = C(3)
 C4 = C(4)
+C5 = C(5)
 
 class MetaC2nCn(MetaCn):
     def __init__(this, classname, bases, classdict):
@@ -535,6 +541,7 @@ C1xI = ExI
 C2xI = CxI(2)
 C3xI = CxI(3)
 C4xI = CxI(4)
+C5xI = CxI(5)
 
 class MetaDnCn(MetaCn):
     def __init__(this, classname, bases, classdict):
@@ -640,6 +647,7 @@ D1C1 = DnC(1)
 D2C2 = DnC(2)
 D3C3 = DnC(3)
 D4C4 = DnC(4)
+D5C5 = DnC(5)
 
 class MetaDn(type):
     def __init__(this, classname, bases, classdict):
@@ -753,6 +761,7 @@ D1 = D(1)
 D2 = D(2)
 D3 = D(3)
 D4 = D(4)
+D5 = D(5)
 
 class MetaDnxI(MetaDn):
     def __init__(this, classname, bases, classdict):
@@ -890,6 +899,7 @@ D1xI = DxI(1)
 D2xI = DxI(2)
 D3xI = DxI(3)
 D4xI = DxI(4)
+D5xI = DxI(5)
 
 class MetaD2nDn(MetaDn):
     def __init__(this, classname, bases, classdict):
@@ -1711,7 +1721,7 @@ class A5(Set):
     order = 60
     def __init__(this, isometries = None, setup = {}):
         """
-        The algebraic group A5, consisting of 120 rotations
+        The algebraic group A5, consisting of 60 rotations
 
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class initPars argument.
@@ -1806,30 +1816,240 @@ class A5(Set):
             return [this]
         elif sg == A4:
             return [
-                # Essentially these lead to 2 different colourings, 4 of these
-                # are mirrors images in 2 different ways.
+                # Essentially these lead to 3 different colourings, of which 2
+                # pairs are mirrors images.
                 sg(setup = {
                     'o2axis0': this.rotAxes[2][i],
                     'o2axis1': this.rotAxes[2][((i+3) % 5) + 5]
-                }),
+                })
                 for i in range(5)
             ]
+        elif sg == D5:
+            isoms = [
+                sg(setup = {
+                    'axis_n': this.rotAxes[5][i],
+                    'axis_2': this.rotAxes[2][(i+2) % 5]
+                })
+                for i in range(5)
+            ]
+            isoms.append(
+                sg(setup = {
+                    'axis_n': this.rotAxes[5][5],
+                    'axis_2': this.rotAxes[2][10]
+                })
+            )
+            return isoms
+        elif sg == D3:
+            isoms = [
+                sg(setup = {
+                    'axis_n': this.rotAxes[3][i],
+                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+            isoms.extend([
+                sg(setup = {
+                    'axis_n': this.rotAxes[3][i + 5],
+                    'axis_2': this.rotAxes[2][(i+3) % 5]
+                })
+                for i in range(5)
+            ])
+            return isoms
+        elif sg == D2:
+            return [
+                sg(setup = {
+                    'axis_n': this.rotAxes[2][i],
+                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+        elif sg == C5:
+            return [ sg(setup = {'axis': a}) for a in this.rotAxes[5] ]
+        elif sg == C3:
+            return [ sg(setup = {'axis': a}) for a in this.rotAxes[3] ]
+        elif sg == C2:
+            return [ sg(setup = {'axis': a}) for a in this.rotAxes[2] ]
         elif sg == E:
             return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
+# Diagram 15
 A5.subgroups = [A5,
-        A4,
+        A4,     # 12
+        D5,     # 10
+        D3,     #  6
+        C5,     #  5
+        D2,     #  4
+        C3,     #  3
+        C2,     #  2
+        E
+    ]
+
+class A5xI(A5):
+    order = 120
+    def __init__(this, isometries = None, setup = {}):
+        """
+        The algebraic group A5xI, which is the complete symmetry of an
+        icosahedron, It consists of 120 isometries.
+
+        either provide the complete set or provide setup that generates
+        the complete group. For the latter see the class initPars argument.
+        Contains:
+        - the identity E,
+        - 24 turns based on the  6  5-fold turns (1/5, 2/5, 3/5, 4/5)
+        - 20 turns based on the 10  3-fold turns (1/3, 2/3)
+        - 15 halfturns
+        - the central inversion I
+        - 24 rotary inversions based on the  6  5-fold axes (1/5, 2/5, 3/5, 4/5)
+        - 20 rotary inversions based on the 10  3-fold axes (1/3, 2/3)
+        - 15 reflections
+        """
+        if isometries != None:
+            assert len(isometries) == this.order, "%d != %d" % (
+                                                this.order, len(isometries))
+            # TODO: more asserts?
+            Set.__init__(this, isometries)
+        else:
+            this.checkSetup(setup)
+            a5 = A5(setup = setup)
+            Set.__init__(this, a5 * ExI())
+            this.rotAxes = a5.rotAxes
+
+    def realiseSubgroups(this, sg):
+        """
+        realise an array of possible oriented subgroups for non-oriented sg
+        """
+        assert isinstance(sg, type)
+        if sg == A5xI:
+            return [this]
+        elif sg == A5:
+            # other ways of orienting A5 into A5xI don't give anything new
+            return [ sg( setup = {
+                        'o3axis': this.rotAxes[3][0],
+                        'o5axis': this.rotAxes[5][0]
+                    }
+                )
+            ]
+        elif sg == A4xI or sg == A4:
+            return [
+                # Essentially these lead to 3 different colourings, of which 2
+                # pairs are mirrors images. For A4xI the mirrors should lead to
+                # to equal solutions.
+                sg(setup = {
+                    'o2axis0': this.rotAxes[2][i],
+                    'o2axis1': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+        elif sg == D5xI or sg == D5:
+            isoms = [
+                sg(setup = {
+                    'axis_n': this.rotAxes[5][i],
+                    'axis_2': this.rotAxes[2][(i+2) % 5]
+                })
+                for i in range(5)
+            ]
+            isoms.append(
+                sg(setup = {
+                    'axis_n': this.rotAxes[5][5],
+                    'axis_2': this.rotAxes[2][10]
+                })
+            )
+            return isoms
+        elif sg == D5C5:
+            isoms = [
+                sg(setup = {
+                    'axis_n': this.rotAxes[5][i],
+                    'normal_r': this.rotAxes[2][(i+2) % 5]
+                })
+                for i in range(5)
+            ]
+            isoms.append(
+                sg(setup = {
+                    'axis_n': this.rotAxes[5][5],
+                    'normal_r': this.rotAxes[2][10]
+                })
+            )
+            return isoms
+        elif sg == D3xI or sg == D3:
+            isoms = [
+                sg(setup = {
+                    'axis_n': this.rotAxes[3][i],
+                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+            isoms.extend([
+                sg(setup = {
+                    'axis_n': this.rotAxes[3][i + 5],
+                    'axis_2': this.rotAxes[2][(i+3) % 5]
+                })
+                for i in range(5)
+            ])
+            return isoms
+        elif sg == D3C3:
+            isoms = [
+                sg(setup = {
+                    'axis_n': this.rotAxes[3][i],
+                    'normal_r': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+            isoms.extend([
+                sg(setup = {
+                    'axis_n': this.rotAxes[3][i + 5],
+                    'normal_r': this.rotAxes[2][(i+3) % 5]
+                })
+                for i in range(5)
+            ])
+            return isoms
+        elif sg == D2xI or sg == D2:
+            return [
+                sg(setup = {
+                    'axis_n': this.rotAxes[2][i],
+                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+        elif sg == D2C2:
+            return [
+                sg(setup = {
+                    'axis_n': this.rotAxes[2][i],
+                    'normal_r': this.rotAxes[2][((i+3) % 5) + 5]
+                })
+                for i in range(5)
+            ]
+        elif sg == C5xI or sg == C5:
+            return [ sg(setup = {'axis': a}) for a in this.rotAxes[5] ]
+        elif sg == C3xI or sg == C3:
+            return [ sg(setup = {'axis': a}) for a in this.rotAxes[3] ]
+        elif sg == C2xI or sg == C2 or sg == C2C1 or sg == D1xI or sg == D1:
+            return [ sg(setup = {'axis': a}) for a in this.rotAxes[2] ]
+        elif sg == ExI:
+            return [sg()]
+        elif sg == E:
+            return [sg()]
+        else: raise ImproperSubgroupError, '%s ! <= %s' % (
+                this.__class__.__name__, sg.__class__.__name__)
+
+A5xI.subgroups = [A5xI,                 # 120
+        A5,                             #  60
+        A4xI,                           #  24
+        D5xI,                           #  20
+        A4, D3xI,                       #  12
+        D5, D5C5, C5xI,                 #  10
+        D3, D3C3, C3xI,                 #   6
+        C5,                             #   5
+        D2, D2C2, C2xI,                 #   4
+        C3,                             #   3
+        C2, C2C1, ExI,                  #   2
         E
     ]
 
 def order(isometry):
     return isometry.order
 
-E.subgroups = [E]
-ExI.subgroups = [ExI, E]
-#TODO:
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, ExI, E]
 C2nCn.subgroups = [C2nCn, Cn, E]
