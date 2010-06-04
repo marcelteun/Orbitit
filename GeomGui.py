@@ -26,10 +26,17 @@
 import wx
 import GeomTypes
 import isometry
+import wx.lib.scrolledpanel as wxXtra
 
 # TODO:
 # - add scroll bar for FacesInput and Vector3DSetInput
 # - filter Fs for FacesInput.GetFace (negative nrs, length 2, etc)
+
+def oppositeOrientation(orientation):
+    if orientation == wx.HORIZONTAL:
+        return wx.VERTICAL
+    else:
+        return wx.HORIZONTAL
 
 class DisabledDropTarget(wx.TextDropTarget):
     def __init__(this, reason = 'for some reason', enableReason = True):
@@ -293,10 +300,8 @@ class FacesInput(wx.StaticBoxSizer):
         this.faceLen = faceLen
         if orientation == wx.HORIZONTAL:
             oppositeOr = wx.VERTICAL
-            oriTxt = 'Row'
         else:
             oppositeOr = wx.HORIZONTAL
-            oriTxt = 'Column'
         this.Boxes = [wx.StaticBox(panel, label = label)]
         wx.StaticBoxSizer.__init__(this, this.Boxes[-1], oppositeOr)
         this.facesSizer = wx.BoxSizer(oppositeOr)
@@ -313,12 +318,15 @@ class FacesInput(wx.StaticBoxSizer):
             ))
         this.__faceLenIndex = len(this.Boxes) - 1
         addSizer.Add(this.Boxes[-1], 0, wx.EXPAND)
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Add %s" % oriTxt))
+        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "-Faces Add:"))
         addSizer.Add(this.Boxes[-1], 1, wx.EXPAND)
-        this.Add(addSizer, 0, wx.EXPAND)
         panel.Bind(wx.EVT_BUTTON, this.onAdd, id = this.Boxes[-1].GetId())
+        this.Boxes.append(IntInput(this.panel, wx.ID_ANY, '1', size = (-1, -1)))
+        this.__nroFsLenIndex = len(this.Boxes) - 1
+        addSizer.Add(this.Boxes[-1], 0, wx.EXPAND)
+        this.Add(addSizer, 0, wx.EXPAND)
         # Delete button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete %s" % oriTxt))
+        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete Face"))
         panel.Bind(wx.EVT_BUTTON, this.onRm, id = this.Boxes[-1].GetId())
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
@@ -339,12 +347,17 @@ class FacesInput(wx.StaticBoxSizer):
             faceSizer.Add(this.__f[-1][-1], 0, wx.EXPAND)
         this.facesSizer.Add(faceSizer, 0, wx.EXPAND)
 
+    def addFaces(this, nr, fLen):
+        for i in range(nr):
+            this.addFace(fLen)
+
     def onAdd(this, e):
+        n = this.Boxes[this.__nroFsLenIndex].GetValue()
         l = this.Boxes[this.__faceLenIndex].GetValue()
         if l < 1:
             l = this.faceLen
             if l < 1: l = 3
-        this.addFace(l)
+        this.addFaces(n, l)
         this.panel.Layout()
         e.Skip()
 
@@ -430,106 +443,91 @@ class Vector3DInput(wx.StaticBoxSizer):
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         #wx.StaticBoxSizer.Destroy(this)
 
-# TODO: use Vector3DInput
-class Vector3DSetInput(wx.StaticBoxSizer):
-    __defaultLabels = ['index', 'x', 'y', 'z']
-    __nrOfColumns = 4
-    def __init__(this,
-        panel,
-        label = '',
-        length = 3,
+class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
+    __hlabels = ['index', 'x', 'y', 'z']
+    def __init__(this, parent,
+        length,
         orientation = wx.HORIZONTAL,
-        elementLabels = None
     ):
         """
-        Create a control embedded in a sizer for defining a set of 3D vectors
+        Create a panel defining a set of 3D vectors
 
-        panel: the panel the input will be a part of.
-        label: the label to be used for the box, default ''
-        length: initialise the input with length amount of 3D vectors.
+        parent: the parent widget.
+        length: initialise with length amount of 3D vectors.
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
                      default. Defines the orientation of the separate vector
                      items.
-        elementLabels: option labels for the vector items. It is an array
-                       consisting of 4 strings On default
-                       ['index', 'x', 'y', 'z'] is used.
         """
-        this.panel = panel
-        if orientation == wx.HORIZONTAL:
-            oppositeOr = wx.VERTICAL
-            oriTxt = 'Row'
-        else:
-            oppositeOr = wx.HORIZONTAL
-            oriTxt = 'Column'
-        this.Boxes = [wx.StaticBox(panel, label = label)]
-        wx.StaticBoxSizer.__init__(this, this.Boxes[-1], oppositeOr)
+
+        wxXtra.ScrolledPanel.__init__(this, parent)
+
+        this.boxes = []
+        oppOri = oppositeOrientation(orientation)
         vectorsSizer = wx.BoxSizer(orientation)
-        if elementLabels == None: elementLabels = this.__defaultLabels
-        this.columnSizer = []
+        this.columnSizers = [] # align vector columns
         # header:
-        for i in range(this.__nrOfColumns):
-            this.Boxes.append(
-                wx.StaticText(panel, wx.ID_ANY, elementLabels[i], style =
-                    wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
+        scale = 0
+        for i in range(len(this.__hlabels)):
+            this.boxes.append(
+                wx.StaticText(this, wx.ID_ANY, this.__hlabels[i],
+                    style = wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
                 )
             )
-            this.columnSizer.append(wx.BoxSizer(oppositeOr))
-            this.columnSizer[i].Add(this.Boxes[-1], 1, wx.EXPAND)
-            s = 0
-            if i != 0: s = 1
-            vectorsSizer.Add(this.columnSizer[i], s, wx.EXPAND)
+            this.columnSizers.append(wx.BoxSizer(oppOri))
+            this.columnSizers[i].Add(this.boxes[-1], 1, wx.EXPAND)
+            vectorsSizer.Add(this.columnSizers[i], scale, wx.EXPAND)
+            scale = 1
         # vectors:
         this.__v = []
         this.__vLabels = []
-        for j in range(length):
-            this.addVector()
-        this.Add(vectorsSizer, 0, wx.EXPAND)
-        this.Add(wx.BoxSizer(orientation), 1, wx.EXPAND) # stretchable glue
-        # Add button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Add %s" % oriTxt))
-        this.Add(this.Boxes[-1], 0, wx.EXPAND)
-        panel.Bind(wx.EVT_BUTTON, this.onAdd, id = this.Boxes[-1].GetId())
-        # Delete button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete %s" % oriTxt))
-        panel.Bind(wx.EVT_BUTTON, this.onRm, id = this.Boxes[-1].GetId())
-        this.Add(this.Boxes[-1], 0, wx.EXPAND)
+        this.addVectors(length)
+
+        # use a list sizer to be able to fill white space for list with vectors
+        # that are too small (cannot remove the wx.EXPAND above since the
+        # vector columns need to be aligned.
+        listSizer = wx.BoxSizer(oppOri)
+        listSizer.Add(vectorsSizer, 0)
+        listSizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
+
+        this.SetSizer(listSizer)
+        this.SetAutoLayout(True)
+        this.SetupScrolling()
 
     def addVector(this):
         j = len(this.__v)
         this.__vLabels.append(
-            wx.StaticText(this.panel, wx.ID_ANY, '%d ' % j, style =
-                wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
+            wx.StaticText(this, wx.ID_ANY, '%d ' % j,
+                style = wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
             )
         )
-        this.columnSizer[0].Add(this.__vLabels[-1], 1, wx.EXPAND)
+        this.columnSizers[0].Add(this.__vLabels[-1], 1, wx.EXPAND)
         this.__v.append([])
-        for i in range(1, this.__nrOfColumns):
-            this.__v[-1].append(FloatInput(this.panel, wx.ID_ANY, "0"))
-            this.columnSizer[i].Add(this.__v[-1][-1], 1, wx.EXPAND)
+        for i in range(1, len(this.__hlabels)):
+            this.__v[-1].append(FloatInput(this, wx.ID_ANY, "0"))
+            this.columnSizers[i].Add(this.__v[-1][-1], 1, wx.EXPAND)
+        this.Layout()
 
-    def onAdd(this, e):
-        this.addVector()
-        this.panel.Layout()
-        e.Skip()
+    def addVectors(this, nr):
+        for i in range(nr):
+            this.addVector()
 
-    def onRm(this, e):
-        if len(this.__v) > 0:
-            assert len(this.__vLabels) > 0
-            g = this.__vLabels[-1]
-            del this.__vLabels[-1]
+    def rmVector(this, i):
+        if len(this.__vLabels) > 0:
+            assert i < len(this.__vLabels)
+            g = this.__vLabels[i]
+            del this.__vLabels[i]
             g.Destroy()
-            v = this.__v[-1]
-            del this.__v[-1]
+            v = this.__v[i]
+            del this.__v[i]
             for g in v:
                 g.Destroy()
-            this.panel.Layout()
-        e.Skip()
+            this.Layout()
 
-    def GetVertex(this, index):
+    def GetVertex(this, i):
         return GeomTypes.Vec3([
-                this.__v[index][0].GetValue(),
-                this.__v[index][1].GetValue(),
-                this.__v[index][2].GetValue(),
+                this.__v[i][0].GetValue(),
+                this.__v[i][1].GetValue(),
+                this.__v[i][2].GetValue(),
             ])
 
     def GetVs(this):
@@ -540,12 +538,78 @@ class Vector3DSetInput(wx.StaticBoxSizer):
     def Destroy(this):
         for ctrl in this.__v: ctrl.Destroy()
         for ctrl in this.__vLabels: ctrl.Destroy()
-        for box in this.Boxes:
+        for box in this.boxes:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError: pass
-        # Segmentation fault in Hardy Heron (with python 2.5.2):
-        #wx.StaticBoxSizer.Destroy(this)
+
+    # TODO Insert?
+    # Note that the panel is used for defining faces.  Inserting and delting
+    # faces in the middle of the list will break these references (of course
+    # this can be fixed by SW
+
+class Vector3DSetDynamicPanel(wx.Panel):
+    __defaultLabels = ['index', 'x', 'y', 'z']
+    __nrOfColumns = 4
+    def __init__(this,
+        parent,
+        label = '',
+        length = 3,
+        orientation = wx.HORIZONTAL,
+        elementLabels = None
+        # TODO: what about the std keywords
+    ):
+        """
+        Create a control embedded in a sizer for defining a set of 3D vectors
+
+        parent: the parent widget.
+        label: the label to be used for the box, default ''
+        length: initialise the input with length amount of 3D vectors.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
+                     default. Defines the orientation of the separate vector
+                     items.
+        elementLabels: option labels for the vector items. It is an array
+                       consisting of 4 strings On default
+                       ['index', 'x', 'y', 'z'] is used.
+        """
+        this.parent = parent
+        wx.Panel.__init__(this, parent)
+
+        this.boxes = []
+        oppOri = oppositeOrientation(orientation)
+        mainSizer = wx.BoxSizer(oppOri)
+
+        # Add vertex list
+        this.boxes.append(Vector3DSetStaticPanel(this, length, orientation))
+        mainSizer.Add(this.boxes[-1], 10, wx.EXPAND)
+        # Add button:
+        addSizer = wx.BoxSizer(orientation)
+        this.boxes.append(IntInput(this, wx.ID_ANY, '1'))
+        this.__addNroVIndex = len(this.boxes) - 1
+        addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
+        this.boxes.append(wx.Button(this, wx.ID_ANY, "Add Vertices"))
+        addSizer.Add(this.boxes[-1], 1, wx.EXPAND)
+        this.Bind(wx.EVT_BUTTON, this.onAdd, id = this.boxes[-1].GetId())
+        mainSizer.Add(addSizer, 1, wx.EXPAND)
+
+        # Delete button:
+        this.boxes.append(wx.Button(this, wx.ID_ANY, "Delete Vertex"))
+        this.Bind(wx.EVT_BUTTON, this.onRm, id = this.boxes[-1].GetId())
+        mainSizer.Add(this.boxes[-1], 1, wx.EXPAND)
+
+        this.SetSizer(mainSizer)
+        this.SetAutoLayout(True)
+
+    def onAdd(this, e):
+        l = this.boxes[this.__addNroVIndex].GetValue()
+        this.boxes[0].addVectors(l)
+        this.Layout()
+        e.Skip()
+
+    def onRm(this, e):
+        this.boxes[0].rmVector(-1)
+        this.Layout()
+        e.Skip()
 
 myEVT_VECTOR_UPDATED = wx.NewEventType()
 EVT_VECTOR_UPDATED   = wx.PyEventBinder(myEVT_VECTOR_UPDATED, 1)

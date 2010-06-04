@@ -89,10 +89,14 @@ class CtrlWin(wx.Frame):
         ctrlSizer.Add(facesSizer, 0, wx.EXPAND)
 
         #VERTICES
+        #this.showGui.append(
+        #    GeomGui.Vector3DSetInput(this.panel, label = 'Vertices'))
+        #this.__VsGuiIndex = len(this.showGui) - 1
+        #facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
         this.showGui.append(
-            GeomGui.Vector3DSetInput(this.panel, label = 'Vertices'))
+            GeomGui.Vector3DSetDynamicPanel(this.panel, label = 'Vertices'))
         this.__VsGuiIndex = len(this.showGui) - 1
-        facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        facesSizer.Add(this.showGui[-1], 1, wx.EXPAND)
 
         # FACES
         this.showGui.append(

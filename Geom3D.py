@@ -2392,6 +2392,7 @@ class SymmetricShape(CompoundShape):
         this.setIsoOp(directIsometries, oppositeIsometry)
         this.unfoldOrbit = unfoldOrbit
         this.setSymmetricFaceColors(colors)
+        this.orbitNeeded = True
         if unfoldOrbit: this.orbit()
 
     def setIsoOp(this,
@@ -2480,8 +2481,8 @@ class SymmetricShape(CompoundShape):
 
     def setSymmetricFaceColors(this, colors):
         this.shapeColors = colors
-        if this.unfoldOrbit:
-            this.setFaceColorsPerIsometry(colors)
+        #if this.unfoldOrbit:
+        this.setFaceColorsPerIsometry(colors)
 
     def setFaceColorsPerIsometry(this, colors):
         """
