@@ -334,11 +334,12 @@ class FacesInput(wx.StaticBoxSizer):
         faceSizer = wx.BoxSizer(this.orientation)
         j = len(this.__f)
         this.__fLabels.append(
-            wx.StaticText(this.panel, wx.ID_ANY, '%d ' % j, style =
-                wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
+            wx.StaticText(this.panel, wx.ID_ANY, '%d ' % j,
+                style = wx.TE_RIGHT
             )
         )
-        faceSizer.Add(this.__fLabels[-1], 0, wx.EXPAND)
+        faceSizer.Add(this.__fLabels[-1], 0,
+                wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL)
         this.__f.append([])
         for i in range(fLen):
             this.__f[-1].append(
@@ -496,11 +497,9 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
     def addVector(this):
         j = len(this.__v)
         this.__vLabels.append(
-            wx.StaticText(this, wx.ID_ANY, '%d ' % j,
-                style = wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
-            )
+            wx.StaticText(this, wx.ID_ANY, '%d ' % j, style = wx.TE_RIGHT)
         )
-        this.columnSizers[0].Add(this.__vLabels[-1], 1, wx.EXPAND)
+        this.columnSizers[0].Add(this.__vLabels[-1], 1, wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL)
         this.__v.append([])
         for i in range(1, len(this.__hlabels)):
             this.__v[-1].append(FloatInput(this, wx.ID_ANY, "0"))
@@ -553,7 +552,6 @@ class Vector3DSetDynamicPanel(wx.Panel):
     __nrOfColumns = 4
     def __init__(this,
         parent,
-        label = '',
         length = 3,
         orientation = wx.HORIZONTAL,
         elementLabels = None
@@ -563,7 +561,6 @@ class Vector3DSetDynamicPanel(wx.Panel):
         Create a control embedded in a sizer for defining a set of 3D vectors
 
         parent: the parent widget.
-        label: the label to be used for the box, default ''
         length: initialise the input with length amount of 3D vectors.
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
                      default. Defines the orientation of the separate vector
@@ -706,6 +703,101 @@ class Vector4DInput(wx.StaticBoxSizer):
             except wx._core.PyDeadObjectError: pass
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         #wx.StaticBoxSizer.Destroy(this)
+
+class FaceSetStaticPanel(wxXtra.ScrolledPanel):
+    def __init__(this,
+        parent,
+        nrOfFaces = 0,
+        faceLen = 0,
+        width = 40,
+        orientation = wx.HORIZONTAL,
+    ):
+        """
+        Create a control embedded in a sizer for defining a set of faces
+
+        parent: the parent widget.
+        nrOfFaces: initialise the input with nrOfFaces amount of faces.
+        faceLen: initialise the faces with faceLen vertices. Also the default
+                 value for adding faces.
+        width: width of the face index fields.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
+                     default. Defines the orientation of the separate face
+                     items.
+        """
+        wxXtra.ScrolledPanel.__init__(this, parent)
+        this.parent = parent
+        this.width = width
+        this.faceLen = faceLen
+        this.orientation = orientation
+        oppOri = oppositeOrientation(orientation)
+
+        this.__f = []
+        this.__fLabels = []
+        this.faceIndexSizer = wx.BoxSizer(oppOri) # align face indices
+        this.vertexIndexSizer = wx.BoxSizer(oppOri)
+        facesSizer = wx.BoxSizer(orientation)
+        facesSizer.Add(this.faceIndexSizer, 0, wx.EXPAND)
+        facesSizer.Add(this.vertexIndexSizer, 0, wx.EXPAND)
+
+        this.addFaces(nrOfFaces, faceLen)
+
+        # use a list sizer to be able to fill white space if the face list
+        # is too small
+        listSizer = wx.BoxSizer(oppOri)
+        listSizer.Add(facesSizer, 0)
+        listSizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
+
+        this.SetSizer(listSizer)
+        this.SetAutoLayout(True)
+        this.SetupScrolling()
+
+    def addFace(this, fLen):
+        j = len(this.__f)
+        this.__fLabels.append(wx.StaticText(this, wx.ID_ANY, '%d ' % j))
+        this.faceIndexSizer.Add(this.__fLabels[-1], 1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
+        faceSizer = wx.BoxSizer(this.orientation)
+        this.__f.append([])
+        for i in range(fLen):
+            this.__f[-1].append(
+                IntInput(this, wx.ID_ANY, "0", size = (this.width, -1))
+            )
+            faceSizer.Add(this.__f[-1][-1], 0, wx.EXPAND)
+        this.vertexIndexSizer.Add(faceSizer, 0, wx.EXPAND)
+        this.Layout()
+
+    def addFaces(this, nr, fLen):
+        for i in range(nr):
+            this.addFace(fLen)
+
+    def rmFace(this, i):
+        if len(this.__f) > 0:
+            assert i < len(this.__f)
+            assert len(this.__fLabels) > 0
+            g = this.__fLabels[i]
+            del this.__fLabels[i]
+            g.Destroy()
+            v = this.__f[i]
+            del this.__f[i]
+            for g in v:
+                g.Destroy()
+            this.Layout()
+
+    def GetFace(this, index):
+        return [
+                this.__f[index][i].GetValue()
+                    for i in range(len(this.__f[index]))
+            ]
+
+    def GetFs(this):
+        return [
+            this.GetFace(i) for i in range(len(this.__f))
+        ]
+
+    def Destroy(this):
+        for ctrl in this.__fLabels: ctrl.Destroy()
+        for ctrl in this.__f: ctrl.Destroy()
+
+    # TODO Insert?
 
 class SymmetrySelect(wx.StaticBoxSizer):
     def __init__(this,

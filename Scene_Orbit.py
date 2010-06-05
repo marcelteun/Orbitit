@@ -89,23 +89,25 @@ class CtrlWin(wx.Frame):
         ctrlSizer.Add(facesSizer, 0, wx.EXPAND)
 
         #VERTICES
-        #this.showGui.append(
-        #    GeomGui.Vector3DSetInput(this.panel, label = 'Vertices'))
-        #this.__VsGuiIndex = len(this.showGui) - 1
-        #facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-        this.showGui.append(
-            GeomGui.Vector3DSetDynamicPanel(this.panel, label = 'Vertices'))
+        this.showGui.append(wx.StaticBox(this.panel, label = 'Vertices'))
+        bSizer = wx.StaticBoxSizer(this.showGui[-1])
+        this.showGui.append(GeomGui.Vector3DSetDynamicPanel(this.panel))
         this.__VsGuiIndex = len(this.showGui) - 1
-        facesSizer.Add(this.showGui[-1], 1, wx.EXPAND)
+        bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
+        facesSizer.Add(bSizer, 1, wx.EXPAND)
 
         # FACES
+        this.showGui.append(wx.StaticBox(this.panel, label = 'Faces'))
+        bSizer = wx.StaticBoxSizer(this.showGui[-1])
         this.showGui.append(
-            GeomGui.FacesInput(
-                this.panel, label = 'Faces', faceLen = 3, width = 40
-            )
+            #GeomGui.FacesInput(
+            #    this.panel, label = 'Faces', faceLen = 3, width = 40
+            #)
+            GeomGui.FaceSetStaticPanel(this.panel, 20, faceLen = 7)
         )
         this.__FsGuiIndex = len(this.showGui) - 1
-        facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
+        facesSizer.Add(bSizer, 1, wx.EXPAND)
 
         # SYMMETRY
         this.showGui.append(
