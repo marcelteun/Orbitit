@@ -29,7 +29,6 @@ import isometry
 import wx.lib.scrolledpanel as wxXtra
 
 # TODO:
-# - add scroll bar for FacesInput and Vector3DSetInput
 # - filter Fs for FacesInput.GetFace (negative nrs, length 2, etc)
 
 def oppositeOrientation(orientation):
@@ -272,129 +271,6 @@ class LabeledIntInput(wx.StaticBoxSizer):
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         #wx.StaticBoxSizer.Destroy(this)
 
-class FacesInput(wx.StaticBoxSizer):
-    def __init__(this,
-        panel,
-        label = '',
-        nrOfFaces = 0,
-        faceLen = 0,
-        width = -1,
-        orientation = wx.HORIZONTAL,
-    ):
-        """
-        Create a control embedded in a sizer for defining a set of faces
-
-        panel: the panel the input will be a part of.
-        label: the label to be used for the box, default ''
-        nrOfFaces: initialise the input with nrOfFaces amount of faces.
-        faceLen: initialise the faces with faceLen vertices. Also the default
-                 value for adding faces.
-        width: width of the face index fields.
-        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
-                     default. Defines the orientation of the separate face
-                     items.
-        """
-        this.width = width
-        this.panel = panel
-        this.orientation = orientation
-        this.faceLen = faceLen
-        if orientation == wx.HORIZONTAL:
-            oppositeOr = wx.VERTICAL
-        else:
-            oppositeOr = wx.HORIZONTAL
-        this.Boxes = [wx.StaticBox(panel, label = label)]
-        wx.StaticBoxSizer.__init__(this, this.Boxes[-1], oppositeOr)
-        this.facesSizer = wx.BoxSizer(oppositeOr)
-        this.__f = []
-        this.__fLabels = []
-        for j in range(nrOfFaces):
-            this.addFace(faceLen, faceLen)
-        this.Add(this.facesSizer, 0, wx.EXPAND)
-        this.Add(wx.BoxSizer(orientation), 1, wx.EXPAND) # stretchable glue
-        # Add button:
-        addSizer = wx.BoxSizer(orientation)
-        this.Boxes.append(IntInput(
-                this.panel, wx.ID_ANY, "%d" % faceLen, size = (this.width, -1)
-            ))
-        this.__faceLenIndex = len(this.Boxes) - 1
-        addSizer.Add(this.Boxes[-1], 0, wx.EXPAND)
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "-Faces Add:"))
-        addSizer.Add(this.Boxes[-1], 1, wx.EXPAND)
-        panel.Bind(wx.EVT_BUTTON, this.onAdd, id = this.Boxes[-1].GetId())
-        this.Boxes.append(IntInput(this.panel, wx.ID_ANY, '1', size = (-1, -1)))
-        this.__nroFsLenIndex = len(this.Boxes) - 1
-        addSizer.Add(this.Boxes[-1], 0, wx.EXPAND)
-        this.Add(addSizer, 0, wx.EXPAND)
-        # Delete button:
-        this.Boxes.append(wx.Button(panel, wx.ID_ANY, "Delete Face"))
-        panel.Bind(wx.EVT_BUTTON, this.onRm, id = this.Boxes[-1].GetId())
-        this.Add(this.Boxes[-1], 0, wx.EXPAND)
-
-    def addFace(this, fLen):
-        faceSizer = wx.BoxSizer(this.orientation)
-        j = len(this.__f)
-        this.__fLabels.append(
-            wx.StaticText(this.panel, wx.ID_ANY, '%d ' % j,
-                style = wx.TE_RIGHT
-            )
-        )
-        faceSizer.Add(this.__fLabels[-1], 0,
-                wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL)
-        this.__f.append([])
-        for i in range(fLen):
-            this.__f[-1].append(
-                IntInput(this.panel, wx.ID_ANY, "0", size = (this.width, -1))
-            )
-            faceSizer.Add(this.__f[-1][-1], 0, wx.EXPAND)
-        this.facesSizer.Add(faceSizer, 0, wx.EXPAND)
-
-    def addFaces(this, nr, fLen):
-        for i in range(nr):
-            this.addFace(fLen)
-
-    def onAdd(this, e):
-        n = this.Boxes[this.__nroFsLenIndex].GetValue()
-        l = this.Boxes[this.__faceLenIndex].GetValue()
-        if l < 1:
-            l = this.faceLen
-            if l < 1: l = 3
-        this.addFaces(n, l)
-        this.panel.Layout()
-        e.Skip()
-
-    def onRm(this, e):
-        if len(this.__f) > 0:
-            assert len(this.__fLabels) > 0
-            g = this.__fLabels[-1]
-            del this.__fLabels[-1]
-            g.Destroy()
-            v = this.__f[-1]
-            del this.__f[-1]
-            for g in v:
-                g.Destroy()
-            this.panel.Layout()
-        e.Skip()
-
-    def GetFace(this, index):
-        return [
-                this.__f[index][i].GetValue()
-                    for i in range(len(this.__f[index]))
-            ]
-
-    def GetFs(this):
-        return [
-            this.GetFace(i) for i in range(len(this.__f))
-        ]
-
-    def Destroy(this):
-        for ctrl in this.__f: ctrl.Destroy()
-        for box in this.Boxes:
-            try:
-                box.Destroy()
-            except wx._core.PyDeadObjectError: pass
-        # Segmentation fault in Hardy Heron (with python 2.5.2):
-        #wx.StaticBoxSizer.Destroy(this)
-
 class Vector3DInput(wx.StaticBoxSizer):
     def __init__(this,
         panel,
@@ -581,12 +457,12 @@ class Vector3DSetDynamicPanel(wx.Panel):
         mainSizer.Add(this.boxes[-1], 10, wx.EXPAND)
         # Add button:
         addSizer = wx.BoxSizer(orientation)
-        this.boxes.append(IntInput(this, wx.ID_ANY, '1'))
-        this.__addNroVIndex = len(this.boxes) - 1
-        addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
-        this.boxes.append(wx.Button(this, wx.ID_ANY, "Add Vertices"))
+        this.boxes.append(wx.Button(this, wx.ID_ANY, "Vertices Add nr:"))
         addSizer.Add(this.boxes[-1], 1, wx.EXPAND)
         this.Bind(wx.EVT_BUTTON, this.onAdd, id = this.boxes[-1].GetId())
+        this.boxes.append(IntInput(this, wx.ID_ANY, '1', size = (40, -1)))
+        this.__addNroVIndex = len(this.boxes) - 1
+        addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
         mainSizer.Add(addSizer, 1, wx.EXPAND)
 
         # Delete button:
@@ -742,7 +618,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         this.addFaces(nrOfFaces, faceLen)
 
         # use a list sizer to be able to fill white space if the face list
-        # is too small
+        #word is too small
         listSizer = wx.BoxSizer(oppOri)
         listSizer.Add(facesSizer, 0)
         listSizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
@@ -752,17 +628,20 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         this.SetupScrolling()
 
     def addFace(this, fLen):
-        j = len(this.__f)
+        j = len(this.__fLabels)
         this.__fLabels.append(wx.StaticText(this, wx.ID_ANY, '%d ' % j))
-        this.faceIndexSizer.Add(this.__fLabels[-1], 1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
+        this.faceIndexSizer.Add(this.__fLabels[-1],
+                1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
+
         faceSizer = wx.BoxSizer(this.orientation)
-        this.__f.append([])
+        this.__f.append([faceSizer])
         for i in range(fLen):
             this.__f[-1].append(
                 IntInput(this, wx.ID_ANY, "0", size = (this.width, -1))
             )
             faceSizer.Add(this.__f[-1][-1], 0, wx.EXPAND)
         this.vertexIndexSizer.Add(faceSizer, 0, wx.EXPAND)
+
         this.Layout()
 
     def addFaces(this, nr, fLen):
@@ -770,15 +649,17 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
             this.addFace(fLen)
 
     def rmFace(this, i):
-        if len(this.__f) > 0:
-            assert i < len(this.__f)
-            assert len(this.__fLabels) > 0
+        if len(this.__fLabels) > 0:
+            assert i < len(this.__fLabels)
+            assert len(this.__f) > 0
             g = this.__fLabels[i]
             del this.__fLabels[i]
             g.Destroy()
-            v = this.__f[i]
+            f = this.__f[i]
             del this.__f[i]
-            for g in v:
+            this.vertexIndexSizer.Remove(f[0])
+            del f[0]
+            for g in f:
                 g.Destroy()
             this.Layout()
 
@@ -798,6 +679,82 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         for ctrl in this.__f: ctrl.Destroy()
 
     # TODO Insert?
+
+class FaceSetDynamicPanel(wx.Panel):
+    def __init__(this,
+        parent,
+        nrOfFaces = 0,
+        faceLen = 0,
+        orientation = wx.HORIZONTAL,
+    ):
+        """
+        Create a control for defining a set of faces, which can grow and shrink
+        in size.
+
+        parent: the parent widget.
+        nrOfFaces: initialise the input with nrOfFaces amount of faces.
+        faceLen: initialise the faces with faceLen vertices. Also the default
+                 value for adding faces.
+        width: width of the face index fields.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
+                     default. Defines the orientation of the separate face
+                     items.
+        """
+        this.parent = parent
+        wx.Panel.__init__(this, parent)
+        this.faceLen = faceLen
+
+        this.boxes = []
+        oppOri = oppositeOrientation(orientation)
+        mainSizer = wx.BoxSizer(oppOri)
+
+        # Add face list
+        this.boxes.append(FaceSetStaticPanel(this, nrOfFaces, faceLen,
+            orientation = orientation))
+        this.__faceListIndex = len(this.boxes) - 1
+        mainSizer.Add(this.boxes[-1], 10, wx.EXPAND)
+
+        # Add button:
+        addSizer = wx.BoxSizer(orientation)
+        this.boxes.append(IntInput(
+                this, wx.ID_ANY, "%d" % faceLen, size = (40, -1)
+            ))
+        this.__faceLenIndex = len(this.boxes) - 1
+        addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
+        this.boxes.append(wx.Button(this, wx.ID_ANY, "-Faces Add nr:"))
+        addSizer.Add(this.boxes[-1], 1, wx.EXPAND)
+        this.Bind(wx.EVT_BUTTON, this.onAdd, id = this.boxes[-1].GetId())
+        this.boxes.append(IntInput(this, wx.ID_ANY, '1', size = (40, -1)))
+        this.__nroFsLenIndex = len(this.boxes) - 1
+        addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
+        mainSizer.Add(addSizer, 0, wx.EXPAND)
+        # Delete button:
+        this.boxes.append(wx.Button(this, wx.ID_ANY, "Delete Face"))
+        this.Bind(wx.EVT_BUTTON, this.onRm, id = this.boxes[-1].GetId())
+        mainSizer.Add(this.boxes[-1], 0, wx.EXPAND)
+
+        this.SetSizer(mainSizer)
+        this.SetAutoLayout(True)
+
+    def onAdd(this, e):
+        n = this.boxes[this.__nroFsLenIndex].GetValue()
+        l = this.boxes[this.__faceLenIndex].GetValue()
+        if l < 1:
+            l = this.faceLen
+            if l < 1: l = 3
+        this.boxes[this.__faceListIndex].addFaces(n, l)
+        this.Layout()
+
+    def onRm(this, e):
+        this.boxes[this.__faceListIndex].rmFace(-1)
+        this.Layout()
+        e.Skip()
+
+    def Destroy(this):
+        for box in this.boxes:
+            try:
+                box.Destroy()
+            except wx._core.PyDeadObjectError: pass
 
 class SymmetrySelect(wx.StaticBoxSizer):
     def __init__(this,

@@ -100,10 +100,7 @@ class CtrlWin(wx.Frame):
         this.showGui.append(wx.StaticBox(this.panel, label = 'Faces'))
         bSizer = wx.StaticBoxSizer(this.showGui[-1])
         this.showGui.append(
-            #GeomGui.FacesInput(
-            #    this.panel, label = 'Faces', faceLen = 3, width = 40
-            #)
-            GeomGui.FaceSetStaticPanel(this.panel, 20, faceLen = 7)
+            GeomGui.FaceSetDynamicPanel(this.panel, 20, faceLen = 7)
         )
         this.__FsGuiIndex = len(this.showGui) - 1
         bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
