@@ -346,18 +346,17 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         scale = 0
         for i in range(len(this.__hlabels)):
             this.boxes.append(
-                wx.StaticText(this, wx.ID_ANY, this.__hlabels[i],
-                    style = wx.TE_CENTRE | wx.ALIGN_CENTRE_VERTICAL
-                )
+                wx.StaticText(this, wx.ID_ANY, this.__hlabels[i])
             )
             this.columnSizers.append(wx.BoxSizer(oppOri))
-            this.columnSizers[i].Add(this.boxes[-1], 1, wx.EXPAND)
+            this.columnSizers[i].Add(this.boxes[-1], 0,
+                wx.ALIGN_CENTRE_HORIZONTAL)
             vectorsSizer.Add(this.columnSizers[i], scale, wx.EXPAND)
             scale = 1
         # vectors:
         this.__v = []
         this.__vLabels = []
-        this.addVectors(length)
+        this.grow(length)
 
         # use a list sizer to be able to fill white space for list with vectors
         # that are too small (cannot remove the wx.EXPAND above since the
@@ -370,21 +369,26 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         this.SetAutoLayout(True)
         this.SetupScrolling()
 
-    def addVector(this):
-        j = len(this.__v)
-        this.__vLabels.append(
-            wx.StaticText(this, wx.ID_ANY, '%d ' % j, style = wx.TE_RIGHT)
-        )
-        this.columnSizers[0].Add(this.__vLabels[-1], 1, wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL)
-        this.__v.append([])
-        for i in range(1, len(this.__hlabels)):
-            this.__v[-1].append(FloatInput(this, wx.ID_ANY, "0"))
-            this.columnSizers[i].Add(this.__v[-1][-1], 1, wx.EXPAND)
+    def grow(this, nr=1, vs=None):
+        assert vs == None or len(vs) == nr
+        for n in range(nr):
+            j = len(this.__v)
+            this.__vLabels.append(
+                wx.StaticText(this, wx.ID_ANY, '%d ' % j, style = wx.TE_CENTRE)
+            )
+            this.columnSizers[0].Add(this.__vLabels[-1], 1)
+            this.__v.append([])
+            for i in range(1, len(this.__hlabels)):
+                if vs == None:
+                    c = "0"
+                else:
+                    c = str(vs[n][i-1])
+                this.__v[-1].append(FloatInput(this, wx.ID_ANY, c))
+                this.columnSizers[i].Add(this.__v[-1][-1], 1, wx.EXPAND)
         this.Layout()
 
-    def addVectors(this, nr):
-        for i in range(nr):
-            this.addVector()
+    def extend(this, Vs):
+        this.grow(len(Vs), Vs)
 
     def rmVector(this, i):
         if len(this.__vLabels) > 0:
@@ -397,18 +401,28 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             for g in v:
                 g.Destroy()
             this.Layout()
+        else:
+            print '%s warning: nothing to delete.' % this.__class__.__name__
 
-    def GetVertex(this, i):
+    def getVector(this, i):
         return GeomTypes.Vec3([
                 this.__v[i][0].GetValue(),
                 this.__v[i][1].GetValue(),
                 this.__v[i][2].GetValue(),
             ])
 
-    def GetVs(this):
+    def get(this):
         return [
-            this.GetVertex(i) for i in range(len(this.__v))
+            this.getVector(i) for i in range(len(this.__v))
         ]
+
+    def clear(this):
+        for l in range(len(this.__v)):
+            this.rmVector(-1)
+
+    def set(this, Vs):
+        this.clear()
+        this.extend(Vs)
 
     def Destroy(this):
         for ctrl in this.__v: ctrl.Destroy()
@@ -465,17 +479,24 @@ class Vector3DSetDynamicPanel(wx.Panel):
         addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
         mainSizer.Add(addSizer, 1, wx.EXPAND)
 
-        # Delete button:
+        # Clear and Delete buttons:
+        rmSizer = wx.BoxSizer(orientation)
+        # Clear:
+        this.boxes.append(wx.Button(this, wx.ID_ANY, "Clear"))
+        this.Bind(wx.EVT_BUTTON, this.onClear, id = this.boxes[-1].GetId())
+        rmSizer.Add(this.boxes[-1], 1, wx.EXPAND)
+        # Delete:
         this.boxes.append(wx.Button(this, wx.ID_ANY, "Delete Vertex"))
         this.Bind(wx.EVT_BUTTON, this.onRm, id = this.boxes[-1].GetId())
-        mainSizer.Add(this.boxes[-1], 1, wx.EXPAND)
+        rmSizer.Add(this.boxes[-1], 1, wx.EXPAND)
+        mainSizer.Add(rmSizer, 1, wx.EXPAND)
 
         this.SetSizer(mainSizer)
         this.SetAutoLayout(True)
 
     def onAdd(this, e):
         l = this.boxes[this.__addNroVIndex].GetValue()
-        this.boxes[0].addVectors(l)
+        this.boxes[0].grow(l)
         this.Layout()
         e.Skip()
 
@@ -483,6 +504,15 @@ class Vector3DSetDynamicPanel(wx.Panel):
         this.boxes[0].rmVector(-1)
         this.Layout()
         e.Skip()
+
+    def onClear(this, e):
+        this.boxes[0].clear()
+        this.Layout()
+        e.Skip()
+
+    def set(this, Vs):
+        this.boxes[0].set(Vs)
+        this.Layout()
 
 myEVT_VECTOR_UPDATED = wx.NewEventType()
 EVT_VECTOR_UPDATED   = wx.PyEventBinder(myEVT_VECTOR_UPDATED, 1)

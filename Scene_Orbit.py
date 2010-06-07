@@ -24,6 +24,7 @@
 #
 #
 
+import os
 import wx
 import wx.lib.colourselect as wxLibCS
 import math
@@ -84,9 +85,11 @@ class CtrlWin(wx.Frame):
 
         facesSizer = wx.StaticBoxSizer(
             wx.StaticBox(this.panel, label = 'Face(s) Definition'),
-            wx.HORIZONTAL
+            wx.VERTICAL
         )
         ctrlSizer.Add(facesSizer, 0, wx.EXPAND)
+
+        dataSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         #VERTICES
         this.showGui.append(wx.StaticBox(this.panel, label = 'Vertices'))
@@ -94,17 +97,24 @@ class CtrlWin(wx.Frame):
         this.showGui.append(GeomGui.Vector3DSetDynamicPanel(this.panel))
         this.__VsGuiIndex = len(this.showGui) - 1
         bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
-        facesSizer.Add(bSizer, 1, wx.EXPAND)
+        dataSizer.Add(bSizer, 1, wx.EXPAND)
 
         # FACES
         this.showGui.append(wx.StaticBox(this.panel, label = 'Faces'))
         bSizer = wx.StaticBoxSizer(this.showGui[-1])
         this.showGui.append(
-            GeomGui.FaceSetDynamicPanel(this.panel, 20, faceLen = 7)
+            GeomGui.FaceSetDynamicPanel(this.panel, 0, faceLen = 3)
         )
         this.__FsGuiIndex = len(this.showGui) - 1
         bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
-        facesSizer.Add(bSizer, 1, wx.EXPAND)
+        dataSizer.Add(bSizer, 1, wx.EXPAND)
+        facesSizer.Add(dataSizer, 0, wx.EXPAND)
+
+        # Import
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Import"))
+        this.panel.Bind(wx.EVT_BUTTON, this.onImport,
+                id = this.showGui[-1].GetId())
+        facesSizer.Add(this.showGui[-1], 0)
 
         # SYMMETRY
         this.showGui.append(
@@ -328,6 +338,20 @@ class CtrlWin(wx.Frame):
         if this.colAlternative < 0:
             this.colAlternative += len(this.colIsom)
         this.updatShapeColours()
+
+    def onImport(this, e):
+        dlg = wx.FileDialog(this, 'New: Choose a file', '.', '',
+                '*.*off', wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetFilename()
+            importDirName  = dlg.GetDirectory()
+            print "opening file:", filename
+            fd = open(os.path.join(importDirName, filename), 'r')
+            shape = Geom3D.readOffFile(fd, recreateEdges = False)
+            fd.close()
+            print 'read ', len(shape.Vs), ' Vs and ', len(shape.Fs), ' Fs.'
+            this.showGui[this.__VsGuiIndex].set(shape.Vs)
+        dlg.Destroy()
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
