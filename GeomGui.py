@@ -514,6 +514,9 @@ class Vector3DSetDynamicPanel(wx.Panel):
         this.boxes[0].set(Vs)
         this.Layout()
 
+    def get(this):
+        return this.boxes[0].get()
+
 myEVT_VECTOR_UPDATED = wx.NewEventType()
 EVT_VECTOR_UPDATED   = wx.PyEventBinder(myEVT_VECTOR_UPDATED, 1)
 
@@ -645,7 +648,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         facesSizer.Add(this.faceIndexSizer, 0, wx.EXPAND)
         facesSizer.Add(this.vertexIndexSizer, 0, wx.EXPAND)
 
-        this.addFaces(nrOfFaces, faceLen)
+        this.add(nrOfFaces, faceLen)
 
         # use a list sizer to be able to fill white space if the face list
         #word is too small
@@ -674,10 +677,6 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
 
         this.Layout()
 
-    def addFaces(this, nr, fLen):
-        for i in range(nr):
-            this.addFace(fLen)
-
     def rmFace(this, i):
         if len(this.__fLabels) > 0:
             assert i < len(this.__fLabels)
@@ -693,15 +692,19 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
                 g.Destroy()
             this.Layout()
 
-    def GetFace(this, index):
+    def getFace(this, index):
         return [
                 this.__f[index][i].GetValue()
-                    for i in range(len(this.__f[index]))
+                    for i in range(1, len(this.__f[index]))
             ]
 
-    def GetFs(this):
+    def add(this, nr, fLen):
+        for i in range(nr):
+            this.addFace(fLen)
+
+    def get(this):
         return [
-            this.GetFace(i) for i in range(len(this.__f))
+            this.getFace(i) for i in range(len(this.__f))
         ]
 
     def Destroy(this):
@@ -772,13 +775,19 @@ class FaceSetDynamicPanel(wx.Panel):
         if l < 1:
             l = this.faceLen
             if l < 1: l = 3
-        this.boxes[this.__faceListIndex].addFaces(n, l)
+        this.boxes[this.__faceListIndex].add(n, l)
         this.Layout()
 
     def onRm(this, e):
         this.boxes[this.__faceListIndex].rmFace(-1)
         this.Layout()
         e.Skip()
+
+    def get(this):
+        return this.boxes[this.__faceListIndex].get()
+
+    def set(this, Fs):
+        this.boxes[this.__faceListIndex].set(Fs)
 
     def Destroy(this):
         for box in this.boxes:

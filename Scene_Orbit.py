@@ -193,8 +193,8 @@ class CtrlWin(wx.Frame):
 
     def onApplySymmetry(this, e):
         #print this.GetSize()
-        Vs = this.showGui[this.__VsGuiIndex].GetVs()
-        Fs = this.showGui[this.__FsGuiIndex].GetFs()
+        Vs = this.showGui[this.__VsGuiIndex].get()
+        Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
             this.statusBar.SetStatusText(
                 "ERROR: No faces defined!"
