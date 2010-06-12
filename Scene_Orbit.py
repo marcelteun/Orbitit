@@ -351,6 +351,7 @@ class CtrlWin(wx.Frame):
             fd.close()
             print 'read ', len(shape.Vs), ' Vs and ', len(shape.Fs), ' Fs.'
             this.showGui[this.__VsGuiIndex].set(shape.Vs)
+            this.showGui[this.__FsGuiIndex].set(shape.Fs)
         dlg.Destroy()
 
 class Scene(Geom3D.Scene):

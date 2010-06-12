@@ -648,7 +648,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         facesSizer.Add(this.faceIndexSizer, 0, wx.EXPAND)
         facesSizer.Add(this.vertexIndexSizer, 0, wx.EXPAND)
 
-        this.add(nrOfFaces, faceLen)
+        this.grow(nrOfFaces, faceLen)
 
         # use a list sizer to be able to fill white space if the face list
         #word is too small
@@ -660,7 +660,10 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         this.SetAutoLayout(True)
         this.SetupScrolling()
 
-    def addFace(this, fLen):
+    def addFace(this, fLen = 0, face = None):
+        assert fLen != 0 or face != None
+        if face != None:
+            fLen = len(face)
         j = len(this.__fLabels)
         this.__fLabels.append(wx.StaticText(this, wx.ID_ANY, '%d ' % j))
         this.faceIndexSizer.Add(this.__fLabels[-1],
@@ -669,8 +672,12 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         faceSizer = wx.BoxSizer(this.orientation)
         this.__f.append([faceSizer])
         for i in range(fLen):
+            if (face != None):
+                f_i = "%d" % face[i]
+            else:
+                f_i = "0"
             this.__f[-1].append(
-                IntInput(this, wx.ID_ANY, "0", size = (this.width, -1))
+                IntInput(this, wx.ID_ANY, f_i, size = (this.width, -1))
             )
             faceSizer.Add(this.__f[-1][-1], 0, wx.EXPAND)
         this.vertexIndexSizer.Add(faceSizer, 0, wx.EXPAND)
@@ -698,14 +705,26 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
                     for i in range(1, len(this.__f[index]))
             ]
 
-    def add(this, nr, fLen):
+    def grow(this, nr, fLen):
         for i in range(nr):
             this.addFace(fLen)
+
+    def extend(this, Fs):
+        for f in Fs:
+            this.addFace(face = f)
 
     def get(this):
         return [
             this.getFace(i) for i in range(len(this.__f))
         ]
+
+    def clear(this):
+        for l in range(len(this.__f)):
+            this.rmFace(-1)
+
+    def set(this, Fs):
+        this.clear()
+        this.extend(Fs)
 
     def Destroy(this):
         for ctrl in this.__fLabels: ctrl.Destroy()
@@ -775,7 +794,7 @@ class FaceSetDynamicPanel(wx.Panel):
         if l < 1:
             l = this.faceLen
             if l < 1: l = 3
-        this.boxes[this.__faceListIndex].add(n, l)
+        this.boxes[this.__faceListIndex].grow(n, l)
         this.Layout()
 
     def onRm(this, e):
@@ -788,6 +807,7 @@ class FaceSetDynamicPanel(wx.Panel):
 
     def set(this, Fs):
         this.boxes[this.__faceListIndex].set(Fs)
+        this.Layout()
 
     def Destroy(this):
         for box in this.boxes:
