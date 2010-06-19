@@ -2311,6 +2311,24 @@ class CompoundShape(SimpleShape):
     def toOffStr(this, precision=15, info = False):
         return this.mergedShape.toOffStr(precision, info)
 
+    def setVertexProperties(this, dictPar = None, **kwargs):
+        try:
+            this.mergedShape.setVertexProperties(dictPar, **kwargs)
+        except AttributeError:
+            SimpleShape.setVertexProperties(this, dictPar, **kwargs)
+
+    def setEdgeProperties(this, dictPar = None, **kwargs):
+        try:
+            this.mergedShape.setEdgeProperties(dictPar, **kwargs)
+        except AttributeError:
+            SimpleShape.setEdgeProperties(this, dictPar, **kwargs)
+
+    def setFaceProperties(this, dictPar = None, **kwargs):
+        try:
+            this.mergedShape.setFaceProperties(dictPar, **kwargs)
+        except AttributeError:
+            SimpleShape.setFaceProperties(this, dictPar, **kwargs)
+
     def toPsPiecesStr(this,
             faceIndices = [],
             scaling = 1,
