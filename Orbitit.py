@@ -36,7 +36,7 @@ from OpenGL.GLU import *
 from OpenGL.GL import *
 
 # TODO
-# 20100405: clean up: get rid of Geom3D.SymmetricShape.unfoldOrbit parameter
+# 20100405: clean up: get rid of Geom3D.IsometricShape.unfoldOrbit parameter
 # introduced for legacy code. The new way by using glMultMatrix is better, since
 # it takes care of the vertex normals in the correct way for opposite
 # isometries. In that case the seperate opposite isometries parameter is not

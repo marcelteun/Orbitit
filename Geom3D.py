@@ -2342,18 +2342,14 @@ class CompoundShape(SimpleShape):
     def getDome(this, level = 2):
         return this.mergedShape.getDome(level)
 
-class SymmetricShape(CompoundShape):
+class IsometricShape(CompoundShape):
     dbgPrn = False
     dbgTrace = False
-    className = "SymmetricShape"
+    className = "IsometricShape"
     """
-    The class describes simple shapes that are symmetric. They can be expressed
-    by a subset of all vertices, edges and faces. The symmetry of the shape is
-    then used to reproduce the complete shape. To be able to know how to
-    reproduce the shape one needs to know the symmetry of the complete shape and
-    one needs to know which symmetry group the of the specified subset is. The
-    later is called stabiliser in group algebra.
-    From these two one can derive which isometries are needed to reproduce the
+    The class describes simple shapes that have a base shape that is reused by
+    some transformations. They can be expressed by a subset of all vertices,
+    edges and faces. The isometries of the shape are then used to reproduce the
     complete shape.
     """
     def __init__(this,
@@ -2361,7 +2357,7 @@ class SymmetricShape(CompoundShape):
         colors = [([], [])],
         directIsometries = [E], oppositeIsometry = None,
         unfoldOrbit = False,
-        name = "SymmetricShape"
+        name = "IsometricShape"
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -2714,6 +2710,57 @@ class SymmetricShape(CompoundShape):
         if this.orbitNeeded:
             this.orbit()
         return CompoundShape.getDome(this, level)
+
+class SymmetricShape(IsometricShape):
+    dbgPrn = False
+    dbgTrace = False
+    className = "SymmetricShape"
+    """
+    The class describes simple shapes that are symmetric. They can be expressed
+    by a subset of all vertices, edges and faces. The symmetry of the shape is
+    then used to reproduce the complete shape. To be able to know how to
+    reproduce the shape one needs to know the symmetry of the complete shape and
+    one needs to know which symmetry group the of the specified subset is. The
+    later is called stabiliser in group algebra.
+    From these two one can derive which isometries are needed to reproduce the
+    complete shape.
+    """
+    def __init__(this,
+        Vs, Fs, Es = [], Ns = [],
+        finalSym = isometry.E, stabSym = isometry.E,
+        name = "SymmetricShape"
+    ):
+        """
+        Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
+            are the coordinates of the vertices.
+        Fs: an array of faces. Each face is an array of vertex indices, in the
+            order in which the vertices appear in the face.
+        Es: optional parameter edges. An array of edges. Each edges is 2
+            dimensional array that contain the vertex indices of the edge.
+        Ns: optional array of normals (per vertex) This value might be [] in
+            which case the normalised vertices are used. If the value is set it
+            is used by glDraw
+        finalSym: the resulting symmetry of the shape.
+        stabSym: the symmetry of the stabiliser, which is a subgroup of finalSym
+        """
+        if this.dbgTrace:
+            print '%s.__init__(%s,..):' % (this.__class__, name)
+        try: fsQuotientSet = finalSym  / stabSym
+        except isometry.ImproperSubgroupError:
+            this.statusBar.SetStatusText(
+                "ERROR: Stabiliser not a subgroup of final symmetry"
+            )
+            raise
+        if this.dbgTrace:
+            print 'fsQuotientSet:'
+            for coset in fsQuotientSet:
+                print '  - len(%d)' % len(coset)
+                for isom in coset: print '   ', isom
+        FsOrbit = [coset.getOne() for coset in fsQuotientSet]
+        print 'Applying an orbit of order %d' % len(FsOrbit)
+        if this.dbgTrace:
+            for isom in FsOrbit: print isom
+        IsometricShape.__init__(this, Vs, Fs, directIsometries = FsOrbit)
 
 class Scene():
     """

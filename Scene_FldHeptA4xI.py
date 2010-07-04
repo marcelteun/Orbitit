@@ -60,7 +60,7 @@ def Vlen(v0, v1):
     z = v1[2] - v0[2]
     return (math.sqrt(x*x + y*y + z*z))
 
-class Shape(Geom3D.SymmetricShape):
+class Shape(Geom3D.IsometricShape):
     def __init__(this, *args, **kwargs):
         R0   = GeomTypes.Hz
         R1   = Rot(axis = Vec([ 1,  1,  1]), angle =     GeomTypes.tTurn)
@@ -68,7 +68,7 @@ class Shape(Geom3D.SymmetricShape):
         R2   = Rot(axis = Vec([-1, -1,  1]), angle =     GeomTypes.tTurn)
         R2_2 = Rot(axis = Vec([-1, -1,  1]), angle = 2 * GeomTypes.tTurn)
         R3   = GeomTypes.Hy;
-        Geom3D.SymmetricShape.__init__(this,
+        Geom3D.IsometricShape.__init__(this,
             Vs = [], Fs = [],
             directIsometries = [
                     GeomTypes.E, R0,
@@ -130,7 +130,7 @@ class Shape(Geom3D.SymmetricShape):
 
     def glDraw(this):
         if this.updateShape: this.setV()
-        Geom3D.SymmetricShape.glDraw(this)
+        Geom3D.IsometricShape.glDraw(this)
 
     def setEdgeAlternative(this, alt):
         this.edgeAlternative = alt % this.nrOfEdgeAlternatives

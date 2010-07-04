@@ -472,13 +472,13 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
             [Vec(N)]
         )
 
-class EqlHeptagonShape(Geom3D.SymmetricShape):
+class EqlHeptagonShape(Geom3D.IsometricShape):
     def __init__(this,
         directIsometries = [GeomTypes.E],
         oppositeIsometry = None,
         name = 'EqlHeptagonShape'
     ):
-        Geom3D.SymmetricShape.__init__(this,
+        Geom3D.IsometricShape.__init__(this,
             Vs = [],
             Fs = [],
             #Es = [],
@@ -572,7 +572,7 @@ class EqlHeptagonShape(Geom3D.SymmetricShape):
 
 
     def glInit(this):
-        Geom3D.SymmetricShape.glInit(this)
+        Geom3D.IsometricShape.glInit(this)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def getStatusStr(this):

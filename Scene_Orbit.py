@@ -72,7 +72,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((437, 609))
+        this.setDefaultSize((582, 847))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -162,8 +162,12 @@ class CtrlWin(wx.Frame):
         this.posColStabSym = []
         this.nrOfCols      = []
         nrOfColsChoiceList = []
+        print 'addColourGui check sub-groups'
         for subSymGrp in finalSym.subgroups:
+            print 'subSymGrp', subSymGrp
+            print '...contains stabSym', stabSym, '...??..',
             if stabSym in subSymGrp.subgroups:
+                print 'yes'
                 this.posColStabSym.append(subSymGrp)
                 #print 'addColourGui, finalSym', finalSym
                 fo = isometry.order(finalSym)
@@ -175,6 +179,8 @@ class CtrlWin(wx.Frame):
                 nrOfColsChoiceList.append(
                     '%d (based on %s)' % (q, subSymGrp.__name__)
                 )
+            else:
+                print 'no'
         this.colGuis = []
         this.colGuis.append(
             wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
@@ -192,7 +198,7 @@ class CtrlWin(wx.Frame):
             )
 
     def onApplySymmetry(this, e):
-        #print this.GetSize()
+        print this.GetSize()
         Vs = this.showGui[this.__VsGuiIndex].get()
         Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
@@ -202,32 +208,19 @@ class CtrlWin(wx.Frame):
             return
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
-        try: fsQuotientSet = finalSym  / stabSym
-        except isometry.ImproperSubgroupError:
-            this.statusBar.SetStatusText(
-                "ERROR: Stabiliser not a subgroup of final symmetry"
-            )
-            raise
-
-        #print 'fsQuotientSet:'
-        #for coset in fsQuotientSet:
-        #    print '  - len(%d)' % len(coset)
-        #    for isom in coset: print '   ', isom
-        this.FsOrbit = [coset.getOne() for coset in fsQuotientSet]
-        print 'Applying an orbit of order %d' % len(this.FsOrbit)
-        #for isom in this.FsOrbit: print isom
-        try:
-            tst = this.cols
-        except AttributeError:
-            this.cols = [(255, 100, 0)]
         this.shape = Geom3D.SymmetricShape(Vs, Fs,
-                directIsometries = this.FsOrbit
+                finalSym = finalSym, stabSym = stabSym
             )
+        this.FsOrbit = this.shape.getIsoOp()['direct']
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
         this.addColourGui()
         this.panel.Layout()
         this.statusBar.SetStatusText("Symmetry applied: choose colours")
+        try:
+            tst = this.cols
+        except AttributeError:
+            this.cols = [(255, 100, 0)]
         e.Skip()
 
     def onNrColsSel(this, e):
