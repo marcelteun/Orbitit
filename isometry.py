@@ -34,6 +34,15 @@ class Set(set):
     def __init__(this, *args):
         set.__init__(this, *args)
 
+    def __repr__(this):
+        s = '%s([\n' % (this.__class__.__name__)
+        for e in this:
+            s = '%s  %s,\n' % (s, repr(e))
+        s = '%s])' % s
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
+
     def __eq__(this, o):
         eq = (len(this) == len(o))
         if eq:
@@ -1343,8 +1352,8 @@ A4xI.subgroups = [A4xI, A4,
 
 class S4(Set):
     initPars = [
-        {'type': 'vec3', 'par': 'o4axis0', 'lab': "half turn axis"},
-        {'type': 'vec3', 'par': 'o4axis1', 'lab': "half turn of orthogonal axis"}
+        {'type': 'vec3', 'par': 'o4axis0', 'lab': "4-fold axis"},
+        {'type': 'vec3', 'par': 'o4axis1', 'lab': "orthogonal 4-fold axis"}
     ]
     order = 24
     def __init__(this, isometries = None, setup = {}):
@@ -1551,7 +1560,7 @@ class S4xI(S4):
                     }
                 )
             ]
-        elif sg == D4xI or sg == D4:
+        elif sg == D4xI or sg == D8D4 or sg == D4:
             o4a = this.rotAxes[4]
             l = len(o4a)
             return [sg(
@@ -1566,6 +1575,14 @@ class S4xI(S4):
                         isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            return isoms
+        elif sg == D4C4:
+            isoms = []
+            for a4 in this.rotAxes[4]:
+                for rn in this.rotAxes[2]:
+                    if GeomTypes.eq(rn*a4, 0):
+                        isoms.append(sg(setup = {'axis_n': a4, 'normal_r': a2}))
+                        break
             return isoms
         elif sg == D4D2:
             o4a = this.rotAxes[4]
@@ -1640,11 +1657,12 @@ class S4xI(S4):
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 this.__class__.__name__, sg.__class__.__name__)
 
-S4xI.subgroups = [S4xI,
+S4xI.subgroups = [S4xI,                 # 48
         S4, S4A4, A4xI,                 # 24
         D4xI,                           # 18
+        D8D4,                           # 16
         A4, D3xI,                       # 12
-        D4D2, D2xI, D4,                 #  8
+        D4D2, D2xI, D4, C4xI, D4C4,     #  8
         D3, D3C3, C3xI,                 #  6
         D2, D2C2, C2xI, C4, C4C2,       #  4
         C3,                             #  3

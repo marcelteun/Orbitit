@@ -30,7 +30,10 @@ class Vec(tuple):
         return tuple.__new__(this, [float(a) for a in v])
 
     def __repr__(v):
-        return '%s(%s)' % (v.__class__.__name__, str(v))
+        s = '%s(%s)' % (v.__class__.__name__, str(v))
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
 
     def __str__(v):
         try:
@@ -265,6 +268,12 @@ class Quat(Vec):
         elif isinstance(w, int) or isinstance(w, float):
             return Vec.__mul__(v, w)
 
+    def __repr__(t):
+        s = '%s(%s)' % (t.__class__.__name__, str(t))
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
+
     def dot(v, w):
         return Vec.__mul__(v, w)
 
@@ -286,6 +295,12 @@ def transform3TypeStr(i):
     if i == Transform3.RotInv: return 'RotInv3'
     else:                      return 'Transform3'
 
+def isQuatPair(q):
+    return (
+        q != None and
+        len(q) == 2 and isinstance(q[0], Quat) and isinstance(q[1], Quat)
+    )
+
 class Transform3(tuple):
     def __new__(this, quatPair):
         assertStr = "A 3D transform is represented by 2 quaternions: "
@@ -295,9 +310,12 @@ class Transform3(tuple):
         return tuple.__new__(this, quatPair)
 
     def __repr__(t):
-        return '%s([%s, %s])' % (
-                transform3TypeStr(t.type()), str(t[0]), str(t[1])
+        s = '%s((%s, %s))' % (
+                transform3TypeStr(t.type()), repr(Quat(t[0])), repr(Quat(t[1]))
             )
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
 
     def __str__(t):
         if t.isRot(): return t.__strRot()
@@ -654,7 +672,11 @@ class Refl3(Transform3):
         or
         planeN: the 3D normal of the plane in which the reflection takes place.
         """
-        if isinstance(q, Quat):
+        if isQuatPair(q):
+            t = Transform3.__new__(this, q)
+            assert t.isRefl(), "%s doesn't represent a reflection" % str(q)
+            return t
+        elif isinstance(q, Quat):
             try: q = q.normalise()
             except ZeroDivisionError: pass # will fail on assert below:
             t = Transform3.__new__(this, [q, q])
@@ -679,8 +701,14 @@ class RotInv3(Transform3):
         """
         # Do not inherit from Rot3 (and then apply inversion):
         # a rotary inversion is not a rotation.
-        ri = Rot3(qLeft, axis, angle).I()
-        return Transform3.__new__(this, [ri[0], ri[1]])
+        if isQuatPair(qLeft):
+            t = Transform3.__new__(this, qLeft)
+            assert t.isRotInv(), "%s doesn't represent a rotary inversion" % (
+                str(qLeft))
+            return t
+        else:
+            ri = Rot3(qLeft, axis, angle).I()
+            return Transform3.__new__(this, [ri[0], ri[1]])
 
 RotRefl = RotInv3
 Hx = HalfTurn3(ux)
@@ -724,9 +752,12 @@ class Transform4(tuple):
         )
 
     #def __repr__(t):
-    #    return '%s([%s, %s])' % (
+    #    s = '%s([%s, %s])' % (
     #            transform3TypeStr(t.type()), str(t[0]), str(t[1])
     #        )
+    #    if __name__ != '__main__':
+    #        s = '%s.%s' % (__name__, s)
+    #    return s
 
     #def __str__(t):
     #    if t.isRot(): return t.__strRot()

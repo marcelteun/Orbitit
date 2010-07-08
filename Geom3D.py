@@ -91,6 +91,26 @@ V5 = math.sqrt(5)
 
 defaultFloatMargin = 1.0e-15
 
+def findModuleClassName(c, m):
+    """ find the class from this module providing this function
+
+        Used to prevent using class names from derived classes outside this
+        module
+        c: class
+        m: module name
+    """
+    def rec(c):
+        if c.__module__ == m:
+            return c.__name__
+        else:
+            for b in c.__bases__:
+                n = rec(b)
+                if n != None:
+                    return n
+        return None
+
+    return rec(c)
+
 def eq(a, b, margin = defaultFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
@@ -719,7 +739,6 @@ def facePlane(Vs, face):
 class SimpleShape:
     dbgPrn = False
     dbgTrace = False
-    className = "SimpleShape"
     bgCol     = rgb.midnightBlue[:]
     """
     This class decribes a simple 3D object consisting of faces and edges.
@@ -2242,7 +2261,6 @@ class SimpleShape:
         return shape
 
 class CompoundShape(SimpleShape):
-    className = "CompoundShape"
     dbgPrn = False
     dbgTrace = False
     """
@@ -2345,7 +2363,7 @@ class CompoundShape(SimpleShape):
 class IsometricShape(CompoundShape):
     dbgPrn = False
     dbgTrace = False
-    className = "IsometricShape"
+    reprName = "IsometricShape"
     """
     The class describes simple shapes that have a base shape that is reused by
     some transformations. They can be expressed by a subset of all vertices,
@@ -2714,7 +2732,7 @@ class IsometricShape(CompoundShape):
 class SymmetricShape(IsometricShape):
     dbgPrn = False
     dbgTrace = False
-    className = "SymmetricShape"
+    reprName = "SymmetricShape"
     """
     The class describes simple shapes that are symmetric. They can be expressed
     by a subset of all vertices, edges and faces. The symmetry of the shape is
@@ -2742,6 +2760,15 @@ class SymmetricShape(IsometricShape):
             is used by glDraw
         finalSym: the resulting symmetry of the shape.
         stabSym: the symmetry of the stabiliser, which is a subgroup of finalSym
+        As an example: a square is used to define a cube. The square has a D4C4
+        symmetry and the cube S4xI. The former is used as stabSym and the latter
+        as finalSym.
+        The following parameters can be used:
+        with v = lambda x, y, z: GeomTypes.Vec3([x, y, z])
+        Vs = [v(1, 1, 1), v(1, -1, 1), v(1, -1, -1), v(1, 1, -1)] and
+        Fs = [[0, 1, 2, 3]]
+        finalSym = S4xI(setup = {'o4axis0': v(0, 0, 1), 'o4axis1': v(0, 1, 0)})
+        stabSym = D4C4(setup = {'axis_n': v(1, 0, 0), 'normal_r': v(0, 1, 0)})
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
@@ -2760,7 +2787,56 @@ class SymmetricShape(IsometricShape):
         print 'Applying an orbit of order %d' % len(FsOrbit)
         if this.dbgTrace:
             for isom in FsOrbit: print isom
-        IsometricShape.__init__(this, Vs, Fs, directIsometries = FsOrbit)
+        IsometricShape.__init__(this, Vs, Fs, Es, Ns, directIsometries = FsOrbit)
+        this.finalSym = finalSym
+        this.stabSym = stabSym
+
+    def __repr__(this):
+        s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+        s = '%sVs = [\n' % (s)
+        for v in this.baseShape.Vs:
+            s = '%s    %s,\n' % (s, repr(v))
+        s = '%s  ],\n  ' % s
+        s = '%sFs = [\n' % (s)
+        for f in this.baseShape.Fs:
+            s = '%s    %s,\n' % (s, repr(f))
+        s = '%s  ],\n  ' % s
+        if this.baseShape.Es != []:
+            s = '%sEs = %s,\n  ' % (s, repr(this.baseShape.Es))
+        if this.baseShape.Ns != []:
+            s = '%sNs = [\n' % (s)
+            for v in this.baseShape.Ns:
+                s = '%s    %s,\n' % (s, repr(v))
+            s = '%s  ],\n  ' % s
+        s = '%sfinalSym = %s,\n  stabSym = %s)' % (
+                s,
+                repr(this.finalSym),
+                repr(this.stabSym)
+            )
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
+
+    def setColours(this, colours, stabSym):
+        """
+        Use the colours as specied and divide them according stabSym
+
+        colours: an array with rgb colour defs.
+        stabSym: the colours will be divided in a symmetric way, ie. in such a
+                 way that the base parts with the same colour have the symmetry
+                 stabSym. For this to happen:
+                 1. the following is required:
+                    - stabSym is a subgroup of finalSym at object creation.
+                 2. the following is usually the case:
+
+                 An example of the usual case. A square is used to define a
+                 cube as explained in __init__.
+                 former is used as stabSym at object creation and the latter as
+                 finalSym.
+                 CONTINUE here: testing cube example.., really need to read a
+                 Scene...
+        """
+        pass
 
 class Scene():
     """
