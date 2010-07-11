@@ -290,6 +290,14 @@ class MainWindow(wx.Frame):
         menu.AppendItem(add)
         export = wx.Menu()
 
+        saveAsPy = wx.MenuItem(
+                export,
+                wx.ID_ANY,
+                text = "&Python\tCtrl+Y"
+            )
+        this.Bind(wx.EVT_MENU, this.onSaveAsPy, id = saveAsPy.GetId())
+        export.AppendItem(saveAsPy)
+
         saveAsOff = wx.MenuItem(
                 export,
                 wx.ID_ANY,
@@ -413,6 +421,31 @@ class MainWindow(wx.Frame):
             fd.close()
             # TODO: set better title
             this.SetTitle('Added: %s (%s)' % (this.filename, this.importDirName))
+        dlg.Destroy()
+
+    def onSaveAsPy(this, e):
+        dlg = wx.FileDialog(this, 'Save as .py file', this.exportDirName, '',
+        '*.py', wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            this.filename = dlg.GetFilename()
+            this.exportDirName  = dlg.GetDirectory()
+            NameExt = this.filename.split('.')
+            if len(NameExt) == 1:
+                this.filename = '%s.py' % this.filename
+            elif NameExt[-1].lower() != 'py':
+                if NameExt[-1] != '':
+                    this.filename = '%s.py' % this.filename
+                else:
+                    this.filename = '%spy' % this.filename
+            fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+            # TODO precision through setting:
+            fd.write("import GeomTypes\n")
+            fd.write("import Geom3D\n")
+            fd.write("import isometry\n")
+            fd.write("shape = %s" % repr(this.panel.getShape()))
+            this.setStatusStr("Python file written")
+            fd.close()
+            this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
 
     def onSaveAsOff(this, e):

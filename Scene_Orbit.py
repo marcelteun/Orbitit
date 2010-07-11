@@ -334,17 +334,27 @@ class CtrlWin(wx.Frame):
 
     def onImport(this, e):
         dlg = wx.FileDialog(this, 'New: Choose a file', '.', '',
-                '*.*off', wx.OPEN)
+                'Python files (*.py)|*.py|OFF files (*.off)|*.*off', wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             importDirName  = dlg.GetDirectory()
             print "opening file:", filename
             fd = open(os.path.join(importDirName, filename), 'r')
-            shape = Geom3D.readOffFile(fd, recreateEdges = False)
+            if filename[-3:] == '.py':
+                shape = Geom3D.readPyFile(fd)
+            else:
+                shape = Geom3D.readOffFile(fd, recreateEdges = False)
             fd.close()
-            print 'read ', len(shape.Vs), ' Vs and ', len(shape.Fs), ' Fs.'
-            this.showGui[this.__VsGuiIndex].set(shape.Vs)
-            this.showGui[this.__FsGuiIndex].set(shape.Fs)
+            if isinstance(shape, Geom3D.IsometricShape):
+                Vs = shape.baseShape.Vs
+                Fs = shape.baseShape.Fs
+            else:
+                print 'no isometry'
+                Vs = shape.Vs
+                Fs = shape.Fs
+            print 'read ', len(Vs), ' Vs and ', len(Fs), ' Fs.'
+            this.showGui[this.__VsGuiIndex].set(Vs)
+            this.showGui[this.__FsGuiIndex].set(Fs)
         dlg.Destroy()
 
 class Scene(Geom3D.Scene):

@@ -141,6 +141,16 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
         result = result and eq(Va[i], Vb[i], margin)
     return result
 
+def readPyFile(fd):
+    """Reads an the python file a 3D shape and returns an instance of that class
+
+    fd: the file descriptor of a file that is opened with read permissions.
+    return: an object of the SimpleShape class.
+    """
+    ed = {'__name__': 'readPyFile'}
+    exec fd in ed
+    return ed['shape']
+
 def readOffFile(fd, recreateEdges = True):
     """Reads an the std 'off' format of a 3D object and returns an object of the
     SimpleShape class.
