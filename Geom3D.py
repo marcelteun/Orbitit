@@ -731,7 +731,8 @@ def facePlane(Vs, face):
     fi_1 = 2
     while not planeFound:
         try:
-            #print fi_0, fi_1
+            # print 0, fi_0, fi_1
+            # print Vs[face[0]], Vs[face[fi_0]], Vs[face[fi_1]]
             plane = Plane(
                     Vs[face[0]],
                     Vs[face[fi_0]],
@@ -1728,7 +1729,6 @@ class SimpleShape:
             faceIndices = range(len(this.Fs))
         PsDoc = PS.doc(title = this.name, pageSize = pageSize)
         offset = 0
-        debug = True
         debug = False
         if debug:
             print '********toPsPiecesStr********'
@@ -1752,9 +1752,19 @@ class SimpleShape:
                 # with an angle equal to the dot product of the normalised vectors.
                 zAxis = vec(0, 0, 1)
                 to2DAngle = math.acos(zAxis * norm)
+                if eq(to2DAngle, 2 * math.pi, margin):
+                    to2DAngle = 0.0
+                elif eq(to2DAngle, -2 * math.pi, margin):
+                    to2DAngle = 0.0
+                elif eq(to2DAngle, math.pi, margin):
+                    to2DAngle = 0.0
+                elif eq(to2DAngle, -math.pi, margin):
+                    to2DAngle = 0.0
                 PsPoints = []
                 if not to2DAngle == 0:
+                    if debug: print 'to2DAngle:', to2DAngle
                     to2Daxis = norm.cross(zAxis)
+                    if debug: print 'to2Daxis:', to2Daxis
                     Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
                     # add vertices to vertex array
                     for v in this.Vs:
@@ -2784,9 +2794,7 @@ class SymmetricShape(IsometricShape):
             print '%s.__init__(%s,..):' % (this.__class__, name)
         try: fsQuotientSet = finalSym  / stabSym
         except isometry.ImproperSubgroupError:
-            this.statusBar.SetStatusText(
-                "ERROR: Stabiliser not a subgroup of final symmetry"
-            )
+            print "ERROR: Stabiliser not a subgroup of final symmetry"
             raise
         if this.dbgTrace:
             print 'fsQuotientSet:'
