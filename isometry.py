@@ -880,6 +880,7 @@ class DnxI(Dn):
 
 # dynamically create DnxI classes:
 def DxI(n):
+    assert n != 0
     if n == 1: return C2xI
     D_nxI = MetaDnxI('D%dxI' % n, (DnxI,),
             {
@@ -898,10 +899,12 @@ def DxI(n):
                     ]
             }
         )
-    # TODO: fix subgroups depending on n:
     D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
     if n != 2:
         D_nxI.subgroups.insert(-4, C(n))
+    if n % 2 == 0:
+        D_nxI.subgroups.insert(-4, D2C2)
+    # TODO: fix more subgroups depending on n:
     return D_nxI
 
 D1xI = DxI(1)
@@ -1011,6 +1014,7 @@ class D2nDn(Dn):
 
 # dynamically create C2nCn classes:
 def D2nD(n):
+    assert n != 0
     D_2n_D_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
             {
                 'n'    : n,
@@ -1029,6 +1033,8 @@ def D2nD(n):
             }
         )
     D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
+    if n % 2 == 1 and n > 1:
+        D_2n_D_n.subgroups.insert(-2, D2C2)
     # TODO: fix more subgroups depending on n, e.g.:
     return D_2n_D_n
 
