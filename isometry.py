@@ -31,6 +31,8 @@ class ImproperSubgroupError(ValueError):
 
 class Set(set):
 
+    debug = False
+
     def __init__(this, *args):
         set.__init__(this, *args)
 
@@ -44,6 +46,7 @@ class Set(set):
         return s
 
     def __eq__(this, o):
+        if this.debug: print this.__class__.__name__, '__eq__'
         eq = (len(this) == len(o))
         if eq:
             for e in this:
@@ -52,6 +55,7 @@ class Set(set):
         return eq
 
     def __sub__(this, o):
+        if this.debug: print this.__class__.__name__, '__sub__'
         new = Set([])
         for e in this:
             if e not in o:
@@ -59,12 +63,14 @@ class Set(set):
         return new
 
     def __or__(this, o):
+        if this.debug: print this.__class__.__name__, '__or__'
         new = Set(this)
         for e in o:
             new.add(e)
         return new
 
     def __mul__(this, o):
+        if this.debug: print this.__class__.__name__, '__mul__'
         if isinstance(o, Set):
             # Set(this) * Set(o)
             new = Set([])
@@ -76,11 +82,13 @@ class Set(set):
             return Set([e * o for e in this])
 
     def __rmul__(this, o):
+        if this.debug: print this.__class__.__name__, '__rmul__'
         # Note rotation Set * Set is caught by __mul__
         # rotation Rot * Set
         return Set([o * e for e in this])
 
     def isGroup(this):
+        if this.debug: print this.__class__.__name__, 'isGroup'
         if len(this) == 0: return False
         isGroup = True
         for e in this:
@@ -100,12 +108,16 @@ class Set(set):
         # the following is not needed to check, is done implicitly:
         # and (GeomTypes.E in this)
 
-    def isSubgroup(this, o):
+    def isSubgroup(this, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
+        if this.debug: print this.__class__.__name__, 'isSubgroup'
         if len(this) > len(o): return False # optimisation
-        return this.isGroup() and this.issubset(o)
+        return (
+                (not checkGroup) or this.isGroup()
+            ) and this.issubset(o)
 
     def subgroup(this, o):
+        if this.debug: print this.__class__.__name__, 'subgroup'
         try:
             if isinstance(o, GeomTypes.Transform3):
                 # generate the quotient set THIS / o
@@ -134,6 +146,7 @@ class Set(set):
                 o.__class__.__name__, this.__class__.__name__)
 
     def __div__(this, o):
+        if this.debug: print this.__class__.__name__, '__div__'
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
         if (len(o) > len(this)): return o.__div__(this)
@@ -153,6 +166,7 @@ class Set(set):
     quotientSet = __div__
 
     def __rdiv__(this, o):
+        if this.debug: print this.__class__.__name__, '__rdiv__'
         #  subgroup * this: left quotient set
         pass # TODO
 
@@ -167,19 +181,24 @@ class Set(set):
                 #print '           ', e.__repr__()
                 #print '  - with o:', o
                 #print '           ', o.__repr__()
+                #print this.__class__.__name__, '__contains__', True
                 return True
+        #print this.__class__.__name__, '__contains__', False
         return False
 
     def add(this, e):
+        if this.debug: print this.__class__.__name__, 'add'
         l = len(this)
         if e not in this:
             set.add(this, e)
 
     def update(this, o):
+        if this.debug: print this.__class__.__name__, 'update'
         for e in o:
             this.add(e)
 
     def getOne(this):
+        if this.debug: print this.__class__.__name__, 'getOne'
         for e in this: return e
 
     def __str__(this):
@@ -197,6 +216,7 @@ class Set(set):
         If it succeeds within maxiter step this set is closed, contains the unit
         element and the set contains for every elements its inverse
         """
+        if this.debug: print this.__class__.__name__, 'group'
         result = copy(this)
         for e in this:
             result.add(e.inverse())
@@ -208,6 +228,7 @@ class Set(set):
         """
         Return a set that is closed, if it can be generated within maxIter steps.
         """
+        if this.debug: print this.__class__.__name__, 'close'
         result = copy(this)
         for i in range(maxIter):
             lPrev = len(result)
@@ -227,6 +248,7 @@ class Set(set):
         return result
 
     def checkSetup(this, setup):
+        if this.debug: print this.__class__.__name__, 'checkSetup'
         if setup != {} and this.initPars == []:
             print "Warning: class %s doesn't handle any setup pars" % (
                     this.___class__._name__), setup.keys()
