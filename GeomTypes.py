@@ -12,6 +12,8 @@ qTurn    = turn(0.25)
 tTurn    = turn(1.0/3)
 
 eqFloatMargin = 1.0e-11
+roundFloatMargin = 11
+
 def eq(a, b):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
@@ -283,7 +285,11 @@ class Quat(Vec):
 
     def vector(v):
         """Returns the vector part of v (as a Vec3)"""
-        return Vec3(v[1:])
+        try:
+            return v.__vector_part__
+        except AttributeError:
+            v.__vector_part__ = Vec3(v[1:])
+            return v.__vector_part__
 
     inner = dot
     S = scalar
@@ -316,6 +322,17 @@ class Transform3(tuple):
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
         return s
+
+    def __hash__(t):
+        try:
+            return t.__hash_nr__
+        except AttributeError:
+            if t.isRot():      t.__hash_nr__ =  t.__hashRot__()
+            elif t.isRefl():   t.__hash_nr__ =  t.__hashRefl__()
+            elif t.isRotInv(): t.__hash_nr__ =  t.__hashRotInv__()
+            else:
+                raise TypeError, "Not a (supported) transfor)"
+            return t.__hash_nr__
 
     def __str__(t):
         if t.isRot(): return t.__strRot()
@@ -368,19 +385,20 @@ class Transform3(tuple):
         if t.isRot(): return t.Rot
         if t.isRefl(): return t.Refl
         if t.isRotInv(): return t.RotInv
-        assert False, 'oops, unknown type of Transform: %s ?= 1' % t[1].norm()
+        raise TypeError, 'oops, unknown type of Transform: %s ?= 1' % (
+            t[1].norm())
 
     def angle(t):
         if t.isRot(): return t.angleRot()
         if t.isRotInv(): return t.angleRotInv()
-        assert False, (
+        raise TypeError, (
             'oops, unknown angle; transform %s\n' % str(t) +
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def axis(t):
         if t.isRot(): return t.axisRot()
         if t.isRotInv(): return t.axisRotInv()
-        assert False, (
+        raise TypeError, (
             'oops, unknown angle; transform %s\n' % str(t) +
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
@@ -478,6 +496,18 @@ class Transform3(tuple):
             (eq(t[0][0], 0) and t[0] == u[1])
         )
 
+    def __hashRot__(t):
+        axis = t.axisRot()
+        return hash(
+            (
+                t.Rot,
+                round(t.angleRot(), roundFloatMargin),
+                round(axis[0], roundFloatMargin),
+                round(axis[1], roundFloatMargin),
+                round(axis[2], roundFloatMargin)
+            )
+        )
+
     def __strRot(t):
         str = 'Rotation of %s degrees around %s' % (
                 degrees(t.angleRot()), t.axisRot()
@@ -485,6 +515,31 @@ class Transform3(tuple):
         return str
 
     def angleRot(t):
+        try:
+            return t.__angleRot__
+        except AttributeError:
+            t.defUniqueAngleAxis()
+            return t.__angleRot__
+
+    def axisRot(t):
+        try:
+            return t.__axisRot__
+        except AttributeError:
+            t.defUniqueAngleAxis()
+            return t.__axisRot__
+
+    def defUniqueAngleAxis(t):
+        # rotation axis
+        try:
+            t.__axisRot__ = t[0].V().normalise()
+        except ZeroDivisionError:
+            assert (t[0] == Quat([1, 0, 0, 0]) or
+                    t[0] == Quat([-1, 0, 0, 0])
+                ), (
+                    "%s doesn't represent a rotation" % t.__repr__()
+                )
+            t.__axisRot__ =  t[0].V()
+        # rotation angle
         cos = t[0][0]
         for i in range(3):
             try:
@@ -497,21 +552,42 @@ class Transform3(tuple):
                         ), (
                             "%s doesn't represent a rotation" % t.__repr__()
                         )
-                    return 0
+                    sin = 0
         #print 'reconstructed cos =', cos
         #print 'reconstructed sin =', sin
-        return 2 * math.atan2(sin, cos)
+        t.__angleRot__ = 2 * math.atan2(sin, cos)
 
-    def axisRot(t):
-        try:
-            return t[0].V().normalise()
-        except ZeroDivisionError:
-            assert (t[0] == Quat([1, 0, 0, 0]) or
-                    t[0] == Quat([-1, 0, 0, 0])
-                ), (
-                    "%s doesn't represent a rotation" % t.__repr__()
-                )
-            return t[0].V()
+        # make unique: -pi < angle < pi
+        if not (t.__angleRot__ < math.pi or eq(t.__angleRot__, math.pi)):
+            t.__angleRot__ = t.__angleRot__ - 2 * math.pi
+        if not (t.__angleRot__ > -math.pi or eq(t.__angleRot__, -math.pi)):
+            t.__angleRot__ = t.__angleRot__ + 2 * math.pi
+
+        # make unique: 0 < angle < pi
+        if eq(t.__angleRot__, 0):
+            t.__angleRot__ = 0.0
+        if t.__angleRot__ < 0:
+            t.__angleRot__ = -t.__angleRot__
+            t.__axisRot__ = -t.__axisRot__
+        if eq(t.__angleRot__, math.pi):
+            # if halfturn, make axis unique: make the first non-zero element
+            # positive:
+            if eq(t.__axisRot__[0], 0):
+                t.__axisRot__ = Vec3([0.0, t.__axisRot__[1], t.__axisRot__[2]])
+            if t.__axisRot__[0] < 0:
+                t.__axisRot__ = -t.__axisRot__
+            elif t.__axisRot__[0] == 0:
+                if eq(t.__axisRot__[1], 0):
+                    t.__axisRot__ = Vec3([0.0, 0.0, t.__axisRot__[2]])
+                if t.__axisRot__[1] < 0:
+                    t.__axisRot__ = -t.__axisRot__
+                elif t.__axisRot__[1] == 0:
+                    # not valid axis: if eq(t.__axisRot__[2], 0):
+                    if t.__axisRot__[2] < 0:
+                        t.__axisRot__ = -t.__axisRot__
+        elif eq(t.__angleRot__, 0):
+            t.__angleRot__ = 0.0
+            t.__axisRot__ = Vec3([1.0, 0.0, 0.0])
 
     def getMatrixRot(this, w, x, y, z, sign = 1):
         dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
@@ -524,15 +600,27 @@ class Transform3(tuple):
         ]
 
     def matrixRot(t):
-        w, x, y, z = t[0]
-        return t.getMatrixRot(w, x, y, z)
+        try:
+            return t.__matrix_rot__
+        except AttributeError:
+            w, x, y, z = t[0]
+            t.__matrix_rot__ = t.getMatrixRot(w, x, y, z)
+            return t.__matrix_rot__
 
     def glMatrixRot(t):
-        w, x, y, z = t[0]
-        return t.getMatrixRot(-w, x, y, z)
+        try:
+            return t.__gl_matrix_rot__
+        except AttributeError:
+            w, x, y, z = t[0]
+            t.__gl_matrix_rot__ = t.getMatrixRot(-w, x, y, z)
+            return t.__gl_matrix_rot__
 
     def inverseRot(t):
-        return Rot3(axis = t.axis(), angle = -t.angle())
+        try:
+            return t.__inverse_rot__
+        except AttributeError:
+             t.__inverse_rot__ = Rot3(axis = t.axis(), angle = -t.angle())
+             return t.__inverse_rot__
 
     ## REFLECTION specific functions:
     def isRefl(t):
@@ -559,21 +647,57 @@ class Transform3(tuple):
             # again not needed: and t[1] == u[1])
         )
 
-    def __strRefl(s):
-        return 'Reflection in plane with normal %s' % (str(s.planeN()))
+    def __hashRefl__(t):
+        normal = t.planeN()
+        return hash(
+            (
+                t.Refl,
+                t.Refl, # to use a tuple of 5 elements for all types
+                round(normal[0], roundFloatMargin),
+                round(normal[1], roundFloatMargin),
+                round(normal[2], roundFloatMargin)
+            )
+        )
 
-    def planeN(s):
-        return s[0].V()
+    def __strRefl(t):
+        return 'Reflection in plane with normal %s' % (str(t.planeN()))
+
+    def planeN(t):
+        try:
+            return t.__plane_normal__
+        except AttributeError:
+            t.__plane_normal__ = t[0].V()
+            # make normal unique: make the first non-zero element positive:
+            if eq(t.__plane_normal__[0], 0):
+                t.__plane_normal__ = Vec3(
+                        [0.0, t.__plane_normal__[1], t.__plane_normal__[2]]
+                    )
+            if t.__plane_normal__[0] < 0:
+                t.__plane_normal__ = -t.__plane_normal__
+            elif t.__plane_normal__[0] == 0:
+                if eq(t.__plane_normal__[1], 0):
+                    t.__plane_normal__ = Vec3([0.0, 0.0, t.__plane_normal__[2]])
+                if t.__plane_normal__[1] < 0:
+                    t.__plane_normal__ = -t.__plane_normal__
+                elif t.__plane_normal__[1] == 0:
+                    # not valid axis: if eq(t.__plane_normal__[2], 0):
+                    if t.__plane_normal__[2] < 0:
+                        t.__plane_normal__ = -t.__plane_normal__
+            return t.__plane_normal__
 
     def matrixRefl(t):
-        w, x, y, z = t[0]
-        dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
-        dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
-        return [
-            Vec([1-dx2,         -dxy,           -dxz]),
-            Vec([-dxy,          1-dy2,          -dyz]),
-            Vec([-dxz,          -dyz,           1-dz2]),
-        ]
+        try:
+            return t.__matrix_refl__
+        except AttributeError:
+            w, x, y, z = t[0]
+            dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
+            dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
+            t.__matrix_refl__ = [
+                Vec([1-dx2,         -dxy,           -dxz]),
+                Vec([-dxy,          1-dy2,          -dyz]),
+                Vec([-dxz,          -dyz,           1-dz2]),
+            ]
+            return t.__matrix_refl__
 
     def inverseRefl(t):
         return t
@@ -583,13 +707,29 @@ class Transform3(tuple):
         """
         Apply a central inversion
         """
-        return Transform3([-t[0], t[1]])
+        try:
+            return t.__central_inverted__
+        except AttributeError:
+            t.__central_inverted__ = Transform3([-t[0], t[1]])
+            return t.__central_inverted__
 
     def isRotInv(t):
         return t.I().isRot() and not t.isRefl()
 
     def __eqRotInv(t, u):
         return t.I().__eqRot(u.I())
+
+    def __hashRotInv__(t):
+        axis = t.axisRotInv()
+        return hash(
+            (
+                t.Rot,
+                round(t.angleRotInv(), roundFloatMargin),
+                round(axis[0], roundFloatMargin),
+                round(axis[1], roundFloatMargin),
+                round(axis[2], roundFloatMargin)
+            )
+        )
 
     def __strRotInv(t):
         r = t.I()
@@ -605,15 +745,27 @@ class Transform3(tuple):
         return t.I().axisRot()
 
     def matrixRotInv(t):
-        w, x, y, z = t[0]
-        return t.getMatrixRot(w, x, y, z, -1)
+        try:
+            return t.__matrix_rot_inv__
+        except AttributeError:
+            w, x, y, z = t[0]
+            t.__matrix_rot_inv__ = t.getMatrixRot(w, x, y, z, -1)
+            return t.__matrix_rot_inv__
 
     def glMatrixRotInv(t):
-        w, x, y, z = t[0]
-        return t.getMatrixRot(-w, x, y, z, -1)
+        try:
+            return t.__gl_matrix_rot_inv__
+        except AttributeError:
+            w, x, y, z = t[0]
+            t.__gl_matrix_rot_inv__ = t.getMatrixRot(-w, x, y, z, -1)
+            return t.__gl_matrix_rot_inv__
 
     def inverseRotInv(t):
-        return RotInv3(axis = t.axis(), angle = -t.angle())
+        try:
+            return t.__inverse_rot_inv__
+        except AttributeError:
+            t.__inverse_rot_inv__ = RotInv3(axis = t.axis(), angle = -t.angle())
+            return t.__inverse_rot_inv__
 
     isRotRefl   = isRotInv
     axisRotRefl = axisRotInv
@@ -1628,6 +1780,7 @@ if __name__ == '__main__':
     rx = t.axis()
     x = v.normalise()
     ra = t.angle()
+    a = a - 2 * math.pi
     assert (
             (eq(ra, a) and rx == x)
             or
