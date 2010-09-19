@@ -1609,7 +1609,7 @@ class S4xI(S4):
             for a4 in this.rotAxes[4]:
                 for rn in this.rotAxes[2]:
                     if GeomTypes.eq(rn*a4, 0):
-                        isoms.append(sg(setup = {'axis_n': a4, 'normal_r': a2}))
+                        isoms.append(sg(setup = {'axis_n': a4, 'normal_r': rn}))
                         break
             return isoms
         elif sg == D4D2:

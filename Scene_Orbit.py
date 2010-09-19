@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -153,34 +153,70 @@ class CtrlWin(wx.Frame):
             this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
             this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.VERTICAL)
             this.ctrlSizer.Add(this.colSizer, 0, wx.EXPAND)
-        finalSym = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass(
+        finalSymClass = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass(
                 applyOrder = True
             )
-        stabSym = this.showGui[this.__StabSymGuiIndex].getSymmetryClass(
+        stabSymClass = this.showGui[this.__StabSymGuiIndex].getSymmetryClass(
                 applyOrder = True
             )
-        this.posColStabSym = []
-        this.nrOfCols      = []
-        nrOfColsChoiceList = []
-        print 'addColourGui check sub-groups'
-        for subSymGrp in finalSym.subgroups:
-            print 'subSymGrp', subSymGrp
-            print '...contains stabSym', stabSym, '...??..',
-            if stabSym in subSymGrp.subgroups:
-                print 'yes'
-                this.posColStabSym.append(subSymGrp)
-                #print 'addColourGui, finalSym', finalSym
-                fo = isometry.order(finalSym)
-                assert fo != 0
-                po = isometry.order(subSymGrp)
-                assert po != 0
-                q = fo / po
-                this.nrOfCols.append(q)
-                nrOfColsChoiceList.append(
-                    '%d (based on %s)' % (q, subSymGrp.__name__)
-                )
-            else:
-                print 'no'
+        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
+        stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
+        this.colIsomsList     = []
+        this.colIsomsFiltered = []
+        this.posColStabSym    = []
+        this.nrOfCols         = []
+        nrOfColsChoiceList    = []
+        #print 'addColourGui check sub-groups'
+        for subSymGrp in finalSymClass.subgroups:
+            #print 'subSymGrp', subSymGrp
+            #print '...contains stabSymClass', stabSymClass, '...??..',
+            if stabSymClass in subSymGrp.subgroups:
+                #print 'yes'
+
+                # Check if the stabiliser can really be a subgroup for this
+                # orientation.
+                # E.g.
+                # final symmetry S4xI
+                # stabiliser: D2C2 with principle axis: one 2-fold from S4xI
+                #                                       (ie not a 4-fold axis)
+                # Now A4xI is a subgroup of S4xI
+                # and D2C2 is a subgroup of A4xI,
+                # However the D2C2 that is a subgroup of the A4xI subgroup of
+                # S4xI has a principle axis that is a 4-fold axis of S4xI.
+
+                colIsoms = finalSym.realiseSubgroups(subSymGrp)
+                #print 'check list of len:', len(colIsoms)
+                for i in range(len(colIsoms)-1, -1, -1):
+                    #print 'isSubgroup', stabSym, colIsoms[i]
+                    if stabSym.isSubgroup(colIsoms[i]):
+                        #print 'add True'
+                        #print 'break at index', i
+                        break
+                    else:
+                        # remove this from the list, this is part of the work of
+                        # filtering the list. This is not done completely here
+                        # since it costs time, and the user might not choose
+                        # this colouring anyway (hence the break above). But to
+                        # save time later, remove it already.
+                        del colIsoms[i]
+                if colIsoms != []:
+                    this.posColStabSym.append(subSymGrp)
+                    this.colIsomsList.append(colIsoms)
+                    this.colIsomsFiltered.append(False)
+                    #print 'addColourGui, finalSymClass', finalSymClass
+                    fo = isometry.order(finalSymClass)
+                    assert fo != 0
+                    po = isometry.order(subSymGrp)
+                    assert po != 0
+                    q = fo / po
+                    this.nrOfCols.append(q)
+                    nrOfColsChoiceList.append(
+                        '%d (based on %s)' % (q, subSymGrp.__name__)
+                    )
+                #else:
+                #    print 'add False'
+            #else:
+            #    print 'no'
         this.colGuis = []
         this.colGuis.append(
             wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
@@ -242,15 +278,16 @@ class CtrlWin(wx.Frame):
             nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
             this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
 
-        id = e.GetSelection()
-        colSym = this.posColStabSym[id]
+        colDivNr = e.GetSelection()
+        colSym = this.posColStabSym[colDivNr]
+        this.colIsoms = this.colIsomsList[colDivNr]
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
-        this.colIsom = finalSym.realiseSubgroups(colSym)
-        assert len(this.colIsom) != 0
-        nrOfCols = this.nrOfCols[id]
+        assert len(this.colIsoms) != 0
+        nrOfCols = this.nrOfCols[colDivNr]
         this.selColGuis = []
         initColour = (255, 255, 255)
         maxColPerRow = 12
+        # Add buttons for choosing individual colours:
         for i in range(nrOfCols):
             try:
                 col = this.cols[i]
@@ -266,6 +303,25 @@ class CtrlWin(wx.Frame):
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
         this.colAlternative = 0
+        if not (this.colIsomsFiltered[colDivNr]):
+            # Now filter out the stabilisers that are not a subgroup for this
+            # orientation.
+            # (part of this is done in addColourGui)
+            # E.g.
+            # final symmetry S4xI
+            # stabiliser: D2C2 with principle axis: one 2-fold from S4xI
+            #                                       (ie not a 4-fold axis)
+            # Now D4xI is a subgroup of S4xI
+            # and D2C2 is a subgroup of D4xI,
+            # but not necessarily this orientation. In fact only one of the
+            # three possible D4xI will have this D2C2 as subgroup.
+            stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
+            for i in range(len(this.colIsoms)-1, -1, -1):
+                if not stabSym.isSubgroup(this.colIsoms[i]):
+                    del this.colIsoms[i]
+            assert len(this.colIsoms) != 0, (
+                "This case should have be taken care of in addColourGui")
+
         this.updatShapeColours()
         this.panel.Layout()
 
@@ -286,7 +342,7 @@ class CtrlWin(wx.Frame):
         #print 'finalSym', finalSym
         #print 'close finalSym', finalSym.close()
         #print 'this.colAlternative', this.colAlternative
-        colQuotientSet = finalSym  / this.colIsom[this.colAlternative]
+        colQuotientSet = finalSym  / this.colIsoms[this.colAlternative]
         #print '-----colQuotientSet-----------'
         #for isom in colQuotientSet: print isom
         #print '------------------------------'
@@ -307,7 +363,7 @@ class CtrlWin(wx.Frame):
         this.shape.setSymmetricFaceColors(cols)
         this.statusBar.SetStatusText(
             "Colour alternative %d of %d applied" % (
-                this.colAlternative + 1, len(this.colIsom)
+                this.colAlternative + 1, len(this.colIsoms)
             )
         )
         this.canvas.paint()
@@ -322,14 +378,14 @@ class CtrlWin(wx.Frame):
 
     def onNextColAlt(this, e):
         this.colAlternative += 1
-        if this.colAlternative >= len(this.colIsom):
-            this.colAlternative -= len(this.colIsom)
+        if this.colAlternative >= len(this.colIsoms):
+            this.colAlternative -= len(this.colIsoms)
         this.updatShapeColours()
 
     def onPrevColAlt(this, e):
         this.colAlternative -= 1
         if this.colAlternative < 0:
-            this.colAlternative += len(this.colIsom)
+            this.colAlternative += len(this.colIsoms)
         this.updatShapeColours()
 
     def onImport(this, e):
