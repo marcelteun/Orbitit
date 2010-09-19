@@ -369,22 +369,29 @@ class Cn(Set):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create Cn classes:
+CnMetas = {}
 def C(n):
-    if n == 1: return E
-    C_n = MetaCn('C%d' % n, (Cn,),
-            {
-                'n'    : n,
-                'order': n,
-                'initPars': [{
-                        'type': 'vec3',
-                        'par': 'axis',
-                        'lab': "%d-fold axis" % n
-                    }]
-            }
-        )
-    # TODO: fix subgroups depending on n:
-    C_n.subgroups = [C_n, E]
-    return C_n
+    try:
+        return CnMetas[n]
+    except KeyError:
+        if n == 1:
+            CnMetas[n] = E
+        else:
+            C_n = MetaCn('C%d' % n, (Cn,),
+                    {
+                        'n'    : n,
+                        'order': n,
+                        'initPars': [{
+                                'type': 'vec3',
+                                'par': 'axis',
+                                'lab': "%d-fold axis" % n
+                            }]
+                    }
+                )
+            # TODO: fix subgroups depending on n:
+            C_n.subgroups = [C_n, E]
+            CnMetas[n] = C_n
+        return CnMetas[n]
 
 C2 = C(2)
 C3 = C(3)
@@ -454,28 +461,33 @@ class C2nCn(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create C2nCn classes:
+C2nCnMetas = {}
 def C2nC(n):
-    C_2n_C_n = MetaC2nCn('C%dC%d' % (2*n, n), (C2nCn,),
-            {
-                'n'    : n,
-                'order': 2 * n,
-                'initPars': [{
-                        'type': 'vec3',
-                        'par': 'axis',
-                        'lab': "%d-fold axis" % n
-                    }]
-            }
-        )
-    C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
-    # Add subgroup {E, reflection}
-    if n % 2 == 1:
-        if n != 1:
-            C_2n_C_n.subgroups.insert(-1, C2C1)
-    # TODO: fix more subgroups depending on n, e.g.:
-    #else:
-    #    if n != 2:
-    #        C_2n_C_n.subgroups.insert(-2, C2nC(2))
-    return C_2n_C_n
+    try:
+        return C2nCnMetas[n]
+    except KeyError:
+        C_2n_C_n = MetaC2nCn('C%dC%d' % (2*n, n), (C2nCn,),
+                {
+                    'n'    : n,
+                    'order': 2 * n,
+                    'initPars': [{
+                            'type': 'vec3',
+                            'par': 'axis',
+                            'lab': "%d-fold axis" % n
+                        }]
+                }
+            )
+        C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
+        # Add subgroup {E, reflection}
+        if n % 2 == 1:
+            if n != 1:
+                C_2n_C_n.subgroups.insert(-1, C2C1)
+        # TODO: fix more subgroups depending on n, e.g.:
+        #else:
+        #    if n != 2:
+        #        C_2n_C_n.subgroups.insert(-2, C2nC(2))
+        C2nCnMetas[n] = C_2n_C_n
+        return C2nCnMetas[n]
 
 C2C1 = C2nC(1)
 C4C2 = C2nC(2)
@@ -547,26 +559,33 @@ class CnxI(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create CnxI classes:
+CnxIMetas = {}
 def CxI(n):
-    if n == 1: return ExI
-    C_nxI = MetaCnxI('C%dxI' % n, (CnxI,),
-            {
-                'n'    : n,
-                'order': 2 * n,
-                'initPars': [{
-                        'type': 'vec3',
-                        'par': 'axis',
-                        'lab': "%d-fold axis" % n
-                    }]
-            }
-        )
-    # TODO: fix subgroups depending on n:
-    C_nxI.subgroups = [C_nxI, C(n), C1xI, E]
-    # Add subgroup {E, reflection}
-    if n % 2 == 0:
-        if n != 0:
-            C_nxI.subgroups.insert(-2, C2C1)
-    return C_nxI
+    try:
+        return CnxIMetas[n]
+    except KeyError:
+        if n == 1:
+            CnxIMetas[n] = ExI
+        else:
+            C_nxI = MetaCnxI('C%dxI' % n, (CnxI,),
+                    {
+                        'n'    : n,
+                        'order': 2 * n,
+                        'initPars': [{
+                                'type': 'vec3',
+                                'par': 'axis',
+                                'lab': "%d-fold axis" % n
+                            }]
+                    }
+                )
+            # TODO: fix subgroups depending on n:
+            C_nxI.subgroups = [C_nxI, C(n), C1xI, E]
+            # Add subgroup {E, reflection}
+            if n % 2 == 0:
+                if n != 0:
+                    C_nxI.subgroups.insert(-2, C2C1)
+            CnxIMetas[n] = C_nxI
+        return CnxIMetas[n]
 
 C1xI = ExI
 C2xI = CxI(2)
@@ -653,26 +672,33 @@ class DnCn(Cn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create DnCn classes:
+DnCnMetas = {}
 def DnC(n):
-    if n == 1: return C2C1
-    D_n_C_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
-            {
-                'n'    : n,
-                'order': 2 * n,
-                'initPars': [{
-                        'type': 'vec3',
-                        'par': 'axis_n',
-                        'lab': "%d-fold axis" % n
-                    }, {
-                        'type': 'vec3',
-                        'par': 'normal_r',
-                        'lab': "normal of reflection"
-                    }]
-            }
-        )
-    D_n_C_n.subgroups = [D_n_C_n, C(n), C2C1, E]
-    # TODO: fix more subgroups depending on n, e.g.:
-    return D_n_C_n
+    try:
+        return DnCnMetas[n]
+    except KeyError:
+        if n == 1:
+            DnCnMetas[n] = C2C1
+        else:
+            D_n_C_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
+                    {
+                        'n'    : n,
+                        'order': 2 * n,
+                        'initPars': [{
+                                'type': 'vec3',
+                                'par': 'axis_n',
+                                'lab': "%d-fold axis" % n
+                            }, {
+                                'type': 'vec3',
+                                'par': 'normal_r',
+                                'lab': "normal of reflection"
+                            }]
+                    }
+                )
+            D_n_C_n.subgroups = [D_n_C_n, C(n), C2C1, E]
+            # TODO: fix more subgroups depending on n, e.g.:
+            DnCnMetas[n] = D_n_C_n
+        return DnCnMetas[n]
 
 D1C1 = DnC(1)
 D2C2 = DnC(2)
@@ -763,30 +789,37 @@ class Dn(Set):
             return [E()]
 
 # dynamically create Dn classes:
+DnMetas = {}
 def D(n):
-    if n == 1: return C2
-    D_n = MetaDn('D%d' % n, (Dn,),
-            {
-                'n'    : n,
-                'order': 2 * n,
-                'initPars': [
-                        {
-                            'type': 'vec3',
-                            'par': 'axis_n',
-                            'lab': "%d-fold axis" % n
-                        }, {
-                            'type': 'vec3',
-                            'par': 'axis_2',
-                            'lab': "axis of halfturn"
-                        }
-                    ]
-            }
-        )
-    # TODO: fix subgroups depending on n:
-    D_n.subgroups = [D_n, C2, E]
-    if n != 2:
-        D_n.subgroups.insert(-2, C(n))
-    return D_n
+    try:
+        return DnMetas[n]
+    except KeyError:
+        if n == 1:
+            DnMetas[n] = C2
+        else:
+            D_n = MetaDn('D%d' % n, (Dn,),
+                    {
+                        'n'    : n,
+                        'order': 2 * n,
+                        'initPars': [
+                                {
+                                    'type': 'vec3',
+                                    'par': 'axis_n',
+                                    'lab': "%d-fold axis" % n
+                                }, {
+                                    'type': 'vec3',
+                                    'par': 'axis_2',
+                                    'lab': "axis of halfturn"
+                                }
+                            ]
+                    }
+                )
+            # TODO: fix subgroups depending on n:
+            D_n.subgroups = [D_n, C2, E]
+            if n != 2:
+                D_n.subgroups.insert(-2, C(n))
+            DnMetas[n] = D_n
+        return DnMetas[n]
 
 D1 = D(1)
 D2 = D(2)
@@ -901,33 +934,40 @@ class DnxI(Dn):
                 this.__class__.__name__, sg.__name__, sg.__class__.__name__)
 
 # dynamically create DnxI classes:
+DnxIMetas = {}
 def DxI(n):
     assert n != 0
-    if n == 1: return C2xI
-    D_nxI = MetaDnxI('D%dxI' % n, (DnxI,),
-            {
-                'n'    : n,
-                'order': 4 * n,
-                'initPars': [
-                        {
-                            'type': 'vec3',
-                            'par': 'axis_n',
-                            'lab': "%d-fold axis" % n
-                        }, {
-                            'type': 'vec3',
-                            'par': 'axis_2',
-                            'lab': "axis of halfturn"
-                        }
-                    ]
-            }
-        )
-    D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
-    if n != 2:
-        D_nxI.subgroups.insert(-4, C(n))
-    if n % 2 == 0:
-        D_nxI.subgroups.insert(-4, D2C2)
-    # TODO: fix more subgroups depending on n:
-    return D_nxI
+    try:
+        return DnxIMetas[n]
+    except KeyError:
+        if n == 1:
+            DnxIMetas[n] = C2xI
+        else:
+            D_nxI = MetaDnxI('D%dxI' % n, (DnxI,),
+                    {
+                        'n'    : n,
+                        'order': 4 * n,
+                        'initPars': [
+                                {
+                                    'type': 'vec3',
+                                    'par': 'axis_n',
+                                    'lab': "%d-fold axis" % n
+                                }, {
+                                    'type': 'vec3',
+                                    'par': 'axis_2',
+                                    'lab': "axis of halfturn"
+                                }
+                            ]
+                    }
+                )
+            D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
+            if n != 2:
+                D_nxI.subgroups.insert(-4, C(n))
+            if n % 2 == 0:
+                D_nxI.subgroups.insert(-4, D2C2)
+            # TODO: fix more subgroups depending on n:
+            DnxIMetas[n] = D_nxI
+        return DnxIMetas[n]
 
 D1xI = DxI(1)
 D2xI = DxI(2)
@@ -1035,30 +1075,35 @@ class D2nDn(Dn):
                 this.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create C2nCn classes:
+D2nDnMetas = {}
 def D2nD(n):
     assert n != 0
-    D_2n_D_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
-            {
-                'n'    : n,
-                'order': 4 * n,
-                'initPars': [
-                        {
-                            'type': 'vec3',
-                            'par': 'axis_n',
-                            'lab': "%d-fold axis" % n
-                        }, {
-                            'type': 'vec3',
-                            'par': 'axis_2',
-                            'lab': "axis of halfturn"
-                        }
-                    ]
-            }
-        )
-    D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
-    if n % 2 == 1 and n > 1:
-        D_2n_D_n.subgroups.insert(-2, D2C2)
-    # TODO: fix more subgroups depending on n, e.g.:
-    return D_2n_D_n
+    try:
+        return D2nDnMetas[n]
+    except KeyError:
+        D_2n_D_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
+                {
+                    'n'    : n,
+                    'order': 4 * n,
+                    'initPars': [
+                            {
+                                'type': 'vec3',
+                                'par': 'axis_n',
+                                'lab': "%d-fold axis" % n
+                            }, {
+                                'type': 'vec3',
+                                'par': 'axis_2',
+                                'lab': "axis of halfturn"
+                            }
+                        ]
+                }
+            )
+        D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
+        if n % 2 == 1 and n > 1:
+            D_2n_D_n.subgroups.insert(-2, D2C2)
+        # TODO: fix more subgroups depending on n, e.g.:
+        D2nDnMetas[n] = D_2n_D_n
+        return D2nDnMetas[n]
 
 D2D1 = D2nD(1)
 D4D2 = D2nD(2)

@@ -189,8 +189,7 @@ class CtrlWin(wx.Frame):
                 for i in range(len(colIsoms)-1, -1, -1):
                     #print 'isSubgroup', stabSym, colIsoms[i]
                     if stabSym.isSubgroup(colIsoms[i]):
-                        #print 'add True'
-                        #print 'break at index', i
+                        #print 'yes, break at index', i
                         break
                     else:
                         # remove this from the list, this is part of the work of
@@ -198,8 +197,10 @@ class CtrlWin(wx.Frame):
                         # since it costs time, and the user might not choose
                         # this colouring anyway (hence the break above). But to
                         # save time later, remove it already.
+                        #print 'no'
                         del colIsoms[i]
                 if colIsoms != []:
+                    #print 'add True'
                     this.posColStabSym.append(subSymGrp)
                     this.colIsomsList.append(colIsoms)
                     this.colIsomsFiltered.append(False)
