@@ -505,7 +505,7 @@ class Line2D(Line):
                 allowOddNrOfIntersections = True
         else:
             # check if all vertices are lying on one line:
-            allOnOneLine = True
+            allOnOneEdge = True
             for vdI in range(nrOfIntersectionsWithVertices - 1):
                 vertexIndexDelta = vertexIntersections[1][0] - vertexIntersections[0][0]
                 # e.g. a heptagon that is really a pentagon, since it happens
@@ -518,15 +518,23 @@ class Line2D(Line):
                         nrOfIntersectionsWithVertices - 1
                     )
                 ):
-                    allOnOneLine = False
-            if allOnOneLine:
+                    allOnOneEdge = False
+            if allOnOneEdge:
                 # see remark above for nrOfIntersectionsWithVertices == 2
                 allowOddNrOfIntersections = True
             else:
                 # more than 2: complex cases.
-                print 'vertexIntersections', vertexIntersections
-                assert False, 'ToDo'
+                print 'WARNING: intersections through more than 2 vertices', \
+                                                            '(not on one edge)'
+                print '         vertexIntersections', vertexIntersections
+                print '         pOnLineAtEdges', pOnLineAtEdges
+                print '         will draw one long line, instead of segments'
+                #assert False, 'ToDo'
                 # if an assert is not wanted, choose pass.
+                #allowOddNrOfIntersections = True
+                pOnLineAtEdges.sort()
+                pOnLineAtEdges = [pOnLineAtEdges[0], pOnLineAtEdges[-1]]
+                print '         using pOnLineAtEdges', pOnLineAtEdges
                 pass
         pOnLineAtEdges.sort()
 
