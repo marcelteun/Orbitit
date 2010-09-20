@@ -237,6 +237,8 @@ def readOffFile(fd, recreateEdges = True):
             statesRev[state], i
         )
     shape = SimpleShape(Vs, Fs, [], colors = (cols, fColors))
+    if name != '':
+        shape.name = name
     if recreateEdges:
         shape.recreateEdges()
     return shape
@@ -2544,6 +2546,9 @@ class IsometricShape(CompoundShape):
         #if this.unfoldOrbit:
         this.setFaceColorsPerIsometry(colors)
 
+    def getSymmetricFaceColors(this):
+        return this.shapeColors
+
     def setFaceColorsPerIsometry(this, colors):
         """
         Define the colours of the faces per isometry.
@@ -2774,6 +2779,7 @@ class SymmetricShape(IsometricShape):
     def __init__(this,
         Vs, Fs, Es = [], Ns = [],
         finalSym = isometry.E, stabSym = isometry.E,
+        colors = [],
         name = "SymmetricShape"
     ):
         """
@@ -2797,6 +2803,7 @@ class SymmetricShape(IsometricShape):
         Fs = [[0, 1, 2, 3]]
         finalSym = S4xI(setup = {'o4axis0': v(0, 0, 1), 'o4axis1': v(0, 1, 0)})
         stabSym = D4C4(setup = {'axis_n': v(1, 0, 0), 'normal_r': v(0, 1, 0)})
+        colors: the colours per isometry. (use [] for none)
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
@@ -2813,9 +2820,15 @@ class SymmetricShape(IsometricShape):
         print 'Applying an orbit of order %d' % len(FsOrbit)
         if this.dbgTrace:
             for isom in FsOrbit: print isom
-        IsometricShape.__init__(this, Vs, Fs, Es, Ns, directIsometries = FsOrbit)
+        IsometricShape.__init__(this,
+                Vs, Fs, Es, Ns,
+                directIsometries = FsOrbit,
+                name = name
+            )
         this.finalSym = finalSym
         this.stabSym = stabSym
+        if colors != []:
+            this.setSymmetricFaceColors(colors)
 
     def __repr__(this):
         s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
@@ -2834,11 +2847,18 @@ class SymmetricShape(IsometricShape):
             for v in this.baseShape.Ns:
                 s = '%s    %s,\n' % (s, repr(v))
             s = '%s  ],\n  ' % s
-        s = '%sfinalSym = %s,\n  stabSym = %s)' % (
+        s = '%sfinalSym = %s,\n  stabSym = %s,\n  ' % (
                 s,
                 repr(this.finalSym),
                 repr(this.stabSym)
             )
+        cols = this.getSymmetricFaceColors()
+        s = '%scolors = [\n  ' % (s)
+        for subShapeCols in cols:
+            s = '%s  %s,\n  ' % (s, repr(subShapeCols))
+        s = '%s],\n  ' % (s)
+        s = '%sname = "%s"\n' % (s, this.name)
+        s = '%s)\n' % (s)
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
         return s

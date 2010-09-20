@@ -52,6 +52,7 @@ class Shape(Geom3D.SimpleShape):
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
         this.shape = shape
+        this.name = shape.name
         this.canvas = canvas
         kwargs['title'] = Title
         wx.Frame.__init__(this, *args, **kwargs)
@@ -246,7 +247,7 @@ class CtrlWin(wx.Frame):
         finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
         stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
         this.shape = Geom3D.SymmetricShape(Vs, Fs,
-                finalSym = finalSym, stabSym = stabSym
+                finalSym = finalSym, stabSym = stabSym, name = this.name
             )
         this.FsOrbit = this.shape.getIsoOp()['direct']
         this.shape.recreateEdges()
@@ -412,6 +413,7 @@ class CtrlWin(wx.Frame):
             print 'read ', len(Vs), ' Vs and ', len(Fs), ' Fs.'
             this.showGui[this.__VsGuiIndex].set(Vs)
             this.showGui[this.__FsGuiIndex].set(Fs)
+            this.name = filename
         dlg.Destroy()
 
 class Scene(Geom3D.Scene):

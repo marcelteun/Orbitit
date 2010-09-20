@@ -397,7 +397,8 @@ class MainWindow(wx.Frame):
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
             # Create a compound shape to be able to add shapes later.
             newShape = Geom3D.CompoundShape(
-                    [Geom3D.readOffFile(fd, recreateEdges = True)]
+                    [Geom3D.readOffFile(fd, recreateEdges = True)],
+                    name = this.filename
                 )
             this.panel.setShape(newShape)
             this.setStatusStr("OFF file opened")
