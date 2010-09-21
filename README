@@ -1,0 +1,37 @@
+With this program you can interactively investigate some polyhedra. I use this
+program myself and I am willing to share it with other who are interested. I use
+Ubuntu, as a consequence some problems might exist with windows.
+
+Copyright (C) 2010 Marcel Tunnissen
+http://www.tunnissen.eu
+
+License: GNU Public License version 2
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program (gpl-2.0.txt); if not,
+check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+or write to the Free Software Foundation,
+Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+Requirements:
+-------------
+You will need:
+1. Python:  http://www.python.org
+2. Wxpython: http://www.wxpython.org
+3. pyOpenGL: http://pyopengl.sourceforge.net/
+
+Run:
+----
+cd to directory
+./Orbitit.py
+
