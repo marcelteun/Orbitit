@@ -391,8 +391,10 @@ class CtrlWin(wx.Frame):
         this.updatShapeColours()
 
     def onImport(this, e):
-        dlg = wx.FileDialog(this, 'New: Choose a file', '.', '',
-                'Python files (*.py)|*.py|OFF files (*.off)|*.*off', wx.OPEN)
+        wildcard = "OFF shape (*.off)|*.off|" \
+            "Python shape (*.py)|*.py|"
+        dlg = wx.FileDialog(this,
+            'New: Choose a file', '.', '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             importDirName  = dlg.GetDirectory()

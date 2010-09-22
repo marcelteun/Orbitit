@@ -162,7 +162,7 @@ import Scene_EqlHeptS4xI
 import Scene_EqlHeptA5xI
 import Scene_EqlHeptA5xI_GD
 import Scene_EqlHeptA5xI_GI
-import Scene_FldHeptA4xI
+#import Scene_FldHeptA4xI
 
 import Scene_5Cell
 import Scene_8Cell
@@ -182,7 +182,7 @@ SceneList = [
         {'lab': Scene_EqlHeptA5xI.Title,     'class': Scene_EqlHeptA5xI.Scene},
         {'lab': Scene_EqlHeptA5xI_GD.Title,  'class': Scene_EqlHeptA5xI_GD.Scene},
         {'lab': Scene_EqlHeptA5xI_GI.Title,  'class': Scene_EqlHeptA5xI_GI.Scene},
-        {'lab': Scene_FldHeptA4xI.Title,  'class': Scene_FldHeptA4xI.Scene},
+        #{'lab': Scene_FldHeptA4xI.Title,  'class': Scene_FldHeptA4xI.Scene},
         {'lab': Scene_5Cell.Title,  'class': Scene_5Cell.Scene},
         {'lab': Scene_8Cell.Title,  'class': Scene_8Cell.Scene},
         {'lab': Scene_24Cell.Title,  'class': Scene_24Cell.Scene},
@@ -388,19 +388,29 @@ class MainWindow(wx.Frame):
         return menu
 
     def onOpen(this, e):
-        dlg = wx.FileDialog(this, 'New: Choose a file', this.importDirName, '', '*.*off', wx.OPEN)
+        wildcard = "OFF shape (*.off)|*.off|" \
+            "Python shape (*.py)|*.py|"
+        dlg = wx.FileDialog(this,
+            'New: Choose a file', this.importDirName, '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             this.closeCurrentScene()
             this.filename = dlg.GetFilename()
+            isOffModel = this.filename[-3:] == 'off'
+            print "isOffModel", isOffModel
             this.importDirName  = dlg.GetDirectory()
             print "opening file:", this.filename
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
             # Create a compound shape to be able to add shapes later.
-            newShape = Geom3D.CompoundShape(
-                    [Geom3D.readOffFile(fd, recreateEdges = True)],
-                    name = this.filename
+            if isOffModel:
+                shape = Geom3D.readOffFile(fd, recreateEdges = True)
+            else:
+                shape = Geom3D.readPyFile(fd)
+            if isinstance(shape, Geom3D.CompoundShape):
+                this.panel.setShape(shape)
+            else:
+                this.panel.setShape(
+                    Geom3D.CompoundShape([shape], name = this.filename)
                 )
-            this.panel.setShape(newShape)
             this.setStatusStr("OFF file opened")
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
