@@ -2672,7 +2672,7 @@ class IsometricShape(CompoundShape):
                 this.baseShape.setFaceProperties(Fs = dict['Fs'])
                 this.orbitNeeded = True
             if 'colors' in dict and dict['colors'] != None:
-                this.setFaceColorsPerIsometry([dict['colors']])
+                this.setSymmetricFaceColors([dict['colors']])
                 # take care of by the function above:
                 # this.orbitNeeded = True
             if 'drawFaces' in dict and dict['drawFaces'] != None:
