@@ -159,7 +159,7 @@ import Scene_EqlHeptS4xI
 import Scene_EqlHeptA5xI
 import Scene_EqlHeptA5xI_GD
 import Scene_EqlHeptA5xI_GI
-#import Scene_FldHeptA4xI
+import Scene_FldHeptA4xI
 
 import Scene_5Cell
 import Scene_8Cell
@@ -176,7 +176,7 @@ SceneList = [
         {'lab': Scene_EqlHeptA5xI.Title,     'class': Scene_EqlHeptA5xI.Scene},
         {'lab': Scene_EqlHeptA5xI_GD.Title,  'class': Scene_EqlHeptA5xI_GD.Scene},
         {'lab': Scene_EqlHeptA5xI_GI.Title,  'class': Scene_EqlHeptA5xI_GI.Scene},
-        #{'lab': Scene_FldHeptA4xI.Title,  'class': Scene_FldHeptA4xI.Scene},
+        {'lab': Scene_FldHeptA4xI.Title,  'class': Scene_FldHeptA4xI.Scene},
         {'lab': Scene_5Cell.Title,  'class': Scene_5Cell.Scene},
         {'lab': Scene_8Cell.Title,  'class': Scene_8Cell.Scene},
         {'lab': Scene_24Cell.Title,  'class': Scene_24Cell.Scene},
