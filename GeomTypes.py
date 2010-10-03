@@ -774,15 +774,19 @@ class Transform3(tuple):
         return (t.angleRotInv() - hTurn)
 
 class Rot3(Transform3):
-    def __new__(this, qLeft = None, axis = Vec3([1, 0, 0]), angle = 0):
+    def __new__(this, q = None, axis = Vec3([1, 0, 0]), angle = 0):
         """
         Initialise a 3D rotation
         """
-        if isinstance(qLeft, Quat):
-            try: qLeft = qLeft.normalise()
+        if isQuatPair(q):
+            t = Transform3.__new__(this, q)
+            assert t.isRot(), "%s doesn't represent a rotation" % str(q)
+            return t
+        elif isinstance(q, Quat):
+            try: q = q.normalise()
             except ZeroDivisionError: pass # will fail on assert below:
-            t = Transform3.__new__(this, [qLeft, qLeft.conjugate()])
-            assert t.isRot(), "%s doesn't represent a rotation" % str(qLeft)
+            t = Transform3.__new__(this, [q, q.conjugate()])
+            assert t.isRot(), "%s doesn't represent a rotation" % str(q)
             return t
         else:
             # q = cos(angle) + y sin(angle)
