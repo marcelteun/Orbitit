@@ -2434,6 +2434,7 @@ class IsometricShape(CompoundShape):
                      simple shape for each glDraw (if not yet done) instead of
                      using glPushMatrix-glMultMatrix-glPopMatrix. This option is
                      provided for legacy scenes.
+        name: a string identifier representing the model.
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
@@ -2456,6 +2457,46 @@ class IsometricShape(CompoundShape):
         this.setSymmetricFaceColors(colors)
         this.orbitNeeded = True
         if unfoldOrbit: this.orbit()
+
+    def __repr__(this):
+        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+        s = 'IsometricShape(\n  '
+        s = '%sVs = [\n' % (s)
+        for v in this.baseShape.Vs:
+            s = '%s    %s,\n' % (s, repr(v))
+        s = '%s  ],\n  ' % s
+        s = '%sFs = [\n' % (s)
+        for f in this.baseShape.Fs:
+            s = '%s    %s,\n' % (s, repr(f))
+        s = '%s  ],\n  ' % s
+        if this.baseShape.Es != []:
+            s = '%sEs = %s,\n  ' % (s, repr(this.baseShape.Es))
+        if this.baseShape.Ns != []:
+            s = '%sNs = [\n' % (s)
+            for v in this.baseShape.Ns:
+                s = '%s    %s,\n' % (s, repr(v))
+            s = '%s  ],\n  ' % s
+        cols = this.getSymmetricFaceColors()
+        s = '%scolors = [\n  ' % (s)
+        for subShapeCols in cols:
+            s = '%s  %s,\n  ' % (s, repr(subShapeCols))
+        s = '%s],\n  ' % (s)
+        if this.isometryOperations['direct'] != None:
+            s = '%sdirectIsometries = [\n  ' % (s)
+            for isom in this.isometryOperations['direct']:
+                s = '%s  %s,\n  ' % (s, repr(isom))
+            s = '%s],\n  ' % (s)
+        if this.isometryOperations['opposite'] != None:
+            s = '%soppositeIsometry = [\n  ' % (s)
+            for isom in this.isometryOperations['opposite']:
+                s = '%s  %s,\n  ' % (s, repr(isom))
+            s = '%s],\n  ' % (s)
+        s = '%sunfoldOrbit = %s,\n  ' % (s, this.unfoldOrbit)
+        s = '%sname = "%s"\n' % (s, this.name)
+        s = '%s)\n' % (s)
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
 
     def setIsoOp(this,
         directIsometries, oppositeIsometry = None
@@ -2830,7 +2871,12 @@ class SymmetricShape(IsometricShape):
         if colors != []:
             this.setSymmetricFaceColors(colors)
 
-    def __repr__(this):
+    def __fix_repr__(this):
+        # This repr should be fixed, since you cannot be sure in which order the
+        # isometry operation will be printed (there is no ordering in a Set.
+        # This requires a more user friendly class interface for the user:
+        # provide an array of colours and a symmetry (and index) on which the
+        # colouring is based. For now fall back on the parental repr.
         s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
         s = '%sVs = [\n' % (s)
         for v in this.baseShape.Vs:
