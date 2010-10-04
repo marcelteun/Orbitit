@@ -233,7 +233,7 @@ class LabeledIntInput(wx.StaticBoxSizer):
     def __init__(this,
         panel,
         label = '',
-        init = "0",
+        init = 0,
         width = -1,
         orientation = wx.HORIZONTAL,
     ):
@@ -255,8 +255,13 @@ class LabeledIntInput(wx.StaticBoxSizer):
             )
         )
         this.Add(this.Boxes[-1], 1, wx.EXPAND)
+        if not isinstance(init, int):
+            print '%s warning: initialiser not an int (%s)' % (
+                    this.__class__, str(init)
+                )
+            init = 0
         this.Boxes.append(IntInput(
-                panel, wx.ID_ANY, init, size = (width, -1)
+                panel, wx.ID_ANY, str(init), size = (width, -1)
             ))
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
@@ -275,6 +280,7 @@ class Vector3DInput(wx.StaticBoxSizer):
     def __init__(this,
         panel,
         label = '',
+        v = None,
         orientation = wx.HORIZONTAL,
     ):
         """
@@ -303,6 +309,8 @@ class Vector3DInput(wx.StaticBoxSizer):
         for i in range(3):
             this.__v.append(FloatInput(this.panel, wx.ID_ANY, "0"))
             this.Add(this.__v[-1], 0, wx.EXPAND)
+        if v != None:
+            this.SetVertex(v)
 
     def GetVertex(this):
         return GeomTypes.Vec3([
@@ -310,6 +318,17 @@ class Vector3DInput(wx.StaticBoxSizer):
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
             ])
+
+    def SetVertex(this, v):
+        for i in v:
+            if not (isinstance(i, float) or isinstance(i, int)):
+                print '%s warning: v[%d] not a float (%s)' % (
+                        this.__class__, v.index(i), str(i)
+                    )
+                return
+        this.__v[0].SetValue(str(v[0]))
+        this.__v[1].SetValue(str(v[1]))
+        this.__v[2].SetValue(str(v[2]))
 
     def Destroy(this):
         for ctrl in this.__v: ctrl.Destroy()
@@ -965,9 +984,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
         for init in sym.initPars:
             inputType = init['type']
             if inputType == 'vec3':
-                gui = Vector3DInput(this.panel, init['lab'])
+                gui = Vector3DInput(this.panel, init['lab'],
+                        v = sym.defaultSetup[init['par']]
+                    )
             elif inputType == 'int':
-                gui = LabeledIntInput(this.panel, init['lab'])
+                gui = LabeledIntInput(this.panel, init['lab'],
+                        init = sym.defaultSetup[init['par']]
+                    )
             else:
                 assert False, "oops unimplemented input type"
             this.oriGuis.append(gui)

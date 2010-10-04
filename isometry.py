@@ -311,6 +311,7 @@ class Cn(Set):
         {'type': 'int', 'par': 'n',    'lab': "order"},
         {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
     ]
+    defaultSetup = {'n': 2, 'axis': Z[:]}
     order = 0
     n = 0
     def __init__(this, isometries = None, setup = {}):
@@ -330,11 +331,11 @@ class Cn(Set):
             this.checkSetup(setup)
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
-            else:              axis = Z[:]
+            else:              axis = this.defaultSetup['axis'][:]
             if this.n != 0   : n = this.n
             else:
                 if 'n' in keys: n = setup['n']
-                else:           n = 2
+                else:           n = this.defaultSetup['n']
                 if n == 0: n = 1
                 this.n = n
 
@@ -385,7 +386,8 @@ def C(n):
                                 'type': 'vec3',
                                 'par': 'axis',
                                 'lab': "%d-fold axis" % n
-                            }]
+                            }],
+                        'defaultSetup': {'axis': Cn.defaultSetup['axis']}
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -474,7 +476,8 @@ def C2nC(n):
                             'type': 'vec3',
                             'par': 'axis',
                             'lab': "%d-fold axis" % n
-                        }]
+                        }],
+                    'defaultSetup': {'axis': C2nCn.defaultSetup['axis']}
                 }
             )
         C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
@@ -575,7 +578,8 @@ def CxI(n):
                                 'type': 'vec3',
                                 'par': 'axis',
                                 'lab': "%d-fold axis" % n
-                            }]
+                            }],
+                        'defaultSetup': {'axis': CnxI.defaultSetup['axis']}
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -603,6 +607,8 @@ class DnCn(Cn):
         {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
         {'type': 'vec3', 'par': 'normal_r', 'lab': "normal of reflection"}
     ]
+    defaultSetup = {'n': 2, 'axis_n': Z[:], 'normal_r': X[:]}
+
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group DnCn, consisting of n rotations and of n rotary
@@ -624,19 +630,21 @@ class DnCn(Cn):
             if 'n' not in setup:
                 if this.n != 0:
                     s['n'] = this.n
+                else:
+                    s['n'] = this.defaultSetup['n']
             else:
                 s['n'] = setup['n']
             if 'axis_n' in setup:
                 s['axis'] = setup['axis_n']
+            else:
+                s['axis'] = this.defaultSetup['axis_n'][:]
             cn = Cn(setup = s)
-            this.n = cn.n
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
-            try:
-                s['axis_n'] = s['axis']
-                del s['axis']
-            except KeyError:
-                pass
+            else:
+                s['axis_2'] = this.defaultSetup['normal_r'][:]
+            s['axis_n'] = s['axis']
+            del s['axis']
             dn = Dn(setup = s)
             Set.__init__(this, cn | ((dn-cn) * GeomTypes.I))
             this.n = s['n']
@@ -692,7 +700,11 @@ def DnC(n):
                                 'type': 'vec3',
                                 'par': 'normal_r',
                                 'lab': "normal of reflection"
-                            }]
+                            }],
+                        'defaultSetup': {
+                                'axis_n': DnCn.defaultSetup['axis_n'],
+                                'normal_r': DnCn.defaultSetup['normal_r']
+                            }
                     }
                 )
             D_n_C_n.subgroups = [D_n_C_n, C(n), C2C1, E]
@@ -716,6 +728,7 @@ class Dn(Set):
         {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
         {'type': 'vec3', 'par': 'axis_2', 'lab': "axis of halfturn"}
     ]
+    defaultSetup = {'n': 2, 'axis_n': Z[:], 'axis_2': X[:]}
     order = 0
     n = 0
     def __init__(this, isometries = None, setup = {}):
@@ -736,9 +749,9 @@ class Dn(Set):
             this.checkSetup(setup)
             keys = setup.keys()
             if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = Z[:]
+            else:                axis_n = this.defaultSetup['axis_n'][:]
             if 'axis_2' in keys: axis_2 = setup['axis_2']
-            else:                axis_2 = X[:]
+            else:                axis_2 = this.defaultSetup['axis_2'][:]
             if this.n != 0     : n = this.n
             else:
                 if 'n' in keys: n = setup['n']
@@ -811,7 +824,11 @@ def D(n):
                                     'par': 'axis_2',
                                     'lab': "axis of halfturn"
                                 }
-                            ]
+                            ],
+                        'defaultSetup': {
+                                'axis_n': Dn.defaultSetup['axis_n'],
+                                'axis_2': Dn.defaultSetup['axis_2']
+                            }
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -957,7 +974,11 @@ def DxI(n):
                                     'par': 'axis_2',
                                     'lab': "axis of halfturn"
                                 }
-                            ]
+                            ],
+                        'defaultSetup': {
+                                'axis_n': DnxI.defaultSetup['axis_n'],
+                                'normal_r': DnxI.defaultSetup['axis_2']
+                            }
                     }
                 )
             D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
@@ -1095,7 +1116,11 @@ def D2nD(n):
                                 'par': 'axis_2',
                                 'lab': "axis of halfturn"
                             }
-                        ]
+                        ],
+                    'defaultSetup': {
+                            'axis_n': D2nDn.defaultSetup['axis_n'],
+                            'normal_r': D2nDn.defaultSetup['axis_2']
+                        }
                 }
             )
         D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
@@ -1115,6 +1140,7 @@ class A4(Set):
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
         {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
     ]
+    defaultSetup = {'o2axis0': X[:], 'o2axis1': Y[:]}
     order = 12
     def __init__(this, isometries = None, setup = {}):
         """
@@ -1142,9 +1168,9 @@ class A4(Set):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = X[:]
+            else:                 o2axis0 = this.defaultSetup['o2axis0'][:]
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = Y[:]
+            else:                 o2axis1 = this.defaultSetup['o2axis1'][:]
             d2 = generateD2(o2axis0, o2axis1)
             H0, H1, H2 = d2
             R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
@@ -1189,10 +1215,6 @@ A4.subgroups = [A4,
     ]
 
 class S4A4(A4):
-    initPars = [
-        {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
-        {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
-    ]
     order = 24
 
     def __init__(this, isometries = None, setup = {}):
@@ -1224,9 +1246,9 @@ class S4A4(A4):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = X[:]
+            else:                 o2axis0 = this.defaultSetup['o2axis0'][:]
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = Y[:]
+            else:                 o2axis0 = this.defaultSetup['o2axis1'][:]
             d2 = generateD2(o2axis0, o2axis1)
             h0, h1, h2 = d2
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
@@ -1428,6 +1450,7 @@ class S4(Set):
         {'type': 'vec3', 'par': 'o4axis0', 'lab': "4-fold axis"},
         {'type': 'vec3', 'par': 'o4axis1', 'lab': "orthogonal 4-fold axis"}
     ]
+    defaultSetup = {'o4axis0': X[:], 'o4axis1': Y[:]}
     order = 24
     def __init__(this, isometries = None, setup = {}):
         """
@@ -1451,9 +1474,9 @@ class S4(Set):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o4axis0' in axes: o4axis0 = setup['o4axis0']
-            else:                 o4axis0 = X[:]
+            else:                 o4axis0 = this.defaultSetup['o4axis0'][:]
             if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
-            else:                 o4axis1 = Y[:]
+            else:                 o4axis1 = this.defaultSetup['o4axis1'][:]
             d2 = generateD2(o4axis0, o4axis1)
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
             q0_2, q1_2, q2_2 = d2
@@ -1809,6 +1832,10 @@ class A5(Set):
         {'type': 'vec3', 'par': 'o3axis', 'lab': "3-fold axis"},
         {'type': 'vec3', 'par': 'o5axis', 'lab': "5-fold axis (nearest)"}
     ]
+    defaultSetup = {
+        'o3axis': GeomTypes.Vec3([(1+2*tau)/3, 0, tau/3]),
+        'o5axis': GeomTypes.Vec3([tau, 1, 0])
+    }
     order = 60
     def __init__(this, isometries = None, setup = {}):
         """
@@ -1832,9 +1859,9 @@ class A5(Set):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o3axis' in axes: o3axis = setup['o3axis']
-            else: o3axis = GeomTypes.Vec3([(1+2*tau)/3, 0, tau/3])
+            else: o3axis = this.defaultSetup['o3axis'][:]
             if 'o5axis' in axes: o5axis = setup['o5axis']
-            else: o5axis = GeomTypes.Vec3([tau, 1, 0])
+            else: o5axis = this.defaultSetup['o5axis'][:]
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
