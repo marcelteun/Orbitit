@@ -977,7 +977,7 @@ def DxI(n):
                             ],
                         'defaultSetup': {
                                 'axis_n': DnxI.defaultSetup['axis_n'],
-                                'normal_r': DnxI.defaultSetup['axis_2']
+                                'axis_2': DnxI.defaultSetup['axis_2']
                             }
                     }
                 )
