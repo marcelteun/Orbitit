@@ -34,6 +34,7 @@ import Geom4D
 import GeomGui
 import Scenes3D
 import isometry
+import orbit
 from OpenGL.GL import *
 
 Title = 'Create Polyhedron by Orbiting'
@@ -154,71 +155,18 @@ class CtrlWin(wx.Frame):
             this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
             this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.VERTICAL)
             this.ctrlSizer.Add(this.colSizer, 0, wx.EXPAND)
-        finalSymClass = this.showGui[this.__FinalSymGuiIndex].getSymmetryClass(
-                applyOrder = True
-            )
-        stabSymClass = this.showGui[this.__StabSymGuiIndex].getSymmetryClass(
-                applyOrder = True
-            )
-        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
-        stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
-        this.colIsomsList     = []
-        this.colIsomsFiltered = []
-        this.posColStabSym    = []
-        this.nrOfCols         = []
-        nrOfColsChoiceList    = []
+        this.orbit = orbit.Orbit((
+            this.showGui[this.__FinalSymGuiIndex].GetSelected(),
+            this.showGui[this.__StabSymGuiIndex].GetSelected()
+        ))
         #print 'addColourGui check sub-groups'
-        for subSymGrp in finalSymClass.subgroups:
-            #print 'subSymGrp', subSymGrp
-            #print '...contains stabSymClass', stabSymClass, '...??..',
-            if stabSymClass in subSymGrp.subgroups:
-                #print 'yes'
-
-                # Check if the stabiliser can really be a subgroup for this
-                # orientation.
-                # E.g.
-                # final symmetry S4xI
-                # stabiliser: D2C2 with principle axis: one 2-fold from S4xI
-                #                                       (ie not a 4-fold axis)
-                # Now A4xI is a subgroup of S4xI
-                # and D2C2 is a subgroup of A4xI,
-                # However the D2C2 that is a subgroup of the A4xI subgroup of
-                # S4xI has a principle axis that is a 4-fold axis of S4xI.
-
-                colIsoms = finalSym.realiseSubgroups(subSymGrp)
-                #print 'check list of len:', len(colIsoms)
-                for i in range(len(colIsoms)-1, -1, -1):
-                    #print 'isSubgroup', stabSym, colIsoms[i]
-                    if stabSym.isSubgroup(colIsoms[i]):
-                        #print 'yes, break at index', i
-                        break
-                    else:
-                        # remove this from the list, this is part of the work of
-                        # filtering the list. This is not done completely here
-                        # since it costs time, and the user might not choose
-                        # this colouring anyway (hence the break above). But to
-                        # save time later, remove it already.
-                        #print 'no'
-                        del colIsoms[i]
-                if colIsoms != []:
-                    #print 'add True'
-                    this.posColStabSym.append(subSymGrp)
-                    this.colIsomsList.append(colIsoms)
-                    this.colIsomsFiltered.append(False)
-                    #print 'addColourGui, finalSymClass', finalSymClass
-                    fo = isometry.order(finalSymClass)
-                    assert fo != 0
-                    po = isometry.order(subSymGrp)
-                    assert po != 0
-                    q = fo / po
-                    this.nrOfCols.append(q)
-                    nrOfColsChoiceList.append(
-                        '%d (based on %s)' % (q, subSymGrp.__name__)
-                    )
-                #else:
-                #    print 'add False'
-            #else:
-            #    print 'no'
+        fo = this.orbit.final.order
+        nrOfColsChoiceList = [
+            '%d (based on %s)' % (
+                fo / HigherOrderStabClass.order, HigherOrderStabClass.__name__
+            )
+            for HigherOrderStabClass in this.orbit.higherOrderStabiliserClasses
+        ]
         this.colGuis = []
         this.colGuis.append(
             wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
@@ -281,11 +229,11 @@ class CtrlWin(wx.Frame):
             this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
 
         colDivNr = e.GetSelection()
-        colSym = this.posColStabSym[colDivNr]
-        this.colIsoms = this.colIsomsList[colDivNr]
-        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
+        this.colIsoms = this.orbit.higherOrderStabiliser(colDivNr)
         assert len(this.colIsoms) != 0
-        nrOfCols = this.nrOfCols[colDivNr]
+        this.colAlternative = 0
+        nrOfCols = (
+            this.orbit.final.order / this.colIsoms[this.colAlternative].order)
         this.selColGuis = []
         initColour = (255, 255, 255)
         maxColPerRow = 12
@@ -304,26 +252,6 @@ class CtrlWin(wx.Frame):
             )
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
-        this.colAlternative = 0
-        if not (this.colIsomsFiltered[colDivNr]):
-            # Now filter out the stabilisers that are not a subgroup for this
-            # orientation.
-            # (part of this is done in addColourGui)
-            # E.g.
-            # final symmetry S4xI
-            # stabiliser: D2C2 with principle axis: one 2-fold from S4xI
-            #                                       (ie not a 4-fold axis)
-            # Now D4xI is a subgroup of S4xI
-            # and D2C2 is a subgroup of D4xI,
-            # but not necessarily this orientation. In fact only one of the
-            # three possible D4xI will have this D2C2 as subgroup.
-            stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
-            for i in range(len(this.colIsoms)-1, -1, -1):
-                if not stabSym.isSubgroup(this.colIsoms[i]):
-                    del this.colIsoms[i]
-            assert len(this.colIsoms) != 0, (
-                "This case should have be taken care of in addColourGui")
-
         this.updatShapeColours()
         this.panel.Layout()
 
@@ -391,8 +319,8 @@ class CtrlWin(wx.Frame):
         this.updatShapeColours()
 
     def onImport(this, e):
-        wildcard = "OFF shape (*.off)|*.off|" \
-            "Python shape (*.py)|*.py|"
+        wildcard = "OFF shape (*.py)|*.py|" \
+            "Python shape (*.off)|*.off|"
         dlg = wx.FileDialog(this,
             'New: Choose a file', '.', '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
@@ -409,7 +337,7 @@ class CtrlWin(wx.Frame):
                 Vs = shape.baseShape.Vs
                 Fs = shape.baseShape.Fs
             else:
-                print 'no isometry'
+                #print 'no isometry'
                 Vs = shape.Vs
                 Fs = shape.Fs
             print 'read ', len(Vs), ' Vs and ', len(Fs), ' Fs.'

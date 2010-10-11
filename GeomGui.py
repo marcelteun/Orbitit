@@ -900,6 +900,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         #print 'getSymmetryClass'
         Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
         selClass = this.groupsList[Id]
+        #print 'getSymmetryClass: nr:', Id, 'class:', selClass.__name__, selClass
         if applyOrder:
             if selClass in [
                 isometry.Cn,
