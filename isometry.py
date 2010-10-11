@@ -34,6 +34,7 @@ class Set(set):
     debug = False
 
     def __init__(this, *args):
+        this.generator = []
         set.__init__(this, *args)
 
     def __repr__(this):
@@ -44,6 +45,27 @@ class Set(set):
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
         return s
+
+    def __str__(this):
+        if this.generator != []:
+            this.short_string = True
+            if this.short_string:
+                s = '%s(setup = {\n' % this.__class__.__name__
+                for key, value in this.generator.iteritems():
+                    s =  '%s    %s: %s\n' % (s, key, value)
+                s = '%s})' % s
+                if __name__ != '__main__':
+                    s = '%s.%s' % (__name__, s)
+            else:
+                s = '%s([\n' % (this.__class__.__name__)
+                for e in this:
+                    s = '%s  %s,\n' % (s, str(e))
+                s = '%s])' % s
+                if __name__ != '__main__':
+                    s = '%s.%s' % (__name__, s)
+            return s
+        else:
+            return this.__repr__()
 
     def __eq__(this, o):
         if this.debug: print this.__class__.__name__, '__eq__'
@@ -112,11 +134,16 @@ class Set(set):
         """returns whether this is a subgroup of o)"""
         if this.debug: print this.__class__.__name__, 'isSubgroup'
         if len(this) > len(o): return False # optimisation
+        if this.debug:
+            print '(not checkGroup or this.isGroup()', (
+                    not checkGroup, this.isGroup())
+            print ' and this.issubset(o)', this.issubset(o)
         return (
                 (not checkGroup) or this.isGroup()
             ) and this.issubset(o)
 
     def subgroup(this, o):
+        #this.debug = True
         if this.debug: print this.__class__.__name__, 'subgroup'
         try:
             if isinstance(o, GeomTypes.Transform3):
@@ -201,14 +228,6 @@ class Set(set):
         if this.debug: print this.__class__.__name__, 'getOne'
         for e in this: return e
 
-    def __str__(this):
-        s = '%s = {' % this.__class__.__name__
-        for d in this:
-            s = '%s\n  %s,' % (s, str(d))
-        s = '%s\n}' % s
-        # TODO if there is an opposite isometry...
-        return s
-
     def group(this, maxIter = 50):
         """
         Tries to make a group out of the set of isometries
@@ -260,6 +279,7 @@ class Set(set):
             if not found:
                 print "Warning: unknown setup parameter %s for class %s" % (
                         k, this.__class__.__name__)
+        this.generator = setup
 
 
 def setup(**kwargs): return kwargs
@@ -1823,18 +1843,14 @@ def generateA4O3(D2HalfTurns):
     # print 'R5_2_3', R4_2_3
     return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
 
-V5 = math.sqrt(5)
-tau  = (1.0 + V5)/2
-tau2 = tau + 1.0
-
 class A5(Set):
     initPars = [
         {'type': 'vec3', 'par': 'o3axis', 'lab': "3-fold axis"},
         {'type': 'vec3', 'par': 'o5axis', 'lab': "5-fold axis (nearest)"}
     ]
     defaultSetup = {
-        'o3axis': GeomTypes.Vec3([(1+2*tau)/3, 0, tau/3]),
-        'o5axis': GeomTypes.Vec3([tau, 1, 0])
+        'o3axis': GeomTypes.Vec3([1, 1, 1]),
+        'o5axis': GeomTypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
     }
     order = 60
     def __init__(this, isometries = None, setup = {}):
