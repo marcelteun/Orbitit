@@ -53,25 +53,31 @@ class Set(set):
         return s
 
     def __str__(this):
-        if this.generator != []:
-            this.short_string = True
-            if this.short_string:
-                s = '%s(setup = {\n' % this.__class__.__name__
-                for key, value in this.generator.iteritems():
-                    s =  '%s    %s: %s\n' % (s, key, value)
-                s = '%s})' % s
-                if __name__ != '__main__':
-                    s = '%s.%s' % (__name__, s)
-            else:
-                s = '%s([\n' % (this.__class__.__name__)
-                for e in this:
-                    s = '%s  %s,\n' % (s, str(e))
-                s = '%s])' % s
-                if __name__ != '__main__':
-                    s = '%s.%s' % (__name__, s)
+        def to_s():
+            s = '%s([\n' % (this.__class__.__name__)
+            for e in this:
+                s = '%s  %s,\n' % (s, str(e))
+            s = '%s])' % s
+            if __name__ != '__main__':
+                s = '%s.%s' % (__name__, s)
             return s
-        else:
-            return this.__repr__()
+        try:
+            if this.generator != []:
+                this.short_string = True
+                if this.short_string:
+                    s = '%s(setup = {\n' % this.__class__.__name__
+                    for key, value in this.generator.iteritems():
+                        s =  "%s    '%s': %s\n" % (s, key, value)
+                    s = '%s})' % s
+                    if __name__ != '__main__':
+                        s = '%s.%s' % (__name__, s)
+                else:
+                    s = to_s()
+            else:
+                s = to_s()
+        except AttributeError:
+            s = to_s()
+        return s
 
     def __eq__(this, o):
         if this.debug: print this.__class__.__name__, '__eq__'
@@ -114,6 +120,19 @@ class Set(set):
         # Note rotation Set * Set is caught by __mul__
         # rotation Rot * Set
         return Set([o * e for e in this])
+
+    def __le__(this, o):
+        return this.issubset(o)
+
+    def issubset(this, o):
+        if len(this) < len(o):
+            a, b = this, o
+        else:
+            a, b = o, this
+        for e in a:
+            if not e in b:
+                return False
+        return True
 
     def isGroup(this):
         if this.debug: print this.__class__.__name__, 'isGroup'

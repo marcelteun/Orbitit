@@ -117,7 +117,7 @@ class Orbit(list):
                     v.indexCovered[index] = True
                     #print 'subOrbitsLengths, finalSymClass', v.final.__class__
                 #else:
-                #    print 'filetered out subgroup', subgroup
+                #    print 'filetered out subgroup', subGroup
                 #    print 'add False'
             #else:
             #    print 'no'
