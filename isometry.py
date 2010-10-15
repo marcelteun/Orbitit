@@ -32,9 +32,15 @@ class ImproperSubgroupError(ValueError):
 class Set(set):
 
     debug = False
+    mixed = False # if True the isometry set consists of direct and indirect
+                  # isometries else it consists of direct isometries only if it
+                  # is a group.
 
     def __init__(this, *args):
-        this.generator = []
+        try:
+            this.generator
+        except AttributeError:
+            this.generator = {}
         set.__init__(this, *args)
 
     def __repr__(this):
@@ -287,6 +293,7 @@ def setup(**kwargs): return kwargs
 class E(Set):
     initPars = []
     order = 1
+    mixed = False
     def __init__(this, isometries = None, setup = {}):
             this.checkSetup(setup)
             Set.__init__(this, [GeomTypes.E])
@@ -304,6 +311,9 @@ C1 = E
 class ExI(Set):
     initPars = []
     order = 2
+    mixed = True
+    directParent = E
+    directParentSetup = {}
     def __init__(this, isometries = None, setup = {}):
             this.checkSetup(setup)
             Set.__init__(this, [GeomTypes.E, GeomTypes.I])
@@ -402,6 +412,7 @@ def C(n):
                     {
                         'n'    : n,
                         'order': n,
+                        'mixed': False,
                         'initPars': [{
                                 'type': 'vec3',
                                 'par': 'axis',
@@ -444,9 +455,13 @@ class C2nCn(Cn):
         else:
             this.checkSetup(setup)
             s = copy(setup)
+            # TODO remove dependency on n, make this class C2nCn internal, use
+            # only C2nC(n) and rename this to an __
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
+            # TODO use direct parent here... (no dep on n)
             cn = Cn(setup = s)
+            this.directParentSetup = copy(s)
             this.n = cn.n
             s['n'] = 2 * s['n']
             c2n = Cn(setup = s)
@@ -492,6 +507,8 @@ def C2nC(n):
                 {
                     'n'    : n,
                     'order': 2 * n,
+                    'mixed': True,
+                    'directParent': C(n),
                     'initPars': [{
                             'type': 'vec3',
                             'par': 'axis',
@@ -544,6 +561,7 @@ class CnxI(Cn):
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
             cn = Cn(setup = s)
+            this.directParentSetup = copy(s)
             this.n = cn.n
             Set.__init__(this, cn * ExI())
             this.rotAxes = {'n': cn.rotAxes['n']}
@@ -594,6 +612,8 @@ def CxI(n):
                     {
                         'n'    : n,
                         'order': 2 * n,
+                        'mixed': True,
+                        'directParent': C(n),
                         'initPars': [{
                                 'type': 'vec3',
                                 'par': 'axis',
@@ -659,6 +679,7 @@ class DnCn(Cn):
             else:
                 s['axis'] = this.defaultSetup['axis_n'][:]
             cn = Cn(setup = s)
+            this.directParentSetup = copy(s)
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
             else:
@@ -712,6 +733,8 @@ def DnC(n):
                     {
                         'n'    : n,
                         'order': 2 * n,
+                        'mixed': True,
+                        'directParent': C(n),
                         'initPars': [{
                                 'type': 'vec3',
                                 'par': 'axis_n',
@@ -834,6 +857,7 @@ def D(n):
                     {
                         'n'    : n,
                         'order': 2 * n,
+                        'mixed': False,
                         'initPars': [
                                 {
                                     'type': 'vec3',
@@ -894,6 +918,7 @@ class DnxI(Dn):
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
             dn = Dn(setup = s)
+            this.directParentSetup = copy(s)
             Set.__init__(this, dn * ExI())
             this.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
             this.n     = dn.n
@@ -984,6 +1009,8 @@ def DxI(n):
                     {
                         'n'    : n,
                         'order': 4 * n,
+                        'mixed': True,
+                        'directParent': D(n),
                         'initPars': [
                                 {
                                     'type': 'vec3',
@@ -1050,6 +1077,7 @@ class D2nDn(Dn):
             this.n = dn.n
             s['n'] = 2 * s['n']
             d2n = Dn(setup = s)
+            this.directParentSetup = copy(s)
             Set.__init__(this, dn | ((d2n-dn) * GeomTypes.I))
             this.rotAxes = dn.rotAxes
             this.reflNormals = []
@@ -1126,6 +1154,8 @@ def D2nD(n):
                 {
                     'n'    : n,
                     'order': 4 * n,
+                    'mixed': True,
+                    'directParent': D(n),
                     'initPars': [
                             {
                                 'type': 'vec3',
@@ -1162,6 +1192,7 @@ class A4(Set):
     ]
     defaultSetup = {'o2axis0': X[:], 'o2axis1': Y[:]}
     order = 12
+    mixed = False
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 12 rotations
@@ -1236,7 +1267,8 @@ A4.subgroups = [A4,
 
 class S4A4(A4):
     order = 24
-
+    mixed = True
+    directParent = A4
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 24 isometries, 12 direct, 12
@@ -1268,7 +1300,8 @@ class S4A4(A4):
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
             else:                 o2axis0 = this.defaultSetup['o2axis0'][:]
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis0 = this.defaultSetup['o2axis1'][:]
+            else:                 o2axis1 = this.defaultSetup['o2axis1'][:]
+            this.directParentSetup = copy(setup)
             d2 = generateD2(o2axis0, o2axis1)
             h0, h1, h2 = d2
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
@@ -1364,6 +1397,8 @@ S4A4.subgroups = [S4A4,
 
 class A4xI(A4):
     order = 24
+    mixed = True
+    directParent = A4
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A4xI, consisting of 12 rotations and 12 rotary
@@ -1386,6 +1421,7 @@ class A4xI(A4):
         else:
             this.checkSetup(setup)
             a4 = A4(setup = setup)
+            this.directParentSetup = copy(setup)
             Set.__init__(this, a4 * ExI())
             this.rotAxes = a4.rotAxes
 
@@ -1472,6 +1508,7 @@ class S4(Set):
     ]
     defaultSetup = {'o4axis0': X[:], 'o4axis1': Y[:]}
     order = 24
+    mixed = False
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group S4, consisting of 24 rotations
@@ -1624,6 +1661,8 @@ S4.subgroups = [S4, A4,
 
 class S4xI(S4):
     order = 48
+    mixed = True
+    directParent = S4
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group S4xI, consisting of 12 rotations and 12 rotary
@@ -1651,6 +1690,7 @@ class S4xI(S4):
         else:
             this.checkSetup(setup)
             s4 = S4(setup = setup)
+            this.directParentSetup = copy(setup)
             Set.__init__(this, s4 * ExI())
             this.rotAxes = s4.rotAxes
 
@@ -1853,6 +1893,7 @@ class A5(Set):
         'o5axis': GeomTypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
     }
     order = 60
+    mixed = False
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A5, consisting of 60 rotations
@@ -2022,6 +2063,8 @@ A5.subgroups = [A5,
 
 class A5xI(A5):
     order = 120
+    mixed = True
+    directParent = A5
     def __init__(this, isometries = None, setup = {}):
         """
         The algebraic group A5xI, which is the complete symmetry of an
@@ -2047,6 +2090,7 @@ class A5xI(A5):
         else:
             this.checkSetup(setup)
             a5 = A5(setup = setup)
+            this.directParentSetup = copy(setup)
             Set.__init__(this, a5 * ExI())
             this.rotAxes = a5.rotAxes
 

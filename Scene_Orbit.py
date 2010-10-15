@@ -160,13 +160,15 @@ class CtrlWin(wx.Frame):
             this.showGui[this.__StabSymGuiIndex].GetSelected()
         ))
         #print 'addColourGui check sub-groups'
-        fo = this.orbit.final.order
         nrOfColsChoiceList = [
-            '%d (based on %s)' % (
-                fo / HigherOrderStabClass.order, HigherOrderStabClass.__name__
-            )
-            for HigherOrderStabClass in this.orbit.higherOrderStabiliserClasses
+            '%d (based on %s)' % (p['index'], p['class'].__name__)
+            for p in this.orbit.higherOrderStabiliserProps
         ]
+        nrOfColsChoiceList.extend([
+            '%d (based on %s)' % (p['index'], p['class'].__name__)
+            for p in this.orbit.lowerOrderStabiliserProps
+        ])
+        print 'nrOfColsChoiceList', nrOfColsChoiceList
         this.colGuis = []
         this.colGuis.append(
             wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
@@ -229,11 +231,16 @@ class CtrlWin(wx.Frame):
             this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
 
         colDivNr = e.GetSelection()
-        this.colIsoms = this.orbit.higherOrderStabiliser(colDivNr)
+        l0 = len(this.orbit.higherOrderStabiliserProps)
+        print 'onNrColsSel: l0: %d, colDivnr: %d' % (l0, colDivNr)
+        if colDivNr < l0:
+            this.colIsoms = this.orbit.higherOrderStabiliser(colDivNr)
+            nrOfCols = this.orbit.higherOrderStabiliserProps[colDivNr]['index']
+        else:
+            this.colIsoms = this.orbit.lowerOrderStabiliser(colDivNr - l0)
+            nrOfCols = this.orbit.lowerOrderStabiliserProps[colDivNr - l0]['index']
         assert len(this.colIsoms) != 0
         this.colAlternative = 0
-        nrOfCols = (
-            this.orbit.final.order / this.colIsoms[this.colAlternative].order)
         this.selColGuis = []
         initColour = (255, 255, 255)
         maxColPerRow = 12

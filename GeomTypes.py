@@ -440,6 +440,12 @@ class Transform3(tuple):
             'oops, unknown matrix; transform %s\n' % str(t) +
             'not a rotation')
 
+    def isDirect(t):
+        return t.isRot()
+
+    def isOpposite(t):
+        return not t.isDirect()
+
     ## ROTATION specific functions:
     def isRot(t):
         global eqFloatMargin

@@ -36,7 +36,7 @@ class Orbit(list):
         return s
 
     @property
-    def higherOrderStabiliserClasses(v):
+    def higherOrderStabiliserProps(v):
         """Get possible sub orbit classes for higher order stabilisers
 
         A sub-orbit is used if a group of isometries are used on the
@@ -47,26 +47,31 @@ class Orbit(list):
         same colour. SUch a set has there own symmetry. The different groups of
         coloured faces are mapped onto each other by a sub orbit. The norm of
         this sub-orbit equals to the amount of colours used. With this a list of
-        higher order stabiliser classes is obtained.
+        dictionaries is obtained. Each dictionary holds:
+            'class': higher order stabiliser classes is obtained.
+            'index': the length of the subgroups in the final group, or the
+                     norme of the coset.
         """
         try:
             assert v.__hoscCalled == True, 'if this exists it should be true'
         except AttributeError:
-            v.__hosc = v.__hosc()
-            v.__hoscCalled = True
-        return v.__hosc
+            v.__hosProps = v.__hosp()
+            v.__hosPropsCalled = True
+        print 'higherOrderStabiliserProps', v.__hosProps
+        return v.__hosProps
 
 
-    def __hosc(v):
-        """See HigherOrderStabiliserClasses"""
+    def __hosp(v):
+        """See higherOrderStabiliserProps"""
 
-        #print '%s.getSubOrbitClasses' % v.__class__.__name__
-        higherOrderStabiliserClasses = []
+        print '%s.getSubOrbitClasses' % v.__class__.__name__
+        higherOrderStabiliserProps   = []
         v.hoStabs                    = []
-        v.hoStabsFilteredIndex       = []
+        v.indexCovered               = {}
         for subGroup in v.final.subgroups:
             #print 'subGroup', subGroup.__class__.__name__
             #print '...contains stabiliser', v.stabiliser, '...??..',
+            assert subGroup.order != 0
             if v.stabiliser.__class__ in subGroup.subgroups:
                 #print 'yes'
 
@@ -101,35 +106,39 @@ class Orbit(list):
                         #print 'has no subgroup:'
                         #print '%s' % (str(v.stabiliser))
                         del hoStabs[i]
+                index = v.final.order/subGroup.order
                 if hoStabs != []:
                     #print 'add True'
-                    higherOrderStabiliserClasses.append(subGroup)
+                    higherOrderStabiliserProps.append({
+                            'class': subGroup, 'index': index, 'filtered': i
+                        }
+                    )
                     v.hoStabs.append(hoStabs)
-                    v.hoStabsFilteredIndex.append(i)
+                    v.indexCovered[index] = True
                     #print 'subOrbitsLengths, finalSymClass', v.final.__class__
-                    assert subGroup.order != 0
                 #else:
+                #    print 'filetered out subgroup', subgroup
                 #    print 'add False'
             #else:
             #    print 'no'
-        return higherOrderStabiliserClasses
+        return higherOrderStabiliserProps
 
-    def higherOrderStabiliser(v, index):
+    def higherOrderStabiliser(v, n):
         """Get possible sub orbits for higher order stabilisers
 
         With this a list of higher order stabilisers of one class is obtained.
-        index: the index in higherOrderStabiliserClasses representing the class.
-        see also higherOrderStabiliserClasses.
+        n: the list index in higherOrderStabiliserProps representing the class.
+        see also higherOrderStabiliserProps.
         """
 
         # Make sure the list is initialised.
-        dont_care = v.higherOrderStabiliserClasses
+        props = v.higherOrderStabiliserProps
 
         # filter rest if needed:
-        if (v.hoStabsFilteredIndex[index] > 0):
+        if (props[n]['filtered'] > 0):
             # Now filter out the stabilisers that are not a subgroup for this
             # orientation.
-            # (part of this is done in __hosc)
+            # (part of this is done in __hosp)
             # E.g.
             # final symmetry S4xI
             # stabiliser: D2C2 with principle axis: one 2-fold from S4xI
@@ -138,14 +147,104 @@ class Orbit(list):
             # and D2C2 is a subgroup of D4xI,
             # but not necessarily this orientation. In fact only one of the
             # three possible D4xI will have this D2C2 as subgroup.
-            for i in range(v.hoStabsFilteredIndex[index]-1, -1, -1):
-                if not v.stabiliser.isSubgroup(v.hoStabs[index][i]):
-                    del v.hoStabs[index][i]
-            assert len(v.hoStabs[index]) != 0, (
-                "This case should have been checked in __hosc"
+            for i in range(props[n]['filtered']-1, -1, -1):
+                if not v.stabiliser.isSubgroup(v.hoStabs[n][i]):
+                    del v.hoStabs[n][i]
+            assert len(v.hoStabs[n]) != 0, (
+                "This case should have been checked in __hosp"
             )
-            v.hoStabsFilteredIndex[index] = 0
-        return v.hoStabs[index]
+            props[n]['filtered'] = 0
+        return v.hoStabs[n]
+
+    @property
+    def lowerOrderStabiliserProps(v):
+        """Get possible sub orbit classes for alternative higher order stabilisers
+
+        TODO
+        """
+        try:
+            assert v.__losPropsCalled == True, 'if this exists it should be true'
+        except AttributeError:
+            v.__losProps = v.__losp()
+            v.__losPropsCalled = True
+        return v.__losProps
+
+
+    def __losp(v):
+        """See lowerOrderStabiliserProps"""
+
+        lowerOrderStabiliserProps = []
+        v.loStabs                 = []
+        if v.stabiliser.mixed == True:
+            # alternative way of colouring by using the direct parents.
+            # TODO explain more
+            assert v.final.mixed
+            print '__losp: final class', v.final.__class__.__name__
+            if v.final.generator != {}:
+                v.altFinal = v.final.directParent(
+                        setup = v.final.directParentSetup
+                    )
+            else:
+                v.altFinal = v.final.directParent(isometries = [
+                        isom for isom in v.final if isom.isDirect()
+                    ])
+            if v.stabiliser.generator != {}:
+                v.altStab = v.stabiliser.directParent(setup =
+                        v.stabiliser.directParentSetup
+                    )
+            else:
+                v.altStab = v.stabiliser.directParent(isometries = [
+                        isom for isom in v.stabiliser if isom.isDirect()
+                    ])
+
+            # TODO: fix; don't copy above code...
+            for subGroup in v.altFinal.subgroups:
+                assert subGroup.order != 0
+                if v.altStab.__class__ in subGroup.subgroups:
+                    loStabs = v.altFinal.realiseSubgroups(subGroup)
+                    for i in range(len(loStabs)-1, -1, -1):
+                        if v.altStab.isSubgroup(loStabs[i]):
+                            break
+                        else:
+                            del loStabs[i]
+                    index = v.altFinal.order/subGroup.order
+                    try:
+                        if v.indexCovered[index]:
+                            pass
+                    except KeyError:
+                        if loStabs != []:
+                            lowerOrderStabiliserProps.append({
+                                    'class': subGroup,
+                                    'index': index, 'filtered': i
+                                }
+                            )
+                            v.loStabs.append(loStabs)
+                            # don't add to v.indexCovered, it means covered by
+                            # ho, really
+
+        return lowerOrderStabiliserProps
+
+    def lowerOrderStabiliser(v, n):
+        """Get possible sub orbits for higher order stabilisers
+
+        With this a list of higher order stabilisers of one class is obtained.
+        n: the list index in lowerOrderStabiliserProps representing the class.
+        see also lowerOrderStabiliserProps.
+        """
+
+        # Make sure the list is initialised.
+        props = v.lowerOrderStabiliserProps
+
+        # filter rest if needed:
+        if (props[n]['filtered'] > 0):
+            for i in range(props[n]['filtered']-1, -1, -1):
+                if not v.altStab.isSubgroup(v.loStabs[n][i]):
+                    del v.loStabs[n][i]
+            assert len(v.loStabs[n]) != 0, (
+                "This case should have been checked in __losp"
+            )
+            props[n]['filtered'] = 0
+        return v.loStabs[n]
 
 #class E(Set):
 #    initPars = []
