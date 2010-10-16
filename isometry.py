@@ -121,19 +121,6 @@ class Set(set):
         # rotation Rot * Set
         return Set([o * e for e in this])
 
-    def __le__(this, o):
-        return this.issubset(o)
-
-    def issubset(this, o):
-        if len(this) < len(o):
-            a, b = this, o
-        else:
-            a, b = o, this
-        for e in a:
-            if not e in b:
-                return False
-        return True
-
     def isGroup(this):
         if this.debug: print this.__class__.__name__, 'isGroup'
         if len(this) == 0: return False

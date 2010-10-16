@@ -11,8 +11,8 @@ hTurn    = turn(0.5)
 qTurn    = turn(0.25)
 tTurn    = turn(1.0/3)
 
-eqFloatMargin = 1.0e-11
-roundFloatMargin = 11
+eqFloatMargin = 1.0e-10
+roundFloatMargin = 10
 
 def eq(a, b):
     """
@@ -308,6 +308,7 @@ def isQuatPair(q):
     )
 
 class Transform3(tuple):
+    debug = False
     def __new__(this, quatPair):
         assertStr = "A 3D transform is represented by 2 quaternions: "
         assert len(quatPair) == 2, assertStr + str(quatPair)
@@ -360,19 +361,24 @@ class Transform3(tuple):
         if not isinstance(u, Transform3): return False
         if t.isRot() and u.isRot():
             #if t.__eqRot(u): print 'equal Rot:', t, u
-            return t.__eqRot(u)
+            eq = t.__eqRot(u)
         elif t.isRefl() and u.isRefl():
             #if t.__eqRefl(u): print 'equal Refl:', t, u
-            return t.__eqRefl(u)
+            eq = t.__eqRefl(u)
         elif t.isRotInv() and u.isRotInv():
             #if t.__eqRotInv(u): print 'equal RotInv:', t, u
-            return t.__eqRotInv(u)
+            eq = t.__eqRotInv(u)
         else:
             eq = t[0] == u[0] and t[1] == u[1]
             if eq: print 'fallback:', t[0], '==', u[0], 'and', t[1], '==', u[1]
             assert not eq, 'oops, fallback: unknown transform \n%s\nor\n%s' % (
                 str(t), str(u))
             return eq
+        if (eq and (t.__hash__() != u.__hash__())):
+            print '\n*** warning hashing will not work between\n%s and\n%s' % (
+                str(t), str(u)
+            )
+        return eq
 
     def __ne__(t, u):
         return not(t == u)
@@ -644,14 +650,9 @@ class Transform3(tuple):
     def __eqRefl(t, u):
         """Compare two transforms that represent reflections
         """
-        return (
-            # not needed: and t[1] == u[1])
-            # since __eqRefl is called for t and u reflections
-            (t[0] == u[0])
-            or
-            (t[0] == -u[0])
-            # again not needed: and t[1] == u[1])
-        )
+        # not needed: and t[1] == u[1]
+        # since __eqRefl is called for t and u reflections
+        return ((t[0] == u[0]) or (t[0] == -u[0]))
 
     def __hashRefl__(t):
         normal = t.planeN()
