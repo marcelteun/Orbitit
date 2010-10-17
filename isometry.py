@@ -62,7 +62,8 @@ class Set(set):
                 s = '%s.%s' % (__name__, s)
             return s
         try:
-            if this.generator != []:
+            if this.generator != {}:
+                print 'this.generator', this.generator
                 this.short_string = True
                 if this.short_string:
                     s = '%s(setup = {\n' % this.__class__.__name__

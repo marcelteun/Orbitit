@@ -168,7 +168,7 @@ class CtrlWin(wx.Frame):
             '%d (based on %s)' % (p['index'], p['class'].__name__)
             for p in this.orbit.lowerOrderStabiliserProps
         ])
-        print 'nrOfColsChoiceList', nrOfColsChoiceList
+        #print 'nrOfColsChoiceList', nrOfColsChoiceList
         this.colGuis = []
         this.colGuis.append(
             wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
@@ -200,6 +200,7 @@ class CtrlWin(wx.Frame):
                 finalSym = finalSym, stabSym = stabSym, name = this.name
             )
         this.FsOrbit = this.shape.getIsoOp()['direct']
+        this.FsOrbitOrg = True
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
         this.addColourGui()
@@ -232,13 +233,30 @@ class CtrlWin(wx.Frame):
 
         colDivNr = e.GetSelection()
         l0 = len(this.orbit.higherOrderStabiliserProps)
-        print 'onNrColsSel: l0: %d, colDivnr: %d' % (l0, colDivNr)
         if colDivNr < l0:
+            this.colFinalSym = this.orbit.final
             this.colIsoms = this.orbit.higherOrderStabiliser(colDivNr)
             nrOfCols = this.orbit.higherOrderStabiliserProps[colDivNr]['index']
         else:
+            this.colFinalSym = this.orbit.altFinal
             this.colIsoms = this.orbit.lowerOrderStabiliser(colDivNr - l0)
             nrOfCols = this.orbit.lowerOrderStabiliserProps[colDivNr - l0]['index']
+            # now the FsOrbit might contain isometries that are not part of the
+            # colouring isometries. Recreate the shape with isometries that only
+            # have these:
+            if this.FsOrbitOrg:
+                finalSym = this.orbit.altFinal
+                stabSym = this.orbit.altStab
+                Vs = this.shape.getBaseVertexProperties()['Vs']
+                Fs = this.shape.getBaseFaceProperties()['Fs']
+                print 'Fs', Fs
+                this.shape = Geom3D.SymmetricShape(Vs, Fs,
+                        finalSym = finalSym, stabSym = stabSym, name = this.name
+                    )
+                this.FsOrbit = this.shape.getIsoOp()['direct']
+                this.shape.recreateEdges()
+                this.canvas.panel.setShape(this.shape)
+                this.FsOrbitOrg = False # and do this only once
         assert len(this.colIsoms) != 0
         this.colAlternative = 0
         this.selColGuis = []
@@ -275,10 +293,10 @@ class CtrlWin(wx.Frame):
     def updatShapeColours(this):
         """apply symmetry on colours
         """
-        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
+        finalSym = this.colFinalSym
         #print 'finalSym', finalSym
-        #print 'close finalSym', finalSym.close()
         #print 'this.colAlternative', this.colAlternative
+        #print 'subGroup', this.colIsoms[this.colAlternative]
         colQuotientSet = finalSym  / this.colIsoms[this.colAlternative]
         #print '-----colQuotientSet-----------'
         #for isom in colQuotientSet: print isom

@@ -2684,7 +2684,7 @@ class IsometricShape(CompoundShape):
             if not (radius == None and color == None):
                 this.setVertexProperties(radius = radius, color = color)
 
-    def getBaseVertexProperties(this, dictPar = None, **kwargs):
+    def getBaseVertexProperties(this):
         """
         Get the vertex properties of the base element.
 
@@ -2718,6 +2718,14 @@ class IsometricShape(CompoundShape):
                 # this.orbitNeeded = True
             if 'drawFaces' in dict and dict['drawFaces'] != None:
                 this.setEnableDrawFaces(dict['drawFaces'])
+
+    def getBaseFaceProperties(this):
+        """
+        Get the face properties of the base element.
+
+        See SimpleShape.getFaceProperties for more.
+        """
+        return this.baseShape.getFaceProperties()
 
     def setBaseEdgeProperties(this, dictPar = None, **kwargs):
         """
@@ -2753,6 +2761,14 @@ class IsometricShape(CompoundShape):
                 this.setEdgeProperties(
                     radius = radius, color = color, drawEdges = drawEdges
                 )
+
+    def getBaseEdgeProperties(this):
+        """
+        Get the edge properties of the base element.
+
+        See SimpleShape.getEdgeProperties for more.
+        """
+        return this.baseShape.getFaceProperties()
 
     def glDraw(this):
         if this.dbgTrace:
