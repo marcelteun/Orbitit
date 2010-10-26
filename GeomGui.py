@@ -156,6 +156,7 @@ class FloatInput(wx.TextCtrl):
         except ValueError:
             c = 0
             pass
+        rkc = e.GetRawKeyCode()
         if c >= '0' and c <= '9':
             e.Skip()
         elif c in ['+', '-', '.']:
@@ -204,10 +205,6 @@ class FloatInput(wx.TextCtrl):
                 sel = this.GetSelection()
                 this.Replace(sel[0], sel[1], '0')
                 this.SetSelection(sel[0], sel[0]+1)
-            if len(wx.TextCtrl.GetValue(this)) <= 1:
-                # do not allow an empt field, set to 0 instead:
-                this.SetValue('0')
-                this.SetSelection(0, 1)
             else:
                 e.Skip()
         elif k == wx.WXK_CLEAR:
@@ -219,10 +216,23 @@ class FloatInput(wx.TextCtrl):
                 wx.WXK_HOME, wx.WXK_END
             ]:
             e.Skip()
+        elif e.ControlDown():
+            if rkc == ord('v'):
+                this.Paste()
+            elif rkc == ord('c'):
+                this.Copy()
+            elif rkc == ord('x'):
+                this.Cut()
+            else:
+                print this.__class__, 'ignores Ctrl-key event with code:', rkc
         else:
             print this.__class__, 'ignores key event with code:', k
         #elif k >= 256:
         #    e.Skip()
+        if len(wx.TextCtrl.GetValue(this)) <= 1:
+            # do not allow an empty field, set to 0 instead:
+            this.SetValue('0')
+            this.SetSelection(0, 1)
 
     def GetValue(this):
         v = wx.TextCtrl.GetValue(this)
