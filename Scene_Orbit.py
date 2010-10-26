@@ -57,16 +57,8 @@ class CtrlWin(wx.Frame):
         this.canvas = canvas
         kwargs['title'] = Title
         wx.Frame.__init__(this, *args, **kwargs)
-        # initialise some default colours:
-        c = lambda rgbCol: [c*255 for c in rgbCol]
-        this.cols = [
-                c(rgb.gold),       c(rgb.forestGreen),
-                c(rgb.red4),       c(rgb.deepSkyBlue),
-                c(rgb.khaki4),     c(rgb.midnightBlue),
-                c(rgb.chocolate1), c(rgb.burlywood1),
-                c(rgb.chocolate4), c(rgb.yellow),
-                c(rgb.aquamarine), c(rgb.indianRed1)
-            ]
+        this.setDefaultColours()
+        this.nrOfCols = 1
         this.statusBar = this.CreateStatusBar()
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -79,6 +71,17 @@ class CtrlWin(wx.Frame):
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
         this.panel.Layout()
+
+    def setDefaultColours(this):
+        c = lambda rgbCol: [c*255 for c in rgbCol]
+        this.cols = [
+                c(rgb.gold),       c(rgb.forestGreen),
+                c(rgb.red4),       c(rgb.deepSkyBlue),
+                c(rgb.khaki4),     c(rgb.midnightBlue),
+                c(rgb.chocolate1), c(rgb.burlywood1),
+                c(rgb.chocolate4), c(rgb.yellow),
+                c(rgb.aquamarine), c(rgb.indianRed1)
+            ]
 
     def createControlsSizer(this):
         ctrlSizer = wx.BoxSizer(wx.VERTICAL)
@@ -229,6 +232,12 @@ class CtrlWin(wx.Frame):
             this.panel.Bind(
                 wx.EVT_BUTTON, this.onNextColAlt, id = this.colGuis[-1].GetId())
             nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
+            nextPrevColSizer.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
+            this.colGuis.append(
+                wx.Button(this.panel, wx.ID_ANY, "Reset Colours"))
+            this.panel.Bind(
+                wx.EVT_BUTTON, this.onResetCols, id = this.colGuis[-1].GetId())
+            nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
             this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
 
         colDivNr = e.GetSelection()
@@ -277,6 +286,7 @@ class CtrlWin(wx.Frame):
             )
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
+        this.nrOfCols = nrOfCols
         this.updatShapeColours()
         this.panel.Layout()
 
@@ -335,6 +345,12 @@ class CtrlWin(wx.Frame):
         this.colAlternative += 1
         if this.colAlternative >= len(this.colIsoms):
             this.colAlternative -= len(this.colIsoms)
+        this.updatShapeColours()
+
+    def onResetCols(this, e):
+        this.setDefaultColours()
+        for i in range(this.nrOfCols):
+            this.selColGuis[i].SetColour(this.cols[i])
         this.updatShapeColours()
 
     def onPrevColAlt(this, e):
