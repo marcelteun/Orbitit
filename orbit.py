@@ -53,10 +53,10 @@ class Orbit(list):
                      norme of the coset.
         """
         try:
-            assert v.__hoscCalled == True, 'if this exists it should be true'
+            assert v.__hospCalled == True, 'if this exists it should be true'
         except AttributeError:
             v.__hosProps = v.__hosp()
-            v.__hosPropsCalled = True
+            v.__hospCalled = True
         #print 'higherOrderStabiliserProps', v.__hosProps
         return v.__hosProps
 
@@ -163,10 +163,10 @@ class Orbit(list):
         TODO
         """
         try:
-            assert v.__losPropsCalled == True, 'if this exists it should be true'
+            assert v.__lospCalled == True, 'if this exists it should be true'
         except AttributeError:
             v.__losProps = v.__losp()
-            v.__losPropsCalled = True
+            v.__lospCalled = True
         return v.__losProps
 
 
