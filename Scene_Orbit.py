@@ -71,6 +71,7 @@ class CtrlWin(wx.Frame):
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
         this.panel.Layout()
+        this.importDirName = '.'
 
     def setDefaultColours(this):
         c = lambda rgbCol: [c*255 for c in rgbCol]
@@ -363,12 +364,12 @@ class CtrlWin(wx.Frame):
         wildcard = "OFF shape (*.py)|*.py|" \
             "Python shape (*.off)|*.off|"
         dlg = wx.FileDialog(this,
-            'New: Choose a file', '.', '', wildcard, wx.OPEN)
+            'New: Choose a file', this.importDirName, '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
-            importDirName  = dlg.GetDirectory()
+            this.importDirName  = dlg.GetDirectory()
             print "opening file:", filename
-            fd = open(os.path.join(importDirName, filename), 'r')
+            fd = open(os.path.join(this.importDirName, filename), 'r')
             if filename[-3:] == '.py':
                 shape = Geom3D.readPyFile(fd)
             else:

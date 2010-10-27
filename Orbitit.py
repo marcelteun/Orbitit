@@ -149,13 +149,6 @@ from OpenGL.GL import *
 
 import os
 
-wDir = 'tstThis'
-cwd = os.getcwd()
-
-if not os.path.isdir(wDir):
-    os.mkdir(wDir, 0775)
-os.chdir(wDir)
-
 import Scene_EqlHeptFromKite
 import Scene_EqlHeptS4A4
 import Scene_EqlHeptS4xI
