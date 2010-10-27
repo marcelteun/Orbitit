@@ -880,6 +880,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.onSymSelect = onSymSelect
         this.panel       = panel
         this.Boxes       = [wx.StaticBox(panel, label = label)]
+        this.__prev      = {}
         wx.StaticBoxSizer.__init__(this, this.Boxes[-1], wx.VERTICAL)
 
         this.groupsStrList = [c.__name__ for c in this.groupsList]
@@ -905,10 +906,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.addSetupGui()
         this.panel.Layout()
 
+    def getSelectedIndex(this):
+        return this.Boxes[this.__SymmetryGuiIndex].GetSelection()
+
     def getSymmetryClass(this, applyOrder = True):
         """returns a symmetry class"""
         #print 'getSymmetryClass'
-        Id = this.Boxes[this.__SymmetryGuiIndex].GetSelection()
+        Id = this.getSelectedIndex()
         selClass = this.groupsList[Id]
         #print 'getSymmetryClass: nr:', Id, 'class:', selClass.__name__, selClass
         if applyOrder:
@@ -1013,6 +1017,42 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.panel.Layout()
         if this.onSymSelect != None:
             this.onSymSelect(this.getSymmetryClass(applyOrder = False))
+
+    def isSymClassUpdated(this):
+        try:
+            curId = this.getSelectedIndex()
+            isUpdated = this.__prev['selectedId'] != curId
+        except KeyError:
+            isUpdated = True
+        this.__prev['selectedId'] = curId
+        #print 'isSymClassUpdated', isUpdated
+        return isUpdated
+
+    def isUpdated(this):
+        isUpdated = this.isSymClassUpdated()
+        curSetup = []
+        sym = this.getSymmetryClass(applyOrder = False)
+        for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+            inputType = sym.initPars[i]['type']
+            if inputType == 'vec3':
+                v = gui.GetVertex()
+            elif inputType == 'int':
+                v = gui.GetValue()
+            curSetup.append(v)
+        try:
+            prevSetup = this.__prev['setup']
+            if len(prevSetup) == len(curSetup):
+                for i in range(len(prevSetup)):
+                    if prevSetup[i] != curSetup[i]:
+                        isUpdated = True
+                        break
+            else:
+                isUpdated = True
+        except KeyError:
+            isUpdated = True
+        this.__prev['setup'] = curSetup
+        #print 'isUpdated', isUpdated
+        return isUpdated
 
     def GetSelected(this):
         """returns a symmetry instance"""

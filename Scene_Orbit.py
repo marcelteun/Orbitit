@@ -181,7 +181,7 @@ class CtrlWin(wx.Frame):
         this.panel.Bind(wx.EVT_CHOICE,
             this.onNrColsSel, id = this.colGuis[-1].GetId())
         this.colGuis[-1].SetSelection(0)
-        this.__nrOfColsGuiId = this.colGuis[-1]
+        this.__nrOfColsGuiId = len(this.colGuis)-1
         this.onNrColsSel(this.colGuis[-1])
 
     def onSymmetrySeleect(this, sym):
@@ -190,7 +190,7 @@ class CtrlWin(wx.Frame):
             )
 
     def onApplySymmetry(this, e):
-        print this.GetSize()
+        #print this.GetSize()
         Vs = this.showGui[this.__VsGuiIndex].get()
         Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
@@ -207,7 +207,15 @@ class CtrlWin(wx.Frame):
         this.FsOrbitOrg = True
         this.shape.recreateEdges()
         this.canvas.panel.setShape(this.shape)
-        this.addColourGui()
+        updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
+        updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
+        # Note the functions above need to be called to update the latest
+        # status. I.e. don't call them in the or below, because the second will
+        # not be called if the first is true.
+        if (updated0 or updated1):
+            this.addColourGui()
+        else:
+            this.onNrColsSel(this.colGuis[this.__nrOfColsGuiId])
         this.panel.Layout()
         this.statusBar.SetStatusText("Symmetry applied: choose colours")
         try:
