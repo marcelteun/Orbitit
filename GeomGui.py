@@ -867,7 +867,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
             isometry.A5,
             isometry.A5xI,
         ],
-        onSymSelect = None
+        onSymSelect = None,
+        onGetSymSetup = None
     ):
         """
         Create a control embedded in a sizer for defining a symmetry.
@@ -875,12 +876,23 @@ class SymmetrySelect(wx.StaticBoxSizer):
         panel: the panel the input will be a part of.
         label: the label to be used for the box, default ''
         groupsList: the list of symmetries that one can choose from.
+        onSymSelect: This function will be called after a user selected the
+                     symmetry from the list. The first and only parameter of the
+                     function is the symmetry class that was selected.
+        onGetSymSetup: This function will also be called after a user selected a
+                       symmetry from the list, but before onSymSelect. With this
+                       function you can return the default setup for the
+                       selected symmetry class. The first parameter of this
+                       function is the index in the symmetries list. If this
+                       function is not set, the class default is used. The class
+                       default is also used if the function returns None.
         """
-        this.groupsList  = groupsList
-        this.onSymSelect = onSymSelect
-        this.panel       = panel
-        this.Boxes       = [wx.StaticBox(panel, label = label)]
-        this.__prev      = {}
+        this.groupsList    = groupsList
+        this.onSymSelect   = onSymSelect
+        this.onGetSymSetup = onGetSymSetup
+        this.panel         = panel
+        this.Boxes         = [wx.StaticBox(panel, label = label)]
+        this.__prev        = {}
         wx.StaticBoxSizer.__init__(this, this.Boxes[-1], wx.VERTICAL)
 
         this.groupsStrList = [c.__name__ for c in this.groupsList]
@@ -1000,15 +1012,21 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
         this.oriGuis = []
         sym = this.getSymmetryClass(applyOrder = False)
+        if this.onGetSymSetup == None:
+            symSetup = sym.defaultSetup
+        else:
+            symSetup = this.onGetSymSetup(this.getSelectedIndex())
+            if symSetup == None:
+                symSetup = sym.defaultSetup
         for init in sym.initPars:
             inputType = init['type']
             if inputType == 'vec3':
                 gui = Vector3DInput(this.panel, init['lab'],
-                        v = sym.defaultSetup[init['par']]
+                        v = symSetup[init['par']]
                     )
             elif inputType == 'int':
                 gui = LabeledIntInput(this.panel, init['lab'],
-                        init = sym.defaultSetup[init['par']]
+                        init = symSetup[init['par']]
                     )
             else:
                 assert False, "oops unimplemented input type"

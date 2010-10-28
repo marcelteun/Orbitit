@@ -35,6 +35,7 @@ class Set(set):
     mixed = False # if True the isometry set consists of direct and indirect
                   # isometries else it consists of direct isometries only if it
                   # is a group.
+    defaultSetup = None
 
     def __init__(this, *args):
         try:
@@ -294,6 +295,9 @@ class Set(set):
                         k, this.__class__.__name__)
         this.generator = setup
 
+    @property
+    def setup(this):
+        return this.generator
 
 def setup(**kwargs): return kwargs
 

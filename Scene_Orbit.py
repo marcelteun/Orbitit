@@ -60,6 +60,8 @@ class CtrlWin(wx.Frame):
         this.setDefaultColours()
         this.nrOfCols = 1
         this.colSelection = None
+        this.finalSymSetup = None
+        this.stabSymSetup = None
         this.statusBar = this.CreateStatusBar()
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -127,13 +129,16 @@ class CtrlWin(wx.Frame):
         this.showGui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Final Symmetry',
-                onSymSelect = lambda a: this.onSymmetrySeleect(a)
+                onSymSelect   = lambda a: this.onSymmetrySeleect(a),
+                onGetSymSetup = lambda a: this.onGetFinalSymSetup(a)
             )
         )
         this.__FinalSymGuiIndex = len(this.showGui) - 1
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
         if this.colSelection == None:
             this.colSelection = [None for i in range(this.showGui[-1].length)]
+            this.finalSymSetup = this.colSelection[:]
+            this.stabSymSetup = this.colSelection[:]
 
         # Stabiliser
         this.showGui.append(
@@ -142,6 +147,7 @@ class CtrlWin(wx.Frame):
                 this.showGui[
                     this.__FinalSymGuiIndex
                 ].getSymmetryClass(applyOrder = True).subgroups,
+                onGetSymSetup = lambda a: this.onGetStabSymSetup(a)
             )
         )
         this.__StabSymGuiIndex = len(this.showGui) - 1
@@ -192,15 +198,33 @@ class CtrlWin(wx.Frame):
         this.__nrOfColsGuiId = len(this.colGuis)-1
         this.onNrColsSel(this.colGuis[-1])
 
+    def onGetFinalSymSetup(this, symIndex):
+        try:
+            return this.finalSymSetup[symIndex]
+        except TypeError:
+            print 'Note: ignoring error at onGetFinalSymSetup: 1st time = ok'
+            return None
+
+    def onGetStabSymSetup(this, symIndex):
+        finalSymId = this.showGui[this.__FinalSymGuiIndex].getSelectedIndex()
+        try:
+            return this.stabSymSetup[finalSymId][symIndex]
+        except TypeError:
+            print 'Note: ignoring error at onGetStabSymSetup: 1st time = ok'
+            return None
+
     def onSymmetrySeleect(this, sym):
         finalSymGui = this.showGui[this.__FinalSymGuiIndex]
-        this.showGui[this.__StabSymGuiIndex].setList(
-                finalSymGui.getSymmetryClass().subgroups,
-            )
+        stabSyms = finalSymGui.getSymmetryClass().subgroups
         i = finalSymGui.getSelectedIndex()
+        # initialise stabiliser setup before setting the list.
+        if this.stabSymSetup[i] == None:
+            this.stabSymSetup[i] = [None for x in stabSyms]
+        this.showGui[this.__StabSymGuiIndex].setList(stabSyms)
         nrStabilisers = this.showGui[this.__StabSymGuiIndex].length
         if this.colSelection[i] == None:
             this.colSelection[i] = [[0, 0] for j in range(nrStabilisers)]
+            this.stabSymSetup[i] = [None for j in range(nrStabilisers)]
 
     def onApplySymmetry(this, e):
         #print this.GetSize()
@@ -211,8 +235,14 @@ class CtrlWin(wx.Frame):
                 "ERROR: No faces defined!"
             )
             return
-        finalSym = this.showGui[this.__FinalSymGuiIndex].GetSelected()
-        stabSym = this.showGui[this.__StabSymGuiIndex].GetSelected()
+        finalSymGui   = this.showGui[this.__FinalSymGuiIndex]
+        finalSym      = finalSymGui.GetSelected()
+        finalSymIndex = finalSymGui.getSelectedIndex()
+        stabSymGui    = this.showGui[this.__StabSymGuiIndex]
+        stabSym       = stabSymGui.GetSelected()
+        stabSymIndex  = stabSymGui.getSelectedIndex()
+        this.finalSymSetup[finalSymIndex] = finalSym.setup             # copy?
+        this.stabSymSetup[finalSymIndex][stabSymIndex] = stabSym.setup # copy?
         this.shape = Geom3D.SymmetricShape(Vs, Fs,
                 finalSym = finalSym, stabSym = stabSym, name = this.name
             )
