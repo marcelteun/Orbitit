@@ -59,6 +59,7 @@ class CtrlWin(wx.Frame):
         wx.Frame.__init__(this, *args, **kwargs)
         this.setDefaultColours()
         this.nrOfCols = 1
+        this.colSelection = None
         this.statusBar = this.CreateStatusBar()
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -131,6 +132,8 @@ class CtrlWin(wx.Frame):
         )
         this.__FinalSymGuiIndex = len(this.showGui) - 1
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        if this.colSelection == None:
+            this.colSelection = [None for i in range(this.showGui[-1].length)]
 
         # Stabiliser
         this.showGui.append(
@@ -180,14 +183,24 @@ class CtrlWin(wx.Frame):
         this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
         this.panel.Bind(wx.EVT_CHOICE,
             this.onNrColsSel, id = this.colGuis[-1].GetId())
-        this.colGuis[-1].SetSelection(0)
+        this.colAlternative = this.colSelection[
+            this.showGui[this.__FinalSymGuiIndex].getSelectedIndex()
+        ][
+            this.showGui[this.__StabSymGuiIndex].getSelectedIndex()
+        ]
+        this.colGuis[-1].SetSelection(this.colAlternative[0])
         this.__nrOfColsGuiId = len(this.colGuis)-1
         this.onNrColsSel(this.colGuis[-1])
 
     def onSymmetrySeleect(this, sym):
+        finalSymGui = this.showGui[this.__FinalSymGuiIndex]
         this.showGui[this.__StabSymGuiIndex].setList(
-                this.showGui[this.__FinalSymGuiIndex].getSymmetryClass().subgroups,
+                finalSymGui.getSymmetryClass().subgroups,
             )
+        i = finalSymGui.getSelectedIndex()
+        nrStabilisers = this.showGui[this.__StabSymGuiIndex].length
+        if this.colSelection[i] == None:
+            this.colSelection[i] = [[0, 0] for j in range(nrStabilisers)]
 
     def onApplySymmetry(this, e):
         #print this.GetSize()
@@ -250,6 +263,7 @@ class CtrlWin(wx.Frame):
             this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
 
         colDivNr = e.GetSelection()
+        this.colAlternative[0] = colDivNr
         l0 = len(this.orbit.higherOrderStabiliserProps)
         if colDivNr < l0:
             this.colFinalSym = this.orbit.final
@@ -267,7 +281,6 @@ class CtrlWin(wx.Frame):
                 stabSym = this.orbit.altStab
                 Vs = this.shape.getBaseVertexProperties()['Vs']
                 Fs = this.shape.getBaseFaceProperties()['Fs']
-                print 'Fs', Fs
                 this.shape = Geom3D.SymmetricShape(Vs, Fs,
                         finalSym = finalSym, stabSym = stabSym, name = this.name
                     )
@@ -276,7 +289,6 @@ class CtrlWin(wx.Frame):
                 this.canvas.panel.setShape(this.shape)
                 this.FsOrbitOrg = False # and do this only once
         assert len(this.colIsoms) != 0
-        this.colAlternative = 0
         this.selColGuis = []
         initColour = (255, 255, 255)
         maxColPerRow = 12
@@ -314,9 +326,9 @@ class CtrlWin(wx.Frame):
         """
         finalSym = this.colFinalSym
         #print 'finalSym', finalSym
-        #print 'this.colAlternative', this.colAlternative
-        #print 'subGroup', this.colIsoms[this.colAlternative]
-        colQuotientSet = finalSym  / this.colIsoms[this.colAlternative]
+        #print 'this.colAlternative', this.colAlternative[1]
+        #print 'subGroup', this.colIsoms[this.colAlternative[1]]
+        colQuotientSet = finalSym  / this.colIsoms[this.colAlternative[1]]
         #print '-----colQuotientSet-----------'
         #for isom in colQuotientSet: print isom
         #print '------------------------------'
@@ -337,7 +349,7 @@ class CtrlWin(wx.Frame):
         this.shape.setSymmetricFaceColors(cols)
         this.statusBar.SetStatusText(
             "Colour alternative %d of %d applied" % (
-                this.colAlternative + 1, len(this.colIsoms)
+                this.colAlternative[1] + 1, len(this.colIsoms)
             )
         )
         this.canvas.paint()
@@ -351,9 +363,9 @@ class CtrlWin(wx.Frame):
         this.SetSize(size)
 
     def onNextColAlt(this, e):
-        this.colAlternative += 1
-        if this.colAlternative >= len(this.colIsoms):
-            this.colAlternative -= len(this.colIsoms)
+        this.colAlternative[1] += 1
+        if this.colAlternative[1] >= len(this.colIsoms):
+            this.colAlternative[1] -= len(this.colIsoms)
         this.updatShapeColours()
 
     def onResetCols(this, e):
@@ -363,9 +375,9 @@ class CtrlWin(wx.Frame):
         this.updatShapeColours()
 
     def onPrevColAlt(this, e):
-        this.colAlternative -= 1
-        if this.colAlternative < 0:
-            this.colAlternative += len(this.colIsoms)
+        this.colAlternative[1] -= 1
+        if this.colAlternative[1] < 0:
+            this.colAlternative[1] += len(this.colIsoms)
         this.updatShapeColours()
 
     def onImport(this, e):

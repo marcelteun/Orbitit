@@ -895,6 +895,10 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
         this.addSetupGui()
 
+    @property
+    def length(this):
+        return len(this.groupsList)
+
     def setList(this, groupsList):
         this.groupsList  = groupsList
         # would be nice is wx.Choice has a SetItems()
