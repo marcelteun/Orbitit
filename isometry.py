@@ -1180,7 +1180,7 @@ def D2nD(n):
                         ],
                     'defaultSetup': {
                             'axis_n': D2nDn.defaultSetup['axis_n'],
-                            'normal_r': D2nDn.defaultSetup['axis_2']
+                            'axis_2': D2nDn.defaultSetup['axis_2']
                         }
                 }
             )
