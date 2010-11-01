@@ -243,6 +243,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         this.shape.glDraw()
 
 class MainWindow(wx.Frame):
+    wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py|"
     def __init__(this, TstScene, shape, *args, **kwargs):
         wx.Frame.__init__(this, *args, **kwargs)
         this.addMenuBar()
@@ -381,46 +382,53 @@ class MainWindow(wx.Frame):
         return menu
 
     def onOpen(this, e):
-        wildcard = "OFF shape (*.off)|*.off|" \
-            "Python shape (*.py)|*.py|"
-        dlg = wx.FileDialog(this,
-            'New: Choose a file', this.importDirName, '', wildcard, wx.OPEN)
+        dlg = wx.FileDialog(this, 'New: Choose a file',
+                this.importDirName, '', this.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             this.closeCurrentScene()
             this.filename = dlg.GetFilename()
             isOffModel = this.filename[-3:] == 'off'
-            print "isOffModel", isOffModel
             this.importDirName  = dlg.GetDirectory()
             print "opening file:", this.filename
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
-            # Create a compound shape to be able to add shapes later.
             if isOffModel:
                 shape = Geom3D.readOffFile(fd, recreateEdges = True)
             else:
                 shape = Geom3D.readPyFile(fd)
             if isinstance(shape, Geom3D.CompoundShape):
-                this.panel.setShape(shape)
-            else:
-                this.panel.setShape(
-                    Geom3D.CompoundShape([shape], name = this.filename)
-                )
+                # convert to SimpleShape first, since adding to IsometricShape
+                # will not work.
+                shape = shape.SimpleShape
+            # Create a compound shape to be able to add shapes later.
+            this.panel.setShape(
+                Geom3D.CompoundShape([shape], name = this.filename)
+            )
             this.setStatusStr("OFF file opened")
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
         dlg.Destroy()
 
     def onAdd(this, e):
-        dlg = wx.FileDialog(this, 'Add: Choose a file', this.importDirName, '', '*.*off', wx.OPEN)
+        dlg = wx.FileDialog(this, 'Add: Choose a file',
+                this.importDirName, '', this.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
+            isOffModel = this.filename[-3:] == 'off'
             this.importDirName  = dlg.GetDirectory()
             print "adding file:", this.filename
             fd = open(os.path.join(this.importDirName, this.filename), 'r')
+            if isOffModel:
+                shape = Geom3D.readOffFile(fd, recreateEdges = True)
+            else:
+                shape = Geom3D.readPyFile(fd)
+            if isinstance(shape, Geom3D.CompoundShape):
+                # convert to SimpleShape first, since adding a IsometricShape
+                # will not work.
+                shape = shape.SimpleShape
             try:
-                # Create a compound shape to be able to add shapes later.
-                this.panel.getShape().addShape(Geom3D.readOffFile(fd, recreateEdges = True))
+                this.panel.getShape().addShape(shape)
             except AttributeError:
-                print "warning: cannot add a shape to this scene, use 'File->Open' instead"
+                print "warning: cannot 'add' a shape to this scene, use 'File->Open' instead"
             this.setStatusStr("OFF file added")
             fd.close()
             # TODO: set better title

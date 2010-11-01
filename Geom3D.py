@@ -2353,6 +2353,14 @@ class CompoundShape(SimpleShape):
                 colors = (colorDefs, colorIndices)
             )
 
+    @property
+    def SimpleShape(this):
+        try:
+            return this.mergedShape
+        except AttributeError:
+            this.mergeShapes()
+            return this.mergedShape
+
     def glDraw(this):
         this.mergedShape.glDraw()
 
@@ -2566,6 +2574,7 @@ class IsometricShape(CompoundShape):
                     Vs, this.baseShape.Fs, this.baseShape.Es,
                     colors = this.shapeColors[i]
                 )
+
             )
             i += 1
         oppIsom = this.isometryOperations['opposite']
@@ -2581,6 +2590,12 @@ class IsometricShape(CompoundShape):
                 i += 1
         this.setShapes(orbits)
         this.orbitNeeded = False
+
+    @property
+    def SimpleShape(this):
+        if (this.orbitNeeded):
+            this.orbit()
+        return this.mergedShape
 
     def setSymmetricFaceColors(this, colors):
         this.shapeColors = colors
