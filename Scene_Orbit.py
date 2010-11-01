@@ -243,9 +243,15 @@ class CtrlWin(wx.Frame):
         stabSymIndex  = stabSymGui.getSelectedIndex()
         this.finalSymSetup[finalSymIndex] = finalSym.setup             # copy?
         this.stabSymSetup[finalSymIndex][stabSymIndex] = stabSym.setup # copy?
-        this.shape = Geom3D.SymmetricShape(Vs, Fs,
-                finalSym = finalSym, stabSym = stabSym, name = this.name
-            )
+        try:
+            this.shape = Geom3D.SymmetricShape(Vs, Fs,
+                    finalSym = finalSym, stabSym = stabSym, name = this.name
+                )
+        except isometry.ImproperSubgroupError:
+            this.statusBar.SetStatusText(
+                "ERROR: Stabiliser not a subgroup of final symmetry")
+            e.Skip()
+            return
         this.FsOrbit = this.shape.getIsoOp()['direct']
         this.FsOrbitOrg = True
         this.shape.recreateEdges()
