@@ -129,7 +129,7 @@ class CtrlWin(wx.Frame):
         this.showGui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Final Symmetry',
-                onSymSelect   = lambda a: this.onSymmetrySeleect(a),
+                onSymSelect   = lambda a: this.onSymmetrySelect(a),
                 onGetSymSetup = lambda a: this.onGetFinalSymSetup(a)
             )
         )
@@ -157,6 +157,11 @@ class CtrlWin(wx.Frame):
         this.panel.Bind(
             wx.EVT_BUTTON, this.onApplySymmetry, id = this.showGui[-1].GetId())
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+
+        this.showGui[this.__FinalSymGuiIndex].SetSelected(0)
+	this.onSymmetrySelect(
+		this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
+	    )
 
         this.ctrlSizer = ctrlSizer
         return ctrlSizer
@@ -213,9 +218,9 @@ class CtrlWin(wx.Frame):
             print 'Note: ignoring error at onGetStabSymSetup: 1st time = ok'
             return None
 
-    def onSymmetrySeleect(this, sym):
+    def onSymmetrySelect(this, sym):
         finalSymGui = this.showGui[this.__FinalSymGuiIndex]
-        stabSyms = finalSymGui.getSymmetryClass().subgroups
+        stabSyms = sym.subgroups
         i = finalSymGui.getSelectedIndex()
         # initialise stabiliser setup before setting the list.
         if this.stabSymSetup[i] == None:

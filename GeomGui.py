@@ -1076,6 +1076,9 @@ class SymmetrySelect(wx.StaticBoxSizer):
         #print 'isUpdated', isUpdated
         return isUpdated
 
+    def SetSelected(this, i):
+        this.Boxes[this.__SymmetryGuiIndex].SetSelection(i)
+
     def GetSelected(this):
         """returns a symmetry instance"""
         sym = this.getSymmetryClass(applyOrder = False)
