@@ -284,7 +284,7 @@ class Set(set):
         if this.debug: print this.__class__.__name__, 'checkSetup'
         if setup != {} and this.initPars == []:
             print "Warning: class %s doesn't handle any setup pars" % (
-                    this.___class__._name__), setup.keys()
+                    this.__class__.__name__), setup.keys()
         for k in setup.keys():
             found = False
             for p in this.initPars:
