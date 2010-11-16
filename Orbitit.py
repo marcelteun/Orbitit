@@ -609,7 +609,13 @@ class MainWindow(wx.Frame):
         this.statusBar.SetStatusText(str)
 
     def onExit(this, e):
-        this.Close(True)
+	dlg = wx.MessageDialog(None, 'Are you sure to quit?', 'Question', 
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+	    dlg.Destroy()
+	    this.Close(True)
+	else:
+	    dlg.Destroy()
 
     def onViewSettingsClose(this, event):
         this.viewSettingsWindow.Destroy()
