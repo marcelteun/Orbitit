@@ -30,6 +30,16 @@ You will need:
 2. Wxpython: http://www.wxpython.org
 3. pyOpenGL: http://pyopengl.sourceforge.net/
 
+E.g. for Ubuntu:
+----------------
+1. sudo apt-get install python
+2. sudo apt-get install python-wxgtk<x.x>
+    Find out which version by 
+    apt-cache show python-wxgtk
+    e.g.
+    sudo apt-get install python-wxgtk2.8
+3. sudo apt-get install python-opengl
+
 Run:
 ----
 cd to directory
