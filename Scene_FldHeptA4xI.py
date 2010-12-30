@@ -222,8 +222,15 @@ class Shape(Geom3D.IsometricShape):
         #this.heptagon.foldParallel(this.fold1, this.fold2)
         #this.heptagon.foldTrapezium(this.fold1, this.fold2)
         # The angle has to be adjusted for historical reasons...
-        this.heptagon.foldParallel(-this.fold1, -this.fold2, keepV0 = False)
+        #this.heptagon.foldParallel(-this.fold1, -this.fold2, keepV0 = False)
         #this.heptagon.foldTrapezium(this.fold1, this.fold2, keepV0 = False)
+        #this.heptagon.foldW(this.fold1, this.fold2, keepV0 = False)
+        #this.heptagon.foldTriangle(this.fold1, this.fold2, keepV0 = False)
+        this.heptagon.foldStar(this.fold1, this.fold2, keepV0 = False)
+	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
+	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
+	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
+	#print 'norm V3-V4: ', (this.heptagon.Vs[3]-this.heptagon.Vs[4]).squareNorm()
         this.heptagon.translate(Heptagons.H*GeomTypes.uy)
         # The angle has to be adjusted for historical reasons...
         this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.angle)

@@ -59,6 +59,10 @@ class RegularHeptagon:
         #         4       3
         #
         #
+	# The fold functions below assume that for the original position holds:
+	#  - parallel to the XOY-plane.
+	#  - a mirror axis parallel to the Y-axis
+	#  - V0 = (0, 0, 0)
         this.VsOrg = [
                 Vec([     0.0,            0.0, 0.0]),
                 Vec([   Rho/2,             -h, 0.0]),
@@ -80,6 +84,7 @@ class RegularHeptagon:
         the fold angle b refers the the axis V2-V5.
         If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
         folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
+	It assumes that the heptagon is in the original position.
         """
         #
         #             0
@@ -151,6 +156,7 @@ class RegularHeptagon:
                 ]
         else:
             # similar to before, except the roles of the vertices are switched
+	    # i.e. keep V[3] constant...
             dV1 = [
                     this.VsOrg[1][1] - this.VsOrg[2][1],
                     this.VsOrg[1][2] - this.VsOrg[2][2]
@@ -197,6 +203,7 @@ class RegularHeptagon:
         The fold angle b refers the the axes V1-V3 and V6-V4 and
         If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
         folding, otherwise the edge V3-V4 is kept invariant.
+	It assumes that the heptagon is in the original position.
         """
         #
         #             0
@@ -258,7 +265,7 @@ class RegularHeptagon:
                     this.VsOrg[1][2] + cosa * dV0[1] + sina * dV0[0]
                 ])
             V1V3 = (this.VsOrg[1] + this.VsOrg[3])/2
-            V1V3axis = Vec([this.VsOrg[3] - this.VsOrg[1]])
+            V1V3axis = Vec(this.VsOrg[3] - this.VsOrg[1])
             r = Rot(axis = V1V3axis, angle = b)
             V2 = V1V3 + r * (this.VsOrg[2] - V1V3)
             this.Vs = [
@@ -271,13 +278,15 @@ class RegularHeptagon:
                     this.VsOrg[6]
                 ]
 
-    def foldW(this, a, b):
+    def foldW(this, a, b, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
         the fold angle a refers the the axes V0-V3 and V0-V4.
         The fold angle b refers the the axes V1-V3 and V6-V4 and
         The vertex V0 is kept invariant during folding
+        The keepV0 variable is ignored here (it is provided to be consistent
+	with the other fold functions.)
         """
         #
         #              0
@@ -292,15 +301,33 @@ class RegularHeptagon:
         #         4         3
         #
         #
-        pass
+	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a)
+	V1 = Rot0_3 * this.VsOrg[1]
+	V2 = Rot0_3 * this.VsOrg[2]
+	Rot1_3 = Rot(axis = this.VsOrg[3] - V1, angle = b)
+	V2 = Rot1_3 * (V2 - V1) + V1
+	this.Vs = [
+		this.VsOrg[0],
+		V1,
+		V2,
+		this.VsOrg[3],
+		this.VsOrg[4],
+		Vec([-V2[0], V2[1], V2[2]]),
+		Vec([-V1[0], V1[1], V1[2]]),
+	    ]
+        this.Fs = [[1, 3, 2], [1, 0, 3], [0, 4, 3], [0, 6, 4], [6, 5, 4]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		#1, 3, 3, 0, 0, 4, 4, 6
+	    ]
 
-    def foldTriangle(this, a, b):
+    def foldTriangle(this, a, b, keepV0 = True):
         """
         Fold around 3 triangular diagonals from V0.
 
         The fold angle a refers the the axes V0-V2 and V0-V5 and
         the fold angle b refers the the axis V2-V5.
-        The vertex V0 is kept invariant during folding
+        If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
+        folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
         """
         #
         #             0
@@ -315,15 +342,47 @@ class RegularHeptagon:
         #         4       3
         #
         #
-        pass
+        this.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		0, 2, 2, 5, 5, 0
+	    ]
+	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = a)
+	V1 = Rot0_2 * this.VsOrg[1]
+	V2 = this.VsOrg[2]
+	if keepV0:
+	    Rot5_2 = Rot(axis = this.VsOrg[5] - this.VsOrg[2], angle = b)
+	    V3 = Rot5_2 * (this.VsOrg[3] - V2) + V2
+	    this.Vs = [
+		    this.VsOrg[0],
+		    V1,
+		    this.VsOrg[2],
+		    V3,
+		    Vec([-V3[0], V3[1], V3[2]]),
+		    this.VsOrg[5],
+		    Vec([-V1[0], V1[1], V1[2]]),
+		]
+	else:
+	    Rot2_5 = Rot(axis = this.VsOrg[2] - this.VsOrg[5], angle = b)
+	    V0 = Rot2_5 * (this.VsOrg[0] - V2) + V2
+	    V1 = Rot2_5 * (V1 - V2) + V2
+	    this.Vs = [
+		    V0,
+		    V1,
+		    this.VsOrg[2],
+		    this.VsOrg[3],
+		    this.VsOrg[4],
+		    this.VsOrg[5],
+		    Vec([-V1[0], V1[1], V1[2]]),
+		]
 
-    def foldStar(this, a, b):
+    def foldStar(this, a, b, keepV0 = True):
         """
         Fold around the 4 diagonals from V0.
 
         The fold angle a refers the the axes V0-V2 and V0-V5 and
         the fold angle b refers the the axes V0-V3 and V0-V4.
-        The vertex V0 is kept invariant during folding
+        The keepV0 variable is ignored here (it is provided to be consistent
+	with the other fold functions.)
         """
         #
         #               0
@@ -338,7 +397,24 @@ class RegularHeptagon:
         #          4         3
         #
         #
-        pass
+	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a)
+	V1 = Rot0_3 * this.VsOrg[1]
+	V2 = Rot0_3 * this.VsOrg[2]
+	Rot0_2 = Rot(axis = V2 - this.VsOrg[0], angle = b)
+	V1 = Rot0_2 * V1
+	this.Vs = [
+		this.VsOrg[0],
+		V1,
+		V2,
+		this.VsOrg[3],
+		this.VsOrg[4],
+		Vec([-V2[0], V2[1], V2[2]]),
+		Vec([-V1[0], V1[1], V1[2]]),
+	    ]
+        this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		0, 2, 0, 3, 0, 4, 0, 5
+	    ]
 
 #    3 don't fit in one vertex. highest is hexagon...  Dooh...
 #    def transform_2_3inV0(this):
