@@ -44,6 +44,29 @@ Sigma     = SigmaH / h
 R         = 0.5 / h
 H         = (1 + Sigma + Rho)*h
 
+class FoldMethod:
+    parallel  = 0
+    trapezium = 1
+    w         = 2
+    triangle  = 3
+    star      = 4
+
+    def get(this, str):
+	for k,v in FoldName.iteritems():
+	    if v == str:
+		return k
+	return None
+
+FoldName = {
+	FoldMethod.parallel: 'Parallel',
+	FoldMethod.trapezium: 'Trapezium',
+	FoldMethod.w: 'W',
+	FoldMethod.triangle: 'Triangle',
+	FoldMethod.star: 'Star',
+    }
+
+foldMethod = FoldMethod()
+
 class RegularHeptagon:
     def __init__(this):
         # V0 in origin
@@ -76,6 +99,20 @@ class RegularHeptagon:
         this.Fs = [[6, 5, 4, 3, 2, 1, 0]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
+    def fold(this, a, b, keepV0 = True, fold = FoldMethod.parallel):
+	if fold == FoldMethod.parallel:
+	    this.foldParallel(a, b, keepV0)
+	elif fold == FoldMethod.trapezium:
+	    this.foldTrapezium(a, b, keepV0)
+	elif fold == FoldMethod.w:
+	    this.foldW(a, b, keepV0)
+	elif fold == FoldMethod.triangle:
+	    this.foldTriangle(a, b, keepV0)
+	elif fold == FoldMethod.star:
+	    this.foldStar(a, b, keepV0)
+	else:
+	    raise TypeError, 'Unknown fold'
+
     def foldParallel(this, a, b, keepV0 = True):
         """
         Fold around the 2 parallel diagonals V1-V6 and V2-V5.
@@ -89,11 +126,11 @@ class RegularHeptagon:
         #
         #             0
         #
-        #      6 ----------- 1    axis a
+        #      6 ----------- 1    axis b
         #
         #
         #
-        #    5 --------------- 2  axis b
+        #    5 --------------- 2  axis a
         #
         #
         #         4       3
@@ -334,9 +371,9 @@ class RegularHeptagon:
         #            _^_
         #      6   _/   \_   1
         #        _/       \_
-        #      _/  axes  a  \_
+        #      _/  axes  b  \_
         #     /               \
-        #    5 --------------- 2  axis b
+        #    5 --------------- 2  axis a
         #
         #
         #         4       3
@@ -346,11 +383,11 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		0, 2, 2, 5, 5, 0
 	    ]
-	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = a)
+	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = b)
 	V1 = Rot0_2 * this.VsOrg[1]
 	V2 = this.VsOrg[2]
 	if keepV0:
-	    Rot5_2 = Rot(axis = this.VsOrg[5] - this.VsOrg[2], angle = b)
+	    Rot5_2 = Rot(axis = this.VsOrg[5] - this.VsOrg[2], angle = a)
 	    V3 = Rot5_2 * (this.VsOrg[3] - V2) + V2
 	    this.Vs = [
 		    this.VsOrg[0],
@@ -362,7 +399,7 @@ class RegularHeptagon:
 		    Vec([-V1[0], V1[1], V1[2]]),
 		]
 	else:
-	    Rot2_5 = Rot(axis = this.VsOrg[2] - this.VsOrg[5], angle = b)
+	    Rot2_5 = Rot(axis = this.VsOrg[2] - this.VsOrg[5], angle = a)
 	    V0 = Rot2_5 * (this.VsOrg[0] - V2) + V2
 	    V1 = Rot2_5 * (V1 - V2) + V2
 	    this.Vs = [
