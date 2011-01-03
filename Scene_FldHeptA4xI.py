@@ -130,6 +130,10 @@ class Shape(Geom3D.IsometricShape):
         this.edgeAlternative = alt % this.nrOfEdgeAlternatives
         this.updateShape = True
 
+    def setFoldMethod(this, method):
+	this.foldHeptagon = method
+        this.updateShape = True
+
     def setAngle(this, angle):
         this.angle = angle
         this.updateShape = True
@@ -929,6 +933,7 @@ class CtrlWin(wx.Frame):
                 [], # None
                 [ # 1, 1, 1, 1
                     [ # index T_STRIP_1_LOOSE
+			[-1.4219137817889349, -2.3782898649783748, 2.5967504554976419, 2.5509612243604232]
                     ],
                     [ # index T_STRIP_I
                     ],
@@ -1342,6 +1347,7 @@ class CtrlWin(wx.Frame):
 	this.foldMethodList = [
 	    Heptagons.FoldName[Heptagons.foldMethod.parallel],
 	    Heptagons.FoldName[Heptagons.foldMethod.triangle],
+	    Heptagons.FoldName[Heptagons.foldMethod.w],
 	]
         this.foldMethodGui = wx.RadioBox(this.panel,
                 label = 'Heptagon Fold Method',
@@ -1515,7 +1521,7 @@ class CtrlWin(wx.Frame):
         this.SetSize(size)
 
     def onAngle(this, event):
-	print this.GetSize()
+	#print this.GetSize()
         this.shape.setAngle(Geom3D.Deg2Rad * this.angleGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
@@ -1561,12 +1567,11 @@ class CtrlWin(wx.Frame):
         this.foldMethod = Heptagons.foldMethod.get(
 		this.foldMethodList[this.foldMethodGui.GetSelection()]
 	    )
-	this.shape.foldHeptagon = this.foldMethod
+	this.shape.setFoldMethod(this.foldMethod)
         if this.prePosGui.GetSelection() != 0:
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
         this.canvas.paint()
 
     def onFirst(this, event = None):
