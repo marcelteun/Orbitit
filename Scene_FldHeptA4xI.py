@@ -761,6 +761,13 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
+                [ # heptagons only: all triangle variants are the same:
+                    [], # index T_STRIP_1_LOOSE
+                    [], # index T_STRIP_I
+                    [], # index T_STRIP_II
+                    [], # index T_STAR
+                    [], # index T_STAR_1_LOOSE
+                ],
             ],
 	    Heptagons.foldMethod.triangle: [
                 [], # None
@@ -928,16 +935,19 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
+                [ # heptagons only: all triangle variants are the same:
+                    [], # index T_STRIP_1_LOOSE
+                    [], # index T_STRIP_I
+                    [], # index T_STRIP_II
+                    [], # index T_STAR
+                    [], # index T_STAR_1_LOOSE
+                ],
             ],
 	    Heptagons.foldMethod.w: [
                 [], # None
                 [ # 1, 1, 1, 1
                     [ # index T_STRIP_1_LOOSE
 			[-1.4219137817889349, -2.3782898649783748, 2.5967504554976419, 2.5509612243604232],
-			# polyhedra with folded Heptagons only....
-			# TODO move these to a new header..
-			[2.380384930679721, 0.693073733186942, -0.568746300899379, -0.882436236397252],
-			[1.7889621671929601, 0.48746365476050291, -1.6930224693313676, -1.5136933696889994]
                     ],
                     [ # index T_STRIP_I
                     ],
@@ -1051,13 +1061,18 @@ class CtrlWin(wx.Frame):
                     [ # index T_STRIP_I
                     ],
                     [ # index T_STRIP_II
-                        # same as STRIP_I
                     ],
                     [ # index T_STAR
-                        # same as STRIP_I
                     ],
                     [ # index T_STAR_1_LOOSE
                     ],
+                ],
+                [ # heptagons only: all triangle variants are the same:
+		    OnlyHeptagons[Heptagons.foldMethod.w],
+		    OnlyHeptagons[Heptagons.foldMethod.w],
+		    OnlyHeptagons[Heptagons.foldMethod.w],
+		    OnlyHeptagons[Heptagons.foldMethod.w],
+		    OnlyHeptagons[Heptagons.foldMethod.w],
                 ],
             ],
 	    Heptagons.foldMethod.trapezium: [
@@ -1186,6 +1201,13 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
+                [ # heptagons only: all triangle variants are the same:
+                    [], # index T_STRIP_1_LOOSE
+                    [], # index T_STRIP_I
+                    [], # index T_STRIP_II
+                    [], # index T_STAR
+                    [], # index T_STAR_1_LOOSE
+                ],
             ],
 	    Heptagons.foldMethod.star: [
                 [], # None
@@ -1313,6 +1335,13 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
+                [ # heptagons only: all triangle variants are the same:
+                    [], # index T_STRIP_1_LOOSE
+                    [], # index T_STRIP_I
+                    [], # index T_STRIP_II
+                    [], # index T_STAR
+                    [], # index T_STAR_1_LOOSE
+                ],
             ],
 	}
 
@@ -1381,7 +1410,7 @@ class CtrlWin(wx.Frame):
                 '|a|=0 & |b|=1 & |c|=1 & |d|=1',
                 '|a|=0 & |b|=1 & |c|=V2 & |d|=1',
                 '|a|=0 & |b|=1 & |c|=1 & |d|=0',
-                'More...?'
+		'Heptagons only',
             ]
         this.prePosGui = wx.RadioBox(this.panel,
                 label = 'Special Positions',
@@ -1646,64 +1675,10 @@ class CtrlWin(wx.Frame):
 			this.tNone, this.aNone, this.fld1None, this.fld2None, 0
 		    )
 	    nrPos = 0
-            i = 1
-            if selStr == this.prePosLst[i]:
-                # 1, 1, 1, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 1, 1, 1, 0
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 1, 1, V2, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 1, V2, 1, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # V2, 1, 1, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # V2, 1, V2, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 1, V2, 1, 0
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 0, 1, 1, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 0, 1, V2, 1
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-            i += 1
-            if selStr == this.prePosLst[i]:
-                # 0, 1, 1, 0
-                EnsureInRange()
-		tVal, aVal, fld1, fld2, nrPos = getVars()
-
-#            i += 1
-#            if selStr == this.prePosLst[i]:
-#                triangleAlt = c.T_STAR_1_LOOSE
-#                tVal = 1.389530133306510
-#                aVal = 1.130026556616254
-#                fld1 = 1.264497840465881
-#                fld2 = -2.775882363308309
+            for i in range(1, len(this.prePosLst)):
+		if selStr == this.prePosLst[i]:
+		    EnsureInRange()
+		    tVal, aVal, fld1, fld2, nrPos = getVars()
 
             this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
             this.trisAltGui.SetSelection(triangleAlt)
@@ -1768,3 +1743,10 @@ class Scene(Geom3D.Scene):
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
 
 
+OnlyHeptagons = {
+    Heptagons.foldMethod.w: [
+	[-1.322333216810468, -2.9671800030020141, -1.1832507472772251, 1.6683015362824891],
+	[1.7889621671929601, 0.48746365476050291, -1.6930224693313676, -1.5136933696889994],
+	[2.380384930679721, 0.693073733186942, -0.568746300899379, -0.882436236397252],
+    ]
+}
