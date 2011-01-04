@@ -256,6 +256,9 @@ class RegularHeptagon:
         #
         #
         this.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		4, 6, 6, 1, 1, 3,
+	    ]
         cosa = math.cos(a)
         sina = math.sin(a)
         if (keepV0):

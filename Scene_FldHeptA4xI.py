@@ -937,7 +937,6 @@ class CtrlWin(wx.Frame):
 			# polyhedra with folded Heptagons only....
 			# TODO move these to a new header..
 			[2.380384930679721, 0.693073733186942, -0.568746300899379, -0.882436236397252],
-
 			[1.7889621671929601, 0.48746365476050291, -1.6930224693313676, -1.5136933696889994]
                     ],
                     [ # index T_STRIP_I
@@ -1065,6 +1064,7 @@ class CtrlWin(wx.Frame):
                 [], # None
                 [ # 1, 1, 1, 1
                     [ # index T_STRIP_1_LOOSE
+			[1.9241399137025972, 0.11912677222050019, 3.0491901395357237, 2.0052942713170037],
                     ],
                     [ # index T_STRIP_I
                     ],
@@ -1191,6 +1191,7 @@ class CtrlWin(wx.Frame):
                 [], # None
                 [ # 1, 1, 1, 1
                     [ # index T_STRIP_1_LOOSE
+			[1.6962939807609119, 0.223747719417109, 2.5922373883920513, -1.5234113058915808],
                     ],
                     [ # index T_STRIP_I
                     ],
@@ -1351,8 +1352,10 @@ class CtrlWin(wx.Frame):
         # static adjustments
 	this.foldMethodList = [
 	    Heptagons.FoldName[Heptagons.foldMethod.parallel],
+	    Heptagons.FoldName[Heptagons.foldMethod.trapezium],
 	    Heptagons.FoldName[Heptagons.foldMethod.triangle],
 	    Heptagons.FoldName[Heptagons.foldMethod.w],
+	    Heptagons.FoldName[Heptagons.foldMethod.star],
 	]
         this.foldMethodGui = wx.RadioBox(this.panel,
                 label = 'Heptagon Fold Method',
