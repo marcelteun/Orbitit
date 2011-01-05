@@ -362,7 +362,7 @@ class Shape(Geom3D.IsometricShape):
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
-        size = (745, 530)
+        size = (745, 550)
         # TODO assert (type(shape) == type(RegHeptagonShape()))
         this.shape = shape
         this.canvas = canvas
@@ -385,9 +385,8 @@ class CtrlWin(wx.Frame):
 
         this.specPosIndex = 0
         this.specPos = {
-	    Heptagons.foldMethod.parallel: [
-                [], # None
-                [ # 1, 1, 1, 1
+	    Heptagons.foldMethod.parallel: {
+                edge_1_1_1_1: [
                     [ # index T_STRIP_1_LOOSE
                         [0.12225322067129163, 0.69387894107538739, -2.8805347296708912, -1.4528097830759066],
                         [0.12225322067129135, 0.69387894107538739, -2.8805347296708907, 0.97566810142912352],
@@ -456,7 +455,7 @@ class CtrlWin(wx.Frame):
                        [2.0540619450271707, -0.69387894107538717, -2.0798236853839418, -1.0637165671611601],
                     ]
                 ],
-                [ # 1, 1, 1, 0
+                edge_1_1_1_0: [
                     [ # index T_STRIP_1_LOOSE
                        [0.61336294993015139, 0.69387894107538739, -2.0238552489037858, -2.9635369142286225],
                        [-0.5887359927166792, 2.4477137125144059, -0.27002047746476787, -2.9635369142286265],
@@ -491,7 +490,7 @@ class CtrlWin(wx.Frame):
                        [2.3906737285215178, 0.69387894107538739, 0.27002047746476748, -0.17805573936117014],
                     ],
                 ],
-                [ # 1, 1, V2, 1
+                edge_1_1_V2_1: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -529,7 +528,7 @@ class CtrlWin(wx.Frame):
                        [2.9655088286928302, 0.69387894107538739, -0.14365758259686778, -0.48553086554936353],
                     ],
                 ],
-                [ # 1, V2, 1, 1
+                edge_1_V2_1_1: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -569,7 +568,7 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
-                [ # V2, 1, V2, 1
+                edge_V2_1_1_1: [
                     [ # index T_STRIP_1_LOOSE
                         [-0.11815285518002175, 1.1300265566162542, -2.6666943060109767, 0.74240619546394604],
                         [-0.11815285518002185, 1.1300265566162542, -2.6666943060109767, -0.6592023595235732],
@@ -613,7 +612,7 @@ class CtrlWin(wx.Frame):
                         [0.2282829165315296, 2.0115660969735387, -1.0635734283383886, 1.7278742032840322],
                     ],
                 ],
-                [ # V2, 1, V2, 1
+                edge_V2_1_V2_1: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -649,7 +648,7 @@ class CtrlWin(wx.Frame):
                         [1.2931714270157797, 1.1300265566162542, -1.3310250490200985, 1.7242216016858904],
                     ],
                 ],
-                [ # 1, V2, 1, 0
+                edge_1_V2_1_0: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -673,7 +672,7 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
-                [ # 0, 1, 1, 1
+                edge_0_1_1_1: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -706,7 +705,7 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
-                [ # 0, 1, V2, 1
+                edge_0_1_V2_1: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -735,7 +734,7 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
-                [ # 0, 1, 1, 0
+                edge_0_1_1_0: [
                     [ # index T_STRIP_1_LOOSE
                     ],
                     [ # index T_STRIP_I
@@ -761,17 +760,16 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ],
                 ],
-                [ # heptagons only: all triangle variants are the same:
+                only_hepts: [ # all triangle variants are the same:
                     [], # index T_STRIP_1_LOOSE
                     [], # index T_STRIP_I
                     [], # index T_STRIP_II
                     [], # index T_STAR
                     [], # index T_STAR_1_LOOSE
                 ],
-            ],
-	    Heptagons.foldMethod.triangle: [
-                [], # None
-                [ # 1, 1, 1, 1
+            },
+	    Heptagons.foldMethod.triangle: {
+                edge_1_1_1_1: [
 		    [ # index T_STRIP_1_LOOSE
 		       [-0.37928429671678865, 2.4477137125144055, 1.6378373600101694, 1.7262201018590639],
 		       [0.82281464593004194, 0.69387894107538739, -2.8915131757303993, 1.7262201018590648],
@@ -824,128 +822,9 @@ class CtrlWin(wx.Frame):
                     ],
 
                 ],
-                [ # 1, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [],  # index T_STRIP_II
-                    [ # index T_STAR, same as T_STRIP_I, since d==0
-                    ],
-                    [ # index T_STAR_1_LOOSE same as T_STRIP_1_LOOSE, since d == 0
-                    ],
-                ],
-                [ # 1, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # heptagons only: all triangle variants are the same:
-                    [], # index T_STRIP_1_LOOSE
-                    [], # index T_STRIP_I
-                    [], # index T_STRIP_II
-                    [], # index T_STAR
-                    [], # index T_STAR_1_LOOSE
-                ],
-            ],
-	    Heptagons.foldMethod.w: [
-                [], # None
-                [ # 1, 1, 1, 1
+            },
+	    Heptagons.foldMethod.w: {
+                edge_1_1_1_1: [
                     [ # index T_STRIP_1_LOOSE
 			[-1.4219137817889349, -2.3782898649783748, 2.5967504554976419, 2.5509612243604232],
                     ],
@@ -956,128 +835,17 @@ class CtrlWin(wx.Frame):
                     ],
                     [ # index T_STAR_1_LOOSE
                     ]
-
                 ],
-                [ # 1, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [],  # index T_STRIP_II
-                    [ # index T_STAR, same as T_STRIP_I, since d==0
-                    ],
-                    [ # index T_STAR_1_LOOSE same as T_STRIP_1_LOOSE, since d == 0
-                    ],
-                ],
-                [ # 1, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # heptagons only: all triangle variants are the same:
+                only_hepts: [ # all triangle variants are the same:
 		    OnlyHeptagons[Heptagons.foldMethod.w],
 		    OnlyHeptagons[Heptagons.foldMethod.w],
 		    OnlyHeptagons[Heptagons.foldMethod.w],
 		    OnlyHeptagons[Heptagons.foldMethod.w],
 		    OnlyHeptagons[Heptagons.foldMethod.w],
                 ],
-            ],
-	    Heptagons.foldMethod.trapezium: [
-                [], # None
-                [ # 1, 1, 1, 1
+            },
+	    Heptagons.foldMethod.trapezium: {
+                edge_1_1_1_1: [
                     [ # index T_STRIP_1_LOOSE
 			[-1.4845890274466147, 3.0626426449873039, -0.097780459842321754, -1.4952529282338594],
 			[-1.4845890274466147, 3.0626426449873039, 2.3306974246627101, -1.4952529282338594],
@@ -1109,128 +877,9 @@ class CtrlWin(wx.Frame):
                     ]
 
                 ],
-                [ # 1, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [],  # index T_STRIP_II
-                    [ # index T_STAR, same as T_STRIP_I, since d==0
-                    ],
-                    [ # index T_STAR_1_LOOSE same as T_STRIP_1_LOOSE, since d == 0
-                    ],
-                ],
-                [ # 1, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # heptagons only: all triangle variants are the same:
-                    [], # index T_STRIP_1_LOOSE
-                    [], # index T_STRIP_I
-                    [], # index T_STRIP_II
-                    [], # index T_STAR
-                    [], # index T_STAR_1_LOOSE
-                ],
-            ],
-	    Heptagons.foldMethod.star: [
-                [], # None
-                [ # 1, 1, 1, 1
+            },
+	    Heptagons.foldMethod.star: {
+                edge_1_1_1_1: [
                     [ # index T_STRIP_1_LOOSE
 			[1.6962939807609119, 0.223747719417109, 2.5922373883920513, -1.5234113058915808],
                     ],
@@ -1243,125 +892,7 @@ class CtrlWin(wx.Frame):
                     ]
 
                 ],
-                [ # 1, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [],  # index T_STRIP_II
-                    [ # index T_STAR, same as T_STRIP_I, since d==0
-                    ],
-                    [ # index T_STAR_1_LOOSE same as T_STRIP_1_LOOSE, since d == 0
-                    ],
-                ],
-                [ # 1, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # V2, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 1, V2, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, V2, 1
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # 0, 1, 1, 0
-                    [ # index T_STRIP_1_LOOSE
-                    ],
-                    [ # index T_STRIP_I
-                    ],
-                    [ # index T_STRIP_II
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR
-                        # same as STRIP_I
-                    ],
-                    [ # index T_STAR_1_LOOSE
-                    ],
-                ],
-                [ # heptagons only: all triangle variants are the same:
-                    [], # index T_STRIP_1_LOOSE
-                    [], # index T_STRIP_I
-                    [], # index T_STRIP_II
-                    [], # index T_STAR
-                    [], # index T_STAR_1_LOOSE
-                ],
-            ],
+            },
 	}
 
     def createControlsSizer(this):
@@ -1418,18 +949,19 @@ class CtrlWin(wx.Frame):
 
 	# predefined positions
         this.prePosLst = [
-                'None',
-                '|a|=1 & |b|=1 & |c|=1 & |d|=1',
-                '|a|=1 & |b|=1 & |c|=1 & |d|=0',
-                '|a|=1 & |b|=1 & |c|=V2 & |d|=1',
-                '|a|=1 & |b|=V2 & |c|=1 & |d|=1',
-                '|a|=V2 & |b|=1 & |c|=1 & |d|=1',
-                '|a|=V2 & |b|=1 & |c|=V2 & |d|=1',
-                '|a|=1 & |b|=V2 & |c|=1 & |d|=0',
-                '|a|=0 & |b|=1 & |c|=1 & |d|=1',
-                '|a|=0 & |b|=1 & |c|=V2 & |d|=1',
-                '|a|=0 & |b|=1 & |c|=1 & |d|=0',
-		'Heptagons only',
+		Stringify[none],
+		Stringify[edge_1_1_1_1],
+		Stringify[edge_1_1_1_0],
+		Stringify[edge_1_1_V2_1],
+		Stringify[edge_1_V2_1_1],
+		Stringify[edge_V2_1_1_1],
+		Stringify[edge_V2_1_V2_1],
+		Stringify[edge_1_V2_1_0],
+		Stringify[edge_0_1_1_1],
+		Stringify[edge_0_1_V2_1],
+		Stringify[edge_0_1_1_0],
+		Stringify[only_hepts],
+		Stringify[only_o3_tris],
             ]
         this.prePosGui = wx.RadioBox(this.panel,
                 label = 'Special Positions',
@@ -1640,64 +1172,78 @@ class CtrlWin(wx.Frame):
         print 'onLast'
         this.onPrePos()
 
+    def getPrePos(this):
+        prePosStr = this.prePosLst[this.prePosGui.GetSelection()]
+	for k,v in Stringify.iteritems():
+	    if v == prePosStr:
+		return k
+	return none
+
     def onPrev(this, event = None):
         triangleAlt = this.trisAltGui.GetSelection()
-        prePosIndex = this.prePosGui.GetSelection()
-        if prePosIndex != 0:
+        prePosIndex = this.getPrePos()
+        if prePosIndex != none:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
-            #else:
-            #    this.specPosIndex = len(this.specPos[this.foldMethod][prePosIndex][triangleAlt]) - 1
             this.onPrePos()
 
     def onNext(this, event = None):
         triangleAlt = this.trisAltGui.GetSelection()
-        prePosIndex = this.prePosGui.GetSelection()
-        if prePosIndex != 0:
-            if this.specPosIndex < len(this.specPos[this.foldMethod][prePosIndex][triangleAlt]) - 1:
-                this.specPosIndex += 1
-            #else:
-            #    this.specPosIndex = 0
-            this.onPrePos()
+        prePosIndex = this.getPrePos()
+        if prePosIndex != none:
+	    try:
+		if (this.specPosIndex < len(this.specPos[this.foldMethod][
+		    prePosIndex][triangleAlt]) - 1
+		):
+		    this.specPosIndex += 1
+		#else:
+		#    this.specPosIndex = 0
+	    except KeyError:
+		pass
+	    this.onPrePos()
 
     tNone = 1.0
     aNone = 0.0
     fld1None = 0.0
     fld2None = 0.0
     def onPrePos(this, event = None):
-        sel = this.prePosGui.GetSelection()
+        sel = this.getPrePos()
         aVal = this.aNone
         tVal = this.tNone
-        if sel != 0:
-            selStr = this.prePosLst[sel]
+        if sel != none:
             triangleAlt = this.trisAltGui.GetSelection()
             c = this.shape
             fld1 = this.fld1None
             fld2 = this.fld2None
-            def EnsureInRange():
-                # if this.specPosIndex not in range
-                if (this.specPosIndex >= len(this.specPos[this.foldMethod][i][triangleAlt])):
-                    this.specPosIndex = len(this.specPos[this.foldMethod][i][triangleAlt]) - 1
-                elif (this.specPosIndex <  0):
-                    this.specPosIndex = 0
-            def getVars():
-		if this.specPos[this.foldMethod][i][triangleAlt] != []:
-		    return ( # tval, aval, fld1, fld2, nrPos
-			this.specPos[this.foldMethod][i][triangleAlt][this.specPosIndex][0],
-			this.specPos[this.foldMethod][i][triangleAlt][this.specPosIndex][1],
-			this.specPos[this.foldMethod][i][triangleAlt][this.specPosIndex][2],
-			this.specPos[this.foldMethod][i][triangleAlt][this.specPosIndex][3],
-			len(this.specPos[this.foldMethod][i][triangleAlt])
-		    )
-		else:
-		    return (
-			this.tNone, this.aNone, this.fld1None, this.fld2None, 0
-		    )
 	    nrPos = 0
-            for i in range(1, len(this.prePosLst)):
-		if selStr == this.prePosLst[i]:
-		    EnsureInRange()
-		    tVal, aVal, fld1, fld2, nrPos = getVars()
+
+	    # Ensure this.specPosIndex in range:
+	    try:
+		if (this.specPosIndex >=
+		    len(this.specPos[this.foldMethod][sel][triangleAlt])
+		):
+		    this.specPosIndex = len(
+			    this.specPos[this.foldMethod][sel][triangleAlt]
+			) - 1
+		elif (this.specPosIndex <  0):
+		    this.specPosIndex = 0
+	    except KeyError:
+		pass
+
+
+	    try:
+		if this.specPos[this.foldMethod][sel][triangleAlt] != []:
+		    tVal = this.specPos[this.foldMethod][sel][triangleAlt][
+			    this.specPosIndex][0]
+		    aVal = this.specPos[this.foldMethod][sel][triangleAlt][
+			    this.specPosIndex][1]
+		    fld1 = this.specPos[this.foldMethod][sel][triangleAlt][
+			    this.specPosIndex][2]
+		    fld2 = this.specPos[this.foldMethod][sel][triangleAlt][
+			    this.specPosIndex][3]
+		    nrPos = len(this.specPos[this.foldMethod][sel][triangleAlt])
+	    except KeyError:
+	        pass
 
             this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
             this.trisAltGui.SetSelection(triangleAlt)
@@ -1712,7 +1258,7 @@ class CtrlWin(wx.Frame):
                 this.statusBar.SetStatusText('No solution for this triangle alternative')
             elif ( this.foldMethod == Heptagons.foldMethod.parallel and (
                     (
-                        selStr == '|a|=1 & |b|=V2 & |c|=1 & |d|=0'
+                        sel == edge_1_V2_1_0
                         and
                         not (
                             triangleAlt == c.T_STRIP_II
@@ -1722,7 +1268,8 @@ class CtrlWin(wx.Frame):
                     )
                     or
                     (
-                        selStr == '|a|=1 & |b|=V2 & |c|=1 & |d|=1' and (
+                        sel == edge_1_V2_1_1
+			and (
                             triangleAlt == c.T_STRIP_1_LOOSE
                             or
                             triangleAlt == c.T_STAR_1_LOOSE
@@ -1730,7 +1277,8 @@ class CtrlWin(wx.Frame):
                     )
                     or
                     (
-                        selStr == '|a|=V2 & |b|=1 & |c|=1 & |d|=1' and not (
+                        sel == edge_V2_1_1_1
+			and not (
                             triangleAlt == c.T_STRIP_1_LOOSE
                             or
                             triangleAlt == c.T_STAR_1_LOOSE
@@ -1739,11 +1287,11 @@ class CtrlWin(wx.Frame):
                     or
                     (
                         (
-                            selStr == '|a|=0 & |b|=1 & |c|=1 & |d|=1'
+                            sel == edge_0_1_1_1
                             or
-                            selStr == '|a|=0 & |b|=1 & |c|=V2 & |d|=1'
+                            sel == edge_0_1_V2_1
                             or
-                            selStr == '|a|=0 & |b|=1 & |c|=1 & |d|=0'
+                            sel == edge_0_1_1_0
                         ) and (
                             triangleAlt == c.T_STRIP_1_LOOSE
                             or
@@ -1761,6 +1309,35 @@ class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
 
+none		= -1
+edge_1_1_1_1	=  0
+edge_1_1_1_0	=  1
+edge_1_1_V2_1	=  2
+edge_1_V2_1_1	=  3
+edge_V2_1_1_1	=  4
+edge_V2_1_V2_1	=  5
+edge_1_V2_1_0	=  6
+edge_0_1_1_1	=  7
+edge_0_1_V2_1	=  8
+edge_0_1_1_0	=  9
+only_hepts	= 10
+only_o3_tris	= 11
+
+Stringify = {
+    none:		'None',
+    edge_1_1_1_1:	'|a|=1 & |b|=1 & |c|=1 & |d|=1',
+    edge_1_1_1_0:	'|a|=1 & |b|=1 & |c|=1 & |d|=0',
+    edge_1_1_V2_1:	'|a|=1 & |b|=1 & |c|=V2 & |d|=1',
+    edge_1_V2_1_1:	'|a|=1 & |b|=V2 & |c|=1 & |d|=1',
+    edge_V2_1_1_1:	'|a|=V2 & |b|=1 & |c|=1 & |d|=1',
+    edge_V2_1_V2_1:	'|a|=V2 & |b|=1 & |c|=V2 & |d|=1',
+    edge_1_V2_1_0:	'|a|=1 & |b|=V2 & |c|=1 & |d|=0',
+    edge_0_1_1_1:	'|a|=0 & |b|=1 & |c|=1 & |d|=1',
+    edge_0_1_V2_1:	'|a|=0 & |b|=1 & |c|=V2 & |d|=1',
+    edge_0_1_1_0:	'|a|=0 & |b|=1 & |c|=1 & |d|=0',
+    only_hepts:		'Only Heptagons',
+    only_o3_tris:	'Only O3 triangles',
+}
 
 OnlyHeptagons = {
     Heptagons.foldMethod.w: [
