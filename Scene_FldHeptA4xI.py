@@ -836,6 +836,13 @@ class CtrlWin(wx.Frame):
                     [ # index T_STAR_1_LOOSE
                     ]
                 ],
+                only_o3_tris: [ # all triangle variants are the same:
+		    OnlyO3Triangles[Heptagons.foldMethod.w],
+		    OnlyO3Triangles[Heptagons.foldMethod.w],
+		    OnlyO3Triangles[Heptagons.foldMethod.w],
+		    OnlyO3Triangles[Heptagons.foldMethod.w],
+		    OnlyO3Triangles[Heptagons.foldMethod.w],
+                ],
                 only_hepts: [ # all triangle variants are the same:
 		    OnlyHeptagons[Heptagons.foldMethod.w],
 		    OnlyHeptagons[Heptagons.foldMethod.w],
@@ -875,7 +882,20 @@ class CtrlWin(wx.Frame):
                     ],
                     [ # index T_STAR_1_LOOSE
                     ]
-
+                ],
+                only_o3_tris: [
+		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		],
+                only_hepts: [ # all triangle variants are the same:
+                    OnlyHeptagons[Heptagons.foldMethod.trapezium],
+		    OnlyHeptagons[Heptagons.foldMethod.trapezium],
+		    OnlyHeptagons[Heptagons.foldMethod.trapezium],
+		    OnlyHeptagons[Heptagons.foldMethod.trapezium],
+		    OnlyHeptagons[Heptagons.foldMethod.trapezium],
                 ],
             },
 	    Heptagons.foldMethod.star: {
@@ -890,7 +910,20 @@ class CtrlWin(wx.Frame):
                     ],
                     [ # index T_STAR_1_LOOSE
                     ]
-
+                ],
+                only_o3_tris: [ # all triangle variants are the same:
+		    OnlyO3Triangles[Heptagons.foldMethod.star],
+		    OnlyO3Triangles[Heptagons.foldMethod.star],
+		    OnlyO3Triangles[Heptagons.foldMethod.star],
+		    OnlyO3Triangles[Heptagons.foldMethod.star],
+		    OnlyO3Triangles[Heptagons.foldMethod.star],
+                ],
+                only_hepts: [ # all triangle variants are the same:
+		    OnlyHeptagons[Heptagons.foldMethod.star],
+		    OnlyHeptagons[Heptagons.foldMethod.star],
+		    OnlyHeptagons[Heptagons.foldMethod.star],
+		    OnlyHeptagons[Heptagons.foldMethod.star],
+		    OnlyHeptagons[Heptagons.foldMethod.star],
                 ],
             },
 	}
@@ -1338,11 +1371,30 @@ Stringify = {
     only_hepts:		'Only Heptagons',
     only_o3_tris:	'Only O3 triangles',
 }
-
 OnlyHeptagons = {
     Heptagons.foldMethod.w: [
+	[-1.8868486799927435, -2.6758432135380379, -3.1283205574215183, 1.9544544516064626],
 	[-1.322333216810468, -2.9671800030020141, -1.1832507472772251, 1.6683015362824891],
 	[1.7889621671929601, 0.48746365476050291, -1.6930224693313676, -1.5136933696889994],
 	[2.380384930679721, 0.693073733186942, -0.568746300899379, -0.882436236397252],
-    ]
+    ],
+    Heptagons.foldMethod.trapezium: [], # none found,... :(
+    Heptagons.foldMethod.star: [], # none found,... :(
+}
+OnlyO3Triangles = {
+    Heptagons.foldMethod.trapezium: [
+	[1.6713285948103263, 0.78612999312594156, 0.94665778267419576, 2.2644932672720368],
+        [1.603988045241469, 1.1791617966606149, -1.2247214682758774, 0.9875936306319586],
+    ],
+    Heptagons.foldMethod.star: [
+       [-1.2787114409728058, -2.5182959872317254, 2.6830500115396658, -0],
+       [-1.278711440972806, -2.5182959872317263, -1.4154825122609482, 0.0],
+       [1.7787114409728062, 0.94749966043682887, -1.7261101413288449, 5.9249751911283334e-17],
+    ],
+    # note, same as Heptagons.foldMethod.star:
+    Heptagons.foldMethod.w: [
+        [-1.278711440972806, -2.5182959872317259, 2.6830500115396663, 0.0],
+        [-1.2787114409728058, -2.5182959872317259, -1.4154825122609482, 8.8817841970012523e-16],
+        [1.7787114409728058, 0.94749966043682898, -1.726110141328844, -2.6645352591003757e-15],
+    ],
 }
