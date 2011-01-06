@@ -94,7 +94,7 @@ class Shape(Geom3D.IsometricShape):
         this.fold1 = 0.0
         this.fold2 = 0.0
 	this.foldHeptagon = Heptagons.foldMethod.parallel
-        this.translation = 2.3
+        this.height = 2.3
         this.applySymmetry = True
         this.addTriangles = True
         this.onlyO3Triangles = False
@@ -148,7 +148,7 @@ class Shape(Geom3D.IsometricShape):
         this.updateShape = True
 
     def setHeight(this, height):
-        this.translation = height
+        this.height = height
         this.updateShape = True
 
     def edgeColor(this):
@@ -163,7 +163,7 @@ class Shape(Geom3D.IsometricShape):
                 this.angle,
                 this.fold1,
                 this.fold2,
-                this.translation
+                this.height
             )
         if this.updateShape:
             #print 'getStatusStr: forced setV'
@@ -234,7 +234,7 @@ class Shape(Geom3D.IsometricShape):
         this.heptagon.translate(Heptagons.H*GeomTypes.uy)
         # The angle has to be adjusted for historical reasons...
         this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.angle)
-        this.heptagon.translate(this.translation*GeomTypes.uz)
+        this.heptagon.translate(this.height*GeomTypes.uz)
         Vs = this.heptagon.Vs[:]
         #                0
         #   13                      12
@@ -1003,7 +1003,7 @@ class CtrlWin(wx.Frame):
 
 	# predefined positions
         this.prePosLst = [
-		Stringify[none],
+		Stringify[dyn_pos],
 		Stringify[edge_1_1_1_1],
 		Stringify[edge_1_1_1_0],
 		Stringify[edge_1_1_V2_1],
@@ -1071,7 +1071,7 @@ class CtrlWin(wx.Frame):
         this.fold2Gui.Bind(wx.EVT_SLIDER, this.onFold2)
         this.heightGui = wx.Slider(
                 this.panel,
-                value = this.maxHeight - this.shape.translation*this.heightF,
+                value = this.maxHeight - this.shape.height*this.heightF,
                 minValue = -this.maxHeight * this.heightF,
                 maxValue = this.maxHeight * this.heightF,
 		style = wx.SL_VERTICAL
@@ -1231,12 +1231,12 @@ class CtrlWin(wx.Frame):
 	for k,v in Stringify.iteritems():
 	    if v == prePosStr:
 		return k
-	return none
+	return dyn_pos
 
     def onPrev(this, event = None):
         triangleAlt = this.trisAltGui.GetSelection()
         prePosIndex = this.getPrePos()
-        if prePosIndex != none:
+        if prePosIndex != dyn_pos:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
             this.onPrePos()
@@ -1244,7 +1244,7 @@ class CtrlWin(wx.Frame):
     def onNext(this, event = None):
         triangleAlt = this.trisAltGui.GetSelection()
         prePosIndex = this.getPrePos()
-        if prePosIndex != none:
+        if prePosIndex != dyn_pos:
 	    try:
 		if (this.specPosIndex < len(this.specPos[this.foldMethod][
 		    prePosIndex][triangleAlt]) - 1
@@ -1279,7 +1279,7 @@ class CtrlWin(wx.Frame):
 	    this.trisAltGui.Enable()
 	    this.addTrisGui.Enable()
 	    this.shape.addTriangles  = this.addTrisGui.IsChecked()
-	    # needed for sel == none
+	    # needed for sel == dyn_pos
 	    this.shape.updateShape = True
 	if (sel == only_o3_tris):
 	    this.shape.onlyO3Triangles = True
@@ -1289,11 +1289,21 @@ class CtrlWin(wx.Frame):
 	    this.restoreO3Tris = False
 	    this.trisAltGui.Enable()
 	    this.shape.onlyO3Triangles = False
-	    # needed for sel == none
+	    # needed for sel == dyn_pos
 	    this.shape.updateShape = True
         aVal = this.aNone
         tVal = this.tNone
-        if sel != none:
+        if sel == dyn_pos:
+	    this.angleGui.Enable()
+	    this.fold1Gui.Enable()
+	    this.fold2Gui.Enable()
+	    this.heightGui.Enable()
+	    this.angleGui.SetValue(Geom3D.Rad2Deg * this.shape.angle)
+	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * this.shape.fold1)
+	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * this.shape.fold2)
+	    this.heightGui.SetValue(
+		this.maxHeight - this.heightF*this.shape.height)
+	else:
             triangleAlt = this.trisAltGui.GetSelection()
             c = this.shape
             fld1 = this.fld1None
@@ -1334,10 +1344,14 @@ class CtrlWin(wx.Frame):
             this.shape.setHeight(tVal)
             this.shape.setFold1(fld1)
             this.shape.setFold2(fld2)
-	    this.angleGui.SetValue(Geom3D.Rad2Deg * aVal)
-	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
-	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
-	    this.heightGui.SetValue(this.maxHeight - this.heightF*tVal)
+	    this.angleGui.SetValue(0)
+	    this.fold1Gui.SetValue(0)
+	    this.fold2Gui.SetValue(0)
+	    this.heightGui.SetValue(0)
+	    this.angleGui.Disable()
+	    this.fold1Gui.Disable()
+	    this.fold2Gui.Disable()
+	    this.heightGui.Disable()
             if ( tVal == this.tNone and aVal == this.aNone and
 		fld1 == this.fld1None and fld2 == this.fld2None
                 ):
@@ -1401,7 +1415,7 @@ class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
 
-none		= -1
+dyn_pos		= -1
 edge_1_1_1_1	=  0
 edge_1_1_1_0	=  1
 edge_1_1_V2_1	=  2
@@ -1416,7 +1430,7 @@ only_hepts	= 10
 only_o3_tris	= 11
 
 Stringify = {
-    none:		'None',
+    dyn_pos:		'Enable sliders',
     edge_1_1_1_1:	'|a|=1 & |b|=1 & |c|=1 & |d|=1',
     edge_1_1_1_0:	'|a|=1 & |b|=1 & |c|=1 & |d|=0',
     edge_1_1_V2_1:	'|a|=1 & |b|=1 & |c|=V2 & |d|=1',
