@@ -137,6 +137,9 @@ class RegularHeptagon:
         #
         #
         this.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		1, 6, 2, 5,
+	    ]
         cosa = math.cos(a)
         sina = math.sin(a)
         cosb = math.cos(b)
@@ -357,7 +360,7 @@ class RegularHeptagon:
 	    ]
         this.Fs = [[1, 3, 2], [1, 0, 3], [0, 4, 3], [0, 6, 4], [6, 5, 4]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-		#1, 3, 3, 0, 0, 4, 4, 6
+		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
 
     def foldTriangle(this, a, b, keepV0 = True):
