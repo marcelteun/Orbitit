@@ -371,6 +371,7 @@ class CtrlWin(wx.Frame):
         this.statusBar = this.CreateStatusBar()
 	#this.foldMethod = Heptagons.foldMethod.parallel
 	this.foldMethod = Heptagons.foldMethod.triangle
+	this.restoreTris = False
 	this.shape.foldHeptagon = this.foldMethod
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
         this.mainSizer.Add(
@@ -1261,6 +1262,21 @@ class CtrlWin(wx.Frame):
     fld2None = 0.0
     def onPrePos(this, event = None):
         sel = this.getPrePos()
+	# if only_hepts:
+	# 1. don't show triangles
+	# 2. disable triangle strip.
+	if (sel == only_hepts):
+	    this.shape.addTriangles = False
+	    this.addTrisGui.Disable()
+	    this.trisAltGui.Disable()
+	    this.restoreTris = True
+	elif (this.restoreTris):
+		this.restoreTris = False
+		this.trisAltGui.Enable()
+		this.addTrisGui.Enable()
+		this.shape.addTriangles  = this.addTrisGui.IsChecked()
+		# needed for sel == none
+		this.shape.updateShape = True
         aVal = this.aNone
         tVal = this.tNone
         if sel != none:
@@ -1311,55 +1327,60 @@ class CtrlWin(wx.Frame):
             if ( tVal == this.tNone and aVal == this.aNone and
 		fld1 == this.fld1None and fld2 == this.fld2None
                 ):
-                this.statusBar.SetStatusText('No solution for this triangle alternative')
-            elif ( this.foldMethod == Heptagons.foldMethod.parallel and (
-                    (
-                        sel == edge_1_V2_1_0
-                        and
-                        not (
-                            triangleAlt == c.T_STRIP_II
-                            or
-                            triangleAlt == c.T_STAR
-                        )
-                    )
-                    or
-                    (
-                        sel == edge_1_V2_1_1
+		if (sel == only_hepts):
+		    txt = 'No solution for this folding method'
+		else:
+		    txt = 'No solution for this triangle alternative'
+                this.statusBar.SetStatusText(txt)
+	    elif ( this.foldMethod == Heptagons.foldMethod.parallel and (
+		    (
+			sel == edge_1_V2_1_0
+			and
+			not (
+			    triangleAlt == c.T_STRIP_II
+			    or
+			    triangleAlt == c.T_STAR
+			)
+		    )
+		    or
+		    (
+			sel == edge_1_V2_1_1
 			and (
-                            triangleAlt == c.T_STRIP_1_LOOSE
-                            or
-                            triangleAlt == c.T_STAR_1_LOOSE
-                        )
-                    )
-                    or
-                    (
-                        sel == edge_V2_1_1_1
+			    triangleAlt == c.T_STRIP_1_LOOSE
+			    or
+			    triangleAlt == c.T_STAR_1_LOOSE
+			)
+		    )
+		    or
+		    (
+			sel == edge_V2_1_1_1
 			and not (
-                            triangleAlt == c.T_STRIP_1_LOOSE
-                            or
-                            triangleAlt == c.T_STAR_1_LOOSE
-                        )
-                    )
-                    or
-                    (
-                        (
-                            sel == edge_0_1_1_1
-                            or
-                            sel == edge_0_1_V2_1
-                            or
-                            sel == edge_0_1_1_0
-                        ) and (
-                            triangleAlt == c.T_STRIP_1_LOOSE
-                            or
-                            triangleAlt == c.T_STAR_1_LOOSE
-                        )
-                    )
+			    triangleAlt == c.T_STRIP_1_LOOSE
+			    or
+			    triangleAlt == c.T_STAR_1_LOOSE
+			)
+		    )
+		    or
+		    (
+			(
+			    sel == edge_0_1_1_1
+			    or
+			    sel == edge_0_1_V2_1
+			    or
+			    sel == edge_0_1_1_0
+			) and (
+			    triangleAlt == c.T_STRIP_1_LOOSE
+			    or
+			    triangleAlt == c.T_STAR_1_LOOSE
+			)
+		    )
 		)
 	    ):
-                this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
-            else:
+
+		this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
+	    else:
 		this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
-                this.statusBar.SetStatusText(this.shape.getStatusStr())
+		this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
 
 class Scene(Geom3D.Scene):
