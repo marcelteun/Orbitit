@@ -94,7 +94,7 @@ class Shape(Geom3D.IsometricShape):
         this.fold1 = 0.0
         this.fold2 = 0.0
 	this.foldHeptagon = Heptagons.foldMethod.parallel
-        this.translation = 4.0
+        this.translation = 2.3
         this.applySymmetry = True
         this.addTriangles = True
         this.useCulling = False
@@ -820,7 +820,13 @@ class CtrlWin(wx.Frame):
 			[1.725095568985058, 2.4477137125144055, -1.6767258051172735, -1.0919470058995833],
 			[2.9271945116318889, 0.69387894107538739, 0.077108966321745367, -1.0919470058995842],
                     ],
-
+                ],
+                only_o3_tris: [ # all triangle variants are the same:
+		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
                 ],
             },
 	    Heptagons.foldMethod.w: {
@@ -929,8 +935,8 @@ class CtrlWin(wx.Frame):
 	}
 
     def createControlsSizer(this):
-        this.heightF = 10
-        this.maxHeight = 18
+        this.heightF = 10 # slider step factor, or: 1 / slider step
+        this.maxHeight = 3
 
         this.Guis = []
 
@@ -1024,8 +1030,8 @@ class CtrlWin(wx.Frame):
         this.angleGui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.angle,
-                minValue = 0,
-                maxValue = 180,
+                minValue = -180,
+                maxValue =  180,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.angleGui)
@@ -1278,13 +1284,16 @@ class CtrlWin(wx.Frame):
 	    except KeyError:
 	        pass
 
-            this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
             this.trisAltGui.SetSelection(triangleAlt)
             this.shape.setEdgeAlternative(triangleAlt)
             this.shape.setAngle(aVal)
             this.shape.setHeight(tVal)
             this.shape.setFold1(fld1)
             this.shape.setFold2(fld2)
+	    this.angleGui.SetValue(Geom3D.Rad2Deg * aVal)
+	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
+	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
+	    this.heightGui.SetValue(tVal)
             if ( tVal == this.tNone and aVal == this.aNone and
 		fld1 == this.fld1None and fld2 == this.fld2None
                 ):
@@ -1335,6 +1344,7 @@ class CtrlWin(wx.Frame):
 	    ):
                 this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
             else:
+		this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
                 this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
 
@@ -1397,4 +1407,7 @@ OnlyO3Triangles = {
         [-1.2787114409728058, -2.5182959872317259, -1.4154825122609482, 8.8817841970012523e-16],
         [1.7787114409728058, 0.94749966043682898, -1.726110141328844, -2.6645352591003757e-15],
     ],
+    Heptagons.foldMethod.triangle: [
+	[1.6800854296744396, 0.47457010697125623, 0.74503485547995096, 2.2177947528033286],
+    ]
 }
