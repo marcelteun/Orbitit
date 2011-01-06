@@ -1307,7 +1307,7 @@ class CtrlWin(wx.Frame):
 	    this.angleGui.SetValue(Geom3D.Rad2Deg * aVal)
 	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
 	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
-	    this.heightGui.SetValue(tVal)
+	    this.heightGui.SetValue(this.maxHeight - this.heightF*tVal)
             if ( tVal == this.tNone and aVal == this.aNone and
 		fld1 == this.fld1None and fld2 == this.fld2None
                 ):
