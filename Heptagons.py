@@ -62,7 +62,7 @@ FoldName = {
 	FoldMethod.trapezium: 'Trapezium',
 	FoldMethod.w: 'W',
 	FoldMethod.triangle: 'Triangle',
-	FoldMethod.star: 'Star',
+	FoldMethod.star: 'Shell',
     }
 
 foldMethod = FoldMethod()
