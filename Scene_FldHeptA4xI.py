@@ -97,6 +97,7 @@ class Shape(Geom3D.IsometricShape):
         this.translation = 2.3
         this.applySymmetry = True
         this.addTriangles = True
+        this.onlyO3Triangles = False
         this.useCulling = False
         this.edgeAlternative = 0
         # There are 4 different edges to separate the triangles:
@@ -275,9 +276,10 @@ class Shape(Geom3D.IsometricShape):
             Fs.extend([[1, 9, 12], [6, 13, 11]]) # eql triangles
             Es.extend([1, 9, 6, 11])
             colIds.extend([3, 3])
-            Fs.extend(this.triFs[this.edgeAlternative])
-            colIds.extend(this.triColIds[this.edgeAlternative])
-            Es.extend(this.triEs[this.edgeAlternative])
+	    if (not this.onlyO3Triangles):
+		Fs.extend(this.triFs[this.edgeAlternative])
+		colIds.extend(this.triColIds[this.edgeAlternative])
+		Es.extend(this.triEs[this.edgeAlternative])
         this.setBaseEdgeProperties(Es = Es)
         this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
         this.showBaseOnly = not this.applySymmetry
@@ -334,9 +336,6 @@ class Shape(Geom3D.IsometricShape):
                 [1, 2, 2, 1, 1, 2],
                 [1, 2, 1, 1, 2, 2],
             ]
-        this.triO3F = [
-                [18, 20, 19], [21, 23, 22],
-            ]
         this.triEs = [
                 [
                     2, 7, 2, 8, 2, 9,
@@ -372,6 +371,7 @@ class CtrlWin(wx.Frame):
 	#this.foldMethod = Heptagons.foldMethod.parallel
 	this.foldMethod = Heptagons.foldMethod.triangle
 	this.restoreTris = False
+	this.restoreO3Tris = False
 	this.shape.foldHeptagon = this.foldMethod
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
         this.mainSizer.Add(
@@ -1270,13 +1270,27 @@ class CtrlWin(wx.Frame):
 	    this.addTrisGui.Disable()
 	    this.trisAltGui.Disable()
 	    this.restoreTris = True
+	    # handle here instead of below...
+	    if (this.restoreO3Tris):
+		this.restoreO3Tris = False
+		this.shape.onlyO3Triangles = False
 	elif (this.restoreTris):
-		this.restoreTris = False
-		this.trisAltGui.Enable()
-		this.addTrisGui.Enable()
-		this.shape.addTriangles  = this.addTrisGui.IsChecked()
-		# needed for sel == none
-		this.shape.updateShape = True
+	    this.restoreTris = False
+	    this.trisAltGui.Enable()
+	    this.addTrisGui.Enable()
+	    this.shape.addTriangles  = this.addTrisGui.IsChecked()
+	    # needed for sel == none
+	    this.shape.updateShape = True
+	if (sel == only_o3_tris):
+	    this.shape.onlyO3Triangles = True
+	    this.trisAltGui.Disable()
+	    this.restoreO3Tris = True
+	elif (this.restoreO3Tris):
+	    this.restoreO3Tris = False
+	    this.trisAltGui.Enable()
+	    this.shape.onlyO3Triangles = False
+	    # needed for sel == none
+	    this.shape.updateShape = True
         aVal = this.aNone
         tVal = this.tNone
         if sel != none:
@@ -1327,7 +1341,7 @@ class CtrlWin(wx.Frame):
             if ( tVal == this.tNone and aVal == this.aNone and
 		fld1 == this.fld1None and fld2 == this.fld2None
                 ):
-		if (sel == only_hepts):
+		if (sel == only_hepts or sel == only_o3_tris):
 		    txt = 'No solution for this folding method'
 		else:
 		    txt = 'No solution for this triangle alternative'
