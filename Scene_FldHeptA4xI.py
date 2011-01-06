@@ -767,6 +767,13 @@ class CtrlWin(wx.Frame):
                     [], # index T_STAR
                     [], # index T_STAR_1_LOOSE
                 ],
+                only_hepts: [ # all triangle variants are the same:
+		    OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    OnlyHeptagons[Heptagons.foldMethod.parallel],
+                ],
             },
 	    Heptagons.foldMethod.triangle: {
                 edge_1_1_1_1: [
@@ -820,6 +827,13 @@ class CtrlWin(wx.Frame):
 			[1.725095568985058, 2.4477137125144055, -1.6767258051172735, -1.0919470058995833],
 			[2.9271945116318889, 0.69387894107538739, 0.077108966321745367, -1.0919470058995842],
                     ],
+                ],
+                only_hepts: [ # all triangle variants are the same:
+		    OnlyHeptagons[Heptagons.foldMethod.triangle],
+		    OnlyHeptagons[Heptagons.foldMethod.triangle],
+		    OnlyHeptagons[Heptagons.foldMethod.triangle],
+		    OnlyHeptagons[Heptagons.foldMethod.triangle],
+		    OnlyHeptagons[Heptagons.foldMethod.triangle],
                 ],
                 only_o3_tris: [ # all triangle variants are the same:
 		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
@@ -1382,6 +1396,12 @@ Stringify = {
     only_o3_tris:	'Only O3 triangles',
 }
 OnlyHeptagons = {
+    Heptagons.foldMethod.parallel: [
+	[2.0552779107977082, 0.0, -1.1787757203628972, -0.93053176681968619],
+	[0.49161494586164856, 3.1415926535897931, 1.9628169332268963, -0.93053176681968619],
+	[-0.2533401749928702, 3.1415926535897931, 1.1787757203628966, -2.2110608867701069],
+	[1.31032278994319, 0.0, -1.9628169332268968, -2.2110608867701069],
+    ],
     Heptagons.foldMethod.w: [
 	[-1.8868486799927435, -2.6758432135380379, -3.1283205574215183, 1.9544544516064626],
 	[-1.322333216810468, -2.9671800030020141, -1.1832507472772251, 1.6683015362824891],
@@ -1390,7 +1410,9 @@ OnlyHeptagons = {
     ],
     Heptagons.foldMethod.trapezium: [], # none found,... :(
     Heptagons.foldMethod.star: [], # none found,... :(
+    Heptagons.foldMethod.triangle: [], # none found,... :(
 }
+
 OnlyO3Triangles = {
     Heptagons.foldMethod.trapezium: [
 	[1.6713285948103263, 0.78612999312594156, 0.94665778267419576, 2.2644932672720368],
