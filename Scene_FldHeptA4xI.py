@@ -547,6 +547,10 @@ class CtrlWin(wx.Frame):
 	    Heptagons.FoldName[Heptagons.foldMethod.w],
 	    Heptagons.FoldName[Heptagons.foldMethod.trapezium],
 	]
+	this.foldMethodListItems = [
+	    Heptagons.foldMethod.get(this.foldMethodList[i]) for i in
+	    range(len(this.foldMethodList))
+	]
         this.foldMethodGui = wx.RadioBox(this.panel,
                 label = 'Heptagon Fold Method',
                 style = wx.RA_VERTICAL,
@@ -860,6 +864,9 @@ class CtrlWin(wx.Frame):
 	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * this.shape.fold2)
 	    this.heightGui.SetValue(
 		this.maxHeight - this.heightF*this.shape.height)
+	    # enable all folding methods:
+	    for i in range(len(this.foldMethodList)):
+		this.foldMethodGui.ShowItem(i, True)
 	else:
             triangleAlt = this.trisAltGui.GetSelection()
             c = this.shape
@@ -880,6 +887,12 @@ class CtrlWin(wx.Frame):
 	    except KeyError:
 		pass
 
+	    # Disable / enable appropriate folding methods.
+	    for i in range(len(this.foldMethodList)):
+		method = this.foldMethodListItems[i]
+		this.foldMethodGui.ShowItem(i, method in this.specPos[sel])
+		# leave up to the user to decide which folding method to choose
+		# in case the selected one was disabled.
 
 	    try:
 		if this.specPos[sel][this.foldMethod][triangleAlt] != []:
