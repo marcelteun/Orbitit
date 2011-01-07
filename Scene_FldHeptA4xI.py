@@ -54,6 +54,79 @@ Title = 'Polyhedra with Folded Regular Heptagons A4xI'
 
 V2 = math.sqrt(2)
 
+dyn_pos		= -1
+all_eq_tris	=  0
+no_o3_tris	=  1
+edge_1_1_V2_1	=  2
+edge_1_V2_1_1	=  3
+edge_V2_1_1_1	=  4
+edge_V2_1_V2_1	=  5
+only_squares	=  6
+edge_0_1_1_1	=  7
+edge_0_1_V2_1	=  8
+edge_0_1_1_0	=  9
+only_hepts	= 10
+only_o3_tris	= 11
+
+#                0
+#   13                      12
+#         6             1
+#
+# 11                           9
+#
+#       5                 2
+#
+#
+#   10       4       3        8
+#
+#
+#                         7
+# There are 4 different edges to separate the triangles:
+# a (V2-V7), b (V2-V8), c (V2-V9), and d (V9-V1)
+# the first three have opposite alternatives:
+# a' (V3-V8), b' (V3-V9) and c' (V1-V8)
+# (there's no (V2-V12): V1-V9-V12 is the O3 triangle)
+# This leads to 2^3 possible combinations,
+# however the edge configuration a b' does not occur
+# neither does b' c'
+# This leaves 5 possible edge configurations:
+class TrisAlt:
+    # Note nrs should be different from above
+    strip_1_loose = 100
+    strip_I       = 101
+    strip_II      = 102
+    star          = 103
+    star_1_loose  = 104
+    nrOfEdgeAlternatives = 5
+    def get(this, str):
+	for k,v in Stringify.iteritems():
+	    if v == str:
+		return k
+	return None
+
+trisAlt = TrisAlt()
+
+Stringify = {
+    dyn_pos:			'Enable Sliders',
+    no_o3_tris:			'No O3 Triangles',
+    all_eq_tris:		'All Equilateral Triangles',
+    edge_1_1_V2_1:		'|a|=1 & |b|=1 & |c|=V2 & |d|=1',
+    edge_1_V2_1_1:		'|a|=1 & |b|=V2 & |c|=1 & |d|=1',
+    edge_V2_1_1_1:		'|a|=V2 & |b|=1 & |c|=1 & |d|=1',
+    edge_V2_1_V2_1:		'|a|=V2 & |b|=1 & |c|=V2 & |d|=1',
+    only_squares:		'Only Folded Squares',
+    edge_0_1_1_1:		'|a|=0 & |b|=1 & |c|=1 & |d|=1',
+    edge_0_1_V2_1:		'|a|=0 & |b|=1 & |c|=V2 & |d|=1',
+    edge_0_1_1_0:		'|a|=0 & |b|=1 & |c|=1 & |d|=0',
+    only_hepts:			'Only Heptagons',
+    only_o3_tris:		'Only O3 Triangles',
+    trisAlt.strip_1_loose:	'Triangle Strip, 1 Loose ',
+    trisAlt.strip_I:		'Triangle Strip I',
+    trisAlt.strip_II:		'Triangle Strip II',
+    trisAlt.star:		'Triangle Shell',
+    trisAlt.star_1_loose:	'Triangle Shell, 1 Loose',
+}
+
 def Vlen(v0, v1):
     x = v1[0] - v0[0]
     y = v1[1] - v0[1]
@@ -99,21 +172,7 @@ class Shape(Geom3D.IsometricShape):
         this.addTriangles = True
         this.onlyO3Triangles = False
         this.useCulling = False
-        this.edgeAlternative = 0
-        # There are 4 different edges to separate the triangles:
-        # a (V2-V9), b (V2-V12), c (V2-V14), and d (V14-V1)
-        # the first three have opposite alternatives:
-        # a' (V3-V12), b' (V3-V14) and c' (V1-V12)
-        # This leads to 2^3 possible combinations,
-        # however the edge configuration a b' does not occur
-        # neither does b' c'
-        # This leaves 5 possible edge configurations:
-        this.nrOfEdgeAlternatives = 5
-        this.T_STRIP_1_LOOSE = 0
-        this.T_STRIP_I       = 1
-        this.T_STRIP_II      = 2
-        this.T_STAR          = 3
-        this.T_STAR_1_LOOSE  = 4
+        this.edgeAlternative = trisAlt.strip_1_loose
 
         #this.lightPosition = [-50., 50., 200., 0.]
         #this.lightAmbient  = [0.25, 0.25, 0.25, 1.]
@@ -128,7 +187,7 @@ class Shape(Geom3D.IsometricShape):
         Geom3D.IsometricShape.glDraw(this)
 
     def setEdgeAlternative(this, alt):
-        this.edgeAlternative = alt % this.nrOfEdgeAlternatives
+        this.edgeAlternative = alt
         this.updateShape = True
 
     def setFoldMethod(this, method):
@@ -159,7 +218,7 @@ class Shape(Geom3D.IsometricShape):
 
     def getStatusStr(this):
         #angle = Geom3D.Rad2Deg * this.angle
-        str = 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
+        s = 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
                 this.angle,
                 this.fold1,
                 this.fold2,
@@ -182,39 +241,42 @@ class Shape(Geom3D.IsometricShape):
         #
         #                         7
         Vs = this.getBaseVertexProperties()['Vs']
-        if this.edgeAlternative == this.T_STRIP_1_LOOSE:
+        if this.edgeAlternative == trisAlt.strip_1_loose:
             aLen = Vlen(Vs[2], Vs[7])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[2], Vs[9])
             dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == this.T_STRIP_I:
+        elif this.edgeAlternative == trisAlt.strip_I:
             aLen = Vlen(Vs[3], Vs[8])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[2], Vs[9])
             dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == this.T_STRIP_II:
+        elif this.edgeAlternative == trisAlt.strip_II:
             aLen = Vlen(Vs[3], Vs[8])
             bLen = Vlen(Vs[3], Vs[9])
             cLen = Vlen(Vs[2], Vs[9])
             dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == this.T_STAR:
+        elif this.edgeAlternative == trisAlt.star:
             aLen = Vlen(Vs[3], Vs[8])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[1], Vs[8])
             dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == this.T_STAR_1_LOOSE:
+        elif this.edgeAlternative == trisAlt.star_1_loose:
             aLen = Vlen(Vs[2], Vs[7])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[1], Vs[8])
             dLen = Vlen(Vs[1], Vs[9])
+	else:
+	    raise TypeError, 'Unknown edgeAlternative %s' % str(
+		this.edgeAlternative)
         #tst:
         #aLen = Vlen(Vs[0], [(Vs[6][i] + Vs[1][i]) / 2 for i in range(3)])
         #bLen = Vlen([(Vs[5][i] + Vs[2][i]) / 2 for i in range(3)], [(Vs[6][i] + Vs[1][i]) / 2 for i in range(3)])
-        str = '%s, |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
-                str, aLen, bLen, cLen, dLen
+        s = '%s, |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
+                s, aLen, bLen, cLen, dLen
             )
 
-        return str
+        return s
 
     def setV(this):
         #print this.name, "setV"
@@ -287,34 +349,34 @@ class Shape(Geom3D.IsometricShape):
 
     def initArrs(this):
         print this.name, "initArrs"
-        this.triFs = [
-                [
+        this.triFs = {
+                trisAlt.strip_1_loose: [
                     [2, 3, 7], [2, 7, 8],
                     [2, 8, 9], [5, 11, 10],
                     [1, 2, 9], [5, 6, 11],
                 ],
-                [
+                trisAlt.strip_I: [
                     [2, 3, 8], [4, 5, 10],
                     [2, 8, 9], [5, 11, 10],
                     [1, 2, 9], [5, 6, 11],
                 ],
 
-                [
+                trisAlt.strip_II: [
                     [3, 8, 9], [4, 11, 10],
                     [2, 3, 9], [4, 5, 11],
                     [1, 2, 9], [5, 6, 11],
                 ],
-                [
+                trisAlt.star: [
                     [2, 3, 8], [4, 5, 10],
                     [1, 2, 8], [5, 6, 10],
                     [1, 8, 9], [6, 11, 10]
                 ],
-                [
+                trisAlt.star_1_loose: [
                     [2, 3, 7], [2, 7, 8],
                     [1, 2, 8], [5, 6, 10],
                     [1, 8, 9], [6, 11, 10]
                 ]
-            ]
+            }
         #                0
         #   13                      12
         #         6             1
@@ -329,35 +391,35 @@ class Shape(Geom3D.IsometricShape):
         #
         #                         7
         #
-        this.triColIds = [
-                [1, 2, 1, 1, 2, 2],
-                [1, 2, 2, 1, 1, 2],
-                [1, 2, 2, 1, 1, 2],
-                [1, 2, 2, 1, 1, 2],
-                [1, 2, 1, 1, 2, 2],
-            ]
-        this.triEs = [
-                [
+        this.triColIds = {
+                trisAlt.strip_1_loose:	[1, 2, 1, 1, 2, 2],
+                trisAlt.strip_I:	[1, 2, 2, 1, 1, 2],
+                trisAlt.strip_II:	[1, 2, 2, 1, 1, 2],
+                trisAlt.star:		[1, 2, 2, 1, 1, 2],
+                trisAlt.star_1_loose:	[1, 2, 1, 1, 2, 2],
+            }
+        this.triEs = {
+                trisAlt.strip_1_loose: [
                     2, 7, 2, 8, 2, 9,
                     5, 10, 5, 11,
                 ],
-                [
+                trisAlt.strip_I: [
                     3, 8, 2, 8, 2, 9,
                     5, 10, 5, 11,
                 ],
-                [
+                trisAlt.strip_II: [
                     3, 8, 3, 9, 2, 9,
                     4, 11, 5, 11,
                 ],
-                [
+                trisAlt.star: [
                     3, 8, 2, 8, 1, 8,
                     5, 10, 6, 10,
                 ],
-                [
+                trisAlt.star_1_loose: [
                     2, 7, 2, 8, 1, 8,
                     5, 10, 6, 10,
                 ]
-            ]
+            }
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
@@ -388,95 +450,81 @@ class CtrlWin(wx.Frame):
         this.specPos = {
 	    only_hepts: {
 		# Note: all triangle variants are the same:
-		Heptagons.foldMethod.parallel: [
-		    OnlyHeptagons[Heptagons.foldMethod.parallel],
-		    OnlyHeptagons[Heptagons.foldMethod.parallel],
-		    OnlyHeptagons[Heptagons.foldMethod.parallel],
-		    OnlyHeptagons[Heptagons.foldMethod.parallel],
-		    OnlyHeptagons[Heptagons.foldMethod.parallel],
-                ],
-                Heptagons.foldMethod.w: [
-		    OnlyHeptagons[Heptagons.foldMethod.w],
-		    OnlyHeptagons[Heptagons.foldMethod.w],
-		    OnlyHeptagons[Heptagons.foldMethod.w],
-		    OnlyHeptagons[Heptagons.foldMethod.w],
-		    OnlyHeptagons[Heptagons.foldMethod.w],
-                ],
+		Heptagons.foldMethod.parallel: {
+		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.parallel],
+		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.parallel],
+                },
+                Heptagons.foldMethod.w: {
+		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.w],
+		    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.w],
+		    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.w],
+		    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.w],
+		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.w],
+                },
 	    },
 	    only_o3_tris: {
 		# Note: all triangle variants are the same:
-		Heptagons.foldMethod.triangle: [
-		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    OnlyO3Triangles[Heptagons.foldMethod.triangle],
-                ],
-                Heptagons.foldMethod.star: [
-		    OnlyO3Triangles[Heptagons.foldMethod.star],
-		    OnlyO3Triangles[Heptagons.foldMethod.star],
-		    OnlyO3Triangles[Heptagons.foldMethod.star],
-		    OnlyO3Triangles[Heptagons.foldMethod.star],
-		    OnlyO3Triangles[Heptagons.foldMethod.star],
-                ],
-                Heptagons.foldMethod.w: [
-		    OnlyO3Triangles[Heptagons.foldMethod.w],
-		    OnlyO3Triangles[Heptagons.foldMethod.w],
-		    OnlyO3Triangles[Heptagons.foldMethod.w],
-		    OnlyO3Triangles[Heptagons.foldMethod.w],
-		    OnlyO3Triangles[Heptagons.foldMethod.w],
-                ],
-                Heptagons.foldMethod.trapezium: [
-		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		],
+		# no solutions for Heptagons.foldMethod.parallel
+		#     reason: it is impossible to get distance c == 0
+		#     since max to fit Rho in: 2*Rho*sin(pi/7) < Rho.
+		Heptagons.foldMethod.triangle: {
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.triangle],
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.triangle],
+                },
+                Heptagons.foldMethod.star: {
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.star],
+		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.star],
+		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.star],
+		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.star],
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.star],
+                },
+                Heptagons.foldMethod.w: {
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.w],
+		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.w],
+		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.w],
+		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.w],
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.w],
+                },
+                Heptagons.foldMethod.trapezium: {
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.trapezium],
+		},
 	    },
 	    edge_0_1_1_0: { # TODO change name: only one kind of triangle
-                Heptagons.foldMethod.parallel: [
-		    # index T_STRIP_1_LOOSE
-                    [],
-                    # index T_STRIP_I
-		    Only1TriangleType[Heptagons.foldMethod.parallel],
-                    # index T_STRIP_II
-		    Only1TriangleType[Heptagons.foldMethod.parallel],
-                    # index T_STAR
-		    Only1TriangleType[Heptagons.foldMethod.parallel],
-		    # index T_STAR_1_LOOSE
-                    [],
-                ],
-		Heptagons.foldMethod.triangle: [
-		    # index T_STRIP_1_LOOSE
-		    [],
-		    # index T_STRIP_I
-		    Only1TriangleType[Heptagons.foldMethod.triangle],
-		    # index T_STRIP_II
-		    Only1TriangleType[Heptagons.foldMethod.triangle],
-		    # index T_STAR
-		    Only1TriangleType[Heptagons.foldMethod.triangle],
-		    # index T_STAR_1_LOOSE
-		    []
-                ],
+		# index T_STRIP_1_LOOSE nothing special TODO double check
+		# index T_STAR_1_LOOSE nothing special TODO double check
+                Heptagons.foldMethod.parallel: {
+		    trisAlt.strip_I:  Only1TriangleType[Heptagons.foldMethod.parallel],
+		    trisAlt.strip_II: Only1TriangleType[Heptagons.foldMethod.parallel],
+		    trisAlt.star:     Only1TriangleType[Heptagons.foldMethod.parallel],
+                },
+		Heptagons.foldMethod.triangle: {
+		    trisAlt.strip_I:  Only1TriangleType[Heptagons.foldMethod.triangle],
+		    trisAlt.strip_II: Only1TriangleType[Heptagons.foldMethod.triangle],
+		    trisAlt.star:     Only1TriangleType[Heptagons.foldMethod.triangle],
+                },
 	    },
-	    edge_1_1_1_1: { # TODO change name: all equilateral triangles
-		Heptagons.foldMethod.parallel: AllEquilateralTris[
-		    Heptagons.foldMethod.parallel],
-		Heptagons.foldMethod.triangle: AllEquilateralTris[
-		    Heptagons.foldMethod.triangle],
-		Heptagons.foldMethod.star: AllEquilateralTris[
-		    Heptagons.foldMethod.star],
-		Heptagons.foldMethod.w: AllEquilateralTris[
-		    Heptagons.foldMethod.w],
-		Heptagons.foldMethod.trapezium: AllEquilateralTris[
-		    Heptagons.foldMethod.trapezium],
+	    all_eq_tris: { # TODO change name: all equilateral triangles
+		Heptagons.foldMethod.parallel:  AllEquilateralTris[Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.triangle:  AllEquilateralTris[Heptagons.foldMethod.triangle],
+		Heptagons.foldMethod.star:      AllEquilateralTris[Heptagons.foldMethod.star],
+		Heptagons.foldMethod.w:         AllEquilateralTris[Heptagons.foldMethod.w],
+		Heptagons.foldMethod.trapezium: AllEquilateralTris[Heptagons.foldMethod.trapezium],
 	    },
-	    edge_1_1_1_0: {
+	    no_o3_tris: {
 		Heptagons.foldMethod.parallel: NoO3Triangles[
 		    Heptagons.foldMethod.parallel],
 	    },
-	    edge_1_V2_1_0: {
+	    only_squares: {
 		Heptagons.foldMethod.parallel: FoldedSquares_0[
 		    Heptagons.foldMethod.parallel],
 	    },
@@ -513,20 +561,25 @@ class CtrlWin(wx.Frame):
         this.Guis = []
 
         # static adjustments
-        this.edgeChoices = [
-                'Triangle Strip, 1 Loose ',
-                'Triangle Strip I',
-                'Triangle Strip II',
-                'Triangle Star',
-                'Triangle Star, 1 Loose'
-            ]
+	l = this.edgeChoicesList = [
+	    Stringify[trisAlt.strip_1_loose],
+	    Stringify[trisAlt.strip_I],
+	    Stringify[trisAlt.strip_II],
+	    Stringify[trisAlt.star],
+	    Stringify[trisAlt.star_1_loose],
+	]
+	this.edgeChoicesListItems = [
+	    trisAlt.get(l[i]) for i in range(len(l))
+	]
         this.trisAltGui = wx.RadioBox(this.panel,
                 label = 'Triangle Fill Alternative',
                 style = wx.RA_VERTICAL,
-                choices = this.edgeChoices
+                choices = this.edgeChoicesList
             )
         this.Guis.append(this.trisAltGui)
         this.trisAltGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+        this.trisAlt = this.edgeChoicesListItems[0]
+        this.shape.setEdgeAlternative(this.trisAlt)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -540,7 +593,7 @@ class CtrlWin(wx.Frame):
         this.addTrisGui.Bind(wx.EVT_CHECKBOX, this.onAddTriangles)
 
         # static adjustments
-	this.foldMethodList = [
+	l = this.foldMethodList = [
 	    Heptagons.FoldName[Heptagons.foldMethod.parallel],
 	    Heptagons.FoldName[Heptagons.foldMethod.triangle],
 	    Heptagons.FoldName[Heptagons.foldMethod.star],
@@ -548,8 +601,7 @@ class CtrlWin(wx.Frame):
 	    Heptagons.FoldName[Heptagons.foldMethod.trapezium],
 	]
 	this.foldMethodListItems = [
-	    Heptagons.foldMethod.get(this.foldMethodList[i]) for i in
-	    range(len(this.foldMethodList))
+	    Heptagons.foldMethod.get(l[i]) for i in range(len(l))
 	]
         this.foldMethodGui = wx.RadioBox(this.panel,
                 label = 'Heptagon Fold Method',
@@ -567,13 +619,13 @@ class CtrlWin(wx.Frame):
 		Stringify[dyn_pos],
 		Stringify[only_hepts],
 		Stringify[only_o3_tris],
-		Stringify[edge_1_1_1_1],
-		Stringify[edge_1_1_1_0],
+		Stringify[only_squares],
+		Stringify[no_o3_tris],
+		Stringify[all_eq_tris],
 		Stringify[edge_1_1_V2_1],
 		Stringify[edge_1_V2_1_1],
 		Stringify[edge_V2_1_1_1],
 		Stringify[edge_V2_1_V2_1],
-		Stringify[edge_1_V2_1_0],
 		Stringify[edge_0_1_1_1],
 		Stringify[edge_0_1_V2_1],
 		Stringify[edge_0_1_1_0],
@@ -759,7 +811,8 @@ class CtrlWin(wx.Frame):
         this.canvas.paint()
 
     def onTriangleAlt(this, event):
-        this.shape.setEdgeAlternative(this.trisAltGui.GetSelection())
+        this.trisAlt = this.edgeChoicesListItems[this.trisAltGui.GetSelection()]
+        this.shape.setEdgeAlternative(this.trisAlt)
         if this.prePosGui.GetSelection() != 0:
             this.onPrePos()
         else:
@@ -767,9 +820,9 @@ class CtrlWin(wx.Frame):
         this.canvas.paint()
 
     def onFoldMethod(this, event):
-        this.foldMethod = Heptagons.foldMethod.get(
-		this.foldMethodList[this.foldMethodGui.GetSelection()]
-	    )
+        this.foldMethod = this.foldMethodListItems[
+		this.foldMethodGui.GetSelection()
+	    ]
 	this.shape.setFoldMethod(this.foldMethod)
         if this.prePosGui.GetSelection() != 0:
             this.onPrePos()
@@ -778,13 +831,11 @@ class CtrlWin(wx.Frame):
         this.canvas.paint()
 
     def onFirst(this, event = None):
-        print 'onFirst'
         this.specPosIndex = 0
         this.onPrePos()
 
     def onLast(this, event = None):
         this.specPosIndex = 0xefffffff
-        print 'onLast'
         this.onPrePos()
 
     def getPrePos(this):
@@ -795,7 +846,6 @@ class CtrlWin(wx.Frame):
 	return dyn_pos
 
     def onPrev(this, event = None):
-        triangleAlt = this.trisAltGui.GetSelection()
         prePosIndex = this.getPrePos()
         if prePosIndex != dyn_pos:
             if this.specPosIndex > 0:
@@ -803,12 +853,11 @@ class CtrlWin(wx.Frame):
             this.onPrePos()
 
     def onNext(this, event = None):
-        triangleAlt = this.trisAltGui.GetSelection()
         prePosIndex = this.getPrePos()
         if prePosIndex != dyn_pos:
 	    try:
 		if (this.specPosIndex < len(this.specPos[prePosIndex][
-		    this.foldMethod][triangleAlt]) - 1
+		    this.foldMethod][this.trisAlt]) - 1
 		):
 		    this.specPosIndex += 1
 		#else:
@@ -854,22 +903,23 @@ class CtrlWin(wx.Frame):
 	    this.shape.updateShape = True
         aVal = this.aNone
         tVal = this.tNone
+	c = this.shape
         if sel == dyn_pos:
 	    this.angleGui.Enable()
 	    this.fold1Gui.Enable()
 	    this.fold2Gui.Enable()
 	    this.heightGui.Enable()
-	    this.angleGui.SetValue(Geom3D.Rad2Deg * this.shape.angle)
-	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * this.shape.fold1)
-	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * this.shape.fold2)
+	    this.angleGui.SetValue(Geom3D.Rad2Deg * c.angle)
+	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * c.fold1)
+	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * c.fold2)
 	    this.heightGui.SetValue(
-		this.maxHeight - this.heightF*this.shape.height)
-	    # enable all folding methods:
+		this.maxHeight - this.heightF*c.height)
+	    # enable all folding and triangle alternatives:
 	    for i in range(len(this.foldMethodList)):
 		this.foldMethodGui.ShowItem(i, True)
+	    for i in range(len(this.edgeChoicesList)):
+		this.trisAltGui.ShowItem(i, True)
 	else:
-            triangleAlt = this.trisAltGui.GetSelection()
-            c = this.shape
             fld1 = this.fld1None
             fld2 = this.fld2None
 	    nrPos = 0
@@ -877,10 +927,10 @@ class CtrlWin(wx.Frame):
 	    # Ensure this.specPosIndex in range:
 	    try:
 		if (this.specPosIndex >=
-		    len(this.specPos[sel][this.foldMethod][triangleAlt])
+		    len(this.specPos[sel][this.foldMethod][this.trisAlt])
 		):
 		    this.specPosIndex = len(
-			    this.specPos[sel][this.foldMethod][triangleAlt]
+			    this.specPos[sel][this.foldMethod][this.trisAlt]
 			) - 1
 		elif (this.specPosIndex <  0):
 		    this.specPosIndex = 0
@@ -894,26 +944,32 @@ class CtrlWin(wx.Frame):
 		# leave up to the user to decide which folding method to choose
 		# in case the selected one was disabled.
 
+	    # Disable / enable appropriate triangle alternatives.
+	    # if the selected folding has valid solutions anyway
+	    if this.foldMethod in this.specPos[sel]:
+		for i in range(len(this.edgeChoicesList)):
+		    alt = this.edgeChoicesListItems[i]
+		    this.trisAltGui.ShowItem(
+			i, alt in this.specPos[sel][this.foldMethod])
+
 	    try:
-		if this.specPos[sel][this.foldMethod][triangleAlt] != []:
-		    tVal = this.specPos[sel][this.foldMethod][triangleAlt][
+		if this.specPos[sel][this.foldMethod][this.trisAlt] != []:
+		    tVal = this.specPos[sel][this.foldMethod][this.trisAlt][
 			    this.specPosIndex][0]
-		    aVal = this.specPos[sel][this.foldMethod][triangleAlt][
+		    aVal = this.specPos[sel][this.foldMethod][this.trisAlt][
 			    this.specPosIndex][1]
-		    fld1 = this.specPos[sel][this.foldMethod][triangleAlt][
+		    fld1 = this.specPos[sel][this.foldMethod][this.trisAlt][
 			    this.specPosIndex][2]
-		    fld2 = this.specPos[sel][this.foldMethod][triangleAlt][
+		    fld2 = this.specPos[sel][this.foldMethod][this.trisAlt][
 			    this.specPosIndex][3]
-		    nrPos = len(this.specPos[sel][this.foldMethod][triangleAlt])
+		    nrPos = len(this.specPos[sel][this.foldMethod][this.trisAlt])
 	    except KeyError:
 	        pass
 
-            this.trisAltGui.SetSelection(triangleAlt)
-            this.shape.setEdgeAlternative(triangleAlt)
-            this.shape.setAngle(aVal)
-            this.shape.setHeight(tVal)
-            this.shape.setFold1(fld1)
-            this.shape.setFold2(fld2)
+            c.setAngle(aVal)
+            c.setHeight(tVal)
+            c.setFold1(fld1)
+            c.setFold2(fld2)
 	    this.angleGui.SetValue(0)
 	    this.fold1Gui.SetValue(0)
 	    this.fold2Gui.SetValue(0)
@@ -932,30 +988,30 @@ class CtrlWin(wx.Frame):
                 this.statusBar.SetStatusText(txt)
 	    elif ( this.foldMethod == Heptagons.foldMethod.parallel and (
 		    (
-			sel == edge_1_V2_1_0
+			sel == only_squares
 			and
 			not (
-			    triangleAlt == c.T_STRIP_II
+			    this.trisAlt == trisAlt.strip_I
 			    or
-			    triangleAlt == c.T_STAR
+			    this.trisAlt == trisAlt.star
 			)
 		    )
 		    or
 		    (
 			sel == edge_1_V2_1_1
 			and (
-			    triangleAlt == c.T_STRIP_1_LOOSE
+			    this.trisAlt == trisAlt.strip_1_loose
 			    or
-			    triangleAlt == c.T_STAR_1_LOOSE
+			    this.trisAlt == trisAlt.star_1_loose
 			)
 		    )
 		    or
 		    (
 			sel == edge_V2_1_1_1
 			and not (
-			    triangleAlt == c.T_STRIP_1_LOOSE
+			    this.trisAlt == trisAlt.strip_1_loose
 			    or
-			    triangleAlt == c.T_STAR_1_LOOSE
+			    this.trisAlt == trisAlt.star_1_loose
 			)
 		    )
 		    or
@@ -967,9 +1023,9 @@ class CtrlWin(wx.Frame):
 			    or
 			    sel == edge_0_1_1_0
 			) and (
-			    triangleAlt == c.T_STRIP_1_LOOSE
+			    this.trisAlt == trisAlt.strip_1_loose
 			    or
-			    triangleAlt == c.T_STAR_1_LOOSE
+			    this.trisAlt == trisAlt.star_1_loose
 			)
 		    )
 		)
@@ -978,42 +1034,12 @@ class CtrlWin(wx.Frame):
 		this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
 	    else:
 		this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
-		this.statusBar.SetStatusText(this.shape.getStatusStr())
+		this.statusBar.SetStatusText(c.getStatusStr())
         this.canvas.paint()
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
-
-dyn_pos		= -1
-edge_1_1_1_1	=  0
-edge_1_1_1_0	=  1
-edge_1_1_V2_1	=  2
-edge_1_V2_1_1	=  3
-edge_V2_1_1_1	=  4
-edge_V2_1_V2_1	=  5
-edge_1_V2_1_0	=  6
-edge_0_1_1_1	=  7
-edge_0_1_V2_1	=  8
-edge_0_1_1_0	=  9
-only_hepts	= 10
-only_o3_tris	= 11
-
-Stringify = {
-    dyn_pos:		'Enable sliders',
-    edge_1_1_1_1:	'|a|=1 & |b|=1 & |c|=1 & |d|=1',
-    edge_1_1_1_0:	'|a|=1 & |b|=1 & |c|=1 & |d|=0',
-    edge_1_1_V2_1:	'|a|=1 & |b|=1 & |c|=V2 & |d|=1',
-    edge_1_V2_1_1:	'|a|=1 & |b|=V2 & |c|=1 & |d|=1',
-    edge_V2_1_1_1:	'|a|=V2 & |b|=1 & |c|=1 & |d|=1',
-    edge_V2_1_V2_1:	'|a|=V2 & |b|=1 & |c|=V2 & |d|=1',
-    edge_1_V2_1_0:	'|a|=1 & |b|=V2 & |c|=1 & |d|=0',
-    edge_0_1_1_1:	'|a|=0 & |b|=1 & |c|=1 & |d|=1',
-    edge_0_1_V2_1:	'|a|=0 & |b|=1 & |c|=V2 & |d|=1',
-    edge_0_1_1_0:	'|a|=0 & |b|=1 & |c|=1 & |d|=0',
-    only_hepts:		'Only Heptagons',
-    only_o3_tris:	'Only O3 triangles',
-}
 
 ###############################################################################
 OnlyHeptagons = {
@@ -1071,19 +1097,35 @@ Only1TriangleType = {
 }
 
 ###############################################################################
+# TODO: use
 FoldedSquareAnd1TriangleType = {
-    Heptagons.foldMethod.star: [
-	[1.5200936080774254, 0.28279384061834983, -1.7562793370655365, 2.9017993292662552],
-	[1.4074958748480417, 0.29634532013454673, -1.8587346053407554, -0.37191199363966465],
-	[-1.0248629078901548, 3.0367879503498347, -0.95004531859792607, -2.9819419706524459],
-	[-0.90815984502062352, 3.0126250996311295, -0.91047126200357198, 0.37145275614090456],
-    ],
+    Heptagons.foldMethod.star: {
+	trisAlt.star: [
+	    [1.5200936080774254, 0.28279384061834983, -1.7562793370655365, 2.9017993292662552],
+	    [1.4074958748480417, 0.29634532013454673, -1.8587346053407554, -0.37191199363966465],
+	    [-1.0248629078901548, 3.0367879503498347, -0.95004531859792607, -2.9819419706524459],
+	    [-0.90815984502062352, 3.0126250996311295, -0.91047126200357198, 0.37145275614090456],
+	],
+    },
+}
+
+###############################################################################
+# TODO: use
+BorderAndO3Triangles = {
+    Heptagons.foldMethod.triangle: {
+	trisAlt.strip_I: [
+	    [0.56477962526448244, 2.5170214708479355, -1.6342822146880849, 1.884160303072703],
+	    [0.39884399626845796, 1.4568403064826343, 2.5715853033334066, -0.88428111441002599],
+	    [-0.25245320098095386, 2.5254918903733907, 1.2927536380277551, -1.9009046158502372],
+	    [1.1958969269857136, 0.47194194051049571, 1.874835153247457, 2.2245693304207181],
+	],
+    },
 }
 
 ###############################################################################
 NoO3Triangles = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
+    Heptagons.foldMethod.parallel: {
+	trisAlt.strip_1_loose: [
 	    [0.61336294993015139, 0.69387894107538739, -2.0238552489037858, -2.9635369142286225],
 	    [-0.5887359927166792, 2.4477137125144059, -0.27002047746476787, -2.9635369142286265],
 	    [-0.58873599271667931, 2.4477137125144055, -0.27002047746476787, -0.53505902972359287],
@@ -1093,20 +1135,22 @@ NoO3Triangles = {
 	    [2.3906737285215178, 0.69387894107538739, 0.27002047746476765, -2.6065336238662007],
 	    [2.3906737285215178, 0.69387894107538739, 0.27002047746476748, -0.17805573936117014],
 	],
-	[ # index T_STRIP_I
+	trisAlt.strip_I: [
 	    [-0.44916112192145952, 2.1122756168847681, -0.79012198328513161, -2.3865538712183882],
 	    [-0.17280305940844223, 1.708197033320781, -1.3032695012730287, -1.0165778617602852],
 	    [1.9747407952132807, 1.4333956202690126, 1.3032695012730287, -2.125014791829507],
 	    [2.2510988577262974, 1.0293170367050262, 0.79012198328513306, -0.75503878237140576],
 	],
-	[],  # index T_STRIP_II
-	[ # index T_STAR, same as T_STRIP_I, since d==0
+	# T_STRIP_II checked
+	trisAlt.star: [
+	    # same as T_STRIP_I, since d==0
 	    [-0.44916112192145868, 2.1122756168847676, -0.7901219832851325, -2.38655387121839],
 	    [-0.17280305940844282, 1.7081970333207814, -1.3032695012730278, -1.0165778617602879],
 	    [1.9747407952132801, 1.433395620269013, 1.3032695012730293, -2.1250147918295088],
 	    [2.2510988577262974, 1.0293170367050257, 0.7901219832851325, -0.75503878237140576],
 	],
-	[ # index T_STAR_1_LOOSE same as T_STRIP_1_LOOSE, since d == 0
+	trisAlt.star_1_loose: [
+	    # same as T_STRIP_1_LOOSE, since d == 0
 	    [0.61336294993015139, 0.69387894107538739, -2.0238552489037858, -2.9635369142286225],
 	    [-0.5887359927166792, 2.4477137125144059, -0.27002047746476787, -2.9635369142286265],
 	    [-0.58873599271667931, 2.4477137125144055, -0.27002047746476787, -0.53505902972359287],
@@ -1116,17 +1160,15 @@ NoO3Triangles = {
 	    [2.3906737285215178, 0.69387894107538739, 0.27002047746476765, -2.6065336238662007],
 	    [2.3906737285215178, 0.69387894107538739, 0.27002047746476748, -0.17805573936117014],
 	],
-    ],
+    },
 }
 
 ###############################################################################
 FoldedSquares_0 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
-	],
-	[ # index T_STRIP_I
-	],
-	[ # index T_STRIP_II
+    Heptagons.foldMethod.parallel: {
+	# T_STRIP_1_LOOSE checked
+	# T_STRIP_I checked
+	trisAlt.strip_II: [
 	   [-0.11267755272150123, -3.0831450050562297, 1.3877578821507743, 1.8449713169461077],
 	   [-0.11267755272150136, -3.0831450050562297, 1.3877578821507746, -2.1153635908403672],
 	   [-0.11267755272150137, 1.6299156253637703, -1.3877578821507743, -0.9099725032984054],
@@ -1136,23 +1178,21 @@ FoldedSquares_0 = {
 	   [1.9146152885263397, 1.511677028226023, 1.3877578821507743, -2.2316201502913877],
 	   [1.9146152885263394, 1.5116770282260232, 1.3877578821507748, 0.091230249101723615],
 	],
-	[ # index T_STAR
+	trisAlt.star: [
 	   [-0.08705843892515136, 1.5969418702542431, -1.421867197734886, 2.9924491746224842],
 	   [0.49431990960006078, 0.84938187722147296, -1.9643841934177342, 0.66547727260192069],
 	   [1.3076178262047773, 2.2922107763683206, 1.9643841934177342, 2.4761153809878742],
 	   [1.8889961747299897, 1.5446507833355498, 1.4218671977348862, 0.14914347896730806],
 	],
-	[ # index T_STAR_1_LOOSE
-	],
-    ],
+	# T_STAR_1_LOOSE checked
+    },
 }
 
 ###############################################################################
 E1_1_V2_1 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
-	],
-	[ # index T_STRIP_I
+    Heptagons.foldMethod.parallel: {
+	# T_STRIP_1_LOOSE checked
+	trisAlt.strip_I: [
 	   [-0.7567470429582589, -2.5576199555507575, 1.1795454244237868, 2.3059857893662681],
 	   [-1.1678661078471526, -2.8121029764287098, 0.68295574950813442, -2.7139655274915295],
 	   [-0.41297524742965674, -3.1174972074287144, 1.7516400761892816, 2.79576640194874],
@@ -1162,9 +1202,8 @@ E1_1_V2_1 = {
 	   [1.7906535720932244, 0.18641414197294012, -0.10475933583315822, -1.4181438292384954],
 	   [1.7043186392248841, 2.5563292347776989, 1.7243790607070171, -0.22076373594903842],
 	],
-	[ # index T_STRIP_II
-	],
-	[ # index T_STAR
+	# T_STRIP_II checked
+	trisAlt.star: [
 	   [0.16424126714814655, 2.9498362993661056, 2.3874240497328016, -1.1058248893059073],
 	   [-0.19882278292562994, 2.9032159671887756, 1.5610799938533146, 2.4783868428030944],
 	   [0.25790649607642102, -2.5549946510779682, 1.7632951187038364, -2.2653071966369556],
@@ -1172,7 +1211,7 @@ E1_1_V2_1 = {
 	   [1.4034311724568889, 0.99681726039765606, -1.4331975048281924, 1.4674950784683738],
 	   [1.8605312748771268, 2.3066435603055355, 1.4909152805218127, -0.17100514406483569],
 	],
-	[ # index T_STAR_1_LOOSE
+	trisAlt.star_1_loose: [
 	   [0.47092324271706787, 2.4477137125144059, 2.202048646419386, -1.6406340012575686],
 	   [0.46605546632809519, 2.4477137125144055, 1.6180811587323642, 2.1466265883588198],
 	   [-0.023098085998088189, 2.4477137125144059, -0.43468821406451319, 0.094928336006570621],
@@ -1186,15 +1225,14 @@ E1_1_V2_1 = {
 	   [2.8446994245107557, 0.69387894107538739, -0.30668553092463391, 0.83140338555908322],
 	   [2.9655088286928302, 0.69387894107538739, -0.14365758259686778, -0.48553086554936353],
 	],
-    ],
+    },
 }
 
 ###############################################################################
 E1_V2_1_1 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
-	],
-	[ # index T_STRIP_I
+    Heptagons.foldMethod.parallel: {
+	# T_STRIP_1_LOOSE checked
+	trisAlt.strip_I: [
 	    [-0.88723458825223489, 2.141882400564767, -1.6003210505207557, -2.1477336329497003],
 	    [-0.46394192201744533, 1.621367132395708, -2.2598634519652006, 1.9795265236502502],
 	    [1.369996063091216, 1.2775041217213143, 1.159285287569392, 1.6506021591176481],
@@ -1202,7 +1240,7 @@ E1_V2_1_1 = {
 	    [1.1322473734478125, 0.92172928555262157, -0.84249799334320841, -0.4404078030788714],
 	    [0.77202842552825701, 1.458950137980036, -0.51098977526082567, 1.7677355683811697],
 	],
-	[ # index T_STRIP_II
+	trisAlt.strip_II: [
 	    [-0.80628139058344039, -3.0770738846902432, 0.32574461708117614, 2.8984049195569037],
 	    [-0.80628139058343917, -3.0770738846902428, 0.32574461708117791, -1.0619299882295747],
 	    [-0.98191238276040615, 2.2760373479649187, -1.3988586849381255, -2.0742239094057418],
@@ -1216,7 +1254,7 @@ E1_V2_1_1 = {
 	    [0.74575327119206369, 1.4935951820064997, -0.47983302969801755, -2.1250684033724889],
 	    [0.74575327119206392, 1.4935951820064999, -0.47983302969801755, 1.8352665044139869],
 	],
-	[ # index T_STAR
+	trisAlt.star: [
 	    [-0.23711356273166503, -1.9485321387360326, 2.6588859204636641, 0.27438318799068728],
 	    [0.72053887962315089, -1.0587432257454417, -2.4208448709388839, 2.557780857852499],
 	    [-0.68553105174082019, -2.1533585028252888, 1.8701178320200809, 2.1722876094332859],
@@ -1228,15 +1266,14 @@ E1_V2_1_1 = {
 	    [1.4151923776916036, 1.0700834951041776, 1.6105159681097811, -1.5804901550554682],
 	    [1.7805383361277138, 2.5930036533142866, 2.155628521555963, -0.25525589134283511],
 	],
-	[ # index T_STAR_1_LOOSE
-	],
-    ],
+	# T_STAR_1_LOOSE checked
+    },
 }
 
 ###############################################################################
 EV2_1_1_1 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
+    Heptagons.foldMethod.parallel: {
+	trisAlt.strip_1_loose: [
 	    [-0.11815285518002175, 1.1300265566162542, -2.6666943060109767, 0.74240619546394604],
 	    [-0.11815285518002185, 1.1300265566162542, -2.6666943060109767, -0.6592023595235732],
 	    [-0.78526743897550999, 2.0115660969735383, -1.7851547656536928, 0.74240619546394626],
@@ -1254,13 +1291,10 @@ EV2_1_1_1 = {
 	    [2.6158816985640239, 1.1300265566162542, 0.21374182951242893, -0.74117297563557027],
 	    [2.6158816985640239, 1.1300265566162542, 0.21374182951242901, 0.66043557935195096],
 	],
-	[ # index T_STRIP_I
-	],
-	[ # index T_STRIP_II
-	],
-	[ # index T_STAR
-	],
-	[ # index T_STAR_1_LOOSE
+	# T_STRIP_I checked
+	# T_STRIP_II checked
+	# T_STAR checked
+	trisAlt.star_1_loose: [
 	    [0.1272521146225038, 1.1300265566162542, -2.7013720871504643, -1.1571432969827011],
 	    [-0.31657120620753615, -2.0115660969735387, 2.0874018389941096, -2.6804514106117261],
 	    [0.35054337758795251, -1.1300265566162544, 2.9689413793513943, -2.6804514106117256],
@@ -1278,15 +1312,14 @@ EV2_1_1_1 = {
 	    [0.89539750032701915, 1.1300265566162542, -1.945112968695673, 1.7278742032840342],
 	    [0.2282829165315296, 2.0115660969735387, -1.0635734283383886, 1.7278742032840322],
 	],
-    ],
+    },
 }
 
 ###############################################################################
 EV2_1_V2_1 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
-	],
-	[ # index T_STRIP_I
+    Heptagons.foldMethod.parallel: {
+	# T_STRIP_1_LOOSE checked
+	trisAlt.strip_I: [
 	    [-0.88408594790666351, -2.6183855720519347, 1.0501269916021272, 1.1971273110129381],
 	    [-0.22760538611589995, -3.0236610436586213, 2.11302679381998, -0.91640479904880934],
 	    [-0.52251694896221135, 2.5997714337408078, 0.66232680538683475, -2.5646397191527139],
@@ -1296,9 +1329,8 @@ EV2_1_V2_1 = {
 	    [0.69884395353658446, -2.8069771099869012, 1.8437108042663022, -1.1531895022337846],
 	    [1.077709726202364, -3.1036307944436721, 1.8621658729852575, -0.98775836501243575],
 	],
-	[ # index T_STRIP_II
-	],
-	[ # index T_STAR
+	# T_STRIP_II checked
+	trisAlt.star: [
 	    [-0.22731540041596912, -3.0240646448069644, 2.1129035314111286, -0.91628785621601416],
 	    [-0.50480379243482942, 2.5756637730618941, 0.63149867422394834, -2.533468953526004],
 	    [0.076502159387365667, 2.0515059435039364, -1.1849051379104427, -0.055808237908243186],
@@ -1308,7 +1340,7 @@ EV2_1_V2_1 = {
 	    [0.58059679846632384, 2.0960448430750178, -0.3442101553928012, 1.5665478800929149],
 	    [1.4589569486498692, 0.56254775250378952, -2.0199206989622489, 0.31868709760073305],
 	],
-	[ # index T_STAR_1_LOOSE
+	trisAlt.star_1_loose: [
 	    [0.7983547701346333, 2.0115660969735392, 1.872281317887972, -2.0534510888507267],
 	    [1.4654693539301229, 1.1300265566162542, 0.99074177753068682, -2.0534510888507258],
 	    [0.9259363275496203, 2.0115660969735387, 1.34591149276301, 2.3199269378316019],
@@ -1318,15 +1350,14 @@ EV2_1_V2_1 = {
 	    [0.62605684322029043, 2.0115660969735387, -0.44948550866281423, 1.7242216016858887],
 	    [1.2931714270157797, 1.1300265566162542, -1.3310250490200985, 1.7242216016858904],
 	],
-    ],
+    },
 }
 
 ###############################################################################
 E0_1_1_1 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
-	],
-	[ # index T_STRIP_I
+    Heptagons.foldMethod.parallel: {
+	# T_STRIP_1_LOOSE checked
+	trisAlt.strip_I: [
 	    [0.50066103037629761, 0.10882709339528368, -3.0023604609977097, 2.0140966266804252],
 	    [-0.26467626788387844, 1.3556184534457512, -2.5057044393209624, -0.37593035276325448],
 	    [0.59768551357833699, 2.2976093709187233, 1.957748903716789, 2.680385915412014],
@@ -1334,7 +1365,7 @@ E0_1_1_1 = {
 	    [1.5736719388603781, 0.43047731296230907, -0.60016386225970209, -0.8643352247702083],
 	    [1.1985019611460941, 0.81163808272056326, -0.87522778313280014, 2.5763539010817778],
 	],
-	[ # index T_STRIP_II
+	trisAlt.strip_II: [
 	    # same as STRIP_I
 	    [0.50066103037629739, 0.10882709339528418, -3.0023604609977097, 2.0140966266804243],
 	    [-0.26467626788387821, 1.3556184534457512, -2.5057044393209624, -0.37593035276325537],
@@ -1343,7 +1374,7 @@ E0_1_1_1 = {
 	    [1.5736719388603781, 0.43047731296230912, -0.60016386225970209, -0.8643352247702083],
 	    [1.1985019611460945, 0.81163808272056293, -0.87522778313280014, 2.5763539010817791],
 	],
-	[ # index T_STAR
+	trisAlt.star: [
 	    [0.77388086277561663, -0.47671588141912213, -2.0645703328144203, -1.1813891329966086],
 	    [0.55687811427288847, -0.092698175989828435, -2.0645703328144203, -1.8364158733093774],
 	    [-0.3380876838223647, -2.0252123250547234, 2.0645703328144194, -2.6894906158962386],
@@ -1353,17 +1384,15 @@ E0_1_1_1 = {
 	    [0.55687811427288958, 2.3357797085152017, 2.0645703328144194, 2.7461066527464011],
 	    [0.77388086277561663, 1.9517620030859095, 2.0645703328144203, -2.8820519141204168],
 	],
-	[ # index T_STAR_1_LOOSE
-	],
-    ],
+	# T_STAR_1_LOOSE checked
+    },
 }
 
 ###############################################################################
 E0_1_V2_1 = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
-	],
-	[ # index T_STRIP_I
+    Heptagons.foldMethod.parallel: {
+	# T_STRIP_1_LOOSE checked
+	trisAlt.strip_I: [
 	    [0.50683836006755412, -0.55412050029899795, -3.1353952031680756, 1.4076850366971332],
 	    [1.2017422000545017, -0.06517682205741071, -1.3978871467946332, -1.0285723720758568],
 	    [-0.1055728440591245, 0.58803505950606749, -2.7978540220757742, -0.53028808268086536],
@@ -1371,7 +1400,7 @@ E0_1_V2_1 = {
 	    [0.50152329137467944, 2.5536384613729495, 2.8194302930666062, -2.5643691546525198],
 	    [0.84883637368334608, 0.47511664615920363, -1.4212897928521313, -2.7363094607078535],
 	],
-	[ # index T_STRIP_II
+	trisAlt.strip_II: [
 	    # same as STRIP_I
 	    [0.50683836006755389, -0.55412050029899795, -3.1353952031680761, 1.4076850366971323],
 	    [1.2017422000545022, -0.06517682205741071, -1.3978871467946323, -1.0285723720758559],
@@ -1380,21 +1409,20 @@ E0_1_V2_1 = {
 	    [0.50152329137467966, 2.553638461372949, 2.8194302930666066, -2.5643691546525194],
 	    [0.8488363736833463, 0.47511664615920329, -1.4212897928521304, -2.736309460707854],
 	],
-	[ # index T_STAR
+	trisAlt.star: [
 	    [1.2076991237109906, -0.058931378634738962, -1.3877578821507743, -1.0260027929742392],
 	    [1.2076991237109909, 1.5111932981248473, 1.3877578821507743, -2.2313938805162028],
 	    [0.86741423589323685, 0.49955639999623797, -1.3877578821507752, -2.7895319152019757],
 	    [0.86741423589323741, 2.0696810767558245, 1.3877578821507746, 2.2882623044356474],
 	],
-	[ # index T_STAR_1_LOOSE
-	],
-    ],
+	# T_STAR_1_LOOSE checked
+    },
 }
 
 ###############################################################################
 AllEquilateralTris = {
-    Heptagons.foldMethod.parallel: [
-	[ # index T_STRIP_1_LOOSE
+    Heptagons.foldMethod.parallel: {
+	trisAlt.strip_1_loose: [
 	    [0.12225322067129163, 0.69387894107538739, -2.8805347296708912, -1.4528097830759066],
 	    [0.12225322067129135, 0.69387894107538739, -2.8805347296708907, 0.97566810142912352],
 	    [-1.0798457219755391, 2.4477137125144059, -1.1266999582318729, -1.4528097830759075],
@@ -1412,7 +1440,7 @@ AllEquilateralTris = {
 	    [2.698857434039617, 0.69387894107538739, -0.46891878007418342, -0.92604124938183041],
 	    [2.6988574340396174, 0.69387894107538739, -0.46891878007418253, 1.5024366351231997],
 	],
-	[ # index T_STRIP_I
+	trisAlt.strip_I: [
 	    [-1.156637817378058, 2.7544847680954581, -0.60432651389549186, -2.1952192586001704],
 	    [-0.80659177867111587, 2.0380849613850587, -1.7484826657781838, 0.75631842380774827],
 	    [0.42167356237852688, 2.5217075314325132, 1.9601130634313986, -1.1682581061100761],
@@ -1424,8 +1452,8 @@ AllEquilateralTris = {
 	    [1.046029937161403, 2.7705999979927567, 1.2607488678219125, 2.5274815882531603],
 	    [2.3225481937956785, 1.5804869294071295, 0.74234494088217806, 0.28406772970135918],
 	],
-	[],  # index T_STRIP_II
-	[ # index T_STAR
+	# index T_STRIP_II: no solutions
+	trisAlt.star: [
 	   [-0.68958505376778345, -2.7696838629629861, 1.8676782736688526, -2.8833852670220774],
 	   [-0.19704139133793197, -2.4699975062528203, 2.5847963085157168, -0.94597526034129231],
 	   [-1.0845032151713569, -2.7900809377096936, 0.72626261351302934, -2.9760746154612101],
@@ -1443,7 +1471,7 @@ AllEquilateralTris = {
 	   [0.61445205337854325, 1.5406078029015788, -1.5599598916192576, 2.1201871496572462],
 	   [1.3155499020279271, -3.0834911230708753, 2.2752628509264001, -0.60007527499206059],
 	],
-	[ # index T_STAR_1_LOOSE
+	trisAlt.star_1_loose: [
 	   [0.28592011827864433, -0.69387894107538717, 3.0914363610021587, -2.7118862151736765],
 	   [0.18803380976514264, 0.69387894107538739, -2.887492084887687, -1.6205232315712745],
 	   [0.45405009105009386, -0.69387894107538717, 3.1070403302585325, 3.0489972727344448],
@@ -1461,9 +1489,9 @@ AllEquilateralTris = {
 	   [1.8357946808430985, -0.69387894107538717, -2.3209411311404757, 1.7744881136624304],
 	   [2.0540619450271707, -0.69387894107538717, -2.0798236853839418, -1.0637165671611601],
 	]
-    ],
-    Heptagons.foldMethod.triangle: [
-	[ # index T_STRIP_1_LOOSE
+    },
+    Heptagons.foldMethod.triangle: {
+	trisAlt.strip_1_loose: [
 	   [-0.37928429671678865, 2.4477137125144055, 1.6378373600101694, 1.7262201018590639],
 	   [0.82281464593004194, 0.69387894107538739, -2.8915131757303993, 1.7262201018590648],
 	   [0.11022350887753472, 0.69387894107538739, -2.8422991804193738, -0.91434765817113828],
@@ -1473,13 +1501,13 @@ AllEquilateralTris = {
 	   [1.5133541296334956, 2.4477137125144055, -1.8700394125440489, 0.92215961894657994],
 	   [2.7154530722803263, 0.69387894107538739, -0.11620464110503104, 0.92215961894658016],
 	],
-	[ # index T_STRIP_I
+	trisAlt.strip_I: [
 	    [0.1732276091010776, 0.52816572632161485, -2.6642171952579274, -1.0965317568448629],
 	    [0.44145650182396207, 1.1775327063113552, 3.0063789276865482, 1.2998509746393099],
 	    [2.15676029301398, 0.63581007425305769, -0.10722803069920772, -2.7622927773697259],
 	    [2.348224522244744, 1.5453402553363258, -0.81158843987649387, 0.21360131904630464],
 	],
-	[ # index T_STRIP_II
+	trisAlt.strip_II: [
 	    [-1.0173740109769405, 2.6081392183549621, 0.91764171185396504, 1.6020518782220581],
 	    [0.48393194675487911, 0.69822055524780546, 3.1395184514998871, 1.6231448463884188],
 	    [-0.64401596851308196, -2.7041662846345611, -0.38486088835850207, -1.3721231856384577],
@@ -1495,7 +1523,7 @@ AllEquilateralTris = {
 	    [1.4223102570117709, 2.242563681630851, -2.3775290002535199, 1.9342770873277209],
 	    [1.3268711167367437, 2.4306309475346963, -1.2560278848749951, -1.8332160432187816],
 	],
-	[ # index T_STAR
+	trisAlt.star: [
 	    [-0.23373296122987397, -0.55594518756283939, -1.9873999503517839, -2.4041323055445654],
 	    [0.38242013446232487, 1.4957117315743427, 2.5100109947299027, 1.2218140754615865],
 	    [0.50230694454076719, 2.6022651424384167, -1.7385581699404362, 2.6254348211587346],
@@ -1503,7 +1531,7 @@ AllEquilateralTris = {
 	    [2.1096695450758833, 0.50651073062025809, 0.066766734495951496, 2.136486936813264],
 	    [2.3960734384866127, 1.3623591825189778, -0.73589587699331993, -1.480288847100689],
 	],
-	[ # index T_STAR_1_LOOSE
+	trisAlt.star_1_loose: [
 	    [-0.43125127814039982, 2.4477137125144055, 1.6832581745906028, 1.7017370908192433],
 	    [0.77084766450643161, 0.69387894107538728, -2.8460923611499656, 1.7017370908192442],
 	    [0.031020143695965056, 0.69387894107538728, -2.894840990191526, -0.87286692360127027],
@@ -1513,33 +1541,19 @@ AllEquilateralTris = {
 	    [1.725095568985058, 2.4477137125144055, -1.6767258051172735, -1.0919470058995833],
 	    [2.9271945116318889, 0.69387894107538739, 0.077108966321745367, -1.0919470058995842],
 	],
-    ],
-    Heptagons.foldMethod.star: [
-	[ # index T_STRIP_1_LOOSE
+    },
+    Heptagons.foldMethod.star: {
+	trisAlt.strip_1_loose: [
 	    [1.6962939807609119, 0.223747719417109, 2.5922373883920513, -1.5234113058915808],
 	],
-	[ # index T_STRIP_I
-	],
-	[],  # index T_STRIP_II
-	[ # index T_STAR
-	],
-	[ # index T_STAR_1_LOOSE
-	]
-    ],
-    Heptagons.foldMethod.w: [
-	[ # index T_STRIP_1_LOOSE
+    },
+    Heptagons.foldMethod.w: {
+	trisAlt.strip_1_loose: [
 	    [-1.4219137817889349, -2.3782898649783748, 2.5967504554976419, 2.5509612243604232],
 	],
-	[ # index T_STRIP_I
-	],
-	[],  # index T_STRIP_II
-	[ # index T_STAR
-	],
-	[ # index T_STAR_1_LOOSE
-	]
-    ],
-    Heptagons.foldMethod.trapezium: [
-	[ # index T_STRIP_1_LOOSE
+    },
+    Heptagons.foldMethod.trapezium: {
+	trisAlt.strip_1_loose: [
 	    [-1.4845890274466147, 3.0626426449873039, -0.097780459842321754, -1.4952529282338594],
 	    [-1.4845890274466147, 3.0626426449873039, 2.3306974246627101, -1.4952529282338594],
 	    [-1.5340069950789443, 3.0416241021604091, 0.062287254153245541, -1.8946937131325789],
@@ -1561,12 +1575,5 @@ AllEquilateralTris = {
 	    [2.7325943248261031, 0.94615739973058832, -1.3980848791205425, -0.62841892332507232],
 	    [2.7325943248261035, 0.94615739973058766, 1.0303930053844903, -0.62841892332507143],
 	],
-	[ # index T_STRIP_I
-	],
-	[],  # index T_STRIP_II
-	[ # index T_STAR
-	],
-	[ # index T_STAR_1_LOOSE
-	]
-    ],
+    },
 }
