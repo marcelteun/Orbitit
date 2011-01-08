@@ -54,20 +54,6 @@ Title = 'Polyhedra with Folded Regular Heptagons A4xI'
 
 V2 = math.sqrt(2)
 
-dyn_pos		= -1
-all_eq_tris	=  0
-no_o3_tris	=  1
-edge_1_1_V2_1	=  2
-edge_1_V2_1_1	=  3
-edge_V2_1_1_1	=  4
-edge_V2_1_V2_1	=  5
-only_squares	=  6
-edge_0_1_1_1	=  7
-edge_0_1_V2_1	=  8
-edge_0_1_1_0	=  9
-only_hepts	= 10
-only_o3_tris	= 11
-
 #                0
 #   13                      12
 #         6             1
@@ -106,6 +92,21 @@ class TrisAlt:
 
 trisAlt = TrisAlt()
 
+dyn_pos		= -1
+all_eq_tris	=  0
+no_o3_tris	=  1
+edge_1_1_V2_1	=  2
+edge_1_V2_1_1	=  3
+edge_V2_1_1_1	=  4
+edge_V2_1_V2_1	=  5
+only_squares	=  6
+edge_0_1_1_1	=  7
+edge_0_1_V2_1	=  8
+edge_0_1_1_0	=  9
+only_hepts	= 10
+only_o3_tris	= 11
+border_o3_tris	= 12
+
 Stringify = {
     dyn_pos:			'Enable Sliders',
     no_o3_tris:			'No O3 Triangles',
@@ -120,6 +121,7 @@ Stringify = {
     edge_0_1_1_0:		'|a|=0 & |b|=1 & |c|=1 & |d|=0',
     only_hepts:			'Only Heptagons',
     only_o3_tris:		'Only O3 Triangles',
+    border_o3_tris:		'Border and O3 Triangles',
     trisAlt.strip_1_loose:	'Triangle Strip, 1 Loose ',
     trisAlt.strip_I:		'Triangle Strip I',
     trisAlt.strip_II:		'Triangle Strip II',
@@ -423,7 +425,7 @@ class Shape(Geom3D.IsometricShape):
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
-        size = (745, 550)
+        size = (745, 570)
         # TODO assert (type(shape) == type(RegHeptagonShape()))
         this.shape = shape
         this.canvas = canvas
@@ -521,36 +523,32 @@ class CtrlWin(wx.Frame):
 		Heptagons.foldMethod.trapezium: AllEquilateralTris[Heptagons.foldMethod.trapezium],
 	    },
 	    no_o3_tris: {
-		Heptagons.foldMethod.parallel: NoO3Triangles[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: NoO3Triangles[Heptagons.foldMethod.parallel],
+	    },
+	    border_o3_tris: {
+		Heptagons.foldMethod.triangle: BorderAndO3Triangles[Heptagons.foldMethod.triangle],
+		Heptagons.foldMethod.star:     BorderAndO3Triangles[Heptagons.foldMethod.star],
 	    },
 	    only_squares: {
-		Heptagons.foldMethod.parallel: FoldedSquares_0[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: FoldedSquares_0[Heptagons.foldMethod.parallel],
 	    },
 	    edge_1_1_V2_1: {
-		Heptagons.foldMethod.parallel: E1_1_V2_1[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: E1_1_V2_1[Heptagons.foldMethod.parallel],
 	    },
 	    edge_1_V2_1_1: {
-		Heptagons.foldMethod.parallel: E1_V2_1_1[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: E1_V2_1_1[Heptagons.foldMethod.parallel],
 	    },
 	    edge_V2_1_1_1: {
-		Heptagons.foldMethod.parallel: EV2_1_1_1[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: EV2_1_1_1[Heptagons.foldMethod.parallel],
 	    },
 	    edge_V2_1_V2_1: {
-		Heptagons.foldMethod.parallel: EV2_1_V2_1[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: EV2_1_V2_1[Heptagons.foldMethod.parallel],
 	    },
 	    edge_0_1_1_1: {
-		Heptagons.foldMethod.parallel: E0_1_1_1[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: E0_1_1_1[Heptagons.foldMethod.parallel],
 	    },
 	    edge_0_1_V2_1: {
-		Heptagons.foldMethod.parallel: E0_1_V2_1[
-		    Heptagons.foldMethod.parallel],
+		Heptagons.foldMethod.parallel: E0_1_V2_1[Heptagons.foldMethod.parallel],
 	    },
 	}
 
@@ -619,8 +617,9 @@ class CtrlWin(wx.Frame):
 		Stringify[dyn_pos],
 		Stringify[only_hepts],
 		Stringify[only_o3_tris],
-		Stringify[only_squares],
+		Stringify[border_o3_tris],
 		Stringify[no_o3_tris],
+		Stringify[only_squares],
 		Stringify[all_eq_tris],
 		Stringify[edge_1_1_V2_1],
 		Stringify[edge_1_V2_1_1],
@@ -1112,13 +1111,25 @@ FoldedSquareAnd1TriangleType = {
 ###############################################################################
 # TODO: use
 BorderAndO3Triangles = {
+    # TODO: fill in more...
     Heptagons.foldMethod.triangle: {
 	trisAlt.strip_I: [
-	    [0.56477962526448244, 2.5170214708479355, -1.6342822146880849, 1.884160303072703],
 	    [0.39884399626845796, 1.4568403064826343, 2.5715853033334066, -0.88428111441002599],
 	    [-0.25245320098095386, 2.5254918903733907, 1.2927536380277551, -1.9009046158502372],
+	    [0.56477962526448244, 2.5170214708479355, -1.6342822146880849, 1.884160303072703],
 	    [1.1958969269857136, 0.47194194051049571, 1.874835153247457, 2.2245693304207181],
 	],
+    },
+    Heptagons.foldMethod.star: {
+	trisAlt.strip_I: [
+	    [1.3589033857968413, 0.57075868490494164, -1.854104152973628, -1.5872846507074385] ,
+	    [1.1510711142603265, 0.76345718622723957, -2.5719659710126268, 1.3787127661296772] ,
+	    [-0.83500624291190872, -3.0100387448217596, -1.2472158731015446, 1.9370891705806654] ,
+	    [-0.61728150693957284, -2.8798182278826023, -0.67139289769202648, -1.3539686423323598] ,
+	    [-1.5443915209996073, -2.1001904551266772, -2.5300662835391172, 0.86765835633091604] ,
+	    [-1.0961611397416087, -2.0658152219428132, 2.7790349062846875, 0.9745184453712924] ,
+	    [1.240760438271816, 1.4093511342004652, 0.64591225448264056, -1.2296559797224518] ,
+],
     },
 }
 
@@ -1141,7 +1152,7 @@ NoO3Triangles = {
 	    [1.9747407952132807, 1.4333956202690126, 1.3032695012730287, -2.125014791829507],
 	    [2.2510988577262974, 1.0293170367050262, 0.79012198328513306, -0.75503878237140576],
 	],
-	# T_STRIP_II checked
+	# T_STRIP_II checked?
 	trisAlt.star: [
 	    # same as T_STRIP_I, since d==0
 	    [-0.44916112192145868, 2.1122756168847676, -0.7901219832851325, -2.38655387121839],
@@ -1164,10 +1175,16 @@ NoO3Triangles = {
 }
 
 ###############################################################################
+l = [
+   [-0.08705843892515136, 1.5969418702542431, -1.421867197734886, 2.9924491746224842],
+   [0.49431990960006078, 0.84938187722147296, -1.9643841934177342, 0.66547727260192069],
+   [1.3076178262047773, 2.2922107763683206, 1.9643841934177342, 2.4761153809878742],
+   [1.8889961747299897, 1.5446507833355498, 1.4218671977348862, 0.14914347896730806],
+]
 FoldedSquares_0 = {
     Heptagons.foldMethod.parallel: {
-	# T_STRIP_1_LOOSE checked
-	# T_STRIP_I checked
+	# T_STRIP_1_LOOSE checked?
+	trisAlt.strip_I: l,
 	trisAlt.strip_II: [
 	   [-0.11267755272150123, -3.0831450050562297, 1.3877578821507743, 1.8449713169461077],
 	   [-0.11267755272150136, -3.0831450050562297, 1.3877578821507746, -2.1153635908403672],
@@ -1178,13 +1195,8 @@ FoldedSquares_0 = {
 	   [1.9146152885263397, 1.511677028226023, 1.3877578821507743, -2.2316201502913877],
 	   [1.9146152885263394, 1.5116770282260232, 1.3877578821507748, 0.091230249101723615],
 	],
-	trisAlt.star: [
-	   [-0.08705843892515136, 1.5969418702542431, -1.421867197734886, 2.9924491746224842],
-	   [0.49431990960006078, 0.84938187722147296, -1.9643841934177342, 0.66547727260192069],
-	   [1.3076178262047773, 2.2922107763683206, 1.9643841934177342, 2.4761153809878742],
-	   [1.8889961747299897, 1.5446507833355498, 1.4218671977348862, 0.14914347896730806],
-	],
-	# T_STAR_1_LOOSE checked
+	trisAlt.star: l,
+	# T_STAR_1_LOOSE checked?
     },
 }
 
