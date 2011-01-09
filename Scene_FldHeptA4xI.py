@@ -107,23 +107,25 @@ only_hepts	= 10
 only_o3_tris	= 11
 border_o3_tris	= 12
 square_o3_tris	= 13
+edge_V2_1_1_0	= 14
 
 Stringify = {
-    dyn_pos:			'Enable Sliders',
-    no_o3_tris:			'48 Triangles',
-    all_eq_tris:		'All 80 Triangles Equilateral',
-    edge_1_1_V2_1:		'32 Triangles and 24 Folded Squares: I',
-    edge_1_V2_1_1:		'32 Triangles and 24 Folded Squares: II',
-    edge_V2_1_1_1:		'56 Triangles and 12 Folded Squares',
-    edge_V2_1_V2_1:		'8 Triangles and 36 Folded Squares',
-    squares_24:			'24 Folded Squares',
-    edge_0_1_1_1:		'56 Triangles',
-    edge_0_1_V2_1:		'8 Triangles and 24 Folded Squares',
-    edge_0_1_1_0:		'24 Triangles',
-    only_hepts:			'No Extra Faces, Only Heptagons',
-    only_o3_tris:		'8 Triangles (O3)',
-    border_o3_tris:		'32 Triangles (24 + 8)',
-    square_o3_tris:		'8 Triangles and 12 Folded Squares',
+    dyn_pos:		'Enable Sliders',
+    no_o3_tris:		'48 Triangles',
+    all_eq_tris:	'All 80 Triangles Equilateral',
+    edge_1_1_V2_1:	'32 Triangles and 24 Folded Squares: I',
+    edge_1_V2_1_1:	'32 Triangles and 24 Folded Squares: II',
+    edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
+    edge_V2_1_V2_1:	'8 Triangles and 36 Folded Squares',
+    squares_24:		'24 Folded Squares',
+    edge_0_1_1_1:	'56 Triangles',
+    edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
+    edge_0_1_1_0:	'24 Triangles',
+    only_hepts:		'No Extra Faces, Only Heptagons',
+    only_o3_tris:	'8 Triangles (O3)',
+    border_o3_tris:	'32 Triangles (24 + 8)',
+    square_o3_tris:	'8 Triangles and 12 Folded Squares',
+    edge_V2_1_1_0:	'24 Triangles and 12 Squares',
     trisAlt.strip_1_loose:	'Triangle Strip, 1 Loose ',
     trisAlt.strip_I:		'Triangle Strip I',
     trisAlt.strip_II:		'Triangle Strip II',
@@ -427,7 +429,7 @@ class Shape(Geom3D.IsometricShape):
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
-        size = (745, 590)
+        size = (745, 620)
         # TODO assert (type(shape) == type(RegHeptagonShape()))
         this.shape = shape
         this.canvas = canvas
@@ -507,6 +509,14 @@ class CtrlWin(wx.Frame):
 		Heptagons.foldMethod.triangle: BorderAndO3Triangles[Heptagons.foldMethod.triangle],
 		Heptagons.foldMethod.star:     BorderAndO3Triangles[Heptagons.foldMethod.star],
 		Heptagons.foldMethod.w:        BorderAndO3Triangles[Heptagons.foldMethod.w],
+	    },
+	    square_o3_tris: {
+		Heptagons.foldMethod.star:     FoldedSquareAndO3Triangle[Heptagons.foldMethod.star],
+		Heptagons.foldMethod.w:        FoldedSquareAndO3Triangle[Heptagons.foldMethod.w],
+		Heptagons.foldMethod.triangle: FoldedSquareAndO3Triangle[Heptagons.foldMethod.triangle],
+	    },
+	    edge_V2_1_1_0: {
+		Heptagons.foldMethod.star:     FoldedSquareAnd1TriangleType[Heptagons.foldMethod.star],
 	    },
 	    edge_0_1_1_0: { # TODO change name: only one kind of triangle
 		# index T_STRIP_1_LOOSE nothing special TODO double check
@@ -624,6 +634,7 @@ class CtrlWin(wx.Frame):
 		Stringify[squares_24],
 		Stringify[border_o3_tris],
 		Stringify[edge_0_1_V2_1],
+		Stringify[edge_V2_1_1_0],
 		Stringify[edge_V2_1_V2_1],
 		Stringify[no_o3_tris],
 		Stringify[edge_0_1_1_1],
@@ -1180,15 +1191,55 @@ BorderAndO3Triangles = {
 }
 
 ###############################################################################
-# TODO: use
+star_strip_lst = [
+   [1.1337834018831718, 0.3983033753431518, -2.1797039818918522, -1.5328428576100608],
+   [0.90307327376725277, 0.63885212596863361, -2.8904845931275038, 2.0878012966188395],
+   [-0.5420331566827894, 2.9979749183990561, -0.78779708747906696, 1.9216762369325204],
+   [-0.30364010591499141, -3.129387164358028, -0.38799713202612018, -1.8798977866386348],
+   [0.85606927913462993, 1.6261911991325377, 0.83086420958161999, -1.8031208657168927],
+   [0.98417091688110503, 1.7002804053036806, 0.57313683688259065, -1.6982959819999621],
+]
+w_strip_lst = [
+    [-1.1873278995710541, 3.0795212915489931, 2.5484729998858415, -1.7099925934432898],
+    [-1.6002075589879676, -3.0554878503734844, 1.9505868416444843, 1.950374772184948],
+    [1.6791195265785936, 0.28190668923148438, 0.7894679357209311, 1.9408382769201495],
+    [2.0981469671043058, 0.35412999252799127, 1.17394892523243, -1.8111512922408615],
+]
+triangle_strip_lst = [
+    [0.76992497486360933, 0.94624022871632729, 3.0803702160830282, -1.3554280853678113],
+    [-0.027892439365956069, 2.0135355382599829, 1.1365693454289998, 1.1300966239587744],
+    [-0.17038567171338109, 2.692349840061993, 0.68719186423390977, -2.2850437463779456],
+    [0.27367697466186752, 2.6735422903020791, -1.4278661736369687, 2.2346826212529747],
+    [1.7889887751470579, 0.56584486671766454, 1.5850459818848297, -2.0045929968418328],
+    [1.1391199990835519, 2.0596070208421637, -0.46567402798771518, -1.1822021274704628],
+]
+FoldedSquareAndO3Triangle = {
+    # nothing found for parallel and trapezium fold (strip triangle alt)
+    Heptagons.foldMethod.star: {
+	trisAlt.strip_I: star_strip_lst,
+	trisAlt.strip_II: star_strip_lst,
+    },
+    Heptagons.foldMethod.w: {
+	trisAlt.strip_I: w_strip_lst,
+	trisAlt.strip_II: w_strip_lst,
+    },
+    Heptagons.foldMethod.triangle: {
+	trisAlt.strip_I: triangle_strip_lst,
+	trisAlt.strip_II: triangle_strip_lst,
+    },
+}
+
+###############################################################################
+star_stripI_star_tri_lst = [
+    [-1.0248629078901548, 3.0367879503498347, -0.95004531859792607, -2.9819419706524459],
+    [-0.90815984502062352, 3.0126250996311295, -0.91047126200357198, 0.37145275614090456],
+    [1.5200936080774254, 0.28279384061834983, -1.7562793370655365, 2.9017993292662552],
+    [1.4074958748480417, 0.29634532013454673, -1.8587346053407554, -0.37191199363966465],
+]
 FoldedSquareAnd1TriangleType = {
     Heptagons.foldMethod.star: {
-	trisAlt.star: [
-	    [1.5200936080774254, 0.28279384061834983, -1.7562793370655365, 2.9017993292662552],
-	    [1.4074958748480417, 0.29634532013454673, -1.8587346053407554, -0.37191199363966465],
-	    [-1.0248629078901548, 3.0367879503498347, -0.95004531859792607, -2.9819419706524459],
-	    [-0.90815984502062352, 3.0126250996311295, -0.91047126200357198, 0.37145275614090456],
-	],
+	trisAlt.star: star_stripI_star_tri_lst,
+	trisAlt.strip_I: star_stripI_star_tri_lst,
     },
 }
 
