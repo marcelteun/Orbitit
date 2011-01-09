@@ -99,29 +99,31 @@ edge_1_1_V2_1	=  2
 edge_1_V2_1_1	=  3
 edge_V2_1_1_1	=  4
 edge_V2_1_V2_1	=  5
-only_squares	=  6
+squares_24	=  6
 edge_0_1_1_1	=  7
 edge_0_1_V2_1	=  8
 edge_0_1_1_0	=  9
 only_hepts	= 10
 only_o3_tris	= 11
 border_o3_tris	= 12
+square_o3_tris	= 13
 
 Stringify = {
     dyn_pos:			'Enable Sliders',
-    no_o3_tris:			'No O3 Triangles',
-    all_eq_tris:		'All Equilateral Triangles',
-    edge_1_1_V2_1:		'|a|=1 & |b|=1 & |c|=V2 & |d|=1',
-    edge_1_V2_1_1:		'|a|=1 & |b|=V2 & |c|=1 & |d|=1',
-    edge_V2_1_1_1:		'|a|=V2 & |b|=1 & |c|=1 & |d|=1',
-    edge_V2_1_V2_1:		'|a|=V2 & |b|=1 & |c|=V2 & |d|=1',
-    only_squares:		'Only Folded Squares',
-    edge_0_1_1_1:		'|a|=0 & |b|=1 & |c|=1 & |d|=1',
-    edge_0_1_V2_1:		'|a|=0 & |b|=1 & |c|=V2 & |d|=1',
-    edge_0_1_1_0:		'|a|=0 & |b|=1 & |c|=1 & |d|=0',
-    only_hepts:			'Only Heptagons',
-    only_o3_tris:		'Only O3 Triangles',
-    border_o3_tris:		'Border and O3 Triangles',
+    no_o3_tris:			'48 Triangles',
+    all_eq_tris:		'All 80 Triangles Equilateral',
+    edge_1_1_V2_1:		'32 Triangles and 24 Folded Squares: I',
+    edge_1_V2_1_1:		'32 Triangles and 24 Folded Squares: II',
+    edge_V2_1_1_1:		'56 Triangles and 12 Folded Squares',
+    edge_V2_1_V2_1:		'8 Triangles and 36 Folded Squares',
+    squares_24:			'24 Folded Squares',
+    edge_0_1_1_1:		'56 Triangles',
+    edge_0_1_V2_1:		'8 Triangles and 24 Folded Squares',
+    edge_0_1_1_0:		'24 Triangles',
+    only_hepts:			'No Extra Faces, Only Heptagons',
+    only_o3_tris:		'8 Triangles (O3)',
+    border_o3_tris:		'32 Triangles (24 + 8)',
+    square_o3_tris:		'8 Triangles and 12 Folded Squares',
     trisAlt.strip_1_loose:	'Triangle Strip, 1 Loose ',
     trisAlt.strip_I:		'Triangle Strip I',
     trisAlt.strip_II:		'Triangle Strip II',
@@ -425,7 +427,7 @@ class Shape(Geom3D.IsometricShape):
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
-        size = (745, 570)
+        size = (745, 590)
         # TODO assert (type(shape) == type(RegHeptagonShape()))
         this.shape = shape
         this.canvas = canvas
@@ -530,7 +532,7 @@ class CtrlWin(wx.Frame):
 	    no_o3_tris: {
 		Heptagons.foldMethod.parallel: NoO3Triangles[Heptagons.foldMethod.parallel],
 	    },
-	    only_squares: {
+	    squares_24: {
 		Heptagons.foldMethod.parallel: FoldedSquares_0[Heptagons.foldMethod.parallel],
 	    },
 	    edge_1_1_V2_1: {
@@ -615,26 +617,32 @@ class CtrlWin(wx.Frame):
 
 	# predefined positions
         this.prePosLst = [
-		Stringify[dyn_pos],
 		Stringify[only_hepts],
 		Stringify[only_o3_tris],
+		Stringify[square_o3_tris],
+		Stringify[edge_0_1_1_0],
+		Stringify[squares_24],
 		Stringify[border_o3_tris],
+		Stringify[edge_0_1_V2_1],
+		Stringify[edge_V2_1_V2_1],
 		Stringify[no_o3_tris],
-		Stringify[only_squares],
-		Stringify[all_eq_tris],
+		Stringify[edge_0_1_1_1],
 		Stringify[edge_1_1_V2_1],
 		Stringify[edge_1_V2_1_1],
 		Stringify[edge_V2_1_1_1],
-		Stringify[edge_V2_1_V2_1],
-		Stringify[edge_0_1_1_1],
-		Stringify[edge_0_1_V2_1],
-		Stringify[edge_0_1_1_0],
+		Stringify[all_eq_tris],
+		Stringify[dyn_pos],
             ]
         this.prePosGui = wx.RadioBox(this.panel,
-                label = 'Special Positions',
+                label = 'Only Regular Faces:',
                 style = wx.RA_VERTICAL,
                 choices = this.prePosLst
             )
+	# Don't hardcode which index is dyn_pos, I might reorder the item list
+	# one time, and will probably forget to update the default selection..
+	for i in range(len(this.prePosLst)):
+	    if (this.prePosLst[i] == Stringify[dyn_pos]):
+		this.prePosGui.SetSelection(i)
         this.Guis.append(this.prePosGui)
         this.prePosGui.Bind(wx.EVT_RADIOBOX, this.onPrePos)
         #wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0, const wxString choices[] = NULL, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listBox")
@@ -988,7 +996,7 @@ class CtrlWin(wx.Frame):
                 this.statusBar.SetStatusText(txt)
 	    elif ( this.foldMethod == Heptagons.foldMethod.parallel and (
 		    (
-			sel == only_squares
+			sel == squares_24
 			and
 			not (
 			    this.trisAlt == trisAlt.strip_I
@@ -1044,10 +1052,10 @@ class Scene(Geom3D.Scene):
 ###############################################################################
 OnlyHeptagons = {
     Heptagons.foldMethod.parallel: [
-	[2.0552779107977082, 0.0, -1.1787757203628972, -0.93053176681968619],
-	[0.49161494586164856, 3.1415926535897931, 1.9628169332268963, -0.93053176681968619],
-	[-0.2533401749928702, 3.1415926535897931, 1.1787757203628966, -2.2110608867701069],
 	[1.31032278994319, 0.0, -1.9628169332268968, -2.2110608867701069],
+	[-0.2533401749928702, 3.1415926535897931, 1.1787757203628966, -2.2110608867701069],
+	[0.49161494586164856, 3.1415926535897931, 1.9628169332268963, -0.93053176681968619],
+	[2.0552779107977082, 0.0, -1.1787757203628972, -0.93053176681968619],
     ],
     Heptagons.foldMethod.w: [
 	[-1.8868486799927435, -2.6758432135380379, -3.1283205574215183, 1.9544544516064626],
