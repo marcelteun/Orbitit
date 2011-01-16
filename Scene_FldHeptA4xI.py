@@ -897,7 +897,7 @@ class CtrlWin(wx.Frame):
     def onTriangleAlt(this, event):
         this.trisAlt = this.edgeChoicesListItems[this.trisAltGui.GetSelection()]
         this.shape.setEdgeAlternative(this.trisAlt)
-        if this.prePosGui.GetSelection() != 0:
+        if this.prePosGui.GetSelection() != len(this.prePosLst) - 1:
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
@@ -908,7 +908,7 @@ class CtrlWin(wx.Frame):
 		this.foldMethodGui.GetSelection()
 	    ]
 	this.shape.setFoldMethod(this.foldMethod)
-        if this.prePosGui.GetSelection() != 0:
+        if this.prePosGui.GetSelection() != len(this.prePosLst) - 1:
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
@@ -955,6 +955,7 @@ class CtrlWin(wx.Frame):
     fld1None = 0.0
     fld2None = 0.0
     def onPrePos(this, event = None):
+	#print "onPrePos"
         sel = this.getPrePos()
 	# if only_hepts:
 	# 1. don't show triangles
