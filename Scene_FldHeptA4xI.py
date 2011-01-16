@@ -78,12 +78,14 @@ V2 = math.sqrt(2)
 # This leaves 5 possible edge configurations:
 class TrisAlt:
     # Note nrs should be different from above
-    strip_1_loose = 100
-    strip_I       = 101
-    strip_II      = 102
-    star          = 103
-    star_1_loose  = 104
-    nrOfEdgeAlternatives = 5
+    strip_1_loose     = 100
+    strip_I           = 101
+    strip_II          = 102
+    star              = 103
+    star_1_loose      = 104
+    alt_strip_I       = 105
+    alt_strip_II      = 106
+    alt_strip_1_loose = 107
     def get(this, str):
 	for k,v in Stringify.iteritems():
 	    if v == str:
@@ -126,11 +128,14 @@ Stringify = {
     border_o3_tris:	'32 Triangles (24 + 8)',
     square_o3_tris:	'8 Triangles and 12 Folded Squares',
     edge_V2_1_1_0:	'24 Triangles and 12 Folded Squares',
-    trisAlt.strip_1_loose:	'Triangle Strip, 1 Loose ',
-    trisAlt.strip_I:		'Triangle Strip I',
-    trisAlt.strip_II:		'Triangle Strip II',
-    trisAlt.star:		'Triangle Shell',
-    trisAlt.star_1_loose:	'Triangle Shell, 1 Loose',
+    trisAlt.strip_1_loose:	'Strip, 1 Loose ',
+    trisAlt.strip_I:		'Strip I',
+    trisAlt.strip_II:		'Strip II',
+    trisAlt.star:		'Shell',
+    trisAlt.star_1_loose:	'Shell, 1 Loose',
+    trisAlt.alt_strip_I:	'Alternative Strip I',
+    trisAlt.alt_strip_II:	'Alternative Strip II',
+    trisAlt.alt_strip_1_loose:	'Alternative Strip, 1 loose',
 }
 
 def Vlen(v0, v1):
@@ -233,19 +238,20 @@ class Shape(Geom3D.IsometricShape):
         if this.updateShape:
             #print 'getStatusStr: forced setV'
             this.setV()
+	#                                  14 = 2'
         #                0
-        #   13                      12
+        #   13                      12 = o3 centre
         #         6             1
         #
-        # 11                           9
+        # 11                           9 = 1'
         #
         #       5                 2
         #
         #
-        #   10       4       3        8
+        #   10       4       3        8 = 0'
         #
         #
-        #                         7
+        #                         7 = 6'
         Vs = this.getBaseVertexProperties()['Vs']
         if this.edgeAlternative == trisAlt.strip_1_loose:
             aLen = Vlen(Vs[2], Vs[7])
@@ -272,6 +278,21 @@ class Shape(Geom3D.IsometricShape):
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[1], Vs[8])
             dLen = Vlen(Vs[1], Vs[9])
+        elif this.edgeAlternative == trisAlt.alt_strip_I:
+            aLen = Vlen(Vs[3], Vs[8])
+            bLen = Vlen(Vs[2], Vs[8])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt_strip_II:
+            aLen = Vlen(Vs[3], Vs[8])
+            bLen = Vlen(Vs[3], Vs[9])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt_strip_1_loose:
+            aLen = Vlen(Vs[2], Vs[7])
+            bLen = Vlen(Vs[2], Vs[8])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
 	else:
 	    raise TypeError, 'Unknown edgeAlternative %s' % str(
 		this.edgeAlternative)
@@ -304,20 +325,21 @@ class Shape(Geom3D.IsometricShape):
         this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.angle)
         this.heptagon.translate(this.height*GeomTypes.uz)
         Vs = this.heptagon.Vs[:]
-        #                0
-        #   13                      12
-        #         6             1
         #
-        # 11                           9
+	# 15                                 14 = 2'
+        #                     0
+        #    (17) 13                      12 = o3c (alt 16)
+        #              6             1
         #
-        #       5                 2
+        #      11                           9 = 1'
+        #
+        #            5                 2
         #
         #
-        #   10       4       3        8
+        #        10       4       3        8 = 0'
         #
         #
-        #                         7
-        #
+        #                              7 = 6'
 
         Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
         Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
@@ -335,14 +357,20 @@ class Shape(Geom3D.IsometricShape):
         halfTurn = HalfTurn(Vec([-1, 1, 1]))
         Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[13]
         this.setBaseVertexProperties(Vs = Vs)
+        Vs.append(Rr * Vs[2])                                  # Vs[14]
+        Vs.append(Rl * Vs[5])                                  # Vs[15]
+        halfTurn = HalfTurn(Vec([1, 1, 1]))
+        Vs.append((Vs[2] + halfTurn*Vs[2]) / 2)                # Vs[16]
+        halfTurn = HalfTurn(Vec([-1, 1, 1]))
+        Vs.append((Vs[5] + halfTurn*Vs[5]) / 2)                # Vs[17]
         Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
         Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
         colIds = [0 for f in Fs]
         if this.addTriangles:
-            Fs.extend([[1, 9, 12], [6, 13, 11]]) # eql triangles
-            Es.extend([1, 9, 6, 11])
+	    Fs.extend(this.o3triFs[this.edgeAlternative]) # eql triangles
+	    Es.extend(this.o3triEs[this.edgeAlternative])
             colIds.extend([3, 3])
 	    if (not this.onlyO3Triangles):
 		Fs.extend(this.triFs[this.edgeAlternative])
@@ -381,28 +409,56 @@ class Shape(Geom3D.IsometricShape):
                     [2, 3, 7], [2, 7, 8],
                     [1, 2, 8], [5, 6, 10],
                     [1, 8, 9], [6, 11, 10]
-                ]
+                ],
+                trisAlt.alt_strip_I: [
+                    [2, 3, 8], [4, 5, 10],
+                    [2, 8, 9], [5, 11, 10],
+                    [2, 9, 14], [5, 15, 11]
+                ],
+                trisAlt.alt_strip_II: [
+                    [3, 8, 9], [4, 11, 10],
+                    [2, 3, 9], [4, 5, 11],
+                    [2, 9, 14], [5, 15, 11]
+                ],
+                trisAlt.alt_strip_1_loose: [
+                    [2, 3, 7], [2, 7, 8],
+                    [2, 8, 9], [5, 11, 10],
+                    [2, 9, 14], [5, 15, 11]
+                ],
             }
-        #                0
-        #   13                      12
-        #         6             1
+	# 15                                 14 = 2'
+        #                     0
+        #    (17) 13                      12 = o3c (alt 16)
+        #              6             1
         #
-        # 11                           9
+        #      11                           9 = 1'
         #
-        #       5                 2
-        #
-        #
-        #   10       4       3        8
+        #            5                 2
         #
         #
-        #                         7
+        #        10       4       3        8 = 0'
         #
+        #
+        #                              7 = 6'
+        this.o3triFs = {
+                trisAlt.strip_1_loose:		[[1, 9, 12], [6, 13, 11]],
+                trisAlt.strip_I:		[[1, 9, 12], [6, 13, 11]],
+                trisAlt.strip_II:		[[1, 9, 12], [6, 13, 11]],
+                trisAlt.star:			[[1, 9, 12], [6, 13, 11]],
+                trisAlt.star_1_loose:		[[1, 9, 12], [6, 13, 11]],
+                trisAlt.alt_strip_I:		[[2, 14, 16], [5, 17, 15]],
+                trisAlt.alt_strip_II:		[[2, 14, 16], [5, 17, 15]],
+                trisAlt.alt_strip_1_loose:	[[2, 14, 16], [5, 17, 15]],
+	    }
         this.triColIds = {
-                trisAlt.strip_1_loose:	[1, 2, 1, 1, 2, 2],
-                trisAlt.strip_I:	[1, 2, 2, 1, 1, 2],
-                trisAlt.strip_II:	[1, 2, 2, 1, 1, 2],
-                trisAlt.star:		[1, 2, 2, 1, 1, 2],
-                trisAlt.star_1_loose:	[1, 2, 1, 1, 2, 2],
+                trisAlt.strip_1_loose:		[1, 2, 1, 1, 2, 2],
+                trisAlt.strip_I:		[1, 2, 2, 1, 1, 2],
+                trisAlt.strip_II:		[1, 2, 2, 1, 1, 2],
+                trisAlt.star:			[1, 2, 2, 1, 1, 2],
+                trisAlt.star_1_loose:		[1, 2, 1, 1, 2, 2],
+                trisAlt.alt_strip_I:		[1, 2, 2, 1, 1, 2],
+                trisAlt.alt_strip_II:		[1, 2, 2, 1, 1, 2],
+                trisAlt.alt_strip_1_loose:	[1, 2, 1, 1, 2, 2],
             }
         this.triEs = {
                 trisAlt.strip_1_loose: [
@@ -424,12 +480,34 @@ class Shape(Geom3D.IsometricShape):
                 trisAlt.star_1_loose: [
                     2, 7, 2, 8, 1, 8,
                     5, 10, 6, 10,
-                ]
+                ],
+                trisAlt.alt_strip_I: [
+                    3, 8, 2, 8, 2, 9,
+                    5, 10, 5, 11,
+                ],
+                trisAlt.alt_strip_II: [
+                    3, 8, 3, 9, 2, 9,
+                    4, 11, 5, 11,
+                ],
+                trisAlt.alt_strip_1_loose: [
+                    2, 7, 2, 8, 2, 9,
+                    5, 10, 5, 11,
+                ],
+            }
+        this.o3triEs = {
+                trisAlt.strip_1_loose:		[1, 9, 6, 11],
+                trisAlt.strip_I:		[1, 9, 6, 11],
+                trisAlt.strip_II:		[1, 9, 6, 11],
+                trisAlt.star:			[1, 9, 6, 11],
+                trisAlt.star_1_loose:		[1, 9, 6, 11],
+                trisAlt.alt_strip_I:		[2, 14, 5, 15],
+                trisAlt.alt_strip_II:		[2, 14, 5, 15],
+                trisAlt.alt_strip_1_loose:	[2, 14, 5, 15],
             }
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
-        size = (745, 620)
+        size = (745, 700)
         # TODO assert (type(shape) == type(RegHeptagonShape()))
         this.shape = shape
         this.canvas = canvas
@@ -562,6 +640,9 @@ class CtrlWin(wx.Frame):
 	    Stringify[trisAlt.strip_II],
 	    Stringify[trisAlt.star],
 	    Stringify[trisAlt.star_1_loose],
+	    Stringify[trisAlt.alt_strip_I],
+	    Stringify[trisAlt.alt_strip_II],
+	    Stringify[trisAlt.alt_strip_1_loose],
 	]
 	this.edgeChoicesListItems = [
 	    trisAlt.get(l[i]) for i in range(len(l))
