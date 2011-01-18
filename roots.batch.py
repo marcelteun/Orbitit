@@ -488,7 +488,8 @@ def FindMultiRootOnDomain(domain,
         precision = 1e-15,
         maxIter = 100,
 	continueTestAt = None,
-	init_results = []
+	init_results = [],
+	printStatus = False
     ):
     results = init_results[:]
     dLen = len(domain)
@@ -497,7 +498,8 @@ def FindMultiRootOnDomain(domain,
     else:
 	testValue = continueTestAt[:]
 	print 'continuing search...'
-    print testValue
+    if printStatus:
+	print testValue
     while testValue[-1] < domain[-1][1]:
     #while testValue[0] < domain[0][1]:
         try:
@@ -531,7 +533,8 @@ def FindMultiRootOnDomain(domain,
             else:
                 if i != dLen-1:
                     testValue[i] = domain[i][0]
-                print testValue
+		if printStatus:
+		    print testValue
     return results
 
 if __name__ == '__main__':
@@ -878,27 +881,45 @@ if __name__ == '__main__':
 	    for r in result: print '  %s,' % str(r)
 	    print '],'
 
-	print 'V2, 1, 1, 0, strip1loose'
-	fold.set(fold.star)
-	batch1(fold)
-	fold.set(fold.w)
-	batch1(fold)
-	fold.set(fold.triangle)
-	batch1(fold)
-	fold.set(fold.trapezium)
-	batch1(fold)
-	#fold.set(fold.parallel)
-	#batch1(fold)
+	def batch15(fold):
+	    print 'searching %s folds' % str(fold)
+	    result = []
+	    result = FindMultiRootOnDomain(Domain,
+		    edgeLengths = [1., 0., 1., 0.],
+		    #edgeAlternative = TriangleAlt.strip1loose, # solutions found
+		    #edgeAlternative = TriangleAlt.star1loose, #
+		    edgeAlternative = TriangleAlt.star, #
+		    fold = fold.fold,
+		    method = Method.hybrids,
+		    cleanupF = cleanupResult,
+		    stepSize = 0.3,
+		    maxIter = 20
+		)
+	    print '['
+	    for r in result: print '  %s,' % str(r)
+	    print '],'
 
-	print 'V2, 1, 1, 0, star1loose'
+	print '1, 0, 1, 0, strip1loose'
 	fold.set(fold.star)
-	batch2(fold)
+	batch15(fold)
 	fold.set(fold.w)
-	batch2(fold)
+	batch15(fold)
 	fold.set(fold.triangle)
-	batch2(fold)
+	batch15(fold)
 	fold.set(fold.trapezium)
-	batch2(fold)
+	batch15(fold)
+	fold.set(fold.parallel)
+	batch15(fold)
+
+	#print 'V2, 1, 1, 0, star1loose'
+	#fold.set(fold.star)
+	#batch2(fold)
+	#fold.set(fold.w)
+	#batch2(fold)
+	#fold.set(fold.triangle)
+	#batch2(fold)
+	#fold.set(fold.trapezium)
+	#batch2(fold)
 	#fold.set(fold.parallel)
 	#batch2(fold)
 
