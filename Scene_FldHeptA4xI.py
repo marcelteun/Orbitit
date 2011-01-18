@@ -550,40 +550,7 @@ class CtrlWin(wx.Frame):
 		    trisAlt.alt_strip_II: OnlyHeptagons[Heptagons.foldMethod.star],
                 },
 	    },
-	    only_o3_tris: {
-		# Note: all triangle variants are the same:
-		# no solutions for Heptagons.foldMethod.parallel
-		#     reason: it is impossible to get distance c == 0
-		#     since max to fit Rho in: 2*Rho*sin(pi/7) < Rho.
-		Heptagons.foldMethod.triangle: {
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.triangle],
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.triangle],
-                },
-                Heptagons.foldMethod.star: {
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.star],
-		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.star],
-		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.star],
-		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.star],
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.star],
-                },
-                Heptagons.foldMethod.w: {
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.w],
-		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.w],
-		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.w],
-		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.w],
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.w],
-                },
-                Heptagons.foldMethod.trapezium: {
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    trisAlt.strip_I:       OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    trisAlt.strip_II:      OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    trisAlt.star:          OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		    trisAlt.strip_1_loose: OnlyO3Triangles[Heptagons.foldMethod.trapezium],
-		},
-	    },
+	    only_o3_tris: OnlyO3Triangles,
 	    border_o3_tris: BorderAndO3Triangles,
 	    square_o3_tris: FoldedSquareAndO3Triangle,
 	    edge_V2_1_1_0: FoldedSquareAnd1TriangleType,
@@ -920,7 +887,7 @@ class CtrlWin(wx.Frame):
         this.onPrePos()
 
     def onLast(this, event = None):
-        this.specPosIndex = 0xefffffff
+        this.specPosIndex = -1
         this.onPrePos()
 
     def getPrePos(this):
@@ -935,18 +902,24 @@ class CtrlWin(wx.Frame):
         if prePosIndex != dyn_pos:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
+	    else: # assume '-1' last item selected.
+                this.specPosIndex = len(
+			this.specPos[prePosIndex][this.foldMethod][this.trisAlt]
+		    ) - 2
             this.onPrePos()
 
     def onNext(this, event = None):
         prePosIndex = this.getPrePos()
         if prePosIndex != dyn_pos:
 	    try:
-		if (this.specPosIndex < len(this.specPos[prePosIndex][
-		    this.foldMethod][this.trisAlt]) - 1
-		):
-		    this.specPosIndex += 1
-		#else:
-		#    this.specPosIndex = 0
+		maxI = len(
+			this.specPos[prePosIndex][this.foldMethod][this.trisAlt]
+		    ) - 1
+		if this.specPosIndex >= 0:
+		    if this.specPosIndex < maxI - 1:
+			this.specPosIndex += 1
+		    else:
+		        this.specPosIndex = -1 # select last
 	    except KeyError:
 		pass
 	    this.onPrePos()
@@ -976,10 +949,6 @@ class CtrlWin(wx.Frame):
 	    this.addTrisGui.Disable()
 	    this.trisAltGui.Disable()
 	    this.restoreTris = True
-	    # handle here instead of below...
-	    if (this.restoreO3Tris):
-		this.restoreO3Tris = False
-		this.shape.onlyO3Triangles = False
 	elif (this.restoreTris):
 	    this.restoreTris = False
 	    this.trisAltGui.Enable()
@@ -989,11 +958,9 @@ class CtrlWin(wx.Frame):
 	    this.shape.updateShape = True
 	if (sel == only_o3_tris):
 	    this.shape.onlyO3Triangles = True
-	    this.trisAltGui.Disable()
 	    this.restoreO3Tris = True
 	elif (this.restoreO3Tris):
 	    this.restoreO3Tris = False
-	    this.trisAltGui.Enable()
 	    this.shape.onlyO3Triangles = False
 	    # needed for sel == dyn_pos
 	    this.shape.updateShape = True
@@ -1022,14 +989,14 @@ class CtrlWin(wx.Frame):
 
 	    # Ensure this.specPosIndex in range:
 	    try:
-		if (this.specPosIndex >=
-		    len(this.specPos[sel][this.foldMethod][this.trisAlt])
-		):
-		    this.specPosIndex = len(
-			    this.specPos[sel][this.foldMethod][this.trisAlt]
-			) - 1
-		elif (this.specPosIndex <  0):
-		    this.specPosIndex = 0
+		nrPos = len(this.specPos[sel][this.foldMethod][this.trisAlt])
+		maxI = nrPos - 1
+		if (this.specPosIndex > maxI):
+		    this.specPosIndex = maxI
+		# keep -1 (last) so switching triangle alternative will keep
+		# last selection.
+		elif (this.specPosIndex < -1):
+		    this.specPosIndex = maxI - 1
 	    except KeyError:
 		pass
 
@@ -1058,7 +1025,6 @@ class CtrlWin(wx.Frame):
 			    this.specPosIndex][2]
 		    fld2 = this.specPos[sel][this.foldMethod][this.trisAlt][
 			    this.specPosIndex][3]
-		    nrPos = len(this.specPos[sel][this.foldMethod][this.trisAlt])
 	    except KeyError:
 	        pass
 
@@ -1129,7 +1095,11 @@ class CtrlWin(wx.Frame):
 
 		this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
 	    else:
-		this.nrTxt.SetLabel('%d/%d' % (this.specPosIndex + 1, nrPos))
+		if this.specPosIndex == -1:
+		    nr = nrPos
+		else:
+		    nr = this.specPosIndex + 1
+		this.nrTxt.SetLabel('%d/%d' % (nr, nrPos))
 		this.statusBar.SetStatusText(c.getStatusStr())
         this.canvas.paint()
 
@@ -1163,25 +1133,65 @@ OnlyHeptagons = {
 }
 
 ###############################################################################
+star_strip_1loose_lst = [
+    [0.84975071885400866, 0.032588654231672121, -3.123498735130565, -2.0824877592417561],
+    [1.2031441726440764, 0.77985326936848609, -2.5087287534276497, 1.2484420071876301],
+    [-1.3176570232737794, -2.646076217507114, -2.8309084651792102, -2.3232921432177327],
+    [-1.5638880068752432, -2.2362876476989033, -2.1550378224617521, 0.68864756632487789],
+    [1.6989771952452002, 0.79879405476155396, -1.1170030013948313, -2.407166580932016],
+    [1.7337065257026629, 0.92947412884703773, -1.796816948510644, 0.076971744283598167],
+]
+w_strip_1loose_lst = [
+    [-1.064771818820939, 2.7267644021703066, 1.7538347714390188, -1.7399218514133903],
+    [-1.0647718188209392, -2.6361403001227632, -1.7538347714390188, 1.5336092971456683],
+     [1.6011356814825821, -0.031110111270192142, 1.7538347714390188, 2.5107377958463428],
+    [1.7315028897368459, 0.0084059713168738032, 1.7538347714390188, 2.9236661785462799],
+     [-1.573689301641376, -2.263365835344846, -1.7538347714390179, -0.55232000947421955],
+]
+star_strip_lst = [
+    [-1.2787114409728058, -2.5182959872317254, 2.6830500115396658, 0.0],
+    [-1.278711440972806, -2.5182959872317263, -1.4154825122609482, 0.0],
+    [1.7787114409728062, 0.94749966043682887, -1.7261101413288449, 0.0],
+]
+tria_strip_lst = [
+    [1.6800854296744396, 0.47457010697125623, 0.74503485547995096, 2.2177947528033286],
+]
+# note, same as Heptagons.foldMethod.star, since last value = 0.0:
+w_strip_lst = star_strip_lst
+trap_strip_lst = [
+    [1.6713285948103263, 0.78612999312594156, 0.94665778267419576, 2.2644932672720368],
+    [1.603988045241469, 1.1791617966606149, -1.2247214682758774, 0.9875936306319586],
+]
+
 OnlyO3Triangles = {
-    Heptagons.foldMethod.trapezium: [
-	[1.6713285948103263, 0.78612999312594156, 0.94665778267419576, 2.2644932672720368],
-        [1.603988045241469, 1.1791617966606149, -1.2247214682758774, 0.9875936306319586],
-    ],
-    Heptagons.foldMethod.star: [
-       [-1.2787114409728058, -2.5182959872317254, 2.6830500115396658, -0],
-       [-1.278711440972806, -2.5182959872317263, -1.4154825122609482, 0.0],
-       [1.7787114409728062, 0.94749966043682887, -1.7261101413288449, 5.9249751911283334e-17],
-    ],
-    # note, same as Heptagons.foldMethod.star:
-    Heptagons.foldMethod.w: [
-        [-1.278711440972806, -2.5182959872317259, 2.6830500115396663, 0.0],
-        [-1.2787114409728058, -2.5182959872317259, -1.4154825122609482, 0.0],
-        [1.7787114409728058, 0.94749966043682898, -1.726110141328844, -2.6645352591003757e-15],
-    ],
-    Heptagons.foldMethod.triangle: [
-	[1.6800854296744396, 0.47457010697125623, 0.74503485547995096, 2.2177947528033286],
-    ],
+    Heptagons.foldMethod.triangle: {
+	trisAlt.strip_I:           tria_strip_lst,
+	trisAlt.strip_II:          tria_strip_lst,
+	trisAlt.alt_strip_I:       tria_strip_lst,
+	trisAlt.alt_strip_II:      tria_strip_lst,
+    },
+    Heptagons.foldMethod.star: {
+	trisAlt.strip_1_loose:     star_strip_1loose_lst,
+	trisAlt.alt_strip_1_loose: star_strip_1loose_lst,
+	trisAlt.strip_I:           star_strip_lst,
+	trisAlt.strip_II:          star_strip_lst,
+	trisAlt.alt_strip_I:       star_strip_lst,
+	trisAlt.alt_strip_II:      star_strip_lst,
+    },
+    Heptagons.foldMethod.w: {
+	trisAlt.strip_1_loose:     w_strip_1loose_lst,
+	trisAlt.alt_strip_1_loose: w_strip_1loose_lst,
+	trisAlt.strip_I:           w_strip_lst,
+	trisAlt.strip_II:          w_strip_lst,
+	trisAlt.alt_strip_I:       w_strip_lst,
+	trisAlt.alt_strip_II:      w_strip_lst,
+    },
+    Heptagons.foldMethod.trapezium: {
+	trisAlt.strip_I:           trap_strip_lst,
+	trisAlt.strip_II:          trap_strip_lst,
+	trisAlt.alt_strip_I:       trap_strip_lst,
+	trisAlt.alt_strip_II:      trap_strip_lst,
+    },
 }
 
 ###############################################################################
