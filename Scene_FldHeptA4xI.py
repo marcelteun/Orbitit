@@ -537,19 +537,17 @@ class CtrlWin(wx.Frame):
 		Heptagons.foldMethod.parallel: {
 		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.parallel],
 		    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.parallel],
-		    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.parallel],
 		    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.parallel],
 		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.parallel],
                 },
                 Heptagons.foldMethod.w: {
 		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.w],
 		    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.w],
-		    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.w],
 		    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.w],
 		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.w],
                 },
 		Heptagons.foldMethod.star: {
-		    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.star],
+		    trisAlt.alt_strip_II: OnlyHeptagons[Heptagons.foldMethod.star],
                 },
 	    },
 	    only_o3_tris: {
@@ -965,6 +963,16 @@ class CtrlWin(wx.Frame):
 	# 2. disable triangle strip.
 	if (sel == only_hepts):
 	    this.shape.addTriangles = False
+	    # if legal fold method select first fitting triangle alternative
+	    if this.foldMethod in this.specPos[sel]:
+		for k in this.specPos[sel][this.foldMethod].iterkeys():
+		    for i in range(len(this.edgeChoicesListItems)):
+			if this.edgeChoicesListItems[i] == k:
+			    this.trisAltGui.SetSelection(i)
+			    this.trisAlt = k
+			    this.shape.setEdgeAlternative(k)
+			    break
+		    break
 	    this.addTrisGui.Disable()
 	    this.trisAltGui.Disable()
 	    this.restoreTris = True
