@@ -35,7 +35,7 @@ E.g. for Ubuntu:
 1. sudo apt-get install python
 2. sudo apt-get install python-wxgtk<x.x>
     Find out which version by 
-    apt-cache show python-wxgtk
+    apt-cache search python-wxgtk
     e.g.
     sudo apt-get install python-wxgtk2.8
 3. sudo apt-get install python-opengl
