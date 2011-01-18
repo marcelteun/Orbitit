@@ -67,14 +67,25 @@ def rotate(v, q):
     return GeomTypes.Vec(r[1:])
 
 class TriangleAlt:
-    strip1loose = 0
-    stripI      = 1
-    stripII     = 2
-    star        = 3
-    star1loose  = 4
+    strip1loose     = 0
+    stripI          = 1
+    stripII         = 2
+    star            = 3
+    star1loose      = 4
     alt_strip1loose = 5
     alt_stripI      = 6
     alt_stripII     = 7
+
+Stringify = {
+    TriangleAlt.strip1loose     : 'strip 1 loose',
+    TriangleAlt.stripI          : 'strip I',
+    TriangleAlt.stripII         : 'strip II',
+    TriangleAlt.star            : 'star',
+    TriangleAlt.star1loose      : 'star 1 loose',
+    TriangleAlt.alt_strip1loose : 'alt strip 1 loose',
+    TriangleAlt.alt_stripI      : 'alt strip I',
+    TriangleAlt.alt_stripII     : 'alt strip II',
+}
 
 class Fold:
     parallel  = 0
@@ -843,17 +854,12 @@ if __name__ == '__main__':
                 [-numx.pi, numx.pi], # fold 2 gamma
             ]
 
-	def batch1(fold):
+	def batch(fold, edges, tris):
 	    print 'searching %s folds' % str(fold)
 	    result = []
 	    result = FindMultiRootOnDomain(Domain,
-		    #edgeLengths = [V2, 1., 0., 0.],
-		    #edgeAlternative = TriangleAlt.stripI, # none found
-		    #edgeAlternative = TriangleAlt.strip1loose, # none found
-
-		    edgeLengths = [V2, 1., 1., 0.],
-		    edgeAlternative = TriangleAlt.strip1loose, # solutions found
-		    #edgeAlternative = TriangleAlt.star1loose, #
+		    edgeLengths = edges,
+		    edgeAlternative = tris,
 		    fold = fold.fold,
 		    method = Method.hybrids,
 		    cleanupF = cleanupResult,
@@ -864,52 +870,21 @@ if __name__ == '__main__':
 	    for r in result: print '  %s,' % str(r)
 	    print '],'
 
-	def batch2(fold):
-	    print 'searching %s folds' % str(fold)
-	    result = []
-	    result = FindMultiRootOnDomain(Domain,
-		    edgeLengths = [V2, 1., 1., 0.],
-		    #edgeAlternative = TriangleAlt.strip1loose, # solutions found
-		    edgeAlternative = TriangleAlt.star1loose, #
-		    fold = fold.fold,
-		    method = Method.hybrids,
-		    cleanupF = cleanupResult,
-		    stepSize = 0.3,
-		    maxIter = 20
-		)
-	    print '['
-	    for r in result: print '  %s,' % str(r)
-	    print '],'
+	edges = [1., 0., 1., 0.]
+	#tris = TriangleAlt.strip1loose # done
+	tris = TriangleAlt.alt_stripII #
 
-	def batch15(fold):
-	    print 'searching %s folds' % str(fold)
-	    result = []
-	    result = FindMultiRootOnDomain(Domain,
-		    edgeLengths = [1., 0., 1., 0.],
-		    #edgeAlternative = TriangleAlt.strip1loose, # solutions found
-		    #edgeAlternative = TriangleAlt.star1loose, #
-		    edgeAlternative = TriangleAlt.star, #
-		    fold = fold.fold,
-		    method = Method.hybrids,
-		    cleanupF = cleanupResult,
-		    stepSize = 0.3,
-		    maxIter = 20
-		)
-	    print '['
-	    for r in result: print '  %s,' % str(r)
-	    print '],'
-
-	print '1, 0, 1, 0, strip1loose'
-	fold.set(fold.star)
-	batch15(fold)
-	fold.set(fold.w)
-	batch15(fold)
-	fold.set(fold.triangle)
-	batch15(fold)
-	fold.set(fold.trapezium)
-	batch15(fold)
+	print edges, Stringify[tris], 'triangle alternative'
 	fold.set(fold.parallel)
-	batch15(fold)
+	batch(fold, edges, tris)
+	fold.set(fold.triangle)
+	batch(fold, edges, tris)
+	fold.set(fold.star)
+	batch(fold, edges, tris)
+	fold.set(fold.w)
+	batch(fold, edges, tris)
+	fold.set(fold.trapezium)
+	batch(fold, edges, tris)
 
 	#print 'V2, 1, 1, 0, star1loose'
 	#fold.set(fold.star)
