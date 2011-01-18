@@ -29,6 +29,7 @@ You will need:
 1. Python 2.x:  http://www.python.org
 2. Wxpython: http://www.wxpython.org
 3. pyOpenGL: http://pyopengl.sourceforge.net/
+4. pyGSL: http://pygsl.sourceforge.net/
 
 E.g. for Ubuntu or other Debian based Linux dist:
 ----------------
@@ -39,6 +40,9 @@ E.g. for Ubuntu or other Debian based Linux dist:
     e.g.
     sudo apt-get install python-wxgtk2.8
 3. sudo apt-get install python-opengl
+4. sudo apt-get install python-numpy libgsl0-dev python-dev
+	download pyGSL from Sourceforge and follow install instructions from
+	tarball.
 
 E.g. for Arch Linux:
 ----------------
