@@ -870,9 +870,18 @@ if __name__ == '__main__':
 	    for r in result: print '  %s,' % str(r)
 	    print '],'
 
-	edges = [1., 0., 1., 0.]
+	#edges = [0., 1., 0., 1.]
 	#tris = TriangleAlt.strip1loose # done
-	tris = TriangleAlt.alt_stripII #
+	#tris = TriangleAlt.star # TODO
+	#tris = TriangleAlt.star1loose # TODO
+	#tris = TriangleAlt.stripI # TODO REDO
+
+	#edges = [0., 1., 1., 0.]
+	#tris = TriangleAlt.alt_stripII # done
+
+	edges = [1., 0., 1., 0.]
+	#tris = TriangleAlt.alt_stripII # done
+	tris = TriangleAlt.alt_stripI #
 
 	print edges, Stringify[tris], 'triangle alternative'
 	fold.set(fold.parallel)
