@@ -854,7 +854,7 @@ if __name__ == '__main__':
                 [-numx.pi, numx.pi], # fold 2 gamma
             ]
 
-	def batch(fold, edges, tris):
+	def multiRootsLog(fold, edges, tris):
 	    print 'searching %s folds' % str(fold)
 	    result = []
 	    result = FindMultiRootOnDomain(Domain,
@@ -868,42 +868,43 @@ if __name__ == '__main__':
 		)
 	    print '['
 	    for r in result: print '  %s,' % str(r)
-	    print '],'
+	    print '],\n'
+
+	def batch(edges, tris):
+		fold = Fold()
+		print edges, Stringify[tris], 'triangle alternative'
+		fold.set(fold.parallel)
+		multiRootsLog(fold, edges, tris)
+		fold.set(fold.triangle)
+		multiRootsLog(fold, edges, tris)
+		fold.set(fold.star)
+		multiRootsLog(fold, edges, tris)
+		fold.set(fold.w)
+		multiRootsLog(fold, edges, tris)
+		fold.set(fold.trapezium)
+		multiRootsLog(fold, edges, tris)
+		print '--------------------------------------------------------------------------------\n'
 
 	#edges = [0., 1., 0., 1.]
-	#tris = TriangleAlt.strip1loose # done
-	#tris = TriangleAlt.star # TODO
-	#tris = TriangleAlt.star1loose # TODO
-	#tris = TriangleAlt.stripI # TODO REDO
+	#batch(edges, TriangleAlt.strip1loose) # done
+	#batch(edges, TriangleAlt.star) # done
+	#batch(edges, TriangleAlt.star1loose) # done
+	#batch(edges, TriangleAlt.stripI) # done
 
 	#edges = [0., 1., 1., 0.]
-	#tris = TriangleAlt.alt_stripII # done
+	#batch(edges, TriangleAlt.alt_stripII) # done
 
-	edges = [1., 0., 1., 0.]
-	#tris = TriangleAlt.alt_stripII # done
-	tris = TriangleAlt.alt_stripI #
+	#edges = [0., V2, 1., 0.]
+	#tris = TriangleAlt.star1loose) # TODO ongoing at me
 
-	print edges, Stringify[tris], 'triangle alternative'
-	fold.set(fold.parallel)
-	batch(fold, edges, tris)
-	fold.set(fold.triangle)
-	batch(fold, edges, tris)
-	fold.set(fold.star)
-	batch(fold, edges, tris)
-	fold.set(fold.w)
-	batch(fold, edges, tris)
-	fold.set(fold.trapezium)
-	batch(fold, edges, tris)
+	#edges = [1., 0., 1., 0.]
+	#batch(edges, TriangleAlt.alt_stripII) # done
+	#batch(edges, TriangleAlt.alt_stripI) # done
 
-	#print 'V2, 1, 1, 0, star1loose'
-	#fold.set(fold.star)
-	#batch2(fold)
-	#fold.set(fold.w)
-	#batch2(fold)
-	#fold.set(fold.triangle)
-	#batch2(fold)
-	#fold.set(fold.trapezium)
-	#batch2(fold)
-	#fold.set(fold.parallel)
-	#batch2(fold)
+	#edges = [1., V2, 1., 0.] # ongoing
+	#batch(edges, TriangleAlt.alt_strip1loose) #
+	#batch(edges, TriangleAlt.star) #
 
+	edges = [V2, 1., 0., 1.] # ongoing
+	batch(edges, TriangleAlt.star1loose) #
+	batch(edges, TriangleAlt.star) #
