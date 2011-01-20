@@ -196,7 +196,8 @@ def FoldedRegularHeptagonsS4A4(x, params):
     gamma = x[3]
 
     #faster = True
-    if (faster):
+    #if (faster):
+    if (params[2] == Fold.parallel):
 	# this code I wrote first only for the parallel case.
 	# I didn't remove the code since it so much faster then the newer code.
 	assert params[2] == Fold.parallel, 'Only parallel case is supported for faster mode'
@@ -864,7 +865,8 @@ if __name__ == '__main__':
 		    method = Method.hybrids,
 		    cleanupF = cleanupResult,
 		    stepSize = 0.3,
-		    maxIter = 20
+		    maxIter = 20,
+		    printStatus = True
 		)
 	    print '['
 	    for r in result: print '  %s,' % str(r)
@@ -885,6 +887,19 @@ if __name__ == '__main__':
 		multiRootsLog(fold, edges, tris)
 		print '--------------------------------------------------------------------------------\n'
 
+	#edges = [0., 0., 1., 0.]
+	#batch(edges, TriangleAlt.alt_strip1loose) # TODO 1
+
+	#edges = [0., 0., 1., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI) # impossible?
+	#batch(edges, TriangleAlt.stripII) # impossible?
+	#batch(edges, TriangleAlt.star) # impossible?
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI) # impossible?
+	#batch(edges, TriangleAlt.alt_stripII) # impossible?
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
 	#edges = [0., 1., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose) # done
 	#batch(edges, TriangleAlt.star) # done
@@ -892,19 +907,130 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.stripI) # done
 
 	#edges = [0., 1., 1., 0.]
+	#batch(edges, TriangleAlt.strip1loose) # TODO 2
+	#batch(edges, TriangleAlt.star1loose) # TODO 3
 	#batch(edges, TriangleAlt.alt_stripII) # done
+
+	#edges = [0., 1., 1., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [0., 1., V2, 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [0., V2, 1., 0.]
-	#tris = TriangleAlt.star1loose) # TODO ongoing at me
+	#batch(edges, TriangleAlt.strip1loose) # TODO 4
+	#batch(edges, TriangleAlt.star1loose)  # TODO ongoing at me
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [0., V2, 1., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [1., 0., 1., 0.]
-	#batch(edges, TriangleAlt.alt_stripII) # done
+	#batch(edges, TriangleAlt.stripII) # IMPOSSIBLE?
 	#batch(edges, TriangleAlt.alt_stripI) # done
+	#batch(edges, TriangleAlt.alt_stripII) # done
+	#batch(edges, TriangleAlt.alt_strip1loose) # probably impossible...
+
+	#edges = [1., 0., 1., 1.]
+	#batch(edges, TriangleAlt.stripII) # IMPOSSIBLE?
+
+	#edges = [1., 1., 0., 1.] # TODO weekend (1)
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 1., 1., 0.] # TODO weekend (1)
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 1., 1., 1.] # TODO weekend (4)
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 1., V2, 1.] # TODO weekend (4)
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [1., V2, 1., 0.] # ongoing
 	#batch(edges, TriangleAlt.alt_strip1loose) #
 	#batch(edges, TriangleAlt.star) #
 
-	edges = [V2, 1., 0., 1.] # ongoing
-	batch(edges, TriangleAlt.star1loose) #
-	batch(edges, TriangleAlt.star) #
+	edges = [V2, 1., 0., 1.] # TODO monday (1)
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [V2, 1., 1., 0.] # TODO monday (2)
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [V2, 1., 1., 1.] # TODO monday (3)
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [V2, 1., V2, 1.] # TODO monday (4)
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
