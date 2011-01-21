@@ -41,6 +41,7 @@ import wx
 import math
 import rgb
 import Heptagons
+import isometry
 import Geom3D
 import Scenes3D
 from OpenGL.GL import *
@@ -124,7 +125,7 @@ Stringify = {
     squares_24:		'24 Folded Squares',
     edge_0_1_1_1:	'56 Triangles',
     edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
-    only_hepts:		'No Extra Faces, Only Heptagons',
+    only_hepts:		'Just Heptagons',
     only_o3_tris:	'8 Triangles (O3)',
     border_o3_tris:	'32 Triangles (24 + 8)',
     square_o3_tris:	'8 Triangles and 12 Folded Squares',
@@ -148,23 +149,9 @@ def Vlen(v0, v1):
 
 class Shape(Geom3D.IsometricShape):
     def __init__(this, *args, **kwargs):
-        R0   = GeomTypes.Hz
-        R1   = Rot(axis = Vec([ 1,  1,  1]), angle =     GeomTypes.tTurn)
-        R1_2 = Rot(axis = Vec([ 1,  1,  1]), angle = 2 * GeomTypes.tTurn)
-        R2   = Rot(axis = Vec([-1, -1,  1]), angle =     GeomTypes.tTurn)
-        R2_2 = Rot(axis = Vec([-1, -1,  1]), angle = 2 * GeomTypes.tTurn)
-        R3   = GeomTypes.Hy;
         Geom3D.IsometricShape.__init__(this,
             Vs = [], Fs = [],
-            directIsometries = [
-                    GeomTypes.E, R0,
-                    R1,          R1_2,
-                    R1*R0,       R1_2 * R0,
-                    R2,          R2_2,
-                    R2*R0,       R2_2 * R0,
-                    R3,          R3 * R0
-                ],
-#            oppositeIsometry = GeomTypes.I,
+            directIsometries = isometry.A4(),
             unfoldOrbit = True,
             name = 'FoldedRegHeptS4xI'
         )
@@ -669,7 +656,7 @@ class CtrlWin(wx.Frame):
 		Stringify[dyn_pos],
             ]
         this.prePosGui = wx.RadioBox(this.panel,
-                label = 'Only Regular Faces:',
+                label = 'Only Regular Faces with:',
                 style = wx.RA_VERTICAL,
                 choices = this.prePosLst
             )
@@ -893,10 +880,11 @@ class CtrlWin(wx.Frame):
         if prePosIndex != dyn_pos:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
-	    else: # assume '-1' last item selected.
+	    elif this.specPosIndex == -1:
                 this.specPosIndex = len(
 			this.specPos[prePosIndex][this.foldMethod][this.trisAlt]
 		    ) - 2
+	    # else prePosIndex == 0 : first one selected don't scroll around
             this.onPrePos()
 
     def onNext(this, event = None):
