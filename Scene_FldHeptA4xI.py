@@ -110,6 +110,7 @@ only_o3_tris	= 11
 border_o3_tris	= 12
 square_o3_tris	= 13
 edge_V2_1_1_0	= 14
+square_12	= 15
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
@@ -128,6 +129,7 @@ Stringify = {
     border_o3_tris:	'32 Triangles (24 + 8)',
     square_o3_tris:	'8 Triangles and 12 Folded Squares',
     edge_V2_1_1_0:	'24 Triangles and 12 Folded Squares',
+    square_12:		'12 Folded Squares',
     trisAlt.strip_1_loose:	'Strip, 1 Loose ',
     trisAlt.strip_I:		'Strip I',
     trisAlt.strip_II:		'Strip II',
@@ -507,7 +509,7 @@ class Shape(Geom3D.IsometricShape):
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
-        size = (745, 700)
+        size = (745, 720)
         # TODO assert (type(shape) == type(RegHeptagonShape()))
         this.shape = shape
         this.canvas = canvas
@@ -554,6 +556,7 @@ class CtrlWin(wx.Frame):
 	    border_o3_tris: BorderAndO3Triangles,
 	    square_o3_tris: FoldedSquareAndO3Triangle,
 	    edge_V2_1_1_0:  FoldedSquareAnd1TriangleType,
+	    square_12:      Squares12,
 	    tris_24:        Tris24,
 	    all_eq_tris:    AllEquilateralTris,
 	    no_o3_tris: {
@@ -649,6 +652,7 @@ class CtrlWin(wx.Frame):
         this.prePosLst = [
 		Stringify[only_hepts],
 		Stringify[only_o3_tris],
+		Stringify[square_12],
 		Stringify[square_o3_tris],
 		Stringify[tris_24],
 		Stringify[squares_24],
@@ -1204,6 +1208,52 @@ OnlyO3Triangles = {
 	trisAlt.strip_II:          trap_strip_lst,
 	trisAlt.alt_strip_I:       trap_strip_lst,
 	trisAlt.alt_strip_II:      trap_strip_lst,
+    },
+}
+
+###############################################################################
+tria_xxx1loose_lst = [
+    [-0.11812292720476364, 3.1415926535897931, -2.2521107857452183, -2.7485792058591905],
+    [1.4455400377312961, 1.6474103802320638e-16, 0.88948186784457373, -2.74857920585919],
+    [0.6083287608517286, 0.0, 2.1820890805977848, 2.645241632924578],
+    [-0.95533420408433101, 3.1415926535897927, -0.95950357299200828, 2.6452416329245785],
+    [-0.65691438551895043, 3.1415926535897931, -1.3357664291869087, 1.1511339170611075],
+    [0.90674857941710896, 0.0, 1.8058262244028844, 1.1511339170611077],
+    [0.47061995246199551, 3.1415926535897931, -2.7857492996506852, 1.2713670509059778],
+    [2.0342829173980554, 0.0, 0.35584335393910815, 1.2713670509059776],
+]
+star_xxx1loose_lst = [
+    [-1.2067303886294825, 2.6488642037634915, 0.54627812569289569, 1.9043982900201781],
+    [1.4064306349240816, -0.18662824019380686, 3.0363759485802091, -2.2681728262581471],
+    [-1.775536519556437, -3.059652071311755, -3.0959821958726943, -0.99511607066055241],
+    [-0.93641732709054237, 2.4403894788628819, 0.8869701402735074, -0.27366004937338673],
+    [0.66845709899031802, -0.38564524697004998, 2.9119077848333421, 0.58930509814088339],
+    [1.5832240892814076, 0.47390958631693647, -0.52100418066512866, -2.0034280111378706],
+    [2.0616596610428299, 0.2225415313454028, -0.22694143729009753, 1.5383286373357166],
+]
+w_xxx1loose_lst = [
+    [-0.94335616235195485, 2.4401396957995773, 0.73690456127343629, 0.30810337906001722],
+    [0.64680225032838723, -0.40681413993508553, -3.0539439390921781, -0.67958538291446935],
+    [1.1351970716058279, 0.12145522427177427, -2.329773998894705, 2.7901583051770227],
+    [-1.8810757999887426, 2.9039900668342371, 2.1571800684509688, -2.4314396917734236],
+    [-1.9137459445722165, -3.1126166507482762, 2.5347437803553339, 1.1648504521655205],
+    [2.2796988899564301, -0.041271922594255273, 0.96500260441343821, 2.994364834727008],
+    [2.3369920233084134, 0.071996887865735701, 0.78873100385446804, -1.7264857472176951],
+
+]
+
+Squares12 = {
+    Heptagons.foldMethod.triangle: {
+	trisAlt.strip_1_loose:     tria_xxx1loose_lst,
+	trisAlt.star_1_loose:      tria_xxx1loose_lst,
+    },
+    Heptagons.foldMethod.star: {
+	trisAlt.strip_1_loose:     star_xxx1loose_lst,
+	trisAlt.star_1_loose:      star_xxx1loose_lst,
+    },
+    Heptagons.foldMethod.w: {
+	trisAlt.strip_1_loose:     w_xxx1loose_lst,
+	trisAlt.star_1_loose:      w_xxx1loose_lst,
     },
 }
 
