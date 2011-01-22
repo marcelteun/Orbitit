@@ -236,6 +236,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
         glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
 
     def onPaint(this):
@@ -711,9 +712,9 @@ class ViewSettingsWindow(wx.Frame):
     def addContents(this):
         this.ctrlSizer = ViewSettingsSizer(this, this.panel, this.canvas)
         if this.canvas.shape.dimension == 4:
-            this.setDefaultSize((413, 726))
+            this.setDefaultSize((413, 791))
         else:
-            this.setDefaultSize((380, 281))
+            this.setDefaultSize((380, 346))
         this.panel.SetSizer(this.ctrlSizer)
         this.panel.SetAutoLayout(True)
         this.panel.Layout()
@@ -854,6 +855,25 @@ class ViewSettingsSizer(wx.BoxSizer):
         faceSizer = wx.BoxSizer(wx.HORIZONTAL)
         faceSizer.Add(this.fOptionsGui, 1, wx.EXPAND)
 
+	# Open GL
+	this.Boxes.append(wx.StaticBox(this.parentPanel,
+						label = 'OpenGL Settings'))
+        oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        this.Guis.append(
+	    wx.CheckBox(this.parentPanel, label = 'Two Sided Faces')
+	)
+	this.ogl2SidedFacesGui = this.Guis[-1]
+	this.ogl2SidedFacesGui.SetValue(glGetBooleanv(GL_LIGHT_MODEL_TWO_SIDE))
+	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
+					id = this.ogl2SidedFacesGui.GetId())
+        this.Guis.append(
+	    wx.CheckBox(this.parentPanel, label = 'Switch Front and Back Face')
+	)
+	this.oglFrontFaceGui = this.Guis[-1]
+	this.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
+	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
+					id = this.oglFrontFaceGui.GetId())
+
         # Sizers
         vRadiusSizer.Add(this.vRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
         vRadiusSizer.Add(this.vColorGui,  1,             wx.BOTTOM | wx.LEFT)
@@ -866,9 +886,12 @@ class ViewSettingsSizer(wx.BoxSizer):
         eSizer = wx.BoxSizer(wx.HORIZONTAL)
         eSizer.Add(this.eOptionsGui, 2, wx.EXPAND)
         eSizer.Add(eRadiusSizer, 5, wx.EXPAND)
+	oglSizer.Add(this.ogl2SidedFacesGui, 0, wx.EXPAND)
+	oglSizer.Add(this.oglFrontFaceGui, 0, wx.EXPAND)
         this.Add(vSizer, 5, wx.EXPAND)
         this.Add(eSizer, 5, wx.EXPAND)
         this.Add(faceSizer, 4, wx.EXPAND)
+        this.Add(oglSizer, 0, wx.EXPAND)
 
         # 4D stuff
         if this.canvas.shape.dimension == 4:
@@ -1129,10 +1152,22 @@ class ViewSettingsSizer(wx.BoxSizer):
         dlg.Destroy()
 
     def onFOption(this, e):
+        #print 'View Settings Window size:', this.parentWindow.GetSize()
         sel = this.fOptionsGui.GetSelection()
         selStr = this.fOptionsLst[sel]
         this.canvas.shape.setFaceProperties(drawFaces = (selStr == 'show'))
-        print 'View Settings Window size:', (this.parentWindow.GetClientSize()[0], this.parentWindow.GetClientSize()[1] + 25)
+        this.canvas.paint()
+
+    def onOgl(this, e):
+	id = e.GetId()
+	if id == this.oglFrontFaceGui.GetId():
+	    if this.oglFrontFaceGui.IsChecked:
+		glFrontFace(GL_CW)
+	    else:
+		glFrontFace(GL_CCW)
+	elif id == this.ogl2SidedFacesGui.GetId():
+	    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,
+					this.ogl2SidedFacesGui.IsChecked())
         this.canvas.paint()
 
     def onUseTransparency(this, event):
