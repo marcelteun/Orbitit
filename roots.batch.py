@@ -869,7 +869,7 @@ if __name__ == '__main__':
 		    printStatus = True
 		)
 	    print '['
-	    for r in result: print '  %s,' % str(r)
+	    for r in result: print '    %s,' % str(r)
 	    print '],\n'
 
 	def batch(edges, tris):
