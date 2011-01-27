@@ -196,7 +196,10 @@ def FoldedRegularHeptagonsS4A4(c, params):
     gamma = c[3]
 
     #if (faster):
-    if (params[2] == Fold.parallel or params[2] == Fold.triangle):
+    if (params[2] == Fold.parallel
+	or params[2] == Fold.triangle
+	or params[2] == Fold.star
+    ):
 	# before rotating, with heptagon centre = origin
 	R = 1.0 / (2*H)       # radius
 	x0, y0, z0 = (H + SigmaH + RhoH, 0.0,     0.)
@@ -246,7 +249,7 @@ def FoldedRegularHeptagonsS4A4(c, params):
 	    #     /               \
 	    #    2 --------------- 5  axis a
 	    #
-	    #          
+	    #
 	    #         3       4
 	    #                                ^ X
 	    #                                |
@@ -264,17 +267,19 @@ def FoldedRegularHeptagonsS4A4(c, params):
 	    z =           sing * H
 	    # now correct for V1 not on x-axis: rotate d around z-axis
 	    # with d: angle of heptagon centre to V1 with x-as
-	    # and translate V3 - V4 back onto x-axis: [0, -Ty, 0]
+	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
 	    cosd = (x1 + Tx) / R
 	    sind = y1 / R
 	    x1, y1, z1 = (cosd * x - Tx, sind * x, z)
 	    # ROTATE V0 and V1 around axis a: angle beta
+	    # ------------------------------------
 	    x = H + SigmaH
 	    x0, y0, z0 = (RhoH + cosb * x, y0, sinb * x)
 	    x = x1 - RhoH
 	    x1, y1, z1 = (RhoH + cosb * x - sinb * z1, y1, sinb * x + cosb * z1)
 
-	    # rotate around 3-4
+	    # rotate around 3-4; angle a
+	    # ------------------------------------
 	    # since half dihedral angle is used instead of angle with x-axis:
 	    cos_a = sina
 	    sin_a = -cosa
@@ -282,6 +287,79 @@ def FoldedRegularHeptagonsS4A4(c, params):
 	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
 	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
 	    # and translate
+	    # ------------------------------------
+	    z0 = z0 + T
+	    z1 = z1 + T
+	    z2 = z2 + T
+	    z3 = z3 + T
+
+	elif (params[2] == Fold.star):
+	    #
+	    #               0
+	    #              .^.
+	    #        1   _/| |\_   6
+	    #          _/ /   \ \_
+	    # axis b _/  |     |  \_ axis b
+	    #       /    |     |    \
+	    #      2    /       \    5
+	    #          | axes  a |
+	    #          "         "
+	    #          3         4
+	    #
+	    #                                ^ X
+	    #                                |
+	    #                                |
+	    #                       Y <------+
+	    #
+	    # rotate gamma around b
+	    # rotate beta  around a
+	    #
+	    # ROTATE V1 around axis a: angle gamma
+	    # ------------------------------------
+	    # refer to V1 as if centre is origon:
+	    # rotate around axis b as if centre -> V1 is x-axis:
+	    x = (R - H) + cosg * H
+	    z =           sing * H
+	    # now correct for V1 not on x-axis: rotate d around z-axis
+	    # with d: angle of heptagon centre to V1 with x-as
+	    cosd = (x1 + Tx) / R
+	    sind = RhoH # = sin(2pi/7)
+	    x1, y1, z1 = (cosd * x, sind * x, z)
+	    # ROTATE V0 and V1 around axis a: angle beta
+	    # ------------------------------------
+	    # correction for V5 not on -x: rotate d around z-axis
+	    # with d: angle of heptagon centre to V2 with -x-as
+	    cosd = -(x2 + Tx) / R
+	    sind = SigmaH # = sin(3pi/7)
+	    # refer to V2 as if centre in origon and as if V5 in -x:
+	    x2, y2, z2 = (x0 - R, 0.5, 0.0)
+	    d0_3 = x2 - RhoH
+	    # rotate around axis b:
+	    x2, z2 = (d0_3 + cosb * RhoH, sinb * RhoH)
+	    # correct for V5 not on -x: rotate d around z-axis
+	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	    x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
+	    # Similarly for V1:
+	    # for V1 rotate V5 into -x: * (cosd, -sind)
+	    x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
+	    # rotate around axis b:
+	    dx = x1 - d0_3
+	    x1, z1 = (d0_3 + cosb * dx - sinb * z1, sinb * dx + cosb * z1)
+	    # correct for V5 not on -x: rotate d around z-axis
+	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	    x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
+
+	    # rotate around 3-4; angle a
+	    # ------------------------------------
+	    # since half dihedral angle is used instead of angle with x-axis:
+	    # TODO don't copy the code...
+	    cos_a = sina
+	    sin_a = -cosa
+	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+	    # and translate
+	    # ------------------------------------
 	    z0 = z0 + T
 	    z1 = z1 + T
 	    z2 = z2 + T
@@ -615,7 +693,7 @@ if __name__ == '__main__':
     #tmp = numx.array((1.1789610329092914, 0.69387894107538728, 2.1697959367422728, -0.49295326187544664))
     #tmp = numx.array((0.00, 0.00, 0.00, 0.00))
     #print FoldedRegularHeptagonsS4A4(tmp,
-    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.triangle ])
+    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.star ])
     #print 'faster', faster
 
     #blabla
@@ -945,7 +1023,11 @@ if __name__ == '__main__':
 		multiRootsLog(fold, edges, tris)
 		print '--------------------------------------------------------------------------------\n'
 
+	# to test fold optimisation:
 	#faster = True
+	#edges = [1., 1., 1., 1.] # TODO weekend (4)
+	#batch(edges, TriangleAlt.strip1loose)
+
 	#edges = [0., 0., 0., 1.] # started 20100126 @ 3
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -986,45 +1068,45 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [0., 1., 0., 1.] # started 20100126 @ 4
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [0., 1., 0., 1.] # started 20100126 @ 4
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [0., 1., 1., 0.] # started 20100126 @ 4
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [0., 1., 1., 0.] # started 20100126 @ 4
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [0., 1., 1., 1.] # started 20100126 @ 4
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [0., 1., 1., 1.] # started 20100126 @ 4
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [0., 1., V2, 1.] # started 20100126 @ 4
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [0., 1., V2, 1.] # started 20100126 @ 4
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [0., 1., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
