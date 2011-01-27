@@ -117,15 +117,15 @@ class Fold:
 
 fold = Fold()
 
-def FoldedRegularHeptagonsS4A4(x, params):
+def FoldedRegularHeptagonsS4A4(c, params):
     """Calculates the 4 variable edge lengths - 1 for the simplest S4A4 case of
     folded heptagons.
     
     The case contains
-    x[0]: a translation (towards the viewer)
-    x[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
-    x[2]: the angle of the first fold around 2-5 (9, 10)
-    x[3]: the angle of the first fold around 1-6 (8, 11)
+    c[0]: a translation (towards the viewer)
+    c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
+    c[2]: the angle of the first fold around 2-5 (9, 10)
+    c[3]: the angle of the first fold around 1-6 (8, 11)
     The vertices are positioned as follows:
     #          19                      18
     #
@@ -190,47 +190,103 @@ def FoldedRegularHeptagonsS4A4(x, params):
     params[2] defines which folding method is used.
     """
 
-    T     = x[0]
-    alpha = x[1]
-    beta  = x[2]
-    gamma = x[3]
+    T     = c[0]
+    alpha = c[1]
+    beta  = c[2]
+    gamma = c[3]
 
-    #faster = True
     #if (faster):
-    if (params[2] == Fold.parallel):
-	# this code I wrote first only for the parallel case.
-	# I didn't remove the code since it so much faster then the newer code.
-	assert params[2] == Fold.parallel, 'Only parallel case is supported for faster mode'
+    if (params[2] == Fold.parallel or params[2] == Fold.triangle):
+	# before rotating, with heptagon centre = origin
+	R = 1.0 / (2*H)       # radius
+	x0, y0, z0 = (H + SigmaH + RhoH, 0.0,     0.)
+	x1, y1, z1 = (    SigmaH + RhoH, Rho/2,   0.)
+	x2, y2, z2 = (             RhoH, Sigma/2, 0.)
+	x3, y3, z3 = (              0.0, 1.0/2,   0.)
+	Tx = R - x0   # translate in X to centre on origin
 	cosa = numx.cos(alpha)
 	sina = numx.sin(alpha)
 	cosb = numx.cos(beta)
 	sinb = numx.sin(beta)
 	cosg = numx.cos(gamma)
 	sing = numx.sin(gamma)
+	if (params[2] == Fold.parallel):
+	    # this code I wrote first only for the parallel case.
+	    # I didn't remove the code since it so much faster then the newer code.
+	    x0__ = cosg * (H) + SigmaH + RhoH
+	    z0__ = sing * (H)
 
-	x0__ = cosg * (H) + SigmaH + RhoH
-	z0__ = sing * (H)
+	    x0_  = cosb * (x0__ - RhoH) - sinb * (z0__       ) + RhoH
+	    z0_  = cosb * (z0__       ) + sinb * (x0__ - RhoH)
 
-	x0_  = cosb * (x0__ - RhoH) - sinb * (z0__       ) + RhoH
-	z0_  = cosb * (z0__       ) + sinb * (x0__ - RhoH)
+	    x1_  = cosb * (SigmaH) + RhoH
+	    z1_  = sinb * (SigmaH)
 
-	x1_  = cosb * (SigmaH) + RhoH
-	z1_  = sinb * (SigmaH)
+	    x0  = sina * x0_ - cosa * z0_
+	    x1  = sina * x1_ - cosa * z1_
+	    x2  = sina * RhoH
+	    x3  = 0
 
-	x0  = sina * x0_ - cosa * z0_
-	x1  = sina * x1_ - cosa * z1_
-	x2  = sina * RhoH
-	x3  = 0
+	    y0  =  0.0
+	    y1  =  Rho / 2
+	    y2  =  Sigma / 2
+	    y3  =  1.0 / 2
 
-	y0  =  0.0
-	y1  =  Rho / 2
-	y2  =  Sigma / 2
-	y3  =  1.0 / 2
+	    z0  = T - (sina * z0_ + cosa * x0_)
+	    z1  = T - (sina * z1_ + cosa * x1_)
+	    z2  = T - cosa * (         RhoH)
+	    z3  = T
+	elif (params[2] == Fold.triangle):
+	    #
+	    #             0
+	    #            _^_
+	    #      1   _/   \_   6
+	    #        _/       \_
+	    #      _/  axes  b  \_
+	    #     /               \
+	    #    2 --------------- 5  axis a
+	    #
+	    #          
+	    #         3       4
+	    #                                ^ X
+	    #                                |
+	    #                                |
+	    #                       Y <------+
+	    #
+	    # rotate gamma around b
+	    # rotate beta  around a
+	    #
+	    # ROTATE V1 around axis b: angle gamma
+	    # ------------------------------------
+	    # refer to V1 as if centre i origon:
+	    # rotate around axis b as if centre -> V1 is x-axis:
+	    x = (R - H) + cosg * H
+	    z =           sing * H
+	    # now correct for V1 not on x-axis: rotate d around z-axis
+	    # with d: angle of heptagon centre to V1 with x-as
+	    # and translate V3 - V4 back onto x-axis: [0, -Ty, 0]
+	    cosd = (x1 + Tx) / R
+	    sind = y1 / R
+	    x1, y1, z1 = (cosd * x - Tx, sind * x, z)
+	    # ROTATE V0 and V1 around axis a: angle beta
+	    x = H + SigmaH
+	    x0, y0, z0 = (RhoH + cosb * x, y0, sinb * x)
+	    x = x1 - RhoH
+	    x1, y1, z1 = (RhoH + cosb * x - sinb * z1, y1, sinb * x + cosb * z1)
 
-	z0  = T - (sina * z0_ + cosa * x0_)
-	z1  = T - (sina * z1_ + cosa * x1_)
-	z2  = T - cosa * (         RhoH)
-	z3  = T
+	    # rotate around 3-4
+	    # since half dihedral angle is used instead of angle with x-axis:
+	    cos_a = sina
+	    sin_a = -cosa
+	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+	    # and translate
+	    z0 = z0 + T
+	    z1 = z1 + T
+	    z2 = z2 + T
+	    z3 = z3 + T
+
     else:
 	# rotation angle around edge
 	alpha = alpha 
@@ -325,7 +381,7 @@ def FoldedRegularHeptagonsS4A4(x, params):
     #print 'v1', x1, y1, z1
     #print 'v2', x2, y2, z2
     #print 'v3', x3, y3, z3
-    y = copy.copy(x)
+    cp = copy.copy(c)
     edgeAlternative = params[0]
     #
     # EDGE A
@@ -343,10 +399,10 @@ def FoldedRegularHeptagonsS4A4(x, params):
 	)
     ):
         # V3 - V12:[ y0,    z0,    x0], # V12 = V0'
-        y[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
+        cp[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
     else:
         # V2 - V9:[-x2,    y2,    z2], # V9 = V2'
-        y[0] = numx.sqrt(4*x2*x2) - edgeLengths[0]
+        cp[0] = numx.sqrt(4*x2*x2) - edgeLengths[0]
     #
     # EDGE B
     #
@@ -355,10 +411,10 @@ def FoldedRegularHeptagonsS4A4(x, params):
 	or edgeAlternative == TriangleAlt.alt_stripII
     ):
         # V3 - V14:[ y1,    z1,    x1], # V14 = V1'
-        y[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
+        cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
     else:
         #V2 - V12:[ y0,    z0,    x0], # V12 = V0'
-        y[1] = numx.sqrt((x2-y0)*(x2-y0) + (y2-z0)*(y2-z0) + (z2-x0)*(z2-x0)) - edgeLengths[1]
+        cp[1] = numx.sqrt((x2-y0)*(x2-y0) + (y2-z0)*(y2-z0) + (z2-x0)*(z2-x0)) - edgeLengths[1]
     #
     # EDGE C
     #
@@ -367,21 +423,21 @@ def FoldedRegularHeptagonsS4A4(x, params):
 	or edgeAlternative > TriangleAlt.star1loose
     ):
         # V2 - V14:[ y1,    z1,    x1], # V14 = V1'
-        y[2] = numx.sqrt((x2-y1)*(x2-y1) + (y2-z1)*(y2-z1) + (z2-x1)*(z2-x1)) - edgeLengths[2]
+        cp[2] = numx.sqrt((x2-y1)*(x2-y1) + (y2-z1)*(y2-z1) + (z2-x1)*(z2-x1)) - edgeLengths[2]
     else:
         # V1 - V12:[ y0,    z0,    x0], # V12 = V0'
-        y[2] = numx.sqrt((x1-y0)*(x1-y0) + (y1-z0)*(y1-z0) + (z1-x0)*(z1-x0)) - edgeLengths[2]
+        cp[2] = numx.sqrt((x1-y0)*(x1-y0) + (y1-z0)*(y1-z0) + (z1-x0)*(z1-x0)) - edgeLengths[2]
     #
     # EDGE D
     #
     if (edgeAlternative < TriangleAlt.alt_strip1loose):
-	y[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
+	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
     else:
         # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
-	y[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
+	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
 
-    #print y
-    return y
+    #print cp
+    return cp
 
 class Method:
     hybrids = 0
@@ -553,12 +609,14 @@ if __name__ == '__main__':
     #tmp = numx.array((0.0, 1.57, 0.00, 0.00))
     #faster = False
     #FoldedRegularHeptagonsS4A4(tmp, [0])
-    faster = False
+    #faster = False
+    #faster = True
     #FoldedRegularHeptagonsS4A4(tmp, [0])
     #tmp = numx.array((1.1789610329092914, 0.69387894107538728, 2.1697959367422728, -0.49295326187544664))
     #tmp = numx.array((0.00, 0.00, 0.00, 0.00))
     #print FoldedRegularHeptagonsS4A4(tmp,
-    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.star ])
+    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.triangle ])
+    #print 'faster', faster
 
     #blabla
 
@@ -866,7 +924,7 @@ if __name__ == '__main__':
 		    cleanupF = cleanupResult,
 		    stepSize = 0.3,
 		    maxIter = 20,
-		    printStatus = True
+		    printStatus = False
 		)
 	    print '['
 	    for r in result: print '    %s,' % str(r)
@@ -887,31 +945,8 @@ if __name__ == '__main__':
 		multiRootsLog(fold, edges, tris)
 		print '--------------------------------------------------------------------------------\n'
 
-	#edges = [0., 0., 1., 0.]
-	#batch(edges, TriangleAlt.alt_strip1loose) # TODO 1
-
-	#edges = [0., 0., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI) # impossible?
-	#batch(edges, TriangleAlt.stripII) # impossible?
-	#batch(edges, TriangleAlt.star) # impossible?
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI) # impossible?
-	#batch(edges, TriangleAlt.alt_stripII) # impossible?
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose) # done
-	#batch(edges, TriangleAlt.star) # done
-	#batch(edges, TriangleAlt.star1loose) # done
-	#batch(edges, TriangleAlt.stripI) # done
-
-	#edges = [0., 1., 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose) # TODO 2
-	#batch(edges, TriangleAlt.star1loose) # TODO 3
-	#batch(edges, TriangleAlt.alt_stripII) # done
-
-	#edges = [0., 1., 1., 1.]
+	#faster = True
+	#edges = [0., 0., 0., 1.] # started 20100126 @ 3
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -920,6 +955,76 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripI)
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [0., 0., 1., 0.] # started 20100126 @ 3
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [0., 0., 1., 1.] # started 20100126 @ 3
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [0., 0., V2, 1.] # started 20100126 @ 3
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [0., 1., 0., 1.] # started 20100126 @ 4
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [0., 1., 1., 0.] # started 20100126 @ 4
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [0., 1., 1., 1.] # started 20100126 @ 4
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [0., 1., V2, 1.] # started 20100126 @ 4
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [0., 1., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
@@ -994,43 +1099,63 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_strip1loose) #
 	#batch(edges, TriangleAlt.star) #
 
-	edges = [V2, 1., 0., 1.] # TODO monday (1)
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
+	#edges = [V2, 1., 0., 1.] # done 20100126
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
 	#batch(edges, TriangleAlt.star)
 	#batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [V2, 1., 1., 0.] # TODO monday (2)
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [V2, 1., 1., 0.] # done 20100126
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [V2, 1., 1., 1.] # TODO monday (3)
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [V2, 1., 1., 1.] # done 20100126
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [V2, 1., V2, 1.] # TODO monday (4)
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [V2, 1., V2, 1.] # done 20100126
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., V2, 1., 0.] # TODO started 20100126 (1)
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., V2, 1., 1.] # TODO started 20100126 (2)
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
 
