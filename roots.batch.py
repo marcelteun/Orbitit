@@ -199,6 +199,7 @@ def FoldedRegularHeptagonsS4A4(c, params):
     if (params[2] == Fold.parallel
 	or params[2] == Fold.triangle
 	or params[2] == Fold.star
+	or params[2] == Fold.trapezium
     ):
 	# before rotating, with heptagon centre = origin
 	R = 1.0 / (2*H)       # radius
@@ -314,7 +315,7 @@ def FoldedRegularHeptagonsS4A4(c, params):
 	    # rotate gamma around b
 	    # rotate beta  around a
 	    #
-	    # ROTATE V1 around axis a: angle gamma
+	    # ROTATE V1 around axis b: angle gamma
 	    # ------------------------------------
 	    # refer to V1 as if centre is origon:
 	    # rotate around axis b as if centre -> V1 is x-axis:
@@ -348,6 +349,63 @@ def FoldedRegularHeptagonsS4A4(c, params):
 	    # correct for V5 not on -x: rotate d around z-axis
 	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
 	    x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
+
+	    # rotate around 3-4; angle a
+	    # ------------------------------------
+	    # since half dihedral angle is used instead of angle with x-axis:
+	    # TODO don't copy the code...
+	    cos_a = sina
+	    sin_a = -cosa
+	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+	    # and translate
+	    # ------------------------------------
+	    z0 = z0 + T
+	    z1 = z1 + T
+	    z2 = z2 + T
+	    z3 = z3 + T
+
+	elif (params[2] == Fold.trapezium):
+	    #
+	    #             0
+	    #
+	    #      1 ----------- 6    axis a
+	    #      .             .
+	    #       \           /
+	    #        \ axes  b /
+	    #    2   |         |   5
+	    #        \        /
+	    #         "       "
+	    #         3       4
+	    #
+	    #                                ^ X
+	    #                                |
+	    #                                |
+	    #                       Y <------+
+	    #
+	    # rotate gamma around b
+	    # rotate beta  around a
+	    #
+	    # ROTATE V2 around axis b: angle gamma
+	    # ------------------------------------
+	    # refer to V2 as if centre is origon:
+	    # rotate around axis b as if centre -> V2 is x-axis:
+	    x = (R - H) + cosg * H
+	    z =           sing * H
+	    # now correct for V2 not on x-axis: rotate d around z-axis
+	    # with d: angle of heptagon centre to V2 with x-as
+	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	    cosd = (x2 + Tx) / R
+	    sind = y2 / R
+	    x2, y2, z2 = (cosd * x - Tx, sind * x, z)
+	    # ROTATE V0 around axis a: angle beta
+	    # ------------------------------------
+	    # refer to V0 as if centre is origon:
+	    #   - rotate around axis b
+	    # Then translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	    x0 = (R - H) + cosb * H - Tx
+	    z0 =           sinb * H
 
 	    # rotate around 3-4; angle a
 	    # ------------------------------------
@@ -693,7 +751,7 @@ if __name__ == '__main__':
     #tmp = numx.array((1.1789610329092914, 0.69387894107538728, 2.1697959367422728, -0.49295326187544664))
     #tmp = numx.array((0.00, 0.00, 0.00, 0.00))
     #print FoldedRegularHeptagonsS4A4(tmp,
-    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.star ])
+    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.trapezium ])
     #print 'faster', faster
 
     #blabla
@@ -1025,7 +1083,7 @@ if __name__ == '__main__':
 
 	# to test fold optimisation:
 	#faster = True
-	#edges = [1., 1., 1., 1.] # TODO weekend (4)
+	#edges = [1., 1., 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 
 	#edges = [0., 0., 0., 1.] # started 20100126 @ 3
