@@ -432,10 +432,10 @@ class RegularHeptagon:
         #              .^.
         #        6   _/| |\_   1
         #          _/ /   \ \_
-        # axis a _/  |     |  \_ axis a
+        # axis b _/  |     |  \_ axis b
         #       /    |     |    \
         #      5    /       \    2
-        #          | axes  b |
+        #          | axes  a |
         #          "         "
         #          4         3
         #
