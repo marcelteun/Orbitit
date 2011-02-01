@@ -1240,24 +1240,65 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., V2, 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose) # TODO 4
-	#batch(edges, TriangleAlt.star1loose)  # TODO ongoing at me
-	#batch(edges, TriangleAlt.alt_strip1loose)
+	edges = [0., V2, 1., 0.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., V2, 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_strip1loose)
+	edges = [0., V2, 1., 1.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [1., 0., 1., 0.]
-	#batch(edges, TriangleAlt.stripII) # IMPOSSIBLE?
-	#batch(edges, TriangleAlt.alt_stripI) # done
-	#batch(edges, TriangleAlt.alt_stripII) # done
-	#batch(edges, TriangleAlt.alt_strip1loose) # probably impossible...
+	edges = [1., 0., 0., 1.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [1., 0., 1., 1.]
-	#batch(edges, TriangleAlt.stripII) # IMPOSSIBLE?
+	edges = [1., 0., 1., 0.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [1., 0., 1., 1.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [1., 0., V2, 1.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [1., 1., 0., 1.] # TODO weekend (1)
 	#batch(edges, TriangleAlt.strip1loose)
@@ -1298,6 +1339,16 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripI)
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	edges = [1., V2, 0., 1.]
+	batch(edges, TriangleAlt.strip1loose)
+	batch(edges, TriangleAlt.stripI)
+	batch(edges, TriangleAlt.stripII)
+	batch(edges, TriangleAlt.star)
+	batch(edges, TriangleAlt.star1loose)
+	batch(edges, TriangleAlt.alt_stripI)
+	batch(edges, TriangleAlt.alt_stripII)
+	batch(edges, TriangleAlt.alt_strip1loose)
 
 	#edges = [1., V2, 1., 0.] # ongoing
 	#batch(edges, TriangleAlt.alt_strip1loose) #
