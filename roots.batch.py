@@ -3,17 +3,17 @@
 # Copyright (C) 2008 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -120,7 +120,7 @@ fold = Fold()
 def FoldedRegularHeptagonsS4A4(c, params):
     """Calculates the 4 variable edge lengths - 1 for the simplest S4A4 case of
     folded heptagons.
-    
+
     The case contains
     c[0]: a translation (towards the viewer)
     c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
@@ -137,14 +137,14 @@ def FoldedRegularHeptagonsS4A4(c, params):
     #      8                               1
     #
     #                      3
-    #                       
+    #
     #   7                                     0
-    #                       
+    #
     #                      4
-    #                       
+    #
     #     11                               6
     #              10             5
-    #                      
+    #
     #                      13
     #             17                15
 
@@ -159,11 +159,11 @@ def FoldedRegularHeptagonsS4A4(c, params):
 
     [ y1,    z1,    x1], # V14 = V1'
 
-    The heptagons are regular, so 
+    The heptagons are regular, so
     |0-1| = |1-2| = |2-3| = |3-4| = |4-5| = |5-6| = |6-0| = |12 - 14| = 1
     The alternatives for creatings triangles leads to the following possible
     variable edge lengths:
-    params[0] | edge a | edge b | edge c | edge d 
+    params[0] | edge a | edge b | edge c | edge d
     ----------+--------+--------+--------+-------
            0  | 2 - 9  | 12 - 2 | 2 - 14 | 14 - 1	strip 1 loose
     ----------+--------+--------+--------+-------
@@ -491,7 +491,7 @@ def FoldedRegularHeptagonsS4A4(c, params):
 
     else:
 	# rotation angle around edge
-	alpha = alpha 
+	alpha = alpha
 	alpha = alpha - numx.pi/2
 	Vs = [
 		GeomTypes.Vec([ (1 + Sigma + Rho)*H,      0.0, 0.0]),
@@ -647,7 +647,7 @@ class Method:
     broyden = 2
     hybrid  = 3
 
-def FindMultiRoot(initialValues, 
+def FindMultiRoot(initialValues,
         edgeAlternative,
         edgeLengths = [1., 1., 1., 1.],
 	fold = Fold.parallel,
@@ -676,7 +676,7 @@ def FindMultiRoot(initialValues,
         [edgeAlternative, edgeLengths, fold],
         4
     )
-    
+
     nrOfIns = 4
     if method == Method.hybrids:
         solver = multiroots.hybrids(mysys, nrOfIns)
@@ -686,7 +686,7 @@ def FindMultiRoot(initialValues,
         solver = multiroots.broyden(mysys, nrOfIns)
     else:
         solver = multiroots.hybrid(mysys, nrOfIns)
-    
+
     solver.set(initialValues)
     if printIter:
         print "# Using solver ", solver.name(), 'with edge alternative:', edgeAlternative
@@ -773,7 +773,7 @@ def FindMultiRootOnDomain(domain,
     while testValue[-1] < domain[-1][1]:
     #while testValue[0] < domain[0][1]:
         try:
-            result = FindMultiRoot(testValue, 
+            result = FindMultiRoot(testValue,
                     edgeAlternative,
                     edgeLengths,
 		    fold,
@@ -1129,7 +1129,9 @@ if __name__ == '__main__':
 		    printStatus = False
 		)
 	    print '['
-	    for r in result: print '    %s,' % str(r)
+	    for r in result:
+		print '    [%.14f, %.14f, %.14f, %.14f],' % (
+						r[0], r[1], r[2], r[3])
 	    print '],\n'
 
 	def batch(edges, tris):
@@ -1150,7 +1152,8 @@ if __name__ == '__main__':
 	# to test fold optimisation:
 	faster = True
 
-	#edges = [0., 0., 0., 1.] # started 20100126 @ 3
+	# at weekend 4X
+	#edges = [0., 0., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1160,7 +1163,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 0., 1., 0.] # started 20100126 @ 3
+	#edges = [0., 0., 1., 0.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1170,7 +1173,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 0., 1., 1.] # started 20100126 @ 3
+	#edges = [0., 0., 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1180,7 +1183,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 0., V2, 1.] # started 20100126 @ 3
+	#edges = [0., 0., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1190,7 +1193,8 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 1., 0., 1.] # started 20100126 @ 4
+	# at weekend 4X
+	#edges = [0., 1., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1200,7 +1204,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 1., 1., 0.] # started 20100126 @ 4
+	#edges = [0., 1., 1., 0.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1210,17 +1214,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 1., 1., 1.] # started 20100126 @ 4
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., V2, 1.] # started 20100126 @ 4
+	#edges = [0., 1., 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1240,7 +1234,141 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [0., V2, 1., 0.]
+	# @4
+	#edges = [0., 1., V2, 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [0., V2, 1., 0.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	# @4
+	#edges = [0., V2, 1., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 0., 0., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 0., 1., 0.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 0., 1., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 0., V2, 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	# @ weekend: 4x:
+	#edges = [1., 1., 0., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 1., 1., 0.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 1., 1., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., 1., V2, 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., V2, 0., 1.]
+	#batch(edges, TriangleAlt.strip1loose)
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	#batch(edges, TriangleAlt.star1loose)
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	#edges = [1., V2, 1., 0.]
+	##batch(edges, TriangleAlt.strip1loose) # nothing special
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	##batch(edges, TriangleAlt.star1loose) # nothing special
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	#batch(edges, TriangleAlt.alt_strip1loose)
+
+	# @2
+	edges = [1., V2, 1., 1.]
 	batch(edges, TriangleAlt.strip1loose)
 	batch(edges, TriangleAlt.stripI)
 	batch(edges, TriangleAlt.stripII)
@@ -1250,57 +1378,8 @@ if __name__ == '__main__':
 	batch(edges, TriangleAlt.alt_stripII)
 	batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [0., V2, 1., 1.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
-
-	edges = [1., 0., 0., 1.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
-
-	edges = [1., 0., 1., 0.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
-
-	edges = [1., 0., 1., 1.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
-
-	edges = [1., 0., V2, 1.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 1., 0., 1.] # TODO weekend (1)
+	# @ weekend 4x:
+	#edges = [V2, 0., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1310,7 +1389,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [1., 1., 1., 0.] # TODO weekend (1)
+	#edges = [V2, 0., 1., 0.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1320,7 +1399,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [1., 1., 1., 1.] # TODO weekend (4)
+	#edges = [V2, 0., 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1330,7 +1409,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [1., 1., V2, 1.] # TODO weekend (4)
+	#edges = [V2, 0., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1340,21 +1419,7 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	edges = [1., V2, 0., 1.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., V2, 1., 0.] # ongoing
-	#batch(edges, TriangleAlt.alt_strip1loose) #
-	#batch(edges, TriangleAlt.star) #
-
-	#edges = [V2, 1., 0., 1.] # done 20100126
+	#edges = [V2, 1., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1364,7 +1429,8 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [V2, 1., 1., 0.] # done 20100126
+	# @2
+	#edges = [V2, 1., 1., 0.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1374,7 +1440,8 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [V2, 1., 1., 1.] # done 20100126
+	# @3
+	#edges = [V2, 1., 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1384,7 +1451,8 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [V2, 1., V2, 1.] # done 20100126
+	# @3
+	#edges = [V2, 1., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -1393,24 +1461,3 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripI)
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., V2, 1., 0.] # TODO started 20100126 (1)
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., V2, 1., 1.] # TODO started 20100126 (2)
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
