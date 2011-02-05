@@ -1152,7 +1152,6 @@ if __name__ == '__main__':
 	# to test fold optimisation:
 	faster = True
 
-	# at weekend 4X
 	#edges = [0., 0., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1193,7 +1192,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# at weekend 4X
 	#edges = [0., 1., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1234,7 +1232,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @4
 	#edges = [0., 1., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1255,7 +1252,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @4
 	#edges = [0., V2, 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1306,7 +1302,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @ weekend: 4x:
 	#edges = [1., 1., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1367,18 +1362,16 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @2
-	edges = [1., V2, 1., 1.]
-	batch(edges, TriangleAlt.strip1loose)
-	batch(edges, TriangleAlt.stripI)
-	batch(edges, TriangleAlt.stripII)
-	batch(edges, TriangleAlt.star)
-	batch(edges, TriangleAlt.star1loose)
-	batch(edges, TriangleAlt.alt_stripI)
-	batch(edges, TriangleAlt.alt_stripII)
-	batch(edges, TriangleAlt.alt_strip1loose)
+	#edges = [1., V2, 1., 1.]
+	##batch(edges, TriangleAlt.strip1loose) # nothing special
+	#batch(edges, TriangleAlt.stripI)
+	#batch(edges, TriangleAlt.stripII)
+	#batch(edges, TriangleAlt.star)
+	##batch(edges, TriangleAlt.star1loose) # nothing special
+	#batch(edges, TriangleAlt.alt_stripI)
+	#batch(edges, TriangleAlt.alt_stripII)
+	##batch(edges, TriangleAlt.alt_strip1loose) # nothing special
 
-	# @ weekend 4x:
 	#edges = [V2, 0., 0., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1429,7 +1422,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @2
 	#edges = [V2, 1., 1., 0.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1440,7 +1432,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @3
 	#edges = [V2, 1., 1., 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
@@ -1451,7 +1442,6 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	# @3
 	#edges = [V2, 1., V2, 1.]
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
