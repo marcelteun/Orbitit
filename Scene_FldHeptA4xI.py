@@ -367,6 +367,7 @@ class Shape(Geom3D.IsometricShape):
 		Fs.extend(this.triFs[this.edgeAlternative])
 		colIds.extend(this.triColIds[this.edgeAlternative])
 		Es.extend(this.triEs[this.edgeAlternative])
+
         this.setBaseEdgeProperties(Es = Es)
         this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
         this.showBaseOnly = not this.applySymmetry
@@ -495,6 +496,32 @@ class Shape(Geom3D.IsometricShape):
                 trisAlt.alt_strip_II:		[2, 14, 5, 15],
                 trisAlt.alt_strip_1_loose:	[2, 14, 5, 15],
             }
+
+    def printTrisAngles(this):
+	# TODO: fix this function. Which angles to take (ie which faces) depends
+	# on the triangle alternative.
+	tris = this.triFs[this.edgeAlternative]
+	# for non 1 loose
+	# for i in range(0, len(tris) - 2, 2):
+	d = 2
+	# for 1 loose:
+	d = 1
+	for i in range(2):
+	    norm0 = Geom3D.Triangle(
+		this.baseShape.Vs[tris[i][0]],
+		this.baseShape.Vs[tris[i][1]],
+		this.baseShape.Vs[tris[i][2]],
+	    ).normal(True)
+	    print 'norm0 %d: ', norm0
+	    norm1 = Geom3D.Triangle(
+		this.baseShape.Vs[tris[i+d][0]],
+		this.baseShape.Vs[tris[i+d][1]],
+		this.baseShape.Vs[tris[i+d][2]],
+	    ).normal(True)
+	    print 'norm1 %d: ', norm1
+	    inprod = norm0 * norm1
+	    print 'Tris angle %d: %.6f degrees' % (i, math.acos(inprod) * Geom3D.Rad2Deg)
+	print '------------' # TODO move out
 
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
