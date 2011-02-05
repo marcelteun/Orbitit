@@ -2776,8 +2776,12 @@ class IsometricShape(CompoundShape):
                 this.setEdgeProperties(
                     radius = radius, color = color, drawEdges = drawEdges
                 )
+		CompoundShape.setEdgeProperties(this,
+			radius = radius, color = color, drawEdges = drawEdges)
+		print 'radius', radius
+                this.orbitNeeded = True
 
-    def getBaseEdgeProperties(this):
+    def getBaseFaceProperties(this):
         """
         Get the edge properties of the base element.
 
@@ -2805,9 +2809,11 @@ class IsometricShape(CompoundShape):
                     #print 'i:', i, isom
                     glMultMatrixd(isom.glMatrix())
                     this.baseShape.setFaceColors(this.shapeColors[i % l])
+		    this.baseShape.divideColorWrapper()
                     this.baseShape.glDraw()
                     glPopMatrix()
                 this.baseShape.setFaceColors(this.shapeColors[0])
+		this.baseShape.divideColorWrapper()
 
     def toOffStr(this, precision=15, info = False):
         if this.orbitNeeded:

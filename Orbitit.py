@@ -252,6 +252,7 @@ class MainWindow(wx.Frame):
         this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
+	this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
         this.exportDirName = '.'
         this.importDirName = '.'
         this.viewSettingsWindow = None
@@ -628,6 +629,15 @@ class MainWindow(wx.Frame):
         if this.viewSettingsWindow != None:
             this.viewSettingsWindow.Close()
 
+    def onKeyDown(this, e):
+	key = e.GetKeyCode()
+	if key == wx.WXK_F3:
+	    if glGetIntegerv(GL_FRONT_FACE) == GL_CW:
+		glFrontFace(GL_CCW)
+	    else:
+		glFrontFace(GL_CW)
+	    this.panel.getCanvas().paint()
+
 class MainPanel(wx.Panel):
     def __init__(this, parent, TstScene, shape, *args, **kwargs):
         wx.Panel.__init__(this, parent, *args, **kwargs)
@@ -867,7 +877,8 @@ class ViewSettingsSizer(wx.BoxSizer):
 	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
 					id = this.ogl2SidedFacesGui.GetId())
         this.Guis.append(
-	    wx.CheckBox(this.parentPanel, label = 'Switch Front and Back Face')
+	    wx.CheckBox(this.parentPanel,
+				label = 'Switch Front and Back Face (F3)')
 	)
 	this.oglFrontFaceGui = this.Guis[-1]
 	this.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
