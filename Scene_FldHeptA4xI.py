@@ -110,7 +110,7 @@ only_hepts	= 10
 only_o3_tris	= 11
 edge_1_1_0_1	= 12
 edge_1_0_1_1	= 13
-square_o3_tris	= 14
+edge_V2_1_0_1	= 14
 edge_V2_1_1_0	= 15
 square_12	= 16
 edge_0_V2_1_1   = 17
@@ -120,7 +120,7 @@ Stringify = {
     no_o3_tris:		'48 Triangles',
     all_eq_tris:	'All 80 Triangles Equilateral',
     only_o3_tris:	'8 Triangles (O3)',
-    square_o3_tris:	'8 Triangles and 12 Folded Squares',
+    edge_V2_1_0_1:	'8 Triangles and 12 Folded Squares',
     edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
     edge_V2_1_V2_1:	'8 Triangles and 36 Folded Squares',
     square_12:		'12 Folded Squares',
@@ -573,20 +573,20 @@ class CtrlWin(wx.Frame):
 	    only_o3_tris:   OnlyO3Triangles,
 	    edge_1_1_0_1:   Pos32TrianglesI,
 	    edge_1_0_1_1:   Pos32TrianglesII,
-	    square_o3_tris: FoldedSquareAndO3Triangle,
+	    edge_V2_1_0_1:  FoldedSquareAndO3Triangle,
 	    edge_V2_1_1_0:  FoldedSquareAnd1TriangleType,
 	    square_12:      Squares12,
 	    tris_24:        Tris24,
 	    all_eq_tris:    AllEquilateralTris,
-	    no_o3_tris:     NoO3Triangles,
-	    squares_24:     FoldedSquares_0,
+	    no_o3_tris:     Pos48Triangles,
+	    squares_24:     Pos24Squares,
 	    edge_1_1_V2_1:  E1_1_V2_1,
 	    edge_1_V2_1_1:  E1_V2_1_1,
 	    edge_V2_1_1_1:  EV2_1_1_1,
 	    edge_V2_1_V2_1: EV2_1_V2_1,
-	    edge_0_1_1_1: E0_1_1_1,
-	    edge_0_V2_1_1: E0_V2_1_1,
-	    edge_0_1_V2_1: E0_1_V2_1,
+	    edge_0_1_1_1:   E0_1_1_1,
+	    edge_0_V2_1_1:  E0_V2_1_1,
+	    edge_0_1_V2_1:  E0_1_V2_1,
 	}
 
     def createControlsSizer(this):
@@ -657,7 +657,7 @@ class CtrlWin(wx.Frame):
 		Stringify[only_hepts],
 		Stringify[only_o3_tris],
 		Stringify[square_12],
-		Stringify[square_o3_tris],
+		Stringify[edge_V2_1_0_1],
 		Stringify[tris_24],
 		Stringify[squares_24],
 		Stringify[edge_1_1_0_1],
@@ -1946,7 +1946,7 @@ trap_altStrip1loose_lst = [
     [1.36602540378444, 0.91561938203030, 2.35755144072579, -2.06457033281442],
     [1.36602540378444, 0.91561938203030, -1.49715598194876, -2.06457033281442],
 ]
-NoO3Triangles = {
+Pos48Triangles = {
     Heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_1loose_lst,
 	trisAlt.strip_I: par_star_stripI_lst,
@@ -2068,7 +2068,7 @@ trap_alt_atripII_lst = [
     [1.14172874232229, 1.72649858941196, -1.14112350448642, -1.11600414739872],
 
 ]
-FoldedSquares_0 = {
+Pos24Squares = {
     Heptagons.foldMethod.parallel: {
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.strip_II: par_stripII_lst,
@@ -2663,6 +2663,7 @@ w_stripI_lst = [
     [-1.19194580738429, -2.99838399748236, 3.05495967954063, 0.47611612974963],
     [-1.22071193145937, -2.99245964647262, -3.00187064473109, -0.46918928519905],
     [1.26212471848357, 0.63678228675852, -1.59354968833213, 0.28306679175272],
+    [1.25935407914121, 0.63913903280080, -2.25372272878080, 2.30933934097687],
     [-0.81666023564508, -3.00597827136257, -1.71696159025271, -2.36457079417992],
     [-0.71256480888860, -2.96567469549899, -1.51129249073855, -0.37106860213447],
     [-0.66525562485414, -2.93240284887343, -1.23855223603033, 3.09987553891302],
