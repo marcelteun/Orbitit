@@ -23,6 +23,8 @@
 
 import math
 import rgb
+import re
+import sys
 import X3D
 import Scenes3D
 import Geom3D
@@ -245,18 +247,21 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
 
 class MainWindow(wx.Frame):
     wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py|"
-    def __init__(this, TstScene, shape, *args, **kwargs):
+    def __init__(this, TstScene, shape, argv, *args, **kwargs):
         wx.Frame.__init__(this, *args, **kwargs)
         this.addMenuBar()
         this.statusBar = this.CreateStatusBar()
-        this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
-        this.Show(True)
-        this.Bind(wx.EVT_CLOSE, this.onClose)
-	this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
+	this.scene = None
         this.exportDirName = '.'
         this.importDirName = '.'
         this.viewSettingsWindow = None
         this.scene = None
+	if argv[1][-4:] == '.off' or argv[1][-3:] == '.py':
+	    shape = this.openFile(argv[1])
+	this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
+        this.Show(True)
+        this.Bind(wx.EVT_CLOSE, this.onClose)
+	this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
 
     def addMenuBar(this):
         menuBar = wx.MenuBar()
@@ -387,28 +392,38 @@ class MainWindow(wx.Frame):
         dlg = wx.FileDialog(this, 'New: Choose a file',
                 this.importDirName, '', this.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
+            this.panel.setShape(
+		this.openFile(dlg.GetFilename(), dlg.GetDirectory())
+            )
+            this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
+        dlg.Destroy()
+
+    def openFile(this, filename, dirname = None):
             this.closeCurrentScene()
-            this.filename = dlg.GetFilename()
+            this.filename = filename
             isOffModel = this.filename[-3:] == 'off'
-            this.importDirName  = dlg.GetDirectory()
             print "opening file:", this.filename
-            fd = open(os.path.join(this.importDirName, this.filename), 'r')
+	    if dirname != None:
+		this.importDirName  = dirname
+		fd = open(os.path.join(this.importDirName, this.filename), 'r')
+	    else:
+		fd = open(this.filename, 'r')
+		m = re.match(r'.*\/', this.filename)
+		if m != None:
+		    this.importDirName = m.group()
             if isOffModel:
                 shape = Geom3D.readOffFile(fd, recreateEdges = True)
             else:
+		assert this.filename[-2:] == 'py'
                 shape = Geom3D.readPyFile(fd)
             if isinstance(shape, Geom3D.CompoundShape):
                 # convert to SimpleShape first, since adding to IsometricShape
                 # will not work.
                 shape = shape.SimpleShape
-            # Create a compound shape to be able to add shapes later.
-            this.panel.setShape(
-                Geom3D.CompoundShape([shape], name = this.filename)
-            )
-            this.setStatusStr("OFF file opened")
+            this.setStatusStr("file opened")
             fd.close()
-            this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
-        dlg.Destroy()
+            # Create a compound shape to be able to add shapes later.
+	    return Geom3D.CompoundShape([shape], name = this.filename)
 
     def onAdd(this, e):
         dlg = wx.FileDialog(this, 'Add: Choose a file',
@@ -1391,9 +1406,12 @@ app = wx.PySimpleApp()
 frame = MainWindow(
         Canvas3DScene,
         Geom3D.SimpleShape([], []),
-        None, wx.ID_ANY, "test",
+	sys.argv,
+        None,
+	wx.ID_ANY, "test",
         size = (430, 482),
         pos = wx.Point(980, 0)
     )
-frame.setScene(SceneList[DefaultScene])
+if (len(sys.argv) == 1):
+    frame.setScene(SceneList[DefaultScene])
 app.MainLoop()
