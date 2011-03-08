@@ -167,9 +167,6 @@ import Scene_Rectified24Cell
 
 import Scene_Orbit
 
-#import tr_icosa
-#import tstScene
-
 SceneList = [
         {'lab': Scene_EqlHeptFromKite.Title, 'class': Scene_EqlHeptFromKite.Scene},
         {'lab': Scene_EqlHeptS4A4.Title,     'class': Scene_EqlHeptS4A4.Scene},
@@ -184,8 +181,6 @@ SceneList = [
         {'lab': Scene_Rectified8Cell.Title,  'class': Scene_Rectified8Cell.Scene},
         {'lab': Scene_Rectified24Cell.Title,  'class': Scene_Rectified24Cell.Scene},
         {'lab': Scene_Orbit.Title,  'class': Scene_Orbit.Scene},
-#        {'lab': tr_icosa.Title,  'class': tr_icosa.Scene},
-#        {'lab': tstScene.Title,  'class': tstScene.Scene},
     ]
 
 DefaultScene = 8 # Start with this scene
@@ -256,7 +251,9 @@ class MainWindow(wx.Frame):
         this.importDirName = '.'
         this.viewSettingsWindow = None
         this.scene = None
-	if argv[1][-4:] == '.off' or argv[1][-3:] == '.py':
+	if len(argv) > 1 and (
+	    argv[1][-4:] == '.off' or argv[1][-3:] == '.py'
+	):
 	    shape = this.openFile(argv[1])
 	this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
