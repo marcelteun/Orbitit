@@ -160,6 +160,7 @@ import Scene_EqlHeptA5xI
 import Scene_EqlHeptA5xI_GD
 import Scene_EqlHeptA5xI_GI
 import Scene_FldHeptA4xI
+import Scene_FldHeptS4
 
 import Scene_5Cell
 import Scene_8Cell
@@ -177,6 +178,7 @@ SceneList = [
         {'lab': Scene_EqlHeptA5xI_GD.Title,  'class': Scene_EqlHeptA5xI_GD.Scene},
         {'lab': Scene_EqlHeptA5xI_GI.Title,  'class': Scene_EqlHeptA5xI_GI.Scene},
         {'lab': Scene_FldHeptA4xI.Title,  'class': Scene_FldHeptA4xI.Scene},
+        {'lab': Scene_FldHeptS4.Title,  'class': Scene_FldHeptS4.Scene},
         {'lab': Scene_5Cell.Title,  'class': Scene_5Cell.Scene},
         {'lab': Scene_8Cell.Title,  'class': Scene_8Cell.Scene},
         {'lab': Scene_24Cell.Title,  'class': Scene_24Cell.Scene},
@@ -186,7 +188,7 @@ SceneList = [
     ]
 
 DefaultScene = -1 # Start with this scene
-DefaultScene = 6 # Start with this scene
+DefaultScene = 7 # Start with this scene
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def __init__(this, shape, *args, **kwargs):

@@ -591,6 +591,103 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
             Vec(N)
         )
 
+class FldHeptagonShape(Geom3D.IsometricShape):
+    def __init__(this, isoms, colors = None, name = 'Folded Regular Heptagons'):
+        Geom3D.IsometricShape.__init__(this,
+            Vs = [], Fs = [],
+            directIsometries = isoms,
+            unfoldOrbit = True,
+            name = name,
+        )
+        this.heptagon = RegularHeptagon()
+	if colors == None:
+	    this.theColors     = [
+		    rgb.oliveDrab[:],
+		    rgb.brown[:],
+		    rgb.yellow[:],
+		    rgb.cyan[:]
+		]
+	else:
+	    this.theColors = None
+        this.angle = 1.2
+        this.posAngle = 0
+        this.fold1 = 0.0
+        this.fold2 = 0.0
+	this.foldHeptagon = foldMethod.parallel
+        this.height = 2.3
+        this.applySymmetry = True
+        this.addTriangles = True
+        this.useCulling = False
+        this.setV()
+
+    def glDraw(this):
+        if this.updateShape: this.setV()
+        Geom3D.IsometricShape.glDraw(this)
+
+    def setEdgeAlternative(this, alt):
+        this.edgeAlternative = alt
+        this.updateShape = True
+
+    def setFoldMethod(this, method):
+	this.foldHeptagon = method
+        this.updateShape = True
+
+    def setAngle(this, angle):
+        this.angle = angle
+        this.updateShape = True
+
+    def setFold1(this, angle):
+        this.fold1 = angle
+        this.updateShape = True
+
+    def setFold2(this, angle):
+        this.fold2 = angle
+        this.updateShape = True
+
+    def setHeight(this, height):
+        this.height = height
+        this.updateShape = True
+
+    def edgeColor(this):
+        glColor(0.5, 0.5, 0.5)
+
+    def vertColor(this):
+        glColor(0.7, 0.5, 0.5)
+
+    def getStatusStr(this):
+        return 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
+                this.angle,
+                this.fold1,
+                this.fold2,
+                this.height
+            )
+
+    def setV(this):
+        #print this.name, "setV"
+	this.heptagon.fold(this.fold1, this.fold2,
+		keepV0 = False, fold = this.foldHeptagon)
+	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
+	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
+	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
+	#print 'norm V3-V4: ', (this.heptagon.Vs[3]-this.heptagon.Vs[4]).squareNorm()
+        this.heptagon.translate(H * GeomTypes.uy)
+        # The angle has to be adjusted for historical reasons...
+        this.heptagon.rotate(-GeomTypes.ux, this.angle)
+        this.heptagon.translate(this.height*GeomTypes.uz)
+	if this.posAngle != 0:
+	    this.heptagon.rotate(GeomTypes.uz, this.posAngle)
+        Vs = this.heptagon.Vs[:]
+        Es = []
+        Fs = []
+        Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
+        Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
+        colIds = [0 for f in Fs]
+        this.setBaseVertexProperties(Vs = Vs)
+        this.setBaseEdgeProperties(Es = Es)
+        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.showBaseOnly = not this.applySymmetry
+        this.updateShape = False
+
 class EqlHeptagonShape(Geom3D.IsometricShape):
     def __init__(this,
         directIsometries = [GeomTypes.E],

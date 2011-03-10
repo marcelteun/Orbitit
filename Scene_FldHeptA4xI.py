@@ -19,23 +19,6 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-# $Log: Scene_RegHeptS4A4Eg.py,v $
-# Revision 1.4  2008/10/04 21:38:16  marcelteun
-# fix canvas position of regular heptagons
-#
-# Revision 1.3  2008/10/04 21:13:29  marcelteun
-# fix for undestroyed boxes in Ubuntu Hardy Heron
-#
-# Revision 1.2  2008/10/03 20:09:51  marcelteun
-# Bridges2008 changes: window position
-#
-# Revision 1.1.1.1  2008/07/05 10:35:43  marcelteun
-# Imported sources
-#
-# Revision 1.1  2008/06/18 05:31:54  teun
-# Initial revision
-#
-#
 
 import wx
 import math
@@ -157,7 +140,7 @@ class Shape(Geom3D.IsometricShape):
             Vs = [], Fs = [],
             directIsometries = isometry.A4(),
             unfoldOrbit = True,
-            name = 'FoldedRegHeptS4xI'
+            name = 'FoldedRegHeptA4xI'
         )
         this.heptagon = Heptagons.RegularHeptagon()
         #this.dbgPrn = True
