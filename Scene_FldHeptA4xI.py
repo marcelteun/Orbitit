@@ -145,9 +145,9 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.setV()
 
     def getStatusStr(this):
-        #angle = Geom3D.Rad2Deg * this.angle
+        #angle = Geom3D.Rad2Deg * this.dihedralAngle
         s = 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
-                this.angle,
+                this.dihedralAngle,
                 this.fold1,
                 this.fold2,
                 this.height
@@ -239,8 +239,10 @@ class Shape(Heptagons.FldHeptagonShape):
 	#print 'norm V3-V4: ', (this.heptagon.Vs[3]-this.heptagon.Vs[4]).squareNorm()
         this.heptagon.translate(Heptagons.H*GeomTypes.uy)
         # The angle has to be adjusted for historical reasons...
-        this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.angle)
+        this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.dihedralAngle)
         this.heptagon.translate(this.height*GeomTypes.uz)
+	if this.posAngle != 0:
+	    this.heptagon.rotate(-GeomTypes.uz, this.posAngle)
         Vs = this.heptagon.Vs[:]
         #
 	# 15                                 14 = 2'
@@ -260,7 +262,7 @@ class Shape(Heptagons.FldHeptagonShape):
 
         Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
         Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
-        Vs.append(Vec([Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[7]
+        Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]
         Vs.append(Rl * Vs[0])                                  # Vs[10]

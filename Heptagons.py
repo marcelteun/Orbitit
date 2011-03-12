@@ -613,7 +613,7 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 		]
 	else:
 	    this.theColors = None
-        this.angle = 1.2
+        this.dihedralAngle = 1.2
         this.posAngle = 0
         this.fold1 = 0.0
         this.fold2 = 0.0
@@ -637,8 +637,12 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 	this.foldHeptagon = method
         this.updateShape = True
 
-    def setAngle(this, angle):
-        this.angle = angle
+    def setDihedralAngle(this, angle):
+        this.dihedralAngle = angle
+        this.updateShape = True
+
+    def setPosAngle(this, angle):
+        this.posAngle = angle
         this.updateShape = True
 
     def setFold1(this, angle):
@@ -661,14 +665,13 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 
     def getStatusStr(this):
         return 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
-                this.angle,
+                this.dihedralAngle,
                 this.fold1,
                 this.fold2,
                 this.height
             )
 
-    def setV(this):
-        #print this.name, "setV"
+    def posHeptagon(this):
 	this.heptagon.fold(this.fold1, this.fold2,
 		keepV0 = False, fold = this.foldHeptagon)
 	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
@@ -676,11 +679,15 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
 	#print 'norm V3-V4: ', (this.heptagon.Vs[3]-this.heptagon.Vs[4]).squareNorm()
         this.heptagon.translate(H * GeomTypes.uy)
-        # The angle has to be adjusted for historical reasons...
-        this.heptagon.rotate(-GeomTypes.ux, this.angle)
+        # Note: the rotation angle != the dihedral angle
+	this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.dihedralAngle)
         this.heptagon.translate(this.height*GeomTypes.uz)
 	if this.posAngle != 0:
-	    this.heptagon.rotate(GeomTypes.uz, this.posAngle)
+	    this.heptagon.rotate(-GeomTypes.uz, this.posAngle)
+
+    def setV(this):
+        #print this.name, "setV"
+	this.posHeptagon()
         Vs = this.heptagon.Vs[:]
         Es = []
         Fs = []
@@ -827,15 +834,24 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.lastButton.Bind(wx.EVT_BUTTON, this.onLast)
 
         # dynamic adjustments
-        this.angleGui = wx.Slider(
+        this.posAngleGui = wx.Slider(
                 this.panel,
-                value = Geom3D.Rad2Deg * this.shape.angle,
+                value = Geom3D.Rad2Deg * this.shape.posAngle,
+                minValue = 0,
+                maxValue = 90,
+		style = wx.SL_HORIZONTAL | wx.SL_LABELS
+            )
+        this.Guis.append(this.posAngleGui)
+        this.posAngleGui.Bind(wx.EVT_SLIDER, this.onPosAngle)
+        this.dihedralAngleGui = wx.Slider(
+                this.panel,
+                value = Geom3D.Rad2Deg * this.shape.dihedralAngle,
                 minValue = -180,
                 maxValue =  180,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.angleGui)
-        this.angleGui.Bind(wx.EVT_SLIDER, this.onAngle)
+        this.Guis.append(this.dihedralAngleGui)
+        this.dihedralAngleGui.Bind(wx.EVT_SLIDER, this.onDihedralAngle)
         this.fold1Gui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.fold1,
@@ -898,7 +914,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         specPosDynamic = wx.BoxSizer(wx.VERTICAL)
         this.Boxes.append(wx.StaticBox(this.panel, label = 'Dihedral Angle (Degrees)'))
         angleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        angleSizer.Add(this.angleGui, 1, wx.EXPAND)
+        angleSizer.Add(this.dihedralAngleGui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'Positional Angle (Degrees)'))
+        posAngleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
+        posAngleSizer.Add(this.posAngleGui, 1, wx.EXPAND)
         this.Boxes.append(wx.StaticBox(this.panel, label = 'Fold 1 Angle (Degrees)'))
         fold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
         fold1Sizer.Add(this.fold1Gui, 1, wx.EXPAND)
@@ -909,6 +928,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         heightSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         heightSizer.Add(this.heightGui, 1, wx.EXPAND)
         specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
+        specPosDynamic.Add(posAngleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(wx.BoxSizer(), 1, wx.EXPAND)
@@ -947,9 +967,17 @@ class FldHeptagonCtrlWin(wx.Frame):
         # (I believe it is needed for Windows as well)
         this.SetSize(size)
 
-    def onAngle(this, event):
+    def onPosAngle(this, event):
 	#print this.GetSize()
-        this.shape.setAngle(Geom3D.Deg2Rad * this.angleGui.GetValue())
+        this.shape.setPosAngle(Geom3D.Deg2Rad * this.posAngleGui.GetValue())
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onDihedralAngle(this, event):
+	#print this.GetSize()
+        this.shape.setDihedralAngle(
+	    Geom3D.Deg2Rad * this.dihedralAngleGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
         event.Skip()
@@ -1089,11 +1117,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         tVal = this.tNone
 	c = this.shape
         if sel == dyn_pos:
-	    this.angleGui.Enable()
+	    this.dihedralAngleGui.Enable()
 	    this.fold1Gui.Enable()
 	    this.fold2Gui.Enable()
 	    this.heightGui.Enable()
-	    this.angleGui.SetValue(Geom3D.Rad2Deg * c.angle)
+	    this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
 	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * c.fold1)
 	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * c.fold2)
 	    this.heightGui.SetValue(
@@ -1149,15 +1177,15 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    except KeyError:
 	        pass
 
-            c.setAngle(aVal)
+            c.setDihedralAngle(aVal)
             c.setHeight(tVal)
             c.setFold1(fld1)
             c.setFold2(fld2)
-	    this.angleGui.SetValue(0)
+	    this.dihedralAngleGui.SetValue(0)
 	    this.fold1Gui.SetValue(0)
 	    this.fold2Gui.SetValue(0)
 	    this.heightGui.SetValue(0)
-	    this.angleGui.Disable()
+	    this.dihedralAngleGui.Disable()
 	    this.fold1Gui.Disable()
 	    this.fold2Gui.Disable()
 	    this.heightGui.Disable()

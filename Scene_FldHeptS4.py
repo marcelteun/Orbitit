@@ -152,7 +152,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.setV()
 
     def getStatusStr(this):
-        #angle = Geom3D.Rad2Deg * this.angle
+        #angle = Geom3D.Rad2Deg * this.dihedralAngle
         s = Heptagons.FldHeptagonShape.getStatusStr(this)
         if this.updateShape:
             #print 'getStatusStr: forced setV'
