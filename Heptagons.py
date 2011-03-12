@@ -44,6 +44,10 @@ Sigma     = SigmaH / h
 R         = 0.5 / h
 H         = (1 + Sigma + Rho)*h
 
+only_hepts	= -1
+dyn_pos		= -2
+only_xtra_o3s   = -3
+
 class FoldMethod:
     parallel  = 0
     trapezium = 1
@@ -616,9 +620,10 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 	this.foldHeptagon = foldMethod.parallel
         this.height = 2.3
         this.applySymmetry = True
-        this.addTriangles = True
+        this.addXtraFs = True
+	this.onlyXtraO3s = False
         this.useCulling = False
-        this.setV()
+        this.updateShape = True
 
     def glDraw(this):
         if this.updateShape: this.setV()
@@ -687,6 +692,499 @@ class FldHeptagonShape(Geom3D.IsometricShape):
         this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
         this.showBaseOnly = not this.applySymmetry
         this.updateShape = False
+
+class FldHeptagonCtrlWin(wx.Frame):
+    def __init__(this,
+	    shape, size, canvas,
+	    maxHeight, 
+	    edgeChoicesList, edgeChoicesListItems,
+	    prePosLst,
+	    stringify,
+	    *args, **kwargs
+    ):
+	"""Create a control window for the scene that folds heptagons
+
+	shape: the Geom3D shape object that is shown
+	size: default size of the frame
+	canvas: wx canvas to be used
+	maxHeight: max translation height to be used for the heptagon
+	edgeChoicesList: string list that expresses which possibilities exist
+	                 for filling the holes between the heptagons.
+	edgeChoicesListItems: ID list for the edgeChoicesList, i.e. in enums
+	prePosLst: string list that expresses which special positions can be
+	           found, e.g. where all holes disappear.
+	stringify: hash table that maps enums on strings.
+	*args: standard wx Frame *args
+	**kwargs: standard wx Frame **kwargs
+	"""
+        # TODO assert (type(shape) == type(RegHeptagonShape()))
+        wx.Frame.__init__(this, *args, **kwargs)
+        this.shape = shape
+        this.canvas = canvas
+	this.maxHeight = maxHeight
+	this.edgeChoicesList = edgeChoicesList
+	this.edgeChoicesListItems = edgeChoicesListItems
+	this.prePosLst = prePosLst
+	this.stringify = stringify
+        this.panel = wx.Panel(this, -1)
+        this.statusBar = this.CreateStatusBar()
+	this.foldMethod = foldMethod.triangle
+	this.restoreTris = False
+	this.restoreO3s = False
+	this.shape.foldHeptagon = this.foldMethod
+        this.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        this.mainSizer.Add(
+                this.createControlsSizer(),
+                1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
+            )
+        this.setDefaultSize(size)
+        this.panel.SetAutoLayout(True)
+        this.panel.SetSizer(this.mainSizer)
+        this.Show(True)
+        this.panel.Layout()
+
+        this.specPosIndex = 0
+        this.specPos = {}
+
+    def createControlsSizer(this):
+        this.heightF = 10 # slider step factor, or: 1 / slider step
+
+        this.Guis = []
+
+        # static adjustments
+	l = this.edgeChoicesList
+        this.trisAltGui = wx.RadioBox(this.panel,
+                label = 'Triangle Fill Alternative',
+                style = wx.RA_VERTICAL,
+                choices = this.edgeChoicesList
+            )
+        this.Guis.append(this.trisAltGui)
+        this.trisAltGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+        this.trisAlt = this.edgeChoicesListItems[0]
+        this.shape.setEdgeAlternative(this.trisAlt)
+
+        # View Settings
+        # I think it is clearer with CheckBox-es than with ToggleButton-s
+        this.applySymGui = wx.CheckBox(this.panel, label = 'Apply Symmetry')
+        this.Guis.append(this.applySymGui)
+        this.applySymGui.SetValue(this.shape.applySymmetry)
+        this.applySymGui.Bind(wx.EVT_CHECKBOX, this.onApplySym)
+        this.addTrisGui = wx.CheckBox(this.panel, label = 'Show Triangles')
+        this.Guis.append(this.addTrisGui)
+        this.addTrisGui.SetValue(this.shape.addXtraFs)
+        this.addTrisGui.Bind(wx.EVT_CHECKBOX, this.onAddTriangles)
+
+        # static adjustments
+	l = this.foldMethodList = [
+	    FoldName[foldMethod.parallel],
+	    FoldName[foldMethod.triangle],
+	    FoldName[foldMethod.star],
+	    FoldName[foldMethod.w],
+	    FoldName[foldMethod.trapezium],
+	]
+	this.foldMethodListItems = [
+	    foldMethod.get(l[i]) for i in range(len(l))
+	]
+        this.foldMethodGui = wx.RadioBox(this.panel,
+                label = 'Heptagon Fold Method',
+                style = wx.RA_VERTICAL,
+                choices = this.foldMethodList
+            )
+	for i in range(len(this.foldMethodList)):
+	    if (this.foldMethodList[i] == FoldName[this.foldMethod]):
+		this.foldMethodGui.SetSelection(i)
+        this.Guis.append(this.foldMethodGui)
+        this.foldMethodGui.Bind(wx.EVT_RADIOBOX, this.onFoldMethod)
+
+	# predefined positions
+        this.prePosGui = wx.RadioBox(this.panel,
+                label = 'Only Regular Faces with:',
+                style = wx.RA_VERTICAL,
+                choices = this.prePosLst
+            )
+	# Don't hardcode which index is dyn_pos, I might reorder the item list
+	# one time, and will probably forget to update the default selection..
+	for i in range(len(this.prePosLst)):
+	    if (this.prePosLst[i] == this.stringify[dyn_pos]):
+		this.prePosGui.SetSelection(i)
+        this.Guis.append(this.prePosGui)
+        this.prePosGui.Bind(wx.EVT_RADIOBOX, this.onPrePos)
+        #wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0, const wxString choices[] = NULL, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listBox")
+
+        this.firstButton = wx.Button(this.panel, label = 'First')
+        this.nextButton  = wx.Button(this.panel, label = 'Next')
+        this.nrTxt       = wx.Button(this.panel, label = '0/0',  style=wx.NO_BORDER)
+        this.prevButton  = wx.Button(this.panel, label = 'Prev')
+        this.lastButton  = wx.Button(this.panel, label = 'Last')
+        this.Guis.append(this.firstButton)
+        this.Guis.append(this.nextButton)
+        this.Guis.append(this.nrTxt)
+        this.Guis.append(this.prevButton)
+        this.Guis.append(this.lastButton)
+        this.firstButton.Bind(wx.EVT_BUTTON, this.onFirst)
+        this.nextButton.Bind(wx.EVT_BUTTON, this.onNext)
+        this.prevButton.Bind(wx.EVT_BUTTON, this.onPrev)
+        this.lastButton.Bind(wx.EVT_BUTTON, this.onLast)
+
+        # dynamic adjustments
+        this.angleGui = wx.Slider(
+                this.panel,
+                value = Geom3D.Rad2Deg * this.shape.angle,
+                minValue = -180,
+                maxValue =  180,
+		style = wx.SL_HORIZONTAL | wx.SL_LABELS
+            )
+        this.Guis.append(this.angleGui)
+        this.angleGui.Bind(wx.EVT_SLIDER, this.onAngle)
+        this.fold1Gui = wx.Slider(
+                this.panel,
+                value = Geom3D.Rad2Deg * this.shape.fold1,
+                minValue = -180,
+                maxValue =  180,
+		style = wx.SL_HORIZONTAL | wx.SL_LABELS
+            )
+        this.Guis.append(this.fold1Gui)
+        this.fold1Gui.Bind(wx.EVT_SLIDER, this.onFold1)
+        this.fold2Gui = wx.Slider(
+                this.panel,
+                value = Geom3D.Rad2Deg * this.shape.fold2,
+                minValue = -180,
+                maxValue =  180,
+		style = wx.SL_HORIZONTAL | wx.SL_LABELS
+            )
+        this.Guis.append(this.fold2Gui)
+        this.fold2Gui.Bind(wx.EVT_SLIDER, this.onFold2)
+        this.heightGui = wx.Slider(
+                this.panel,
+                value = this.maxHeight - this.shape.height*this.heightF,
+                minValue = -this.maxHeight * this.heightF,
+                maxValue = this.maxHeight * this.heightF,
+		style = wx.SL_VERTICAL
+            )
+        this.Guis.append(this.heightGui)
+        this.heightGui.Bind(wx.EVT_SLIDER, this.onHeight)
+
+
+        # Sizers
+        this.Boxes = []
+
+        # view settings
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'View Settings'))
+        settingsSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        settingsSizer.Add(this.applySymGui, 0, wx.EXPAND)
+        settingsSizer.Add(this.addTrisGui, 0, wx.EXPAND)
+        settingsSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+
+        statSizer = wx.BoxSizer(wx.HORIZONTAL)
+        statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
+        statSizer.Add(this.trisAltGui, 0, wx.EXPAND)
+        statSizer.Add(settingsSizer, 0, wx.EXPAND)
+        statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+
+        posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
+        posSizerSubH.Add(this.firstButton, 1, wx.EXPAND)
+        posSizerSubH.Add(this.prevButton, 1, wx.EXPAND)
+        posSizerSubH.Add(this.nrTxt, 1, wx.EXPAND)
+        posSizerSubH.Add(this.nextButton, 1, wx.EXPAND)
+        posSizerSubH.Add(this.lastButton, 1, wx.EXPAND)
+        posSizerSubV = wx.BoxSizer(wx.VERTICAL)
+        posSizerSubV.Add(this.prePosGui, 0, wx.EXPAND)
+        posSizerSubV.Add(posSizerSubH, 0, wx.EXPAND)
+        posSizerSubV.Add(wx.BoxSizer(), 1, wx.EXPAND)
+        posSizerH = wx.BoxSizer(wx.HORIZONTAL)
+        posSizerH.Add(posSizerSubV, 2, wx.EXPAND)
+
+        # dynamic adjustments
+        specPosDynamic = wx.BoxSizer(wx.VERTICAL)
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'Dihedral Angle (Degrees)'))
+        angleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
+        angleSizer.Add(this.angleGui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'Fold 1 Angle (Degrees)'))
+        fold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
+        fold1Sizer.Add(this.fold1Gui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'Fold 2 Angle (Degrees)'))
+        fold2Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
+        fold2Sizer.Add(this.fold2Gui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'Offset T'))
+        heightSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        heightSizer.Add(this.heightGui, 1, wx.EXPAND)
+        specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
+        specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
+        specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
+        specPosDynamic.Add(wx.BoxSizer(), 1, wx.EXPAND)
+        posSizerH.Add(specPosDynamic, 3, wx.EXPAND)
+        posSizerH.Add(heightSizer, 1, wx.EXPAND)
+
+        mainVSizer = wx.BoxSizer(wx.VERTICAL)
+        mainVSizer.Add(statSizer, 0, wx.EXPAND)
+        mainVSizer.Add(posSizerH, 0, wx.EXPAND)
+        mainVSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+
+        mainSizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainSizer.Add(mainVSizer, 6, wx.EXPAND)
+
+        this.errorStr = {
+                'PosEdgeCfg': "ERROR: Impossible combination of position and edge configuration!"
+            }
+
+        return mainSizer
+
+    def rmControlsSizer(this):
+        #print "rmControlsSizer"
+        # The 'try' is necessary, since the boxes are destroyed in some OS,
+        # while this is necessary for Ubuntu Hardy Heron.
+        for Box in this.Boxes:
+            try:
+                Box.Destroy()
+            except wx._core.PyDeadObjectError: pass
+        for Gui in this.Guis:
+            Gui.Destroy()
+
+    # move to general class
+    def setDefaultSize(this, size):
+        this.SetMinSize(size)
+        # Needed for Dapper, not for Feisty:
+        # (I believe it is needed for Windows as well)
+        this.SetSize(size)
+
+    def onAngle(this, event):
+	#print this.GetSize()
+        this.shape.setAngle(Geom3D.Deg2Rad * this.angleGui.GetValue())
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onFold1(this, event):
+        this.shape.setFold1(Geom3D.Deg2Rad * this.fold1Gui.GetValue())
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onFold2(this, event):
+        this.shape.setFold2(Geom3D.Deg2Rad * this.fold2Gui.GetValue())
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onHeight(this, event):
+        this.shape.setHeight(float(this.maxHeight - this.heightGui.GetValue())/this.heightF)
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onApplySym(this, event):
+        this.shape.applySymmetry = this.applySymGui.IsChecked()
+        this.shape.updateShape = True
+        this.canvas.paint()
+
+    def onAddTriangles(this, event):
+        this.shape.addXtraFs = this.addTrisGui.IsChecked()
+        this.shape.updateShape = True
+        this.canvas.paint()
+
+    def onTriangleAlt(this, event):
+        this.trisAlt = this.edgeChoicesListItems[this.trisAltGui.GetSelection()]
+        this.shape.setEdgeAlternative(this.trisAlt)
+        if this.prePosGui.GetSelection() != len(this.prePosLst) - 1:
+            this.onPrePos()
+        else:
+            this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+
+    def onFoldMethod(this, event):
+        this.foldMethod = this.foldMethodListItems[
+		this.foldMethodGui.GetSelection()
+	    ]
+	this.shape.setFoldMethod(this.foldMethod)
+        if this.prePosGui.GetSelection() != len(this.prePosLst) - 1:
+            this.onPrePos()
+        else:
+            this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+
+    def onFirst(this, event = None):
+        this.specPosIndex = 0
+        this.onPrePos()
+
+    def onLast(this, event = None):
+        this.specPosIndex = -1
+        this.onPrePos()
+
+    def getPrePos(this):
+        prePosStr = this.prePosLst[this.prePosGui.GetSelection()]
+	for k,v in this.stringify.iteritems():
+	    if v == prePosStr:
+		return k
+	return dyn_pos
+
+    def onPrev(this, event = None):
+        prePosIndex = this.getPrePos()
+        if prePosIndex != dyn_pos:
+            if this.specPosIndex > 0:
+                this.specPosIndex -= 1
+	    elif this.specPosIndex == -1:
+                this.specPosIndex = len(
+			this.specPos[prePosIndex][this.foldMethod][this.trisAlt]
+		    ) - 2
+	    # else prePosIndex == 0 : first one selected don't scroll around
+            this.onPrePos()
+
+    def onNext(this, event = None):
+        prePosIndex = this.getPrePos()
+        if prePosIndex != dyn_pos:
+	    try:
+		maxI = len(
+			this.specPos[prePosIndex][this.foldMethod][this.trisAlt]
+		    ) - 1
+		if this.specPosIndex >= 0:
+		    if this.specPosIndex < maxI - 1:
+			this.specPosIndex += 1
+		    else:
+		        this.specPosIndex = -1 # select last
+	    except KeyError:
+		pass
+	    this.onPrePos()
+
+    tNone = 1.0
+    aNone = 0.0
+    fld1None = 0.0
+    fld2None = 0.0
+    def onPrePos(this, event = None):
+	#print "onPrePos"
+        sel = this.getPrePos()
+	# if only_hepts:
+	# 1. don't show triangles
+	# 2. disable triangle strip.
+	if (sel == only_hepts):
+	    this.shape.addXtraFs = False
+	    # if legal fold method select first fitting triangle alternative
+	    if this.foldMethod in this.specPos[sel]:
+		for k in this.specPos[sel][this.foldMethod].iterkeys():
+		    for i in range(len(this.edgeChoicesListItems)):
+			if this.edgeChoicesListItems[i] == k:
+			    this.trisAltGui.SetSelection(i)
+			    this.trisAlt = k
+			    this.shape.setEdgeAlternative(k)
+			    break
+		    break
+	    this.addTrisGui.Disable()
+	    this.trisAltGui.Disable()
+	    this.restoreTris = True
+	elif (this.restoreTris):
+	    this.restoreTris = False
+	    this.trisAltGui.Enable()
+	    this.addTrisGui.Enable()
+	    this.shape.addXtraFs = this.addTrisGui.IsChecked()
+	    # needed for sel == dyn_pos
+	    this.shape.updateShape = True
+	if (sel == only_xtra_o3s):
+	    this.shape.onlyXtraO3s = True
+	    this.restoreO3s = True
+	elif (this.restoreO3s):
+	    this.restoreO3s = False
+	    this.shape.onlyXtraO3s = False
+	    # needed for sel == dyn_pos
+	    this.shape.updateShape = True
+        aVal = this.aNone
+        tVal = this.tNone
+	c = this.shape
+        if sel == dyn_pos:
+	    this.angleGui.Enable()
+	    this.fold1Gui.Enable()
+	    this.fold2Gui.Enable()
+	    this.heightGui.Enable()
+	    this.angleGui.SetValue(Geom3D.Rad2Deg * c.angle)
+	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * c.fold1)
+	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * c.fold2)
+	    this.heightGui.SetValue(
+		this.maxHeight - this.heightF*c.height)
+	    # enable all folding and triangle alternatives:
+	    for i in range(len(this.foldMethodList)):
+		this.foldMethodGui.ShowItem(i, True)
+	    for i in range(len(this.edgeChoicesList)):
+		this.trisAltGui.ShowItem(i, True)
+	else:
+            fld1 = this.fld1None
+            fld2 = this.fld2None
+	    nrPos = 0
+
+	    # Ensure this.specPosIndex in range:
+	    try:
+		nrPos = len(this.specPos[sel][this.foldMethod][this.trisAlt])
+		maxI = nrPos - 1
+		if (this.specPosIndex > maxI):
+		    this.specPosIndex = maxI
+		# keep -1 (last) so switching triangle alternative will keep
+		# last selection.
+		elif (this.specPosIndex < -1):
+		    this.specPosIndex = maxI - 1
+	    except KeyError:
+		pass
+
+	    # Disable / enable appropriate folding methods.
+	    for i in range(len(this.foldMethodList)):
+		method = this.foldMethodListItems[i]
+		this.foldMethodGui.ShowItem(i, method in this.specPos[sel])
+		# leave up to the user to decide which folding method to choose
+		# in case the selected one was disabled.
+
+	    # Disable / enable appropriate triangle alternatives.
+	    # if the selected folding has valid solutions anyway
+	    if this.foldMethod in this.specPos[sel]:
+		for i in range(len(this.edgeChoicesList)):
+		    alt = this.edgeChoicesListItems[i]
+		    this.trisAltGui.ShowItem(
+			i, alt in this.specPos[sel][this.foldMethod])
+
+	    try:
+		if this.specPos[sel][this.foldMethod][this.trisAlt] != []:
+		    tVal = this.specPos[sel][this.foldMethod][this.trisAlt][
+			    this.specPosIndex][0]
+		    aVal = this.specPos[sel][this.foldMethod][this.trisAlt][
+			    this.specPosIndex][1]
+		    fld1 = this.specPos[sel][this.foldMethod][this.trisAlt][
+			    this.specPosIndex][2]
+		    fld2 = this.specPos[sel][this.foldMethod][this.trisAlt][
+			    this.specPosIndex][3]
+	    except KeyError:
+	        pass
+
+            c.setAngle(aVal)
+            c.setHeight(tVal)
+            c.setFold1(fld1)
+            c.setFold2(fld2)
+	    this.angleGui.SetValue(0)
+	    this.fold1Gui.SetValue(0)
+	    this.fold2Gui.SetValue(0)
+	    this.heightGui.SetValue(0)
+	    this.angleGui.Disable()
+	    this.fold1Gui.Disable()
+	    this.fold2Gui.Disable()
+	    this.heightGui.Disable()
+            if ( tVal == this.tNone and aVal == this.aNone and
+		    fld1 == this.fld1None and fld2 == this.fld2None
+	    ):
+		txt = 'No solutions found'
+                this.statusBar.SetStatusText(txt)
+	    elif this.isntSpecialPos(sel):
+		this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
+	    else:
+		# For the user: start counting with '1' instead of '0'
+		if this.specPosIndex == -1:
+		    nr = nrPos # last position
+		else:
+		    nr = this.specPosIndex + 1
+		this.nrTxt.SetLabel('%d/%d' % (nr, nrPos))
+		this.statusBar.SetStatusText(c.getStatusStr())
+		#this.shape.printTrisAngles()
+        this.canvas.paint()
+
+    def isntSpecialPos(this, sel):
+	"""Check whether this selection is special for this triangle alternative
+
+	Needs to be implemented by the offspring, return true on default
+	"""
+	return True
 
 class EqlHeptagonShape(Geom3D.IsometricShape):
     def __init__(this,
