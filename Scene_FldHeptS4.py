@@ -34,7 +34,7 @@ from GeomTypes import Rot3      as Rot
 from GeomTypes import HalfTurn3 as HalfTurn
 from GeomTypes import Vec3      as Vec
 
-Title = 'Polyhedra with Folded Regular Heptagons S4xI'
+Title = 'Polyhedra with Folded Regular Heptagons S4'
 
 V2 = math.sqrt(2)
 
@@ -70,6 +70,11 @@ class TrisAlt:
     alt_strip_I       = 105
     alt_strip_II      = 106
     alt_strip_1_loose = 107
+    # TODO:
+    # for the o3 triangle there is another altenative as well: [0, 0', 0"]
+    # for the square there exist 2 alts as well:
+    # [0, 0', 0", 0'"] and [5, 5', 5", 5'"]
+    # And there are combinations of these...
     def get(this, str):
 	for k,v in Stringify.iteritems():
 	    if v == str:
@@ -137,18 +142,18 @@ def Vlen(v0, v1):
 
 class Shape(Heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-        this.initArrs()
+	o4_fld_0 = GeomTypes.Vec3([1, 0, 0])
+	o4_fld_1 = GeomTypes.Vec3([0, 1, 1])
         Heptagons.FldHeptagonShape.__init__(this,
-            isometry.S4(
-		setup = {
-		    'o4axis0': GeomTypes.Vec3([1, 0, 0]),
-		    'o4axis1': GeomTypes.Vec3([0, 1, 1]),
-		}),
+            isometry.S4(setup = {'o4axis0': o4_fld_0, 'o4axis1': o4_fld_1}),
             name = 'FoldedRegHeptS4xI'
         )
 	this.edgeAlternative = trisAlt.strip_1_loose
 	this.posAngle = math.pi/4
-	#this.initArrs()
+	this.o4_fld_0 = o4_fld_0
+	this.o4_fld_1 = o4_fld_1
+	this.height = 3.9
+	this.initArrs()
 	this.setV()
 
     def getStatusStr(this):
@@ -227,25 +232,38 @@ class Shape(Heptagons.FldHeptagonShape):
         return s
 
     def setV(this):
-        Heptagons.FldHeptagonShape.setV(this)
-	#TODO: continue here
 
         #
-	# 15                                 14 = 2'
-        #                     0
-        #    (17) 13                      12 = o3c (alt 16)
-        #              6             1
-        #
-        #      11                           9 = 1'
+	#      8      7                  16 = 2"
+        #         o4          0
+        #                                   11 = 1"
+        #       9      6             1   o3
+        #                                           15 = 2'
+        #                                   10 = 1'
         #
         #            5                 2
         #
         #
-        #        10       4       3        8 = 0'
+        #       14        4       3        13 = 0'
         #
         #
-        #                              7 = 6'
+        #                              12 = 6'
 
+	this.posHeptagon()
+	Vs = this.heptagon.Vs[:]
+	o4fld = Rot(axis = this.o4_fld_1, angle = GeomTypes.qTurn)
+	Vs.append(o4fld * Vs[-1])				# Vs[7]
+	Vs.append(o4fld * Vs[-1])				# Vs[8]
+	Vs.append(o4fld * Vs[-1])				# Vs[9]
+	o3axis = GeomTypes.Vec3([1, 0, V2])
+	o3fld = Rot(axis = o3axis, angle = GeomTypes.tTurn)
+	Vs.append(o3fld * Vs[1])				# Vs[10]
+	Vs.append(o3fld * Vs[-1])				# Vs[11]
+	Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[12]
+	Vs.append(o3fld * Vs[0])				# Vs[13]
+	Vs.append(Vec([-Vs[13][0], -Vs[13][1], Vs[13][2]]))     # Vs[14]
+	Vs.append(o3fld * Vs[2])				# Vs[10]
+	Vs.append(o3fld * Vs[-1])				# Vs[11]
         #Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
         #Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
         #Vs.append(Vec([Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[7]
@@ -267,82 +285,95 @@ class Shape(Heptagons.FldHeptagonShape):
         #Vs.append((Vs[2] + halfTurn*Vs[2]) / 2)                # Vs[16]
         #halfTurn = HalfTurn(Vec([-1, 1, 1]))
         #Vs.append((Vs[5] + halfTurn*Vs[5]) / 2)                # Vs[17]
-        #if this.addTriangles:
-	#    Fs.extend(this.o3triFs[this.edgeAlternative]) # eql triangles
-	#    Es.extend(this.o3triEs[this.edgeAlternative])
-        #    colIds.extend([3, 3])
-	#    if (not this.onlyXtraO3s):
-	#	Fs.extend(this.triFs[this.edgeAlternative])
-	#	colIds.extend(this.triColIds[this.edgeAlternative])
-	#	Es.extend(this.triEs[this.edgeAlternative])
+	Es = []
+        Fs = []
+        Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
+        Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
+        colIds = [0 for f in Fs]
+        if this.addXtraFs:
+	    Fs.extend(this.o3triFs[this.edgeAlternative]) # eql triangles
+	    Es.extend(this.o3triEs[this.edgeAlternative])
+            colIds.extend([3, 3])
+	    if (not this.onlyRegFs):
+		Fs.extend(this.triFs[this.edgeAlternative])
+		colIds.extend(this.triColIds[this.edgeAlternative])
+		Es.extend(this.triEs[this.edgeAlternative])
+        this.setBaseVertexProperties(Vs = Vs)
+        this.setBaseEdgeProperties(Es = Es)
+        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.showBaseOnly = not this.applySymmetry
+        this.updateShape = False
 
     def initArrs(this):
         this.triFs = {
                 trisAlt.strip_1_loose: [
-                    [2, 3, 7], [2, 7, 8],
-                    [2, 8, 9], [5, 11, 10],
-                    [1, 2, 9], [5, 6, 11],
+                    [2, 3, 12], [2, 12, 13],
+                    [2, 13, 10], [5, 9, 14],
+                    [1, 2, 10], [5, 6, 9],
                 ],
                 trisAlt.strip_I: [
-                    [2, 3, 8], [4, 5, 10],
-                    [2, 8, 9], [5, 11, 10],
-                    [1, 2, 9], [5, 6, 11],
+                    [2, 3, 13], [4, 5, 14],
+                    [2, 13, 10], [5, 9, 14],
+                    [1, 2, 10], [5, 6, 9],
                 ],
 
                 trisAlt.strip_II: [
-                    [3, 8, 9], [4, 11, 10],
-                    [2, 3, 9], [4, 5, 11],
-                    [1, 2, 9], [5, 6, 11],
+                    [3, 13, 10], [4, 9, 14],
+                    [2, 3, 10], [4, 5, 9],
+                    [1, 2, 10], [5, 6, 9],
                 ],
                 trisAlt.star: [
-                    [2, 3, 8], [4, 5, 10],
-                    [1, 2, 8], [5, 6, 10],
-                    [1, 8, 9], [6, 11, 10]
+                    [2, 3, 13], [4, 5, 14],
+                    [1, 2, 13], [5, 6, 14],
+                    [1, 13, 10], [6, 9, 14]
                 ],
                 trisAlt.star_1_loose: [
-                    [2, 3, 7], [2, 7, 8],
-                    [1, 2, 8], [5, 6, 10],
-                    [1, 8, 9], [6, 11, 10]
+                    [2, 3, 12], [2, 12, 13],
+                    [1, 2, 13], [5, 6, 14],
+                    [1, 13, 10], [6, 9, 14]
                 ],
                 trisAlt.alt_strip_I: [
-                    [2, 3, 8], [4, 5, 10],
-                    [2, 8, 9], [5, 11, 10],
-                    [2, 9, 14], [5, 15, 11]
+                    [2, 3, 13], [4, 5, 14],
+                    [2, 13, 10], [5, 9, 14],
+                    [2, 15, 10], [6, 9, 5]
                 ],
                 trisAlt.alt_strip_II: [
-                    [3, 8, 9], [4, 11, 10],
-                    [2, 3, 9], [4, 5, 11],
-                    [2, 9, 14], [5, 15, 11]
+                    [3, 13, 10], [4, 9, 14],
+                    [2, 3, 10], [4, 5, 9],
+                    [2, 15, 10], [6, 9, 5]
                 ],
                 trisAlt.alt_strip_1_loose: [
-                    [2, 3, 7], [2, 7, 8],
-                    [2, 8, 9], [5, 11, 10],
-                    [2, 9, 14], [5, 15, 11]
+                    [2, 3, 12], [2, 12, 13],
+                    [2, 13, 10], [5, 9, 14],
+                    [2, 15, 10], [6, 9, 5]
                 ],
             }
-	# 15                                 14 = 2'
-        #                     0
-        #    (17) 13                      12 = o3c (alt 16)
-        #              6             1
+
         #
-        #      11                           9 = 1'
+	#      8      7                  16 = 2"
+        #         o4          0
+        #                                   11 = 1"
+        #       9      6             1   o3
+        #                                           15 = 2'
+        #                                   10 = 1'
         #
         #            5                 2
         #
         #
-        #        10       4       3        8 = 0'
+        #       14        4       3        13 = 0'
         #
         #
-        #                              7 = 6'
+        #                              12 = 6'
+
         this.o3triFs = {
-                trisAlt.strip_1_loose:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.strip_I:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.strip_II:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.star:			[[1, 9, 12], [6, 13, 11]],
-                trisAlt.star_1_loose:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.alt_strip_I:		[[2, 14, 16], [5, 17, 15]],
-                trisAlt.alt_strip_II:		[[2, 14, 16], [5, 17, 15]],
-                trisAlt.alt_strip_1_loose:	[[2, 14, 16], [5, 17, 15]],
+                trisAlt.strip_1_loose:		[[6, 7, 8, 9], [1, 10, 11]],
+                trisAlt.strip_I:		[[6, 7, 8, 9], [1, 10, 11]],
+                trisAlt.strip_II:		[[6, 7, 8, 9], [1, 10, 11]],
+                trisAlt.star:			[[6, 7, 8, 9], [1, 10, 11]],
+                trisAlt.star_1_loose:		[[6, 7, 8, 9], [1, 10, 11]],
+                trisAlt.alt_strip_I:		[[6, 7, 8, 9], [2, 15, 16]],
+                trisAlt.alt_strip_II:		[[6, 7, 8, 9], [2, 15, 16]],
+                trisAlt.alt_strip_1_loose:	[[6, 7, 8, 9], [2, 15, 16]],
 	    }
         this.triColIds = {
                 trisAlt.strip_1_loose:		[1, 2, 1, 1, 2, 2],
@@ -356,47 +387,47 @@ class Shape(Heptagons.FldHeptagonShape):
             }
         this.triEs = {
                 trisAlt.strip_1_loose: [
-                    2, 7, 2, 8, 2, 9,
-                    5, 10, 5, 11,
+                    2, 12, 2, 13, 2, 10,
+                    5, 14, 5, 9,
                 ],
                 trisAlt.strip_I: [
-                    3, 8, 2, 8, 2, 9,
-                    5, 10, 5, 11,
+                    3, 13, 2, 13, 2, 10,
+                    5, 14, 5, 9,
                 ],
                 trisAlt.strip_II: [
-                    3, 8, 3, 9, 2, 9,
-                    4, 11, 5, 11,
+                    3, 13, 3, 10, 2, 10,
+                    4, 9, 5, 9,
                 ],
                 trisAlt.star: [
-                    3, 8, 2, 8, 1, 8,
-                    5, 10, 6, 10,
+                    3, 13, 2, 13, 1, 13,
+                    5, 14, 6, 14,
                 ],
                 trisAlt.star_1_loose: [
-                    2, 7, 2, 8, 1, 8,
-                    5, 10, 6, 10,
+                    2, 12, 2, 13, 1, 13,
+                    5, 14, 6, 14,
                 ],
                 trisAlt.alt_strip_I: [
-                    3, 8, 2, 8, 2, 9,
-                    5, 10, 5, 11,
+                    3, 13, 2, 13, 2, 10,
+                    5, 14, 5, 9,
                 ],
                 trisAlt.alt_strip_II: [
-                    3, 8, 3, 9, 2, 9,
-                    4, 11, 5, 11,
+                    3, 13, 3, 10, 2, 10,
+                    4, 9, 5, 9,
                 ],
                 trisAlt.alt_strip_1_loose: [
-                    2, 7, 2, 8, 2, 9,
-                    5, 10, 5, 11,
+                    2, 12, 2, 13, 2, 10,
+                    5, 14, 5, 9,
                 ],
             }
         this.o3triEs = {
-                trisAlt.strip_1_loose:		[1, 9, 6, 11],
-                trisAlt.strip_I:		[1, 9, 6, 11],
-                trisAlt.strip_II:		[1, 9, 6, 11],
-                trisAlt.star:			[1, 9, 6, 11],
-                trisAlt.star_1_loose:		[1, 9, 6, 11],
-                trisAlt.alt_strip_I:		[2, 14, 5, 15],
-                trisAlt.alt_strip_II:		[2, 14, 5, 15],
-                trisAlt.alt_strip_1_loose:	[2, 14, 5, 15],
+                trisAlt.strip_1_loose:		[6, 7, 1, 10],
+                trisAlt.strip_I:		[6, 7, 1, 10],
+                trisAlt.strip_II:		[6, 7, 1, 10],
+                trisAlt.star:			[6, 7, 1, 10],
+                trisAlt.star_1_loose:		[6, 7, 1, 10],
+                trisAlt.alt_strip_I:		[6, 7, 2, 15],
+                trisAlt.alt_strip_II:		[6, 7, 2, 15],
+                trisAlt.alt_strip_1_loose:	[6, 7, 2, 15],
             }
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
@@ -409,6 +440,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    Stringify[trisAlt.star_1_loose],
 	    Stringify[trisAlt.alt_strip_I],
 	    Stringify[trisAlt.alt_strip_II],
+	    Stringify[trisAlt.alt_strip_1_loose],
 	]
 	nr_of = len(edgeChoicesList)
 	edgeChoicesListItems = [

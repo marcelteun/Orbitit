@@ -621,7 +621,7 @@ class FldHeptagonShape(Geom3D.IsometricShape):
         this.height = 2.3
         this.applySymmetry = True
         this.addXtraFs = True
-	this.onlyXtraO3s = False
+	this.onlyRegFs = False
         this.useCulling = False
         this.updateShape = True
 
@@ -754,7 +754,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.specPos = {}
 
     def createControlsSizer(this):
-        this.heightF = 10 # slider step factor, or: 1 / slider step
+        this.heightF = 40 # slider step factor, or: 1 / slider step
 
         this.Guis = []
 
@@ -927,8 +927,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Boxes.append(wx.StaticBox(this.panel, label = 'Offset T'))
         heightSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         heightSizer.Add(this.heightGui, 1, wx.EXPAND)
-        specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(posAngleSizer, 0, wx.EXPAND)
+        specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(wx.BoxSizer(), 1, wx.EXPAND)
@@ -1106,11 +1106,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    # needed for sel == dyn_pos
 	    this.shape.updateShape = True
 	if (sel == only_xtra_o3s):
-	    this.shape.onlyXtraO3s = True
+	    this.shape.onlyRegFs = True
 	    this.restoreO3s = True
 	elif (this.restoreO3s):
 	    this.restoreO3s = False
-	    this.shape.onlyXtraO3s = False
+	    this.shape.onlyRegFs = False
 	    # needed for sel == dyn_pos
 	    this.shape.updateShape = True
         aVal = this.aNone

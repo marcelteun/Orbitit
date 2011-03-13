@@ -262,7 +262,7 @@ class Shape(Heptagons.FldHeptagonShape):
 
         Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
         Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
-        Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[7]
+        Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))       # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]
         Vs.append(Rl * Vs[0])                                  # Vs[10]
@@ -291,7 +291,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    Fs.extend(this.o3triFs[this.edgeAlternative]) # eql triangles
 	    Es.extend(this.o3triEs[this.edgeAlternative])
             colIds.extend([3, 3])
-	    if (not this.onlyXtraO3s):
+	    if (not this.onlyRegFs):
 		Fs.extend(this.triFs[this.edgeAlternative])
 		colIds.extend(this.triColIds[this.edgeAlternative])
 		Es.extend(this.triEs[this.edgeAlternative])
@@ -461,6 +461,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    Stringify[trisAlt.star_1_loose],
 	    Stringify[trisAlt.alt_strip_I],
 	    Stringify[trisAlt.alt_strip_II],
+	    Stringify[trisAlt.alt_strip_1_loose],
 	]
 	nr_of = len(edgeChoicesList)
 	edgeChoicesListItems = [
