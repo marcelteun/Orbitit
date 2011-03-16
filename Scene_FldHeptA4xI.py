@@ -60,22 +60,24 @@ V2 = math.sqrt(2)
 # however the edge configuration a b' does not occur
 # neither does b' c'
 # This leaves 5 possible edge configurations:
+alt1_bit = 8
+alt2_bit = 16
 class TrisAlt:
-    # Note nrs should be different from above
+    # Note nrs should be different from below
     strip_1_loose      = 100
+    alt1_strip_1_loose = 100 | alt1_bit
+    alt2_strip_1_loose = 100            | alt2_bit
+    alt_strip_1_loose  = 100 | alt1_bit | alt2_bit
     strip_I            = 101
+    alt1_strip_I       = 101 | alt1_bit
+    alt2_strip_I       = 101            | alt2_bit
+    alt_strip_I        = 101 | alt1_bit | alt2_bit
     strip_II           = 102
+    alt1_strip_II      = 102 | alt1_bit
+    alt2_strip_II      = 102            | alt2_bit
+    alt_strip_II       = 102 | alt1_bit | alt2_bit
     star               = 103
     star_1_loose       = 104
-    alt_strip_I        = 105
-    alt_strip_II       = 106
-    alt_strip_1_loose  = 107
-    alt1_strip_I       = 108
-    alt1_strip_II      = 109
-    alt1_strip_1_loose = 110
-    alt2_strip_I       = 111
-    alt2_strip_II      = 112
-    alt2_strip_1_loose = 113
     def get(this, str):
 	for k,v in Stringify.iteritems():
 	    if v == str:
@@ -149,6 +151,7 @@ def Vlen(v0, v1):
 class Shape(Heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
 	Heptagons.FldHeptagonShape.__init__(this, isometry.A4(),
+	    nFold = 3, mFold = 3,
             name = 'FoldedRegHeptA4xI'
         )
 	this.posAngle = 0
@@ -265,6 +268,33 @@ class Shape(Heptagons.FldHeptagonShape):
             )
 
         return s
+
+    def correctEdgeAlternative(this):
+	if (this.edgeAlternative == trisAlt.star or
+		this.edgeAlternative == trisAlt.star_1_loose):
+	    this.altMFoldFace = False
+	    this.altNFoldFace = False
+	else:
+	    if this.altNFoldFace:
+		this.edgeAlternative = this.edgeAlternative | alt1_bit
+	    else:
+		this.edgeAlternative = this.edgeAlternative & ~alt1_bit
+	    if this.altMFoldFace:
+		this.edgeAlternative = this.edgeAlternative | alt2_bit
+	    else:
+		this.edgeAlternative = this.edgeAlternative & ~alt2_bit
+
+    def setNfoldAlt(this, val):
+	Heptagons.FldHeptagonShape.setNfoldAlt(this, val)
+	this.correctEdgeAlternative()
+
+    def setMfoldAlt(this, val):
+	Heptagons.FldHeptagonShape.setMfoldAlt(this, val)
+	this.correctEdgeAlternative()
+
+    def setEdgeAlternative(this, method):
+	Heptagons.FldHeptagonShape.setEdgeAlternative(this, method)
+	this.correctEdgeAlternative()
 
     def setV(this):
         #print this.name, "setV"
@@ -527,15 +557,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    Stringify[trisAlt.strip_II],
 	    Stringify[trisAlt.star],
 	    Stringify[trisAlt.star_1_loose],
-	    Stringify[trisAlt.alt_strip_I],
-	    Stringify[trisAlt.alt_strip_II],
-	    Stringify[trisAlt.alt_strip_1_loose],
-	    Stringify[trisAlt.alt1_strip_I],
-	    Stringify[trisAlt.alt1_strip_II],
-	    Stringify[trisAlt.alt1_strip_1_loose],
-	    Stringify[trisAlt.alt2_strip_I],
-	    Stringify[trisAlt.alt2_strip_II],
-	    Stringify[trisAlt.alt2_strip_1_loose],
 	]
 	nr_of = len(edgeChoicesList)
 	edgeChoicesListItems = [

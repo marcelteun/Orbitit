@@ -596,7 +596,15 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
         )
 
 class FldHeptagonShape(Geom3D.IsometricShape):
-    def __init__(this, isoms, colors = None, name = 'Folded Regular Heptagons'):
+    def __init__(this, isoms, colors = None,
+	    nFold = 3,
+	    mFold = 3,
+	    name = 'Folded Regular Heptagons'
+    ):
+	this.nFold = nFold
+	this.mFold = mFold
+	this.altNFoldFace = False
+	this.altMFoldFace = False
         Geom3D.IsometricShape.__init__(this,
             Vs = [], Fs = [],
             directIsometries = isoms,
@@ -625,6 +633,12 @@ class FldHeptagonShape(Geom3D.IsometricShape):
         this.useCulling = False
         this.updateShape = True
 
+    def setNfoldAlt(this, val):
+	this.altNFoldFace = val
+
+    def setMfoldAlt(this, val):
+	this.altMFoldFace = val
+
     def glDraw(this):
         if this.updateShape: this.setV()
         Geom3D.IsometricShape.glDraw(this)
@@ -632,6 +646,9 @@ class FldHeptagonShape(Geom3D.IsometricShape):
     def setEdgeAlternative(this, alt):
         this.edgeAlternative = alt
         this.updateShape = True
+
+    def getEdgeAlternative(this):
+        return this.edgeAlternative
 
     def setFoldMethod(this, method):
 	this.foldHeptagon = method
@@ -767,8 +784,19 @@ class FldHeptagonCtrlWin(wx.Frame):
             )
         this.Guis.append(this.trisAltGui)
         this.trisAltGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
-        this.trisAlt = this.edgeChoicesListItems[0]
-        this.shape.setEdgeAlternative(this.trisAlt)
+        this.shape.setEdgeAlternative(this.edgeChoicesListItems[0])
+        this.trisAlt = this.shape.getEdgeAlternative()
+
+        this.nFoldFaceGui = wx.CheckBox(this.panel,
+	    label = 'alternative 3-fold face')
+        this.Guis.append(this.nFoldFaceGui)
+        this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
+        this.nFoldFaceGui.Bind(wx.EVT_CHECKBOX, this.onNFoldFace)
+        this.mFoldFaceGui = wx.CheckBox(this.panel,
+	    label = 'alternative %d-fold face' % this.shape.mFold)
+        this.Guis.append(this.mFoldFaceGui)
+        this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
+        this.mFoldFaceGui.Bind(wx.EVT_CHECKBOX, this.onMFoldFace)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -891,9 +919,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         settingsSizer.Add(this.addTrisGui, 0, wx.EXPAND)
         settingsSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
+        fillSizer = wx.BoxSizer(wx.VERTICAL)
+        fillSizer.Add(this.trisAltGui, 0, wx.EXPAND)
+        fillSizer.Add(this.nFoldFaceGui, 0, wx.EXPAND)
+        fillSizer.Add(this.mFoldFaceGui, 0, wx.EXPAND)
+        fillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
         statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
-        statSizer.Add(this.trisAltGui, 0, wx.EXPAND)
+        statSizer.Add(fillSizer, 0, wx.EXPAND)
         statSizer.Add(settingsSizer, 0, wx.EXPAND)
         statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
@@ -1010,21 +1044,57 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.updateShape = True
         this.canvas.paint()
 
+    def isPrePos(this):
+	# TODO: move to offspring
+        return this.prePosGui.GetSelection() != len(this.prePosLst) - 1
+
     def onTriangleAlt(this, event):
-        this.trisAlt = this.edgeChoicesListItems[this.trisAltGui.GetSelection()]
-        this.shape.setEdgeAlternative(this.trisAlt)
-        if this.prePosGui.GetSelection() != len(this.prePosLst) - 1:
+        this.shape.setEdgeAlternative(
+	    this.edgeChoicesListItems[this.trisAltGui.GetSelection()])
+        this.trisAlt = this.shape.getEdgeAlternative()
+	# setting the edge alternative might reset the n/m-fold values
+	this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
+	this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
+        if this.isPrePos():
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
+
+    def onNFoldFace(this, event):
+        tryNfoldAlt = this.nFoldFaceGui.IsChecked()
+        this.shape.setNfoldAlt(tryNfoldAlt )
+        if (this.shape.altNFoldFace == tryNfoldAlt):
+	    this.trisAlt = this.shape.getEdgeAlternative()
+	    this.shape.updateShape = True
+	    if this.isPrePos():
+		this.onPrePos()
+	    this.canvas.paint()
+	else:
+	    this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
+            this.statusBar.SetStatusText(
+				    "Invalid for this triangle alternative")
+
+    def onMFoldFace(this, event):
+        tryMfoldAlt = this.mFoldFaceGui.IsChecked()
+        this.shape.setMfoldAlt(tryMfoldAlt )
+        if (this.shape.altMFoldFace == tryMfoldAlt):
+	    this.trisAlt = this.shape.getEdgeAlternative()
+	    this.shape.updateShape = True
+	    if this.isPrePos():
+		this.onPrePos()
+	    this.canvas.paint()
+	else:
+	    this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
+            this.statusBar.SetStatusText(
+				    "Invalid for this triangle alternative")
 
     def onFoldMethod(this, event):
         this.foldMethod = this.foldMethodListItems[
 		this.foldMethodGui.GetSelection()
 	    ]
 	this.shape.setFoldMethod(this.foldMethod)
-        if this.prePosGui.GetSelection() != len(this.prePosLst) - 1:
+        if this.isPrePos():
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
