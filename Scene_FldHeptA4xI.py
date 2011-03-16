@@ -62,14 +62,20 @@ V2 = math.sqrt(2)
 # This leaves 5 possible edge configurations:
 class TrisAlt:
     # Note nrs should be different from above
-    strip_1_loose     = 100
-    strip_I           = 101
-    strip_II          = 102
-    star              = 103
-    star_1_loose      = 104
-    alt_strip_I       = 105
-    alt_strip_II      = 106
-    alt_strip_1_loose = 107
+    strip_1_loose      = 100
+    strip_I            = 101
+    strip_II           = 102
+    star               = 103
+    star_1_loose       = 104
+    alt_strip_I        = 105
+    alt_strip_II       = 106
+    alt_strip_1_loose  = 107
+    alt1_strip_I       = 108
+    alt1_strip_II      = 109
+    alt1_strip_1_loose = 110
+    alt2_strip_I       = 111
+    alt2_strip_II      = 112
+    alt2_strip_1_loose = 113
     def get(this, str):
 	for k,v in Stringify.iteritems():
 	    if v == str:
@@ -123,9 +129,15 @@ Stringify = {
     trisAlt.strip_II:		'Strip II',
     trisAlt.star:		'Shell',
     trisAlt.star_1_loose:	'Shell, 1 Loose',
-    trisAlt.alt_strip_I:	'Alternative Strip I',
-    trisAlt.alt_strip_II:	'Alternative Strip II',
-    trisAlt.alt_strip_1_loose:	'Alternative Strip, 1 loose',
+    trisAlt.alt1_strip_I:	'Strip I, alternative 3-fold 1',
+    trisAlt.alt1_strip_II:	'Strip II, alternative 3-fold 1',
+    trisAlt.alt1_strip_1_loose:	'Strip, 1 loose, alternative 3-fold 1',
+    trisAlt.alt2_strip_I:	'Strip I, alternative 3-fold 2',
+    trisAlt.alt2_strip_II:	'Strip II, alternative 3-fold 2',
+    trisAlt.alt2_strip_1_loose:	'Strip, 1 loose, alternative 3-fold 2',
+    trisAlt.alt_strip_I:	'Strip I, alternative 3-folds',
+    trisAlt.alt_strip_II:	'Strip II, alternative 3-folds',
+    trisAlt.alt_strip_1_loose:	'Strip, 1 loose, alternative 3-folds',
 }
 
 def Vlen(v0, v1):
@@ -210,6 +222,38 @@ class Shape(Heptagons.FldHeptagonShape):
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[2], Vs[9])
             dLen = Vlen(Vs[2], Vs[14])
+	# TODO add a Elen
+        elif this.edgeAlternative == trisAlt.alt1_strip_I:
+            aLen = Vlen(Vs[3], Vs[8])
+            bLen = Vlen(Vs[2], Vs[8])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt1_strip_II:
+            aLen = Vlen(Vs[3], Vs[8])
+            bLen = Vlen(Vs[3], Vs[9])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt1_strip_1_loose:
+            aLen = Vlen(Vs[2], Vs[7])
+            bLen = Vlen(Vs[2], Vs[8])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt2_strip_I:
+            aLen = Vlen(Vs[3], Vs[8])
+            bLen = Vlen(Vs[2], Vs[8])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt2_strip_II:
+            aLen = Vlen(Vs[3], Vs[8])
+            bLen = Vlen(Vs[3], Vs[9])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+        elif this.edgeAlternative == trisAlt.alt2_strip_1_loose:
+            aLen = Vlen(Vs[2], Vs[7])
+            bLen = Vlen(Vs[2], Vs[8])
+            cLen = Vlen(Vs[2], Vs[9])
+            dLen = Vlen(Vs[2], Vs[14])
+
 	else:
 	    raise TypeError, 'Unknown edgeAlternative %s' % str(
 		this.edgeAlternative)
@@ -303,49 +347,58 @@ class Shape(Heptagons.FldHeptagonShape):
 
     def initArrs(this):
         print this.name, "initArrs"
+	strip_1_loose = [[2, 3, 7], [2, 7, 8], [2, 8, 9], [5, 11, 10]]
+	stripI        = [[2, 3, 8], [4, 5, 10], [2, 8, 9], [5, 11, 10]]
+	stripII       = [[3, 8, 9], [4, 11, 10], [2, 3, 9], [4, 5, 11]]
+	star          = [[2, 3, 8], [4, 5, 10], [1, 2, 8], [5, 6, 10],
+						    [1, 8, 9], [6, 11, 10]]
+	star_1_loose  = [[2, 3, 7], [2, 7, 8], [1, 2, 8], [5, 6, 10],
+						    [1, 8, 9], [6, 11, 10]]
         this.triFs = {
-                trisAlt.strip_1_loose: [
-                    [2, 3, 7], [2, 7, 8],
-                    [2, 8, 9], [5, 11, 10],
-                    [1, 2, 9], [5, 6, 11],
-                ],
-                trisAlt.strip_I: [
-                    [2, 3, 8], [4, 5, 10],
-                    [2, 8, 9], [5, 11, 10],
-                    [1, 2, 9], [5, 6, 11],
-                ],
+                trisAlt.strip_1_loose:      strip_1_loose[:],
+                trisAlt.alt_strip_1_loose:  strip_1_loose[:],
+                trisAlt.alt1_strip_1_loose: strip_1_loose[:],
+                trisAlt.alt2_strip_1_loose: strip_1_loose[:],
+                trisAlt.strip_I:            stripI[:],
+                trisAlt.alt_strip_I:        stripI[:],
+                trisAlt.alt1_strip_I:       stripI[:],
+                trisAlt.alt2_strip_I:       stripI[:],
+                trisAlt.strip_II:           stripII[:],
+                trisAlt.alt_strip_II:       stripII[:],
+                trisAlt.alt1_strip_II:      stripII[:],
+                trisAlt.alt2_strip_II:      stripII[:],
+                trisAlt.star:               star[:],
+                trisAlt.star_1_loose:       star_1_loose[:],
+	}
+	std_1 = [1, 2, 9]
+	std_2 = [5, 6, 11]
+	alt_1 = [2, 9, 14]
+	alt_2 = [5, 15, 11]
+        this.triFs[trisAlt.strip_1_loose].append(std_1)
+        this.triFs[trisAlt.strip_1_loose].append(std_2)
+        this.triFs[trisAlt.alt_strip_1_loose].append(alt_1)
+        this.triFs[trisAlt.alt_strip_1_loose].append(alt_2)
+        this.triFs[trisAlt.alt1_strip_1_loose].append(alt_1)
+        this.triFs[trisAlt.alt1_strip_1_loose].append(std_2)
+        this.triFs[trisAlt.alt2_strip_1_loose].append(std_1)
+        this.triFs[trisAlt.alt2_strip_1_loose].append(alt_2)
+        this.triFs[trisAlt.strip_I].append(std_1)
+        this.triFs[trisAlt.strip_I].append(std_2)
+        this.triFs[trisAlt.alt_strip_I].append(alt_1)
+        this.triFs[trisAlt.alt_strip_I].append(alt_2)
+        this.triFs[trisAlt.alt1_strip_I].append(alt_1)
+        this.triFs[trisAlt.alt1_strip_I].append(std_2)
+        this.triFs[trisAlt.alt2_strip_I].append(std_1)
+        this.triFs[trisAlt.alt2_strip_I].append(alt_2)
+        this.triFs[trisAlt.strip_II].append(std_1)
+        this.triFs[trisAlt.strip_II].append(std_2)
+        this.triFs[trisAlt.alt_strip_II].append(alt_1)
+        this.triFs[trisAlt.alt_strip_II].append(alt_2)
+        this.triFs[trisAlt.alt1_strip_II].append(alt_1)
+        this.triFs[trisAlt.alt1_strip_II].append(std_2)
+        this.triFs[trisAlt.alt2_strip_II].append(std_1)
+        this.triFs[trisAlt.alt2_strip_II].append(alt_2)
 
-                trisAlt.strip_II: [
-                    [3, 8, 9], [4, 11, 10],
-                    [2, 3, 9], [4, 5, 11],
-                    [1, 2, 9], [5, 6, 11],
-                ],
-                trisAlt.star: [
-                    [2, 3, 8], [4, 5, 10],
-                    [1, 2, 8], [5, 6, 10],
-                    [1, 8, 9], [6, 11, 10]
-                ],
-                trisAlt.star_1_loose: [
-                    [2, 3, 7], [2, 7, 8],
-                    [1, 2, 8], [5, 6, 10],
-                    [1, 8, 9], [6, 11, 10]
-                ],
-                trisAlt.alt_strip_I: [
-                    [2, 3, 8], [4, 5, 10],
-                    [2, 8, 9], [5, 11, 10],
-                    [2, 9, 14], [5, 15, 11]
-                ],
-                trisAlt.alt_strip_II: [
-                    [3, 8, 9], [4, 11, 10],
-                    [2, 3, 9], [4, 5, 11],
-                    [2, 9, 14], [5, 15, 11]
-                ],
-                trisAlt.alt_strip_1_loose: [
-                    [2, 3, 7], [2, 7, 8],
-                    [2, 8, 9], [5, 11, 10],
-                    [2, 9, 14], [5, 15, 11]
-                ],
-            }
 	# 15                                 14 = 2'
         #                     0
         #    (17) 13                      12 = o3c (alt 16)
@@ -360,69 +413,84 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #
         #                              7 = 6'
+	std_1 = [1, 9, 12]
+	std_2 = [6, 13, 11]
+	alt_1 = [2, 14, 16]
+	alt_2 = [5, 17, 15]
         this.o3triFs = {
-                trisAlt.strip_1_loose:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.strip_I:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.strip_II:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.star:			[[1, 9, 12], [6, 13, 11]],
-                trisAlt.star_1_loose:		[[1, 9, 12], [6, 13, 11]],
-                trisAlt.alt_strip_I:		[[2, 14, 16], [5, 17, 15]],
-                trisAlt.alt_strip_II:		[[2, 14, 16], [5, 17, 15]],
-                trisAlt.alt_strip_1_loose:	[[2, 14, 16], [5, 17, 15]],
+                trisAlt.strip_1_loose:		[std_1, std_2],
+                trisAlt.strip_I:		[std_1, std_2],
+                trisAlt.strip_II:		[std_1, std_2],
+                trisAlt.star:			[std_1, std_2],
+                trisAlt.star_1_loose:		[std_1, std_2],
+                trisAlt.alt_strip_I:		[alt_1, alt_2],
+                trisAlt.alt_strip_II: 		[alt_1, alt_2],
+                trisAlt.alt_strip_1_loose:	[alt_1, alt_2],
+                trisAlt.alt1_strip_I:		[alt_1, std_2],
+                trisAlt.alt1_strip_II:		[alt_1, std_2],
+                trisAlt.alt1_strip_1_loose:	[alt_1, std_2],
+                trisAlt.alt2_strip_I:		[std_1, alt_2],
+                trisAlt.alt2_strip_II:		[std_1, alt_2],
+                trisAlt.alt2_strip_1_loose:	[std_1, alt_2],
 	    }
+	strip = [1, 2, 2, 1, 1, 2]
+	loose = [1, 2, 1, 1, 2, 2]
         this.triColIds = {
-                trisAlt.strip_1_loose:		[1, 2, 1, 1, 2, 2],
-                trisAlt.strip_I:		[1, 2, 2, 1, 1, 2],
-                trisAlt.strip_II:		[1, 2, 2, 1, 1, 2],
-                trisAlt.star:			[1, 2, 2, 1, 1, 2],
-                trisAlt.star_1_loose:		[1, 2, 1, 1, 2, 2],
-                trisAlt.alt_strip_I:		[1, 2, 2, 1, 1, 2],
-                trisAlt.alt_strip_II:		[1, 2, 2, 1, 1, 2],
-                trisAlt.alt_strip_1_loose:	[1, 2, 1, 1, 2, 2],
+                trisAlt.strip_1_loose:		loose,
+                trisAlt.strip_I:		strip,
+                trisAlt.strip_II:		strip,
+                trisAlt.star:			strip,
+                trisAlt.star_1_loose:		loose,
+                trisAlt.alt_strip_I:		strip,
+                trisAlt.alt_strip_II:		strip,
+                trisAlt.alt_strip_1_loose:	loose,
+                trisAlt.alt1_strip_I:		strip,
+                trisAlt.alt1_strip_II:		strip,
+                trisAlt.alt1_strip_1_loose:	loose,
+                trisAlt.alt2_strip_I:		strip,
+                trisAlt.alt2_strip_II:		strip,
+                trisAlt.alt2_strip_1_loose:	loose,
             }
+	strip_1_loose = [2, 7, 2, 8, 2, 9, 5, 10, 5, 11]
+	stripI        = [3, 8, 2, 8, 2, 9, 5, 10, 5, 11]
+	stripII       = [3, 8, 3, 9, 2, 9, 4, 11, 5, 11]
+	star          = [3, 8, 2, 8, 1, 8, 5, 10, 6, 10]
+	star_1_loose  = [2, 7, 2, 8, 1, 8, 5, 10, 6, 10]
         this.triEs = {
-                trisAlt.strip_1_loose: [
-                    2, 7, 2, 8, 2, 9,
-                    5, 10, 5, 11,
-                ],
-                trisAlt.strip_I: [
-                    3, 8, 2, 8, 2, 9,
-                    5, 10, 5, 11,
-                ],
-                trisAlt.strip_II: [
-                    3, 8, 3, 9, 2, 9,
-                    4, 11, 5, 11,
-                ],
-                trisAlt.star: [
-                    3, 8, 2, 8, 1, 8,
-                    5, 10, 6, 10,
-                ],
-                trisAlt.star_1_loose: [
-                    2, 7, 2, 8, 1, 8,
-                    5, 10, 6, 10,
-                ],
-                trisAlt.alt_strip_I: [
-                    3, 8, 2, 8, 2, 9,
-                    5, 10, 5, 11,
-                ],
-                trisAlt.alt_strip_II: [
-                    3, 8, 3, 9, 2, 9,
-                    4, 11, 5, 11,
-                ],
-                trisAlt.alt_strip_1_loose: [
-                    2, 7, 2, 8, 2, 9,
-                    5, 10, 5, 11,
-                ],
+                trisAlt.strip_1_loose: strip_1_loose,
+                trisAlt.strip_I: stripI,
+                trisAlt.strip_II: stripII,
+                trisAlt.star: star,
+                trisAlt.star_1_loose: star_1_loose,
+                trisAlt.alt_strip_I: stripI,
+                trisAlt.alt_strip_II: stripII,
+                trisAlt.alt_strip_1_loose: strip_1_loose,
+                trisAlt.alt1_strip_I: stripI,
+                trisAlt.alt1_strip_II: stripII,
+                trisAlt.alt1_strip_1_loose: strip_1_loose,
+                trisAlt.alt2_strip_I: stripI,
+                trisAlt.alt2_strip_II: stripII,
+                trisAlt.alt2_strip_1_loose: strip_1_loose,
             }
+	std_1_2     = [1, 9, 6, 11]
+	std_1_alt_2 = [1, 9, 5, 15]
+	alt_1_std_2 = [2, 14, 6, 11]
+	alt_1_2     = [2, 14, 5, 15]
         this.o3triEs = {
-                trisAlt.strip_1_loose:		[1, 9, 6, 11],
-                trisAlt.strip_I:		[1, 9, 6, 11],
-                trisAlt.strip_II:		[1, 9, 6, 11],
-                trisAlt.star:			[1, 9, 6, 11],
-                trisAlt.star_1_loose:		[1, 9, 6, 11],
-                trisAlt.alt_strip_I:		[2, 14, 5, 15],
-                trisAlt.alt_strip_II:		[2, 14, 5, 15],
-                trisAlt.alt_strip_1_loose:	[2, 14, 5, 15],
+                trisAlt.strip_1_loose:		std_1_2,
+                trisAlt.strip_I:		std_1_2,
+                trisAlt.strip_II:		std_1_2,
+                trisAlt.star:			std_1_2,
+                trisAlt.star_1_loose:		std_1_2,
+                trisAlt.alt_strip_I:		alt_1_2,
+                trisAlt.alt_strip_II:		alt_1_2,
+                trisAlt.alt_strip_1_loose:	alt_1_2,
+                trisAlt.alt1_strip_I:		alt_1_std_2,
+                trisAlt.alt1_strip_II:		alt_1_std_2,
+                trisAlt.alt1_strip_1_loose:	alt_1_std_2,
+                trisAlt.alt2_strip_I:		std_1_alt_2,
+                trisAlt.alt2_strip_II:		std_1_alt_2,
+                trisAlt.alt2_strip_1_loose:	std_1_alt_2,
             }
 
     def printTrisAngles(this):
@@ -462,6 +530,12 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    Stringify[trisAlt.alt_strip_I],
 	    Stringify[trisAlt.alt_strip_II],
 	    Stringify[trisAlt.alt_strip_1_loose],
+	    Stringify[trisAlt.alt1_strip_I],
+	    Stringify[trisAlt.alt1_strip_II],
+	    Stringify[trisAlt.alt1_strip_1_loose],
+	    Stringify[trisAlt.alt2_strip_I],
+	    Stringify[trisAlt.alt2_strip_II],
+	    Stringify[trisAlt.alt2_strip_1_loose],
 	]
 	nr_of = len(edgeChoicesList)
 	edgeChoicesListItems = [
