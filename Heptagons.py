@@ -622,7 +622,9 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 	else:
 	    this.theColors = None
         this.dihedralAngle = 1.2
-        this.posAngle = 0
+        this.posAngleMin = 0
+        this.posAngleMax = math.pi/2
+        this.posAngle = this.posAngleMin
         this.fold1 = 0.0
         this.fold2 = 0.0
 	this.foldHeptagon = foldMethod.parallel
@@ -865,8 +867,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.posAngleGui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.posAngle,
-                minValue = 0,
-                maxValue = 90,
+                minValue = Geom3D.Rad2Deg * this.shape.posAngleMin,
+                maxValue = Geom3D.Rad2Deg * this.shape.posAngleMax,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.posAngleGui)

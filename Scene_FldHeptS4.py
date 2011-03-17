@@ -149,6 +149,8 @@ class Shape(Heptagons.FldHeptagonShape):
             name = 'FoldedRegHeptS4xI'
         )
 	this.edgeAlternative = trisAlt.strip_1_loose
+	this.posAngleMin = 0
+	this.posAngleMax = math.pi/2
 	this.posAngle = math.pi/4
 	this.o4_fld_0 = o4_fld_0
 	this.o4_fld_1 = o4_fld_1
