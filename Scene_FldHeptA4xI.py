@@ -64,20 +64,20 @@ alt1_bit = 8
 alt2_bit = 16
 class TrisAlt:
     # Note nrs should be different from below
-    strip_1_loose      = 100
-    alt1_strip_1_loose = 100 | alt1_bit
-    alt2_strip_1_loose = 100            | alt2_bit
-    alt_strip_1_loose  = 100 | alt1_bit | alt2_bit
-    strip_I            = 101
-    alt1_strip_I       = 101 | alt1_bit
-    alt2_strip_I       = 101            | alt2_bit
-    alt_strip_I        = 101 | alt1_bit | alt2_bit
-    strip_II           = 102
-    alt1_strip_II      = 102 | alt1_bit
-    alt2_strip_II      = 102            | alt2_bit
-    alt_strip_II       = 102 | alt1_bit | alt2_bit
-    star               = 103
-    star_1_loose       = 104
+    strip_1_loose      = 128
+    alt1_strip_1_loose = 128 | alt1_bit
+    alt2_strip_1_loose = 128            | alt2_bit
+    alt_strip_1_loose  = 128 | alt1_bit | alt2_bit
+    strip_I            = 129
+    alt1_strip_I       = 129 | alt1_bit
+    alt2_strip_I       = 129            | alt2_bit
+    alt_strip_I        = 129 | alt1_bit | alt2_bit
+    strip_II           = 130
+    alt1_strip_II      = 130 | alt1_bit
+    alt2_strip_II      = 130            | alt2_bit
+    alt_strip_II       = 130 | alt1_bit | alt2_bit
+    star               = 131
+    star_1_loose       = 132
     def get(this, str):
 	for k,v in Stringify.iteritems():
 	    if v == str:
@@ -160,13 +160,6 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.setV()
 
     def getStatusStr(this):
-        #angle = Geom3D.Rad2Deg * this.dihedralAngle
-        s = 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
-                this.dihedralAngle,
-                this.fold1,
-                this.fold2,
-                this.height
-            )
         if this.updateShape:
             #print 'getStatusStr: forced setV'
             this.setV()
@@ -185,86 +178,41 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #                         7 = 6'
         Vs = this.getBaseVertexProperties()['Vs']
-        if this.edgeAlternative == trisAlt.strip_1_loose:
+	cleanEdgeAlt = this.edgeAlternative & ~alt1_bit
+	cleanEdgeAlt = cleanEdgeAlt & ~alt2_bit
+        if cleanEdgeAlt == trisAlt.strip_1_loose:
             aLen = Vlen(Vs[2], Vs[7])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.strip_I:
+        elif cleanEdgeAlt == trisAlt.strip_I:
             aLen = Vlen(Vs[3], Vs[8])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.strip_II:
+        elif cleanEdgeAlt == trisAlt.strip_II:
             aLen = Vlen(Vs[3], Vs[8])
             bLen = Vlen(Vs[3], Vs[9])
             cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.star:
+        elif cleanEdgeAlt == trisAlt.star:
             aLen = Vlen(Vs[3], Vs[8])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[1], Vs[8])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.star_1_loose:
+        elif cleanEdgeAlt == trisAlt.star_1_loose:
             aLen = Vlen(Vs[2], Vs[7])
             bLen = Vlen(Vs[2], Vs[8])
             cLen = Vlen(Vs[1], Vs[8])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.alt_strip_I:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt_strip_II:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[3], Vs[9])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt_strip_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-	# TODO add a Elen
-        elif this.edgeAlternative == trisAlt.alt1_strip_I:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt1_strip_II:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[3], Vs[9])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt1_strip_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt2_strip_I:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt2_strip_II:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[3], Vs[9])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt2_strip_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-
 	else:
-	    raise TypeError, 'Unknown edgeAlternative %s' % str(
-		this.edgeAlternative)
-        #tst:
-        #aLen = Vlen(Vs[0], [(Vs[6][i] + Vs[1][i]) / 2 for i in range(3)])
-        #bLen = Vlen([(Vs[5][i] + Vs[2][i]) / 2 for i in range(3)], [(Vs[6][i] + Vs[1][i]) / 2 for i in range(3)])
-        s = '%s, |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
-                s, aLen, bLen, cLen, dLen
+	    raise TypeError, 'Unknown edgeAlternative %d (%d)' % (
+		this.edgeAlternative, cleanEdgeAlt)
+	if (this.edgeAlternative & alt1_bit) == alt1_bit:
+            dLen = Vlen(Vs[2], Vs[14])
+	else:
+            dLen = Vlen(Vs[1], Vs[9])
+	if (this.edgeAlternative & alt2_bit) == alt2_bit:
+            eLen = Vlen(Vs[5], Vs[15])
+	else:
+            eLen = Vlen(Vs[6], Vs[11])
+        s = '|a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f, |e|: %02.2f' % (
+                aLen, bLen, cLen, dLen, eLen
             )
 
         return s

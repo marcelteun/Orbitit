@@ -1069,6 +1069,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.shape.updateShape = True
 	    if this.isPrePos():
 		this.onPrePos()
+	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    this.canvas.paint()
 	else:
 	    this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
@@ -1083,6 +1084,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.shape.updateShape = True
 	    if this.isPrePos():
 		this.onPrePos()
+	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    this.canvas.paint()
 	else:
 	    this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
@@ -1188,10 +1190,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 	c = this.shape
         if sel == dyn_pos:
 	    this.dihedralAngleGui.Enable()
+	    this.posAngleGui.Enable()
 	    this.fold1Gui.Enable()
 	    this.fold2Gui.Enable()
 	    this.heightGui.Enable()
 	    this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
+	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
 	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * c.fold1)
 	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * c.fold2)
 	    this.heightGui.SetValue(
@@ -1252,10 +1256,12 @@ class FldHeptagonCtrlWin(wx.Frame):
             c.setFold1(fld1)
             c.setFold2(fld2)
 	    this.dihedralAngleGui.SetValue(0)
+	    this.posAngleGui.SetValue(0)
 	    this.fold1Gui.SetValue(0)
 	    this.fold2Gui.SetValue(0)
 	    this.heightGui.SetValue(0)
 	    this.dihedralAngleGui.Disable()
+	    this.posAngleGui.Disable()
 	    this.fold1Gui.Disable()
 	    this.fold2Gui.Disable()
 	    this.heightGui.Disable()
