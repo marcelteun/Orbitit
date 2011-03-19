@@ -2336,7 +2336,7 @@ class SimpleShape:
         shape.recreateEdges()
         return shape
 
-class CompoundShape(SimpleShape):
+class CompoundShape():
     dbgPrn = False
     dbgTrace = False
     """
@@ -2351,7 +2351,7 @@ class CompoundShape(SimpleShape):
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
-        SimpleShape.__init__(this, [], [], name = name)
+	this.name = name
         this.setShapes(simpleShapes)
 
     def addShape(this, shape):
@@ -2361,13 +2361,13 @@ class CompoundShape(SimpleShape):
         if this.dbgTrace:
             print '%s.addShape(%s,..):' % (this.__class__, this.name)
         this.shapeElements.append(shape)
-        this.mergeShapes()
+	this.mergeNeeded = True
 
     def setShapes(this, simpleShapes):
         if this.dbgTrace:
             print '%s.setShapes(%s,..):' % (this.__class__, this.name)
         this.shapeElements = simpleShapes
-        this.mergeShapes()
+	this.mergeNeeded = True
 
     def mergeShapes(this):
         """Using the current array of shapes as defined in shapeElements,
@@ -2398,32 +2398,32 @@ class CompoundShape(SimpleShape):
                 Vs = Vs, Fs = Fs, Es = Es, Ns = Ns,
                 colors = (colorDefs, colorIndices)
             )
+	this.mergeNeeded = False
 
     @property
     def SimpleShape(this):
-        try:
-            return this.mergedShape
-        except AttributeError:
+	if this.mergeNeeded:
             this.mergeShapes()
-            return this.mergedShape
+	return this.mergedShape
 
     def glDraw(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
         this.mergedShape.glDraw()
 
-    def toOffStr(this, precision=15, info = False):
-        return this.mergedShape.toOffStr(precision, info)
-
     def setVertexProperties(this, dictPar = None, **kwargs):
-        try:
-            this.mergedShape.setVertexProperties(dictPar, **kwargs)
-        except AttributeError:
-            SimpleShape.setVertexProperties(this, dictPar, **kwargs)
+	try:
+	    this.mergedShape.setVertexProperties(dictPar, **kwargs)
+	except AttributeError:
+            this.mergeShapes()
+	    this.mergedShape.setVertexProperties(dictPar, **kwargs)
 
     def setEdgeProperties(this, dictPar = None, **kwargs):
-        try:
-            this.mergedShape.setEdgeProperties(dictPar, **kwargs)
-        except AttributeError:
-            SimpleShape.setEdgeProperties(this, dictPar, **kwargs)
+	try:
+	    this.mergedShape.setEdgeProperties(dictPar, **kwargs)
+	except AttributeError:
+            this.mergeShapes()
+	    this.mergedShape.setEdgeProperties(dictPar, **kwargs)
 
     def getVertexProperties(this):
         try:
@@ -2450,10 +2450,77 @@ class CompoundShape(SimpleShape):
         return shape.getFaceProperties()
 
     def setFaceProperties(this, dictPar = None, **kwargs):
-        try:
-            this.mergedShape.setFaceProperties(dictPar, **kwargs)
-        except AttributeError:
-            SimpleShape.setFaceProperties(this, dictPar, **kwargs)
+	try:
+	    this.mergedShape.setFaceProperties(dictPar, **kwargs)
+	except AttributeError:
+            this.mergeShapes()
+	    this.mergedShape.setFaceProperties(dictPar, **kwargs)
+
+    def getVertexProperties(this):
+	try:
+	    return this.mergedShape.getVertexProperties()
+	except AttributeError:
+            this.mergeShapes()
+	    return this.mergedShape.getVertexProperties()
+
+    def getEdgeProperties(this):
+	try:
+	    return this.mergedShape.getEdgeProperties()
+	except AttributeError:
+            this.mergeShapes()
+	    return this.mergedShape.getEdgeProperties()
+
+    def getFaceProperties(this):
+	try:
+	    return this.mergedShape.getFaceProperties()
+	except AttributeError:
+            this.mergeShapes()
+	    return this.mergedShape.getFaceProperties()
+
+    @property
+    def dimension(this):
+	return this.shapeElements[0].dimension
+
+    @property
+    def Vs(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+	return this.mergedShape.Vs
+
+    @property
+    def Ns(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+	return this.mergedShape.Ns
+
+    @property
+    def Es(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+	return this.mergedShape.Es
+
+    @property
+    def Fs(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+	return this.mergedShape.Fs
+
+    @property
+    def colorData(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+	return this.mergedShape.colorData
+
+    @property
+    def generateNormals(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+	return this.mergedShape.generateNormals
+
+    def toOffStr(this, precision=15, info = False):
+	if this.mergeNeeded:
+            this.mergeShapes()
+        return this.mergedShape.toOffStr(precision, info)
 
     def toPsPiecesStr(this,
             faceIndices = [],
@@ -2462,10 +2529,19 @@ class CompoundShape(SimpleShape):
             margin = 1.0e5*defaultFloatMargin,
             pageSize = PS.PageSizeA4
         ):
+	if this.mergeNeeded:
+            this.mergeShapes()
         return this.mergedShape.toPsPiecesStr(
             faceIndices, scaling, precision, margin, pageSize)
 
+    def toX3dDoc(this, id = 'SISH', precision = 5, edgeRadius = 0):
+	if this.mergeNeeded:
+            this.mergeShapes()
+        return this.mergedShape.toX3dDoc(id, precision, edgeRadius)
+
     def getDome(this, level = 2):
+	if this.mergeNeeded:
+            this.mergeShapes()
         return this.mergedShape.getDome(level)
 
 class IsometricShape(CompoundShape):
@@ -2533,7 +2609,7 @@ class IsometricShape(CompoundShape):
         this.setIsoOp(directIsometries, oppositeIsometry)
         this.unfoldOrbit = unfoldOrbit
         this.setSymmetricFaceColors(colors)
-        this.orbitNeeded = True
+	this.mergeNeeded = True
         if unfoldOrbit: this.orbit()
 
     def __repr__(this):
@@ -2617,6 +2693,13 @@ class IsometricShape(CompoundShape):
             print '%s.getIsoOp(%s,..):' % (this.__class__, this.name)
         return this.isometryOperations
 
+    @property
+    def dimension(this):
+	return this.baseShape.dimension
+
+    def mergeShapes(this):
+	this.orbit()
+
     def orbit(this):
         """
         Orbit the faces according to the specified isometries
@@ -2659,11 +2742,13 @@ class IsometricShape(CompoundShape):
                 )
                 i += 1
         this.setShapes(orbits)
-        this.orbitNeeded = False
+	CompoundShape.mergeShapes(this)
+	# not needed done by CompoundShape.mergeShapes:
+        #this.mergeNeeded = False
 
     @property
     def SimpleShape(this):
-        if (this.orbitNeeded):
+        if (this.mergeNeeded):
             this.orbit()
         return this.mergedShape
 
@@ -2688,7 +2773,7 @@ class IsometricShape(CompoundShape):
             colors = [([rgb.red[:]], [])]
         this.checkColorsPerIsometry(colors)
         this.nrOfShapeColorDefs = len(colors)
-        this.orbitNeeded = True
+        this.mergeNeeded = True
 
     def checkColorsPerIsometry(this, colors):
         """
@@ -2759,7 +2844,7 @@ class IsometricShape(CompoundShape):
             except KeyError: pass
             if not (Vs == None and Ns == None):
                 this.baseShape.setVertexProperties(Vs = Vs, Ns = Ns)
-                this.orbitNeeded = True
+                this.mergeNeeded = True
             radius = None
             try: radius = dict['radius']
             except KeyError: pass
@@ -2768,6 +2853,8 @@ class IsometricShape(CompoundShape):
             except KeyError: pass
             if not (radius == None and color == None):
                 this.setVertexProperties(radius = radius, color = color)
+	else:
+	    print 'oops'
 
     def getBaseVertexProperties(this):
         """
@@ -2796,11 +2883,11 @@ class IsometricShape(CompoundShape):
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
                 this.baseShape.setFaceProperties(Fs = dict['Fs'])
-                this.orbitNeeded = True
+                this.mergeNeeded = True
             if 'colors' in dict and dict['colors'] != None:
                 this.setSymmetricFaceColors([dict['colors']])
-                # take care of by the function above:
-                # this.orbitNeeded = True
+                # taken care of by the function above:
+                # this.mergeNeeded = True
             if 'drawFaces' in dict and dict['drawFaces'] != None:
                 this.setEnableDrawFaces(dict['drawFaces'])
 
@@ -2832,7 +2919,7 @@ class IsometricShape(CompoundShape):
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
                 this.baseShape.setEdgeProperties(Es = dict['Es'])
-                this.orbitNeeded = True
+                this.mergeNeeded = True
             radius = None
             try: radius = dict['radius']
             except KeyError: pass
@@ -2849,7 +2936,7 @@ class IsometricShape(CompoundShape):
 		CompoundShape.setEdgeProperties(this,
 			radius = radius, color = color, drawEdges = drawEdges)
 		print 'radius', radius
-                this.orbitNeeded = True
+                this.mergeNeeded = True
 
     def getBaseFaceProperties(this):
         """
@@ -2866,7 +2953,7 @@ class IsometricShape(CompoundShape):
             this.baseShape.glDraw()
         else:
             if this.unfoldOrbit:
-                if this.orbitNeeded:
+                if this.mergeNeeded:
                     this.orbit()
                 CompoundShape.glDraw(this)
             else:
@@ -2886,7 +2973,7 @@ class IsometricShape(CompoundShape):
 		this.baseShape.divideColorWrapper()
 
     def toOffStr(this, precision=15, info = False):
-        if this.orbitNeeded:
+        if this.mergeNeeded:
             this.orbit()
         return CompoundShape.toOffStr(this, precision, info)
 
@@ -2897,7 +2984,7 @@ class IsometricShape(CompoundShape):
             margin = 1.0e5*defaultFloatMargin,
             pageSize = PS.PageSizeA4
         ):
-        if this.orbitNeeded:
+        if this.mergeNeeded:
             this.orbit()
         if faceIndices == []:
             # no need to print all faces in orbited, because of symmetry
@@ -2906,7 +2993,7 @@ class IsometricShape(CompoundShape):
             faceIndices, scaling, precision, margin, pageSize)
 
     def getDome(this, level = 2):
-        if this.orbitNeeded:
+        if this.mergeNeeded:
             this.orbit()
         return CompoundShape.getDome(this, level)
 
