@@ -148,6 +148,38 @@ def Vlen(v0, v1):
     z = v1[2] - v0[2]
     return (math.sqrt(x*x + y*y + z*z))
 
+# get the col faces array by using a similar shape here, so it is calculated
+# only once
+useIsom = isometry.A4()
+egShape = Geom3D.IsometricShape(
+    Vs = [
+	GeomTypes.Vec3([0, 0, 1]),
+	GeomTypes.Vec3([0, 1, 1]),
+	GeomTypes.Vec3([1, 1, 1])
+    ],
+    Fs = [[0, 1, 2]],
+    directIsometries = useIsom,
+    unfoldOrbit = True
+)
+#colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
+#colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
+colStabiliser = isometry.C2(setup = {'axis': [1.0, 0.0, 0.0]})
+colQuotientSet = useIsom / colStabiliser
+useRgbCols = [
+    rgb.indianRed,
+    rgb.mediumBlue,
+    rgb.limeGreen,
+    rgb.cornflowerBlue,
+    rgb.mistyRose1,
+    rgb.gray20,
+]
+heptColPerIsom = []
+for isom in useIsom:
+    for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
+	if isom in subSet:
+	    heptColPerIsom.append(([useRgbCols[i]], []))
+	    break;
+
 class Shape(Heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
 	Heptagons.FldHeptagonShape.__init__(this, isometry.A4(),
@@ -310,20 +342,18 @@ class Shape(Heptagons.FldHeptagonShape):
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
         Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
-        colIds = [0 for f in Fs]
         if this.addXtraFs:
 	    Fs.extend(this.o3triFs[this.edgeAlternative]) # eql triangles
 	    Es.extend(this.o3triEs[this.edgeAlternative])
-            colIds.extend([3, 3])
 	    if (not this.onlyRegFs):
 		Fs.extend(this.triFs[this.edgeAlternative])
-		colIds.extend(this.triColIds[this.edgeAlternative])
 		Es.extend(this.triEs[this.edgeAlternative])
 
         this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.setBaseFaceProperties(Fs = Fs)
         this.showBaseOnly = not this.applySymmetry
         this.updateShape = False
+	this.setFaceColors(heptColPerIsom)
 
     def initArrs(this):
         print this.name, "initArrs"
