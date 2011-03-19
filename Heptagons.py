@@ -595,32 +595,16 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
             Vec(N)
         )
 
-class FldHeptagonShape(Geom3D.IsometricShape):
-    def __init__(this, isoms, colors = None,
-	    nFold = 3,
-	    mFold = 3,
+class FldHeptagonShape(Geom3D.CompoundShape):
+    def __init__(this, shapes, nFold = 3, mFold = 3,
 	    name = 'Folded Regular Heptagons'
     ):
 	this.nFold = nFold
 	this.mFold = mFold
 	this.altNFoldFace = False
 	this.altMFoldFace = False
-        Geom3D.IsometricShape.__init__(this,
-            Vs = [], Fs = [],
-            directIsometries = isoms,
-            unfoldOrbit = True,
-            name = name,
-        )
+        Geom3D.CompoundShape.__init__(this, shapes, name = name)
         this.heptagon = RegularHeptagon()
-	if colors == None:
-	    this.theColors     = [
-		    rgb.oliveDrab[:],
-		    rgb.brown[:],
-		    rgb.yellow[:],
-		    rgb.cyan[:]
-		]
-	else:
-	    this.theColors = None
         this.dihedralAngle = 1.2
         this.posAngleMin = 0
         this.posAngleMax = math.pi/2
@@ -643,7 +627,7 @@ class FldHeptagonShape(Geom3D.IsometricShape):
 
     def glDraw(this):
         if this.updateShape: this.setV()
-        Geom3D.IsometricShape.glDraw(this)
+        Geom3D.CompoundShape.glDraw(this)
 
     def setEdgeAlternative(this, alt):
         this.edgeAlternative = alt
@@ -708,15 +692,12 @@ class FldHeptagonShape(Geom3D.IsometricShape):
         #print this.name, "setV"
 	this.posHeptagon()
         Vs = this.heptagon.Vs[:]
-        Es = []
-        Fs = []
-        Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
-        Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
+        Es = this.heptagon.Fs
+        Fs = this.heptagon.Es
         colIds = [0 for f in Fs]
-        this.setBaseVertexProperties(Vs = Vs)
-        this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
-        this.showBaseOnly = not this.applySymmetry
+        this.setVertexProperties(Vs = Vs)
+        this.setEdgeProperties(Es = Es)
+        this.setFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
         this.updateShape = False
 
 class FldHeptagonCtrlWin(wx.Frame):

@@ -179,13 +179,31 @@ for isom in useIsom:
 	if isom in subSet:
 	    heptColPerIsom.append(([useRgbCols[i]], []))
 	    break;
+isomsO3 = isometry.D2()
 
 class Shape(Heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-	Heptagons.FldHeptagonShape.__init__(this, isometry.A4(),
-	    nFold = 3, mFold = 3,
+	heptagonsShape = Geom3D.IsometricShape(
+	    Vs = [], Fs = [], directIsometries = isometry.A4(),
+            name = 'FoldedHeptagonsA4'
+        )
+	xtraTrisShape = Geom3D.IsometricShape(
+	    Vs = [], Fs = [], directIsometries = isometry.A4(),
+            name = 'xtraTrisA4'
+        )
+	trisO3Shape = Geom3D.IsometricShape(
+	    Vs = [], Fs = [], directIsometries = isomsO3,
+	    colors = [([rgb.cyan[:]], [])],
+            name = 'o3TrisA4'
+        )
+	Heptagons.FldHeptagonShape.__init__(this,
+	    [heptagonsShape, xtraTrisShape, trisO3Shape],
+	    3, 3,
             name = 'FoldedRegHeptA4xI'
         )
+	this.heptagonsShape = heptagonsShape
+	this.xtraTrisShape = xtraTrisShape
+	this.trisO3Shape = trisO3Shape
 	this.posAngleMin = 0
 	this.posAngleMax = math.pi/4
 	this.posAngle = this.posAngleMin
@@ -211,7 +229,7 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #
         #                         7 = 6'
-        Vs = this.getBaseVertexProperties()['Vs']
+        Vs = this.baseVs
 	cleanEdgeAlt = this.edgeAlternative & ~alt1_bit
 	cleanEdgeAlt = cleanEdgeAlt & ~alt2_bit
         if cleanEdgeAlt == trisAlt.strip_1_loose:
@@ -279,7 +297,6 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.correctEdgeAlternative()
 
     def setV(this):
-        #print this.name, "setV"
         #this.heptagon.foldParallel(this.fold1, this.fold2)
         #this.heptagon.foldTrapezium(this.fold1, this.fold2)
         # The angle has to be adjusted for historical reasons...
@@ -306,7 +323,7 @@ class Shape(Heptagons.FldHeptagonShape):
         #    (17) 13                      12 = o3c (alt 16)
         #              6             1
         #
-        #      11                           9 = 1'
+        # 11 = 6'                           9 = 1'
         #
         #            5                 2
         #
@@ -331,29 +348,44 @@ class Shape(Heptagons.FldHeptagonShape):
         Vs.append((Vs[1] + halfTurn*Vs[1]) / 2)                # Vs[12]
         halfTurn = HalfTurn(Vec([-1, 1, 1]))
         Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[13]
-        this.setBaseVertexProperties(Vs = Vs)
         Vs.append(Rr * Vs[2])                                  # Vs[14]
         Vs.append(Rl * Vs[5])                                  # Vs[15]
         halfTurn = HalfTurn(Vec([1, 1, 1]))
         Vs.append((Vs[2] + halfTurn*Vs[2]) / 2)                # Vs[16]
         halfTurn = HalfTurn(Vec([-1, 1, 1]))
         Vs.append((Vs[5] + halfTurn*Vs[5]) / 2)                # Vs[17]
+        Vs.append(Rr * Vs[9])                                  # Vs[18]
+        Vs.append(Rl * Vs[11])                                 # Vs[19]
+        this.baseVs = Vs
         Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
         Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
+        this.heptagonsShape.setBaseVertexProperties(Vs = Vs)
+        this.heptagonsShape.setBaseEdgeProperties(Es = Es)
+        this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
+        this.heptagonsShape.setFaceColors(heptColPerIsom)
+        theShapes = [this.heptagonsShape]
         if this.addXtraFs:
-	    Fs.extend(this.o3triFs[this.edgeAlternative]) # eql triangles
-	    Es.extend(this.o3triEs[this.edgeAlternative])
-	    if (not this.onlyRegFs):
-		Fs.extend(this.triFs[this.edgeAlternative])
-		Es.extend(this.triEs[this.edgeAlternative])
-
-        this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs)
+            this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
+            this.trisO3Shape.setBaseEdgeProperties(
+                Es = this.o3triEs[this.edgeAlternative])
+            this.trisO3Shape.setBaseFaceProperties(
+                Fs = this.o3triFs[this.edgeAlternative])
+            theShapes.append(this.trisO3Shape)
+            if (not this.onlyRegFs):
+                this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
+                this.xtraTrisShape.setBaseEdgeProperties(
+                    Es = this.triEs[this.edgeAlternative])
+                this.xtraTrisShape.setBaseFaceProperties(
+                    Fs = this.triFs[this.edgeAlternative],
+                    colors = ([rgb.brown[:], rgb.yellow[:]],
+                        this.triColIds[this.edgeAlternative])
+                )
+                theShapes.append(this.xtraTrisShape)
         this.showBaseOnly = not this.applySymmetry
+        this.setShapes(theShapes)
         this.updateShape = False
-	this.setFaceColors(heptColPerIsom)
 
     def initArrs(this):
         print this.name, "initArrs"
@@ -423,8 +455,8 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #
         #                              7 = 6'
-	std_1 = [1, 9, 12]
-	std_2 = [6, 13, 11]
+	std_1 = [1, 9, 18]
+	std_2 = [6, 19, 11]
 	alt_1 = [2, 14, 16]
 	alt_2 = [5, 17, 15]
         this.o3triFs = {
@@ -434,7 +466,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.star:			[std_1, std_2],
                 trisAlt.star_1_loose:		[std_1, std_2],
                 trisAlt.alt_strip_I:		[alt_1, alt_2],
-                trisAlt.alt_strip_II: 		[alt_1, alt_2],
+                trisAlt.alt_strip_II:		[alt_1, alt_2],
                 trisAlt.alt_strip_1_loose:	[alt_1, alt_2],
                 trisAlt.alt1_strip_I:		[alt_1, std_2],
                 trisAlt.alt1_strip_II:		[alt_1, std_2],
@@ -443,8 +475,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt2_strip_II:		[std_1, alt_2],
                 trisAlt.alt2_strip_1_loose:	[std_1, alt_2],
 	    }
-	strip = [1, 2, 2, 1, 1, 2]
-	loose = [1, 2, 1, 1, 2, 2]
+	strip = [0, 1, 1, 0, 0, 1]
+	loose = [0, 1, 0, 0, 1, 1]
         this.triColIds = {
                 trisAlt.strip_1_loose:		loose,
                 trisAlt.strip_I:		strip,
@@ -482,9 +514,9 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt2_strip_II: stripII,
                 trisAlt.alt2_strip_1_loose: strip_1_loose,
             }
-	std_1_2     = [1, 9, 6, 11]
-	std_1_alt_2 = [1, 9, 5, 15]
-	alt_1_std_2 = [2, 14, 6, 11]
+	std_1_2     = [1, 9, 9, 18, 18, 1, 6, 19, 19, 11, 11, 6]
+	std_1_alt_2 = [1, 9, 9, 18, 18, 1, 5, 15]
+	alt_1_std_2 = [2, 14, 6, 19, 19, 11, 11, 6]
 	alt_1_2     = [2, 14, 5, 15]
         this.o3triEs = {
                 trisAlt.strip_1_loose:		std_1_2,
@@ -619,7 +651,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	"""
 	return (
 	    (
-	    	sel == squares_24 and this.trisAlt == trisAlt.strip_1_loose
+		sel == squares_24 and this.trisAlt == trisAlt.strip_1_loose
 	    ) or (this.foldMethod == Heptagons.foldMethod.parallel and (
 		(
 		    sel == edge_1_V2_1_1
