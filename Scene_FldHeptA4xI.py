@@ -38,28 +38,6 @@ Title = 'Polyhedra with Folded Regular Heptagons A4xI'
 
 V2 = math.sqrt(2)
 
-#                0
-#   13                      12
-#         6             1
-#
-# 11                           9
-#
-#       5                 2
-#
-#
-#   10       4       3        8
-#
-#
-#                         7
-# There are 4 different edges to separate the triangles:
-# a (V2-V7), b (V2-V8), c (V2-V9), and d (V9-V1)
-# the first three have opposite alternatives:
-# a' (V3-V8), b' (V3-V9) and c' (V1-V8)
-# (there's no (V2-V12): V1-V9-V12 is the O3 triangle)
-# This leads to 2^3 possible combinations,
-# however the edge configuration a b' does not occur
-# neither does b' c'
-# This leaves 5 possible edge configurations:
 alt1_bit = 8
 alt2_bit = 16
 class TrisAlt:
@@ -215,20 +193,21 @@ class Shape(Heptagons.FldHeptagonShape):
         if this.updateShape:
             #print 'getStatusStr: forced setV'
             this.setV()
-	#                                  14 = 2'
-        #                0
-        #   13                      12 = o3 centre
-        #         6             1
+	#            5" = 17                 12 = 2"
+	#    6" = 15                                 10 = 1"
+        #                           0
+        # 5' = 16     o3                         o3      11 = 2'
+        #                    6             1
         #
-        # 11                           9 = 1'
+        #       6' = 14                           9 = 1'
         #
-        #       5                 2
-        #
-        #
-        #   10       4       3        8 = 0'
+        #                  5                 2
         #
         #
-        #                         7 = 6'
+        #              13       4       3        8 = 0'
+        #
+        #
+        #                                    7 = 6'
         Vs = this.baseVs
 	cleanEdgeAlt = this.edgeAlternative & ~alt1_bit
 	cleanEdgeAlt = cleanEdgeAlt & ~alt2_bit
@@ -256,17 +235,16 @@ class Shape(Heptagons.FldHeptagonShape):
 	    raise TypeError, 'Unknown edgeAlternative %d (%d)' % (
 		this.edgeAlternative, cleanEdgeAlt)
 	if (this.edgeAlternative & alt1_bit) == alt1_bit:
-            dLen = Vlen(Vs[2], Vs[14])
+            dLen = Vlen(Vs[2], Vs[11])
 	else:
             dLen = Vlen(Vs[1], Vs[9])
 	if (this.edgeAlternative & alt2_bit) == alt2_bit:
-            eLen = Vlen(Vs[5], Vs[15])
+            eLen = Vlen(Vs[5], Vs[16])
 	else:
-            eLen = Vlen(Vs[6], Vs[11])
+            eLen = Vlen(Vs[6], Vs[14])
         s = '|a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f, |e|: %02.2f' % (
                 aLen, bLen, cLen, dLen, eLen
             )
-
         return s
 
     def correctEdgeAlternative(this):
@@ -317,45 +295,42 @@ class Shape(Heptagons.FldHeptagonShape):
 	if this.posAngle != 0:
 	    this.heptagon.rotate(-GeomTypes.uz, this.posAngle)
         Vs = this.heptagon.Vs[:]
+
+	#            5" = 17                 12 = 2"
+	#    6" = 15                                 10 = 1"
+        #                           0
+        # 5' = 16     o3                         o3      11 = 2'
+        #                    6             1
         #
-	# 15                                 14 = 2'
-        #                     0
-        #    (17) 13                      12 = o3c (alt 16)
-        #              6             1
+        #       6' = 14                           9 = 1'
         #
-        # 11 = 6'                           9 = 1'
-        #
-        #            5                 2
-        #
-        #
-        #        10       4       3        8 = 0'
+        #                  5                 2
         #
         #
-        #                              7 = 6'
+        #              13       4       3        8 = 0'
+        #
+        #
+        #                                    7 = 6'
 
         Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
         Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
         Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))       # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]
-        Vs.append(Rl * Vs[0])                                  # Vs[10]
-        Vs.append(Rl * Vs[6])                                  # Vs[11]
-        # V12 and V13 are the centres of the triangle on the O3 axis.
-        # for V12 the O3 axis is (1, 1, 1). So we need to find the n*(1, 1, 1)
-        # that lies in the face. This can found by projecting V12 straight onto
-        # this axis, or we can rotate 180 degrees and take the average:
-        halfTurn = HalfTurn(Vec([1, 1, 1]))
-        Vs.append((Vs[1] + halfTurn*Vs[1]) / 2)                # Vs[12]
-        halfTurn = HalfTurn(Vec([-1, 1, 1]))
-        Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[13]
-        Vs.append(Rr * Vs[2])                                  # Vs[14]
-        Vs.append(Rl * Vs[5])                                  # Vs[15]
-        halfTurn = HalfTurn(Vec([1, 1, 1]))
-        Vs.append((Vs[2] + halfTurn*Vs[2]) / 2)                # Vs[16]
-        halfTurn = HalfTurn(Vec([-1, 1, 1]))
-        Vs.append((Vs[5] + halfTurn*Vs[5]) / 2)                # Vs[17]
-        Vs.append(Rr * Vs[9])                                  # Vs[18]
-        Vs.append(Rl * Vs[11])                                 # Vs[19]
+        Vs.append(Rr * Vs[9])                                  # Vs[10]
+        Vs.append(Rr * Vs[2])                                  # Vs[11]
+        Vs.append(Rr * Vs[11])                                 # Vs[12]
+        Vs.append(Rl * Vs[0])                                  # Vs[13]
+        Vs.append(Rl * Vs[6])                                  # Vs[14]
+        Vs.append(Rl * Vs[14])                                 # Vs[15]
+        Vs.append(Rl * Vs[5])                                  # Vs[16]
+        Vs.append(Rl * Vs[16])                                 # Vs[17]
+	# OOPS, I cp Vs[11] into Vs[18] and use it as alt 1 in this.triFs
+	# instead of Vs[11], otherwise python crashes with a segementation dump
+	# on my PC... This while I'm still using Vs[11] for the edges...
+	# Ai, scary weird bug....
+	# TODO, remove...
+        Vs.append(Vs[11])                                      # Vs[18]
         this.baseVs = Vs
         Es = []
         Fs = []
@@ -379,7 +354,7 @@ class Shape(Heptagons.FldHeptagonShape):
                     Es = this.triEs[this.edgeAlternative])
                 this.xtraTrisShape.setBaseFaceProperties(
                     Fs = this.triFs[this.edgeAlternative],
-                    colors = ([rgb.brown[:], rgb.yellow[:]],
+                    colors = ([rgb.darkRed[:], rgb.yellow[:]],
                         this.triColIds[this.edgeAlternative])
                 )
                 theShapes.append(this.xtraTrisShape)
@@ -389,13 +364,14 @@ class Shape(Heptagons.FldHeptagonShape):
 
     def initArrs(this):
         print this.name, "initArrs"
-	strip_1_loose = [[2, 3, 7], [2, 7, 8], [2, 8, 9], [5, 11, 10]]
-	stripI        = [[2, 3, 8], [4, 5, 10], [2, 8, 9], [5, 11, 10]]
-	stripII       = [[3, 8, 9], [4, 11, 10], [2, 3, 9], [4, 5, 11]]
-	star          = [[2, 3, 8], [4, 5, 10], [1, 2, 8], [5, 6, 10],
-						    [1, 8, 9], [6, 11, 10]]
-	star_1_loose  = [[2, 3, 7], [2, 7, 8], [1, 2, 8], [5, 6, 10],
-						    [1, 8, 9], [6, 11, 10]]
+
+	strip_1_loose = [[2, 3, 7], [2, 7, 8], [2, 8, 9], [5, 14, 13]]
+	stripI        = [[2, 3, 8], [4, 5, 13], [2, 8, 9], [5, 14, 13]]
+	stripII       = [[3, 8, 9], [4, 14, 13], [2, 3, 9], [4, 5, 14]]
+	star          = [[2, 3, 8], [4, 5, 13], [1, 2, 8], [5, 6, 13],
+						    [1, 8, 9], [6, 14, 13]]
+	star_1_loose  = [[2, 3, 7], [2, 7, 8], [1, 2, 8], [5, 6, 13],
+						    [1, 8, 9], [6, 14, 13]]
         this.triFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.alt_strip_1_loose:  strip_1_loose[:],
@@ -413,9 +389,9 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.star_1_loose:       star_1_loose[:],
 	}
 	std_1 = [1, 2, 9]
-	std_2 = [5, 6, 11]
-	alt_1 = [2, 9, 14]
-	alt_2 = [5, 15, 11]
+	std_2 = [6, 14, 5]
+	alt_1 = [2, 9, 18]  #TODO rm, see OOPS above...
+	alt_2 = [5, 16, 14]
         this.triFs[trisAlt.strip_1_loose].append(std_1)
         this.triFs[trisAlt.strip_1_loose].append(std_2)
         this.triFs[trisAlt.alt_strip_1_loose].append(alt_1)
@@ -441,24 +417,25 @@ class Shape(Heptagons.FldHeptagonShape):
         this.triFs[trisAlt.alt2_strip_II].append(std_1)
         this.triFs[trisAlt.alt2_strip_II].append(alt_2)
 
-	# 15                                 14 = 2'
-        #                     0
-        #    (17) 13                      12 = o3c (alt 16)
-        #              6             1
+	#            5" = 17                 12 = 2"
+	#    6" = 15                                 10 = 1"
+        #                           0
+        # 5' = 16     o3                         o3      11 = 2'
+        #                    6             1
         #
-        #      11                           9 = 1'
+        #       6' = 14                           9 = 1'
         #
-        #            5                 2
-        #
-        #
-        #        10       4       3        8 = 0'
+        #                  5                 2
         #
         #
-        #                              7 = 6'
-	std_1 = [1, 9, 18]
-	std_2 = [6, 19, 11]
-	alt_1 = [2, 14, 16]
-	alt_2 = [5, 17, 15]
+        #              13       4       3        8 = 0'
+        #
+        #
+        #                                    7 = 6'
+	std_1 = [1, 9, 10]
+	std_2 = [6, 15, 14]
+	alt_1 = [2, 11, 12]
+	alt_2 = [5, 17, 16]
         this.o3triFs = {
                 trisAlt.strip_1_loose:		[std_1, std_2],
                 trisAlt.strip_I:		[std_1, std_2],
@@ -514,10 +491,10 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt2_strip_II: stripII,
                 trisAlt.alt2_strip_1_loose: strip_1_loose,
             }
-	std_1_2     = [1, 9, 9, 18, 18, 1, 6, 19, 19, 11, 11, 6]
-	std_1_alt_2 = [1, 9, 9, 18, 18, 1, 5, 15]
-	alt_1_std_2 = [2, 14, 6, 19, 19, 11, 11, 6]
-	alt_1_2     = [2, 14, 5, 15]
+	std_1_2     = [1, 9, 9, 10, 10, 1,   6, 15, 15, 14, 14, 6]
+	std_1_alt_2 = [1, 9, 9, 10, 10, 1,   5, 17, 17, 16, 16, 5]
+	alt_1_std_2 = [2, 11, 11, 12, 12, 2, 6, 15, 15, 14, 14, 6]
+	alt_1_2     = [2, 11, 11, 12, 12, 2, 5, 17, 17, 16, 16, 5]
         this.o3triEs = {
                 trisAlt.strip_1_loose:		std_1_2,
                 trisAlt.strip_I:		std_1_2,
