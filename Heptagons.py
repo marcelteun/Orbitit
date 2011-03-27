@@ -48,6 +48,45 @@ only_hepts	= -1
 dyn_pos		= -2
 only_xtra_o3s   = -3
 
+alt_bit = 8
+loose_bit = 16
+class TrisAlt:
+    # Note nrs should be different from below
+    strip_I            = 128
+    strip_II           = 129
+    star               = 130
+    strip_1_loose      = strip_I  | loose_bit
+    star_1_loose       = star     | loose_bit
+    alt_strip_I        = strip_I              | alt_bit
+    alt_strip_II       = strip_II             | alt_bit
+    alt_strip_1_loose  = strip_I  | loose_bit | alt_bit
+
+    @property
+    def key(this):
+	return {
+	    Stringify[this.strip_I]:           this.strip_I,
+	    Stringify[this.strip_II]:          this.strip_II,
+	    Stringify[this.star]:              this.star,
+	    Stringify[this.strip_1_loose]:     this.strip_1_loose,
+	    Stringify[this.star_1_loose]:      this.star_1_loose,
+	    Stringify[this.alt_strip_I]:       this.alt_strip_I,
+	    Stringify[this.alt_strip_II]:      this.alt_strip_II,
+	    Stringify[this.alt_strip_1_loose]: this.alt_strip_1_loose
+	}
+
+trisAlt = TrisAlt()
+
+Stringify = {
+    trisAlt.strip_1_loose:	'Strip, 1 Loose',
+    trisAlt.strip_I:		'Strip I',
+    trisAlt.strip_II:		'Strip II',
+    trisAlt.star:		'Shell',
+    trisAlt.star_1_loose:	'Shell, 1 Loose',
+    trisAlt.alt_strip_I:	'Alternative Strip I',
+    trisAlt.alt_strip_II:	'Alternative Strip II',
+    trisAlt.alt_strip_1_loose:	'Alternative Strip, 1 loose',
+}
+
 class FoldMethod:
     parallel  = 0
     trapezium = 1
@@ -103,17 +142,19 @@ class RegularHeptagon:
         this.Fs = [[6, 5, 4, 3, 2, 1, 0]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
-    def fold(this, a, b, keepV0 = True, fold = FoldMethod.parallel):
+    def fold(this, a0, b0, a1 = None, b1 = None, keepV0 = True,
+						fold = FoldMethod.parallel
+    ):
 	if fold == FoldMethod.parallel:
-	    this.foldParallel(a, b, keepV0)
+	    this.foldParallel(a0, b0, keepV0)
 	elif fold == FoldMethod.trapezium:
-	    this.foldTrapezium(a, b, keepV0)
+	    this.foldTrapezium(a0, b0, b1, keepV0)
 	elif fold == FoldMethod.w:
-	    this.foldW(a, b, keepV0)
+	    this.foldW(a0, b0, a1, b1, keepV0)
 	elif fold == FoldMethod.triangle:
-	    this.foldTriangle(a, b, keepV0)
+	    this.foldTriangle(a0, b0, b1, keepV0)
 	elif fold == FoldMethod.star:
-	    this.foldStar(a, b, keepV0)
+	    this.foldStar(a0, b0, a1, b1, keepV0)
 	else:
 	    raise TypeError, 'Unknown fold'
 
@@ -239,7 +280,7 @@ class RegularHeptagon:
                     Vec([-V1[0], V1[1], V1[2]])
                 ]
 
-    def foldTrapezium(this, a, b, keepV0 = True):
+    def foldTrapezium(this, a, b0, b1 = None, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of a trapezium (trapezoid)
 
@@ -250,16 +291,16 @@ class RegularHeptagon:
 	It assumes that the heptagon is in the original position.
         """
         #
-        #             0
+        #              0
         #
-        #      6 ----------- 1    axis a
-        #      .             .
-        #       \           /
-        #        \ axes  b /
-        #    5   |         |   2
-        #        \        /
-        #         "       "
-        #         4       3
+        #       6 ----------- 1    axis a
+        #       .             .
+        #        \           /
+        # axis b0 \         / axis b1
+        #     5   |         |   2
+        #         \        /
+        #          "       "
+        #          4       3
         #
         #
         this.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
@@ -290,7 +331,7 @@ class RegularHeptagon:
                 ])
             V1V3 = (this.VsOrg[1] + V3)/2
             V1V3axis = Vec([V3 - this.VsOrg[1]])
-            r = Rot(axis = V1V3axis, angle = b)
+            r = Rot(axis = V1V3axis, angle = b0)
             V2 = V1V3 + r * (V2_ - V1V3)
             this.Vs = [
                     this.VsOrg[0],
@@ -313,7 +354,7 @@ class RegularHeptagon:
                 ])
             V1V3 = (this.VsOrg[1] + this.VsOrg[3])/2
             V1V3axis = Vec(this.VsOrg[3] - this.VsOrg[1])
-            r = Rot(axis = V1V3axis, angle = b)
+            r = Rot(axis = V1V3axis, angle = b0)
             V2 = V1V3 + r * (this.VsOrg[2] - V1V3)
             this.Vs = [
                     V0,
@@ -325,49 +366,64 @@ class RegularHeptagon:
                     this.VsOrg[6]
                 ]
 
-    def foldW(this, a, b, keepV0 = True):
+    def foldW(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a refers the the axes V0-V3 and V0-V4.
-        The fold angle b refers the the axes V1-V3 and V6-V4 and
+        the fold angle a0 refers the the axes V0-V3,
+        the fold angle a1 refers the the axes V0-V4,
+        The fold angle b0 refers the the axes V1-V3,
+        The fold angle b1 refers the the axes V6-V4 and
         The vertex V0 is kept invariant during folding
         The keepV0 variable is ignored here (it is provided to be consistent
 	with the other fold functions.)
         """
         #
-        #              0
-        #              ^
-        #       6     | |     1
-        #       .    /   \    .
-        # axis b \  |     |  / axis b
-        #         " |     | "
-        #     5   |/       \|   2
-        #         V axes  a V
-        #         "         "
-        #         4         3
+        #               0
+        #               ^
+        #        6     | |     1
+        #        .    /   \    .
+        # axis b0 \  |     |  / axis b1
+        #          " |     | "
+        #      5   |/       \|   2
+        #          V axes  a V
+        #          "         "
+        #          4         3
         #
-        #
-	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a)
+	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
 	V1 = Rot0_3 * this.VsOrg[1]
-	V2 = Rot0_3 * this.VsOrg[2]
-	Rot1_3 = Rot(axis = this.VsOrg[3] - V1, angle = b)
-	V2 = Rot1_3 * (V2 - V1) + V1
+	V2_ = Rot0_3 * this.VsOrg[2]
+	Rot1_3 = Rot(axis = this.VsOrg[3] - V1, angle = b0)
+	V2 = Rot1_3 * (V2_ - V1) + V1
+	if (Geom3D.eq(a0, a1)):
+	    V6 = Vec([-V1[0], V1[1], V1[2]])
+	    if (Geom3D.eq(b0, b1)):
+		V5 = Vec([-V2[0], V2[1], V2[2]])
+	    else:
+		V5 = Vec([-V2_[0], V2_[1], V2_[2]])
+		Rot4_6 = Rot(axis = V6 - this.VsOrg[4], angle = b1)
+		V5 = Rot4_6 * (V5 - V6) + V6
+	else:
+	    Rot4_0 = Rot(axis = this.VsOrg[0] - this.VsOrg[4], angle = a1)
+	    V6 = Rot4_0 * this.VsOrg[6]
+	    V5 = Rot4_0 * this.VsOrg[5]
+	    Rot4_6 = Rot(axis = V6 - this.VsOrg[4], angle = b1)
+	    V5 = Rot4_6 * (V5 - V6) + V6
 	this.Vs = [
 		this.VsOrg[0],
 		V1,
 		V2,
 		this.VsOrg[3],
 		this.VsOrg[4],
-		Vec([-V2[0], V2[1], V2[2]]),
-		Vec([-V1[0], V1[1], V1[2]]),
+		V5,
+		V6,
 	    ]
         this.Fs = [[1, 3, 2], [1, 0, 3], [0, 4, 3], [0, 6, 4], [6, 5, 4]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
 
-    def foldTriangle(this, a, b, keepV0 = True):
+    def foldTriangle(this, a, b0, b1, keepV0 = True):
         """
         Fold around 3 triangular diagonals from V0.
 
@@ -377,23 +433,23 @@ class RegularHeptagon:
         folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
         """
         #
-        #             0
-        #            _^_
-        #      6   _/   \_   1
-        #        _/       \_
-        #      _/  axes  b  \_
-        #     /               \
-        #    5 --------------- 2  axis a
+        #                0
+        #               _^_
+        #         6   _/   \_   1
+        #           _/       \_
+        # axis b0 _/           \_ axis b1
+        #        /               \
+        #       5 --------------- 2  axis a
         #
         #
-        #         4       3
+        #            4       3
         #
         #
         this.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		0, 2, 2, 5, 5, 0
 	    ]
-	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = b)
+	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = b0)
 	V1 = Rot0_2 * this.VsOrg[1]
 	V2 = this.VsOrg[2]
 	if keepV0:
@@ -422,32 +478,32 @@ class RegularHeptagon:
 		    Vec([-V1[0], V1[1], V1[2]]),
 		]
 
-    def foldStar(this, a, b, keepV0 = True):
+    def foldStar(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around the 4 diagonals from V0.
 
         The fold angle a refers the the axes V0-V2 and V0-V5 and
-        the fold angle b refers the the axes V0-V3 and V0-V4.
+        the fold angle b0 refers the the axes V0-V3 and V0-V4.
         The keepV0 variable is ignored here (it is provided to be consistent
 	with the other fold functions.)
         """
         #
-        #               0
-        #              .^.
-        #        6   _/| |\_   1
+        #                0
+        #               .^.
+        #         6   _/| |\_   1
         #          _/ /   \ \_
-        # axis b _/  |     |  \_ axis b
-        #       /    |     |    \
-        #      5    /       \    2
-        #          | axes  a |
-        #          "         "
-        #          4         3
+        # axis b0 _/  |     |  \_ axis b1
+        #        /    |     |    \
+        #       5    /       \    2
+        #   axis a0 |         | axis a1
+        #           "         "
+        #           4         3
         #
         #
 	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a)
 	V1 = Rot0_3 * this.VsOrg[1]
 	V2 = Rot0_3 * this.VsOrg[2]
-	Rot0_2 = Rot(axis = V2 - this.VsOrg[0], angle = b)
+	Rot0_2 = Rot(axis = V2 - this.VsOrg[0], angle = b0)
 	V1 = Rot0_2 * V1
 	this.Vs = [
 		this.VsOrg[0],
@@ -609,8 +665,11 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.posAngleMin = 0
         this.posAngleMax = math.pi/2
         this.posAngle = this.posAngleMin
+        this.inclReflections = True
         this.fold1 = 0.0
         this.fold2 = 0.0
+        this.oppFold1 = 0.0
+        this.oppFold2 = 0.0
 	this.foldHeptagon = foldMethod.parallel
         this.height = 2.3
         this.applySymmetry = True
@@ -619,22 +678,16 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.useCulling = False
         this.updateShape = True
 
-    def setNfoldAlt(this, val):
-	this.altNFoldFace = val
-
-    def setMfoldAlt(this, val):
-	this.altMFoldFace = val
-
     def glDraw(this):
         if this.updateShape: this.setV()
         Geom3D.CompoundShape.glDraw(this)
 
-    def setEdgeAlternative(this, alt):
-        this.edgeAlternative = alt
+    def setEdgeAlternative(this, alt = None, oppositeAlt = None):
+        if alt != None:
+	    this.edgeAlternative = alt
+        if oppositeAlt != None:
+	    this.oppEdgeAlternative = oppositeAlt
         this.updateShape = True
-
-    def getEdgeAlternative(this):
-        return this.edgeAlternative
 
     def setFoldMethod(this, method):
 	this.foldHeptagon = method
@@ -648,12 +701,18 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.posAngle = angle
         this.updateShape = True
 
-    def setFold1(this, angle):
-        this.fold1 = angle
+    def setFold1(this, angle = None, oppositeAngle = None):
+        if angle != None:
+	    this.fold1 = angle
+        if oppositeAngle != None:
+	    this.oppFold1 = oppositeAngle
         this.updateShape = True
 
-    def setFold2(this, angle):
-        this.fold2 = angle
+    def setFold2(this, angle = None, oppositeAngle = None):
+        if angle != None:
+	    this.fold2 = angle
+        if oppositeAngle != None:
+	    this.oppFold2 = oppositeAngle
         this.updateShape = True
 
     def setHeight(this, height):
@@ -667,11 +726,11 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         glColor(0.7, 0.5, 0.5)
 
     def getStatusStr(this):
-        return 'Angle = %01.2f rad, fold1 = %01.2f rad, fold2 = %01.2f rad, T = %02.2f' % (
+        return 'T = %02.2f, Angle = %01.2f rad, fold1 = %01.2f (%01.2f) rad, fold2 = %01.2f (%01.2f) rad' % (
+                this.height,
                 this.dihedralAngle,
-                this.fold1,
-                this.fold2,
-                this.height
+                this.fold1, this.oppFold1,
+                this.fold2, this.oppFold2
             )
 
     def posHeptagon(this):
@@ -704,7 +763,6 @@ class FldHeptagonCtrlWin(wx.Frame):
     def __init__(this,
 	    shape, size, canvas,
 	    maxHeight, 
-	    edgeChoicesList, edgeChoicesListItems,
 	    prePosLst,
 	    stringify,
 	    *args, **kwargs
@@ -729,8 +787,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape = shape
         this.canvas = canvas
 	this.maxHeight = maxHeight
-	this.edgeChoicesList = edgeChoicesList
-	this.edgeChoicesListItems = edgeChoicesListItems
 	this.prePosLst = prePosLst
 	this.stringify = stringify
         this.panel = wx.Panel(this, -1)
@@ -740,6 +796,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.restoreO3s = False
 	this.shape.foldHeptagon = this.foldMethod
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
+
         this.mainSizer.Add(
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
@@ -757,9 +814,24 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.heightF = 40 # slider step factor, or: 1 / slider step
 
         this.Guis = []
+	# TODO: rm as this.field
+	this.edgeChoicesList = [
+	    Stringify[trisAlt.strip_1_loose],
+	    Stringify[trisAlt.strip_I],
+	    Stringify[trisAlt.strip_II],
+	    Stringify[trisAlt.star],
+	    Stringify[trisAlt.star_1_loose],
+	    Stringify[trisAlt.alt_strip_I],
+	    Stringify[trisAlt.alt_strip_II],
+	    Stringify[trisAlt.alt_strip_1_loose],
+	]
+	nr_of = len(this.edgeChoicesList)
+	# TODO: rm as this.field
+	this.edgeChoicesListItems = [
+	    trisAlt.key[this.edgeChoicesList[i]] for i in range(nr_of)
+	]
 
         # static adjustments
-	l = this.edgeChoicesList
         this.trisAltGui = wx.RadioBox(this.panel,
                 label = 'Triangle Fill Alternative',
                 style = wx.RA_VERTICAL,
@@ -767,19 +839,26 @@ class FldHeptagonCtrlWin(wx.Frame):
             )
         this.Guis.append(this.trisAltGui)
         this.trisAltGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
-        this.shape.setEdgeAlternative(this.edgeChoicesListItems[0])
-        this.trisAlt = this.shape.getEdgeAlternative()
 
-        this.nFoldFaceGui = wx.CheckBox(this.panel,
-	    label = 'alternative 3-fold face')
-        this.Guis.append(this.nFoldFaceGui)
-        this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
-        this.nFoldFaceGui.Bind(wx.EVT_CHECKBOX, this.onNFoldFace)
-        this.mFoldFaceGui = wx.CheckBox(this.panel,
-	    label = 'alternative %d-fold face' % this.shape.mFold)
-        this.Guis.append(this.mFoldFaceGui)
-        this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
-        this.mFoldFaceGui.Bind(wx.EVT_CHECKBOX, this.onMFoldFace)
+        this.oppTrisAltGui = wx.RadioBox(this.panel,
+                label = 'Opposite Triangle Fill Alternative',
+                style = wx.RA_VERTICAL,
+		choices = [
+		    Stringify[trisAlt.strip_I],
+		    Stringify[trisAlt.strip_II],
+		    Stringify[trisAlt.star],
+		]
+            )
+        this.Guis.append(this.oppTrisAltGui)
+        this.oppTrisAltGui.Bind(wx.EVT_RADIOBOX, this.onOppTriangleAlt)
+        this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
+
+	# CONTINUE HERE: add loose check button and alt button
+	# TODO
+        #this.oppTriAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
+        #this.Guis.append(this.oppTriAltGui)
+        #this.applySymGui.SetValue(..)
+	# Bind
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -791,6 +870,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Guis.append(this.addTrisGui)
         this.addTrisGui.SetValue(this.shape.addXtraFs)
         this.addTrisGui.Bind(wx.EVT_CHECKBOX, this.onAddTriangles)
+        this.noReflGui = wx.CheckBox(this.panel,
+				label = 'No Reflection Symmetries Required')
+        this.Guis.append(this.noReflGui)
+        this.noReflGui.SetValue(not this.shape.inclReflections)
+        this.noReflGui.Bind(wx.EVT_CHECKBOX, this.onNoRefl)
 
         # static adjustments
 	l = this.foldMethodList = [
@@ -815,8 +899,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.foldMethodGui.Bind(wx.EVT_RADIOBOX, this.onFoldMethod)
 
 	# predefined positions
-        this.prePosGui = wx.RadioBox(this.panel,
-                label = 'Only Regular Faces with:',
+        this.prePosGui = wx.Choice(this.panel,
+                #label = 'Only Regular Faces with:',
                 style = wx.RA_VERTICAL,
                 choices = this.prePosLst
             )
@@ -824,9 +908,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	# one time, and will probably forget to update the default selection..
 	for i in range(len(this.prePosLst)):
 	    if (this.prePosLst[i] == this.stringify[dyn_pos]):
-		this.prePosGui.SetSelection(i)
+		this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
         this.Guis.append(this.prePosGui)
-        this.prePosGui.Bind(wx.EVT_RADIOBOX, this.onPrePos)
+        this.prePosGui.Bind(wx.EVT_CHOICE, this.onPrePos)
         #wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0, const wxString choices[] = NULL, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listBox")
 
         this.firstButton = wx.Button(this.panel, label = 'First')
@@ -881,6 +965,24 @@ class FldHeptagonCtrlWin(wx.Frame):
             )
         this.Guis.append(this.fold2Gui)
         this.fold2Gui.Bind(wx.EVT_SLIDER, this.onFold2)
+        this.fold1OppGui = wx.Slider(
+                this.panel,
+                value = Geom3D.Rad2Deg * this.shape.oppFold1,
+                minValue = -180,
+                maxValue =  180,
+		style = wx.SL_HORIZONTAL | wx.SL_LABELS
+            )
+        this.Guis.append(this.fold1OppGui)
+        this.fold1OppGui.Bind(wx.EVT_SLIDER, this.onFold1Opp)
+        this.fold2OppGui = wx.Slider(
+                this.panel,
+                value = Geom3D.Rad2Deg * this.shape.oppFold2,
+                minValue = -180,
+                maxValue =  180,
+		style = wx.SL_HORIZONTAL | wx.SL_LABELS
+            )
+        this.Guis.append(this.fold2OppGui)
+        this.fold2OppGui.Bind(wx.EVT_SLIDER, this.onFold2Opp)
         this.heightGui = wx.Slider(
                 this.panel,
                 value = this.maxHeight - this.shape.height*this.heightF,
@@ -890,70 +992,100 @@ class FldHeptagonCtrlWin(wx.Frame):
             )
         this.Guis.append(this.heightGui)
         this.heightGui.Bind(wx.EVT_SLIDER, this.onHeight)
-
+	if this.shape.inclReflections:
+	    this.posAngleGui.Disable()
+	    this.fold1OppGui.Disable()
+	    this.fold2OppGui.Disable()
+	    this.oppTrisAltGui.Disable()
 
         # Sizers
         this.Boxes = []
 
-        # view settings
+        # sizer with view settings
         this.Boxes.append(wx.StaticBox(this.panel, label = 'View Settings'))
         settingsSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         settingsSizer.Add(this.applySymGui, 0, wx.EXPAND)
         settingsSizer.Add(this.addTrisGui, 0, wx.EXPAND)
         settingsSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
-        fillSizer = wx.BoxSizer(wx.VERTICAL)
-        fillSizer.Add(this.trisAltGui, 0, wx.EXPAND)
-        fillSizer.Add(this.nFoldFaceGui, 0, wx.EXPAND)
-        fillSizer.Add(this.mFoldFaceGui, 0, wx.EXPAND)
-        fillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
-
-        statSizer = wx.BoxSizer(wx.HORIZONTAL)
-        statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
-        statSizer.Add(fillSizer, 0, wx.EXPAND)
-        statSizer.Add(settingsSizer, 0, wx.EXPAND)
-        statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
-
+	# The sizers holding the special positions
+        this.Boxes.append(wx.StaticBox(this.panel, label = 'Special Positions'))
+        posSizerSubV = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
         posSizerSubH.Add(this.firstButton, 1, wx.EXPAND)
         posSizerSubH.Add(this.prevButton, 1, wx.EXPAND)
         posSizerSubH.Add(this.nrTxt, 1, wx.EXPAND)
         posSizerSubH.Add(this.nextButton, 1, wx.EXPAND)
         posSizerSubH.Add(this.lastButton, 1, wx.EXPAND)
-        posSizerSubV = wx.BoxSizer(wx.VERTICAL)
         posSizerSubV.Add(this.prePosGui, 0, wx.EXPAND)
         posSizerSubV.Add(posSizerSubH, 0, wx.EXPAND)
         posSizerSubV.Add(wx.BoxSizer(), 1, wx.EXPAND)
-        posSizerH = wx.BoxSizer(wx.HORIZONTAL)
-        posSizerH.Add(posSizerSubV, 2, wx.EXPAND)
+        prePosSizerH = wx.BoxSizer(wx.HORIZONTAL)
+        prePosSizerH.Add(posSizerSubV, 0, wx.EXPAND)
+        prePosSizerH.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
-        # dynamic adjustments
+	# Alterntives of filling with triangles
+        fillSizer = wx.BoxSizer(wx.VERTICAL)
+        fillSizer.Add(this.trisAltGui, 0, wx.EXPAND)
+        fillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+        # Alternatives only if no reflections
+        oppFillSizer = wx.BoxSizer(wx.VERTICAL)
+        oppFillSizer.Add(this.oppTrisAltGui, 0, wx.EXPAND)
+        oppFillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+
+        statSizer = wx.BoxSizer(wx.HORIZONTAL)
+        statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
+        statSizer.Add(fillSizer, 0, wx.EXPAND)
+        statSizer.Add(oppFillSizer, 0, wx.EXPAND)
+        statSizer.Add(settingsSizer, 0, wx.EXPAND)
+        statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
+
+        posSizerH = wx.BoxSizer(wx.HORIZONTAL)
+        # sizer holding the dynamic adjustments
         specPosDynamic = wx.BoxSizer(wx.VERTICAL)
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'Dihedral Angle (Degrees)'))
+        this.Boxes.append(wx.StaticBox(this.panel,
+					    label = 'Dihedral Angle (Degrees)'))
         angleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
         angleSizer.Add(this.dihedralAngleGui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'Positional Angle (Degrees)'))
+        this.Boxes.append(wx.StaticBox(this.panel,
+					    label = 'Fold 1 Angle (Degrees)'))
+        fold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        fold1Sizer.Add(this.fold1Gui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel,
+					    label = 'Fold 2 Angle (Degrees)'))
+        fold2Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        fold2Sizer.Add(this.fold2Gui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel,
+					label = 'Positional Angle (Degrees)'))
         posAngleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
         posAngleSizer.Add(this.posAngleGui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'Fold 1 Angle (Degrees)'))
-        fold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        fold1Sizer.Add(this.fold1Gui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'Fold 2 Angle (Degrees)'))
-        fold2Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        fold2Sizer.Add(this.fold2Gui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel,
+				    label = 'Opposite Fold 1 Angle (Degrees)'))
+        oppFold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        oppFold1Sizer.Add(this.fold1OppGui, 1, wx.EXPAND)
+        this.Boxes.append(wx.StaticBox(this.panel,
+				    label = 'Opposite Fold 2 Angle (Degrees)'))
+        oppFold2Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        oppFold2Sizer.Add(this.fold2OppGui, 1, wx.EXPAND)
+
         this.Boxes.append(wx.StaticBox(this.panel, label = 'Offset T'))
         heightSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         heightSizer.Add(this.heightGui, 1, wx.EXPAND)
-        specPosDynamic.Add(posAngleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
+        specPosDynamic.Add(this.noReflGui, 0, wx.EXPAND)
+        specPosDynamic.Add(posAngleSizer, 0, wx.EXPAND)
+        specPosDynamic.Add(oppFold1Sizer, 0, wx.EXPAND)
+        specPosDynamic.Add(oppFold2Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(wx.BoxSizer(), 1, wx.EXPAND)
         posSizerH.Add(specPosDynamic, 3, wx.EXPAND)
         posSizerH.Add(heightSizer, 1, wx.EXPAND)
 
+	# MAIN sizer
         mainVSizer = wx.BoxSizer(wx.VERTICAL)
         mainVSizer.Add(statSizer, 0, wx.EXPAND)
+        mainVSizer.Add(prePosSizerH, 0, wx.EXPAND)
         mainVSizer.Add(posSizerH, 0, wx.EXPAND)
         mainVSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
@@ -1000,13 +1132,37 @@ class FldHeptagonCtrlWin(wx.Frame):
         event.Skip()
 
     def onFold1(this, event):
-        this.shape.setFold1(Geom3D.Deg2Rad * this.fold1Gui.GetValue())
+	val = this.fold1Gui.GetValue()
+        s_val = Geom3D.Deg2Rad * val
+	if this.shape.inclReflections:
+	    this.shape.setFold1(s_val, s_val)
+	else:
+	    this.shape.setFold1(s_val)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
         event.Skip()
 
     def onFold2(this, event):
-        this.shape.setFold2(Geom3D.Deg2Rad * this.fold2Gui.GetValue())
+	val = this.fold2Gui.GetValue()
+        s_val = Geom3D.Deg2Rad * val
+	if this.shape.inclReflections:
+	    this.shape.setFold2(s_val, s_val)
+	else:
+	    this.shape.setFold2(s_val)
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onFold1Opp(this, event):
+        this.shape.setFold1(
+	    oppositeAngle = Geom3D.Deg2Rad * this.fold1OppGui.GetValue())
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onFold2Opp(this, event):
+        this.shape.setFold2(
+	    oppositeAngle = Geom3D.Deg2Rad * this.fold2OppGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
         event.Skip()
@@ -1027,52 +1183,75 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.updateShape = True
         this.canvas.paint()
 
+    def onNoRefl(this, event):
+        this.shape.inclReflections = not this.noReflGui.IsChecked()
+        if this.shape.inclReflections:
+		this.fold1OppGui.Disable()
+		this.fold2OppGui.Disable()
+		this.posAngleGui.Disable()
+		this.oppTrisAltGui.Disable()
+		# the code below is added to be able to check and uncheck "Has
+		# Reflections" in a "undo" kind of way.
+		this.shape.setFold1(oppositeAngle = this.shape.fold1)
+		this.shape.setFold2(oppositeAngle = this.shape.fold2)
+		this.shape.setPosAngle(0)
+		this.shape.updateShape = True
+		this.canvas.paint()
+		# Don't do the below, so the use can undo by unchecking this.
+		#this.posAngleGui.SetValue(0)
+	else:
+		this.fold1OppGui.Enable()
+		this.fold2OppGui.Enable()
+		this.posAngleGui.Enable()
+		this.oppTrisAltGui.Enable()
+		# the code below is added to be able to check and uncheck "Has
+		# Reflections" in a "undo" kind of way.
+		this.shape.setFold1(
+		    oppositeAngle = Geom3D.Deg2Rad * this.fold1OppGui.GetValue())
+		this.shape.setFold2(
+		    oppositeAngle = Geom3D.Deg2Rad * this.fold2OppGui.GetValue())
+		this.shape.setPosAngle(
+		    Geom3D.Deg2Rad * this.posAngleGui.GetValue())
+		this.shape.updateShape = True
+		this.canvas.paint()
+
     def isPrePos(this):
 	# TODO: move to offspring
         return this.prePosGui.GetSelection() != len(this.prePosLst) - 1
 
+    def setTrisAlt(this, i):
+	assert False, "TODO"
+
+    @property
+    def trisAlt(this):
+        return trisAlt.key[this.trisAltGui.GetStringSelection()]
+
+    @property
+    def oppTrisAlt(this):
+	if this.shape.inclReflections:
+	    return this.trisAlt
+	else:
+	    oppTrisAlt = trisAlt.key[this.oppTrisAltGui.GetStringSelection()]
+	    if this.trisAlt & loose_bit:
+		assert oppTrisAlt != trisAlt.strip_II
+		oppTrisAlt = oppTrisAlt | loose_bit
+	    return oppTrisAlt
+
     def onTriangleAlt(this, event):
-        this.shape.setEdgeAlternative(
-	    this.edgeChoicesListItems[this.trisAltGui.GetSelection()])
-        this.trisAlt = this.shape.getEdgeAlternative()
-	# setting the edge alternative might reset the n/m-fold values
-	this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
-	this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
+        this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
         if this.isPrePos():
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
 
-    def onNFoldFace(this, event):
-        tryNfoldAlt = this.nFoldFaceGui.IsChecked()
-        this.shape.setNfoldAlt(tryNfoldAlt )
-        if (this.shape.altNFoldFace == tryNfoldAlt):
-	    this.trisAlt = this.shape.getEdgeAlternative()
-	    this.shape.updateShape = True
-	    if this.isPrePos():
-		this.onPrePos()
-	    this.statusBar.SetStatusText(this.shape.getStatusStr())
-	    this.canvas.paint()
-	else:
-	    this.nFoldFaceGui.SetValue(this.shape.altNFoldFace)
-            this.statusBar.SetStatusText(
-				    "Invalid for this triangle alternative")
-
-    def onMFoldFace(this, event):
-        tryMfoldAlt = this.mFoldFaceGui.IsChecked()
-        this.shape.setMfoldAlt(tryMfoldAlt )
-        if (this.shape.altMFoldFace == tryMfoldAlt):
-	    this.trisAlt = this.shape.getEdgeAlternative()
-	    this.shape.updateShape = True
-	    if this.isPrePos():
-		this.onPrePos()
-	    this.statusBar.SetStatusText(this.shape.getStatusStr())
-	    this.canvas.paint()
-	else:
-	    this.mFoldFaceGui.SetValue(this.shape.altMFoldFace)
-            this.statusBar.SetStatusText(
-				    "Invalid for this triangle alternative")
+    def onOppTriangleAlt(this, event):
+        this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
+        if this.isPrePos():
+            this.onPrePos()
+        else:
+            this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
 
     def onFoldMethod(this, event):
         this.foldMethod = this.foldMethodListItems[
@@ -1094,7 +1273,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.onPrePos()
 
     def getPrePos(this):
-        prePosStr = this.prePosLst[this.prePosGui.GetSelection()]
+        prePosStr = this.prePosGui.GetStringSelection()
 	for k,v in this.stringify.iteritems():
 	    if v == prePosStr:
 		return k
@@ -1146,12 +1325,13 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    for i in range(len(this.edgeChoicesListItems)):
 			if this.edgeChoicesListItems[i] == k:
 			    this.trisAltGui.SetSelection(i)
-			    this.trisAlt = k
+			    this.setTrisAlt(k)
 			    this.shape.setEdgeAlternative(k)
 			    break
 		    break
 	    this.addTrisGui.Disable()
 	    this.trisAltGui.Disable()
+	    this.oppTrisAltGui.Disable()
 	    this.restoreTris = True
 	elif (this.restoreTris):
 	    this.restoreTris = False
@@ -1172,20 +1352,32 @@ class FldHeptagonCtrlWin(wx.Frame):
         tVal = this.tNone
 	c = this.shape
         if sel == dyn_pos:
+	    # currently for all special positions the polyhedron has reflections
+	    # TODO add other special positions: choose by static check box.
+	    #      then rm line below
+	    this.shape.inclReflections = True
 	    this.dihedralAngleGui.Enable()
-	    this.posAngleGui.Enable()
 	    this.fold1Gui.Enable()
 	    this.fold2Gui.Enable()
 	    this.heightGui.Enable()
 	    this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
 	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
-	    this.fold1Gui.SetValue(Geom3D.Rad2Deg * c.fold1)
-	    this.fold2Gui.SetValue(Geom3D.Rad2Deg * c.fold2)
+	    val1 = Geom3D.Rad2Deg * c.fold1
+	    val2 = Geom3D.Rad2Deg * c.fold2
+	    this.fold1Gui.SetValue(val1)
+	    this.fold2Gui.SetValue(val2)
+	    if not this.shape.inclReflections:
+		this.fold1OppGui.SetValue(c.oppFold1)
+		this.fold2OppGui.SetValue(c.oppFold2)
+		this.fold1OppGui.Enable()
+		this.fold2OppGui.Enable()
+		this.posAngleGui.Enable()
 	    this.heightGui.SetValue(
 		this.maxHeight - this.heightF*c.height)
 	    # enable all folding and triangle alternatives:
 	    for i in range(len(this.foldMethodList)):
 		this.foldMethodGui.ShowItem(i, True)
+	    # TODO move into a function and add oppEdgeChoice
 	    for i in range(len(this.edgeChoicesList)):
 		this.trisAltGui.ShowItem(i, True)
 	else:
@@ -1242,11 +1434,15 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.posAngleGui.SetValue(0)
 	    this.fold1Gui.SetValue(0)
 	    this.fold2Gui.SetValue(0)
+	    this.fold1OppGui.SetValue(0)
+	    this.fold2OppGui.SetValue(0)
 	    this.heightGui.SetValue(0)
 	    this.dihedralAngleGui.Disable()
 	    this.posAngleGui.Disable()
 	    this.fold1Gui.Disable()
 	    this.fold2Gui.Disable()
+	    this.fold1OppGui.Disable()
+	    this.fold2OppGui.Disable()
 	    this.heightGui.Disable()
             if ( tVal == this.tNone and aVal == this.aNone and
 		    fld1 == this.fld1None and fld2 == this.fld2None

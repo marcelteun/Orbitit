@@ -38,31 +38,7 @@ Title = 'Polyhedra with Folded Regular Heptagons A4xI'
 
 V2 = math.sqrt(2)
 
-alt1_bit = 8
-alt2_bit = 16
-class TrisAlt:
-    # Note nrs should be different from below
-    strip_1_loose      = 128
-    alt1_strip_1_loose = 128 | alt1_bit
-    alt2_strip_1_loose = 128            | alt2_bit
-    alt_strip_1_loose  = 128 | alt1_bit | alt2_bit
-    strip_I            = 129
-    alt1_strip_I       = 129 | alt1_bit
-    alt2_strip_I       = 129            | alt2_bit
-    alt_strip_I        = 129 | alt1_bit | alt2_bit
-    strip_II           = 130
-    alt1_strip_II      = 130 | alt1_bit
-    alt2_strip_II      = 130            | alt2_bit
-    alt_strip_II       = 130 | alt1_bit | alt2_bit
-    star               = 131
-    star_1_loose       = 132
-    def get(this, str):
-	for k,v in Stringify.iteritems():
-	    if v == str:
-		return k
-	return None
-
-trisAlt = TrisAlt()
+trisAlt = Heptagons.TrisAlt()
 
 dyn_pos		=  Heptagons.dyn_pos
 only_hepts      =  Heptagons.only_hepts
@@ -104,20 +80,6 @@ Stringify = {
     edge_0_1_1_1:	'56 Triangles',
     edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
     only_hepts:		'Just Heptagons',
-    trisAlt.strip_1_loose:	'Strip, 1 Loose ',
-    trisAlt.strip_I:		'Strip I',
-    trisAlt.strip_II:		'Strip II',
-    trisAlt.star:		'Shell',
-    trisAlt.star_1_loose:	'Shell, 1 Loose',
-    trisAlt.alt1_strip_I:	'Strip I, alternative 3-fold 1',
-    trisAlt.alt1_strip_II:	'Strip II, alternative 3-fold 1',
-    trisAlt.alt1_strip_1_loose:	'Strip, 1 loose, alternative 3-fold 1',
-    trisAlt.alt2_strip_I:	'Strip I, alternative 3-fold 2',
-    trisAlt.alt2_strip_II:	'Strip II, alternative 3-fold 2',
-    trisAlt.alt2_strip_1_loose:	'Strip, 1 loose, alternative 3-fold 2',
-    trisAlt.alt_strip_I:	'Strip I, alternative 3-folds',
-    trisAlt.alt_strip_II:	'Strip II, alternative 3-folds',
-    trisAlt.alt_strip_1_loose:	'Strip, 1 loose, alternative 3-folds',
 }
 
 def Vlen(v0, v1):
@@ -185,7 +147,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.posAngleMin = 0
 	this.posAngleMax = math.pi/4
 	this.posAngle = this.posAngleMin
-        this.edgeAlternative = trisAlt.strip_1_loose
+        this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
 	this.initArrs()
 	this.setV()
 
@@ -208,9 +170,9 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #
         #                                    7 = 6'
+	return "TODO"
         Vs = this.baseVs
-	cleanEdgeAlt = this.edgeAlternative & ~alt1_bit
-	cleanEdgeAlt = cleanEdgeAlt & ~alt2_bit
+	cleanEdgeAlt = this.edgeAlternative & alt_bit
         if cleanEdgeAlt == trisAlt.strip_1_loose:
             aLen = Vlen(Vs[2], Vs[7])
             bLen = Vlen(Vs[2], Vs[8])
@@ -234,20 +196,17 @@ class Shape(Heptagons.FldHeptagonShape):
 	else:
 	    raise TypeError, 'Unknown edgeAlternative %d (%d)' % (
 		this.edgeAlternative, cleanEdgeAlt)
-	if (this.edgeAlternative & alt1_bit) == alt1_bit:
+	if (this.edgeAlternative & alt_bit) == alt_bit:
             dLen = Vlen(Vs[2], Vs[11])
 	else:
             dLen = Vlen(Vs[1], Vs[9])
-	if (this.edgeAlternative & alt2_bit) == alt2_bit:
-            eLen = Vlen(Vs[5], Vs[16])
-	else:
-            eLen = Vlen(Vs[6], Vs[14])
-        s = '|a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f, |e|: %02.2f' % (
-                aLen, bLen, cLen, dLen, eLen
+        s = 'T = %02.2f; |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
+                this.height, aLen, bLen, cLen, dLen
             )
         return s
 
     def correctEdgeAlternative(this):
+	# TODO
 	if (this.edgeAlternative == trisAlt.star or
 		this.edgeAlternative == trisAlt.star_1_loose):
 	    this.altMFoldFace = False
@@ -262,17 +221,10 @@ class Shape(Heptagons.FldHeptagonShape):
 	    else:
 		this.edgeAlternative = this.edgeAlternative & ~alt2_bit
 
-    def setNfoldAlt(this, val):
-	Heptagons.FldHeptagonShape.setNfoldAlt(this, val)
-	this.correctEdgeAlternative()
-
-    def setMfoldAlt(this, val):
-	Heptagons.FldHeptagonShape.setMfoldAlt(this, val)
-	this.correctEdgeAlternative()
-
-    def setEdgeAlternative(this, method):
-	Heptagons.FldHeptagonShape.setEdgeAlternative(this, method)
-	this.correctEdgeAlternative()
+    def setEdgeAlternative(this, alt = None, oppositeAlt = None):
+	Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
+	# TODO
+	#this.correctEdgeAlternative()
 
     def setV(this):
         #this.heptagon.foldParallel(this.fold1, this.fold2)
@@ -282,8 +234,10 @@ class Shape(Heptagons.FldHeptagonShape):
 	if this.foldHeptagon == Heptagons.foldMethod.parallel:
 	    this.heptagon.foldParallel(-this.fold1, -this.fold2, keepV0 = False)
 	else:
-	    this.heptagon.fold(this.fold1, this.fold2,
-		    keepV0 = False, fold = this.foldHeptagon)
+	    this.heptagon.fold(
+		this.fold1, this.fold2, this.oppFold1, this.oppFold2,
+		keepV0 = False, fold = this.foldHeptagon
+	    )
 	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
 	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
 	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
@@ -296,21 +250,21 @@ class Shape(Heptagons.FldHeptagonShape):
 	    this.heptagon.rotate(-GeomTypes.uz, this.posAngle)
         Vs = this.heptagon.Vs[:]
 
-	#            5" = 17                 12 = 2"
-	#    6" = 15                                 10 = 1"
+	#            5" = 18                 12 = 2"
+	#    6" = 16                                 10 = 1"
         #                           0
-        # 5' = 16     o3                         o3      11 = 2'
+        # 5' = 17     o3                         o3      11 = 2'
         #                    6             1
         #
-        #       6' = 14                           9 = 1'
+        #       6' = 15                           9 = 1'
         #
         #                  5                 2
         #
         #
-        #              13       4       3        8 = 0'
+        #              14       4       3        8 = 0'
         #
         #
-        #                                    7 = 6'
+        #             2' = 13                7 = 5'
 
         Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
         Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
@@ -320,17 +274,18 @@ class Shape(Heptagons.FldHeptagonShape):
         Vs.append(Rr * Vs[9])                                  # Vs[10]
         Vs.append(Rr * Vs[2])                                  # Vs[11]
         Vs.append(Rr * Vs[11])                                 # Vs[12]
-        Vs.append(Rl * Vs[0])                                  # Vs[13]
-        Vs.append(Rl * Vs[6])                                  # Vs[14]
-        Vs.append(Rl * Vs[14])                                 # Vs[15]
-        Vs.append(Rl * Vs[5])                                  # Vs[16]
-        Vs.append(Rl * Vs[16])                                 # Vs[17]
-	# OOPS, I cp Vs[11] into Vs[18] and use it as alt 1 in this.triFs
+        Vs.append(Vec([-Vs[2][0], -Vs[2][1], Vs[2][2]]))       # Vs[13]
+        Vs.append(Rl * Vs[0])                                  # Vs[14]
+        Vs.append(Rl * Vs[6])                                  # Vs[15]
+        Vs.append(Rl * Vs[-1])                                 # Vs[16]
+        Vs.append(Rl * Vs[5])                                  # Vs[17]
+        Vs.append(Rl * Vs[-1])                                 # Vs[18]
+	# OOPS, I cp Vs[11] into Vs[19] and use it as alt 1 in this.triFs
 	# instead of Vs[11], otherwise python crashes with a segementation dump
 	# on my PC... This while I'm still using Vs[11] for the edges...
 	# Ai, scary weird bug....
 	# TODO, remove...
-        Vs.append(Vs[11])                                      # Vs[18]
+        Vs.append(Vs[11])                                      # Vs[19]
         this.baseVs = Vs
         Es = []
         Fs = []
@@ -342,18 +297,23 @@ class Shape(Heptagons.FldHeptagonShape):
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.addXtraFs:
+	    Es      = this.o3triEs[this.edgeAlternative][:]
+	    Fs      = this.o3triFs[this.edgeAlternative][:]
+	    Es.extend(this.oppO3triEs[this.oppEdgeAlternative])
+	    Fs.extend(this.oppO3triFs[this.oppEdgeAlternative])
             this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
-            this.trisO3Shape.setBaseEdgeProperties(
-                Es = this.o3triEs[this.edgeAlternative])
-            this.trisO3Shape.setBaseFaceProperties(
-                Fs = this.o3triFs[this.edgeAlternative])
+            this.trisO3Shape.setBaseEdgeProperties(Es = Es)
+            this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
             if (not this.onlyRegFs):
+		Es      = this.triEs[this.edgeAlternative][:]
+		Fs      = this.triFs[this.edgeAlternative][:]
+		Es.extend(this.oppTriEs[this.oppEdgeAlternative])
+		Fs.extend(this.oppTriFs[this.oppEdgeAlternative])
                 this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
-                this.xtraTrisShape.setBaseEdgeProperties(
-                    Es = this.triEs[this.edgeAlternative])
+                this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
                 this.xtraTrisShape.setBaseFaceProperties(
-                    Fs = this.triFs[this.edgeAlternative],
+		    Fs = Fs,
                     colors = ([rgb.darkRed[:], rgb.yellow[:]],
                         this.triColIds[this.edgeAlternative])
                 )
@@ -365,92 +325,117 @@ class Shape(Heptagons.FldHeptagonShape):
     def initArrs(this):
         print this.name, "initArrs"
 
-	strip_1_loose = [[2, 3, 7], [2, 7, 8], [2, 8, 9], [5, 14, 13]]
-	stripI        = [[2, 3, 8], [4, 5, 13], [2, 8, 9], [5, 14, 13]]
-	stripII       = [[3, 8, 9], [4, 14, 13], [2, 3, 9], [4, 5, 14]]
-	star          = [[2, 3, 8], [4, 5, 13], [1, 2, 8], [5, 6, 13],
-						    [1, 8, 9], [6, 14, 13]]
-	star_1_loose  = [[2, 3, 7], [2, 7, 8], [1, 2, 8], [5, 6, 13],
-						    [1, 8, 9], [6, 14, 13]]
-        this.triFs = {
-                trisAlt.strip_1_loose:      strip_1_loose[:],
-                trisAlt.alt_strip_1_loose:  strip_1_loose[:],
-                trisAlt.alt1_strip_1_loose: strip_1_loose[:],
-                trisAlt.alt2_strip_1_loose: strip_1_loose[:],
-                trisAlt.strip_I:            stripI[:],
-                trisAlt.alt_strip_I:        stripI[:],
-                trisAlt.alt1_strip_I:       stripI[:],
-                trisAlt.alt2_strip_I:       stripI[:],
-                trisAlt.strip_II:           stripII[:],
-                trisAlt.alt_strip_II:       stripII[:],
-                trisAlt.alt1_strip_II:      stripII[:],
-                trisAlt.alt2_strip_II:      stripII[:],
-                trisAlt.star:               star[:],
-                trisAlt.star_1_loose:       star_1_loose[:],
-	}
-	std_1 = [1, 2, 9]
-	std_2 = [6, 14, 5]
-	alt_1 = [2, 9, 18]  #TODO rm, see OOPS above...
-	alt_2 = [5, 16, 14]
-        this.triFs[trisAlt.strip_1_loose].append(std_1)
-        this.triFs[trisAlt.strip_1_loose].append(std_2)
-        this.triFs[trisAlt.alt_strip_1_loose].append(alt_1)
-        this.triFs[trisAlt.alt_strip_1_loose].append(alt_2)
-        this.triFs[trisAlt.alt1_strip_1_loose].append(alt_1)
-        this.triFs[trisAlt.alt1_strip_1_loose].append(std_2)
-        this.triFs[trisAlt.alt2_strip_1_loose].append(std_1)
-        this.triFs[trisAlt.alt2_strip_1_loose].append(alt_2)
-        this.triFs[trisAlt.strip_I].append(std_1)
-        this.triFs[trisAlt.strip_I].append(std_2)
-        this.triFs[trisAlt.alt_strip_I].append(alt_1)
-        this.triFs[trisAlt.alt_strip_I].append(alt_2)
-        this.triFs[trisAlt.alt1_strip_I].append(alt_1)
-        this.triFs[trisAlt.alt1_strip_I].append(std_2)
-        this.triFs[trisAlt.alt2_strip_I].append(std_1)
-        this.triFs[trisAlt.alt2_strip_I].append(alt_2)
-        this.triFs[trisAlt.strip_II].append(std_1)
-        this.triFs[trisAlt.strip_II].append(std_2)
-        this.triFs[trisAlt.alt_strip_II].append(alt_1)
-        this.triFs[trisAlt.alt_strip_II].append(alt_2)
-        this.triFs[trisAlt.alt1_strip_II].append(alt_1)
-        this.triFs[trisAlt.alt1_strip_II].append(std_2)
-        this.triFs[trisAlt.alt2_strip_II].append(std_1)
-        this.triFs[trisAlt.alt2_strip_II].append(alt_2)
-
-	#            5" = 17                 12 = 2"
-	#    6" = 15                                 10 = 1"
+	#            5" = 18                 12 = 2"
+	#    6" = 16                                 10 = 1"
         #                           0
-        # 5' = 16     o3                         o3      11 = 2'
+        # 5' = 17     o3                         o3      11 = 2'
         #                    6             1
         #
-        #       6' = 14                           9 = 1'
+        #       6' = 15                           9 = 1'
         #
         #                  5                 2
         #
         #
-        #              13       4       3        8 = 0'
+        #              14       4       3        8 = 0'
         #
         #
-        #                                    7 = 6'
-	std_1 = [1, 9, 10]
-	std_2 = [6, 15, 14]
-	alt_1 = [2, 11, 12]
-	alt_2 = [5, 17, 16]
+        #             2' = 13                7 = 5'
+
+	I_loose = [[2, 3, 7], [2, 7, 8]]
+	noLoose = [[2, 3, 8]]
+	stripI  = [[2, 8, 9]]
+	stripII = [[3, 8, 9], [2, 3, 9]]
+	star    = [[1, 2, 8], [1, 8, 9]]
+	strip_1_loose = stripI[:]
+	star_1_loose  = star[:]
+	stripI.extend(noLoose)
+	star.extend(noLoose)
+	strip_1_loose.extend(I_loose)
+	star_1_loose.extend(I_loose)
+        this.triFs = {
+                trisAlt.strip_1_loose:      strip_1_loose[:],
+                trisAlt.strip_I:            stripI[:],
+                trisAlt.strip_II:           stripII[:],
+                trisAlt.star:               star[:],
+                trisAlt.star_1_loose:       star_1_loose[:],
+                trisAlt.alt_strip_1_loose:  strip_1_loose[:],
+                trisAlt.alt_strip_I:        stripI[:],
+                trisAlt.alt_strip_II:       stripII[:],
+	}
+	stdO3   = [1, 2, 9]
+	altO3   = [2, 9, 19]  #TODO rm, see OOPS above...
+        this.triFs[trisAlt.strip_1_loose].append(stdO3)
+        this.triFs[trisAlt.strip_I].append(stdO3)
+        this.triFs[trisAlt.strip_II].append(stdO3)
+        this.triFs[trisAlt.alt_strip_1_loose].append(altO3)
+        this.triFs[trisAlt.alt_strip_I].append(altO3)
+        this.triFs[trisAlt.alt_strip_II].append(altO3)
+	noLoose = [[3, 7, 8]]
+	stripI  = [[5, 15, 14]]
+	stripII = [[4, 15, 14], [4, 5, 15]]
+	star    = [[5, 6, 14], [6, 15, 14]]
+	strip_1_loose = stripI[:]
+	star_1_loose  = star[:]
+	stripI.extend(noLoose)
+	star.extend(noLoose)
+        this.oppTriFs = {
+                trisAlt.strip_1_loose:      strip_1_loose[:],
+                trisAlt.strip_I:            stripI[:],
+                trisAlt.strip_II:           stripII[:],
+                trisAlt.star:               star[:],
+                trisAlt.star_1_loose:       star_1_loose[:],
+                trisAlt.alt_strip_1_loose:  strip_1_loose[:],
+                trisAlt.alt_strip_I:        stripI[:],
+                trisAlt.alt_strip_II:       stripII[:],
+	}
+	stdO3   = [6, 15, 5]
+	altO3   = [5, 17, 15]
+        this.oppTriFs[trisAlt.strip_1_loose].append(stdO3)
+        this.oppTriFs[trisAlt.strip_I].append(stdO3)
+        this.oppTriFs[trisAlt.strip_II].append(stdO3)
+        this.oppTriFs[trisAlt.alt_strip_1_loose].append(altO3)
+        this.oppTriFs[trisAlt.alt_strip_I].append(altO3)
+        this.oppTriFs[trisAlt.alt_strip_II].append(altO3)
+
+	#            5" = 18                 12 = 2"
+	#    6" = 16                                 10 = 1"
+        #                           0
+        # 5' = 17     o3                         o3      11 = 2' ( = 19)
+        #                    6             1
+        #
+        #       6' = 15                           9 = 1'
+        #
+        #                  5                 2
+        #
+        #
+        #              14       4       3        8 = 0'
+        #
+        #
+        #             2' = 13                7 = 5'
+
+	std = [1, 9, 10]
+	alt = [2, 11, 12]
         this.o3triFs = {
-                trisAlt.strip_1_loose:		[std_1, std_2],
-                trisAlt.strip_I:		[std_1, std_2],
-                trisAlt.strip_II:		[std_1, std_2],
-                trisAlt.star:			[std_1, std_2],
-                trisAlt.star_1_loose:		[std_1, std_2],
-                trisAlt.alt_strip_I:		[alt_1, alt_2],
-                trisAlt.alt_strip_II:		[alt_1, alt_2],
-                trisAlt.alt_strip_1_loose:	[alt_1, alt_2],
-                trisAlt.alt1_strip_I:		[alt_1, std_2],
-                trisAlt.alt1_strip_II:		[alt_1, std_2],
-                trisAlt.alt1_strip_1_loose:	[alt_1, std_2],
-                trisAlt.alt2_strip_I:		[std_1, alt_2],
-                trisAlt.alt2_strip_II:		[std_1, alt_2],
-                trisAlt.alt2_strip_1_loose:	[std_1, alt_2],
+                trisAlt.strip_1_loose:		[std],
+                trisAlt.strip_I:		[std],
+                trisAlt.strip_II:		[std],
+                trisAlt.star:			[std],
+                trisAlt.star_1_loose:		[std],
+                trisAlt.alt_strip_I:		[alt],
+                trisAlt.alt_strip_II:		[alt],
+                trisAlt.alt_strip_1_loose:	[alt],
+	    }
+	std = [6, 16, 15]
+	alt = [5, 18, 17]
+        this.oppO3triFs = {
+                trisAlt.strip_1_loose:		[std],
+                trisAlt.strip_I:		[std],
+                trisAlt.strip_II:		[std],
+                trisAlt.star:			[std],
+                trisAlt.star_1_loose:		[std],
+                trisAlt.alt_strip_I:		[alt],
+                trisAlt.alt_strip_II:		[alt],
+                trisAlt.alt_strip_1_loose:	[alt],
 	    }
 	strip = [0, 1, 1, 0, 0, 1]
 	loose = [0, 1, 0, 0, 1, 1]
@@ -463,53 +448,77 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:		strip,
                 trisAlt.alt_strip_II:		strip,
                 trisAlt.alt_strip_1_loose:	loose,
-                trisAlt.alt1_strip_I:		strip,
-                trisAlt.alt1_strip_II:		strip,
-                trisAlt.alt1_strip_1_loose:	loose,
-                trisAlt.alt2_strip_I:		strip,
-                trisAlt.alt2_strip_II:		strip,
-                trisAlt.alt2_strip_1_loose:	loose,
             }
-	strip_1_loose = [2, 7, 2, 8, 2, 9, 5, 10, 5, 11]
-	stripI        = [3, 8, 2, 8, 2, 9, 5, 10, 5, 11]
-	stripII       = [3, 8, 3, 9, 2, 9, 4, 11, 5, 11]
-	star          = [3, 8, 2, 8, 1, 8, 5, 10, 6, 10]
-	star_1_loose  = [2, 7, 2, 8, 1, 8, 5, 10, 6, 10]
+
+	#            5" = 18                 12 = 2"
+	#    6" = 16                                 10 = 1"
+        #                           0
+        # 5' = 17     o3                         o3      11 = 2' ( = 19)
+        #                    6             1
+        #
+        #       6' = 15                           9 = 1'
+        #
+        #                  5                 2
+        #
+        #
+        #              14       4       3        8 = 0'
+        #
+        #
+        #             2' = 13                7 = 5'
+	strip_1_loose = [2, 7, 2, 8, 2, 9]
+	stripI        = [3, 8, 2, 8, 2, 9]
+	stripII       = [3, 8, 3, 9, 2, 9]
+	star          = [3, 8, 2, 8, 1, 8]
+	star_1_loose  = [2, 7, 2, 8, 1, 8]
         this.triEs = {
-                trisAlt.strip_1_loose: strip_1_loose,
-                trisAlt.strip_I: stripI,
-                trisAlt.strip_II: stripII,
-                trisAlt.star: star,
-                trisAlt.star_1_loose: star_1_loose,
-                trisAlt.alt_strip_I: stripI,
-                trisAlt.alt_strip_II: stripII,
+                trisAlt.strip_1_loose:     strip_1_loose,
+                trisAlt.strip_I:           stripI,
+                trisAlt.strip_II:          stripII,
+                trisAlt.star:              star,
+                trisAlt.star_1_loose:      star_1_loose,
+                trisAlt.alt_strip_I:       stripI,
+                trisAlt.alt_strip_II:      stripII,
                 trisAlt.alt_strip_1_loose: strip_1_loose,
-                trisAlt.alt1_strip_I: stripI,
-                trisAlt.alt1_strip_II: stripII,
-                trisAlt.alt1_strip_1_loose: strip_1_loose,
-                trisAlt.alt2_strip_I: stripI,
-                trisAlt.alt2_strip_II: stripII,
-                trisAlt.alt2_strip_1_loose: strip_1_loose,
             }
-	std_1_2     = [1, 9, 9, 10, 10, 1,   6, 15, 15, 14, 14, 6]
-	std_1_alt_2 = [1, 9, 9, 10, 10, 1,   5, 17, 17, 16, 16, 5]
-	alt_1_std_2 = [2, 11, 11, 12, 12, 2, 6, 15, 15, 14, 14, 6]
-	alt_1_2     = [2, 11, 11, 12, 12, 2, 5, 17, 17, 16, 16, 5]
+	strip_1_loose = [5, 14, 5, 15]
+	stripI        = [5, 14, 5, 15]
+	stripII       = [4, 15, 5, 15]
+	star          = [5, 14, 6, 14]
+	star_1_loose  = [5, 14, 6, 14]
+        this.oppTriEs = {
+                trisAlt.strip_1_loose:     strip_1_loose,
+                trisAlt.strip_I:           stripI,
+                trisAlt.strip_II:          stripII,
+                trisAlt.star:              star,
+                trisAlt.star_1_loose:      star_1_loose,
+                trisAlt.alt_strip_I:       stripI,
+                trisAlt.alt_strip_II:      stripII,
+                trisAlt.alt_strip_1_loose: strip_1_loose,
+            }
+
+	std = [1, 9, 9, 10, 10, 1]
+	alt = [2, 11, 11, 12, 12, 2]
         this.o3triEs = {
-                trisAlt.strip_1_loose:		std_1_2,
-                trisAlt.strip_I:		std_1_2,
-                trisAlt.strip_II:		std_1_2,
-                trisAlt.star:			std_1_2,
-                trisAlt.star_1_loose:		std_1_2,
-                trisAlt.alt_strip_I:		alt_1_2,
-                trisAlt.alt_strip_II:		alt_1_2,
-                trisAlt.alt_strip_1_loose:	alt_1_2,
-                trisAlt.alt1_strip_I:		alt_1_std_2,
-                trisAlt.alt1_strip_II:		alt_1_std_2,
-                trisAlt.alt1_strip_1_loose:	alt_1_std_2,
-                trisAlt.alt2_strip_I:		std_1_alt_2,
-                trisAlt.alt2_strip_II:		std_1_alt_2,
-                trisAlt.alt2_strip_1_loose:	std_1_alt_2,
+                trisAlt.strip_1_loose:		std,
+                trisAlt.strip_I:		std,
+                trisAlt.strip_II:		std,
+                trisAlt.star:			std,
+                trisAlt.star_1_loose:		std,
+                trisAlt.alt_strip_I:		alt,
+                trisAlt.alt_strip_II:		alt,
+                trisAlt.alt_strip_1_loose:	alt,
+            }
+	std = [6, 16, 16, 15, 15, 6]
+	alt = [5, 18, 18, 17, 17, 5]
+        this.oppO3triEs = {
+                trisAlt.strip_1_loose:		std,
+                trisAlt.strip_I:		std,
+                trisAlt.strip_II:		std,
+                trisAlt.star:			std,
+                trisAlt.star_1_loose:		std,
+                trisAlt.alt_strip_I:		alt,
+                trisAlt.alt_strip_II:		alt,
+                trisAlt.alt_strip_1_loose:	alt,
             }
 
     def printTrisAngles(this):
@@ -540,21 +549,9 @@ class Shape(Heptagons.FldHeptagonShape):
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
-	edgeChoicesList = [
-	    Stringify[trisAlt.strip_1_loose],
-	    Stringify[trisAlt.strip_I],
-	    Stringify[trisAlt.strip_II],
-	    Stringify[trisAlt.star],
-	    Stringify[trisAlt.star_1_loose],
-	]
-	nr_of = len(edgeChoicesList)
-	edgeChoicesListItems = [
-	    trisAlt.get(edgeChoicesList[i]) for i in range(nr_of)
-	]
 	Heptagons.FldHeptagonCtrlWin.__init__(this,
 	    shape, (745, 765), canvas,
 	    3, # maxHeigth
-	    edgeChoicesList, edgeChoicesListItems,
 	    [ # prePosLst
 		Stringify[only_hepts],
 		Stringify[only_xtra_o3s],
