@@ -775,7 +775,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	maxHeight: max translation height to be used for the heptagon
 	edgeChoicesList: string list that expresses which possibilities exist
 	                 for filling the holes between the heptagons.
-	edgeChoicesListItems: ID list for the edgeChoicesList, i.e. in enums
 	prePosLst: string list that expresses which special positions can be
 	           found, e.g. where all holes disappear.
 	stringify: hash table that maps enums on strings.
@@ -814,7 +813,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.heightF = 40 # slider step factor, or: 1 / slider step
 
         this.Guis = []
-	# TODO: rm as this.field
+	# TODO: rm as this.field?
 	this.edgeChoicesList = [
 	    Stringify[trisAlt.strip_1_loose],
 	    Stringify[trisAlt.strip_I],
@@ -826,39 +825,45 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    Stringify[trisAlt.alt_strip_1_loose],
 	]
 	nr_of = len(this.edgeChoicesList)
-	# TODO: rm as this.field
+	# TODO: rm as this.field? or use as below?
 	this.edgeChoicesListItems = [
 	    trisAlt.key[this.edgeChoicesList[i]] for i in range(nr_of)
 	]
 
         # static adjustments
-        this.trisAltGui = wx.RadioBox(this.panel,
+        this.trisFillGui = wx.RadioBox(this.panel,
                 label = 'Triangle Fill Alternative',
                 style = wx.RA_VERTICAL,
                 choices = this.edgeChoicesList
             )
-        this.Guis.append(this.trisAltGui)
-        this.trisAltGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+        this.Guis.append(this.trisFillGui)
+        this.trisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
 
-        this.oppTrisAltGui = wx.RadioBox(this.panel,
+	this.choiceListOppTrisFill = [
+	    Stringify[trisAlt.strip_I],
+	    Stringify[trisAlt.strip_II],
+	    Stringify[trisAlt.star],
+	]
+	nr_of = len(this.choiceListOppTrisFill)
+	this.choiceListItemsOppTrisFill = {}
+	for i in range(nr_of):
+	    this.choiceListItemsOppTrisFill[this.choiceListOppTrisFill[i]] = i
+        this.oppTrisFillGui = wx.RadioBox(this.panel,
                 label = 'Opposite Triangle Fill Alternative',
                 style = wx.RA_VERTICAL,
-		choices = [
-		    Stringify[trisAlt.strip_I],
-		    Stringify[trisAlt.strip_II],
-		    Stringify[trisAlt.star],
-		]
+		choices = this.choiceListOppTrisFill
             )
-        this.Guis.append(this.oppTrisAltGui)
-        this.oppTrisAltGui.Bind(wx.EVT_RADIOBOX, this.onOppTriangleAlt)
-        this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
+        this.Guis.append(this.oppTrisFillGui)
+        this.oppTrisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+        this.shape.setEdgeAlternative(
+		this.trisAlt & ~alt_bit,
+		this.oppTrisAlt & ~alt_bit
+	    )
 
-	# CONTINUE HERE: add loose check button and alt button
-	# TODO
-        #this.oppTriAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
-        #this.Guis.append(this.oppTriAltGui)
-        #this.applySymGui.SetValue(..)
-	# Bind
+        this.oppTrisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
+        this.Guis.append(this.oppTrisAltGui)
+        this.oppTrisAltGui.SetValue(this.oppTrisAlt & alt_bit == alt_bit)
+        this.oppTrisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -938,11 +943,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             )
         this.Guis.append(this.posAngleGui)
         this.posAngleGui.Bind(wx.EVT_SLIDER, this.onPosAngle)
+	this.minFoldAngle = -180
+	this.maxFoldAngle =  180
         this.dihedralAngleGui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.dihedralAngle,
-                minValue = -180,
-                maxValue =  180,
+                minValue = this.minFoldAngle,
+                maxValue = this.maxFoldAngle,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.dihedralAngleGui)
@@ -950,8 +957,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.fold1Gui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.fold1,
-                minValue = -180,
-                maxValue =  180,
+                minValue = this.minFoldAngle,
+                maxValue = this.maxFoldAngle,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.fold1Gui)
@@ -959,8 +966,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.fold2Gui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.fold2,
-                minValue = -180,
-                maxValue =  180,
+                minValue = this.minFoldAngle,
+                maxValue = this.maxFoldAngle,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.fold2Gui)
@@ -968,8 +975,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.fold1OppGui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.oppFold1,
-                minValue = -180,
-                maxValue =  180,
+                minValue = this.minFoldAngle,
+                maxValue = this.maxFoldAngle,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.fold1OppGui)
@@ -977,8 +984,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.fold2OppGui = wx.Slider(
                 this.panel,
                 value = Geom3D.Rad2Deg * this.shape.oppFold2,
-                minValue = -180,
-                maxValue =  180,
+                minValue = this.minFoldAngle,
+                maxValue = this.maxFoldAngle,
 		style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
         this.Guis.append(this.fold2OppGui)
@@ -993,10 +1000,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Guis.append(this.heightGui)
         this.heightGui.Bind(wx.EVT_SLIDER, this.onHeight)
 	if this.shape.inclReflections:
-	    this.posAngleGui.Disable()
-	    this.fold1OppGui.Disable()
-	    this.fold2OppGui.Disable()
-	    this.oppTrisAltGui.Disable()
+	    this.disableGuisNoRefl()
 
         # Sizers
         this.Boxes = []
@@ -1026,10 +1030,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 	# Alterntives of filling with triangles
         fillSizer = wx.BoxSizer(wx.VERTICAL)
-        fillSizer.Add(this.trisAltGui, 0, wx.EXPAND)
+        fillSizer.Add(this.trisFillGui, 0, wx.EXPAND)
         fillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
         # Alternatives only if no reflections
         oppFillSizer = wx.BoxSizer(wx.VERTICAL)
+        oppFillSizer.Add(this.oppTrisFillGui, 0, wx.EXPAND)
         oppFillSizer.Add(this.oppTrisAltGui, 0, wx.EXPAND)
         oppFillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
@@ -1183,35 +1188,68 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.updateShape = True
         this.canvas.paint()
 
+    def correctOppTrisFillSettings(this):
+	# TODO fix assert statement in this.oppTrisAlt here:
+	#	if this.trisAlt & loose_bit:
+	#	    # TODO fix in correctOppTrisFillSettings
+	#	    assert oppTrisAlt != trisAlt.strip_II
+	this.oppTrisFillGui.ShowItem(
+	    this.choiceListItemsOppTrisFill[Stringify[trisAlt.star]],
+	    not this.oppTrisAltGui.IsChecked()
+	)
+	if trisAlt.key[this.oppTrisFillGui.GetStringSelection()
+						    ] == trisAlt.star:
+	    this.oppTrisAltGui.Disable()
+	else:
+	    this.oppTrisAltGui.Enable()
+
+    def disableSlidersNoRefl(this):
+	this.fold1OppGui.Disable()
+	this.fold2OppGui.Disable()
+	this.posAngleGui.Disable()
+	# the code below is added to be able to check and uncheck "Has
+	# Reflections" in a "undo" kind of way.
+	this.__sav_oppFld1 = this.shape.oppFold1
+	this.__sav_oppFld2 = this.shape.oppFold2
+	this.__sav_posAngle = this.shape.posAngle
+	this.shape.setFold1(oppositeAngle = this.shape.fold1)
+	this.shape.setFold2(oppositeAngle = this.shape.fold2)
+	this.shape.setPosAngle(0)
+	this.fold1OppGui.SetValue(this.minFoldAngle)
+	this.fold2OppGui.SetValue(this.minFoldAngle)
+	this.posAngleGui.SetValue(0)
+
+    def enableSlidersNoRefl(this):
+	this.fold1OppGui.Enable()
+	this.fold2OppGui.Enable()
+	this.posAngleGui.Enable()
+	# the code below is added to be able to check and uncheck "Has
+	# Reflections" in a "undo" kind of way.
+	this.shape.setFold1(oppositeAngle = this.__sav_oppFld1)
+	this.shape.setFold2(oppositeAngle = this.__sav_oppFld2)
+	this.shape.setPosAngle(this.__sav_posAngle)
+	this.fold1OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld1)
+	this.fold2OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld2)
+	this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.__sav_posAngle)
+
+    def disableGuisNoRefl(this):
+	this.oppTrisFillGui.Disable()
+	this.oppTrisAltGui.Disable()
+	this.disableSlidersNoRefl()
+
+    def enableGuisNoRefl(this):
+	this.oppTrisFillGui.Enable()
+	this.correctOppTrisFillSettings()
+	this.enableSlidersNoRefl()
+
     def onNoRefl(this, event):
         this.shape.inclReflections = not this.noReflGui.IsChecked()
         if this.shape.inclReflections:
-		this.fold1OppGui.Disable()
-		this.fold2OppGui.Disable()
-		this.posAngleGui.Disable()
-		this.oppTrisAltGui.Disable()
-		# the code below is added to be able to check and uncheck "Has
-		# Reflections" in a "undo" kind of way.
-		this.shape.setFold1(oppositeAngle = this.shape.fold1)
-		this.shape.setFold2(oppositeAngle = this.shape.fold2)
-		this.shape.setPosAngle(0)
+		this.disableGuisNoRefl()
 		this.shape.updateShape = True
 		this.canvas.paint()
-		# Don't do the below, so the use can undo by unchecking this.
-		#this.posAngleGui.SetValue(0)
 	else:
-		this.fold1OppGui.Enable()
-		this.fold2OppGui.Enable()
-		this.posAngleGui.Enable()
-		this.oppTrisAltGui.Enable()
-		# the code below is added to be able to check and uncheck "Has
-		# Reflections" in a "undo" kind of way.
-		this.shape.setFold1(
-		    oppositeAngle = Geom3D.Deg2Rad * this.fold1OppGui.GetValue())
-		this.shape.setFold2(
-		    oppositeAngle = Geom3D.Deg2Rad * this.fold2OppGui.GetValue())
-		this.shape.setPosAngle(
-		    Geom3D.Deg2Rad * this.posAngleGui.GetValue())
+		this.enableGuisNoRefl()
 		this.shape.updateShape = True
 		this.canvas.paint()
 
@@ -1224,28 +1262,32 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     @property
     def trisAlt(this):
-        return trisAlt.key[this.trisAltGui.GetStringSelection()]
+        return trisAlt.key[this.trisFillGui.GetStringSelection()]
 
     @property
     def oppTrisAlt(this):
-	if this.shape.inclReflections:
-	    return this.trisAlt
-	else:
-	    oppTrisAlt = trisAlt.key[this.oppTrisAltGui.GetStringSelection()]
-	    if this.trisAlt & loose_bit:
-		assert oppTrisAlt != trisAlt.strip_II
-		oppTrisAlt = oppTrisAlt | loose_bit
+	try:
+	    return this.__oppTrisAlt
+	except AttributeError:
+	    if this.shape.inclReflections:
+		oppTrisAlt = this.trisAlt
+	    else:
+		oppTrisAlt = trisAlt.key[
+				    this.oppTrisFillGui.GetStringSelection()]
+		if this.oppTrisAltGui.IsChecked():
+		    oppTrisAlt = oppTrisAlt | alt_bit
+		if this.trisAlt & loose_bit:
+		    # TODO fix in correctOppTrisFillSettings
+		    assert oppTrisAlt != trisAlt.strip_II
+		    oppTrisAlt = oppTrisAlt | loose_bit
+	    this.__oppTrisAlt = oppTrisAlt
+	    print 'DBG oppTrisAlt', Stringify[oppTrisAlt]
 	    return oppTrisAlt
 
     def onTriangleAlt(this, event):
-        this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
-        if this.isPrePos():
-            this.onPrePos()
-        else:
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
-
-    def onOppTriangleAlt(this, event):
+	if not this.shape.inclReflections:
+	    this.correctOppTrisFillSettings()
+	del this.__oppTrisAlt
         this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
         if this.isPrePos():
             this.onPrePos()
@@ -1324,18 +1366,18 @@ class FldHeptagonCtrlWin(wx.Frame):
 		for k in this.specPos[sel][this.foldMethod].iterkeys():
 		    for i in range(len(this.edgeChoicesListItems)):
 			if this.edgeChoicesListItems[i] == k:
-			    this.trisAltGui.SetSelection(i)
+			    this.trisFillGui.SetSelection(i)
 			    this.setTrisAlt(k)
 			    this.shape.setEdgeAlternative(k)
 			    break
 		    break
 	    this.addTrisGui.Disable()
-	    this.trisAltGui.Disable()
-	    this.oppTrisAltGui.Disable()
+	    this.trisFillGui.Disable()
+	    this.disableGuisNoRefl()
 	    this.restoreTris = True
 	elif (this.restoreTris):
 	    this.restoreTris = False
-	    this.trisAltGui.Enable()
+	    this.trisFillGui.Enable()
 	    this.addTrisGui.Enable()
 	    this.shape.addXtraFs = this.addTrisGui.IsChecked()
 	    # needed for sel == dyn_pos
@@ -1355,7 +1397,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    # currently for all special positions the polyhedron has reflections
 	    # TODO add other special positions: choose by static check box.
 	    #      then rm line below
-	    this.shape.inclReflections = True
 	    this.dihedralAngleGui.Enable()
 	    this.fold1Gui.Enable()
 	    this.fold2Gui.Enable()
@@ -1367,11 +1408,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.fold1Gui.SetValue(val1)
 	    this.fold2Gui.SetValue(val2)
 	    if not this.shape.inclReflections:
-		this.fold1OppGui.SetValue(c.oppFold1)
-		this.fold2OppGui.SetValue(c.oppFold2)
-		this.fold1OppGui.Enable()
-		this.fold2OppGui.Enable()
-		this.posAngleGui.Enable()
+		this.enableGuisNoRefl()
 	    this.heightGui.SetValue(
 		this.maxHeight - this.heightF*c.height)
 	    # enable all folding and triangle alternatives:
@@ -1379,7 +1416,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.foldMethodGui.ShowItem(i, True)
 	    # TODO move into a function and add oppEdgeChoice
 	    for i in range(len(this.edgeChoicesList)):
-		this.trisAltGui.ShowItem(i, True)
+		this.trisFillGui.ShowItem(i, True)
 	else:
             fld1 = this.fld1None
             fld2 = this.fld2None
@@ -1410,7 +1447,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    if this.foldMethod in this.specPos[sel]:
 		for i in range(len(this.edgeChoicesList)):
 		    alt = this.edgeChoicesListItems[i]
-		    this.trisAltGui.ShowItem(
+		    this.trisFillGui.ShowItem(
 			i, alt in this.specPos[sel][this.foldMethod])
 
 	    try:
@@ -1431,19 +1468,14 @@ class FldHeptagonCtrlWin(wx.Frame):
             c.setFold1(fld1)
             c.setFold2(fld2)
 	    this.dihedralAngleGui.SetValue(0)
-	    this.posAngleGui.SetValue(0)
 	    this.fold1Gui.SetValue(0)
 	    this.fold2Gui.SetValue(0)
-	    this.fold1OppGui.SetValue(0)
-	    this.fold2OppGui.SetValue(0)
 	    this.heightGui.SetValue(0)
 	    this.dihedralAngleGui.Disable()
-	    this.posAngleGui.Disable()
 	    this.fold1Gui.Disable()
 	    this.fold2Gui.Disable()
-	    this.fold1OppGui.Disable()
-	    this.fold2OppGui.Disable()
 	    this.heightGui.Disable()
+	    this.enableGuisNoRefl()
             if ( tVal == this.tNone and aVal == this.aNone and
 		    fld1 == this.fld1None and fld2 == this.fld2None
 	    ):
