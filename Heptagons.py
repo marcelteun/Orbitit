@@ -500,7 +500,7 @@ class RegularHeptagon:
         #           4         3
         #
         #
-	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a)
+	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a1)
 	V1 = Rot0_3 * this.VsOrg[1]
 	V2 = Rot0_3 * this.VsOrg[2]
 	Rot0_2 = Rot(axis = V2 - this.VsOrg[0], angle = b0)
@@ -773,8 +773,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	size: default size of the frame
 	canvas: wx canvas to be used
 	maxHeight: max translation height to be used for the heptagon
-	edgeChoicesList: string list that expresses which possibilities exist
-	                 for filling the holes between the heptagons.
 	prePosLst: string list that expresses which special positions can be
 	           found, e.g. where all holes disappear.
 	stringify: hash table that maps enums on strings.
@@ -813,57 +811,54 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.heightF = 40 # slider step factor, or: 1 / slider step
 
         this.Guis = []
-	# TODO: rm as this.field?
-	this.edgeChoicesList = [
-	    Stringify[trisAlt.strip_1_loose],
+	this.choiceListTrisFill = [
 	    Stringify[trisAlt.strip_I],
 	    Stringify[trisAlt.strip_II],
 	    Stringify[trisAlt.star],
-	    Stringify[trisAlt.star_1_loose],
-	    Stringify[trisAlt.alt_strip_I],
-	    Stringify[trisAlt.alt_strip_II],
-	    Stringify[trisAlt.alt_strip_1_loose],
 	]
-	nr_of = len(this.edgeChoicesList)
-	# TODO: rm as this.field? or use as below?
-	this.edgeChoicesListItems = [
-	    trisAlt.key[this.edgeChoicesList[i]] for i in range(nr_of)
-	]
+	nr_of = len(this.choiceListTrisFill)
+	this.choiceListItemsTrisFill = {}
+	for i in range(nr_of):
+	    this.choiceListItemsTrisFill[this.choiceListTrisFill[i]] = i
 
         # static adjustments
         this.trisFillGui = wx.RadioBox(this.panel,
                 label = 'Triangle Fill Alternative',
                 style = wx.RA_VERTICAL,
-                choices = this.edgeChoicesList
+		choices = this.choiceListTrisFill
             )
         this.Guis.append(this.trisFillGui)
         this.trisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
 
-	this.choiceListOppTrisFill = [
-	    Stringify[trisAlt.strip_I],
-	    Stringify[trisAlt.strip_II],
-	    Stringify[trisAlt.star],
-	]
-	nr_of = len(this.choiceListOppTrisFill)
-	this.choiceListItemsOppTrisFill = {}
-	for i in range(nr_of):
-	    this.choiceListItemsOppTrisFill[this.choiceListOppTrisFill[i]] = i
+        this.trisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
+        this.Guis.append(this.trisAltGui)
+        this.trisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+
+        this.looseTriGui = wx.CheckBox(this.panel, label = 'One Loose Triangle')
+        this.Guis.append(this.looseTriGui)
+        this.looseTriGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+
         this.oppTrisFillGui = wx.RadioBox(this.panel,
-                label = 'Opposite Triangle Fill Alternative',
+                label = 'Neighbour Fill Alternative',
                 style = wx.RA_VERTICAL,
-		choices = this.choiceListOppTrisFill
+		choices = this.choiceListTrisFill
             )
         this.Guis.append(this.oppTrisFillGui)
         this.oppTrisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+
+        this.oppTrisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
+        this.Guis.append(this.oppTrisAltGui)
+        this.oppTrisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+
         this.shape.setEdgeAlternative(
 		this.trisAlt & ~alt_bit,
 		this.oppTrisAlt & ~alt_bit
 	    )
 
-        this.oppTrisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
-        this.Guis.append(this.oppTrisAltGui)
-        this.oppTrisAltGui.SetValue(this.oppTrisAlt & alt_bit == alt_bit)
-        this.oppTrisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+        this.reflGui = wx.CheckBox(this.panel, label = 'Reflections Required')
+        this.Guis.append(this.reflGui)
+        this.reflGui.SetValue(this.shape.inclReflections)
+        this.reflGui.Bind(wx.EVT_CHECKBOX, this.onRefl)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -875,11 +870,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Guis.append(this.addTrisGui)
         this.addTrisGui.SetValue(this.shape.addXtraFs)
         this.addTrisGui.Bind(wx.EVT_CHECKBOX, this.onAddTriangles)
-        this.noReflGui = wx.CheckBox(this.panel,
-				label = 'No Reflection Symmetries Required')
-        this.Guis.append(this.noReflGui)
-        this.noReflGui.SetValue(not this.shape.inclReflections)
-        this.noReflGui.Bind(wx.EVT_CHECKBOX, this.onNoRefl)
 
         # static adjustments
 	l = this.foldMethodList = [
@@ -1031,11 +1021,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 	# Alterntives of filling with triangles
         fillSizer = wx.BoxSizer(wx.VERTICAL)
         fillSizer.Add(this.trisFillGui, 0, wx.EXPAND)
+        fillSizer.Add(this.trisAltGui, 0, wx.EXPAND)
+        fillSizer.Add(this.looseTriGui, 0, wx.EXPAND)
         fillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
         # Alternatives only if no reflections
         oppFillSizer = wx.BoxSizer(wx.VERTICAL)
         oppFillSizer.Add(this.oppTrisFillGui, 0, wx.EXPAND)
         oppFillSizer.Add(this.oppTrisAltGui, 0, wx.EXPAND)
+        oppFillSizer.Add(this.reflGui, 0, wx.EXPAND)
         oppFillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1079,7 +1072,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
-        specPosDynamic.Add(this.noReflGui, 0, wx.EXPAND)
         specPosDynamic.Add(posAngleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(oppFold1Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(oppFold2Sizer, 0, wx.EXPAND)
@@ -1188,13 +1180,20 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.updateShape = True
         this.canvas.paint()
 
+    def correctTrisFillSettings(this):
+	this.trisFillGui.ShowItem(
+	    this.choiceListItemsTrisFill[Stringify[trisAlt.star]],
+	    not this.trisAltGui.IsChecked()
+	)
+	if trisAlt.key[this.trisFillGui.GetStringSelection()] == trisAlt.star:
+	    this.trisAltGui.Disable()
+	else:
+	    this.trisAltGui.Enable()
+
+    # Similarly for the opposite fill
     def correctOppTrisFillSettings(this):
-	# TODO fix assert statement in this.oppTrisAlt here:
-	#	if this.trisAlt & loose_bit:
-	#	    # TODO fix in correctOppTrisFillSettings
-	#	    assert oppTrisAlt != trisAlt.strip_II
 	this.oppTrisFillGui.ShowItem(
-	    this.choiceListItemsOppTrisFill[Stringify[trisAlt.star]],
+	    this.choiceListItemsTrisFill[Stringify[trisAlt.star]],
 	    not this.oppTrisAltGui.IsChecked()
 	)
 	if trisAlt.key[this.oppTrisFillGui.GetStringSelection()
@@ -1202,6 +1201,25 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.oppTrisAltGui.Disable()
 	else:
 	    this.oppTrisAltGui.Enable()
+
+    def correctLooseTrisFillSettings(this):
+	# As long as the loose variant is chosen you cannot select strip II
+	noLooseTriangle = not this.looseTriGui.IsChecked()
+	this.oppTrisFillGui.ShowItem(
+	    this.choiceListItemsTrisFill[Stringify[trisAlt.strip_II]],
+	    noLooseTriangle
+	)
+	this.trisFillGui.ShowItem(
+	    this.choiceListItemsTrisFill[Stringify[trisAlt.strip_II]],
+	    noLooseTriangle
+	)
+	# As long as a strip_II variant is used you cannot use a loose triangle
+	selTrisAlt = trisAlt.key[this.trisFillGui.GetStringSelection()]
+	selOppTrisAlt = trisAlt.key[this.oppTrisFillGui.GetStringSelection()]
+	if selTrisAlt == trisAlt.strip_II or selOppTrisAlt == trisAlt.strip_II:
+	    this.looseTriGui.Disable()
+	else:
+	    this.looseTriGui.Enable()
 
     def disableSlidersNoRefl(this):
 	this.fold1OppGui.Disable()
@@ -1239,11 +1257,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def enableGuisNoRefl(this):
 	this.oppTrisFillGui.Enable()
+	this.correctLooseTrisFillSettings()
 	this.correctOppTrisFillSettings()
 	this.enableSlidersNoRefl()
 
-    def onNoRefl(this, event):
-        this.shape.inclReflections = not this.noReflGui.IsChecked()
+    def onRefl(this, event):
+        this.shape.inclReflections = this.reflGui.IsChecked()
         if this.shape.inclReflections:
 		this.disableGuisNoRefl()
 		this.shape.updateShape = True
@@ -1255,14 +1274,24 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def isPrePos(this):
 	# TODO: move to offspring
-        return this.prePosGui.GetSelection() != len(this.prePosLst) - 1
+        return this.prePosGui.GetStringSelection() != this.prePosLst[-1]
 
     def setTrisAlt(this, i):
 	assert False, "TODO"
 
     @property
     def trisAlt(this):
-        return trisAlt.key[this.trisFillGui.GetStringSelection()]
+	try:
+	    return this.__trisAlt
+	except AttributeError:
+	    this.__trisAlt = trisAlt.key[this.trisFillGui.GetStringSelection()]
+	    if this.trisAltGui.IsChecked():
+		this.__trisAlt = this.__trisAlt | alt_bit
+	    if this.looseTriGui.IsChecked():
+		assert this.__trisAlt != trisAlt.strip_II
+		this.__trisAlt = this.__trisAlt | loose_bit
+
+	    return this.__trisAlt
 
     @property
     def oppTrisAlt(this):
@@ -1276,18 +1305,20 @@ class FldHeptagonCtrlWin(wx.Frame):
 				    this.oppTrisFillGui.GetStringSelection()]
 		if this.oppTrisAltGui.IsChecked():
 		    oppTrisAlt = oppTrisAlt | alt_bit
-		if this.trisAlt & loose_bit:
-		    # TODO fix in correctOppTrisFillSettings
+		if this.looseTriGui.IsChecked():
 		    assert oppTrisAlt != trisAlt.strip_II
 		    oppTrisAlt = oppTrisAlt | loose_bit
 	    this.__oppTrisAlt = oppTrisAlt
-	    print 'DBG oppTrisAlt', Stringify[oppTrisAlt]
 	    return oppTrisAlt
 
     def onTriangleAlt(this, event):
+	this.correctLooseTrisFillSettings()
+	this.correctTrisFillSettings()
 	if not this.shape.inclReflections:
 	    this.correctOppTrisFillSettings()
+	# rm the saved value, it is not valid anymore:
 	del this.__oppTrisAlt
+	del this.__trisAlt
         this.shape.setEdgeAlternative(this.trisAlt, this.oppTrisAlt)
         if this.isPrePos():
             this.onPrePos()
@@ -1362,15 +1393,16 @@ class FldHeptagonCtrlWin(wx.Frame):
 	if (sel == only_hepts):
 	    this.shape.addXtraFs = False
 	    # if legal fold method select first fitting triangle alternative
-	    if this.foldMethod in this.specPos[sel]:
-		for k in this.specPos[sel][this.foldMethod].iterkeys():
-		    for i in range(len(this.edgeChoicesListItems)):
-			if this.edgeChoicesListItems[i] == k:
-			    this.trisFillGui.SetSelection(i)
-			    this.setTrisAlt(k)
-			    this.shape.setEdgeAlternative(k)
-			    break
-		    break
+#TODO TODO TODO
+#	    if this.foldMethod in this.specPos[sel]:
+#		for k in this.specPos[sel][this.foldMethod].iterkeys():
+#		    for i in range(len(this.edgeChoicesListItems)):
+#			if this.edgeChoicesListItems[i] == k:
+#			    this.trisFillGui.SetSelection(i)
+#			    this.setTrisAlt(k)
+#			    this.shape.setEdgeAlternative(k)
+#			    break
+#		    break
 	    this.addTrisGui.Disable()
 	    this.trisFillGui.Disable()
 	    this.disableGuisNoRefl()
@@ -1415,8 +1447,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    for i in range(len(this.foldMethodList)):
 		this.foldMethodGui.ShowItem(i, True)
 	    # TODO move into a function and add oppEdgeChoice
-	    for i in range(len(this.edgeChoicesList)):
-		this.trisFillGui.ShowItem(i, True)
+# TODO TODO TODO
+#	    for i in range(len(this.edgeChoicesList)):
+#		this.trisFillGui.ShowItem(i, True)
 	else:
             fld1 = this.fld1None
             fld2 = this.fld2None
@@ -1444,11 +1477,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 	    # Disable / enable appropriate triangle alternatives.
 	    # if the selected folding has valid solutions anyway
-	    if this.foldMethod in this.specPos[sel]:
-		for i in range(len(this.edgeChoicesList)):
-		    alt = this.edgeChoicesListItems[i]
-		    this.trisFillGui.ShowItem(
-			i, alt in this.specPos[sel][this.foldMethod])
+# TODO TODO TODO
+#	    if this.foldMethod in this.specPos[sel]:
+#		for i in range(len(this.edgeChoicesList)):
+#		    alt = this.edgeChoicesListItems[i]
+#		    this.trisFillGui.ShowItem(
+#			i, alt in this.specPos[sel][this.foldMethod])
 
 	    try:
 		if this.specPos[sel][this.foldMethod][this.trisAlt] != []:
