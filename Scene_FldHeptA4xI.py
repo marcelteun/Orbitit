@@ -280,12 +280,6 @@ class Shape(Heptagons.FldHeptagonShape):
         Vs.append(Rl * Vs[-1])                                 # Vs[16]
         Vs.append(Rl * Vs[5])                                  # Vs[17]
         Vs.append(Rl * Vs[-1])                                 # Vs[18]
-	# OOPS, I cp Vs[11] into Vs[19] and use it as alt 1 in this.triFs
-	# instead of Vs[11], otherwise python crashes with a segementation dump
-	# on my PC... This while I'm still using Vs[11] for the edges...
-	# Ai, scary weird bug....
-	# TODO, remove...
-        Vs.append(Vs[11])                                      # Vs[19]
         this.baseVs = Vs
         Es = []
         Fs = []
@@ -344,7 +338,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	I_loose = [[2, 3, 7], [2, 7, 8]]
 	noLoose = [[2, 3, 8]]
 	stripI  = [[2, 8, 9]]
-	stripII = [[3, 8, 9], [2, 3, 9]]
+	stripII = [[2, 3, 9], [3, 8, 9]]
 	star    = [[1, 2, 8], [1, 8, 9]]
 	strip_1_loose = stripI[:]
 	star_1_loose  = star[:]
@@ -363,7 +357,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_II:       stripII[:],
 	}
 	stdO3   = [1, 2, 9]
-	altO3   = [2, 9, 19]  #TODO rm, see OOPS above...
+	altO3   = [2, 9, 11]  #TODO rm, see OOPS above...
         this.triFs[trisAlt.strip_1_loose].append(stdO3)
         this.triFs[trisAlt.strip_I].append(stdO3)
         this.triFs[trisAlt.strip_II].append(stdO3)
@@ -372,7 +366,7 @@ class Shape(Heptagons.FldHeptagonShape):
         this.triFs[trisAlt.alt_strip_II].append(altO3)
 	noLoose = [[3, 7, 8]]
 	stripI  = [[5, 15, 14]]
-	stripII = [[4, 15, 14], [4, 5, 15]]
+	stripII = [[4, 5, 15], [4, 15, 14]]
 	star    = [[5, 6, 14], [6, 15, 14]]
 	strip_1_loose = stripI[:]
 	star_1_loose  = star[:]
@@ -397,10 +391,24 @@ class Shape(Heptagons.FldHeptagonShape):
         this.oppTriFs[trisAlt.alt_strip_I].append(altO3)
         this.oppTriFs[trisAlt.alt_strip_II].append(altO3)
 
+	strip = [0, 1, 1, 1, 0, 0]
+	loose = [0, 0, 1, 1, 0, 1]
+	star1loose = [0, 1, 0, 1, 0, 1]
+        this.triColIds = {
+                trisAlt.strip_1_loose:		loose,
+                trisAlt.strip_I:		strip,
+                trisAlt.strip_II:		strip,
+                trisAlt.star:			strip,
+                trisAlt.star_1_loose:		star1loose,
+                trisAlt.alt_strip_I:		strip,
+                trisAlt.alt_strip_II:		strip,
+                trisAlt.alt_strip_1_loose:	loose,
+            }
+
 	#            5" = 18                 12 = 2"
 	#    6" = 16                                 10 = 1"
         #                           0
-        # 5' = 17     o3                         o3      11 = 2' ( = 19)
+        # 5' = 17     o3                         o3      11 = 2'
         #                    6             1
         #
         #       6' = 15                           9 = 1'
@@ -437,23 +445,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_II:		[alt],
                 trisAlt.alt_strip_1_loose:	[alt],
 	    }
-	strip = [0, 1, 1, 0, 0, 1]
-	loose = [0, 1, 0, 0, 1, 1]
-        this.triColIds = {
-                trisAlt.strip_1_loose:		loose,
-                trisAlt.strip_I:		strip,
-                trisAlt.strip_II:		strip,
-                trisAlt.star:			strip,
-                trisAlt.star_1_loose:		loose,
-                trisAlt.alt_strip_I:		strip,
-                trisAlt.alt_strip_II:		strip,
-                trisAlt.alt_strip_1_loose:	loose,
-            }
 
 	#            5" = 18                 12 = 2"
 	#    6" = 16                                 10 = 1"
         #                           0
-        # 5' = 17     o3                         o3      11 = 2' ( = 19)
+        # 5' = 17     o3                         o3      11 = 2'
         #                    6             1
         #
         #       6' = 15                           9 = 1'
