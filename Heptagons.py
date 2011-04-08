@@ -1304,12 +1304,19 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.__slidersNoRelfEnabled = True
 
     def disableGuisNoRefl(this):
+	this.__sav_oppTrisFill = this.oppTrisFill
+	this.setTrisFill(this.trisFill, this.trisFill)
+	del this.__oppTrisFill
+        this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 	this.oppTrisFillGui.Disable()
 	this.oppTrisAltGui.Disable()
 	this.disableSlidersNoRefl()
 
     def enableGuisNoRefl(this):
 	this.oppTrisFillGui.Enable()
+	this.setTrisFill(this.trisFill, this.__sav_oppTrisFill)
+	del this.__oppTrisFill
+        this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 	this.correctLooseTrisFillSettings()
 	this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
 	this.enableSlidersNoRefl()
@@ -1366,10 +1373,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	oppTris = oppTris & ~alt_bit
 	tris_index = this.choiceListItemsTrisFill[Stringify[tris]]
 	#this.trisFillGui.ShowItem(tris_index)
-	this.trisFillGui.SetValue(tris_index)
+	this.trisFillGui.SetSelection(tris_index)
 	tris_index = this.choiceListItemsTrisFill[Stringify[oppTris]]
 	#this.oppTrisFillGui.ShowItem(tris_index)
-	this.oppTrisFillGui.SetValue(tris_index)
+	this.oppTrisFillGui.SetSelection(tris_index)
 
     @property
     def trisFill(this):
