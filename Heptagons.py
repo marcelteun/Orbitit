@@ -1341,6 +1341,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.enableGuisNoRefl()
 		this.shape.updateShape = True
 		this.canvas.paint()
+	this.statusBar.SetStatusText(this.shape.getStatusStr())
 
     def isPrePos(this):
 	# TODO: move to offspring

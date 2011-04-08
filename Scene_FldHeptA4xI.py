@@ -155,54 +155,27 @@ class Shape(Heptagons.FldHeptagonShape):
         if this.updateShape:
             #print 'getStatusStr: forced setV'
             this.setV()
-	#            5" = 17                 12 = 2"
-	#    6" = 15                                 10 = 1"
-        #                           0
-        # 5' = 16     o3                         o3      11 = 2'
-        #                    6             1
-        #
-        #       6' = 14                           9 = 1'
-        #
-        #                  5                 2
-        #
-        #
-        #              13       4       3        8 = 0'
-        #
-        #
-        #                                    7 = 6'
-	return "TODO"
         Vs = this.baseVs
-	cleanEdgeAlt = this.edgeAlternative & alt_bit
-        if cleanEdgeAlt == trisAlt.strip_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-        elif cleanEdgeAlt == trisAlt.strip_I:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-        elif cleanEdgeAlt == trisAlt.strip_II:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[3], Vs[9])
-            cLen = Vlen(Vs[2], Vs[9])
-        elif cleanEdgeAlt == trisAlt.star:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[1], Vs[8])
-        elif cleanEdgeAlt == trisAlt.star_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[1], Vs[8])
+	Es = this.triEs[this.edgeAlternative]
+	aLen = Vlen(Vs[Es[0]], Vs[Es[1]])
+	bLen = Vlen(Vs[Es[2]], Vs[Es[3]])
+	cLen = Vlen(Vs[Es[4]], Vs[Es[5]])
+	Es = this.o3triEs[this.edgeAlternative]
+	dLen = Vlen(Vs[Es[0]], Vs[Es[1]])
+	if this.inclReflections:
+	    s = 'T = %02.2f; |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
+		    this.height, aLen, bLen, cLen, dLen
+		)
 	else:
-	    raise TypeError, 'Unknown edgeAlternative %d (%d)' % (
-		this.edgeAlternative, cleanEdgeAlt)
-	if (this.edgeAlternative & alt_bit) == alt_bit:
-            dLen = Vlen(Vs[2], Vs[11])
-	else:
-            dLen = Vlen(Vs[1], Vs[9])
-        s = 'T = %02.2f; |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
-                this.height, aLen, bLen, cLen, dLen
-            )
+	    Es = this.oppTriEs[this.oppEdgeAlternative]
+	    opp_bLen = Vlen(Vs[Es[0]], Vs[Es[1]])
+	    opp_cLen = Vlen(Vs[Es[2]], Vs[Es[3]])
+	    Es = this.oppO3triEs[this.oppEdgeAlternative]
+	    opp_dLen = Vlen(Vs[Es[0]], Vs[Es[1]])
+	    s = 'T = %02.2f; |a|: %02.2f, |b|: %02.2f (%02.2f), |c|: %02.2f (%02.2f), |d|: %02.2f (%02.2f)' % (
+		    this.height,
+		    aLen, bLen, opp_bLen, cLen, opp_cLen, dLen, opp_dLen
+		)
         return s
 
     def correctEdgeAlternative(this):
