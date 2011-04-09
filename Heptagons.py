@@ -329,17 +329,26 @@ class RegularHeptagon:
                     this.VsOrg[1][1] + cosa * dV3[0] - sina * dV3[1],
                     this.VsOrg[1][2] + cosa * dV3[1] + sina * dV3[0]
                 ])
+            V4 = Vec([-V3[0], V3[1], V3[2]])
             V1V3 = (this.VsOrg[1] + V3)/2
-            V1V3axis = Vec([V3 - this.VsOrg[1]])
+            V1V3axis = Vec(V3 - this.VsOrg[1])
             r = Rot(axis = V1V3axis, angle = b0)
             V2 = V1V3 + r * (V2_ - V1V3)
+	    if not Geom3D.eq(b0, b1):
+		V5 = Vec([-V2[0], V2[1], V2[2]])
+	    else:
+		V4V6 = (V4 + this.VsOrg[6])/2
+		V4V6axis = Vec(this.VsOrg[6] - V4)
+		r = Rot(axis = V4V6axis, angle = b1)
+		V5_ = Vec([-V2_[0], V2_[1], V2_[2]])
+		V5 = V4V6 + r * (V5_ - V4V6)
             this.Vs = [
                     this.VsOrg[0],
                     this.VsOrg[1],
                     V2,
                     V3,
-                    Vec([-V3[0], V3[1], V3[2]]),
-                    Vec([-V2[0], V2[1], V2[2]]),
+		    V4,
+		    V5,
                     this.VsOrg[6]
                 ]
         else:
@@ -356,15 +365,82 @@ class RegularHeptagon:
             V1V3axis = Vec(this.VsOrg[3] - this.VsOrg[1])
             r = Rot(axis = V1V3axis, angle = b0)
             V2 = V1V3 + r * (this.VsOrg[2] - V1V3)
+	    if Geom3D.eq(b0, b1):
+		V5 = Vec([-V2[0], V2[1], V2[2]])
+	    else:
+		V4V6 = (this.VsOrg[4] + this.VsOrg[6])/2
+		V4V6axis = Vec(this.VsOrg[6] - this.VsOrg[4])
+		r = Rot(axis = V4V6axis, angle = b1)
+		V5 = V4V6 + r * (this.VsOrg[5] - V4V6)
             this.Vs = [
                     V0,
                     this.VsOrg[1],
                     V2,
                     this.VsOrg[3],
                     this.VsOrg[4],
-                    Vec([-V2[0], V2[1], V2[2]]),
+                    V5,
                     this.VsOrg[6]
                 ]
+
+    def foldTriangle(this, a, b0, b1, keepV0 = True):
+        """
+        Fold around 3 triangular diagonals from V0.
+
+        The fold angle a refers the the axes V0-V2 and V0-V5 and
+        the fold angle b refers the the axis V2-V5.
+        If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
+        folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
+        """
+        #
+        #                0
+        #               _^_
+        #         6   _/   \_   1
+        #           _/       \_
+        # axis b0 _/           \_ axis b1
+        #        /               \
+        #       5 --------------- 2  axis a
+        #
+        #
+        #            4       3
+        #
+        this.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		0, 2, 2, 5, 5, 0
+	    ]
+	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = b0)
+	V1 = Rot0_2 * this.VsOrg[1]
+	if (Geom3D.eq(b0, b1)):
+	    V6 = Vec([-V1[0], V1[1], V1[2]])
+	else:
+	    Rot5_0 = Rot(axis = this.VsOrg[0] - this.VsOrg[5], angle = b1)
+	    V6 = Rot5_0 * this.VsOrg[6]
+	V2 = this.VsOrg[2]
+	if keepV0:
+	    Rot5_2 = Rot(axis = this.VsOrg[5] - this.VsOrg[2], angle = a)
+	    V3 = Rot5_2 * (this.VsOrg[3] - V2) + V2
+	    this.Vs = [
+		    this.VsOrg[0],
+		    V1,
+		    this.VsOrg[2],
+		    V3,
+		    Vec([-V3[0], V3[1], V3[2]]),
+		    this.VsOrg[5],
+		    V6,
+		]
+	else:
+	    Rot2_5 = Rot(axis = this.VsOrg[2] - this.VsOrg[5], angle = a)
+	    V0 = Rot2_5 * (this.VsOrg[0] - V2) + V2
+	    V1 = Rot2_5 * (V1 - V2) + V2
+	    V6 = Rot2_5 * (V6 - V2) + V2
+	    this.Vs = [
+		    V0,
+		    V1,
+		    this.VsOrg[2],
+		    this.VsOrg[3],
+		    this.VsOrg[4],
+		    this.VsOrg[5],
+		    V6,
+		]
 
     def foldW(this, a0, b0, a1, b1, keepV0 = True):
         """
@@ -423,61 +499,6 @@ class RegularHeptagon:
 		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
 
-    def foldTriangle(this, a, b0, b1, keepV0 = True):
-        """
-        Fold around 3 triangular diagonals from V0.
-
-        The fold angle a refers the the axes V0-V2 and V0-V5 and
-        the fold angle b refers the the axis V2-V5.
-        If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
-        folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
-        """
-        #
-        #                0
-        #               _^_
-        #         6   _/   \_   1
-        #           _/       \_
-        # axis b0 _/           \_ axis b1
-        #        /               \
-        #       5 --------------- 2  axis a
-        #
-        #
-        #            4       3
-        #
-        #
-        this.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-		0, 2, 2, 5, 5, 0
-	    ]
-	Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = b0)
-	V1 = Rot0_2 * this.VsOrg[1]
-	V2 = this.VsOrg[2]
-	if keepV0:
-	    Rot5_2 = Rot(axis = this.VsOrg[5] - this.VsOrg[2], angle = a)
-	    V3 = Rot5_2 * (this.VsOrg[3] - V2) + V2
-	    this.Vs = [
-		    this.VsOrg[0],
-		    V1,
-		    this.VsOrg[2],
-		    V3,
-		    Vec([-V3[0], V3[1], V3[2]]),
-		    this.VsOrg[5],
-		    Vec([-V1[0], V1[1], V1[2]]),
-		]
-	else:
-	    Rot2_5 = Rot(axis = this.VsOrg[2] - this.VsOrg[5], angle = a)
-	    V0 = Rot2_5 * (this.VsOrg[0] - V2) + V2
-	    V1 = Rot2_5 * (V1 - V2) + V2
-	    this.Vs = [
-		    V0,
-		    V1,
-		    this.VsOrg[2],
-		    this.VsOrg[3],
-		    this.VsOrg[4],
-		    this.VsOrg[5],
-		    Vec([-V1[0], V1[1], V1[2]]),
-		]
-
     def foldStar(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around the 4 diagonals from V0.
@@ -500,20 +521,27 @@ class RegularHeptagon:
         #           4         3
         #
         #
-	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a1)
-	V1 = Rot0_3 * this.VsOrg[1]
+	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
+	V0 = this.VsOrg[0]
+	V1_ = Rot0_3 * this.VsOrg[1]
 	V2 = Rot0_3 * this.VsOrg[2]
-	Rot0_2 = Rot(axis = V2 - this.VsOrg[0], angle = b0)
-	V1 = Rot0_2 * V1
-	this.Vs = [
-		this.VsOrg[0],
-		V1,
-		V2,
-		this.VsOrg[3],
-		this.VsOrg[4],
-		Vec([-V2[0], V2[1], V2[2]]),
-		Vec([-V1[0], V1[1], V1[2]]),
-	    ]
+	Rot0_2 = Rot(axis = V2 - V0, angle = b0)
+	V1 = Rot0_2 * V1_
+	if (Geom3D.eq(a0, a1)):
+	    V5 = Vec([-V2[0], V2[1], V2[2]])
+	    if (Geom3D.eq(b0, b1)):
+		V6 = Vec([-V1[0], V1[1], V1[2]])
+	    else:
+		V6 = Vec([-V1_[0], V1_[1], V1_[2]])
+		Rot5_0 = Rot(axis = V0 - this.VsOrg[5], angle = b1)
+		V6 = Rot5_0 * (V6 - V0) + V0
+	else:
+	    Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
+	    V6 = Rot4_0 * this.VsOrg[6]
+	    V5 = Rot4_0 * this.VsOrg[5]
+	    Rot5_0 = Rot(axis = V0 - this.VsOrg[5], angle = b1)
+	    V6 = Rot5_0 * (V6 - V0) + V0
+	this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
         this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		0, 2, 0, 3, 0, 4, 0, 5
@@ -734,7 +762,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             )
 
     def posHeptagon(this):
-	this.heptagon.fold(this.fold1, this.fold2,
+	this.heptagon.fold(this.fold1, this.fold2, this.oppFold1, this.oppFold2,
 		keepV0 = False, fold = this.foldHeptagon)
 	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
 	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
@@ -829,15 +857,15 @@ class FldHeptagonCtrlWin(wx.Frame):
 		choices = this.choiceListTrisFill
             )
         this.Guis.append(this.trisFillGui)
-        this.trisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+        this.trisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleFill)
 
         this.trisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
         this.Guis.append(this.trisAltGui)
-        this.trisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+        this.trisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleFill)
 
         this.looseTriGui = wx.CheckBox(this.panel, label = 'One Loose Triangle')
         this.Guis.append(this.looseTriGui)
-        this.looseTriGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+        this.looseTriGui.Bind(wx.EVT_CHECKBOX, this.onTriangleFill)
 
         this.oppTrisFillGui = wx.RadioBox(this.panel,
                 label = 'Neighbour Fill Alternative',
@@ -845,11 +873,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 		choices = this.choiceListTrisFill
             )
         this.Guis.append(this.oppTrisFillGui)
-        this.oppTrisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleAlt)
+        this.oppTrisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleFill)
 
         this.oppTrisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
         this.Guis.append(this.oppTrisAltGui)
-        this.oppTrisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleAlt)
+        this.oppTrisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleFill)
 
         this.shape.setEdgeAlternative(
 		this.trisFill & ~alt_bit,
@@ -1270,6 +1298,22 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    noLooseTriangle
 	)
 
+    def allignFoldSlideBarsWithFoldMethod(this):
+	if not this.shape.inclReflections:
+	    if this.foldMethod == FoldMethod.parallel:
+		this.fold1OppGui.Disable()
+		this.fold2OppGui.Disable()
+	    elif (this.foldMethod == FoldMethod.w or
+		this.foldMethod == FoldMethod.star
+	    ):
+		this.fold1OppGui.Enable()
+		this.fold2OppGui.Enable()
+	    elif (this.foldMethod == FoldMethod.trapezium or
+		this.foldMethod == FoldMethod.triangle
+	    ):
+		this.fold1OppGui.Disable()
+		this.fold2OppGui.Enable()
+
     def disableSlidersNoRefl(this):
 	if this.__slidersNoRelfEnabled:
 	    this.fold1OppGui.Disable()
@@ -1290,8 +1334,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def enableSlidersNoRefl(this):
 	if not this.__slidersNoRelfEnabled:
-	    this.fold1OppGui.Enable()
-	    this.fold2OppGui.Enable()
+	    this.allignFoldSlideBarsWithFoldMethod()
 	    this.posAngleGui.Enable()
 	    # the code below is added to be able to check and uncheck "Has
 	    # Reflections" in a "undo" kind of way.
@@ -1410,7 +1453,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.__oppTrisFill = oppTrisFill
 	    return oppTrisFill
 
-    def onTriangleAlt(this, event):
+    def onTriangleFill(this, event):
 	this.correctLooseTrisFillSettings()
 	this.correctTrisFillSettings(this.trisFillGui, this.trisAltGui)
 	if not this.shape.inclReflections:
@@ -1430,6 +1473,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.foldMethodGui.GetSelection()
 	    ]
 	this.shape.setFoldMethod(this.foldMethod)
+	this.allignFoldSlideBarsWithFoldMethod()
         if this.isPrePos():
             this.onPrePos()
         else:
