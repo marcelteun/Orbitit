@@ -1399,10 +1399,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def setTrisFill(this, tris, oppTris):
 	if (tris & loose_bit == loose_bit):
-	    assert(oppTris & loose_bit)
+	    if oppTris & loose_bit != loose_bit:
+		print "Warning: forcing loose opposite triangle fill"
 	    this.looseTriGui.SetValue(True)
 	else:
-	    assert(oppTris & loose_bit == 0)
+	    if oppTris & loose_bit == loose_bit:
+		print "Warning: removing loose opposite triangle fill"
 	    this.looseTriGui.SetValue(False)
 	tris    = tris    & ~loose_bit
 	oppTris = oppTris & ~loose_bit
