@@ -31,6 +31,9 @@ import copy
 import Heptagons
 import GeomTypes
 
+import time
+import random
+
 H         = numx.sin(  numx.pi / 7)
 RhoH      = numx.sin(2*numx.pi / 7)
 SigmaH    = numx.sin(3*numx.pi / 7)
@@ -196,10 +199,10 @@ def FoldedRegularHeptagonsA4xI(c, params):
     params[2] defines which heptagon folding method is used.
     """
 
-    T     = c[0]
-    alpha = c[1]
-    beta  = c[2]
-    gamma = c[3]
+    T     = c[3]
+    alpha = c[2]
+    beta  = c[1]
+    gamma = c[0]
 
     # below are the calculations that are much faster then the generic ones
     # (further below). The former were added to optimise.
@@ -1106,20 +1109,20 @@ def FoldedRegularHeptagonsA4(c, params):
 	and edgeAlternative != TriangleAlt.star1loose
     ):
         # V2 - V14:[ y1, z1, x1], # V14 = V1'
-        cp[3] = numx.sqrt((x2-y1)*(x2-y1) + (y2-z1)*(y2-z1) + (z2-x1)*(z2-x1)) - edgeLengths[3]
+        cp[2] = numx.sqrt((x2-y1)*(x2-y1) + (y2-z1)*(y2-z1) + (z2-x1)*(z2-x1)) - edgeLengths[2]
     else:
         # V1 - V12:[y0,    z0,    x0], # V12 = V0'
-        cp[3] = numx.sqrt((x1-y0)*(x1-y0) + (y1-z0)*(y1-z0) + (z1-x0)*(z1-x0)) - edgeLengths[3]
+        cp[2] = numx.sqrt((x1-y0)*(x1-y0) + (y1-z0)*(y1-z0) + (z1-x0)*(z1-x0)) - edgeLengths[2]
 
     #
     # EDGE D
     #
     if (edgeAlternative & alt1_bit == 0):
 	# V1 - V14:[ y1,    z1,    x1], # V14 = V1'
-	cp[5] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[5]
+	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
     else:
         # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
-	cp[5] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[5]
+	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
 
     # opposite alternative edges, similar as above
     #
@@ -1129,10 +1132,10 @@ def FoldedRegularHeptagonsA4(c, params):
     plain_edge_alt = plain_edge_alt  & ~alt2_bit
     if plain_edge_alt == TriangleAlt.stripII:
         # V3 - V16:[y6, z6, x6], # V16 = V6'
-        cp[2] = numx.sqrt((x3-y6)*(x3-y6) + (y3-z6)*(y3-z6) + (z3-x6)*(z3-x6)) - edgeLengths[2]
+        cp[4] = numx.sqrt((x3-y6)*(x3-y6) + (y3-z6)*(y3-z6) + (z3-x6)*(z3-x6)) - edgeLengths[4]
     else:
         #V9:[-x5, -y5, z5] - V12, # V9 = V5'
-        cp[2] = numx.sqrt((-x5-y0)*(-x5-y0) + (-y5-z0)*(-y5-z0) + (z5-x0)*(z5-x0)) - edgeLengths[2]
+        cp[4] = numx.sqrt((-x5-y0)*(-x5-y0) + (-y5-z0)*(-y5-z0) + (z5-x0)*(z5-x0)) - edgeLengths[4]
     #
     # OPPOSITE EDGE C
     #
@@ -1141,10 +1144,10 @@ def FoldedRegularHeptagonsA4(c, params):
 	and oppoAlternative != TriangleAlt.star1loose
     ):
 	# V9 - V16: V9 = V5' = [-x5, -y5, z5], V16 = V6' = [ y6, z6, x6]
-        cp[4] = numx.sqrt((y6+x5)*(y6+x5) + (z6+y5)*(z6+y5) + (x6-z5)*(x6-z5)) - edgeLengths[4]
+        cp[5] = numx.sqrt((y6+x5)*(y6+x5) + (z6+y5)*(z6+y5) + (x6-z5)*(x6-z5)) - edgeLengths[5]
     else:
         # V8: [-x6, -y6, z6] - V12, # V8 = V6'
-        cp[4] = numx.sqrt((x6+y0)*(x6+y0) + (y6+z0)*(y6+z0) + (x0-z6)*(x0-z6)) - edgeLengths[4]
+        cp[5] = numx.sqrt((x6+y0)*(x6+y0) + (y6+z0)*(y6+z0) + (x0-z6)*(x0-z6)) - edgeLengths[5]
     #
     # OPPOSITE EDGE D
     #
@@ -1277,13 +1280,76 @@ def solutionAlreadyFound(sol, list, precision = 1.e-12):
             break # for old loop
     return found
 
+def RandFindMultiRootOnDomain(domain,
+        edgeAlternative,
+        edgeLengths = [1., 1., 1., 1.],
+	fold = Fold.parallel,
+        method = 1,
+        cleanupF  = None,
+        steps = None,
+        precision = 1e-15,
+        maxIter = 1024,
+	continueTestAt = None,
+	init_results = [],
+	printStatus = False,
+	oppEdgeAlternative = None
+    ):
+    results = init_results[:]
+    if oppEdgeAlternative == None:
+	oppEdgeAlternative = edgeAlternative
+    dLen = len(domain)
+    random.seed()
+    testValue = [
+	random.random() * (domain[i][1] - domain[i][0]) + domain[i][0]
+	for i in range(dLen)
+    ]
+    if printStatus:
+	print testValue
+    while True:
+        try:
+            result = FindMultiRoot(testValue,
+                    edgeAlternative,
+                    edgeLengths,
+		    fold,
+                    method,
+                    cleanupF,
+                    precision,
+                    maxIter,
+                    printIter = False,
+                    quiet     = True,
+		    oppEdgeAlternative = oppEdgeAlternative
+                )
+            if result != None and not solutionAlreadyFound(result, results):
+                results.append(result)
+		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+                print 'added new result nr', len(results),':', result
+        except pygsl.errors.gsl_SingularityError:
+            pass
+        except pygsl.errors.gsl_NoProgressError:
+            pass
+        except pygsl.errors.gsl_JacobianEvaluationError:
+            pass
+        #for i in range(dLen-1, 0, -1):
+        for i in range(dLen):
+            # note that domain[i][1] is not tested if the steps do not end there
+            # explicitely. TODO also test upper limits.
+            testValue[i] += steps[i]
+            if testValue[i] <= domain[i][1]:
+                break # break from for-loop, not from while
+            else:
+                if i != dLen-1:
+                    testValue[i] = domain[i][0]
+		if printStatus:
+		    print testValue
+    return results
+
 def FindMultiRootOnDomain(domain,
         edgeAlternative,
         edgeLengths = [1., 1., 1., 1.],
 	fold = Fold.parallel,
         method = 1,
         cleanupF  = None,
-        stepSize = 0.1, # TODO make this an array to allow different stepsizes for different parameters
+        steps = None,
         precision = 1e-15,
         maxIter = 100,
 	continueTestAt = None,
@@ -1300,6 +1366,8 @@ def FindMultiRootOnDomain(domain,
     else:
 	testValue = continueTestAt[:]
 	print 'continuing search...'
+    if steps == None:
+	steps = [0.1 for e in domain]
     if printStatus:
 	print testValue
     while testValue[-1] < domain[-1][1]:
@@ -1319,6 +1387,7 @@ def FindMultiRootOnDomain(domain,
                 )
             if result != None and not solutionAlreadyFound(result, results):
                 results.append(result)
+		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
                 print 'added new result nr', len(results),':', result
         except pygsl.errors.gsl_SingularityError:
             pass
@@ -1330,7 +1399,7 @@ def FindMultiRootOnDomain(domain,
         for i in range(dLen):
             # note that domain[i][1] is not tested if the steps do not end there
             # explicitely. TODO also test upper limits.
-            testValue[i] += stepSize
+            testValue[i] += steps[i]
             if testValue[i] <= domain[i][1]:
                 break # break from for-loop, not from while
             else:
@@ -1653,30 +1722,41 @@ if __name__ == '__main__':
 
 	pass
     else:
-        Domain = [
-                [-2., 3.],           # Translation
-                [-numx.pi, numx.pi], # angle alpha
-                [-numx.pi, numx.pi], # fold 1 beta
-                [-numx.pi, numx.pi], # fold 2 gamma
-            ]
-
+	printStatus = False
 	def multiRootsLog(fold, edges, tris, oppTris = None):
+	    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
 	    print 'searching %s folds' % str(fold)
 	    result = []
 	    if len(edges) == 4:
-		dom = Domain
+		dom = [
+		    [-numx.pi, numx.pi], # fold 2 gamma
+		    [-numx.pi, numx.pi], # fold 1 beta
+		    [-numx.pi, numx.pi], # angle alpha
+		    [-2., 3.],           # Translation
+		]
+		steps = [0.5, 0.5, 0.3, 0.3]
 	    else:
-		dom = Domain7
-	    result = FindMultiRootOnDomain(dom,
+		dom = [
+		    [-2., 3.],             # Translation
+		    [-numx.pi, numx.pi],   # angle alpha
+		    [0,        numx.pi/4], # delta: around z-axis
+		    [-numx.pi, numx.pi],   # fold 1 beta0
+		    [-numx.pi, numx.pi],   # fold 1 beta1
+		    [-numx.pi, numx.pi],   # fold 2 gamma0
+		    [-numx.pi, numx.pi],   # fold 2 gamma1
+		]
+		steps = [0.5, 0.5, 0.3, 0.3, 0.3, 0.3, 0.3]
+	    result = RandFindMultiRootOnDomain(dom,
+	    #result = FindMultiRootOnDomain(dom,
 		    edgeLengths = edges,
 		    edgeAlternative = tris,
 		    oppEdgeAlternative = oppTris,
 		    fold = fold.fold,
 		    method = Method.hybrids,
 		    cleanupF = cleanupResult,
-		    stepSize = 0.3,
+		    steps = steps,
 		    maxIter = 20,
-		    printStatus = False
+		    printStatus = printStatus
 		)
 	    print '['
 	    if len(edges) == 4:
@@ -1714,7 +1794,11 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	#edges = [0., 0., 1., 0.]
+	edges = [0., 0., 1., 0.]
+	# fold = Fold()
+	# fold.set(fold.w)
+	# multiRootsLog(fold, edges, TriangleAlt.strip1loose)
+	# print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()), 'Done'
 	#batch(edges, TriangleAlt.strip1loose)
 	#batch(edges, TriangleAlt.stripI)
 	#batch(edges, TriangleAlt.stripII)
@@ -2004,19 +2088,9 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-        Domain7 = [
-                [-2., 3.],             # Translation
-                [-numx.pi, numx.pi],   # angle alpha
-                [0,        numx.pi/4], # delta: around z-axis
-                [-numx.pi, numx.pi],   # fold 1 beta0
-                [-numx.pi, numx.pi],   # fold 1 beta1
-                [-numx.pi, numx.pi],   # fold 2 gamma0
-                [-numx.pi, numx.pi],   # fold 2 gamma1
-            ]
-
 	def batch7(edges, tris, oppTris):
 	    fold = Fold()
-	    print 'seraching solutiond for', edges
+	    print 'searching solutiond for', edges
 	    print Stringify[tris], 'triangle alternative'
 	    print Stringify[oppTris], 'opp triangle alternative'
 	    #fold.set(fold.parallel)
@@ -2054,6 +2128,6 @@ if __name__ == '__main__':
 	    batch7(edges, TriangleAlt.alt_stripI, TriangleAlt.alt_stripII)
 	    batch7(edges, TriangleAlt.alt_stripII, TriangleAlt.alt_stripII)
 
-	edges = [0., 0., 0., 1., 1., 0., 0.]
+	edges = [0., 0., 1., 0., 0., 1., 0.]
 	#edges = [1., 1., 1., 1., 1., 1., 1.]
 	batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
