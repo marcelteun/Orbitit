@@ -202,6 +202,13 @@ class Shape(Heptagons.FldHeptagonShape):
     def setV(this):
         #this.heptagon.foldParallel(this.fold1, this.fold2)
         #this.heptagon.foldTrapezium(this.fold1, this.fold2)
+	# print 'T =', this.height
+	# print 'a =', this.dihedralAngle
+	# print 'd =', this.posAngle
+	# print 'b0 =', this.fold1
+	# print 'b1 =', this.oppFold1
+	# print 'g0 =', this.fold2
+	# print 'g1 =', this.oppFold2
         # The angle has to be adjusted for historical reasons...
 	# TODO: fix me
 	if this.foldHeptagon == Heptagons.foldMethod.parallel:
@@ -288,6 +295,13 @@ class Shape(Heptagons.FldHeptagonShape):
         this.showBaseOnly = not this.applySymmetry
         this.setShapes(theShapes)
         this.updateShape = False
+	# print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][1], Vs[0][0], Vs[0][2])
+	# print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][1], Vs[1][0], Vs[1][2])
+	# print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][1], Vs[2][0], Vs[2][2])
+	# print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][1], Vs[3][0], Vs[3][2])
+	# print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][1], Vs[4][0], Vs[4][2])
+	# print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][1], Vs[5][0], Vs[5][2])
+	# print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][1], Vs[6][0], Vs[6][2])
 
     def initArrs(this):
         print this.name, "initArrs"
