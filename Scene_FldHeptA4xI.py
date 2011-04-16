@@ -30,6 +30,7 @@ import Scenes3D
 from OpenGL.GL import *
 
 import Data_FldHeptA4xI
+import Data_FldHeptA4
 import GeomTypes
 from GeomTypes import Rot3      as Rot
 from GeomTypes import HalfTurn3 as HalfTurn
@@ -560,8 +561,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    Stringify,
 	    *args, **kwargs
 	)
-        this.specPosInclRefl = Data_FldHeptA4xI.specPos
-        this.specPos = this.specPosInclRefl
+        this.specPos = {
+	    True:  Data_FldHeptA4xI.specPos,
+	    False: Data_FldHeptA4.specPos,
+	}
 
     def isntSpecialPos(this, sel):
 	"""Check whether this selection is special for this triangle alternative
