@@ -1021,7 +1021,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             )
         this.Guis.append(this.heightGui)
         this.heightGui.Bind(wx.EVT_SLIDER, this.onHeight)
-	this.__slidersNoRelfEnabled = True
+	this.__guisNoReflEnabled = True
 	if this.shape.inclReflections:
 	    this.disableGuisNoRefl()
 
@@ -1251,6 +1251,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	):
 	    if all_alt:
 		altGui.SetValue(True)
+	    elif no_alt:
+		altGui.SetValue(False)
 	    altGui.Disable()
 	else:
 	    altGui.Enable()
@@ -1288,25 +1290,43 @@ class FldHeptagonCtrlWin(wx.Frame):
 	):
 	    if all_loose:
 		this.looseTriGui.SetValue(True)
-		try:
-		    del this.__oppTrisFill
-		    del this.__trisFill
-		except AttributeError:
-		    pass
+	    elif no_loose:
+		this.looseTriGui.SetValue(False)
 	    this.looseTriGui.Disable()
 	else:
 	    this.looseTriGui.Enable()
 	# As long as the loose variant is chosen you cannot select strip II
 	# It is essential this one comes after
-	noLooseTriangle = not this.looseTriGui.IsChecked()
+	looseTriangleSelected = this.looseTriGui.IsChecked()
 	this.oppTrisFillGui.ShowItem(
 	    this.choiceListItemsTrisFill[Stringify[trisAlt.strip_II]],
-	    noLooseTriangle
+	    not looseTriangleSelected
 	)
 	this.trisFillGui.ShowItem(
 	    this.choiceListItemsTrisFill[Stringify[trisAlt.strip_II]],
-	    noLooseTriangle
+	    not looseTriangleSelected
 	)
+	if looseTriangleSelected:
+	    # 1 loose and strip II don't combine: select smth else.
+	    oppTrisFill = this.oppTrisFill
+	    reset = False
+	    if oppTrisFill == trisAlt.strip_II or oppTrisFill == trisAlt.alt_strip_II:
+		for k, v in this.isOppTrisFillEnabled.iteritems():
+		    if v and k != trisAlt.strip_II:
+			oppTrisFill = k
+			reset = True
+			break
+	    trisFill = this.trisFill
+	    if trisFill == trisAlt.strip_II or trisFill == trisAlt.alt_strip_II:
+		for k, v in this.isTrisFillEnabled.iteritems():
+		    if v and k != trisAlt.strip_II:
+			trisFill = k
+			reset = True
+			break
+	    if reset:
+		this.setTrisFill(trisFill, oppTrisFill)
+	this.resetTrisFill(opp = False)
+	this.resetTrisFill(opp = True)
 
     def allignFoldSlideBarsWithFoldMethod(this):
 	if not this.shape.inclReflections:
@@ -1325,54 +1345,63 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.fold2OppGui.Enable()
 
     def disableSlidersNoRefl(this):
-	if this.__slidersNoRelfEnabled:
-	    this.fold1OppGui.Disable()
-	    this.fold2OppGui.Disable()
-	    this.posAngleGui.Disable()
-	    # the code below is added to be able to check and uncheck "Has
-	    # Reflections" in a "undo" kind of way.
-	    this.__sav_oppFld1 = this.shape.oppFold1
-	    this.__sav_oppFld2 = this.shape.oppFold2
-	    this.__sav_posAngle = this.shape.posAngle
-	    this.shape.setFold1(oppositeAngle = this.shape.fold1)
-	    this.shape.setFold2(oppositeAngle = this.shape.fold2)
-	    this.shape.setPosAngle(0)
-	    this.fold1OppGui.SetValue(this.minFoldAngle)
-	    this.fold2OppGui.SetValue(this.minFoldAngle)
-	    this.posAngleGui.SetValue(0)
-	    this.__slidersNoRelfEnabled = False
+	this.fold1OppGui.Disable()
+	this.fold2OppGui.Disable()
+	this.posAngleGui.Disable()
+	# the code below is added to be able to check and uncheck "Has
+	# Reflections" in a "undo" kind of way.
+	this.__sav_oppFld1 = this.shape.oppFold1
+	this.__sav_oppFld2 = this.shape.oppFold2
+	this.__sav_posAngle = this.shape.posAngle
+	this.shape.setFold1(oppositeAngle = this.shape.fold1)
+	this.shape.setFold2(oppositeAngle = this.shape.fold2)
+	this.shape.setPosAngle(0)
+	this.fold1OppGui.SetValue(this.minFoldAngle)
+	this.fold2OppGui.SetValue(this.minFoldAngle)
+	this.posAngleGui.SetValue(0)
 
     def enableSlidersNoRefl(this):
-	if not this.__slidersNoRelfEnabled:
-	    this.allignFoldSlideBarsWithFoldMethod()
-	    this.posAngleGui.Enable()
-	    # the code below is added to be able to check and uncheck "Has
-	    # Reflections" in a "undo" kind of way.
-	    this.shape.setFold1(oppositeAngle = this.__sav_oppFld1)
-	    this.shape.setFold2(oppositeAngle = this.__sav_oppFld2)
-	    this.shape.setPosAngle(this.__sav_posAngle)
-	    this.fold1OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld1)
-	    this.fold2OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld2)
-	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.__sav_posAngle)
-	    this.__slidersNoRelfEnabled = True
+	this.allignFoldSlideBarsWithFoldMethod()
+	this.posAngleGui.Enable()
+	# the code below is added to be able to check and uncheck "Has
+	# Reflections" in a "undo" kind of way.
+	this.shape.setFold1(oppositeAngle = this.__sav_oppFld1)
+	this.shape.setFold2(oppositeAngle = this.__sav_oppFld2)
+	this.shape.setPosAngle(this.__sav_posAngle)
+	this.fold1OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld1)
+	this.fold2OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld2)
+	this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.__sav_posAngle)
+
+    def resetTrisFill(this, opp = False):
+	try:
+	    if opp:
+		del this.__oppTrisFill
+	    else:
+		del this.__trisFill
+	except AttributeError:
+	    pass
 
     def disableGuisNoRefl(this):
-	this.__sav_oppTrisFill = this.oppTrisFill
-	this.setTrisFill(this.trisFill, this.trisFill)
-	del this.__oppTrisFill
-        this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
-	this.oppTrisFillGui.Disable()
-	this.oppTrisAltGui.Disable()
-	this.disableSlidersNoRefl()
+	if this.__guisNoReflEnabled:
+	    this.__sav_oppTrisFill = this.oppTrisFill
+	    this.setTrisFill(this.trisFill, this.trisFill)
+	    this.resetTrisFill(opp = True)
+	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
+	    this.oppTrisFillGui.Disable()
+	    this.oppTrisAltGui.Disable()
+	    this.disableSlidersNoRefl()
+	    this.__guisNoReflEnabled = False
 
     def enableGuisNoRefl(this):
-	this.oppTrisFillGui.Enable()
-	this.setTrisFill(this.trisFill, this.__sav_oppTrisFill)
-	del this.__oppTrisFill
-        this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
-	this.correctLooseTrisFillSettings()
-	this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
-	this.enableSlidersNoRefl()
+	if not this.__guisNoReflEnabled:
+	    this.oppTrisFillGui.Enable()
+	    this.setTrisFill(this.trisFill, this.__sav_oppTrisFill)
+	    this.resetTrisFill(opp = True)
+	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
+	    this.correctLooseTrisFillSettings()
+	    this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
+	    this.enableSlidersNoRefl()
+	    this.__guisNoReflEnabled = True
 
     def disableTrisFillGuis(this):
 	this.addTrisGui.Disable()
@@ -1474,8 +1503,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	if not this.shape.inclReflections:
 	    this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
 	# rm the saved value, it is not valid anymore:
-	del this.__oppTrisFill
-	del this.__trisFill
+	this.resetTrisFill(opp = False)
+	this.resetTrisFill(opp = True)
         this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
         if this.isPrePos():
             this.onPrePos()
@@ -1617,6 +1646,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 	    # Disable / enable appropriate triangle alternatives.
 	    # if the selected folding has valid solutions anyway
+#CONTINUE HERE: why is shell still available....
 	    if this.foldMethod in specPos[sel]:
 		if this.shape.inclReflections:
 		    for k in Stringify.iterkeys():
@@ -1673,7 +1703,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		elif (this.specPosIndex < -1):
 		    this.specPosIndex = maxI - 1
 	    except KeyError:
-		print 'dbg key eror'
+		print 'dbg key eror', Stringify[this.trisFill], Stringify[this.oppTrisFill]
 	        pass
 
             c.setDihedralAngle(aVal)
@@ -1689,7 +1719,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.fold1Gui.Disable()
 	    this.fold2Gui.Disable()
 	    this.heightGui.Disable()
-	    this.enableSlidersNoRefl()
 	    if not this.shape.inclReflections:
 		this.enableGuisNoRefl()
 	    else:
