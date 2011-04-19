@@ -62,6 +62,8 @@ edge_V2_1_1_0	= Data_FldHeptA4xI.edge_V2_1_1_0
 square_12	= Data_FldHeptA4xI.square_12
 edge_0_V2_1_1   = Data_FldHeptA4xI.edge_0_V2_1_1
 
+tris_16         = Data_FldHeptA4.tris_16
+
 Stringify = {
     dyn_pos:		'Enable Sliders',
     no_o3_tris:		'48 Triangles',
@@ -71,6 +73,7 @@ Stringify = {
     edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
     edge_V2_1_V2_1:	'8 Triangles and 36 Folded Squares',
     square_12:		'12 Folded Squares',
+    tris_16:		'16 Triangles',
     tris_24:		'24 Triangles',
     squares_24:		'24 Folded Squares',
     edge_V2_1_1_0:	'24 Triangles and 12 Folded Squares',
@@ -539,6 +542,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    3, # maxHeigth
 	    [ # prePosLst
 		Stringify[only_hepts],
+		Stringify[tris_16],
 		Stringify[only_xtra_o3s],
 		Stringify[square_12],
 		Stringify[edge_V2_1_0_1],
@@ -558,13 +562,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[all_eq_tris],
 		Stringify[dyn_pos],
 	    ],
+	    {
+		True:  Data_FldHeptA4xI.specPos,
+		False: Data_FldHeptA4.specPos,
+	    },
 	    Stringify,
 	    *args, **kwargs
 	)
-        this.specPos = {
-	    True:  Data_FldHeptA4xI.specPos,
-	    False: Data_FldHeptA4.specPos,
-	}
 
     def isntSpecialPos(this, sel):
 	"""Check whether this selection is special for this triangle alternative

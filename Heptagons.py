@@ -50,6 +50,9 @@ only_xtra_o3s   = -3
 all_eq_tris     = -4
 no_o3_tris	= -5
 
+A4xI_bas	= 0
+A4_bas		= 100
+
 alt_bit = 8
 loose_bit = 16
 class TrisAlt:
@@ -793,6 +796,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def __init__(this,
 	    shape, size, canvas,
 	    maxHeight, 
+	    prePosStrLst,
 	    prePosLst,
 	    stringify,
 	    *args, **kwargs
@@ -803,8 +807,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	size: default size of the frame
 	canvas: wx canvas to be used
 	maxHeight: max translation height to be used for the heptagon
-	prePosLst: string list that expresses which special positions can be
-	           found, e.g. where all holes disappear.
+	prePosStrLst: string list that expresses which special positions can be
+	              found, e.g. where all holes disappear.
+	prePosLst: The list with the complete settings for the special
+	           positions.
 	stringify: hash table that maps enums on strings.
 	*args: standard wx Frame *args
 	**kwargs: standard wx Frame **kwargs
@@ -814,7 +820,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape = shape
         this.canvas = canvas
 	this.maxHeight = maxHeight
-	this.prePosLst = prePosLst
+	this.prePosStrLst = prePosStrLst
 	this.stringify = stringify
         this.panel = wx.Panel(this, -1)
         this.statusBar = this.CreateStatusBar()
@@ -824,6 +830,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.shape.foldHeptagon = this.foldMethod
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
 	this.initTrisEnabled()
+        this.specPosIndex = 0
+        this.specPos = prePosLst
 
         this.mainSizer.Add(
                 this.createControlsSizer(),
@@ -834,9 +842,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
         this.panel.Layout()
-
-        this.specPosIndex = 0
-        this.specPos = {}
 
     def createControlsSizer(this):
         this.heightF = 40 # slider step factor, or: 1 / slider step
@@ -928,14 +933,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.prePosGui = wx.Choice(this.panel,
                 #label = 'Only Regular Faces with:',
                 style = wx.RA_VERTICAL,
-                choices = this.prePosLst
+                choices = this.prePosStrLst
             )
 	# Don't hardcode which index is dyn_pos, I might reorder the item list
 	# one time, and will probably forget to update the default selection..
-	for i in range(len(this.prePosLst)):
-	    if (this.prePosLst[i] == this.stringify[dyn_pos]):
+	for i in range(len(this.prePosStrLst)):
+	    if (this.prePosStrLst[i] == this.stringify[dyn_pos]):
 		this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
 		break
+	this.setEnablePrePosItems()
         this.Guis.append(this.prePosGui)
         this.prePosGui.Bind(wx.EVT_CHOICE, this.onPrePos)
         #wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0, const wxString choices[] = NULL, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listBox")
@@ -1127,6 +1133,25 @@ class FldHeptagonCtrlWin(wx.Frame):
             }
 
         return mainSizer
+
+    def setEnablePrePosItems(this):
+	currentPrePos = this.prePos
+	this.prePosGui.Clear()
+	prePosStillValid = False
+	for prePosStr in this.prePosStrLst:
+	    try:
+		tmp = this.specPos[this.shape.inclReflections][
+						this.mapPrePosStr(prePosStr)]
+		this.prePosGui.Append(prePosStr)
+		if currentPrePos == this.mapPrePosStr(prePosStr):
+		    prePosStillValid = True
+	    except KeyError:
+		if prePosStr == this.stringify[dyn_pos]:
+		    this.prePosGui.Append(prePosStr)
+	if prePosStillValid:
+	    this.prePosGui.SetStringSelection(this.stringify[currentPrePos])
+	else:
+	    this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
 
     def rmControlsSizer(this):
         #print "rmControlsSizer"
@@ -1430,6 +1455,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.enableGuisNoRefl()
 		this.shape.updateShape = True
 		this.canvas.paint()
+	this.setEnablePrePosItems()
         if this.isPrePos():
             this.onPrePos()
 	else:
@@ -1437,7 +1463,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def isPrePos(this):
 	# TODO: move to offspring
-        return this.prePosGui.GetStringSelection() != this.prePosLst[-1]
+        return this.prePosGui.GetStringSelection() != this.prePosStrLst[-1]
 
     def setTrisFill(this, tris, oppTris):
 	if (tris & loose_bit == loose_bit):
@@ -1532,15 +1558,21 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.specPosIndex = -1
         this.onPrePos()
 
-    def getPrePos(this):
-        prePosStr = this.prePosGui.GetStringSelection()
-	for k,v in this.stringify.iteritems():
-	    if v == prePosStr:
-		return k
-	return dyn_pos
+    def mapPrePosStr(this, s):
+	try:
+	    return this.__prePosStr2Key[s]
+	except AttributeError:
+	    this.__prePosStr2Key = {}
+	    for k, v in this.stringify.iteritems():
+		this.__prePosStr2Key[v] = k
+	    return this.__prePosStr2Key[s]
+
+    @property
+    def prePos(this):
+	return this.mapPrePosStr(this.prePosGui.GetStringSelection())
 
     def onPrev(this, event = None):
-        prePosId = this.getPrePos()
+        prePosId = this.prePos
         if prePosId != dyn_pos:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
@@ -1550,7 +1582,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             this.onPrePos()
 
     def onNext(this, event = None):
-        prePosId = this.getPrePos()
+        prePosId = this.prePos
         if prePosId != dyn_pos:
 	    try:
 		maxI = len(this.getPossibleSpecPosSettings()) - 1
@@ -1564,7 +1596,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.onPrePos()
 
     def getPossibleSpecPosSettings(this):
-        prePosId = this.getPrePos()
+        prePosId = this.prePos
         if prePosId != dyn_pos:
 	    if this.shape.inclReflections:
 		trisF = this.trisFill
@@ -1581,7 +1613,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     fld2None = 0.0
     def onPrePos(this, event = None):
 	#print "onPrePos"
-        sel = this.getPrePos()
+        sel = this.prePos
 	# if only_hepts:
 	# 1. don't show triangles
 	# 2. disable triangle strip.
@@ -1646,7 +1678,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 	    # Disable / enable appropriate triangle alternatives.
 	    # if the selected folding has valid solutions anyway
-#CONTINUE HERE: why is shell still available....
 	    if this.foldMethod in specPos[sel]:
 		if this.shape.inclReflections:
 		    for k in Stringify.iterkeys():

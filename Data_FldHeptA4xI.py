@@ -24,25 +24,25 @@ import Heptagons
 
 trisAlt = Heptagons.TrisAlt()
 
-dyn_pos		=  Heptagons.dyn_pos
-only_hepts      =  Heptagons.only_hepts
-only_xtra_o3s	=  Heptagons.only_xtra_o3s
-all_eq_tris	=  Heptagons.all_eq_tris
-no_o3_tris	=  Heptagons.no_o3_tris
-edge_1_1_V2_1	=  0
-edge_1_V2_1_1	=  1
-edge_V2_1_1_1	=  2
-edge_V2_1_V2_1	=  3
-squares_24	=  4
-edge_0_1_1_1	=  5
-edge_0_1_V2_1	=  6
-tris_24		=  7
-edge_1_1_0_1	=  8
-edge_1_0_1_1	=  9
-edge_V2_1_0_1	= 10
-edge_V2_1_1_0	= 11
-square_12	= 12
-edge_0_V2_1_1   = 13
+dyn_pos		= Heptagons.dyn_pos
+only_hepts      = Heptagons.only_hepts
+only_xtra_o3s	= Heptagons.only_xtra_o3s
+all_eq_tris	= Heptagons.all_eq_tris
+no_o3_tris	= Heptagons.no_o3_tris
+edge_1_1_V2_1	= Heptagons.A4xI_bas + 0
+edge_1_V2_1_1	= Heptagons.A4xI_bas + 1
+edge_V2_1_1_1	= Heptagons.A4xI_bas + 2
+edge_V2_1_V2_1	= Heptagons.A4xI_bas + 3
+squares_24	= Heptagons.A4xI_bas + 4
+edge_0_1_1_1	= Heptagons.A4xI_bas + 5
+edge_0_1_V2_1	= Heptagons.A4xI_bas + 6
+tris_24		= Heptagons.A4xI_bas + 7
+edge_1_1_0_1	= Heptagons.A4xI_bas + 8
+edge_1_0_1_1	= Heptagons.A4xI_bas + 9
+edge_V2_1_0_1	= Heptagons.A4xI_bas + 10
+edge_V2_1_1_0	= Heptagons.A4xI_bas + 11
+square_12	= Heptagons.A4xI_bas + 12
+edge_0_V2_1_1   = Heptagons.A4xI_bas + 13
 
 par_lst = [
     [1.31032278994319, 0.0, -1.96281693322690, -2.21106088677011],
