@@ -650,10 +650,10 @@ def FoldedRegularHeptagonsA4(c, params):
     The case contains
     c[0]: a translation (towards the viewer)
     c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
-    c[2]: rotation angle around z-axis
-    c[3]: the angle of the first fold (left)
-    c[4]: the angle of the first fold (right)
-    c[5]: the angle of the second fold (left)
+    c[2]: the angle of the first fold (left)
+    c[3]: the angle of the second fold (left)
+    c[4]: rotation angle around z-axis
+    c[5]: the angle of the first fold (right)
     c[6]: the angle of the second fold (right)
     The vertices are positioned as follows:
     #          19                      18
@@ -721,10 +721,10 @@ def FoldedRegularHeptagonsA4(c, params):
 
     T      = c[0]
     alpha  = c[1]
-    delta  = c[2]
-    beta0  = c[3]
-    beta1  = c[4]
-    gamma0 = c[5]
+    beta0  = c[2]
+    gamma0 = c[3]
+    delta  = c[4]
+    beta1  = c[5]
     gamma1 = c[6]
 
     par_tri_fill = 0
@@ -1262,11 +1262,11 @@ def FindMultiRoot(initialValues,
         if not quiet:
             print "# not converged... :("
     if result != None and cleanupF != None:
-        result = cleanupF(result)
+        result = cleanupF(result, nrOfIns)
     return result
 
 # This can be optimised
-def solutionAlreadyFound(sol, list, precision = 1.e-12):
+def solutionAlreadyFound(sol, list, precision = 1.e-13):
     found = False
     lstRange = range(len(sol))
     for old in list:
@@ -1288,12 +1288,12 @@ def RandFindMultiRootOnDomain(domain,
         cleanupF  = None,
         steps = None,
         precision = 1e-15,
-        maxIter = 1024,
 	continueTestAt = None,
 	init_results = [],
 	printStatus = False,
 	oppEdgeAlternative = None
     ):
+    print 'random search, press Ctrl-C to stop'
     results = init_results[:]
     if oppEdgeAlternative == None:
 	oppEdgeAlternative = edgeAlternative
@@ -1305,8 +1305,40 @@ def RandFindMultiRootOnDomain(domain,
     ]
     if printStatus:
 	print testValue
+    # changeIterLimits depends a bit on the amount of solutions.
+    # 1. if you don't have a solution: just jump around until you get a
+    #    hit.
+    # 2. But you don't want to jump around a long time, just to find out
+    #    it was a solution you already had.
+    # Nr 2 will happen, when you are looking for the last solution,
+    # especially if solutions are rare.
+    changeIterLimits = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    maxIters = [2 ** (5+8-i) for i in range(9)]
+    def setMaxIter(r):
+	nrSols = len(r)
+	if nrSols >= changeIterLimits[8]:
+	    return maxIters[8]
+	elif nrSols == changeIterLimits[7]:
+	    return maxIters[7]
+	elif nrSols == changeIterLimits[6]:
+	    return maxIters[6]
+	elif nrSols == changeIterLimits[5]:
+	    return maxIters[5]
+	elif nrSols == changeIterLimits[4]:
+	    return maxIters[4]
+	elif nrSols == changeIterLimits[3]:
+	    return maxIters[3]
+	elif nrSols == changeIterLimits[2]:
+	    return maxIters[2]
+	elif nrSols == changeIterLimits[1]:
+	    return maxIters[1]
+	elif nrSols <= changeIterLimits[0]:
+	    return maxIters[0]
+    maxIter = setMaxIter(results)
     while True:
         try:
+	    #print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+	    #print 'step'
             result = FindMultiRoot(testValue,
                     edgeAlternative,
                     edgeLengths,
@@ -1321,8 +1353,10 @@ def RandFindMultiRootOnDomain(domain,
                 )
             if result != None and not solutionAlreadyFound(result, results):
                 results.append(result)
+		maxIter = setMaxIter(results)
 		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-                print 'added new result nr', len(results),':', result
+                print 'added new result nr', len(results),': [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
+		    result[0], result[1], result[2], result[3], result[4], result[5], result[6])
         except pygsl.errors.gsl_SingularityError:
             pass
         except pygsl.errors.gsl_NoProgressError:
@@ -1439,8 +1473,8 @@ if __name__ == '__main__':
     V2 = numx.sqrt(2.)
 
     tpi = 2*numx.pi
-    def cleanupResult(v):
-        for i in range(1,4):
+    def cleanupResult(v, l = 4):
+        for i in range(1, l):
             v[i] = v[i] % tpi
             if v[i] > numx.pi:
                 v[i] -= tpi
@@ -1739,25 +1773,39 @@ if __name__ == '__main__':
 		dom = [
 		    [-2., 3.],             # Translation
 		    [-numx.pi, numx.pi],   # angle alpha
-		    [0,        numx.pi/4], # delta: around z-axis
 		    [-numx.pi, numx.pi],   # fold 1 beta0
-		    [-numx.pi, numx.pi],   # fold 1 beta1
 		    [-numx.pi, numx.pi],   # fold 2 gamma0
+		    [0,        numx.pi/4], # delta: around z-axis
+		    [-numx.pi, numx.pi],   # fold 1 beta1
 		    [-numx.pi, numx.pi],   # fold 2 gamma1
 		]
-		steps = [0.5, 0.5, 0.3, 0.3, 0.3, 0.3, 0.3]
-	    result = RandFindMultiRootOnDomain(dom,
-	    #result = FindMultiRootOnDomain(dom,
-		    edgeLengths = edges,
-		    edgeAlternative = tris,
-		    oppEdgeAlternative = oppTris,
-		    fold = fold.fold,
-		    method = Method.hybrids,
-		    cleanupF = cleanupResult,
-		    steps = steps,
-		    maxIter = 20,
-		    printStatus = printStatus
-		)
+		steps = [0.5, 0.5, 0.3, 0.5, 0.3, 0.5, 0.3]
+	    print 'randomSearch:', randomSearch
+	    if (randomSearch):
+		    result = RandFindMultiRootOnDomain(dom,
+			    edgeLengths = edges,
+			    edgeAlternative = tris,
+			    oppEdgeAlternative = oppTris,
+			    fold = fold.fold,
+			    method = Method.hybrids,
+			    cleanupF = cleanupResult,
+			    steps = steps,
+			    printStatus = printStatus
+			)
+
+	    else:
+		    result = FindMultiRootOnDomain(dom,
+			    edgeLengths = edges,
+			    edgeAlternative = tris,
+			    oppEdgeAlternative = oppTris,
+			    fold = fold.fold,
+			    method = Method.hybrids,
+			    cleanupF = cleanupResult,
+			    steps = steps,
+			    maxIter = 20,
+			    printStatus = printStatus
+			)
+
 	    print '['
 	    if len(edges) == 4:
 		for r in result:
@@ -2090,7 +2138,7 @@ if __name__ == '__main__':
 
 	def batch7(edges, tris, oppTris):
 	    fold = Fold()
-	    print 'searching solutiond for', edges
+	    print 'searching solutions for', edges
 	    print Stringify[tris], 'triangle alternative'
 	    print Stringify[oppTris], 'opp triangle alternative'
 	    #fold.set(fold.parallel)
@@ -2128,6 +2176,16 @@ if __name__ == '__main__':
 	    batch7(edges, TriangleAlt.alt_stripI, TriangleAlt.alt_stripII)
 	    batch7(edges, TriangleAlt.alt_stripII, TriangleAlt.alt_stripII)
 
-	edges = [0., 0., 1., 0., 0., 1., 0.]
+	randomSearch = True
+
+	#edges = [0., 0., 1., 0., 0., 1., 0.]
 	#edges = [1., 1., 1., 1., 1., 1., 1.]
-	batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+
+	#print '16 tris (4 O3):'
+	#edges = [1., 0., 1., 0., 1., 0., 1.]
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.stripII)
+
+	print 'only hepts:'
+	edges = [1., 0., 1., 0., 0., 1., 0.]
+	batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripII)
