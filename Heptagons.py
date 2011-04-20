@@ -148,18 +148,19 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
     def fold(this, a0, b0, a1 = None, b1 = None, keepV0 = True,
-						fold = FoldMethod.parallel
+						fold = FoldMethod.parallel,
+						rotate = 0
     ):
 	if fold == FoldMethod.parallel:
-	    this.foldParallel(a0, b0, keepV0)
+	    this.foldParallel(a0, b0, keepV0, rotate)
 	elif fold == FoldMethod.trapezium:
-	    this.foldTrapezium(a0, b0, b1, keepV0)
+	    this.foldTrapezium(a0, b0, b1, keepV0, rotate)
 	elif fold == FoldMethod.w:
-	    this.foldW(a0, b0, a1, b1, keepV0)
+	    this.foldW(a0, b0, a1, b1, keepV0, rotate)
 	elif fold == FoldMethod.triangle:
-	    this.foldTriangle(a0, b0, b1, keepV0)
+	    this.foldTriangle(a0, b0, b1, keepV0, rotate)
 	elif fold == FoldMethod.star:
-	    this.foldStar(a0, b0, a1, b1, keepV0)
+	    this.foldStar(a0, b0, a1, b1, keepV0, rotate)
 	else:
 	    raise TypeError, 'Unknown fold'
 
@@ -699,6 +700,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.posAngleMax = math.pi/2
         this.posAngle = this.posAngleMin
         this.inclReflections = True
+	this.rotateFold = 0
         this.fold1 = 0.0
         this.fold2 = 0.0
         this.oppFold1 = 0.0
@@ -724,6 +726,10 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 
     def setFoldMethod(this, method):
 	this.foldHeptagon = method
+        this.updateShape = True
+
+    def setRotateFold(this, step):
+        this.rotateFold = step
         this.updateShape = True
 
     def setDihedralAngle(this, angle):
@@ -895,6 +901,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Guis.append(this.reflGui)
         this.reflGui.SetValue(this.shape.inclReflections)
         this.reflGui.Bind(wx.EVT_CHECKBOX, this.onRefl)
+
+	this.rotateFldGui = wx.Button(this.panel, label = 'Rotate Fold 0/7')
+	this.rotateFld = 0
+        this.Guis.append(this.rotateFldGui)
+        this.rotateFldGui.Bind(wx.EVT_BUTTON, this.onRotateFld)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -1068,6 +1079,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         oppFillSizer.Add(this.oppTrisFillGui, 0, wx.EXPAND)
         oppFillSizer.Add(this.oppTrisAltGui, 0, wx.EXPAND)
         oppFillSizer.Add(this.reflGui, 0, wx.EXPAND)
+        oppFillSizer.Add(this.rotateFldGui, 0, wx.EXPAND)
         oppFillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1414,6 +1426,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 	    this.oppTrisFillGui.Disable()
 	    this.oppTrisAltGui.Disable()
+	    this.rotateFldGui.Disable()
+	    this.shape.setRotateFold(0)
 	    this.disableSlidersNoRefl()
 	    this.__guisNoReflEnabled = False
 
@@ -1425,6 +1439,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 	    this.correctLooseTrisFillSettings()
 	    this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
+	    this.rotateFldGui.Enable()
+	    this.shape.setRotateFold(this.rotateFld)
 	    this.enableSlidersNoRefl()
 	    this.__guisNoReflEnabled = True
 
@@ -1460,6 +1476,12 @@ class FldHeptagonCtrlWin(wx.Frame):
             this.onPrePos()
 	else:
 	    this.statusBar.SetStatusText(this.shape.getStatusStr())
+
+    def onRotateFld(this, event):
+	this.rotateFld = (this.rotateFld + 1) % 7
+	this.shape.setRotateFold(this.rotateFld)
+	this.rotateFldGui.SetLabel('Rotate Fold %d/7' % this.rotateFld)
+	print '************* TODO ******************'
 
     def isPrePos(this):
 	# TODO: move to offspring
@@ -1678,6 +1700,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 	    # Disable / enable appropriate triangle alternatives.
 	    # if the selected folding has valid solutions anyway
+	    #CONTINUE HERE: why is shell still available....
 	    if this.foldMethod in specPos[sel]:
 		if this.shape.inclReflections:
 		    for k in Stringify.iterkeys():
