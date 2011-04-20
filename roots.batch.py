@@ -498,7 +498,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
 	    z2 = z2 + T
 	    z3 = z3 + T
 
-    else:
+    else: # easier way of folding, but way too slow...
 	# rotation angle around edge
 	alpha = alpha
 	alpha = alpha - numx.pi/2
@@ -838,14 +838,14 @@ def FoldedRegularHeptagonsA4(c, params):
 	#              .^.
 	#        1   _/| |\_   6
 	#          _/ /   \ \_
-	# axis g _/  |     |  \_ axis g
-	#       /    |     |    \
-	#      2    /       \    5
-	#          | axes  b |
-	#          "         "
+	# axis g0_/  |     |  \_ axis g1
+	#       /    |a   a|    \
+	#      2    / x   x \    5
+	#          |  i   i  |
+	#          "  s   s  "
 	#          3         4
-	#
-	#                                ^ X
+	#             b   b
+	#             0   1              ^ X
 	#                                |
 	#                                |
 	#                       Y <------+
@@ -857,13 +857,19 @@ def FoldedRegularHeptagonsA4(c, params):
 	# ------------------------------------
 	# refer to V1 as if centre is origon:
 	# rotate around axis g as if centre -> V1 is x-axis:
-	x = (R - H) + cosg * H
-	z =           sing * H
+	x = (R - H) + cosg0 * H
+	z =           sing0 * H
 	# now correct for V1 not on x-axis: rotate d around z-axis
 	# with d: angle of heptagon centre to V1 with x-as
 	cosd = (x1 + Tx) / R
 	sind = RhoH # = sin(2pi/7)
 	x1, y1, z1 = (cosd * x, sind * x, z)
+
+	# use similar calc for different angle and x6, y6, z6 = x1, -y1, z1
+	x = (R - H) + cosg1 * H
+	z =           sing1 * H
+	x6, y6, z6 = (cosd * x, sind * x, z)
+
 	# ROTATE V1 and V2 around axis b
 	# ------------------------------------
 	# correction for V5 not on -x: rotate d around z-axis
@@ -875,7 +881,7 @@ def FoldedRegularHeptagonsA4(c, params):
 	d0_3 = x2 - RhoH
 	# rotate around axis b:
 	# TODO: above: rm x2, y2 assignment, mv y2 assignment down.
-	x2, z2 = (d0_3 + cosb * RhoH, sinb * RhoH)
+	x2, z2 = (d0_3 + cosb0 * RhoH, sinb0 * RhoH)
 	# correct for V5 not on -x: rotate d around z-axis
 	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
 	x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
@@ -884,10 +890,23 @@ def FoldedRegularHeptagonsA4(c, params):
 	x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
 	# rotate around axis b:
 	dx = x1 - d0_3
-	x1, z1 = (d0_3 + cosb * dx - sinb * z1, sinb * dx + cosb * z1)
+	x1, z1 = (d0_3 + cosb0 * dx - sinb0 * z1, sinb0 * dx + cosb0 * z1)
 	# correct for V5 not on -x: rotate d around z-axis
 	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
 	x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
+
+	# use similar calc for different angle for
+	# x5, y5, z5 = x2, -y2, z2
+	# x6, y6, z6 = x1, -y1, z1
+	y5 = 0.5
+	x5, z5 = (d0_3 + cosb1 * RhoH, sinb1 * RhoH)
+	x5, y5 = (cosd * x5 - sind * y5 - Tx, sind * x5 + cosd * y5)
+	x6, y6 = (cosd * x6 + sind * y6, -sind * x6 + cosd * y6)
+	dx = x6 - d0_3
+	x6, z6 = (d0_3 + cosb1 * dx - sinb1 * z6, sinb1 * dx + cosb1 * z6)
+	x6, y6 = (cosd * x6 - sind * y6 - Tx, sind * x6 + cosd * y6)
+	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
+	y5, y6 = -y5, -y6
 
 	# rotate around 3-4; angle a
 	# ------------------------------------
@@ -895,15 +914,20 @@ def FoldedRegularHeptagonsA4(c, params):
 	# TODO don't copy the code...
 	cos_a = sina
 	sin_a = -cosa
-	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
 	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+	x5, y5, z5, = (cos_a * x5 - sin_a * z5, y5, sin_a * x5 + cos_a * z5)
+	x6, y6, z6, = (cos_a * x6 - sin_a * z6, y6, sin_a * x6 + cos_a * z6)
 	# and translate
 	# ------------------------------------
 	z0 = z0 + T
 	z1 = z1 + T
 	z2 = z2 + T
 	z3 = z3 + T
+	z4 = z4 + T
+	z5 = z5 + T
+	z6 = z6 + T
 
     elif (params[par_fold] == Fold.trapezium):
 	#
@@ -997,7 +1021,7 @@ def FoldedRegularHeptagonsA4(c, params):
 
 	#x2, y2, z2 = (cosd * x - Tx, sind * x, z)
 
-	# use similar calc for different angle and x5, y5, z5 = x2, -y2, z2
+	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
 	x = (R - H) + cosg1 * H
 	z =           sing1 * H
 	x5, y5, z5 = (cosd0 * x, sind0 * x, z)
@@ -1019,7 +1043,7 @@ def FoldedRegularHeptagonsA4(c, params):
 	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
 	x2, y2 = (cosd1 * x2 - sind1 * y2 - Tx, sind1 * x2 + cosd1 * y2)
 
-	# use similar calc for different angle and
+	# use similar calc for different angle for
 	# x5, y5, z5 = x2, -y2, z2
 	# x6, y6, z6 = x1, -y1, z1
 	x6, y6, z6 = (d0_3 + cosb1 * RhoH, -0.5, sinb1 * RhoH)
@@ -1457,16 +1481,16 @@ if __name__ == '__main__':
     #print FoldedRegularHeptagonsA4xI(tmp,
     #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.w ])
     #T  = 2.3
-    #a  = Geom3D.Deg2Rad * 30
+    #a  = Geom3D.Deg2Rad * 90
     #d  = Geom3D.Deg2Rad * 40
     #b0 = Geom3D.Deg2Rad * 60
-    #b1 = Geom3D.Deg2Rad * 50
     #g0 = Geom3D.Deg2Rad * 50
+    #b1 = Geom3D.Deg2Rad * 50
     #g1 = Geom3D.Deg2Rad * 60
-    #tmp1 = numx.array((T, a, d, b0, b1, g0, g1))
+    #tmp1 = numx.array((T, a, b0, g0, d, b1, g1))
     #print 'input values', tmp1
     #print FoldedRegularHeptagonsA4(tmp1,
-    #    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.w ])
+    #    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
     ##print 'faster', faster
     #assert False, "end single test"
 
