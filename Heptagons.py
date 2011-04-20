@@ -545,7 +545,7 @@ class RegularHeptagon:
 	    Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
 	    V6 = Rot4_0 * this.VsOrg[6]
 	    V5 = Rot4_0 * this.VsOrg[5]
-	    Rot5_0 = Rot(axis = V0 - this.VsOrg[5], angle = b1)
+	    Rot5_0 = Rot(axis = V0 - V5, angle = b1)
 	    V6 = Rot5_0 * (V6 - V0) + V0
 	this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
         this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
