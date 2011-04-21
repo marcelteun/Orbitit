@@ -152,15 +152,15 @@ class RegularHeptagon:
 						rotate = 0
     ):
 	if fold == FoldMethod.parallel:
-	    this.foldParallel(a0, b0, keepV0, rotate)
+	    this.foldParallel(a0, b0, keepV0) #, rotate)
 	elif fold == FoldMethod.trapezium:
-	    this.foldTrapezium(a0, b0, b1, keepV0, rotate)
+	    this.foldTrapezium(a0, b0, b1, keepV0) #, rotate)
 	elif fold == FoldMethod.w:
-	    this.foldW(a0, b0, a1, b1, keepV0, rotate)
+	    this.foldW(a0, b0, a1, b1, keepV0) #, rotate)
 	elif fold == FoldMethod.triangle:
-	    this.foldTriangle(a0, b0, b1, keepV0, rotate)
+	    this.foldTriangle(a0, b0, b1, keepV0) #, rotate)
 	elif fold == FoldMethod.star:
-	    this.foldStar(a0, b0, a1, b1, keepV0, rotate)
+	    this.foldStar(a0, b0, a1, b1, keepV0) #, rotate)
 	else:
 	    raise TypeError, 'Unknown fold'
 
