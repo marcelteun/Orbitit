@@ -63,6 +63,7 @@ square_12	= Data_FldHeptA4xI.square_12
 edge_0_V2_1_1   = Data_FldHeptA4xI.edge_0_V2_1_1
 
 tris_16         = Data_FldHeptA4.tris_16
+tris_40         = Data_FldHeptA4.tris_40
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
@@ -82,6 +83,7 @@ Stringify = {
     edge_0_V2_1_1:	'32 Triangles and 12 Folded Squares',
     edge_1_1_V2_1:	'32 Triangles and 24 Folded Squares: I',
     edge_1_V2_1_1:	'32 Triangles and 24 Folded Squares: II',
+    tris_40:		'40 Triangles',
     edge_0_1_1_1:	'56 Triangles',
     edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
     only_hepts:		'Just Heptagons',
@@ -548,6 +550,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[edge_V2_1_0_1],
 		Stringify[tris_24],
 		Stringify[squares_24],
+		Stringify[tris_40],
 		Stringify[edge_1_1_0_1],
 		Stringify[edge_1_0_1_1],
 		Stringify[edge_0_1_V2_1],
