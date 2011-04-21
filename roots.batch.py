@@ -27,6 +27,7 @@ import pygsl._numobj as numx
 from pygsl  import multiroots, errno
 import pygsl
 import copy
+import gc
 
 import Heptagons
 import GeomTypes
@@ -39,6 +40,19 @@ RhoH      = numx.sin(2*numx.pi / 7)
 SigmaH    = numx.sin(3*numx.pi / 7)
 Rho       = RhoH / H
 Sigma     = SigmaH / H
+
+eqFloatMargin = 1.0e-12
+
+def eq(a, b):
+    """
+    Check if 2 floats 'a' and 'b' are close enough to be called equal.
+
+    a: a floating point number.
+    b: a floating point number.
+    margin: if |a - b| < margin then the floats will be considered equal and
+            True is returned.
+    """
+    return abs(a - b) < eqFloatMargin
 
 # since GeomTypes.quat doesn't work well with multiroots...
 def quatRot(axis, angle):
@@ -1323,10 +1337,12 @@ def RandFindMultiRootOnDomain(domain,
 	oppEdgeAlternative = edgeAlternative
     dLen = len(domain)
     random.seed()
-    testValue = [
-	random.random() * (domain[i][1] - domain[i][0]) + domain[i][0]
-	for i in range(dLen)
-    ]
+    def randTestvalue():
+	return [
+	    random.random() * (domain[i][1] - domain[i][0]) + domain[i][0]
+	    for i in range(dLen)
+	]
+    testValue = randTestvalue()
     if printStatus:
 	print testValue
     # changeIterLimits depends a bit on the amount of solutions.
@@ -1337,7 +1353,7 @@ def RandFindMultiRootOnDomain(domain,
     # Nr 2 will happen, when you are looking for the last solution,
     # especially if solutions are rare.
     changeIterLimits = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    maxIters = [2 ** (5+8-i) for i in range(9)]
+    maxIters = [2 ** (6+8-i) for i in range(9)]
     def setMaxIter(r):
 	nrSols = len(r)
 	if nrSols >= changeIterLimits[8]:
@@ -1359,6 +1375,7 @@ def RandFindMultiRootOnDomain(domain,
 	elif nrSols <= changeIterLimits[0]:
 	    return maxIters[0]
     maxIter = setMaxIter(results)
+    nrOfIters = 0
     while True:
         try:
 	    #print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
@@ -1379,7 +1396,8 @@ def RandFindMultiRootOnDomain(domain,
                 results.append(result)
 		maxIter = setMaxIter(results)
 		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-                print 'added new result nr', len(results),': [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
+                print 'added new result nr', len(results),':'
+		print '    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
 		    result[0], result[1], result[2], result[3], result[4], result[5], result[6])
         except pygsl.errors.gsl_SingularityError:
             pass
@@ -1387,18 +1405,26 @@ def RandFindMultiRootOnDomain(domain,
             pass
         except pygsl.errors.gsl_JacobianEvaluationError:
             pass
-        #for i in range(dLen-1, 0, -1):
-        for i in range(dLen):
-            # note that domain[i][1] is not tested if the steps do not end there
-            # explicitely. TODO also test upper limits.
-            testValue[i] += steps[i]
-            if testValue[i] <= domain[i][1]:
-                break # break from for-loop, not from while
-            else:
-                if i != dLen-1:
-                    testValue[i] = domain[i][0]
-		if printStatus:
-		    print testValue
+	testValue = randTestvalue()
+	nrOfIters = nrOfIters + 1
+	if (nrOfIters % 10000) == 0:
+	    print 'current results:'
+	    print '['
+	    if len(edgeLengths) == 4:
+		for r in results:
+		    print '    [%.14f, %.14f, %.14f, %.14f],' % (
+						    r[0], r[1], r[2], r[3])
+	    else:
+		for r in results:
+		    print '    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
+				    r[0], r[1], r[2], r[3], r[4], r[5], r[6])
+	    print ']'
+	    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+	    print nrOfIters, 'random iterations done; -->', len(results), 'nr of sols found'
+	    # To to spawn a new process and kill the childs instead?
+	    #del results # doesn't help
+	    #results = []
+	    #gc.collect() # doesn't help....
     return results
 
 def FindMultiRootOnDomain(domain,
@@ -1481,7 +1507,7 @@ if __name__ == '__main__':
     #print FoldedRegularHeptagonsA4xI(tmp,
     #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.w ])
     #T  = 2.3
-    #a  = Geom3D.Deg2Rad * 90
+    #a  = Geom3D.Deg2Rad * 30
     #d  = Geom3D.Deg2Rad * 40
     #b0 = Geom3D.Deg2Rad * 60
     #g0 = Geom3D.Deg2Rad * 50
@@ -1500,8 +1526,10 @@ if __name__ == '__main__':
     def cleanupResult(v, l = 4):
         for i in range(1, l):
             v[i] = v[i] % tpi
-            if v[i] > numx.pi:
-                v[i] -= tpi
+            if v[i] < -numx.pi:
+                v[i] += tpi
+	    elif eq(v[i], tpi):
+		v[i] = 0
         return v
 
     FindSingleRoots = False
@@ -1783,7 +1811,7 @@ if __name__ == '__main__':
 	printStatus = False
 	def multiRootsLog(fold, edges, tris, oppTris = None):
 	    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-	    print 'searching %s folds' % str(fold)
+	    print 'started searching %s folds' % str(fold)
 	    result = []
 	    if len(edges) == 4:
 		dom = [
@@ -2169,9 +2197,9 @@ if __name__ == '__main__':
 	    #multiRootsLog(fold, edges, tris, oppTris)
 	    #fold.set(fold.triangle)
 	    #multiRootsLog(fold, edges, tris, oppTris)
-	    #fold.set(fold.star)
+	    fold.set(fold.star)
 	    #multiRootsLog(fold, edges, tris, oppTris)
-	    fold.set(fold.w)
+	    #fold.set(fold.w)
 	    multiRootsLog(fold, edges, tris, oppTris)
 	    #fold.set(fold.trapezium)
 	    #multiRootsLog(fold, edges, tris, oppTris)
@@ -2202,14 +2230,109 @@ if __name__ == '__main__':
 
 	randomSearch = True
 
-	#edges = [0., 0., 1., 0., 0., 1., 0.]
+	#######################################################################
+	#print 'all eq tris:'
+
 	#edges = [1., 1., 1., 1., 1., 1., 1.]
 	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+	# 158 sols found:
+	# 110415 120515: searching w folds
+	# 1st at: 110415 120518
+	# before last: 110417 235221
+	# last at: 110418 042039
+	# stopped at: 110418 081500
+	# ------------------------------------------------------
+	# 76 sols found:
+	# 110421 101623: started searching star folds
+	# 1st at: 110421 101623
+	# before last: 110421 101749
+	# last at: 110421 101752
+	# stopped at: 110421 114600
 
-	#print '16 tris (4 O3):'
+	#######################################################################
+	#print '16 tris (12 + 4 O3):'
+
 	#edges = [1., 0., 1., 0., 1., 0., 1.]
 	#batch7(edges, TriangleAlt.stripI, TriangleAlt.stripII)
+	# valid for next as well
+	# 15 sols found:
+	# started: 110418 123930
+	# 1st at: 110418 123940
+	# last at: 110418 135338
+	# stopped at: 110419 090000
 
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+	# valid for previous as well
+	# 16 sols found:
+	# 110419 094705: searching w folds
+	# 1st at: 110419 094722
+	# before last: 110419 131002
+	# last at: 110419 134110
+	# stopped at: 110421 075300
+	# ==========================
+	# 0 sols found:
+	# 110421 081908: started searching star folds
+	# 1st at: -
+	# before last: -
+	# last at: -
+	# stopped at: 110421 094100
+	# Bis:
+	# 110421 095353: started searching star folds
+	# 110421 104626: 100000 random iterations done
+
+
+	#######################################################################
 	print 'only hepts:'
-	edges = [1., 0., 1., 0., 0., 1., 0.]
-	batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripII)
+
+	#edges = [1., 0., 1., 0., 0., 1., 0.]
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripII)
+	# 0 sols found:
+	# 110418 124227: searching w folds
+	# 1st at:
+	# last at:
+	# stopped at: 110419 090000
+	# ==========================
+	# 0 sols found:
+	# 110421 114909: started searching star folds
+	# 1st at: -
+	# before last: -
+	# last at: -
+	# stopped at: 110421 133143: 200000 random iterations done
+
+	edges = [0., 0., 1., 0., 0., 1., 0.]
+	batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+	# ==========================
+	# 0 sols found:
+	# 110421 145719: started searching star folds
+	# 1st at: -
+	# before last: -
+	# last at: -
+	# stopped at: 110421 160624: 120000 random iterations done
+
+	#######################################################################
+	#print 'tst'
+	#edges = [1., 0., 1., 0., 0., 1., 0.]
+	#batch7(edges, TriangleAlt.alt_stripII, TriangleAlt.stripI)
+	#batch7(edges, TriangleAlt.star1loose, TriangleAlt.star1loose)
+	# 0 sols found:
+	# 110420 104042: started searching w folds
+	# killed at: 110421 075300
+
+	#######################################################################
+	#print '12 folded squares:'
+
+	#edges = [V2, 0., 1., 0., V2, 1., 0.]
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+	# 0 sols found:
+	# 110419 092021: started searching w folds
+	# crashed with MemoryError (during evening/night)
+	#batch7(edges, TriangleAlt.star1loose, TriangleAlt.star1loose)
+	# 110420 084211: started searching w folds
+	# killed at: 110421 075300
+	# ==========================
+	# 0 sols found:
+	# 110421 133127: started searching star folds
+	# 1st at: -
+	# before last: -
+	# last at: -
+	# stopped at: 110421 145321: 150000 random iterations done
