@@ -1528,6 +1528,8 @@ if __name__ == '__main__':
             v[i] = v[i] % tpi
             if v[i] < -numx.pi:
                 v[i] += tpi
+            elif v[i] > numx.pi:
+                v[i] -= tpi
 	    elif eq(v[i], tpi):
 		v[i] = 0
         return v
@@ -2197,9 +2199,9 @@ if __name__ == '__main__':
 	    #multiRootsLog(fold, edges, tris, oppTris)
 	    #fold.set(fold.triangle)
 	    #multiRootsLog(fold, edges, tris, oppTris)
-	    fold.set(fold.star)
+	    #fold.set(fold.star)
 	    #multiRootsLog(fold, edges, tris, oppTris)
-	    #fold.set(fold.w)
+	    fold.set(fold.w)
 	    multiRootsLog(fold, edges, tris, oppTris)
 	    #fold.set(fold.trapezium)
 	    #multiRootsLog(fold, edges, tris, oppTris)
@@ -2280,9 +2282,61 @@ if __name__ == '__main__':
 	# 110421 095353: started searching star folds
 	# 110421 104626: 100000 random iterations done
 
+	# TODO:
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
 
 	#######################################################################
-	print 'only hepts:'
+	print '40 tris (36 + 4 O3):'
+
+	edges = [1., 0., 1., 0., 1., 1., 1.]
+	# TODO
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+	# has solutions
+
+	#######################################################################
+	print '-- tris'
+
+	edges = [1., 0., 1., 0., 0., 1., 1.]
+	# TODO
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+
+	#######################################################################
+	print 'xx tris:'
+
+	edges = [1., 0., 1., 0., 1., 0., 0.]
+	# TODO
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+
+	#######################################################################
+	print 'xx tris:'
+
+	edges = [1., 0., 1., 0., 1., 1., 0.]
+	# TODO
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+
+	#######################################################################
+	print 'xx tris:'
+
+	edges = [1., 1., 1., 0., 1., 0., 0.]
+	# TODO
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+
+	#######################################################################
+	print 'xx tris:'
+
+	edges = [1., 1., 1., 0., 1., 1., 0.]
+	# TODO
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
+	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+
+	#######################################################################
+	#print 'only hepts:'
 
 	#edges = [1., 0., 1., 0., 0., 1., 0.]
 	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripII)
@@ -2299,8 +2353,8 @@ if __name__ == '__main__':
 	# last at: -
 	# stopped at: 110421 133143: 200000 random iterations done
 
-	edges = [0., 0., 1., 0., 0., 1., 0.]
-	batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
+	#edges = [0., 0., 1., 0., 0., 1., 0.]
+	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
 	# ==========================
 	# 0 sols found:
 	# 110421 145719: started searching star folds
