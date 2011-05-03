@@ -27,11 +27,13 @@ import pygsl._numobj as numx
 from pygsl  import multiroots, errno
 import pygsl
 import copy
+import threading
 import gc
 
 import Heptagons
 import GeomTypes
 
+import string
 import time
 import random
 
@@ -95,6 +97,17 @@ class TriangleAlt:
     alt_stripII     = 1             | alt1_bit | alt2_bit
     star            = 2
     star1loose      = 2 | loose_bit
+    def __iter__(t):
+	return iter([
+	    t.stripI,
+	    t.strip1loose,
+	    t.alt_stripI,
+	    t.alt_strip1loose,
+	    t.stripII,
+	    t.alt_stripII,
+	    t.star,
+	    t.star1loose
+	])
 
 Stringify = {
     TriangleAlt.strip1loose     : 'strip 1 loose',
@@ -1276,29 +1289,45 @@ def FindMultiRoot(initialValues,
         )
     result = None
     for iter in range(maxIter):
-        status = solver.iterate()
-        r = solver.root()
-        x = solver.getx()
-        f = solver.getf()
-        status = multiroots.test_residual(f, precision)
-        if status == errno.GSL_SUCCESS and not quiet:
-            print "# Converged :"
-        if printIter:
-            print "  %5d % .7f % .7f % .7f % .7f  % .7f  % .7f  % .7f  % .7f" %(
-                iter+1,
-                x[0], x[1], x[2], x[3],
-                f[0], f[1], f[2], f[3]
-            )
-        if status == errno.GSL_SUCCESS:
-            # Now print solution with high precision
-            if not quiet:
-                for i in range(nrOfIns):
-                    print "x[%d] = %.15f" % (i, x[i])
-            result = [x[i] for i in range(nrOfIns)]
-            break
-    else:
-        if not quiet:
-            print "# not converged... :("
+	try:
+	    status = solver.iterate()
+	    r = solver.root()
+	    x = solver.getx()
+	    f = solver.getf()
+	    status = multiroots.test_residual(f, precision)
+	    if status == errno.GSL_SUCCESS and not quiet:
+		print "# Converged :"
+	    if printIter:
+		print "  %5d % .7f % .7f % .7f % .7f  % .7f  % .7f  % .7f  % .7f" %(
+		    iter+1,
+		    x[0], x[1], x[2], x[3],
+		    f[0], f[1], f[2], f[3]
+		)
+	    if status == errno.GSL_SUCCESS:
+		# Now print solution with high precision
+		if not quiet:
+		    for i in range(nrOfIns):
+			print "x[%d] = %.15f" % (i, x[i])
+		result = [x[i] for i in range(nrOfIns)]
+		break
+	    else:
+		if not quiet:
+		    print "# not converged... :("
+	except pygsl.errors.gsl_SingularityError:
+	    #print 'gsl_Singularity Error exception', maxIter
+	    del(solver)
+	    break
+	    pass
+	except pygsl.errors.gsl_NoProgressError:
+	    #print 'gsl_NoProgress Error exception', maxIter
+	    del(solver)
+	    break
+	    pass
+	except pygsl.errors.gsl_JacobianEvaluationError:
+	    #print 'gsl_JacobianEvaluation Error exception', maxIter
+	    del(solver)
+	    break
+	    pass
     if result != None and cleanupF != None:
         result = cleanupF(result, nrOfIns)
     return result
@@ -1318,114 +1347,187 @@ def solutionAlreadyFound(sol, list, precision = 1.e-13):
             break # for old loop
     return found
 
-def RandFindMultiRootOnDomain(domain,
-        edgeAlternative,
-        edgeLengths = [1., 1., 1., 1.],
+class RandFindMultiRootOnDomain(threading.Thread):
+    def __init__(this,
+	domain,
+	edgeAlternative = TriangleAlt.stripI,
+	oppEdgeAlternative = None,
+	method = 1,
+	precision = 1e-15,
 	fold = Fold.parallel,
-        method = 1,
-        cleanupF  = None,
-        steps = None,
-        precision = 1e-15,
-	continueTestAt = None,
-	init_results = [],
-	printStatus = False,
-	oppEdgeAlternative = None
+	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
     ):
-    print 'random search, press Ctrl-C to stop'
-    results = init_results[:]
-    if oppEdgeAlternative == None:
-	oppEdgeAlternative = edgeAlternative
-    dLen = len(domain)
-    random.seed()
-    def randTestvalue():
-	return [
-	    random.random() * (domain[i][1] - domain[i][0]) + domain[i][0]
-	    for i in range(dLen)
-	]
-    testValue = randTestvalue()
-    if printStatus:
-	print testValue
-    # changeIterLimits depends a bit on the amount of solutions.
-    # 1. if you don't have a solution: just jump around until you get a
-    #    hit.
-    # 2. But you don't want to jump around a long time, just to find out
-    #    it was a solution you already had.
-    # Nr 2 will happen, when you are looking for the last solution,
-    # especially if solutions are rare.
+	this.domain = domain
+	this.method = method
+	this.precision = precision
+	this.fold = fold
+	this.edgeAlternative = edgeAlternative
+	this.oppEdgeAlternative = oppEdgeAlternative
+	this.edgeLengths = edgeLengths
+	this.stopAfter = 100000
+	this.printStatus = False,
+	random.seed()
+	threading.Thread.__init__(this)
+
     changeIterLimits = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     maxIters = [2 ** (6+8-i) for i in range(9)]
-    def setMaxIter(r):
-	nrSols = len(r)
-	if nrSols >= changeIterLimits[8]:
-	    return maxIters[8]
-	elif nrSols == changeIterLimits[7]:
-	    return maxIters[7]
-	elif nrSols == changeIterLimits[6]:
-	    return maxIters[6]
-	elif nrSols == changeIterLimits[5]:
-	    return maxIters[5]
-	elif nrSols == changeIterLimits[4]:
-	    return maxIters[4]
-	elif nrSols == changeIterLimits[3]:
-	    return maxIters[3]
-	elif nrSols == changeIterLimits[2]:
-	    return maxIters[2]
-	elif nrSols == changeIterLimits[1]:
-	    return maxIters[1]
-	elif nrSols <= changeIterLimits[0]:
-	    return maxIters[0]
-    maxIter = setMaxIter(results)
-    nrOfIters = 0
-    while True:
-        try:
-	    #print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-	    #print 'step'
-            result = FindMultiRoot(testValue,
-                    edgeAlternative,
-                    edgeLengths,
-		    fold,
-                    method,
-                    cleanupF,
-                    precision,
-                    maxIter,
-                    printIter = False,
-                    quiet     = True,
-		    oppEdgeAlternative = oppEdgeAlternative
-                )
-            if result != None and not solutionAlreadyFound(result, results):
-                results.append(result)
-		maxIter = setMaxIter(results)
-		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-                print 'added new result nr', len(results),':'
-		print '    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
-		    result[0], result[1], result[2], result[3], result[4], result[5], result[6])
-        except pygsl.errors.gsl_SingularityError:
-            pass
-        except pygsl.errors.gsl_NoProgressError:
-            pass
-        except pygsl.errors.gsl_JacobianEvaluationError:
-            pass
-	testValue = randTestvalue()
-	nrOfIters = nrOfIters + 1
-	if (nrOfIters % 10000) == 0:
-	    print 'current results:'
-	    print '['
-	    if len(edgeLengths) == 4:
-		for r in results:
-		    print '    [%.14f, %.14f, %.14f, %.14f],' % (
-						    r[0], r[1], r[2], r[3])
+    def setMaxIter(this):
+	nrSols = len(this.results)
+	if nrSols >= this.changeIterLimits[8]:
+	    return this.maxIters[8]
+	elif nrSols == this.changeIterLimits[7]:
+	    return this.maxIters[7]
+	elif nrSols == this.changeIterLimits[6]:
+	    return this.maxIters[6]
+	elif nrSols == this.changeIterLimits[5]:
+	    return this.maxIters[5]
+	elif nrSols == this.changeIterLimits[4]:
+	    return this.maxIters[4]
+	elif nrSols == this.changeIterLimits[3]:
+	    return this.maxIters[3]
+	elif nrSols == this.changeIterLimits[2]:
+	    return this.maxIters[2]
+	elif nrSols == this.changeIterLimits[1]:
+	    return this.maxIters[1]
+	elif nrSols <= this.changeIterLimits[0]:
+	    return this.maxIters[0]
+
+    tpi = 2*numx.pi
+    def cleanupResult(this, v, l = 4):
+        for i in range(1, l):
+            v[i] = v[i] % this.tpi
+            if v[i] < -numx.pi:
+                v[i] += this.tpi
+            elif v[i] > numx.pi:
+                v[i] -= this.tpi
+	    elif eq(v[i], this.tpi):
+		v[i] = 0
+        return v
+
+    def randTestvalue(this):
+	dLen = len(this.domain)
+	#return [0.5, 0.1, 1.0, 0.0, 0.0, 1.0, 1.0]
+	return [
+	    random.random() * (this.domain[i][1] - this.domain[i][0]) + this.domain[i][0]
+	    for i in range(dLen)
+	]
+
+    # This can be optimised
+    def solutionAlreadyFound(this, sol):
+	found = False
+	lstRange = range(len(sol))
+	for old in this.results:
+	    allElemsEqual = True
+	    for i in lstRange:
+		if abs(old[i] - sol[i]) > 100 * this.precision: # TODO: 10?
+		    allElemsEqual = False
+		    break # for i loop, not for old
+	    if allElemsEqual:
+		found = True
+		break # for old loop
+	return found
+
+    def getOutName(this):
+	es = ''
+	for l in this.edgeLengths:
+	    if l == 1 or l == 0:
+		es = '%s_%d' % (es, l)
 	    else:
-		for r in results:
+		es = '%s_%.1f' % (es, l)
+	es = es[1:]
+	return 'frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+		es, Fold(this.fold),
+		string.join(Stringify[this.edgeAlternative].split(), '_'),
+		string.join(Stringify[this.oppEdgeAlternative].split(), '_')
+	    )
+
+    def run(this):
+	if this.oppEdgeAlternative == None:
+	    this.oppEdgeAlternative = this.edgeAlternative
+	testValue = this.randTestvalue()
+	if printStatus:
+	    print testValue
+	# changeIterLimits depends a bit on the amount of solutions.
+	# 1. if you don't have a solution: just jump around until you get a
+	#    hit.
+	# 2. But you don't want to jump around a long time, just to find out
+	#    it was a solution you already had.
+	# Nr 2 will happen, when you are looking for the last solution,
+	# especially if solutions are rare.
+
+	filename = this.getOutName()
+
+	# read previous file
+	try:
+	    f = open(filename, 'r')
+	    ed = {'__name__': 'readPyFile'}
+	    exec f in ed
+	    # TODO check settings
+	    this.results = ed['results']
+	    prev_iterations = ed['iterations']
+	    f.close()
+	except IOError:
+	    this.results = []
+	    prev_iterations = 0
+
+	nrOfIters = 0
+	maxIter = this.setMaxIter()
+	while True:
+	    try:
+		#print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+		#print 'step'
+		result = FindMultiRoot(testValue,
+			this.edgeAlternative,
+			this.edgeLengths,
+			this.fold,
+			this.method,
+			lambda v,l: this.cleanupResult(v, l),
+			this.precision,
+			maxIter,
+			printIter = False,
+			quiet     = True,
+			oppEdgeAlternative = this.oppEdgeAlternative
+		    )
+		if result != None and not this.solutionAlreadyFound(result):
+		    this.results.append(result)
+		    maxIter = this.setMaxIter()
+		    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+		    print 'added new result nr', len(this.results),':'
 		    print '    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
-				    r[0], r[1], r[2], r[3], r[4], r[5], r[6])
-	    print ']'
-	    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-	    print nrOfIters, 'random iterations done; -->', len(results), 'nr of sols found'
-	    # To to spawn a new process and kill the childs instead?
-	    #del results # doesn't help
-	    #results = []
-	    #gc.collect() # doesn't help....
-    return results
+			result[0], result[1], result[2], result[3], result[4], result[5], result[6])
+	    except pygsl.errors.gsl_SingularityError:
+		pass
+	    except pygsl.errors.gsl_NoProgressError:
+		pass
+	    except pygsl.errors.gsl_JacobianEvaluationError:
+		pass
+	    testValue = this.randTestvalue()
+	    nrOfIters = nrOfIters + 1
+	    if nrOfIters >= this.stopAfter:
+		f = open(filename, 'w')
+		f.write('# edgeLengths = %s\n' % str(this.edgeLengths))
+		f.write('# edgeAlternative = %s\n' % Stringify[this.edgeAlternative])
+		f.write('# oppEdgeAlternative = %s\n' % Stringify[this.oppEdgeAlternative])
+		f.write('# fold = %s\n' % Fold(this.fold))
+		f.write('# %s: ' % time.strftime(
+			"%y%m%d %H%M%S", time.localtime())
+		    )
+		f.write('%d solutions found\n' % len(this.results))
+		f.write('iterations = %d\n' % (nrOfIters + prev_iterations))
+		f.write('results = [\n')
+		if len(this.edgeLengths) == 4:
+		    for r in this.results:
+			f.write('    [%.14f, %.14f, %.14f, %.14f],\n' % (
+							r[0], r[1], r[2], r[3]))
+		else:
+		    for r in this.results:
+			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
+				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+		f.write(']\n')
+		f.close()
+		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+		print len(this.results), 'results written to', filename
+		break
 
 def FindMultiRootOnDomain(domain,
         edgeAlternative,
@@ -1812,7 +1914,6 @@ if __name__ == '__main__':
     else:
 	printStatus = False
 	def multiRootsLog(fold, edges, tris, oppTris = None):
-	    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
 	    print 'started searching %s folds' % str(fold)
 	    result = []
 	    if len(edges) == 4:
@@ -1836,40 +1937,84 @@ if __name__ == '__main__':
 		steps = [0.5, 0.5, 0.3, 0.5, 0.3, 0.5, 0.3]
 	    print 'randomSearch:', randomSearch
 	    if (randomSearch):
-		    result = RandFindMultiRootOnDomain(dom,
-			    edgeLengths = edges,
-			    edgeAlternative = tris,
-			    oppEdgeAlternative = oppTris,
-			    fold = fold.fold,
-			    method = Method.hybrids,
-			    cleanupF = cleanupResult,
-			    steps = steps,
-			    printStatus = printStatus
-			)
-
+		rndT = RandFindMultiRootOnDomain(dom,
+			edgeAlternative    = tris,
+			oppEdgeAlternative = oppTris,
+			edgeLengths        = edges,
+			fold               = fold.fold,
+			method             = Method.hybrids
+		    )
+		rndT.stopAfter = 100
+		while True:
+		    rndT.start()
+		    rndT.join()
+		    #del rndT
+		    break
+		    threading.Thread.__init__(rndT)
+		    print '======================='
 	    else:
-		    result = FindMultiRootOnDomain(dom,
-			    edgeLengths = edges,
-			    edgeAlternative = tris,
-			    oppEdgeAlternative = oppTris,
-			    fold = fold.fold,
-			    method = Method.hybrids,
-			    cleanupF = cleanupResult,
-			    steps = steps,
-			    maxIter = 20,
-			    printStatus = printStatus
-			)
+		result = FindMultiRootOnDomain(dom,
+			edgeLengths = edges,
+			edgeAlternative = tris,
+			oppEdgeAlternative = oppTris,
+			fold = fold.fold,
+			method = Method.hybrids,
+			cleanupF = cleanupResult,
+			steps = steps,
+			maxIter = 2,
+			printStatus = printStatus
+		    )
+		print '['
+		if len(edges) == 4:
+		    for r in result:
+			print ' [%.14f, %.14f, %.14f, %.14f],' % (
+							r[0], r[1], r[2], r[3])
+		else:
+		    for r in result:
+			print ' [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
+					r[0], r[1], r[2], r[3], r[4], r[5], r[6])
+		print '],\n'
 
-	    print '['
-	    if len(edges) == 4:
-		for r in result:
-		    print ' [%.14f, %.14f, %.14f, %.14f],' % (
-						    r[0], r[1], r[2], r[3])
-	    else:
-		for r in result:
-		    print ' [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
-				    r[0], r[1], r[2], r[3], r[4], r[5], r[6])
-	    print '],\n'
+	def randBatch(continueAfter = 100):
+	    folds = [Fold.star, Fold.w]
+	    edgeLs = [
+		[1., 1., 1., 1., 1., 1., 1.],
+		[1., 0., 1., 0., 0., 1., 1.],
+		[1., 0., 1., 0., 1., 0., 0.],
+		[1., 0., 1., 0., 1., 0., 1.],
+		[1., 0., 1., 0., 1., 1., 0.],
+		[1., 0., 1., 0., 1., 1., 1.],
+		[1., 1., 1., 0., 1., 0., 0.],
+		[1., 1., 1., 0., 1., 1., 0.],
+	    ]
+	    ta = TriangleAlt()
+	    edgeAlts = [t for t in ta]
+	    oppEdgeAlts = [t for t in ta]
+	    dom = [
+		[-3., 4.],             # Translation
+		[-numx.pi, numx.pi],   # angle alpha
+		[-numx.pi, numx.pi],   # fold 1 beta0
+		[-numx.pi, numx.pi],   # fold 2 gamma0
+		[0,        numx.pi/4], # delta: around z-axis
+		[-numx.pi, numx.pi],   # fold 1 beta1
+		[-numx.pi, numx.pi],   # fold 2 gamma1
+	    ]
+	    while True:
+		for edges in edgeLs:
+		    for fold in folds:
+			for ea in edgeAlts:
+			    for oea in oppEdgeAlts:
+				rndT = RandFindMultiRootOnDomain(dom,
+				    edgeAlternative    = ea,
+				    oppEdgeAlternative = oea,
+				    edgeLengths        = edges,
+				    fold               = fold,
+				    method             = Method.hybrids
+				)
+				rndT.stopAfter = continueAfter
+				rndT.start()
+				rndT.join()
+				print '======================='
 
 	def batch(edges, tris):
 		fold = Fold()
@@ -2286,54 +2431,7 @@ if __name__ == '__main__':
 	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
 	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
 
-	#######################################################################
-	print '40 tris (36 + 4 O3):'
-
-	edges = [1., 0., 1., 0., 1., 1., 1.]
-	# TODO
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-	# has solutions
-
-	#######################################################################
-	print '-- tris'
-
-	edges = [1., 0., 1., 0., 0., 1., 1.]
-	# TODO
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-
-	#######################################################################
-	print 'xx tris:'
-
-	edges = [1., 0., 1., 0., 1., 0., 0.]
-	# TODO
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-
-	#######################################################################
-	print 'xx tris:'
-
-	edges = [1., 0., 1., 0., 1., 1., 0.]
-	# TODO
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-
-	#######################################################################
-	print 'xx tris:'
-
-	edges = [1., 1., 1., 0., 1., 0., 0.]
-	# TODO
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-
-	#######################################################################
-	print 'xx tris:'
-
-	edges = [1., 1., 1., 0., 1., 1., 0.]
-	# TODO
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
+	randBatch(1000)
 
 	#######################################################################
 	#print 'only hepts:'
