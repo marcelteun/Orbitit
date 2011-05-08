@@ -22,11 +22,14 @@
 
 import wx
 import math
+import string
 import rgb
 import Heptagons
 import isometry
 import Geom3D
 import Scenes3D
+
+from glob import glob
 from OpenGL.GL import *
 
 import Data_FldHeptA4xI
@@ -68,7 +71,8 @@ tris_40         = Data_FldHeptA4.tris_40
 Stringify = {
     dyn_pos:		'Enable Sliders',
     no_o3_tris:		'48 Triangles',
-    all_eq_tris:	'All 80 Triangles Equilateral',
+    #all_eq_tris:	'All 80 Triangles Equilateral',
+    all_eq_tris:	'1_1_1_1_1_1_1',
     only_xtra_o3s:	'8 Triangles (O3)',
     edge_V2_1_0_1:	'8 Triangles and 12 Folded Squares',
     edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
@@ -601,6 +605,101 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    ))
 	)
 
+    prePosStrToFileStrMap = {
+	all_eq_tris: '1_1_1_1_1_1_1'
+    }
+
+    rDir = 'Data_FldHeptA4'
+    rPre = 'frh-roots'
+
+    def mapPrePosStrToFileStr(this, prePosId):
+	try:
+	    s = this.prePosStrToFileStrMap[prePosId]
+	except KeyError:
+	    s = this.stringify[prePosId]
+	return s
+
+    def mapTrisFill(this, trisFillId):
+	tStr = Heptagons.Stringify[trisFillId]
+	t = string.join(tStr.split(), '_').lower().replace('ernative', '')
+	t = t.replace('_ii', '_II')
+	t = t.replace('_i', '_I')
+	return t
+
+    def isPrePosValid(this, prePosId):
+	# This means that files with empty results should be filtered out from
+	# the directory.
+	if this.shape.inclReflections:
+	    return Heptagons.FldHeptagonCtrlWin.isPrePosValid(this, prePosId)
+	else:
+	    print 'isPrePosValid'
+	    s = this.mapPrePosStrToFileStr(prePosId)
+	    print s
+	    return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
+
+    def isFoldValid(this, foldMethod):
+	print 'isFoldValid'
+	if this.shape.inclReflections:
+	    return Heptagons.FldHeptagonCtrlWin.isFoldValid(this, foldMethod)
+	else:
+	    p = this.mapPrePosStrToFileStr(this.prePos)
+	    f = Heptagons.FoldName[foldMethod].lower()
+	    print glob(
+		    '%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
+		)
+	    return glob(
+		    '%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
+		) != []
+
+    def isTrisFillValid(this, trisFillId):
+	print 'isTrisFillValid'
+	if this.shape.inclReflections:
+	    return Heptagons.FldHeptagonCtrlWin.isTrisFillValid(this, trisFillId)
+	else:
+	    p = this.mapPrePosStrToFileStr(this.prePos)
+	    f = Heptagons.FoldName[this.foldMethod].lower()
+	    t = this.mapTrisFill(trisFillId)
+	    print [
+		glob('%s/%s-%s-fld_%s*-%s-opp_*' % (
+		    this.rDir, this.rPre, p, f, t)
+		),
+		glob('%s/%s-%s-fld_%s*-opp_%s*' % (
+		    this.rDir, this.rPre, p, f, t)
+		)
+	    ]
+	    return [
+		glob('%s/%s-%s-fld_%s*-%s-opp_*' % (
+		    this.rDir, this.rPre, p, f, t)
+		) != [],
+		glob('%s/%s-%s-fld_%s*-opp_%s*' % (
+		    this.rDir, this.rPre, p, f, t)
+		) != []
+	    ]
+
+    @property
+    def stdPrePos(this):
+	prePosId = this.prePos
+	if prePosId == dyn_pos:
+	    return []
+	if this.shape.inclReflections:
+	    return this.specPos[this.shape.inclReflections][prePosId][
+						this.foldMethod][this.trisFill]
+	else:
+	    filename = 'Data_FldHeptA4/frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+			Stringify[prePosId],
+			Heptagons.FoldName[this.foldMethod].lower(),
+			this.mapTrisFill(this.trisFill),
+			this.mapTrisFill(this.oppTrisFill)
+		    )
+	    try:
+		fd = open(filename, 'r')
+	    except IOError:
+		print 'DBG file not found:\n %s' % filename
+		return []
+	    ed = {'__name__': 'readPyFile'}
+	    exec fd in ed
+	    fd.close()
+	    return ed['results']
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):

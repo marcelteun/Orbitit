@@ -82,14 +82,14 @@ class TrisAlt:
 trisAlt = TrisAlt()
 
 Stringify = {
-    trisAlt.strip_1_loose:	'Strip, 1 Loose',
+    trisAlt.strip_1_loose:	'Strip 1 Loose',
     trisAlt.strip_I:		'Strip I',
     trisAlt.strip_II:		'Strip II',
     trisAlt.star:		'Shell',
-    trisAlt.star_1_loose:	'Shell, 1 Loose',
+    trisAlt.star_1_loose:	'Shell 1 Loose',
     trisAlt.alt_strip_I:	'Alternative Strip I',
     trisAlt.alt_strip_II:	'Alternative Strip II',
-    trisAlt.alt_strip_1_loose:	'Alternative Strip, 1 loose',
+    trisAlt.alt_strip_1_loose:	'Alternative Strip 1 loose',
 }
 
 class FoldMethod:
@@ -1146,18 +1146,53 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         return mainSizer
 
+    def isPrePosValid(this, prePosId):
+	try:
+	    tmp = this.specPos[this.shape.inclReflections][prePosId]
+	    return True
+	except KeyError:
+	    return False
+
+    def isFoldValid(this, foldMethod):
+	inclRefl = this.shape.inclReflections
+        prePosId = this.prePos
+	return (
+	    this.isPrePosValid(prePosId)
+	    and
+	    foldMethod in this.specPos[inclRefl][prePosId]
+	)
+
+    def isTrisFillValid(this, trisFillId):
+	inclRefl = this.shape.inclReflections
+        prePosId = this.prePos
+	foldMethod = this.foldMethod
+	if inclRefl:
+	    return (
+		trisFillId in this.specPos[inclRefl][prePosId][foldMethod],
+		False
+	    )
+	else:
+	    enable = [False, False]
+	    for setPair in this.specPos[inclRefl][prePosId][foldMethod]:
+		if trisFillId == setPair[0]:
+		    enable[0] = True
+		if trisFillId == setPair[1]:
+		    enable[1] = True
+		if enable[0] == True and enable[1] == True:
+		    break
+	    return enable
+
     def setEnablePrePosItems(this):
 	currentPrePos = this.prePos
 	this.prePosGui.Clear()
 	prePosStillValid = False
 	for prePosStr in this.prePosStrLst:
-	    try:
-		tmp = this.specPos[this.shape.inclReflections][
-						this.mapPrePosStr(prePosStr)]
+	    prePosId = this.mapPrePosStr(prePosStr)
+	    if this.isPrePosValid(prePosId):
 		this.prePosGui.Append(prePosStr)
-		if currentPrePos == this.mapPrePosStr(prePosStr):
+		if currentPrePos == prePosId:
 		    prePosStillValid = True
-	    except KeyError:
+	    else:
 		if prePosStr == this.stringify[dyn_pos]:
 		    this.prePosGui.Append(prePosStr)
 	if prePosStillValid:
@@ -1257,11 +1292,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.isTrisFillEnabled[k] = True
 	    this.isOppTrisFillEnabled[k] = True
 
-    def setEnableTrisFill(this, alt, enable = True, opposite = False):
-	if not opposite:
-	    this.isTrisFillEnabled[alt] = enable
-	else:
-	    this.isOppTrisFillEnabled[alt] = enable
+    def setEnableTrisFill(this, alt, enable = True, oppEnable = False):
+	this.isTrisFillEnabled[alt] = enable
+	this.isOppTrisFillEnabled[alt] = oppEnable
 
     def correctTrisFillSettings(this, fillGui, altGui):
         if this.isPrePos():
@@ -1593,31 +1626,8 @@ class FldHeptagonCtrlWin(wx.Frame):
     def prePos(this):
 	return this.mapPrePosStr(this.prePosGui.GetStringSelection())
 
-    def onPrev(this, event = None):
-        prePosId = this.prePos
-        if prePosId != dyn_pos:
-            if this.specPosIndex > 0:
-                this.specPosIndex -= 1
-	    elif this.specPosIndex == -1:
-                this.specPosIndex = len(this.getPossibleSpecPosSettings()) - 2
-	    # else prePosId == 0 : first one selected don't scroll around
-            this.onPrePos()
-
-    def onNext(this, event = None):
-        prePosId = this.prePos
-        if prePosId != dyn_pos:
-	    try:
-		maxI = len(this.getPossibleSpecPosSettings()) - 1
-		if this.specPosIndex >= 0:
-		    if this.specPosIndex < maxI - 1:
-			this.specPosIndex += 1
-		    else:
-		        this.specPosIndex = -1 # select last
-	    except KeyError:
-		pass
-	    this.onPrePos()
-
-    def getPossibleSpecPosSettings(this):
+    @property
+    def stdPrePos(this):
         prePosId = this.prePos
         if prePosId != dyn_pos:
 	    if this.shape.inclReflections:
@@ -1628,6 +1638,30 @@ class FldHeptagonCtrlWin(wx.Frame):
 							this.foldMethod][trisF]
 	else:
 	    return []
+
+    def onPrev(this, event = None):
+        prePosId = this.prePos
+        if prePosId != dyn_pos:
+            if this.specPosIndex > 0:
+                this.specPosIndex -= 1
+	    elif this.specPosIndex == -1:
+                this.specPosIndex = len(this.stdPrePos) - 2
+	    # else prePosId == 0 : first one selected don't scroll around
+            this.onPrePos()
+
+    def onNext(this, event = None):
+        prePosId = this.prePos
+        if prePosId != dyn_pos:
+	    try:
+		maxI = len(this.stdPrePos) - 1
+		if this.specPosIndex >= 0:
+		    if this.specPosIndex < maxI - 1:
+			this.specPosIndex += 1
+		    else:
+		        this.specPosIndex = -1 # select last
+	    except KeyError:
+		pass
+	    this.onPrePos()
 
     tNone = 1.0
     aNone = 0.0
@@ -1642,8 +1676,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	if (sel == only_hepts):
 	    this.shape.addXtraFs = False
 	    this.disableTrisFillGuis()
-	    # TODO rm: (only for the current spec prepos
-	    this.disableGuisNoRefl()
 	    this.restoreTris = True
 	elif (this.restoreTris):
 	    this.restoreTris = False
@@ -1689,36 +1721,24 @@ class FldHeptagonCtrlWin(wx.Frame):
             oppFld2 = fld2 = this.fld2None
 	    posVal = this.aNone
 	    nrPos = 0
-	    specPos = this.specPos[this.shape.inclReflections]
 
 	    # Disable / enable appropriate folding methods.
 	    for i in range(len(this.foldMethodList)):
 		method = this.foldMethodListItems[i]
-		this.foldMethodGui.ShowItem(i, method in specPos[sel])
+		this.foldMethodGui.ShowItem(i,
+		    this.isFoldValid(this.foldMethodListItems[i])
+		)
 		# leave up to the user to decide which folding method to choose
 		# in case the selected one was disabled.
 
 	    # Disable / enable appropriate triangle alternatives.
 	    # if the selected folding has valid solutions anyway
 	    #CONTINUE HERE: why is shell still available....
-	    if this.foldMethod in specPos[sel]:
-		if this.shape.inclReflections:
-		    for k in Stringify.iterkeys():
-			enable = k in specPos[sel][this.foldMethod]
-			this.setEnableTrisFill(k, enable)
-		else:
-		    print '--------------------------'
-		    for k in Stringify.iterkeys():
-			enable = [False, False]
-			for setPair in specPos[sel][this.foldMethod]:
-			    if k == setPair[0]:
-				enable[0] = True
-			    if k == setPair[1]:
-				enable[1] = True
-			    if enable[0] == True and enable[1] == True:
-				break
-			print 'DBG setEnable:', Stringify[k], ':', enable[0], enable[1]
-			this.setEnableTrisFill(k, enable[0], enable[1])
+	    if this.isFoldValid(this.foldMethod):
+		for k in Stringify.iterkeys():
+		    enable = this.isTrisFillValid(k)
+		    print 'DBG setEnable:', Stringify[k], ':', enable[0], enable[1]
+		    this.setEnableTrisFill(k, enable[0], enable[1])
 	    if (sel != only_hepts):
 		this.correctLooseTrisFillSettings()
 		this.correctTrisFillSettings(this.trisFillGui, this.trisAltGui)
@@ -1726,7 +1746,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    this.correctTrisFillSettings(this.oppTrisFillGui,
 							    this.oppTrisAltGui)
 	    try:
-		setting = this.getPossibleSpecPosSettings()
+		setting = this.stdPrePos
 		if setting != []:
 		    tVal = setting[this.specPosIndex][0]
 		    aVal = setting[this.specPosIndex][1]
