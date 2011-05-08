@@ -1350,6 +1350,7 @@ def solutionAlreadyFound(sol, list, precision = 1.e-13):
 class RandFindMultiRootOnDomain(threading.Thread):
     def __init__(this,
 	domain,
+	threadId = 0,
 	edgeAlternative = TriangleAlt.stripI,
 	oppEdgeAlternative = None,
 	method = 1,
@@ -1358,6 +1359,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
     ):
 	this.domain = domain
+	this.threadId = threadId
 	this.method = method
 	this.precision = precision
 	this.fold = fold
@@ -1491,10 +1493,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		if result != None and not this.solutionAlreadyFound(result):
 		    this.results.append(result)
 		    maxIter = this.setMaxIter()
-		    print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-		    print 'added new result nr', len(this.results),':'
-		    print '    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
-			result[0], result[1], result[2], result[3], result[4], result[5], result[6])
+		    print '(thread %d) %s:' % (
+			    this.threadId,
+			    time.strftime("%y%m%d %H%M%S", time.localtime())
+			),
+		    print 'added new result nr %d (after %d new iterations)' % (
+			    len(this.results),
+			    nrOfIters
+			)
 	    except pygsl.errors.gsl_SingularityError:
 		pass
 	    except pygsl.errors.gsl_NoProgressError:
@@ -1525,7 +1531,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
 		f.write(']\n')
 		f.close()
-		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
+		print '(thread %d) %s:' % (
+			this.threadId,
+			time.strftime("%y%m%d %H%M%S", time.localtime())
+		    ),
 		print len(this.results), 'results written to', filename
 		break
 
@@ -1975,10 +1984,12 @@ if __name__ == '__main__':
 					r[0], r[1], r[2], r[3], r[4], r[5], r[6])
 		print '],\n'
 
-	def randBatch(continueAfter = 100):
+	def randBatch(continueAfter = 100, nrThreads = 1):
 	    folds = [Fold.star, Fold.w]
 	    edgeLs = [
 		[1., 1., 1., 1., 1., 1., 1.],
+		[0., 0., 1., 0., 0., 1., 0.],
+		[1., 0., 1., 0., 0., 1., 0.],
 		[1., 0., 1., 0., 0., 1., 1.],
 		[1., 0., 1., 0., 1., 0., 0.],
 		[1., 0., 1., 0., 1., 0., 1.],
@@ -1986,6 +1997,7 @@ if __name__ == '__main__':
 		[1., 0., 1., 0., 1., 1., 1.],
 		[1., 1., 1., 0., 1., 0., 0.],
 		[1., 1., 1., 0., 1., 1., 0.],
+		[V2, 0., 1., 0., V2, 1., 0.],
 	    ]
 	    ta = TriangleAlt()
 	    edgeAlts = [t for t in ta]
@@ -1999,22 +2011,38 @@ if __name__ == '__main__':
 		[-numx.pi, numx.pi],   # fold 1 beta1
 		[-numx.pi, numx.pi],   # fold 2 gamma1
 	    ]
+	    rndT = [None for j in range(nrThreads)]
+	    i = 0
 	    while True:
 		for edges in edgeLs:
 		    for fold in folds:
 			for ea in edgeAlts:
 			    for oea in oppEdgeAlts:
-				rndT = RandFindMultiRootOnDomain(dom,
-				    edgeAlternative    = ea,
-				    oppEdgeAlternative = oea,
-				    edgeLengths        = edges,
-				    fold               = fold,
-				    method             = Method.hybrids
-				)
-				rndT.stopAfter = continueAfter
-				rndT.start()
-				rndT.join()
-				print '======================='
+				# loose_bit must be the same for both:
+				if (
+				    ea & loose_bit == loose_bit and
+				    oea & loose_bit == loose_bit
+				) or (
+				    ea & loose_bit == 0 and
+				    oea & loose_bit == 0
+				):
+				    print '====set up thread %d===' % i
+				    rndT[i] = RandFindMultiRootOnDomain(dom,
+					threadId           = i,
+					edgeAlternative    = ea,
+					oppEdgeAlternative = oea,
+					edgeLengths        = edges,
+					fold               = fold,
+					method             = Method.hybrids
+				    )
+				    rndT[i].stopAfter = continueAfter
+				    rndT[i].start()
+				    i = i + 1
+				    if (i == nrThreads):
+					for j in range(nrThreads):
+					    rndT[j].join()
+					print '===threads finished===='
+					i = 0
 
 	def batch(edges, tris):
 		fold = Fold()
@@ -2431,7 +2459,7 @@ if __name__ == '__main__':
 	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
 	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
 
-	randBatch(1000)
+	randBatch(continueAfter = 4000, nrThreads = 1)
 
 	#######################################################################
 	#print 'only hepts:'
