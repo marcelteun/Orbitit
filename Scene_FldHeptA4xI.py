@@ -71,8 +71,7 @@ tris_40         = Data_FldHeptA4.tris_40
 Stringify = {
     dyn_pos:		'Enable Sliders',
     no_o3_tris:		'48 Triangles',
-    #all_eq_tris:	'All 80 Triangles Equilateral',
-    all_eq_tris:	'1_1_1_1_1_1_1',
+    all_eq_tris:	'All 80 Triangles Equilateral',
     only_xtra_o3s:	'8 Triangles (O3)',
     edge_V2_1_0_1:	'8 Triangles and 12 Folded Squares',
     edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
@@ -606,7 +605,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	)
 
     prePosStrToFileStrMap = {
-	all_eq_tris: '1_1_1_1_1_1_1'
+	all_eq_tris: '1_1_1_1_1_1_1',
+	tris_16:     '1_0_1_0_1_0_1',
+	only_hepts:  '1_0_1_0_0_1_0',
     }
 
     rDir = 'Data_FldHeptA4'
@@ -663,7 +664,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		glob('%s/%s-%s-fld_%s*-%s-opp_*' % (
 		    this.rDir, this.rPre, p, f, t)
 		),
-		glob('%s/%s-%s-fld_%s*-opp_%s*' % (
+		glob('%s/%s-%s-fld_%s*-opp_%s.*' % (
 		    this.rDir, this.rPre, p, f, t)
 		)
 	    ]
@@ -671,7 +672,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		glob('%s/%s-%s-fld_%s*-%s-opp_*' % (
 		    this.rDir, this.rPre, p, f, t)
 		) != [],
-		glob('%s/%s-%s-fld_%s*-opp_%s*' % (
+		glob('%s/%s-%s-fld_%s*-opp_%s.*' % (
 		    this.rDir, this.rPre, p, f, t)
 		) != []
 	    ]
@@ -686,7 +687,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 						this.foldMethod][this.trisFill]
 	else:
 	    filename = 'Data_FldHeptA4/frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
-			Stringify[prePosId],
+			this.mapPrePosStrToFileStr(this.prePos),
 			Heptagons.FoldName[this.foldMethod].lower(),
 			this.mapTrisFill(this.trisFill),
 			this.mapTrisFill(this.oppTrisFill)
