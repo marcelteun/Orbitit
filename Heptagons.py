@@ -66,31 +66,175 @@ class TrisAlt:
     alt_strip_II       = strip_II             | alt_bit
     alt_strip_1_loose  = strip_I  | loose_bit | alt_bit
 
-    @property
-    def key(this):
-	return {
-	    Stringify[this.strip_I]:           this.strip_I,
-	    Stringify[this.strip_II]:          this.strip_II,
-	    Stringify[this.star]:              this.star,
-	    Stringify[this.strip_1_loose]:     this.strip_1_loose,
-	    Stringify[this.star_1_loose]:      this.star_1_loose,
-	    Stringify[this.alt_strip_I]:       this.alt_strip_I,
-	    Stringify[this.alt_strip_II]:      this.alt_strip_II,
-	    Stringify[this.alt_strip_1_loose]: this.alt_strip_1_loose
-	}
+    strip_I_strip_I		= (strip_I, strip_I)
+    strip_I_strip_II		= (strip_I, strip_II)
+    strip_I_star		= (strip_I, star)
+    strip_I_alt_strip_I		= (strip_I, alt_strip_I)
+    strip_I_alt_strip_II	= (strip_I, alt_strip_II)
+
+    strip_II_strip_I		= (strip_II, strip_I)
+    strip_II_strip_II		= (strip_II, strip_II)
+    strip_II_star		= (strip_II, star)
+    strip_II_alt_strip_I	= (strip_II, alt_strip_I)
+    strip_II_alt_strip_II	= (strip_II, alt_strip_II)
+
+    star_strip_I		= (star, strip_I)
+    star_strip_II		= (star, strip_II)
+    star_star			= (star, star)
+    star_alt_strip_I		= (star, alt_strip_I)
+    star_alt_strip_II		= (star, alt_strip_II)
+
+    alt_strip_I_strip_I		= (alt_strip_I, strip_I)
+    alt_strip_I_strip_II	= (alt_strip_I, strip_II)
+    alt_strip_I_star		= (alt_strip_I, star)
+    alt_strip_I_alt_strip_I	= (alt_strip_I, alt_strip_I)
+    alt_strip_I_alt_strip_II	= (alt_strip_I, alt_strip_II)
+
+    alt_strip_II_strip_I	= (alt_strip_II, strip_I)
+    alt_strip_II_strip_II	= (alt_strip_II, strip_II)
+    alt_strip_II_star		= (alt_strip_II, star)
+    alt_strip_II_alt_strip_I	= (alt_strip_II, alt_strip_I)
+    alt_strip_II_alt_strip_II	= (alt_strip_II, alt_strip_II)
+
+    strip_1_loose_strip		= (strip_1_loose, strip_1_loose)
+    strip_1_loose_star		= (strip_1_loose, star_1_loose)
+    strip_1_loose_alt_strip	= (strip_1_loose, alt_strip_1_loose)
+
+    star_1_loose_strip		= (star_1_loose, strip_1_loose)
+    star_1_loose_star		= (star_1_loose, star_1_loose)
+    star_1_loose_alt_strip	= (star_1_loose, alt_strip_1_loose)
+
+    alt_strip_1_loose_strip	= (alt_strip_1_loose, strip_1_loose)
+    alt_strip_1_loose_star	= (alt_strip_1_loose, star_1_loose)
+    alt_strip_1_loose_alt_strip	= (alt_strip_1_loose, alt_strip_1_loose)
+
+    baseKey = {
+        strip_I: True,
+	strip_II: True,
+	star: True,
+	strip_1_loose: True,
+	star_1_loose: True,
+	alt_strip_I: True,
+	alt_strip_II: True,
+	alt_strip_1_loose: True,
+    }
+
+    stringify = {
+	strip_1_loose:		'Strip 1 Loose',
+	strip_I:		'Strip I',
+	strip_II:		'Strip II',
+	star:			'Shell',
+	star_1_loose:		'Shell 1 Loose',
+	alt_strip_I:		'Alternative Strip I',
+	alt_strip_II:		'Alternative Strip II',
+	alt_strip_1_loose:	'Alternative Strip 1 loose',
+
+	strip_I_strip_I:		'strip I - strip I',
+	strip_I_strip_II:		'strip I - strip II',
+	strip_I_star:			'strip I - star',
+	strip_I_alt_strip_I:		'strip I - alt. strip I',
+	strip_I_alt_strip_II:		'strip I - alt. strip II',
+
+	strip_II_strip_I:		'strip II - strip I',
+	strip_II_strip_II:		'strip II - strip II',
+	strip_II_star:			'strip II - star',
+	strip_II_alt_strip_I:		'strip II - alt. strip I',
+	strip_II_alt_strip_II:		'strip II - alt. strip II',
+
+	star_strip_I:			'star - strip I',
+	star_strip_II:			'star - strip II',
+	star_star:			'star - star',
+	star_alt_strip_I:		'star - alt. strip I',
+	star_alt_strip_II:		'star - alt. strip II',
+
+	alt_strip_I_strip_I:		'alt. strip I - strip I',
+	alt_strip_I_strip_II:		'alt. strip I - strip II',
+	alt_strip_I_star:		'alt. strip I - star',
+	alt_strip_I_alt_strip_I:	'alt. strip I - alt. strip I',
+	alt_strip_I_alt_strip_II:	'alt. strip I - alt. strip II',
+
+	alt_strip_II_strip_I:		'alt. strip II - strip I',
+	alt_strip_II_strip_II:		'alt. strip II - strip II',
+	alt_strip_II_star:		'alt. strip II - star',
+	alt_strip_II_alt_strip_I:	'alt. strip II - alt. strip I',
+	alt_strip_II_alt_strip_II:	'alt. strip II - alt. strip II',
+
+	strip_1_loose_strip:		'strip - 1 loose - strip',
+	strip_1_loose_star:		'strip - 1 loose - star',
+	strip_1_loose_alt_strip:	'strip - 1 loose - alt. strip',
+
+	star_1_loose_strip:		'star - 1 loose - strip',
+	star_1_loose_star:		'star - 1 loose - star',
+	star_1_loose_alt_strip:		'star - 1 loose - alt. strip',
+
+	alt_strip_1_loose_strip:	'alt. strip - 1 loose - strip',
+	alt_strip_1_loose_star:		'alt. strip - 1 loose - star',
+	alt_strip_1_loose_alt_strip:	'alt. strip - 1 loose - alt. strip',
+    }
+
+    key = {
+	stringify[strip_I]:           strip_I,
+	stringify[strip_II]:          strip_II,
+	stringify[star]:              star,
+	stringify[strip_1_loose]:     strip_1_loose,
+	stringify[star_1_loose]:      star_1_loose,
+	stringify[alt_strip_I]:       alt_strip_I,
+	stringify[alt_strip_II]:      alt_strip_II,
+	stringify[alt_strip_1_loose]: alt_strip_1_loose,
+
+	stringify[strip_I_strip_I]:		strip_I_strip_I,
+	stringify[strip_I_strip_II]:		strip_I_strip_II,
+	stringify[strip_I_star]:		strip_I_star,
+	stringify[strip_I_alt_strip_I]:		strip_I_alt_strip_I,
+	stringify[strip_I_alt_strip_II]:	strip_I_alt_strip_II,
+
+	stringify[strip_II_strip_I]:		strip_II_strip_I,
+	stringify[strip_II_strip_II]:		strip_II_strip_II,
+	stringify[strip_II_star]:		strip_II_star,
+	stringify[strip_II_alt_strip_I]:	strip_II_alt_strip_I,
+	stringify[strip_II_alt_strip_II]:	strip_II_alt_strip_II,
+
+	stringify[star_strip_I]:		star_strip_I,
+	stringify[star_strip_II]:		star_strip_II,
+	stringify[star_star]:			star_star,
+	stringify[star_alt_strip_I]:		star_alt_strip_I,
+	stringify[star_alt_strip_II]:		star_alt_strip_II,
+
+	stringify[alt_strip_I_strip_I]: 	alt_strip_I_strip_I,
+	stringify[alt_strip_I_strip_II]: 	alt_strip_I_strip_II,
+	stringify[alt_strip_I_star]:		alt_strip_I_star,
+	stringify[alt_strip_I_alt_strip_I]: 	alt_strip_I_alt_strip_I,
+	stringify[alt_strip_I_alt_strip_II]: 	alt_strip_I_alt_strip_II,
+
+	stringify[alt_strip_II_strip_I]: 	alt_strip_II_strip_I,
+	stringify[alt_strip_II_strip_II]: 	alt_strip_II_strip_II,
+	stringify[alt_strip_II_star]:		alt_strip_II_star,
+	stringify[alt_strip_II_alt_strip_I]: 	alt_strip_II_alt_strip_I,
+	stringify[alt_strip_II_alt_strip_II]: 	alt_strip_II_alt_strip_II,
+
+	stringify[strip_1_loose_strip]: 	strip_1_loose_strip,
+	stringify[strip_1_loose_star]:		strip_1_loose_star,
+	stringify[strip_1_loose_alt_strip]: 	strip_1_loose_alt_strip,
+
+	stringify[star_1_loose_strip]:		star_1_loose_strip,
+	stringify[star_1_loose_star]:		star_1_loose_star,
+	stringify[star_1_loose_alt_strip]: 	star_1_loose_alt_strip,
+
+	stringify[alt_strip_1_loose_strip]: 	alt_strip_1_loose_strip,
+	stringify[alt_strip_1_loose_star]: 	alt_strip_1_loose_star,
+	stringify[alt_strip_1_loose_alt_strip]:	alt_strip_1_loose_alt_strip,
+    }
+
+    def isBaseKey(this, k):
+	try:
+	    return this.baseKey[k]
+	except KeyError:
+	    return False
+
+    def __init__(this):
+	this.choiceList = [s for s in this.stringify.itervalues()]
 
 trisAlt = TrisAlt()
-
-Stringify = {
-    trisAlt.strip_1_loose:	'Strip 1 Loose',
-    trisAlt.strip_I:		'Strip I',
-    trisAlt.strip_II:		'Strip II',
-    trisAlt.star:		'Shell',
-    trisAlt.star_1_loose:	'Shell 1 Loose',
-    trisAlt.alt_strip_I:	'Alternative Strip I',
-    trisAlt.alt_strip_II:	'Alternative Strip II',
-    trisAlt.alt_strip_1_loose:	'Alternative Strip 1 loose',
-}
 
 class FoldMethod:
     parallel  = 0
@@ -835,7 +979,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.restoreO3s = False
 	this.shape.foldHeptagon = this.foldMethod
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
-	this.initTrisEnabled()
         this.specPosIndex = 0
         this.specPos = prePosLst
 
@@ -853,49 +996,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.heightF = 40 # slider step factor, or: 1 / slider step
 
         this.Guis = []
-	this.choiceListTrisFill = [
-	    Stringify[trisAlt.strip_I],
-	    Stringify[trisAlt.strip_II],
-	    Stringify[trisAlt.star],
-	]
-	nr_of = len(this.choiceListTrisFill)
-	this.choiceListItemsTrisFill = {}
-	for i in range(nr_of):
-	    this.choiceListItemsTrisFill[this.choiceListTrisFill[i]] = i
 
         # static adjustments
-        this.trisFillGui = wx.RadioBox(this.panel,
-                label = 'Triangle Fill Alternative',
+        this.trisFillGui = wx.Choice(this.panel,
                 style = wx.RA_VERTICAL,
-		choices = this.choiceListTrisFill
+                choices = ''
             )
         this.Guis.append(this.trisFillGui)
-        this.trisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleFill)
-
-        this.trisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
-        this.Guis.append(this.trisAltGui)
-        this.trisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleFill)
-
-        this.looseTriGui = wx.CheckBox(this.panel, label = 'One Loose Triangle')
-        this.Guis.append(this.looseTriGui)
-        this.looseTriGui.Bind(wx.EVT_CHECKBOX, this.onTriangleFill)
-
-        this.oppTrisFillGui = wx.RadioBox(this.panel,
-                label = 'Neighbour Fill Alternative',
-                style = wx.RA_VERTICAL,
-		choices = this.choiceListTrisFill
-            )
-        this.Guis.append(this.oppTrisFillGui)
-        this.oppTrisFillGui.Bind(wx.EVT_RADIOBOX, this.onTriangleFill)
-
-        this.oppTrisAltGui = wx.CheckBox(this.panel, label = 'Alternative O3')
-        this.Guis.append(this.oppTrisAltGui)
-        this.oppTrisAltGui.Bind(wx.EVT_CHECKBOX, this.onTriangleFill)
-
-        this.shape.setEdgeAlternative(
-		this.trisFill & ~alt_bit,
-		this.oppTrisFill & ~alt_bit
-	    )
+        this.trisFillGui.Bind(wx.EVT_CHOICE, this.onTriangleFill)
+	this.setEnableTrisFillItems()
 
         this.reflGui = wx.CheckBox(this.panel, label = 'Reflections Required')
         this.Guis.append(this.reflGui)
@@ -955,7 +1064,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.setEnablePrePosItems()
         this.Guis.append(this.prePosGui)
         this.prePosGui.Bind(wx.EVT_CHOICE, this.onPrePos)
-        #wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0, const wxString choices[] = NULL, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listBox")
 
         this.firstButton = wx.Button(this.panel, label = 'First')
         this.nextButton  = wx.Button(this.panel, label = 'Next')
@@ -1050,6 +1158,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         settingsSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         settingsSizer.Add(this.applySymGui, 0, wx.EXPAND)
         settingsSizer.Add(this.addTrisGui, 0, wx.EXPAND)
+        settingsSizer.Add(this.reflGui, 0, wx.EXPAND)
+        settingsSizer.Add(this.rotateFldGui, 0, wx.EXPAND)
         settingsSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
 	# The sizers holding the special positions
@@ -1068,24 +1178,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         prePosSizerH.Add(posSizerSubV, 0, wx.EXPAND)
         prePosSizerH.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
-	# Alterntives of filling with triangles
-        fillSizer = wx.BoxSizer(wx.VERTICAL)
+	# Alternatives of filling with triangles
+        this.Boxes.append(wx.StaticBox(this.panel,
+					label = 'Triangle Fill Alternative'))
+        fillSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         fillSizer.Add(this.trisFillGui, 0, wx.EXPAND)
-        fillSizer.Add(this.trisAltGui, 0, wx.EXPAND)
-        fillSizer.Add(this.looseTriGui, 0, wx.EXPAND)
-        fillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
-        # Alternatives only if no reflections
-        oppFillSizer = wx.BoxSizer(wx.VERTICAL)
-        oppFillSizer.Add(this.oppTrisFillGui, 0, wx.EXPAND)
-        oppFillSizer.Add(this.oppTrisAltGui, 0, wx.EXPAND)
-        oppFillSizer.Add(this.reflGui, 0, wx.EXPAND)
-        oppFillSizer.Add(this.rotateFldGui, 0, wx.EXPAND)
-        oppFillSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
         statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
         statSizer.Add(fillSizer, 0, wx.EXPAND)
-        statSizer.Add(oppFillSizer, 0, wx.EXPAND)
         statSizer.Add(settingsSizer, 0, wx.EXPAND)
         statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
@@ -1166,21 +1267,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	inclRefl = this.shape.inclReflections
         prePosId = this.prePos
 	foldMethod = this.foldMethod
-	if inclRefl:
-	    return (
-		trisFillId in this.specPos[inclRefl][prePosId][foldMethod],
-		False
-	    )
-	else:
-	    enable = [False, False]
-	    for setPair in this.specPos[inclRefl][prePosId][foldMethod]:
-		if trisFillId == setPair[0]:
-		    enable[0] = True
-		if trisFillId == setPair[1]:
-		    enable[1] = True
-		if enable[0] == True and enable[1] == True:
-		    break
-	    return enable
+	return trisFillId in this.specPos[inclRefl][prePosId][foldMethod]
 
     def setEnablePrePosItems(this):
 	currentPrePos = this.prePos
@@ -1285,119 +1372,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.updateShape = True
         this.canvas.paint()
 
-    def initTrisEnabled(this):
-	this.isTrisFillEnabled = {}
-	this.isOppTrisFillEnabled = {}
-	for k in Stringify.iterkeys():
-	    this.isTrisFillEnabled[k] = True
-	    this.isOppTrisFillEnabled[k] = True
-
-    def setEnableTrisFill(this, alt, enable = True, oppEnable = False):
-	this.isTrisFillEnabled[alt] = enable
-	this.isOppTrisFillEnabled[alt] = oppEnable
-
-    def correctTrisFillSettings(this, fillGui, altGui):
-        if this.isPrePos():
-	    # check if we only have alt or if there are no alt fill settings:
-	    no_alt = True
-	    all_alt = True
-	    for k, v in this.isTrisFillEnabled.iteritems():
-		if k & alt_bit:
-		    if v:
-			no_alt = False
-			if not all_alt: break
-		else:
-		    if v:
-			all_alt = False
-			if not no_alt: break
-	else:
-	    no_alt = False
-	    all_alt = False
-	# and act on abov:
-	# there is not alternative o3 for the star variant
-	if (
-	    trisAlt.key[fillGui.GetStringSelection()] == trisAlt.star or
-	    no_alt or all_alt
-	):
-	    if all_alt:
-		altGui.SetValue(True)
-	    elif no_alt:
-		altGui.SetValue(False)
-	    altGui.Disable()
-	else:
-	    altGui.Enable()
-	# It is essential this one comes after
-	fillGui.ShowItem(
-	    this.choiceListItemsTrisFill[Stringify[trisAlt.star]],
-	    not altGui.IsChecked()
-	)
-
-    def correctLooseTrisFillSettings(this):
-	# As long as a strip_II variant is used
-	# or if all loose variants are explicitely disabled
-	# you cannot use a loose triangle
-	selTrisAlt = trisAlt.key[this.trisFillGui.GetStringSelection()]
-	selOppTrisAlt = trisAlt.key[this.oppTrisFillGui.GetStringSelection()]
-        if this.isPrePos():
-	    no_loose = True
-	    all_loose = True
-	    for k, v in this.isTrisFillEnabled.iteritems():
-		if k & loose_bit:
-		    if v:
-			no_loose = False
-			if not all_loose: break
-		else:
-		    if v:
-			all_loose = False
-			if not no_loose: break
-	else:
-	    no_loose = False
-	    all_loose = False
-	if (
-	    selTrisAlt == trisAlt.strip_II or
-	    selOppTrisAlt == trisAlt.strip_II or
-	    no_loose or all_loose
-	):
-	    if all_loose:
-		this.looseTriGui.SetValue(True)
-	    elif no_loose:
-		this.looseTriGui.SetValue(False)
-	    this.looseTriGui.Disable()
-	else:
-	    this.looseTriGui.Enable()
-	# As long as the loose variant is chosen you cannot select strip II
-	# It is essential this one comes after
-	looseTriangleSelected = this.looseTriGui.IsChecked()
-	this.oppTrisFillGui.ShowItem(
-	    this.choiceListItemsTrisFill[Stringify[trisAlt.strip_II]],
-	    not looseTriangleSelected
-	)
-	this.trisFillGui.ShowItem(
-	    this.choiceListItemsTrisFill[Stringify[trisAlt.strip_II]],
-	    not looseTriangleSelected
-	)
-	if looseTriangleSelected:
-	    # 1 loose and strip II don't combine: select smth else.
-	    oppTrisFill = this.oppTrisFill
-	    reset = False
-	    if oppTrisFill == trisAlt.strip_II or oppTrisFill == trisAlt.alt_strip_II:
-		for k, v in this.isOppTrisFillEnabled.iteritems():
-		    if v and k != trisAlt.strip_II:
-			oppTrisFill = k
-			reset = True
-			break
-	    trisFill = this.trisFill
-	    if trisFill == trisAlt.strip_II or trisFill == trisAlt.alt_strip_II:
-		for k, v in this.isTrisFillEnabled.iteritems():
-		    if v and k != trisAlt.strip_II:
-			trisFill = k
-			reset = True
-			break
-	    if reset:
-		this.setTrisFill(trisFill, oppTrisFill)
-	this.resetTrisFill(opp = False)
-	this.resetTrisFill(opp = True)
-
     def allignFoldSlideBarsWithFoldMethod(this):
 	if not this.shape.inclReflections:
 	    if this.foldMethod == FoldMethod.parallel:
@@ -1442,23 +1416,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.fold2OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld2)
 	this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.__sav_posAngle)
 
-    def resetTrisFill(this, opp = False):
-	try:
-	    if opp:
-		del this.__oppTrisFill
-	    else:
-		del this.__trisFill
-	except AttributeError:
-	    pass
-
     def disableGuisNoRefl(this):
 	if this.__guisNoReflEnabled:
-	    this.__sav_oppTrisFill = this.oppTrisFill
-	    this.setTrisFill(this.trisFill, this.trisFill)
-	    this.resetTrisFill(opp = True)
+	    this.setEnableTrisFillItems()
 	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
-	    this.oppTrisFillGui.Disable()
-	    this.oppTrisAltGui.Disable()
 	    this.rotateFldGui.Disable()
 	    this.shape.setRotateFold(0)
 	    this.disableSlidersNoRefl()
@@ -1466,12 +1427,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def enableGuisNoRefl(this):
 	if not this.__guisNoReflEnabled:
-	    this.oppTrisFillGui.Enable()
-	    this.setTrisFill(this.trisFill, this.__sav_oppTrisFill)
-	    this.resetTrisFill(opp = True)
+	    this.setEnableTrisFillItems()
 	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
-	    this.correctLooseTrisFillSettings()
-	    this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
 	    this.rotateFldGui.Enable()
 	    this.shape.setRotateFold(this.rotateFld)
 	    this.enableSlidersNoRefl()
@@ -1479,36 +1436,30 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def disableTrisFillGuis(this):
 	this.addTrisGui.Disable()
-	this.looseTriGui.Disable()
 	this.trisFillGui.Disable()
-	this.trisAltGui.Disable()
-	this.oppTrisFillGui.Disable()
-	this.oppTrisAltGui.Disable()
 
     def enableTrisFillGuis(this):
 	this.addTrisGui.Enable()
-	this.looseTriGui.Enable()
 	this.trisFillGui.Enable()
-	this.trisAltGui.Enable()
-	if not this.shape.inclReflections:
-	    this.oppTrisFillGui.Enable()
-	    this.oppTrisAltGui.Enable()
 
     def onRefl(this, event):
         this.shape.inclReflections = this.reflGui.IsChecked()
-        if this.shape.inclReflections:
-		this.disableGuisNoRefl()
-		this.shape.updateShape = True
-		this.canvas.paint()
-	else:
-		this.enableGuisNoRefl()
-		this.shape.updateShape = True
-		this.canvas.paint()
+	this.shape.updateShape = True
+	isPrePos = this.isPrePos()
 	this.setEnablePrePosItems()
-        if this.isPrePos():
+        if isPrePos:
+	    this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
+	    if not this.shape.inclReflections:
+		this.__sav_oppFld1 = this.shape.fold1
+		this.__sav_oppFld2 = this.shape.fold2
             this.onPrePos()
 	else:
+	    this.canvas.paint()
 	    this.statusBar.SetStatusText(this.shape.getStatusStr())
+	    if this.shape.inclReflections:
+		this.disableGuisNoRefl()
+	    else:
+		this.enableGuisNoRefl()
 
     def onRotateFld(this, event):
 	this.rotateFld = (this.rotateFld + 1) % 7
@@ -1520,72 +1471,65 @@ class FldHeptagonCtrlWin(wx.Frame):
 	# TODO: move to offspring
         return this.prePosGui.GetStringSelection() != this.prePosStrLst[-1]
 
-    def setTrisFill(this, tris, oppTris):
-	if (tris & loose_bit == loose_bit):
-	    if oppTris & loose_bit != loose_bit:
-		print "Warning: forcing loose opposite triangle fill"
-	    this.looseTriGui.SetValue(True)
+    def saveTrisFillItem(this):
+	currentChoice = trisAlt.key[this.trisFillGui.GetStringSelection()]
+	if trisAlt.isBaseKey(currentChoice):
+	    this.__sav_reflTrisFill = currentChoice
 	else:
-	    if oppTris & loose_bit == loose_bit:
-		print "Warning: removing loose opposite triangle fill"
-	    this.looseTriGui.SetValue(False)
-	tris    = tris    & ~loose_bit
-	oppTris = oppTris & ~loose_bit
-	if tris & alt_bit:
-	    #this.trisAltGui.Enable()
-	    this.trisAltGui.SetValue(True)
-	if tris & alt_bit:
-	    #this.oppTrisAltGui.Enable()
-	    this.oppTrisAltGui.SetValue(True)
-	tris    = tris    & ~alt_bit
-	oppTris = oppTris & ~alt_bit
-	tris_index = this.choiceListItemsTrisFill[Stringify[tris]]
-	#this.trisFillGui.ShowItem(tris_index)
-	this.trisFillGui.SetSelection(tris_index)
-	tris_index = this.choiceListItemsTrisFill[Stringify[oppTris]]
-	#this.oppTrisFillGui.ShowItem(tris_index)
-	this.oppTrisFillGui.SetSelection(tris_index)
+	    this.__sav_rotTrisFill = currentChoice
+
+    def setEnableTrisFillItems(this, itemList = None):
+	# first time fails
+	if this.trisFillGui.GetStringSelection() == '':
+	    currentChoice = trisAlt.strip_I
+	else:
+	    currentChoice = trisAlt.key[this.trisFillGui.GetStringSelection()]
+	if itemList == None:
+	    itemList = trisAlt.choiceList
+	    if this.shape.inclReflections:
+		isValid = lambda c: trisAlt.isBaseKey(trisAlt.key[choice])
+	    else:
+		isValid = lambda c: not trisAlt.isBaseKey(trisAlt.key[choice])
+	else:
+	    isValid = lambda c: True
+	this.trisFillGui.Clear()
+	currentStillValid = False
+	for choice in itemList:
+	    if isValid(choice):
+		this.trisFillGui.Append(choice)
+		if currentChoice == trisAlt.key[choice]:
+		    currentStillValid = True
+		lastValid = choice
+
+	if currentStillValid:
+	    this.trisFillGui.SetStringSelection(trisAlt.stringify[currentChoice])
+	else:
+	    try:
+		this.trisFillGui.SetStringSelection(lastValid)
+	    except UnboundLocalError:
+		# None are valid...
+		pass
 
     @property
     def trisFill(this):
-	try:
-	    return this.__trisFill
-	except AttributeError:
-	    this.__trisFill = trisAlt.key[this.trisFillGui.GetStringSelection()]
-	    if this.trisAltGui.IsChecked():
-		this.__trisFill = this.__trisFill | alt_bit
-	    if this.looseTriGui.IsChecked():
-		assert this.__trisFill != trisAlt.strip_II
-		this.__trisFill = this.__trisFill | loose_bit
-
-	    return this.__trisFill
+	s = this.trisFillGui.GetStringSelection()
+	if s == '':
+	    return None
+	t = trisAlt.key[s]
+        if this.shape.inclReflections:
+	    return t
+	else:
+	    return t[0]
 
     @property
     def oppTrisFill(this):
-	try:
-	    return this.__oppTrisFill
-	except AttributeError:
-	    if this.shape.inclReflections:
-		oppTrisFill = this.trisFill
-	    else:
-		oppTrisFill = trisAlt.key[
-				    this.oppTrisFillGui.GetStringSelection()]
-		if this.oppTrisAltGui.IsChecked():
-		    oppTrisFill = oppTrisFill | alt_bit
-		if this.looseTriGui.IsChecked():
-		    assert oppTrisFill != trisAlt.strip_II
-		    oppTrisFill = oppTrisFill | loose_bit
-	    this.__oppTrisFill = oppTrisFill
-	    return oppTrisFill
+	t = trisAlt.key[this.trisFillGui.GetStringSelection()]
+        if this.shape.inclReflections:
+	    return t
+	else:
+	    return t[1]
 
     def onTriangleFill(this, event):
-	this.correctLooseTrisFillSettings()
-	this.correctTrisFillSettings(this.trisFillGui, this.trisAltGui)
-	if not this.shape.inclReflections:
-	    this.correctTrisFillSettings(this.oppTrisFillGui, this.oppTrisAltGui)
-	# rm the saved value, it is not valid anymore:
-	this.resetTrisFill(opp = False)
-	this.resetTrisFill(opp = True)
         this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
         if this.isPrePos():
             this.onPrePos()
@@ -1695,19 +1639,23 @@ class FldHeptagonCtrlWin(wx.Frame):
         tVal = this.tNone
 	c = this.shape
         if sel == dyn_pos:
-	    # currently for all special positions the polyhedron has reflections
-	    # TODO add other special positions: choose by static check box.
-	    #      then rm line below
-	    this.dihedralAngleGui.Enable()
-	    this.fold1Gui.Enable()
-	    this.fold2Gui.Enable()
-	    this.heightGui.Enable()
+	    for gui in [
+		this.dihedralAngleGui, this.posAngleGui,
+		this.heightGui,
+		this.fold1Gui, this.fold2Gui,
+		this.fold1OppGui, this.fold2OppGui
+	    ]:
+		gui.Enable()
 	    this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
 	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
 	    val1 = Geom3D.Rad2Deg * c.fold1
 	    val2 = Geom3D.Rad2Deg * c.fold2
 	    this.fold1Gui.SetValue(val1)
 	    this.fold2Gui.SetValue(val2)
+	    val1 = Geom3D.Rad2Deg * c.oppFold1
+	    val2 = Geom3D.Rad2Deg * c.oppFold2
+	    this.fold1OppGui.SetValue(val1)
+	    this.fold2OppGui.SetValue(val2)
 	    if not this.shape.inclReflections:
 		this.enableGuisNoRefl()
 	    this.heightGui.SetValue(
@@ -1715,7 +1663,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    # enable all folding and triangle alternatives:
 	    for i in range(len(this.foldMethodList)):
 		this.foldMethodGui.ShowItem(i, True)
-	    this.initTrisEnabled()
+	    this.setEnableTrisFillItems()
 	else:
             oppFld1 = fld1 = this.fld1None
             oppFld2 = fld2 = this.fld2None
@@ -1729,22 +1677,17 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    this.isFoldValid(this.foldMethodListItems[i])
 		)
 		# leave up to the user to decide which folding method to choose
-		# in case the selected one was disabled.
+		# in case the seposAngleGuilected one was disabled.
 
 	    # Disable / enable appropriate triangle alternatives.
 	    # if the selected folding has valid solutions anyway
 	    #CONTINUE HERE: why is shell still available....
+	    choiceLst = []
 	    if this.isFoldValid(this.foldMethod):
-		for k in Stringify.iterkeys():
-		    enable = this.isTrisFillValid(k)
-		    print 'DBG setEnable:', Stringify[k], ':', enable[0], enable[1]
-		    this.setEnableTrisFill(k, enable[0], enable[1])
-	    if (sel != only_hepts):
-		this.correctLooseTrisFillSettings()
-		this.correctTrisFillSettings(this.trisFillGui, this.trisAltGui)
-		if not this.shape.inclReflections:
-		    this.correctTrisFillSettings(this.oppTrisFillGui,
-							    this.oppTrisAltGui)
+		for k, v in trisAlt.stringify.iteritems():
+		    if this.isTrisFillValid(k):
+			choiceLst.append(v)
+	    this.setEnableTrisFillItems(choiceLst)
 	    try:
 		setting = this.stdPrePos
 		if setting != []:
@@ -1767,6 +1710,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 			posVal = 0
 			oppFld1 = fld1
 			oppFld2 = fld2
+		    print '----------------------------------------------------'
 		# Ensure this.specPosIndex in range:
 		nrPos = len(setting)
 		maxI = nrPos - 1
@@ -1777,7 +1721,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		elif (this.specPosIndex < -1):
 		    this.specPosIndex = maxI - 1
 	    except KeyError:
-		print 'dbg key eror', Stringify[this.trisFill], Stringify[this.oppTrisFill]
+		print 'dbg key eror for trisFill', this.trisFillGui.GetStringSelection()
 	        pass
 
             c.setDihedralAngle(aVal)
@@ -1785,14 +1729,14 @@ class FldHeptagonCtrlWin(wx.Frame):
             c.setFold1(fld1, oppFld1)
             c.setFold2(fld2, oppFld2)
             c.setPosAngle(posVal)
-	    this.dihedralAngleGui.SetValue(0)
-	    this.fold1Gui.SetValue(0)
-	    this.fold2Gui.SetValue(0)
-	    this.heightGui.SetValue(0)
-	    this.dihedralAngleGui.Disable()
-	    this.fold1Gui.Disable()
-	    this.fold2Gui.Disable()
-	    this.heightGui.Disable()
+	    for gui in [
+		this.dihedralAngleGui, this.posAngleGui,
+		this.heightGui,
+		this.fold1Gui, this.fold2Gui,
+		this.fold1OppGui, this.fold2OppGui
+	    ]:
+		gui.SetValue(0)
+		gui.Disable()
 	    if not this.shape.inclReflections:
 		this.enableGuisNoRefl()
 	    else:

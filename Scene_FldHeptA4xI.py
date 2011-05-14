@@ -579,16 +579,16 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def isntSpecialPos(this, sel):
 	"""Check whether this selection is special for this triangle alternative
 	"""
-	return (
+	return (this.shape.inclReflections and (
 	    (
-		sel == squares_24 and this.trisAlt == trisAlt.strip_1_loose
+		sel == squares_24 and this.trisFill == trisAlt.strip_1_loose
 	    ) or (this.foldMethod == Heptagons.foldMethod.parallel and (
 		(
 		    sel == edge_1_V2_1_1
 		    and (
-			this.trisAlt == trisAlt.strip_1_loose
+			this.trisFill == trisAlt.strip_1_loose
 			or
-			this.trisAlt == trisAlt.star_1_loose
+			this.trisFill == trisAlt.star_1_loose
 		    )
 		)
 		or
@@ -596,13 +596,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		    (
 			sel == tris_24
 		    ) and (
-			this.trisAlt == trisAlt.strip_1_loose
+			this.trisFill == trisAlt.strip_1_loose
 			or
-			this.trisAlt == trisAlt.star_1_loose
+			this.trisFill == trisAlt.star_1_loose
 		    )
 		)
 	    ))
-	)
+	))
 
     prePosStrToFileStrMap = {
 	all_eq_tris: '1_1_1_1_1_1_1',
@@ -621,7 +621,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	return s
 
     def mapTrisFill(this, trisFillId):
-	tStr = Heptagons.Stringify[trisFillId]
+	tStr = trisAlt.stringify[trisFillId]
 	t = string.join(tStr.split(), '_').lower().replace('ernative', '')
 	t = t.replace('_ii', '_II')
 	t = t.replace('_i', '_I')
@@ -633,49 +633,32 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	if this.shape.inclReflections:
 	    return Heptagons.FldHeptagonCtrlWin.isPrePosValid(this, prePosId)
 	else:
-	    print 'isPrePosValid'
 	    s = this.mapPrePosStrToFileStr(prePosId)
-	    print s
 	    return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
 
     def isFoldValid(this, foldMethod):
-	print 'isFoldValid'
 	if this.shape.inclReflections:
 	    return Heptagons.FldHeptagonCtrlWin.isFoldValid(this, foldMethod)
 	else:
 	    p = this.mapPrePosStrToFileStr(this.prePos)
 	    f = Heptagons.FoldName[foldMethod].lower()
-	    print glob(
-		    '%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
-		)
 	    return glob(
 		    '%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
 		) != []
 
     def isTrisFillValid(this, trisFillId):
-	print 'isTrisFillValid'
 	if this.shape.inclReflections:
 	    return Heptagons.FldHeptagonCtrlWin.isTrisFillValid(this, trisFillId)
 	else:
+	    if type(trisFillId) == int:
+		return False
 	    p = this.mapPrePosStrToFileStr(this.prePos)
 	    f = Heptagons.FoldName[this.foldMethod].lower()
-	    t = this.mapTrisFill(trisFillId)
-	    print [
-		glob('%s/%s-%s-fld_%s*-%s-opp_*' % (
-		    this.rDir, this.rPre, p, f, t)
-		),
-		glob('%s/%s-%s-fld_%s*-opp_%s.*' % (
-		    this.rDir, this.rPre, p, f, t)
-		)
-	    ]
-	    return [
-		glob('%s/%s-%s-fld_%s*-%s-opp_*' % (
-		    this.rDir, this.rPre, p, f, t)
-		) != [],
-		glob('%s/%s-%s-fld_%s*-opp_%s.*' % (
-		    this.rDir, this.rPre, p, f, t)
+	    t0 = this.mapTrisFill(trisFillId[0])
+	    t1 = this.mapTrisFill(trisFillId[1])
+	    return glob('%s/%s-%s-fld_%s*-%s-opp_%s.*' % (
+		    this.rDir, this.rPre, p, f, t0, t1)
 		) != []
-	    ]
 
     @property
     def stdPrePos(this):
@@ -693,6 +676,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 			this.mapTrisFill(this.oppTrisFill)
 		    )
 	    try:
+		print 'DBG open', filename
 		fd = open(filename, 'r')
 	    except IOError:
 		print 'DBG file not found:\n %s' % filename
