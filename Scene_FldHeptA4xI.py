@@ -33,7 +33,6 @@ from glob import glob
 from OpenGL.GL import *
 
 import Data_FldHeptA4xI
-import Data_FldHeptA4
 import GeomTypes
 from GeomTypes import Rot3      as Rot
 from GeomTypes import HalfTurn3 as HalfTurn
@@ -65,8 +64,12 @@ edge_V2_1_1_0	= Data_FldHeptA4xI.edge_V2_1_1_0
 square_12	= Data_FldHeptA4xI.square_12
 edge_0_V2_1_1   = Data_FldHeptA4xI.edge_0_V2_1_1
 
-tris_16         = Data_FldHeptA4.tris_16
-tris_40         = Data_FldHeptA4.tris_40
+tris_16_0 = Heptagons.A4_bas + 1
+tris_16_1 = Heptagons.A4_bas + 2
+tris_16_2 = Heptagons.A4_bas + 3
+tris_32   = Heptagons.A4_bas + 4
+tris_40   = Heptagons.A4_bas + 5
+anew = Heptagons.A4_bas + 6
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
@@ -77,10 +80,13 @@ Stringify = {
     edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
     edge_V2_1_V2_1:	'8 Triangles and 36 Folded Squares',
     square_12:		'12 Folded Squares',
-    tris_16:		'16 Triangles',
+    tris_16_0:		'16 Triangles (A)',
+    tris_16_1:		'16 Triangles (B)',
+    tris_16_2:		'16 Triangles (C)',
     tris_24:		'24 Triangles',
     squares_24:		'24 Folded Squares',
     edge_V2_1_1_0:	'24 Triangles and 12 Folded Squares',
+    tris_32:	        '32 Triangles',
     edge_1_1_0_1:	'32 Triangles (24 + 8) I',
     edge_1_0_1_1:	'32 Triangles (24 + 8) II',
     edge_0_V2_1_1:	'32 Triangles and 12 Folded Squares',
@@ -90,6 +96,7 @@ Stringify = {
     edge_0_1_1_1:	'56 Triangles',
     edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
     only_hepts:		'Just Heptagons',
+    anew:		'new',
 }
 
 def Vlen(v0, v1):
@@ -547,13 +554,16 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    3, # maxHeigth
 	    [ # prePosLst
 		Stringify[only_hepts],
-		Stringify[tris_16],
+		Stringify[tris_16_0],
+		Stringify[tris_16_1],
+		Stringify[tris_16_2],
 		Stringify[only_xtra_o3s],
 		Stringify[square_12],
 		Stringify[edge_V2_1_0_1],
 		Stringify[tris_24],
 		Stringify[squares_24],
 		Stringify[tris_40],
+		Stringify[tris_32],
 		Stringify[edge_1_1_0_1],
 		Stringify[edge_1_0_1_1],
 		Stringify[edge_0_1_V2_1],
@@ -567,10 +577,11 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[edge_V2_1_1_1],
 		Stringify[all_eq_tris],
 		Stringify[dyn_pos],
+		Stringify[anew],
 	    ],
 	    {
 		True:  Data_FldHeptA4xI.specPos,
-		False: Data_FldHeptA4.specPos,
+		False: [],
 	    },
 	    Stringify,
 	    *args, **kwargs
@@ -598,16 +609,22 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		    ) and (
 			this.trisFill == trisAlt.strip_1_loose
 			or
-			this.trisFill == trisAlt.star_1_loose
+			this.trisAlt == trisAlt.star_1_loose
 		    )
 		)
 	    ))
 	))
 
     prePosStrToFileStrMap = {
-	all_eq_tris: '1_1_1_1_1_1_1',
-	tris_16:     '1_0_1_0_1_0_1',
 	only_hepts:  '1_0_1_0_0_1_0',
+	tris_16_0:   '1_0_1_0_0_1_1',
+	tris_16_1:   '1_0_1_0_1_0_1',
+	tris_24:     '1_0_1_0_1_1_0',
+	tris_40:     '1_0_1_0_1_1_1',
+	tris_16_2:   '1_1_0_1_0_1_0',
+	tris_32:     '1_1_0_1_0_1_1',
+	no_o3_tris:  '1_1_1_0_1_1_0',
+	all_eq_tris: '1_1_1_1_1_1_1',
     }
 
     rDir = 'Data_FldHeptA4'
@@ -669,7 +686,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    return this.specPos[this.shape.inclReflections][prePosId][
 						this.foldMethod][this.trisFill]
 	else:
-	    filename = 'Data_FldHeptA4/frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+	    filename = '%s/%s-%s-fld_%s.0-%s-opp_%s.py' % (
+			this.rDir, this.rPre,
 			this.mapPrePosStrToFileStr(this.prePos),
 			Heptagons.FoldName[this.foldMethod].lower(),
 			this.mapTrisFill(this.trisFill),
