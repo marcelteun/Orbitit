@@ -1466,6 +1466,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    exec f in ed
 	    # TODO check settings
 	    this.results = ed['results']
+	    try:
+		this.results.extend(ed['results_refl'])
+	    except KeyError:
+		pass
 	    prev_iterations = ed['iterations']
 	    f.close()
 	except IOError:
@@ -1526,7 +1530,15 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			f.write('    [%.14f, %.14f, %.14f, %.14f],\n' % (
 							r[0], r[1], r[2], r[3]))
 		else:
+		    results_refl = []
 		    for r in this.results:
+			if not eq(r[4], 0.0):
+			    f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
+				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+			else:
+			    results_refl.append(r)
+		    f.write(']\nresults_refl = [\n')
+		    for r in results_refl:
 			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
 				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
 		f.write(']\n')
@@ -1536,6 +1548,11 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			time.strftime("%y%m%d %H%M%S", time.localtime())
 		    ),
 		print len(this.results), 'results written to', filename
+		print '%d (+%d) results written to %s' % (
+		    len(this.results) - len(results_refl),
+		    len(results_refl),
+		    filename
+		)
 		break
 
 def FindMultiRootOnDomain(domain,
@@ -1988,6 +2005,11 @@ if __name__ == '__main__':
 	    folds = [Fold.star, Fold.w]
 	    edgeLs = [
 		[1., 1., 1., 1., 1., 1., 1.],
+		[0., 1., 0., 1., 0., 1., 0.],
+		[1., 1., 0., 1., 0., 1., 0.],
+		[1., 1., 0., 1., 0., 1., 1.],
+
+		[1., 1., 1., 1., 1., 1., 1.],
 		[0., 0., 1., 0., 0., 1., 0.],
 		[1., 0., 1., 0., 0., 1., 0.],
 		[1., 0., 1., 0., 0., 1., 1.],
@@ -1997,7 +2019,8 @@ if __name__ == '__main__':
 		[1., 0., 1., 0., 1., 1., 1.],
 		[1., 1., 1., 0., 1., 0., 0.],
 		[1., 1., 1., 0., 1., 1., 0.],
-		[V2, 0., 1., 0., V2, 1., 0.],
+		#[V2, 0., 1., 0., V2, 1., 0.],
+		#[1., 1., 0., 1., 2., 1., 1.],
 	    ]
 	    ta = TriangleAlt()
 	    edgeAlts = [t for t in ta]
@@ -2404,6 +2427,7 @@ if __name__ == '__main__':
 	    batch7(edges, TriangleAlt.alt_stripII, TriangleAlt.alt_stripII)
 
 	randomSearch = True
+	randBatch(continueAfter = 100, nrThreads = 1)
 
 	#######################################################################
 	#print 'all eq tris:'
@@ -2458,8 +2482,6 @@ if __name__ == '__main__':
 	# TODO:
 	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
 	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-
-	randBatch(continueAfter = 4000, nrThreads = 1)
 
 	#######################################################################
 	#print 'only hepts:'
