@@ -144,7 +144,7 @@ class Fold:
 	elif (this.fold == this.triangle):
 	    return 'triangle'
 	elif (this.fold == this.star):
-	    return 'star'
+	    return 'shell'
 	else:
 	    return None
 
@@ -744,6 +744,8 @@ def FoldedRegularHeptagonsA4(c, params):
     given, the edge lengths are supposed to be 1.
 
     params[3] defines which heptagon folding method is used.
+
+    params[4] rotate the folding with n/7 turn
     """
 
     T      = c[0]
@@ -758,6 +760,7 @@ def FoldedRegularHeptagonsA4(c, params):
     par_opp_fill = 1
     par_edge_len = 2
     par_fold = 3
+    n_7_turn = 4
 
     # before rotating, with heptagon centre = origin
     R = 1.0 / (2*H)       # radius
@@ -935,39 +938,18 @@ def FoldedRegularHeptagonsA4(c, params):
 	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
 	y5, y6 = -y5, -y6
 
-	# rotate around 3-4; angle a
-	# ------------------------------------
-	# since half dihedral angle is used instead of angle with x-axis:
-	# TODO don't copy the code...
-	cos_a = sina
-	sin_a = -cosa
-	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	x5, y5, z5, = (cos_a * x5 - sin_a * z5, y5, sin_a * x5 + cos_a * z5)
-	x6, y6, z6, = (cos_a * x6 - sin_a * z6, y6, sin_a * x6 + cos_a * z6)
-	# and translate
-	# ------------------------------------
-	z0 = z0 + T
-	z1 = z1 + T
-	z2 = z2 + T
-	z3 = z3 + T
-	z4 = z4 + T
-	z5 = z5 + T
-	z6 = z6 + T
-
     elif (params[par_fold] == Fold.trapezium):
 	#
-	#             0
+	#               0
 	#
-	#      1 ----------- 6    axis a
-	#      .             .
-	#       \           /
-	#        \ axes  b /
-	#    2   |         |   5
-	#        \        /
-	#         "       "
-	#         3       4
+	#        1 ----------- 6    axis b0
+	#        .             .
+	# axis g0 \           / axis g1
+	#          \         /
+	#      2   |         |   5
+	#          \        /
+	#           "       "
+	#           3       4
 	#
 	#                                ^ X
 	#                                |
@@ -977,12 +959,12 @@ def FoldedRegularHeptagonsA4(c, params):
 	# rotate gamma around b
 	# rotate beta  around a
 	#
-	# ROTATE V2 around axis b: angle gamma
+	# ROTATE V2 around axis g0: angle gamma
 	# ------------------------------------
 	# refer to V2 as if centre is origon:
-	# rotate around axis b as if centre -> V2 is x-axis:
-	x = (R - H) + cosg * H
-	z =           sing * H
+	# rotate around axis g0 as if centre -> V2 is x-axis:
+	x = (R - H) + cosg0 * H
+	z =           sing0 * H
 	# now correct for V2 not on x-axis: rotate d around z-axis
 	# with d: angle of heptagon centre to V2 with x-as
 	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
@@ -990,29 +972,19 @@ def FoldedRegularHeptagonsA4(c, params):
 	#TODO: change into SigmaH and retest
 	sind = y2 / R
 	x2, y2, z2 = (cosd * x - Tx, sind * x, z)
-	# ROTATE V0 around axis a: angle beta
+
+	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
+	x = (R - H) + cosg1 * H
+	z =           sing1 * H
+	x5, y5, z5 = (cosd * x - Tx, -sind * x, z)
+
+	# ROTATE V0 around axis b0: angle beta
 	# ------------------------------------
 	# refer to V0 as if centre is origon:
-	#   - rotate around axis b
+	#   - rotate around axis b0
 	# Then translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	x0 = (R - H) + cosb * H - Tx
-	z0 =           sinb * H
-
-	# rotate around 3-4; angle a
-	# ------------------------------------
-	# since half dihedral angle is used instead of angle with x-axis:
-	# TODO don't copy the code...
-	cos_a = sina
-	sin_a = -cosa
-	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	# and translate
-	# ------------------------------------
-	z0 = z0 + T
-	z1 = z1 + T
-	z2 = z2 + T
-	z3 = z3 + T
+	x0 = (R - H) + cosb0 * H - Tx
+	z0 =           sinb0 * H
 
     elif (params[par_fold] == Fold.w):
 	#
@@ -1045,8 +1017,6 @@ def FoldedRegularHeptagonsA4(c, params):
 	cosd1 = -(x2 + Tx) / R
 	sind1 = SigmaH # = sin(3pi/7)
 	x2, y2, z2 = (cosd0 * x, sind0 * x, z)
-
-	#x2, y2, z2 = (cosd * x - Tx, sind * x, z)
 
 	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
 	x = (R - H) + cosg1 * H
@@ -1081,28 +1051,26 @@ def FoldedRegularHeptagonsA4(c, params):
 	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
 	y5, y6 = -y5, -y6
 
-	# rotate around 3-4; angle a
-	# ------------------------------------
-	# since half dihedral angle is used instead of angle with x-axis:
-	# TODO don't copy the code...
-	cos_a = sina
-	sin_a = -cosa
-	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	x5, y5, z5, = (cos_a * x5 - sin_a * z5, y5, sin_a * x5 + cos_a * z5)
-	x6, y6, z6, = (cos_a * x6 - sin_a * z6, y6, sin_a * x6 + cos_a * z6)
-	# and translate
-	# ------------------------------------
-	z0 = z0 + T
-	z1 = z1 + T
-	z2 = z2 + T
-	z3 = z3 + T
-	z4 = z4 + T
-	z5 = z5 + T
-	z6 = z6 + T
-
-    x2_bas = x2 # saved for below
+    # rotate around 3-4; angle a
+    # ------------------------------------
+    # since half dihedral angle is used instead of angle with x-axis:
+    # TODO don't copy the code...
+    cos_a = sina
+    sin_a = -cosa
+    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+    x5, y5, z5, = (cos_a * x5 - sin_a * z5, y5, sin_a * x5 + cos_a * z5)
+    x6, y6, z6, = (cos_a * x6 - sin_a * z6, y6, sin_a * x6 + cos_a * z6)
+    # and translate
+    # ------------------------------------
+    z0 = z0 + T
+    z1 = z1 + T
+    z2 = z2 + T
+    z3 = z3 + T
+    z4 = z4 + T
+    z5 = z5 + T
+    z6 = z6 + T
 
     cosd = numx.cos(delta)
     sind = numx.sin(delta)
@@ -1127,11 +1095,10 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # EDGE A: only one for A4
     #
-    edgeLengths = [1., 1., 1., 1.]
     try:
         edgeLengths = params[par_edge_len]
     except IndexError:
-        pass
+	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
 
     if edgeAlternative & loose_bit:
         # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
@@ -1477,7 +1444,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    prev_iterations = 0
 
 	nrOfIters = 0
-	maxIter = this.setMaxIter()
+	if this.fold == Fold.trapezium:
+	    maxIter = 50
+	else:
+	    maxIter = this.setMaxIter()
 	while True:
 	    try:
 		#print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
@@ -1547,7 +1517,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.threadId,
 			time.strftime("%y%m%d %H%M%S", time.localtime())
 		    ),
-		print len(this.results), 'results written to', filename
 		print '%d (+%d) results written to %s' % (
 		    len(this.results) - len(results_refl),
 		    len(results_refl),
@@ -1640,12 +1609,13 @@ if __name__ == '__main__':
     #b0 = Geom3D.Deg2Rad * 60
     #g0 = Geom3D.Deg2Rad * 50
     #b1 = Geom3D.Deg2Rad * 50
-    #g1 = Geom3D.Deg2Rad * 60
+    #g1 = Geom3D.Deg2Rad * 100
     #tmp1 = numx.array((T, a, b0, g0, d, b1, g1))
     #print 'input values', tmp1
     #print FoldedRegularHeptagonsA4(tmp1,
-    #    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
-    ##print 'faster', faster
+    #    #[TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
+    #    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.trapezium ])
+    ###print 'faster', faster
     #assert False, "end single test"
 
     V2 = numx.sqrt(2.)
@@ -2003,8 +1973,11 @@ if __name__ == '__main__':
 
 	def randBatch(continueAfter = 100, nrThreads = 1):
 	    folds = [Fold.star, Fold.w]
+	    #folds = [Fold.trapezium]
 	    edgeLs = [
-		[1., 1., 1., 1., 1., 1., 1.],
+		[1., 1., 1., 1., 0., 1., 0.],
+		[1., 1., 1., 1., 1., 1., 0.],
+
 		[0., 1., 0., 1., 0., 1., 0.],
 		[1., 1., 0., 1., 0., 1., 0.],
 		[1., 1., 0., 1., 0., 1., 1.],
@@ -2386,155 +2359,5 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	def batch7(edges, tris, oppTris):
-	    fold = Fold()
-	    print 'searching solutions for', edges
-	    print Stringify[tris], 'triangle alternative'
-	    print Stringify[oppTris], 'opp triangle alternative'
-	    #fold.set(fold.parallel)
-	    #multiRootsLog(fold, edges, tris, oppTris)
-	    #fold.set(fold.triangle)
-	    #multiRootsLog(fold, edges, tris, oppTris)
-	    #fold.set(fold.star)
-	    #multiRootsLog(fold, edges, tris, oppTris)
-	    fold.set(fold.w)
-	    multiRootsLog(fold, edges, tris, oppTris)
-	    #fold.set(fold.trapezium)
-	    #multiRootsLog(fold, edges, tris, oppTris)
-	    print '--------------------------------------------------------------------------------\n'
-
-	def bBatch7(edges):
-	    batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
-	    batch7(edges, TriangleAlt.strip1loose, TriangleAlt.star1loose)
-	    batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	    batch7(edges, TriangleAlt.star1loose, TriangleAlt.star1loose)
-	    batch7(edges, TriangleAlt.star1loose, TriangleAlt.alt_strip1loose)
-	    batch7(edges, TriangleAlt.alt_strip1loose, TriangleAlt.alt_strip1loose)
-	    batch7(edges, TriangleAlt.stripI, TriangleAlt.stripI)
-	    batch7(edges, TriangleAlt.stripI, TriangleAlt.stripII)
-	    batch7(edges, TriangleAlt.stripI, TriangleAlt.star)
-	    batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-	    batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripII)
-	    batch7(edges, TriangleAlt.stripII, TriangleAlt.stripII)
-	    batch7(edges, TriangleAlt.stripII, TriangleAlt.star)
-	    batch7(edges, TriangleAlt.stripII, TriangleAlt.alt_stripI)
-	    batch7(edges, TriangleAlt.stripII, TriangleAlt.alt_stripII)
-	    batch7(edges, TriangleAlt.star, TriangleAlt.star)
-	    batch7(edges, TriangleAlt.star, TriangleAlt.alt_stripI)
-	    batch7(edges, TriangleAlt.star, TriangleAlt.alt_stripII)
-	    batch7(edges, TriangleAlt.alt_stripI, TriangleAlt.alt_stripI)
-	    batch7(edges, TriangleAlt.alt_stripI, TriangleAlt.alt_stripII)
-	    batch7(edges, TriangleAlt.alt_stripII, TriangleAlt.alt_stripII)
-
 	randomSearch = True
-	randBatch(continueAfter = 100, nrThreads = 1)
-
-	#######################################################################
-	#print 'all eq tris:'
-
-	#edges = [1., 1., 1., 1., 1., 1., 1.]
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
-	# 158 sols found:
-	# 110415 120515: searching w folds
-	# 1st at: 110415 120518
-	# before last: 110417 235221
-	# last at: 110418 042039
-	# stopped at: 110418 081500
-	# ------------------------------------------------------
-	# 76 sols found:
-	# 110421 101623: started searching star folds
-	# 1st at: 110421 101623
-	# before last: 110421 101749
-	# last at: 110421 101752
-	# stopped at: 110421 114600
-
-	#######################################################################
-	#print '16 tris (12 + 4 O3):'
-
-	#edges = [1., 0., 1., 0., 1., 0., 1.]
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.stripII)
-	# valid for next as well
-	# 15 sols found:
-	# started: 110418 123930
-	# 1st at: 110418 123940
-	# last at: 110418 135338
-	# stopped at: 110419 090000
-
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
-	# valid for previous as well
-	# 16 sols found:
-	# 110419 094705: searching w folds
-	# 1st at: 110419 094722
-	# before last: 110419 131002
-	# last at: 110419 134110
-	# stopped at: 110421 075300
-	# ==========================
-	# 0 sols found:
-	# 110421 081908: started searching star folds
-	# 1st at: -
-	# before last: -
-	# last at: -
-	# stopped at: 110421 094100
-	# Bis:
-	# 110421 095353: started searching star folds
-	# 110421 104626: 100000 random iterations done
-
-	# TODO:
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.alt_strip1loose)
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripI)
-
-	#######################################################################
-	#print 'only hepts:'
-
-	#edges = [1., 0., 1., 0., 0., 1., 0.]
-	#batch7(edges, TriangleAlt.stripI, TriangleAlt.alt_stripII)
-	# 0 sols found:
-	# 110418 124227: searching w folds
-	# 1st at:
-	# last at:
-	# stopped at: 110419 090000
-	# ==========================
-	# 0 sols found:
-	# 110421 114909: started searching star folds
-	# 1st at: -
-	# before last: -
-	# last at: -
-	# stopped at: 110421 133143: 200000 random iterations done
-
-	#edges = [0., 0., 1., 0., 0., 1., 0.]
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
-	# ==========================
-	# 0 sols found:
-	# 110421 145719: started searching star folds
-	# 1st at: -
-	# before last: -
-	# last at: -
-	# stopped at: 110421 160624: 120000 random iterations done
-
-	#######################################################################
-	#print 'tst'
-	#edges = [1., 0., 1., 0., 0., 1., 0.]
-	#batch7(edges, TriangleAlt.alt_stripII, TriangleAlt.stripI)
-	#batch7(edges, TriangleAlt.star1loose, TriangleAlt.star1loose)
-	# 0 sols found:
-	# 110420 104042: started searching w folds
-	# killed at: 110421 075300
-
-	#######################################################################
-	#print '12 folded squares:'
-
-	#edges = [V2, 0., 1., 0., V2, 1., 0.]
-	#batch7(edges, TriangleAlt.strip1loose, TriangleAlt.strip1loose)
-	# 0 sols found:
-	# 110419 092021: started searching w folds
-	# crashed with MemoryError (during evening/night)
-	#batch7(edges, TriangleAlt.star1loose, TriangleAlt.star1loose)
-	# 110420 084211: started searching w folds
-	# killed at: 110421 075300
-	# ==========================
-	# 0 sols found:
-	# 110421 133127: started searching star folds
-	# 1st at: -
-	# before last: -
-	# last at: -
-	# stopped at: 110421 145321: 150000 random iterations done
+	randBatch(continueAfter = 4000, nrThreads = 1)
