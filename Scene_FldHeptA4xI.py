@@ -68,8 +68,9 @@ tris_16_0 = Heptagons.A4_bas + 1
 tris_16_1 = Heptagons.A4_bas + 2
 tris_16_2 = Heptagons.A4_bas + 3
 tris_32   = Heptagons.A4_bas + 4
-tris_40   = Heptagons.A4_bas + 5
-anew = Heptagons.A4_bas + 6
+tris_40_0 = Heptagons.A4_bas + 5
+tris_40_1 = Heptagons.A4_bas + 6
+tris_64   = Heptagons.A4_bas + 7
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
@@ -92,11 +93,12 @@ Stringify = {
     edge_0_V2_1_1:	'32 Triangles and 12 Folded Squares',
     edge_1_1_V2_1:	'32 Triangles and 24 Folded Squares: I',
     edge_1_V2_1_1:	'32 Triangles and 24 Folded Squares: II',
-    tris_40:		'40 Triangles',
+    tris_40_0:		'40 Triangles (A)',
+    tris_40_1:		'40 Triangles (B)',
     edge_0_1_1_1:	'56 Triangles',
     edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
+    tris_64:		'64 Triangles',
     only_hepts:		'Just Heptagons',
-    anew:		'new',
 }
 
 def Vlen(v0, v1):
@@ -562,8 +564,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[edge_V2_1_0_1],
 		Stringify[tris_24],
 		Stringify[squares_24],
-		Stringify[tris_40],
 		Stringify[tris_32],
+		Stringify[tris_40_0],
+		Stringify[tris_40_1],
+		Stringify[tris_64],
 		Stringify[edge_1_1_0_1],
 		Stringify[edge_1_0_1_1],
 		Stringify[edge_0_1_V2_1],
@@ -577,7 +581,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[edge_V2_1_1_1],
 		Stringify[all_eq_tris],
 		Stringify[dyn_pos],
-		Stringify[anew],
 	    ],
 	    {
 		True:  Data_FldHeptA4xI.specPos,
@@ -620,7 +623,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	tris_16_0:   '1_0_1_0_0_1_1',
 	tris_16_1:   '1_0_1_0_1_0_1',
 	tris_24:     '1_0_1_0_1_1_0',
-	tris_40:     '1_0_1_0_1_1_1',
+	tris_40_0:   '1_0_1_0_1_1_1',
+	tris_40_1:   '1_1_1_1_0_1_0',
+	tris_64:     '1_1_1_1_1_1_0',
 	tris_16_2:   '1_1_0_1_0_1_0',
 	tris_32:     '1_1_0_1_0_1_1',
 	no_o3_tris:  '1_1_1_0_1_1_0',
