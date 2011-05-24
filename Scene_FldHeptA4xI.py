@@ -67,10 +67,16 @@ edge_0_V2_1_1   = Data_FldHeptA4xI.edge_0_V2_1_1
 tris_16_0 = Heptagons.A4_bas + 1
 tris_16_1 = Heptagons.A4_bas + 2
 tris_16_2 = Heptagons.A4_bas + 3
-tris_32   = Heptagons.A4_bas + 4
-tris_40_0 = Heptagons.A4_bas + 5
-tris_40_1 = Heptagons.A4_bas + 6
-tris_64   = Heptagons.A4_bas + 7
+tris_16_3 = Heptagons.A4_bas + 4
+tris_32_0 = Heptagons.A4_bas + 5
+tris_32_1 = Heptagons.A4_bas + 6
+tris_40_0 = Heptagons.A4_bas + 7
+tris_40_1 = Heptagons.A4_bas + 8
+tris_40_2 = Heptagons.A4_bas + 9
+tris_40_3 = Heptagons.A4_bas + 10
+tris_40_4 = Heptagons.A4_bas + 11
+tris_64_0 = Heptagons.A4_bas + 12
+tris_64_1 = Heptagons.A4_bas + 13
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
@@ -84,10 +90,12 @@ Stringify = {
     tris_16_0:		'16 Triangles (A)',
     tris_16_1:		'16 Triangles (B)',
     tris_16_2:		'16 Triangles (C)',
+    tris_16_3:		'16 Triangles (D)',
     tris_24:		'24 Triangles',
     squares_24:		'24 Folded Squares',
     edge_V2_1_1_0:	'24 Triangles and 12 Folded Squares',
-    tris_32:	        '32 Triangles',
+    tris_32_0:	        '32 Triangles (A)',
+    tris_32_1:	        '32 Triangles (B)',
     edge_1_1_0_1:	'32 Triangles (24 + 8) I',
     edge_1_0_1_1:	'32 Triangles (24 + 8) II',
     edge_0_V2_1_1:	'32 Triangles and 12 Folded Squares',
@@ -95,9 +103,13 @@ Stringify = {
     edge_1_V2_1_1:	'32 Triangles and 24 Folded Squares: II',
     tris_40_0:		'40 Triangles (A)',
     tris_40_1:		'40 Triangles (B)',
+    tris_40_2:		'40 Triangles (C)',
+    tris_40_3:		'40 Triangles (D)',
+    tris_40_4:		'40 Triangles (E)',
     edge_0_1_1_1:	'56 Triangles',
     edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
-    tris_64:		'64 Triangles',
+    tris_64_0:		'64 Triangles (A)',
+    tris_64_1:		'64 Triangles (B)',
     only_hepts:		'Just Heptagons',
 }
 
@@ -559,15 +571,21 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[tris_16_0],
 		Stringify[tris_16_1],
 		Stringify[tris_16_2],
+		Stringify[tris_16_3],
 		Stringify[only_xtra_o3s],
 		Stringify[square_12],
 		Stringify[edge_V2_1_0_1],
 		Stringify[tris_24],
 		Stringify[squares_24],
-		Stringify[tris_32],
+		Stringify[tris_32_0],
+		Stringify[tris_32_1],
 		Stringify[tris_40_0],
 		Stringify[tris_40_1],
-		Stringify[tris_64],
+		Stringify[tris_40_2],
+		Stringify[tris_40_3],
+		Stringify[tris_40_4],
+		Stringify[tris_64_0],
+		Stringify[tris_64_1],
 		Stringify[edge_1_1_0_1],
 		Stringify[edge_1_0_1_1],
 		Stringify[edge_0_1_V2_1],
@@ -624,11 +642,17 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	tris_16_1:   '1_0_1_0_1_0_1',
 	tris_24:     '1_0_1_0_1_1_0',
 	tris_40_0:   '1_0_1_0_1_1_1',
+	tris_16_3:   '1_0_1_1_0_1_0',
+	tris_32_1:   '1_0_1_1_0_1_1',
+	tris_40_2:   '1_0_1_1_1_1_0',
+	tris_40_3:   '1_1_1_0_0_1_1',
 	tris_40_1:   '1_1_1_1_0_1_0',
-	tris_64:     '1_1_1_1_1_1_0',
+	tris_64_0:   '1_1_1_1_1_1_0',
 	tris_16_2:   '1_1_0_1_0_1_0',
-	tris_32:     '1_1_0_1_0_1_1',
+	tris_32_0:   '1_1_0_1_0_1_1',
 	no_o3_tris:  '1_1_1_0_1_1_0',
+	tris_40_4:   '1_1_1_1_0_1_0',
+	tris_64_1:   '1_1_1_1_1_1_0',
 	all_eq_tris: '1_1_1_1_1_1_1',
     }
 
