@@ -113,8 +113,8 @@ Stringify = {
     TriangleAlt.strip1loose     : 'strip 1 loose',
     TriangleAlt.stripI          : 'strip I',
     TriangleAlt.stripII         : 'strip II',
-    TriangleAlt.star            : 'star',
-    TriangleAlt.star1loose      : 'star 1 loose',
+    TriangleAlt.star            : 'shell',
+    TriangleAlt.star1loose      : 'shell 1 loose',
     TriangleAlt.alt_strip1loose : 'alt strip 1 loose',
     TriangleAlt.alt_stripI      : 'alt strip I',
     TriangleAlt.alt_stripII     : 'alt strip II',
@@ -1484,6 +1484,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    testValue = this.randTestvalue()
 	    nrOfIters = nrOfIters + 1
 	    if nrOfIters >= this.stopAfter:
+		# always write the result, even when empty, so it is known how
+		# many iterations were done (without finding a result)
 		f = open(filename, 'w')
 		f.write('# edgeLengths = %s\n' % str(this.edgeLengths))
 		f.write('# edgeAlternative = %s\n' % Stringify[this.edgeAlternative])
@@ -1973,25 +1975,33 @@ if __name__ == '__main__':
 
 	def randBatch(continueAfter = 100, nrThreads = 1):
 	    folds = [Fold.star, Fold.w]
+	    #folds = [Fold.star]
+	    #folds = [Fold.w]
 	    #folds = [Fold.trapezium]
 	    edgeLs = [
-		[1., 1., 1., 1., 0., 1., 0.],
-		[1., 1., 1., 1., 1., 1., 0.],
+		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
 
-		[0., 1., 0., 1., 0., 1., 0.],
-		[1., 1., 0., 1., 0., 1., 0.],
-		[1., 1., 0., 1., 0., 1., 1.],
+		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
 
-		[1., 1., 1., 1., 1., 1., 1.],
-		[0., 0., 1., 0., 0., 1., 0.],
-		[1., 0., 1., 0., 0., 1., 0.],
-		[1., 0., 1., 0., 0., 1., 1.],
-		[1., 0., 1., 0., 1., 0., 0.],
-		[1., 0., 1., 0., 1., 0., 1.],
-		[1., 0., 1., 0., 1., 1., 0.],
-		[1., 0., 1., 0., 1., 1., 1.],
-		[1., 1., 1., 0., 1., 0., 0.],
-		[1., 1., 1., 0., 1., 1., 0.],
+		[0., 1., 0., 1., 0., 1., 0.], # no sols
+		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+
+		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
+		[0., 0., 1., 0., 0., 1., 0.], # no sols
+		[1., 0., 1., 0., 0., 1., 0.], # only hepts
+		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
+		[1., 0., 1., 0., 1., 0., 0.], # no sols
+		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
+		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
+		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+		[1., 1., 1., 0., 1., 0., 0.], # no sols
+		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
 		#[V2, 0., 1., 0., V2, 1., 0.],
 		#[1., 1., 0., 1., 2., 1., 1.],
 	    ]
