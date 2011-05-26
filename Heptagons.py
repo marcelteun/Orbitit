@@ -124,6 +124,8 @@ class TrisAlt:
 	alt_strip_I: True,
 	alt_strip_II: True,
 	alt_strip_1_loose: True,
+	rot_strip_1_loose: False,
+	arot_strip_1_loose: False,
     }
 
     stringify = {
@@ -135,6 +137,9 @@ class TrisAlt:
 	alt_strip_I:		'Alternative Strip I',
 	alt_strip_II:		'Alternative Strip II',
 	alt_strip_1_loose:	'Alternative Strip 1 loose',
+
+	rot_strip_1_loose:	'Rot. Strip 1 loose',
+	arot_strip_1_loose:	'Alternative Rot. Strip 1 loose',
 
 	strip_I_strip_I:		'strip I - strip I',
 	strip_I_strip_II:		'strip I - strip II',
@@ -192,6 +197,9 @@ class TrisAlt:
 	stringify[alt_strip_I]:       alt_strip_I,
 	stringify[alt_strip_II]:      alt_strip_II,
 	stringify[alt_strip_1_loose]: alt_strip_1_loose,
+
+	stringify[rot_strip_1_loose]:  rot_strip_1_loose,
+	stringify[arot_strip_1_loose]: arot_strip_1_loose,
 
 	stringify[strip_I_strip_I]:		strip_I_strip_I,
 	stringify[strip_I_strip_II]:		strip_I_strip_II,
