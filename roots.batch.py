@@ -86,17 +86,19 @@ def rotate(v, q):
     return GeomTypes.Vec(r[1:])
 
 loose_bit = 4
-alt1_bit = 8
-alt2_bit = 16
+alt_bit = 8
+rot_bit  = 16
 class TriangleAlt:
-    stripI          = 0
-    strip1loose     = 0 | loose_bit
-    alt_stripI      = 0             | alt1_bit | alt2_bit
-    alt_strip1loose = 0 | loose_bit | alt1_bit | alt2_bit
-    stripII         = 1
-    alt_stripII     = 1             | alt1_bit | alt2_bit
-    star            = 2
-    star1loose      = 2 | loose_bit
+    stripI           = 0
+    strip1loose      = 0 | loose_bit
+    alt_stripI       = 0             | alt_bit
+    alt_strip1loose  = 0 | loose_bit | alt_bit
+    stripII          = 1
+    alt_stripII      = 1             | alt_bit
+    star             = 2
+    star1loose       = 2 | loose_bit
+    rot_strip1loose  = 0 | loose_bit           | rot_bit
+    arot_strip1loose = 0 | loose_bit | alt_bit | rot_bit
     def __iter__(t):
 	return iter([
 	    t.stripI,
@@ -106,7 +108,9 @@ class TriangleAlt:
 	    t.stripII,
 	    t.alt_stripII,
 	    t.star,
-	    t.star1loose
+	    t.star1loose,
+	    t.rot_strip1loose,
+	    t.arot_strip1loose
 	])
 
 Stringify = {
@@ -118,6 +122,8 @@ Stringify = {
     TriangleAlt.alt_strip1loose : 'alt strip 1 loose',
     TriangleAlt.alt_stripI      : 'alt strip I',
     TriangleAlt.alt_stripII     : 'alt strip II',
+    TriangleAlt.rot_strip1loose : 'rot strip 1 loose',
+    TriangleAlt.arot_strip1loose: 'alt rot strip 1 loose',
 }
 
 class Fold:
@@ -638,8 +644,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
     #
     # EDGE B
     #
-    plain_edge_alt = edgeAlternative & ~alt1_bit
-    plain_edge_alt = plain_edge_alt  & ~alt2_bit
+    plain_edge_alt = edgeAlternative & ~alt_bit
     if plain_edge_alt == TriangleAlt.stripII:
         # V3 - V14:[ y1,    z1,    x1], # V14 = V1'
         cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
@@ -661,7 +666,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
     #
     # EDGE D
     #
-    if (edgeAlternative & alt1_bit == 0):
+    if (edgeAlternative & alt_bit == 0):
 	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
     else:
         # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
@@ -721,21 +726,26 @@ def FoldedRegularHeptagonsA4(c, params):
     variable edge lengths:
     params[0] | edge a | edge b | edge c | edge d
     ----------+--------+--------+--------+-------
-           0  | 2 - 9  | 12 - 2 | 2 - 14 | 14 - 1	strip 1 loose
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 14 - 1	strip 1 loose
     ----------+--------+--------+--------+-------
-           1  | 3 - 12 | 12 - 2 | 2 - 14 | 14 - 1	strip I
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 14 - 1	strip I
     ----------+--------+--------+--------+-------
-           2  | 3 - 12 | 3 - 14 | 2 - 14 | 14 - 1	strip II
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 14 - 1	strip II
     ----------+--------+--------+--------+-------
-           3  | 3 - 12 | 12 - 2 | 12 - 1 | 14 - 1	star
+           ?  | 3 - 12 | 12 - 2 | 12 - 1 | 14 - 1	star
     ----------+--------+--------+--------+-------
-           4  | 2 - 9  | 12 - 2 | 12 - 1 | 14 - 1	star 1 loose
+           ?  | 2 - 9  | 12 - 2 | 12 - 1 | 14 - 1	star 1 loose
     ----------+--------+--------+--------+-------
-           5  | 2 - 9  | 12 - 2 | 2 - 14 | 18 - 2	strip 1 loose
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 18 - 2	alt strip 1 loose
     ----------+--------+--------+--------+-------
-           6  | 3 - 12 | 3 - 14 | 2 - 14 | 18 - 2	alt strip II
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 18 - 2	alt strip II
     ----------+--------+--------+--------+-------
-           7  | 3 - 12 | 12 - 2 | 2 - 14 | 18 - 2	alt strip I
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 18 - 2	alt strip I
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 14 - 9 | 2 - 14 | 14 - 1	rot strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 14 - 9 | 2 - 14 | 18 - 2	alt rot strip 1 loose
+    ----------+--------+--------+--------+-------
 
     params[1] alternatives for the opposite triangle fill.
 
@@ -1110,8 +1120,7 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # EDGE B: 2 different B's for A4
     #
-    plain_edge_alt = edgeAlternative & ~alt1_bit
-    plain_edge_alt = plain_edge_alt  & ~alt2_bit
+    plain_edge_alt = edgeAlternative & ~alt_bit
     if plain_edge_alt == TriangleAlt.stripII:
         # V3 - V14:[y1, z1, x1], # V14 = V1'
         cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
@@ -1135,22 +1144,45 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # EDGE D
     #
-    if (edgeAlternative & alt1_bit == 0):
+    if (edgeAlternative & alt_bit == 0):
 	# V1 - V14:[ y1,    z1,    x1], # V14 = V1'
 	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
     else:
         # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
 	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
 
+    #          19                      18
+    #
+    #
+    #             16                14
+    #                      12
+    #
+    #               9             2
+    #      8                               1
+    #
+    #                      3
+    #
+    #   7                                     0
+    #
+    #                      4
+    #
+    #     11                               6
+    #              10             5
+    #
+    #                      13
+    #             17                15
+
     # opposite alternative edges, similar as above
     #
     # OPPOSITE EDGE B
     #
-    plain_edge_alt = oppoAlternative & ~alt1_bit
-    plain_edge_alt = plain_edge_alt  & ~alt2_bit
+    plain_edge_alt = oppoAlternative & ~alt_bit
     if plain_edge_alt == TriangleAlt.stripII:
         # V3 - V16:[y6, z6, x6], # V16 = V6'
         cp[4] = numx.sqrt((x3-y6)*(x3-y6) + (y3-z6)*(y3-z6) + (z3-x6)*(z3-x6)) - edgeLengths[4]
+    elif plain_edge_alt & rot_bit == rot_bit:
+        # V2 - V16:[y6, z6, x6], # V16 = V6'
+        cp[4] = numx.sqrt((x2-y6)*(x2-y6) + (y2-z6)*(y2-z6) + (z2-x6)*(z2-x6)) - edgeLengths[4]
     else:
         #V9:[-x5, -y5, z5] - V12, # V9 = V5'
         cp[4] = numx.sqrt((-x5-y0)*(-x5-y0) + (-y5-z0)*(-y5-z0) + (z5-x0)*(z5-x0)) - edgeLengths[4]
@@ -1169,7 +1201,7 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # OPPOSITE EDGE D
     #
-    if (oppoAlternative & alt1_bit == 0):
+    if (oppoAlternative & alt_bit == 0):
 	# V8 - V16: V8 = V6' = [-x6, -y6, z6]; V16 = V6' = [y6, z6, x6]
 	cp[6] = numx.sqrt((y6+x6)*(y6+x6) + (z6+y6)*(z6+y6) + (x6-z6)*(x6-z6)) - edgeLengths[6]
     else:
@@ -1616,9 +1648,10 @@ if __name__ == '__main__':
     #print 'input values', tmp1
     #print FoldedRegularHeptagonsA4(tmp1,
     #    #[TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
-    #    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.trapezium ])
-    ###print 'faster', faster
+    #    [TriangleAlt.star1loose, TriangleAlt.rot_strip1loose, [0., 0., 0., 0.,
+    #        0., 0., 0.], Fold.star ])
     #assert False, "end single test"
+    ##print 'faster', faster
 
     V2 = numx.sqrt(2.)
 
@@ -1979,6 +2012,9 @@ if __name__ == '__main__':
 	    #folds = [Fold.w]
 	    #folds = [Fold.trapezium]
 	    edgeLs = [
+		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
+		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
+
 		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
 		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
 		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
@@ -2006,7 +2042,11 @@ if __name__ == '__main__':
 		#[1., 1., 0., 1., 2., 1., 1.],
 	    ]
 	    ta = TriangleAlt()
-	    edgeAlts = [t for t in ta]
+	    #edgeAlts = [t for t in ta]
+	    edgeAlts = []
+	    for t in ta:
+		if t & rot_bit == 0:
+		    edgeAlts.append(ta)
 	    oppEdgeAlts = [t for t in ta]
 	    dom = [
 		[-3., 4.],             # Translation
