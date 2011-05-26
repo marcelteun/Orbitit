@@ -55,6 +55,7 @@ A4_bas		= 100
 
 alt_bit = 8
 loose_bit = 16
+rot_bit   = 32
 class TrisAlt:
     # Note nrs should be different from below
     strip_I            = 128
@@ -65,6 +66,8 @@ class TrisAlt:
     alt_strip_I        = strip_I              | alt_bit
     alt_strip_II       = strip_II             | alt_bit
     alt_strip_1_loose  = strip_I  | loose_bit | alt_bit
+    rot_strip_1_loose  = strip_I  | loose_bit           | rot_bit
+    arot_strip_1_loose = strip_I  | loose_bit | alt_bit | rot_bit
 
     strip_I_strip_I		= (strip_I, strip_I)
     strip_I_strip_II		= (strip_I, strip_II)
@@ -107,6 +110,10 @@ class TrisAlt:
     alt_strip_1_loose_strip	= (alt_strip_1_loose, strip_1_loose)
     alt_strip_1_loose_star	= (alt_strip_1_loose, star_1_loose)
     alt_strip_1_loose_alt_strip	= (alt_strip_1_loose, alt_strip_1_loose)
+
+    star_1_loose_rot_strip	= (star_1_loose, rot_strip_1_loose)
+
+    star_1_loose_arot_strip	= (star_1_loose, arot_strip_1_loose)
 
     baseKey = {
         strip_I: True,
@@ -170,6 +177,10 @@ class TrisAlt:
 	alt_strip_1_loose_strip:	'alt. strip - 1 loose - strip',
 	alt_strip_1_loose_star:		'alt. strip - 1 loose - star',
 	alt_strip_1_loose_alt_strip:	'alt. strip - 1 loose - alt. strip',
+
+	star_1_loose_rot_strip:		'star - 1 loose - rot. strip',
+
+	star_1_loose_arot_strip:	'star - 1 loose - alt. rot. strip',
     }
 
     key = {
@@ -223,6 +234,10 @@ class TrisAlt:
 	stringify[alt_strip_1_loose_strip]: 	alt_strip_1_loose_strip,
 	stringify[alt_strip_1_loose_star]: 	alt_strip_1_loose_star,
 	stringify[alt_strip_1_loose_alt_strip]:	alt_strip_1_loose_alt_strip,
+
+	stringify[star_1_loose_rot_strip]:	star_1_loose_rot_strip,
+
+	stringify[star_1_loose_arot_strip]:	star_1_loose_arot_strip,
     }
 
     def isBaseKey(this, k):
