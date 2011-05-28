@@ -689,6 +689,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	t = string.join(tStr.split(), '_').lower().replace('ernative', '')
 	t = t.replace('_ii', '_II')
 	t = t.replace('_i', '_I')
+	t = t.replace('_i', '_I')
+	t = t.replace('rot.', 'rot')
+	#print 'DBP map(%s) ==> %s' % (trisAlt.stringify[trisFillId], t)
 	return t
 
     def isPrePosValid(this, prePosId):

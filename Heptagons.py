@@ -112,8 +112,12 @@ class TrisAlt:
     alt_strip_1_loose_alt_strip	= (alt_strip_1_loose, alt_strip_1_loose)
 
     star_1_loose_rot_strip	= (star_1_loose, rot_strip_1_loose)
+    strip_1_loose_rot_strip	= (strip_1_loose, rot_strip_1_loose)
+    alt_strip_1_loose_rot_strip	= (alt_strip_1_loose, rot_strip_1_loose)
 
     star_1_loose_arot_strip	= (star_1_loose, arot_strip_1_loose)
+    strip_1_loose_arot_strip	= (strip_1_loose, arot_strip_1_loose)
+    alt_strip_1_loose_arot_strip= (alt_strip_1_loose, arot_strip_1_loose)
 
     baseKey = {
         strip_I: True,
@@ -184,8 +188,12 @@ class TrisAlt:
 	alt_strip_1_loose_alt_strip:	'alt. strip - 1 loose - alt. strip',
 
 	star_1_loose_rot_strip:		'star - 1 loose - rot. strip',
+	strip_1_loose_rot_strip:	'strip - 1 loose - rot. strip',
+	alt_strip_1_loose_rot_strip:	'alt. strip - 1 loose - rot. strip',
 
 	star_1_loose_arot_strip:	'star - 1 loose - alt. rot. strip',
+	strip_1_loose_arot_strip:	'strip - 1 loose - alt. rot. strip',
+	alt_strip_1_loose_arot_strip:	'alt. strip - 1 loose - alt. rot. strip',
     }
 
     key = {
@@ -244,8 +252,12 @@ class TrisAlt:
 	stringify[alt_strip_1_loose_alt_strip]:	alt_strip_1_loose_alt_strip,
 
 	stringify[star_1_loose_rot_strip]:	star_1_loose_rot_strip,
+	stringify[strip_1_loose_rot_strip]:	strip_1_loose_rot_strip,
+	stringify[alt_strip_1_loose_rot_strip]:	alt_strip_1_loose_rot_strip,
 
 	stringify[star_1_loose_arot_strip]:	star_1_loose_arot_strip,
+	stringify[strip_1_loose_arot_strip]:	strip_1_loose_arot_strip,
+	stringify[alt_strip_1_loose_arot_strip]:alt_strip_1_loose_arot_strip,
     }
 
     def isBaseKey(this, k):
