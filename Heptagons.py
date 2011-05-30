@@ -1185,6 +1185,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 	if this.shape.inclReflections:
 	    this.disableGuisNoRefl()
 
+        this.setOrientGui = wx.TextCtrl(
+                this.panel
+            )
+        this.Guis.append(this.setOrientGui)
+        this.setOrientButton  = wx.Button(this.panel, label = 'Apply')
+        this.Guis.append(this.setOrientButton)
+        this.setOrientButton.Bind(wx.EVT_BUTTON, this.onSetOrient)
+
         # Sizers
         this.Boxes = []
 
@@ -1266,11 +1274,18 @@ class FldHeptagonCtrlWin(wx.Frame):
         posSizerH.Add(specPosDynamic, 3, wx.EXPAND)
         posSizerH.Add(heightSizer, 1, wx.EXPAND)
 
+        this.Boxes.append(wx.StaticBox(this.panel,
+	    label = 'Set Orientation Directly (specify array)'))
+        setOrientSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
+        setOrientSizer.Add(this.setOrientGui, 1, wx.EXPAND)
+        setOrientSizer.Add(this.setOrientButton, 0, wx.EXPAND)
+
 	# MAIN sizer
         mainVSizer = wx.BoxSizer(wx.VERTICAL)
         mainVSizer.Add(statSizer, 0, wx.EXPAND)
         mainVSizer.Add(prePosSizerH, 0, wx.EXPAND)
         mainVSizer.Add(posSizerH, 0, wx.EXPAND)
+        mainVSizer.Add(setOrientSizer, 0, wx.EXPAND)
         mainVSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1393,6 +1408,47 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onHeight(this, event):
         this.shape.setHeight(float(this.maxHeight - this.heightGui.GetValue())/this.heightF)
+        this.statusBar.SetStatusText(this.shape.getStatusStr())
+        this.canvas.paint()
+        event.Skip()
+
+    def onSetOrient(this, event):
+	inputStr = 'ar = %s' % this.setOrientGui.GetValue()
+	ed = {'__name__': 'inputStr'}
+	try:
+		exec inputStr in ed
+	except SyntaxError:
+		this.statusBar.SetStatusText('Syntax error in input string');
+		raise
+	tVal = ed['ar'][0]
+	aVal = ed['ar'][1]
+	fld1 = ed['ar'][2]
+	fld2 = ed['ar'][3]
+	this.heightGui.SetValue(this.maxHeight - this.heightF * tVal)
+	this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * aVal)
+	this.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
+	this.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
+	inclRefl = len(ed['ar']) == 4
+	this.shape.inclReflections = inclRefl
+	this.reflGui.SetValue(inclRefl)
+	if not inclRefl:
+	    this.enableGuisNoRefl()
+	    posVal = ed['ar'][4]
+	    oppFld1 = ed['ar'][5]
+	    oppFld2 = ed['ar'][6]
+	    this.fold1OppGui.SetValue(Geom3D.Rad2Deg * oppFld1)
+	    this.fold2OppGui.SetValue(Geom3D.Rad2Deg * oppFld2)
+	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * posVal)
+	else:
+	    this.disableGuisNoRefl()
+	    posVal = 0.
+	    oppFld1 = fld1
+	    oppFld2 = fld2
+	this.shape.setDihedralAngle(aVal)
+	this.shape.setHeight(tVal)
+	this.shape.setFold1(fld1, oppFld1)
+	this.shape.setFold2(fld2, oppFld2)
+	this.shape.setPosAngle(posVal)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
         event.Skip()
@@ -1694,7 +1750,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    if not this.shape.inclReflections:
 		this.enableGuisNoRefl()
 	    this.heightGui.SetValue(
-		this.maxHeight - this.heightF*c.height)
+		this.maxHeight - this.heightF * c.height)
 	    # enable all folding and triangle alternatives:
 	    for i in range(len(this.foldMethodList)):
 		this.foldMethodGui.ShowItem(i, True)
