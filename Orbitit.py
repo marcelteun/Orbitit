@@ -272,7 +272,13 @@ class MainWindow(wx.Frame):
         this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
-        this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
+        #this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
+	_id = wx.NewId()
+	ac = [
+		(wx.ACCEL_NORMAL, wx.WXK_F3, _id)
+	    ]
+        this.Bind(wx.EVT_MENU, this.onKeyDown, id=_id)
+	this.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
     def addMenuBar(this):
         menuBar = wx.MenuBar()
@@ -285,13 +291,13 @@ class MainWindow(wx.Frame):
     def createFileMenu(this):
         menu = wx.Menu()
 
-        open = wx.MenuItem(
+        openGui = wx.MenuItem(
                 menu,
                 wx.ID_ANY,
                 text = "&Open\tCtrl+O"
             )
-        this.Bind(wx.EVT_MENU, this.onOpen, id = open.GetId())
-        menu.AppendItem(open)
+        this.Bind(wx.EVT_MENU, this.onOpen, id = openGui.GetId())
+        menu.AppendItem(openGui)
 
         add = wx.MenuItem(
                 menu,
@@ -708,6 +714,7 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.Close()
 
     def onKeyDown(this, e):
+	print 'DBG onKeyDown', e
         key = e.GetKeyCode()
         if key == wx.WXK_F3:
             if glGetIntegerv(GL_FRONT_FACE) == GL_CW:
