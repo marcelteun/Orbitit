@@ -1490,10 +1490,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.__sav_posAngle = this.shape.posAngle
 	this.shape.setFold1(oppositeAngle = this.shape.fold1)
 	this.shape.setFold2(oppositeAngle = this.shape.fold2)
-	this.shape.setPosAngle(0)
+	this.shape.setPosAngle(this.shape.posAngleMin)
 	this.fold1OppGui.SetValue(this.minFoldAngle)
 	this.fold2OppGui.SetValue(this.minFoldAngle)
-	this.posAngleGui.SetValue(0)
+	this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.shape.posAngleMin)
 
     def enableSlidersNoRefl(this):
 	this.allignFoldSlideBarsWithFoldMethod()
