@@ -175,7 +175,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.trisO3Shape = trisO3Shape
 	this.posAngleMin = -math.pi
         this.posAngleMax = math.pi
-	this.posAngle = this.posAngleMin
+	this.posAngle = 0
         this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
 	this.initArrs()
 	this.setV()

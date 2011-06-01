@@ -877,7 +877,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.dihedralAngle = 1.2
         this.posAngleMin = 0
         this.posAngleMax = math.pi/2
-        this.posAngle = this.posAngleMin
+        this.posAngle = 0
         this.inclReflections = True
 	this.rotateFold = 0
         this.fold1 = 0.0
@@ -1490,10 +1490,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.__sav_posAngle = this.shape.posAngle
 	this.shape.setFold1(oppositeAngle = this.shape.fold1)
 	this.shape.setFold2(oppositeAngle = this.shape.fold2)
-	this.shape.setPosAngle(this.shape.posAngleMin)
+	this.shape.setPosAngle(0)
 	this.fold1OppGui.SetValue(this.minFoldAngle)
 	this.fold2OppGui.SetValue(this.minFoldAngle)
-	this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.shape.posAngleMin)
+	this.posAngleGui.SetValue(0)
 
     def enableSlidersNoRefl(this):
 	this.allignFoldSlideBarsWithFoldMethod()
