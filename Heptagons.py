@@ -150,60 +150,61 @@ class TrisAlt:
 
 	rot_strip_1_loose:	'Rot. Strip 1 loose',
 	arot_strip_1_loose:	'Alternative Rot. Strip 1 loose',
+	arot_strip_1_loose:	'Alternative Rot. Shell 1 loose',
 
 	strip_I_strip_I:		'strip I - strip I',
 	strip_I_strip_II:		'strip I - strip II',
-	strip_I_star:			'strip I - star',
+	strip_I_star:			'strip I - shell',
 	strip_I_alt_strip_I:		'strip I - alt. strip I',
 	strip_I_alt_strip_II:		'strip I - alt. strip II',
 
 	strip_II_strip_I:		'strip II - strip I',
 	strip_II_strip_II:		'strip II - strip II',
-	strip_II_star:			'strip II - star',
+	strip_II_star:			'strip II - shell',
 	strip_II_alt_strip_I:		'strip II - alt. strip I',
 	strip_II_alt_strip_II:		'strip II - alt. strip II',
 
-	star_strip_I:			'star - strip I',
-	star_strip_II:			'star - strip II',
-	star_star:			'star - star',
-	star_alt_strip_I:		'star - alt. strip I',
-	star_alt_strip_II:		'star - alt. strip II',
+	star_strip_I:			'shell - strip I',
+	star_strip_II:			'shell - strip II',
+	star_star:			'shell - shell',
+	star_alt_strip_I:		'shell - alt. strip I',
+	star_alt_strip_II:		'shell - alt. strip II',
 
 	alt_strip_I_strip_I:		'alt. strip I - strip I',
 	alt_strip_I_strip_II:		'alt. strip I - strip II',
-	alt_strip_I_star:		'alt. strip I - star',
+	alt_strip_I_star:		'alt. strip I - shell',
 	alt_strip_I_alt_strip_I:	'alt. strip I - alt. strip I',
 	alt_strip_I_alt_strip_II:	'alt. strip I - alt. strip II',
 
 	alt_strip_II_strip_I:		'alt. strip II - strip I',
 	alt_strip_II_strip_II:		'alt. strip II - strip II',
-	alt_strip_II_star:		'alt. strip II - star',
+	alt_strip_II_star:		'alt. strip II - shell',
 	alt_strip_II_alt_strip_I:	'alt. strip II - alt. strip I',
 	alt_strip_II_alt_strip_II:	'alt. strip II - alt. strip II',
 
 	strip_1_loose_strip:		'strip - 1 loose - strip',
-	strip_1_loose_star:		'strip - 1 loose - star',
+	strip_1_loose_star:		'strip - 1 loose - shell',
 	strip_1_loose_alt_strip:	'strip - 1 loose - alt. strip',
 
-	star_1_loose_strip:		'star - 1 loose - strip',
-	star_1_loose_star:		'star - 1 loose - star',
-	star_1_loose_alt_strip:		'star - 1 loose - alt. strip',
+	star_1_loose_strip:		'shell - 1 loose - strip',
+	star_1_loose_star:		'shell - 1 loose - shell',
+	star_1_loose_alt_strip:		'shell - 1 loose - alt. strip',
 
 	alt_strip_1_loose_strip:	'alt. strip - 1 loose - strip',
-	alt_strip_1_loose_star:		'alt. strip - 1 loose - star',
+	alt_strip_1_loose_star:		'alt. strip - 1 loose - shell',
 	alt_strip_1_loose_alt_strip:	'alt. strip - 1 loose - alt. strip',
 
-	star_1_loose_rot_strip:		'star - 1 loose - rot. strip',
+	star_1_loose_rot_strip:		'shell - 1 loose - rot. strip',
 	strip_1_loose_rot_strip:	'strip - 1 loose - rot. strip',
 	alt_strip_1_loose_rot_strip:	'alt. strip - 1 loose - rot. strip',
 
-	star_1_loose_arot_strip:	'star - 1 loose - alt. rot. strip',
+	star_1_loose_arot_strip:	'shell - 1 loose - alt. rot. strip',
 	strip_1_loose_arot_strip:	'strip - 1 loose - alt. rot. strip',
 	alt_strip_1_loose_arot_strip:	'alt. strip - 1 loose - alt. rot. strip',
 
-	star_1_loose_arot_star:		'star - 1 loose - alt. rot. star',
-	strip_1_loose_arot_star:	'strip - 1 loose - alt. rot. star',
-	alt_strip_1_loose_arot_star:	'alt. strip - 1 loose - alt. rot. star',
+	star_1_loose_arot_star:		'shell - 1 loose - alt. rot. shell',
+	strip_1_loose_arot_star:	'strip - 1 loose - alt. rot. shell',
+	alt_strip_1_loose_arot_star:	'alt. strip - 1 loose - alt. rot. shell',
     }
 
     key = {
