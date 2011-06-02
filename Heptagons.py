@@ -1578,9 +1578,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 	if itemList == None:
 	    itemList = trisAlt.choiceList
 	    if this.shape.inclReflections:
-		isValid = lambda c: trisAlt.isBaseKey(trisAlt.key[choice])
+		isValid = lambda c: trisAlt.isBaseKey(trisAlt.key[c])
 	    else:
-		isValid = lambda c: not trisAlt.isBaseKey(trisAlt.key[choice])
+		def isValid (c):
+		    c_key = trisAlt.key[c]
+		    if trisAlt.isBaseKey(c_key) or type(c_key) == type(1):
+			return False
+		    else:
+			return c_key[0] <= c_key[1]
 	else:
 	    isValid = lambda c: True
 	this.trisFillGui.Clear()
