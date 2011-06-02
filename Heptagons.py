@@ -68,6 +68,7 @@ class TrisAlt:
     alt_strip_1_loose  = strip_I  | loose_bit | alt_bit
     rot_strip_1_loose  = strip_I  | loose_bit           | rot_bit
     arot_strip_1_loose = strip_I  | loose_bit | alt_bit | rot_bit
+    rot_star_1_loose   = star     | loose_bit           | rot_bit
     arot_star_1_loose  = star     | loose_bit | alt_bit | rot_bit
 
     strip_I_strip_I		= (strip_I, strip_I)
@@ -120,6 +121,10 @@ class TrisAlt:
     strip_1_loose_arot_strip	= (strip_1_loose, arot_strip_1_loose)
     alt_strip_1_loose_arot_strip= (alt_strip_1_loose, arot_strip_1_loose)
 
+    star_1_loose_rot_star	= (star_1_loose, rot_star_1_loose)
+    strip_1_loose_rot_star	= (strip_1_loose, rot_star_1_loose)
+    alt_strip_1_loose_rot_star	= (alt_strip_1_loose, rot_star_1_loose)
+
     star_1_loose_arot_star	= (star_1_loose, arot_star_1_loose)
     strip_1_loose_arot_star	= (strip_1_loose, arot_star_1_loose)
     alt_strip_1_loose_arot_star	= (alt_strip_1_loose, arot_star_1_loose)
@@ -135,6 +140,7 @@ class TrisAlt:
 	alt_strip_1_loose: True,
 	rot_strip_1_loose: False,
 	arot_strip_1_loose: False,
+	rot_star_1_loose: False,
 	arot_star_1_loose: False,
     }
 
@@ -149,6 +155,7 @@ class TrisAlt:
 	alt_strip_1_loose:	'Alternative Strip 1 loose',
 
 	rot_strip_1_loose:	'Rot. Strip 1 loose',
+	rot_strip_1_loose:	'Rot. Shell 1 loose',
 	arot_strip_1_loose:	'Alternative Rot. Strip 1 loose',
 	arot_strip_1_loose:	'Alternative Rot. Shell 1 loose',
 
@@ -201,6 +208,10 @@ class TrisAlt:
 	star_1_loose_arot_strip:	'shell - 1 loose - alt. rot. strip',
 	strip_1_loose_arot_strip:	'strip - 1 loose - alt. rot. strip',
 	alt_strip_1_loose_arot_strip:	'alt. strip - 1 loose - alt. rot. strip',
+
+	star_1_loose_rot_star:		'shell - 1 loose - rot. shell',
+	strip_1_loose_rot_star:		'strip - 1 loose - rot. shell',
+	alt_strip_1_loose_rot_star:	'alt. strip - 1 loose - rot. shell',
 
 	star_1_loose_arot_star:		'shell - 1 loose - alt. rot. shell',
 	strip_1_loose_arot_star:	'strip - 1 loose - alt. rot. shell',
@@ -269,6 +280,10 @@ class TrisAlt:
 	stringify[star_1_loose_arot_strip]:	star_1_loose_arot_strip,
 	stringify[strip_1_loose_arot_strip]:	strip_1_loose_arot_strip,
 	stringify[alt_strip_1_loose_arot_strip]:alt_strip_1_loose_arot_strip,
+
+	stringify[star_1_loose_rot_star]:	star_1_loose_rot_star,
+	stringify[strip_1_loose_rot_star]:	strip_1_loose_rot_star,
+	stringify[alt_strip_1_loose_rot_star]:	alt_strip_1_loose_rot_star,
 
 	stringify[star_1_loose_arot_star]:	star_1_loose_arot_star,
 	stringify[strip_1_loose_arot_star]:	strip_1_loose_arot_star,
