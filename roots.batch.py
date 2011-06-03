@@ -99,6 +99,8 @@ class TriangleAlt:
     star1loose       = 2 | loose_bit
     rot_strip1loose  = 0 | loose_bit           | rot_bit
     arot_strip1loose = 0 | loose_bit | alt_bit | rot_bit
+    rot_star1loose   = 2 | loose_bit           | rot_bit
+    arot_star1loose  = 2 | loose_bit | alt_bit | rot_bit
     def __iter__(t):
 	return iter([
 	    t.stripI,
@@ -110,7 +112,9 @@ class TriangleAlt:
 	    t.star,
 	    t.star1loose,
 	    t.rot_strip1loose,
-	    t.arot_strip1loose
+	    t.arot_strip1loose,
+	    t.rot_star1loose,
+	    t.arot_star1loose
 	])
 
 Stringify = {
@@ -124,6 +128,8 @@ Stringify = {
     TriangleAlt.alt_stripII     : 'alt strip II',
     TriangleAlt.rot_strip1loose : 'rot strip 1 loose',
     TriangleAlt.arot_strip1loose: 'alt rot strip 1 loose',
+    TriangleAlt.rot_star1loose  : 'rot shell 1 loose',
+    TriangleAlt.arot_star1loose : 'alt rot shell 1 loose',
 }
 
 class Fold:
@@ -726,25 +732,32 @@ def FoldedRegularHeptagonsA4(c, params):
     variable edge lengths:
     params[0] | edge a | edge b | edge c | edge d
     ----------+--------+--------+--------+-------
-           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 14 - 1	strip 1 loose
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 8 - 16	strip 1 loose
     ----------+--------+--------+--------+-------
-           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 14 - 1	strip I
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 8 - 16	strip I
     ----------+--------+--------+--------+-------
-           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 14 - 1	strip II
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 8 - 16	strip II
     ----------+--------+--------+--------+-------
-           ?  | 3 - 12 | 12 - 2 | 12 - 1 | 14 - 1	star
+           ?  | 3 - 12 | 12 - 2 | 12 - 1 | 8 - 16	star
     ----------+--------+--------+--------+-------
-           ?  | 2 - 9  | 12 - 2 | 12 - 1 | 14 - 1	star 1 loose
+           ?  | 2 - 9  | 12 - 2 | 12 - 1 | 8 - 16	star 1 loose
     ----------+--------+--------+--------+-------
-           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 18 - 2	alt strip 1 loose
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 9 - 19	alt strip 1 loose
     ----------+--------+--------+--------+-------
-           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 18 - 2	alt strip II
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 9 - 19	alt strip II
     ----------+--------+--------+--------+-------
-           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 18 - 2	alt strip I
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 9 - 19	alt strip I
     ----------+--------+--------+--------+-------
-           ?  | 2 - 9  | 14 - 9 | 2 - 14 | 14 - 1	rot strip 1 loose
+
+    only valid for opposites alternatives:
     ----------+--------+--------+--------+-------
-           ?  | 2 - 9  | 14 - 9 | 2 - 14 | 18 - 2	alt rot strip 1 loose
+           ?  | 2 - 9  | 2 - 16 | 9 - 16 | 8 - 16	rot strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 9 - 16 | 9 - 19	alt rot strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 2 -  8 | 8 - 16	rot star 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 2 - 19 | 9 - 19	alt rot star 1 loose
     ----------+--------+--------+--------+-------
 
     params[1] alternatives for the opposite triangle fill.
@@ -1168,7 +1181,13 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # OPPOSITE EDGE C
     #
-    if (
+    if oppoAlternative == TriangleAlt.arot_star1loose:
+	# V2 - V19: V19 = V5' = [y5, z5, x5]
+        cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
+    elif oppoAlternative == TriangleAlt.rot_star1loose:
+	# V2 - V8: V8 = V6' = [-x6, -y6, z6]
+        cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
+    elif (
 	oppoAlternative != TriangleAlt.star
 	and oppoAlternative != TriangleAlt.star1loose
     ):
@@ -1624,11 +1643,12 @@ if __name__ == '__main__':
     #b1 = Geom3D.Deg2Rad * 50
     #g1 = Geom3D.Deg2Rad * 100
     #tmp1 = numx.array((T, a, b0, g0, d, b1, g1))
-    #print 'input values', tmp1
+    #print 'input values: \n [',
+    #for t in tmp1: print t, ',',
+    #print ']'
     #print FoldedRegularHeptagonsA4(tmp1,
-    #    #[TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
-    #    [TriangleAlt.star1loose, TriangleAlt.rot_strip1loose, [0., 0., 0., 0.,
-    #        0., 0., 0.], Fold.star ])
+    ##    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
+    #    [TriangleAlt.star1loose, TriangleAlt.arot_star1loose, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
     #assert False, "end single test"
     ##print 'faster', faster
 
