@@ -1151,27 +1151,6 @@ def FoldedRegularHeptagonsA4(c, params):
         # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
 	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
 
-    #          19                      18
-    #
-    #
-    #             16                14
-    #                      12
-    #
-    #               9             2
-    #      8                               1
-    #
-    #                      3
-    #
-    #   7                                     0
-    #
-    #                      4
-    #
-    #     11                               6
-    #              10             5
-    #
-    #                      13
-    #             17                15
-
     # opposite alternative edges, similar as above
     #
     # OPPOSITE EDGE B
@@ -2031,9 +2010,14 @@ if __name__ == '__main__':
 		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
 		[0., 0., 1., 0., 0., 1., 0.], # no sols
 		[1., 0., 1., 0., 0., 1., 0.], # only hepts
+			# it seems that
+			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
+			# needs to find nr 11 (has 10 now)
 		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
 		[1., 0., 1., 0., 1., 0., 0.], # no sols
 		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
+						# NOTE still found solutions
+						# after 220,00 iterations...
 		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
 		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
 		[1., 1., 1., 0., 1., 0., 0.], # no sols
@@ -2046,7 +2030,7 @@ if __name__ == '__main__':
 	    edgeAlts = []
 	    for t in ta:
 		if t & rot_bit == 0:
-		    edgeAlts.append(ta)
+		    edgeAlts.append(t)
 	    oppEdgeAlts = [t for t in ta]
 	    dom = [
 		[-3., 4.],             # Translation
