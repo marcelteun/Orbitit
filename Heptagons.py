@@ -56,11 +56,12 @@ A4_bas		= 100
 alt_bit = 8
 loose_bit = 16
 rot_bit   = 32
+twist_bit = 64
 class TrisAlt:
     # Note nrs should be different from below
-    strip_I            = 128
-    strip_II           = 129
-    star               = 130
+    strip_I            = 0
+    strip_II           = 1
+    star               = 2
     strip_1_loose      = strip_I  | loose_bit
     star_1_loose       = star     | loose_bit
     alt_strip_I        = strip_I              | alt_bit
@@ -70,6 +71,7 @@ class TrisAlt:
     arot_strip_1_loose = strip_I  | loose_bit | alt_bit | rot_bit
     rot_star_1_loose   = star     | loose_bit           | rot_bit
     arot_star_1_loose  = star     | loose_bit | alt_bit | rot_bit
+    twist_strip_I      = strip_I                                  | twist_bit
 
     strip_I_strip_I		= (strip_I, strip_I)
     strip_I_strip_II		= (strip_I, strip_II)
@@ -94,6 +96,8 @@ class TrisAlt:
     alt_strip_I_star		= (alt_strip_I, star)
     alt_strip_I_alt_strip_I	= (alt_strip_I, alt_strip_I)
     alt_strip_I_alt_strip_II	= (alt_strip_I, alt_strip_II)
+
+    twist_strip_I_strip_I	= (twist_strip_I, twist_strip_I)
 
     alt_strip_II_strip_I	= (alt_strip_II, strip_I)
     alt_strip_II_strip_II	= (alt_strip_II, strip_II)
@@ -142,6 +146,7 @@ class TrisAlt:
 	arot_strip_1_loose: False,
 	rot_star_1_loose: False,
 	arot_star_1_loose: False,
+	twist_strip_I: True,
     }
 
     stringify = {
@@ -154,10 +159,12 @@ class TrisAlt:
 	alt_strip_II:		'Alternative Strip II',
 	alt_strip_1_loose:	'Alternative Strip 1 loose',
 
+	twist_strip_I:		'Twisted Strip I',
+
 	rot_strip_1_loose:	'Rot. Strip 1 loose',
-	rot_strip_1_loose:	'Rot. Shell 1 loose',
+	rot_star_1_loose:	'Rot. Shell 1 loose',
 	arot_strip_1_loose:	'Alternative Rot. Strip 1 loose',
-	arot_strip_1_loose:	'Alternative Rot. Shell 1 loose',
+	arot_star_1_loose:	'Alternative Rot. Shell 1 loose',
 
 	strip_I_strip_I:		'strip I - strip I',
 	strip_I_strip_II:		'strip I - strip II',
@@ -182,6 +189,8 @@ class TrisAlt:
 	alt_strip_I_star:		'alt. strip I - shell',
 	alt_strip_I_alt_strip_I:	'alt. strip I - alt. strip I',
 	alt_strip_I_alt_strip_II:	'alt. strip I - alt. strip II',
+
+	twist_strip_I_strip_I:		'strip I - twisted - strip I',
 
 	alt_strip_II_strip_I:		'alt. strip II - strip I',
 	alt_strip_II_strip_II:		'alt. strip II - strip II',
@@ -228,8 +237,12 @@ class TrisAlt:
 	stringify[alt_strip_II]:      alt_strip_II,
 	stringify[alt_strip_1_loose]: alt_strip_1_loose,
 
+	stringify[twist_strip_I]:     twist_strip_I,
+
 	stringify[rot_strip_1_loose]:  rot_strip_1_loose,
+	stringify[rot_star_1_loose]:   rot_star_1_loose,
 	stringify[arot_strip_1_loose]: arot_strip_1_loose,
+	stringify[arot_star_1_loose]:  arot_star_1_loose,
 
 	stringify[strip_I_strip_I]:		strip_I_strip_I,
 	stringify[strip_I_strip_II]:		strip_I_strip_II,
@@ -254,6 +267,8 @@ class TrisAlt:
 	stringify[alt_strip_I_star]:		alt_strip_I_star,
 	stringify[alt_strip_I_alt_strip_I]: 	alt_strip_I_alt_strip_I,
 	stringify[alt_strip_I_alt_strip_II]: 	alt_strip_I_alt_strip_II,
+
+	stringify[twist_strip_I_strip_I]: 	twist_strip_I_strip_I,
 
 	stringify[alt_strip_II_strip_I]: 	alt_strip_II_strip_I,
 	stringify[alt_strip_II_strip_II]: 	alt_strip_II_strip_II,
@@ -998,14 +1013,6 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def setV(this):
         #print this.name, "setV"
 	this.posHeptagon()
-        Vs = this.heptagon.Vs[:]
-        Es = this.heptagon.Fs
-        Fs = this.heptagon.Es
-        colIds = [0 for f in Fs]
-        this.setVertexProperties(Vs = Vs)
-        this.setEdgeProperties(Es = Es)
-        this.setFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
-        this.updateShape = False
 
 class FldHeptagonCtrlWin(wx.Frame):
     def __init__(this,
@@ -1520,10 +1527,15 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.__sav_posAngle = this.shape.posAngle
 	this.shape.setFold1(oppositeAngle = this.shape.fold1)
 	this.shape.setFold2(oppositeAngle = this.shape.fold2)
-	this.shape.setPosAngle(0)
+	print 'DBG this.trisFill', this.trisFill, twist_bit, this.trisFill & twist_bit
+	if this.trisFill & twist_bit == twist_bit:
+	    posAngle = math.pi/4
+	else:
+	    posAngle = 0
+	this.shape.setPosAngle(posAngle)
+	this.posAngleGui.SetValue(Geom3D.Rad2Deg * posAngle)
 	this.fold1OppGui.SetValue(this.minFoldAngle)
 	this.fold2OppGui.SetValue(this.minFoldAngle)
-	this.posAngleGui.SetValue(0)
 
     def enableSlidersNoRefl(this):
 	this.allignFoldSlideBarsWithFoldMethod()
@@ -1578,6 +1590,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.canvas.paint()
 	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    if this.shape.inclReflections:
+		# TODO
+		# if the previous triangle fill wasn't a basic one (valid for
+		# having reflections, then the triangle fill should change.
 		this.disableGuisNoRefl()
 	    else:
 		this.enableGuisNoRefl()
@@ -1615,7 +1630,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    if trisAlt.isBaseKey(c_key) or type(c_key) == type(1):
 			return False
 		    else:
-			return c_key[0] <= c_key[1]
+			return c_key[0] >= c_key[1]
 	else:
 	    isValid = lambda c: True
 	this.trisFillGui.Clear()
@@ -1660,6 +1675,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         if this.isPrePos():
             this.onPrePos()
         else:
+	    if this.shape.inclReflections:
+		if this.trisFill & twist_bit == twist_bit:
+		    this.shape.setPosAngle(math.pi/4)
+		else:
+		    this.shape.setPosAngle(0)
             this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.canvas.paint()
 
