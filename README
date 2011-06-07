@@ -45,3 +45,20 @@ Run:
 cd to directory
 ./Orbitit.py
 
+Segmentation Faults:
+--------------------
+
+Ig you get a segmentation fault, make sure that you have a python with debug
+symbols. Then in the Orbitit directory exevute the following:
+$ gdb python
+...
+(gdb) run
+...
+>>> import Orbitit
+
+Then do your stuff to recreate the segmentation fault.
+E.g. you might see the following:
+Program received signal SIGSEGV, Segmentation fault.
+0x024303aa in ?? () from /usr/lib/nvidia-xxx/libGLcore.so.1
+
+Then the crash was caused your nvidia-xxx driver.
