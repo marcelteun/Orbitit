@@ -395,30 +395,34 @@ class MainWindow(wx.Frame):
             this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
         dlg.Destroy()
 
-    def openFile(this, filename, dirname = None):
-            this.closeCurrentScene()
-            this.filename = filename
-            isOffModel = this.filename[-3:] == 'off'
-            print "opening file:", this.filename
+    def readShapeFile(this, filename, dirname = None):
+            isOffModel = filename[-3:] == 'off'
+            print "opening file:", filename
 	    if dirname != None:
 		this.importDirName  = dirname
-		fd = open(os.path.join(this.importDirName, this.filename), 'r')
+		fd = open(os.path.join(this.importDirName, filename), 'r')
 	    else:
-		fd = open(this.filename, 'r')
-		m = re.match(r'.*\/', this.filename)
+		fd = open(filename, 'r')
+		m = re.match(r'.*\/', filename)
 		if m != None:
 		    this.importDirName = m.group()
             if isOffModel:
                 shape = Geom3D.readOffFile(fd, recreateEdges = True)
             else:
-		assert this.filename[-2:] == 'py'
+		assert filename[-2:] == 'py'
                 shape = Geom3D.readPyFile(fd)
+            this.setStatusStr("file opened")
+            fd.close()
+	    return shape
+
+    def openFile(this, filename, dirname = None):
+            this.closeCurrentScene()
+            this.filename = filename
+            shape = this.readShapeFile(filename, dirname)
             if isinstance(shape, Geom3D.CompoundShape):
                 # convert to SimpleShape first, since adding to IsometricShape
                 # will not work.
                 shape = shape.SimpleShape
-            this.setStatusStr("file opened")
-            fd.close()
             # Create a compound shape to be able to add shapes later.
 	    return Geom3D.CompoundShape([shape], name = this.filename)
 
