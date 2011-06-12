@@ -1544,7 +1544,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.__sav_posAngle = this.shape.posAngle
 	this.shape.setFold1(oppositeAngle = this.shape.fold1)
 	this.shape.setFold2(oppositeAngle = this.shape.fold2)
-	print 'DBG this.trisFill', this.trisFill, twist_bit, this.trisFill & twist_bit
 	if this.trisFill & twist_bit == twist_bit:
 	    posAngle = math.pi/4
 	else:
@@ -1606,11 +1605,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    if this.shape.inclReflections:
-		# TODO
-		# if the previous triangle fill wasn't a basic one (valid for
-		# having reflections, then the triangle fill should change.
+		this.savTrisNoRefl = this.trisFillGui.GetStringSelection()
+
 		this.disableGuisNoRefl()
 	    else:
+		this.savTrisRefl = this.trisFillGui.GetStringSelection()
 		this.enableGuisNoRefl()
 	    this.updateShape()
 
@@ -1641,6 +1640,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    itemList = trisAlt.choiceList
 	    if this.shape.inclReflections:
 		isValid = lambda c: trisAlt.isBaseKey(trisAlt.key[c])
+		if not trisAlt.isBaseKey(currentChoice):
+		    try:
+			currentChoice = trisAlt.key[this.savTrisRefl]
+		    except AttributeError:
+			currentChoice = trisAlt.strip_I
 	    else:
 		def isValid (c):
 		    c_key = trisAlt.key[c]
@@ -1648,6 +1652,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 			return False
 		    else:
 			return c_key[0] >= c_key[1]
+		if not isValid(trisAlt.stringify[currentChoice]):
+		    try:
+			currentChoice = trisAlt.key[this.savTrisNoRefl]
+		    except AttributeError:
+			currentChoice = trisAlt.strip_I_strip_I
 	else:
 	    isValid = lambda c: True
 	this.trisFillGui.Clear()
