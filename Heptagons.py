@@ -937,6 +937,21 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.useCulling = False
         this.updateShape = True
 
+    def __repr__(this):
+        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+        s = 'FldHeptagonShape(\n  '
+        s = '%sshapes = [\n' % (s)
+        for shape in this.shapeElements:
+            s = '%s    %s,\n' % (s, repr(shape))
+        s = '%s  ],\n  ' % s
+        s = '%snFold = "%s",\n' % (s, this.nFold)
+        s = '%smFold = "%s",\n' % (s, this.mFold)
+        s = '%sname = "%s"\n' % (s, this.mFold)
+        s = '%s)\n' % (s)
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
+
     def glDraw(this):
         if this.updateShape: this.setV()
         Geom3D.CompoundShape.glDraw(this)
@@ -1021,6 +1036,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    prePosStrLst,
 	    prePosLst,
 	    stringify,
+	    parent,
 	    *args, **kwargs
     ):
 	"""Create a control window for the scene that folds heptagons
@@ -1038,7 +1054,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	**kwargs: standard wx Frame **kwargs
 	"""
         # TODO assert (type(shape) == type(RegHeptagonShape()))
-        wx.Frame.__init__(this, *args, **kwargs)
+        wx.Frame.__init__(this, parent, *args, **kwargs)
+	this.parent = parent
         this.shape = shape
         this.canvas = canvas
 	this.maxHeight = maxHeight
@@ -1396,7 +1413,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	#print this.GetSize()
         this.shape.setPosAngle(Geom3D.Deg2Rad * this.posAngleGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onDihedralAngle(this, event):
@@ -1404,7 +1421,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.setDihedralAngle(
 	    Geom3D.Deg2Rad * this.dihedralAngleGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onFold1(this, event):
@@ -1415,7 +1432,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    this.shape.setFold1(s_val)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onFold2(this, event):
@@ -1426,27 +1443,27 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    this.shape.setFold2(s_val)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onFold1Opp(this, event):
         this.shape.setFold1(
 	    oppositeAngle = Geom3D.Deg2Rad * this.fold1OppGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onFold2Opp(this, event):
         this.shape.setFold2(
 	    oppositeAngle = Geom3D.Deg2Rad * this.fold2OppGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onHeight(this, event):
         this.shape.setHeight(float(this.maxHeight - this.heightGui.GetValue())/this.heightF)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onSetOrient(this, event):
@@ -1487,18 +1504,18 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.shape.setFold2(fld2, oppFld2)
 	this.shape.setPosAngle(posVal)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
         event.Skip()
 
     def onApplySym(this, event):
         this.shape.applySymmetry = this.applySymGui.IsChecked()
         this.shape.updateShape = True
-        this.canvas.paint()
+        this.updateShape()
 
     def onAddTriangles(this, event):
         this.shape.addXtraFs = this.addTrisGui.IsChecked()
         this.shape.updateShape = True
-        this.canvas.paint()
+        this.updateShape()
 
     def allignFoldSlideBarsWithFoldMethod(this):
 	if not this.shape.inclReflections:
@@ -1587,7 +1604,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.__sav_oppFld2 = this.shape.fold2
             this.onPrePos()
 	else:
-	    this.canvas.paint()
 	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    if this.shape.inclReflections:
 		# TODO
@@ -1596,6 +1612,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.disableGuisNoRefl()
 	    else:
 		this.enableGuisNoRefl()
+	    this.updateShape()
 
     def onRotateFld(this, event):
 	this.rotateFld = (this.rotateFld + 1) % 7
@@ -1670,6 +1687,59 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    return t[1]
 
+    def nvidea_workaround(this):
+	print '---------nvidia-seg-fault-work-around-----------'
+	prevTrisFill = this.shape.edgeAlternative
+	prevOppTrisFill = this.shape.oppEdgeAlternative
+	restoreMyShape = (
+	    prevTrisFill == trisAlt.twist_strip_I and
+	    prevOppTrisFill == trisAlt.twist_strip_I and
+	    this.trisFill != trisAlt.twist_strip_I and
+	    this.oppTrisFill != trisAlt.twist_strip_I
+	)
+	changeMyShape = (
+	    this.trisFill == trisAlt.twist_strip_I and
+	    this.oppTrisFill == trisAlt.twist_strip_I
+	)
+	if changeMyShape:
+	    if (
+		prevTrisFill != trisAlt.twist_strip_I and
+		prevOppTrisFill != trisAlt.twist_strip_I
+	    ):
+		this.restoreShape = this.canvas.shape
+	    this.shape.setV() # make sure the shape is updated
+	    shape =  FldHeptagonShape(this.shape.shapes,
+		this.shape.nFold, this.shape.mFold,
+		name = this.shape.name
+	    )
+	    shape.altNFoldFace = this.shape.altNFoldFace
+	    shape.altMFoldFace = this.shape.altMFoldFace
+	    shape.heptagon = this.shape.heptagon
+	    shape.dihedralAngle = this.shape.dihedralAngle
+	    shape.posAngleMin = this.shape.posAngleMin
+	    shape.posAngleMax = this.shape.posAngleMax
+	    shape.posAngle = this.shape.posAngle
+	    shape.inclReflections = this.shape.inclReflections
+	    shape.rotateFold = this.shape.rotateFold
+	    shape.fold1 = this.shape.fold1
+	    shape.fold2 = this.shape.fold2
+	    shape.oppFold1 = this.shape.oppFold1
+	    shape.oppFold2 = this.shape.oppFold2
+	    shape.foldHeptagon = this.shape.foldHeptagon
+	    shape.height = this.shape.height
+	    shape.applySymmetry = this.shape.applySymmetry
+	    shape.addXtraFs = this.shape.addXtraFs
+	    shape.onlyRegFs = this.shape.onlyRegFs
+	    shape.useCulling = this.shape.useCulling
+	    shape.updateShape = True
+	    this.canvas.shape = shape
+	elif restoreMyShape:
+	    this.canvas.shape = this.restoreShape
+
+    def updateShape(this):
+	this.nvidea_workaround()
+        this.canvas.paint()
+
     def onTriangleFill(this, event):
         this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
         if this.isPrePos():
@@ -1681,7 +1751,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		else:
 		    this.shape.setPosAngle(0)
             this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
 
     def onFoldMethod(this, event):
         this.foldMethod = this.foldMethodListItems[
@@ -1693,7 +1763,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             this.onPrePos()
         else:
             this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.canvas.paint()
+        this.updateShape()
 
     def onFirst(this, event = None):
         this.specPosIndex = 0
@@ -1901,7 +1971,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.nrTxt.SetLabel('%d/%d' % (nr, nrPos))
 		this.statusBar.SetStatusText(c.getStatusStr())
 		#this.shape.printTrisAngles()
-        this.canvas.paint()
+        this.updateShape()
 
     def isntSpecialPos(this, sel):
 	"""Check whether this selection is special for this triangle alternative
