@@ -88,6 +88,7 @@ def rotate(v, q):
 loose_bit = 4
 alt_bit = 8
 rot_bit  = 16
+twist_bit  = 32
 class TriangleAlt:
     stripI           = 0
     strip1loose      = 0 | loose_bit
@@ -101,6 +102,7 @@ class TriangleAlt:
     arot_strip1loose = 0 | loose_bit | alt_bit | rot_bit
     rot_star1loose   = 2 | loose_bit           | rot_bit
     arot_star1loose  = 2 | loose_bit | alt_bit | rot_bit
+    twisted          = 					   twist_bit
     def __iter__(t):
 	return iter([
 	    t.stripI,
@@ -114,7 +116,8 @@ class TriangleAlt:
 	    t.rot_strip1loose,
 	    t.arot_strip1loose,
 	    t.rot_star1loose,
-	    t.arot_star1loose
+	    t.arot_star1loose,
+	    t.twisted
 	])
 
 Stringify = {
@@ -130,6 +133,7 @@ Stringify = {
     TriangleAlt.arot_strip1loose: 'alt rot strip 1 loose',
     TriangleAlt.rot_star1loose  : 'rot shell 1 loose',
     TriangleAlt.arot_star1loose : 'alt rot shell 1 loose',
+    TriangleAlt.twisted		: 'twisted',
 }
 
 class Fold:
@@ -170,7 +174,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
     folded heptagons.
 
     The case contains
-    c[0]: a translation (towards the viewer)
+    c[3]: a translation (towards the viewer)
     c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
     c[2]: the angle of the first fold around 2-5 (9, 10)
     c[3]: the angle of the first fold around 1-6 (8, 11)
@@ -203,7 +207,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
 
     [-x2,    y2,    z2], # V9 = V2'
 
-    [ y0,    z0,    x0], # V12 = V0'
+    [ y0,    z0,    x0], # V12 =(              0.0, 1.0/2,   0.) V0'
 
     [ y1,    z1,    x1], # V14 = V1'
 
@@ -213,21 +217,23 @@ def FoldedRegularHeptagonsA4xI(c, params):
     variable edge lengths:
     params[0] | edge a | edge b | edge c | edge d
     ----------+--------+--------+--------+-------
-           0  | 2 - 9  | 12 - 2 | 2 - 14 | 14 - 1	strip 1 loose
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 14 - 1	strip 1 loose
     ----------+--------+--------+--------+-------
-           1  | 3 - 12 | 12 - 2 | 2 - 14 | 14 - 1	strip I
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 14 - 1	strip I
     ----------+--------+--------+--------+-------
-           2  | 3 - 12 | 3 - 14 | 2 - 14 | 14 - 1	strip II
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 14 - 1	strip II
     ----------+--------+--------+--------+-------
-           3  | 3 - 12 | 12 - 2 | 12 - 1 | 14 - 1	star
+           ?  | 3 - 12 | 12 - 2 | 12 - 1 | 14 - 1	star
     ----------+--------+--------+--------+-------
-           4  | 2 - 9  | 12 - 2 | 12 - 1 | 14 - 1	star 1 loose
+           ?  | 2 - 9  | 12 - 2 | 12 - 1 | 14 - 1	star 1 loose
     ----------+--------+--------+--------+-------
-           5  | 2 - 9  | 12 - 2 | 2 - 14 | 18 - 2	strip 1 loose
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 18 - 2	strip 1 loose
     ----------+--------+--------+--------+-------
-           6  | 3 - 12 | 3 - 14 | 2 - 14 | 18 - 2	alt strip II
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 18 - 2	alt strip II
     ----------+--------+--------+--------+-------
-           7  | 3 - 12 | 12 - 2 | 2 - 14 | 18 - 2	alt strip I
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 18 - 2	alt strip I
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 19 - 2 | 1 - 16 | 12 - 0	twisted
 
     For the param[0] the following constant names can be used, see TriangleAlt.
 
@@ -238,10 +244,10 @@ def FoldedRegularHeptagonsA4xI(c, params):
     params[2] defines which heptagon folding method is used.
     """
 
-    T     = c[3]
-    alpha = c[2]
-    beta  = c[1]
-    gamma = c[0]
+    T     = c[0]
+    alpha = c[1]
+    beta  = c[2]
+    gamma = c[3]
 
     # below are the calculations that are much faster then the generic ones
     # (further below). The former were added to optimise.
@@ -627,12 +633,24 @@ def FoldedRegularHeptagonsA4xI(c, params):
 	z2 = z2 + T
 	z3 = z3 + T
 
+    edgeAlternative = params[0]
+    if edgeAlternative & twist_bit == twist_bit:
+	# rotate 45 degrees:
+	hV2 = numx.sqrt(2)/2
+	x0, y0 = hV2 * x0 - hV2 * y0, hV2 * x0 + hV2 * y0
+	x1, y1 = hV2 * x1 - hV2 * y1, hV2 * x1 + hV2 * y1
+	x2, y2 = hV2 * x2 - hV2 * y2, hV2 * x2 + hV2 * y2
+	x3, y3 = hV2 * x3 - hV2 * y3, hV2 * x3 + hV2 * y3
+
+	# mirror and rotate 45 degrees:
+	x5, y5, z5 = y2, x2, z2
+	x6, y6, z6 = y1, x1, z1
+
     #print 'v0', x0, y0, z0
     #print 'v1', x1, y1, z1
     #print 'v2', x2, y2, z2
     #print 'v3', x3, y3, z3
     cp = copy.copy(c)
-    edgeAlternative = params[0]
     #
     # EDGE A
     #
@@ -644,6 +662,9 @@ def FoldedRegularHeptagonsA4xI(c, params):
     if edgeAlternative & loose_bit:
         # V2 - V9:[-x2,    y2,    z2], # V9 = V2'
         cp[0] = numx.sqrt(4*x2*x2) - edgeLengths[0]
+    elif edgeAlternative & twist_bit == twist_bit:
+        # V2 - V9 = V2 - V5':  V5' = [-x5, -y5, z5]
+        cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
     else:
         # V3 - V12:[ y0,    z0,    x0], # V12 = V0'
         cp[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
@@ -654,13 +675,19 @@ def FoldedRegularHeptagonsA4xI(c, params):
     if plain_edge_alt == TriangleAlt.stripII:
         # V3 - V14:[ y1,    z1,    x1], # V14 = V1'
         cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
+    elif edgeAlternative & twist_bit == twist_bit:
+        # V2 - V19: V19 = V5' = [y5, z5, x5]
+        cp[1] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[1]
     else:
         #V2 - V12:[ y0,    z0,    x0], # V12 = V0'
         cp[1] = numx.sqrt((x2-y0)*(x2-y0) + (y2-z0)*(y2-z0) + (z2-x0)*(z2-x0)) - edgeLengths[1]
     #
     # EDGE C
     #
-    if (
+    if edgeAlternative & twist_bit == twist_bit:
+        # V1 - V16: V16 = V6' = [y6, z6, x6]
+        cp[2] = numx.sqrt((x1-y6)*(x1-y6) + (y1-z6)*(y1-z6) + (z1-x6)*(z1-x6)) - edgeLengths[2]
+    elif (
 	edgeAlternative != TriangleAlt.star
 	and edgeAlternative != TriangleAlt.star1loose
     ):
@@ -672,7 +699,10 @@ def FoldedRegularHeptagonsA4xI(c, params):
     #
     # EDGE D
     #
-    if (edgeAlternative & alt_bit == 0):
+    if edgeAlternative & twist_bit == twist_bit:
+        # V0 - V12 = V0 - V0': V0' = [ y0,    z0,    x0]
+	cp[3] = numx.sqrt((x0-y0)*(x0-y0) + (y0-z0)*(y0-z0) + (z0-x0)*(z0-x0)) - edgeLengths[3]
+    elif (edgeAlternative & alt_bit == 0):
 	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
     else:
         # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
@@ -1528,6 +1558,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		f.write('iterations = %d\n' % (nrOfIters + prev_iterations))
 		f.write('results = [\n')
 		if len(this.edgeLengths) == 4:
+		    results_refl = []
 		    for r in this.results:
 			f.write('    [%.14f, %.14f, %.14f, %.14f],\n' % (
 							r[0], r[1], r[2], r[3]))
@@ -1549,11 +1580,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.threadId,
 			time.strftime("%y%m%d %H%M%S", time.localtime())
 		    ),
-		print '%d (+%d) results written to %s' % (
-		    len(this.results) - len(results_refl),
-		    len(results_refl),
-		    filename
-		)
+		print len(this.results) - len(results_refl),
+		if len(this.edgeLengths) != 4:
+		    print '(+%d)' % (len(results_refl)),
+		print 'results written to %s' % (filename)
 		break
 
 def FindMultiRootOnDomain(domain,
@@ -1624,17 +1654,16 @@ def FindMultiRootOnDomain(domain,
 
 if __name__ == '__main__':
     import Geom3D
-    #tmp = numx.array((0.0, 1.57, 0.00, 0.00))
-    #faster = False
-    #FoldedRegularHeptagonsA4xI(tmp, [0])
-    #faster = False
-    #faster = True
-    #FoldedRegularHeptagonsA4xI(tmp, [0])
-    #tmp = numx.array((1.1789610329092914, 0.69387894107538728, 2.1697959367422728, -0.49295326187544664))
-    #                 T     a     b     g
-    #tmp = numx.array((0.00, 1.00, 1.00, 0.00))
+    #T  = 2.45
+    #a  = Geom3D.Deg2Rad * 40
+    #b0 = Geom3D.Deg2Rad * 25
+    #g0 = Geom3D.Deg2Rad * 27
+    #tmp = numx.array((T, a, b0, g0))
+    ##faster = False
+    ##faster = True
     #print FoldedRegularHeptagonsA4xI(tmp,
-    #    [TriangleAlt.strip1loose, [0., 0., 0., 0.], Fold.w ])
+    #	[TriangleAlt.twisted, [0., 0., 0., 0], Fold.triangle])
+    #
     #T  = 2.3
     #a  = Geom3D.Deg2Rad * 30
     #d  = Geom3D.Deg2Rad * 40
@@ -1948,10 +1977,10 @@ if __name__ == '__main__':
 	    result = []
 	    if len(edges) == 4:
 		dom = [
-		    [-numx.pi, numx.pi], # fold 2 gamma
-		    [-numx.pi, numx.pi], # fold 1 beta
-		    [-numx.pi, numx.pi], # angle alpha
 		    [-2., 3.],           # Translation
+		    [-numx.pi, numx.pi], # angle alpha
+		    [-numx.pi, numx.pi], # fold 1 beta
+		    [-numx.pi, numx.pi], # fold 2 gamma
 		]
 		steps = [0.5, 0.5, 0.3, 0.3]
 	    else:
@@ -1991,7 +2020,7 @@ if __name__ == '__main__':
 			method = Method.hybrids,
 			cleanupF = cleanupResult,
 			steps = steps,
-			maxIter = 2,
+			maxIter = 50,
 			printStatus = printStatus
 		    )
 		print '['
@@ -2094,11 +2123,77 @@ if __name__ == '__main__':
 					print '===threads finished===='
 					i = 0
 
+	def randBatchA4xI(continueAfter = 100, nrThreads = 1):
+	    #folds = [Fold.star, Fold.w]
+	    #folds = [Fold.star]
+	    #folds = [Fold.w]
+	    #folds = [Fold.trapezium]
+	    folds = [
+		Fold.w,
+		Fold.star,
+		Fold.triangle,
+		Fold.trapezium,
+		Fold.parallel,
+	    ]
+	    edgeLs = [
+		#[0., 0., 0., 0.],
+		#[1., 0., 0., 0.],
+		[0., 1., 0., 0.],
+		[1., 1., 0., 0.],
+	    ]
+	    ta = TriangleAlt()
+	    #edgeAlts = [t for t in ta]
+	    #edgeAlts = []
+	    #for t in ta:
+	    #    if t & rot_bit == 0:
+	    #        edgeAlts.append(t)
+	    #oppEdgeAlts = [t for t in ta]
+	    edgeAlts = [ta.twisted]
+	    oppEdgeAlts = [ta.twisted]
+	    dom = [
+		[-2., 3.],           # Translation
+		[-numx.pi, numx.pi], # angle alpha
+		[-numx.pi, numx.pi], # fold 1 beta
+		[-numx.pi, numx.pi], # fold 2 gamma
+	    ]
+	    rndT = [None for j in range(nrThreads)]
+	    i = 0
+	    while True:
+		for edges in edgeLs:
+		    for fold in folds:
+			for ea in edgeAlts:
+			    for oea in oppEdgeAlts:
+				# loose_bit must be the same for both:
+				if (
+				    ea & loose_bit == loose_bit and
+				    oea & loose_bit == loose_bit
+				) or (
+				    ea & loose_bit == 0 and
+				    oea & loose_bit == 0
+				):
+				    print '====set up thread %d===' % i
+				    rndT[i] = RandFindMultiRootOnDomain(dom,
+					threadId           = i,
+					edgeAlternative    = ea,
+					oppEdgeAlternative = oea,
+					edgeLengths        = edges,
+					fold               = fold,
+					method             = Method.hybrids
+				    )
+				    rndT[i].stopAfter = continueAfter
+				    rndT[i].start()
+				    i = i + 1
+				    if (i == nrThreads):
+					for j in range(nrThreads):
+					    rndT[j].join()
+					print '===threads finished===='
+					i = 0
+
 	def batch(edges, tris):
 		fold = Fold()
 		print edges, Stringify[tris], 'triangle alternative'
-		fold.set(fold.parallel)
-		multiRootsLog(fold, edges, tris)
+		#fold.set(fold.parallel)
+		#multiRootsLog(fold, edges, tris)
 		fold.set(fold.triangle)
 		multiRootsLog(fold, edges, tris)
 		fold.set(fold.star)
@@ -2413,5 +2508,10 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.alt_stripII)
 	#batch(edges, TriangleAlt.alt_strip1loose)
 
-	randomSearch = True
-	randBatch(continueAfter = 4000, nrThreads = 1)
+	#randomSearch = True
+	#randomSearch = False
+	#edges = [1, 1., 0., 0.]
+	#batch(edges, TriangleAlt.twisted)
+
+	randBatchA4xI(continueAfter = 40, nrThreads = 1)
+	#randBatch(continueAfter = 4000, nrThreads = 1)
