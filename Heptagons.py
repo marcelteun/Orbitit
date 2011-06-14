@@ -1080,6 +1080,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
         this.panel.Layout()
+	this.prevTrisFill    = -1
+	this.prevOppTrisFill = -1
 
     def createControlsSizer(this):
         this.heightF = 40 # slider step factor, or: 1 / slider step
@@ -1696,13 +1698,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    return t[1]
 
+    def nvidea_workaround_0(this):
+	this.prevTrisFill    = this.shape.edgeAlternative
+	this.prevOppTrisFill = this.shape.oppEdgeAlternative
+
     def nvidea_workaround(this):
-	print '---------nvidia-seg-fault-work-around-----------'
-	prevTrisFill = this.shape.edgeAlternative
-	prevOppTrisFill = this.shape.oppEdgeAlternative
 	restoreMyShape = (
-	    prevTrisFill == trisAlt.twist_strip_I and
-	    prevOppTrisFill == trisAlt.twist_strip_I and
+	    this.prevTrisFill == trisAlt.twist_strip_I and
+	    this.prevOppTrisFill == trisAlt.twist_strip_I and
 	    this.trisFill != trisAlt.twist_strip_I and
 	    this.oppTrisFill != trisAlt.twist_strip_I
 	)
@@ -1712,9 +1715,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	)
 	if changeMyShape:
 	    if (
-		prevTrisFill != trisAlt.twist_strip_I and
-		prevOppTrisFill != trisAlt.twist_strip_I
+		this.prevTrisFill != trisAlt.twist_strip_I and
+		this.prevOppTrisFill != trisAlt.twist_strip_I
 	    ):
+		print '---------nvidia-seg-fault-work-around-----------'
 		this.restoreShape = this.canvas.shape
 	    this.shape.setV() # make sure the shape is updated
 	    shape =  FldHeptagonShape(this.shape.shapes,
@@ -1740,6 +1744,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    shape.addXtraFs = this.shape.addXtraFs
 	    shape.onlyRegFs = this.shape.onlyRegFs
 	    shape.useCulling = this.shape.useCulling
+	    shape.edgeAlternative = this.trisFill
+	    shape.oppEdgeAlternative = this.oppTrisFill
 	    shape.updateShape = True
 	    this.canvas.shape = shape
 	elif restoreMyShape:
@@ -1750,6 +1756,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.canvas.paint()
 
     def onTriangleFill(this, event):
+	this.nvidea_workaround_0()
         this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
         if this.isPrePos():
             this.onPrePos()
