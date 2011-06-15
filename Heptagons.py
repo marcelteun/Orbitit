@@ -1495,16 +1495,16 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.fold1OppGui.SetValue(Geom3D.Rad2Deg * oppFld1)
 	    this.fold2OppGui.SetValue(Geom3D.Rad2Deg * oppFld2)
 	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * posVal)
+	    this.shape.setPosAngle(posVal)
 	else:
 	    this.disableGuisNoRefl()
-	    posVal = 0.
+	    this.setReflPosAngle()
 	    oppFld1 = fld1
 	    oppFld2 = fld2
 	this.shape.setDihedralAngle(aVal)
 	this.shape.setHeight(tVal)
 	this.shape.setFold1(fld1, oppFld1)
 	this.shape.setFold2(fld2, oppFld2)
-	this.shape.setPosAngle(posVal)
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.updateShape()
         event.Skip()
@@ -1535,6 +1535,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.fold1OppGui.Disable()
 		this.fold2OppGui.Enable()
 
+    def setReflPosAngle(this):
+	if this.trisFill & twist_bit == twist_bit:
+	    posAngle = math.pi/4
+	else:
+	    posAngle = 0
+	this.shape.setPosAngle(posAngle)
+	this.posAngleGui.SetValue(Geom3D.Rad2Deg * posAngle)
+
     def disableSlidersNoRefl(this):
 	this.fold1OppGui.Disable()
 	this.fold2OppGui.Disable()
@@ -1546,12 +1554,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.__sav_posAngle = this.shape.posAngle
 	this.shape.setFold1(oppositeAngle = this.shape.fold1)
 	this.shape.setFold2(oppositeAngle = this.shape.fold2)
-	if this.trisFill & twist_bit == twist_bit:
-	    posAngle = math.pi/4
-	else:
-	    posAngle = 0
-	this.shape.setPosAngle(posAngle)
-	this.posAngleGui.SetValue(Geom3D.Rad2Deg * posAngle)
+	this.setReflPosAngle()
 	this.fold1OppGui.SetValue(this.minFoldAngle)
 	this.fold2OppGui.SetValue(this.minFoldAngle)
 
@@ -1605,7 +1608,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.__sav_oppFld2 = this.shape.fold2
             this.onPrePos()
 	else:
-	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    if this.shape.inclReflections:
 		this.savTrisNoRefl = this.trisFillGui.GetStringSelection()
 
@@ -1613,6 +1615,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    else:
 		this.savTrisRefl = this.trisFillGui.GetStringSelection()
 		this.enableGuisNoRefl()
+	    this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    this.updateShape()
 
     def onRotateFld(this, event):
@@ -1924,21 +1927,24 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    aVal = setting[this.specPosIndex][1]
 		    fld1 = setting[this.specPosIndex][2]
 		    fld2 = setting[this.specPosIndex][3]
-		    print 'DBG tVal', tVal
-		    print 'DBG aVal', aVal
-		    print 'DBG fld1', fld1
-		    print 'DBG fld2', fld2
+		    vStr = '[tVal, aVal, fld1, fld2'
+		    dbgStr = '  [%.12f, %.12f, %.12f, %.12f' % (
+							tVal, aVal, fld1, fld2)
 		    if not this.shape.inclReflections:
 			posVal = setting[this.specPosIndex][4]
 			oppFld1 = setting[this.specPosIndex][5]
 			oppFld2 = setting[this.specPosIndex][6]
-			print 'DBG posVal', posVal
-			print 'DBG oppFld1', oppFld1
-			print 'DBG oppFld2', oppFld2
+			vStr = '%s, posVal, oppFld1, oppFld2] =' % vStr
+			dbgStr = '%s, %.12f, %.12f, %.12f]' % (
+					    dbgStr, posVal, oppFld1, oppFld2)
 		    else:
 			posVal = 0
 			oppFld1 = fld1
 			oppFld2 = fld2
+			vStr = '%s] =' % vStr
+			dbgStr = '%s]' % dbgStr
+		    print vStr
+		    print dbgStr
 		    print '----------------------------------------------------'
 		# Ensure this.specPosIndex in range:
 		nrPos = len(setting)
