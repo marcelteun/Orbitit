@@ -1034,7 +1034,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    shape, size, canvas,
 	    maxHeight, 
 	    prePosStrLst,
-	    prePosLst,
 	    stringify,
 	    parent,
 	    *args, **kwargs
@@ -1047,8 +1046,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	maxHeight: max translation height to be used for the heptagon
 	prePosStrLst: string list that expresses which special positions can be
 	              found, e.g. where all holes disappear.
-	prePosLst: The list with the complete settings for the special
-	           positions.
 	stringify: hash table that maps enums on strings.
 	*args: standard wx Frame *args
 	**kwargs: standard wx Frame **kwargs
@@ -1069,7 +1066,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.shape.foldHeptagon = this.foldMethod
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
         this.specPosIndex = 0
-        this.specPos = prePosLst
 
         this.mainSizer.Add(
                 this.createControlsSizer(),
@@ -1354,26 +1350,13 @@ class FldHeptagonCtrlWin(wx.Frame):
         return mainSizer
 
     def isPrePosValid(this, prePosId):
-	try:
-	    tmp = this.specPos[this.shape.inclReflections][prePosId]
-	    return True
-	except KeyError:
-	    return False
+	assert False, "TODO: implement at offspring"
 
     def isFoldValid(this, foldMethod):
-	inclRefl = this.shape.inclReflections
-        prePosId = this.prePos
-	return (
-	    this.isPrePosValid(prePosId)
-	    and
-	    foldMethod in this.specPos[inclRefl][prePosId]
-	)
+	assert False, "TODO: implement at offspring"
 
     def isTrisFillValid(this, trisFillId):
-	inclRefl = this.shape.inclReflections
-        prePosId = this.prePos
-	foldMethod = this.foldMethod
-	return trisFillId in this.specPos[inclRefl][prePosId][foldMethod]
+	assert False, "TODO: implement at offspring"
 
     def setEnablePrePosItems(this):
 	currentPrePos = this.prePos
@@ -1573,7 +1556,6 @@ class FldHeptagonCtrlWin(wx.Frame):
     def disableGuisNoRefl(this):
 	if this.__guisNoReflEnabled:
 	    this.setEnableTrisFillItems()
-	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 	    this.rotateFldGui.Disable()
 	    this.shape.setRotateFold(0)
 	    this.disableSlidersNoRefl()
@@ -1582,7 +1564,6 @@ class FldHeptagonCtrlWin(wx.Frame):
     def enableGuisNoRefl(this):
 	if not this.__guisNoReflEnabled:
 	    this.setEnableTrisFillItems()
-	    this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 	    this.rotateFldGui.Enable()
 	    this.shape.setRotateFold(this.rotateFld)
 	    this.enableSlidersNoRefl()
@@ -1680,7 +1661,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.trisFillGui.SetStringSelection(lastValid)
 	    except UnboundLocalError:
 		# None are valid...
-		pass
+		return
+	this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
 
     @property
     def trisFill(this):
@@ -1807,16 +1789,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     @property
     def stdPrePos(this):
-        prePosId = this.prePos
-        if prePosId != dyn_pos:
-	    if this.shape.inclReflections:
-		trisF = this.trisFill
-	    else:
-		trisF = (this.trisFill, this.oppTrisFill)
-	    return this.specPos[this.shape.inclReflections][prePosId][
-							this.foldMethod][trisF]
-	else:
-	    return []
+	assert False, "TODO: implement at offspring"
 
     def onPrev(this, event = None):
         prePosId = this.prePos
@@ -1854,11 +1827,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	# 2. disable triangle strip.
 	if (sel == only_hepts):
 	    this.shape.addXtraFs = False
-	    this.disableTrisFillGuis()
 	    this.restoreTris = True
 	elif (this.restoreTris):
 	    this.restoreTris = False
-	    this.enableTrisFillGuis()
 	    this.shape.addXtraFs = this.addTrisGui.IsChecked()
 	    # needed for sel == dyn_pos
 	    this.shape.updateShape = True

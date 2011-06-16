@@ -45,8 +45,9 @@ V2 = math.sqrt(2)
 trisAlt = Heptagons.TrisAlt()
 
 dyn_pos		= Heptagons.dyn_pos
-only_hepts      = Heptagons.only_hepts
 only_xtra_o3s	= Heptagons.only_xtra_o3s
+only_hepts_S0	= Heptagons.only_hepts
+only_hepts_S1	= Heptagons.A4xI_bas + 0
 all_eq_tris	= Data_FldHeptA4xI.all_eq_tris
 no_o3_tris	= Data_FldHeptA4xI.no_o3_tris
 edge_1_1_V2_1	= Data_FldHeptA4xI.edge_1_1_V2_1
@@ -62,7 +63,7 @@ edge_1_0_1_1	= Data_FldHeptA4xI.edge_1_0_1_1
 edge_V2_1_0_1	= Data_FldHeptA4xI.edge_V2_1_0_1
 edge_V2_1_1_0	= Data_FldHeptA4xI.edge_V2_1_1_0
 square_12	= Data_FldHeptA4xI.square_12
-edge_0_V2_1_1   = Data_FldHeptA4xI.edge_0_V2_1_1
+edge_0_V2_1_1	= Data_FldHeptA4xI.edge_0_V2_1_1
 
 tris_16_0 = Heptagons.A4_bas + 1
 tris_16_1 = Heptagons.A4_bas + 2
@@ -108,7 +109,29 @@ Stringify = {
     edge_0_1_1_1:	'56 Triangles',
     edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
     tris_64_0:		'64 Triangles (A)',
-    only_hepts:		'Just Heptagons',
+    only_hepts_S0:	'Just Heptagons (A)',
+    only_hepts_S1:	'Just Heptagons (B)',
+}
+
+prePosStrToFileStrMap = {
+    only_hepts_S0:	'1_0_1_0_0_1_0',
+    only_hepts_S1:	'0_0_1_0_0_1_0',
+    only_xtra_o3s:	'0_1_0_1_0_0_1',
+    tris_16_0:		'1_0_1_0_0_1_1',
+    tris_16_1:		'1_0_1_0_1_0_1',
+    tris_24_0:		'1_0_1_0_1_1_0',
+    tris_40_0:		'1_0_1_0_1_1_1',
+    tris_16_3:		'1_0_1_1_0_1_0',
+    tris_32_1:		'1_0_1_1_0_1_1',
+    tris_40_2:		'1_0_1_1_1_1_0',
+    tris_16_2:		'1_1_0_1_0_1_0',
+    tris_32_0:		'1_1_0_1_0_1_1',
+    tris_24_1:		'1_1_1_0_0_1_0',
+    tris_40_3:		'1_1_1_0_0_1_1',
+    no_o3_tris:		'1_1_1_0_1_1_0',
+    tris_40_1:		'1_1_1_1_0_1_0',
+    tris_64_0:		'1_1_1_1_1_1_0',
+    all_eq_tris:	'1_1_1_1_1_1_1',
 }
 
 def Vlen(v0, v1):
@@ -672,7 +695,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    shape, (745, 765), canvas,
 	    3, # maxHeigth
 	    [ # prePosLst
-		Stringify[only_hepts],
+		Stringify[only_hepts_S0],
+		Stringify[only_hepts_S1],
 		Stringify[tris_16_0],
 		Stringify[tris_16_1],
 		Stringify[tris_16_2],
@@ -704,10 +728,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[all_eq_tris],
 		Stringify[dyn_pos],
 	    ],
-	    {
-		True:  Data_FldHeptA4xI.specPos,
-		False: [],
-	    },
 	    Stringify,
 	    *args, **kwargs
 	)
@@ -740,32 +760,12 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    ))
 	))
 
-    prePosStrToFileStrMap = {
-	only_hepts:	'1_0_1_0_0_1_0',
-	only_xtra_o3s:	'0_1_0_1_0_0_1',
-	tris_16_0:	'1_0_1_0_0_1_1',
-	tris_16_1:	'1_0_1_0_1_0_1',
-	tris_24_0:	'1_0_1_0_1_1_0',
-	tris_40_0:	'1_0_1_0_1_1_1',
-	tris_16_3:	'1_0_1_1_0_1_0',
-	tris_32_1:	'1_0_1_1_0_1_1',
-	tris_40_2:	'1_0_1_1_1_1_0',
-	tris_16_2:	'1_1_0_1_0_1_0',
-	tris_32_0:	'1_1_0_1_0_1_1',
-	tris_24_1:	'1_1_1_0_0_1_0',
-	tris_40_3:	'1_1_1_0_0_1_1',
-	no_o3_tris:	'1_1_1_0_1_1_0',
-	tris_40_1:	'1_1_1_1_0_1_0',
-	tris_64_0:	'1_1_1_1_1_1_0',
-	all_eq_tris:	'1_1_1_1_1_1_1',
-    }
-
     rDir = 'Data_FldHeptA4'
     rPre = 'frh-roots'
 
     def mapPrePosStrToFileStr(this, prePosId):
 	try:
-	    s = this.prePosStrToFileStrMap[prePosId]
+	    s = prePosStrToFileStrMap[prePosId]
 	except KeyError:
 	    s = this.stringify[prePosId]
 	return s
@@ -783,35 +783,36 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def isPrePosValid(this, prePosId):
 	# This means that files with empty results should be filtered out from
 	# the directory.
-	if this.shape.inclReflections:
-	    return Heptagons.FldHeptagonCtrlWin.isPrePosValid(this, prePosId)
-	else:
-	    s = this.mapPrePosStrToFileStr(prePosId)
-	    return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
+	s = this.mapPrePosStrToFileStr(prePosId)
+	return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
 
     def isFoldValid(this, foldMethod):
-	if this.shape.inclReflections:
-	    return Heptagons.FldHeptagonCtrlWin.isFoldValid(this, foldMethod)
-	else:
-	    p = this.mapPrePosStrToFileStr(this.prePos)
-	    f = Heptagons.FoldName[foldMethod].lower()
-	    return glob(
-		    '%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
-		) != []
+	p = this.mapPrePosStrToFileStr(this.prePos)
+	f = Heptagons.FoldName[foldMethod].lower()
+	return glob(
+		'%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
+	    ) != []
 
     def isTrisFillValid(this, trisFillId):
 	if this.shape.inclReflections:
-	    return Heptagons.FldHeptagonCtrlWin.isTrisFillValid(this, trisFillId)
+	    if type(trisFillId) != int:
+		return False
+	    t = [trisFillId, trisFillId]
 	else:
 	    if type(trisFillId) == int:
 		return False
-	    p = this.mapPrePosStrToFileStr(this.prePos)
-	    f = Heptagons.FoldName[this.foldMethod].lower()
-	    t0 = this.mapTrisFill(trisFillId[0])
-	    t1 = this.mapTrisFill(trisFillId[1])
-	    return glob('%s/%s-%s-fld_%s*-%s-opp_%s.*' % (
-		    this.rDir, this.rPre, p, f, t0, t1)
-		) != []
+	    t = trisFillId
+	p = this.mapPrePosStrToFileStr(this.prePos)
+	f = Heptagons.FoldName[this.foldMethod].lower()
+	t0 = this.mapTrisFill(t[0])
+	t1 = this.mapTrisFill(t[1])
+	# TODO: in the future you could change this:
+	# for solutions with reflections, make soft links only if the file with
+	# the whole name has non empty results_refl (for Windows this should be
+	# empty files)
+	return glob('%s/%s-%s-fld_%s*-%s-opp_%s.*' % (
+		this.rDir, this.rPre, p, f, t0, t1)
+	    ) != []
 
     @property
     def stdPrePos(this):
@@ -819,26 +820,28 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	if prePosId == dyn_pos:
 	    return []
 	if this.shape.inclReflections:
-	    return this.specPos[this.shape.inclReflections][prePosId][
-						this.foldMethod][this.trisFill]
+	    oppFill = this.mapTrisFill(this.trisFill)
+	    restr = 'results_refl'
 	else:
-	    filename = '%s/%s-%s-fld_%s.0-%s-opp_%s.py' % (
-			this.rDir, this.rPre,
-			this.mapPrePosStrToFileStr(this.prePos),
-			Heptagons.FoldName[this.foldMethod].lower(),
-			this.mapTrisFill(this.trisFill),
-			this.mapTrisFill(this.oppTrisFill)
-		    )
-	    try:
-		print 'DBG open', filename
-		fd = open(filename, 'r')
-	    except IOError:
-		print 'DBG file not found:\n %s' % filename
-		return []
-	    ed = {'__name__': 'readPyFile'}
-	    exec fd in ed
-	    fd.close()
-	    return ed['results']
+	    oppFill = this.mapTrisFill(this.oppTrisFill)
+	    restr = 'results'
+	filename = '%s/%s-%s-fld_%s.0-%s-opp_%s.py' % (
+		    this.rDir, this.rPre,
+		    this.mapPrePosStrToFileStr(this.prePos),
+		    Heptagons.FoldName[this.foldMethod].lower(),
+		    this.mapTrisFill(this.trisFill),
+		    oppFill
+		)
+	try:
+	    print 'DBG open', filename
+	    fd = open(filename, 'r')
+	except IOError:
+	    print 'DBG file not found:\n %s' % filename
+	    return []
+	ed = {'__name__': 'readPyFile'}
+	exec fd in ed
+	fd.close()
+	return ed[restr]
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
