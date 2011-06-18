@@ -50,8 +50,7 @@ only_xtra_o3s   = -3
 all_eq_tris     = -4
 no_o3_tris	= -5
 
-A4xI_bas	= 0
-A4_bas		= 100
+tris_fill_base	= 0
 
 alt_bit = 8
 loose_bit = 16
@@ -1244,6 +1243,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.setOrientButton  = wx.Button(this.panel, label = 'Apply')
         this.Guis.append(this.setOrientButton)
         this.setOrientButton.Bind(wx.EVT_BUTTON, this.onSetOrient)
+        this.cleanOrientButton  = wx.Button(this.panel, label = 'Clean')
+        this.Guis.append(this.cleanOrientButton)
+        this.cleanOrientButton.Bind(wx.EVT_BUTTON, this.onCleanOrient)
 
         # Sizers
         this.Boxes = []
@@ -1331,6 +1333,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         setOrientSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
         setOrientSizer.Add(this.setOrientGui, 1, wx.EXPAND)
         setOrientSizer.Add(this.setOrientButton, 0, wx.EXPAND)
+        setOrientSizer.Add(this.cleanOrientButton, 0, wx.EXPAND)
 
 	# MAIN sizer
         mainVSizer = wx.BoxSizer(wx.VERTICAL)
@@ -1450,6 +1453,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.updateShape()
         event.Skip()
+
+    def onCleanOrient(this, event):
+	this.setOrientGui.SetValue('')
 
     def onSetOrient(this, event):
 	inputStr = 'ar = %s' % this.setOrientGui.GetValue()

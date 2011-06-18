@@ -32,7 +32,6 @@ import Scenes3D
 from glob import glob
 from OpenGL.GL import *
 
-import Data_FldHeptA4xI
 import GeomTypes
 from GeomTypes import Rot3      as Rot
 from GeomTypes import HalfTurn3 as HalfTurn
@@ -45,93 +44,116 @@ V2 = math.sqrt(2)
 trisAlt = Heptagons.TrisAlt()
 
 dyn_pos		= Heptagons.dyn_pos
-only_xtra_o3s	= Heptagons.only_xtra_o3s
-only_hepts_S0	= Heptagons.only_hepts
-only_hepts_S1	= Heptagons.A4xI_bas + 0
-all_eq_tris	= Data_FldHeptA4xI.all_eq_tris
-no_o3_tris	= Data_FldHeptA4xI.no_o3_tris
-edge_1_1_V2_1	= Data_FldHeptA4xI.edge_1_1_V2_1
-edge_1_V2_1_1	= Data_FldHeptA4xI.edge_1_V2_1_1
-edge_V2_1_1_1	= Data_FldHeptA4xI.edge_V2_1_1_1
-edge_V2_1_V2_1	= Data_FldHeptA4xI.edge_V2_1_V2_1
-squares_24	= Data_FldHeptA4xI.squares_24
-edge_0_1_1_1	= Data_FldHeptA4xI.edge_0_1_1_1
-edge_0_1_V2_1	= Data_FldHeptA4xI.edge_0_1_V2_1
-tris_24_0	= Data_FldHeptA4xI.tris_24
-edge_1_1_0_1	= Data_FldHeptA4xI.edge_1_1_0_1
-edge_1_0_1_1	= Data_FldHeptA4xI.edge_1_0_1_1
-edge_V2_1_0_1	= Data_FldHeptA4xI.edge_V2_1_0_1
-edge_V2_1_1_0	= Data_FldHeptA4xI.edge_V2_1_1_0
-square_12	= Data_FldHeptA4xI.square_12
-edge_0_V2_1_1	= Data_FldHeptA4xI.edge_0_V2_1_1
+# symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
+S_T8		= Heptagons.only_xtra_o3s
+S_only_hepts0	= Heptagons.only_hepts
+S_only_hepts1	= Heptagons.tris_fill_base + 0
+S_T24		= Heptagons.tris_fill_base + 1
+S_T32_0		= Heptagons.tris_fill_base + 2
+S_T32_1		= Heptagons.tris_fill_base + 3
+S_T48		= Heptagons.no_o3_tris
+S_T56		= Heptagons.tris_fill_base + 4
+S_T80		= Heptagons.all_eq_tris
 
-tris_16_0 = Heptagons.A4_bas + 1
-tris_16_1 = Heptagons.A4_bas + 2
-tris_16_2 = Heptagons.A4_bas + 3
-tris_16_3 = Heptagons.A4_bas + 4
-tris_24_1 = Heptagons.A4_bas + 5
-tris_32_0 = Heptagons.A4_bas + 6
-tris_32_1 = Heptagons.A4_bas + 7
-tris_40_0 = Heptagons.A4_bas + 8
-tris_40_1 = Heptagons.A4_bas + 9
-tris_40_2 = Heptagons.A4_bas + 10
-tris_40_3 = Heptagons.A4_bas + 11
-tris_64_0 = Heptagons.A4_bas + 12
+# symmtric edge lengths with folded squares
+S_S12		= Heptagons.tris_fill_base + 5
+S_T8_S12	= Heptagons.tris_fill_base + 6
+S_S24		= Heptagons.tris_fill_base + 7
+S_T8_S24	= Heptagons.tris_fill_base + 8
+S_T24_S12	= Heptagons.tris_fill_base + 9
+S_T8_S36	= Heptagons.tris_fill_base + 10
+S_T32_S12   	= Heptagons.tris_fill_base + 11
+S_T32_S24_0	= Heptagons.tris_fill_base + 12
+S_T32_S24_1	= Heptagons.tris_fill_base + 13
+S_T56_S12	= Heptagons.tris_fill_base + 14
+
+T8_0		= Heptagons.tris_fill_base + 15
+T16_0		= Heptagons.tris_fill_base + 16
+T16_1		= Heptagons.tris_fill_base + 17
+T16_2		= Heptagons.tris_fill_base + 18
+T16_3		= Heptagons.tris_fill_base + 19
+T24_0		= Heptagons.tris_fill_base + 20
+T24_1		= Heptagons.tris_fill_base + 21
+T32_0		= Heptagons.tris_fill_base + 22
+T40_0		= Heptagons.tris_fill_base + 23
+T40_1		= Heptagons.tris_fill_base + 24
+T40_2		= Heptagons.tris_fill_base + 25
+T40_3		= Heptagons.tris_fill_base + 26
+T64_0		= Heptagons.tris_fill_base + 27
 
 Stringify = {
-    dyn_pos:		'Enable Sliders',
-    no_o3_tris:		'48 Triangles',
-    all_eq_tris:	'All 80 Triangles Equilateral',
-    only_xtra_o3s:	'8 Triangles (O3)',
-    edge_V2_1_0_1:	'8 Triangles and 12 Folded Squares',
-    edge_0_1_V2_1:	'8 Triangles and 24 Folded Squares',
-    edge_V2_1_V2_1:	'8 Triangles and 36 Folded Squares',
-    square_12:		'12 Folded Squares',
-    tris_16_0:		'16 Triangles (A)',
-    tris_16_1:		'16 Triangles (B)',
-    tris_16_2:		'16 Triangles (C)',
-    tris_16_3:		'16 Triangles (D)',
-    tris_24_0:		'24 Triangles (A)',
-    tris_24_1:		'24 Triangles (B)',
-    squares_24:		'24 Folded Squares',
-    edge_V2_1_1_0:	'24 Triangles and 12 Folded Squares',
-    tris_32_0:	        '32 Triangles (A)',
-    tris_32_1:	        '32 Triangles (B)',
-    edge_1_1_0_1:	'32 Triangles (24 + 8) I',
-    edge_1_0_1_1:	'32 Triangles (24 + 8) II',
-    edge_0_V2_1_1:	'32 Triangles and 12 Folded Squares',
-    edge_1_1_V2_1:	'32 Triangles and 24 Folded Squares: I',
-    edge_1_V2_1_1:	'32 Triangles and 24 Folded Squares: II',
-    tris_40_0:		'40 Triangles (A)',
-    tris_40_1:		'40 Triangles (B)',
-    tris_40_2:		'40 Triangles (C)',
-    tris_40_3:		'40 Triangles (D)',
-    edge_0_1_1_1:	'56 Triangles',
-    edge_V2_1_1_1:	'56 Triangles and 12 Folded Squares',
-    tris_64_0:		'64 Triangles (A)',
-    only_hepts_S0:	'Just Heptagons (A)',
-    only_hepts_S1:	'Just Heptagons (B)',
+    dyn_pos:		'  Enable Sliders',
+    # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
+    S_only_hepts0:	'SEL:  Just Heptagons (A)',
+    S_only_hepts1:	'SEL:  Just Heptagons (B)',
+    S_T8:		'SEL: 8 Triangles (O3)',
+    S_T24:		'SEL: 24 Triangles (A)',
+    S_T32_0:		'SEL: 32 Triangles (24 + 8) (A)',
+    S_T32_1:		'SEL: 32 Triangles (24 + 8) (B)',
+    S_T48:		'SEL: 48 Triangles',
+    S_T56:		'SEL: 56 Triangles',
+    S_T80:		'SEL: 80 Triangles Equilateral',
+    # with folded squares:
+    S_S12:		'SEL: 12 Folded Squares',
+    S_T8_S12:		'SEL: 20 = 8 Triangles + 12 Folded Squares',
+    S_S24:		'SEL: 24 Folded Squares',
+    S_T8_S24:		'SEL: 32 = 8 Triangles + 24 Folded Squares',
+    S_T24_S12:		'SEL: 36 = 24 Triangles + 12 Folded Squares',
+    S_T8_S36:		'SEL: 44 = 8 Triangles + 36 Folded Squares',
+    S_T32_S12:		'SEL: 44 = 32 Triangles + 12 Folded Squares',
+    S_T32_S24_0:	'SEL: 56 = 32 Triangles + 24 Folded Squares (A)',
+    S_T32_S24_1:	'SEL: 56 = 32 Triangles + 24 Folded Squares: (B)',
+    S_T56_S12:		'SEL: 68 = 56 Triangles + 12 Folded Squares',
+
+    # non-symmetric edges lengths
+    T8_0:		' 8 Triangles (O3)',
+    T16_0:		'16 Triangles (A)',
+    T16_1:		'16 Triangles (B)',
+    T16_2:		'16 Triangles (C)',
+    T16_3:		'16 Triangles (D)',
+    T24_0:		'24 Triangles (A)',
+    T24_1:		'24 Triangles (B)',
+    T32_0:	        '32 Triangles (A)',
+    T40_0:		'40 Triangles (A)',
+    T40_1:		'40 Triangles (B)',
+    T40_2:		'40 Triangles (C)',
+    T40_3:		'40 Triangles (D)',
+    T64_0:		'64 Triangles (A)',
+}
+
+prePosStrToReflFileStrMap = {
+    S_only_hepts0:	'1_0_1_0',
+    S_only_hepts1:	'0_0_1_0',
+    S_T8:		'0_1_0_1',
+    S_T32_0:		'1_0_1_1',
+    S_T48:		'1_1_1_0',
+    S_T80:		'1_1_1_1',
 }
 
 prePosStrToFileStrMap = {
-    only_hepts_S0:	'1_0_1_0_0_1_0',
-    only_hepts_S1:	'0_0_1_0_0_1_0',
-    only_xtra_o3s:	'0_1_0_1_0_0_1',
-    tris_16_0:		'1_0_1_0_0_1_1',
-    tris_16_1:		'1_0_1_0_1_0_1',
-    tris_24_0:		'1_0_1_0_1_1_0',
-    tris_40_0:		'1_0_1_0_1_1_1',
-    tris_16_3:		'1_0_1_1_0_1_0',
-    tris_32_1:		'1_0_1_1_0_1_1',
-    tris_40_2:		'1_0_1_1_1_1_0',
-    tris_16_2:		'1_1_0_1_0_1_0',
-    tris_32_0:		'1_1_0_1_0_1_1',
-    tris_24_1:		'1_1_1_0_0_1_0',
-    tris_40_3:		'1_1_1_0_0_1_1',
-    no_o3_tris:		'1_1_1_0_1_1_0',
-    tris_40_1:		'1_1_1_1_0_1_0',
-    tris_64_0:		'1_1_1_1_1_1_0',
-    all_eq_tris:	'1_1_1_1_1_1_1',
+    # symmetric edge lengths:
+    S_only_hepts0:	'1_0_1_0_0_1_0',
+    S_only_hepts1:	'0_0_1_0_0_1_0',
+    S_T8:		'0_1_0_1_1_0_1',
+    S_T24:		'0_1_1_0_1_1_0',
+    S_T32_0:		'1_0_1_1_0_1_1',
+    S_T48:		'1_1_1_0_1_1_0',
+    S_T80:		'1_1_1_1_1_1_1',
+
+    # non-symmetric edges lengths
+    T8_0:		'0_1_0_1_0_0_1',
+    T16_0:		'1_0_1_0_0_1_1',
+    T16_1:		'1_0_1_0_1_0_1',
+    T16_2:		'1_1_0_1_0_1_0',
+    T16_3:		'1_0_1_1_0_1_0',
+    T24_0:		'1_0_1_0_1_1_0',
+    T24_1:		'1_1_1_0_0_1_0',
+    T32_0:		'1_1_0_1_0_1_1',
+    T40_0:		'1_0_1_0_1_1_1',
+    T40_1:		'1_1_1_1_0_1_0',
+    T40_2:		'1_0_1_1_1_1_0',
+    T40_3:		'1_1_1_0_0_1_1',
+    T64_0:		'1_1_1_1_1_1_0',
 }
 
 def Vlen(v0, v1):
@@ -695,37 +717,40 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    shape, (745, 765), canvas,
 	    3, # maxHeigth
 	    [ # prePosLst
-		Stringify[only_hepts_S0],
-		Stringify[only_hepts_S1],
-		Stringify[tris_16_0],
-		Stringify[tris_16_1],
-		Stringify[tris_16_2],
-		Stringify[tris_16_3],
-		Stringify[only_xtra_o3s],
-		Stringify[square_12],
-		Stringify[edge_V2_1_0_1],
-		Stringify[tris_24_0],
-		Stringify[tris_24_1],
-		Stringify[squares_24],
-		Stringify[tris_32_0],
-		Stringify[tris_32_1],
-		Stringify[tris_40_0],
-		Stringify[tris_40_1],
-		Stringify[tris_40_2],
-		Stringify[tris_40_3],
-		Stringify[tris_64_0],
-		Stringify[edge_1_1_0_1],
-		Stringify[edge_1_0_1_1],
-		Stringify[edge_0_1_V2_1],
-		Stringify[edge_V2_1_1_0],
-		Stringify[edge_V2_1_V2_1],
-		Stringify[edge_0_V2_1_1],
-		Stringify[no_o3_tris],
-		Stringify[edge_0_1_1_1],
-		Stringify[edge_1_1_V2_1],
-		Stringify[edge_1_V2_1_1],
-		Stringify[edge_V2_1_1_1],
-		Stringify[all_eq_tris],
+		Stringify[S_only_hepts0],
+		Stringify[S_only_hepts1],
+		Stringify[S_T8],
+		Stringify[S_T24],
+		Stringify[S_T32_0],
+		Stringify[S_T32_1],
+		Stringify[S_T48],
+		Stringify[S_T56],
+		Stringify[S_T80],
+
+		Stringify[S_S12],
+		Stringify[S_T8_S12],
+		Stringify[S_S24],
+		Stringify[S_T8_S24],
+		Stringify[S_T24_S12],
+		Stringify[S_T8_S36],
+		Stringify[S_T32_S12],
+		Stringify[S_T32_S24_0],
+		Stringify[S_T32_S24_1],
+		Stringify[S_T56_S12],
+
+		Stringify[T8_0],
+		Stringify[T16_0],
+		Stringify[T16_1],
+		Stringify[T16_2],
+		Stringify[T16_3],
+		Stringify[T24_0],
+		Stringify[T24_1],
+		Stringify[T32_0],
+		Stringify[T40_0],
+		Stringify[T40_1],
+		Stringify[T40_2],
+		Stringify[T40_3],
+		Stringify[T64_0],
 		Stringify[dyn_pos],
 	    ],
 	    Stringify,
@@ -737,10 +762,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	"""
 	return (this.shape.inclReflections and (
 	    (
-		sel == squares_24 and this.trisFill == trisAlt.strip_1_loose
+		sel == S_S24 and this.trisFill == trisAlt.strip_1_loose
 	    ) or (this.foldMethod == Heptagons.foldMethod.parallel and (
 		(
-		    sel == edge_1_V2_1_1
+		    sel == S_T32_S24_1
 		    and (
 			this.trisFill == trisAlt.strip_1_loose
 			or
@@ -750,7 +775,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		or
 		(
 		    (
-			sel == tris_24_0
+			sel == S_T24
 		    ) and (
 			this.trisFill == trisAlt.strip_1_loose
 			or
@@ -763,9 +788,12 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     rDir = 'Data_FldHeptA4'
     rPre = 'frh-roots'
 
-    def mapPrePosStrToFileStr(this, prePosId):
+    def mapPrePosStrToFileStr(this, prePosId, refl = False):
 	try:
-	    s = prePosStrToFileStrMap[prePosId]
+	    if refl:
+		s = prePosStrToReflFileStrMap[prePosId]
+	    else:
+		s = prePosStrToFileStrMap[prePosId]
 	except KeyError:
 	    s = this.stringify[prePosId]
 	return s
@@ -783,11 +811,11 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def isPrePosValid(this, prePosId):
 	# This means that files with empty results should be filtered out from
 	# the directory.
-	s = this.mapPrePosStrToFileStr(prePosId)
+	s = this.mapPrePosStrToFileStr(prePosId, this.shape.inclReflections)
 	return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
 
     def isFoldValid(this, foldMethod):
-	p = this.mapPrePosStrToFileStr(this.prePos)
+	p = this.mapPrePosStrToFileStr(this.prePos, this.shape.inclReflections)
 	f = Heptagons.FoldName[foldMethod].lower()
 	return glob(
 		'%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
@@ -802,7 +830,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    if type(trisFillId) == int:
 		return False
 	    t = trisFillId
-	p = this.mapPrePosStrToFileStr(this.prePos)
+	p = this.mapPrePosStrToFileStr(this.prePos, this.shape.inclReflections)
 	f = Heptagons.FoldName[this.foldMethod].lower()
 	t0 = this.mapTrisFill(t[0])
 	t1 = this.mapTrisFill(t[1])
