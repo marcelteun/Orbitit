@@ -45,7 +45,7 @@ Sigma     = SigmaH / H
 
 eqFloatMargin = 1.0e-12
 
-def eq(a, b):
+def eq(a, b, precision = eqFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
 
@@ -54,7 +54,7 @@ def eq(a, b):
     margin: if |a - b| < margin then the floats will be considered equal and
             True is returned.
     """
-    return abs(a - b) < eqFloatMargin
+    return abs(a - b) < precision
 
 # since GeomTypes.quat doesn't work well with multiroots...
 def quatRot(axis, angle):
@@ -1424,13 +1424,18 @@ class RandFindMultiRootOnDomain(threading.Thread):
     tpi = 2*numx.pi
     def cleanupResult(this, v, l = 4):
         for i in range(1, l):
-            v[i] = v[i] % this.tpi
-            if v[i] < -numx.pi:
-                v[i] += this.tpi
-            elif v[i] > numx.pi:
-                v[i] -= this.tpi
-	    elif eq(v[i], this.tpi):
-		v[i] = 0
+	    lim = this.tpi
+	    hLim = numx.pi
+            v[i] = v[i] % lim
+	    # move interval from [0, lim] to [-lim/2, lim/2]:
+            if v[i] > hLim:
+                v[i] = v[i] - lim
+	    if eq(v[i], -hLim):
+                # float rounding:
+                v[i] = v[i] + lim
+            # shouldn't happen:
+            #elif v[i] < -hLim:
+            #    v[i] = v[i] + lim
         return v
 
     def randTestvalue(this):
@@ -1492,15 +1497,27 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    ed = {'__name__': 'readPyFile'}
 	    exec f in ed
 	    # TODO check settings
-	    this.results = ed['results']
 	    try:
-		this.results.extend(ed['results_refl'])
+		this.results = ed['results']
 	    except KeyError:
+		this.results = []
 		pass
-	    prev_iterations = ed['iterations']
+	    try:
+		results_refl = ed['results_refl']
+		this.results.extend(results_refl)
+	    except KeyError:
+		results_refl = []
+		pass
+	    try:
+		prev_iterations = ed['iterations']
+	    except KeyError:
+		prev_iterations = 0
+		pass
 	    f.close()
+
 	except IOError:
 	    this.results = []
+	    this.results_refl = []
 	    prev_iterations = 0
 
 	nrOfIters = 0
@@ -1551,26 +1568,71 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		f.write('# edgeAlternative = %s\n' % Stringify[this.edgeAlternative])
 		f.write('# oppEdgeAlternative = %s\n' % Stringify[this.oppEdgeAlternative])
 		f.write('# fold = %s\n' % Fold(this.fold))
+
+		# filter results. This is needed since the filter changed after
+		# having found many solutions.
+		# Also split in results and results_refl:
+		cp_results = this.results[:]
+		this.results = [] # for this.solutionAlreadyFound(result)
+		results      = []
+		results_refl = []
+		for result in cp_results:
+		    this.cleanupResult(result, len(result))
+		    if not this.solutionAlreadyFound(result):
+			this.results.append(result)
+			# check if this value is (still) valid. This check is
+			# done since the script is under development all the
+			# time.  It is easier to throw an solution that appeared
+			# to be invalid, then to start over the whole search
+			# again...
+			if len(this.edgeLengths) == 4:
+			    chk = FoldedRegularHeptagonsA4xI(result,
+				[this.edgeAlternative, this.edgeLengths, this.fold])
+			else:
+			    chk = FoldedRegularHeptagonsA4(result,
+				[ this.edgeAlternative, this.oppEdgeAlternative,
+				    this.edgeLengths, this.fold
+				]
+			    )
+			isEq = True
+			for i in range(len(chk)):
+			    if not eq(chk[i], 0., eqFloatMargin):
+				print '|', chk[i], '| >', eqFloatMargin
+				isEq = False
+				break
+			if isEq:
+			    if len(this.edgeLengths) > 4 and (
+				eq(result[4], 0.0) or
+				eq(result[4], numx.pi/4) or
+				eq(result[4], -numx.pi/4) or
+				eq(result[4], numx.pi/2) or
+				eq(result[4], -numx.pi/2) or
+				eq(result[4], numx.pi) or
+				eq(result[4], -numx.pi)
+			    ):
+				results_refl.append(result)
+			    else:
+				results.append(result)
+			else:
+			    print 'Throwing invalid solution:', result
+
 		f.write('# %s: ' % time.strftime(
 			"%y%m%d %H%M%S", time.localtime())
 		    )
-		f.write('%d solutions found\n' % len(this.results))
+		f.write('%d (+%d) solutions found\n' % (
+				len(results), len(results_refl)))
 		f.write('iterations = %d\n' % (nrOfIters + prev_iterations))
 		f.write('results = [\n')
+		if len(this.edgeLengths) != 4:
+		    for r in results:
+			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
+				r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+		f.write(']\nresults_refl = [\n')
 		if len(this.edgeLengths) == 4:
-		    results_refl = []
-		    for r in this.results:
+		    for r in results:
 			f.write('    [%.14f, %.14f, %.14f, %.14f],\n' % (
 							r[0], r[1], r[2], r[3]))
 		else:
-		    results_refl = []
-		    for r in this.results:
-			if not eq(r[4], 0.0):
-			    f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
-				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
-			else:
-			    results_refl.append(r)
-		    f.write(']\nresults_refl = [\n')
 		    for r in results_refl:
 			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
 				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
@@ -1580,7 +1642,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.threadId,
 			time.strftime("%y%m%d %H%M%S", time.localtime())
 		    ),
-		print len(this.results) - len(results_refl),
+		print len(results),
 		if len(this.edgeLengths) != 4:
 		    print '(+%d)' % (len(results_refl)),
 		print 'results written to %s' % (filename)
@@ -2040,37 +2102,55 @@ if __name__ == '__main__':
 	    #folds = [Fold.w]
 	    #folds = [Fold.trapezium]
 	    edgeLs = [
-		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
-		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
+		[0., 0., 0., 0., 0., 0., 0.],
 
-		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
-		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
-		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
-		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
-		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
+		[0., 0., 0., 1., 0., 0., 1.],
 
-		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
-		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+		[0., 0., 1., 0., 0., 1., 0.],
 
-		[0., 1., 0., 1., 0., 1., 0.], # no sols
-		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
-		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+		[0., 0., 1., 1., 0., 1., 1.],
 
-		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
-		[0., 0., 1., 0., 0., 1., 0.], # no sols
+		[0., 1., 0., 0., 1., 0., 0.],
+
+		[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
+		[0., 1., 0., 1., 1., 0., 1.],
+
+		[0., 1., 1., 0., 1., 1., 0.],
+
+		[1., 0., 0., 0., 0., 0., 0.],
+
+		[1., 0., 0., 1., 0., 0., 1.],
+
 		[1., 0., 1., 0., 0., 1., 0.], # only hepts
 			# it seems that
 			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
 			# needs to find nr 11 (has 10 now)
+		[1., 0., 1., 0., 0., 1., 0.],
 		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
 		[1., 0., 1., 0., 1., 0., 0.], # no sols
 		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
-						# NOTE still found solutions
-						# after 220,00 iterations...
 		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
 		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+
+		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+
+		[1., 1., 0., 0., 1., 0., 0.],
+
+		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
+		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
+		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+
+		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
 		[1., 1., 1., 0., 1., 0., 0.], # no sols
 		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
+
+		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
 		#[V2, 0., 1., 0., V2, 1., 0.],
 		#[1., 1., 0., 1., 2., 1., 1.],
 	    ]
@@ -2080,7 +2160,8 @@ if __name__ == '__main__':
 	    for t in ta:
 		if t & rot_bit == 0:
 		    edgeAlts.append(t)
-	    oppEdgeAlts = [t for t in ta]
+	    #oppEdgeAlts = [t for t in ta]
+	    oppEdgeAlts = edgeAlts[:]
 	    dom = [
 		[-3., 4.],             # Translation
 		[-numx.pi, numx.pi],   # angle alpha
@@ -2136,10 +2217,17 @@ if __name__ == '__main__':
 		Fold.parallel,
 	    ]
 	    edgeLs = [
-		#[0., 0., 0., 0.],
-		#[1., 0., 0., 0.],
+		[0., 0., 0., 0.],
+		[1., 0., 0., 0.],
 		[0., 1., 0., 0.],
+		[0., 0., 1., 0.],
+		[0., 0., 0., 1.],
 		[1., 1., 0., 0.],
+		[1., 0., 1., 0.],
+		[1., 0., 0., 1.],
+		[0., 1., 1., 0.],
+		[0., 1., 0., 1.],
+		[0., 0., 1., 1.],
 	    ]
 	    ta = TriangleAlt()
 	    #edgeAlts = [t for t in ta]
@@ -2513,5 +2601,5 @@ if __name__ == '__main__':
 	#edges = [1, 1., 0., 0.]
 	#batch(edges, TriangleAlt.twisted)
 
-	randBatchA4xI(continueAfter = 40, nrThreads = 1)
-	#randBatch(continueAfter = 4000, nrThreads = 1)
+	#randBatchA4xI(continueAfter = 4000, nrThreads = 1)
+	randBatch(continueAfter = 4000, nrThreads = 1)
