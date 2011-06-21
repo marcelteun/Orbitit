@@ -130,6 +130,7 @@ prePosStrToReflFileStrMap = {
     S_T80:		'1_1_1_1',
 
     S_S12:		'0_V2_1_0',
+    S_S24:		'1_V2_1_0',
 }
 
 prePosStrToFileStrMap = {
@@ -158,6 +159,7 @@ prePosStrToFileStrMap = {
     T64_0:		'1_1_1_1_1_1_0',
 
     S_S12:		'0_V2_1_0_V2_1_0',
+    S_S24:		'1_V2_1_0_V2_1_0',
 }
 
 def Vlen(v0, v1):
@@ -840,11 +842,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	f = Heptagons.FoldName[this.foldMethod].lower()
 	t0 = this.mapTrisFill(t[0])
 	t1 = this.mapTrisFill(t[1])
-	# TODO: in the future you could change this:
-	# for solutions with reflections, make soft links only if the file with
-	# the whole name has non empty results_refl (for Windows this should be
-	# empty files)
-	print '--> %s/%s-%s-fld_%s*-%s-opp_%s.*' % (this.rDir, this.rPre, p, f, t0, t1)
 	return glob('%s/%s-%s-fld_%s*-%s-opp_%s.*' % (
 		this.rDir, this.rPre, p, f, t0, t1)
 	    ) != []
