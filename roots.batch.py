@@ -1468,6 +1468,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		es = '%s_%d' % (es, l)
 	    else:
 		es = '%s_%.1f' % (es, l)
+	# Use A4xI filename:
+	#if len(this.edgeLengths) == 4:
+	#    for i in range(1, len(this.edgeLengths)):
+	#	l = this.edgeLengths[i]
+	#	if l == 1 or l == 0:
+	#	    es = '%s_%d' % (es, l)
+	#	else:
+	#	    es = '%s_%.1f' % (es, l)
 	es = es[1:]
 	return 'frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
 		es, Fold(this.fold),
