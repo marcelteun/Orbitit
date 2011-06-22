@@ -1915,7 +1915,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 			dbgStr = '%s, %.12f, %.12f, %.12f]' % (
 					    dbgStr, posVal, oppFld1, oppFld2)
 		    else:
-			posVal = 0
+			if len(setting[this.specPosIndex]) > 4:
+			    posVal = setting[this.specPosIndex][4]
+			else:
+			    posVal = 0
 			oppFld1 = fld1
 			oppFld2 = fld2
 			vStr = '%s] =' % vStr
@@ -1933,7 +1936,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		elif (this.specPosIndex < -1):
 		    this.specPosIndex = maxI - 1
 	    except KeyError:
-		print 'dbg key eror for trisFill', this.trisFillGui.GetStringSelection()
+		print 'DBG key eror for trisFill', this.trisFillGui.GetStringSelection()
 	        pass
 
             c.setDihedralAngle(aVal)

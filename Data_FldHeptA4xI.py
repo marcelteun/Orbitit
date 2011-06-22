@@ -33,7 +33,7 @@ edge_1_1_V2_1	= Heptagons.tris_fill_base + 1
 edge_1_V2_1_1	= Heptagons.tris_fill_base + 2
 edge_V2_1_1_1	= Heptagons.tris_fill_base + 3
 edge_V2_1_V2_1	= Heptagons.tris_fill_base + 4
-squares_24	= Heptagons.tris_fill_base + 5
+squares_24	= Heptagons.tris_fill_base + 5 # Copied out
 edge_0_1_1_1	= Heptagons.tris_fill_base + 6
 edge_0_1_V2_1	= Heptagons.tris_fill_base + 7
 tris_24		= Heptagons.tris_fill_base + 8
@@ -41,7 +41,7 @@ edge_1_1_0_1	= Heptagons.tris_fill_base + 9
 edge_1_0_1_1	= Heptagons.tris_fill_base + 10
 edge_V2_1_0_1	= Heptagons.tris_fill_base + 11
 edge_V2_1_1_0	= Heptagons.tris_fill_base + 12
-square_12	= Heptagons.tris_fill_base + 13
+square_12	= Heptagons.tris_fill_base + 13 # Copied out
 edge_0_V2_1_1   = Heptagons.tris_fill_base + 14
 
 par_lst = [

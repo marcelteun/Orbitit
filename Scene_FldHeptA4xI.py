@@ -795,9 +795,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     rDir = 'Data_FldHeptA4'
     rPre = 'frh-roots'
 
-    def mapPrePosStrToFileStr(this, prePosId, refl = False):
+    def mapPrePosStrToFileStr(this, prePosId):
 	try:
-	    if refl:
+	    if this.shape.inclReflections:
 		s = prePosStrToReflFileStrMap[prePosId]
 	    else:
 		s = prePosStrToFileStrMap[prePosId]
@@ -819,11 +819,11 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def isPrePosValid(this, prePosId):
 	# This means that files with empty results should be filtered out from
 	# the directory.
-	s = this.mapPrePosStrToFileStr(prePosId, this.shape.inclReflections)
+	s = this.mapPrePosStrToFileStr(prePosId)
 	return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
 
     def isFoldValid(this, foldMethod):
-	p = this.mapPrePosStrToFileStr(this.prePos, this.shape.inclReflections)
+	p = this.mapPrePosStrToFileStr(this.prePos)
 	f = Heptagons.FoldName[foldMethod].lower()
 	return glob(
 		'%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
@@ -833,17 +833,17 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	if this.shape.inclReflections:
 	    if type(trisFillId) != int:
 		return False
-	    t = [trisFillId, trisFillId]
+	    oppFill = ''
+	    t = this.mapTrisFill(trisFillId)
 	else:
 	    if type(trisFillId) == int:
 		return False
-	    t = trisFillId
-	p = this.mapPrePosStrToFileStr(this.prePos, this.shape.inclReflections)
+	    oppFill = '-opp_%s' % this.mapTrisFill(trisFillId[1])
+	    t = this.mapTrisFill(trisFillId[0])
+	p = this.mapPrePosStrToFileStr(this.prePos)
 	f = Heptagons.FoldName[this.foldMethod].lower()
-	t0 = this.mapTrisFill(t[0])
-	t1 = this.mapTrisFill(t[1])
-	return glob('%s/%s-%s-fld_%s*-%s-opp_%s.*' % (
-		this.rDir, this.rPre, p, f, t0, t1)
+	return glob('%s/%s-%s-fld_%s*-%s%s.*' % (
+		this.rDir, this.rPre, p, f, t, oppFill)
 	    ) != []
 
     @property
@@ -852,12 +852,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	if prePosId == dyn_pos:
 	    return []
 	if this.shape.inclReflections:
-	    oppFill = this.mapTrisFill(this.trisFill)
-	    restr = 'results_refl'
+	    oppFill = ''
 	else:
-	    oppFill = this.mapTrisFill(this.oppTrisFill)
-	    restr = 'results'
-	filename = '%s/%s-%s-fld_%s.0-%s-opp_%s.py' % (
+	    oppFill = '-opp_%s' % this.mapTrisFill(this.oppTrisFill)
+	filename = '%s/%s-%s-fld_%s.0-%s%s.py' % (
 		    this.rDir, this.rPre,
 		    this.mapPrePosStrToFileStr(this.prePos),
 		    Heptagons.FoldName[this.foldMethod].lower(),
@@ -873,7 +871,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	ed = {'__name__': 'readPyFile'}
 	exec fd in ed
 	fd.close()
-	return ed[restr]
+	return ed['results']
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
