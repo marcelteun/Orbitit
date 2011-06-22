@@ -1461,27 +1461,55 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		break # for old loop
 	return found
 
+    def symmetricEdges(this):
+	el = this.edgeLengths
+	return (
+	    eq(el[1], el[4]) and eq(el[2], el[5]) and eq(el[3], el[6])
+	    and this.edgeAlternative == this.oppEdgeAlternative
+	)
+
     def getOutName(this):
+	if len(this.edgeLengths) == 4:
+	    return this.getOutReflName()
+	# else:
 	es = ''
 	for l in this.edgeLengths:
+	    # TODO move to func and reuse in getOutReflName
 	    if l == 1 or l == 0:
 		es = '%s_%d' % (es, l)
+	    elif eq(l, V2):
+		es = '%s_V2' % (es)
 	    else:
 		es = '%s_%.1f' % (es, l)
-	# Use A4xI filename:
-	#if len(this.edgeLengths) == 4:
-	#    for i in range(1, len(this.edgeLengths)):
-	#	l = this.edgeLengths[i]
-	#	if l == 1 or l == 0:
-	#	    es = '%s_%d' % (es, l)
-	#	else:
-	#	    es = '%s_%.1f' % (es, l)
 	es = es[1:]
 	return 'frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
 		es, Fold(this.fold),
 		string.join(Stringify[this.edgeAlternative].split(), '_'),
 		string.join(Stringify[this.oppEdgeAlternative].split(), '_')
 	    )
+
+    def getOutReflName(this):
+	es = ''
+	for i in range(0, 4):
+	    l = this.edgeLengths[i]
+	    if l == 1 or l == 0:
+		es = '%s_%d' % (es, l)
+	    elif eq(l, V2):
+		es = '%s_V2' % (es)
+	    else:
+		es = '%s_%.1f' % (es, l)
+	es = es[1:]
+	return 'frh-roots-%s-fld_%s.0-%s.py' % (
+		es, Fold(this.fold),
+		string.join(Stringify[this.edgeAlternative].split(), '_')
+	    )
+
+    def _extend_refl_results(this, refl_results):
+	for r in refl_results:
+	    if len(r) == 4:
+		r.extend([0.0, r[2], r[3]])
+	    elif len(r) == 5:
+		r.extend([r[2], r[3]])
 
     def run(this):
 	if this.oppEdgeAlternative == None:
@@ -1512,9 +1540,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		pass
 	    try:
 		results_refl = ed['results_refl']
+		this._extend_refl_results(results_refl)
 		this.results.extend(results_refl)
 	    except KeyError:
-		results_refl = []
 		pass
 	    try:
 		prev_iterations = ed['iterations']
@@ -1525,8 +1553,38 @@ class RandFindMultiRootOnDomain(threading.Thread):
 
 	except IOError:
 	    this.results = []
-	    this.results_refl = []
 	    prev_iterations = 0
+
+	if this.symmetricEdges():
+	    refl_filename = this.getOutReflName()
+
+	    # read previous file with reflective sols
+	    try:
+		f = open(refl_filename, 'r')
+		ed = {'__name__': 'readPyFile'}
+		exec f in ed
+		# TODO check settings
+		try:
+		    results_refl = ed['results']
+		    this._extend_refl_results(results_refl)
+		    this.results.extend(results_refl)
+		except KeyError:
+		    pass
+		try:
+		    results_refl = ed['results_refl']
+		    this._extend_refl_results(results_refl)
+		    this.results.extend(results_refl)
+		except KeyError:
+		    pass
+		try:
+		    prev_refl_iterations = ed['iterations']
+		except KeyError:
+		    prev_refl_iterations = 0
+		    pass
+		f.close()
+
+	    except IOError:
+		prev_refl_iterations = 0
 
 	nrOfIters = 0
 	if this.fold == Fold.trapezium:
@@ -1571,10 +1629,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    if nrOfIters >= this.stopAfter:
 		# always write the result, even when empty, so it is known how
 		# many iterations were done (without finding a result)
-		f = open(filename, 'w')
+		if len(this.edgeLengths) == 4:
+		    f = open(refl_filename, 'w')
+		else:
+		    f = open(filename, 'w')
 		f.write('# edgeLengths = %s\n' % str(this.edgeLengths))
 		f.write('# edgeAlternative = %s\n' % Stringify[this.edgeAlternative])
-		f.write('# oppEdgeAlternative = %s\n' % Stringify[this.oppEdgeAlternative])
+		if len(this.edgeLengths) > 4:
+		    f.write('# oppEdgeAlternative = %s\n' % Stringify[this.oppEdgeAlternative])
 		f.write('# fold = %s\n' % Fold(this.fold))
 
 		# filter results. This is needed since the filter changed after
@@ -1593,15 +1655,21 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			# time.  It is easier to throw an solution that appeared
 			# to be invalid, then to start over the whole search
 			# again...
-			if len(this.edgeLengths) == 4:
-			    chk = FoldedRegularHeptagonsA4xI(result,
-				[this.edgeAlternative, this.edgeLengths, this.fold])
-			else:
-			    chk = FoldedRegularHeptagonsA4(result,
-				[ this.edgeAlternative, this.oppEdgeAlternative,
-				    this.edgeLengths, this.fold
-				]
-			    )
+			try:
+			    # handle angle if 5:
+			    if len(this.edgeLengths) == 4: # or len(this.edgeLengths) == 5:
+				chk = FoldedRegularHeptagonsA4xI(result,
+				    [this.edgeAlternative, this.edgeLengths, this.fold])
+			    else:
+				chk = FoldedRegularHeptagonsA4(result,
+				    [ this.edgeAlternative, this.oppEdgeAlternative,
+					this.edgeLengths, this.fold
+				    ]
+				)
+			except IndexError:
+			    print 'Ooops while working on', filename
+			    raise
+
 			isEq = True
 			for i in range(len(chk)):
 			    if not eq(chk[i], 0., eqFloatMargin):
@@ -1609,7 +1677,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
 				isEq = False
 				break
 			if isEq:
-			    if len(this.edgeLengths) > 4 and (
+			    if len(this.edgeLengths) <= 4:
+				results_refl.append(result)
+			    elif (
 				eq(result[4], 0.0) or
 				eq(result[4], numx.pi/4) or
 				eq(result[4], -numx.pi/4) or
@@ -1630,16 +1700,39 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		f.write('%d (+%d) solutions found\n' % (
 				len(results), len(results_refl)))
 		f.write('iterations = %d\n' % (nrOfIters + prev_iterations))
-		f.write('results = [\n')
 		if len(this.edgeLengths) != 4:
+		    f.write('results = [\n')
 		    for r in results:
 			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
 				r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
-		f.write(']\nresults_refl = [\n')
 		if len(this.edgeLengths) == 4:
-		    for r in results:
-			f.write('    [%.14f, %.14f, %.14f, %.14f],\n' % (
-							r[0], r[1], r[2], r[3]))
+		    # set angle centrally
+		    if this.edgeAlternative & twist_bit == twist_bit:
+			angle = numx.pi/4
+		    else:
+			angle = 0.0
+		    f.write('results = [\n')
+		    for r in results_refl:
+			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
+						r[0], r[1], r[2], r[3], angle))
+		elif this.symmetricEdges():
+		    f.write(']\n')
+		    # close this file open the relective file:
+		    f.write('# for results_refl, see %s\n' % refl_filename)
+		    f.close()
+		    f = open(refl_filename, 'w')
+		    f.write('# edgeLengths = %s\n' % str(this.edgeLengths))
+		    f.write('# edgeAlternative = %s\n' % Stringify[this.edgeAlternative])
+		    f.write('# fold = %s\n' % Fold(this.fold))
+		    f.write('# %s: ' % time.strftime(
+			    "%y%m%d %H%M%S", time.localtime())
+			)
+		    f.write('%d solutions found\n' % (len(results_refl)))
+		    f.write('iterations = %d\n' % (nrOfIters + prev_refl_iterations))
+		    f.write('results = [\n')
+		    for r in results_refl:
+			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
+						r[0], r[1], r[2], r[3], r[4]))
 		else:
 		    for r in results_refl:
 			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
@@ -1653,7 +1746,13 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		print len(results),
 		if len(this.edgeLengths) != 4:
 		    print '(+%d)' % (len(results_refl)),
-		print 'results written to %s' % (filename)
+		print 'results written to',
+		if len(this.edgeLengths) == 4:
+		    print refl_filename
+		elif this.symmetricEdges():
+		    print '%s (%s)' % (filename, refl_filename)
+		else:
+		    print filename
 		break
 
 def FindMultiRootOnDomain(domain,
@@ -2110,57 +2209,58 @@ if __name__ == '__main__':
 	    #folds = [Fold.w]
 	    #folds = [Fold.trapezium]
 	    edgeLs = [
-		[0., 0., 0., 0., 0., 0., 0.],
-
-		[0., 0., 0., 1., 0., 0., 1.],
-
-		[0., 0., 1., 0., 0., 1., 0.],
-
-		[0., 0., 1., 1., 0., 1., 1.],
-
-		[0., 1., 0., 0., 1., 0., 0.],
-
-		[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
-		[0., 1., 0., 1., 1., 0., 1.],
-
-		[0., 1., 1., 0., 1., 1., 0.],
-
-		[1., 0., 0., 0., 0., 0., 0.],
-
-		[1., 0., 0., 1., 0., 0., 1.],
-
-		[1., 0., 1., 0., 0., 1., 0.], # only hepts
-			# it seems that
-			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
-			# needs to find nr 11 (has 10 now)
-		[1., 0., 1., 0., 0., 1., 0.],
-		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
-		[1., 0., 1., 0., 1., 0., 0.], # no sols
-		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
-		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
-		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
-
-		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
-		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
-		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
-
-		[1., 1., 0., 0., 1., 0., 0.],
-
-		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
-		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
-		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
-		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
-
-		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
-		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
-		[1., 1., 1., 0., 1., 0., 0.], # no sols
-		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
-
-		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
-		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
-		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
-		#[V2, 0., 1., 0., V2, 1., 0.],
-		#[1., 1., 0., 1., 2., 1., 1.],
+#		[0., 0., 0., 0., 0., 0., 0.],
+#
+#		[0., 0., 0., 1., 0., 0., 1.],
+#
+#		[0., 0., 1., 0., 0., 1., 0.],
+#
+#		[0., 0., 1., 1., 0., 1., 1.],
+#
+#		[0., 1., 0., 0., 1., 0., 0.],
+#
+#		[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
+#		[0., 1., 0., 1., 1., 0., 1.],
+#
+#		[0., 1., 1., 0., 1., 1., 0.],
+#
+#		[1., 0., 0., 0., 0., 0., 0.],
+#
+#		[1., 0., 0., 1., 0., 0., 1.],
+#
+#		[1., 0., 1., 0., 0., 1., 0.], # only hepts
+#			# it seems that
+#			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
+#			# needs to find nr 11 (has 10 now)
+#		[1., 0., 1., 0., 0., 1., 0.],
+#		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
+#		[1., 0., 1., 0., 1., 0., 0.], # no sols
+#		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
+#		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
+#		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+#
+#		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+#		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+#		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+#
+#		[1., 1., 0., 0., 1., 0., 0.],
+#
+#		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
+#		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
+#		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+#		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+#
+#		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+#		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
+#		[1., 1., 1., 0., 1., 0., 0.], # no sols
+#		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
+#
+#		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+#		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+#		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
+#
+		[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
+		[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
 	    ]
 	    ta = TriangleAlt()
 	    #edgeAlts = [t for t in ta]
