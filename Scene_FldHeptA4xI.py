@@ -842,9 +842,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    t = this.mapTrisFill(trisFillId[0])
 	p = this.mapPrePosStrToFileStr(this.prePos)
 	f = Heptagons.FoldName[this.foldMethod].lower()
-	return glob('%s/%s-%s-fld_%s*-%s%s.*' % (
+	files = '%s/%s-%s-fld_%s.?-%s%s.*' % (
 		this.rDir, this.rPre, p, f, t, oppFill)
-	    ) != []
+	if glob(files) != []:
+	    print 'DBG: found %s' % files
+	else:
+	    print 'DBG: NOT found %s' % files
+	return glob(files) != []
 
     @property
     def stdPrePos(this):

@@ -1936,7 +1936,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		elif (this.specPosIndex < -1):
 		    this.specPosIndex = maxI - 1
 	    except KeyError:
-		print 'DBG key eror for trisFill', this.trisFillGui.GetStringSelection()
+		print 'DBG key eror for trisFill: "%s"' % this.trisFillGui.GetStringSelection()
 	        pass
 
             c.setDihedralAngle(aVal)
