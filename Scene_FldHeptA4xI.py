@@ -51,35 +51,36 @@ S_only_hepts1	= Heptagons.tris_fill_base + 0
 S_T24		= Heptagons.tris_fill_base + 1
 S_T32_0		= Heptagons.tris_fill_base + 2
 S_T32_1		= Heptagons.tris_fill_base + 3
+S_T32_2		= Heptagons.tris_fill_base + 4
 S_T48		= Heptagons.no_o3_tris
-S_T56		= Heptagons.tris_fill_base + 4
+S_T56		= Heptagons.tris_fill_base + 5
 S_T80		= Heptagons.all_eq_tris
 
 # symmtric edge lengths with folded squares
-S_S12		= Heptagons.tris_fill_base + 5
-S_T8_S12	= Heptagons.tris_fill_base + 6
-S_S24		= Heptagons.tris_fill_base + 7
-S_T8_S24	= Heptagons.tris_fill_base + 8
-S_T24_S12	= Heptagons.tris_fill_base + 9
-S_T8_S36	= Heptagons.tris_fill_base + 10
-S_T32_S12   	= Heptagons.tris_fill_base + 11
-S_T32_S24_0	= Heptagons.tris_fill_base + 12
-S_T32_S24_1	= Heptagons.tris_fill_base + 13
-S_T56_S12	= Heptagons.tris_fill_base + 14
+S_S12		= Heptagons.tris_fill_base + 6
+S_T8_S12	= Heptagons.tris_fill_base + 7
+S_S24		= Heptagons.tris_fill_base + 8
+S_T8_S24	= Heptagons.tris_fill_base + 9
+S_T24_S12	= Heptagons.tris_fill_base + 10
+S_T8_S36	= Heptagons.tris_fill_base + 11
+S_T32_S12   	= Heptagons.tris_fill_base + 12
+S_T32_S24_0	= Heptagons.tris_fill_base + 13
+S_T32_S24_1	= Heptagons.tris_fill_base + 14
+S_T56_S12	= Heptagons.tris_fill_base + 15
 
-T8_0		= Heptagons.tris_fill_base + 15
-T16_0		= Heptagons.tris_fill_base + 16
-T16_1		= Heptagons.tris_fill_base + 17
-T16_2		= Heptagons.tris_fill_base + 18
-T16_3		= Heptagons.tris_fill_base + 19
-T24_0		= Heptagons.tris_fill_base + 20
-T24_1		= Heptagons.tris_fill_base + 21
-T32_0		= Heptagons.tris_fill_base + 22
-T40_0		= Heptagons.tris_fill_base + 23
-T40_1		= Heptagons.tris_fill_base + 24
-T40_2		= Heptagons.tris_fill_base + 25
-T40_3		= Heptagons.tris_fill_base + 26
-T64_0		= Heptagons.tris_fill_base + 27
+T8_0		= Heptagons.tris_fill_base + 16
+T16_0		= Heptagons.tris_fill_base + 17
+T16_1		= Heptagons.tris_fill_base + 18
+T16_2		= Heptagons.tris_fill_base + 19
+T16_3		= Heptagons.tris_fill_base + 20
+T24_0		= Heptagons.tris_fill_base + 21
+T24_1		= Heptagons.tris_fill_base + 22
+T32_0		= Heptagons.tris_fill_base + 23
+T40_0		= Heptagons.tris_fill_base + 24
+T40_1		= Heptagons.tris_fill_base + 25
+T40_2		= Heptagons.tris_fill_base + 26
+T40_3		= Heptagons.tris_fill_base + 27
+T64_0		= Heptagons.tris_fill_base + 28
 
 Stringify = {
     dyn_pos:		'  Enable Sliders',
@@ -90,6 +91,7 @@ Stringify = {
     S_T24:		'SEL: 24 Triangles (A)',
     S_T32_0:		'SEL: 32 Triangles (24 + 8) (A)',
     S_T32_1:		'SEL: 32 Triangles (24 + 8) (B)',
+    S_T32_2:		'SEL: 32 Triangles (24 + 8) (C)',
     S_T48:		'SEL: 48 Triangles',
     S_T56:		'SEL: 56 Triangles',
     S_T80:		'SEL: 80 Triangles Equilateral',
@@ -122,15 +124,27 @@ Stringify = {
 }
 
 prePosStrToReflFileStrMap = {
-    S_only_hepts0:	'1_0_1_0',
+    S_T32_1:		'0_0_1_1',
     S_only_hepts1:	'0_0_1_0',
     S_T8:		'0_1_0_1',
-    S_T32_0:		'1_0_1_1',
+    S_T24:		'0_1_1_0',
+    S_T56:		'0_1_1_1',
+    S_only_hepts0:	'1_0_1_0',
+    S_T32_2:		'1_0_1_1',
+    S_T32_0:		'1_1_0_1',
     S_T48:		'1_1_1_0',
     S_T80:		'1_1_1_1',
 
+    S_T8_S24:		'0_1_V2_1',
     S_S12:		'0_V2_1_0',
+    S_T32_S12:		'0_V2_1_1',
+    S_T32_S24_0:	'1_1_V2_1',
     S_S24:		'1_V2_1_0',
+    S_T32_S24_1:	'1_V2_1_1',
+    S_T8_S12:		'V2_1_0_1',
+    S_T24_S12:		'V2_1_1_0',
+    S_T56_S12:		'V2_1_1_1',
+    S_T8_S36:		'V2_1_V2_1',
 }
 
 prePosStrToFileStrMap = {
@@ -730,6 +744,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[S_T24],
 		Stringify[S_T32_0],
 		Stringify[S_T32_1],
+		Stringify[S_T32_2],
 		Stringify[S_T48],
 		Stringify[S_T56],
 		Stringify[S_T80],
@@ -802,7 +817,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    else:
 		s = prePosStrToFileStrMap[prePosId]
 	except KeyError:
-	    print 'Warning: no file name mapping found for prepos:', prePosId
+	    print 'info: no file name mapping found for prepos:', prePosId
 	    s = this.stringify[prePosId]
 	return s
 
@@ -844,10 +859,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	f = Heptagons.FoldName[this.foldMethod].lower()
 	files = '%s/%s-%s-fld_%s.?-%s%s.*' % (
 		this.rDir, this.rPre, p, f, t, oppFill)
-	if glob(files) != []:
-	    print 'DBG: found %s' % files
-	else:
-	    print 'DBG: NOT found %s' % files
+	#if glob(files) != []:
+	#    print 'DBG: found %s' % files
+	#else:
+	#    print 'DBG: NOT found %s' % files
 	return glob(files) != []
 
     @property
