@@ -1648,7 +1648,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		results_refl = []
 		for result in cp_results:
 		    this.cleanupResult(result, len(result))
+		    #print 'sols checked', len(this.results)
 		    if not this.solutionAlreadyFound(result):
+			# register result handled for this.solutionAlreadyFound
 			this.results.append(result)
 			# check if this value is (still) valid. This check is
 			# done since the script is under development all the
@@ -1671,6 +1673,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			    raise
 
 			isEq = True
+			# check if the solution is valid (a solution)
 			for i in range(len(chk)):
 			    if not eq(chk[i], 0., eqFloatMargin):
 				print '|', chk[i], '| >', eqFloatMargin
@@ -1680,19 +1683,29 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			    if len(this.edgeLengths) <= 4:
 				results_refl.append(result)
 			    elif (
-				eq(result[4], 0.0) or
-				eq(result[4], numx.pi/4) or
-				eq(result[4], -numx.pi/4) or
-				eq(result[4], numx.pi/2) or
-				eq(result[4], -numx.pi/2) or
-				eq(result[4], numx.pi) or
-				eq(result[4], -numx.pi)
+				(
+				    eq(result[4], 0.0) or
+				    eq(result[4], numx.pi/4) or
+				    eq(result[4], -numx.pi/4) or
+				    eq(result[4], numx.pi/2) or
+				    eq(result[4], -numx.pi/2) or
+				    eq(result[4], numx.pi) or
+				    eq(result[4], -numx.pi)
+				) and (
+				    len(result) == 5 or (
+					len(result) == 7 and
+					eq(result[2], result[5], 1e-12) and
+					eq(result[3], result[6], 1e-12)
+				    )
+				)
 			    ):
 				results_refl.append(result)
 			    else:
 				results.append(result)
 			else:
 			    print 'Throwing invalid solution:', result
+		    else:
+			print 'Throwing doublet:', result
 
 		f.write('# %s: ' % time.strftime(
 			"%y%m%d %H%M%S", time.localtime())
@@ -2259,8 +2272,8 @@ if __name__ == '__main__':
 #		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
 #		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
 #
-		[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
-		[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+#		[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
+#		[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
 	    ]
 	    ta = TriangleAlt()
 	    #edgeAlts = [t for t in ta]
