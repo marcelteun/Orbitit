@@ -1153,7 +1153,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         this.firstButton = wx.Button(this.panel, label = 'First')
         this.nextButton  = wx.Button(this.panel, label = 'Next')
-        this.nrTxt       = wx.Button(this.panel, label = '0/0',  style=wx.NO_BORDER)
+        this.nrTxt       = wx.Button(this.panel, label = '---',  style=wx.NO_BORDER)
         this.prevButton  = wx.Button(this.panel, label = 'Prev')
         this.lastButton  = wx.Button(this.panel, label = 'Last')
         this.Guis.append(this.firstButton)
@@ -1877,6 +1877,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    for i in range(len(this.foldMethodList)):
 		this.foldMethodGui.ShowItem(i, True)
 	    this.setEnableTrisFillItems()
+	    this.nrTxt.SetLabel('---')
 	else:
             oppFld1 = fld1 = this.fld1None
             oppFld2 = fld2 = this.fld2None
