@@ -1710,6 +1710,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.prevOppTrisFill != trisAlt.twist_strip_I
 	    ):
 		print '---------nvidia-seg-fault-work-around-----------'
+		this.nvidea_workaround_0()
 		this.restoreShape = this.canvas.shape
 	    this.shape.setV() # make sure the shape is updated
 	    shape =  FldHeptagonShape(this.shape.shapes,
