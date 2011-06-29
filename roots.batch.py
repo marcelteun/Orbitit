@@ -1423,9 +1423,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
 
     tpi = 2*numx.pi
     def cleanupResult(this, v, l = 4):
+	lim = this.tpi
+	hLim = numx.pi
         for i in range(1, l):
-	    lim = this.tpi
-	    hLim = numx.pi
             v[i] = v[i] % lim
 	    # move interval from [0, lim] to [-lim/2, lim/2]:
             if v[i] > hLim:
@@ -1436,6 +1436,23 @@ class RandFindMultiRootOnDomain(threading.Thread):
             # shouldn't happen:
             #elif v[i] < -hLim:
             #    v[i] = v[i] + lim
+	if (
+	    len(v) >= 5
+	    and
+	    eq(v[4], numx.pi, 100 * this.precision)
+	):
+	    v[4] = 0			# set pos angle to 0 instead
+	    v[0] = -v[0] 		# -translate
+	    if v[1] < 0:
+		v[1] = -numx.pi - v[1]	# oppsite dihedral angle
+	    else:
+		v[1] = numx.pi - v[1]	# oppsite dihedral angle
+	    v[2] = -v[2]		# opposite folds
+	    v[3] = -v[3]
+	    if len(v) >= 6:
+		v[5] = -v[5]		# opposite folds
+		if len(v) >= 7:
+		    v[6] = -v[6]
         return v
 
     def randTestvalue(this):
@@ -2222,58 +2239,58 @@ if __name__ == '__main__':
 	    #folds = [Fold.w]
 	    #folds = [Fold.trapezium]
 	    edgeLs = [
-#		[0., 0., 0., 0., 0., 0., 0.],
-#
-#		[0., 0., 0., 1., 0., 0., 1.],
-#
-#		[0., 0., 1., 0., 0., 1., 0.],
-#
-#		[0., 0., 1., 1., 0., 1., 1.],
-#
-#		[0., 1., 0., 0., 1., 0., 0.],
-#
-#		[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
-#		[0., 1., 0., 1., 1., 0., 1.],
-#
-#		[0., 1., 1., 0., 1., 1., 0.],
-#
-#		[1., 0., 0., 0., 0., 0., 0.],
-#
-#		[1., 0., 0., 1., 0., 0., 1.],
-#
-#		[1., 0., 1., 0., 0., 1., 0.], # only hepts
-#			# it seems that
-#			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
-#			# needs to find nr 11 (has 10 now)
-#		[1., 0., 1., 0., 0., 1., 0.],
-#		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
-#		[1., 0., 1., 0., 1., 0., 0.], # no sols
-#		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
-#		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
-#		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
-#
-#		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
-#		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
-#		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
-#
-#		[1., 1., 0., 0., 1., 0., 0.],
-#
-#		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
-#		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
-#		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
-#		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
-#
-#		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
-#		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
-#		[1., 1., 1., 0., 1., 0., 0.], # no sols
-#		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
-#
-#		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
-#		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
-#		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
-#
-#		[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
-#		[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+		[0., 0., 0., 0., 0., 0., 0.],
+
+		[0., 0., 0., 1., 0., 0., 1.],
+
+		[0., 0., 1., 0., 0., 1., 0.],
+
+		[0., 0., 1., 1., 0., 1., 1.],
+
+		[0., 1., 0., 0., 1., 0., 0.],
+
+		[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
+		[0., 1., 0., 1., 1., 0., 1.],
+
+		[0., 1., 1., 0., 1., 1., 0.],
+
+		[1., 0., 0., 0., 0., 0., 0.],
+
+		[1., 0., 0., 1., 0., 0., 1.],
+
+		[1., 0., 1., 0., 0., 1., 0.], # only hepts
+			# it seems that
+			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
+			# needs to find nr 11 (has 10 now)
+		[1., 0., 1., 0., 0., 1., 0.],
+		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
+		[1., 0., 1., 0., 1., 0., 0.], # no sols
+		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
+		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
+		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+
+		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+
+		[1., 1., 0., 0., 1., 0., 0.],
+
+		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
+		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
+		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+
+		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
+		[1., 1., 1., 0., 1., 0., 0.], # no sols
+		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
+
+		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
+
+		[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
+		[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
 	    ]
 	    ta = TriangleAlt()
 	    #edgeAlts = [t for t in ta]
@@ -2723,4 +2740,4 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.twisted)
 
 	#randBatchA4xI(continueAfter = 4000, nrThreads = 1)
-	randBatch(continueAfter = 4000, nrThreads = 1)
+	randBatch(continueAfter = 0, nrThreads = 1)
