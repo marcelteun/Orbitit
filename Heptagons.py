@@ -1902,6 +1902,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    try:
 		setting = this.stdPrePos
 		if setting != []:
+		    if this.specPosIndex >= len(setting):
+			this.specPosIndex = len(setting) - 1
 		    tVal = setting[this.specPosIndex][0]
 		    aVal = setting[this.specPosIndex][1]
 		    fld1 = setting[this.specPosIndex][2]
