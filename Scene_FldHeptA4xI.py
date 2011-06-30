@@ -83,11 +83,11 @@ T40_3		= Heptagons.tris_fill_base + 27
 T64_0		= Heptagons.tris_fill_base + 28
 
 Stringify = {
-    dyn_pos:		'  Enable Sliders',
+    dyn_pos:		'Enable Sliders',
     # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
-    S_only_hepts0:	'SEL:  Just Heptagons (A)',
-    S_only_hepts1:	'SEL:  Just Heptagons (B)',
-    S_T8:		'SEL: 8 Triangles (O3)',
+    S_only_hepts0:	'SEL:  0 Extra Faces (A)',
+    S_only_hepts1:	'SEL:  0 Extra Faces (B)',
+    S_T8:		'SEL:  8 Triangles (O3)',
     S_T24:		'SEL: 24 Triangles (A)',
     S_T32_0:		'SEL: 32 Triangles (24 + 8) (A)',
     S_T32_1:		'SEL: 32 Triangles (24 + 8) (B)',
