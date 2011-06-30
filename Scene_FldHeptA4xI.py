@@ -801,7 +801,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		    ) and (
 			this.trisFill == trisAlt.strip_1_loose
 			or
-			this.trisAlt == trisAlt.star_1_loose
+			this.trisFill == trisAlt.star_1_loose
 		    )
 		)
 	    ))
