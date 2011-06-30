@@ -449,7 +449,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    trisAlt.get(edgeChoicesList[i]) for i in range(nr_of)
 	]
 	Heptagons.FldHeptagonCtrlWin.__init__(this,
-	    shape, (745, 765), canvas,
+	    shape, canvas,
 	    4, # maxHeigth
 	    edgeChoicesList, edgeChoicesListItems,
 	    [ # prePosLst

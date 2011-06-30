@@ -1029,8 +1029,10 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 	this.posHeptagon()
 
 class FldHeptagonCtrlWin(wx.Frame):
+    refl_min_size = (525, 425)
+    rot_min_size = (545, 600)
     def __init__(this,
-	    shape, size, canvas,
+	    shape, canvas,
 	    maxHeight, 
 	    prePosStrLst,
 	    stringify,
@@ -1040,7 +1042,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 	"""Create a control window for the scene that folds heptagons
 
 	shape: the Geom3D shape object that is shown
-	size: default size of the frame
 	canvas: wx canvas to be used
 	maxHeight: max translation height to be used for the heptagon
 	prePosStrLst: string list that expresses which special positions can be
@@ -1070,7 +1071,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize(size)
+        this.setDefaultSize(this.refl_min_size)
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -1390,7 +1391,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         for Gui in this.Guis:
             Gui.Destroy()
 
-    # move to general class
     def setDefaultSize(this, size):
         this.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
@@ -1398,7 +1398,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.SetSize(size)
 
     def onPosAngle(this, event):
-	#print this.GetSize()
         this.shape.setPosAngle(Geom3D.Deg2Rad * this.posAngleGui.GetValue())
         this.statusBar.SetStatusText(this.shape.getStatusStr())
         this.updateShape()
@@ -1588,6 +1587,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.shape.updateShape = True
 	isPrePos = this.isPrePos()
 	this.setEnablePrePosItems()
+	if this.shape.inclReflections:
+	    this.setDefaultSize(this.refl_min_size)
+	else:
+	    this.setDefaultSize(this.rot_min_size)
         if isPrePos:
 	    this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
 	    if not this.shape.inclReflections:

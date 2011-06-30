@@ -735,7 +735,7 @@ class Shape(Heptagons.FldHeptagonShape):
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
 	Heptagons.FldHeptagonCtrlWin.__init__(this,
-	    shape, (745, 765), canvas,
+	    shape, canvas,
 	    3, # maxHeigth
 	    [ # prePosLst
 		Stringify[S_only_hepts0],
