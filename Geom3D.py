@@ -2411,6 +2411,11 @@ class CompoundShape():
             this.mergeShapes()
         this.mergedShape.glDraw()
 
+    def recreateEdges(this):
+	if this.mergeNeeded:
+            this.mergeShapes()
+        this.mergedShape.recreateEdges()
+
     def setVertexProperties(this, dictPar = None, **kwargs):
 	try:
 	    this.mergedShape.setVertexProperties(dictPar, **kwargs)
