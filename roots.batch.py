@@ -2242,6 +2242,9 @@ if __name__ == '__main__':
 		[0., 0., 0., 0., 0., 0., 0.],
 
 		[0., 0., 0., 1., 0., 0., 1.],
+			# should give solutions around
+			#	T=1.60, (0, -116, -16) for
+			#		parallel fold and twisted strip
 
 		[0., 0., 1., 0., 0., 1., 0.],
 
