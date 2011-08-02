@@ -1825,36 +1825,30 @@ class FldHeptagonCtrlWin(wx.Frame):
 		pass
 	    this.onPrePos()
 
+    def showOnlyHepts(this):
+	return this.prePos == only_hepts
+
+    def showOnlyO3Tris(this):
+	return this.prePos == only_xtra_o3s
+
     tNone = 1.0
     aNone = 0.0
     fld1None = 0.0
     fld2None = 0.0
     def onPrePos(this, event = None):
 	#print "onPrePos"
-        sel = this.prePos
-	# if only_hepts:
-	# 1. don't show triangles
-	# 2. disable triangle strip.
-	if (sel == only_hepts):
-	    this.shape.addXtraFs = False
-	    this.restoreTris = True
-	elif (this.restoreTris):
-	    this.restoreTris = False
-	    this.shape.addXtraFs = this.addTrisGui.IsChecked()
-	    # needed for sel == dyn_pos
-	    this.shape.updateShape = True
-	if (sel == only_xtra_o3s):
-	    this.shape.onlyRegFs = True
-	    this.restoreO3s = True
-	elif (this.restoreO3s):
-	    this.restoreO3s = False
-	    this.shape.onlyRegFs = False
-	    # needed for sel == dyn_pos
-	    this.shape.updateShape = True
         aVal = this.aNone
         tVal = this.tNone
 	c = this.shape
-        if sel == dyn_pos:
+        if this.prePos == dyn_pos:
+	    if (this.restoreTris):
+		this.restoreTris = False
+		this.shape.addXtraFs = this.addTrisGui.IsChecked()
+		this.shape.updateShape = True
+	    if (this.restoreO3s):
+		this.restoreO3s = False
+		this.shape.onlyRegFs = False
+		this.shape.updateShape = True
 	    for gui in [
 		this.dihedralAngleGui, this.posAngleGui,
 		this.heightGui,
@@ -1902,6 +1896,18 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    if this.isTrisFillValid(k):
 			choiceLst.append(v)
 	    this.setEnableTrisFillItems(choiceLst)
+	    if (this.showOnlyHepts()):
+		this.shape.addXtraFs = False
+		this.restoreTris = True
+	    elif (this.restoreTris):
+		this.restoreTris = False
+		this.shape.addXtraFs = this.addTrisGui.IsChecked()
+	    if (this.showOnlyO3Tris()):
+		this.shape.onlyRegFs = True
+		this.restoreO3s = True
+	    elif (this.restoreO3s):
+		this.restoreO3s = False
+		this.shape.onlyRegFs = False
 	    try:
 		setting = this.stdPrePos
 		if setting != []:
@@ -1968,7 +1974,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    ):
 		txt = 'No solutions found'
                 this.statusBar.SetStatusText(txt)
-	    elif this.isntSpecialPos(sel):
+	    elif this.isntSpecialPos(this.prePos):
 		this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
 	    else:
 		# For the user: start counting with '1' instead of '0'

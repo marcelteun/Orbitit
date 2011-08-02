@@ -779,6 +779,18 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    *args, **kwargs
 	)
 
+    def showOnlyHepts(this):
+	return this.prePos == Heptagons.only_hepts and not (
+		this.trisFill == None
+	    ) and not (
+		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
+
+    def showOnlyO3Tris(this):
+	return this.prePos == Heptagons.only_xtra_o3s and not (
+		this.trisFill == None
+	    ) and not (
+		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
+
     def isntSpecialPos(this, sel):
 	"""Check whether this selection is special for this triangle alternative
 	"""
