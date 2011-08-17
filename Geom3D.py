@@ -1,4 +1,4 @@
-#!/usr/bin/python
+e!/usr/bin/python
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -151,7 +151,7 @@ def readPyFile(fd):
     exec fd in ed
     return ed['shape']
 
-def readOffFile(fd, recreateEdges = True):
+def rdOeadOffFile(fd, recreateEdges = True, name = ''):
     """Reads an the std 'off' format of a 3D object and returns an object of the
     SimpleShape class.
 
