@@ -26,6 +26,7 @@
 import wx
 import math
 import rgb
+import string
 import Geom3D
 from OpenGL.GL import *
 
@@ -46,9 +47,10 @@ H         = (1 + Sigma + Rho)*h
 
 only_hepts	= -1
 dyn_pos		= -2
-only_xtra_o3s   = -3
-all_eq_tris     = -4
-no_o3_tris	= -5
+open_file       = -3
+only_xtra_o3s   = -4
+all_eq_tris     = -5
+no_o3_tris      = -6
 
 tris_fill_base	= 0
 
@@ -310,8 +312,37 @@ class TrisAlt:
 	except KeyError:
 	    return False
 
+    def toFileStr(this, tId = None, tStr = None):
+	assert(tId != None or tStr != None)
+	if (tId == None):
+	    tId = this.key[tStr]
+	if not type(tId) == int:
+	    tStr0 = this.stringify[tId[0]]
+	    tStr1 = this.stringify[tId[1]]
+	    tStr = "%s-opp_%s" % (tStr0, tStr1)
+	elif tStr == None:
+	    tStr = this.stringify[tId]
+
+	t = string.join(tStr.split(), '_').lower().replace('ernative', '')
+	t = t.replace('_ii', '_II')
+	t = t.replace('_i', '_I')
+	t = t.replace('_i', '_I')
+	t = t.replace('rot.', 'rot')
+	#print 'DBP map(%s) ==> %s' % (trisAlt.stringify[trisFillId], t)
+	return t
+
     def __init__(this):
 	this.choiceList = [s for s in this.stringify.itervalues()]
+	this.mapKeyOnFileStr = {}
+	this.mapStrOnFileStr = {}
+	this.mapFileStrOnStr = {}
+	this.mapFileStrOnKey = {}
+	for (tStr, tId) in this.key.iteritems():
+	    fileStr = this.toFileStr(tStr = tStr)
+	    this.mapKeyOnFileStr[tId]     = fileStr
+	    this.mapStrOnFileStr[tStr]    = fileStr
+	    this.mapFileStrOnStr[fileStr] = tStr
+	    this.mapFileStrOnKey[fileStr] = tId
 
 trisAlt = TrisAlt()
 
@@ -1058,6 +1089,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.maxHeight = maxHeight
 	this.prePosStrLst = prePosStrLst
 	this.stringify = stringify
+	if not open_file in stringify:
+		this.stringify[open_file] = "From File"
         this.panel = wx.Panel(this, -1)
         this.statusBar = this.CreateStatusBar()
 	this.foldMethod = foldMethod.triangle
@@ -1152,16 +1185,19 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Guis.append(this.prePosGui)
         this.prePosGui.Bind(wx.EVT_CHOICE, this.onPrePos)
 
-        this.firstButton = wx.Button(this.panel, label = 'First')
-        this.nextButton  = wx.Button(this.panel, label = 'Next')
-        this.nrTxt       = wx.Button(this.panel, label = '---',  style=wx.NO_BORDER)
-        this.prevButton  = wx.Button(this.panel, label = 'Prev')
-        this.lastButton  = wx.Button(this.panel, label = 'Last')
+        this.openFileButton = wx.Button(this.panel, label = 'Open File')
+        this.firstButton    = wx.Button(this.panel, label = 'First')
+        this.nextButton     = wx.Button(this.panel, label = 'Next')
+        this.nrTxt          = wx.Button(this.panel, label = '---',  style=wx.NO_BORDER)
+        this.prevButton     = wx.Button(this.panel, label = 'Prev')
+        this.lastButton     = wx.Button(this.panel, label = 'Last')
+        this.Guis.append(this.openFileButton)
         this.Guis.append(this.firstButton)
         this.Guis.append(this.nextButton)
         this.Guis.append(this.nrTxt)
         this.Guis.append(this.prevButton)
         this.Guis.append(this.lastButton)
+        this.openFileButton.Bind(wx.EVT_BUTTON, this.onOpenFile)
         this.firstButton.Bind(wx.EVT_BUTTON, this.onFirst)
         this.nextButton.Bind(wx.EVT_BUTTON, this.onNext)
         this.prevButton.Bind(wx.EVT_BUTTON, this.onPrev)
@@ -1264,12 +1300,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Boxes.append(wx.StaticBox(this.panel, label = 'Special Positions'))
         posSizerSubV = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
+        posSizerSubH.Add(this.openFileButton, 0, wx.EXPAND)
+        posSizerSubH.Add(this.prePosGui, 0, wx.EXPAND)
+        posSizerSubV.Add(posSizerSubH, 0, wx.EXPAND)
+        posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
         posSizerSubH.Add(this.firstButton, 1, wx.EXPAND)
         posSizerSubH.Add(this.prevButton, 1, wx.EXPAND)
         posSizerSubH.Add(this.nrTxt, 1, wx.EXPAND)
         posSizerSubH.Add(this.nextButton, 1, wx.EXPAND)
         posSizerSubH.Add(this.lastButton, 1, wx.EXPAND)
-        posSizerSubV.Add(this.prePosGui, 0, wx.EXPAND)
         posSizerSubV.Add(posSizerSubH, 0, wx.EXPAND)
         posSizerSubV.Add(wx.BoxSizer(), 1, wx.EXPAND)
         prePosSizerH = wx.BoxSizer(wx.HORIZONTAL)
@@ -1546,17 +1585,18 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.fold1OppGui.SetValue(this.minFoldAngle)
 	this.fold2OppGui.SetValue(this.minFoldAngle)
 
-    def enableSlidersNoRefl(this):
+    def enableSlidersNoRefl(this, restore = True):
 	this.allignFoldSlideBarsWithFoldMethod()
 	this.posAngleGui.Enable()
 	# the code below is added to be able to check and uncheck "Has
 	# Reflections" in a "undo" kind of way.
-	this.shape.setFold1(oppositeAngle = this.__sav_oppFld1)
-	this.shape.setFold2(oppositeAngle = this.__sav_oppFld2)
-	this.shape.setPosAngle(this.__sav_posAngle)
-	this.fold1OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld1)
-	this.fold2OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld2)
-	this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.__sav_posAngle)
+	if restore:
+	    this.shape.setFold1(oppositeAngle = this.__sav_oppFld1)
+	    this.shape.setFold2(oppositeAngle = this.__sav_oppFld2)
+	    this.shape.setPosAngle(this.__sav_posAngle)
+	    this.fold1OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld1)
+	    this.fold2OppGui.SetValue(Geom3D.Rad2Deg * this.__sav_oppFld2)
+	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * this.__sav_posAngle)
 
     def disableGuisNoRefl(this):
 	if this.__guisNoReflEnabled:
@@ -1566,12 +1606,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.disableSlidersNoRefl()
 	    this.__guisNoReflEnabled = False
 
-    def enableGuisNoRefl(this):
+    def enableGuisNoRefl(this, restore = True):
 	if not this.__guisNoReflEnabled:
 	    this.setEnableTrisFillItems()
 	    this.rotateFldGui.Enable()
 	    this.shape.setRotateFold(this.rotateFld)
-	    this.enableSlidersNoRefl()
+	    this.enableSlidersNoRefl(restore)
 	    this.__guisNoReflEnabled = True
 
     def disableTrisFillGuis(this):
@@ -1582,31 +1622,30 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.addTrisGui.Enable()
 	this.trisFillGui.Enable()
 
-    def onRefl(this, event):
+    def onRefl(this, event = None):
         this.shape.inclReflections = this.reflGui.IsChecked()
 	this.shape.updateShape = True
-	isPrePos = this.isPrePos()
 	this.setEnablePrePosItems()
 	if this.shape.inclReflections:
 	    this.setDefaultSize(this.refl_min_size)
 	else:
 	    this.setDefaultSize(this.rot_min_size)
-        if isPrePos:
-	    this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
-	    if not this.shape.inclReflections:
-		this.__sav_oppFld1 = this.shape.fold1
-		this.__sav_oppFld2 = this.shape.fold2
-            this.onPrePos()
-	else:
-	    if this.shape.inclReflections:
-		this.savTrisNoRefl = this.trisFillGui.GetStringSelection()
-
-		this.disableGuisNoRefl()
+	if event != None:
+	    if this.isPrePos():
+		this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
+		if not this.shape.inclReflections:
+		    this.__sav_oppFld1 = this.shape.fold1
+		    this.__sav_oppFld2 = this.shape.fold2
+		this.onPrePos(event)
 	    else:
-		this.savTrisRefl = this.trisFillGui.GetStringSelection()
-		this.enableGuisNoRefl()
-	    this.statusBar.SetStatusText(this.shape.getStatusStr())
-	    this.updateShape()
+		if this.shape.inclReflections:
+		    this.savTrisNoRefl = this.trisFillGui.GetStringSelection()
+		    this.disableGuisNoRefl()
+		else:
+		    this.savTrisRefl = this.trisFillGui.GetStringSelection()
+		    this.enableGuisNoRefl()
+		this.statusBar.SetStatusText(this.shape.getStatusStr())
+		this.updateShape()
 
     def onRotateFld(this, event):
 	this.rotateFld = (this.rotateFld + 1) % 7
@@ -1750,31 +1789,33 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.nvidea_workaround()
         this.canvas.paint()
 
-    def onTriangleFill(this, event):
+    def onTriangleFill(this, event = None):
 	this.nvidea_workaround_0()
         this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
-        if this.isPrePos():
-            this.onPrePos()
-        else:
-	    if this.shape.inclReflections:
-		if this.trisFill & twist_bit == twist_bit:
-		    this.shape.setPosAngle(math.pi/4)
-		else:
-		    this.shape.setPosAngle(0)
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.updateShape()
+	if event != None:
+	    if this.isPrePos():
+		this.onPrePos(event)
+	    else:
+		if this.shape.inclReflections:
+		    if this.trisFill & twist_bit == twist_bit:
+			this.shape.setPosAngle(math.pi/4)
+		    else:
+			this.shape.setPosAngle(0)
+		this.statusBar.SetStatusText(this.shape.getStatusStr())
+	    this.updateShape()
 
-    def onFoldMethod(this, event):
+    def onFoldMethod(this, event = None):
         this.foldMethod = this.foldMethodListItems[
 		this.foldMethodGui.GetSelection()
 	    ]
 	this.shape.setFoldMethod(this.foldMethod)
 	this.allignFoldSlideBarsWithFoldMethod()
-        if this.isPrePos():
-            this.onPrePos()
-        else:
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
-        this.updateShape()
+	if event != None:
+	    if this.isPrePos():
+		this.onPrePos(event)
+	    else:
+		this.statusBar.SetStatusText(this.shape.getStatusStr())
+	    this.updateShape()
 
     def onFirst(this, event = None):
         this.specPosIndex = 0
@@ -1803,7 +1844,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onPrev(this, event = None):
         prePosId = this.prePos
-        if prePosId != dyn_pos:
+        if this.stdPrePos != []:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
 	    elif this.specPosIndex == -1:
@@ -1813,7 +1854,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onNext(this, event = None):
         prePosId = this.prePos
-        if prePosId != dyn_pos:
+        if this.stdPrePos != []:
 	    try:
 		maxI = len(this.stdPrePos) - 1
 		if this.specPosIndex >= 0:
@@ -1831,6 +1872,103 @@ class FldHeptagonCtrlWin(wx.Frame):
     def showOnlyO3Tris(this):
 	return this.prePos == only_xtra_o3s
 
+    def chooseOpenFile(this):
+	filename = None
+        dlg = wx.FileDialog(this, 'New: Choose a file',
+		this.rDir, '', '*.py', wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+		filename = '%s/%s' % (dlg.GetDirectory(), dlg.GetFilename())
+        dlg.Destroy()
+	return filename
+
+    def onOpenFile(this, e):
+	filename = this.chooseOpenFile()
+	if filename == None:
+	    return
+	this.prePosFileName = filename
+	this.foldMethodGui.SetStringSelection(
+	    this.fileStrMapFoldMethodStr(this.prePosFileName))
+	this.onFoldMethod()
+	# Note: Reflections need to be set before triangle fill, otherwise the
+	# right triangle fills are not available
+	has_reflections = this.fileStrMapHasReflections(this.prePosFileName)
+        this.reflGui.SetValue(has_reflections)
+	this.onRefl()
+	# not needed: this.shape.updateShape = True
+	this.setEnableTrisFillItems()
+	this.trisFillGui.SetStringSelection(
+	    this.fileStrMapTrisStr(this.prePosFileName))
+	this.onTriangleFill()
+	# it's essential that prePosGui is set to dynamic be4 stdPrePos is read
+	# otherwise something else than dynamic might be read...
+	openFileStr = this.stringify[open_file] 
+	if not openFileStr in this.prePosGui.GetItems():
+		this.prePosGui.Append(openFileStr)
+	this.prePosGui.SetStringSelection(openFileStr)
+	this.resetStdPrePos()
+	this.onPrePos()
+
+    def updateShapeSettings(this, setting):
+	if setting == []:
+	    return
+	else:
+	    if this.specPosIndex >= len(setting):
+		this.specPosIndex = len(setting) - 1
+	    tVal = setting[this.specPosIndex][0]
+	    aVal = setting[this.specPosIndex][1]
+	    fld1 = setting[this.specPosIndex][2]
+	    fld2 = setting[this.specPosIndex][3]
+	    vStr = '[tVal, aVal, fld1, fld2'
+	    dbgStr = '  [%.12f, %.12f, %.12f, %.12f' % (
+						tVal, aVal, fld1, fld2)
+	    if len(setting[this.specPosIndex]) > 4:
+		posVal = setting[this.specPosIndex][4]
+	    else:
+		posVal = 0
+	    if len(setting[this.specPosIndex]) > 5:
+		oppFld1 = setting[this.specPosIndex][5]
+		oppFld2 = setting[this.specPosIndex][6]
+		vStr = '%s, posVal, oppFld1, oppFld2] =' % vStr
+		dbgStr = '%s, %.12f, %.12f, %.12f]' % (
+				    dbgStr, posVal, oppFld1, oppFld2)
+	    else:
+		oppFld1 = fld1
+		oppFld2 = fld2
+		vStr = '%s] =' % vStr
+		dbgStr = '%s]' % dbgStr
+	    print vStr
+	    print dbgStr
+	    print '----------------------------------------------------'
+	    # Ensure this.specPosIndex in range:
+	nrPos = len(setting)
+	maxI = nrPos - 1
+	if (this.specPosIndex > maxI):
+	    this.specPosIndex = maxI
+	# keep -1 (last) so switching triangle alternative will keep
+	# last selection.
+	elif (this.specPosIndex < -1):
+	    this.specPosIndex = maxI - 1
+	this.shape.setDihedralAngle(aVal)
+	this.shape.setHeight(tVal)
+	this.shape.setFold1(fld1, oppFld1)
+	this.shape.setFold2(fld2, oppFld2)
+	this.shape.setPosAngle(posVal)
+	# For the user: start counting with '1' instead of '0'
+	if this.specPosIndex == -1:
+	    nr = nrPos # last position
+	else:
+	    nr = this.specPosIndex + 1
+	# set nr of possible positions
+	this.nrTxt.SetLabel('%d/%d' % (nr, nrPos))
+	this.statusBar.SetStatusText(this.shape.getStatusStr())
+	#this.shape.printTrisAngles()
+
+    def resetStdPrePos(this):
+	try:
+	    del this.sav_stdPrePos
+	except AttributeError:
+	    pass
+
     tNone = 1.0
     aNone = 0.0
     fld1None = 0.0
@@ -1840,7 +1978,19 @@ class FldHeptagonCtrlWin(wx.Frame):
         aVal = this.aNone
         tVal = this.tNone
 	c = this.shape
+	# remove the "From File" from the pull down list as soon as it is
+	# deselected
+        if event != None and this.prePos != open_file:
+	    openFileStr = this.stringify[open_file] 
+	    n = this.prePosGui.FindString(openFileStr)
+	    if n >= 0:
+		# deleting will reset the selectio, so save and reselect:
+		selStr = this.prePosGui.GetSelection()
+		this.prePosGui.Delete(this.prePosGui.FindString(openFileStr))
+		this.prePosGui.SetSelection(selStr)
         if this.prePos == dyn_pos:
+	    if event != None:
+		this.prePosFileName = None
 	    if (this.restoreTris):
 		this.restoreTris = False
 		this.shape.addXtraFs = this.addTrisGui.IsChecked()
@@ -1849,33 +1999,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.restoreO3s = False
 		this.shape.onlyRegFs = False
 		this.shape.updateShape = True
-	    for gui in [
-		this.dihedralAngleGui, this.posAngleGui,
-		this.heightGui,
-		this.fold1Gui, this.fold2Gui,
-		this.fold1OppGui, this.fold2OppGui
-	    ]:
-		gui.Enable()
-	    this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
-	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
-	    val1 = Geom3D.Rad2Deg * c.fold1
-	    val2 = Geom3D.Rad2Deg * c.fold2
-	    this.fold1Gui.SetValue(val1)
-	    this.fold2Gui.SetValue(val2)
-	    val1 = Geom3D.Rad2Deg * c.oppFold1
-	    val2 = Geom3D.Rad2Deg * c.oppFold2
-	    this.fold1OppGui.SetValue(val1)
-	    this.fold2OppGui.SetValue(val2)
-	    if not this.shape.inclReflections:
-		this.enableGuisNoRefl()
-	    this.heightGui.SetValue(
-		this.maxHeight - this.heightF * c.height)
-	    # enable all folding and triangle alternatives:
-	    for i in range(len(this.foldMethodList)):
-		this.foldMethodGui.ShowItem(i, True)
-	    this.setEnableTrisFillItems()
 	    this.nrTxt.SetLabel('---')
-	else:
+        elif not this.prePos == open_file:
             oppFld1 = fld1 = this.fld1None
             oppFld2 = fld2 = this.fld2None
 	    posVal = this.aNone
@@ -1908,55 +2033,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    elif (this.restoreO3s):
 		this.restoreO3s = False
 		this.shape.onlyRegFs = False
-	    try:
-		setting = this.stdPrePos
-		if setting != []:
-		    if this.specPosIndex >= len(setting):
-			this.specPosIndex = len(setting) - 1
-		    tVal = setting[this.specPosIndex][0]
-		    aVal = setting[this.specPosIndex][1]
-		    fld1 = setting[this.specPosIndex][2]
-		    fld2 = setting[this.specPosIndex][3]
-		    vStr = '[tVal, aVal, fld1, fld2'
-		    dbgStr = '  [%.12f, %.12f, %.12f, %.12f' % (
-							tVal, aVal, fld1, fld2)
-		    if not this.shape.inclReflections:
-			posVal = setting[this.specPosIndex][4]
-			oppFld1 = setting[this.specPosIndex][5]
-			oppFld2 = setting[this.specPosIndex][6]
-			vStr = '%s, posVal, oppFld1, oppFld2] =' % vStr
-			dbgStr = '%s, %.12f, %.12f, %.12f]' % (
-					    dbgStr, posVal, oppFld1, oppFld2)
-		    else:
-			if len(setting[this.specPosIndex]) > 4:
-			    posVal = setting[this.specPosIndex][4]
-			else:
-			    posVal = 0
-			oppFld1 = fld1
-			oppFld2 = fld2
-			vStr = '%s] =' % vStr
-			dbgStr = '%s]' % dbgStr
-		    print vStr
-		    print dbgStr
-		    print '----------------------------------------------------'
-		# Ensure this.specPosIndex in range:
-		nrPos = len(setting)
-		maxI = nrPos - 1
-		if (this.specPosIndex > maxI):
-		    this.specPosIndex = maxI
-		# keep -1 (last) so switching triangle alternative will keep
-		# last selection.
-		elif (this.specPosIndex < -1):
-		    this.specPosIndex = maxI - 1
-	    except KeyError:
-		print 'DBG key eror for trisFill: "%s"' % this.trisFillGui.GetStringSelection()
-	        pass
+#	    try:
+#	    except AttributeError:
+#		print 'DBG key eror for trisFill: "%s"' % this.trisFillGui.GetStringSelection()
+#	        pass
 
-            c.setDihedralAngle(aVal)
-            c.setHeight(tVal)
-            c.setFold1(fld1, oppFld1)
-            c.setFold2(fld2, oppFld2)
-            c.setPosAngle(posVal)
 	    for gui in [
 		this.dihedralAngleGui, this.posAngleGui,
 		this.heightGui,
@@ -1969,31 +2050,43 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.enableGuisNoRefl()
 	    else:
 		this.disableGuisNoRefl()
-            if ( tVal == this.tNone and aVal == this.aNone and
-		    fld1 == this.fld1None and fld2 == this.fld2None
-	    ):
-		txt = 'No solutions found'
-                this.statusBar.SetStatusText(txt)
-	    elif this.isntSpecialPos(this.prePos):
-		this.statusBar.SetStatusText('Doesnot mean anything special for this triangle alternative')
-	    else:
-		# For the user: start counting with '1' instead of '0'
-		if this.specPosIndex == -1:
-		    nr = nrPos # last position
-		else:
-		    nr = this.specPosIndex + 1
-		# set nr of possible positions
-		this.nrTxt.SetLabel('%d/%d' % (nr, nrPos))
-		this.statusBar.SetStatusText(c.getStatusStr())
-		#this.shape.printTrisAngles()
+	if this.prePos != dyn_pos:
+	    if event != None:
+		this.resetStdPrePos()
+	    setting = this.stdPrePos
+	    # Note if the setting array uses a none symmetric setting, then the
+	    # shape will not be symmetric. This is not supposed to be handled
+	    # here: don't overdo it!
+	    this.updateShapeSettings(setting)
+	# for open_file it is important that updateShapeSettins is done before
+	# updating the sliders...
+        if this.prePos == dyn_pos or this.prePos == open_file:
+	    for gui in [
+		this.dihedralAngleGui, this.posAngleGui,
+		this.heightGui,
+		this.fold1Gui, this.fold2Gui,
+		this.fold1OppGui, this.fold2OppGui
+	    ]:
+		gui.Enable()
+	    this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
+	    this.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
+	    val1 = Geom3D.Rad2Deg * c.fold1
+	    val2 = Geom3D.Rad2Deg * c.fold2
+	    this.fold1Gui.SetValue(val1)
+	    this.fold2Gui.SetValue(val2)
+	    val1 = Geom3D.Rad2Deg * c.oppFold1
+	    val2 = Geom3D.Rad2Deg * c.oppFold2
+	    this.fold1OppGui.SetValue(val1)
+	    this.fold2OppGui.SetValue(val2)
+	    if not this.shape.inclReflections:
+		this.enableGuisNoRefl(restore = False)
+	    this.heightGui.SetValue(
+		this.maxHeight - this.heightF * c.height)
+	    # enable all folding and triangle alternatives:
+	    for i in range(len(this.foldMethodList)):
+		this.foldMethodGui.ShowItem(i, True)
+	    this.setEnableTrisFillItems()
         this.updateShape()
-
-    def isntSpecialPos(this, sel):
-	"""Check whether this selection is special for this triangle alternative
-
-	Needs to be implemented by the offspring, return true on default
-	"""
-	return True
 
 class EqlHeptagonShape(Geom3D.IsometricShape):
     def __init__(this,

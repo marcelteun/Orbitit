@@ -22,7 +22,7 @@
 
 import wx
 import math
-import string
+import re
 import rgb
 import Heptagons
 import isometry
@@ -44,6 +44,7 @@ V2 = math.sqrt(2)
 trisAlt = Heptagons.TrisAlt()
 
 dyn_pos		= Heptagons.dyn_pos
+open_file	= Heptagons.open_file
 # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
 S_T8		= Heptagons.only_xtra_o3s
 S_only_hepts0	= Heptagons.only_hepts
@@ -791,34 +792,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    ) and not (
 		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
-    def isntSpecialPos(this, sel):
-	"""Check whether this selection is special for this triangle alternative
-	"""
-	return (this.shape.inclReflections and (
-	    (
-		sel == S_S24 and this.trisFill == trisAlt.strip_1_loose
-	    ) or (this.foldMethod == Heptagons.foldMethod.parallel and (
-		(
-		    sel == S_T32_S24_1
-		    and (
-			this.trisFill == trisAlt.strip_1_loose
-			or
-			this.trisFill == trisAlt.star_1_loose
-		    )
-		)
-		or
-		(
-		    (
-			sel == S_T24
-		    ) and (
-			this.trisFill == trisAlt.strip_1_loose
-			or
-			this.trisFill == trisAlt.star_1_loose
-		    )
-		)
-	    ))
-	))
-
     rDir = 'Data_FldHeptA4'
     rPre = 'frh-roots'
 
@@ -833,15 +806,33 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    s = this.stringify[prePosId]
 	return s
 
-    def mapTrisFill(this, trisFillId):
-	tStr = trisAlt.stringify[trisFillId]
-	t = string.join(tStr.split(), '_').lower().replace('ernative', '')
-	t = t.replace('_ii', '_II')
-	t = t.replace('_i', '_I')
-	t = t.replace('_i', '_I')
-	t = t.replace('rot.', 'rot')
-	#print 'DBP map(%s) ==> %s' % (trisAlt.stringify[trisFillId], t)
-	return t
+    def printFileStrMapWarning(this, filename, funcname):
+	print '%s:' % funcname
+	print '  WARNING: unable to interprete filename', filename
+
+    def fileStrMapFoldMethodStr(this, filename):
+	res = re.search("-fld_([^.]*)\.", filename)
+	if res:
+	    return res.groups()[0]
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapFoldMethodStr')
+
+    def fileStrMapHasReflections(this, filename):
+	res = re.search(".*frh-roots-(.*)-fld_.*", filename)
+	if res:
+	    pos_vals = res.groups()[0].split('_')
+	    nr_pos = len(pos_vals)
+	    return (nr_pos == 4) or (nr_pos == 5 and pos_vals[4] == '0')
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapHasReflections')
+
+    def fileStrMapTrisStr(this, filename):
+	res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
+	if res:
+	    tris_str = res.groups()[0]
+	    return trisAlt.mapFileStrOnStr[tris_str]
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapTrisStr')
 
     def isPrePosValid(this, prePosId):
 	# This means that files with empty results should be filtered out from
@@ -861,12 +852,12 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    if type(trisFillId) != int:
 		return False
 	    oppFill = ''
-	    t = this.mapTrisFill(trisFillId)
+	    t = trisAlt.mapKeyOnFileStr[trisFillId]
 	else:
 	    if type(trisFillId) == int:
 		return False
-	    oppFill = '-opp_%s' % this.mapTrisFill(trisFillId[1])
-	    t = this.mapTrisFill(trisFillId[0])
+	    oppFill = '-opp_%s' % trisAlt.mapKeyOnFileStr[trisFillId[1]]
+	    t = trisAlt.mapKeyOnFileStr[trisFillId[0]]
 	p = this.mapPrePosStrToFileStr(this.prePos)
 	f = Heptagons.FoldName[this.foldMethod].lower()
 	files = '%s/%s-%s-fld_%s.?-%s%s.*' % (
@@ -877,22 +868,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	#    print 'DBG: NOT found %s' % files
 	return glob(files) != []
 
-    @property
-    def stdPrePos(this):
-	prePosId = this.prePos
-	if prePosId == dyn_pos:
-	    return []
-	if this.shape.inclReflections:
-	    oppFill = ''
-	else:
-	    oppFill = '-opp_%s' % this.mapTrisFill(this.oppTrisFill)
-	filename = '%s/%s-%s-fld_%s.0-%s%s.py' % (
-		    this.rDir, this.rPre,
-		    this.mapPrePosStrToFileStr(this.prePos),
-		    Heptagons.FoldName[this.foldMethod].lower(),
-		    this.mapTrisFill(this.trisFill),
-		    oppFill
-		)
+    # TODO move to parent
+    def openPrePosFile(this, filename):
 	try:
 	    print 'DBG open', filename
 	    fd = open(filename, 'r')
@@ -903,6 +880,34 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	exec fd in ed
 	fd.close()
 	return ed['results']
+
+    @property
+    def stdPrePos(this):
+	try:
+	    return this.sav_stdPrePos
+	except AttributeError:
+	    prePosId = this.prePos
+	    assert prePosId != dyn_pos
+	    if prePosId == open_file:
+		filename = this.prePosFileName
+		if filename == None:
+		    return []
+	    else:
+		if this.trisFill == None:
+		    return []
+		if this.shape.inclReflections:
+		    oppFill = ''
+		else:
+		    oppFill = '-opp_%s' % trisAlt.mapKeyOnFileStr[this.oppTrisFill]
+		filename = '%s/%s-%s-fld_%s.0-%s%s.py' % (
+			    this.rDir, this.rPre,
+			    this.mapPrePosStrToFileStr(this.prePos),
+			    Heptagons.FoldName[this.foldMethod].lower(),
+			    trisAlt.mapKeyOnFileStr[this.trisFill],
+			    oppFill
+			)
+	    this.sav_stdPrePos = this.openPrePosFile(filename)
+	    return this.sav_stdPrePos
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
