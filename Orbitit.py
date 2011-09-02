@@ -389,9 +389,14 @@ class MainWindow(wx.Frame):
         dlg = wx.FileDialog(this, 'New: Choose a file',
                 this.importDirName, '', this.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            this.panel.setShape(
-		this.openFile(dlg.GetFilename(), dlg.GetDirectory())
-            )
+            shape = this.openFile(dlg.GetFilename(), dlg.GetDirectory())
+            this.panel.setShape(shape)
+            # overwrite the view properties, if the shape doesn't have any
+            # faces and would be invisible to the user otherwise
+            if len(shape.getFaceProperties()['Fs']) == 0 and (
+                this.panel.getShape().getVertexProperties()['radius'] <= 0
+            ):
+                this.panel.getShape().setVertexProperties(radius = 0.05)
             this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
         dlg.Destroy()
 

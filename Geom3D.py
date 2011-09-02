@@ -175,6 +175,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
     state = states['checkOff']
     debug = True
     debug = False
+    vRadius = 0
     for line in fd:
         words = line.split()
         if len(words) > 0 and words[0][0] != '#':
@@ -209,24 +210,37 @@ def readOffFile(fd, recreateEdges = True, name = ''):
                     cols = []
                     fColors = [i for i in range(nrOfFs)]
                     i = 0
+                    if nrOfFs == 0:
+                        state = states['readOk']
+                        print 'Note: the OFF file only contains vertices'
+                        vRadius = 0.05
             elif state == states['readFs']:
                 # the function assumes: no comments in beween "q i0 .. iq-1 r g b"
                 assert words[0].isdigit()
                 lenF = int(words[0])
-                assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
-                Fs.append(  [  int(words[j])     for j in range(1,      lenF+1)])
-                if len(words) == lenF + 1:
-                    cols.append([0.8, 0.8, 0.8])
-                else:
-                    cols.append(
-                        [float(words[j])/255 for j in range(lenF+1, lenF+4)]
-                    )
-                if debug: print 'F[', i, '] =',  Fs[-1]
-                if debug: print 'col[', i, '] =',  cols[-1]
-                i = i + 1
-                if i == nrOfFs:
-                    state = states['readOk']
-                    break;
+		if lenF > 0:
+		    assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
+		    face = [int(words[j]) for j in range(1, lenF + 1)]
+		    if lenF < 3:
+			print 'Note: face %d has only %d vertices, appending 1st' % (
+			    i, lenF
+			)
+			face.append(face[0])
+			if lenF == 1:
+			   face.append(face[0])
+		    Fs.append(face)
+		    if len(words) == lenF + 1:
+			cols.append([0.8, 0.8, 0.8])
+		    else:
+			cols.append(
+			    [float(words[j])/255 for j in range(lenF+1, lenF+4)]
+			)
+		    if debug: print 'F[', i, '] =',  Fs[-1]
+		    if debug: print 'col[', i, '] =',  cols[-1]
+		    i = i + 1
+		    if i == nrOfFs:
+			state = states['readOk']
+			break;
             else:
                 break
     assert state == states['readOk'], """
@@ -237,6 +251,8 @@ def readOffFile(fd, recreateEdges = True, name = ''):
             statesRev[state], i
         )
     shape = SimpleShape(Vs, Fs, [], colors = (cols, fColors))
+    if vRadius != 0:
+        shape.setVertexProperties(radius = vRadius)
     if name != '':
         shape.name = name
     if recreateEdges:
@@ -2378,6 +2394,30 @@ class CompoundShape(SimpleShape):
             this.mergedShape.setEdgeProperties(dictPar, **kwargs)
         except AttributeError:
             SimpleShape.setEdgeProperties(this, dictPar, **kwargs)
+
+    def getVertexProperties(this):
+        try:
+            shape = this.mergedShape
+        except AttributeError:
+            this.mergeShapes()
+            shape = this.mergedShape
+        return shape.getVertexProperties()
+
+    def getEdgeProperties(this):
+        try:
+            shape = this.mergedShape
+        except AttributeError:
+            this.mergeShapes()
+            shape = this.mergedShape
+        return shape.getEdgeProperties()
+
+    def getFaceProperties(this):
+        try:
+            shape = this.mergedShape
+        except AttributeError:
+            this.mergeShapes()
+            shape = this.mergedShape
+        return shape.getFaceProperties()
 
     def setFaceProperties(this, dictPar = None, **kwargs):
         try:
