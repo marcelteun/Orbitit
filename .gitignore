@@ -3,10 +3,13 @@
 
 # DIRs
 attic
+data
+doc
 logs
+out
 polyhEqlHept
 tmp
-tstThis
+tst
 
 # general files
 *.pyc
