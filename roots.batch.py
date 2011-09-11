@@ -1852,7 +1852,8 @@ def FindMultiRootOnDomain(domain,
     return results
 
 if __name__ == '__main__':
-    import Geom3D
+    import sys
+    #import Geom3D
     #T  = 2.45
     #a  = Geom3D.Deg2Rad * 40
     #b0 = Geom3D.Deg2Rad * 25
@@ -2233,68 +2234,11 @@ if __name__ == '__main__':
 					r[0], r[1], r[2], r[3], r[4], r[5], r[6])
 		print '],\n'
 
-	def randBatch(continueAfter = 100, nrThreads = 1):
+	def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = []):
 	    folds = [Fold.star, Fold.w]
 	    #folds = [Fold.star]
 	    #folds = [Fold.w]
 	    #folds = [Fold.trapezium]
-	    edgeLs = [
-		[0., 0., 0., 0., 0., 0., 0.],
-
-		[0., 0., 0., 1., 0., 0., 1.],
-			# should give solutions around
-			#	T=1.60, (0, -116, -16) for
-			#		parallel fold and twisted strip
-
-		[0., 0., 1., 0., 0., 1., 0.],
-
-		[0., 0., 1., 1., 0., 1., 1.],
-
-		[0., 1., 0., 0., 1., 0., 0.],
-
-		[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
-		[0., 1., 0., 1., 1., 0., 1.],
-
-		[0., 1., 1., 0., 1., 1., 0.],
-
-		[1., 0., 0., 0., 0., 0., 0.],
-
-		[1., 0., 0., 1., 0., 0., 1.],
-
-		[1., 0., 1., 0., 0., 1., 0.], # only hepts
-			# it seems that
-			# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
-			# needs to find nr 11 (has 10 now)
-		[1., 0., 1., 0., 0., 1., 0.],
-		[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
-		[1., 0., 1., 0., 1., 0., 0.], # no sols
-		[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
-		[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
-		[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
-
-		[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
-		[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
-		[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
-
-		[1., 1., 0., 0., 1., 0., 0.],
-
-		[1., 1., 0., 1., 0., 0., 0.], # for rot 0
-		[1., 1., 0., 1., 0., 0., 1.], # for rot 0
-		[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
-		[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
-
-		[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
-		[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
-		[1., 1., 1., 0., 1., 0., 0.], # no sols
-		[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
-
-		[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
-		[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
-		[1., 1., 1., 1., 1., 1., 1.], # all equilateral
-
-		[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
-		[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
-	    ]
 	    ta = TriangleAlt()
 	    #edgeAlts = [t for t in ta]
 	    edgeAlts = []
@@ -2743,4 +2687,87 @@ if __name__ == '__main__':
 	#batch(edges, TriangleAlt.twisted)
 
 	#randBatchA4xI(continueAfter = 4000, nrThreads = 1)
-	randBatch(continueAfter = 0, nrThreads = 1)
+	pre_edgeLs = [
+	    [0., 0., 0., 0., 0., 0., 0.],
+
+	    [0., 0., 0., 1., 0., 0., 1.],
+		    # should give solutions around
+		    #	T=1.60, (0, -116, -16) for
+		    #		parallel fold and twisted strip
+
+	    [0., 0., 1., 0., 0., 1., 0.],
+
+	    [0., 0., 1., 1., 0., 1., 1.],
+
+	    [0., 1., 0., 0., 1., 0., 0.],
+
+	    [0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
+	    [0., 1., 0., 1., 1., 0., 1.],
+
+	    [0., 1., 1., 0., 1., 1., 0.],
+
+	    [1., 0., 0., 0., 0., 0., 0.],
+
+	    [1., 0., 0., 1., 0., 0., 1.],
+
+	    [1., 0., 1., 0., 0., 1., 0.], # only hepts
+		    # it seems that
+		    # frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
+		    # needs to find nr 11 (has 10 now)
+	    [1., 0., 1., 0., 0., 1., 0.],
+	    [1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
+	    [1., 0., 1., 0., 1., 0., 0.], # no sols
+	    [1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
+	    [1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
+	    [1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+
+	    [1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+	    [1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+	    [1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+
+	    [1., 1., 0., 0., 1., 0., 0.],
+
+	    [1., 1., 0., 1., 0., 0., 0.], # for rot 0
+	    [1., 1., 0., 1., 0., 0., 1.], # for rot 0
+	    [1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+	    [1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+
+	    [1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+	    [1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
+	    [1., 1., 1., 0., 1., 0., 0.], # no sols
+	    [1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
+
+	    [1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+	    [1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+	    [1., 1., 1., 1., 1., 1., 1.], # all equilateral
+
+	    [0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
+	    [1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+	]
+	if len(sys.argv) <= 1:
+	    edgeLs = pre_edgeLs
+	    i = 0
+	    j = len(pre_edgeLs)
+	elif sys.argv[1] == '-h':
+	    print 'Usage:'
+	    print sys.argv[0], '-l: list the length of the predefined list'
+	    print sys.argv[0], '[i0] [i1]'
+	    print '        search using the specified slice from the predefined list'
+	    print '        If nothing is specified the whole list is searched'
+	    print '        If only i0 is specified the list is searched from that index'
+	    sys.exit(0)
+	elif sys.argv[1] == '-l':
+	    for (i, e) in zip(range(len(pre_edgeLs)), pre_edgeLs):
+		print '%3d' % i, e
+	    sys.exit(0)
+	else:
+	    i = int(sys.argv[1])
+	    if len(sys.argv) > 2:
+		j = int(sys.argv[2])
+	    else:
+		j = len(pre_edgeLs)
+	    edgeLs = pre_edgeLs[i:j]
+	print 'search slice [%d:%d]:' % (i, j)
+	for e in edgeLs:
+	    print '  -', e
+	randBatch(continueAfter = 4000, nrThreads = 1, edgeLs = edgeLs)
