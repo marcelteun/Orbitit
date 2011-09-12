@@ -1383,6 +1383,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	method = 1,
 	precision = 1e-15,
 	fold = Fold.parallel,
+	dynSols = None,
 	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
     ):
 	this.domain = domain
@@ -1393,6 +1394,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.edgeAlternative = edgeAlternative
 	this.oppEdgeAlternative = oppEdgeAlternative
 	this.edgeLengths = edgeLengths
+	this.dynamicSols = dynSols
+	this.dynSols = dynSols
 	this.stopAfter = 100000
 	this.printStatus = False,
 	random.seed()
@@ -1477,6 +1480,40 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		found = True
 		break # for old loop
 	return found
+
+    def isDynamicSol(this, sol):
+	if this.dynamicSols != None:
+	    for d in this.dynamicSols:
+		ea_ok = False
+		for ea in d['edgeAlternative']:
+		    ea_ok = (this.edgeAlternative == ea) or ea_ok
+		if ea_ok:
+		    oa_ok = False
+		    for oa in d['oppEdgeAlternative']:
+			oa_ok = (this.oppEdgeAlternative == oa) or oa_ok
+		    if oa_ok:
+			fld_ok = False
+			for fld in d['fold']:
+			    fld_ok = (this.fold == fld) or fld_ok
+			if fld_ok:
+			    for vs in d['sol_vector']:
+				sol_isEq = True
+				for (i, v) in vs.iteritems():
+				    if not eq(v, sol[i]):
+					sol_isEq = False
+					break # don't check other (i, v)
+				if sol_isEq:
+				    break # from vs in d['sol_vector']
+			    if sol_isEq:
+				for vs in d['set_vector']:
+				    isEq = True
+				    for (i, v) in vs.iteritems():
+					if not eq(v, sol[i]):
+					    isEq = False
+					    break # don't check other (i, v)
+				    if isEq:
+					return isEq
+	return False
 
     def symmetricEdges(this):
 	el = this.edgeLengths
@@ -1624,7 +1661,11 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			quiet     = True,
 			oppEdgeAlternative = this.oppEdgeAlternative
 		    )
-		if result != None and not this.solutionAlreadyFound(result):
+		if (
+		    result != None
+		    and not this.solutionAlreadyFound(result)
+		    and not this.isDynamicSol(result)
+		):
 		    this.results.append(result)
 		    maxIter = this.setMaxIter()
 		    print '(thread %d) %s:' % (
@@ -1880,6 +1921,63 @@ if __name__ == '__main__':
     #    [TriangleAlt.star1loose, TriangleAlt.arot_star1loose, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
     #assert False, "end single test"
     ##print 'faster', faster
+
+    def tstDynamicSolutions():
+	passed = True
+	tst = RandFindMultiRootOnDomain(
+	    [
+		    [-2., 3.],             # Translation
+		    [-numx.pi, numx.pi],   # angle alpha
+		    [-numx.pi, numx.pi],   # fold 1 beta0
+		    [-numx.pi, numx.pi],   # fold 2 gamma0
+		    [0,        numx.pi/4], # delta: around z-axis
+		    [-numx.pi, numx.pi],   # fold 1 beta1
+		    [-numx.pi, numx.pi],   # fold 2 gamma1
+		],
+	    edgeAlternative    = TriangleAlt.star1loose,
+	    oppEdgeAlternative = TriangleAlt.star1loose,
+	    fold               = Fold.w,
+	    dynSols            = dynamicSols,
+	)
+	chkDynSols = [
+	    [2.59691495774690, 0.37180029203870, -0.99159844699067, 0.0, 0.0, -0.99159844699067, 1.90],
+	    [-2.39662854867090, -2.76044142453588, -2.28962724865982, 0.0, 0.0, -2.28962724865982, 4.30],
+	    [-1.32969344523106, 2.93729908156380, 0.47840318769040, 0.3, 0.0, 0.47840318769040, -1.24666979460112],
+	    [1.56791889743089, 0.07044231686021, -3.01397582234294, 0.3, 0.0, -3.01397582234294, -0.617],
+	    [-1.48353635258086, 3.14159265358979, -2.17789038635323, 0.3, 2.00286242147445, 2.17789038635323, -0.3],
+	    [1.48353635258086, 0.0, -2.17789038635323, 6.0, 1.13873023211535, 2.17789038635323, -6.0],
+	    [-1.48353635258086, 3.14159265358979, 2.17789038635323, 0.0, -2.00286242147445, -2.17789038635323, -0.0],
+	    [1.48353635258086, 0.0, 2.17789038635323, 0.3, -1.13873023211535, -2.17789038635323, -0.3],
+	    [-1.79862645974663, 2.89384136702916, 2.66115365118573, 0.0, 2.22084886403160, 2.66115365118573, 1.16715894682047],
+	    [1.79862645974663, 0.24775128656063, -2.66115365118573, 0.3, 0.92074378955819, -2.66115365118573, -1.46715894682047],
+	    [-1.79862645974663, 2.89384136702916, 2.66115365118573, 0.3, -2.22084886403160, 2.66115365118573, 0.86715894682047],
+	    [1.79862645974663, 0.24775128656063, -2.66115365118573, 0.0, -0.92074378955819, -2.66115365118573, -1.16715894682047],
+	    [-1.93838678986755, -2.82756860983026, -0.78734965896067, 0.0, 1.35463810886690, -0.78734965896067, +1.53424315674435],
+	    [1.93838678986755, -0.31402404375953, 0.78734965896067, 0.3, 1.78695454472289, 0.78734965896067, -1.83424315674435],
+	    [-1.93838678986755, -2.82756860983026, -0.78734965896067, 0.0, -1.35463810886690, -0.78734965896067, +1.53424315674435],
+	    [1.93838678986755, -0.31402404375953, 0.78734965896067, 0.0, -1.78695454472289, 0.78734965896067, -1.53424315674435],
+	    [1.73117867469463, 0.46014030244326, -1.75383477143902, 3,4, -1.75383477143902, 6],
+	    [1.73117867469463, -0.46014030244326, 1.75383477143902, 3,4, 1.75383477143902, 6],
+	    [-1.73117867469463, -2.68145235114654, -1.75383477143902, 3,4, -1.75383477143902, 6],
+	    [-1.73117867469463, 2.68145235114654, 1.75383477143902, 3,4, 1.75383477143902, 6],
+	]
+	for ds in chkDynSols:
+	    if not tst.isDynamicSol(ds):
+		print 'oops', ds, 'should be a dynamic solution'
+		passed = False
+	chkNoDynSols = [
+	    [1.48353635258086, 0.0, 2.177, 0.3, -1.1387, -2.17789, -0.3],
+	    [-2.59691495774690, 0.37180029203870, -0.99159844699067, 0.0, 0.0, -0.99159844699067, 1.90],
+	    [-1.73117867469463, 0.46014030244326, -1.75383477143902, 3,4, -1.75383477143902, 6],
+	    [-1.73117867469463, -0.46014030244326, 1.75383477143902, 3,4, 1.75383477143902, 6],
+	    [-1.73117867469463, 2.68145235114654, -1.75383477143902, 3,4, -1.75383477143902, 6],
+	    [-1.73117867469463, 2.68145235114654, 1.75383477143902, 3,4, -1.75383477143902, 6],
+	]
+	for ds in chkNoDynSols:
+	    if tst.isDynamicSol(ds):
+		print 'oops', ds, "shouldn't be a dynamic solution"
+		passed = False
+	return passed
 
     V2 = numx.sqrt(2.)
 
@@ -2234,7 +2332,8 @@ if __name__ == '__main__':
 					r[0], r[1], r[2], r[3], r[4], r[5], r[6])
 		print '],\n'
 
-	def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = []):
+	def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = [],
+								dynSols = None):
 	    folds = [Fold.star, Fold.w]
 	    #folds = [Fold.star]
 	    #folds = [Fold.w]
@@ -2277,6 +2376,7 @@ if __name__ == '__main__':
 					edgeAlternative    = ea,
 					oppEdgeAlternative = oea,
 					edgeLengths        = edges,
+					dynSols            = dynSols,
 					fold               = fold,
 					method             = Method.hybrids
 				    )
@@ -2744,6 +2844,7 @@ if __name__ == '__main__':
 	    [0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
 	    [1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
 	]
+	tstProg = False
 	if len(sys.argv) <= 1:
 	    edgeLs = pre_edgeLs
 	    i = 0
@@ -2760,6 +2861,8 @@ if __name__ == '__main__':
 	    for (i, e) in zip(range(len(pre_edgeLs)), pre_edgeLs):
 		print '%3d' % i, e
 	    sys.exit(0)
+	elif sys.argv[1] == '-t':
+	    tstProg = True
 	else:
 	    i = int(sys.argv[1])
 	    if len(sys.argv) > 2:
@@ -2767,7 +2870,174 @@ if __name__ == '__main__':
 	    else:
 		j = len(pre_edgeLs)
 	    edgeLs = pre_edgeLs[i:j]
-	print 'search slice [%d:%d]:' % (i, j)
-	for e in edgeLs:
-	    print '  -', e
-	randBatch(continueAfter = 4000, nrThreads = 1, edgeLs = edgeLs)
+	dynamicSols = [
+	    # TODO: important add edge lengths!!!
+	    {
+		# here is an example of where it is important to define the
+		# sol_vector. Since it can be that solutions with different edge
+		# lengths have non-dynamic solutions for which the translation
+		# and the dihedral angle have the values below.
+		'edgeAlternative': [TriangleAlt.star1loose],
+		'oppEdgeAlternative': [TriangleAlt.star1loose],
+		'fold': [Fold.star],
+		'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
+		'set_vector': [
+			{
+			    0: 1.48353635258086,
+			    1: 0.0,
+			},{
+			    0: -1.48353635258086,
+			    1: 3.14159265358979,
+			}
+		    ]
+	    },{
+		'edgeAlternative': [TriangleAlt.star1loose],
+		'oppEdgeAlternative': [TriangleAlt.star1loose],
+		'fold': [Fold.w],
+		'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
+		'set_vector': [
+		    {
+			0: 2.59691495774690,
+			1: 0.37180029203870,
+			2: -0.99159844699067,
+			4: 0.0,
+			5: -0.99159844699067,
+		    },{
+			0: -2.39662854867090,
+			1: -2.76044142453588,
+			2: -2.28962724865982,
+			4: 0.0,
+			5: -2.28962724865982,
+		    },{
+			0: -1.32969344523106,
+			1: 2.93729908156380,
+			2: 0.47840318769040,
+			4: 0.0,
+			5: 0.47840318769040,
+		    },{
+			0: 1.56791889743089,
+			1: 0.07044231686021,
+			2: -3.01397582234294,
+			4: 0.0,
+			5: -3.01397582234294,
+		    },{
+			0: -1.48353635258086,
+			1: 3.14159265358979,
+			2: -2.17789038635323,
+			4: 2.00286242147445,
+			5: 2.17789038635323,
+		    },{
+			0: 1.48353635258086,
+			1: 0.0,
+			2: -2.17789038635323,
+			4: 1.13873023211535,
+			5: 2.17789038635323,
+		    },{
+			0: -1.48353635258086,
+			1: 3.14159265358979,
+			2: 2.17789038635323,
+			4: -2.00286242147445,
+			5: -2.17789038635323,
+		    },{
+			0: 1.48353635258086,
+			1: 0.0,
+			2: 2.17789038635323,
+			4: -1.13873023211535,
+			5: -2.17789038635323,
+		    },{
+			0: -1.79862645974663,
+			1: 2.89384136702916,
+			2: 2.66115365118573,
+			4: 2.22084886403160,
+			5: 2.66115365118573,
+		    },{
+			0: 1.79862645974663,
+			1: 0.24775128656063,
+			2: -2.66115365118573,
+			4: 0.92074378955819,
+			5: -2.66115365118573,
+		    },{
+			0: -1.79862645974663,
+			1: 2.89384136702916,
+			2: 2.66115365118573,
+			4: -2.22084886403160,
+			5: 2.66115365118573,
+		    },{
+			0: 1.79862645974663,
+			1: 0.24775128656063,
+			2: -2.66115365118573,
+			4: -0.92074378955819,
+			5: -2.66115365118573,
+		    },{
+			0: -1.93838678986755,
+			1: -2.82756860983026,
+			2: -0.78734965896067,
+			4: 1.35463810886690,
+			5: -0.78734965896067,
+		    },{
+			0: 1.93838678986755,
+			1: -0.31402404375953,
+			2: 0.78734965896067,
+			4: 1.78695454472289,
+			5: 0.78734965896067,
+		    },{
+			0: -1.93838678986755,
+			1: -2.82756860983026,
+			2: -0.78734965896067,
+			4: -1.35463810886690,
+			5: -0.78734965896067,
+		    },{
+			0: 1.93838678986755,
+			1: -0.31402404375953,
+			2: 0.78734965896067,
+			4: -1.78695454472289,
+			5: 0.78734965896067,
+		    }
+		]
+	    },{
+		'edgeAlternative': [
+		    TriangleAlt.star1loose, TriangleAlt.strip1loose],
+		'oppEdgeAlternative': [
+		    TriangleAlt.star1loose, TriangleAlt.strip1loose],
+		'fold': [Fold.w],
+		'sol_vector': [
+			[0, 1, 1, 0, 1, 1, 0],
+			[0, V2, 1, 0, V2, 1, 0]
+		].
+		'set_vector': [
+		    {
+			0: 1.73117867469463,
+			1: 0.46014030244326,
+			2: -1.75383477143902,
+			5: -1.75383477143902,
+		    },{
+			0: 1.73117867469463,
+			1: -0.46014030244326,
+			2: 1.75383477143902,
+			5: 1.75383477143902,
+		    },{
+			0: -1.73117867469463,
+			1: -2.68145235114654,
+			2: -1.75383477143902,
+			5: -1.75383477143902,
+		    },{
+			0: -1.73117867469463,
+			1: 2.68145235114654,
+			2: 1.75383477143902,
+			5: 1.75383477143902,
+		    }
+		]
+	    }
+	]
+
+	if tstProg:
+	    if tstDynamicSolutions():
+		print 'test PASSED'
+	    else:
+		print 'test FAILED'
+	else:
+	    print 'search slice [%d:%d]:' % (i, j)
+	    for e in edgeLs:
+		print '  -', e
+	    randBatch(continueAfter = 4000, nrThreads = 1,
+				edgeLs = edgeLs, dynSols = dynamicSols)
