@@ -792,7 +792,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    ) and not (
 		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
-    rDir = 'Data_FldHeptA4'
+    rDir = 'data/Data_FldHeptA4'
     rPre = 'frh-roots'
 
     def mapPrePosStrToFileStr(this, prePosId):
