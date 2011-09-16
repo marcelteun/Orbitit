@@ -1498,8 +1498,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			if fld_ok:
 			    for vs in d['sol_vector']:
 				sol_isEq = True
-				for (i, v) in vs.iteritems():
-				    if not eq(v, sol[i]):
+				for i in range(len(vs)):
+				    if not eq(vs[i], this.edgeLengths[i]):
 					sol_isEq = False
 					break # don't check other (i, v)
 				if sol_isEq:
@@ -1937,6 +1937,7 @@ if __name__ == '__main__':
 	    edgeAlternative    = TriangleAlt.star1loose,
 	    oppEdgeAlternative = TriangleAlt.star1loose,
 	    fold               = Fold.w,
+	    edgeLengths        = [0, 1, 0, 1, 1, 0, 1],
 	    dynSols            = dynamicSols,
 	)
 	chkDynSols = [
@@ -1956,15 +1957,39 @@ if __name__ == '__main__':
 	    [1.93838678986755, -0.31402404375953, 0.78734965896067, 0.3, 1.78695454472289, 0.78734965896067, -1.83424315674435],
 	    [-1.93838678986755, -2.82756860983026, -0.78734965896067, 0.0, -1.35463810886690, -0.78734965896067, +1.53424315674435],
 	    [1.93838678986755, -0.31402404375953, 0.78734965896067, 0.0, -1.78695454472289, 0.78734965896067, -1.53424315674435],
-	    [1.73117867469463, 0.46014030244326, -1.75383477143902, 3,4, -1.75383477143902, 6],
-	    [1.73117867469463, -0.46014030244326, 1.75383477143902, 3,4, 1.75383477143902, 6],
-	    [-1.73117867469463, -2.68145235114654, -1.75383477143902, 3,4, -1.75383477143902, 6],
-	    [-1.73117867469463, 2.68145235114654, 1.75383477143902, 3,4, 1.75383477143902, 6],
 	]
 	for ds in chkDynSols:
 	    if not tst.isDynamicSol(ds):
 		print 'oops', ds, 'should be a dynamic solution'
 		passed = False
+	chkDynSols = [
+	    [1.73117867469463, 0.46014030244326, -1.75383477143902, 3,4, -1.75383477143902, 6],
+	    [1.73117867469463, -0.46014030244326, 1.75383477143902, 3,4, 1.75383477143902, 6],
+	    [-1.73117867469463, -2.68145235114654, -1.75383477143902, 3,4, -1.75383477143902, 6],
+	    [-1.73117867469463, 2.68145235114654, 1.75383477143902, 3,4, 1.75383477143902, 6],
+	]
+	tst.edgeLengths = [0, V2, 1, 0, V2, 1, 0]
+	for ds in chkDynSols:
+	    if not tst.isDynamicSol(ds):
+		print 'oops', ds, 'should be a dynamic solution'
+		passed = False
+	tst.edgeLengths = [0, 1, 1, 0, 1, 1, 0]
+	for ds in chkDynSols:
+	    if not tst.isDynamicSol(ds):
+		print 'oops', ds, 'should be a dynamic solution'
+		passed = False
+	chkDynSols = [
+	    [1.48353635258086, 0, 2, 3, 4, 5, 6],
+	    [-1.48353635258086, 3.14159265358979, 2, 3, 4, 5, 6],
+	    [1.48353635258086, 0.0, 2.177, 0.3, -1.1387, -2.17789, -0.3],
+	]
+	tst.edgeLengths = [0, 1, 0, 1, 1, 0, 1]
+	tst.fold = Fold.star
+	for ds in chkDynSols:
+	    if not tst.isDynamicSol(ds):
+		print 'oops', ds, 'should be a dynamic solution'
+		passed = False
+	tst.fold = Fold.w
 	chkNoDynSols = [
 	    [1.48353635258086, 0.0, 2.177, 0.3, -1.1387, -2.17789, -0.3],
 	    [-2.59691495774690, 0.37180029203870, -0.99159844699067, 0.0, 0.0, -0.99159844699067, 1.90],
@@ -1973,10 +1998,12 @@ if __name__ == '__main__':
 	    [-1.73117867469463, 2.68145235114654, -1.75383477143902, 3,4, -1.75383477143902, 6],
 	    [-1.73117867469463, 2.68145235114654, 1.75383477143902, 3,4, -1.75383477143902, 6],
 	]
-	for ds in chkNoDynSols:
-	    if tst.isDynamicSol(ds):
-		print 'oops', ds, "shouldn't be a dynamic solution"
-		passed = False
+	for edgeL in [[0, V2, 1, 0, V2, 1, 0], [0, 1, 1, 0, 1, 1, 0]]:
+	    tst.edgeLengths = edgeL
+	    for ds in chkNoDynSols:
+		if tst.isDynamicSol(ds):
+		    print 'oops', ds, "shouldn't be a dynamic solution"
+		    passed = False
 	return passed
 
     V2 = numx.sqrt(2.)
@@ -3003,7 +3030,7 @@ if __name__ == '__main__':
 		'sol_vector': [
 			[0, 1, 1, 0, 1, 1, 0],
 			[0, V2, 1, 0, V2, 1, 0]
-		].
+		],
 		'set_vector': [
 		    {
 			0: 1.73117867469463,
