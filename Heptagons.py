@@ -22,7 +22,7 @@
 #-----------------------------------------------------------------
 # $Log$
 #
-
+TODO_TMP_TST_RM = True
 import wx
 import math
 import rgb
@@ -2001,26 +2001,28 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.shape.updateShape = True
 	    this.nrTxt.SetLabel('---')
         elif not this.prePos == open_file:
+	    # this block is run for predefined sped pos only:
             oppFld1 = fld1 = this.fld1None
             oppFld2 = fld2 = this.fld2None
 	    posVal = this.aNone
 	    nrPos = 0
+	    if not TODO_TMP_TST_RM:
+	        # Disable / enable appropriate folding methods.
+	        for i in range(len(this.foldMethodList)):
+		    method = this.foldMethodListItems[i]
+		    this.foldMethodGui.ShowItem(i,
+		        this.isFoldValid(this.foldMethodListItems[i])
+		    )
+		    # leave up to the user to decide which folding method to choose
+		    # in case the seposAngleGuilected one was disabled.
 
-	    # Disable / enable appropriate folding methods.
-	    for i in range(len(this.foldMethodList)):
-		method = this.foldMethodListItems[i]
-		this.foldMethodGui.ShowItem(i,
-		    this.isFoldValid(this.foldMethodListItems[i])
-		)
-		# leave up to the user to decide which folding method to choose
-		# in case the seposAngleGuilected one was disabled.
+	        choiceLst = []
+	        if this.isFoldValid(this.foldMethod):
+		    for k, v in trisAlt.stringify.iteritems():
+		        if this.isTrisFillValid(k):
+			    choiceLst.append(v)
+	        this.setEnableTrisFillItems(choiceLst)
 
-	    choiceLst = []
-	    if this.isFoldValid(this.foldMethod):
-		for k, v in trisAlt.stringify.iteritems():
-		    if this.isTrisFillValid(k):
-			choiceLst.append(v)
-	    this.setEnableTrisFillItems(choiceLst)
 	    if (this.showOnlyHepts()):
 		this.shape.addXtraFs = False
 		this.restoreTris = True
@@ -2038,6 +2040,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 #		print 'DBG key eror for trisFill: "%s"' % this.trisFillGui.GetStringSelection()
 #	        pass
 
+	    # get fold, tris als
+	    sps = this.specPosSetup
+	    # TODO RM TMP TEST
+	    if TODO_TMP_TST_RM:
+		this.foldMethodGui.SetStringSelection(FoldName[sps['7fold']])
+		this.trisFillGui.SetStringSelection(trisAlt.stringify[sps['tris']])
+		this.onFoldMethod()
+		this.onTriangleFill()
 	    for gui in [
 		this.dihedralAngleGui, this.posAngleGui,
 		this.heightGui,
@@ -2082,9 +2092,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.enableGuisNoRefl(restore = False)
 	    this.heightGui.SetValue(
 		this.maxHeight - this.heightF * c.height)
-	    # enable all folding and triangle alternatives:
-	    for i in range(len(this.foldMethodList)):
-		this.foldMethodGui.ShowItem(i, True)
+	    if not TODO_TMP_TST_RM:
+		# enable all folding and triangle alternatives:
+		for i in range(len(this.foldMethodList)):
+		    this.foldMethodGui.ShowItem(i, True)
+
 	    this.setEnableTrisFillItems()
         this.updateShape()
 

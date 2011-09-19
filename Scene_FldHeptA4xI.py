@@ -86,7 +86,7 @@ T64_0		= Heptagons.tris_fill_base + 28
 Stringify = {
     dyn_pos:		'Enable Sliders',
     # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
-    S_only_hepts0:	'SEL:  0 Extra Faces (A)',
+    S_only_hepts0:	'Only heptagons',
     S_only_hepts1:	'SEL:  0 Extra Faces (B)',
     S_T8:		'SEL:  8 Triangles (O3)',
     S_T24:		'SEL: 24 Triangles (A)',
@@ -882,6 +882,22 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	return ed['results']
 
     @property
+    def specPosSetup(this):
+	prePosId = this.prePos
+	if prePosId != open_file and prePosId != dyn_pos:
+	    # TODO rm this tmp check
+	    if Heptagons.TODO_TMP_TST_RM and this.prePos == Heptagons.only_hepts:
+		# use correct predefined special positions
+		if this.shape.inclReflections:
+		    psp = this.predefReflSpecPos
+		else:
+		    psp = this.predefRotSpecPos
+		data = psp[this.prePos][this.specPosIndex]
+		if data.has_key('file'):
+		    print 'see file %s/%s' % (this.rDir, data['file'])
+		return data
+
+    @property
     def stdPrePos(this):
 	try:
 	    return this.sav_stdPrePos
@@ -893,6 +909,17 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		if filename == None:
 		    return []
 	    else:
+		# TODO rm this tmp check
+		if Heptagons.TODO_TMP_TST_RM and this.prePos == Heptagons.only_hepts:
+		    # use correct predefined special positions
+		    if this.shape.inclReflections:
+			psp = this.predefReflSpecPos
+		    else:
+			psp = this.predefRotSpecPos
+		    # Oops not good for performance:
+		    # TODO only return correct one en add length func
+		    return [sp['set'] for sp in psp[this.prePos]]
+		    #this.predefSpecPos[this.prePos]['set']
 		if this.trisFill == None:
 		    return []
 		if this.shape.inclReflections:
@@ -908,6 +935,73 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 			)
 	    this.sav_stdPrePos = this.openPrePosFile(filename)
 	    return this.sav_stdPrePos
+
+    predefReflSpecPos = {
+	Heptagons.only_hepts: [
+	    # TODO can this be store more efficiently?
+	    {
+		#'file': 'frh-roots-1_0_1_0-fld_w.0-strip_I.py',
+		'set': [2.380384930680, 0.693073733187, -0.568746300899, -0.882436236397],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.star,
+	    },{
+		'set': [-1.886848679993, -2.675843213538, -3.128320557422, 1.954454451606],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.star,
+	    },{
+		'set': [-1.322333216810, -2.967180003002, -1.183250747277, 1.668301536282],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.star,
+	    },{
+		#'file': 'frh-roots-1_0_1_0-fld_shell.0-strip_II.py',
+		'set': [1.384557049344, 1.446970234245, -1.316197505877, -0.865444046055],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.strip_II,
+	    },{
+		'set': [-0.893811200268, -2.124009132680, -2.221957533639, 0.797991253652],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.strip_II,
+	    },{
+		'set': [-0.556102494513, -2.609660225894, -1.565821769393, -2.603286338808],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.strip_II,
+	    },{
+		'set': [-0.621710474737, -2.385085606668, 2.979725519925, 2.212236586768],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.strip_II,
+	    },{
+		'set': [-0.744610213721, -2.981881518271, 2.772201116514, -1.626936107939],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.strip_II,
+	    }
+	]
+    }
+
+    predefRotSpecPos = {
+	Heptagons.only_hepts: [
+	    # TODO can this be store more efficiently?
+	    {
+		#'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
+		'set': [-0.584447329706, -2.485288015235, 2.540930460981, 2.593087704091, 0.385739827710, -1.373557246626, -2.412102564927],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.alt_strip_II_alt_strip_II,
+	    },{
+		'set': [-0.801847203711, -2.608143090127, -2.668837734722, -1.252388597181, -1.021040545614, 1.744176845223, -2.460124162981],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.alt_strip_II_alt_strip_II,
+	    },{
+		'set': [-0.866025403784, -2.222676713307, -2.064570332814,
+		-0.827255867832, -0.884416238250, -2.064570332813, 1.904278188607],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.alt_strip_II_alt_strip_II,
+	    },{
+		#'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-strip_I-opp_shell.py',
+		'set': [1.731178674695, -0.460140302443, 1.753834771439, -0.784585557814, 2.512070703819, 1.753834771439, -2.488945590745],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.strip_I_star,
+	    },
+	]
+    }
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
