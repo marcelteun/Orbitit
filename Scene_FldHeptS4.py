@@ -308,8 +308,8 @@ class Shape(Heptagons.FldHeptagonShape):
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
-	    Es      = this.o4triEs[this.edgeAlternative][:]
-	    Fs      = this.o4triFs[this.edgeAlternative][:]
+	    Es      = this.o4triEs[this.oppEdgeAlternative][:]
+	    Fs      = this.o4triFs[this.oppEdgeAlternative][:]
             this.trisO4Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO4Shape.setBaseEdgeProperties(Es = Es)
             this.trisO4Shape.setBaseFaceProperties(Fs = Fs)
@@ -455,14 +455,14 @@ class Shape(Heptagons.FldHeptagonShape):
 	}
 	stdO3   = [6, 17, 5]
 	stdO3_x = [6, 17, 13]
-	altO3   = [5, 17, 15]
+	altO3   = [5, 20, 17]
 	altO3_x = [5, 17, 13]
         this.oppTriFs[trisAlt.strip_1_loose].append(stdO3)
         this.oppTriFs[trisAlt.strip_I].append(stdO3)
         this.oppTriFs[trisAlt.strip_II].append(stdO3)
-        this.oppTriFs[trisAlt.alt_strip_1_loose].append(stdO3)
-        this.oppTriFs[trisAlt.alt_strip_I].append(stdO3)
-        this.oppTriFs[trisAlt.alt_strip_II].append(stdO3)
+        this.oppTriFs[trisAlt.alt_strip_1_loose].append(altO3)
+        this.oppTriFs[trisAlt.alt_strip_I].append(altO3)
+        this.oppTriFs[trisAlt.alt_strip_II].append(altO3)
         this.oppTriFs[trisAlt.rot_strip_1_loose].append(stdO3)
         this.oppTriFs[trisAlt.arot_strip_1_loose].append(altO3)
         this.oppTriFs[trisAlt.rot_star_1_loose].append(stdO3_x)
@@ -547,7 +547,7 @@ class Shape(Heptagons.FldHeptagonShape):
             }
 	strip_1_loose = [5, 14, 5, 17]
 	stripI        = [5, 14, 5, 17]
-	stripII       = [4, 15, 5, 17]
+	stripII       = [4, 17, 5, 17]
 	star          = [5, 14, 6, 14]
 	star_1_loose  = [5, 14, 6, 14]
 	rot_strip     = [13, 15, 5, 15]

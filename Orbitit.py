@@ -188,7 +188,7 @@ SceneList = [
     ]
 
 DefaultScene = -1 # Start with this scene
-DefaultScene = 6 # Start with this scene
+DefaultScene = 7 # Start with this scene
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def __init__(this, shape, *args, **kwargs):
