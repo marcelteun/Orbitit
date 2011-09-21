@@ -112,6 +112,8 @@ o4_fld_0 = GeomTypes.Vec3([1, 0, 0])
 o4_fld_1 = GeomTypes.Vec3([0, 1, 1])
 isomS4 = isometry.S4(setup = {'o4axis0': o4_fld_0, 'o4axis1': o4_fld_1})
 o4fld = Rot(axis = o4_fld_1, angle = GeomTypes.qTurn)
+isomO4 = isometry.C4(setup = {'axis': o4_fld_1})
+
 o3axis = GeomTypes.Vec3([1/V3, 0, V2/V3])
 o3fld = Rot(axis = o3axis, angle = GeomTypes.tTurn)
 isomO3 = isometry.C3(setup = {'axis': o3axis})
@@ -153,14 +155,21 @@ class Shape(Heptagons.FldHeptagonShape):
 	    colors = [([rgb.cyan[:]], [])],
             name = 'o3TrisS4'
         )
+	trisO4Shape = Geom3D.SymmetricShape(
+	    Vs = [], Fs = [],
+	    finalSym = isomS4, stabSym = isomO4,
+	    colors = [([rgb.cyan[:]], [])],
+            name = 'o4SquareS4'
+        )
 	Heptagons.FldHeptagonShape.__init__(this,
-	    [heptagonsShape, xtraTrisShape],#, trisO3Shape],
+	    [heptagonsShape, xtraTrisShape, trisO3Shape, trisO4Shape],
 	    4, 3,
             name = 'FoldedRegHeptS4xI'
         )
 	this.heptagonsShape = heptagonsShape
 	this.xtraTrisShape = xtraTrisShape
 	this.trisO3Shape = trisO3Shape
+	this.trisO4Shape = trisO4Shape
 	this.posAngleMin = -math.pi/2 # 0?
         this.posAngleMax = math.pi/2
 	this.posAngle = math.pi/4
@@ -275,44 +284,12 @@ class Shape(Heptagons.FldHeptagonShape):
 	Vs.append(o4fld * Vs[6])				# Vs[15]
 	Vs.append(o4fld * Vs[-1])				# Vs[16]
 	Vs.append(o4fld * Vs[-1])				# Vs[17]
-	Vs.append(o4fld * Vs[0])				# Vs[18]
+	Vs.append(o4fld * Vs[5])				# Vs[18]
 	Vs.append(o4fld * Vs[-1])				# Vs[19]
 	Vs.append(o4fld * Vs[-1])				# Vs[20]
-	#-----------------------ORG--------------------------------
-	#Vs.append(o4fld * Vs[-1])				# Vs[7]
-	#Vs.append(o4fld * Vs[-1])				# Vs[8]
-	#Vs.append(o4fld * Vs[-1])				# Vs[9]
-	#o3axis = GeomTypes.Vec3([1, 0, V2])
-	#o3fld = Rot(axis = o3axis, angle = GeomTypes.tTurn)
-	#Vs.append(o3fld * Vs[1])				# Vs[10]
-	#Vs.append(o3fld * Vs[-1])				# Vs[11]
-	#Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))       # Vs[12]
-	#Vs.append(o3fld * Vs[0])				# Vs[13]
-	#Vs.append(Vec([-Vs[13][0], -Vs[13][1], Vs[13][2]]))    # Vs[14]
-	#Vs.append(o3fld * Vs[2])				# Vs[15]
-	#Vs.append(o3fld * Vs[-1])				# Vs[16]
-	#-----------------------------------------------
-        #Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
-        #Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
-        #Vs.append(Vec([Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[7]
-        #Vs.append(Rr * Vs[0])                                  # Vs[8]
-        #Vs.append(Rr * Vs[1])                                  # Vs[9]
-        #Vs.append(Rl * Vs[0])                                  # Vs[10]
-        #Vs.append(Rl * Vs[6])                                  # Vs[11]
-        ## V12 and V13 are the centres of the triangle on the O3 axis.
-        ## for V12 the O3 axis is (1, 1, 1). So we need to find the n*(1, 1, 1)
-        ## that lies in the face. This can found by projecting V12 straight onto
-        ## this axis, or we can rotate 180 degrees and take the average:
-        #halfTurn = HalfTurn(Vec([1, 1, 1]))
-        #Vs.append((Vs[1] + halfTurn*Vs[1]) / 2)                # Vs[12]
-        #halfTurn = HalfTurn(Vec([-1, 1, 1]))
-        #Vs.append((Vs[6] + halfTurn*Vs[6]) / 2)                # Vs[13]
-        #Vs.append(Rr * Vs[2])                                  # Vs[14]
-        #Vs.append(Rl * Vs[5])                                  # Vs[15]
-        #halfTurn = HalfTurn(Vec([1, 1, 1]))
-        #Vs.append((Vs[2] + halfTurn*Vs[2]) / 2)                # Vs[16]
-        #halfTurn = HalfTurn(Vec([-1, 1, 1]))
-        #Vs.append((Vs[5] + halfTurn*Vs[5]) / 2)                # Vs[17]
+	Vs.append(o4fld * Vs[0])				# Vs[21]
+	Vs.append(o4fld * Vs[-1])				# Vs[22]
+	Vs.append(o4fld * Vs[-1])				# Vs[23]
 	Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
@@ -327,12 +304,16 @@ class Shape(Heptagons.FldHeptagonShape):
 	if this.addXtraFs:
 	    Es      = this.o3triEs[this.edgeAlternative][:]
 	    Fs      = this.o3triFs[this.edgeAlternative][:]
-	    Es.extend(this.oppO3triEs[this.oppEdgeAlternative])
-	    Fs.extend(this.oppO3triFs[this.oppEdgeAlternative])
             this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
-            #theShapes.append(this.trisO3Shape)
+            theShapes.append(this.trisO3Shape)
+	    Es      = this.o4triEs[this.edgeAlternative][:]
+	    Fs      = this.o4triFs[this.edgeAlternative][:]
+            this.trisO4Shape.setBaseVertexProperties(Vs = Vs)
+            this.trisO4Shape.setBaseEdgeProperties(Es = Es)
+            this.trisO4Shape.setBaseFaceProperties(Fs = Fs)
+            theShapes.append(this.trisO4Shape)
             if (not this.onlyRegFs):
 		# when you use the rot alternative the rot is leading for
 		# choosing the colours.
@@ -384,7 +365,8 @@ class Shape(Heptagons.FldHeptagonShape):
     def initArrs(this):
 
 	#
-	# o4: 0 -> 18 -> 19 -> 20
+	# o4: 5 -> 18 -> 19 -> 20
+	#     0 -> 21 -> 22 -> 23
 	#
         # 6" = 16
 	#             6' = 15             12 = 2"
@@ -471,7 +453,6 @@ class Shape(Heptagons.FldHeptagonShape):
 		trisAlt.arot_star_1_loose:  arot_star[:],
                 #trisAlt.twist_strip_I:      twist_strip,
 	}
-	# TODO:
 	stdO3   = [6, 17, 5]
 	stdO3_x = [6, 17, 13]
 	altO3   = [5, 17, 15]
@@ -479,7 +460,7 @@ class Shape(Heptagons.FldHeptagonShape):
         this.oppTriFs[trisAlt.strip_1_loose].append(stdO3)
         this.oppTriFs[trisAlt.strip_I].append(stdO3)
         this.oppTriFs[trisAlt.strip_II].append(stdO3)
-        this.oppTriFs[trisAlt.alt_strip_1_loose].append(altO3)
+        this.oppTriFs[trisAlt.alt_strip_1_loose].append(stdO3)
         this.oppTriFs[trisAlt.alt_strip_I].append(stdO3)
         this.oppTriFs[trisAlt.alt_strip_II].append(stdO3)
         this.oppTriFs[trisAlt.rot_strip_1_loose].append(stdO3)
@@ -513,7 +494,6 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.twist_strip_I:		twist,
             }
 
-	# TODO:
 	std = [1, 9, 10]
 	alt = [2, 11, 12]
 	twist = [0, 8, 19]
@@ -528,10 +508,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:	[alt],
                 #trisAlt.twist_strip_I:		[twist],
 	    }
-	std = [6, 16, 15]
-	alt = [5, 18, 17]
+
+	std = [6, 15, 16, 17]
+	alt = [5, 18, 19, 20]
 	twist = [5, 23, 18, 22, 17, 13]
-        this.oppO3triFs = {
+        this.o4triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
                 trisAlt.strip_II:		[std],
@@ -564,9 +545,9 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose: strip_1_loose,
                 #trisAlt.twist_strip_I:     twist_stripI,
             }
-	strip_1_loose = [5, 14, 5, 15]
-	stripI        = [5, 14, 5, 15]
-	stripII       = [4, 15, 5, 15]
+	strip_1_loose = [5, 14, 5, 17]
+	stripI        = [5, 14, 5, 17]
+	stripII       = [4, 15, 5, 17]
 	star          = [5, 14, 6, 14]
 	star_1_loose  = [5, 14, 6, 14]
 	rot_strip     = [13, 15, 5, 15]
@@ -606,10 +587,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:	alt,
                 #trisAlt.twist_strip_I:		twist,
             }
-	std = [6, 16, 16, 15, 15, 6]
-	alt = [5, 18, 18, 17, 17, 5]
+
+	std = [6, 15, 15, 16, 16, 17, 17, 6]
+	alt = [5, 18, 18, 19, 19, 20, 20, 5]
 	twist = []
-        this.oppO3triEs = {
+        this.o4triEs = {
                 trisAlt.strip_1_loose:		std,
                 trisAlt.strip_I:		std,
                 trisAlt.strip_II:		std,
@@ -650,7 +632,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    ) and not (
 		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
-    rDir = 'data/Data_FldHeptA4'
+    rDir = 'data/Data_FldHeptS4'
     rPre = 'frh-roots'
 
     def mapPrePosStrToFileStr(this, prePosId):
