@@ -39,6 +39,7 @@ from GeomTypes import Vec3      as Vec
 Title = 'Polyhedra with Folded Regular Heptagons S4'
 
 trisAlt = Heptagons.TrisAlt()
+trisAlt.baseKey[trisAlt.strip_I] = True
 
 dyn_pos		=  Heptagons.dyn_pos
 only_hepts	=  Heptagons.only_hepts
@@ -616,6 +617,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
 	    ],
+	    trisAlt,
 	    Stringify,
 	    *args, **kwargs
 	)

@@ -42,6 +42,15 @@ Title = 'Polyhedra with Folded Regular Heptagons A4xI'
 V2 = math.sqrt(2)
 
 trisAlt = Heptagons.TrisAlt()
+trisAlt.baseKey[trisAlt.strip_I]           = True
+trisAlt.baseKey[trisAlt.strip_II]          = True
+trisAlt.baseKey[trisAlt.star]              = True
+trisAlt.baseKey[trisAlt.strip_1_loose]     = True
+trisAlt.baseKey[trisAlt.star_1_loose]      = True
+trisAlt.baseKey[trisAlt.alt_strip_I]       = True
+trisAlt.baseKey[trisAlt.alt_strip_II]      = True
+trisAlt.baseKey[trisAlt.alt_strip_1_loose] = True
+trisAlt.baseKey[trisAlt.twist_strip_I]     = True
 
 dyn_pos		= Heptagons.dyn_pos
 open_file	= Heptagons.open_file
@@ -771,6 +780,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[T64_0],
 		Stringify[dyn_pos],
 	    ],
+	    trisAlt,
 	    Stringify,
 	    *args, **kwargs
 	)

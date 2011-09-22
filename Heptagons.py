@@ -22,7 +22,6 @@
 #-----------------------------------------------------------------
 # $Log$
 #
-TODO_TMP_TST_RM = True
 import wx
 import math
 import rgb
@@ -133,22 +132,6 @@ class TrisAlt:
     star_1_loose_arot_star	= (star_1_loose, arot_star_1_loose)
     strip_1_loose_arot_star	= (strip_1_loose, arot_star_1_loose)
     alt_strip_1_loose_arot_star	= (alt_strip_1_loose, arot_star_1_loose)
-
-    baseKey = {
-        strip_I: True,
-	strip_II: True,
-	star: True,
-	strip_1_loose: True,
-	star_1_loose: True,
-	alt_strip_I: True,
-	alt_strip_II: True,
-	alt_strip_1_loose: True,
-	rot_strip_1_loose: False,
-	arot_strip_1_loose: False,
-	rot_star_1_loose: False,
-	arot_star_1_loose: False,
-	twist_strip_I: True,
-    }
 
     stringify = {
 	strip_1_loose:		'Strip 1 Loose',
@@ -328,10 +311,11 @@ class TrisAlt:
 	t = t.replace('_i', '_I')
 	t = t.replace('_i', '_I')
 	t = t.replace('rot.', 'rot')
-	#print 'DBP map(%s) ==> %s' % (trisAlt.stringify[trisFillId], t)
+	#print 'DBP map(%s) ==> %s' % (this.stringify[trisFillId], t)
 	return t
 
     def __init__(this):
+	this.baseKey = {}
 	this.choiceList = [s for s in this.stringify.itervalues()]
 	this.mapKeyOnFileStr = {}
 	this.mapStrOnFileStr = {}
@@ -343,8 +327,6 @@ class TrisAlt:
 	    this.mapStrOnFileStr[tStr]    = fileStr
 	    this.mapFileStrOnStr[fileStr] = tStr
 	    this.mapFileStrOnKey[fileStr] = tId
-
-trisAlt = TrisAlt()
 
 class FoldMethod:
     parallel  = 0
@@ -1066,6 +1048,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    shape, canvas,
 	    maxHeight, 
 	    prePosStrLst,
+	    trisAlt,
 	    stringify,
 	    parent,
 	    *args, **kwargs
@@ -1077,6 +1060,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	maxHeight: max translation height to be used for the heptagon
 	prePosStrLst: string list that expresses which special positions can be
 	              found, e.g. where all holes disappear.
+	trisAlt: the TrisAlt object that is valid for this scene.
 	stringify: hash table that maps enums on strings.
 	*args: standard wx Frame *args
 	**kwargs: standard wx Frame **kwargs
@@ -1085,6 +1069,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         wx.Frame.__init__(this, parent, *args, **kwargs)
 	this.parent = parent
         this.shape = shape
+        this.trisAlt = trisAlt
         this.canvas = canvas
 	this.maxHeight = maxHeight
 	this.prePosStrLst = prePosStrLst
@@ -1658,8 +1643,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         return this.prePosGui.GetStringSelection() != this.prePosStrLst[-1]
 
     def saveTrisFillItem(this):
-	currentChoice = trisAlt.key[this.trisFillGui.GetStringSelection()]
-	if trisAlt.isBaseKey(currentChoice):
+	currentChoice = this.trisAlt.key[this.trisFillGui.GetStringSelection()]
+	if this.trisAlt.isBaseKey(currentChoice):
 	    this.__sav_reflTrisFill = currentChoice
 	else:
 	    this.__sav_rotTrisFill = currentChoice
@@ -1667,30 +1652,33 @@ class FldHeptagonCtrlWin(wx.Frame):
     def setEnableTrisFillItems(this, itemList = None):
 	# first time fails
 	if this.trisFillGui.GetStringSelection() == '':
-	    currentChoice = trisAlt.strip_I
+	    currentChoice = this.trisAlt.strip_I
 	else:
-	    currentChoice = trisAlt.key[this.trisFillGui.GetStringSelection()]
+	    currentChoice = this.trisAlt.key[this.trisFillGui.GetStringSelection()]
 	if itemList == None:
-	    itemList = trisAlt.choiceList
+	    itemList = this.trisAlt.choiceList
 	    if this.shape.inclReflections:
-		isValid = lambda c: trisAlt.isBaseKey(trisAlt.key[c])
-		if not trisAlt.isBaseKey(currentChoice):
+		isValid = lambda c: this.trisAlt.isBaseKey(this.trisAlt.key[c])
+		if not this.trisAlt.isBaseKey(currentChoice):
 		    try:
-			currentChoice = trisAlt.key[this.savTrisRefl]
+			currentChoice = this.trisAlt.key[this.savTrisRefl]
 		    except AttributeError:
-			currentChoice = trisAlt.strip_I
+			# TODO: use the first one that is valid
+			currentChoice = this.trisAlt.strip_I
 	    else:
 		def isValid (c):
-		    c_key = trisAlt.key[c]
-		    if trisAlt.isBaseKey(c_key) or type(c_key) == type(1):
+		    c_key = this.trisAlt.key[c]
+		    if this.trisAlt.isBaseKey(c_key) or type(c_key) == type(1):
 			return False
 		    else:
+			# TODO: I think that all should be included for S4
 			return c_key[0] >= c_key[1]
-		if not isValid(trisAlt.stringify[currentChoice]):
+		if not isValid(this.trisAlt.stringify[currentChoice]):
 		    try:
-			currentChoice = trisAlt.key[this.savTrisNoRefl]
+			currentChoice = this.trisAlt.key[this.savTrisNoRefl]
 		    except AttributeError:
-			currentChoice = trisAlt.strip_I_strip_I
+			# TODO: use the first one that is valid
+			currentChoice = this.trisAlt.strip_I_strip_I
 	else:
 	    isValid = lambda c: True
 	this.trisFillGui.Clear()
@@ -1698,12 +1686,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 	for choice in itemList:
 	    if isValid(choice):
 		this.trisFillGui.Append(choice)
-		if currentChoice == trisAlt.key[choice]:
+		if currentChoice == this.trisAlt.key[choice]:
 		    currentStillValid = True
 		lastValid = choice
 
 	if currentStillValid:
-	    this.trisFillGui.SetStringSelection(trisAlt.stringify[currentChoice])
+	    this.trisFillGui.SetStringSelection(this.trisAlt.stringify[currentChoice])
 	else:
 	    try:
 		this.trisFillGui.SetStringSelection(lastValid)
@@ -1717,7 +1705,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	s = this.trisFillGui.GetStringSelection()
 	if s == '':
 	    return None
-	t = trisAlt.key[s]
+	t = this.trisAlt.key[s]
         if this.shape.inclReflections:
 	    return t
 	else:
@@ -1725,7 +1713,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     @property
     def oppTrisFill(this):
-	t = trisAlt.key[this.trisFillGui.GetStringSelection()]
+	t = this.trisAlt.key[this.trisFillGui.GetStringSelection()]
         if this.shape.inclReflections:
 	    return t
 	else:
@@ -1737,19 +1725,19 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def nvidea_workaround(this):
 	restoreMyShape = (
-	    this.prevTrisFill == trisAlt.twist_strip_I and
-	    this.prevOppTrisFill == trisAlt.twist_strip_I and
-	    this.trisFill != trisAlt.twist_strip_I and
-	    this.oppTrisFill != trisAlt.twist_strip_I
+	    this.prevTrisFill == this.trisAlt.twist_strip_I and
+	    this.prevOppTrisFill == this.trisAlt.twist_strip_I and
+	    this.trisFill != this.trisAlt.twist_strip_I and
+	    this.oppTrisFill != this.trisAlt.twist_strip_I
 	)
 	changeMyShape = (
-	    this.trisFill == trisAlt.twist_strip_I and
-	    this.oppTrisFill == trisAlt.twist_strip_I
+	    this.trisFill == this.trisAlt.twist_strip_I and
+	    this.oppTrisFill == this.trisAlt.twist_strip_I
 	)
 	if changeMyShape:
 	    if (
-		this.prevTrisFill != trisAlt.twist_strip_I and
-		this.prevOppTrisFill != trisAlt.twist_strip_I
+		this.prevTrisFill != this.trisAlt.twist_strip_I and
+		this.prevOppTrisFill != this.trisAlt.twist_strip_I
 	    ):
 		print '---------nvidia-seg-fault-work-around-----------'
 		this.nvidea_workaround_0()
@@ -2006,23 +1994,6 @@ class FldHeptagonCtrlWin(wx.Frame):
             oppFld2 = fld2 = this.fld2None
 	    posVal = this.aNone
 	    nrPos = 0
-	    if not TODO_TMP_TST_RM:
-	        # Disable / enable appropriate folding methods.
-	        for i in range(len(this.foldMethodList)):
-		    method = this.foldMethodListItems[i]
-		    this.foldMethodGui.ShowItem(i,
-		        this.isFoldValid(this.foldMethodListItems[i])
-		    )
-		    # leave up to the user to decide which folding method to choose
-		    # in case the seposAngleGuilected one was disabled.
-
-	        choiceLst = []
-	        if this.isFoldValid(this.foldMethod):
-		    for k, v in trisAlt.stringify.iteritems():
-		        if this.isTrisFillValid(k):
-			    choiceLst.append(v)
-	        this.setEnableTrisFillItems(choiceLst)
-
 	    if (this.showOnlyHepts()):
 		this.shape.addXtraFs = False
 		this.restoreTris = True
@@ -2042,12 +2013,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 	    # get fold, tris als
 	    sps = this.specPosSetup
-	    # TODO RM TMP TEST
-	    if TODO_TMP_TST_RM:
-		this.foldMethodGui.SetStringSelection(FoldName[sps['7fold']])
-		this.trisFillGui.SetStringSelection(trisAlt.stringify[sps['tris']])
-		this.onFoldMethod()
-		this.onTriangleFill()
+	    this.foldMethodGui.SetStringSelection(FoldName[sps['7fold']])
+	    this.trisFillGui.SetStringSelection(this.trisAlt.stringify[sps['tris']])
+	    this.onFoldMethod()
+	    this.onTriangleFill()
+
 	    for gui in [
 		this.dihedralAngleGui, this.posAngleGui,
 		this.heightGui,
@@ -2092,11 +2062,6 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.enableGuisNoRefl(restore = False)
 	    this.heightGui.SetValue(
 		this.maxHeight - this.heightF * c.height)
-	    if not TODO_TMP_TST_RM:
-		# enable all folding and triangle alternatives:
-		for i in range(len(this.foldMethodList)):
-		    this.foldMethodGui.ShowItem(i, True)
-
 	    this.setEnableTrisFillItems()
         this.updateShape()
 
