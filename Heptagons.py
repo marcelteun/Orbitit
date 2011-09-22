@@ -1547,11 +1547,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.fold1OppGui.Disable()
 		this.fold2OppGui.Enable()
 
+    def theReflPosAngle(this):
+	# meant to be implemented by child
+	return 0
+
     def setReflPosAngle(this):
-	if this.trisFill & twist_bit == twist_bit:
-	    posAngle = math.pi/4
-	else:
-	    posAngle = 0
+	posAngle = this.theReflPosAngle()
 	this.shape.setPosAngle(posAngle)
 	this.posAngleGui.SetValue(Geom3D.Rad2Deg * posAngle)
 

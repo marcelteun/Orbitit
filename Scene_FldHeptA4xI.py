@@ -800,6 +800,12 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     rDir = 'data/Data_FldHeptA4'
     rPre = 'frh-roots'
 
+    def theReflPosAngle(this):
+	if this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit:
+	    return math.pi/4
+	else:
+	    return 0
+
     def mapPrePosStrToFileStr(this, prePosId):
 	try:
 	    if this.shape.inclReflections:

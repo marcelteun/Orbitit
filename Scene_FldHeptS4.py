@@ -39,7 +39,7 @@ from GeomTypes import Vec3      as Vec
 Title = 'Polyhedra with Folded Regular Heptagons S4'
 
 trisAlt = Heptagons.TrisAlt()
-trisAlt.baseKey[trisAlt.strip_I] = True
+trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
 dyn_pos		=  Heptagons.dyn_pos
 only_hepts	=  Heptagons.only_hepts
@@ -173,7 +173,6 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.trisO4Shape = trisO4Shape
 	this.posAngleMin = -math.pi/2 # 0?
         this.posAngleMax = math.pi/2
-	this.posAngle = math.pi/4
 	this.height = 3.9
         this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
 	this.initArrs()
@@ -256,6 +255,10 @@ class Shape(Heptagons.FldHeptagonShape):
 
     def setV(this):
 
+	# o4: 5 -> 18 -> 19 -> 20
+	#     0 -> 21 -> 22 -> 23
+	#     6 -> 26
+	#
         # 6" = 16
 	#             6' = 15             12 = 2"
         #          o4          0
@@ -270,7 +273,7 @@ class Shape(Heptagons.FldHeptagonShape):
         #        14        4       3        8 = 0'
         #
         #
-        #         2' = 13               7 = 5'
+        #         2' = 13               7 = 5' -> o3 -> 24, 25
 
 	this.posHeptagon()
 	Vs = this.heptagon.Vs[:]
@@ -291,6 +294,9 @@ class Shape(Heptagons.FldHeptagonShape):
 	Vs.append(o4fld * Vs[0])				# Vs[21]
 	Vs.append(o4fld * Vs[-1])				# Vs[22]
 	Vs.append(o4fld * Vs[-1])				# Vs[23]
+	Vs.append(o3fld * Vs[7])				# Vs[24]
+	Vs.append(o3fld * Vs[-1])				# Vs[25]
+	Vs.append(o4fld * Vs[6])				# Vs[26]
 	Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
@@ -303,14 +309,18 @@ class Shape(Heptagons.FldHeptagonShape):
 	theShapes = [this.heptagonsShape]
 	# TODO rm:
 	if this.addXtraFs:
-	    Es      = this.o3triEs[this.edgeAlternative][:]
-	    Fs      = this.o3triFs[this.edgeAlternative][:]
+	    if this.edgeAlternative == trisAlt.twist_strip_I:
+		Fs = this.o3triFs[this.edgeAlternative][this.inclReflections][:]
+		Es = this.o3triEs[this.edgeAlternative][this.inclReflections][:]
+	    else:
+		Fs = this.o3triFs[this.edgeAlternative][:]
+		Es = this.o3triEs[this.edgeAlternative][:]
             this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
-	    Es      = this.o4triEs[this.oppEdgeAlternative][:]
-	    Fs      = this.o4triFs[this.oppEdgeAlternative][:]
+	    Es = this.o4triEs[this.oppEdgeAlternative][:]
+	    Fs = this.o4triFs[this.oppEdgeAlternative][:]
             this.trisO4Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO4Shape.setBaseEdgeProperties(Es = Es)
             this.trisO4Shape.setBaseFaceProperties(Fs = Fs)
@@ -322,24 +332,16 @@ class Shape(Heptagons.FldHeptagonShape):
 		    eAlt = this.oppEdgeAlternative
 		else:
 		    eAlt = this.edgeAlternative
-		Es      = this.triEs[this.edgeAlternative][:]
 		if this.edgeAlternative == trisAlt.twist_strip_I:
 		    Fs = this.triFs[this.edgeAlternative][
 			this.inclReflections][:]
-		    Fs.extend(
-			this.oppTriFs[this.oppEdgeAlternative][
-			    this.inclReflections
-			]
-		    )
-		    Es.extend(
-			this.oppTriEs[this.oppEdgeAlternative][
-			    this.inclReflections
-			]
-		    )
+		    Es = this.triEs[this.edgeAlternative][this.inclReflections][:]
                     colIds = this.triColIds[eAlt][this.inclReflections]
+		    # oppTriFs and oppTriEs are empty...
 		else:
 		    Fs = this.triFs[this.edgeAlternative][:]
 		    Fs.extend(this.oppTriFs[this.oppEdgeAlternative])
+		    Es = this.triEs[this.edgeAlternative][:]
 		    Es.extend(this.oppTriEs[this.oppEdgeAlternative])
                     colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
@@ -368,6 +370,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	#
 	# o4: 5 -> 18 -> 19 -> 20
 	#     0 -> 21 -> 22 -> 23
+	#     6 -> 26
 	#
         # 6" = 16
 	#             6' = 15             12 = 2"
@@ -383,7 +386,7 @@ class Shape(Heptagons.FldHeptagonShape):
         #        14        4       3        8 = 0'
         #
         #
-        #         2' = 13               7 = 5'
+        #         2' = 13               7 = 5' -> o3 -> 24, 25
 
 	I_loose = [[2, 3, 7]]
 	noLoose = [[2, 3, 8]]
@@ -396,11 +399,13 @@ class Shape(Heptagons.FldHeptagonShape):
 	star.extend(noLoose)
 	strip_1_loose.extend(I_loose)
 	star_1_loose.extend(I_loose)
-	# TODO:
-	#twist_strip = { # reflections included:
-	#    False: [[2, 3, 7], [1, 2, 20], [0, 1, 8]],
-	#    True:  [[2, 3, 7], [1, 2, 21, 20], [0, 1, 20, 8]]
-	#}
+	# TODO: there are more possibilities for non-reflective twists..
+	twist_strip = { # reflections included:
+	    #False: [[2, 3, 7], [1, 2, 26], [0, 1, 26]],
+	    #False: [[2, 3, 7], [1, 2, 26], [0, 1, 21]],
+	    False: [[2, 12, 25], [2, 3, 7], [1, 2, 25], [25, 26, 1], [0, 1, 26], [26, 21, 0]],
+	    True:  [[2, 3, 7], [1, 2, 25, 26], [0, 1, 26, 21]]
+	}
 	this.triFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
@@ -410,7 +415,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:  strip_1_loose[:],
                 trisAlt.alt_strip_I:        stripI[:],
                 trisAlt.alt_strip_II:       stripII[:],
-                #trisAlt.twist_strip_I:      twist_strip,
+                trisAlt.twist_strip_I:      twist_strip,
 	}
 	stdO3   = [1, 2, 9]
 	altO3   = [2, 9, 11]
@@ -435,10 +440,10 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_star = [[13, 17, 14], [13, 5, 6]]
 	arot_star = [[13, 17, 14], [13, 17, 17]]
 	# TODO:
-	#twist_strip = { # reflections included:
-	#    False: [[1, 20, 8], [2, 21, 20]],
-	#    True:  []
-	#}
+	twist_strip = { # reflections included:
+	    False: [],
+	    True:  []
+	}
         this.oppTriFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
@@ -452,7 +457,7 @@ class Shape(Heptagons.FldHeptagonShape):
 		trisAlt.arot_strip_1_loose: rot_strip[:],
 		trisAlt.rot_star_1_loose:   rot_star[:],
 		trisAlt.arot_star_1_loose:  arot_star[:],
-                #trisAlt.twist_strip_I:      twist_strip,
+                trisAlt.twist_strip_I:      twist_strip,
 	}
 	stdO3   = [6, 17, 5]
 	stdO3_x = [6, 17, 13]
@@ -476,7 +481,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_x = [0, 0, 1, 1, 1, 0]
 	arot_x = [1, 1, 0, 0, 1, 0]
 	twist = { # reflections included:
-	    False: [1, 1, 0, 0, 1],
+	    False: [0, 1, 1, 0, 1, 0],
 	    True:  [1, 1, 0]
 	}
         this.triColIds = {
@@ -497,7 +502,10 @@ class Shape(Heptagons.FldHeptagonShape):
 
 	std = [1, 9, 10]
 	alt = [2, 11, 12]
-	twist = [0, 8, 19]
+	twist = { # reflections included:
+	    False: [[2, 11, 12]],
+	    True: [[2, 7, 11, 24, 12, 25]]
+	}
         this.o3triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -507,12 +515,12 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:		[alt],
                 trisAlt.alt_strip_II:		[alt],
                 trisAlt.alt_strip_1_loose:	[alt],
-                #trisAlt.twist_strip_I:		[twist],
+                trisAlt.twist_strip_I:		twist,
 	    }
 
 	std = [6, 15, 16, 17]
 	alt = [5, 18, 19, 20]
-	twist = [5, 23, 18, 22, 17, 13]
+	twist = [0, 21, 22, 23]
         this.o4triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -526,7 +534,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose:	[alt],
                 trisAlt.rot_star_1_loose:	[std],
                 trisAlt.arot_star_1_loose:	[alt],
-                #trisAlt.twist_strip_I:		[twist],
+                trisAlt.twist_strip_I:		[twist],
 	    }
 
 	strip_1_loose = [2, 7, 2, 8, 2, 9]
@@ -534,7 +542,11 @@ class Shape(Heptagons.FldHeptagonShape):
 	stripII       = [3, 8, 3, 9, 2, 9]
 	star          = [3, 8, 2, 8, 1, 8]
 	star_1_loose  = [2, 7, 2, 8, 1, 8]
-	twist_stripI  = [2, 7, 2, 21, 1, 20]
+	twist_stripI  = { # reflections included:
+	    False: [12, 25, 2, 25, 25, 1, 1, 26, 26, 0],
+	    #False: [25, 2, 2, 26, 26, 1, 1, 21],
+	    True:  [1, 26]
+	}
         this.triEs = {
                 trisAlt.strip_1_loose:     strip_1_loose,
                 trisAlt.strip_I:           stripI,
@@ -544,7 +556,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:       stripI,
                 trisAlt.alt_strip_II:      stripII,
                 trisAlt.alt_strip_1_loose: strip_1_loose,
-                #trisAlt.twist_strip_I:     twist_stripI,
+                trisAlt.twist_strip_I:     twist_stripI,
             }
 	strip_1_loose = [5, 14, 5, 17]
 	stripI        = [5, 14, 5, 17]
@@ -555,7 +567,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_star      = [13, 15, 6, 13]
 	arot_star     = [13, 15, 13, 17]
 	twist_stripI  = { # reflections included:
-	    False: [1, 8, 2, 20],
+	    False: [],
 	    True:  []
 	}
         this.oppTriEs = {
@@ -571,12 +583,15 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose: rot_strip,
                 trisAlt.rot_star_1_loose:   rot_star,
                 trisAlt.arot_star_1_loose:  arot_star,
-                #trisAlt.twist_strip_I:      twist_stripI,
+                trisAlt.twist_strip_I:      twist_stripI,
             }
 
 	std = [1, 9, 9, 10, 10, 1]
 	alt = [2, 11, 11, 12, 12, 2]
-	twist = [0, 8, 8, 19, 19, 0]
+	twist = { # reflections included:
+	    False: [2, 11, 11, 12, 12, 2],
+	    True:  [2, 7, 7, 11, 11, 24, 24, 12, 12, 25, 25, 2]
+	}
         this.o3triEs = {
                 trisAlt.strip_1_loose:		std,
                 trisAlt.strip_I:		std,
@@ -586,12 +601,12 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:		alt,
                 trisAlt.alt_strip_II:		alt,
                 trisAlt.alt_strip_1_loose:	alt,
-                #trisAlt.twist_strip_I:		twist,
+                trisAlt.twist_strip_I:		twist,
             }
 
 	std = [6, 15, 15, 16, 16, 17, 17, 6]
 	alt = [5, 18, 18, 19, 19, 20, 20, 5]
-	twist = []
+	twist = [0, 21, 21, 22, 22, 23, 23, 0]
         this.o4triEs = {
                 trisAlt.strip_1_loose:		std,
                 trisAlt.strip_I:		std,
@@ -605,14 +620,14 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose:	alt,
                 trisAlt.rot_star_1_loose:	std,
                 trisAlt.arot_star_1_loose:	alt,
-                #trisAlt.twist_strip_I:		twist,
+                trisAlt.twist_strip_I:		twist,
             }
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
 	Heptagons.FldHeptagonCtrlWin.__init__(this,
 	    shape, canvas,
-	    4, # maxHeigth
+	    8, # maxHeigth
 	    [ # prePosLst
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
