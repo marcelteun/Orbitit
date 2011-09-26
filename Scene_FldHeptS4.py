@@ -198,59 +198,34 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #
         #                         7 = 6'
-	return s
-	# TODO
-        Vs = this.getBaseVertexProperties()['Vs']
-        if this.edgeAlternative == trisAlt.strip_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.strip_I:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.strip_II:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[3], Vs[9])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.star:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[1], Vs[8])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.star_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[1], Vs[8])
-            dLen = Vlen(Vs[1], Vs[9])
-        elif this.edgeAlternative == trisAlt.alt_strip_I:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt_strip_II:
-            aLen = Vlen(Vs[3], Vs[8])
-            bLen = Vlen(Vs[3], Vs[9])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
-        elif this.edgeAlternative == trisAlt.alt_strip_1_loose:
-            aLen = Vlen(Vs[2], Vs[7])
-            bLen = Vlen(Vs[2], Vs[8])
-            cLen = Vlen(Vs[2], Vs[9])
-            dLen = Vlen(Vs[2], Vs[14])
+        Vs = this.baseVs
+	Es = this.triEs[this.edgeAlternative]
+	if this.edgeAlternative == trisAlt.twist_strip_I:
+		Es = Es[this.inclReflections]
+	aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
+	bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
+	cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
+	Es = this.o4triEs[this.edgeAlternative]
+	dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
+	if this.inclReflections:
+	    s = 'T = %02.2f; |a|: %s, |b|: %s, |c|: %s, |d|: %s' % (
+		    this.height, aLen, bLen, cLen, dLen
+		)
 	else:
-	    raise TypeError, 'Unknown edgeAlternative %s' % str(
-		this.edgeAlternative)
-        #tst:
-        #aLen = Vlen(Vs[0], [(Vs[6][i] + Vs[1][i]) / 2 for i in range(3)])
-        #bLen = Vlen([(Vs[5][i] + Vs[2][i]) / 2 for i in range(3)], [(Vs[6][i] + Vs[1][i]) / 2 for i in range(3)])
-        s = '%s, |a|: %02.2f, |b|: %02.2f, |c|: %02.2f, |d|: %02.2f' % (
-                s, aLen, bLen, cLen, dLen
-            )
-
+	    Es = this.oppTriEs[this.oppEdgeAlternative]
+	    if this.edgeAlternative == trisAlt.twist_strip_I:
+		Es = Es[this.inclReflections]
+	    opp_bLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
+	    opp_cLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
+	    #Es = this.oppO3triEs[this.oppEdgeAlternative]
+	    if this.oppEdgeAlternative != trisAlt.twist_strip_I:
+		opp_dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
+	    else:
+		opp_dLen = '-'
+	    s = 'T = %02.2f; |a|: %s, |b|: %s (%s), |c|: %s (%s), |d|: %s (%s)' % (
+		    this.height,
+		    aLen, bLen, opp_bLen, cLen, opp_cLen, dLen, opp_dLen
+		)
         return s
 
     def setV(this):
@@ -297,6 +272,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	Vs.append(o3fld * Vs[7])				# Vs[24]
 	Vs.append(o3fld * Vs[-1])				# Vs[25]
 	Vs.append(o4fld * Vs[6])				# Vs[26]
+	this.baseVs = Vs
 	Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
@@ -545,7 +521,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	twist_stripI  = { # reflections included:
 	    False: [12, 25, 2, 25, 25, 1, 1, 26, 26, 0],
 	    #False: [25, 2, 2, 26, 26, 1, 1, 21],
-	    True:  [1, 26]
+	    True:  [2, 7, 2, 25, 1, 26]
 	}
         this.triEs = {
                 trisAlt.strip_1_loose:     strip_1_loose,
@@ -590,7 +566,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	alt = [2, 11, 11, 12, 12, 2]
 	twist = { # reflections included:
 	    False: [2, 11, 11, 12, 12, 2],
-	    True:  [2, 7, 7, 11, 11, 24, 24, 12, 12, 25, 25, 2]
+	    True:  []
 	}
         this.o3triEs = {
                 trisAlt.strip_1_loose:		std,
