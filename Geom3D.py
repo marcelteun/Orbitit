@@ -151,6 +151,13 @@ def readPyFile(fd):
     exec fd in ed
     return ed['shape']
 
+def isInt(str):
+    try:
+	num = int(str)
+	return True
+    except ValueError:
+	return False
+
 def readOffFile(fd, recreateEdges = True, name = ''):
     """Reads an the std 'off' format of a 3D object and returns an object of the
     SimpleShape class.
@@ -232,9 +239,14 @@ def readOffFile(fd, recreateEdges = True, name = ''):
 		    if len(words) == lenF + 1:
 			cols.append([0.8, 0.8, 0.8])
 		    else:
-			cols.append(
-			    [float(words[j])/255 for j in range(lenF+1, lenF+4)]
-			)
+			if isInt(words[lenF+1]):
+			    cols.append(
+				[float(words[j])/255 for j in range(lenF+1, lenF+4)]
+			    )
+			else:
+			    cols.append(
+				[float(words[j]) for j in range(lenF+1, lenF+4)]
+			    )
 		    if debug: print 'F[', i, '] =',  Fs[-1]
 		    if debug: print 'col[', i, '] =',  cols[-1]
 		    i = i + 1
