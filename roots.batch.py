@@ -45,6 +45,13 @@ Sigma     = SigmaH / H
 
 eqFloatMargin = 1.0e-12
 
+V2 = numx.sqrt(2.)
+hV2 = V2/2
+V3 = numx.sqrt(3.)
+hV3 = V3/2
+tV3 = V3/3
+V2dV3 = V2/V3
+
 def eq(a, b, precision = eqFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
@@ -165,6 +172,349 @@ class Fold:
 	    return None
 
 fold = Fold()
+
+def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
+    """Returns the positioned base heptagon indepent on symmetry
+
+    Returns the tuple of 7 vertices.
+    T: translation of the heptagon
+    alpha: half of the dihedral angle
+    beta0: first fold left
+    beta1: first fold right
+    gamma0: second fold left
+    gamma0: second fold right
+    delta: rotation around the z-axis
+    fold_type: expresses how the heptagon is folded, ie over which diagonals
+    """
+    # before rotating, with heptagon centre = origin
+    R = 1.0 / (2*H)       # radius
+    x0, y0, z0 = (H + SigmaH + RhoH, 0.0,     0.)
+    x1, y1, z1 = (    SigmaH + RhoH, Rho/2,   0.)
+    x2, y2, z2 = (             RhoH, Sigma/2, 0.)
+    x3, y3, z3 = (              0.0, 1.0/2,   0.)
+    x4, y4, z4 = (               x3, -y3,     z3)
+    x5, y5, z5 = (               x2, -y2,     z2)
+    x6, y6, z6 = (               x1, -y1,     z1)
+    Tx = R - x0   # translate in X to centre on origin
+    cosa  = numx.cos(alpha)
+    sina  = numx.sin(alpha)
+    cosb0 = numx.cos(beta0)
+    sinb0 = numx.sin(beta0)
+    cosg0 = numx.cos(gamma0)
+    sing0 = numx.sin(gamma0)
+    cosb1 = numx.cos(beta1)
+    sinb1 = numx.sin(beta1)
+    cosg1 = numx.cos(gamma1)
+    sing1 = numx.sin(gamma1)
+    if (fold_type == Fold.parallel):
+	# this code I wrote first only for the parallel case.
+	# I didn't remove the code since it so much faster then the newer code.
+	x0__ = cosg * (H) + SigmaH + RhoH
+	z0__ = sing * (H)
+
+	x0_  = cosb * (x0__ - RhoH) - sinb * (z0__       ) + RhoH
+	z0_  = cosb * (z0__       ) + sinb * (x0__ - RhoH)
+
+	x1_  = cosb * (SigmaH) + RhoH
+	z1_  = sinb * (SigmaH)
+
+	x0  = sina * x0_ - cosa * z0_
+	x1  = sina * x1_ - cosa * z1_
+	x2  = sina * RhoH
+	x3  = 0
+
+	y0  =  0.0
+	y1  =  Rho / 2
+	y2  =  Sigma / 2
+	y3  =  1.0 / 2
+
+	z0  = T - (sina * z0_ + cosa * x0_)
+	z1  = T - (sina * z1_ + cosa * x1_)
+	z2  = T - cosa * (         RhoH)
+	z3  = T
+    elif (fold_type == Fold.triangle):
+	#
+	#             0
+	#            _^_
+	#      1   _/   \_   6
+	#        _/       \_
+	#      _/  axes  b  \_
+	#     /               \
+	#    2 --------------- 5  axis a
+	#
+	#
+	#         3       4
+	#                                ^ X
+	#                                |
+	#                                |
+	#                       Y <------+
+	#
+	# rotate gamma around b
+	# rotate beta  around a
+	#
+	# ROTATE V1 around axis b: angle gamma
+	# ------------------------------------
+	# refer to V1 as if centre i origon:
+	# rotate around axis b as if centre -> V1 is x-axis:
+	x = (R - H) + cosg * H
+	z =           sing * H
+	# now correct for V1 not on x-axis: rotate d around z-axis
+	# with d: angle of heptagon centre to V1 with x-as
+	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	cosd = (x1 + Tx) / R
+	sind = y1 / R
+	x1, y1, z1 = (cosd * x - Tx, sind * x, z)
+	# ROTATE V0 and V1 around axis a: angle beta
+	# ------------------------------------
+	x = H + SigmaH
+	x0, y0, z0 = (RhoH + cosb * x, y0, sinb * x)
+	x = x1 - RhoH
+	x1, y1, z1 = (RhoH + cosb * x - sinb * z1, y1, sinb * x + cosb * z1)
+
+	# rotate around 3-4; angle a
+	# ------------------------------------
+	# since half dihedral angle is used instead of angle with x-axis:
+	cos_a = sina
+	sin_a = -cosa
+	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+	# and translate
+	# ------------------------------------
+	z0 = z0 + T
+	z1 = z1 + T
+	z2 = z2 + T
+	z3 = z3 + T
+
+    elif (fold_type == Fold.star):
+	#
+	#               0
+	#              .^.
+	#        1   _/| |\_   6
+	#          _/ /   \ \_
+	# axis g0_/  |     |  \_ axis g1
+	#       /    |a   a|    \
+	#      2    / x   x \    5
+	#          |  i   i  |
+	#          "  s   s  "
+	#          3         4
+	#             b   b
+	#             0   1              ^ X
+	#                                |
+	#                                |
+	#                       Y <------+
+	#
+	# rotate gamma around b
+	# rotate beta  around a
+	#
+	# ROTATE V1 around axis g
+	# ------------------------------------
+	# refer to V1 as if centre is origon:
+	# rotate around axis g as if centre -> V1 is x-axis:
+	x = (R - H) + cosg0 * H
+	z =           sing0 * H
+	# now correct for V1 not on x-axis: rotate d around z-axis
+	# with d: angle of heptagon centre to V1 with x-as
+	cosd = (x1 + Tx) / R
+	sind = RhoH # = sin(2pi/7)
+	x1, y1, z1 = (cosd * x, sind * x, z)
+
+	# use similar calc for different angle and x6, y6, z6 = x1, -y1, z1
+	x = (R - H) + cosg1 * H
+	z =           sing1 * H
+	x6, y6, z6 = (cosd * x, sind * x, z)
+
+	# ROTATE V1 and V2 around axis b
+	# ------------------------------------
+	# correction for V5 not on -x: rotate d around z-axis
+	# with d: angle of heptagon centre to V2 with -x-as
+	cosd = -(x2 + Tx) / R
+	sind = SigmaH # = sin(3pi/7)
+	# refer to V2 as if centre in origon and as if V5 in -x:
+	x2, y2, z2 = (x0 - R, 0.5, 0.0)
+	d0_3 = x2 - RhoH
+	# rotate around axis b:
+	# TODO: above: rm x2, y2 assignment, mv y2 assignment down.
+	x2, z2 = (d0_3 + cosb0 * RhoH, sinb0 * RhoH)
+	# correct for V5 not on -x: rotate d around z-axis
+	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
+	# Similarly for V1:
+	# for V1 rotate V5 into -x: * (cosd, -sind)
+	x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
+	# rotate around axis b:
+	dx = x1 - d0_3
+	x1, z1 = (d0_3 + cosb0 * dx - sinb0 * z1, sinb0 * dx + cosb0 * z1)
+	# correct for V5 not on -x: rotate d around z-axis
+	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
+
+	# use similar calc for different angle for
+	# x5, y5, z5 = x2, -y2, z2
+	# x6, y6, z6 = x1, -y1, z1
+	y5 = 0.5
+	x5, z5 = (d0_3 + cosb1 * RhoH, sinb1 * RhoH)
+	x5, y5 = (cosd * x5 - sind * y5 - Tx, sind * x5 + cosd * y5)
+	x6, y6 = (cosd * x6 + sind * y6, -sind * x6 + cosd * y6)
+	dx = x6 - d0_3
+	x6, z6 = (d0_3 + cosb1 * dx - sinb1 * z6, sinb1 * dx + cosb1 * z6)
+	x6, y6 = (cosd * x6 - sind * y6 - Tx, sind * x6 + cosd * y6)
+	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
+	y5, y6 = -y5, -y6
+
+    elif (fold_type == Fold.trapezium):
+	#
+	#               0
+	#
+	#        1 ----------- 6    axis b0
+	#        .             .
+	# axis g0 \           / axis g1
+	#          \         /
+	#      2   |         |   5
+	#          \        /
+	#           "       "
+	#           3       4
+	#
+	#                                ^ X
+	#                                |
+	#                                |
+	#                       Y <------+
+	#
+	# rotate gamma around b
+	# rotate beta  around a
+	#
+	# ROTATE V2 around axis g0: angle gamma
+	# ------------------------------------
+	# refer to V2 as if centre is origon:
+	# rotate around axis g0 as if centre -> V2 is x-axis:
+	x = (R - H) + cosg0 * H
+	z =           sing0 * H
+	# now correct for V2 not on x-axis: rotate d around z-axis
+	# with d: angle of heptagon centre to V2 with x-as
+	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	cosd = (x2 + Tx) / R
+	#TODO: change into SigmaH and retest
+	sind = y2 / R
+	x2, y2, z2 = (cosd * x - Tx, sind * x, z)
+
+	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
+	x = (R - H) + cosg1 * H
+	z =           sing1 * H
+	x5, y5, z5 = (cosd * x - Tx, -sind * x, z)
+
+	# ROTATE V0 around axis b0: angle beta
+	# ------------------------------------
+	# refer to V0 as if centre is origon:
+	#   - rotate around axis b0
+	# Then translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	x0 = (R - H) + cosb0 * H - Tx
+	z0 =           sinb0 * H
+
+    elif (fold_type == Fold.w):
+	#
+	#               0
+	#              .^.
+	#        1     | |     6
+	#        .    /   \    .
+	# axis g0 \  |     |  / axis g1
+	#          " |a   a| "
+	#      2   |/ x   x \|   5
+	#          V  i   i  V
+	#          "  s   s  "
+	#          3         4
+	#             b   b              ^ X
+	#             0   1              |
+	#                                |
+	#                       Y <------+
+	#
+	# ROTATE V2 around axis g:
+	# ------------------------------------
+	# refer to V2 as if centre is origon:
+	# rotate around axis b as if centre -> V2 is x-axis:
+	x = (R - H) + cosg0 * H
+	z =           sing0 * H
+	# prepare for next: rotate V5 onto -x with angle d0
+	cosd0 = -Tx / R
+	sind0 = H # = sin(pi/7)
+	# Then later: correction for V5 not on -x: rotate d around z-axis
+	# with d: angle of heptagon centre to V2 with -x-as
+	cosd1 = -(x2 + Tx) / R
+	sind1 = SigmaH # = sin(3pi/7)
+	x2, y2, z2 = (cosd0 * x, sind0 * x, z)
+
+	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
+	x = (R - H) + cosg1 * H
+	z =           sing1 * H
+	x5, y5, z5 = (cosd0 * x, sind0 * x, z)
+
+	# ROTATE V1 and V2 around axis b
+	# ------------------------------------
+	# refer to V1 as if centre in origon and as if V5 in -x:
+	d0_3 = x0 - R - RhoH
+	# rotate around axis b:
+	x1, y1, z1 = (d0_3 + cosb0 * RhoH, -0.5, sinb0 * RhoH)
+	# correct for V5 not on -x: rotate d around z-axis
+	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	x1, y1 = (cosd1 * x1 - sind1 * y1 - Tx, sind1 * x1 + cosd1 * y1)
+	# Similarly for V2:
+	# rotate around axis b:
+	dx = x2 - d0_3
+	x2, z2 = (d0_3 + cosb0 * dx - sinb0 * z2, sinb0 * dx + cosb0 * z2)
+	# correct for V5 not on -x: rotate d around z-axis
+	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+	x2, y2 = (cosd1 * x2 - sind1 * y2 - Tx, sind1 * x2 + cosd1 * y2)
+
+	# use similar calc for different angle for
+	# x5, y5, z5 = x2, -y2, z2
+	# x6, y6, z6 = x1, -y1, z1
+	x6, y6, z6 = (d0_3 + cosb1 * RhoH, -0.5, sinb1 * RhoH)
+	x6, y6 = (cosd1 * x6 - sind1 * y6 - Tx, sind1 * x6 + cosd1 * y6)
+	dx = x5 - d0_3
+	x5, z5 = (d0_3 + cosb1 * dx - sinb1 * z5, sinb1 * dx + cosb1 * z5)
+	x5, y5 = (cosd1 * x5 - sind1 * y5 - Tx, sind1 * x5 + cosd1 * y5)
+	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
+	y5, y6 = -y5, -y6
+
+    # rotate around 3-4; angle a
+    # ------------------------------------
+    # since half dihedral angle is used instead of angle with x-axis:
+    # TODO don't copy the code...
+    cos_a = sina
+    sin_a = -cosa
+    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
+    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
+    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
+    x5, y5, z5, = (cos_a * x5 - sin_a * z5, y5, sin_a * x5 + cos_a * z5)
+    x6, y6, z6, = (cos_a * x6 - sin_a * z6, y6, sin_a * x6 + cos_a * z6)
+    # and translate
+    # ------------------------------------
+    z0 = z0 + T
+    z1 = z1 + T
+    z2 = z2 + T
+    z3 = z3 + T
+    z4 = z4 + T
+    z5 = z5 + T
+    z6 = z6 + T
+
+    cosd = numx.cos(delta)
+    sind = numx.sin(delta)
+    x0, y0 = x0 * cosd - y0 * sind, x0 * sind + y0 * cosd
+    x1, y1 = x1 * cosd - y1 * sind, x1 * sind + y1 * cosd
+    x2, y2 = x2 * cosd - y2 * sind, x2 * sind + y2 * cosd
+    x3, y3 = x3 * cosd - y3 * sind, x3 * sind + y3 * cosd
+    x4, y4 = x4 * cosd - y4 * sind, x4 * sind + y4 * cosd
+    x5, y5 = x5 * cosd - y5 * sind, x5 * sind + y5 * cosd
+    x6, y6 = x6 * cosd - y6 * sind, x6 * sind + y6 * cosd
+
+    #print 'v0', x0, y0, z0
+    #print 'v1', x1, y1, z1
+    #print 'v2', x2, y2, z2
+    #print 'v3', x3, y3, z3
+    #print 'v4', x4, y4, z4
+    #print 'v5', x5, y5, z5
+    #print 'v6', x6, y6, z6
+
+    return (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6)
 
 # to test fold optimisation:
 faster = True
@@ -636,7 +986,6 @@ def FoldedRegularHeptagonsA4xI(c, params):
     edgeAlternative = params[0]
     if edgeAlternative & twist_bit == twist_bit:
 	# rotate 45 degrees:
-	hV2 = numx.sqrt(2)/2
 	x0, y0 = hV2 * x0 - hV2 * y0, hV2 * x0 + hV2 * y0
 	x1, y1 = hV2 * x1 - hV2 * y1, hV2 * x1 + hV2 * y1
 	x2, y2 = hV2 * x2 - hV2 * y2, hV2 * x2 + hV2 * y2
@@ -792,9 +1141,9 @@ def FoldedRegularHeptagonsA4(c, params):
 
     params[1] alternatives for the opposite triangle fill.
 
-    params[2] steers which the edge lengths. It is a vector of 4 floating point
-    numbers that expresses the edge lengths of [a, b, c, d]. If params 1 is not
-    given, the edge lengths are supposed to be 1.
+    params[2] steers which the edge lengths. It is a vector of 7 floating point
+    numbers that expresses the edge lengths of [a, b0, c0, d, b1, c1]. If this
+    params is not given, the edge lengths are supposed to be 1.
 
     params[3] defines which heptagon folding method is used.
 
@@ -815,333 +1164,8 @@ def FoldedRegularHeptagonsA4(c, params):
     par_fold = 3
     n_7_turn = 4
 
-    # before rotating, with heptagon centre = origin
-    R = 1.0 / (2*H)       # radius
-    x0, y0, z0 = (H + SigmaH + RhoH, 0.0,     0.)
-    x1, y1, z1 = (    SigmaH + RhoH, Rho/2,   0.)
-    x2, y2, z2 = (             RhoH, Sigma/2, 0.)
-    x3, y3, z3 = (              0.0, 1.0/2,   0.)
-    x4, y4, z4 = (               x3, -y3,     z3)
-    x5, y5, z5 = (               x2, -y2,     z2)
-    x6, y6, z6 = (               x1, -y1,     z1)
-    Tx = R - x0   # translate in X to centre on origin
-    cosa  = numx.cos(alpha)
-    sina  = numx.sin(alpha)
-    cosb0 = numx.cos(beta0)
-    sinb0 = numx.sin(beta0)
-    cosg0 = numx.cos(gamma0)
-    sing0 = numx.sin(gamma0)
-    cosb1 = numx.cos(beta1)
-    sinb1 = numx.sin(beta1)
-    cosg1 = numx.cos(gamma1)
-    sing1 = numx.sin(gamma1)
-    if (params[par_fold] == Fold.parallel):
-	# this code I wrote first only for the parallel case.
-	# I didn't remove the code since it so much faster then the newer code.
-	x0__ = cosg * (H) + SigmaH + RhoH
-	z0__ = sing * (H)
-
-	x0_  = cosb * (x0__ - RhoH) - sinb * (z0__       ) + RhoH
-	z0_  = cosb * (z0__       ) + sinb * (x0__ - RhoH)
-
-	x1_  = cosb * (SigmaH) + RhoH
-	z1_  = sinb * (SigmaH)
-
-	x0  = sina * x0_ - cosa * z0_
-	x1  = sina * x1_ - cosa * z1_
-	x2  = sina * RhoH
-	x3  = 0
-
-	y0  =  0.0
-	y1  =  Rho / 2
-	y2  =  Sigma / 2
-	y3  =  1.0 / 2
-
-	z0  = T - (sina * z0_ + cosa * x0_)
-	z1  = T - (sina * z1_ + cosa * x1_)
-	z2  = T - cosa * (         RhoH)
-	z3  = T
-    elif (params[par_fold] == Fold.triangle):
-	#
-	#             0
-	#            _^_
-	#      1   _/   \_   6
-	#        _/       \_
-	#      _/  axes  b  \_
-	#     /               \
-	#    2 --------------- 5  axis a
-	#
-	#
-	#         3       4
-	#                                ^ X
-	#                                |
-	#                                |
-	#                       Y <------+
-	#
-	# rotate gamma around b
-	# rotate beta  around a
-	#
-	# ROTATE V1 around axis b: angle gamma
-	# ------------------------------------
-	# refer to V1 as if centre i origon:
-	# rotate around axis b as if centre -> V1 is x-axis:
-	x = (R - H) + cosg * H
-	z =           sing * H
-	# now correct for V1 not on x-axis: rotate d around z-axis
-	# with d: angle of heptagon centre to V1 with x-as
-	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	cosd = (x1 + Tx) / R
-	sind = y1 / R
-	x1, y1, z1 = (cosd * x - Tx, sind * x, z)
-	# ROTATE V0 and V1 around axis a: angle beta
-	# ------------------------------------
-	x = H + SigmaH
-	x0, y0, z0 = (RhoH + cosb * x, y0, sinb * x)
-	x = x1 - RhoH
-	x1, y1, z1 = (RhoH + cosb * x - sinb * z1, y1, sinb * x + cosb * z1)
-
-	# rotate around 3-4; angle a
-	# ------------------------------------
-	# since half dihedral angle is used instead of angle with x-axis:
-	cos_a = sina
-	sin_a = -cosa
-	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	# and translate
-	# ------------------------------------
-	z0 = z0 + T
-	z1 = z1 + T
-	z2 = z2 + T
-	z3 = z3 + T
-
-    elif (params[par_fold] == Fold.star):
-	#
-	#               0
-	#              .^.
-	#        1   _/| |\_   6
-	#          _/ /   \ \_
-	# axis g0_/  |     |  \_ axis g1
-	#       /    |a   a|    \
-	#      2    / x   x \    5
-	#          |  i   i  |
-	#          "  s   s  "
-	#          3         4
-	#             b   b
-	#             0   1              ^ X
-	#                                |
-	#                                |
-	#                       Y <------+
-	#
-	# rotate gamma around b
-	# rotate beta  around a
-	#
-	# ROTATE V1 around axis g
-	# ------------------------------------
-	# refer to V1 as if centre is origon:
-	# rotate around axis g as if centre -> V1 is x-axis:
-	x = (R - H) + cosg0 * H
-	z =           sing0 * H
-	# now correct for V1 not on x-axis: rotate d around z-axis
-	# with d: angle of heptagon centre to V1 with x-as
-	cosd = (x1 + Tx) / R
-	sind = RhoH # = sin(2pi/7)
-	x1, y1, z1 = (cosd * x, sind * x, z)
-
-	# use similar calc for different angle and x6, y6, z6 = x1, -y1, z1
-	x = (R - H) + cosg1 * H
-	z =           sing1 * H
-	x6, y6, z6 = (cosd * x, sind * x, z)
-
-	# ROTATE V1 and V2 around axis b
-	# ------------------------------------
-	# correction for V5 not on -x: rotate d around z-axis
-	# with d: angle of heptagon centre to V2 with -x-as
-	cosd = -(x2 + Tx) / R
-	sind = SigmaH # = sin(3pi/7)
-	# refer to V2 as if centre in origon and as if V5 in -x:
-	x2, y2, z2 = (x0 - R, 0.5, 0.0)
-	d0_3 = x2 - RhoH
-	# rotate around axis b:
-	# TODO: above: rm x2, y2 assignment, mv y2 assignment down.
-	x2, z2 = (d0_3 + cosb0 * RhoH, sinb0 * RhoH)
-	# correct for V5 not on -x: rotate d around z-axis
-	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
-	# Similarly for V1:
-	# for V1 rotate V5 into -x: * (cosd, -sind)
-	x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
-	# rotate around axis b:
-	dx = x1 - d0_3
-	x1, z1 = (d0_3 + cosb0 * dx - sinb0 * z1, sinb0 * dx + cosb0 * z1)
-	# correct for V5 not on -x: rotate d around z-axis
-	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
-
-	# use similar calc for different angle for
-	# x5, y5, z5 = x2, -y2, z2
-	# x6, y6, z6 = x1, -y1, z1
-	y5 = 0.5
-	x5, z5 = (d0_3 + cosb1 * RhoH, sinb1 * RhoH)
-	x5, y5 = (cosd * x5 - sind * y5 - Tx, sind * x5 + cosd * y5)
-	x6, y6 = (cosd * x6 + sind * y6, -sind * x6 + cosd * y6)
-	dx = x6 - d0_3
-	x6, z6 = (d0_3 + cosb1 * dx - sinb1 * z6, sinb1 * dx + cosb1 * z6)
-	x6, y6 = (cosd * x6 - sind * y6 - Tx, sind * x6 + cosd * y6)
-	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
-	y5, y6 = -y5, -y6
-
-    elif (params[par_fold] == Fold.trapezium):
-	#
-	#               0
-	#
-	#        1 ----------- 6    axis b0
-	#        .             .
-	# axis g0 \           / axis g1
-	#          \         /
-	#      2   |         |   5
-	#          \        /
-	#           "       "
-	#           3       4
-	#
-	#                                ^ X
-	#                                |
-	#                                |
-	#                       Y <------+
-	#
-	# rotate gamma around b
-	# rotate beta  around a
-	#
-	# ROTATE V2 around axis g0: angle gamma
-	# ------------------------------------
-	# refer to V2 as if centre is origon:
-	# rotate around axis g0 as if centre -> V2 is x-axis:
-	x = (R - H) + cosg0 * H
-	z =           sing0 * H
-	# now correct for V2 not on x-axis: rotate d around z-axis
-	# with d: angle of heptagon centre to V2 with x-as
-	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	cosd = (x2 + Tx) / R
-	#TODO: change into SigmaH and retest
-	sind = y2 / R
-	x2, y2, z2 = (cosd * x - Tx, sind * x, z)
-
-	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
-	x = (R - H) + cosg1 * H
-	z =           sing1 * H
-	x5, y5, z5 = (cosd * x - Tx, -sind * x, z)
-
-	# ROTATE V0 around axis b0: angle beta
-	# ------------------------------------
-	# refer to V0 as if centre is origon:
-	#   - rotate around axis b0
-	# Then translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	x0 = (R - H) + cosb0 * H - Tx
-	z0 =           sinb0 * H
-
-    elif (params[par_fold] == Fold.w):
-	#
-	#               0
-	#              .^.
-	#        1     | |     6
-	#        .    /   \    .
-	# axis g0 \  |     |  / axis g1
-	#          " |a   a| "
-	#      2   |/ x   x \|   5
-	#          V  i   i  V
-	#          "  s   s  "
-	#          3         4
-	#             b   b              ^ X
-	#             0   1              |
-	#                                |
-	#                       Y <------+
-	#
-	# ROTATE V2 around axis g:
-	# ------------------------------------
-	# refer to V2 as if centre is origon:
-	# rotate around axis b as if centre -> V2 is x-axis:
-	x = (R - H) + cosg0 * H
-	z =           sing0 * H
-	# prepare for next: rotate V5 onto -x with angle d0
-	cosd0 = -Tx / R
-	sind0 = H # = sin(pi/7)
-	# Then later: correction for V5 not on -x: rotate d around z-axis
-	# with d: angle of heptagon centre to V2 with -x-as
-	cosd1 = -(x2 + Tx) / R
-	sind1 = SigmaH # = sin(3pi/7)
-	x2, y2, z2 = (cosd0 * x, sind0 * x, z)
-
-	# use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
-	x = (R - H) + cosg1 * H
-	z =           sing1 * H
-	x5, y5, z5 = (cosd0 * x, sind0 * x, z)
-
-	# ROTATE V1 and V2 around axis b
-	# ------------------------------------
-	# refer to V1 as if centre in origon and as if V5 in -x:
-	d0_3 = x0 - R - RhoH
-	# rotate around axis b:
-	x1, y1, z1 = (d0_3 + cosb0 * RhoH, -0.5, sinb0 * RhoH)
-	# correct for V5 not on -x: rotate d around z-axis
-	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	x1, y1 = (cosd1 * x1 - sind1 * y1 - Tx, sind1 * x1 + cosd1 * y1)
-	# Similarly for V2:
-	# rotate around axis b:
-	dx = x2 - d0_3
-	x2, z2 = (d0_3 + cosb0 * dx - sinb0 * z2, sinb0 * dx + cosb0 * z2)
-	# correct for V5 not on -x: rotate d around z-axis
-	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	x2, y2 = (cosd1 * x2 - sind1 * y2 - Tx, sind1 * x2 + cosd1 * y2)
-
-	# use similar calc for different angle for
-	# x5, y5, z5 = x2, -y2, z2
-	# x6, y6, z6 = x1, -y1, z1
-	x6, y6, z6 = (d0_3 + cosb1 * RhoH, -0.5, sinb1 * RhoH)
-	x6, y6 = (cosd1 * x6 - sind1 * y6 - Tx, sind1 * x6 + cosd1 * y6)
-	dx = x5 - d0_3
-	x5, z5 = (d0_3 + cosb1 * dx - sinb1 * z5, sinb1 * dx + cosb1 * z5)
-	x5, y5 = (cosd1 * x5 - sind1 * y5 - Tx, sind1 * x5 + cosd1 * y5)
-	# x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
-	y5, y6 = -y5, -y6
-
-    # rotate around 3-4; angle a
-    # ------------------------------------
-    # since half dihedral angle is used instead of angle with x-axis:
-    # TODO don't copy the code...
-    cos_a = sina
-    sin_a = -cosa
-    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-    x5, y5, z5, = (cos_a * x5 - sin_a * z5, y5, sin_a * x5 + cos_a * z5)
-    x6, y6, z6, = (cos_a * x6 - sin_a * z6, y6, sin_a * x6 + cos_a * z6)
-    # and translate
-    # ------------------------------------
-    z0 = z0 + T
-    z1 = z1 + T
-    z2 = z2 + T
-    z3 = z3 + T
-    z4 = z4 + T
-    z5 = z5 + T
-    z6 = z6 + T
-
-    cosd = numx.cos(delta)
-    sind = numx.sin(delta)
-    x0, y0 = x0 * cosd - y0 * sind, x0 * sind + y0 * cosd
-    x1, y1 = x1 * cosd - y1 * sind, x1 * sind + y1 * cosd
-    x2, y2 = x2 * cosd - y2 * sind, x2 * sind + y2 * cosd
-    x3, y3 = x3 * cosd - y3 * sind, x3 * sind + y3 * cosd
-    x4, y4 = x4 * cosd - y4 * sind, x4 * sind + y4 * cosd
-    x5, y5 = x5 * cosd - y5 * sind, x5 * sind + y5 * cosd
-    x6, y6 = x6 * cosd - y6 * sind, x6 * sind + y6 * cosd
-
-    #print 'v0', x0, y0, z0
-    #print 'v1', x1, y1, z1
-    #print 'v2', x2, y2, z2
-    #print 'v3', x3, y3, z3
-    #print 'v4', x4, y4, z4
-    #print 'v5', x5, y5, z5
-    #print 'v6', x6, y6, z6
+    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+	    T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
     cp = copy.copy(c)
     edgeAlternative = params[par_tri_fill]
     oppoAlternative = params[par_opp_fill]
@@ -1238,6 +1262,298 @@ def FoldedRegularHeptagonsA4(c, params):
 
     #print cp
     return cp
+
+def S4_Q_turn_o4(x, y, z):
+    """Rotate [x, y, z] a quarter turn around the S4 o4 axis [1, 0, 1]
+
+    Returns the tuple [x', y', z']
+    """
+    # Rotations is obtained by
+    # 1. rotate quarter turn around negative y-axis
+    # 1. rotate half turn around positive z-axis
+    # 3. rotate quarter turn around positive x-axis
+    # TODO: optimise me
+
+    # 1: x_, y_, z_ =  hV2x - hV2z, y,  hV2x + hV2z
+    # 2: x_, y_     = -y_, x_
+    # so 1 & 2:
+    hV2x = hV2 * x
+    hV2z = hV2 * z
+    y_, x_, z_ = hV2x - hV2z, -y, hV2x + hV2z
+    # 3: x_, y_, z_ =  hV2x + hV2z, y, -hV2x + hV2z
+    hV2x = hV2 * x_
+    hV2z = hV2 * z_
+    y_, z_ =  hV2x + hV2z, -hV2x + hV2z
+    return (x_, y_, z_)
+
+def S4_T_turn_o3(x, y, z):
+    """Rotate [x, y, z] a third turn around the S4 o3 axis [0, 1/V3, V2/V3]
+
+    Returns the tuple [x', y', z']
+    """
+    # Rotations is obtained by
+    # 1. rotate alpha turn around positive x-axis
+    # 1. rotate third turn around positive z-axis
+    # 3. rotate alpha turn around negative x-axis
+    # where alpha = atan(hV2) <----- atan( (1/V3) / (V2/V3) )
+
+    # TODO: optimise me
+    # 1: x_, y_, z_ =  x, y*V2/V3 - z/V3, y/V3 + z * V2/V3
+    x_, y_, z_ = x, V2dV3 * y - tV3 * z, tV3 * y + V2dV3 * z
+    # 2: x_, y_     = -x/2 - hV3.y,  hV3.x - y/2
+    x_, y_ = -x_/2 - hV3 * y_, hV3 * x_ - y_/2
+    # 3: x_, y_, z_ =  x, y*V2/V3 + z/V3, -y/V3 + z * V2/V3
+    y_, z_ = V2dV3 * y + tV3 * z, -tV3 * y + V2dV3 * z
+    return (x_, y_, z_)
+
+def v_delta(x0, y0, z0, x1, y1, z1):
+    return numx.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0) + (z1-z0)*(z1-z0))
+
+def FoldedRegularHeptagonsS4(c, params):
+    """Calculates the 4 variable edge lengths - 1 for the simplest S4 case of
+    folded heptagons.
+
+    The case contains
+    c[0]: a translation (towards the viewer)
+    c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
+    c[2]: the angle of the first fold (left)
+    c[3]: the angle of the second fold (left)
+    c[4]: rotation angle around z-axis
+    c[5]: the angle of the first fold (right)
+    c[6]: the angle of the second fold (right)
+    The vertices are positioned as follows:
+    #
+    #                      . o3 axis: [0, 1/V3, V2/V3]
+    #
+    #
+    #               9             2
+    #      8                               1
+    #
+    #                      3
+    #
+    #   7           z-axis . o2-axis          0       . o4-axis: [1, 0, 1]
+    #
+    #                      4
+    #
+    #     11                               6
+    #              10             5
+    #
+    #
+
+    And the relevant vertices are defined as follows:
+
+    The heptagons are regular, so
+    |0-1| = |1-2| = |2-3| = |3-4| = |4-5| = |5-6| = |6-0| = |12 - 14| = 1
+
+    For the param[0] the following constant names can be used:
+    The alternatives for creatings triangles leads to the following possible
+    variable edge lengths:
+    params[0] | edge a | edge b | edge c | edge d
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 8 - 16	strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 8 - 16	strip I
+    ----------+--------+--------+--------+-------
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 8 - 16	strip II
+    ----------+--------+--------+--------+-------
+           ?  | 3 - 12 | 12 - 2 | 12 - 1 | 8 - 16	star
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 12 - 2 | 12 - 1 | 8 - 16	star 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 12 - 2 | 2 - 14 | 9 - 19	alt strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 3 - 12 | 3 - 14 | 2 - 14 | 9 - 19	alt strip II
+    ----------+--------+--------+--------+-------
+           ?  | 3 - 12 | 12 - 2 | 2 - 14 | 9 - 19	alt strip I
+    ----------+--------+--------+--------+-------
+
+    only valid for opposites alternatives:
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 9 - 16 | 8 - 16	rot strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 9 - 16 | 9 - 19	alt rot strip 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 2 -  8 | 8 - 16	rot star 1 loose
+    ----------+--------+--------+--------+-------
+           ?  | 2 - 9  | 2 - 16 | 2 - 19 | 9 - 19	alt rot star 1 loose
+    ----------+--------+--------+--------+-------
+
+    params[1] alternatives for the opposite triangle fill.
+
+    params[2] steers the edge lengths. It is a vector of 4 or 7 floating point
+    numbers that expresses the edge lengths of [a, b, c, d] or
+    [a, b0, c0, d, b1, c1] resp. If length 4, then c[5] = c[2] and c[6] = c[3];
+    the value of c[4] is either 0 or pi/2 rad, depending on params[5].
+    If this params[2] is not given, the edge lengths are supposed to be 1.
+
+    params[3] defines which heptagon folding method is used.
+
+    params[4] rotate the folding with n/7 turn
+
+    params[5] Only used if params 2 has length 4, then if:
+              False: c[4] = 0
+              True:  c[4] = pi/2
+    """
+
+    # params indices in text:
+    par_tri_fill = 0
+    par_opp_fill = 1
+    par_edge_len = 2
+    par_fold = 3
+    n_7_turn = 4
+    par_refl_max_angle = 5
+
+    T      = c[0]
+    alpha  = c[1]
+    beta0  = c[2]
+    gamma0 = c[3]
+    incl_reflections = len(params[par_edge_len]) == 4
+    if incl_reflections:
+	beta1  = beta0
+	gamma1 = gamma0
+	if params[par_refl_max_angle]:
+	    delta  = numx.pi/2
+	else:
+	    delta  = 0
+    else:
+	delta  = c[4]
+	beta1  = c[5]
+	gamma1 = c[6]
+    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+	    T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    cp = copy.copy(c)
+    edgeAlternative = params[par_tri_fill]
+    oppoAlternative = params[par_opp_fill]
+    #
+    # EDGE A: only one for A4
+    #
+    try:
+        edgeLengths = params[par_edge_len]
+    except IndexError:
+	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
+
+    if ((edgeAlternative & loose_bit) != 0 or
+    	(edgeAlternative & twist_bit) != 0
+    ):
+        # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
+        cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
+    else:
+	# TODO
+        # V3 - V12:[ y0,    z0,    x0], # V12 = V0'
+        cp[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
+
+    #
+    # EDGE B:
+    #
+    plain_edge_alt = edgeAlternative & ~alt_bit
+    if (edgeAlternative & twist_bit) != 0:
+	# V5 - Q-turn-around-o4(V2)
+	V2_o4_x, V2_o4_y, V2_o4_z = S4_Q_turn_o4(x2, y2, z2)
+        cp[1] = v_delta(x5, y5, z5, V2_o4_x, V2_o4_y, V2_o4_z) - edgeLengths[1]
+    #TODO:
+    elif plain_edge_alt == TriangleAlt.stripII:
+        # V3 - V14:[y1, z1, x1], # V14 = V1'
+        cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
+    else:
+        #V2 - V12:[y0, z0, x0], # V12 = V0'
+        cp[1] = numx.sqrt((x2-y0)*(x2-y0) + (y2-z0)*(y2-z0) + (z2-x0)*(z2-x0)) - edgeLengths[1]
+
+    #
+    #
+    #               9             2
+    #      8                               1
+    #
+    #                      3
+    #
+    #   7           z-axis . o2-axis          0       . o4-axis: [0, 1, 1]
+    #
+    #                      4
+    #
+    #     11                               6
+    #              10             5
+    #
+    #
+    #                      . o3 axis: [1/V3, 0, V2/V3]
+
+    #
+    # EDGE C
+    #
+    if (edgeAlternative & twist_bit) != 0:
+	# V6 - Q-turn-around-o4(V1)
+	V1_o4_x, V1_o4_y, V1_o4_z = S4_Q_turn_o4(x1, y1, z1)
+        cp[2] = v_delta(x6, y6, z6, V1_o4_x, V1_o4_y, V1_o4_z) - edgeLengths[2]
+    #TODO:
+    elif (
+	edgeAlternative != TriangleAlt.star
+	and edgeAlternative != TriangleAlt.star1loose
+    ):
+        # V2 - V14:[ y1, z1, x1], # V14 = V1'
+        cp[2] = numx.sqrt((x2-y1)*(x2-y1) + (y2-z1)*(y2-z1) + (z2-x1)*(z2-x1)) - edgeLengths[2]
+    else:
+        # V1 - V12:[y0,    z0,    x0], # V12 = V0'
+        cp[2] = numx.sqrt((x1-y0)*(x1-y0) + (y1-z0)*(y1-z0) + (z1-x0)*(z1-x0)) - edgeLengths[2]
+
+    #
+    # EDGE D
+    #
+    if (edgeAlternative & twist_bit) != 0:
+	# V2 - T-turn-around-o3(V9:[-x5,   -y5,    z5])
+	V9_o3_x, V9_o3_y, V9_o3_z = S4_T_turn_o3(-x5, -y5, z5)
+        cp[3] = v_delta(x6, y6, z6, V9_o3_x, V9_o3_y, V9_o3_z) - edgeLengths[3]
+    #TODO:
+    elif (edgeAlternative & alt_bit == 0):
+	# V1 - V14:[ y1,    z1,    x1], # V14 = V1'
+	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
+    else:
+        # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
+	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
+
+    if not incl_reflections:
+	# opposite alternative edges, similar as above
+	#
+	# OPPOSITE EDGE B
+	#
+	plain_edge_alt = oppoAlternative & ~alt_bit
+	if plain_edge_alt == TriangleAlt.stripII:
+	    # V3 - V16:[y6, z6, x6], # V16 = V6'
+	    cp[4] = numx.sqrt((x3-y6)*(x3-y6) + (y3-z6)*(y3-z6) + (z3-x6)*(z3-x6)) - edgeLengths[4]
+	elif plain_edge_alt & rot_bit == rot_bit:
+	    # V2 - V16:[y6, z6, x6], # V16 = V6'
+	    cp[4] = numx.sqrt((x2-y6)*(x2-y6) + (y2-z6)*(y2-z6) + (z2-x6)*(z2-x6)) - edgeLengths[4]
+	else:
+	    #V9:[-x5, -y5, z5] - V12, # V9 = V5'
+	    cp[4] = numx.sqrt((-x5-y0)*(-x5-y0) + (-y5-z0)*(-y5-z0) + (z5-x0)*(z5-x0)) - edgeLengths[4]
+	#
+	# OPPOSITE EDGE C
+	#
+	if oppoAlternative == TriangleAlt.arot_star1loose:
+	    # V2 - V19: V19 = V5' = [y5, z5, x5]
+	    cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
+	elif oppoAlternative == TriangleAlt.rot_star1loose:
+	    # V2 - V8: V8 = V6' = [-x6, -y6, z6]
+	    cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
+	elif (
+	    oppoAlternative != TriangleAlt.star
+	    and oppoAlternative != TriangleAlt.star1loose
+	):
+	    # V9 - V16: V9 = V5' = [-x5, -y5, z5], V16 = V6' = [ y6, z6, x6]
+	    cp[5] = numx.sqrt((y6+x5)*(y6+x5) + (z6+y5)*(z6+y5) + (x6-z5)*(x6-z5)) - edgeLengths[5]
+	else:
+	    # V8: [-x6, -y6, z6] - V12, # V8 = V6'
+	    cp[5] = numx.sqrt((x6+y0)*(x6+y0) + (y6+z0)*(y6+z0) + (x0-z6)*(x0-z6)) - edgeLengths[5]
+	#
+	# OPPOSITE EDGE D
+	#
+	if (oppoAlternative & alt_bit == 0):
+	    # V8 - V16: V8 = V6' = [-x6, -y6, z6]; V16 = V6' = [y6, z6, x6]
+	    cp[6] = numx.sqrt((y6+x6)*(y6+x6) + (z6+y6)*(z6+y6) + (x6-z6)*(x6-z6)) - edgeLengths[6]
+	else:
+	    # V9 - V19: V9 = V5' = [-x5, -y5, z5]; V19 = V5' = [y5, z5, x5]
+	    cp[6] = numx.sqrt((y5+x5)*(y5+x5) + (z5+y5)*(z5+y5) + (x5-z5)*(x5-z5)) - edgeLengths[6]
+
+    #print cp
+    return cp
+
 
 class Method:
     hybrids = 0
@@ -1384,7 +1700,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	precision = 1e-15,
 	fold = Fold.parallel,
 	dynSols = None,
-	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
+	edgeLengths = [1., 1., 1., 1., 1., 1., 1.],
+	outDir = "frh-roots"
     ):
 	this.domain = domain
 	this.threadId = threadId
@@ -1398,6 +1715,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.dynSols = dynSols
 	this.stopAfter = 100000
 	this.printStatus = False,
+	this.outDir = outDir
 	random.seed()
 	threading.Thread.__init__(this)
 
@@ -1536,7 +1854,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    else:
 		es = '%s_%.1f' % (es, l)
 	es = es[1:]
-	return 'frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+	return '%s/frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+		this.outDir,
 		es, Fold(this.fold),
 		string.join(Stringify[this.edgeAlternative].split(), '_'),
 		string.join(Stringify[this.oppEdgeAlternative].split(), '_')
@@ -1553,7 +1872,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    else:
 		es = '%s_%.1f' % (es, l)
 	es = es[1:]
-	return 'frh-roots-%s-fld_%s.0-%s.py' % (
+	return '%s/frh-roots-%s-fld_%s.0-%s.py' % (
+		this.outDir,
 		es, Fold(this.fold),
 		string.join(Stringify[this.edgeAlternative].split(), '_')
 	    )
@@ -2005,8 +2325,6 @@ if __name__ == '__main__':
 		    print 'oops', ds, "shouldn't be a dynamic solution"
 		    passed = False
 	return passed
-
-    V2 = numx.sqrt(2.)
 
     tpi = 2*numx.pi
     def cleanupResult(v, l = 4):
@@ -3066,5 +3384,5 @@ if __name__ == '__main__':
 	    print 'search slice [%d:%d]:' % (i, j)
 	    for e in edgeLs:
 		print '  -', e
-	    randBatch(continueAfter = 4000, nrThreads = 1,
+	    randBatch(continueAfter = 1, nrThreads = 1,
 				edgeLs = edgeLs, dynSols = dynamicSols)
