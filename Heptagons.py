@@ -143,7 +143,7 @@ class TrisAlt:
 	alt_strip_II:		'Alternative Strip II',
 	alt_strip_1_loose:	'Alternative Strip 1 loose',
 
-	twist_strip_I:		'Twisted Strip I',
+	twist_strip_I:		'Twisted',
 
 	rot_strip_1_loose:	'Rot. Strip 1 loose',
 	rot_star_1_loose:	'Rot. Shell 1 loose',
