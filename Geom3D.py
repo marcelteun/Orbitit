@@ -172,7 +172,8 @@ def readOffFile(fd, recreateEdges = True, name = ''):
     """
     states = {'checkOff': 0, 'readSizes': 1, 'readVs': 2, 'readFs': 3, 'readOk': 4}
     nrOfVs = 0
-    nrOfFs = 0
+    nrOfEs = 0
+    Es = []
     i = 0
     # A dictionary where the key and value pairs are exchanged, for debugging
     # purposes:
@@ -183,6 +184,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
     debug = True
     debug = False
     vRadius = 0
+    eRadius = 0
     for line in fd:
         words = line.split()
         if len(words) > 0 and words[0][0] != '#':
@@ -209,7 +211,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
             elif state == states['readVs']:
                 # the function assumes: no comments in beween (x, y, z) of Vs
                 Vs.append(GeomTypes.Vec3(words[0:3]))
-                if debug: print 'V[', i, '] =',  Vs[-1]
+                if debug: print 'V[%d] =' % i,  Vs[-1]
                 i = i + 1
                 if i == nrOfVs:
                     state = states['readFs']
@@ -228,27 +230,34 @@ def readOffFile(fd, recreateEdges = True, name = ''):
 		if lenF > 0:
 		    assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
 		    face = [int(words[j]) for j in range(1, lenF + 1)]
-		    if lenF < 3:
-			print 'Note: face %d has only %d vertices, appending 1st' % (
-			    i, lenF
-			)
-			face.append(face[0])
-			if lenF == 1:
-			   face.append(face[0])
-		    Fs.append(face)
-		    if len(words) == lenF + 1:
-			cols.append([0.8, 0.8, 0.8])
-		    else:
-			if isInt(words[lenF+1]):
-			    cols.append(
-				[float(words[j])/255 for j in range(lenF+1, lenF+4)]
-			    )
+		    if lenF >= 3:
+			Fs.append(face)
+			if len(words) == lenF + 1:
+			    cols.append([0.8, 0.8, 0.8])
 			else:
-			    cols.append(
-				[float(words[j]) for j in range(lenF+1, lenF+4)]
+			    if isInt(words[lenF+1]):
+				cols.append(
+				    [float(words[j])/255 for j in range(lenF+1, lenF+4)]
+				)
+			    else:
+				cols.append(
+				    [float(words[j]) for j in range(lenF+1, lenF+4)]
+				)
+			if debug: print 'face[%d] =' % i,  Fs[-1]
+			if debug: print 'col[%d] =' % i,  cols[-1]
+		    else:
+			if lenF == 2:
+			    # this is an edge really...
+			    Es.extend(face)
+			    eRadius = 0.15
+			    if debug: print 'face[%d] =' % i,  face, '( = an edge)'
+			    # what about different edge colours?
+			else:
+			    # since vertices are defined explicitely, show them
+			    vRadius = 0.05
+			    print 'Note: ignoring face %d with only %d vertices' % (
+				i, lenF
 			    )
-		    if debug: print 'F[', i, '] =',  Fs[-1]
-		    if debug: print 'col[', i, '] =',  cols[-1]
 		    i = i + 1
 		    if i == nrOfFs:
 			state = states['readOk']
@@ -262,12 +271,17 @@ def readOffFile(fd, recreateEdges = True, name = ''):
             nrOfVs, nrOfFs,
             statesRev[state], i
         )
-    shape = SimpleShape(Vs, Fs, [], colors = (cols, fColors))
+    shape = SimpleShape(Vs, Fs, Es, colors = (cols, fColors))
+    # Note that Orbitit's panel.setShape will ignore these anyway...
     if vRadius != 0:
         shape.setVertexProperties(radius = vRadius)
+    if eRadius != 0:
+        shape.setEdgeProperties(radius = eRadius)
     if name != '':
         shape.name = name
-    if recreateEdges:
+    # If the file defines edges (faces of length 2) then don't recreate any
+    # edges, even if requested
+    if recreateEdges and len(Es) ==0:
         shape.recreateEdges()
     return shape
 
