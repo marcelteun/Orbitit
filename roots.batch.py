@@ -999,7 +999,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
     #print 'v1', x1, y1, z1
     #print 'v2', x2, y2, z2
     #print 'v3', x3, y3, z3
-    cp = copy.copy(c)
+    cp = [0, 0, 0, 0]
     #
     # EDGE A
     #
@@ -1793,6 +1793,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	for old in this.results:
 	    allElemsEqual = True
 	    for i in lstRange:
+		if len(old) < len(sol):
+		    print 'Oops'
+		    print 'old', old
+		    print 'sol', sol
 		if abs(old[i] - sol[i]) > 100 * this.precision: # TODO: 10?
 		    allElemsEqual = False
 		    break # for i loop, not for old
@@ -1838,8 +1842,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
     def symmetricEdges(this):
 	el = this.edgeLengths
 	return (
-	    eq(el[1], el[4]) and eq(el[2], el[5]) and eq(el[3], el[6])
-	    and this.edgeAlternative == this.oppEdgeAlternative
+	    len(el) > 5 and (
+		eq(el[1], el[4]) and eq(el[2], el[5]) and eq(el[3], el[6])
+		and this.edgeAlternative == this.oppEdgeAlternative
+	    )
 	)
 
     def getOutName(this):
@@ -1931,7 +1937,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    this.results = []
 	    prev_iterations = 0
 
-	if this.symmetricEdges():
+	if len(this.edgeLengths) > 4 and this.symmetricEdges():
 	    refl_filename = this.getOutReflName()
 
 	    # read previous file with reflective sols
@@ -2009,10 +2015,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    if nrOfIters >= this.stopAfter:
 		# always write the result, even when empty, so it is known how
 		# many iterations were done (without finding a result)
-		if len(this.edgeLengths) == 4:
-		    f = open(refl_filename, 'w')
-		else:
-		    f = open(filename, 'w')
+		f = open(filename, 'w')
 		f.write('# edgeLengths = %s\n' % str(this.edgeLengths))
 		f.write('# edgeAlternative = %s\n' % Stringify[this.edgeAlternative])
 		if len(this.edgeLengths) > 4:
@@ -2038,8 +2041,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			# to be invalid, then to start over the whole search
 			# again...
 			try:
-			    # handle angle if 5:
-			    if len(this.edgeLengths) == 4: # or len(this.edgeLengths) == 5:
+			    if len(this.edgeLengths) == 4:
 				chk = FoldedRegularHeptagonsA4xI(result,
 				    [this.edgeAlternative, this.edgeLengths, this.fold])
 			    else:
@@ -2136,12 +2138,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.threadId,
 			time.strftime("%y%m%d %H%M%S", time.localtime())
 		    ),
-		print len(results),
-		if len(this.edgeLengths) != 4:
+		if len(this.edgeLengths) == 4:
+		    print len(results_refl),
+		else:
+		    print len(results),
 		    print '(+%d)' % (len(results_refl)),
 		print 'results written to',
 		if len(this.edgeLengths) == 4:
-		    print refl_filename
+		    print filename
 		elif this.symmetricEdges():
 		    print '%s (%s)' % (filename, refl_filename)
 		else:
@@ -2429,6 +2433,9 @@ if __name__ == '__main__':
 	]
 	rndT = [None for j in range(nrThreads)]
 	i = 0
+	if edgeLs == [] or folds == [] or edgeAlts ==[] or oppEdgeAlts == []:
+	    print 'Warning: empty search specified, bailing out'
+	    return
 	while True:
 	    for edges in edgeLs:
 		for fold in folds:
@@ -2461,96 +2468,7 @@ if __name__ == '__main__':
 				    print '===threads finished===='
 				    i = 0
 
-    def randBatchA4xI(continueAfter = 100, nrThreads = 1):
-	#folds = [Fold.star, Fold.w]
-	#folds = [Fold.star]
-	#folds = [Fold.w]
-	#folds = [Fold.trapezium]
-	folds = [
-	    Fold.w,
-	    Fold.star,
-	    Fold.triangle,
-	    Fold.trapezium,
-	    Fold.parallel,
-	]
-	edgeLs = [
-	    [0., 0., 0., 0.],
-	    [1., 0., 0., 0.],
-	    [0., 1., 0., 0.],
-	    [0., 0., 1., 0.],
-	    [0., 0., 0., 1.],
-	    [1., 1., 0., 0.],
-	    [1., 0., 1., 0.],
-	    [1., 0., 0., 1.],
-	    [0., 1., 1., 0.],
-	    [0., 1., 0., 1.],
-	    [0., 0., 1., 1.],
-	]
-	ta = TriangleAlt()
-	#edgeAlts = [t for t in ta]
-	#edgeAlts = []
-	#for t in ta:
-	#    if t & rot_bit == 0:
-	#        edgeAlts.append(t)
-	#oppEdgeAlts = [t for t in ta]
-	edgeAlts = [ta.twisted]
-	oppEdgeAlts = [ta.twisted]
-	dom = [
-	    [-2., 3.],           # Translation
-	    [-numx.pi, numx.pi], # angle alpha
-	    [-numx.pi, numx.pi], # fold 1 beta
-	    [-numx.pi, numx.pi], # fold 2 gamma
-	]
-	rndT = [None for j in range(nrThreads)]
-	i = 0
-	while True:
-	    for edges in edgeLs:
-		for fold in folds:
-		    for ea in edgeAlts:
-			for oea in oppEdgeAlts:
-			    # loose_bit must be the same for both:
-			    if (
-				ea & loose_bit == loose_bit and
-				oea & loose_bit == loose_bit
-			    ) or (
-				ea & loose_bit == 0 and
-				oea & loose_bit == 0
-			    ):
-				print '====set up thread %d===' % i
-				rndT[i] = RandFindMultiRootOnDomain(dom,
-				    threadId           = i,
-				    edgeAlternative    = ea,
-				    oppEdgeAlternative = oea,
-				    edgeLengths        = edges,
-				    fold               = fold,
-				    method             = Method.hybrids
-				)
-				rndT[i].stopAfter = continueAfter
-				rndT[i].start()
-				i = i + 1
-				if (i == nrThreads):
-				    for j in range(nrThreads):
-					rndT[j].join()
-				    print '===threads finished===='
-				    i = 0
-
-    def batch(edges, tris):
-	    fold = Fold()
-	    print edges, Stringify[tris], 'triangle alternative'
-	    #fold.set(fold.parallel)
-	    #multiRootsLog(fold, edges, tris)
-	    fold.set(fold.triangle)
-	    multiRootsLog(fold, edges, tris)
-	    fold.set(fold.star)
-	    multiRootsLog(fold, edges, tris)
-	    fold.set(fold.w)
-	    multiRootsLog(fold, edges, tris)
-	    fold.set(fold.trapezium)
-	    multiRootsLog(fold, edges, tris)
-	    print '--------------------------------------------------------------------------------\n'
-
-    #randBatchA4xI(continueAfter = 4000, nrThreads = 1)
-    pre_edgeLs = [
+    pre_edgeLs_A4 = [
 	[0., 0., 0., 0., 0., 0., 0.],
 
 	[0., 0., 0., 1., 0., 0., 1.],
@@ -2607,33 +2525,8 @@ if __name__ == '__main__':
 	[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
 	[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
     ]
-    tstProg = False
-    if len(sys.argv) <= 1:
-	edgeLs = pre_edgeLs
-	i = 0
-	j = len(pre_edgeLs)
-    elif sys.argv[1] == '-h':
-	print 'Usage:'
-	print sys.argv[0], '-l: list the length of the predefined list'
-	print sys.argv[0], '[i0] [i1]'
-	print '        search using the specified slice from the predefined list'
-	print '        If nothing is specified the whole list is searched'
-	print '        If only i0 is specified the list is searched from that index'
-	sys.exit(0)
-    elif sys.argv[1] == '-l':
-	for (i, e) in zip(range(len(pre_edgeLs)), pre_edgeLs):
-	    print '%3d' % i, e
-	sys.exit(0)
-    elif sys.argv[1] == '-t':
-	tstProg = True
-    else:
-	i = int(sys.argv[1])
-	if len(sys.argv) > 2:
-	    j = int(sys.argv[2])
-	else:
-	    j = len(pre_edgeLs)
-	edgeLs = pre_edgeLs[i:j]
-    dynamicSols = [
+
+    dynamicSols_A4 = [
 	# TODO: important add edge lengths!!!
 	{
 	    # here is an example of where it is important to define the
@@ -2793,14 +2686,160 @@ if __name__ == '__main__':
 	}
     ]
 
+    def randBatchA4xI(continueAfter = 100, nrThreads = 1, edgeLs = []):
+	folds = [
+	    Fold.w,
+	    Fold.star,
+	    Fold.triangle,
+	    Fold.trapezium,
+	    Fold.parallel,
+	]
+	ta = TriangleAlt()
+	#edgeAlts = [t for t in ta]
+	#edgeAlts = []
+	#for t in ta:
+	#    if t & rot_bit == 0:
+	#        edgeAlts.append(t)
+	#oppEdgeAlts = [t for t in ta]
+	edgeAlts = [ta.twisted]
+	dom = [
+	    [-2., 3.],           # Translation
+	    [-numx.pi, numx.pi], # angle alpha
+	    [-numx.pi, numx.pi], # fold 1 beta
+	    [-numx.pi, numx.pi], # fold 2 gamma
+	]
+	rndT = [None for j in range(nrThreads)]
+	i = 0
+	if edgeLs == [] or folds == [] or edgeAlts ==[]:
+	    print 'Warning: empty search specified, bailing out'
+	    return
+	while True:
+	    for edges in edgeLs:
+		for fold in folds:
+		    for ea in edgeAlts:
+			print '====set up thread %d===' % i
+			rndT[i] = RandFindMultiRootOnDomain(dom,
+			    threadId           = i,
+			    edgeAlternative    = ea,
+			    oppEdgeAlternative = ea,
+			    edgeLengths        = edges,
+			    fold               = fold,
+			    method             = Method.hybrids
+			)
+			rndT[i].stopAfter = continueAfter
+			rndT[i].start()
+			i = i + 1
+			if (i == nrThreads):
+			    for j in range(nrThreads):
+				rndT[j].join()
+			    print '===threads finished===='
+			    i = 0
+
+    pre_edgeLs_A4xI = [
+	[0., 0., 0., 0.],
+	[1., 0., 0., 0.],
+	[0., 1., 0., 0.],
+	[0., 0., 1., 0.],
+	[0., 0., 0., 1.],
+	[1., 1., 0., 0.],
+	[1., 0., 1., 0.],
+	[1., 0., 0., 1.],
+	[0., 1., 1., 0.],
+	[0., 1., 0., 1.],
+	[0., 0., 1., 1.],
+    ]
+
+    pre_edgeLs = {
+	'A4xI': pre_edgeLs_A4xI,
+	'A4'  : pre_edgeLs_A4,
+	'S4'  : [], # TODO
+    }
+    dynamicSols = {
+	'A4xI': dynamicSols_A4,
+	'A4'  : [],
+	'S4'  : [],
+    }
+
+    tstProg = False
+
+    def printUsage():
+	print 'Usage:'
+	print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
+	print 'where options:'
+	print '     -i <num>: number of iterations to use.'
+	print '     -l      : list the length of the predefined list'
+	print 'And'
+	print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
+	print '                      values are "A4", "A4xI", "S4"'
+	print '    [i0]: begin slice'
+	print '    [i1]: end slice'
+	print '        search using the specified slice from the predefined list'
+	print '        If nothing is specified the whole list is searched'
+	print '        If only i0 is specified the list is searched from that index'
+
+    # Handle command line arguments:
+    if len(sys.argv) <= 1:
+	printUsage()
+	sys.exit(-1)
+    else:
+	skipNext = False # for options that take arguments
+	symGrp = '' # which symmetry group to search: '' means not read yet
+	nr_iterations = 4000
+	list_pre_edgeLs = False
+	for n in range(1, len(sys.argv)):
+	    if skipNext:
+		skipNext = False
+	    elif sys.argv[n] == '-h':
+		printUsage()
+		sys.exit(0)
+	    elif sys.argv[n] == '-i':
+		if len(sys.argv) > n + 1:
+		    nr_iterations = int(sys.argv[n + 1])
+		else:
+		    printUsage()
+		    sys.exit(-1)
+		skipNext = True
+	    elif sys.argv[n] == '-l':
+		list_pre_edgeLs = True
+	    elif sys.argv[n] == '-t':
+		tstProg = True
+	    elif symGrp == '':
+		if sys.argv[n] in ['A4xI', 'A4', 'S4']:
+		    symGrp = sys.argv[n]
+		    edgeLs = pre_edgeLs[symGrp]
+		    i = 0
+		    j = len(edgeLs)
+		else:
+		    printUsage()
+		    sys.exit(-1)
+	    else:
+		# last arguments slice i0, i1
+		i = int(sys.argv[n])
+		if len(sys.argv) > n + 1:
+		    j = int(sys.argv[n + 1])
+		else:
+		    j = len(edgeLs)
+		edgeLs = edgeLs[i:j]
+		break
+
     if tstProg:
 	if tstDynamicSolutions():
 	    print 'test PASSED'
 	else:
 	    print 'test FAILED'
     else:
-	print 'search slice [%d:%d]:' % (i, j)
+	if list_pre_edgeLs:
+	    for (i, e) in zip(range(len(edgeLs)), edgeLs):
+		print '%3d' % i, e
+	    sys.exit(0)
+	print 'Search solutions for symmetry group %s' % symGrp
+	print 'Switch setup after %d randomly selected begin values' % (
+							    nr_iterations)
+	print 'Search slice [%d:%d]:' % (i, j)
 	for e in edgeLs:
 	    print '  -', e
-	randBatch(continueAfter = 4000, nrThreads = 1,
-			    edgeLs = edgeLs, dynSols = dynamicSols)
+	if symGrp == 'A4xI':
+	    randBatchA4xI(continueAfter = nr_iterations, nrThreads = 1, edgeLs = edgeLs)
+	elif symGrp == 'A4':
+	    randBatch(continueAfter = nr_iterations, nrThreads = 1,
+			    edgeLs = edgeLs, dynSols = dynamicSols[symGrp])
