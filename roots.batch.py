@@ -1716,6 +1716,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.stopAfter = 100000
 	this.printStatus = False,
 	this.outDir = outDir
+	if not os.path.isdir(outDir):
+	    os.mkdir(outDir, 0755)
 	random.seed()
 	threading.Thread.__init__(this)
 
@@ -2214,6 +2216,7 @@ def FindMultiRootOnDomain(domain,
 
 if __name__ == '__main__':
     import sys
+    import os
     #import Geom3D
     #T  = 2.45
     #a  = Geom3D.Deg2Rad * 40
@@ -2338,361 +2341,21 @@ if __name__ == '__main__':
 		v[i] = 0
         return v
 
-    FindSingleRoots = False
-    if FindSingleRoots:
-        #
-        # EDGE LENGTH [1, 1, 1, 0]
-        #
-        # Triangle strip 1 loose
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.4, 0.69,  0.28, 0.07)),
-        #    edgeAlternative = TriangleAlt.strip1loose,
-        #    edgeLengths     = [1., 1., 1., 0.],
-        #    method          = Method.hybrids
-        #    #precision       = 1.0e-11,
-        #    #maxIter         = 1000
-        #)
-
-        # Triangle strip I
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.3, 1.03,  0.79, -0.76)),
-        #    edgeAlternative = TriangleAlt.stripI,
-        #    edgeLengths     = [1., 1., 1., 0.],
-        #)
-
-        #
-        # EDGE LENGTH [1, 1, 1, 1]
-        #
-        # Triangle strip 1 loose
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.7, 0.70, -0.45,  1.48)),
-        #    edgeAlternative = TriangleAlt.strip1loose
-        #)
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.5, 2.44, 1.27, -0.91)),
-        #    edgeAlternative = TriangleAlt.strip1loose
-        #)
-
-        # Triangle strip I
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.2, 1.75, 0.91, 0.0)),
-        #    edgeAlternative = TriangleAlt.stripI
-        #)
-        #FindMultiRoot(
-        #    initialValues   = numx.array((0.3, 2.09,  0.26, 2.82)),
-        #    edgeAlternative = TriangleAlt.stripI
-        #)
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.6, 0.93,  0.65, 2.67)),
-        #    edgeAlternative = TriangleAlt.stripI
-        #)
-
-        # Triangle star
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.7, 0.56, -1.59,  0.71)),
-        #    edgeAlternative = TriangleAlt.star,
-        #    #method          = Method.hybrids
-        #)
-
-        # Triangle star, 1 loose
-        #FindMultiRoot(
-        #    # not good enough, but converges ~ to next values:
-        #    #initialValues   = numx.array((3.1, 0.66,  0.00,  0.00)),
-        #    initialValues   = numx.array((1.7, 0.69,  0.80, -2.18)),
-        #    edgeAlternative = TriangleAlt.star1loose,
-        #    edgeLengths     = [1., 1., 1., 1.],
-        #    #method          = Method.hybrids
-        #)
-
-        # Triangle star, 1 loose
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.7, 0.56, -1.59,  0.71)),
-        #    edgeAlternative = TriangleAlt.star1loose,
-        #    #method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [1, 1, 0, 1]
-        #
-        # Triangle strip II
-        # Not possible
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.5, 1.62, 0.42, -0.61)),
-        #    edgeAlternative = TriangleAlt.stripII,
-        #    edgeLengths     = [1., 1., 0., 1.],
-        #    #method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [V2, 1, 1, 1]
-        #
-        # Triangle star, 1 loose
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.4, 1.13, -1.90,  1.74)),
-        #    edgeAlternative = TriangleAlt.star1loose,
-        #    edgeLengths     = [V2, 1., 1., 1.],
-        #    method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [1, V2, 1, 0]
-        #
-        #FindMultiRoot(
-        #    # doesn't converge:
-        #    initialValues   = numx.array((1.9, 1.50,  1.38,  0.00)),
-        #    edgeAlternative = TriangleAlt.stripII,
-        #    edgeLengths     = [1., V2, 1., 0.],
-        #    #method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [1, 1, V2, 1]
-        #
-        # Triangle star
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.4, 1.13, -1.38,  1.64)),
-        #    edgeAlternative = TriangleAlt.star,
-        #    edgeLengths     = [1., 1., V2, 1.],
-        #    #method          = Method.hybrids
-        #)
-
-        # Triangle strip II
-        #FindMultiRoot(
-        #    initialValues   = numx.array((-0.2, 2.90,  1.55, 2.50)),
-        #    edgeAlternative = TriangleAlt.star,
-        #    edgeLengths     = [1., 1., V2, 1.],
-        #    #method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [1, 1, 0, 1]
-        #
-        # Triangle strip II
-        #FindMultiRoot(
-        #    initialValues   = numx.array((-0.2, 2.90,  1.55, 2.50)),
-        #    edgeAlternative = TriangleAlt.star,
-        #    edgeLengths     = [1., 1., 0, 1.],
-        #    #method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [0, 0, 1, 0]
-        #
-        # Triangle strip 1 loose
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.3, 0.75, -1.05, 0.09)),
-        #    #initialValues   = numx.array((2.3, 0.70, -0.93, -1.06)),
-        #    #edgeAlternative = TriangleAlt.strip1loose,
-        #    #edgeAlternative = TriangleAlt.stripI,
-        #    edgeAlternative = TriangleAlt.star1loose,
-        #    edgeLengths     = [0., 0., 1., 0.],
-	#    fold            = Fold.w,
-        #    #method          = Method.hybrids
-        #)
-	# NOTE, with the settings above nothing is found. Something is found
-	# though by using the same settings, but another triangle alternative.
-	# This is also a solution for the above...
-	# NOTE NOTE NOTE
-	# This means that it is likely that the digital search in the else
-	# clause below misses local solutions (which I was already afraid of)
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.3, 0.75, -1.05, 0.09)),
-        #    #initialValues   = numx.array((2.3, 0.70, -0.93, -1.06)),
-        #    #edgeAlternative = TriangleAlt.strip1loose,
-        #    edgeAlternative = TriangleAlt.star,
-        #    edgeLengths     = [1., 0., 1., 0.],
-	#    fold            = Fold.w,
-        #    #method        heightF  = Method.hybrids
-        #)
-
-	# no conversion:
-        #FindMultiRoot(
-        #    initialValues   = numx.array((2.3, 0.63,  1.08, -0.99)),
-        #    edgeAlternative = TriangleAlt.star,
-        #    edgeLengths     = [1., 0., 1., 0.],
-	#    fold            = Fold.trapezium,
-        #    #method          = Method.hybrids
-        #)
-
-	# no conversion:
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.3, 1.40, -2.06,  0.99)),
-        #    edgeAlternative = TriangleAlt.stripI,
-        #    edgeLengths     = [0., 1., 0., 1.],
-	#    fold            = Fold.trapezium,
-        #    #method          = Method.hybrids
-        #)
-
-        #
-        # EDGE LENGTH [1, 1, 2, 1]
-        # C will be shared by 2 edges
-        # Triangle star
-        # no solutions
-        #FindMultiRoot(
-        #    initialValues   = numx.array((1.6, 1.47,  0.00,  0.09)),
-        #    edgeAlternative = TriangleAlt.stripII,
-        #    edgeLengths     = [1., 1., 2., 1.],
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # doesn't converge:
-        #    #initialValues   = numx.array((2.1, 1.20,  1.05,  0.49)),
-        #    # doesn't converge:
-        #    initialValues   = numx.array((2.3, 0.79,  0.35, -1.24)),
-        #    edgeAlternative = TriangleAlt.stripII,
-        #    edgeLengths     = [1., 1., 1., 0.],
-        #    printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # doesn't converge:
-        #    #initialValues   = numx.array((2.1, 1.20,  1.05,  0.49)),
-        #    # doesn't converge:
-        #    initialValues   = numx.array((2.5, 0.51, 2.97, -1.43)),
-        #    edgeAlternative = TriangleAlt.strip1loose,
-        #    edgeLengths     = [0., 1., 1., 0.],
-	#    fold            = Fold.trapezium,
-        #    #printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # doesn't converge:
-        #    #initialValues   = numx.array((1.7, 1.45, -0.72,  0.75)),
-        #    #initialValues   = numx.array((1.8, 1.2, -0.38,  0.94)),
-        #    initialValues   = numx.array((1.75, 1.32, -0.50,  0.84)),
-        #    #edgeAlternative = TriangleAlt.stripI,
-        #    edgeAlternative = TriangleAlt.stripII,
-        #    edgeLengths     = [0., 1., 0., 1.],
-	#    fold            = Fold.triangle,
-        #    #printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # doesn't converge:
-        #    initialValues   = numx.array((2.00, 1.06,  0.58,  0.12)),
-	#    edgeAlternative = TriangleAlt.stripI,
-	#    edgeLengths = [1., 1., 0., 1.],
-	#    fold = Fold.trapezium,
-        #    #printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # doesn't converge:
-        #    initialValues   = numx.array((2.10, 1.29, -0.63, -0.37)),
-	#    edgeAlternative = TriangleAlt.stripI,
-	#    edgeLengths = [1., 1., 0., 1.],
-	#    fold = Fold.star,
-        #    #printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # YES
-        #    initialValues   = numx.array((2.40, 0.72, -0.98, -1.34)),
-	#    edgeAlternative = TriangleAlt.star,
-	#    edgeLengths = [1., 0., 1., 1.],
-	#    fold = Fold.star,
-        #    #printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-        #FindMultiRoot(
-        #    # doesn't converge:
-	#    # taken from 1, 1, 0, 1
-        #    initialValues   = numx.array((1.240760438271816, 1.4093511342004652, 0.64591225448264056, -1.2296559797224518)),
-	#    edgeAlternative = TriangleAlt.stripI,
-	#    edgeLengths = [V2, 1., 0., 1.],
-	#    fold = Fold.star,
-        #    #printIter = True,
-        #    #method          = Method.hybrids
-        #)
-
-	pass
-    else:
-	printStatus = False
-	def multiRootsLog(fold, edges, tris, oppTris = None):
-	    print 'started searching %s folds' % str(fold)
-	    result = []
-	    if len(edges) == 4:
-		dom = [
-		    [-2., 3.],           # Translation
-		    [-numx.pi, numx.pi], # angle alpha
-		    [-numx.pi, numx.pi], # fold 1 beta
-		    [-numx.pi, numx.pi], # fold 2 gamma
-		]
-		steps = [0.5, 0.5, 0.3, 0.3]
-	    else:
-		dom = [
-		    [-2., 3.],             # Translation
-		    [-numx.pi, numx.pi],   # angle alpha
-		    [-numx.pi, numx.pi],   # fold 1 beta0
-		    [-numx.pi, numx.pi],   # fold 2 gamma0
-		    [0,        numx.pi/4], # delta: around z-axis
-		    [-numx.pi, numx.pi],   # fold 1 beta1
-		    [-numx.pi, numx.pi],   # fold 2 gamma1
-		]
-		steps = [0.5, 0.5, 0.3, 0.5, 0.3, 0.5, 0.3]
-	    print 'randomSearch:', randomSearch
-	    if (randomSearch):
-		rndT = RandFindMultiRootOnDomain(dom,
-			edgeAlternative    = tris,
-			oppEdgeAlternative = oppTris,
-			edgeLengths        = edges,
-			fold               = fold.fold,
-			method             = Method.hybrids
-		    )
-		rndT.stopAfter = 100
-		while True:
-		    rndT.start()
-		    rndT.join()
-		    #del rndT
-		    break
-		    threading.Thread.__init__(rndT)
-		    print '======================='
-	    else:
-		result = FindMultiRootOnDomain(dom,
-			edgeLengths = edges,
-			edgeAlternative = tris,
-			oppEdgeAlternative = oppTris,
-			fold = fold.fold,
-			method = Method.hybrids,
-			cleanupF = cleanupResult,
-			steps = steps,
-			maxIter = 50,
-			printStatus = printStatus
-		    )
-		print '['
-		if len(edges) == 4:
-		    for r in result:
-			print ' [%.14f, %.14f, %.14f, %.14f],' % (
-							r[0], r[1], r[2], r[3])
-		else:
-		    for r in result:
-			print ' [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
-					r[0], r[1], r[2], r[3], r[4], r[5], r[6])
-		print '],\n'
-
-	def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = [],
-								dynSols = None):
-	    folds = [Fold.star, Fold.w]
-	    #folds = [Fold.star]
-	    #folds = [Fold.w]
-	    #folds = [Fold.trapezium]
-	    ta = TriangleAlt()
-	    #edgeAlts = [t for t in ta]
-	    edgeAlts = []
-	    for t in ta:
-		if t & rot_bit == 0:
-		    edgeAlts.append(t)
-	    #oppEdgeAlts = [t for t in ta]
-	    oppEdgeAlts = edgeAlts[:]
+    printStatus = False
+    def multiRootsLog(fold, edges, tris, oppTris = None):
+	print 'started searching %s folds' % str(fold)
+	result = []
+	if len(edges) == 4:
 	    dom = [
-		[-3., 4.],             # Translation
+		[-2., 3.],           # Translation
+		[-numx.pi, numx.pi], # angle alpha
+		[-numx.pi, numx.pi], # fold 1 beta
+		[-numx.pi, numx.pi], # fold 2 gamma
+	    ]
+	    steps = [0.5, 0.5, 0.3, 0.3]
+	else:
+	    dom = [
+		[-2., 3.],             # Translation
 		[-numx.pi, numx.pi],   # angle alpha
 		[-numx.pi, numx.pi],   # fold 1 beta0
 		[-numx.pi, numx.pi],   # fold 2 gamma0
@@ -2700,689 +2363,444 @@ if __name__ == '__main__':
 		[-numx.pi, numx.pi],   # fold 1 beta1
 		[-numx.pi, numx.pi],   # fold 2 gamma1
 	    ]
-	    rndT = [None for j in range(nrThreads)]
-	    i = 0
+	    steps = [0.5, 0.5, 0.3, 0.5, 0.3, 0.5, 0.3]
+	print 'randomSearch:', randomSearch
+	if (randomSearch):
+	    rndT = RandFindMultiRootOnDomain(dom,
+		    edgeAlternative    = tris,
+		    oppEdgeAlternative = oppTris,
+		    edgeLengths        = edges,
+		    fold               = fold.fold,
+		    method             = Method.hybrids
+		)
+	    rndT.stopAfter = 100
 	    while True:
-		for edges in edgeLs:
-		    for fold in folds:
-			for ea in edgeAlts:
-			    for oea in oppEdgeAlts:
-				# loose_bit must be the same for both:
-				if (
-				    ea & loose_bit == loose_bit and
-				    oea & loose_bit == loose_bit
-				) or (
-				    ea & loose_bit == 0 and
-				    oea & loose_bit == 0
-				):
-				    print '====set up thread %d===' % i
-				    rndT[i] = RandFindMultiRootOnDomain(dom,
-					threadId           = i,
-					edgeAlternative    = ea,
-					oppEdgeAlternative = oea,
-					edgeLengths        = edges,
-					dynSols            = dynSols,
-					fold               = fold,
-					method             = Method.hybrids
-				    )
-				    rndT[i].stopAfter = continueAfter
-				    rndT[i].start()
-				    i = i + 1
-				    if (i == nrThreads):
-					for j in range(nrThreads):
-					    rndT[j].join()
-					print '===threads finished===='
-					i = 0
+		rndT.start()
+		rndT.join()
+		#del rndT
+		break
+		threading.Thread.__init__(rndT)
+		print '======================='
+	else:
+	    result = FindMultiRootOnDomain(dom,
+		    edgeLengths = edges,
+		    edgeAlternative = tris,
+		    oppEdgeAlternative = oppTris,
+		    fold = fold.fold,
+		    method = Method.hybrids,
+		    cleanupF = cleanupResult,
+		    steps = steps,
+		    maxIter = 50,
+		    printStatus = printStatus
+		)
+	    print '['
+	    if len(edges) == 4:
+		for r in result:
+		    print ' [%.14f, %.14f, %.14f, %.14f],' % (
+						    r[0], r[1], r[2], r[3])
+	    else:
+		for r in result:
+		    print ' [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
+				    r[0], r[1], r[2], r[3], r[4], r[5], r[6])
+	    print '],\n'
 
-	def randBatchA4xI(continueAfter = 100, nrThreads = 1):
-	    #folds = [Fold.star, Fold.w]
-	    #folds = [Fold.star]
-	    #folds = [Fold.w]
-	    #folds = [Fold.trapezium]
-	    folds = [
-		Fold.w,
-		Fold.star,
-		Fold.triangle,
-		Fold.trapezium,
-		Fold.parallel,
-	    ]
-	    edgeLs = [
-		[0., 0., 0., 0.],
-		[1., 0., 0., 0.],
-		[0., 1., 0., 0.],
-		[0., 0., 1., 0.],
-		[0., 0., 0., 1.],
-		[1., 1., 0., 0.],
-		[1., 0., 1., 0.],
-		[1., 0., 0., 1.],
-		[0., 1., 1., 0.],
-		[0., 1., 0., 1.],
-		[0., 0., 1., 1.],
-	    ]
-	    ta = TriangleAlt()
-	    #edgeAlts = [t for t in ta]
-	    #edgeAlts = []
-	    #for t in ta:
-	    #    if t & rot_bit == 0:
-	    #        edgeAlts.append(t)
-	    #oppEdgeAlts = [t for t in ta]
-	    edgeAlts = [ta.twisted]
-	    oppEdgeAlts = [ta.twisted]
-	    dom = [
-		[-2., 3.],           # Translation
-		[-numx.pi, numx.pi], # angle alpha
-		[-numx.pi, numx.pi], # fold 1 beta
-		[-numx.pi, numx.pi], # fold 2 gamma
-	    ]
-	    rndT = [None for j in range(nrThreads)]
-	    i = 0
-	    while True:
-		for edges in edgeLs:
-		    for fold in folds:
-			for ea in edgeAlts:
-			    for oea in oppEdgeAlts:
-				# loose_bit must be the same for both:
-				if (
-				    ea & loose_bit == loose_bit and
-				    oea & loose_bit == loose_bit
-				) or (
-				    ea & loose_bit == 0 and
-				    oea & loose_bit == 0
-				):
-				    print '====set up thread %d===' % i
-				    rndT[i] = RandFindMultiRootOnDomain(dom,
-					threadId           = i,
-					edgeAlternative    = ea,
-					oppEdgeAlternative = oea,
-					edgeLengths        = edges,
-					fold               = fold,
-					method             = Method.hybrids
-				    )
-				    rndT[i].stopAfter = continueAfter
-				    rndT[i].start()
-				    i = i + 1
-				    if (i == nrThreads):
-					for j in range(nrThreads):
-					    rndT[j].join()
-					print '===threads finished===='
-					i = 0
-
-	def batch(edges, tris):
-		fold = Fold()
-		print edges, Stringify[tris], 'triangle alternative'
-		#fold.set(fold.parallel)
-		#multiRootsLog(fold, edges, tris)
-		fold.set(fold.triangle)
-		multiRootsLog(fold, edges, tris)
-		fold.set(fold.star)
-		multiRootsLog(fold, edges, tris)
-		fold.set(fold.w)
-		multiRootsLog(fold, edges, tris)
-		fold.set(fold.trapezium)
-		multiRootsLog(fold, edges, tris)
-		print '--------------------------------------------------------------------------------\n'
-
-	#edges = [0., 0., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	edges = [0., 0., 1., 0.]
-	# fold = Fold()
-	# fold.set(fold.w)
-	# multiRootsLog(fold, edges, TriangleAlt.strip1loose)
-	# print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()), 'Done'
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 0., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 0., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., 1., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., V2, 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [0., V2, 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 0., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 0., 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 0., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 0., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 1., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 1., 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 1., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., 1., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., V2, 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., V2, 1., 0.]
-	##batch(edges, TriangleAlt.strip1loose) # nothing special
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	##batch(edges, TriangleAlt.star1loose) # nothing special
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [1., V2, 1., 1.]
-	##batch(edges, TriangleAlt.strip1loose) # nothing special
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	##batch(edges, TriangleAlt.star1loose) # nothing special
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	##batch(edges, TriangleAlt.alt_strip1loose) # nothing special
-
-	#edges = [V2, 0., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 0., 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 0., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 0., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 1., 0., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 1., 1., 0.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 1., 1., 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#edges = [V2, 1., V2, 1.]
-	#batch(edges, TriangleAlt.strip1loose)
-	#batch(edges, TriangleAlt.stripI)
-	#batch(edges, TriangleAlt.stripII)
-	#batch(edges, TriangleAlt.star)
-	#batch(edges, TriangleAlt.star1loose)
-	#batch(edges, TriangleAlt.alt_stripI)
-	#batch(edges, TriangleAlt.alt_stripII)
-	#batch(edges, TriangleAlt.alt_strip1loose)
-
-	#randomSearch = True
-	#randomSearch = False
-	#edges = [1, 1., 0., 0.]
-	#batch(edges, TriangleAlt.twisted)
-
-	#randBatchA4xI(continueAfter = 4000, nrThreads = 1)
-	pre_edgeLs = [
-	    [0., 0., 0., 0., 0., 0., 0.],
-
-	    [0., 0., 0., 1., 0., 0., 1.],
-		    # should give solutions around
-		    #	T=1.60, (0, -116, -16) for
-		    #		parallel fold and twisted strip
-
-	    [0., 0., 1., 0., 0., 1., 0.],
-
-	    [0., 0., 1., 1., 0., 1., 1.],
-
-	    [0., 1., 0., 0., 1., 0., 0.],
-
-	    [0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
-	    [0., 1., 0., 1., 1., 0., 1.],
-
-	    [0., 1., 1., 0., 1., 1., 0.],
-
-	    [1., 0., 0., 0., 0., 0., 0.],
-
-	    [1., 0., 0., 1., 0., 0., 1.],
-
-	    [1., 0., 1., 0., 0., 1., 0.], # only hepts
-		    # it seems that
-		    # frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
-		    # needs to find nr 11 (has 10 now)
-	    [1., 0., 1., 0., 0., 1., 0.],
-	    [1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
-	    [1., 0., 1., 0., 1., 0., 0.], # no sols
-	    [1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
-	    [1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
-	    [1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
-
-	    [1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
-	    [1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
-	    [1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
-
-	    [1., 1., 0., 0., 1., 0., 0.],
-
-	    [1., 1., 0., 1., 0., 0., 0.], # for rot 0
-	    [1., 1., 0., 1., 0., 0., 1.], # for rot 0
-	    [1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
-	    [1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
-
-	    [1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
-	    [1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
-	    [1., 1., 1., 0., 1., 0., 0.], # no sols
-	    [1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
-
-	    [1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
-	    [1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
-	    [1., 1., 1., 1., 1., 1., 1.], # all equilateral
-
-	    [0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
-	    [1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+    def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = [],
+							    dynSols = None):
+	folds = [Fold.star, Fold.w]
+	#folds = [Fold.star]
+	#folds = [Fold.w]
+	#folds = [Fold.trapezium]
+	ta = TriangleAlt()
+	#edgeAlts = [t for t in ta]
+	edgeAlts = []
+	for t in ta:
+	    if t & rot_bit == 0:
+		edgeAlts.append(t)
+	#oppEdgeAlts = [t for t in ta]
+	oppEdgeAlts = edgeAlts[:]
+	dom = [
+	    [-3., 4.],             # Translation
+	    [-numx.pi, numx.pi],   # angle alpha
+	    [-numx.pi, numx.pi],   # fold 1 beta0
+	    [-numx.pi, numx.pi],   # fold 2 gamma0
+	    [0,        numx.pi/4], # delta: around z-axis
+	    [-numx.pi, numx.pi],   # fold 1 beta1
+	    [-numx.pi, numx.pi],   # fold 2 gamma1
 	]
-	tstProg = False
-	if len(sys.argv) <= 1:
-	    edgeLs = pre_edgeLs
-	    i = 0
+	rndT = [None for j in range(nrThreads)]
+	i = 0
+	while True:
+	    for edges in edgeLs:
+		for fold in folds:
+		    for ea in edgeAlts:
+			for oea in oppEdgeAlts:
+			    # loose_bit must be the same for both:
+			    if (
+				ea & loose_bit == loose_bit and
+				oea & loose_bit == loose_bit
+			    ) or (
+				ea & loose_bit == 0 and
+				oea & loose_bit == 0
+			    ):
+				print '====set up thread %d===' % i
+				rndT[i] = RandFindMultiRootOnDomain(dom,
+				    threadId           = i,
+				    edgeAlternative    = ea,
+				    oppEdgeAlternative = oea,
+				    edgeLengths        = edges,
+				    dynSols            = dynSols,
+				    fold               = fold,
+				    method             = Method.hybrids
+				)
+				rndT[i].stopAfter = continueAfter
+				rndT[i].start()
+				i = i + 1
+				if (i == nrThreads):
+				    for j in range(nrThreads):
+					rndT[j].join()
+				    print '===threads finished===='
+				    i = 0
+
+    def randBatchA4xI(continueAfter = 100, nrThreads = 1):
+	#folds = [Fold.star, Fold.w]
+	#folds = [Fold.star]
+	#folds = [Fold.w]
+	#folds = [Fold.trapezium]
+	folds = [
+	    Fold.w,
+	    Fold.star,
+	    Fold.triangle,
+	    Fold.trapezium,
+	    Fold.parallel,
+	]
+	edgeLs = [
+	    [0., 0., 0., 0.],
+	    [1., 0., 0., 0.],
+	    [0., 1., 0., 0.],
+	    [0., 0., 1., 0.],
+	    [0., 0., 0., 1.],
+	    [1., 1., 0., 0.],
+	    [1., 0., 1., 0.],
+	    [1., 0., 0., 1.],
+	    [0., 1., 1., 0.],
+	    [0., 1., 0., 1.],
+	    [0., 0., 1., 1.],
+	]
+	ta = TriangleAlt()
+	#edgeAlts = [t for t in ta]
+	#edgeAlts = []
+	#for t in ta:
+	#    if t & rot_bit == 0:
+	#        edgeAlts.append(t)
+	#oppEdgeAlts = [t for t in ta]
+	edgeAlts = [ta.twisted]
+	oppEdgeAlts = [ta.twisted]
+	dom = [
+	    [-2., 3.],           # Translation
+	    [-numx.pi, numx.pi], # angle alpha
+	    [-numx.pi, numx.pi], # fold 1 beta
+	    [-numx.pi, numx.pi], # fold 2 gamma
+	]
+	rndT = [None for j in range(nrThreads)]
+	i = 0
+	while True:
+	    for edges in edgeLs:
+		for fold in folds:
+		    for ea in edgeAlts:
+			for oea in oppEdgeAlts:
+			    # loose_bit must be the same for both:
+			    if (
+				ea & loose_bit == loose_bit and
+				oea & loose_bit == loose_bit
+			    ) or (
+				ea & loose_bit == 0 and
+				oea & loose_bit == 0
+			    ):
+				print '====set up thread %d===' % i
+				rndT[i] = RandFindMultiRootOnDomain(dom,
+				    threadId           = i,
+				    edgeAlternative    = ea,
+				    oppEdgeAlternative = oea,
+				    edgeLengths        = edges,
+				    fold               = fold,
+				    method             = Method.hybrids
+				)
+				rndT[i].stopAfter = continueAfter
+				rndT[i].start()
+				i = i + 1
+				if (i == nrThreads):
+				    for j in range(nrThreads):
+					rndT[j].join()
+				    print '===threads finished===='
+				    i = 0
+
+    def batch(edges, tris):
+	    fold = Fold()
+	    print edges, Stringify[tris], 'triangle alternative'
+	    #fold.set(fold.parallel)
+	    #multiRootsLog(fold, edges, tris)
+	    fold.set(fold.triangle)
+	    multiRootsLog(fold, edges, tris)
+	    fold.set(fold.star)
+	    multiRootsLog(fold, edges, tris)
+	    fold.set(fold.w)
+	    multiRootsLog(fold, edges, tris)
+	    fold.set(fold.trapezium)
+	    multiRootsLog(fold, edges, tris)
+	    print '--------------------------------------------------------------------------------\n'
+
+    #randBatchA4xI(continueAfter = 4000, nrThreads = 1)
+    pre_edgeLs = [
+	[0., 0., 0., 0., 0., 0., 0.],
+
+	[0., 0., 0., 1., 0., 0., 1.],
+		# should give solutions around
+		#	T=1.60, (0, -116, -16) for
+		#		parallel fold and twisted strip
+
+	[0., 0., 1., 0., 0., 1., 0.],
+
+	[0., 0., 1., 1., 0., 1., 1.],
+
+	[0., 1., 0., 0., 1., 0., 0.],
+
+	[0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
+	[0., 1., 0., 1., 1., 0., 1.],
+
+	[0., 1., 1., 0., 1., 1., 0.],
+
+	[1., 0., 0., 0., 0., 0., 0.],
+
+	[1., 0., 0., 1., 0., 0., 1.],
+
+	[1., 0., 1., 0., 0., 1., 0.], # only hepts
+		# it seems that
+		# frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
+		# needs to find nr 11 (has 10 now)
+	[1., 0., 1., 0., 0., 1., 0.],
+	[1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
+	[1., 0., 1., 0., 1., 0., 0.], # no sols
+	[1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
+	[1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
+	[1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+
+	[1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+	[1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+	[1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+
+	[1., 1., 0., 0., 1., 0., 0.],
+
+	[1., 1., 0., 1., 0., 0., 0.], # for rot 0
+	[1., 1., 0., 1., 0., 0., 1.], # for rot 0
+	[1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+	[1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+
+	[1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+	[1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
+	[1., 1., 1., 0., 1., 0., 0.], # no sols
+	[1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
+
+	[1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+	[1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+	[1., 1., 1., 1., 1., 1., 1.], # all equilateral
+
+	[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
+	[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+    ]
+    tstProg = False
+    if len(sys.argv) <= 1:
+	edgeLs = pre_edgeLs
+	i = 0
+	j = len(pre_edgeLs)
+    elif sys.argv[1] == '-h':
+	print 'Usage:'
+	print sys.argv[0], '-l: list the length of the predefined list'
+	print sys.argv[0], '[i0] [i1]'
+	print '        search using the specified slice from the predefined list'
+	print '        If nothing is specified the whole list is searched'
+	print '        If only i0 is specified the list is searched from that index'
+	sys.exit(0)
+    elif sys.argv[1] == '-l':
+	for (i, e) in zip(range(len(pre_edgeLs)), pre_edgeLs):
+	    print '%3d' % i, e
+	sys.exit(0)
+    elif sys.argv[1] == '-t':
+	tstProg = True
+    else:
+	i = int(sys.argv[1])
+	if len(sys.argv) > 2:
+	    j = int(sys.argv[2])
+	else:
 	    j = len(pre_edgeLs)
-	elif sys.argv[1] == '-h':
-	    print 'Usage:'
-	    print sys.argv[0], '-l: list the length of the predefined list'
-	    print sys.argv[0], '[i0] [i1]'
-	    print '        search using the specified slice from the predefined list'
-	    print '        If nothing is specified the whole list is searched'
-	    print '        If only i0 is specified the list is searched from that index'
-	    sys.exit(0)
-	elif sys.argv[1] == '-l':
-	    for (i, e) in zip(range(len(pre_edgeLs)), pre_edgeLs):
-		print '%3d' % i, e
-	    sys.exit(0)
-	elif sys.argv[1] == '-t':
-	    tstProg = True
-	else:
-	    i = int(sys.argv[1])
-	    if len(sys.argv) > 2:
-		j = int(sys.argv[2])
-	    else:
-		j = len(pre_edgeLs)
-	    edgeLs = pre_edgeLs[i:j]
-	dynamicSols = [
-	    # TODO: important add edge lengths!!!
-	    {
-		# here is an example of where it is important to define the
-		# sol_vector. Since it can be that solutions with different edge
-		# lengths have non-dynamic solutions for which the translation
-		# and the dihedral angle have the values below.
-		'edgeAlternative': [TriangleAlt.star1loose],
-		'oppEdgeAlternative': [TriangleAlt.star1loose],
-		'fold': [Fold.star],
-		'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
-		'set_vector': [
-			{
-			    0: 1.48353635258086,
-			    1: 0.0,
-			},{
-			    0: -1.48353635258086,
-			    1: 3.14159265358979,
-			}
-		    ]
-	    },{
-		'edgeAlternative': [TriangleAlt.star1loose],
-		'oppEdgeAlternative': [TriangleAlt.star1loose],
-		'fold': [Fold.w],
-		'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
-		'set_vector': [
+	edgeLs = pre_edgeLs[i:j]
+    dynamicSols = [
+	# TODO: important add edge lengths!!!
+	{
+	    # here is an example of where it is important to define the
+	    # sol_vector. Since it can be that solutions with different edge
+	    # lengths have non-dynamic solutions for which the translation
+	    # and the dihedral angle have the values below.
+	    'edgeAlternative': [TriangleAlt.star1loose],
+	    'oppEdgeAlternative': [TriangleAlt.star1loose],
+	    'fold': [Fold.star],
+	    'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
+	    'set_vector': [
 		    {
-			0: 2.59691495774690,
-			1: 0.37180029203870,
-			2: -0.99159844699067,
-			4: 0.0,
-			5: -0.99159844699067,
-		    },{
-			0: -2.39662854867090,
-			1: -2.76044142453588,
-			2: -2.28962724865982,
-			4: 0.0,
-			5: -2.28962724865982,
-		    },{
-			0: -1.32969344523106,
-			1: 2.93729908156380,
-			2: 0.47840318769040,
-			4: 0.0,
-			5: 0.47840318769040,
-		    },{
-			0: 1.56791889743089,
-			1: 0.07044231686021,
-			2: -3.01397582234294,
-			4: 0.0,
-			5: -3.01397582234294,
+			0: 1.48353635258086,
+			1: 0.0,
 		    },{
 			0: -1.48353635258086,
 			1: 3.14159265358979,
-			2: -2.17789038635323,
-			4: 2.00286242147445,
-			5: 2.17789038635323,
-		    },{
-			0: 1.48353635258086,
-			1: 0.0,
-			2: -2.17789038635323,
-			4: 1.13873023211535,
-			5: 2.17789038635323,
-		    },{
-			0: -1.48353635258086,
-			1: 3.14159265358979,
-			2: 2.17789038635323,
-			4: -2.00286242147445,
-			5: -2.17789038635323,
-		    },{
-			0: 1.48353635258086,
-			1: 0.0,
-			2: 2.17789038635323,
-			4: -1.13873023211535,
-			5: -2.17789038635323,
-		    },{
-			0: -1.79862645974663,
-			1: 2.89384136702916,
-			2: 2.66115365118573,
-			4: 2.22084886403160,
-			5: 2.66115365118573,
-		    },{
-			0: 1.79862645974663,
-			1: 0.24775128656063,
-			2: -2.66115365118573,
-			4: 0.92074378955819,
-			5: -2.66115365118573,
-		    },{
-			0: -1.79862645974663,
-			1: 2.89384136702916,
-			2: 2.66115365118573,
-			4: -2.22084886403160,
-			5: 2.66115365118573,
-		    },{
-			0: 1.79862645974663,
-			1: 0.24775128656063,
-			2: -2.66115365118573,
-			4: -0.92074378955819,
-			5: -2.66115365118573,
-		    },{
-			0: -1.93838678986755,
-			1: -2.82756860983026,
-			2: -0.78734965896067,
-			4: 1.35463810886690,
-			5: -0.78734965896067,
-		    },{
-			0: 1.93838678986755,
-			1: -0.31402404375953,
-			2: 0.78734965896067,
-			4: 1.78695454472289,
-			5: 0.78734965896067,
-		    },{
-			0: -1.93838678986755,
-			1: -2.82756860983026,
-			2: -0.78734965896067,
-			4: -1.35463810886690,
-			5: -0.78734965896067,
-		    },{
-			0: 1.93838678986755,
-			1: -0.31402404375953,
-			2: 0.78734965896067,
-			4: -1.78695454472289,
-			5: 0.78734965896067,
 		    }
 		]
-	    },{
-		'edgeAlternative': [
-		    TriangleAlt.star1loose, TriangleAlt.strip1loose],
-		'oppEdgeAlternative': [
-		    TriangleAlt.star1loose, TriangleAlt.strip1loose],
-		'fold': [Fold.w],
-		'sol_vector': [
-			[0, 1, 1, 0, 1, 1, 0],
-			[0, V2, 1, 0, V2, 1, 0]
-		],
-		'set_vector': [
-		    {
-			0: 1.73117867469463,
-			1: 0.46014030244326,
-			2: -1.75383477143902,
-			5: -1.75383477143902,
-		    },{
-			0: 1.73117867469463,
-			1: -0.46014030244326,
-			2: 1.75383477143902,
-			5: 1.75383477143902,
-		    },{
-			0: -1.73117867469463,
-			1: -2.68145235114654,
-			2: -1.75383477143902,
-			5: -1.75383477143902,
-		    },{
-			0: -1.73117867469463,
-			1: 2.68145235114654,
-			2: 1.75383477143902,
-			5: 1.75383477143902,
-		    }
-		]
-	    }
-	]
+	},{
+	    'edgeAlternative': [TriangleAlt.star1loose],
+	    'oppEdgeAlternative': [TriangleAlt.star1loose],
+	    'fold': [Fold.w],
+	    'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
+	    'set_vector': [
+		{
+		    0: 2.59691495774690,
+		    1: 0.37180029203870,
+		    2: -0.99159844699067,
+		    4: 0.0,
+		    5: -0.99159844699067,
+		},{
+		    0: -2.39662854867090,
+		    1: -2.76044142453588,
+		    2: -2.28962724865982,
+		    4: 0.0,
+		    5: -2.28962724865982,
+		},{
+		    0: -1.32969344523106,
+		    1: 2.93729908156380,
+		    2: 0.47840318769040,
+		    4: 0.0,
+		    5: 0.47840318769040,
+		},{
+		    0: 1.56791889743089,
+		    1: 0.07044231686021,
+		    2: -3.01397582234294,
+		    4: 0.0,
+		    5: -3.01397582234294,
+		},{
+		    0: -1.48353635258086,
+		    1: 3.14159265358979,
+		    2: -2.17789038635323,
+		    4: 2.00286242147445,
+		    5: 2.17789038635323,
+		},{
+		    0: 1.48353635258086,
+		    1: 0.0,
+		    2: -2.17789038635323,
+		    4: 1.13873023211535,
+		    5: 2.17789038635323,
+		},{
+		    0: -1.48353635258086,
+		    1: 3.14159265358979,
+		    2: 2.17789038635323,
+		    4: -2.00286242147445,
+		    5: -2.17789038635323,
+		},{
+		    0: 1.48353635258086,
+		    1: 0.0,
+		    2: 2.17789038635323,
+		    4: -1.13873023211535,
+		    5: -2.17789038635323,
+		},{
+		    0: -1.79862645974663,
+		    1: 2.89384136702916,
+		    2: 2.66115365118573,
+		    4: 2.22084886403160,
+		    5: 2.66115365118573,
+		},{
+		    0: 1.79862645974663,
+		    1: 0.24775128656063,
+		    2: -2.66115365118573,
+		    4: 0.92074378955819,
+		    5: -2.66115365118573,
+		},{
+		    0: -1.79862645974663,
+		    1: 2.89384136702916,
+		    2: 2.66115365118573,
+		    4: -2.22084886403160,
+		    5: 2.66115365118573,
+		},{
+		    0: 1.79862645974663,
+		    1: 0.24775128656063,
+		    2: -2.66115365118573,
+		    4: -0.92074378955819,
+		    5: -2.66115365118573,
+		},{
+		    0: -1.93838678986755,
+		    1: -2.82756860983026,
+		    2: -0.78734965896067,
+		    4: 1.35463810886690,
+		    5: -0.78734965896067,
+		},{
+		    0: 1.93838678986755,
+		    1: -0.31402404375953,
+		    2: 0.78734965896067,
+		    4: 1.78695454472289,
+		    5: 0.78734965896067,
+		},{
+		    0: -1.93838678986755,
+		    1: -2.82756860983026,
+		    2: -0.78734965896067,
+		    4: -1.35463810886690,
+		    5: -0.78734965896067,
+		},{
+		    0: 1.93838678986755,
+		    1: -0.31402404375953,
+		    2: 0.78734965896067,
+		    4: -1.78695454472289,
+		    5: 0.78734965896067,
+		}
+	    ]
+	},{
+	    'edgeAlternative': [
+		TriangleAlt.star1loose, TriangleAlt.strip1loose],
+	    'oppEdgeAlternative': [
+		TriangleAlt.star1loose, TriangleAlt.strip1loose],
+	    'fold': [Fold.w],
+	    'sol_vector': [
+		    [0, 1, 1, 0, 1, 1, 0],
+		    [0, V2, 1, 0, V2, 1, 0]
+	    ],
+	    'set_vector': [
+		{
+		    0: 1.73117867469463,
+		    1: 0.46014030244326,
+		    2: -1.75383477143902,
+		    5: -1.75383477143902,
+		},{
+		    0: 1.73117867469463,
+		    1: -0.46014030244326,
+		    2: 1.75383477143902,
+		    5: 1.75383477143902,
+		},{
+		    0: -1.73117867469463,
+		    1: -2.68145235114654,
+		    2: -1.75383477143902,
+		    5: -1.75383477143902,
+		},{
+		    0: -1.73117867469463,
+		    1: 2.68145235114654,
+		    2: 1.75383477143902,
+		    5: 1.75383477143902,
+		}
+	    ]
+	}
+    ]
 
-	if tstProg:
-	    if tstDynamicSolutions():
-		print 'test PASSED'
-	    else:
-		print 'test FAILED'
+    if tstProg:
+	if tstDynamicSolutions():
+	    print 'test PASSED'
 	else:
-	    print 'search slice [%d:%d]:' % (i, j)
-	    for e in edgeLs:
-		print '  -', e
-	    randBatch(continueAfter = 1, nrThreads = 1,
-				edgeLs = edgeLs, dynSols = dynamicSols)
+	    print 'test FAILED'
+    else:
+	print 'search slice [%d:%d]:' % (i, j)
+	for e in edgeLs:
+	    print '  -', e
+	randBatch(continueAfter = 4000, nrThreads = 1,
+			    edgeLs = edgeLs, dynSols = dynamicSols)
