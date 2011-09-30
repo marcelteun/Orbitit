@@ -1567,7 +1567,7 @@ def FindMultiRoot(initialValues,
 	fold = Fold.parallel,
         method = 1,
         cleanupF  = None,
-        precision = 1e-15,
+        prec_delta = 1e-15,
         maxIter = 100,
         printIter = False,
         quiet     = False,
@@ -1637,7 +1637,7 @@ def FindMultiRoot(initialValues,
 	    r = solver.root()
 	    x = solver.getx()
 	    f = solver.getf()
-	    status = multiroots.test_residual(f, precision)
+	    status = multiroots.test_residual(f, prec_delta)
 	    if status == errno.GSL_SUCCESS and not quiet:
 		print "# Converged :"
 	    if printIter:
@@ -1675,21 +1675,6 @@ def FindMultiRoot(initialValues,
         result = cleanupF(result, nrOfIns)
     return result
 
-# This can be optimised
-def solutionAlreadyFound(sol, list, precision = 1.e-13):
-    found = False
-    lstRange = range(len(sol))
-    for old in list:
-        allElemsEqual = True
-        for i in lstRange:
-            if abs(old[i] - sol[i]) > precision:
-                allElemsEqual = False
-                break # for i loop, not for old
-        if allElemsEqual:
-            found = True
-            break # for old loop
-    return found
-
 class RandFindMultiRootOnDomain(threading.Thread):
     def __init__(this,
 	domain,
@@ -1697,7 +1682,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	edgeAlternative = TriangleAlt.stripI,
 	oppEdgeAlternative = None,
 	method = 1,
-	precision = 1e-15,
+	precision = 15,
 	fold = Fold.parallel,
 	dynSols = None,
 	edgeLengths = [1., 1., 1., 1., 1., 1., 1.],
@@ -1707,6 +1692,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.threadId = threadId
 	this.method = method
 	this.precision = precision
+	this.prec_delta = pow(10, -precision)
+	pf = '%%.%df' % this.precision
+	this.sol5 = '    [%s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf)
+	this.sol7 = '    [%s, %s, %s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf, pf, pf)
 	this.fold = fold
 	this.edgeAlternative = edgeAlternative
 	this.oppEdgeAlternative = oppEdgeAlternative
@@ -1744,9 +1733,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	elif nrSols <= this.changeIterLimits[0]:
 	    return this.maxIters[0]
 
-    tpi = 2*numx.pi
+    dpi = 2*numx.pi
     def cleanupResult(this, v, l = 4):
-	lim = this.tpi
+	lim = this.dpi
 	hLim = numx.pi
         for i in range(1, l):
             v[i] = v[i] % lim
@@ -1759,10 +1748,16 @@ class RandFindMultiRootOnDomain(threading.Thread):
             # shouldn't happen:
             #elif v[i] < -hLim:
             #    v[i] = v[i] + lim
+	# If the position angle equals 180 degrees, reconstruct the solution to
+	# a pos angle = 0 by:
+	# - using a negative translation
+	# - an opposite dihedral angle
+	# - negative folding angles
+	# TODO check if this is valid for symmetries other than A4
 	if (
 	    len(v) >= 5
 	    and
-	    eq(v[4], numx.pi, 100 * this.precision)
+	    eq(v[4], numx.pi, this.prec_delta)
 	):
 	    v[4] = 0			# set pos angle to 0 instead
 	    v[0] = -v[0] 		# -translate
@@ -1780,7 +1775,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 
     def randTestvalue(this):
 	dLen = len(this.domain)
-	#return [0.5, 0.1, 1.0, 0.0, 0.0, 1.0, 1.0]
 	return [
 	    random.random() * (this.domain[i][1] - this.domain[i][0]) + this.domain[i][0]
 	    for i in range(dLen)
@@ -1797,7 +1791,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    print 'Oops'
 		    print 'old', old
 		    print 'sol', sol
-		if abs(old[i] - sol[i]) > 100 * this.precision: # TODO: 10?
+		if abs(old[i] - sol[i]) > 100 * this.prec_delta:
 		    allElemsEqual = False
 		    break # for i loop, not for old
 	    if allElemsEqual:
@@ -1983,7 +1977,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.fold,
 			this.method,
 			lambda v,l: this.cleanupResult(v, l),
-			this.precision,
+			this.prec_delta,
 			maxIter,
 			printIter = False,
 			quiet     = True,
@@ -2057,8 +2051,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			isEq = True
 			# check if the solution is valid (a solution)
 			for i in range(len(chk)):
-			    if not eq(chk[i], 0., eqFloatMargin):
-				print '|', chk[i], '| >', eqFloatMargin
+			    # apparently the precision is bigger then
+			    # 1e^precision: use a factor...
+			    if not eq(chk[i], 0., 10 * this.prec_delta):
+				print '|', chk[i], '| >', this.prec_delta
 				isEq = False
 				break
 			if isEq:
@@ -2098,8 +2094,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		if len(this.edgeLengths) != 4:
 		    f.write('results = [\n')
 		    for r in results:
-			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
-				r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
 		if len(this.edgeLengths) == 4:
 		    # set angle centrally
 		    if this.edgeAlternative & twist_bit == twist_bit:
@@ -2108,8 +2103,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			angle = 0.0
 		    f.write('results = [\n')
 		    for r in results_refl:
-			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
-						r[0], r[1], r[2], r[3], angle))
+			f.write(this.sol5 % (r[0], r[1], r[2], r[3], angle))
 		elif this.symmetricEdges():
 		    f.write(']\n')
 		    # close this file open the relective file:
@@ -2126,12 +2120,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    f.write('iterations = %d\n' % (nrOfIters + prev_refl_iterations))
 		    f.write('results = [\n')
 		    for r in results_refl:
-			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
-						r[0], r[1], r[2], r[3], r[4]))
+			f.write(this.sol5 % (r[0], r[1], r[2], r[3], r[4]))
 		else:
 		    for r in results_refl:
-			f.write('    [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],\n' % (
-				    r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
 		f.write(']\n')
 		f.close()
 		print '(thread %d) %s:' % (
@@ -2151,72 +2143,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		else:
 		    print filename
 		break
-
-def FindMultiRootOnDomain(domain,
-        edgeAlternative,
-        edgeLengths = [1., 1., 1., 1.],
-	fold = Fold.parallel,
-        method = 1,
-        cleanupF  = None,
-        steps = None,
-        precision = 1e-15,
-        maxIter = 100,
-	continueTestAt = None,
-	init_results = [],
-	printStatus = False,
-	oppEdgeAlternative = None
-    ):
-    if oppEdgeAlternative == None:
-	oppEdgeAlternative = edgeAlternative
-    results = init_results[:]
-    dLen = len(domain)
-    if (continueTestAt == None):
-	testValue = [domain[i][0] for i in range(dLen)]
-    else:
-	testValue = continueTestAt[:]
-	print 'continuing search...'
-    if steps == None:
-	steps = [0.1 for e in domain]
-    if printStatus:
-	print testValue
-    while testValue[-1] < domain[-1][1]:
-    #while testValue[0] < domain[0][1]:
-        try:
-            result = FindMultiRoot(testValue,
-                    edgeAlternative,
-                    edgeLengths,
-		    fold,
-                    method,
-                    cleanupF,
-                    precision,
-                    maxIter,
-                    printIter = False,
-                    quiet     = True,
-		    oppEdgeAlternative = oppEdgeAlternative
-                )
-            if result != None and not solutionAlreadyFound(result, results):
-                results.append(result)
-		print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-                print 'added new result nr', len(results),':', result
-        except pygsl.errors.gsl_SingularityError:
-            pass
-        except pygsl.errors.gsl_NoProgressError:
-            pass
-        except pygsl.errors.gsl_JacobianEvaluationError:
-            pass
-        #for i in range(dLen-1, 0, -1):
-        for i in range(dLen):
-            # note that domain[i][1] is not tested if the steps do not end there
-            # explicitely. TODO also test upper limits.
-            testValue[i] += steps[i]
-            if testValue[i] <= domain[i][1]:
-                break # break from for-loop, not from while
-            else:
-                if i != dLen-1:
-                    testValue[i] = domain[i][0]
-		if printStatus:
-		    print testValue
-    return results
 
 if __name__ == '__main__':
     import sys
@@ -2333,83 +2259,10 @@ if __name__ == '__main__':
 		    passed = False
 	return passed
 
-    tpi = 2*numx.pi
-    def cleanupResult(v, l = 4):
-        for i in range(1, l):
-            v[i] = v[i] % tpi
-            if v[i] < -numx.pi:
-                v[i] += tpi
-            elif v[i] > numx.pi:
-                v[i] -= tpi
-	    elif eq(v[i], tpi):
-		v[i] = 0
-        return v
-
     printStatus = False
-    def multiRootsLog(fold, edges, tris, oppTris = None):
-	print 'started searching %s folds' % str(fold)
-	result = []
-	if len(edges) == 4:
-	    dom = [
-		[-2., 3.],           # Translation
-		[-numx.pi, numx.pi], # angle alpha
-		[-numx.pi, numx.pi], # fold 1 beta
-		[-numx.pi, numx.pi], # fold 2 gamma
-	    ]
-	    steps = [0.5, 0.5, 0.3, 0.3]
-	else:
-	    dom = [
-		[-2., 3.],             # Translation
-		[-numx.pi, numx.pi],   # angle alpha
-		[-numx.pi, numx.pi],   # fold 1 beta0
-		[-numx.pi, numx.pi],   # fold 2 gamma0
-		[0,        numx.pi/4], # delta: around z-axis
-		[-numx.pi, numx.pi],   # fold 1 beta1
-		[-numx.pi, numx.pi],   # fold 2 gamma1
-	    ]
-	    steps = [0.5, 0.5, 0.3, 0.5, 0.3, 0.5, 0.3]
-	print 'randomSearch:', randomSearch
-	if (randomSearch):
-	    rndT = RandFindMultiRootOnDomain(dom,
-		    edgeAlternative    = tris,
-		    oppEdgeAlternative = oppTris,
-		    edgeLengths        = edges,
-		    fold               = fold.fold,
-		    method             = Method.hybrids
-		)
-	    rndT.stopAfter = 100
-	    while True:
-		rndT.start()
-		rndT.join()
-		#del rndT
-		break
-		threading.Thread.__init__(rndT)
-		print '======================='
-	else:
-	    result = FindMultiRootOnDomain(dom,
-		    edgeLengths = edges,
-		    edgeAlternative = tris,
-		    oppEdgeAlternative = oppTris,
-		    fold = fold.fold,
-		    method = Method.hybrids,
-		    cleanupF = cleanupResult,
-		    steps = steps,
-		    maxIter = 50,
-		    printStatus = printStatus
-		)
-	    print '['
-	    if len(edges) == 4:
-		for r in result:
-		    print ' [%.14f, %.14f, %.14f, %.14f],' % (
-						    r[0], r[1], r[2], r[3])
-	    else:
-		for r in result:
-		    print ' [%.14f, %.14f, %.14f, %.14f, %.14f, %.14f, %.14f],' % (
-				    r[0], r[1], r[2], r[3], r[4], r[5], r[6])
-	    print '],\n'
 
     def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = [],
-							    dynSols = None):
+					    dynSols = None, precision = 14):
 	folds = [Fold.star, Fold.w]
 	#folds = [Fold.star]
 	#folds = [Fold.w]
@@ -2457,6 +2310,7 @@ if __name__ == '__main__':
 				    edgeLengths        = edges,
 				    dynSols            = dynSols,
 				    fold               = fold,
+				    precision          = precision,
 				    method             = Method.hybrids
 				)
 				rndT[i].stopAfter = continueAfter
@@ -2686,7 +2540,8 @@ if __name__ == '__main__':
 	}
     ]
 
-    def randBatchA4xI(continueAfter = 100, nrThreads = 1, edgeLs = []):
+    def randBatchA4xI(continueAfter = 100, nrThreads = 1, edgeLs = [],
+							precision = 14):
 	folds = [
 	    Fold.w,
 	    Fold.star,
@@ -2724,6 +2579,7 @@ if __name__ == '__main__':
 			    oppEdgeAlternative = ea,
 			    edgeLengths        = edges,
 			    fold               = fold,
+			    precision          = precision,
 			    method             = Method.hybrids
 			)
 			rndT[i].stopAfter = continueAfter
@@ -2747,6 +2603,11 @@ if __name__ == '__main__':
 	[0., 1., 1., 0.],
 	[0., 1., 0., 1.],
 	[0., 0., 1., 1.],
+	[1., 1., 1., 0.],
+	[1., 1., 0., 1.],
+	[1., 0., 1., 1.],
+	[0., 1., 1., 1.],
+	[1., 1., 1., 1.],
     ]
 
     pre_edgeLs = {
@@ -2767,6 +2628,7 @@ if __name__ == '__main__':
 	print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
 	print 'where options:'
 	print '     -i <num>: number of iterations to use.'
+	print '     -p <num>: precision, specify the amount of digits after the point.'
 	print '     -l      : list the length of the predefined list'
 	print 'And'
 	print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
@@ -2785,7 +2647,12 @@ if __name__ == '__main__':
 	skipNext = False # for options that take arguments
 	symGrp = '' # which symmetry group to search: '' means not read yet
 	nr_iterations = 4000
+	precision = 10
 	list_pre_edgeLs = False
+	def errIfNoNxt(n):
+	    if len(sys.argv) <= n + 1: # note incl the cmd line also
+		printUsage()
+		sys.exit(-1)
 	for n in range(1, len(sys.argv)):
 	    if skipNext:
 		skipNext = False
@@ -2793,14 +2660,15 @@ if __name__ == '__main__':
 		printUsage()
 		sys.exit(0)
 	    elif sys.argv[n] == '-i':
-		if len(sys.argv) > n + 1:
-		    nr_iterations = int(sys.argv[n + 1])
-		else:
-		    printUsage()
-		    sys.exit(-1)
+		errIfNoNxt(n)
+		nr_iterations = int(sys.argv[n + 1])
 		skipNext = True
 	    elif sys.argv[n] == '-l':
 		list_pre_edgeLs = True
+	    elif sys.argv[n] == '-p':
+		errIfNoNxt(n)
+		precision = int(sys.argv[n + 1])
+		skipNext = True
 	    elif sys.argv[n] == '-t':
 		tstProg = True
 	    elif symGrp == '':
@@ -2839,7 +2707,10 @@ if __name__ == '__main__':
 	for e in edgeLs:
 	    print '  -', e
 	if symGrp == 'A4xI':
-	    randBatchA4xI(continueAfter = nr_iterations, nrThreads = 1, edgeLs = edgeLs)
+	    randBatchA4xI(continueAfter = nr_iterations, nrThreads = 1,
+					edgeLs = edgeLs, precision = precision)
 	elif symGrp == 'A4':
 	    randBatch(continueAfter = nr_iterations, nrThreads = 1,
-			    edgeLs = edgeLs, dynSols = dynamicSols[symGrp])
+			    edgeLs = edgeLs,
+			    dynSols = dynamicSols[symGrp],
+			    precision = precision)
