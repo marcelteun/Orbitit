@@ -1825,8 +1825,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			    if sol_isEq:
 				for vs in d['set_vector']:
 				    isEq = True
-				    for (i, v) in vs.iteritems():
-					if not eq(v, sol[i]):
+				    for i in range(len(vs)):
+					if not eq(vs[i], this.edgeLengths[i]):
 					    isEq = False
 					    break # don't check other (i, v)
 				    if isEq:
