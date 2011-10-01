@@ -209,14 +209,14 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     if (fold_type == Fold.parallel):
 	# this code I wrote first only for the parallel case.
 	# I didn't remove the code since it so much faster then the newer code.
-	x0__ = cosg * (H) + SigmaH + RhoH
-	z0__ = sing * (H)
+	x0__ = cosg0 * (H) + SigmaH + RhoH
+	z0__ = sing0 * (H)
 
-	x0_  = cosb * (x0__ - RhoH) - sinb * (z0__       ) + RhoH
-	z0_  = cosb * (z0__       ) + sinb * (x0__ - RhoH)
+	x0_  = cosb0 * (x0__ - RhoH) - sinb0 * (z0__       ) + RhoH
+	z0_  = cosb0 * (z0__       ) + sinb0 * (x0__ - RhoH)
 
-	x1_  = cosb * (SigmaH) + RhoH
-	z1_  = sinb * (SigmaH)
+	x1_  = cosb0 * (SigmaH) + RhoH
+	z1_  = sinb0 * (SigmaH)
 
 	x0  = sina * x0_ - cosa * z0_
 	x1  = sina * x1_ - cosa * z1_
@@ -256,8 +256,8 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
 	# ------------------------------------
 	# refer to V1 as if centre i origon:
 	# rotate around axis b as if centre -> V1 is x-axis:
-	x = (R - H) + cosg * H
-	z =           sing * H
+	x = (R - H) + cosg0 * H
+	z =           sing0 * H
 	# now correct for V1 not on x-axis: rotate d around z-axis
 	# with d: angle of heptagon centre to V1 with x-as
 	# and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
@@ -267,9 +267,9 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
 	# ROTATE V0 and V1 around axis a: angle beta
 	# ------------------------------------
 	x = H + SigmaH
-	x0, y0, z0 = (RhoH + cosb * x, y0, sinb * x)
+	x0, y0, z0 = (RhoH + cosb0 * x, y0, sinb0 * x)
 	x = x1 - RhoH
-	x1, y1, z1 = (RhoH + cosb * x - sinb * z1, y1, sinb * x + cosb * z1)
+	x1, y1, z1 = (RhoH + cosb0 * x - sinb0 * z1, y1, sinb0 * x + cosb0 * z1)
 
 	# rotate around 3-4; angle a
 	# ------------------------------------
@@ -601,6 +601,9 @@ def FoldedRegularHeptagonsA4xI(c, params):
 
     # below are the calculations that are much faster then the generic ones
     # (further below). The former were added to optimise.
+    # TODO TODO TODO TODO TODO TODO
+    # Why not use GetBaseHeptagon here
+    # TODO TODO TODO TODO TODO TODO
     if (faster):
 	# before rotating, with heptagon centre = origin
 	R = 1.0 / (2*H)       # radius
@@ -2147,33 +2150,37 @@ class RandFindMultiRootOnDomain(threading.Thread):
 if __name__ == '__main__':
     import sys
     import os
-    #import Geom3D
-    #T  = 2.45
-    #a  = Geom3D.Deg2Rad * 40
-    #b0 = Geom3D.Deg2Rad * 25
-    #g0 = Geom3D.Deg2Rad * 27
-    #tmp = numx.array((T, a, b0, g0))
-    ##faster = False
-    ##faster = True
-    #print FoldedRegularHeptagonsA4xI(tmp,
-    #	[TriangleAlt.twisted, [0., 0., 0., 0], Fold.triangle])
-    #
-    #T  = 2.3
-    #a  = Geom3D.Deg2Rad * 30
-    #d  = Geom3D.Deg2Rad * 40
-    #b0 = Geom3D.Deg2Rad * 60
-    #g0 = Geom3D.Deg2Rad * 50
-    #b1 = Geom3D.Deg2Rad * 50
-    #g1 = Geom3D.Deg2Rad * 100
-    #tmp1 = numx.array((T, a, b0, g0, d, b1, g1))
-    #print 'input values: \n [',
-    #for t in tmp1: print t, ',',
-    #print ']'
-    #print FoldedRegularHeptagonsA4(tmp1,
-    ##    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
-    #    [TriangleAlt.star1loose, TriangleAlt.arot_star1loose, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
-    #assert False, "end single test"
-    ##print 'faster', faster
+
+    # TODO: ctrl by cmd line args? Put in separate file?
+    if False:
+	import Geom3D
+	T  = 2.45
+	a  = Geom3D.Deg2Rad * 40
+	b0 = Geom3D.Deg2Rad * 25
+	g0 = Geom3D.Deg2Rad * 27
+	tmp = numx.array((T, a, b0, g0))
+	#faster = False
+	#faster = True
+	print FoldedRegularHeptagonsA4xI(tmp,
+	    [TriangleAlt.twisted, [0., 0., 0., 0], Fold.triangle])
+	T  = 2.3
+	a  = Geom3D.Deg2Rad * 30
+	b0 = Geom3D.Deg2Rad * 60
+	g0 = Geom3D.Deg2Rad * 50
+	d  = Geom3D.Deg2Rad * 40
+	b1 = Geom3D.Deg2Rad * 50
+	g1 = Geom3D.Deg2Rad * 100
+	tmp1 = numx.array((T, a, b0, g0, d, b1, g1))
+	#tmp1 = [2.42367662112328, 0.73523867591239, -0.95915637221717, -1.30440374966920, 0.00000000000000, -0.95915637221717, 2.10151055662430]
+	tmp1 = [2.42367662112328, 0.73523867591239, -0.95915637221717, -1.30440374966920, 0.00000000000000, -0.95915637221717, g1]
+	print 'input values: \n [',
+	for t in tmp1: print t, ',',
+	print ']'
+	print FoldedRegularHeptagonsA4(tmp1,
+	#    [TriangleAlt.alt_stripII, TriangleAlt.alt_stripII, [0., 0., 0., 0., 0., 0., 0.], Fold.star ])
+	    [TriangleAlt.star1loose, TriangleAlt.strip1loose, [0., 0., 0., 0.,
+	    0., 0., 0.], Fold.w ])
+	sys.exit(0)
 
     def tstDynamicSolutions():
 	passed = True
