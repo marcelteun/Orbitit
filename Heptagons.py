@@ -775,7 +775,7 @@ class RegularHeptagon:
 		V6 = Vec([-V1[0], V1[1], V1[2]])
 	    else:
 		V6 = Vec([-V1_[0], V1_[1], V1_[2]])
-		Rot5_0 = Rot(axis = V0 - this.VsOrg[5], angle = b1)
+		Rot5_0 = Rot(axis = V0 - V5, angle = b1)
 		V6 = Rot5_0 * (V6 - V0) + V0
 	else:
 	    Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
