@@ -598,405 +598,19 @@ def FoldedRegularHeptagonsA4xI(c, params):
     alpha = c[1]
     beta  = c[2]
     gamma = c[3]
+    delta = 0
 
-    # below are the calculations that are much faster then the generic ones
-    # (further below). The former were added to optimise.
-    # TODO TODO TODO TODO TODO TODO
-    # Why not use GetBaseHeptagon here
-    # TODO TODO TODO TODO TODO TODO
-    if (faster):
-	# before rotating, with heptagon centre = origin
-	R = 1.0 / (2*H)       # radius
-	x0, y0, z0 = (H + SigmaH + RhoH, 0.0,     0.)
-	x1, y1, z1 = (    SigmaH + RhoH, Rho/2,   0.)
-	x2, y2, z2 = (             RhoH, Sigma/2, 0.)
-	x3, y3, z3 = (              0.0, 1.0/2,   0.)
-	Tx = R - x0   # translate in X to centre on origin
-	cosa = numx.cos(alpha)
-	sina = numx.sin(alpha)
-	cosb = numx.cos(beta)
-	sinb = numx.sin(beta)
-	cosg = numx.cos(gamma)
-	sing = numx.sin(gamma)
-	if (params[2] == Fold.parallel):
-	    # this code I wrote first only for the parallel case.
-	    # I didn't remove the code since it so much faster then the newer code.
-	    x0__ = cosg * (H) + SigmaH + RhoH
-	    z0__ = sing * (H)
+    par_tri_fill = 0
+    par_edge_len = 1
+    par_fold = 2
 
-	    x0_  = cosb * (x0__ - RhoH) - sinb * (z0__       ) + RhoH
-	    z0_  = cosb * (z0__       ) + sinb * (x0__ - RhoH)
-
-	    x1_  = cosb * (SigmaH) + RhoH
-	    z1_  = sinb * (SigmaH)
-
-	    x0  = sina * x0_ - cosa * z0_
-	    x1  = sina * x1_ - cosa * z1_
-	    x2  = sina * RhoH
-	    x3  = 0
-
-	    y0  =  0.0
-	    y1  =  Rho / 2
-	    y2  =  Sigma / 2
-	    y3  =  1.0 / 2
-
-	    z0  = T - (sina * z0_ + cosa * x0_)
-	    z1  = T - (sina * z1_ + cosa * x1_)
-	    z2  = T - cosa * (         RhoH)
-	    z3  = T
-	elif (params[2] == Fold.triangle):
-	    #
-	    #             0
-	    #            _^_
-	    #      1   _/   \_   6
-	    #        _/       \_
-	    #      _/  axes  b  \_
-	    #     /               \
-	    #    2 --------------- 5  axis a
-	    #
-	    #
-	    #         3       4
-	    #                                ^ X
-	    #                                |
-	    #                                |
-	    #                       Y <------+
-	    #
-	    # rotate gamma around b
-	    # rotate beta  around a
-	    #
-	    # ROTATE V1 around axis b: angle gamma
-	    # ------------------------------------
-	    # refer to V1 as if centre i origon:
-	    # rotate around axis b as if centre -> V1 is x-axis:
-	    x = (R - H) + cosg * H
-	    z =           sing * H
-	    # now correct for V1 not on x-axis: rotate d around z-axis
-	    # with d: angle of heptagon centre to V1 with x-as
-	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    cosd = (x1 + Tx) / R
-	    sind = y1 / R
-	    x1, y1, z1 = (cosd * x - Tx, sind * x, z)
-	    # ROTATE V0 and V1 around axis a: angle beta
-	    # ------------------------------------
-	    x = H + SigmaH
-	    x0, y0, z0 = (RhoH + cosb * x, y0, sinb * x)
-	    x = x1 - RhoH
-	    x1, y1, z1 = (RhoH + cosb * x - sinb * z1, y1, sinb * x + cosb * z1)
-
-	    # rotate around 3-4; angle a
-	    # ------------------------------------
-	    # since half dihedral angle is used instead of angle with x-axis:
-	    cos_a = sina
-	    sin_a = -cosa
-	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	    # and translate
-	    # ------------------------------------
-	    z0 = z0 + T
-	    z1 = z1 + T
-	    z2 = z2 + T
-	    z3 = z3 + T
-
-	elif (params[2] == Fold.star):
-	    #
-	    #               0
-	    #              .^.
-	    #        1   _/| |\_   6
-	    #          _/ /   \ \_
-	    # axis g _/  |     |  \_ axis g
-	    #       /    |     |    \
-	    #      2    /       \    5
-	    #          | axes  b |
-	    #          "         "
-	    #          3         4
-	    #
-	    #                                ^ X
-	    #                                |
-	    #                                |
-	    #                       Y <------+
-	    #
-	    # rotate gamma around b
-	    # rotate beta  around a
-	    #
-	    # ROTATE V1 around axis g
-	    # ------------------------------------
-	    # refer to V1 as if centre is origon:
-	    # rotate around axis g as if centre -> V1 is x-axis:
-	    x = (R - H) + cosg * H
-	    z =           sing * H
-	    # now correct for V1 not on x-axis: rotate d around z-axis
-	    # with d: angle of heptagon centre to V1 with x-as
-	    cosd = (x1 + Tx) / R
-	    sind = RhoH # = sin(2pi/7)
-	    x1, y1, z1 = (cosd * x, sind * x, z)
-	    # ROTATE V1 and V2 around axis b
-	    # ------------------------------------
-	    # correction for V5 not on -x: rotate d around z-axis
-	    # with d: angle of heptagon centre to V2 with -x-as
-	    cosd = -(x2 + Tx) / R
-	    sind = SigmaH # = sin(3pi/7)
-	    # refer to V2 as if centre in origon and as if V5 in -x:
-	    x2, y2, z2 = (x0 - R, 0.5, 0.0)
-	    d0_3 = x2 - RhoH
-	    # rotate around axis b:
-	    # TODO: above: rm x2, y2 assignment, mv y2 assignment down.
-	    x2, z2 = (d0_3 + cosb * RhoH, sinb * RhoH)
-	    # correct for V5 not on -x: rotate d around z-axis
-	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
-	    # Similarly for V1:
-	    # for V1 rotate V5 into -x: * (cosd, -sind)
-	    x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
-	    # rotate around axis b:
-	    dx = x1 - d0_3
-	    x1, z1 = (d0_3 + cosb * dx - sinb * z1, sinb * dx + cosb * z1)
-	    # correct for V5 not on -x: rotate d around z-axis
-	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
-
-	    # rotate around 3-4; angle a
-	    # ------------------------------------
-	    # since half dihedral angle is used instead of angle with x-axis:
-	    # TODO don't copy the code...
-	    cos_a = sina
-	    sin_a = -cosa
-	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	    # and translate
-	    # ------------------------------------
-	    z0 = z0 + T
-	    z1 = z1 + T
-	    z2 = z2 + T
-	    z3 = z3 + T
-
-	elif (params[2] == Fold.trapezium):
-	    #
-	    #             0
-	    #
-	    #      1 ----------- 6    axis a
-	    #      .             .
-	    #       \           /
-	    #        \ axes  b /
-	    #    2   |         |   5
-	    #        \        /
-	    #         "       "
-	    #         3       4
-	    #
-	    #                                ^ X
-	    #                                |
-	    #                                |
-	    #                       Y <------+
-	    #
-	    # rotate gamma around b
-	    # rotate beta  around a
-	    #
-	    # ROTATE V2 around axis b: angle gamma
-	    # ------------------------------------
-	    # refer to V2 as if centre is origon:
-	    # rotate around axis b as if centre -> V2 is x-axis:
-	    x = (R - H) + cosg * H
-	    z =           sing * H
-	    # now correct for V2 not on x-axis: rotate d around z-axis
-	    # with d: angle of heptagon centre to V2 with x-as
-	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    cosd = (x2 + Tx) / R
-	    #TODO: change into SigmaH and retest
-	    sind = y2 / R
-	    x2, y2, z2 = (cosd * x - Tx, sind * x, z)
-	    # ROTATE V0 around axis a: angle beta
-	    # ------------------------------------
-	    # refer to V0 as if centre is origon:
-	    #   - rotate around axis b
-	    # Then translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    x0 = (R - H) + cosb * H - Tx
-	    z0 =           sinb * H
-
-	    # rotate around 3-4; angle a
-	    # ------------------------------------
-	    # since half dihedral angle is used instead of angle with x-axis:
-	    # TODO don't copy the code...
-	    cos_a = sina
-	    sin_a = -cosa
-	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	    # and translate
-	    # ------------------------------------
-	    z0 = z0 + T
-	    z1 = z1 + T
-	    z2 = z2 + T
-	    z3 = z3 + T
-
-	elif (params[2] == Fold.w):
-	    #
-	    #              0
-	    #              ^
-	    #       1     | |     6
-	    #       .    /   \    .
-	    # axis g \  |     |  / axis g
-	    #         " |     | "
-	    #     2   |/       \|   5
-	    #         V axes  b V
-	    #         "         "
-	    #         3         4
-	    #                                ^ X
-	    #                                |
-	    #                                |
-	    #                       Y <------+
-	    #
-	    # ROTATE V2 around axis g:
-	    # ------------------------------------
-	    # refer to V2 as if centre is origon:
-	    # rotate around axis b as if centre -> V2 is x-axis:
-	    x = (R - H) + cosg * H
-	    z =           sing * H
-	    # prepare for next: rotate V5 onto -x with angle d0
-	    cosd0 = -Tx / R
-	    sind0 = H # = sin(pi/7)
-	    # Thenn later: correction for V5 not on -x: rotate d around z-axis
-	    # with d: angle of heptagon centre to V2 with -x-as
-	    cosd1 = -(x2 + Tx) / R
-	    sind1 = SigmaH # = sin(3pi/7)
-	    x2, y2, z2 = (cosd0 * x, sind0 * x, z)
-
-	    #x2, y2, z2 = (cosd * x - Tx, sind * x, z)
-
-	    # ROTATE V1 and V2 around axis b
-	    # ------------------------------------
-	    # refer to V1 as if centre in origon and as if V5 in -x:
-	    d0_3 = x0 - R - RhoH
-	    # rotate around axis b:
-	    x1, y1, z1 = (d0_3 + cosb * RhoH, -0.5, sinb * RhoH)
-	    # correct for V5 not on -x: rotate d around z-axis
-	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    x1, y1 = (cosd1 * x1 - sind1 * y1 - Tx, sind1 * x1 + cosd1 * y1)
-	    # Similarly for V2:
-	    # rotate around axis b:
-	    dx = x2 - d0_3
-	    x2, z2 = (d0_3 + cosb * dx - sinb * z2, sinb * dx + cosb * z2)
-	    # correct for V5 not on -x: rotate d around z-axis
-	    # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-	    x2, y2 = (cosd1 * x2 - sind1 * y2 - Tx, sind1 * x2 + cosd1 * y2)
-
-	    # rotate around 3-4; angle a
-	    # ------------------------------------
-	    # since half dihedral angle is used instead of angle with x-axis:
-	    # TODO don't copy the code...
-	    cos_a = sina
-	    sin_a = -cosa
-	    x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	    x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	    x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	    # and translate
-	    # ------------------------------------
-	    z0 = z0 + T
-	    z1 = z1 + T
-	    z2 = z2 + T
-	    z3 = z3 + T
-
-    else: # easier way of folding, but way too slow...
-	# rotation angle around edge
-	alpha = alpha
-	alpha = alpha - numx.pi/2
-	Vs = [
-		GeomTypes.Vec([ (1 + Sigma + Rho)*H,      0.0, 0.0]),
-		GeomTypes.Vec([     (Sigma + Rho)*H,    Rho/2, 0.0]),
-		GeomTypes.Vec([             (Rho)*H,  Sigma/2, 0.0]),
-		GeomTypes.Vec([                 0.0,      0.5, 0.0]),
-		GeomTypes.Vec([                 0.0,-     0.5, 0.0]),
-		GeomTypes.Vec([             (Rho)*H,- Sigma/2, 0.0]),
-		GeomTypes.Vec([     (Sigma + Rho)*H,-   Rho/2, 0.0]),
-	    ]
-	# fold edge:
-	# rotate alpha
-	a = Vs[4] - Vs[3]
-	r = quatRot(a, alpha)
-	v0 = rotate(Vs[0] - Vs[3], r) + Vs[3]
-	v1 = rotate(Vs[1] - Vs[3], r) + Vs[3]
-	v2 = rotate(Vs[2] - Vs[3], r) + Vs[3]
-	v3 = Vs[3]
-	v5 = GeomTypes.Vec([v2[0], -v2[1], v2[2]])
-	v6 = GeomTypes.Vec([v1[0], -v1[1], v1[2]])
-
-	if (params[2] == Fold.parallel):
-	    # rotate beta
-	    a = v2 - v5
-	    r = quatRot(a, beta)
-	    v0 = rotate(v0-v2, r) + v2
-	    v1 = rotate(v1-v2, r) + v2
-	    v6 = rotate(v6-v2, r) + v2
-	    # TODO: exchange for this:
-	    #v6 = GeomTypes.Vec([v1[0], -v1[1], v1[2]])
-	    # rotate gamma
-	    a = v1 - v6
-	    r = quatRot(a, gamma)
-	    v0 = rotate(v0 - v1, r) + v1
-
-	elif (params[2] == Fold.trapezium):
-	    # rotate beta
-	    a = v6 - v1
-	    r = quatRot(a, beta)
-	    v0 = rotate(v0-v1, r) + v1
-	    # rotate gamma
-	    a = v1 - v3
-	    r = quatRot(a, gamma)
-	    v2 = rotate(v2-v1, r) + v1
-
-	elif (params[2] == Fold.triangle):
-	    # rotate gamma
-	    a = v0 - v2
-	    r = quatRot(a, gamma)
-	    v1 = rotate(v1-v0, r) + v0
-	    # rotate beta
-	    a = v5 - v2
-	    r = quatRot(a, beta)
-	    v0 = rotate(v0-v2, r) + v2
-	    v1 = rotate(v1-v2, r) + v2
-
-	elif (params[2] == Fold.w):
-	    # rotate beta
-	    a = v0 - v3
-	    r = quatRot(a, beta)
-	    v1 = rotate(v1-v0, r) + v0
-	    v2 = rotate(v2-v0, r) + v0
-	    # rotate gamma
-	    a = v1 - v3
-	    r = quatRot(a, gamma)
-	    v2 = rotate(v2-v1, r) + v1
-
-	elif (params[2] == Fold.star):
-	    # rotate beta
-	    a = v0 - v3
-	    r = quatRot(a, beta)
-	    v1 = rotate(v1-v0, r) + v0
-	    v2 = rotate(v2-v0, r) + v0
-	    # rotate gamma
-	    a = v0 - v2
-	    r = quatRot(a, gamma)
-	    v1 = rotate(v1-v0, r) + v0
-
-	x0, y0, z0 = v0
-	x1, y1, z1 = v1
-	x2, y2, z2 = v2
-	x3, y3, z3 = v3
-	z0 = z0 + T
-	z1 = z1 + T
-	z2 = z2 + T
-	z3 = z3 + T
-
-    edgeAlternative = params[0]
+    edgeAlternative = params[par_tri_fill]
     if edgeAlternative & twist_bit == twist_bit:
 	# rotate 45 degrees:
-	x0, y0 = hV2 * x0 - hV2 * y0, hV2 * x0 + hV2 * y0
-	x1, y1 = hV2 * x1 - hV2 * y1, hV2 * x1 + hV2 * y1
-	x2, y2 = hV2 * x2 - hV2 * y2, hV2 * x2 + hV2 * y2
-	x3, y3 = hV2 * x3 - hV2 * y3, hV2 * x3 + hV2 * y3
+	delta = numx.pi/4
 
-	# mirror and rotate 45 degrees:
-	x5, y5, z5 = y2, x2, z2
-	x6, y6, z6 = y1, x1, z1
+    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+	    T, alpha, beta, beta, gamma, gamma, delta, params[par_fold])
 
     #print 'v0', x0, y0, z0
     #print 'v1', x1, y1, z1
@@ -1708,6 +1322,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.stopAfter = 100000
 	this.printStatus = False,
 	this.outDir = outDir
+	if not outDir[-1] == '/':
+	    this.outDir = "%s/" % outDir
 	if not os.path.isdir(outDir):
 	    os.mkdir(outDir, 0755)
 	random.seed()
@@ -1859,7 +1475,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    else:
 		es = '%s_%.1f' % (es, l)
 	es = es[1:]
-	return '%s/frh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+	return '%sfrh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
 		this.outDir,
 		es, Fold(this.fold),
 		string.join(Stringify[this.edgeAlternative].split(), '_'),
@@ -1877,7 +1493,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    else:
 		es = '%s_%.1f' % (es, l)
 	es = es[1:]
-	return '%s/frh-roots-%s-fld_%s.0-%s.py' % (
+	return '%sfrh-roots-%s-fld_%s.0-%s.py' % (
 		this.outDir,
 		es, Fold(this.fold),
 		string.join(Stringify[this.edgeAlternative].split(), '_')
@@ -2268,9 +1884,10 @@ if __name__ == '__main__':
 
     printStatus = False
 
-    def randBatch(continueAfter = 100, nrThreads = 1, edgeLs = [],
-					    dynSols = None, precision = 14):
+    def randBatchA4(continueAfter = 100, nrThreads = 1, edgeLs = [],
+				dynSols = None, precision = 14, outDir = "./"):
 	folds = [Fold.star, Fold.w]
+	# TODO: howto:
 	#folds = [Fold.star]
 	#folds = [Fold.w]
 	#folds = [Fold.trapezium]
@@ -2318,7 +1935,8 @@ if __name__ == '__main__':
 				    dynSols            = dynSols,
 				    fold               = fold,
 				    precision          = precision,
-				    method             = Method.hybrids
+				    method             = Method.hybrids,
+				    outDir             = outDir
 				)
 				rndT[i].stopAfter = continueAfter
 				rndT[i].start()
@@ -2548,7 +2166,7 @@ if __name__ == '__main__':
     ]
 
     def randBatchA4xI(continueAfter = 100, nrThreads = 1, edgeLs = [],
-							precision = 14):
+						precision = 14, outDir = "./"):
 	folds = [
 	    Fold.w,
 	    Fold.star,
@@ -2557,13 +2175,12 @@ if __name__ == '__main__':
 	    Fold.parallel,
 	]
 	ta = TriangleAlt()
-	#edgeAlts = [t for t in ta]
+	edgeAlts = [t for t in ta]
 	#edgeAlts = []
 	#for t in ta:
 	#    if t & rot_bit == 0:
 	#        edgeAlts.append(t)
-	#oppEdgeAlts = [t for t in ta]
-	edgeAlts = [ta.twisted]
+	#edgeAlts = [ta.twisted]
 	dom = [
 	    [-2., 3.],           # Translation
 	    [-numx.pi, numx.pi], # angle alpha
@@ -2587,7 +2204,8 @@ if __name__ == '__main__':
 			    edgeLengths        = edges,
 			    fold               = fold,
 			    precision          = precision,
-			    method             = Method.hybrids
+			    method             = Method.hybrids,
+			    outDir             = outDir
 			)
 			rndT[i].stopAfter = continueAfter
 			rndT[i].start()
@@ -2630,22 +2248,6 @@ if __name__ == '__main__':
 
     tstProg = False
 
-    def printUsage():
-	print 'Usage:'
-	print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
-	print 'where options:'
-	print '     -i <num>: number of iterations to use.'
-	print '     -p <num>: precision, specify the amount of digits after the point.'
-	print '     -l      : list the length of the predefined list'
-	print 'And'
-	print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
-	print '                      values are "A4", "A4xI", "S4"'
-	print '    [i0]: begin slice'
-	print '    [i1]: end slice'
-	print '        search using the specified slice from the predefined list'
-	print '        If nothing is specified the whole list is searched'
-	print '        If only i0 is specified the list is searched from that index'
-
     # Handle command line arguments:
     if len(sys.argv) <= 1:
 	printUsage()
@@ -2655,7 +2257,27 @@ if __name__ == '__main__':
 	symGrp = '' # which symmetry group to search: '' means not read yet
 	nr_iterations = 4000
 	precision = 10
+	outDir = "tst/frh-roots"
 	list_pre_edgeLs = False
+	def printUsage():
+	    print 'Usage:'
+	    print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
+	    print 'where options:'
+	    print '     -h      : prints this help'
+	    print '     -i <num>: number of iterations to use; default %d' % nr_iterations
+	    print '     -l      : list the length of the predefined list'
+	    print "     -o <out>: specifiy the output directory: don't use spaces; default"
+	    print '               %s' % outDir
+	    print '     -p <num>: precision, specify the amount of digits after the point; default'
+	    print '               %d' % precision
+	    print 'And'
+	    print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
+	    print '                      values are "A4", "A4xI", "S4"'
+	    print '    [i0]: begin slice'
+	    print '    [i1]: end slice'
+	    print '        search using the specified slice from the predefined list'
+	    print '        If nothing is specified the whole list is searched'
+	    print '        If only i0 is specified the list is searched from that index'
 	def errIfNoNxt(n):
 	    if len(sys.argv) <= n + 1: # note incl the cmd line also
 		printUsage()
@@ -2672,6 +2294,10 @@ if __name__ == '__main__':
 		skipNext = True
 	    elif sys.argv[n] == '-l':
 		list_pre_edgeLs = True
+	    elif sys.argv[n] == '-o':
+		errIfNoNxt(n)
+		outDir = sys.argv[n + 1]
+		skipNext = True
 	    elif sys.argv[n] == '-p':
 		errIfNoNxt(n)
 		precision = int(sys.argv[n + 1])
@@ -2711,13 +2337,16 @@ if __name__ == '__main__':
 	print 'Switch setup after %d randomly selected begin values' % (
 							    nr_iterations)
 	print 'Search slice [%d:%d]:' % (i, j)
+	print 'Save solutions in:', outDir
+	# TODO: specify fold by command line...
 	for e in edgeLs:
 	    print '  -', e
 	if symGrp == 'A4xI':
 	    randBatchA4xI(continueAfter = nr_iterations, nrThreads = 1,
-					edgeLs = edgeLs, precision = precision)
+			edgeLs = edgeLs, precision = precision, outDir = outDir)
 	elif symGrp == 'A4':
-	    randBatch(continueAfter = nr_iterations, nrThreads = 1,
+	    randBatchA4(continueAfter = nr_iterations, nrThreads = 1,
 			    edgeLs = edgeLs,
 			    dynSols = dynamicSols[symGrp],
+			    outDir = outDir,
 			    precision = precision)
