@@ -22,6 +22,7 @@
 
 import wx
 import math
+import re
 import rgb
 import Heptagons
 import isometry
@@ -42,6 +43,7 @@ trisAlt = Heptagons.TrisAlt()
 trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
 dyn_pos		=  Heptagons.dyn_pos
+open_file	=  Heptagons.open_file
 only_hepts	=  Heptagons.only_hepts
 all_eq_tris	=  0
 no_o3_tris	=  1

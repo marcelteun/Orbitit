@@ -1496,7 +1496,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * aVal)
 	this.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
 	this.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
-	inclRefl = len(ed['ar']) == 4
+	inclRefl = len(ed['ar']) <= 5
 	this.shape.inclReflections = inclRefl
 	this.reflGui.SetValue(inclRefl)
 	if not inclRefl:
