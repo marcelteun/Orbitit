@@ -1339,6 +1339,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.precision = precision
 	this.prec_delta = pow(10, -precision)
 	pf = '%%.%df' % this.precision
+	this.sol4 = '    [%s, %s, %s, %s],\n' % (pf, pf, pf, pf)
 	this.sol5 = '    [%s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf)
 	this.sol7 = '    [%s, %s, %s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf, pf, pf)
 	this.fold = fold
@@ -1767,12 +1768,16 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    if this.edgeAlternative & twist_bit == twist_bit and (
 			    this.symmetry == Symmetry.A4xI
 		    ):
+			# todo dyn set
 			angle = numx.pi/4
 		    else:
 			angle = 0.0
 		    f.write('results = [\n')
 		    for r in results_refl:
-			f.write(this.sol5 % (r[0], r[1], r[2], r[3], angle))
+			if eq(angle, 0):
+			    f.write(this.sol4 % (r[0], r[1], r[2], r[3]))
+			else:
+			    f.write(this.sol5 % (r[0], r[1], r[2], r[3], angle))
 		elif this.symmetricEdges():
 		    f.write(']\n')
 		    # close this file open the relective file:
@@ -1789,7 +1794,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    f.write('iterations = %d\n' % (nrOfIters + prev_refl_iterations))
 		    f.write('results = [\n')
 		    for r in results_refl:
-			f.write(this.sol5 % (r[0], r[1], r[2], r[3], r[4]))
+			if eq(r[4], 0):
+			    f.write(this.sol4 % (r[0], r[1], r[2], r[3]))
+			else:
+			    f.write(this.sol5 % (r[0], r[1], r[2], r[3], r[4]))
 		else:
 		    for r in results_refl:
 			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
