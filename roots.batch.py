@@ -209,6 +209,7 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     x4, y4, z4 = (               x3, -y3,     z3)
     x5, y5, z5 = (               x2, -y2,     z2)
     x6, y6, z6 = (               x1, -y1,     z1)
+
     Tx = R - x0   # translate in X to centre on origin
     cosa  = numx.cos(alpha)
     sina  = numx.sin(alpha)
@@ -223,29 +224,30 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     if (fold_type == Fold.parallel):
 	# this code I wrote first only for the parallel case.
 	# I didn't remove the code since it so much faster then the newer code.
+	#
+        #             0
+        #
+        #      6 ----------- 1    axis b
+        #
+        #
+        #
+        #    5 --------------- 2  axis a
+        #
+        #
+        #         4       3
+        #
+        #
 	x0__ = cosg0 * (H) + SigmaH + RhoH
 	z0__ = sing0 * (H)
 
-	x0_  = cosb0 * (x0__ - RhoH) - sinb0 * (z0__       ) + RhoH
-	z0_  = cosb0 * (z0__       ) + sinb0 * (x0__ - RhoH)
+	x0   = cosb0 * (x0__ - RhoH) - sinb0 * (z0__       ) + RhoH
+	z0   = cosb0 * (z0__       ) + sinb0 * (x0__ - RhoH)
 
-	x1_  = cosb0 * (SigmaH) + RhoH
-	z1_  = sinb0 * (SigmaH)
+	x1   = cosb0 * (SigmaH) + RhoH
+	z1   = sinb0 * (SigmaH)
 
-	x0  = sina * x0_ - cosa * z0_
-	x1  = sina * x1_ - cosa * z1_
-	x2  = sina * RhoH
-	x3  = 0
+	x6, y6, z6 = x1, -y1, z1
 
-	y0  =  0.0
-	y1  =  Rho / 2
-	y2  =  Sigma / 2
-	y3  =  1.0 / 2
-
-	z0  = T - (sina * z0_ + cosa * x0_)
-	z1  = T - (sina * z1_ + cosa * x1_)
-	z2  = T - cosa * (         RhoH)
-	z3  = T
     elif (fold_type == Fold.triangle):
 	#
 	#             0
@@ -285,20 +287,8 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
 	x = x1 - RhoH
 	x1, y1, z1 = (RhoH + cosb0 * x - sinb0 * z1, y1, sinb0 * x + cosb0 * z1)
 
-	# rotate around 3-4; angle a
-	# ------------------------------------
-	# since half dihedral angle is used instead of angle with x-axis:
-	cos_a = sina
-	sin_a = -cosa
-	x2, y2, z2, = (cos_a * x2 - sin_a * z2, y2, sin_a * x2 + cos_a * z2)
-	x1, y1, z1, = (cos_a * x1 - sin_a * z1, y1, sin_a * x1 + cos_a * z1)
-	x0, y0, z0, = (cos_a * x0 - sin_a * z0, y0, sin_a * x0 + cos_a * z0)
-	# and translate
-	# ------------------------------------
-	z0 = z0 + T
-	z1 = z1 + T
-	z2 = z2 + T
-	z3 = z3 + T
+	x6, y6, z6 = x1, -y1, z1
+	x5, y5, z5 = x2, -y2, z2
 
     elif (fold_type == Fold.star):
 	#
@@ -520,13 +510,13 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     x5, y5 = x5 * cosd - y5 * sind, x5 * sind + y5 * cosd
     x6, y6 = x6 * cosd - y6 * sind, x6 * sind + y6 * cosd
 
-    #print 'v0', x0, y0, z0
-    #print 'v1', x1, y1, z1
-    #print 'v2', x2, y2, z2
-    #print 'v3', x3, y3, z3
-    #print 'v4', x4, y4, z4
-    #print 'v5', x5, y5, z5
-    #print 'v6', x6, y6, z6
+    #print 'v0 =', [x0, y0, z0]
+    #print 'v1 =', [x1, y1, z1]
+    #print 'v2 =', [x2, y2, z2]
+    #print 'v3 =', [x3, y3, z3]
+    #print 'v4 =', [x4, y4, z4]
+    #print 'v5 =', [x5, y5, z5]
+    #print 'v6 =', [x6, y6, z6]
 
     return (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6)
 
@@ -1831,11 +1821,12 @@ if __name__ == '__main__':
     def testOneSolution(symGrp):
 
 	if symGrp == Symmetry.A4xI:
-	    T  = 2.45
-	    a  = Geom3D.Deg2Rad * 40
-	    b0 = Geom3D.Deg2Rad * 25
-	    g0 = Geom3D.Deg2Rad * 27
-	    tmp = numx.array((T, a, b0, g0))
+	    #T  = 2.45
+	    #a  = Geom3D.Deg2Rad * 40
+	    #b0 = Geom3D.Deg2Rad * 25
+	    #g0 = Geom3D.Deg2Rad * 27
+	    #tmp = numx.array((T, a, b0, g0))
+	    tmp = numx.array((3., 0., 0.0, 0.0))
 	    print 'input values: \n [',
 	    for t in tmp: print t, ',',
 	    print ']'
@@ -1884,7 +1875,7 @@ if __name__ == '__main__':
 		{
 		    Param.tri_fill: TriangleAlt.twisted,
 		    Param.edge_len: [0., 0., 0., 0.],
-		    Param.h_fold:   Fold.w,
+		    Param.h_fold:   Fold.trapezium,
 		    Param.refl_max_angle: False # TODO, dyn set
 		}
 	    )
