@@ -1053,7 +1053,6 @@ def FoldedRegularHeptagonsS4(c, params):
 	beta1  = c[5]
 	gamma1 = c[6]
 	oppoAlternative = params[par_opp_fill]
-    GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, 0, params[par_fold])
     x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
 	    T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
     cp = copy.copy(c)
@@ -1080,7 +1079,7 @@ def FoldedRegularHeptagonsS4(c, params):
         cp[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
 
     #
-    # EDGE B:this.posAngleMax
+    # EDGE B:
     #
     plain_edge_alt = edgeAlternative & ~alt_bit
     #if (edgeAlternative & twist_bit) != 0:
@@ -2376,6 +2375,32 @@ if __name__ == '__main__':
 
     tstProg = False
 
+    def printError(s):
+	print '\n*** %s\n' % s
+
+    def printUsage():
+	print 'Usage:'
+	print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
+	print 'where options:'
+	print '     -h      : prints this help'
+	print '     -i <num>: number of iterations to use; default %d' % nr_iterations
+	print '     -l      : list the length of the predefined list'
+	print "     -o <out>: specifiy the output directory: don't use spaces; default"
+	print '               %s' % outDir
+	print '     -p <num>: precision, specify the amount of digits after the point; default'
+	print '               %d' % precision
+	print '     -1      : try one solution (for debugging/ testing): TODO: improve interface'
+	print 'And'
+	print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
+	print '                      values are "%s", "%s", "%s"' % (
+			Symmetry.A4xI, Symmetry.A4, Symmetry.S4xI
+	    )
+	print '    [i0]: begin slice'
+	print '    [i1]: end slice'
+	print '        search using the specified slice from the predefined list'
+	print '        If nothing is specified the whole list is searched'
+	print '        If only i0 is specified the list is searched from that index'
+
     # Handle command line arguments:
     if len(sys.argv) <= 1:
 	printUsage()
@@ -2387,30 +2412,9 @@ if __name__ == '__main__':
 	precision = 10
 	outDir = "tst/frh-roots"
 	list_pre_edgeLs = False
-	def printUsage():
-	    print 'Usage:'
-	    print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
-	    print 'where options:'
-	    print '     -h      : prints this help'
-	    print '     -i <num>: number of iterations to use; default %d' % nr_iterations
-	    print '     -l      : list the length of the predefined list'
-	    print "     -o <out>: specifiy the output directory: don't use spaces; default"
-	    print '               %s' % outDir
-	    print '     -p <num>: precision, specify the amount of digits after the point; default'
-	    print '               %d' % precision
-	    print '     -1      : try one solution (for debugging/ testing): TODO: improve interface'
-	    print 'And'
-	    print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
-	    print '                      values are "%s", "%s", "%s"' % (
-			Symmetry.A4xI, Symmetry.A4, Symmetry.S4xI
-		)
-	    print '    [i0]: begin slice'
-	    print '    [i1]: end slice'
-	    print '        search using the specified slice from the predefined list'
-	    print '        If nothing is specified the whole list is searched'
-	    print '        If only i0 is specified the list is searched from that index'
-	def errIfNoNxt(n):
+	def errIfNoNxt(s, n):
 	    if len(sys.argv) <= n + 1: # note incl the cmd line also
+		printError('Missing parameter for option: %s' % s)
 		printUsage()
 		sys.exit(-1)
 	for n in range(1, len(sys.argv)):
@@ -2420,17 +2424,17 @@ if __name__ == '__main__':
 		printUsage()
 		sys.exit(0)
 	    elif sys.argv[n] == '-i':
-		errIfNoNxt(n)
+		errIfNoNxt('i', n)
 		nr_iterations = int(sys.argv[n + 1])
 		skipNext = True
 	    elif sys.argv[n] == '-l':
 		list_pre_edgeLs = True
 	    elif sys.argv[n] == '-o':
-		errIfNoNxt(n)
+		errIfNoNxt('o', n)
 		outDir = sys.argv[n + 1]
 		skipNext = True
 	    elif sys.argv[n] == '-p':
-		errIfNoNxt(n)
+		errIfNoNxt('p', n)
 		precision = int(sys.argv[n + 1])
 		skipNext = True
 	    elif sys.argv[n] == '-t':
@@ -2442,6 +2446,7 @@ if __name__ == '__main__':
 		    i = 0
 		    j = len(edgeLs)
 		else:
+		    printError('Unknown symmetry group defined')
 		    printUsage()
 		    sys.exit(-1)
 	    else:
@@ -2459,6 +2464,10 @@ if __name__ == '__main__':
 	    print 'test PASSED'
 	else:
 	    print 'test FAILED'
+    elif symGrp == '':
+	printError('Error: No symmetry group defined')
+	printUsage()
+	sys.exit(-1)
     else:
 	if list_pre_edgeLs:
 	    for (i, e) in zip(range(len(edgeLs)), edgeLs):
