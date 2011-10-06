@@ -896,17 +896,15 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def specPosSetup(this):
 	prePosId = this.prePos
 	if prePosId != open_file and prePosId != dyn_pos:
-	    # TODO rm this tmp check
-	    if Heptagons.TODO_TMP_TST_RM:
-		# use correct predefined special positions
-		if this.shape.inclReflections:
-		    psp = this.predefReflSpecPos
-		else:
-		    psp = this.predefRotSpecPos
-		data = psp[this.prePos][this.specPosIndex]
-		if data.has_key('file'):
-		    print 'see file %s/%s' % (this.rDir, data['file'])
-		return data
+	    # use correct predefined special positions
+	    if this.shape.inclReflections:
+		psp = this.predefReflSpecPos
+	    else:
+		psp = this.predefRotSpecPos
+	    data = psp[this.prePos][this.specPosIndex]
+	    if data.has_key('file'):
+		print 'see file %s/%s' % (this.rDir, data['file'])
+	    return data
 
     @property
     def stdPrePos(this):
@@ -920,17 +918,15 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		if filename == None:
 		    return []
 	    else:
-		# TODO rm this tmp check
-		if Heptagons.TODO_TMP_TST_RM:
-		    # use correct predefined special positions
-		    if this.shape.inclReflections:
-			psp = this.predefReflSpecPos
-		    else:
-			psp = this.predefRotSpecPos
-		    # Oops not good for performance:
-		    # TODO only return correct one en add length func
-		    return [sp['set'] for sp in psp[this.prePos]]
-		    #this.predefSpecPos[this.prePos]['set']
+		# use correct predefined special positions
+		if this.shape.inclReflections:
+		    psp = this.predefReflSpecPos
+		else:
+		    psp = this.predefRotSpecPos
+		# Oops not good for performance:
+		# TODO only return correct one en add length func
+		return [sp['set'] for sp in psp[this.prePos]]
+		#this.predefSpecPos[this.prePos]['set']
 		if this.trisFill == None:
 		    return []
 		if this.shape.inclReflections:
@@ -949,7 +945,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     predefReflSpecPos = {
 	S_only_hepts: [
-	    # TODO can this be store more efficiently?
+	    # TODO can this be stored more efficiently?
 	    {
 		#'file': 'frh-roots-1_0_1_0-fld_w.0-strip_I.py',
 		'set': [2.380384930680, 0.693073733187, -0.568746300899, -0.882436236397],

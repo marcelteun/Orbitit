@@ -59,9 +59,10 @@ rot_bit   = 32
 twist_bit = 64
 class TrisAlt:
     # Note nrs should be different from below
-    strip_I            = 0
-    strip_II           = 1
-    star               = 2
+    refl_1             = 0
+    strip_I            = 1
+    strip_II           = 2
+    star               = 3
     strip_1_loose      = strip_I  | loose_bit
     star_1_loose       = star     | loose_bit
     alt_strip_I        = strip_I              | alt_bit
@@ -134,6 +135,7 @@ class TrisAlt:
     alt_strip_1_loose_arot_star	= (alt_strip_1_loose, arot_star_1_loose)
 
     stringify = {
+	refl_1:			'refl 1',
 	strip_1_loose:		'Strip 1 Loose',
 	strip_I:		'Strip I',
 	strip_II:		'Strip II',
@@ -212,6 +214,7 @@ class TrisAlt:
     }
 
     key = {
+	stringify[refl_1]:            refl_1,
 	stringify[strip_I]:           strip_I,
 	stringify[strip_II]:          strip_II,
 	stringify[star]:              star,

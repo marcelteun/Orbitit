@@ -40,7 +40,8 @@ from GeomTypes import Vec3      as Vec
 Title = 'Polyhedra with Folded Regular Heptagons S4'
 
 trisAlt = Heptagons.TrisAlt()
-trisAlt.baseKey[trisAlt.twist_strip_I] = True
+trisAlt.baseKey[trisAlt.refl_1]        = True
+#trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
 dyn_pos		=  Heptagons.dyn_pos
 open_file	=  Heptagons.open_file
@@ -202,7 +203,7 @@ class Shape(Heptagons.FldHeptagonShape):
         #                         7 = 6'
         Vs = this.baseVs
 	Es = this.triEs[this.edgeAlternative]
-	if this.edgeAlternative == trisAlt.twist_strip_I:
+	if this.edgeAlternative == trisAlt.refl_1:
 		Es = Es[this.inclReflections]
 	aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
@@ -215,12 +216,12 @@ class Shape(Heptagons.FldHeptagonShape):
 		)
 	else:
 	    Es = this.oppTriEs[this.oppEdgeAlternative]
-	    if this.edgeAlternative == trisAlt.twist_strip_I:
+	    if this.edgeAlternative == trisAlt.refl_1:
 		Es = Es[this.inclReflections]
 	    opp_bLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    opp_cLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
 	    #Es = this.oppO3triEs[this.oppEdgeAlternative]
-	    if this.oppEdgeAlternative != trisAlt.twist_strip_I:
+	    if this.oppEdgeAlternative != trisAlt.refl_1:
 		opp_dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    else:
 		opp_dLen = '-'
@@ -287,7 +288,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	theShapes = [this.heptagonsShape]
 	# TODO rm:
 	if this.addXtraFs:
-	    if this.edgeAlternative == trisAlt.twist_strip_I:
+	    if this.edgeAlternative == trisAlt.refl_1:
 		Fs = this.o3triFs[this.edgeAlternative][this.inclReflections][:]
 		Es = this.o3triEs[this.edgeAlternative][this.inclReflections][:]
 	    else:
@@ -310,7 +311,7 @@ class Shape(Heptagons.FldHeptagonShape):
 		    eAlt = this.oppEdgeAlternative
 		else:
 		    eAlt = this.edgeAlternative
-		if this.edgeAlternative == trisAlt.twist_strip_I:
+		if this.edgeAlternative == trisAlt.refl_1:
 		    Fs = this.triFs[this.edgeAlternative][
 			this.inclReflections][:]
 		    Es = this.triEs[this.edgeAlternative][this.inclReflections][:]
@@ -377,8 +378,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	star.extend(noLoose)
 	strip_1_loose.extend(I_loose)
 	star_1_loose.extend(I_loose)
-	# TODO: there are more possibilities for non-reflective twists..
-	twist_strip = { # reflections included:
+	# TODO: there are more possibilities for reflective twists..
+	refl = { # reflections included:
 	    #False: [[2, 3, 7], [1, 2, 26], [0, 1, 26]],
 	    #False: [[2, 3, 7], [1, 2, 26], [0, 1, 21]],
 	    False: [[2, 12, 25], [2, 3, 7], [1, 2, 25], [25, 26, 1], [0, 1, 26], [26, 21, 0]],
@@ -393,7 +394,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:  strip_1_loose[:],
                 trisAlt.alt_strip_I:        stripI[:],
                 trisAlt.alt_strip_II:       stripII[:],
-                trisAlt.twist_strip_I:      twist_strip,
+                trisAlt.refl_1:             refl,
 	}
 	stdO3   = [1, 2, 9]
 	altO3   = [2, 9, 11]
@@ -418,7 +419,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_star = [[13, 17, 14], [13, 5, 6]]
 	arot_star = [[13, 17, 14], [13, 17, 17]]
 	# TODO:
-	twist_strip = { # reflections included:
+	refl = { # reflections included:
 	    False: [],
 	    True:  []
 	}
@@ -435,7 +436,7 @@ class Shape(Heptagons.FldHeptagonShape):
 		trisAlt.arot_strip_1_loose: rot_strip[:],
 		trisAlt.rot_star_1_loose:   rot_star[:],
 		trisAlt.arot_star_1_loose:  arot_star[:],
-                trisAlt.twist_strip_I:      twist_strip,
+                trisAlt.refl_1:             refl,
 	}
 	stdO3   = [6, 17, 5]
 	stdO3_x = [6, 17, 13]
@@ -458,7 +459,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot = [1, 0, 0, 0, 1, 0]
 	rot_x = [0, 0, 1, 1, 1, 0]
 	arot_x = [1, 1, 0, 0, 1, 0]
-	twist = { # reflections included:
+	refl = { # reflections included:
 	    False: [0, 1, 1, 0, 1, 0],
 	    True:  [1, 1, 0]
 	}
@@ -475,12 +476,12 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose:	rot,
                 trisAlt.rot_star_1_loose:	rot_x,
                 trisAlt.arot_star_1_loose:	arot_x,
-                trisAlt.twist_strip_I:		twist,
+                trisAlt.refl_1:		        refl,
             }
 
 	std = [1, 9, 10]
 	alt = [2, 11, 12]
-	twist = { # reflections included:
+	refl = { # reflections included:
 	    False: [[2, 11, 12]],
 	    True: [[2, 7, 11, 24, 12, 25]]
 	}
@@ -493,12 +494,12 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:		[alt],
                 trisAlt.alt_strip_II:		[alt],
                 trisAlt.alt_strip_1_loose:	[alt],
-                trisAlt.twist_strip_I:		twist,
+                trisAlt.refl_1:		        refl,
 	    }
 
 	std = [6, 15, 16, 17]
 	alt = [5, 18, 19, 20]
-	twist = [0, 21, 22, 23]
+	refl = [0, 21, 22, 23]
         this.o4triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -512,7 +513,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose:	[alt],
                 trisAlt.rot_star_1_loose:	[std],
                 trisAlt.arot_star_1_loose:	[alt],
-                trisAlt.twist_strip_I:		[twist],
+                trisAlt.refl_1:		        [refl],
 	    }
 
 	strip_1_loose = [2, 7, 2, 8, 2, 9]
@@ -520,7 +521,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	stripII       = [3, 8, 3, 9, 2, 9]
 	star          = [3, 8, 2, 8, 1, 8]
 	star_1_loose  = [2, 7, 2, 8, 1, 8]
-	twist_stripI  = { # reflections included:
+	refl = { # reflections included:
 	    False: [12, 25, 2, 25, 25, 1, 1, 26, 26, 0],
 	    #False: [25, 2, 2, 26, 26, 1, 1, 21],
 	    True:  [2, 7, 2, 25, 1, 26]
@@ -534,7 +535,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:       stripI,
                 trisAlt.alt_strip_II:      stripII,
                 trisAlt.alt_strip_1_loose: strip_1_loose,
-                trisAlt.twist_strip_I:     twist_stripI,
+                trisAlt.refl_1:            refl,
             }
 	strip_1_loose = [5, 14, 5, 17]
 	stripI        = [5, 14, 5, 17]
@@ -544,7 +545,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_strip     = [13, 15, 5, 15]
 	rot_star      = [13, 15, 6, 13]
 	arot_star     = [13, 15, 13, 17]
-	twist_stripI  = { # reflections included:
+	refl  = { # reflections included:
 	    False: [],
 	    True:  []
 	}
@@ -561,44 +562,44 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose: rot_strip,
                 trisAlt.rot_star_1_loose:   rot_star,
                 trisAlt.arot_star_1_loose:  arot_star,
-                trisAlt.twist_strip_I:      twist_stripI,
+                trisAlt.refl_1:             refl,
             }
 
 	std = [1, 9, 9, 10, 10, 1]
 	alt = [2, 11, 11, 12, 12, 2]
-	twist = { # reflections included:
+	refl = { # reflections included:
 	    False: [2, 11, 11, 12, 12, 2],
 	    True:  []
 	}
         this.o3triEs = {
-                trisAlt.strip_1_loose:		std,
-                trisAlt.strip_I:		std,
-                trisAlt.strip_II:		std,
-                trisAlt.star:			std,
-                trisAlt.star_1_loose:		std,
-                trisAlt.alt_strip_I:		alt,
-                trisAlt.alt_strip_II:		alt,
-                trisAlt.alt_strip_1_loose:	alt,
-                trisAlt.twist_strip_I:		twist,
+                trisAlt.strip_1_loose:	    std,
+                trisAlt.strip_I:	    std,
+                trisAlt.strip_II:	    std,
+                trisAlt.star:		    std,
+                trisAlt.star_1_loose:	    std,
+                trisAlt.alt_strip_I:	    alt,
+                trisAlt.alt_strip_II:	    alt,
+                trisAlt.alt_strip_1_loose:  alt,
+                trisAlt.refl_1:		    refl,
             }
 
 	std = [6, 15, 15, 16, 16, 17, 17, 6]
 	alt = [5, 18, 18, 19, 19, 20, 20, 5]
-	twist = [0, 21, 21, 22, 22, 23, 23, 0]
+	refl = [0, 21, 21, 22, 22, 23, 23, 0]
         this.o4triEs = {
-                trisAlt.strip_1_loose:		std,
-                trisAlt.strip_I:		std,
-                trisAlt.strip_II:		std,
-                trisAlt.star:			std,
-                trisAlt.star_1_loose:		std,
-                trisAlt.alt_strip_I:		alt,
-                trisAlt.alt_strip_II:		alt,
-                trisAlt.alt_strip_1_loose:	alt,
-                trisAlt.rot_strip_1_loose:	std,
-                trisAlt.arot_strip_1_loose:	alt,
-                trisAlt.rot_star_1_loose:	std,
-                trisAlt.arot_star_1_loose:	alt,
-                trisAlt.twist_strip_I:		twist,
+                trisAlt.strip_1_loose:	    std,
+                trisAlt.strip_I:	    std,
+                trisAlt.strip_II:	    std,
+                trisAlt.star:		    std,
+                trisAlt.star_1_loose:	    std,
+                trisAlt.alt_strip_I:	    alt,
+                trisAlt.alt_strip_II:	    alt,
+                trisAlt.alt_strip_1_loose:  alt,
+                trisAlt.rot_strip_1_loose:  std,
+                trisAlt.arot_strip_1_loose: alt,
+                trisAlt.rot_star_1_loose:   std,
+                trisAlt.arot_star_1_loose:  alt,
+                trisAlt.refl_1:		    refl,
             }
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
@@ -619,13 +620,17 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	return this.prePos == only_hepts and not (
 		this.trisFill == None
 	    ) and not (
-		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
+		this.trisFill == trisAlt.refl_1
+	    )
+		#this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
     def showOnlyO3Tris(this):
 	return this.prePos == Heptagons.only_xtra_o3s and not (
 		this.trisFill == None
 	    ) and not (
-		this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
+		this.trisFill == trisAlt.refl_1
+	    )
+		#this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
     rDir = 'data/Data_FldHeptS4'
     rPre = 'frh-roots'
@@ -720,17 +725,15 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def specPosSetup(this):
 	prePosId = this.prePos
 	if prePosId != open_file and prePosId != dyn_pos:
-	    # TODO rm this tmp check
-	    if Heptagons.TODO_TMP_TST_RM:
-		# use correct predefined special positions
-		if this.shape.inclReflections:
-		    psp = this.predefReflSpecPos
-		else:
-		    psp = this.predefRotSpecPos
-		data = psp[this.prePos][this.specPosIndex]
-		if data.has_key('file'):
-		    print 'see file %s/%s' % (this.rDir, data['file'])
-		return data
+	    # use correct predefined special positions
+	    if this.shape.inclReflections:
+		psp = this.predefReflSpecPos
+	    else:
+		psp = this.predefRotSpecPos
+	    data = psp[this.prePos][this.specPosIndex]
+	    if data.has_key('file'):
+		print 'see file %s/%s' % (this.rDir, data['file'])
+	    return data
 
     @property
     def stdPrePos(this):
@@ -744,17 +747,15 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		if filename == None:
 		    return []
 	    else:
-		# TODO rm this tmp check
-		if Heptagons.TODO_TMP_TST_RM:
-		    # use correct predefined special positions
-		    if this.shape.inclReflections:
-			psp = this.predefReflSpecPos
-		    else:
-			psp = this.predefRotSpecPos
-		    # Oops not good for performance:
-		    # TODO only return correct one en add length func
-		    return [sp['set'] for sp in psp[this.prePos]]
-		    #this.predefSpecPos[this.prePos]['set']
+		# use correct predefined special positions
+		if this.shape.inclReflections:
+		    psp = this.predefReflSpecPos
+		else:
+		    psp = this.predefRotSpecPos
+		# Oops not good for performance:
+		# TODO only return correct one en add length func
+		return [sp['set'] for sp in psp[this.prePos]]
+		#this.predefSpecPos[this.prePos]['set']
 		if this.trisFill == None:
 		    return []
 		if this.shape.inclReflections:
@@ -772,7 +773,24 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    return this.sav_stdPrePos
 
     predefReflSpecPos = {
-	only_hepts: [],
+	only_hepts: [
+	    {
+		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
+		'set': [2.3689660916, 0.0851258971, -0.0853666149, 2.1212284837],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_1,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
+		'set': [2.3706859974, -0., 1.4330985471, 1.1300265566],
+		'7fold': Heptagons.foldMethod.triangle,
+		'tris': trisAlt.refl_1,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
+		'set': [2.3706859974, 0., 0.1376977796, 2.0115660970],
+		'7fold': Heptagons.foldMethod.triangle,
+		'tris': trisAlt.refl_1,
+	    }
+	],
     }
     predefRotSpecPos = {
 	only_hepts: [],
