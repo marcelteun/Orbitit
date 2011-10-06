@@ -103,29 +103,34 @@ class Param:
     opp_fill = 1
     edge_len = 2
     h_fold = 3
-    refl_max_angle = 4
-    n_7_turn = 5
+    n_7_turn = 4
 
-loose_bit = 4
-alt_bit = 8
-rot_bit  = 16
-twist_bit  = 32
+refl1_bas  = 0
+strip1_bas = 1
+strip2_bas = 2
+star_bas   = 3
+loose_bit  = 8
+alt_bit    = 16
+rot_bit    = 32
+twist_bit  = 64
 class TriangleAlt:
-    stripI           = 0
-    strip1loose      = 0 | loose_bit
-    alt_stripI       = 0             | alt_bit
-    alt_strip1loose  = 0 | loose_bit | alt_bit
-    stripII          = 1
-    alt_stripII      = 1             | alt_bit
-    star             = 2
-    star1loose       = 2 | loose_bit
-    rot_strip1loose  = 0 | loose_bit           | rot_bit
-    arot_strip1loose = 0 | loose_bit | alt_bit | rot_bit
-    rot_star1loose   = 2 | loose_bit           | rot_bit
-    arot_star1loose  = 2 | loose_bit | alt_bit | rot_bit
-    twisted          = 					   twist_bit
+    refl_1           = refl1_bas
+    stripI           = strip1_bas
+    strip1loose      = strip1_bas | loose_bit
+    alt_stripI       = strip1_bas             | alt_bit
+    alt_strip1loose  = strip1_bas | loose_bit | alt_bit
+    stripII          = strip2_bas
+    alt_stripII      = strip2_bas             | alt_bit
+    star             = star_bas
+    star1loose       = star_bas   | loose_bit
+    rot_strip1loose  = strip1_bas | loose_bit           | rot_bit
+    arot_strip1loose = strip1_bas | loose_bit | alt_bit | rot_bit
+    rot_star1loose   = star_bas   | loose_bit           | rot_bit
+    arot_star1loose  = star_bas   | loose_bit | alt_bit | rot_bit
+    twisted          = 					  twist_bit
     def __iter__(t):
 	return iter([
+	    t.refl_1,
 	    t.stripI,
 	    t.strip1loose,
 	    t.alt_stripI,
@@ -142,6 +147,7 @@ class TriangleAlt:
 	])
 
 Stringify = {
+    TriangleAlt.refl_1          : 'refl 1',
     TriangleAlt.strip1loose     : 'strip 1 loose',
     TriangleAlt.stripI          : 'strip I',
     TriangleAlt.stripII         : 'strip II',
@@ -1025,14 +1031,13 @@ def FoldedRegularHeptagonsS4(c, params):
     par_tri_fill       = Param.tri_fill
     par_edge_len       = Param.edge_len
     par_fold           = Param.h_fold
-    par_refl_max_angle = Param.refl_max_angle
 
     incl_reflections = len(params[par_edge_len]) == 4
     if incl_reflections:
 	beta1  = beta0
 	gamma1 = gamma0
-	if params[par_refl_max_angle]:
-	    delta  = numx.pi/2
+	if params[par_tri_fill] & twist_bit == twist_bit:
+	    delta  = numx.pi/4
 	else:
 	    delta  = 0
 	oppoAlternative = params[par_tri_fill]
@@ -1053,9 +1058,10 @@ def FoldedRegularHeptagonsS4(c, params):
     except IndexError:
 	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
 
-    if ((edgeAlternative & loose_bit) != 0 or
-    	(edgeAlternative & twist_bit) != 0
-    ):
+    #if ((edgeAlternative & loose_bit) != 0 or
+    #	(edgeAlternative & twist_bit) != 0
+    #):
+    if (edgeAlternative == TriangleAlt.refl_1):
         # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
         cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
     else:
@@ -1067,7 +1073,8 @@ def FoldedRegularHeptagonsS4(c, params):
     # EDGE B:
     #
     plain_edge_alt = edgeAlternative & ~alt_bit
-    if (edgeAlternative & twist_bit) != 0:
+    #if (edgeAlternative & twist_bit) != 0:
+    if (edgeAlternative == TriangleAlt.refl_1):
 	# V5 - Q-turn-around-o4(V2)
 	V2_o4_x, V2_o4_y, V2_o4_z = S4_Q_turn_o4(x2, y2, z2)
         cp[1] = v_delta(x5, y5, z5, V2_o4_x, V2_o4_y, V2_o4_z) - edgeLengths[1]
@@ -1099,7 +1106,8 @@ def FoldedRegularHeptagonsS4(c, params):
     #
     # EDGE C
     #
-    if (edgeAlternative & twist_bit) != 0:
+    #if (edgeAlternative & twist_bit) != 0:
+    if (edgeAlternative == TriangleAlt.refl_1):
 	# V6 - Q-turn-around-o4(V1)
 	V1_o4_x, V1_o4_y, V1_o4_z = S4_Q_turn_o4(x1, y1, z1)
         cp[2] = v_delta(x6, y6, z6, V1_o4_x, V1_o4_y, V1_o4_z) - edgeLengths[2]
@@ -1117,7 +1125,8 @@ def FoldedRegularHeptagonsS4(c, params):
     #
     # EDGE D
     #
-    if (edgeAlternative & twist_bit) != 0:
+    #if (edgeAlternative & twist_bit) != 0:
+    if (edgeAlternative == TriangleAlt.refl_1):
 	# V0 - T-turn-around-o4(V9:[x0,   y0,    z0])
 	V0_o4_x, V0_o4_y, V0_o4_z = S4_Q_turn_o4(x0, y0, z0)
         cp[3] = v_delta(x0, y0, z0, V0_o4_x, V0_o4_y, V0_o4_z) - edgeLengths[3]
@@ -1130,6 +1139,7 @@ def FoldedRegularHeptagonsS4(c, params):
 	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
 
     if not incl_reflections:
+	# TODO
 	# opposite alternative edges, similar as above
 	#
 	# OPPOSITE EDGE B
@@ -1229,7 +1239,6 @@ def FindMultiRoot(initialValues,
 			Param.tri_fill:       edgeAlternative,
 			Param.edge_len:       edgeLengths,
 			Param.h_fold:         fold,
-			Param.refl_max_angle: False # TODO, dyn set
 		    },
 		    nrOfIns
 		)
@@ -1699,7 +1708,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 					    Param.tri_fill: this.edgeAlternative,
 					    Param.edge_len: this.edgeLengths,
 					    Param.h_fold:   this.fold,
-					    Param.refl_max_angle: False # TODO, dyn set
 					}
 				    )
 			    else:
@@ -1763,12 +1771,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    for r in results:
 			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
 		if len(this.edgeLengths) == 4:
-		    # set angle centrally
-		    # TODO handle min and max
-		    if this.edgeAlternative & twist_bit == twist_bit and (
-			    this.symmetry == Symmetry.A4xI
-		    ):
-			# todo dyn set
+		    if this.edgeAlternative & twist_bit == twist_bit:
 			angle = numx.pi/4
 		    else:
 			angle = 0.0
@@ -1881,10 +1884,9 @@ if __name__ == '__main__':
 	    print ']'
 	    print FoldedRegularHeptagonsS4(tmp,
 		{
-		    Param.tri_fill: TriangleAlt.twisted,
+		    Param.tri_fill: TriangleAlt.refl_1,
 		    Param.edge_len: [0., 0., 0., 0.],
 		    Param.h_fold:   Fold.trapezium,
-		    Param.refl_max_angle: False # TODO, dyn set
 		}
 	    )
 
@@ -2276,7 +2278,7 @@ if __name__ == '__main__':
 	#for t in ta:
 	#    if t & rot_bit == 0:
 	#        edgeAlts.append(t)
-	edgeAlts = [ta.twisted] # for now for S4 # TODO set by cmd line
+	edgeAlts = [ta.refl_1] # for now for S4 # TODO set by cmd line
 	if symGrp == Symmetry.A4xI:
 	    T = [-2., 3.]
 	elif symGrp == Symmetry.S4xI:
