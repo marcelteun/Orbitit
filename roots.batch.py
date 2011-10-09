@@ -98,6 +98,10 @@ class Symmetry:
 	A4   = "A4"
 	S4xI = "S4xI"
 
+def refl2_angle(sym):
+	if sym == Symmetry.S4xI:
+	    return numx.pi/2
+
 class Param:
     tri_fill = 0
     opp_fill = 1
@@ -109,12 +113,14 @@ refl1_bas  = 0
 strip1_bas = 1
 strip2_bas = 2
 star_bas   = 3
+refl2_bas  = 4
 loose_bit  = 8
 alt_bit    = 16
 rot_bit    = 32
 twist_bit  = 64
 class TriangleAlt:
     refl_1           = refl1_bas
+    refl_2           = refl2_bas
     stripI           = strip1_bas
     strip1loose      = strip1_bas | loose_bit
     alt_stripI       = strip1_bas             | alt_bit
@@ -131,6 +137,7 @@ class TriangleAlt:
     def __iter__(t):
 	return iter([
 	    t.refl_1,
+	    t.refl_2,
 	    t.stripI,
 	    t.strip1loose,
 	    t.alt_stripI,
@@ -148,6 +155,7 @@ class TriangleAlt:
 
 Stringify = {
     TriangleAlt.refl_1          : 'refl 1',
+    TriangleAlt.refl_2          : 'refl 2',
     TriangleAlt.strip1loose     : 'strip 1 loose',
     TriangleAlt.stripI          : 'strip I',
     TriangleAlt.stripII         : 'strip II',
@@ -516,13 +524,16 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     x5, y5 = x5 * cosd - y5 * sind, x5 * sind + y5 * cosd
     x6, y6 = x6 * cosd - y6 * sind, x6 * sind + y6 * cosd
 
-    #print 'v0 =', [x0, y0, z0]
-    #print 'v1 =', [x1, y1, z1]
-    #print 'v2 =', [x2, y2, z2]
-    #print 'v3 =', [x3, y3, z3]
-    #print 'v4 =', [x4, y4, z4]
-    #print 'v5 =', [x5, y5, z5]
-    #print 'v6 =', [x6, y6, z6]
+    # comment out the return below if you want to see the prints
+    return (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6)
+
+    print 'v0 =', [x0, y0, z0]
+    print 'v1 =', [x1, y1, z1]
+    print 'v2 =', [x2, y2, z2]
+    print 'v3 =', [x3, y3, z3]
+    print 'v4 =', [x4, y4, z4]
+    print 'v5 =', [x5, y5, z5]
+    print 'v6 =', [x6, y6, z6]
 
     return (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6)
 
@@ -1014,10 +1025,6 @@ def FoldedRegularHeptagonsS4(c, params):
 
     params{'3'} defines which heptagon folding method is used.
 
-    params{'5'} Only used if params 2 has length 4, then if:
-                False: c[4] = 0
-                True:  c[4] = pi/2
-
     params{'4'} rotate the folding with n/7 turn
     """
 
@@ -1036,8 +1043,8 @@ def FoldedRegularHeptagonsS4(c, params):
     if incl_reflections:
 	beta1  = beta0
 	gamma1 = gamma0
-	if params[par_tri_fill] & twist_bit == twist_bit:
-	    delta  = numx.pi/4
+	if params[par_tri_fill] == TriangleAlt.refl_2:
+	    delta  = refl2_angle(Symmetry.S4xI)
 	else:
 	    delta  = 0
 	oppoAlternative = params[par_tri_fill]
@@ -1046,6 +1053,7 @@ def FoldedRegularHeptagonsS4(c, params):
 	beta1  = c[5]
 	gamma1 = c[6]
 	oppoAlternative = params[par_opp_fill]
+    GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, 0, params[par_fold])
     x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
 	    T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
     cp = copy.copy(c)
@@ -1061,7 +1069,9 @@ def FoldedRegularHeptagonsS4(c, params):
     #if ((edgeAlternative & loose_bit) != 0 or
     #	(edgeAlternative & twist_bit) != 0
     #):
-    if (edgeAlternative == TriangleAlt.refl_1):
+    if (edgeAlternative == TriangleAlt.refl_1 or 
+				edgeAlternative == TriangleAlt.refl_2
+    ):
         # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
         cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
     else:
@@ -1070,7 +1080,7 @@ def FoldedRegularHeptagonsS4(c, params):
         cp[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
 
     #
-    # EDGE B:
+    # EDGE B:this.posAngleMax
     #
     plain_edge_alt = edgeAlternative & ~alt_bit
     #if (edgeAlternative & twist_bit) != 0:
@@ -1078,6 +1088,10 @@ def FoldedRegularHeptagonsS4(c, params):
 	# V5 - Q-turn-around-o4(V2)
 	V2_o4_x, V2_o4_y, V2_o4_z = S4_Q_turn_o4(x2, y2, z2)
         cp[1] = v_delta(x5, y5, z5, V2_o4_x, V2_o4_y, V2_o4_z) - edgeLengths[1]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+	# V10 - Q-turn-around-o4(V5), V10 = V2' = [-x2, -y2, z2]
+	V_o4_x, V_o4_y, V_o4_z = S4_Q_turn_o4(x5, y5, z5)
+        cp[1] = v_delta(-x2, -y2, z2, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[1]
     #TODO:
     elif plain_edge_alt == TriangleAlt.stripII:
         # V3 - V14:[y1, z1, x1], # V14 = V1'
@@ -1111,6 +1125,10 @@ def FoldedRegularHeptagonsS4(c, params):
 	# V6 - Q-turn-around-o4(V1)
 	V1_o4_x, V1_o4_y, V1_o4_z = S4_Q_turn_o4(x1, y1, z1)
         cp[2] = v_delta(x6, y6, z6, V1_o4_x, V1_o4_y, V1_o4_z) - edgeLengths[2]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+	# V11 - Q-turn-around-o4(V6), V11 = V1' = [-x1, -y1, z1]
+	V_o4_x, V_o4_y, V_o4_z = S4_Q_turn_o4(x6, y6, z6)
+        cp[2] = v_delta(-x1, -y1, z1, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[2]
     #TODO:
     elif (
 	edgeAlternative != TriangleAlt.star
@@ -1130,6 +1148,10 @@ def FoldedRegularHeptagonsS4(c, params):
 	# V0 - T-turn-around-o4(V9:[x0,   y0,    z0])
 	V0_o4_x, V0_o4_y, V0_o4_z = S4_Q_turn_o4(x0, y0, z0)
         cp[3] = v_delta(x0, y0, z0, V0_o4_x, V0_o4_y, V0_o4_z) - edgeLengths[3]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+	# V7 - Q-turn-around-o4(V0), V7 = o2(v0) = [-x0, -y0, z0]
+	V_o4_x, V_o4_y, V_o4_z = S4_Q_turn_o4(x0, y0, z0)
+        cp[3] = v_delta(-x0, -y0, z0, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[3]
     #TODO:
     elif (edgeAlternative & alt_bit == 0):
 	# V1 - V14:[ y1,    z1,    x1], # V14 = V1'
@@ -1771,10 +1793,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    for r in results:
 			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
 		if len(this.edgeLengths) == 4:
-		    if this.edgeAlternative & twist_bit == twist_bit:
-			angle = numx.pi/4
-		    else:
+		    if this.edgeAlternative == TriangleAlt.refl_1:
 			angle = 0.0
+		    else:
+			angle = refl2_angle(this.symmetry)
 		    f.write('results = [\n')
 		    for r in results_refl:
 			if eq(angle, 0):
@@ -1878,13 +1900,13 @@ if __name__ == '__main__':
 	    #b1 = Geom3D.Deg2Rad * 50
 	    #g1 = Geom3D.Deg2Rad * 100
 	    #tmp = numx.array((T, a, b0, g0, d, b1, g1))
-	    tmp = numx.array((3., 0., 0.0, 0.0))
+	    tmp = numx.array((3., 0., 0., 0.))
 	    print 'input values: \n [',
 	    for t in tmp: print t, ',',
 	    print ']'
 	    print FoldedRegularHeptagonsS4(tmp,
 		{
-		    Param.tri_fill: TriangleAlt.refl_1,
+		    Param.tri_fill: TriangleAlt.refl_2,
 		    Param.edge_len: [0., 0., 0., 0.],
 		    Param.h_fold:   Fold.trapezium,
 		}
@@ -2278,7 +2300,7 @@ if __name__ == '__main__':
 	#for t in ta:
 	#    if t & rot_bit == 0:
 	#        edgeAlts.append(t)
-	edgeAlts = [ta.refl_1] # for now for S4 # TODO set by cmd line
+	edgeAlts = [ta.refl_2] # for now for S4 # TODO set by cmd line
 	if symGrp == Symmetry.A4xI:
 	    T = [-2., 3.]
 	elif symGrp == Symmetry.S4xI:
@@ -2376,10 +2398,11 @@ if __name__ == '__main__':
 	    print '               %s' % outDir
 	    print '     -p <num>: precision, specify the amount of digits after the point; default'
 	    print '               %d' % precision
+	    print '     -1      : try one solution (for debugging/ testing): TODO: improve interface'
 	    print 'And'
 	    print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
 	    print '                      values are "%s", "%s", "%s"' % (
-			Symmtry.A4xI, Symmetry.A4, Symmetry.S4xI
+			Symmetry.A4xI, Symmetry.A4, Symmetry.S4xI
 		)
 	    print '    [i0]: begin slice'
 	    print '    [i1]: end slice'
