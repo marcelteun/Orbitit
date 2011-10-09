@@ -1795,10 +1795,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.onPrePos(event)
 	    else:
 		if this.shape.inclReflections:
-		    if this.trisFill & twist_bit == twist_bit:
-			this.shape.setPosAngle(math.pi/4)
-		    else:
-			this.shape.setPosAngle(0)
+		    this.setReflPosAngle()
 		this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    this.updateShape()
 
@@ -1840,6 +1837,11 @@ class FldHeptagonCtrlWin(wx.Frame):
     def stdPrePos(this):
 	assert False, "TODO: implement at offspring"
 
+    def noPrePosFound(this):
+	s = 'Note: no valid positions found' 
+	print s
+	this.statusBar.SetStatusText(s)
+
     def onPrev(this, event = None):
         prePosId = this.prePos
         if this.stdPrePos != []:
@@ -1849,6 +1851,8 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.specPosIndex = len(this.stdPrePos) - 2
 	    # else prePosId == 0 : first one selected don't scroll around
             this.onPrePos()
+	else:
+	    this.noPrePosFound()
 
     def onNext(this, event = None):
         prePosId = this.prePos
@@ -1863,6 +1867,8 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    except KeyError:
 		pass
 	    this.onPrePos()
+	else:
+	    this.noPrePosFound()
 
     def showOnlyHepts(this):
 	return this.prePos == only_hepts
@@ -2044,6 +2050,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    if event != None:
 		this.resetStdPrePos()
 	    setting = this.stdPrePos
+	    if setting == []:
+		this.noPrePosFound()
+		return
 	    # Note if the setting array uses a none symmetric setting, then the
 	    # shape will not be symmetric. This is not supposed to be handled
 	    # here: don't overdo it!
