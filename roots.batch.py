@@ -2002,20 +2002,13 @@ if __name__ == '__main__':
 
     printStatus = False
 
-    def randBatchA4(continueAfter = 100, nrThreads = 1, edgeLs = [],
+    def randBatchA4(edgeLs, edgeAlts, continueAfter = 100, nrThreads = 1,
 				dynSols = None, precision = 14, outDir = "./"):
 	folds = [Fold.star, Fold.w]
 	# TODO: howto:
 	#folds = [Fold.star]
 	#folds = [Fold.w]
 	#folds = [Fold.trapezium]
-	ta = TriangleAlt()
-	#edgeAlts = [t for t in ta]
-	edgeAlts = []
-	for t in ta:
-	    if t & rot_bit == 0:
-		edgeAlts.append(t)
-	#oppEdgeAlts = [t for t in ta]
 	oppEdgeAlts = edgeAlts[:]
 	dom = [
 	    [-3., 4.],             # Translation
@@ -2284,8 +2277,41 @@ if __name__ == '__main__':
 	}
     ]
 
-    def randBatchYxI(symGrp, continueAfter = 100, nrThreads = 1, edgeLs = [],
-						precision = 14, outDir = "./"):
+    edgeAltOpts = {
+	Symmetry.A4: [
+		    TriangleAlt.stripI,
+		    TriangleAlt.strip1loose,
+		    TriangleAlt.alt_stripI,
+		    TriangleAlt.alt_strip1loose,
+		    TriangleAlt.stripII,
+		    TriangleAlt.alt_stripII,
+		    TriangleAlt.star,
+		    TriangleAlt.star1loose,
+		    TriangleAlt.twisted,
+		],
+	Symmetry.A4xI: [
+		    TriangleAlt.stripI,
+		    TriangleAlt.strip1loose,
+		    TriangleAlt.alt_stripI,
+		    TriangleAlt.alt_strip1loose,
+		    TriangleAlt.stripII,
+		    TriangleAlt.alt_stripII,
+		    TriangleAlt.star,
+		    TriangleAlt.star1loose,
+		    TriangleAlt.rot_strip1loose,
+		    TriangleAlt.arot_strip1loose,
+		    TriangleAlt.rot_star1loose,
+		    TriangleAlt.arot_star1loose,
+		    TriangleAlt.twisted,
+		],
+	Symmetry.S4xI: [
+		    TriangleAlt.refl_1,
+		    TriangleAlt.refl_2,
+		],
+    }
+
+    def randBatchYxI(symGrp, edgeLs, edgeAlts, continueAfter = 100,
+			    nrThreads = 1, precision = 14, outDir = "./"):
 	folds = [
 	    Fold.w,
 	    Fold.star,
@@ -2293,13 +2319,6 @@ if __name__ == '__main__':
 	    Fold.trapezium,
 	    Fold.parallel,
 	]
-	ta = TriangleAlt()
-	edgeAlts = [t for t in ta]
-	#edgeAlts = []
-	#for t in ta:
-	#    if t & rot_bit == 0:
-	#        edgeAlts.append(t)
-	edgeAlts = [ta.refl_2] # for now for S4 # TODO set by cmd line
 	if symGrp == Symmetry.A4xI:
 	    T = [-2., 3.]
 	elif symGrp == Symmetry.S4xI:
@@ -2382,9 +2401,11 @@ if __name__ == '__main__':
 	print 'Usage:'
 	print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
 	print 'where options:'
+	print '     -a [x:y]: slice of edge alternative list to search'
+	print '     -A      : list the edge alternatives'
 	print '     -h      : prints this help'
 	print '     -i <num>: number of iterations to use; default %d' % nr_iterations
-	print '     -l      : list the length of the predefined list'
+	print '     -l      : list the edge lengths of the predefined list'
 	print "     -o <out>: specifiy the output directory: don't use spaces; default"
 	print '               %s' % outDir
 	print '     -p <num>: precision, specify the amount of digits after the point; default'
@@ -2411,7 +2432,10 @@ if __name__ == '__main__':
 	nr_iterations = 4000
 	precision = 10
 	outDir = "tst/frh-roots"
+	# can be set to true by cmd line
 	list_pre_edgeLs = False
+	list_edge_alts  = False
+	set_edge_alts   = ''
 	def errIfNoNxt(s, n):
 	    if len(sys.argv) <= n + 1: # note incl the cmd line also
 		printError('Missing parameter for option: %s' % s)
@@ -2420,6 +2444,12 @@ if __name__ == '__main__':
 	for n in range(1, len(sys.argv)):
 	    if skipNext:
 		skipNext = False
+	    elif sys.argv[n] == '-a':
+		errIfNoNxt('a', n)
+		set_edge_alts = sys.argv[n + 1]
+		skipNext = True
+	    elif sys.argv[n] == '-A':
+		list_edge_alts = True
 	    elif sys.argv[n] == '-h':
 		printUsage()
 		sys.exit(0)
@@ -2469,24 +2499,48 @@ if __name__ == '__main__':
 	printUsage()
 	sys.exit(-1)
     else:
-	if list_pre_edgeLs:
-	    for (i, e) in zip(range(len(edgeLs)), edgeLs):
-		print '%3d' % i, e
+	if list_pre_edgeLs or list_edge_alts:
+	    if list_pre_edgeLs:
+		for (i, e) in zip(range(len(edgeLs)), edgeLs):
+		    print '%3d:' % i, e
+	    if list_edge_alts:
+		for (i, e) in zip(range(len(edgeAltOpts[symGrp])),
+							edgeAltOpts[symGrp]):
+		    print '%3d: %s' % (i, Stringify[e])
 	    sys.exit(0)
+	if set_edge_alts == '':
+	    edgeAlts = edgeAltOpts[symGrp]
+	else:
+	    try:
+		edgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (symGrp,
+								set_edge_alts))
+		# if just an index was used instead of a slice:
+		if type(edgeAlts) == int:
+		    edgeAlts = [edgeAlts]
+	    except TypeError:
+		printError("type error for edge slice: '%s'\n" % set_edge_alts)
+		printUsage()
+		sys.exit(0)
+	    except SyntaxError:
+		printError("syntax error for edge slice: '%s'\n" % set_edge_alts)
+		printUsage()
+		sys.exit(0)
 	print 'Search solutions for symmetry group %s' % symGrp
 	print 'Switch setup after %d randomly selected begin values' % (
 							    nr_iterations)
-	print 'Search slice [%d:%d]:' % (i, j)
 	print 'Save solutions in:', outDir
 	# TODO: specify fold by command line...
+	print 'Edge lengths slice [%d:%d]:' % (i, j)
 	for e in edgeLs:
 	    print '  -', e
+	print 'edgeAlts = ['
+	for e in edgeAlts:
+	    print '  %s,' % Stringify[e]
+	print ']'
 	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4xI:
-	    randBatchYxI(symGrp, continueAfter = nr_iterations, nrThreads = 1,
-			edgeLs = edgeLs, precision = precision, outDir = outDir)
+	    randBatchYxI(symGrp, edgeLs, edgeAlts, nr_iterations, nrThreads = 1,
+			precision = precision, outDir = outDir)
 	elif symGrp == SYmmetry.A4:
-	    randBatchA4(continueAfter = nr_iterations, nrThreads = 1,
-			    edgeLs = edgeLs,
+	    randBatchA4(edgeLs, edgeAlts, nr_iterations, nrThreads = 1,
 			    dynSols = dynamicSols[symGrp],
-			    outDir = outDir,
-			    precision = precision)
+			    precision = precision, outDir = outDir)
