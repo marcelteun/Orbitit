@@ -1055,7 +1055,7 @@ def FoldedRegularHeptagonsS4(c, params):
 	oppoAlternative = params[par_opp_fill]
     x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
 	    T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
-    cp = copy.copy(c)
+    cp = copy.copy(params[par_edge_len])
     edgeAlternative = params[par_tri_fill]
     #
     # EDGE A: only one for A4
@@ -1750,7 +1750,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			    # apparently the precision is bigger then
 			    # 1e^precision: use a factor...
 			    if not eq(chk[i], 0., 10 * this.prec_delta):
-				print '|', chk[i], '| >', this.prec_delta
+				print '|chk[%d]| = |' % i, chk[i], '| >', this.prec_delta
 				isEq = False
 				break
 			if isEq:
