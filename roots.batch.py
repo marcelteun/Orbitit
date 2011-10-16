@@ -1368,7 +1368,15 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.method = method
 	this.precision = precision
 	this.prec_delta = pow(10, -precision)
-	pf = '%%.%df' % this.precision
+	# Try to write with a precision that is 1 higher than specified
+	# otherwise so that the edge length has the required precision,
+	# otherwise you might end throwing the solution later, because it
+	# ends up outside the valid boundaries when checking the edges.
+	if this.precision <= 14:
+	    write_precision = this.precision + 1
+	else:
+	    write_precision = this.precision
+	pf = '%%.%df' % write_precision
 	this.sol4 = '    [%s, %s, %s, %s],\n' % (pf, pf, pf, pf)
 	this.sol5 = '    [%s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf)
 	this.sol7 = '    [%s, %s, %s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf, pf, pf)
@@ -1469,7 +1477,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    print 'Oops'
 		    print 'old', old
 		    print 'sol', sol
-		if abs(old[i] - sol[i]) > 100 * this.prec_delta:
+		if abs(old[i] - sol[i]) > this.prec_delta:
 		    allElemsEqual = False
 		    break # for i loop, not for old
 	    if allElemsEqual:
@@ -1503,10 +1511,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			    if sol_isEq:
 				for vs in d['set_vector']:
 				    isEq = True
-				    for i in range(len(vs)):
-					if not eq(vs[i], this.edgeLengths[i]):
+				    for k, v in vs.iteritems():
+					if not eq(sol[k], v, this.prec_delta):
 					    isEq = False
-					    break # don't check other (i, v)
+					    break
 				    if isEq:
 					return isEq
 	return False
@@ -1649,6 +1657,16 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    try:
 		#print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
 		#print 'step'
+		find_prec_delta = this.prec_delta
+		# Try to find with much higher precisiona, since using the
+		# solution to calculate the edge lengths will decrease the
+		# precision (100 times should be enough)
+		if find_prec_delta >= 1e-15:
+		    find_prec_delta = find_prec_delta / 10
+		    if find_prec_delta >= 1e-15:
+			find_prec_delta = find_prec_delta / 10
+			if find_prec_delta >= 1e-15:
+			    find_prec_delta = find_prec_delta / 10
 		result = FindMultiRoot(testValue,
 			this.symmetry,
 			this.edgeAlternative,
@@ -1656,7 +1674,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.fold,
 			this.method,
 			lambda v,l: this.cleanupResult(v, l),
-			this.prec_delta,
+			find_prec_delta,
 			maxIter,
 			printIter = False,
 			quiet     = True,
@@ -1747,9 +1765,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			isEq = True
 			# check if the solution is valid (a solution)
 			for i in range(len(chk)):
-			    # apparently the precision is bigger then
-			    # 1e^precision: use a factor...
-			    if not eq(chk[i], 0., 10 * this.prec_delta):
+			    if not eq(chk[i], 0., this.prec_delta):
 				print '|chk[%d]| = |' % i, chk[i], '| >', this.prec_delta
 				isEq = False
 				break
@@ -2299,6 +2315,20 @@ if __name__ == '__main__':
 			1: -2.77997947392212,
 			2:  2.84861154567842,
 			3:  2.06457033281442,
+			5: -1.28052911995042,
+			6: -2.06457033281442
+		    },{
+			0: -0.86602540378444,
+			1: -2.77997947392212,
+			2: -2.84861154567842,
+			3: -2.06457033281442,
+			5:  2.84861154567842,
+			6:  2.06457033281442
+		    },{
+			0: -0.86602540378444,
+			1: -2.77997947392212,
+			2:  2.84861154567842,
+			3:  2.06457033281442,
 			5:  2.84861154567842,
 			6:  2.06457033281442
 		    },{
@@ -2343,6 +2373,13 @@ if __name__ == '__main__':
 			3: -2.06457033281442,
 			5:  1.28052911995042,
 			6:  2.06457033281442
+		    },{
+			0:  0.86602540378444,
+			1: -0.36161317966767,
+			2:  1.28052911995042,
+			3:  2.06457033281442,
+			5: -2.84861154567842,
+			6: -2.06457033281442
 		    },{
 			0:  0.86602540378444,
 			1: -0.36161317966767,
@@ -2646,7 +2683,7 @@ if __name__ == '__main__':
 	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4xI:
 	    randBatchYxI(symGrp, edgeLs, edgeAlts, nr_iterations, nrThreads = 1,
 			precision = precision, outDir = outDir)
-	elif symGrp == SYmmetry.A4:
+	elif symGrp == Symmetry.A4:
 	    randBatchA4(edgeLs, edgeAlts, nr_iterations, nrThreads = 1,
 			    dynSols = dynamicSols[symGrp],
 			    precision = precision, outDir = outDir)
