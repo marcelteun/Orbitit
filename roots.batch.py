@@ -2523,11 +2523,23 @@ if __name__ == '__main__':
 	[0., 1., 1., 1.],
 	[1., 1., 1., 1.], # no 0
     ]
+    pre_edgeLs_S4xI = pre_edgeLs_A4xI[:]
+    V_2p2V2_ = numx.sqrt(2 + 2*V2)
+    V3p1     = 1 + V3
+    dogram   = V3p1 / (2 + V3)
+    pre_edgeLs_S4xI.extend([
+		[0., 0., 0., V_2p2V2_], # squares become regular octagons
+		                        # for a octagram this is 1 too.
+		[0., 0., 1., V3p1],     # folded regular dodecagons
+		                        # not interesting: dodecagram, since
+					# there is no guarantee it will be
+					# regular (more requirements needed)
+	])
 
     pre_edgeLs = {
 	Symmetry.A4xI: pre_edgeLs_A4xI,
 	Symmetry.A4  : pre_edgeLs_A4,
-	Symmetry.S4xI: pre_edgeLs_A4xI,
+	Symmetry.S4xI: pre_edgeLs_S4xI,
     }
     dynamicSols = {
 	Symmetry.A4xI: [],
