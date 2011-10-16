@@ -781,8 +781,28 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     predefReflSpecPos = {
 	only_hepts: [
 	    {
+		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
+		'set': [0.0194846506, 2.5209776869, 0.7387578325, -0.2490014706, 1.5707963268],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
+		'set': [1.9046884810, -0.0895860579, 0.0898667459, -0.8043880107, 1.5707963268],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_2,
+	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
 		'set': [2.3689660916, 0.0851258971, -0.0853666149, 2.1212284837],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_1,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
+		'set': [0.1801294042, -0.5679882382, 2.7691714565, -0.1647931959, 1.5707963268],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
+		'set': [0.1985558264, -0.7212633593, 2.5993674146, -0.2638659586],
 		'7fold': Heptagons.foldMethod.star,
 		'tris': trisAlt.refl_1,
 	    },{
@@ -791,10 +811,35 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'7fold': Heptagons.foldMethod.triangle,
 		'tris': trisAlt.refl_1,
 	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py'
+		'set': [1.9053212843, 0.0000000000, 2.0476430098, 0.6938789411, 1.5707963268],
+		'7fold': Heptagons.foldMethod.triangle,
+		'tris': trisAlt.refl_2,
+	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
 		'set': [2.3706859974, 0., 0.1376977796, 2.0115660970],
 		'7fold': Heptagons.foldMethod.triangle,
 		'tris': trisAlt.refl_1,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py'
+		'set': [1.9053212843, 0.0000000000, -0.1370097736, -0.6938789411, 1.5707963268],
+		'7fold': Heptagons.foldMethod.triangle,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py'
+		'set': [0.2144969422, -0.7161063284, 2.4479090034, 0.2591004995],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_1,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
+		'set': [1.8797513382, -0.0971685207, -0.3990474779, 0.9416509246, 1.5707963268],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
+		'set': [1.4801185612, -0.2147509348, -0.4352845433, 2.4498730531, 1.5707963268],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_2,
 	    }
 	],
     }
