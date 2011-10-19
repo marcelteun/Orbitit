@@ -43,6 +43,7 @@ class Set(set):
         except AttributeError:
             this.generator = {}
         set.__init__(this, *args)
+	this.short_string = True
 
     def __repr__(this):
         s = '%s([\n' % (this.__class__.__name__)
@@ -62,23 +63,14 @@ class Set(set):
             if __name__ != '__main__':
                 s = '%s.%s' % (__name__, s)
             return s
-        try:
-            if this.generator != {}:
-                print 'this.generator', this.generator
-                this.short_string = True
-                if this.short_string:
-                    s = '%s(setup = {\n' % this.__class__.__name__
-                    for key, value in this.generator.iteritems():
-                        s =  "%s    '%s': %s\n" % (s, key, value)
-                    s = '%s})' % s
-                    if __name__ != '__main__':
-                        s = '%s.%s' % (__name__, s)
-                else:
-                    s = to_s()
-            else:
-                s = to_s()
-        except AttributeError:
-            s = to_s()
+	if this.generator != {}:
+	    if this.short_string:
+		s = '%s(setup = %s)' % (this.__class__.__name__,
+			this.generator)
+	    else:
+		s = to_s()
+	else:
+	    s = to_s()
         return s
 
     def __eq__(this, o):
