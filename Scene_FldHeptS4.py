@@ -128,6 +128,10 @@ isomO3 = isometry.C3(setup = {'axis': o3axis})
 #colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
 #colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
 colStabiliser = isometry.D4(setup = {'axis_n': [1.0, 0.0, 0.0]})
+colStabiliser = isometry.D2(setup = {
+	'axis_n': [1.0, 0.0, 0.0],
+	'axis_2': [0.0, 1.0, 1.0],
+})
 colQuotientSet = isomS4 / colStabiliser
 useRgbCols = [
     rgb.indianRed,
