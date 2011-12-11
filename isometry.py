@@ -364,11 +364,11 @@ class Cn(Set):
             this.checkSetup(setup)
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
-            else:              axis = this.defaultSetup['axis'][:]
+            else:              axis = copy(this.defaultSetup['axis'])
             if this.n != 0   : n = this.n
             else:
                 if 'n' in keys: n = setup['n']
-                else:           n = this.defaultSetup['n']
+                else:           n = copy(this.defaultSetup['n'])
                 if n == 0: n = 1
                 this.n = n
 
@@ -674,19 +674,19 @@ class DnCn(Cn):
                 if this.n != 0:
                     s['n'] = this.n
                 else:
-                    s['n'] = this.defaultSetup['n']
+                    s['n'] = copy(this.defaultSetup['n'])
             else:
                 s['n'] = setup['n']
             if 'axis_n' in setup:
                 s['axis'] = setup['axis_n']
             else:
-                s['axis'] = this.defaultSetup['axis_n'][:]
+                s['axis'] = copy(this.defaultSetup['axis_n'])
             cn = Cn(setup = s)
             this.directParentSetup = copy(s)
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
             else:
-                s['axis_2'] = this.defaultSetup['normal_r'][:]
+                s['axis_2'] = copy(this.defaultSetup['normal_r'])
             s['axis_n'] = s['axis']
             del s['axis']
             dn = Dn(setup = s)
@@ -795,9 +795,9 @@ class Dn(Set):
             this.checkSetup(setup)
             keys = setup.keys()
             if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = this.defaultSetup['axis_n'][:]
+            else:                axis_n = copy(this.defaultSetup['axis_n'])
             if 'axis_2' in keys: axis_2 = setup['axis_2']
-            else:                axis_2 = this.defaultSetup['axis_2'][:]
+            else:                axis_2 = copy(this.defaultSetup['axis_2'])
             if this.n != 0     : n = this.n
             else:
                 if 'n' in keys: n = setup['n']
@@ -1222,9 +1222,9 @@ class A4(Set):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = this.defaultSetup['o2axis0'][:]
+            else:                 o2axis0 = copy(this.defaultSetup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = this.defaultSetup['o2axis1'][:]
+            else:                 o2axis1 = copy(this.defaultSetup['o2axis1'])
             d2 = generateD2(o2axis0, o2axis1)
             H0, H1, H2 = d2
             R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
@@ -1301,9 +1301,9 @@ class S4A4(A4):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = this.defaultSetup['o2axis0'][:]
+            else:                 o2axis0 = copy(this.defaultSetup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = this.defaultSetup['o2axis1'][:]
+            else:                 o2axis1 = copy(this.defaultSetup['o2axis1'])
             this.directParentSetup = copy(setup)
             d2 = generateD2(o2axis0, o2axis1)
             h0, h1, h2 = d2
@@ -1534,9 +1534,9 @@ class S4(Set):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o4axis0' in axes: o4axis0 = setup['o4axis0']
-            else:                 o4axis0 = this.defaultSetup['o4axis0'][:]
+            else:                 o4axis0 = copy(this.defaultSetup['o4axis0'])
             if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
-            else:                 o4axis1 = this.defaultSetup['o4axis1'][:]
+            else:                 o4axis1 = copy(this.defaultSetup['o4axis1'])
             d2 = generateD2(o4axis0, o4axis1)
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
             q0_2, q1_2, q2_2 = d2
@@ -1919,9 +1919,9 @@ class A5(Set):
             this.checkSetup(setup)
             axes = setup.keys()
             if 'o3axis' in axes: o3axis = setup['o3axis']
-            else: o3axis = this.defaultSetup['o3axis'][:]
+            else: o3axis = copy(this.defaultSetup['o3axis'])
             if 'o5axis' in axes: o5axis = setup['o5axis']
-            else: o5axis = this.defaultSetup['o5axis'][:]
+            else: o5axis = copy(this.defaultSetup['o5axis'])
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
