@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -37,7 +37,7 @@ from GeomTypes import Rot3      as Rot
 from GeomTypes import HalfTurn3 as HalfTurn
 from GeomTypes import Vec3      as Vec
 
-Title = 'Polyhedra with Folded Regular Heptagons A4xI'
+Title = 'Polyhedra with Folded Regular Heptagons and Tetrahedral Symmetry'
 
 V2 = math.sqrt(2)
 
@@ -239,7 +239,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	Heptagons.FldHeptagonShape.__init__(this,
 	    [heptagonsShape, xtraTrisShape, trisO3Shape],
 	    3, 3,
-            name = 'FoldedRegHeptA4xI'
+            name = 'FoldedRegHeptA4'
         )
 	this.heptagonsShape = heptagonsShape
 	this.xtraTrisShape = xtraTrisShape
