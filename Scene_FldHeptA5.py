@@ -81,13 +81,17 @@ def Vlen(v0, v1):
 
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
+V5 = math.sqrt(5)
+tau = (1.0 + V5)/2
+dtau = 1.0/tau
 
 isomA5 = isometry.A5()
-o5axis = isometry.A5.defaultSetup['o5axis']
+o5axis = GeomTypes.Vec([1, 0, tau])
 o5fld = Rot(axis = o5axis, angle = GeomTypes.turn(1.0/5))
+_o5fld = Rot(axis = o5axis, angle = GeomTypes.turn(-1.0/5))
 isomO5 = isometry.C5(setup = {'axis': o5axis})
 
-o3axis = isometry.A5.defaultSetup['o3axis']
+o3axis = GeomTypes.Vec([0, dtau, tau])
 o3fld = Rot(axis = o3axis, angle = GeomTypes.tTurn)
 isomO3 = isometry.C3(setup = {'axis': o3axis})
 
@@ -140,8 +144,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    recreateEdges = False
         )
 	Heptagons.FldHeptagonShape.__init__(this,
-	    #[heptagonsShape, xtraTrisShape, trisO3Shape, trisO5Shape],
-	    [heptagonsShape],
+	    [heptagonsShape, xtraTrisShape, trisO3Shape, trisO5Shape],
 	    5, 3,
             name = 'FoldedRegHeptA5xI'
         )
@@ -162,20 +165,6 @@ class Shape(Heptagons.FldHeptagonShape):
         if this.updateShape:
             #print 'getStatusStr: forced setV'
             this.setV()
-	#                                  14 = 2'
-        #                0
-        #   13                      12 = o3 centre
-        #         6             1
-        #
-        # 11                           9 = 1'
-        #
-        #       5                 2
-        #
-        #
-        #   10       4       3        8 = 0'
-        #
-        #
-        #                         7 = 6'
         Vs = this.baseVs
 	if this.inclReflections:
 	    Es = this.triEs[this.edgeAlternative]
@@ -188,7 +177,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
 	    cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
-	    Es = this.o4triEs[this.edgeAlternative]
+	    Es = this.o5triEs[this.edgeAlternative]
 	    dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 
 	if this.inclReflections:
@@ -213,57 +202,71 @@ class Shape(Heptagons.FldHeptagonShape):
     def setV(this):
 
 	#
-	# o4: 5 -> 18 -> 19 -> 20
-	#     0 -> 21 -> 22 -> 23
-	#    12 -> 28 -> 29 -> 30
-	#     6 -> 31
+	# o3:
+	#     0 -> 9 -> 10
+	#     6 -> 16 -> 17
+	#     5 -> 22 -> 23
+	#     4 -> 28 -> 29
+	#     8 -> 34 -> 35
 	#
-        # 6" = 16
-	#             6' = 15             12 = 2"
-        #          o4          0
-        #                                    10 = 1"
-        #  6'" = 17     6             1   o3
-        #                                            11 = 2'
-        #                                    9 = 1'
+	# o5: 0 -> 11 -> 12 -> 13 -> 14
+	#     1 -> 18 -> 19 -> 20 -> 21
+	#     2 -> 24 -> 25 -> 26 -> 27
+	#     3 -> 30 -> 31 -> 32 -> 33
+	#     7 -> 36 -> 37 -> 38 -> 39
+	#
+	#                      o3
+        #
+	#
+        #                      0
+        #
+        #               6             1
+        #
+        #
         #
         #             5                 2
         #
         #
-        #        14        4       3        8 = 0'
+        #    11'=15        4   .   3        11 = 0'   o5
+        #                      o2
         #
-        #
-        #         2' = 13               7 = 5'
-	#
-	#				o3: 7 -> 24 -> 25
-	#				    0 -> 26 -> 27
+        #         2' = 8                7 = 5'
 
 	this.posHeptagon()
 	Vs = this.heptagon.Vs[:]
 	Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[7]
-	Vs.append(o3fld * Vs[0])				# Vs[8]
-	Vs.append(o3fld * Vs[1])				# Vs[9]
+	Vs.append(Vec([-Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[8]
+	Vs.append(o3fld * Vs[0])				# Vs[9]
 	Vs.append(o3fld * Vs[-1])				# Vs[10]
-	Vs.append(o3fld * Vs[2])				# Vs[11]
-	Vs.append(o3fld * Vs[-1])				# Vs[12]
-	Vs.append(Vec([-Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[13]
-	Vs.append(Vec([-Vs[8][0], -Vs[8][1], Vs[8][2]]))        # Vs[14]
-	Vs.append(o5fld * Vs[6])				# Vs[15]
-	Vs.append(o5fld * Vs[-1])				# Vs[16]
-	Vs.append(o5fld * Vs[-1])				# Vs[17]
-	Vs.append(o5fld * Vs[5])				# Vs[18]
+	Vs.append(o5fld * Vs[0])				# Vs[11]
+	Vs.append(o5fld * Vs[-1])				# Vs[12]
+	Vs.append(o5fld * Vs[-1])				# Vs[13]
+	Vs.append(o5fld * Vs[-1])				# Vs[14]
+	Vs.append(Vec([-Vs[11][0], -Vs[11][1], Vs[11][2]]))     # Vs[15]
+	Vs.append(o3fld * Vs[6])				# Vs[16]
+	Vs.append(o3fld * Vs[-1])				# Vs[17]
+	Vs.append(o5fld * Vs[1])				# Vs[18]
 	Vs.append(o5fld * Vs[-1])				# Vs[19]
 	Vs.append(o5fld * Vs[-1])				# Vs[20]
-	Vs.append(o5fld * Vs[0])				# Vs[21]
-	Vs.append(o5fld * Vs[-1])				# Vs[22]
-	Vs.append(o5fld * Vs[-1])				# Vs[23]
-	Vs.append(o3fld * Vs[7])				# Vs[24]
-	Vs.append(o3fld * Vs[-1])				# Vs[25]
-	Vs.append(o3fld * Vs[0])				# Vs[26]
-	Vs.append(o3fld * Vs[-1])				# Vs[27]
-	Vs.append(o5fld * Vs[12])				# Vs[28]
-	Vs.append(o5fld * Vs[-1])				# Vs[29]
-	Vs.append(o5fld * Vs[-1])				# Vs[30]
-	Vs.append(o5fld * Vs[6])				# Vs[31]
+	Vs.append(o5fld * Vs[-1])				# Vs[21]
+	Vs.append(o3fld * Vs[5])				# Vs[22]
+	Vs.append(o3fld * Vs[-1])				# Vs[23]
+	Vs.append(o5fld * Vs[2])				# Vs[24]
+	Vs.append(o5fld * Vs[-1])				# Vs[25]
+	Vs.append(o5fld * Vs[-1])				# Vs[26]
+	Vs.append(o5fld * Vs[-1])				# Vs[27]
+	Vs.append(o3fld * Vs[4])				# Vs[28]
+	Vs.append(o3fld * Vs[-1])				# Vs[29]
+	Vs.append(o5fld * Vs[3])				# Vs[30]
+	Vs.append(o5fld * Vs[-1])				# Vs[31]
+	Vs.append(o5fld * Vs[-1])				# Vs[32]
+	Vs.append(o5fld * Vs[-1])				# Vs[33]
+	Vs.append(o3fld * Vs[8])				# Vs[34]
+	Vs.append(o3fld * Vs[-1])				# Vs[35]
+	Vs.append(o5fld * Vs[7])				# Vs[36]
+	Vs.append(o5fld * Vs[-1])				# Vs[37]
+	Vs.append(o5fld * Vs[-1])				# Vs[38]
+	Vs.append(o5fld * Vs[-1])				# Vs[39]
 	# TODO: if adding more Vs, rm above if or use predefined indices
 	this.baseVs = Vs
 	Es = []
@@ -276,17 +279,15 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
 	theShapes = [this.heptagonsShape]
-	# TODO rm:
-	if False:
-	#if this.addXtraFs:
+	if this.addXtraFs:
 	    Fs = this.o3triFs[this.edgeAlternative][:]
 	    Es = this.o3triEs[this.edgeAlternative][:]
             this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
-	    Es = this.o4triEs[this.oppEdgeAlternative][:]
-	    Fs = this.o4triFs[this.oppEdgeAlternative][:]
+	    Es = this.o5triEs[this.oppEdgeAlternative][:]
+	    Fs = this.o5triFs[this.oppEdgeAlternative][:]
             this.trisO5Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO5Shape.setBaseEdgeProperties(Es = Es)
             this.trisO5Shape.setBaseFaceProperties(Fs = Fs)
@@ -329,37 +330,43 @@ class Shape(Heptagons.FldHeptagonShape):
     def initArrs(this):
 
 	#
-	# o4: 5 -> 18 -> 19 -> 20
-	#     0 -> 21 -> 22 -> 23
-	#    12 -> 28 -> 29 -> 30
-	#     6 -> 31
+	# o3:
+	#     0 -> 9 -> 10
+	#     6 -> 16 -> 17
+	#     5 -> 22 -> 23
+	#     4 -> 28 -> 29
+	#     8 -> 34 -> 35
 	#
-        # 6" = 16
-	#             6' = 15             12 = 2"
-        #          o4          0
-        #                                    10 = 1"
-        #  6'" = 17     6             1   o3
-        #                                            11 = 2'
-        #                                    9 = 1'
+	# o5: 0 -> 11 -> 12 -> 13 -> 14
+	#     1 -> 18 -> 19 -> 20 -> 21
+	#     2 -> 24 -> 25 -> 26 -> 27
+	#     3 -> 30 -> 31 -> 32 -> 33
+	#     7 -> 36 -> 37 -> 38 -> 39
+	#
+	#                      o3
+        #
+	#
+        #                      0
+        #
+        #               6             1
+        #
+        #
         #
         #             5                 2
         #
         #
-        #        14        4       3        8 = 0'
+        #    11'=15        4   .   3        11 = 0'   o5
+        #                      o2
         #
-        #
-        #         2' = 13               7 = 5'
-	#
-	#				o3: 7 -> 24 -> 25
-	#				    0 -> 26 -> 27
+        #         2' = 8                7 = 5'
 
 	I_loose = [[2, 3, 7]]
 	noLoose = [[2, 3, 8]]
 	stripI  = [[2, 8, 9]]
 	stripII = [[2, 3, 9], [3, 8, 9]]
 	star    = [[1, 2, 8], [1, 8, 9]]
-	refl_1  = [[2, 3, 7], [1, 2, 25, 31], [0, 1, 31, 21]]
-	refl_2  = [[4, 5, 30], [5, 6, 10, 12], [0, 27, 10, 6]]
+	refl_1  = [[2, 3, 7], [1, 2, 39, 16], [0, 1, 16, 9]]
+	refl_2  = [[4, 5, 8], [5, 6, 21, 34], [6, 0, 14, 21]]
 	strip_1_loose = stripI[:]
 	star_1_loose  = star[:]
 	stripI.extend(noLoose)
@@ -464,8 +471,8 @@ class Shape(Heptagons.FldHeptagonShape):
 
 	std    = [1, 9, 10]
 	alt    = [2, 11, 12]
-	refl_1 = [2, 7, 11, 24, 12, 25]
-	refl_2 = [0, 26, 27]
+	refl_1 = [0, 9, 10]
+	refl_2 = [5, 34, 22, 35, 23, 8]
         this.o3triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -481,9 +488,9 @@ class Shape(Heptagons.FldHeptagonShape):
 
 	std  = [6, 15, 16, 17]
 	alt  = [5, 18, 19, 20]
-	refl_1 = [0, 21, 22, 23]
-	refl_2 = [5, 12, 18, 28, 19, 29, 20, 30]
-        this.o4triFs = {
+	refl_1 = [2, 7, 24, 36, 25, 37, 26, 38, 27, 39]
+	refl_2 = [0, 11, 12, 13, 14]
+        this.o5triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
                 trisAlt.strip_II:		[std],
@@ -505,8 +512,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	stripII       = [3, 8, 3, 9, 2, 9]
 	star          = [3, 8, 2, 8, 1, 8]
 	star_1_loose  = [2, 7, 2, 8, 1, 8]
-	refl_1        = [2, 7, 2, 25, 1, 31, 0, 21]
-	refl_2        = [30, 5, 5, 12, 6, 10, 0, 26]
+	refl_1        = [2, 7, 2, 39, 1, 16, 0, 9]
+	refl_2        = [5, 8, 5, 34, 6, 21, 0, 14]
         this.triEs = {
                 trisAlt.strip_1_loose:     strip_1_loose,
                 trisAlt.strip_I:           stripI,
@@ -564,7 +571,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	std    = [6, 15, 15, 16, 16, 17, 17, 6]
 	alt    = [5, 18, 18, 19, 19, 20, 20, 5]
 	refl   = []
-        this.o4triEs = {
+        this.o5triEs = {
                 trisAlt.strip_1_loose:	    std,
                 trisAlt.strip_I:	    std,
                 trisAlt.strip_II:	    std,
