@@ -57,52 +57,65 @@ open_file	= Heptagons.open_file
 # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
 S_T8		= Heptagons.only_xtra_o3s
 S_only_hepts	= Heptagons.only_hepts
-S_T24		= Heptagons.tris_fill_base + 1
-S_T32_0		= Heptagons.tris_fill_base + 2
-S_T32_1		= Heptagons.tris_fill_base + 3
-S_T32_2		= Heptagons.tris_fill_base + 4
-S_T48		= Heptagons.no_o3_tris
-S_T56		= Heptagons.tris_fill_base + 5
-S_T80		= Heptagons.all_eq_tris
+S_T16		= Heptagons.tris_fill_base + 1
+S_T24		= S_T16 + 1
+S_T32_0		= S_T24 + 1
+S_T32_1		= S_T32_0 + 1
+S_T32_2		= S_T32_1 + 1
+S_T32_3		= S_T32_2 + 1
+S_T48		= S_T32_3 + 1
+S_T56		= S_T48 + 1
+S_T80		= S_T56 + 1
+
+# symmtric edge lengths with flat squares
+S_T16_S12	= S_T80 + 1
 
 # symmtric edge lengths with folded squares
-S_S12		= Heptagons.tris_fill_base + 6
-S_T8_S12	= Heptagons.tris_fill_base + 7
-S_S24		= Heptagons.tris_fill_base + 8
-S_T8_S24	= Heptagons.tris_fill_base + 9
-S_T24_S12	= Heptagons.tris_fill_base + 10
-S_T8_S36	= Heptagons.tris_fill_base + 11
-S_T32_S12   	= Heptagons.tris_fill_base + 12
-S_T32_S24_0	= Heptagons.tris_fill_base + 13
-S_T32_S24_1	= Heptagons.tris_fill_base + 14
-S_T56_S12	= Heptagons.tris_fill_base + 15
+S_S12		= S_T16_S12 + 1
+S_T8_S12	= S_S12 + 1
+S_S24		= S_T8_S12 + 1
+S_T8_S24	= S_S24 + 1
+S_T24_S12	= S_T8_S24 + 1
+S_T8_S36	= S_T24_S12 + 1
+S_T32_S12   	= S_T8_S36 + 1
+S_T32_S24_0	= S_T32_S12 + 1
+S_T32_S24_1	= S_T32_S24_0 + 1
+S_T56_S12	= S_T32_S24_1 + 1
 
-T8_0		= Heptagons.tris_fill_base + 16
-T16_0		= Heptagons.tris_fill_base + 17
-T16_1		= Heptagons.tris_fill_base + 18
-T16_2		= Heptagons.tris_fill_base + 19
-T16_3		= Heptagons.tris_fill_base + 20
-T24_0		= Heptagons.tris_fill_base + 21
-T24_1		= Heptagons.tris_fill_base + 22
-T32_0		= Heptagons.tris_fill_base + 23
-T40_0		= Heptagons.tris_fill_base + 24
-T40_1		= Heptagons.tris_fill_base + 25
-T40_2		= Heptagons.tris_fill_base + 26
-T40_3		= Heptagons.tris_fill_base + 27
-T64_0		= Heptagons.tris_fill_base + 28
+# symmtric edge lengths with hexagon
+S_T24_H4	= S_T56_S12 + 1
+
+# non-symmetryc edge lengths
+T8_0		= S_T24_H4 + 1
+T16_0		= T8_0 + 1
+T16_1		= T16_0 + 1
+T16_2		= T16_1 + 1
+T16_3		= T16_2 + 1
+T24_0		= T16_3 + 1
+T24_1		= T24_0 + 1
+T32_0		= T24_1 + 1
+T40_0		= T32_0 + 1
+T40_1		= T40_0 + 1
+T40_2		= T40_1 + 1
+T40_3		= T40_2 + 1
+T64_0		= T40_3 + 1
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
     # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
     S_only_hepts:	'Only heptagons',
     S_T8:		'Heptagons and 8 Triangles',
+    S_T16:		'SEL: 16 Triangles',
     S_T24:		'SEL: 24 Triangles (A)',
-    S_T32_0:		'SEL: 32 Triangles (24 + 8) (A)',
+    S_T32_0:		'SEL: 32 Triangles',
     S_T32_1:		'SEL: 32 Triangles (24 + 8) (B)',
     S_T32_2:		'SEL: 32 Triangles (24 + 8) (C)',
+    S_T32_3:		'SEL: 32 Triangles (8 x 4) (D)',
     S_T48:		'SEL: 48 Triangles',
     S_T56:		'SEL: 56 Triangles',
     S_T80:		'SEL: 80 Triangles Equilateral',
+    # with flat squares
+    S_T16_S12:		'SEL: 28 = 16 Triangles and 12 Squares',
     # with folded squares:
     S_S12:		'SEL: 12 Folded Squares',
     S_T8_S12:		'SEL: 20 = 8 Triangles + 12 Folded Squares',
@@ -114,6 +127,9 @@ Stringify = {
     S_T32_S24_0:	'SEL: 56 = 32 Triangles + 24 Folded Squares (A)',
     S_T32_S24_1:	'SEL: 56 = 32 Triangles + 24 Folded Squares: (B)',
     S_T56_S12:		'SEL: 68 = 56 Triangles + 12 Folded Squares',
+
+    # with hexagons
+    S_T24_H4:		'SEL: 28 = 24 Triangles + 4 Hexagons',
 
     # non-symmetric edges lengths
     T8_0:		' 8 Triangles (O3)',
@@ -136,11 +152,16 @@ prePosStrToReflFileStrMap = {
     S_T8:		'0_1_0_1',
     S_T24:		'0_1_1_0',
     S_T56:		'0_1_1_1',
+    S_T16:		'1_0_0_0',
     S_only_hepts:	'1_0_1_0',
     S_T32_2:		'1_0_1_1',
+    S_T32_3:		'0_1_1_0',
+    S_T24_H4:		'1_1_0_0',
     S_T32_0:		'1_1_0_1',
     S_T48:		'1_1_1_0',
     S_T80:		'1_1_1_1',
+
+    S_T16_S12:		'0_1_1_0',
 
     S_T8_S24:		'0_1_V2_1',
     S_S12:		'0_V2_1_0',
@@ -164,7 +185,6 @@ prePosStrToFileStrMap = {
     S_T80:		'1_1_1_1_1_1_1',
 
     # non-symmetric edges lengths
-    T8_0:		'0_1_0_1_0_0_1',
     T16_0:		'1_0_1_0_0_1_1',
     T16_1:		'1_0_1_0_1_0_1',
     T16_2:		'1_1_0_1_0_1_0',
@@ -752,13 +772,17 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    [ # prePosLst
 		Stringify[S_only_hepts],
 		Stringify[S_T8],
+		Stringify[S_T16],
 		Stringify[S_T24],
+
+		Stringify[S_T24_H4],
+
 		Stringify[S_T32_0],
-		Stringify[S_T32_1],
-		Stringify[S_T32_2],
 		Stringify[S_T48],
 		Stringify[S_T56],
 		Stringify[S_T80],
+
+		Stringify[S_T16_S12],
 
 		Stringify[S_S12],
 		Stringify[S_T8_S12],
@@ -901,9 +925,18 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		psp = this.predefReflSpecPos
 	    else:
 		psp = this.predefRotSpecPos
-	    data = psp[this.prePos][this.specPosIndex]
-	    if data.has_key('file'):
-		print 'see file %s/%s' % (this.rDir, data['file'])
+	    in_data = psp[this.prePos][this.specPosIndex]
+	    fold_method_str = this.fileStrMapFoldMethodStr(in_data['file'])
+	    assert fold_method_str != None
+	    tris_str = this.fileStrMapTrisStr(in_data['file'])
+	    assert tris_str != None
+	    tris_str = trisAlt.key[tris_str]
+	    data = {
+		    'set': in_data['set'],
+		    '7fold': Heptagons.foldMethod.get(fold_method_str),
+		    'tris': tris_str
+	    }
+	    print 'see file %s/%s' % (this.rDir, in_data['file'])
 	    return data
 
     @property
@@ -945,143 +978,273 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     predefReflSpecPos = {
 	S_only_hepts: [
-	    # TODO can this be stored more efficiently?
 	    {
-		#'file': 'frh-roots-1_0_1_0-fld_w.0-strip_I.py',
+		'file': 'frh-roots-1_0_1_0-fld_w.0-strip_I.py',
 		'set': [2.380384930680, 0.693073733187, -0.568746300899, -0.882436236397],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star,
 	    },{
+		'file': 'frh-roots-1_0_1_0-fld_w.0-strip_I.py',
 		'set': [-1.886848679993, -2.675843213538, -3.128320557422, 1.954454451606],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star,
 	    },{
+		'file': 'frh-roots-1_0_1_0-fld_w.0-strip_I.py',
 		'set': [-1.322333216810, -2.967180003002, -1.183250747277, 1.668301536282],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star,
 	    },{
-		#'file': 'frh-roots-1_0_1_0-fld_shell.0-strip_II.py',
+		'file': 'frh-roots-1_0_1_0-fld_shell.0-alt_strip_II.py',
 		'set': [1.384557049344, 1.446970234245, -1.316197505877, -0.865444046055],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_II,
 	    },{
+		'file': 'frh-roots-1_0_1_0-fld_shell.0-alt_strip_II.py',
 		'set': [-0.893811200268, -2.124009132680, -2.221957533639, 0.797991253652],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_II,
 	    },{
+		'file': 'frh-roots-1_0_1_0-fld_shell.0-alt_strip_II.py',
 		'set': [-0.556102494513, -2.609660225894, -1.565821769393, -2.603286338808],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_II,
 	    },{
+		'file': 'frh-roots-1_0_1_0-fld_shell.0-alt_strip_II.py',
 		'set': [-0.621710474737, -2.385085606668, 2.979725519925, 2.212236586768],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_II,
 	    },{
+		'file': 'frh-roots-1_0_1_0-fld_shell.0-alt_strip_II.py',
 		'set': [-0.744610213721, -2.981881518271, 2.772201116514, -1.626936107939],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_II,
+           },{
+               'file': 'frh-roots-1_0_1_0-fld_parallel.0-shell.py',
+               'set': [2.05527791079771, 0.0, -1.17877572036290, -0.93053176681969, 0.],
+           },{
+               'file': 'frh-roots-0_0_0_0-fld_triangle.0-twisted.py',
+               'set': [1.57625873995627, 0.0, 1.70780610035987, 0.69387894107559, 0.78539816339745],
+           },{
+               'file': 'frh-roots-0_0_0_0-fld_w.0-twisted.py',
+               'set': [-0.55652539638413, 2.39522124261844, 0.72665170889609, 0.82988500709760, 0.78539816339745],
+           },{
+               'file': 'frh-roots-0_0_0_0-fld_w.0-twisted.py',
+               'set': [-0.75211335117600, 2.47041152939265, 0.78109340649621, 1.45595139993016, 0.78539816339745],
+           },{
+               'file': 'frh-roots-0_0_0_0-fld_shell.0-twisted.py',
+               'set': [1.57829332274746, -0.32640923840694, 0.34074243237606, 2.04797705220462, 0.78539816339745],
 	    }
 	],
 	S_T8: [
 	    {
-		#'file': 'frh-roots-0_1_0_1-fld_triangle.0-strip_I.py',
+		'file': 'frh-roots-0_1_0_1-fld_triangle.0-strip_I.py',
 		'set': [1.668804061427, 1.471660709431, -0.787124235167, 0.879575685317],
-		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.strip_I,
 	    },{
-		#'file': 'frh-roots-0_1_0_1-fld_shell.0-strip_I.py',
-		'set': [1.778711440973, 0.947499660437, -1.726110141329, 0.000000000000],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_I,
+		'file': 'frh-roots-0_1_0_1-fld_shell.0-strip_I.py',
+		'set': [1.778711440973, 0.947499660437, -1.726110141329, 0.0],
 	    },{
-		'set': [1.778711440973, 0.947499660437, 0.458542642050, 0.000000000000],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_I,
+		'file': 'frh-roots-0_1_0_1-fld_shell.0-strip_I.py',
+		'set': [1.778711440973, 0.947499660437, 0.458542642050, 0.0],
 	    },{
-		# frh-roots-0_1_0_1-fld_trapezium.0-strip_I.py
+		'file': 'frh-roots-0_1_0_1-fld_trapezium.0-strip_I.py',
 		'set': [1.603988045241, 1.179161796661, -1.224721468276, 0.987593630632],
-		'7fold': Heptagons.foldMethod.trapezium,
-		'tris': trisAlt.strip_I,
 	    },{
-		# frh-roots-0_1_0_1-fld_w.0-shell_1_loose.py
+		'file': 'frh-roots-0_1_0_1-fld_w.0-shell_1_loose.py',
 		'set': [2.596914957747, 0.371800292039, -0.991598446991, 0.954998112111],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star_1_loose,
 	    },{
+		'file': 'frh-roots-0_1_0_1-fld_w.0-shell_1_loose.py',
 		'set': [-2.396628548671, -2.760441424536, -2.289627248660, 2.151908864169],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star_1_loose,
 	    },{
+		'file': 'frh-roots-0_1_0_1-fld_w.0-shell_1_loose.py',
 		'set': [-2.396628548671, -2.760441424536, -2.289627248660, -0.989683789421],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star_1_loose,
 	    }
 	],
+	S_T16_S12: [
+	    {
+		'file': 'frh-roots-0_1_1_0-fld_shell.0-twisted.py',
+		'set': [2.28349922775437, 0.06277160667564, -0.06286795681704, 2.75487753324911, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_1_0-fld_triangle.0-twisted.py',
+		'set': [2.28336552114282, 0.0, 1.13059660075713, 1.75383477143902, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_1_0-fld_triangle.0-twisted.py',
+		'set': [2.28336552114282, 0.0, 1.13059660075713, -2.67411537632553, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_1_0-fld_triangle.0-twisted.py',
+		'set': [2.28336552114282, 0.0, 0.10036281658365, 2.67411537632553, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_0_1_1-fld_triangle.0-twisted.py',
+		'set': [1.57625873995627, 0.0, 2.13564659960344, 1.09359107312669, 0.78539816339745],
+	    }
+	],
+	S_T16: [
+	    {
+		'file': 'frh-roots-1_0_0_0-fld_w.0-twisted.py',
+		'set': [0.38625024358001, 2.04181085346543, 0.53307481297736, -0.02371984670375, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_0-fld_shell.0-twisted.py',
+		'set': [0.38635143295225, 2.04177274103915, 0.51985442041897, 0.02379038049852, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_0-fld_shell.0-twisted.py',
+		'set': [2.28349922775437, 0.06277160667564, -0.06286795681704, 1.46852003907435, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_parallel.0-twisted.py',
+		'set': [1.57625873995627, 0.0, -2.05411520911343, -0.26432165270370, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_0-fld_triangle.0-twisted.py',
+		'set': [1.74903011940493, 0.69387894107539, 1.01392715928449, 0.69387894107539, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_0-fld_triangle.0-twisted.py',
+		'set': [0.54693117675810, 2.44771371251441, -0.73990761215453, 0.69387894107539, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_0-fld_triangle.0-twisted.py',
+		'set': [2.28336552114282, 0.0, 1.13059660075713, 0.46747727726426, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_0-fld_triangle.0-twisted.py',
+		'set': [2.28336552114282, -0.0, 1.13059660075713, -1.38775788215078, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_0-fld_triangle.0-twisted.py',
+		'set': [2.28336552114282, 0.0, 0.10036281658365, 1.38775788215077, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-twisted.py',
+		'set': [1.57625873995627, 0.0, 2.13564659960344, -0.19276642104807, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-twisted.py',
+		'set': [1.57625873995627, 0.0, 2.13564659960344, -2.04800158046311, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-twisted.py',
+		'set': [1.57625873995627, 0.0, 1.13059660075713, 1.75383477143902, 0.78539816339745],
+	    }
+	],
+	S_T24: [
+	    {
+		'file': 'frh-roots-1_1_0_0-fld_w.0-twisted.py',
+		'set': [1.76492506022939, -0.23739205643944, -0.34895078545162, -0.15519364844989, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_w.0-twisted.py',
+		'set': [-0.79173444161549, 2.48583128085619, -2.97499620550543, 0.36291871955997, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [1.76465226082310, -0.23752704781790, -0.43444382937558, 0.15892519348001, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [-0.18835951730218, 2.25653920053309, 0.20791586793685, 0.83498494726983, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [1.76465226082310, -0.23752704781790, -0.43444382937558, 2.01416035289505, 0.78539816339745],
+	    }
+	],
+	S_T24_H4: [
+	    {
+		'file': 'frh-roots-1_1_0_0-fld_w.0-twisted.py',
+		'set': [2.45721938357382, 1.02864406950856, -1.27167415256983, 1.13471006522803, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_w.0-twisted.py',
+		'set': [2.45628709627969, 0.20145076069264, 1.27330784422036, -1.34814068537132, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_w.0-twisted.py',
+		'set': [-1.74055595544021, 2.89220370313053, 1.27640556999649, 0.99923157377633, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_triangle.0-twisted.py',
+		'set': [1.25403795794465, 2.44771371251441, -1.31711711175728, -1.38775788215077, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_triangle.0-twisted.py',
+		'set': [2.45613690059148, 0.69387894107539, 0.43671765968174, -1.38775788215077, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_triangle.0-twisted.py',
+		'set': [2.45613690059148, 0.69387894107539, -0.59351612449174, 1.38775788215078, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_triangle.0-twisted.py',
+		'set': [1.25403795794465, 2.44771371251441, -2.34735089593076, -0.46747727726426, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [2.46960924618761, 1.01698736209970, -0.38433974199343, 0.86045704157206, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [2.47252905514248, 0.21676593171114, 0.45516655939558, 0.93763273086315, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [2.47252905514248, 0.21676593171114, 0.45516655939558, -0.91760242855189, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [0.83956069972121, 1.86800900646576, 0.91933083158157, -2.73340822015620, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_1_0_0-fld_shell.0-twisted.py',
+		'set': [0.83956069972121, 1.86800900646576, 0.91933083158157, -0.87817306074117, 0.78539816339745],
+	    }
+	],
+	S_T32_0: [
+	    {
+		'file': 'frh-roots-1_0_0_1-fld_trapezium.0-twisted.py',
+		'set': [0.48568807039262, 2.25669785825937, 0.06173900355777, 0.41753524083101, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_shell.0-twisted.py',
+		'set': [0.51874726388437, 2.25653920053309, 0.20791586793685, -0.45137254690493, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_shell.0-twisted.py',
+		'set': [0.51874726388437, 2.25653920053309, 0.20791586793685, -2.30660770631996, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_parallel.0-twisted.py',
+		'set': [0.54693117675810, 2.44771371251441, 0.39359850340097, -0.26432165270381, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_parallel.0-twisted.py',
+		'set': [1.74903011940493, 0.69387894107539, -1.36023626803805, -0.26432165270370, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
+		'set': [0.54693117675810, 2.44771371251441, -0.31206711291096, -0.19276642104807, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
+		'set': [1.74903011940493, 0.69387894107539, 1.44176765852806, -0.19276642104807, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
+		'set': [1.74903011940493, 0.69387894107539, 1.44176765852806, -2.04800158046311, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
+		'set': [0.54693117675810, 2.44771371251441, -0.31206711291096, -2.04800158046311, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
+		'set': [0.54693117675810, 2.44771371251441, -1.31711711175728, 1.75383477143902, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
+		'set': [1.74903011940493, 0.69387894107539, 0.43671765968174, 1.75383477143902, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_0_1-fld_w.0-twisted.py',
+		'set': [0.48540719864890, 2.26900223672547, -0.02757800836859, 0.44535720008269, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_parallel.0-twisted.py',
+		'set': [2.28336552114282, 0.0, -1.37672964253502, -0.94170721928212, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_parallel.0-twisted.py',
+		'set': [2.28336552114282, 0.0, -1.37672964253501, 2.46420708701138, 0.78539816339745],
+	    }
+	]
     }
 
     predefRotSpecPos = {
 	S_only_hepts: [
-	    # TODO can this be store more efficiently?
 	    {
-		#'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
 		'set': [-0.584447329706, -2.485288015235, 2.540930460981, 2.593087704091, 0.385739827710, -1.373557246626, -2.412102564927],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.alt_strip_II_alt_strip_II,
 	    },{
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
 		'set': [-0.801847203711, -2.608143090127, -2.668837734722, -1.252388597181, -1.021040545614, 1.744176845223, -2.460124162981],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.alt_strip_II_alt_strip_II,
 	    },{
-		'set': [-0.866025403784, -2.222676713307, -2.064570332814,
-		-0.827255867832, -0.884416238250, -2.064570332813, 1.904278188607],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.alt_strip_II_alt_strip_II,
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
+		'set': [-0.866025403784, -2.222676713307, -2.064570332814, -0.827255867832, -0.884416238250, -2.064570332813, 1.904278188607],
 	    },{
-		#'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-strip_I-opp_shell.py',
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-strip_I-opp_shell.py',
 		'set': [1.731178674695, -0.460140302443, 1.753834771439, -0.784585557814, 2.512070703819, 1.753834771439, -2.488945590745],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.strip_I_star,
 	    },
 	],
 	S_T8: [
 	    {
-		#'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-strip_II-opp_strip_II.py'
-		'set': [1.778711440973, 0.947499660437, -1.726110141329, -0.000000000000, 0.000000000000, 0.458542642050, 0.000000000000],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_II_strip_II,
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-strip_II-opp_strip_II.py',
+		'set': [1.778711440973, 0.947499660437, -1.726110141329, 0.0, 0.0, 0.458542642050, 0.0],
 	    },{
-		#'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-strip_1_loose-opp_strip_1_loose.py'
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-strip_1_loose-opp_strip_1_loose.py',
 		'set': [1.230780883271, -0.833487854345, 1.222093745524, 1.087041924921, 1.964018074389, 1.222093745524, 1.087041924921],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_1_loose_strip,
 	    },{
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-strip_1_loose-opp_strip_1_loose.py',
 		'set': [0.997749181426, -0.792857842956, 1.100626985898, 2.388598519690, 1.598141634206, 1.100626985898, 2.388598519690],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.strip_1_loose_strip,
 	    },{
-		#'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_1_loose-opp_alt_strip_1_loose.py'
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_1_loose-opp_alt_strip_1_loose.py',
 		'set': [1.322002234160, -0.777358422835, 1.753834771439, -0.835355509883, 2.211531833297, 1.753834771439, -0.835355509883],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.strip_1_loose_alt_strip,
 	    },{
-		'set': [1.601135681483, 0.889170493616, -1.753834771439, -0.498916362774, 0.000000000000, -1.753834771439, -0.498916362774],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.strip_1_loose_alt_strip,
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_1_loose-opp_alt_strip_1_loose.py',
+		'set': [1.601135681483, 0.889170493616, -1.753834771439, -0.498916362774, 0.0, -1.753834771439, -0.498916362774],
 	    },{
-		#'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-shell_1_loose-opp_shell_1_loose.py'
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-shell_1_loose-opp_shell_1_loose.py',
 		'set': [1.901507063757, -0.303461611612, 0.314885093380, 0.854512058189, -1.863748016803, 0.314885093380, 0.854512058189],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.star_1_loose_star,
 	    },{
-		#'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-shell_1_loose-opp_strip_1_loose.py'
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-shell_1_loose-opp_strip_1_loose.py',
 		'set': [-1.876023780285, 2.806553402452, 2.764486274075, -2.283625185913, -2.226783359690, 0.308178247636, 2.459602201102],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star_1_loose_strip,
 	    },{
-		#'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-shell_1_loose-opp_shell_1_loose.py'
-		'set': [2.596914957747, 0.371800292039, -0.991598446991, 0.000000000000, 0.000000000000, -0.991598446991, 1.909996224222],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.star_1_loose_star,
+		'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-shell_1_loose-opp_shell_1_loose.py',
+		'set': [2.596914957747, 0.371800292039, -0.991598446991, 0.0, 0.0, -0.991598446991, 1.909996224222],
 	    },
 	]
     }

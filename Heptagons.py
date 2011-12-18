@@ -341,9 +341,13 @@ class FoldMethod:
     triangle  = 3
     star      = 4
 
-    def get(this, str):
+    def get(this, s):
 	for k,v in FoldName.iteritems():
-	    if v == str:
+	    if v == s:
+		return k
+	s = str.capitalize(s)
+	for k,v in FoldName.iteritems():
+	    if v == s:
 		return k
 	return None
 
@@ -2191,8 +2195,8 @@ class EqlHeptagonShape(Geom3D.IsometricShape):
         if this.errorStr == '':
           floatFmt = '%02.2f'
           fmtStr   = 'H = %s, Angle = %s degrees' % (floatFmt, floatFmt)
-          str      = fmtStr % (this.h, this.angle)
-          return str
+          s        = fmtStr % (this.h, this.angle)
+          return s
         else:
           return this.errorStr
 
