@@ -63,7 +63,8 @@ S_T32_0		= S_T24 + 1
 S_T32_1		= S_T32_0 + 1
 S_T32_2		= S_T32_1 + 1
 S_T32_3		= S_T32_2 + 1
-S_T48		= S_T32_3 + 1
+S_T40		= S_T32_3 + 1
+S_T48		= S_T40 + 1
 S_T56		= S_T48 + 1
 S_T80		= S_T56 + 1
 
@@ -111,6 +112,7 @@ Stringify = {
     S_T32_1:		'SEL: 32 Triangles (24 + 8) (B)',
     S_T32_2:		'SEL: 32 Triangles (24 + 8) (C)',
     S_T32_3:		'SEL: 32 Triangles (8 x 4) (D)',
+    S_T40:		'SEL: 40 Triangles',
     S_T48:		'SEL: 48 Triangles',
     S_T56:		'SEL: 56 Triangles',
     S_T80:		'SEL: 80 Triangles Equilateral',
@@ -158,6 +160,7 @@ prePosStrToReflFileStrMap = {
     S_T32_3:		'0_1_1_0',
     S_T24_H4:		'1_1_0_0',
     S_T32_0:		'1_1_0_1',
+    S_T40:		'1_0_1_0',
     S_T48:		'1_1_1_0',
     S_T80:		'1_1_1_1',
 
@@ -778,6 +781,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[S_T24_H4],
 
 		Stringify[S_T32_0],
+		Stringify[S_T40],
 		Stringify[S_T48],
 		Stringify[S_T56],
 		Stringify[S_T80],
@@ -1200,6 +1204,21 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    },{
 		'file': 'frh-roots-0_1_0_1-fld_parallel.0-twisted.py',
 		'set': [2.28336552114282, 0.0, -1.37672964253501, 2.46420708701138, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_shell.0-twisted.py',
+		'set': [1.84775911011892, 0.92575452409419, -1.72327793624487, 2.57828590634453, 0.78539816339745],
+	    }
+	],
+	S_T40: [
+	    {
+		'file': 'frh-roots-1_0_1_0-fld_w.0-twisted.py',
+		'set': [0.01810673840905, 2.17952724009918, -0.07870584086126, 1.61757544772923, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_1_0-fld_w.0-twisted.py',
+		'set': [-0.16303030453660, 2.24707815221230, -0.03993084437920, 2.11938494155470, 0.78539816339745],
+	    },{
+		'file': 'frh-roots-1_0_1_0-fld_w.0-twisted.py',
+		'set': [0.17474539602927, 2.12109878921778, 1.27980043291040, -1.16062859887813, 0.78539816339745],
 	    }
 	]
     }
