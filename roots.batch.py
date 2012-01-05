@@ -46,11 +46,15 @@ Sigma     = SigmaH / H
 eqFloatMargin = 1.0e-12
 
 V2 = numx.sqrt(2.)
+V5 = numx.sqrt(5)
 hV2 = V2/2
 V3 = numx.sqrt(3.)
 hV3 = V3/2
 tV3 = V3/3
 V2dV3 = V2/V3
+
+tau = (1.0 + V5)/2
+dtau = 1.0/tau
 
 def eq(a, b, precision = eqFloatMargin):
     """
@@ -98,12 +102,16 @@ class Symmetry:
 	A4   = "A4"
 	S4xI = "S4xI"
 	S4   = "S4"
+	A5   = "A5"
+	A5xI = "A5xI"
 
 D_Dom =  {
     Symmetry.A4xI: [0, numx.pi/4],
     Symmetry.A4  : [0, numx.pi/4],
     Symmetry.S4xI: [0, numx.pi/2],
     Symmetry.S4  : [0, numx.pi/2],
+    Symmetry.A5  : [0, numx.pi/2],
+    Symmetry.A5xI: [0, numx.pi/2],
 }
 
 T_Dom =  {
@@ -111,6 +119,8 @@ T_Dom =  {
     Symmetry.A4  : [-2., 3.],
     Symmetry.S4xI: [-4., 4.8],
     Symmetry.S4  : [-4., 4.8],
+    Symmetry.A5  : [-5., 6.0],
+    Symmetry.A5xI: [-5., 6.0],
 }
 
 class Param:
@@ -933,7 +943,9 @@ def S4_Q_turn_o4(x, y, z):
     return (x_, y_, z_)
 
 def S4_T_turn_o3(x, y, z):
-    # TODO TODO TODO: FIX THIS FUNCTION, there is an error
+    # TODO TODO TODO: FIX THIS FUNCTION (bedore using) there is an error
+    #                 look at A5 example, this works, probably the axis needs tp
+    #                 be turned
     """Rotate [x, y, z] a third turn around the S4 o3 axis [0, -1/V3, V2/V3]
 
     Returns the tuple [x', y', z']
@@ -957,7 +969,7 @@ def v_delta(x0, y0, z0, x1, y1, z1):
     return numx.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0) + (z1-z0)*(z1-z0))
 
 def FoldedRegularHeptagonsS4(c, params):
-    """Calculates the 4 variable edge lengths - 1 for the simplest S4 case of
+    """Calculates the 4 variable edge lengths for the simplest S4 case of
     folded heptagons.
 
     The case contains
@@ -1078,7 +1090,7 @@ def FoldedRegularHeptagonsS4(c, params):
     #if ((edgeAlternative & loose_bit) != 0 or
     #	(edgeAlternative & twist_bit) != 0
     #):
-    if (edgeAlternative == TriangleAlt.refl_1 or 
+    if (edgeAlternative == TriangleAlt.refl_1 or
 				edgeAlternative == TriangleAlt.refl_2
     ):
         # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
@@ -1216,6 +1228,273 @@ def FoldedRegularHeptagonsS4(c, params):
     #print cp
     return cp
 
+# For A5:
+# o3axis = GeomTypes.Vec([1/tau, 0, tau]
+# o5axis = GeomTypes.Vec([0, -1, tau])
+# o5axis = GeomTypes.Vec([0, 1, tau])
+
+def A5_T_turn_o3(x, y, z, positive = True):
+    """Rotate [x, y, z] a third turn around the A4 o3 axis [1/tau, 0, tau]
+
+    If positive == False, then a third turn around the negative axis is
+    returned.
+    Returns the tuple [x', y', z']
+    """
+    # Rotations is obtained by
+    # 1. rotate (tau, 1/tau) / l around positive x-axis, l = V(tau^2 + 1/tau^2)
+    # 1. rotate third turn around positive = <positive> z-axis
+    # 3. rotate opposite of step 1.
+
+    tau2 = tau + 1
+    l = numx.sqrt(tau2 + 1/tau2)
+    cosa = tau/l
+    sina = dtau/l
+
+    # 1:
+    x_, y_, z_ =  cosa * x - sina * z, y, sina * x + cosa * z
+    # 2:
+    cosb = -0.5
+    sinb = hV3
+    if not positive:
+	sinb = -sinb
+    x_, y_ = cosb * x_ - sinb * y_, sinb * x_ + cosb * y_
+    # 3:
+    x_, z_ =  cosa * x_ + sina * z_, -sina * x_ + cosa * z_
+    return (x_, y_, z_)
+
+def FoldedRegularHeptagonsA5(c, params):
+    """Calculates the 4 variable edge lengths for the simplest A5 case of
+    folded heptagons.
+
+    The case contains
+    c[0]: a translation (towards the viewer)
+    c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
+    c[2]: the angle of the first fold (left)
+    c[3]: the angle of the second fold (left)
+    c[4]: rotation angle around z-axis
+    c[5]: the angle of the first fold (right)
+    c[6]: the angle of the second fold (right)
+    The vertices are positioned as follows:
+
+    #
+    #
+    #               9             2
+    #      8                               1
+    #
+    #                      3
+    #
+    #   7           z-axis . o2-axis          0       . o3-axis: [1/tau, 0, tau]
+    #
+    #                      4
+    #
+    #     11                               6
+    #              10             5
+    #
+    #
+    #                      . o5 axis: [0, -1, tau]
+    #    ^ y
+    #    |
+    #    |
+    #  z .-----> x
+
+    And the relevant vertices are defined as follows:
+
+    The heptagons are regular, so
+    |0-1| = |1-2| = |2-3| = |3-4| = |4-5| = |5-6| = |6-0| = |12 - 14| = 1
+
+    For the param[0] constant TriangleAlt names can be used:
+    The alternatives for creatings triangles lead to the possible variable edge
+    lengths: refl_1, refl_2
+
+    params{'1'} alternatives for the opposite triangle fill.
+
+    params{'2'} steers the edge lengths. It is a vector of 4 or 7 floating point
+    numbers that expresses the edge lengths of [a, b, c, d] or
+    [a, b0, c0, d, b1, c1] resp. If length 4, then c[5] = c[2] and c[6] = c[3];
+    the value of c[4] is either 0 or pi/2 rad, depending on params[5].
+    If this params[2] is not given, the edge lengths are supposed to be 1.
+
+    params{'3'} defines which heptagon folding method is used.
+
+    params{'4'} rotate the folding with n/7 turn
+    """
+
+    # params indices in text:
+
+    T      = c[0]
+    alpha  = c[1]
+    beta0  = c[2]
+    gamma0 = c[3]
+
+    par_tri_fill       = Param.tri_fill
+    par_edge_len       = Param.edge_len
+    par_fold           = Param.h_fold
+
+    incl_reflections = len(params[par_edge_len]) == 4
+    if incl_reflections:
+	beta1  = beta0
+	gamma1 = gamma0
+	if params[par_tri_fill] == TriangleAlt.refl_2:
+	    delta = D_Dom[Symmetry.A5xI][1]
+	else:
+	    delta = D_Dom[Symmetry.A5xI][0]
+	oppoAlternative = params[par_tri_fill]
+    else:
+	delta  = c[4]
+	beta1  = c[5]
+	gamma1 = c[6]
+	oppoAlternative = params[par_opp_fill]
+    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+	    T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    cp = copy.copy(params[par_edge_len])
+    edgeAlternative = params[par_tri_fill]
+    try:
+        edgeLengths = params[par_edge_len]
+    except IndexError:
+	edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
+
+    #
+    # EDGE A: only one for A5xI
+    #
+    #if ((edgeAlternative & loose_bit) != 0 or
+    #	(edgeAlternative & twist_bit) != 0
+    #):
+    if (edgeAlternative == TriangleAlt.refl_1 or
+				edgeAlternative == TriangleAlt.refl_2
+    ):
+        # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
+        cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
+    else:
+	# TODO
+        # V3 - V12:[ y0,    z0,    x0], # V12 = V0'
+        cp[0] = numx.sqrt((x3-y0)*(x3-y0) + (y3-z0)*(y3-z0) + (z3-x0)*(z3-x0)) - edgeLengths[0]
+
+    #
+    # EDGE B:
+    #
+    plain_edge_alt = edgeAlternative & ~alt_bit
+    if (edgeAlternative == TriangleAlt.refl_1):
+	# V5 - Q-turn-around-o4(V2)
+	V2_o4_x, V2_o4_y, V2_o4_z = A5_T_turn_o3(x2, y2, z2)
+        cp[1] = v_delta(x5, y5, z5, V2_o4_x, V2_o4_y, V2_o4_z) - edgeLengths[1]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+	# V10 - Q-turn-around-o4(V5), V10 = V2' = [-x2, -y2, z2]
+	V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x5, y5, z5)
+        cp[1] = v_delta(-x2, -y2, z2, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[1]
+    #TODO:
+    elif plain_edge_alt == TriangleAlt.stripII:
+        # V3 - V14:[y1, z1, x1], # V14 = V1'
+        cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
+    else:
+        #V2 - V12:[y0, z0, x0], # V12 = V0'
+        cp[1] = numx.sqrt((x2-y0)*(x2-y0) + (y2-z0)*(y2-z0) + (z2-x0)*(z2-x0)) - edgeLengths[1]
+
+    #
+    # EDGE C
+    #
+    #if (edgeAlternative & twist_bit) != 0:
+    if (edgeAlternative == TriangleAlt.refl_1):
+	# V6 - Q-turn-around-o4(V1)
+	V1_o4_x, V1_o4_y, V1_o4_z = A5_T_turn_o3(x1, y1, z1)
+        cp[2] = v_delta(x6, y6, z6, V1_o4_x, V1_o4_y, V1_o4_z) - edgeLengths[2]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+	# V11 - Q-turn-around-o4(V6), V11 = V1' = [-x1, -y1, z1]
+	V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x6, y6, z6)
+        cp[2] = v_delta(-x1, -y1, z1, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[2]
+    #TODO:
+    elif (
+	edgeAlternative != TriangleAlt.star
+	and edgeAlternative != TriangleAlt.star1loose
+    ):
+        # V2 - V14:[ y1, z1, x1], # V14 = V1'
+        cp[2] = numx.sqrt((x2-y1)*(x2-y1) + (y2-z1)*(y2-z1) + (z2-x1)*(z2-x1)) - edgeLengths[2]
+    else:
+        # V1 - V12:[y0,    z0,    x0], # V12 = V0'
+        cp[2] = numx.sqrt((x1-y0)*(x1-y0) + (y1-z0)*(y1-z0) + (z1-x0)*(z1-x0)) - edgeLengths[2]
+
+    #
+    # EDGE D
+    #
+    #if (edgeAlternative & twist_bit) != 0:
+    if (edgeAlternative == TriangleAlt.refl_1):
+	# V0 - T-turn-around-o4(V9:[x0,   y0,    z0])
+	V0_o4_x, V0_o4_y, V0_o4_z = A5_T_turn_o3(x0, y0, z0)
+        cp[3] = v_delta(x0, y0, z0, V0_o4_x, V0_o4_y, V0_o4_z) - edgeLengths[3]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+	# V7 - Q-turn-around-o4(V0), V7 = o2(v0) = [-x0, -y0, z0]
+	V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x0, y0, z0)
+        cp[3] = v_delta(-x0, -y0, z0, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[3]
+    #TODO:
+    elif (edgeAlternative & alt_bit == 0):
+	# V1 - V14:[ y1,    z1,    x1], # V14 = V1'
+	cp[3] = numx.sqrt((x1-y1)*(x1-y1) + (y1-z1)*(y1-z1) + (z1-x1)*(z1-x1)) - edgeLengths[3]
+    else:
+        # V2 - V18:[ y2,    z2,    x2], # V18 = V2'
+	cp[3] = numx.sqrt((x2-y2)*(x2-y2) + (y2-z2)*(y2-z2) + (z2-x2)*(z2-x2)) - edgeLengths[3]
+
+    if not incl_reflections:
+	# TODO
+	# opposite alternative edges, similar as above
+	#
+	# OPPOSITE EDGE B
+	#
+	plain_edge_alt = oppoAlternative & ~alt_bit
+	if plain_edge_alt == TriangleAlt.stripII:
+	    # V3 - V16:[y6, z6, x6], # V16 = V6'
+	    cp[4] = numx.sqrt((x3-y6)*(x3-y6) + (y3-z6)*(y3-z6) + (z3-x6)*(z3-x6)) - edgeLengths[4]
+	elif plain_edge_alt & rot_bit == rot_bit:
+	    # V2 - V16:[y6, z6, x6], # V16 = V6'
+	    cp[4] = numx.sqrt((x2-y6)*(x2-y6) + (y2-z6)*(y2-z6) + (z2-x6)*(z2-x6)) - edgeLengths[4]
+	else:
+	    #V9:[-x5, -y5, z5] - V12, # V9 = V5'
+	    cp[4] = numx.sqrt((-x5-y0)*(-x5-y0) + (-y5-z0)*(-y5-z0) + (z5-x0)*(z5-x0)) - edgeLengths[4]
+
+    #
+    #
+    #               9             2
+    #      8                               1
+    #
+    #                      3
+    #
+    #   7           z-axis . o2-axis          0       . o4-axis: [0, 1, 1]
+    #
+    #                      4
+    #
+    #     11                               6
+    #              10             5
+    #
+    #
+    #                      . o3 axis: [1/V3, 0, V2/V3]
+	#
+	# OPPOSITE EDGE C
+	#
+	if oppoAlternative == TriangleAlt.arot_star1loose:
+	    # V2 - V19: V19 = V5' = [y5, z5, x5]
+	    cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
+	elif oppoAlternative == TriangleAlt.rot_star1loose:
+	    # V2 - V8: V8 = V6' = [-x6, -y6, z6]
+	    cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
+	elif (
+	    oppoAlternative != TriangleAlt.star
+	    and oppoAlternative != TriangleAlt.star1loose
+	):
+	    # V9 - V16: V9 = V5' = [-x5, -y5, z5], V16 = V6' = [ y6, z6, x6]
+	    cp[5] = numx.sqrt((y6+x5)*(y6+x5) + (z6+y5)*(z6+y5) + (x6-z5)*(x6-z5)) - edgeLengths[5]
+	else:
+	    # V8: [-x6, -y6, z6] - V12, # V8 = V6'
+	    cp[5] = numx.sqrt((x6+y0)*(x6+y0) + (y6+z0)*(y6+z0) + (x0-z6)*(x0-z6)) - edgeLengths[5]
+	#
+	# OPPOSITE EDGE D
+	#
+	if (oppoAlternative & alt_bit == 0):
+	    # V8 - V16: V8 = V6' = [-x6, -y6, z6]; V16 = V6' = [y6, z6, x6]
+	    cp[6] = numx.sqrt((y6+x6)*(y6+x6) + (z6+y6)*(z6+y6) + (x6-z6)*(x6-z6)) - edgeLengths[6]
+	else:
+	    # V9 - V19: V9 = V5' = [-x5, -y5, z5]; V19 = V5' = [y5, z5, x5]
+	    cp[6] = numx.sqrt((y5+x5)*(y5+x5) + (z5+y5)*(z5+y5) + (x5-z5)*(x5-z5)) - edgeLengths[6]
+
+    #print cp
+    return cp
 
 class Method:
     hybrids = 0
@@ -1252,7 +1531,17 @@ def FindMultiRoot(initialValues,
             print 'triangle star, 1 loose:'
 
     nrOfIns = len(initialValues)
-    if symmetry == Symmetry.S4 or symmetry == Symmetry.S4xI:
+    if symmetry == Symmetry.A5 or symmetry == Symmetry.A5xI:
+	mysys = multiroots.gsl_multiroot_function(
+	    FoldedRegularHeptagonsA5,
+	    {
+		Param.tri_fill:       edgeAlternative,
+		Param.edge_len:       edgeLengths,
+		Param.h_fold:         fold,
+	    },
+	    nrOfIns
+	)
+    elif symmetry == Symmetry.S4 or symmetry == Symmetry.S4xI:
 	mysys = multiroots.gsl_multiroot_function(
 	    FoldedRegularHeptagonsS4,
 	    {
@@ -1753,6 +2042,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
 					    Param.h_fold:   this.fold
 					}
 				    )
+				elif this.symmetry == Symmetry.A5xI:
+				    chk = FoldedRegularHeptagonsA5(result,
+					{
+					    Param.tri_fill: this.edgeAlternative,
+					    Param.edge_len: this.edgeLengths,
+					    Param.h_fold:   this.fold
+					}
+				    )
 				else:
 				    chk = FoldedRegularHeptagonsS4(result,
 					{
@@ -1938,10 +2235,24 @@ if __name__ == '__main__':
 		    Param.h_fold:   Fold.trapezium,
 		}
 	    )
-
-    if sys.argv[1] == '-1':
-	testOneSolution(sys.argv[2])
-	sys.exit(0)
+	elif symGrp == Symmetry.A5xI:
+	    T  = 8.38
+	    a  = Geom3D.Deg2Rad * 60
+	    b0 = Geom3D.Deg2Rad * 10
+	    g0 = Geom3D.Deg2Rad * 20
+	    tmp = numx.array((T, a, b0, g0))
+	    print 'input values: \n [',
+	    for t in tmp: print t, ',',
+	    print ']'
+	    print FoldedRegularHeptagonsA5(tmp,
+		{
+		    Param.tri_fill: TriangleAlt.refl_2,
+		    Param.edge_len: [0., 0., 0., 0.],
+		    Param.h_fold:   Fold.triangle,
+		}
+	    )
+	else:
+	    printError('Error: Unkown symmetry group: %s' % symGrp)
 
     def tstDynamicSolutions():
 	passed = True
@@ -2145,7 +2456,6 @@ if __name__ == '__main__':
 	[0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
 	[1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
     ]
-    pre_edgeLs_S4 = pre_edgeLs_A4[:]
 
     dynamicSols_A4 = [
 	# TODO: important add edge lengths!!!
@@ -2469,6 +2779,14 @@ if __name__ == '__main__':
 		    TriangleAlt.refl_1,
 		    TriangleAlt.refl_2,
 		],
+	Symmetry.A5xI: [
+		    TriangleAlt.refl_1,
+		    TriangleAlt.refl_2,
+		],
+	Symmetry.A5: [
+		    TriangleAlt.refl_1,
+		    TriangleAlt.refl_2,
+		],
     }
 
     def randBatchYxI(symGrp, edgeLs, edgeAlts, continueAfter = 100,
@@ -2546,21 +2864,33 @@ if __name__ == '__main__':
 					# there is no guarantee it will be
 					# regular (more requirements needed)
 	])
+    pre_edgeLs_S4 = pre_edgeLs_A4[:]
+
+    pre_edgeLs_A5xI = pre_edgeLs_A4xI[:]
+    pre_edgeLs_A5 = pre_edgeLs_A4[:]
 
     pre_edgeLs = {
 	Symmetry.A4xI: pre_edgeLs_A4xI,
 	Symmetry.A4  : pre_edgeLs_A4,
 	Symmetry.S4xI: pre_edgeLs_S4xI,
 	Symmetry.S4  : pre_edgeLs_S4,
+	Symmetry.A5xI: pre_edgeLs_A5xI,
+	Symmetry.A5  : pre_edgeLs_A5,
     }
     dynamicSols = {
 	Symmetry.A4xI: [],
 	Symmetry.A4  : dynamicSols_A4,
 	Symmetry.S4xI: [],
 	Symmetry.S4  : [],
+	Symmetry.A5xI: [],
+	Symmetry.S4  : [],
     }
     
-    sym_sup = [Symmetry.A4xI, Symmetry.A4, Symmetry.S4xI, Symmetry.S4]
+    sym_sup = [
+	Symmetry.A4xI, Symmetry.A4,
+	Symmetry.S4xI, Symmetry.S4,
+	Symmetry.A5xI, Symmetry.A5,
+    ]
 
     tstProg = False
 
@@ -2593,6 +2923,11 @@ if __name__ == '__main__':
 	print '        If nothing is specified the whole list is searched'
 	print '        If only i0 is specified the list is searched from that index'
 
+    # default values used by printUsage
+    nr_iterations = 4000
+    outDir = "tst/frh-roots"
+    precision = 10
+
     # Handle command line arguments:
     if len(sys.argv) <= 1:
 	printUsage()
@@ -2600,13 +2935,18 @@ if __name__ == '__main__':
     else:
 	skipNext = False # for options that take arguments
 	symGrp = '' # which symmetry group to search: '' means not read yet
-	nr_iterations = 4000
-	precision = 10
-	outDir = "tst/frh-roots"
 	# can be set to true by cmd line
 	list_pre_edgeLs = False
 	list_edge_alts  = False
 	set_edge_alts   = ''
+
+	if sys.argv[1] == '-1':
+	    if len(sys.argv) <= 2:
+		printError('Error: No symmetry group defined')
+		printUsage()
+		sys.exit(-1)
+	    testOneSolution(sys.argv[2])
+	    sys.exit(0)
 	def errIfNoNxt(s, n):
 	    if len(sys.argv) <= n + 1: # note incl the cmd line also
 		printError('Missing parameter for option: %s' % s)
@@ -2708,10 +3048,10 @@ if __name__ == '__main__':
 	for e in edgeAlts:
 	    print '  %s,' % Stringify[e]
 	print ']'
-	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4xI:
+	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
 	    randBatchYxI(symGrp, edgeLs, edgeAlts, nr_iterations,
 	    		nrThreads = 1, precision = precision, outDir = outDir)
-	elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4:
+	elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
 	    randBatchY(symGrp, edgeLs, edgeAlts, nr_iterations,
 			nrThreads = 1, dynSols = dynamicSols[symGrp],
 			precision = precision, outDir = outDir)
