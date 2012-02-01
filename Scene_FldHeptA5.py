@@ -42,6 +42,7 @@ Title = 'Polyhedra with Folded Regular Heptagons and Icosahedral Symmetry'
 trisAlt = Heptagons.TrisAlt()
 trisAlt.baseKey[trisAlt.refl_1]        = True
 trisAlt.baseKey[trisAlt.refl_2]        = True
+trisAlt.baseKey[trisAlt.crossed_2]     = True
 #trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
 dyn_pos		=  Heptagons.dyn_pos
@@ -154,8 +155,9 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.trisO5Shape = trisO5Shape
 	this.posAngleMin = -math.pi/2
         this.posAngleMax = math.pi/2
-	this.height = 5.8
-        this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
+	this.height = 2.7
+	this.dihedralAngle = Geom3D.Deg2Rad * 119
+        this.setEdgeAlternative(trisAlt.crossed_2, trisAlt.crossed_2)
 	this.initArrs()
 	this.setV()
 
@@ -209,7 +211,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	#     4 -> 28 -> 29
 	#     8 -> 34 -> 35
 	#
-	# o5: 0 -> 11 -> 12 -> 13 -> 14
+	# o5: 0 -> 11 -> 12 -> 13 -> 14		centre: 40
 	#     1 -> 18 -> 19 -> 20 -> 21
 	#     2 -> 24 -> 25 -> 26 -> 27
 	#     3 -> 30 -> 31 -> 32 -> 33
@@ -267,6 +269,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	Vs.append(o5fld * Vs[-1])				# Vs[37]
 	Vs.append(o5fld * Vs[-1])				# Vs[38]
 	Vs.append(o5fld * Vs[-1])				# Vs[39]
+	Vs.append((Vs[0] + Vs[11] + Vs[12] + Vs[13] + Vs[14])/5)# Vs[40]
 	# TODO: if adding more Vs, rm above if or use predefined indices
 	this.baseVs = Vs
 	Es = []
@@ -360,13 +363,14 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #         2' = 8                7 = 5'
 
-	I_loose = [[2, 3, 7]]
-	noLoose = [[2, 3, 8]]
-	stripI  = [[2, 8, 9]]
-	stripII = [[2, 3, 9], [3, 8, 9]]
-	star    = [[1, 2, 8], [1, 8, 9]]
-	refl_1  = [[2, 3, 7], [1, 2, 39, 16], [0, 1, 16, 9]]
-	refl_2  = [[4, 5, 8], [5, 6, 21, 34], [6, 0, 14, 21]]
+	I_loose   = [[2, 3, 7]]
+	noLoose   = [[2, 3, 8]]
+	stripI    = [[2, 8, 9]]
+	stripII   = [[2, 3, 9], [3, 8, 9]]
+	star      = [[1, 2, 8], [1, 8, 9]]
+	refl_1    = [[2, 3, 7], [1, 2, 39, 16], [0, 1, 16, 9]]
+	refl_2    = [[4, 5, 8], [5, 6, 21, 34], [6, 0, 14, 21]]
+	crossed_2 = [[29, 4, 5, 35], [5, 26, 35], [5, 6, 20, 26], [6, 0, 13, 20]]
 	strip_1_loose = stripI[:]
 	star_1_loose  = star[:]
 	stripI.extend(noLoose)
@@ -384,6 +388,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_II:       stripII[:],
                 trisAlt.refl_1:             refl_1[:],
                 trisAlt.refl_2:             refl_2[:],
+                trisAlt.crossed_2:          crossed_2[:],
 	}
 	stdO3   = [1, 2, 9]
 	altO3   = [2, 9, 11]
@@ -427,6 +432,7 @@ class Shape(Heptagons.FldHeptagonShape):
 		trisAlt.arot_star_1_loose:  arot_star[:],
                 trisAlt.refl_1:             refl[:],
                 trisAlt.refl_2:             refl[:],
+                trisAlt.crossed_2:          refl[:],
 	}
 	stdO3   = [6, 17, 5]
 	stdO3_x = [6, 17, 13]
@@ -451,6 +457,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	arot_x     = [1, 1, 0, 0, 1, 0]
 	refl_1     = [1, 1, 0]
 	refl_2     = [1, 1, 0]
+	crossed_2  = [1, 0, 1, 0]
 
         this.triColIds = {
                 trisAlt.strip_1_loose:		loose,
@@ -467,12 +474,14 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_star_1_loose:	arot_x,
                 trisAlt.refl_1:		        refl_1,
                 trisAlt.refl_2:		        refl_2,
+                trisAlt.crossed_2:		crossed_2,
             }
 
 	std    = [1, 9, 10]
 	alt    = [2, 11, 12]
 	refl_1 = [0, 9, 10]
 	refl_2 = [5, 34, 22, 35, 23, 8]
+	crossed_2 = [4, 28, 29]
         this.o3triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -484,12 +493,17 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:	[alt],
                 trisAlt.refl_1:		        [refl_1],
                 trisAlt.refl_2:		        [refl_2],
+                trisAlt.crossed_2:		[crossed_2],
 	    }
 
 	std  = [6, 15, 16, 17]
 	alt  = [5, 18, 19, 20]
 	refl_1 = [2, 7, 24, 36, 25, 37, 26, 38, 27, 39]
 	refl_2 = [0, 11, 12, 13, 14]
+	crossed_2 = [
+		[0, 12, 40], [12, 14, 40], [14, 11, 40], [11, 13, 40],
+		[13, 0, 40]
+	]
         this.o5triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -505,6 +519,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_star_1_loose:	[alt],
                 trisAlt.refl_1:		        [refl_1],
                 trisAlt.refl_2:		        [refl_2],
+                trisAlt.crossed_2:		crossed_2,
 	    }
 
 	strip_1_loose = [2, 7, 2, 8, 2, 9]
@@ -514,6 +529,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	star_1_loose  = [2, 7, 2, 8, 1, 8]
 	refl_1        = [2, 7, 2, 39, 1, 16, 0, 9]
 	refl_2        = [5, 8, 5, 34, 6, 21, 0, 14]
+	crossed_2     = [4, 28, 5, 35, 5, 26, 6, 20, 0, 13]
         this.triEs = {
                 trisAlt.strip_1_loose:     strip_1_loose,
                 trisAlt.strip_I:           stripI,
@@ -525,6 +541,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose: strip_1_loose,
                 trisAlt.refl_1:            refl_1,
                 trisAlt.refl_2:            refl_2,
+                trisAlt.crossed_2:         crossed_2,
             }
 	strip_1_loose = [5, 14, 5, 17]
 	stripI        = [5, 14, 5, 17]
@@ -550,6 +567,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_star_1_loose:  arot_star,
                 trisAlt.refl_1:             refl,
                 trisAlt.refl_2:             refl,
+                trisAlt.crossed_2:          refl,
             }
 
 	std  = [1, 9, 9, 10, 10, 1]
@@ -566,6 +584,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:  alt,
                 trisAlt.refl_1:		    refl,
                 trisAlt.refl_2:		    refl,
+                trisAlt.crossed_2:	    refl,
             }
 
 	std    = [6, 15, 15, 16, 16, 17, 17, 6]
@@ -586,6 +605,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_star_1_loose:  alt,
                 trisAlt.refl_1:		    refl,
                 trisAlt.refl_2:		    refl,
+                trisAlt.crossed_2:	    refl,
             }
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
@@ -607,7 +627,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		this.trisFill == None
 	    ) and not (
 		this.trisFill == trisAlt.refl_1 or
-		this.trisFill == trisAlt.refl_2
+		this.trisFill == trisAlt.refl_2 or
+		this.trisFill == trisAlt.crossed_2
 	    )
 
     def showOnlyO3Tris(this):
@@ -615,7 +636,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		this.trisFill == None
 	    ) and not (
 		this.trisFill == trisAlt.refl_1 or
-		this.trisFill == trisAlt.refl_2
+		this.trisFill == trisAlt.refl_2 or
+		this.trisFill == trisAlt.crossed_2
 	    )
 
     rDir = 'data/Data_FldHeptA5'

@@ -64,6 +64,7 @@ class TrisAlt:
     strip_II           = 2
     star               = 3
     refl_2             = 4
+    crossed_2          = 5
     strip_1_loose      = strip_I  | loose_bit
     star_1_loose       = star     | loose_bit
     alt_strip_I        = strip_I              | alt_bit
@@ -138,6 +139,7 @@ class TrisAlt:
     stringify = {
 	refl_1:			'refl 1',
 	refl_2:			'refl 2',
+	crossed_2:		'crossed',
 	strip_1_loose:		'Strip 1 Loose',
 	strip_I:		'Strip I',
 	strip_II:		'Strip II',
@@ -218,6 +220,7 @@ class TrisAlt:
     key = {
 	stringify[refl_1]:            refl_1,
 	stringify[refl_2]:            refl_2,
+	stringify[crossed_2]:         crossed_2,
 	stringify[strip_I]:           strip_I,
 	stringify[strip_II]:          strip_II,
 	stringify[star]:              star,
