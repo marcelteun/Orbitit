@@ -783,63 +783,43 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     predefReflSpecPos = {
 	only_hepts: [
 	    {
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
-		'set': [0.0194846506, 2.5209776869, 0.7387578325, -0.2490014706, 1.5707963268],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_2,
-	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
-		'set': [1.9046884810, -0.0895860579, 0.0898667459, -0.8043880107, 1.5707963268],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_2,
-	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
-		'set': [2.3689660916, 0.0851258971, -0.0853666149, 2.1212284837],
+		'set': [2.59804095112, 0.07208941199, -0.07223544999, 2.53866531680],
 		'7fold': Heptagons.foldMethod.star,
 		'tris': trisAlt.refl_1,
 	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
-		'set': [0.1801294042, -0.5679882382, 2.7691714565, -0.1647931959, 1.5707963268],
+		'set': [3.54099634761, 0.46203434348, -0.50537193698, 2.35569911915, 1.57079632679],
 		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_2,
-	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
-		'set': [0.1985558264, -0.7212633593, 2.5993674146, -0.2638659586],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_1,
-	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
-		'set': [2.3706859974, -0., 1.4330985471, 1.1300265566],
-		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.refl_1,
-	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py'
-		'set': [1.9053212843, 0.0000000000, 2.0476430098, 0.6938789411, 1.5707963268],
-		'7fold': Heptagons.foldMethod.triangle,
 		'tris': trisAlt.refl_2,
 	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
-		'set': [2.3706859974, 0., 0.1376977796, 2.0115660970],
+		'set': [2.59967616789, 0.00000000000, 0.11360610699, 2.44771371251],
 		'7fold': Heptagons.foldMethod.triangle,
 		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py'
-		'set': [1.9053212843, 0.0000000000, -0.1370097736, -0.6938789411, 1.5707963268],
+		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
+		'set': [2.59967616789, -0.00000000000, 2.29825889037, 0.69387894108],
 		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.refl_2,
+		'tris': trisAlt.refl_1,
 	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py'
-		'set': [0.2144969422, -0.7161063284, 2.4479090034, 0.2591004995],
+		'set': [0.78019870723, 2.64930187805, 0.54062307364, 0.00913464936],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_1,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py'
+		'set': [2.56440119971, 0.06605029302, -0.42550124895, 0.64274301662],
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.refl_1,
 	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
-		'set': [1.8797513382, -0.0971685207, -0.3990474779, 0.9416509246, 1.5707963268],
+		'set': [3.41692468489, 0.40788151929, -0.96765917562, 0.84720346804, 1.57079632679],
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.refl_2,
 	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
-		'set': [1.4801185612, -0.2147509348, -0.4352845433, 2.4498730531, 1.5707963268],
+		'set': [-0.78796389438, 2.77826685391, 1.16636078799, 2.12574368211, 1.57079632679],
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.refl_2,
 	    }
