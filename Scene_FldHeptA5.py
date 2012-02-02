@@ -84,6 +84,7 @@ V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 tau = (1.0 + V5)/2
+tau2 = tau + 1
 dtau = 1.0/tau
 
 isomA5 = isometry.A5()
@@ -98,10 +99,17 @@ isomO3 = isometry.C3(setup = {'axis': o3axis})
 
 # get the col faces array by using a similar shape here, so it is calculated
 # only once
-colStabiliser = isometry.A4(setup = {
-	'o2axis0': [1.0, 0.0, 0.0],
-	'o2axis1': [0.0, 0.0, 1.0],
-})
+colStabilisers = [
+	isometry.A4(setup = {
+		'o2axis0': [1.0, 0.0, 0.0],
+		'o2axis1': [0.0, 0.0, 1.0],
+	}),
+	isometry.A4(setup = {
+		'o2axis0': [1.0,  tau, tau2],
+		'o2axis1': [tau, -tau2, 1.0],
+	}),
+]
+colStabiliser = colStabilisers[1]
 colQuotientSet = isomA5 / colStabiliser
 useRgbCols = [
     rgb.indianRed,
