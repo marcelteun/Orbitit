@@ -112,6 +112,7 @@ def Vlen(v0, v1):
 
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
+hV2 = V2/2
 
 o4_fld_0 = GeomTypes.Vec3([1, 0, 0])
 o4_fld_1 = GeomTypes.Vec3([0, 1, 1])
@@ -125,13 +126,21 @@ isomO3 = isometry.C3(setup = {'axis': o3axis})
 
 # get the col faces array by using a similar shape here, so it is calculated
 # only once
-#colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
-#colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
-colStabiliser = isometry.D4(setup = {'axis_n': [1.0, 0.0, 0.0]})
-colStabiliser = isometry.D2(setup = {
-	'axis_n': [1.0, 0.0, 0.0],
-	'axis_2': [0.0, 1.0, 1.0],
-})
+colStabilisers = [
+	isometry.D2(setup = {
+		'axis_n': [0.0, 0.0, 1.0],
+		'axis_2': [1.0, 0.0, 0.0],
+	}),
+	isometry.D2(setup = {
+		'axis_n': [1.0, 0.0, 0.0],
+		'axis_2': [0.0, 1.0, 1.0],
+	}),
+	isometry.D2(setup = {
+		'axis_n': [0.0, 1.0, 1.0],
+		'axis_2': [1.0, -hV2, hV2],
+	}),
+]
+colStabiliser = colStabilisers[-1]
 colQuotientSet = isomS4 / colStabiliser
 useRgbCols = [
     rgb.indianRed,
