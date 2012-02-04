@@ -844,8 +844,18 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.refl_1,
 	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py'
+		'set': [1.82916035932, -0.15381215148, -0.73341848407, 2.31852723230],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_1,
+	    },{
 		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
 		'set': [1.8797513382, -0.0971685207, -0.3990474779, 0.9416509246, 1.5707963268],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
+		'set': [0.0078461298, 2.5240450735, 0.6010013359, 0.2588481477, 1.5707963268],
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.refl_2,
 	    },{
