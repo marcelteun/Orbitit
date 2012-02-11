@@ -29,6 +29,7 @@ import X3D
 import PS
 import Scenes3D
 import wx
+import sys
 import os
 import GeomTypes
 import isometry
@@ -1789,6 +1790,9 @@ class SimpleShape:
         orgMargin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
         try:
             for i in faceIndices:
+		if not debug:
+		    print '\rchecking face %d (of %d)' % (i + 1, len(this.Fs)),
+		sys.stdout.flush()
                 Vs = []
                 pointsIn2D = []
                 Es  = []
