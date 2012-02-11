@@ -513,7 +513,10 @@ class MainWindow(wx.Frame):
                 precision = dlg.getPrecision()
                 margin = dlg.getFloatMargin()
                 assert (scalingFactor >= 0 and scalingFactor != None)
-                fileDlg = wx.FileDialog(this, 'Save as .ps file', this.exportDirName, '', '*.ps', wx.SAVE)
+                fileDlg = wx.FileDialog(this, 'Save as .ps file',
+		    this.exportDirName, '', '*.ps',
+		    style = wx.SAVE | wx.OVERWRITE_PROMPT
+		)
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
                     this.filename = fileDlg.GetFilename()
@@ -553,7 +556,10 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def onSaveAsWrl(this, e):
-        dlg = wx.FileDialog(this, 'Save as .vrml file', this.exportDirName, '', '*.wrl', wx.SAVE)
+        dlg = wx.FileDialog(this,
+	    'Save as .vrml file', this.exportDirName, '', '*.wrl',
+	    style = wx.SAVE | wx.OVERWRITE_PROMPT
+	)
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
             this.exportDirName  = dlg.GetDirectory()
