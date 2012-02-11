@@ -1326,10 +1326,14 @@ class ViewSettingsSizer(wx.BoxSizer):
         #    pass
 
 class ExportPsDialog(wx.Dialog):
+    scaling = 50
+    precision = 10
+    floatMargin = 10
     """
     Dialog for exporting a polyhedron to a PS file.
 
-    Settings like: scaling size and file..
+    Settings like: scaling size and precision. Changing these settings will
+    reflect in the next dialog that is created.
     Based on wxPython example dialog
     """
     def __init__(this,
@@ -1358,30 +1362,33 @@ class ExportPsDialog(wx.Dialog):
         label = wx.StaticText(this, -1, "Scaling Factor:")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         this.scalingFactorGui = wx.lib.intctrl.IntCtrl(this,
-                value = 10,
+                value = ExportPsDialog.scaling,
                 min   = 1,
                 max   = 10000
             )
+	this.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, this.onScaling)
         hbox.Add(this.scalingFactorGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(this, -1, "vertex precision (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         this.precisionGui = wx.lib.intctrl.IntCtrl(this,
-                value = 10,
+                value = ExportPsDialog.precision,
                 min   = 1,
                 max   = 16
             )
+	this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
         hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         this.floatMarginGui = wx.lib.intctrl.IntCtrl(this,
-                value = 10,
+                value = ExportPsDialog.floatMargin,
                 min   = 1,
                 max   = 16
             )
+	this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
         hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
@@ -1399,11 +1406,20 @@ class ExportPsDialog(wx.Dialog):
         this.SetSizer(sizer)
         sizer.Fit(this)
 
+    def onScaling(this, e):
+        ExportPsDialog.scaling = this.scalingFactorGui.GetValue()
+
     def getScaling(this):
         return this.scalingFactorGui.GetValue()
 
+    def onPrecision(this, e):
+        ExportPsDialog.precision = this.precisionGui.GetValue()
+
     def getPrecision(this):
         return this.precisionGui.GetValue()
+
+    def onFloatMargin(this, e):
+        ExportPsDialog.floatMargin = this.floatMarginGui.GetValue()
 
     def getFloatMargin(this):
         return this.floatMarginGui.GetValue()
