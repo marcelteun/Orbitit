@@ -33,6 +33,7 @@ import GeomGui
 import wx
 import pprint
 import wx.lib.intctrl
+import wx.lib.colourselect
 
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -235,6 +236,15 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glEnable(GL_DEPTH_TEST)
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
         glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
+
+    def setBgCol(this, bgCol):
+        """rgb in value between 0 and 1"""
+        this.bgCol = bgCol
+        glClearColor(bgCol[0], bgCol[1], bgCol[2], 0)
+
+    def getBgCol(this):
+        """rgb in value between 0 and 1"""
+        return this.bgCol
 
     def onPaint(this):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -751,7 +761,7 @@ class ViewSettingsWindow(wx.Frame):
         if this.canvas.shape.dimension == 4:
             this.setDefaultSize((413, 791))
         else:
-            this.setDefaultSize((380, 346))
+            this.setDefaultSize((380, 364))
         this.panel.SetSizer(this.ctrlSizer)
         this.panel.SetAutoLayout(True)
         this.panel.Layout()
@@ -895,7 +905,7 @@ class ViewSettingsSizer(wx.BoxSizer):
 	# Open GL
 	this.Boxes.append(wx.StaticBox(this.parentPanel,
 						label = 'OpenGL Settings'))
-        oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
         this.Guis.append(
 	    wx.CheckBox(this.parentPanel, label = 'Two Sided Faces')
 	)
@@ -911,6 +921,16 @@ class ViewSettingsSizer(wx.BoxSizer):
 	this.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
 	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
 					id = this.oglFrontFaceGui.GetId())
+        # background Colour
+        colTxt = wx.StaticText(this.parentPanel, -1, "Background Colour:")
+        this.Guis.append(colTxt)
+        col = this.canvas.getBgCol()
+        this.bgColorGui = wx.lib.colourselect.ColourSelect(this.parentPanel,
+            wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255)
+        )
+        this.Guis.append(this.bgColorGui)
+        this.parentPanel.Bind(wx.lib.colourselect.EVT_COLOURSELECT,
+            this.onBgCol)
 
         # Sizers
         vRadiusSizer.Add(this.vRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
@@ -924,8 +944,17 @@ class ViewSettingsSizer(wx.BoxSizer):
         eSizer = wx.BoxSizer(wx.HORIZONTAL)
         eSizer.Add(this.eOptionsGui, 2, wx.EXPAND)
         eSizer.Add(eRadiusSizer, 5, wx.EXPAND)
-	oglSizer.Add(this.ogl2SidedFacesGui, 0, wx.EXPAND)
-	oglSizer.Add(this.oglFrontFaceGui, 0, wx.EXPAND)
+        subSizer = wx.BoxSizer(wx.VERTICAL)
+        subSizer.Add(this.ogl2SidedFacesGui, 0, wx.EXPAND)
+        subSizer.Add(this.oglFrontFaceGui, 0, wx.EXPAND)
+        bgSizerMain = wx.BoxSizer(wx.VERTICAL)
+        bgSizerSub = wx.BoxSizer(wx.HORIZONTAL)
+        bgSizerSub.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
+        bgSizerSub.Add(this.bgColorGui, 0, wx.EXPAND)
+        bgSizerMain.Add(colTxt, 0, wx.EXPAND)
+        bgSizerMain.Add(bgSizerSub, 0, wx.EXPAND)
+        oglSizer.Add(subSizer, 0, wx.EXPAND)
+        oglSizer.Add(bgSizerMain, 0, wx.EXPAND)
         this.Add(vSizer, 5, wx.EXPAND)
         this.Add(eSizer, 5, wx.EXPAND)
         this.Add(faceSizer, 4, wx.EXPAND)
@@ -1206,6 +1235,13 @@ class ViewSettingsSizer(wx.BoxSizer):
 	elif id == this.ogl2SidedFacesGui.GetId():
 	    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,
 					this.ogl2SidedFacesGui.IsChecked())
+        this.canvas.paint()
+
+    def onBgCol(this, e):
+        col = e.GetValue().Get()
+        this.canvas.setBgCol(
+            [float(col[0])/255, float(col[1])/255, float(col[2])/255]
+        )
         this.canvas.paint()
 
     def onUseTransparency(this, event):
