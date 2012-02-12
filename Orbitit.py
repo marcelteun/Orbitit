@@ -761,7 +761,7 @@ class ViewSettingsWindow(wx.Frame):
         if this.canvas.shape.dimension == 4:
             this.setDefaultSize((413, 791))
         else:
-            this.setDefaultSize((380, 364))
+            this.setDefaultSize((380, 414))
         this.panel.SetSizer(this.ctrlSizer)
         this.panel.SetAutoLayout(True)
         this.panel.Layout()
@@ -784,6 +784,10 @@ class ViewSettingsWindow(wx.Frame):
         this.statusBar.SetStatusText(str)
 
 class ViewSettingsSizer(wx.BoxSizer):
+    cull_show_none  = 'Hide'
+    cull_show_both  = 'Show Front and Back Faces'
+    cull_show_front = 'Show Only Front Face'
+    cull_show_back  = 'Show Only Back Face'
     def __init__(this, parentWindow, parentPanel, canvas, *args, **kwargs):
         """
         Create a sizer with view settings.
@@ -889,8 +893,12 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.Guis.append(this.eColorGui)
         this.parentPanel.Bind(wx.EVT_BUTTON, this.onEColor, id = this.eColorGui.GetId())
         # Show / hide face
-        default = 1
-        this.fOptionsLst = ['hide', 'show']
+        this.fOptionsLst = [
+	    this.cull_show_both,
+	    this.cull_show_front,
+	    this.cull_show_back,
+	    this.cull_show_none,
+	]
         this.fOptionsGui = wx.RadioBox(this.parentPanel,
             label = 'Face Options',
             style = wx.RA_VERTICAL,
@@ -898,21 +906,24 @@ class ViewSettingsSizer(wx.BoxSizer):
         )
         this.Guis.append(this.fOptionsGui)
         this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onFOption, id = this.fOptionsGui.GetId())
-        this.fOptionsGui.SetSelection(default)
         faceSizer = wx.BoxSizer(wx.HORIZONTAL)
         faceSizer.Add(this.fOptionsGui, 1, wx.EXPAND)
+	if not glIsEnabled(GL_CULL_FACE):
+	    this.fOptionsGui.SetStringSelection(this.cull_show_both)
+	else:
+	    # Looks like I switch front and back here, but this makes sense from
+	    # the GUI.
+	    if glGetInteger(GL_CULL_FACE_MODE) == GL_FRONT:
+		this.fOptionsGui.SetStringSelection(this.cull_show_front)
+	    if glGetInteger(GL_CULL_FACE_MODE) == GL_BACK:
+		this.fOptionsGui.SetStringSelection(this.cull_show_back)
+	    else: # ie GL_FRONT_AND_BACK
+		this.fOptionsGui.SetStringSelection(this.cull_show_none)
 
 	# Open GL
 	this.Boxes.append(wx.StaticBox(this.parentPanel,
 						label = 'OpenGL Settings'))
-        oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        this.Guis.append(
-	    wx.CheckBox(this.parentPanel, label = 'Two Sided Faces')
-	)
-	this.ogl2SidedFacesGui = this.Guis[-1]
-	this.ogl2SidedFacesGui.SetValue(glGetBooleanv(GL_LIGHT_MODEL_TWO_SIDE))
-	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
-					id = this.ogl2SidedFacesGui.GetId())
+        oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         this.Guis.append(
 	    wx.CheckBox(this.parentPanel,
 				label = 'Switch Front and Back Face (F3)')
@@ -922,7 +933,7 @@ class ViewSettingsSizer(wx.BoxSizer):
 	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
 					id = this.oglFrontFaceGui.GetId())
         # background Colour
-        colTxt = wx.StaticText(this.parentPanel, -1, "Background Colour:")
+        colTxt = wx.StaticText(this.parentPanel, -1, "Background Colour: ")
         this.Guis.append(colTxt)
         col = this.canvas.getBgCol()
         this.bgColorGui = wx.lib.colourselect.ColourSelect(this.parentPanel,
@@ -944,20 +955,15 @@ class ViewSettingsSizer(wx.BoxSizer):
         eSizer = wx.BoxSizer(wx.HORIZONTAL)
         eSizer.Add(this.eOptionsGui, 2, wx.EXPAND)
         eSizer.Add(eRadiusSizer, 5, wx.EXPAND)
-        subSizer = wx.BoxSizer(wx.VERTICAL)
-        subSizer.Add(this.ogl2SidedFacesGui, 0, wx.EXPAND)
-        subSizer.Add(this.oglFrontFaceGui, 0, wx.EXPAND)
-        bgSizerMain = wx.BoxSizer(wx.VERTICAL)
         bgSizerSub = wx.BoxSizer(wx.HORIZONTAL)
-        bgSizerSub.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
+        bgSizerSub.Add(colTxt, 0, wx.EXPAND)
         bgSizerSub.Add(this.bgColorGui, 0, wx.EXPAND)
-        bgSizerMain.Add(colTxt, 0, wx.EXPAND)
-        bgSizerMain.Add(bgSizerSub, 0, wx.EXPAND)
-        oglSizer.Add(subSizer, 0, wx.EXPAND)
-        oglSizer.Add(bgSizerMain, 0, wx.EXPAND)
+        bgSizerSub.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
+        oglSizer.Add(this.oglFrontFaceGui, 0, wx.EXPAND)
+        oglSizer.Add(bgSizerSub, 0, wx.EXPAND)
         this.Add(vSizer, 5, wx.EXPAND)
         this.Add(eSizer, 5, wx.EXPAND)
-        this.Add(faceSizer, 4, wx.EXPAND)
+        this.Add(faceSizer, 6, wx.EXPAND)
         this.Add(oglSizer, 0, wx.EXPAND)
 
         # 4D stuff
@@ -1219,10 +1225,24 @@ class ViewSettingsSizer(wx.BoxSizer):
         dlg.Destroy()
 
     def onFOption(this, e):
-        #print 'View Settings Window size:', this.parentWindow.GetSize()
-        sel = this.fOptionsGui.GetSelection()
-        selStr = this.fOptionsLst[sel]
-        this.canvas.shape.setFaceProperties(drawFaces = (selStr == 'show'))
+        print 'View Settings Window size:', this.parentWindow.GetSize()
+	sel = this.fOptionsGui.GetStringSelection()
+	# Looks like I switch front and back here, but this makes sense from
+	# the GUI.
+	this.canvas.shape.setFaceProperties(drawFaces = True)
+	if sel == this.cull_show_both:
+	    glDisable(GL_CULL_FACE)
+	elif sel == this.cull_show_none:
+	    # don't use culling here: doesn't work with edge radius and vertext
+	    # radius > 0
+	    this.canvas.shape.setFaceProperties(drawFaces = False)
+	    glDisable(GL_CULL_FACE)
+	elif sel == this.cull_show_front:
+	    glCullFace(GL_FRONT)
+	    glEnable(GL_CULL_FACE)
+	elif this.cull_show_back:
+	    glCullFace(GL_BACK)
+	    glEnable(GL_CULL_FACE)
         this.canvas.paint()
 
     def onOgl(this, e):
@@ -1232,9 +1252,6 @@ class ViewSettingsSizer(wx.BoxSizer):
 		glFrontFace(GL_CW)
 	    else:
 		glFrontFace(GL_CCW)
-	elif id == this.ogl2SidedFacesGui.GetId():
-	    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,
-					this.ogl2SidedFacesGui.IsChecked())
         this.canvas.paint()
 
     def onBgCol(this, e):
