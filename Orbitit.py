@@ -8,12 +8,12 @@
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -67,7 +67,7 @@ from OpenGL.GL import *
 #            set normals for FLD to see the effect of folding...
 #            what about more roots.... combos of 1/V2/0
 #
-# TODO: 
+# TODO:
 # - 20090302: fix glInit and initGl confusion. Both set lights, one in canvas
 #             one in shape. Be consistent.
 #             20100406: setup through GUI.
@@ -195,7 +195,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def initGl(this):
         this.setCameraPosition(15.0)
         Scenes3D.Interactive3DCanvas.initGl(this)
-        
+
         #glShadeModel(GL_SMOOTH)
 
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -621,7 +621,7 @@ class MainWindow(wx.Frame):
                 thisScene = scene
         if thisScene != None:
             this.setScene(thisScene)
-            try: 
+            try:
                 this.viewSettingsWindow.reBuild()
             except AttributeError:
                 pass
@@ -648,7 +648,7 @@ class MainWindow(wx.Frame):
         this.statusBar.SetStatusText(str)
 
     def onExit(this, e):
-	dlg = wx.MessageDialog(None, 'Are you sure to quit?', 'Question', 
+	dlg = wx.MessageDialog(None, 'Are you sure to quit?', 'Question',
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
 	    dlg.Destroy()
@@ -825,7 +825,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.vOptionsGui.SetSelection(default)
         # Vertex Radius
         nrOfSliderSteps   = 40
-        this.vRadiusMin   = 0.01 
+        this.vRadiusMin   = 0.01
         this.vRadiusMax   = 0.100
         this.vRadiusScale = 1.0 / this.vRadiusMin
         s = (this.vRadiusMax - this.vRadiusMin) * this.vRadiusScale
@@ -842,7 +842,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Vertex radius'))
         vRadiusSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         # disable if vertices are hidden anyway:
-        if default != 1: 
+        if default != 1:
             this.vRadiusGui.Disable()
         # Vertex Colour
         this.vColorGui = wx.Button(this.parentPanel, wx.ID_ANY, "Colour")
@@ -869,7 +869,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.eOptionsGui.SetSelection(default)
         # Edge Radius
         nrOfSliderSteps   = 40
-        this.eRadiusMin   = 0.008 
+        this.eRadiusMin   = 0.008
         this.eRadiusMax   = 0.08
         this.eRadiusScale = 1.0 / this.eRadiusMin
         s = (this.eRadiusMax - this.eRadiusMin) * this.eRadiusScale
@@ -886,7 +886,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Edge radius'))
         eRadiusSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         # disable if edges are not drawn as scalable items anyway:
-        if default != 1: 
+        if default != 1:
             this.eRadiusGui.Disable()
         # Edge Colour
         this.eColorGui = wx.Button(this.parentPanel, wx.ID_ANY, "Colour")
@@ -1272,7 +1272,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.canvas.paint()
 
     def Value2Slider(this, factor, offset, y):
-        return (y - offset) / factor 
+        return (y - offset) / factor
 
     def Slider2Value(this, factor, offset, x):
         return factor * float(x) + offset
@@ -1396,7 +1396,7 @@ class ExportPsDialog(wx.Dialog):
     Based on wxPython example dialog
     """
     def __init__(this,
-            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition, 
+            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
             style=wx.DEFAULT_DIALOG_STYLE
         ):
 

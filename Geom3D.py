@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -37,7 +37,7 @@ import isometry
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
-# TODO: 
+# TODO:
 # - Test the gl stuf of SimpleShape: create an Interactive3DCanvas
 #   the Symmetry stuff should not contain any shape stuff
 # - In SimpleShape I split the setFaceProperties in functions that set separate
@@ -115,7 +115,7 @@ def findModuleClassName(c, m):
 def eq(a, b, margin = defaultFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
-    
+
     a: a floating point number.
     b: a floating point number.
     margin: if |a - b| < margin then the floats will be considered equal and
@@ -128,7 +128,7 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
     """
     Check if 2 'd' dimensional floating point vectors 'Va' and 'Vb' are close
     enough to be called equal.
-    
+
     Va: a floating point number.
     Vb: a floating point number.
     margin: The function returns True if all elements ly within a margin of each
@@ -197,7 +197,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
                 if debug: print 'OFF file format recognised'
             elif state == states['readSizes']:
                 # the function assumes: no comments in beween the 3 nrs
-                assert words[0].isdigit() 
+                assert words[0].isdigit()
                 assert words[1].isdigit()
                 assert words[2].isdigit()
                 nrOfVs = int(words[0])
@@ -362,7 +362,7 @@ class Line:
             t = this.getFactorAt(v[1], 1, margin)
         assert t != None
         return Veq(this.getPoint(t), v, margin, min(len(v), this.dimension))
-        
+
 
     def getFactor(this, p, check = True, margin = defaultFloatMargin):
         """Assuming the point p lies on the line, the factor is returned.
@@ -439,7 +439,7 @@ class Line2D(Line):
         # If the edge lies in the plane the intersection of the 2 lines 2D are
         # calculated.
         # Otherwise the edges is parallel to the plane z = z0: no intersection.
-        # 
+        #
         # pOnLineAtEdges contains the factors in a line for the points where
         # the line intersects the sides of iFacet.
         pOnLineAtEdges = []
@@ -889,7 +889,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Vs' in dict and dict['Vs'] != None:
                 this.Vs = dict['Vs']
@@ -951,7 +951,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
                 this.Es = dict['Es']
@@ -1044,7 +1044,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
                 this.__setFs(dict['Fs'])
@@ -1289,7 +1289,7 @@ class SimpleShape:
 
     def divideColorWrapper(this):
         """
-        Divide the specified colours over the faces. 
+        Divide the specified colours over the faces.
 
         This function wraps the divideColor function and handles the trivial
         cases for which there is only one colour of for which there are more
@@ -1330,7 +1330,7 @@ class SimpleShape:
 
     def divideColor(this):
         """
-        Divide the specified colours over the isometries. 
+        Divide the specified colours over the isometries.
 
         This function should actually be implemented by a descendent, so that
         the colours can be divided according to the symmetry. This function
@@ -1851,7 +1851,7 @@ class SimpleShape:
                     intersectingPlane = facePlane(Vs, intersectingFacet)
                     # First check if this facet has an edge in common
                     facesShareAnEdge = False
-                    if intersectingFacet == face: 
+                    if intersectingFacet == face:
                         baseFacets.append(intersectingFacet)
                         Es.append(intersectingFacet)
                         facesShareAnEdge = True
@@ -2021,7 +2021,7 @@ class SimpleShape:
         #
         # Because of the reasons above one would use a separate function for
         # printing.
-        # 
+        #
         # Then this function needs to generate only the edges that appear because of
         # extra intersections.
         #
@@ -2111,7 +2111,7 @@ class SimpleShape:
                 # First check if this facet has at least one edge in common
                 facesShareAnEdge = False
                 # if this facet has the face itself:
-                if intersectingFacet == face: 
+                if intersectingFacet == face:
                     baseFacets.append(intersectingFacet)
                     Es.append(intersectingFacet)
                     facesShareAnEdge = True
@@ -2362,7 +2362,7 @@ class CompoundShape(SimpleShape):
             print '%s.addShape(%s,..):' % (this.__class__, this.name)
         this.shapeElements.append(shape)
         this.mergeShapes()
-        
+
     def setShapes(this, simpleShapes):
         if this.dbgTrace:
             print '%s.setShapes(%s,..):' % (this.__class__, this.name)
@@ -2503,7 +2503,7 @@ class IsometricShape(CompoundShape):
                 specify the base element.
         directIsometries: the direct isometries that are needed to reproduce all
                           parts of the shape can can be transformed from the
-                          specified base element through a direct isometry. 
+                          specified base element through a direct isometry.
                           See the setIsoOp and orbit functios for more info.
         oppositeIsometry: an opposite isometry that together with all the direct
                           isometries map the base element onto all elements.
@@ -2623,7 +2623,7 @@ class IsometricShape(CompoundShape):
 
         The order of the orbit is first all direct isomtries in the order as
         specified in __init__, then all the indirect isomemetries in a similar
-        order where each opposite isometry is defined as follows: I o D, 
+        order where each opposite isometry is defined as follows: I o D,
         where 'D' is the direct isometry and 'I' is the opposite isometry.
         The result is saved in this.shapeOrbits in which each element is a
         SimpleShape. If this is not wanted anymore, use unOrbit.
@@ -2699,7 +2699,7 @@ class IsometricShape(CompoundShape):
         if this.dbgPrn:
             print 'colors', colors
         assert len(colors) > 0, 'colors should have at least one element'
-        assert len(colors[0]) == 2, 'a colors element should be a tuple of 2 elements: (colors, fColors)' 
+        assert len(colors[0]) == 2, 'a colors element should be a tuple of 2 elements: (colors, fColors)'
 
     def genColorPerShape(this):
         """
@@ -2749,7 +2749,7 @@ class IsometricShape(CompoundShape):
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             Vs = None
             try: Vs = dict['Vs']
@@ -2792,7 +2792,7 @@ class IsometricShape(CompoundShape):
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
                 this.baseShape.setFaceProperties(Fs = dict['Fs'])
@@ -2828,7 +2828,7 @@ class IsometricShape(CompoundShape):
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
                 this.baseShape.setEdgeProperties(Es = dict['Es'])
@@ -3042,7 +3042,7 @@ class Scene():
     Used for creating scenes in the PolyhedraBrowser.
 
     To implement a scene one typically needs to do the following:
-    1. implement a class derived from Geom3D.SimpleShape 
+    1. implement a class derived from Geom3D.SimpleShape
     2. implement a class derived from a wx.Frame window that controls the layout
        of a shape object from step 1.
     3. implement a scene class derived from this class as follows:
