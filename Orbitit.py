@@ -1248,7 +1248,7 @@ class ViewSettingsSizer(wx.BoxSizer):
     def onOgl(this, e):
 	id = e.GetId()
 	if id == this.oglFrontFaceGui.GetId():
-	    if this.oglFrontFaceGui.IsChecked:
+	    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
 		glFrontFace(GL_CW)
 	    else:
 		glFrontFace(GL_CCW)
