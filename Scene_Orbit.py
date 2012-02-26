@@ -40,6 +40,21 @@ from OpenGL.GL import *
 
 Title = 'Create Polyhedron by Orbiting'
 
+LOG_DBG  = 1
+LOG_INFO = 2
+LOG_WARN = 3
+LOG_ERR  = 4
+
+LOG_TXT  = {
+    LOG_DBG:	'DEBUG',
+    LOG_INFO:	'INFO',
+    LOG_WARN:	'WARNING',
+    LOG_ERR:	'ERROR',
+}
+
+LOG_STDOUT_LVL = LOG_INFO # or WARN?
+LOG_BAR_LVL    = LOG_INFO
+
 class Shape(Geom3D.SimpleShape):
     def __init__(this):
         Geom3D.SimpleShape.__init__(this, [], [])
@@ -257,9 +272,7 @@ class CtrlWin(wx.Frame):
         Vs = this.showGui[this.__VsGuiIndex].get()
         Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
-            this.statusBar.SetStatusText(
-                "ERROR: No faces defined!"
-            )
+	    this.statusText('No faces defined!', LOG_ERR)
             return
         finalSymGui   = this.showGui[this.__FinalSymGuiIndex]
         finalSym      = finalSymGui.GetSelected()
@@ -274,8 +287,8 @@ class CtrlWin(wx.Frame):
                     finalSym = finalSym, stabSym = stabSym, name = this.name
                 )
         except isometry.ImproperSubgroupError:
-            this.statusBar.SetStatusText(
-                "ERROR: Stabiliser not a subgroup of final symmetry")
+	    this.statusText(
+		'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
             e.Skip()
             return
         this.FsOrbit = this.shape.getIsometries()['direct']
@@ -293,12 +306,19 @@ class CtrlWin(wx.Frame):
         else:
             this.onNrColsSel(this.colGuis[this.__nrOfColsGuiId])
         this.panel.Layout()
-        this.statusBar.SetStatusText("Symmetry applied: choose colours")
+	this.statusText('Symmetry applied: choose colours!', LOG_INFO)
         try:
             tst = this.cols
         except AttributeError:
             this.cols = [(255, 100, 0)]
         e.Skip()
+
+    def statusText(this, txt, lvl = LOG_INFO):
+	txt = '%s: %s' % (LOG_TXT[lvl], txt)
+	if lvl >= LOG_STDOUT_LVL:
+	    print txt
+	if lvl >= LOG_BAR_LVL:
+	    this.statusBar.SetStatusText(txt)
 
     def updateOrientation(this):
 	aIndex = this.__AngleGuiIndex
@@ -306,6 +326,10 @@ class CtrlWin(wx.Frame):
 	v = this.showGui[vIndex].GetVertex()
 	if v == GeomTypes.Vec3([0, 0, 0]):
 	    rot = GeomTypes.E
+	    this.statusText(
+		'Rotation axis is the null-vector: applying identity',
+		LOG_INFO
+	    )
 	else:
 	    rot = GeomTypes.Rot3(
 		axis = v,
@@ -314,7 +338,10 @@ class CtrlWin(wx.Frame):
 	try:
 	    this.shape.setBaseOrientation(rot)
 	except AttributeError:
-	    print 'WARNING: Apply symmetry first, before pulling the slide-bar'
+	    this.statusText(
+		'Apply symmetry first, before pulling the slide-bar',
+		LOG_WARN
+	    )
 
     def onAngleAdjust(this, e):
 	this.updateOrientation()
@@ -434,10 +461,9 @@ class CtrlWin(wx.Frame):
                 for col in colPerIsom
             ]
         this.shape.setFaceColors(cols)
-        this.statusBar.SetStatusText(
-            "Colour alternative %d of %d applied" % (
+	this.statusText('Colour alternative %d of %d applied' % (
                 this.colAlternative[1] + 1, len(this.colIsoms)
-            )
+            ), LOG_INFO
         )
         this.canvas.paint()
         #print 'TODO: gen colour quotientset and compare with face quotient set'
