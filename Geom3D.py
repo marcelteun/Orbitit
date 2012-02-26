@@ -872,6 +872,25 @@ class SimpleShape:
                 assert this.colorData[0][1] != [0]
             print this.colorData[1]
 
+    def __repr__(this):
+        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+        s = 'SimpleShape(\n  '
+        s = '%sVs = [\n' % (s)
+        for v in this.Vs:
+            s = '%s    %s,\n' % (s, repr(v))
+        s = '%s  ],\n  ' % s
+        s = '%sFs = [\n' % (s)
+        for f in this.Fs:
+            s = '%s    %s,\n' % (s, repr(f))
+        s = '%s  ],\n  ' % s
+        s = '%sEs = %s,\n  ' % (s, repr(this.Es))
+        s = '%scolors = %s,\n  ' % (s, repr(this.colorData))
+        s = '%sname = "%s"\n' % (s, this.name)
+        s = '%s)\n' % (s)
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
+
     def setVs(this, Vs):
         this.setVertexProperties(Vs = Vs)
 
@@ -2371,6 +2390,40 @@ class CompoundShape():
             print '%s.__init__(%s,..):' % (this.__class__, name)
 	this.name = name
         this.setShapes(simpleShapes)
+
+    def __repr__(this):
+	"""
+	Saves the compound, but it flattens it, so loading it will not result in
+	the same thing.
+
+	Flatting or merging is done, because the orbit scene doesn't handle
+	importing compound shapes (yet)
+	"""
+        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+	if len(this.shapeElements) == 1:
+	    return repr(this.shapeElements[0])
+	else:
+	    if this.mergeNeeded:
+		this.mergeShapes()
+	    return repr(this.mergedShape)
+
+    def alt__repr(this):
+	"""
+	This is an alternative __repr__ that saves the compound unflattened"
+
+	This one should be used really as soon as the orbit scene can import
+	with compound shapes.
+	"""
+        s = 'CompoundShape(\n  '
+        s = '%ssimpleShapes = [\n' % (s)
+        for shape in this.shapeElements:
+            s = '%s    %s,\n' % (s, repr(shape))
+        s = '%s  ],\n  ' % s
+        s = '%sname = "%s"\n' % (s, this.name)
+        s = '%s)\n' % (s)
+        if __name__ != '__main__':
+            s = '%s.%s' % (__name__, s)
+        return s
 
     def addShape(this, shape):
         """
