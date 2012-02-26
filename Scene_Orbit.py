@@ -32,6 +32,7 @@ import rgb
 import Geom3D
 import Geom4D
 import GeomGui
+import GeomTypes
 import Scenes3D
 import isometry
 import orbit
@@ -69,7 +70,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((582, 847))
+        this.setDefaultSize((582, 921))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -124,6 +125,26 @@ class CtrlWin(wx.Frame):
         this.panel.Bind(wx.EVT_BUTTON, this.onImport,
                 id = this.showGui[-1].GetId())
         facesSizer.Add(this.showGui[-1], 0)
+
+	# Rotate Axis
+        this.showGui.append(GeomGui.Vector3DInput(this.panel,
+						"Rotate around Axis:"))
+        facesSizer.Add(this.showGui[-1], 0)
+	this.__AxisGuiIndex = len(this.showGui) - 1
+	this.showGui.append(wx.Slider(
+	    this.panel,
+	    value = 0,
+	    minValue = -180,
+	    maxValue = 180,
+	    style = wx.SL_HORIZONTAL | wx.SL_LABELS
+	))
+	this.__AngleGuiIndex = len(this.showGui) - 1
+	this.panel.Bind(wx.EVT_SLIDER,
+	    this.onAngleAdjust,
+	    id = this.showGui[-1].GetId()
+        )
+        facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+	# TODO add set angle directly (enough with only one axis)
 
         # SYMMETRY
         this.showGui.append(
@@ -232,7 +253,7 @@ class CtrlWin(wx.Frame):
             this.stabSymSetup[i] = [None for j in range(nrStabilisers)]
 
     def onApplySymmetry(this, e):
-        #print this.GetSize()
+        print this.GetSize()
         Vs = this.showGui[this.__VsGuiIndex].get()
         Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
@@ -257,9 +278,10 @@ class CtrlWin(wx.Frame):
                 "ERROR: Stabiliser not a subgroup of final symmetry")
             e.Skip()
             return
-        this.FsOrbit = this.shape.getIsoOp()['direct']
+        this.FsOrbit = this.shape.getIsometries()['direct']
         this.FsOrbitOrg = True
         this.shape.recreateEdges()
+	this.updateOrientation()
         this.canvas.panel.setShape(this.shape)
         updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
         updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
@@ -277,6 +299,27 @@ class CtrlWin(wx.Frame):
         except AttributeError:
             this.cols = [(255, 100, 0)]
         e.Skip()
+
+    def updateOrientation(this):
+	aIndex = this.__AngleGuiIndex
+	vIndex = this.__AxisGuiIndex
+	v = this.showGui[vIndex].GetVertex()
+	if v == GeomTypes.Vec3([0, 0, 0]):
+	    rot = GeomTypes.E
+	else:
+	    rot = GeomTypes.Rot3(
+		axis = v,
+		angle = Geom3D.Deg2Rad * this.showGui[aIndex].GetValue()
+	    )
+	try:
+	    this.shape.setBaseOrientation(rot)
+	except AttributeError:
+	    print 'WARNING: Apply symmetry first, before pulling the slide-bar'
+
+    def onAngleAdjust(this, e):
+	this.updateOrientation()
+	this.canvas.panel.setShape(this.shape)
+	e.Skip()
 
     def onNrColsSel(this, e):
         try:
@@ -325,7 +368,7 @@ class CtrlWin(wx.Frame):
                 this.shape = Geom3D.SymmetricShape(Vs, Fs,
                         finalSym = finalSym, stabSym = stabSym, name = this.name
                     )
-                this.FsOrbit = this.shape.getIsoOp()['direct']
+                this.FsOrbit = this.shape.getIsometries()['direct']
                 this.shape.recreateEdges()
                 this.canvas.panel.setShape(this.shape)
                 this.FsOrbitOrg = False # and do this only once
@@ -349,6 +392,9 @@ class CtrlWin(wx.Frame):
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
         this.nrOfCols = nrOfCols
+	# replace invalid index of colour alternative with the last possible
+        if this.colAlternative[1] >= len(this.colIsoms):
+	    this.colAlternative[1] = len(this.colIsoms) - 1
         this.updatShapeColours()
         this.panel.Layout()
 
@@ -387,7 +433,7 @@ class CtrlWin(wx.Frame):
                 ([[float(colCh)/255 for colCh in col]], [])
                 for col in colPerIsom
             ]
-        this.shape.setSymmetricFaceColors(cols)
+        this.shape.setFaceColors(cols)
         this.statusBar.SetStatusText(
             "Colour alternative %d of %d applied" % (
                 this.colAlternative[1] + 1, len(this.colIsoms)

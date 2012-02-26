@@ -160,6 +160,12 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.zScaleFactor  = 1.0/100
         this.currentScale  = 1.0
         this.rScale = 0.8
+	# these repos are used internally and are related to the rotation
+	# caused by the mouse
+	# - modelRepos is used when calculating a new orientation. It expresses
+	#   the rotation caused by the mouse, before calculating the new one.
+	# - movingRepos is the newly calculated rotation after a mouse indicated
+	#   rotation is finished.
         this.modelRepos = GeomTypes.E
         this.movingRepos = GeomTypes.E
         this.xAxis = GeomTypes.ux

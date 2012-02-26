@@ -714,7 +714,7 @@ class MainPanel(wx.Panel):
     def setShape(this, shape):
         """Set a new shape to be shown with the current viewing settings
 
-        shape: the new shape.
+        shape: the new shape. This will refresh the canvas.
         """
         oldShape = this.canvas.shape
         this.canvas.shape = shape
