@@ -484,10 +484,12 @@ class MainWindow(wx.Frame):
                     this.filename = '%spy' % this.filename
             fd = open(os.path.join(this.exportDirName, this.filename), 'w')
             # TODO precision through setting:
+	    shape = this.panel.getShape()
+	    shape.name = this.filename
             fd.write("import GeomTypes\n")
             fd.write("import Geom3D\n")
             fd.write("import isometry\n")
-            fd.write("shape = %s" % repr(this.panel.getShape()))
+            fd.write("shape = %s" % repr(shape))
             this.setStatusStr("Python file written")
             fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))

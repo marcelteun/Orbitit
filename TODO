@@ -53,10 +53,6 @@ Scene_Orbit:
 			in CompoundShape.setShapes:
 				shape.gl.alwaysSetVertices = True
 
-	2012-02-27
-	If you save a result as python, the name will be the name of the base.
-	Add to Orbitit: set name.
-
 	2012-02-26
 	when you choose the last colour alternative and switch colours and this
 	one has less options, you get a list index out of range. I.e. you need
