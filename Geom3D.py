@@ -2394,37 +2394,21 @@ class CompoundShape():
 
     def __repr__(this):
 	"""
-	Saves the compound, but it flattens it, so loading it will not result in
-	the same thing.
-
-	Flatting or merging is done, because the orbit scene doesn't handle
-	importing compound shapes (yet)
+	Returns a python string that can be interpreted by Python for the shape
 	"""
-        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
 	if len(this.shapeElements) == 1:
 	    return repr(this.shapeElements[0])
 	else:
-	    if this.mergeNeeded:
-		this.mergeShapes()
-	    return repr(this.mergedShape)
-
-    def alt__repr(this):
-	"""
-	This is an alternative __repr__ that saves the compound unflattened"
-
-	This one should be used really as soon as the orbit scene can import
-	with compound shapes.
-	"""
-        s = 'CompoundShape(\n  '
-        s = '%ssimpleShapes = [\n' % (s)
-        for shape in this.shapeElements:
-            s = '%s    %s,\n' % (s, repr(shape))
-        s = '%s  ],\n  ' % s
-        s = '%sname = "%s"\n' % (s, this.name)
-        s = '%s)\n' % (s)
-        if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
-        return s
+	    s = 'CompoundShape(\n  '
+	    s = '%ssimpleShapes = [\n' % (s)
+	    for shape in this.shapeElements:
+		s = '%s    %s,\n' % (s, repr(shape))
+	    s = '%s  ],\n  ' % s
+	    s = '%sname = "%s"\n' % (s, this.name)
+	    s = '%s)\n' % (s)
+	    if __name__ != '__main__':
+		s = '%s.%s' % (__name__, s)
+	    return s
 
     def addShape(this, shape):
         """
@@ -2890,6 +2874,11 @@ class IsometricShape(CompoundShape):
             print '%s.getIsometries(%s,..):' % (this.__class__, this.name)
         return this.isometryOperations
 
+    def mergeShapes(this):
+	if this.applySymmetryNeeded:
+	    this.applySymmetry()
+	CompoundShape.mergeShapes(this)
+
     def setFaceColors(this, colors):
         """
         Check and set the face colours and and save their properties.
@@ -3154,13 +3143,6 @@ class IsometricShape(CompoundShape):
             else:
                 CompoundShape.glDraw(this)
 
-    def toOffStr(this, precision=15, info = False):
-        if this.dbgTrace:
-            print '%s.toOffStr(%s,..):' % (this.__class__, this.name)
-        if this.mergeNeeded:
-            this.mergeShapes()
-        return this.SimpleShape.toOffStr(precision, info)
-
     def toPsPiecesStr(this,
             faceIndices = [],
             scaling = 1,
@@ -3177,13 +3159,6 @@ class IsometricShape(CompoundShape):
             faceIndices = range(len(this.baseShape.Fs))
         return this.SimpleShape.toPsPiecesStr(
             faceIndices, scaling, precision, margin, pageSize)
-
-    def getDome(this, level = 2):
-        if this.dbgTrace:
-            print '%s.getDome(%s,..):' % (this.__class__, this.name)
-        if this.mergeNeeded:
-            this.mergeShapes()
-        return this.SimpleShape.getDome(level)
 
 class SymmetricShape(IsometricShape):
     dbgPrn = False

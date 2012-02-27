@@ -5,6 +5,9 @@ MW115 error comes from
 2012-02-26
 Move rest of general fixes from 'working branch' to master branch
 
+print:
+	use a class for printing reprs, to handle indent, unindent. The init
+	method should derive from a string, perhaps. Does is already exist?
 Orbitit:
 	2012-02-11
 	export to off: specify precision, since Ulrich had a problem with
@@ -26,6 +29,14 @@ Orbitit:
 	should have them as pentagrams with 5 edges and handle the 3D stuff...
 	That will help for the new scene as well.
 
+	2012-02-14 - 23:42
+	Ctrl-Y, save as python, doesn't warn for overwrite.
+
+Scenes:
+	2012-02-27
+	Move the fancy logging from '1c56863 orbit: add fancy logging' to the
+	general scenes file (from Scene_Orbit.py).
+
 Geom3D:
 	2012-02-11
 	export to PS: print faces that ly in the same plane on top of each other
@@ -36,14 +47,15 @@ Geom3D:
 
 Scene_Orbit:
 	2012-02-26:
-		TODO cannot import compound shapes: if fixed, update compound
-		repr, see patch:
-		ec3a24a, Geom3D: add reprs for simple and compound shape
 		TODO set angle by copy paste
 		TODO orbit test: apply, rotate, then colour: no rotation
 		TODO cannot handle compound of isometric shapes:
 			in CompoundShape.setShapes:
 				shape.gl.alwaysSetVertices = True
+
+	2012-02-27
+	If you save a result as python, the name will be the name of the base.
+	Add to Orbitit: set name.
 
 	2012-02-26
 	when you choose the last colour alternative and switch colours and this

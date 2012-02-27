@@ -11,6 +11,9 @@ Sanity test all scenes
 		compare to 12A.S4xI.C2xI.mu3.off
 	- export to PS (std settings)
 	- export to python
+	- import the resulting python file
+	- create a new compound: e.g. using A5xI | A4xI
+	?- Ctrl-A: add another model, e.g. icosahedron, dodecahedron
 
 Test View Settings, ^W
 

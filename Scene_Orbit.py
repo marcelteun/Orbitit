@@ -505,6 +505,12 @@ class CtrlWin(wx.Frame):
             fd = open(os.path.join(this.importDirName, filename), 'r')
             if filename[-3:] == '.py':
                 shape = Geom3D.readPyFile(fd)
+		# For Compound derived shapes (isinstance) use merge:
+		try:
+		    shape = shape.SimpleShape
+		except AttributeError:
+		    # probably a SimpleShape
+		    pass
             else:
                 shape = Geom3D.readOffFile(fd, recreateEdges = False)
             fd.close()
