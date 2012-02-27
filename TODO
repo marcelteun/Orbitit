@@ -29,9 +29,6 @@ Orbitit:
 	should have them as pentagrams with 5 edges and handle the 3D stuff...
 	That will help for the new scene as well.
 
-	2012-02-14 - 23:42
-	Ctrl-Y, save as python, doesn't warn for overwrite.
-
 Scenes:
 	2012-02-27
 	Move the fancy logging from '1c56863 orbit: add fancy logging' to the

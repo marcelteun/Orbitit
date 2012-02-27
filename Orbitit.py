@@ -469,8 +469,10 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def onSaveAsPy(this, e):
-        dlg = wx.FileDialog(this, 'Save as .py file', this.exportDirName, '',
-        '*.py', wx.SAVE)
+        dlg = wx.FileDialog(this, 'Save as .py file',
+	    this.exportDirName, '', '*.py',
+	    style = wx.SAVE | wx.OVERWRITE_PROMPT
+	)
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
             this.exportDirName  = dlg.GetDirectory()
