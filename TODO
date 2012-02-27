@@ -48,15 +48,11 @@ Geom3D:
 Scene_Orbit:
 	2012-02-26:
 		TODO set angle by copy paste
-		TODO orbit test: apply, rotate, then colour: no rotation
+		TODO fix the following orbit test: apply, rotate, then colour:
+			no rotation
 		TODO cannot handle compound of isometric shapes:
 			in CompoundShape.setShapes:
 				shape.gl.alwaysSetVertices = True
-
-	2012-02-26
-	when you choose the last colour alternative and switch colours and this
-	one has less options, you get a list index out of range. I.e. you need
-	to reset the colour alternative.
 
 	2012-02-26
 	Create a rotate arount axis widget, which can be used by the orbit scene
