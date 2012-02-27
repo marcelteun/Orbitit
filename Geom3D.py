@@ -1828,7 +1828,8 @@ class SimpleShape:
         try:
             for i in faceIndices:
 		if not debug:
-		    print '\rchecking face %d (of %d)' % (i + 1, len(this.Fs)),
+		    print '\rchecking face %d (of %d)' % (
+						    i + 1, len(faceIndices)),
 		sys.stdout.flush()
                 Vs = []
                 pointsIn2D = []
