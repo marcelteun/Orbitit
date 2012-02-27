@@ -1,0 +1,54 @@
+2012-02-14
+move export to PS stuff from 'working branch' to master and check where the
+MW115 error comes from
+
+2012-02-26
+Move rest of general fixes from 'working branch' to master branch
+
+Orbitit:
+	2012-02-11
+	export to off: specify precision, since Ulrich had a problem with
+	Stella, which might be precision related.
+
+	2012-02-12
+	Add view settings: list all faces by length and choose colour
+	These nrs can be used for exporting to PS: only export...
+
+	2012-02-14
+	Enable start Orbitit with a specified scene
+	Open any python scene through File -> Open menu (call it plug-in?)
+
+	2012-02-14
+	Open / Import python files
+
+	2012-02-14
+	handle pentagrams: in export to PS, it should be one edge. Perhaps you
+	should have them as pentagrams with 5 edges and handle the 3D stuff...
+	That will help for the new scene as well.
+
+Geom3D:
+	2012-02-11
+	export to PS: print faces that ly in the same plane on top of each other
+
+	2012-02-11
+	export to PS: show lines with problem with different colour
+
+
+Scene_Orbit:
+	2012-02-26:
+		TODO cannot import compound shapes: if fixed, update compound
+		repr, see patch:
+		ec3a24a, Geom3D: add reprs for simple and compound shape
+		TODO set angle by copy paste
+		TODO orbit test: apply, rotate, then colour: no rotation
+		TODO cannot handle compound of isometric shapes:
+			in CompoundShape.setShapes:
+				shape.gl.alwaysSetVertices = True
+
+	2012-02-26
+	when you choose the last colour alternative and switch colours and this
+	one has less options, you get a list index out of range. I.e. you need
+	to reset the colour alternative.
+
+	2012-02-26
+	Create a rotate arount axis widget, which can be used by the orbit scene

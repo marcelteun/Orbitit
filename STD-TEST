@@ -1,0 +1,44 @@
+Sanity test all scenes
+	TEST ORBIT SCENE
+	- import cube: data/cubeCompounds/5.A5xI.A4xI.py (todo move and rename)
+	- Apply Symmetry
+	- Final symmetry: S4xI (std axes)
+	- Stabiliser symmetry: C2xI, axis [1, 1, 0] (12A)
+	- Apply Symmetry
+	- rotate axis: [1, 1, 0] ~ 35 degrees
+	- use 4 colours
+	- export to OFF
+		compare to 12A.S4xI.C2xI.mu3.off
+	- export to PS (std settings)
+	- export to python
+
+Test View Settings, ^W
+
+Test export to PS:
+	- MV115 - MW117
+	  e.g.
+	  import (^o) data/Uniform/MV115.off
+	  export (^p) to tst/MW115.tst.ps		# ask replace?
+		using scaling 100, round at 10, and eq at 9
+	  	and diff with out/Uniform/MW115.ps
+			diff tst/MW115.ps out/Uniform/MW115.ps
+	- also compose off files and export
+		^o MW115.3.A5xI.C3.off
+		^a MW115.5_2.A5xI.C5.off
+		^a MW115.3.A5.E.off
+		In that order.
+		^p out/Uniform/MW115.ps	
+		diff tst/MW115.ps out/Uniform/MW115.ps
+	- also test an export from orbit
+		Open Orbit Scene
+		Import data/cubeCompounds/5.A5xI.A4xI.py
+		Use std settings for A5xI | A4xI
+		apply symmetry
+		^p	100, 10, 9   --> tst/cube.5.A5xI.A4xI.ps	# ask replace?
+		diff tst/cube.5.A5xI.A4xI.ps tst/cube.5.A5xI.A4xI.ps.orbit.compare
+		-------------------------------------------------------------
+		Test merge:
+		^e tst/5.A5xI.A4xI.off
+		^o tst/5.A5xI.A4xI.off
+		^p	100, 10, 9   --> tst/cube.5.A5xI.A4xI.ps	# ask replace?
+		diff tst/cube.5.A5xI.A4xI.ps tst/cube.5.A5xI.A4xI.ps.merge.compare
