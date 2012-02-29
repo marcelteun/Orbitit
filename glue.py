@@ -215,6 +215,12 @@ def facesToX3d(
     )
 
 def getVUsageIn1D(Vs, Es, vUsage = None):
+    """
+    Check how often the vertices in Vs are referred through the 1D array Es
+
+    Returns an array of lenth Vs with the amount.
+    vUsage (of length Vs) can be used as initialisation value for this array.
+    """
     if vUsage == None:
         vUsage = [0 for v in Vs]
     for vIndex in Es:
@@ -222,6 +228,12 @@ def getVUsageIn1D(Vs, Es, vUsage = None):
     return vUsage
 
 def getVUsageIn2D(Vs, Fs, vUsage = None):
+    """
+    Check how often the vertices in Vs are referred through the 2D array Fs
+
+    Returns an array of lenth Vs with the amount.
+    vUsage (of length Vs) can be used as initialisation value for this array.
+    """
     if vUsage == None:
         vUsage = [0 for v in Vs]
     for f in Fs:
@@ -250,6 +262,7 @@ def cleanUpVsFs(Vs, Fs):
     vUsage = getVUsageIn2D(Vs, Fs)
     vRemoved = [0 for x in vUsage]
     notUsed = 0 # counts the amount of vertices that are not used until vertex i
+    print 'Clean up unused Vs'
     for i in range(len(vUsage)):
         # If the vertex is not used
         if vUsage[i - notUsed] == 0:
@@ -265,47 +278,41 @@ def cleanUpVsFs(Vs, Fs):
             f[faceIndex] = f[faceIndex] - vRemoved[f[faceIndex]]
     return vUsage
 
-def cleanUp(Vs, Fs):
-    """cleanup Vs and update Fs by removing unused vertices.
-
-    Note that the arrays themselves are updated. If this is not wanted, send in
-    copies.
-    It returns an array with tuples expressing which vertices are deleted. This
-    array can be used as input to filterEs
+def mergeVs(Vs, Fs, margin = 1.e-12):
     """
-    # The clean up is done as follows: 
-    # first construct an array of unused vertex indices 
-    # remove all unused indices from Vs and subtract the approproate amount
-    # from the indices  in Fs that are bigger 
-    # isUsed contains for each vertex a tuple that expresses:
-    # 1. whether the vertex is used:
-    # 2. how many vertices before this vertex are deleted.
-    #
-    # tested on
-    # a = range(10)
-    # b = [[0, 1, 4], [4, 1, 8]]
-    #print 'cleanUp(Vs, Fs):'
-    isUsed = [[False, 0] for i in range(len(Vs))]
+    Merges vertices that are equal into one vertex.
+
+    Note that this might change the content of Fs and Es.
+    Note that Vs is not cleaned up. This means that some vertices might not be
+    used. The return value indicates if some vertices are unused now.
+    """
+    replaced = False
+    replace_by = [-1 for v in Vs]
+    # first build up an array that expresses for each vertex by which vertex it
+    # can be replaced.
+    org_margin = GeomTypes.eqFloatMargin
+    GeomTypes.eqFloatMargin = margin
+    print 'Merge Vs\n',
+    for i in range(len(Vs) - 1, -1, -1):
+	print '\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)),
+	v = Vs[i]
+	for j in range(i):
+	    if v == Vs[j]:
+		replaced = True
+		replace_by[i] = j
+		break
+    GeomTypes.eqFloatMargin = org_margin
+    # Apply the changes now. Don't delete the vertices, since that means
+    # re-indexing
+    print '\nClean up Fs'
     for f in Fs:
-        for i in f:
-            isUsed[i][0] = True
-    notUsed = 0
-    #print 'not used:'
-    for i in range(len(isUsed)):
-        vData = isUsed[i]
-        vData[1] = notUsed
-        if vData[0] == False:
-            del Vs[i - notUsed]
-            #print i, ', new Vs:', Vs
-            notUsed += 1
-    #print 'new index mapping:'
-    #for i in range(len(isUsed)):
-    #    print i, ' ->', i, '-', isUsed[i][1], '=', i - isUsed[i][1]
-    #print notUsed, 'vertices not used'
-    for f in Fs:
-        for i in range(len(f)):
-            f[i] = f[i] - isUsed[f[i]][1]
-    return isUsed
+	for i in range(len(f)):
+	    if replace_by[f[i]] > -1:
+		f[i] = replace_by[f[i]]
+#    for i in range(len(Es)):
+#	if replace_by[Es[i]] > -1:
+#	    Es[i] = replace_by[Es[i]]
+    return replaced
 
 def filterIsUsed(isUsed, flatArray):
     for i in range(len(flatArray)):

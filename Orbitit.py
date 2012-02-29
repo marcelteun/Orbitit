@@ -21,6 +21,8 @@
 #
 #------------------------------------------------------------------
 
+import copy
+import glue
 import math
 import rgb
 import re
@@ -498,24 +500,63 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def onSaveAsOff(this, e):
-        dlg = wx.FileDialog(this, 'Save as .off file', this.exportDirName, '', '*.off', wx.SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            this.filename = dlg.GetFilename()
-            this.exportDirName  = dlg.GetDirectory()
-            NameExt = this.filename.split('.')
-            if len(NameExt) == 1:
-                this.filename = '%s.off' % this.filename
-            elif NameExt[-1].lower() != 'off':
-                if NameExt[-1] != '':
-                    this.filename = '%s.off' % this.filename
-                else:
-                    this.filename = '%soff' % this.filename
-            fd = open(os.path.join(this.exportDirName, this.filename), 'w')
-            # TODO precision through setting:
-            fd.write(this.panel.getShape().toOffStr(info = False))
-            this.setStatusStr("OFF file written")
-            fd.close()
-            this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
+        dlg = ExportOffDialog(this, wx.ID_ANY, 'OFF settings')
+        fileChoosen = False
+        while not fileChoosen:
+	    if dlg.ShowModal() == wx.ID_OK:
+                cleanUp = dlg.getCleanUp()
+                precision = dlg.getPrecision()
+                margin = dlg.getFloatMargin()
+		fileDlg = wx.FileDialog(this, 'Save as .off file',
+		    this.exportDirName, '', '*.off',
+		    wx.SAVE | wx.OVERWRITE_PROMPT
+		)
+		fileChoosen = fileDlg.ShowModal() == wx.ID_OK
+                if fileChoosen:
+		    this.filename = fileDlg.GetFilename()
+		    this.exportDirName  = fileDlg.GetDirectory()
+		    NameExt = this.filename.split('.')
+		    if len(NameExt) == 1:
+			this.filename = '%s.off' % this.filename
+		    elif NameExt[-1].lower() != 'off':
+			if NameExt[-1] != '':
+			    this.filename = '%s.off' % this.filename
+			else:
+			    this.filename = '%soff' % this.filename
+		    fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+		    # TODO precision through setting:
+		    shape = this.panel.getShape()
+		    try:
+			shape = shape.SimpleShape
+		    except AttributeError:
+			pass
+		    if not cleanUp:
+			fd.write(
+			    this.panel.getShape().toOffStr(precisions, False))
+		    else:
+			# integrate into Geom3D?
+			pVs = shape.getVertexProperties()
+			pFs = shape.getFaceProperties()
+			Vs = copy.copy(pVs['Vs'])
+			Fs = copy.copy(pFs['Fs'])
+			glue.mergeVs(Vs, Fs)
+			glue.cleanUpVsFs(Vs, Fs)
+			pVs['Vs'] = Vs
+			pFs['Fs'] = Fs
+			s = Geom3D.SimpleShape([], [], [])
+			s.setVertexProperties(pVs)
+			s.setFaceProperties(pFs)
+			fd.write(s.toOffStr(info = False))
+		    print "OFF file written"
+		    this.setStatusStr("OFF file written")
+		    fd.close()
+		    this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
+		else:
+                    dlg.Show()
+                fileDlg.Destroy()
+            else:
+                break
+        # done while: file choosen
         dlg.Destroy()
 
     def onSaveAsPs(this, e):
@@ -1387,6 +1428,108 @@ class ViewSettingsSizer(wx.BoxSizer):
         #    else:
         #        this.parentWindow.statusBar.SetStatusText("Error: The specified vectors are (too) parallel")
         #    pass
+
+class ExportOffDialog(wx.Dialog):
+    precision = 10
+    floatMargin = 10
+    cleanUp = False
+    """
+    Dialog for exporting a polyhedron to a PS file.
+
+    Settings like: scaling size and precision. Changing these settings will
+    reflect in the next dialog that is created.
+    Based on wxPython example dialog
+    """
+    def __init__(this,
+            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
+            style=wx.DEFAULT_DIALOG_STYLE
+        ):
+
+        # Instead of calling wx.Dialog.__init__ we precreate the dialog
+        # so we can set an extra style that must be set before
+        # creation, and then we create the GUI dialog using the Create
+        # method.
+        pre = wx.PreDialog()
+        pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
+        pre.Create(parent, ID, title, pos, size, style)
+
+        # This next step is the most important, it turns this Python
+        # object into the real wrapper of the dialog (instead of pre)
+        # as far as the wxPython extension is concerned.
+        this.PostCreate(pre)
+
+        # Now continue with the normal construction of the dialog
+        # contents
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(this, -1, "vertex precision (decimals):")
+        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        this.precisionGui = wx.lib.intctrl.IntCtrl(this,
+                value = this.precision,
+                min   = 1,
+                max   = 16
+            )
+	this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
+        hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+
+	this.cleanUpGui = wx.CheckBox(this,
+		label = 'Merge equal vertices (can take a while)')
+	this.cleanUpGui.SetValue(this.cleanUp)
+	this.cleanUpGui.Bind(wx.EVT_CHECKBOX, this.onCleanUp)
+        sizer.Add(this.cleanUpGui,
+	    0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
+        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        this.floatMarginGui = wx.lib.intctrl.IntCtrl(this,
+                value = this.floatMargin,
+                min   = 1,
+                max   = 16
+            )
+	this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
+	if not this.cleanUp:
+	    this.floatMarginGui.Disable()
+        hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+
+        buttonSizer = wx.StdDialogButtonSizer()
+
+        button = wx.Button(this, wx.ID_OK)
+        button.SetDefault()
+        buttonSizer.AddButton(button)
+        button = wx.Button(this, wx.ID_CANCEL)
+        buttonSizer.AddButton(button)
+        buttonSizer.Realize()
+
+        sizer.Add(buttonSizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+
+        this.SetSizer(sizer)
+        sizer.Fit(this)
+
+    def onCleanUp(this, e):
+        ExportOffDialog.cleanUp = this.cleanUpGui.GetValue()
+	if ExportOffDialog.cleanUp:
+	    this.floatMarginGui.Enable()
+	else:
+	    this.floatMarginGui.Disable()
+
+    def getCleanUp(this):
+        return this.cleanUpGui.GetValue()
+
+    def onPrecision(this, e):
+        ExportOffDialog.precision = this.precisionGui.GetValue()
+
+    def getPrecision(this):
+        return this.precisionGui.GetValue()
+
+    def onFloatMargin(this, e):
+        ExportOffDialog.floatMargin = this.floatMarginGui.GetValue()
+
+    def getFloatMargin(this):
+        return this.floatMarginGui.GetValue()
 
 class ExportPsDialog(wx.Dialog):
     scaling = 50
