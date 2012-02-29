@@ -3015,7 +3015,7 @@ class IsometricShape(CompoundShape):
             except KeyError: pass
             if not (Vs == None and Ns == None):
                 this.baseShape.setVertexProperties(Vs = Vs, Ns = Ns)
-                this.mergeNeeded = True
+		this.applySymmetryNeeded = True
             radius = None
             try: radius = dict['radius']
             except KeyError: pass
@@ -3059,7 +3059,7 @@ class IsometricShape(CompoundShape):
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
                 this.baseShape.setEdgeProperties(Es = dict['Es'])
-                this.mergeNeeded = True
+		this.applySymmetryNeeded = True
             radius = None
             try: radius = dict['radius']
             except KeyError: pass
@@ -3109,7 +3109,7 @@ class IsometricShape(CompoundShape):
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
                 this.baseShape.setFaceProperties(Fs = dict['Fs'])
-                this.mergeNeeded = True
+		this.applySymmetryNeeded = True
             if 'colors' in dict and dict['colors'] != None:
                 this.setFaceColors([dict['colors']])
                 # taken care of by the function above:
@@ -3139,9 +3139,9 @@ class IsometricShape(CompoundShape):
             if this.unfoldOrbit:
                 if this.mergeNeeded:
                     this.mergeShapes()
-                this.SimpleShape.glDraw(this)
+                this.SimpleShape.glDraw()
             else:
-                CompoundShape.glDraw(this)
+                CompoundShape.glDraw()
 
     def toPsPiecesStr(this,
             faceIndices = [],

@@ -469,7 +469,7 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
                 Vec([h5[0], h5[1], h5[2]]),
                 Vec([h6[0], h6[1], h6[2]])
             ],
-            [Vec(N)]
+            Vec(N)
         )
 
 class EqlHeptagonShape(Geom3D.IsometricShape):
