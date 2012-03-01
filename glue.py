@@ -262,7 +262,6 @@ def cleanUpVsFs(Vs, Fs):
     vUsage = getVUsageIn2D(Vs, Fs)
     vRemoved = [0 for x in vUsage]
     notUsed = 0 # counts the amount of vertices that are not used until vertex i
-    print 'Clean up unused Vs'
     for i in range(len(vUsage)):
         # If the vertex is not used
         if vUsage[i - notUsed] == 0:

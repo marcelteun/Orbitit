@@ -166,18 +166,19 @@ class doc:
             print 'len(Vs):', len(Vs)
             print 'Lines[0]:', Lines[0]
         vStr = '/vertices [\n'
-        formatStr = '%%s  [%%.%df %%.%df] %%%% %%d\n' % (precision, precision)
-        bboxFormatStr = '/bbox [%%.%df %%.%df %%.%df %%.%df] def' % (
-                precision, precision, precision, precision
-            )
         # use copies, for the cleanup
         Vs = [[c for c in v] for v in Vs]
         Lines = [[i for i in l] for l in Lines]
         # sometimes the Vs contains many more vertices then needed: clean up:
-        glue.cleanUp(Vs, Lines)
+        glue.cleanUpVsFs(Vs, Lines)
         for i in range(len(Vs)):
             v = Vs[i]
-            vStr = formatStr % (vStr, v[0], v[1], i)
+            vStr = '%s  [%s %s] %% %d\n' % (
+		vStr,
+		glue.f2s(v[0], precision),
+		glue.f2s(v[1], precision),
+		i
+	    )
         vStr = '%s] def' % vStr
         fStr = '/faces ['
         maxX = maxY = -sys.maxint-1 # 2-complement
@@ -192,7 +193,12 @@ class doc:
                 if v[1] > maxY: maxY = v[1]
                 oneFaceStr = '%s %d' % (oneFaceStr, vNr)
             fStr = '%s [%s]' % (fStr, oneFaceStr)
-        bboxStr = bboxFormatStr % (minX, minY, maxX, maxY)
+        bboxStr = '/bbox [%s %s %s %s] def' % (
+	    glue.f2s(minX, precision),
+	    glue.f2s(minY, precision),
+	    glue.f2s(maxX, precision),
+	    glue.f2s(maxY, precision)
+	)
         fStr = '%s] def' % fStr
         scalingStr = '/scalingSize %d def' % scaling
         addBBoxStr = ""
@@ -218,7 +224,7 @@ class doc:
 /dy bbox 3 get bbox 1 get sub scalingSize mul def
 
 gsave
-  bbox 0 get scalingSize mul neg 
+  bbox 0 get scalingSize mul neg
   bbox 1 get scalingSize mul neg
   translate
   faces aload length { %%repeat
