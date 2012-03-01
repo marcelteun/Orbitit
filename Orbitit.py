@@ -534,7 +534,7 @@ class MainWindow(wx.Frame):
 			fd.write(
 			    this.panel.getShape().toOffStr(precision, False))
 		    else:
-			# integrate into Geom3D?
+			# TODO integrate into Geom3D?
 			pVs = shape.getVertexProperties()
 			pFs = shape.getFaceProperties()
 			Vs = copy.copy(pVs['Vs'])
