@@ -504,6 +504,7 @@ class MainWindow(wx.Frame):
         fileChoosen = False
         while not fileChoosen:
 	    if dlg.ShowModal() == wx.ID_OK:
+                extraInfo = dlg.getExtraInfo()
                 cleanUp = dlg.getCleanUp()
                 precision = dlg.getPrecision()
                 margin = dlg.getFloatMargin()
@@ -546,7 +547,7 @@ class MainWindow(wx.Frame):
 			s = Geom3D.SimpleShape([], [], [])
 			s.setVertexProperties(pVs)
 			s.setFaceProperties(pFs)
-			fd.write(s.toOffStr(precision, info = False))
+			fd.write(s.toOffStr(precision, extraInfo))
 		    print "OFF file written"
 		    this.setStatusStr("OFF file written")
 		    fd.close()
@@ -1433,6 +1434,7 @@ class ExportOffDialog(wx.Dialog):
     precision = 10
     floatMargin = 10
     cleanUp = False
+    extraInfo = False
     """
     Dialog for exporting a polyhedron to a PS file.
 
@@ -1474,6 +1476,13 @@ class ExportOffDialog(wx.Dialog):
         hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
+	this.extraInfoGui = wx.CheckBox(this,
+		label = 'Print extra info')
+	this.extraInfoGui.SetValue(this.extraInfo)
+	this.extraInfoGui.Bind(wx.EVT_CHECKBOX, this.onExtraInfo)
+        sizer.Add(this.extraInfoGui,
+	    0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+
 	this.cleanUpGui = wx.CheckBox(this,
 		label = 'Merge equal vertices (can take a while)')
 	this.cleanUpGui.SetValue(this.cleanUp)
@@ -1508,6 +1517,12 @@ class ExportOffDialog(wx.Dialog):
 
         this.SetSizer(sizer)
         sizer.Fit(this)
+
+    def onExtraInfo(this, e):
+        ExportOffDialog.extraInfo = this.extraInfoGui.GetValue()
+
+    def getExtraInfo(this):
+        return this.extraInfoGui.GetValue()
 
     def onCleanUp(this, e):
         ExportOffDialog.cleanUp = this.cleanUpGui.GetValue()
