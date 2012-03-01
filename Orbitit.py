@@ -532,21 +532,21 @@ class MainWindow(wx.Frame):
 			pass
 		    if not cleanUp:
 			fd.write(
-			    this.panel.getShape().toOffStr(precisions, False))
+			    this.panel.getShape().toOffStr(precision, False))
 		    else:
 			# integrate into Geom3D?
 			pVs = shape.getVertexProperties()
 			pFs = shape.getFaceProperties()
 			Vs = copy.copy(pVs['Vs'])
 			Fs = copy.copy(pFs['Fs'])
-			glue.mergeVs(Vs, Fs)
+			glue.mergeVs(Vs, Fs, precision)
 			glue.cleanUpVsFs(Vs, Fs)
 			pVs['Vs'] = Vs
 			pFs['Fs'] = Fs
 			s = Geom3D.SimpleShape([], [], [])
 			s.setVertexProperties(pVs)
 			s.setFaceProperties(pFs)
-			fd.write(s.toOffStr(info = False))
+			fd.write(s.toOffStr(precision, info = False))
 		    print "OFF file written"
 		    this.setStatusStr("OFF file written")
 		    fd.close()

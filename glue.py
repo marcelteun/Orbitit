@@ -278,7 +278,7 @@ def cleanUpVsFs(Vs, Fs):
             f[faceIndex] = f[faceIndex] - vRemoved[f[faceIndex]]
     return vUsage
 
-def mergeVs(Vs, Fs, margin = 1.e-12):
+def mergeVs(Vs, Fs, precision = 12):
     """
     Merges vertices that are equal into one vertex.
 
@@ -291,7 +291,7 @@ def mergeVs(Vs, Fs, margin = 1.e-12):
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
     org_margin = GeomTypes.eqFloatMargin
-    GeomTypes.eqFloatMargin = margin
+    GeomTypes.eqFloatMargin = math.pow(10, -precision)
     print 'Merge Vs\n',
     for i in range(len(Vs) - 1, -1, -1):
 	print '\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)),
