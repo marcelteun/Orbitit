@@ -1729,15 +1729,18 @@ class SimpleShape:
             s = w('# circumscribed sphere(s): %s' % str(this.spheresRadii.circumscribed))
             d = this.createDihedralAngles()
             for a, Es in d.iteritems():
-                s = w('# Dihedral angle: %0.12f rad (%0.12f degrees) for %d edges'
-                            % (a, a*Rad2Deg, len(Es))
-                        )
+                s = w('# Dihedral angle: %s rad (%s degrees) for %d edges' % (
+		    glue.f2s(a, precision),
+		    glue.f2s(a*Rad2Deg, precision),
+		    len(Es)
+		))
                 if len(Es) > 2:
                     s = w('#                 E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
             l2e = this.createEdgeLengths()
             for l, Es in l2e.iteritems():
-                s = w('# Length: %0.12f for %d edges' % (l, len(Es))
-                        )
+                s = w('# Length: %s for %d edges' % (
+		    glue.f2s(l, precision), len(Es)
+		))
                 if len(Es) > 2:
                     s = w('#         E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
         s = w('# Vertices Faces Edges')
@@ -1745,9 +1748,12 @@ class SimpleShape:
         nrOfEdges = len(this.Es)/2
         s = w('%d %d %d' % (len(this.Vs), nrOfFaces, nrOfEdges))
         s = w('# Vertices')
-        formatStr = '%%0.%df %%0.%df %%0.%df' % (precision, precision, precision)
         for V in this.Vs:
-            s = w(formatStr % (V[0], V[1], V[2]))
+            s = w('%s %s %s' % (
+		glue.f2s(V[0], precision),
+		glue.f2s(V[1], precision),
+		glue.f2s(V[2], precision)
+	    ))
         s = w('# Sides and colours')
         # this.colorData[1] = [] : use this.colorData[0][0]
         # this.colorData[1] = [c0, c1, .. cn] where ci is an index i
@@ -1778,8 +1784,10 @@ class SimpleShape:
                 color = this.colorData[0][this.colorData[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s = '%s%s\n' % (s, faceStr(face))
-                fnStr = formatStr % (
-                        this.fNs[i][0], this.fNs[i][1], this.fNs[i][2]
+                fnStr = '%s %s %s' % (
+                        glue.f2s(this.fNs[i][0], precision),
+			glue.f2s(this.fNs[i][1], precision),
+			glue.f2s(this.fNs[i][2], precision)
                     )
                 if info:
                     s = w('# face normal: %s' % fnStr)
