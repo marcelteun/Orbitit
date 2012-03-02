@@ -535,7 +535,7 @@ class MainWindow(wx.Frame):
 			fd.write(
 			    this.panel.getShape().toOffStr(precision, False))
 		    else:
-			# TODO integrate into Geom3D?
+			# TODO integrate into Geom3, see also onSaveAsPs?
 			pVs = shape.getVertexProperties()
 			pFs = shape.getFaceProperties()
 			Vs = copy.copy(pVs['Vs'])
@@ -588,9 +588,26 @@ class MainWindow(wx.Frame):
                     # Note: if file exists is part of file dlg...
                     fd = open(os.path.join(this.exportDirName, this.filename), 'w')
                     #print 'onSaveAsPs: toPsPiecesStr:',  scalingFactor, precision, margin
+		    shape = this.panel.getShape()
+		    try:
+			shape = shape.SimpleShape
+		    except AttributeError:
+			pass
                     try:
+			# TODO integrate into Geom3D, see also onSaveAsOff?
+			pVs = shape.getVertexProperties()
+			pFs = shape.getFaceProperties()
+			Vs = copy.copy(pVs['Vs'])
+			Fs = copy.copy(pFs['Fs'])
+			glue.mergeVs(Vs, Fs, precision)
+			glue.cleanUpVsFs(Vs, Fs)
+			pVs['Vs'] = Vs
+			pFs['Fs'] = Fs
+			s = Geom3D.SimpleShape([], [], [])
+			s.setVertexProperties(pVs)
+			s.setFaceProperties(pFs)
                         fd.write(
-                            this.panel.getShape().toPsPiecesStr(
+                            s.toPsPiecesStr(
                                 scaling = scalingFactor,
                                 precision = precision,
                                 margin = math.pow(10, -margin)
