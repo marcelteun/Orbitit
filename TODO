@@ -7,6 +7,8 @@ Ongoing
 
 2012-03-01 - 1
 
+2012-03-03 - 16:28 print to PS from orbit scene.
+
 -------------------------------------------------------------------------------
 2012-02-14 - 1
 move export to PS stuff from 'working branch' to master and check where the
@@ -24,6 +26,13 @@ fix empty OFF file read
 print:
 	use a class for printing reprs, to handle indent, unindent. The init
 	method should derive from a string, perhaps. Does is already exist?
+
+Orbitit - Geom3D:
+	2012-03-03 - 16:28
+	THe orbit scene creates compounds of symmetric shapes now, so output to
+	PS checks all the faces again, while only the faces from the base shape
+	are needed. Fix this. First and mainly for compounds of 1 shape.
+
 Orbitit:
 	2012-02-12
 	Add view settings: list all faces by length and choose colour
@@ -52,6 +61,9 @@ Scenes:
 	general scenes file (from Scene_Orbit.py).
 
 Geom3D:
+	2012-03-03 - 16:33
+	The cleaned up shape could destroy the colours if faces are deleted.
+
 	2012-02-11
 	export to PS: print faces that ly in the same plane on top of each other
 

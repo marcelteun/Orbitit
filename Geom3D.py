@@ -22,6 +22,7 @@
 #------------------------------------------------------------------
 
 
+import copy
 import math
 import rgb
 import glue
@@ -890,6 +891,27 @@ class SimpleShape:
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
         return s
+
+    def cleanShape(this, precision):
+	"""Return a new shape for which vertices are merged and degenerated faces are deleted.
+
+	The shape will not have any edges.
+	"""
+	vProps = this.getVertexProperties()
+	fProps = this.getFaceProperties()
+	cpVs = copy.copy(vProps['Vs'])
+	cpFs = copy.copy(fProps['Fs'])
+	glue.mergeVs(cpVs, cpFs, precision)
+	# this may result on less faces, which breaks the colours!
+	# TODO either update the colors immediately or return an array with
+	# deleted face indices.
+	glue.cleanUpVsFs(cpVs, cpFs)
+	vProps['Vs'] = cpVs
+	fProps['Fs'] = cpFs
+	shape = SimpleShape([], [], [])
+	shape.setVertexProperties(vProps)
+	shape.setFaceProperties(fProps)
+	return shape
 
     def setVs(this, Vs):
         this.setVertexProperties(Vs = Vs)
