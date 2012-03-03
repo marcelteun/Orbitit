@@ -30,7 +30,6 @@ import Scenes3D
 import GeomTypes
 import Geom3D
 import wx
-from copy import copy
 
 from OpenGL.GLU import *
 from OpenGL.GL import *

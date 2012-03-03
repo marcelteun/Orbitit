@@ -899,8 +899,8 @@ class SimpleShape:
 	"""
 	vProps = this.getVertexProperties()
 	fProps = this.getFaceProperties()
-	cpVs = copy.copy(vProps['Vs'])
-	cpFs = copy.copy(fProps['Fs'])
+	cpVs = copy.deepcopy(vProps['Vs'])
+	cpFs = copy.deepcopy(fProps['Fs'])
 	glue.mergeVs(cpVs, cpFs, precision)
 	# this may result on less faces, which breaks the colours!
 	# TODO either update the colors immediately or return an array with

@@ -4,7 +4,6 @@ import math
 #import re
 import GeomTypes
 import isometry
-#from copy import copy
 
 def setup(**kwargs): return kwargs
 
