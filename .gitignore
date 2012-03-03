@@ -9,7 +9,6 @@ logs
 out
 polyhEqlHept
 tmp
-tst
 
 # general files
 *.pyc
