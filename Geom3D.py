@@ -419,7 +419,11 @@ class Line2D(Line):
         """
         return this.getPoint(this.intersectLineGetFactor(l))
 
-    def intersectWithFacet(this, FacetVs, iFacet, z0 = 0.0, margin = defaultFloatMargin):
+    def intersectWithFacet(this, FacetVs, iFacet,
+	z0 = 0.0,
+	margin = defaultFloatMargin ,
+	suppressWarn = False
+    ):
         """
         Intersect the 2D line object in plane z = Z0 with a 3D facet and return
         the factors of the line where it intersects the edges.
@@ -570,17 +574,21 @@ class Line2D(Line):
                 allowOddNrOfIntersections = True
             else:
                 # more than 2: complex cases.
-                print 'WARNING: intersections through more than 2 vertices', \
-                                                            '(not on one edge)'
-                print '         vertexIntersections', vertexIntersections
-                print '         pOnLineAtEdges', pOnLineAtEdges
-                print '         will draw one long line, instead of segments'
+		if not suppressWarn:
+			print 'WARNING: intersections through more than 2',\
+						'vertices (not on one edge)'
+			print '         vertexIntersections',\
+							vertexIntersections
+			print '         pOnLineAtEdges', pOnLineAtEdges
+			print '         will draw one long line, instead of'\
+								'segments'
                 #assert False, 'ToDo'
                 # if an assert is not wanted, choose pass.
                 #allowOddNrOfIntersections = True
                 pOnLineAtEdges.sort()
                 pOnLineAtEdges = [pOnLineAtEdges[0], pOnLineAtEdges[-1]]
-                print '         using pOnLineAtEdges', pOnLineAtEdges
+		if not suppressWarn:
+			print '         using pOnLineAtEdges', pOnLineAtEdges
                 pass
         pOnLineAtEdges.sort()
 
@@ -1824,7 +1832,8 @@ class SimpleShape:
             scaling = 1,
             precision = 7,
             margin = 1.0e5*defaultFloatMargin,
-            pageSize = PS.PageSizeA4
+            pageSize = PS.PageSizeA4,
+	    suppressWarn = False
         ):
         """
         Returns a string in PS format that shows the pieces of faces that can
@@ -1973,7 +1982,8 @@ class SimpleShape:
                         # call. The line is in the plane of the facet and we want to
                         # know where it shares edges.
                         pInLoiFacet = loi2D.intersectWithFacet(Vs,
-                                intersectingFacet, Loi3D.p[2], margin)
+                                intersectingFacet, Loi3D.p[2],
+				margin, suppressWarn)
                         if debug: print 'pInLoiFacet', pInLoiFacet
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
@@ -1986,7 +1996,7 @@ class SimpleShape:
                     # Now Intersect loi with the baseFacets.
                     for baseFacet in baseFacets:
                         pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet,
-                                loiData[2], margin)
+                                loiData[2], margin, suppressWarn)
                         if debug: print 'pInLoiBase', pInLoiBase
                         # Now combine the results of pInLoiFacet and pInLoiBase:
                         # Only keep intersections that fall within 2 segments for
@@ -2054,7 +2064,8 @@ class SimpleShape:
 
     def intersectFacets(this,
             faceIndices = [],
-            margin = 1.0e5*defaultFloatMargin
+            margin = 1.0e5*defaultFloatMargin,
+	    suppressWarn = False
         ):
         """
         Returns a simple shape object for which the faces do not intersect
@@ -2236,7 +2247,7 @@ class SimpleShape:
                         # call. The line is in the plane of the facet and we want to
                         # know where it shares edges.
                         pInLoiFacet = loi2D.intersectWithFacet(Vs,
-                                intersectingFacet, Loi3D.p[2], margin)
+			    intersectingFacet, Loi3D.p[2], margin, suppressWarn)
                         if debug: print 'pInLoiFacet', pInLoiFacet
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
@@ -2264,7 +2275,7 @@ class SimpleShape:
                 # Now Intersect loi with the baseFacets.
                 for baseFacet in baseFacets:
                     pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet,
-                            loiData[2], margin)
+			loiData[2], margin, suppressWarn)
                     if debug: print 'pInLoiBase', pInLoiBase
                     # Now combine the results of pInLoiFacet and pInLoiBase:
                     # Only keep intersections that fall within 2 segments for
@@ -2744,14 +2755,15 @@ class CompoundShape():
             scaling = 1,
             precision = 7,
             margin = 1.0e5*defaultFloatMargin,
-            pageSize = PS.PageSizeA4
+            pageSize = PS.PageSizeA4,
+	    suppressWarn = False
     ):
         if this.dbgTrace:
             print '%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name)
 	if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape.toPsPiecesStr(
-            faceIndices, scaling, precision, margin, pageSize)
+            faceIndices, scaling, precision, margin, pageSize, suppressWarn)
 
     def toX3dDoc(this, id = 'SISH', precision = 5, edgeRadius = 0):
         if this.dbgTrace:
@@ -3180,7 +3192,8 @@ class IsometricShape(CompoundShape):
             scaling = 1,
             precision = 7,
             margin = 1.0e5*defaultFloatMargin,
-            pageSize = PS.PageSizeA4
+            pageSize = PS.PageSizeA4,
+	    suppressWarn = False
         ):
         if this.dbgTrace:
             print '%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name)
@@ -3190,7 +3203,7 @@ class IsometricShape(CompoundShape):
             # no need to print all faces in orbited, because of symmetry
             faceIndices = range(len(this.baseShape.Fs))
         return this.SimpleShape.toPsPiecesStr(
-            faceIndices, scaling, precision, margin, pageSize)
+            faceIndices, scaling, precision, margin, pageSize, suppressWarn)
 
 class SymmetricShape(IsometricShape):
     dbgPrn = False
