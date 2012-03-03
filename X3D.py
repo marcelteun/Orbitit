@@ -20,35 +20,6 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
-# $Log: X3D.py,v $
-# Revision 1.8  2006/11/30 20:47:32  teun
-# ''
-#
-# Revision 1.6  2005/12/31 08:38:18  teun
-# small fixes
-#
-# Revision 1.5  2005/08/12 10:08:22  teun
-# fixed prototype for vrml
-#
-# Revision 1.4  2005/08/11 15:54:13  teun
-# Fixes while converting S4xICompounds.py
-#
-# Revision 1.3  2005/08/10 11:09:50  teun
-# added X3D headers, meta, scene and routes
-# fixed a bit in strings and node arrays (for children)
-# tested main for wrl and x3d
-#
-# Revision 1.2  2005/08/09 13:05:08  teun
-# add X3D formatting
-# removed special node functions
-# next: X3D headers, meta, scene
-# etc
-#
-# Revision 1.1  2005/08/09 11:22:42  teun
-# Initial revision
-#
-
-# TODO: use valueToX3DStr function, like valueToVrmlStr.
 
 import string
 import time

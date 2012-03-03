@@ -19,18 +19,6 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #--------------------------------------------------------------------
-#
-# $Log: Scene_EqlHeptS4A4.py,v $
-# Revision 1.2  2008/10/03 20:09:51  marcelteun
-# Bridges2008 changes: window position
-#
-# Revision 1.1.1.1  2008/07/05 10:35:43  marcelteun
-# Imported sources
-#
-# Revision 1.1  2008/06/18 05:31:54  teun
-# Initial revision
-#
-#
 
 import wx
 import math

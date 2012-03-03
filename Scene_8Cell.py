@@ -19,9 +19,6 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-# $Log$
-#
-#
 
 import wx
 import math

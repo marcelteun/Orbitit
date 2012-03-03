@@ -20,11 +20,6 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
-# $Log: PS.py,v $
-# Revision 1.1  2006/09/15 15:15:57  teun
-# Initial revision
-#
-# 
 
 import sys
 import glue

@@ -20,21 +20,6 @@
 # or write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #--------------------------------------------------------------------
-# 
-# $Log: Scene_EqlHeptA5xI_GD.py,v $
-# Revision 1.3  2008/10/04 21:13:29  marcelteun
-# fix for undestroyed boxes in Ubuntu Hardy Heron
-#
-# Revision 1.2  2008/10/03 20:09:51  marcelteun
-# Bridges2008 changes: window position
-#
-# Revision 1.1.1.1  2008/07/05 10:35:42  marcelteun
-# Imported sources
-#
-# Revision 1.1  2008/06/18 05:31:54  teun
-# Initial revision
-#
-#
 
 import wx
 import math
