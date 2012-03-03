@@ -28,11 +28,16 @@ echo -n "$ccgray"
 obj="5cubes"
 tst="export $obj to PS"
 ./Orbitit.py -p tst/$obj.off tst/tst.ps
-diff_test "tst/tst.ps" "tst/$obj.ps"
+diff_test "tst/$obj.ps" "tst/tst.ps"
 
 obj="MW115"
 tst="export $obj to PS"
 ./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
-diff_test "tst/tst.ps" "tst/$obj.ps"
+diff_test "tst/$obj.ps" "tst/tst.ps"
+
+obj="MW117"
+tst="export $obj to PS"
+./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
+diff_test "tst/$obj.ps" "tst/tst.ps"
 
 rm tst/tst.ps
