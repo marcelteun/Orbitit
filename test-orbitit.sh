@@ -16,12 +16,23 @@ function pass()
 	echo "test $1 $ccbgreen"passed"$ccgray"
 }
 
+function diff_test()
+{
+	echo -n "$ccdefault"
+	diff $1 $2 > /dev/null && pass "$tst" || fail "$tst"
+}
+
 echo -n "$ccgray"
 
-# test output to PS
-./Orbitit.py -p tst/5cubes.off tst/tst.ps
-echo -n "$ccdefault"
-test="export 5cubes to PS"
-diff tst/tst.ps tst/5cubes.ps > /dev/null && pass "$test" || fail "$test"
+# test: output to PS
+obj="5cubes"
+tst="export $obj to PS"
+./Orbitit.py -p tst/$obj.off tst/tst.ps
+diff_test "tst/tst.ps" "tst/$obj.ps"
+
+obj="MW115"
+tst="export $obj to PS"
+./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
+diff_test "tst/tst.ps" "tst/$obj.ps"
 
 rm tst/tst.ps
