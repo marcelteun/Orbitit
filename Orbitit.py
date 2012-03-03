@@ -1634,13 +1634,14 @@ class ExportPsDialog(wx.Dialog):
     def getFloatMargin(this):
         return this.floatMarginGui.GetValue()
 
-def convertToPs(i_fd, o_fd, scale = 50, precision = 12):
+def convertToPs(i_fd, o_fd, scale, margin, precision):
     shape = Geom3D.readOffFile(i_fd, recreateEdges = True)
     o_fd.write(
 	shape.toPsPiecesStr(
 	    scaling = scale,
 	    precision = precision,
-	    margin = math.pow(10, -precision),
+	    margin = math.pow(10, -margin),
+	    suppressWarn = True
 	)
     )
 
@@ -1661,6 +1662,11 @@ Options:
 	-f <file>
 	--off=<file> export to a python fyle defing a shape that can be read by
 	             other programs, like Antiprism and Stella.
+
+	-m <int>
+	--margin=<int> set the margin for floating point numbers to be
+	               considered equal. All numbers with a difference that is
+		       smaller than 1.0e-<int> will be considered equal.
     """
     sys.exit(exit_nr)
 
@@ -1674,21 +1680,28 @@ import getopt
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],
-	'fpsy:', ['off', 'ps', 'scene=', 'py'])
+	'fm:psy:', ['off', '--margin=', 'ps', 'scene=', 'py'])
 except getopt.GetoptError, err:
     print str(err)
     usage(2)
 
+# defaults:
+scale = 50
+margin = 10
+precision = 12
+
 oper = None
 for opt, opt_arg in opts:
-    if opt in ('-p', '--ps'):
+    if opt in ('-f', '--off'):
+	oper = op.toOff
+    elif opt in ('-m', '--margin'):
+	margin = int(opt_arg)
+    elif opt in ('-p', '--ps'):
 	oper = op.toPs
-    elif opt in ('-y', '--py'):
-	oper = op.toPy
     elif opt in ('-s', '--scene'):
 	oper = op.openScene
-    elif opt in ('-f', '--off'):
-	oper = op.toOff
+    elif opt in ('-y', '--py'):
+	oper = op.toPy
     else:
 	print "Error: unknown option"
 	usage(2)
@@ -1710,7 +1723,7 @@ if oper != None:
 	a_ind += 1
 
 if oper == op.toPs:
-    convertToPs(i_fd, o_fd)
+    convertToPs(i_fd, o_fd, scale, margin, precision)
 elif oper == op.toOff:
     print "TODO"
 elif oper == op.toPy:
