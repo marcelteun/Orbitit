@@ -3149,7 +3149,7 @@ class IsometricShape(CompoundShape):
                     this.mergeShapes()
                 this.SimpleShape.glDraw()
             else:
-                CompoundShape.glDraw()
+                CompoundShape.glDraw(this)
 
     def toPsPiecesStr(this,
             faceIndices = [],
