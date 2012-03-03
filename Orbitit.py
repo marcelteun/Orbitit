@@ -530,7 +530,7 @@ class MainWindow(wx.Frame):
 		    except AttributeError:
 			pass
 		    if cleanUp:
-			shape = shape.cleanShape(precision)
+			shape = shape.cleanShape(margin)
 		    fd.write(shape.toOffStr(precision, extraInfo))
 		    print "OFF file written"
 		    this.setStatusStr("OFF file written")
@@ -576,7 +576,7 @@ class MainWindow(wx.Frame):
 			shape = shape.SimpleShape
 		    except AttributeError:
 			pass
-		    shape = shape.cleanShape(precision)
+		    shape = shape.cleanShape(margin)
                     try:
                         fd.write(
                             shape.toPsPiecesStr(
@@ -1420,7 +1420,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         #    pass
 
 class ExportOffDialog(wx.Dialog):
-    precision = 10
+    precision = 12
     floatMargin = 10
     cleanUp = False
     extraInfo = False
@@ -1537,7 +1537,7 @@ class ExportOffDialog(wx.Dialog):
 
 class ExportPsDialog(wx.Dialog):
     scaling = 50
-    precision = 10
+    precision = 12
     floatMargin = 10
     """
     Dialog for exporting a polyhedron to a PS file.
@@ -1634,7 +1634,7 @@ class ExportPsDialog(wx.Dialog):
     def getFloatMargin(this):
         return this.floatMarginGui.GetValue()
 
-def convertToPs(i_fd, o_fd, scale = 50, precision = 10):
+def convertToPs(i_fd, o_fd, scale = 50, precision = 12):
     shape = Geom3D.readOffFile(i_fd, recreateEdges = True)
     o_fd.write(
 	shape.toPsPiecesStr(
