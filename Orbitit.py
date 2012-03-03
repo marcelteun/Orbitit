@@ -254,7 +254,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
 
 class MainWindow(wx.Frame):
     wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py|"
-    def __init__(this, TstScene, shape, argv, *args, **kwargs):
+    def __init__(this, TstScene, shape, p_args, *args, **kwargs):
         wx.Frame.__init__(this, *args, **kwargs)
         this.addMenuBar()
         this.statusBar = this.CreateStatusBar()
@@ -263,10 +263,10 @@ class MainWindow(wx.Frame):
         this.importDirName = '.'
         this.viewSettingsWindow = None
         this.scene = None
-	if len(argv) > 1 and (
-	    argv[1][-4:] == '.off' or argv[1][-3:] == '.py'
+	if len(p_args) > 0 and (
+	    p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
 	):
-	    shape = this.openFile(argv[1])
+	    shape = this.openFile(p_args[0])
 	this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
@@ -1662,16 +1662,105 @@ class ExportPsDialog(wx.Dialog):
     def getFloatMargin(this):
         return this.floatMarginGui.GetValue()
 
-app = wx.PySimpleApp()
-frame = MainWindow(
-        Canvas3DScene,
-        Geom3D.SimpleShape([], []),
-	sys.argv,
-        None,
-	wx.ID_ANY, "test",
-        size = (430, 482),
-        pos = wx.Point(980, 0)
+def convertToPs(i_fd, o_fd, scale = 50, precision = 10):
+    shape = Geom3D.readOffFile(i_fd, recreateEdges = True)
+    o_fd.write(
+	shape.toPsPiecesStr(
+	    scaling = scale,
+	    precision = precision,
+	    margin = math.pow(10, -precision),
+	)
     )
-if (len(sys.argv) == 1):
-    frame.setScene(SceneList[DefaultScene])
-app.MainLoop()
+
+def usage(exit_nr):
+    print """
+usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
+
+Without any specified options ut starts the program in the default scene.
+Options:
+
+	-p --ps      export to PS. The input file is either a python scrypt,
+		     specified by -y or an off file, specified by -f. If no
+		     argument is specified, the the result is piped to stdout.
+	-y <file>
+	--py=<file>  export to a python fyle defing a shape that can be
+	             interpreted by Orbitit
+
+	-f <file>
+	--off=<file> export to a python fyle defing a shape that can be read by
+	             other programs, like Antiprism and Stella.
+    """
+    sys.exit(exit_nr)
+
+class op:
+    toPs = 1
+    toOff = 2
+    toPy = 2
+    openScene = 3
+
+import getopt
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:],
+	'fpsy:', ['off', 'ps', 'scene=', 'py'])
+except getopt.GetoptError, err:
+    print str(err)
+    usage(2)
+
+oper = None
+for opt, opt_arg in opts:
+    if opt in ('-p', '--ps'):
+	oper = op.toPs
+    elif opt in ('-y', '--py'):
+	oper = op.toPy
+    elif opt in ('-s', '--scene'):
+	oper = op.openScene
+    elif opt in ('-f', '--off'):
+	oper = op.toOff
+    else:
+	print "Error: unknown option"
+	usage(2)
+
+o_fd = None
+i_fd = None
+a_ind = 0
+if oper != None:
+    if len(args) <= a_ind:
+	print "reading from std input"
+	i_fd = sys.stdin
+    else:
+	i_fd = open(args[a_ind], 'r')
+	a_ind += 1
+    if len(args) <= a_ind:
+	o_fd = sys.stdout
+    else:
+	o_fd = open(args[a_ind], 'w')
+	a_ind += 1
+
+if oper == op.toPs:
+    convertToPs(i_fd, o_fd)
+elif oper == op.toOff:
+    print "TODO"
+elif oper == op.toPy:
+    print "TODO"
+else:
+    if oper == op.openScene:
+	print "TODO"
+    app = wx.PySimpleApp()
+    frame = MainWindow(
+	    Canvas3DScene,
+	    Geom3D.SimpleShape([], []),
+	    args,
+	    None,
+	    wx.ID_ANY, "test",
+	    size = (430, 482),
+	    pos = wx.Point(980, 0)
+	)
+    if (len(args) == 0):
+	frame.setScene(SceneList[DefaultScene])
+    app.MainLoop()
+
+print "Done"
+
+if o_fd != None: o_fd.close()
+if i_fd != None: i_fd.close()

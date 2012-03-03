@@ -1836,9 +1836,11 @@ class SimpleShape:
         try:
             for i in faceIndices:
 		if not debug:
-		    print '\rchecking face %d (of %d)' % (
-						    i + 1, len(faceIndices)),
-		sys.stdout.flush()
+		    # write to stderr, since we might we writing the model
+		    # itself to stdout, which might be piped to a file
+		    sys.stderr.write( '\rchecking face %d (of %d)' % (
+						    i + 1, len(faceIndices))),
+		    sys.stderr.flush()
                 Vs = []
                 pointsIn2D = []
                 Es  = []

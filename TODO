@@ -1,12 +1,25 @@
 PRIO
+2012-03-01 - 4
+Ongoing
+
+2012-02-14 - 1 and 2012-02-26
+2012-03-01 - 2
+
+2012-03-01 - 1
 
 -------------------------------------------------------------------------------
-2012-02-14
+2012-02-14 - 1
 move export to PS stuff from 'working branch' to master and check where the
 MW115 error comes from
 
+2012-03-01 - 1
+	All: clean up white space (after merging back from new dev branch)
+
 2012-02-26
 Move rest of general fixes from 'working branch' to master branch
+
+2012-03-01 - 2
+fix empty OFF file read
 
 print:
 	use a class for printing reprs, to handle indent, unindent. The init
@@ -16,14 +29,17 @@ Orbitit:
 	Add view settings: list all faces by length and choose colour
 	These nrs can be used for exporting to PS: only export...
 
-	2012-02-14
+	2012-02-14 - 2
 	Enable start Orbitit with a specified scene
 	Open any python scene through File -> Open menu (call it plug-in?)
 
-	2012-02-14
+	2012-02-14 - 3
 	Open / Import python files
 
-	2012-02-14
+	2012-03-01 - 4
+	add command line parameters for auto test.
+
+	2012-02-14 - 4
 	handle pentagrams: in export to PS, it should be one edge. Perhaps you
 	should have them as pentagrams with 5 edges and handle the 3D stuff...
 	That will help for the new scene as well.
@@ -42,6 +58,9 @@ Geom3D:
 	2012-02-11
 	export to PS: show lines with problem with different colour
 
+	2012-03-01 - 3
+	extra info in toOffStr file: angles aren't merged that should have after
+	rounding.
 
 Scene_Orbit:
 	2012-02-26:
