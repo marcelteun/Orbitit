@@ -40,4 +40,9 @@ tst="export $obj to PS"
 ./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
 diff_test "tst/$obj.ps" "tst/tst.ps"
 
+obj="MW119"
+tst="export $obj to PS"
+./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
+diff_test "tst/$obj.ps" "tst/tst.ps"
+
 rm tst/tst.ps
