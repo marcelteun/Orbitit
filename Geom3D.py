@@ -174,6 +174,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
     """
     states = {'checkOff': 0, 'readSizes': 1, 'readVs': 2, 'readFs': 3, 'readOk': 4}
     nrOfVs = 0
+    nrOfFs = 0
     nrOfEs = 0
     Es = []
     i = 0
