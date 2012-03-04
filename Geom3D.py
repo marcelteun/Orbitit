@@ -288,6 +288,17 @@ def readOffFile(fd, recreateEdges = True, name = ''):
         shape.recreateEdges()
     return shape
 
+def saveFile(fd, shape):
+    """
+    Save a shape in a file descriptor
+
+    The caller still need to close the filde descriptor afterwards
+    """
+    fd.write("import GeomTypes\n")
+    fd.write("import Geom3D\n")
+    fd.write("import isometry\n")
+    fd.write("shape = %s" % repr(shape))
+
 class Fields:
     """
     This class is an empty class to be able to set some fields, like structures
@@ -900,6 +911,14 @@ class SimpleShape:
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
         return s
+
+    def saveFile(this, fd):
+	"""
+	Save a shape in a file descriptor
+
+	The caller still need to close the filde descriptor afterwards
+	"""
+	saveFile(fd, this)
 
     def cleanShape(this, precision):
 	"""Return a new shape for which vertices are merged and degenerated faces are deleted.
@@ -2454,6 +2473,14 @@ class CompoundShape():
 		s = '%s.%s' % (__name__, s)
 	    return s
 
+    def saveFile(this, fd):
+	"""
+	Save a shape in a file descriptor
+
+	The caller still need to close the filde descriptor afterwards
+	"""
+	saveFile(fd, this)
+
     def addShape(this, shape):
         """
         Add shape 'shape' to the current compound.
@@ -2851,7 +2878,6 @@ class IsometricShape(CompoundShape):
     def __repr__(this):
         if this.dbgTrace:
             print '%s.__repr__(%s,..):' % (this.__class__, name)
-	print 'TESTED? %s.__repr__(%s,..):' % (this.__class__, name)
 	# comment out class name, see comment at __fix_repr__ below:
 	#s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
         s = 'IsometricShape(\n  '
@@ -2944,7 +2970,6 @@ class IsometricShape(CompoundShape):
     def getFaceColors(this):
         if this.dbgTrace:
             print '%s.getFaceColors(%s,..):' % (this.__class__, this.name)
-	print 'TESTED? %s.getFaceColors(%s,..):' % (this.__class__, this.name)
         return this.shapeColors
 
     def applyColors(this):

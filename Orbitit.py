@@ -489,12 +489,8 @@ class MainWindow(wx.Frame):
             # TODO precision through setting:
 	    shape = this.panel.getShape()
 	    shape.name = this.filename
-            fd.write("import GeomTypes\n")
-            fd.write("import Geom3D\n")
-            fd.write("import isometry\n")
-            fd.write("shape = %s" % repr(shape))
+	    shape.saveFile(fd)
             this.setStatusStr("Python file written")
-            fd.close()
             this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
 
@@ -1634,8 +1630,21 @@ class ExportPsDialog(wx.Dialog):
     def getFloatMargin(this):
         return this.floatMarginGui.GetValue()
 
-def convertToPs(i_fd, o_fd, scale, margin, precision):
-    shape = Geom3D.readOffFile(i_fd, recreateEdges = True)
+def readShapeFile(filename):
+    if filename == None:
+	fd = sys.stdin
+    else:
+	if filename[-3:] == '.py':
+	    fd = open(filename, 'r')
+	    return Geom3D.readPyFile(fd)
+	elif filename[-4:] == '.off':
+	    fd = open(filename, 'r')
+	    return Geom3D.readOffFile(fd, recreateEdges = True)
+	else:
+	    print 'unrecognised file extension'
+	    return None
+
+def convertToPs(shape, o_fd, scale, margin, precision):
     o_fd.write(
 	shape.toPsPiecesStr(
 	    scaling = scale,
@@ -1670,17 +1679,17 @@ Options:
     """
     sys.exit(exit_nr)
 
-class op:
+class Oper:
     toPs = 1
     toOff = 2
-    toPy = 2
-    openScene = 3
+    toPy = 3
+    openScene = 4
 
 import getopt
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],
-	'fm:psy:', ['off', '--margin=', 'ps', 'scene=', 'py'])
+	'fm:psy', ['off', '--margin=', 'ps', 'scene=', 'py'])
 except getopt.GetoptError, err:
     print str(err)
     usage(2)
@@ -1693,28 +1702,27 @@ precision = 12
 oper = None
 for opt, opt_arg in opts:
     if opt in ('-f', '--off'):
-	oper = op.toOff
+	oper = Oper.toOff
     elif opt in ('-m', '--margin'):
 	margin = int(opt_arg)
     elif opt in ('-p', '--ps'):
-	oper = op.toPs
+	oper = Oper.toPs
     elif opt in ('-s', '--scene'):
-	oper = op.openScene
+	oper = Oper.openScene
     elif opt in ('-y', '--py'):
-	oper = op.toPy
+	oper = Oper.toPy
     else:
 	print "Error: unknown option"
 	usage(2)
 
 o_fd = None
-i_fd = None
 a_ind = 0
 if oper != None:
     if len(args) <= a_ind:
-	print "reading from std input"
-	i_fd = sys.stdin
+	print "reading python format from std input"
+	i_filename = None
     else:
-	i_fd = open(args[a_ind], 'r')
+	i_filename = args[a_ind]
 	a_ind += 1
     if len(args) <= a_ind:
 	o_fd = sys.stdout
@@ -1722,14 +1730,18 @@ if oper != None:
 	o_fd = open(args[a_ind], 'w')
 	a_ind += 1
 
-if oper == op.toPs:
-    convertToPs(i_fd, o_fd, scale, margin, precision)
-elif oper == op.toOff:
-    print "TODO"
-elif oper == op.toPy:
-    print "TODO"
+if oper == Oper.toPs:
+    shape = readShapeFile(i_filename)
+    if shape != None:
+	convertToPs(shape, o_fd, scale, margin, precision)
+elif oper == Oper.toOff:
+    print "TODO to Off"
+elif oper == Oper.toPy:
+    shape = readShapeFile(i_filename)
+    if shape != None:
+	shape.saveFile(o_fd)
 else:
-    if oper == op.openScene:
+    if oper == Oper.openScene:
 	print "TODO"
     app = wx.PySimpleApp()
     frame = MainWindow(
@@ -1748,4 +1760,3 @@ else:
 print "Done"
 
 if o_fd != None: o_fd.close()
-if i_fd != None: i_fd.close()
