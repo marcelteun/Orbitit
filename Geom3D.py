@@ -483,8 +483,13 @@ class Line2D(Line):
                 tEq1 = eq(t, 1, margin)
                 if (t >= 0 or tEq0) and (t <= 1 or tEq1):
                     if this.debug:
-                        print 'edge intersects plane z =', z0, 'in a point'
-                    s = this.getFactor(edgePV3D.getPoint(t), margin = margin)
+                        print 'edge intersects plane z =', z0,\
+			    'in a point (t = %f)' % (t)
+		    try:
+			s = this.getFactor(edgePV3D.getPoint(t),
+                                                                margin = margin)
+                    except PrecisionError:
+                        s = None
                 else:
                     if this.debug:
                         print 'edge intersects plane z =', z0, 'but only if exteded (t =', t, ')'
@@ -743,9 +748,9 @@ class Plane:
     + Nz z + D = 0 is the equation of the plane.
     """
     def __init__(this, P0, P1, P2):
-        assert(not P0 == P1)
-        assert(not P0 == P2)
-        assert(not P1 == P2)
+        assert(not P0 == P1), '\n  P0 = %s,\n  P1 = %s' % (str(P0), str(P1))
+        assert(not P0 == P2), '\n  P0 = %s,\n  P2 = %s' % (str(P0), str(P2))
+        assert(not P1 == P2), '\n  P1 = %s,\n  P2 = %s' % (str(P1), str(P2))
         this.N = this.norm(P0, P1, P2)
         this.D = -this.N * GeomTypes.Vec3(P0)
 
@@ -762,6 +767,8 @@ class Plane:
         If the planes are parallel None is returned (even if the planes define
         the same plane) otherwise a line is returned.
         """
+        if plane == None:
+            return None
         N0 = this.N
         N1 = plane.N
         if N0 == N1 or N0 == -N1:
@@ -795,6 +802,7 @@ def facePlane(Vs, face):
 
     Vs: the 3D vertex coordinates
     face: the indices in Vs that form the face.
+    Returns None if the vertices do not define a plane.
     """
     assert len(face) > 2, 'a face should at least be a triangle'
     #print len(Vs)
@@ -813,12 +821,14 @@ def facePlane(Vs, face):
                     Vs[face[fi_1]]
                 )
             planeFound = True
-        except ZeroDivisionError:
+        except ZeroDivisionError or AssertionError:
             fi_1 += 1
             if fi_1 >= len(face):
                 fi_0 += 1
                 fi_1 = fi_0 + 1
-                assert fi_1 < len(face), "This face is not a face (line or point?)"
+                if fi_1 >= len(face):
+                    print "Ignoring degenerate face (line or point?)"
+                    break
     return plane
 
 class SimpleShape:
@@ -1752,12 +1762,12 @@ class SimpleShape:
         return doc
 
 
-    def toOffStr(this, precision=15, info = False):
+    def toOffStr(this, precision = 15, info = False):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
 
-        precision: The precision that will be used for printing the coordinates
+        precision: the precision that will be used for printing the coordinates
                    of the vertices.
         """
         if this.dbgTrace:
@@ -1898,7 +1908,9 @@ class SimpleShape:
                 face = this.Fs[i]
                 # find out norm
                 if debug: print 'face idx:', face
-                norm = facePlane(this.Vs, face).N
+                face_pl = facePlane(this.Vs, face)
+                if face_pl == None: continue # not a face
+                norm = face_pl.N
                 if norm == None: continue # not a face.
                 if debug: print 'norm before', norm
                 # Find out how to rotate the faces such that the norm of the base face
@@ -2076,6 +2088,7 @@ class SimpleShape:
             # catching assertion errors, to be able to set back margin
             GeomTypes.eqFloatMargin = margin
             raise
+        print # print a line feed
 
         # restore margin
         GeomTypes.eqFloatMargin = orgMargin
@@ -2775,7 +2788,7 @@ class CompoundShape():
             print '%s.generateNormals(%s,..):' % (this.__class__, this.name)
 	return this.shapeElements[0].generateNormals
 
-    def toOffStr(this, precision=15, info = False):
+    def toOffStr(this, precision = 15, info = False):
         if this.dbgTrace:
             print '%s.toOffStr(%s,..):' % (this.__class__, this.name)
 	if this.mergeNeeded:
@@ -3002,7 +3015,8 @@ class IsometricShape(CompoundShape):
                 colorDataPerShape = this.shapeColors[:this.order],
             this.shapeColors = colorDataPerShape
         this.nrOfShapeColorDefs = len(this.shapeColors)
-        assert (this.nrOfShapeColorDefs == this.order), '%d != %d' % (this.nrOfShapeColorDefs, this.order)
+        assert (this.nrOfShapeColorDefs == this.order), '%d != %d' % (
+            this.nrOfShapeColorDefs, this.order)
 
     def applySymmetry(this):
         """
