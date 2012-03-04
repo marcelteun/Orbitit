@@ -2494,6 +2494,10 @@ class CompoundShape():
 		this.shapeElements[0].generateNormals
 	this.mergeNeeded = True
 
+    @property
+    def shapes(this):
+	return this.shapeElements
+
     def setShapes(this, simpleShapes):
 	"""
 	Set the shapes all at once.
