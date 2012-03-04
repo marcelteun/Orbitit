@@ -24,25 +24,37 @@ function diff_test()
 
 echo -n "$ccgray"
 
-# test: output to PS
-obj="5cubes"
-tst="export $obj to PS"
-./Orbitit.py -p tst/$obj.off tst/tst.ps
-diff_test "tst/$obj.ps" "tst/tst.ps"
+# test: output to Python
+if [ -z $SKIP_PY_TST ]; then {
+	obj="5cubes"
+	tst="export $obj to Python"
+	./Orbitit.py -y tst/$obj.py tst/tst.py
+	diff_test "tst/$obj.py" "tst/tst.py"
 
-obj="MW115"
-tst="export $obj to PS"
-./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
-diff_test "tst/$obj.ps" "tst/tst.ps"
+	rm tst/tst.py
+} fi
 
-obj="MW117"
-tst="export $obj to PS"
-./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
-diff_test "tst/$obj.ps" "tst/tst.ps"
+if [ -z $SKIP_PS_TST ]; then {
+	# test: output to PS
+	obj="5cubes"
+	tst="export $obj to PS"
+	./Orbitit.py -p tst/$obj.off tst/tst.ps
+	diff_test "tst/$obj.ps" "tst/tst.ps"
 
-obj="MW119"
-tst="export $obj to PS"
-./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
-diff_test "tst/$obj.ps" "tst/tst.ps"
+	obj="MW115"
+	tst="export $obj to PS"
+	./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
+	diff_test "tst/$obj.ps" "tst/tst.ps"
 
-rm tst/tst.ps
+	obj="MW117"
+	tst="export $obj to PS"
+	./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
+	diff_test "tst/$obj.ps" "tst/tst.ps"
+
+	obj="MW119"
+	tst="export $obj to PS"
+	./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
+	diff_test "tst/$obj.ps" "tst/tst.ps"
+
+	rm tst/tst.ps
+} fi
