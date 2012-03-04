@@ -3,6 +3,8 @@ PRIO
 Ongoing incl adding tests
 
 2012-02-14 - 1 and 2012-02-26 : merge from dev to master
+Ongoing
+
 2012-03-01 - 2 fix empty OFF file read
 
 2012-03-01 - 1 clean up white-space
@@ -22,6 +24,16 @@ Move rest of general fixes from 'working branch' to master branch
 
 2012-03-01 - 2
 fix empty OFF file read: make error message more readable than now.
+
+test:
+	2012-03-05 0:44
+	Add summery at the end of a complete test.
+
+	2012-03-05 0:45
+	Add some performance test, with a limit.
+
+	2012-03-05 0:46
+	Split test, so you can run them separately?
 
 print:
 	use a class for printing reprs, to handle indent, unindent. The init
