@@ -2442,7 +2442,7 @@ class CompoundShape():
 	if len(this.shapeElements) == 1:
 	    return repr(this.shapeElements[0])
 	else:
-	    s = 'CompoundShape(\n  '
+	    s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
 	    s = '%ssimpleShapes = [\n' % (s)
 	    for shape in this.shapeElements:
 		s = '%s    %s,\n' % (s, repr(shape))
@@ -2848,10 +2848,11 @@ class IsometricShape(CompoundShape):
         if unfoldOrbit: this.mergeShapes()
 
     def __repr__(this):
-        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
         if this.dbgTrace:
             print '%s.__repr__(%s,..):' % (this.__class__, name)
 	print 'TESTED? %s.__repr__(%s,..):' % (this.__class__, name)
+	# comment out class name, see comment at __fix_repr__ below:
+	#s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
         s = 'IsometricShape(\n  '
         s = '%sVs = [\n' % (s)
         for v in this.baseShape.Vs:
