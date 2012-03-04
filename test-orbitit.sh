@@ -34,13 +34,23 @@ if [ -z $SKIP_PY_TST ]; then {
 	rm tst/tst.py
 } fi
 
+# test: output to PS
 if [ -z $SKIP_PS_TST ]; then {
-	# test: output to PS
+	# a simple example, classic comound of five cubes
 	obj="5cubes"
 	tst="export $obj to PS"
 	./Orbitit.py -p tst/$obj.off tst/tst.ps
 	diff_test "tst/$obj.ps" "tst/tst.ps"
 
+	# a cube with a degenerate face
+	# and a face for which the 1st 3 vertices cannot be used to calculate
+	# the face normal
+	obj="cube.degenerate.face"
+	tst="export $obj to PS"
+	./Orbitit.py -p tst/$obj.py tst/tst.ps
+	diff_test "tst/$obj.ps" "tst/tst.ps"
+
+	# some complex uniform star polyhedra examples
 	obj="MW115"
 	tst="export $obj to PS"
 	./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
@@ -56,5 +66,6 @@ if [ -z $SKIP_PS_TST ]; then {
 	./Orbitit.py -m 9 -p tst/$obj.off tst/tst.ps
 	diff_test "tst/$obj.ps" "tst/tst.ps"
 
+	# clean up
 	rm tst/tst.ps
 } fi
