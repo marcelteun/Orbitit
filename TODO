@@ -1,13 +1,13 @@
 PRIO
-2012-03-01 - 4
-Ongoing
+2012-03-01 - 4 add command line parameters for auto test.
+Ongoing incl adding tests
 
-2012-02-14 - 1 and 2012-02-26
-2012-03-01 - 2
+2012-02-14 - 1 and 2012-02-26 : merge from dev to master
+2012-03-01 - 2 fix empty OFF file read
 
-2012-03-01 - 1
+2012-03-01 - 1 clean up white-space
 
-2012-03-03 - 16:28 print to PS from orbit scene.
+2012-03-03 - 16:28 simplified print to PS from orbit scene.
 
 -------------------------------------------------------------------------------
 2012-02-14 - 1
@@ -21,7 +21,7 @@ MW115 error comes from
 Move rest of general fixes from 'working branch' to master branch
 
 2012-03-01 - 2
-fix empty OFF file read
+fix empty OFF file read: make error message more readable than now.
 
 print:
 	use a class for printing reprs, to handle indent, unindent. The init
