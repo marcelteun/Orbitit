@@ -405,7 +405,8 @@ class Shape(Heptagons.FldHeptagonShape):
 		    )
                 )
                 theShapes.append(this.xtraTrisShape)
-        this.showBaseOnly = not this.applySymmetry
+	for shape in theShapes:
+	    shape.showBaseOnly = not this.applySymmetry
         this.setShapes(theShapes)
         this.updateShape = False
 	# print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][1], Vs[0][0], Vs[0][2])
