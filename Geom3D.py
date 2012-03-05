@@ -2964,8 +2964,13 @@ class IsometricShape(CompoundShape):
         return this.isometryOperations
 
     def mergeShapes(this):
-	if this.applySymmetryNeeded:
-	    this.applySymmetry()
+        if this.showBaseOnly:
+	    # assuming that the base shape is a simple shape:
+	    this.mergedShape = this.baseShape
+	    this.mergeNeeded = False
+	elif this.applySymmetryNeeded:
+	        this.applySymmetry()
+
 	CompoundShape.mergeShapes(this)
 
     def setFaceColors(this, colors):
