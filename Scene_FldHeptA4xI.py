@@ -443,6 +443,12 @@ class Shape(Heptagons.FldHeptagonShape):
 	# print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][1], Vs[5][0], Vs[5][2])
 	# print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][1], Vs[6][0], Vs[6][2])
 
+    def getReflPosAngle(this):
+	if this.edgeAlternative & Heptagons.twist_bit == Heptagons.twist_bit:
+	    return math.pi/4
+	else:
+	    return 0
+
     def initArrs(this):
         print this.name, "initArrs"
 
@@ -586,8 +592,8 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #             2' = 13                7 = 5'
 
-	std = [1, 9, 10]
-	alt = [2, 11, 12]
+	std   = [1, 9, 10]
+	alt   = [2, 11, 12]
 	twist = [0, 8, 19]
         this.o3triFs = {
                 trisAlt.strip_1_loose:		[std],
@@ -600,8 +606,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:	[alt],
                 trisAlt.twist_strip_I:		[twist],
 	    }
-	std = [6, 16, 15]
-	alt = [5, 18, 17]
+	std   = [6, 16, 15]
+	alt   = [5, 18, 17]
 	twist = [5, 23, 18, 22, 17, 13]
         this.oppO3triFs = {
                 trisAlt.strip_1_loose:		[std],
@@ -679,8 +685,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.twist_strip_I:      twist_stripI,
             }
 
-	std = [1, 9, 9, 10, 10, 1]
-	alt = [2, 11, 11, 12, 12, 2]
+	std   = [1, 9, 9, 10, 10, 1]
+	alt   = [2, 11, 11, 12, 12, 2]
 	twist = [0, 8, 8, 19, 19, 0]
         this.o3triEs = {
                 trisAlt.strip_1_loose:		std,
@@ -693,8 +699,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_1_loose:	alt,
                 trisAlt.twist_strip_I:		twist,
             }
-	std = [6, 16, 16, 15, 15, 6]
-	alt = [5, 18, 18, 17, 17, 5]
+	std   = [6, 16, 16, 15, 15, 6]
+	alt   = [5, 18, 18, 17, 17, 5]
 	twist = []
         this.oppO3triEs = {
                 trisAlt.strip_1_loose:		std,
@@ -799,12 +805,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     rDir = 'data/Data_FldHeptA4'
     rPre = 'frh-roots'
-
-    def theReflPosAngle(this):
-	if this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit:
-	    return math.pi/4
-	else:
-	    return 0
 
     def mapPrePosStrToFileStr(this, prePosId):
 	try:
