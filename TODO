@@ -2,9 +2,6 @@ PRIO
 2012-03-01 - 4 add command line parameters for auto test.
 Ongoing incl adding tests
 
-2012-02-14 - 1 and 2012-02-26 : merge from dev to master
-Ongoing
-
 2012-03-01 - 2 fix empty OFF file read
 
 2012-03-01 - 1 clean up white-space
@@ -12,15 +9,8 @@ Ongoing
 2012-03-03 - 16:28 simplified print to PS from orbit scene.
 
 -------------------------------------------------------------------------------
-2012-02-14 - 1
-move export to PS stuff from 'working branch' to master and check where the
-MW115 error comes from
-
 2012-03-01 - 1
 	All: clean up white space (after merging back from new dev branch)
-
-2012-02-26
-Move rest of general fixes from 'working branch' to master branch
 
 2012-03-01 - 2
 fix empty OFF file read: make error message more readable than now.
