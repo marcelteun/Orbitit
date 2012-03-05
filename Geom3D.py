@@ -1283,23 +1283,17 @@ class SimpleShape:
             return this.createVertexNormals_vi
         this.nFs = [[inc() for i in face] for face in this.Fs]
         this.TriangulatedFs = this.triangulate(this.nFs)
-        # TODO handle the case where there are vertices in this.Vs that are not
-        # indexed by this.Fs. These are lost now. You can also add an option
-        # whether this should be handled.
-        # I think that this might be the reason that it doesn't work so well for
-        # Polychora, though it is not so important, since for Geom4D.SimpleShape
-        # this will decrease performance too much anyway.
-        mapVi = [-1 for v in this.Vs]
-        nrOfOldVs = len(mapVi)
-        this.createVertexNormals_vi = 0
-        for oldFace, newFace in zip(this.Fs, this.nFs):
-            for oldVi, newVi in zip(oldFace, newFace):
-                if (mapVi[oldVi] == -1):
-                    mapVi[oldVi] = newVi
-                    if inc() >= nrOfOldVs:
-                        break
-            if this.createVertexNormals_vi >= nrOfOldVs: break
-        this.nEs = [mapVi[oldVi] for oldVi in this.Es]
+	# Now for the edge vertices. Note that edge vertices aren't necessarily
+	# part of the face vertices.
+	edgeIndexOffset = len(this.nVs)
+	this.nVs.extend(Vs)
+	if normalise:
+	    for v in Vs:
+		this.vNs.append(v.normalize())
+	else:
+	    for v in Vs:
+		this.vNs.append(v)
+        this.nEs = [oldVi + edgeIndexOffset for oldVi in this.Es]
 
     def createEdgeLengths(this, precision = 12):
         e2l = {}
@@ -2839,7 +2833,8 @@ class IsometricShape(CompoundShape):
         colors = [([], [])],
         directIsometries = [E], oppositeIsometry = None,
         unfoldOrbit = False,
-        name = "IsometricShape"
+	name = "IsometricShape",
+	recreateEdges = True
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -2884,7 +2879,8 @@ class IsometricShape(CompoundShape):
             print '  ]'
         # this is before creating the base shape, since it check "colors"
         this.baseShape = SimpleShape(Vs, Fs, Es, Ns = Ns, colors = colors[0])
-        this.baseShape.recreateEdges()
+	if recreateEdges:
+	    this.baseShape.recreateEdges()
         CompoundShape.__init__(this, [this.baseShape], name = name)
 	this.setFaceColors(colors)
 	this.setIsometries(directIsometries, oppositeIsometry)
@@ -3273,7 +3269,8 @@ class SymmetricShape(IsometricShape):
         Vs, Fs, Es = [], Ns = [],
         finalSym = isometry.E, stabSym = isometry.E,
         colors = [],
-        name = "SymmetricShape"
+        name = "SymmetricShape",
+	recreateEdges = True
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -3317,7 +3314,8 @@ class SymmetricShape(IsometricShape):
         IsometricShape.__init__(this,
                 Vs, Fs, Es, Ns,
                 directIsometries = FsOrbit,
-                name = name
+                name = name,
+		recreateEdges = recreateEdges
             )
         this.finalSym = finalSym
         this.stabSym = stabSym
