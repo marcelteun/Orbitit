@@ -2834,7 +2834,8 @@ class IsometricShape(CompoundShape):
         directIsometries = [E], oppositeIsometry = None,
         unfoldOrbit = False,
 	name = "IsometricShape",
-	recreateEdges = True
+	recreateEdges = True,
+	orientation = None,
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -2865,6 +2866,7 @@ class IsometricShape(CompoundShape):
                      using glPushMatrix-glMultMatrix-glPopMatrix. This option is
                      provided for legacy scenes.
         name: a string identifier representing the model.
+	orientation: orientation of the base shape.
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
@@ -2878,7 +2880,8 @@ class IsometricShape(CompoundShape):
                 print '    ', V
             print '  ]'
         # this is before creating the base shape, since it check "colors"
-        this.baseShape = SimpleShape(Vs, Fs, Es, Ns = Ns, colors = colors[0])
+        this.baseShape = SimpleShape(Vs, Fs, Es, Ns = Ns,
+	    colors = colors[0], orientation = orientation)
 	if recreateEdges:
 	    this.baseShape.recreateEdges()
         CompoundShape.__init__(this, [this.baseShape], name = name)
@@ -2925,7 +2928,8 @@ class IsometricShape(CompoundShape):
                 s = '%s  %s,\n  ' % (s, repr(isom))
             s = '%s],\n  ' % (s)
         s = '%sunfoldOrbit = %s,\n  ' % (s, this.unfoldOrbit)
-        s = '%sname = "%s"\n' % (s, this.name)
+        s = '%sname = "%s",\n  ' % (s, this.name)
+	s = '%sorientation = %s\n' % (s, repr(this.baseShape.orientation))
         s = '%s)\n' % (s)
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
@@ -2965,7 +2969,7 @@ class IsometricShape(CompoundShape):
 	    this.mergedShape = this.baseShape
 	    this.mergeNeeded = False
 	elif this.applySymmetryNeeded:
-	        this.applySymmetry()
+	    this.applySymmetry()
 
 	CompoundShape.mergeShapes(this)
 
