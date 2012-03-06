@@ -33,7 +33,7 @@ if [ -z $SKIP_PY_TST ]; then {
 	diff_test "tst/$obj.py" "tst/tst.py"
 
 	# test isometric shape with a non-default orientation of base shape
-	obj="4cubes"
+	obj="12cubes"
 	tst="export $obj to Python"
 	./Orbitit.py -y tst/$obj.py tst/tst.py
 	diff_test "tst/$obj.py" "tst/tst.py"
@@ -50,7 +50,7 @@ if [ -z $SKIP_PS_TST ]; then {
 	diff_test "tst/$obj.ps" "tst/tst.ps"
 
 	# python: isometric shape with non-default orientation of base shape
-	obj="4cubes"
+	obj="12cubes"
 	tst="export $obj to PS"
 	./Orbitit.py -p tst/$obj.py tst/tst.ps
 	diff_test "tst/$obj.ps" "tst/tst.ps"
