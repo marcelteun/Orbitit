@@ -36,5 +36,6 @@ shape = Geom3D.IsometricShape(
     GeomTypes.Rot3((GeomTypes.Quat([4.582785177e-15, -0.5, 0.809016994375, 0.309016994375]), GeomTypes.Quat([4.582785177e-15, 0.5, -0.809016994375, -0.309016994375]))),
   ],
   unfoldOrbit = False,
-  name = "5cubes.py"
+  name = "5cubes.py",
+  orientation = GeomTypes.Rot3((GeomTypes.Quat([1.0, 0.0, 0.0, 0.0]), GeomTypes.Quat([1.0, -0.0, -0.0, -0.0])))
 )

@@ -26,7 +26,14 @@ echo -n "$ccgray"
 
 # test: output to Python
 if [ -z $SKIP_PY_TST ]; then {
+	# test isometric shape with default orientation of base shape
 	obj="5cubes"
+	tst="export $obj to Python"
+	./Orbitit.py -y tst/$obj.py tst/tst.py
+	diff_test "tst/$obj.py" "tst/tst.py"
+
+	# test isometric shape with a non-default orientation of base shape
+	obj="4cubes"
 	tst="export $obj to Python"
 	./Orbitit.py -y tst/$obj.py tst/tst.py
 	diff_test "tst/$obj.py" "tst/tst.py"
@@ -36,10 +43,16 @@ if [ -z $SKIP_PY_TST ]; then {
 
 # test: output to PS
 if [ -z $SKIP_PS_TST ]; then {
-	# a simple example, classic comound of five cubes
+	# a simple example, .off input: classic compound of five cubes
 	obj="5cubes"
 	tst="export $obj to PS"
 	./Orbitit.py -p tst/$obj.off tst/tst.ps
+	diff_test "tst/$obj.ps" "tst/tst.ps"
+
+	# python: isometric shape with non-default orientation of base shape
+	obj="4cubes"
+	tst="export $obj to PS"
+	./Orbitit.py -p tst/$obj.py tst/tst.ps
 	diff_test "tst/$obj.ps" "tst/tst.ps"
 
 	# a cube with a degenerate face
