@@ -33,7 +33,7 @@ class doc:
     def __init__(this,
         originX = 0, originY = 0, width = 595, height = 842,
         title = 'Generated from Python',
-        creator = 'PS.py',
+        creator = 'PS.py written by marcelteun',
         pageSize = PageSizeA4,
         eps = False
     ):
