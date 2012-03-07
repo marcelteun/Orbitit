@@ -1,15 +1,10 @@
 PRIO
-2012-03-01 - 4 add command line parameters for auto test.
-Ongoing incl adding tests
-
 2012-03-01 - 2 fix empty OFF file read
-
-2012-03-01 - 1 clean up white-space
 
 2012-03-03 - 16:28 simplified print to PS from orbit scene.
 
 -------------------------------------------------------------------------------
-2012-03-08
+2012-03-08 - 1
 	heptagon from Kite scene is broken
 	this.showKite
 	Traceback (most recent call last):
@@ -23,9 +18,8 @@ Ongoing incl adding tests
 	    this.vNs.append(v.normalize())
 	AttributeError: 'list' object has no attribute 'normalize'
 
-
-2012-03-01 - 1
-	All: clean up white space (after merging back from new dev branch)
+2012-03-08 - 2
+Implement a float slider with support for set
 
 2012-03-01 - 2
 fix empty OFF file read: make error message more readable than now.
