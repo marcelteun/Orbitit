@@ -9,6 +9,21 @@ Ongoing incl adding tests
 2012-03-03 - 16:28 simplified print to PS from orbit scene.
 
 -------------------------------------------------------------------------------
+2012-03-08
+	heptagon from Kite scene is broken
+	this.showKite
+	Traceback (most recent call last):
+	  File "/home/teun/prj/python/polyh/PolyhedraBrowser/Scenes3D.py", line 230, in OnPaint
+	    this.onPaint()
+	  File "./Orbitit.py", line 252, in onPaint
+	    this.shape.glDraw()
+	  File "/home/teun/prj/python/polyh/PolyhedraBrowser/Geom3D.py", line 1567, in glDraw
+	    this.createVertexNormals(True, Vs)
+	  File "/home/teun/prj/python/polyh/PolyhedraBrowser/Geom3D.py", line 1292, in createVertexNormals
+	    this.vNs.append(v.normalize())
+	AttributeError: 'list' object has no attribute 'normalize'
+
+
 2012-03-01 - 1
 	All: clean up white space (after merging back from new dev branch)
 
