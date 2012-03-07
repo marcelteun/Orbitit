@@ -1644,7 +1644,7 @@ def readShapeFile(filename):
 	    print 'unrecognised file extension'
 	    return None
 
-def convertToPs(shape, o_fd, scale, margin, precision):
+def convertToPs(shape, o_fd, scale, precision, margin):
     o_fd.write(
 	shape.toPsPiecesStr(
 	    scaling = scale,
@@ -1654,6 +1654,25 @@ def convertToPs(shape, o_fd, scale, margin, precision):
 	)
     )
 
+def convertToOff(shape, o_fd, precision, margin = 0):
+    """
+    Save the shape to the o_fd file descriptor in .off format
+
+    precision: how many decimals to write.
+    margin: what margin to use to require that 2 floating numbers are equal.
+            If not specified or 0, then no cleaning up is done, meaning that no
+	    attempt is made of merging vertices that have the same coordinate.
+	    Neither are faces with the same coordinates filtered out.
+    """
+    try:
+	shape = shape.SimpleShape
+    except AttributeError:
+	pass
+    if margin != 0:
+	shape = shape.cleanShape(margin)
+    # TODO: support for saving extraInfo?
+    o_fd.write(shape.toOffStr(precision))
+
 def usage(exit_nr):
     print """
 usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
@@ -1661,6 +1680,8 @@ usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
 Without any specified options ut starts the program in the default scene.
 Options:
 
+	-P <int>
+        --precision <int> Write the number with <int> number of decimals.
 	-p --ps      export to PS. The input file is either a python scrypt,
 		     specified by -y or an off file, specified by -f. If no
 		     argument is specified, the the result is piped to stdout.
@@ -1689,7 +1710,7 @@ import getopt
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],
-	'fm:psy', ['off', '--margin=', 'ps', 'scene=', 'py'])
+	'fm:P:psy', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
 except getopt.GetoptError, err:
     print str(err)
     usage(2)
@@ -1697,7 +1718,7 @@ except getopt.GetoptError, err:
 # defaults:
 scale = 50
 margin = 10
-precision = 12
+precision = 15
 
 oper = None
 for opt, opt_arg in opts:
@@ -1705,6 +1726,8 @@ for opt, opt_arg in opts:
 	oper = Oper.toOff
     elif opt in ('-m', '--margin'):
 	margin = int(opt_arg)
+    elif opt in ('-P', '--precision'):
+	precision = int(opt_arg)
     elif opt in ('-p', '--ps'):
 	oper = Oper.toPs
     elif opt in ('-s', '--scene'):
@@ -1733,9 +1756,11 @@ if oper != None:
 if oper == Oper.toPs:
     shape = readShapeFile(i_filename)
     if shape != None:
-	convertToPs(shape, o_fd, scale, margin, precision)
+	convertToPs(shape, o_fd, scale, precision, margin)
 elif oper == Oper.toOff:
-    print "TODO to Off"
+    shape = readShapeFile(i_filename)
+    if shape != None:
+	convertToOff(shape, o_fd, precision, margin)
 elif oper == Oper.toPy:
     shape = readShapeFile(i_filename)
     if shape != None:
