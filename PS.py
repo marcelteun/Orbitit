@@ -169,11 +169,11 @@ class doc:
         for i in range(len(Vs)):
             v = Vs[i]
             vStr = '%s  [%s %s] %% %d\n' % (
-		vStr,
-		glue.f2s(v[0], precision),
-		glue.f2s(v[1], precision),
-		i
-	    )
+                vStr,
+                glue.f2s(v[0], precision),
+                glue.f2s(v[1], precision),
+                i
+            )
         vStr = '%s] def' % vStr
         fStr = '/faces ['
         maxX = maxY = -sys.maxint-1 # 2-complement
@@ -189,11 +189,11 @@ class doc:
                 oneFaceStr = '%s %d' % (oneFaceStr, vNr)
             fStr = '%s [%s]' % (fStr, oneFaceStr)
         bboxStr = '/bbox [%s %s %s %s] def' % (
-	    glue.f2s(minX, precision),
-	    glue.f2s(minY, precision),
-	    glue.f2s(maxX, precision),
-	    glue.f2s(maxY, precision)
-	)
+            glue.f2s(minX, precision),
+            glue.f2s(minY, precision),
+            glue.f2s(maxX, precision),
+            glue.f2s(maxY, precision)
+        )
         fStr = '%s] def' % fStr
         scalingStr = '/scalingSize %d def' % scaling
         addBBoxStr = ""

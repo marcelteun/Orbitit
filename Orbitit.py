@@ -235,7 +235,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
+        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
         glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
 
     def setBgCol(this, bgCol):
@@ -257,19 +257,19 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(this, *args, **kwargs)
         this.addMenuBar()
         this.statusBar = this.CreateStatusBar()
-	this.scene = None
+        this.scene = None
         this.exportDirName = '.'
         this.importDirName = '.'
         this.viewSettingsWindow = None
         this.scene = None
-	if len(p_args) > 0 and (
-	    p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
-	):
-	    shape = this.openFile(p_args[0])
-	this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
+        if len(p_args) > 0 and (
+            p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
+        ):
+            shape = this.openFile(p_args[0])
+        this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
-	this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
+        this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
 
     def addMenuBar(this):
         menuBar = wx.MenuBar()
@@ -414,22 +414,22 @@ class MainWindow(wx.Frame):
     def readShapeFile(this, filename, dirname = None):
             isOffModel = filename[-3:] == 'off'
             print "opening file:", filename
-	    if dirname != None:
-		this.importDirName  = dirname
-		fd = open(os.path.join(this.importDirName, filename), 'r')
-	    else:
-		fd = open(filename, 'r')
-		m = re.match(r'.*\/', filename)
-		if m != None:
-		    this.importDirName = m.group()
+            if dirname != None:
+                this.importDirName  = dirname
+                fd = open(os.path.join(this.importDirName, filename), 'r')
+            else:
+                fd = open(filename, 'r')
+                m = re.match(r'.*\/', filename)
+                if m != None:
+                    this.importDirName = m.group()
             if isOffModel:
                 shape = Geom3D.readOffFile(fd, recreateEdges = True)
             else:
-		assert filename[-2:] == 'py'
+                assert filename[-2:] == 'py'
                 shape = Geom3D.readPyFile(fd)
             this.setStatusStr("file opened")
             fd.close()
-	    return shape
+            return shape
 
     def openFile(this, filename, dirname = None):
             this.closeCurrentScene()
@@ -440,7 +440,7 @@ class MainWindow(wx.Frame):
                 # will not work.
                 shape = shape.SimpleShape
             # Create a compound shape to be able to add shapes later.
-	    return Geom3D.CompoundShape([shape], name = this.filename)
+            return Geom3D.CompoundShape([shape], name = this.filename)
 
     def onAdd(this, e):
         dlg = wx.FileDialog(this, 'Add: Choose a file',
@@ -471,9 +471,9 @@ class MainWindow(wx.Frame):
 
     def onSaveAsPy(this, e):
         dlg = wx.FileDialog(this, 'Save as .py file',
-	    this.exportDirName, '', '*.py',
-	    style = wx.SAVE | wx.OVERWRITE_PROMPT
-	)
+            this.exportDirName, '', '*.py',
+            style = wx.SAVE | wx.OVERWRITE_PROMPT
+        )
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
             this.exportDirName  = dlg.GetDirectory()
@@ -487,9 +487,9 @@ class MainWindow(wx.Frame):
                     this.filename = '%spy' % this.filename
             fd = open(os.path.join(this.exportDirName, this.filename), 'w')
             # TODO precision through setting:
-	    shape = this.panel.getShape()
-	    shape.name = this.filename
-	    shape.saveFile(fd)
+            shape = this.panel.getShape()
+            shape.name = this.filename
+            shape.saveFile(fd)
             this.setStatusStr("Python file written")
             this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
@@ -498,41 +498,41 @@ class MainWindow(wx.Frame):
         dlg = ExportOffDialog(this, wx.ID_ANY, 'OFF settings')
         fileChoosen = False
         while not fileChoosen:
-	    if dlg.ShowModal() == wx.ID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 extraInfo = dlg.getExtraInfo()
                 cleanUp = dlg.getCleanUp()
                 precision = dlg.getPrecision()
                 margin = dlg.getFloatMargin()
-		fileDlg = wx.FileDialog(this, 'Save as .off file',
-		    this.exportDirName, '', '*.off',
-		    wx.SAVE | wx.OVERWRITE_PROMPT
-		)
-		fileChoosen = fileDlg.ShowModal() == wx.ID_OK
+                fileDlg = wx.FileDialog(this, 'Save as .off file',
+                    this.exportDirName, '', '*.off',
+                    wx.SAVE | wx.OVERWRITE_PROMPT
+                )
+                fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
-		    this.filename = fileDlg.GetFilename()
-		    this.exportDirName  = fileDlg.GetDirectory()
-		    NameExt = this.filename.split('.')
-		    if len(NameExt) == 1:
-			this.filename = '%s.off' % this.filename
-		    elif NameExt[-1].lower() != 'off':
-			if NameExt[-1] != '':
-			    this.filename = '%s.off' % this.filename
-			else:
-			    this.filename = '%soff' % this.filename
-		    fd = open(os.path.join(this.exportDirName, this.filename), 'w')
-		    shape = this.panel.getShape()
-		    try:
-			shape = shape.SimpleShape
-		    except AttributeError:
-			pass
-		    if cleanUp:
-			shape = shape.cleanShape(margin)
-		    fd.write(shape.toOffStr(precision, extraInfo))
-		    print "OFF file written"
-		    this.setStatusStr("OFF file written")
-		    fd.close()
-		    this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
-		else:
+                    this.filename = fileDlg.GetFilename()
+                    this.exportDirName  = fileDlg.GetDirectory()
+                    NameExt = this.filename.split('.')
+                    if len(NameExt) == 1:
+                        this.filename = '%s.off' % this.filename
+                    elif NameExt[-1].lower() != 'off':
+                        if NameExt[-1] != '':
+                            this.filename = '%s.off' % this.filename
+                        else:
+                            this.filename = '%soff' % this.filename
+                    fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+                    shape = this.panel.getShape()
+                    try:
+                        shape = shape.SimpleShape
+                    except AttributeError:
+                        pass
+                    if cleanUp:
+                        shape = shape.cleanShape(margin)
+                    fd.write(shape.toOffStr(precision, extraInfo))
+                    print "OFF file written"
+                    this.setStatusStr("OFF file written")
+                    fd.close()
+                    this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
+                else:
                     dlg.Show()
                 fileDlg.Destroy()
             else:
@@ -550,9 +550,9 @@ class MainWindow(wx.Frame):
                 margin = dlg.getFloatMargin()
                 assert (scalingFactor >= 0 and scalingFactor != None)
                 fileDlg = wx.FileDialog(this, 'Save as .ps file',
-		    this.exportDirName, '', '*.ps',
-		    style = wx.SAVE | wx.OVERWRITE_PROMPT
-		)
+                    this.exportDirName, '', '*.ps',
+                    style = wx.SAVE | wx.OVERWRITE_PROMPT
+                )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
                     this.filename = fileDlg.GetFilename()
@@ -567,12 +567,12 @@ class MainWindow(wx.Frame):
                             this.filename = '%sps' % this.filename
                     # Note: if file exists is part of file dlg...
                     fd = open(os.path.join(this.exportDirName, this.filename), 'w')
-		    shape = this.panel.getShape()
-		    try:
-			shape = shape.SimpleShape
-		    except AttributeError:
-			pass
-		    shape = shape.cleanShape(margin)
+                    shape = this.panel.getShape()
+                    try:
+                        shape = shape.SimpleShape
+                    except AttributeError:
+                        pass
+                    shape = shape.cleanShape(margin)
                     try:
                         fd.write(
                             shape.toPsPiecesStr(
@@ -598,9 +598,9 @@ class MainWindow(wx.Frame):
 
     def onSaveAsWrl(this, e):
         dlg = wx.FileDialog(this,
-	    'Save as .vrml file', this.exportDirName, '', '*.wrl',
-	    style = wx.SAVE | wx.OVERWRITE_PROMPT
-	)
+            'Save as .vrml file', this.exportDirName, '', '*.wrl',
+            style = wx.SAVE | wx.OVERWRITE_PROMPT
+        )
         if dlg.ShowModal() == wx.ID_OK:
             this.filename = dlg.GetFilename()
             this.exportDirName  = dlg.GetDirectory()
@@ -679,13 +679,13 @@ class MainWindow(wx.Frame):
         this.statusBar.SetStatusText(str)
 
     def onExit(this, e):
-	dlg = wx.MessageDialog(None, 'Are you sure to quit?', 'Question',
+        dlg = wx.MessageDialog(None, 'Are you sure to quit?', 'Question',
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
-	    dlg.Destroy()
-	    this.Close(True)
-	else:
-	    dlg.Destroy()
+            dlg.Destroy()
+            this.Close(True)
+        else:
+            dlg.Destroy()
 
     def onViewSettingsClose(this, event):
         this.viewSettingsWindow.Destroy()
@@ -698,13 +698,13 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.Close()
 
     def onKeyDown(this, e):
-	key = e.GetKeyCode()
-	if key == wx.WXK_F3:
-	    if glGetIntegerv(GL_FRONT_FACE) == GL_CW:
-		glFrontFace(GL_CCW)
-	    else:
-		glFrontFace(GL_CW)
-	    this.panel.getCanvas().paint()
+        key = e.GetKeyCode()
+        if key == wx.WXK_F3:
+            if glGetIntegerv(GL_FRONT_FACE) == GL_CW:
+                glFrontFace(GL_CCW)
+            else:
+                glFrontFace(GL_CW)
+            this.panel.getCanvas().paint()
 
 class MainPanel(wx.Panel):
     def __init__(this, parent, TstScene, shape, *args, **kwargs):
@@ -925,11 +925,11 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.parentPanel.Bind(wx.EVT_BUTTON, this.onEColor, id = this.eColorGui.GetId())
         # Show / hide face
         this.fOptionsLst = [
-	    this.cull_show_both,
-	    this.cull_show_front,
-	    this.cull_show_back,
-	    this.cull_show_none,
-	]
+            this.cull_show_both,
+            this.cull_show_front,
+            this.cull_show_back,
+            this.cull_show_none,
+        ]
         this.fOptionsGui = wx.RadioBox(this.parentPanel,
             label = 'Face Options',
             style = wx.RA_VERTICAL,
@@ -939,30 +939,30 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onFOption, id = this.fOptionsGui.GetId())
         faceSizer = wx.BoxSizer(wx.HORIZONTAL)
         faceSizer.Add(this.fOptionsGui, 1, wx.EXPAND)
-	if not glIsEnabled(GL_CULL_FACE):
-	    this.fOptionsGui.SetStringSelection(this.cull_show_both)
-	else:
-	    # Looks like I switch front and back here, but this makes sense from
-	    # the GUI.
-	    if glGetInteger(GL_CULL_FACE_MODE) == GL_FRONT:
-		this.fOptionsGui.SetStringSelection(this.cull_show_front)
-	    if glGetInteger(GL_CULL_FACE_MODE) == GL_BACK:
-		this.fOptionsGui.SetStringSelection(this.cull_show_back)
-	    else: # ie GL_FRONT_AND_BACK
-		this.fOptionsGui.SetStringSelection(this.cull_show_none)
+        if not glIsEnabled(GL_CULL_FACE):
+            this.fOptionsGui.SetStringSelection(this.cull_show_both)
+        else:
+            # Looks like I switch front and back here, but this makes sense from
+            # the GUI.
+            if glGetInteger(GL_CULL_FACE_MODE) == GL_FRONT:
+                this.fOptionsGui.SetStringSelection(this.cull_show_front)
+            if glGetInteger(GL_CULL_FACE_MODE) == GL_BACK:
+                this.fOptionsGui.SetStringSelection(this.cull_show_back)
+            else: # ie GL_FRONT_AND_BACK
+                this.fOptionsGui.SetStringSelection(this.cull_show_none)
 
-	# Open GL
-	this.Boxes.append(wx.StaticBox(this.parentPanel,
-						label = 'OpenGL Settings'))
+        # Open GL
+        this.Boxes.append(wx.StaticBox(this.parentPanel,
+                                                label = 'OpenGL Settings'))
         oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         this.Guis.append(
-	    wx.CheckBox(this.parentPanel,
-				label = 'Switch Front and Back Face (F3)')
-	)
-	this.oglFrontFaceGui = this.Guis[-1]
-	this.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
-	this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
-					id = this.oglFrontFaceGui.GetId())
+            wx.CheckBox(this.parentPanel,
+                                label = 'Switch Front and Back Face (F3)')
+        )
+        this.oglFrontFaceGui = this.Guis[-1]
+        this.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
+        this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
+                                        id = this.oglFrontFaceGui.GetId())
         # background Colour
         colTxt = wx.StaticText(this.parentPanel, -1, "Background Colour: ")
         this.Guis.append(colTxt)
@@ -1257,32 +1257,32 @@ class ViewSettingsSizer(wx.BoxSizer):
 
     def onFOption(this, e):
         print 'View Settings Window size:', this.parentWindow.GetSize()
-	sel = this.fOptionsGui.GetStringSelection()
-	# Looks like I switch front and back here, but this makes sense from
-	# the GUI.
-	this.canvas.shape.setFaceProperties(drawFaces = True)
-	if sel == this.cull_show_both:
-	    glDisable(GL_CULL_FACE)
-	elif sel == this.cull_show_none:
-	    # don't use culling here: doesn't work with edge radius and vertext
-	    # radius > 0
-	    this.canvas.shape.setFaceProperties(drawFaces = False)
-	    glDisable(GL_CULL_FACE)
-	elif sel == this.cull_show_front:
-	    glCullFace(GL_FRONT)
-	    glEnable(GL_CULL_FACE)
-	elif this.cull_show_back:
-	    glCullFace(GL_BACK)
-	    glEnable(GL_CULL_FACE)
+        sel = this.fOptionsGui.GetStringSelection()
+        # Looks like I switch front and back here, but this makes sense from
+        # the GUI.
+        this.canvas.shape.setFaceProperties(drawFaces = True)
+        if sel == this.cull_show_both:
+            glDisable(GL_CULL_FACE)
+        elif sel == this.cull_show_none:
+            # don't use culling here: doesn't work with edge radius and vertext
+            # radius > 0
+            this.canvas.shape.setFaceProperties(drawFaces = False)
+            glDisable(GL_CULL_FACE)
+        elif sel == this.cull_show_front:
+            glCullFace(GL_FRONT)
+            glEnable(GL_CULL_FACE)
+        elif this.cull_show_back:
+            glCullFace(GL_BACK)
+            glEnable(GL_CULL_FACE)
         this.canvas.paint()
 
     def onOgl(this, e):
-	id = e.GetId()
-	if id == this.oglFrontFaceGui.GetId():
-	    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
-		glFrontFace(GL_CW)
-	    else:
-		glFrontFace(GL_CCW)
+        id = e.GetId()
+        if id == this.oglFrontFaceGui.GetId():
+            if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
+                glFrontFace(GL_CW)
+            else:
+                glFrontFace(GL_CCW)
         this.canvas.paint()
 
     def onBgCol(this, e):
@@ -1457,23 +1457,23 @@ class ExportOffDialog(wx.Dialog):
                 min   = 1,
                 max   = 16
             )
-	this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
+        this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
         hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-	this.extraInfoGui = wx.CheckBox(this,
-		label = 'Print extra info')
-	this.extraInfoGui.SetValue(this.extraInfo)
-	this.extraInfoGui.Bind(wx.EVT_CHECKBOX, this.onExtraInfo)
+        this.extraInfoGui = wx.CheckBox(this,
+                label = 'Print extra info')
+        this.extraInfoGui.SetValue(this.extraInfo)
+        this.extraInfoGui.Bind(wx.EVT_CHECKBOX, this.onExtraInfo)
         sizer.Add(this.extraInfoGui,
-	    0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+            0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-	this.cleanUpGui = wx.CheckBox(this,
-		label = 'Merge equal vertices (can take a while)')
-	this.cleanUpGui.SetValue(this.cleanUp)
-	this.cleanUpGui.Bind(wx.EVT_CHECKBOX, this.onCleanUp)
+        this.cleanUpGui = wx.CheckBox(this,
+                label = 'Merge equal vertices (can take a while)')
+        this.cleanUpGui.SetValue(this.cleanUp)
+        this.cleanUpGui.Bind(wx.EVT_CHECKBOX, this.onCleanUp)
         sizer.Add(this.cleanUpGui,
-	    0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+            0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
@@ -1483,9 +1483,9 @@ class ExportOffDialog(wx.Dialog):
                 min   = 1,
                 max   = 16
             )
-	this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
-	if not this.cleanUp:
-	    this.floatMarginGui.Disable()
+        this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
+        if not this.cleanUp:
+            this.floatMarginGui.Disable()
         hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
@@ -1511,10 +1511,10 @@ class ExportOffDialog(wx.Dialog):
 
     def onCleanUp(this, e):
         ExportOffDialog.cleanUp = this.cleanUpGui.GetValue()
-	if ExportOffDialog.cleanUp:
-	    this.floatMarginGui.Enable()
-	else:
-	    this.floatMarginGui.Disable()
+        if ExportOffDialog.cleanUp:
+            this.floatMarginGui.Enable()
+        else:
+            this.floatMarginGui.Disable()
 
     def getCleanUp(this):
         return this.cleanUpGui.GetValue()
@@ -1572,7 +1572,7 @@ class ExportPsDialog(wx.Dialog):
                 min   = 1,
                 max   = 10000
             )
-	this.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, this.onScaling)
+        this.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, this.onScaling)
         hbox.Add(this.scalingFactorGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -1583,7 +1583,7 @@ class ExportPsDialog(wx.Dialog):
                 min   = 1,
                 max   = 16
             )
-	this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
+        this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
         hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -1594,7 +1594,7 @@ class ExportPsDialog(wx.Dialog):
                 min   = 1,
                 max   = 16
             )
-	this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
+        this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
         hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
@@ -1632,26 +1632,26 @@ class ExportPsDialog(wx.Dialog):
 
 def readShapeFile(filename):
     if filename == None:
-	fd = sys.stdin
+        fd = sys.stdin
     else:
-	if filename[-3:] == '.py':
-	    fd = open(filename, 'r')
-	    return Geom3D.readPyFile(fd)
-	elif filename[-4:] == '.off':
-	    fd = open(filename, 'r')
-	    return Geom3D.readOffFile(fd, recreateEdges = True)
-	else:
-	    print 'unrecognised file extension'
-	    return None
+        if filename[-3:] == '.py':
+            fd = open(filename, 'r')
+            return Geom3D.readPyFile(fd)
+        elif filename[-4:] == '.off':
+            fd = open(filename, 'r')
+            return Geom3D.readOffFile(fd, recreateEdges = True)
+        else:
+            print 'unrecognised file extension'
+            return None
 
 def convertToPs(shape, o_fd, scale, precision, margin):
     o_fd.write(
-	shape.toPsPiecesStr(
-	    scaling = scale,
-	    precision = precision,
-	    margin = math.pow(10, -margin),
-	    suppressWarn = True
-	)
+        shape.toPsPiecesStr(
+            scaling = scale,
+            precision = precision,
+            margin = math.pow(10, -margin),
+            suppressWarn = True
+        )
     )
 
 def convertToOff(shape, o_fd, precision, margin = 0):
@@ -1661,15 +1661,15 @@ def convertToOff(shape, o_fd, precision, margin = 0):
     precision: how many decimals to write.
     margin: what margin to use to require that 2 floating numbers are equal.
             If not specified or 0, then no cleaning up is done, meaning that no
-	    attempt is made of merging vertices that have the same coordinate.
-	    Neither are faces with the same coordinates filtered out.
+            attempt is made of merging vertices that have the same coordinate.
+            Neither are faces with the same coordinates filtered out.
     """
     try:
-	shape = shape.SimpleShape
+        shape = shape.SimpleShape
     except AttributeError:
-	pass
+        pass
     if margin != 0:
-	shape = shape.cleanShape(margin)
+        shape = shape.cleanShape(margin)
     # TODO: support for saving extraInfo?
     o_fd.write(shape.toOffStr(precision))
 
@@ -1680,23 +1680,23 @@ usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
 Without any specified options ut starts the program in the default scene.
 Options:
 
-	-P <int>
+        -P <int>
         --precision <int> Write the number with <int> number of decimals.
-	-p --ps      export to PS. The input file is either a python scrypt,
-		     specified by -y or an off file, specified by -f. If no
-		     argument is specified, the the result is piped to stdout.
-	-y <file>
-	--py=<file>  export to a python fyle defing a shape that can be
-	             interpreted by Orbitit
+        -p --ps      export to PS. The input file is either a python scrypt,
+                     specified by -y or an off file, specified by -f. If no
+                     argument is specified, the the result is piped to stdout.
+        -y <file>
+        --py=<file>  export to a python fyle defing a shape that can be
+                     interpreted by Orbitit
 
-	-f <file>
-	--off=<file> export to a python fyle defing a shape that can be read by
-	             other programs, like Antiprism and Stella.
+        -f <file>
+        --off=<file> export to a python fyle defing a shape that can be read by
+                     other programs, like Antiprism and Stella.
 
-	-m <int>
-	--margin=<int> set the margin for floating point numbers to be
-	               considered equal. All numbers with a difference that is
-		       smaller than 1.0e-<int> will be considered equal.
+        -m <int>
+        --margin=<int> set the margin for floating point numbers to be
+                       considered equal. All numbers with a difference that is
+                       smaller than 1.0e-<int> will be considered equal.
     """
     sys.exit(exit_nr)
 
@@ -1710,7 +1710,7 @@ import getopt
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],
-	'fm:P:psy', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
+        'fm:P:psy', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
 except getopt.GetoptError, err:
     print str(err)
     usage(2)
@@ -1723,63 +1723,63 @@ precision = 15
 oper = None
 for opt, opt_arg in opts:
     if opt in ('-f', '--off'):
-	oper = Oper.toOff
+        oper = Oper.toOff
     elif opt in ('-m', '--margin'):
-	margin = int(opt_arg)
+        margin = int(opt_arg)
     elif opt in ('-P', '--precision'):
-	precision = int(opt_arg)
+        precision = int(opt_arg)
     elif opt in ('-p', '--ps'):
-	oper = Oper.toPs
+        oper = Oper.toPs
     elif opt in ('-s', '--scene'):
-	oper = Oper.openScene
+        oper = Oper.openScene
     elif opt in ('-y', '--py'):
-	oper = Oper.toPy
+        oper = Oper.toPy
     else:
-	print "Error: unknown option"
-	usage(2)
+        print "Error: unknown option"
+        usage(2)
 
 o_fd = None
 a_ind = 0
 if oper != None:
     if len(args) <= a_ind:
-	print "reading python format from std input"
-	i_filename = None
+        print "reading python format from std input"
+        i_filename = None
     else:
-	i_filename = args[a_ind]
-	a_ind += 1
+        i_filename = args[a_ind]
+        a_ind += 1
     if len(args) <= a_ind:
-	o_fd = sys.stdout
+        o_fd = sys.stdout
     else:
-	o_fd = open(args[a_ind], 'w')
-	a_ind += 1
+        o_fd = open(args[a_ind], 'w')
+        a_ind += 1
 
 if oper == Oper.toPs:
     shape = readShapeFile(i_filename)
     if shape != None:
-	convertToPs(shape, o_fd, scale, precision, margin)
+        convertToPs(shape, o_fd, scale, precision, margin)
 elif oper == Oper.toOff:
     shape = readShapeFile(i_filename)
     if shape != None:
-	convertToOff(shape, o_fd, precision, margin)
+        convertToOff(shape, o_fd, precision, margin)
 elif oper == Oper.toPy:
     shape = readShapeFile(i_filename)
     if shape != None:
-	shape.saveFile(o_fd)
+        shape.saveFile(o_fd)
 else:
     if oper == Oper.openScene:
-	print "TODO"
+        print "TODO"
     app = wx.PySimpleApp()
     frame = MainWindow(
-	    Canvas3DScene,
-	    Geom3D.SimpleShape([], []),
-	    args,
-	    None,
-	    wx.ID_ANY, "test",
-	    size = (430, 482),
-	    pos = wx.Point(980, 0)
-	)
+            Canvas3DScene,
+            Geom3D.SimpleShape([], []),
+            args,
+            None,
+            wx.ID_ANY, "test",
+            size = (430, 482),
+            pos = wx.Point(980, 0)
+        )
     if (len(args) == 0):
-	frame.setScene(SceneList[DefaultScene])
+        frame.setScene(SceneList[DefaultScene])
     app.MainLoop()
 
 print "Done"

@@ -144,7 +144,7 @@ class Shape(Heptagons.EqlHeptagonShape):
                         heptN[0][4],
                         vec(v[0], v[1], v[2]),
                     ]
-	    RegularTrianglePartN = Vs[2]
+            RegularTrianglePartN = Vs[2]
             # vt is the vertex that will be projected by a half turn on the
             # third vertex of the isosceles triangle.
             IsoscelesTriangleV = [
@@ -169,7 +169,7 @@ class Shape(Heptagons.EqlHeptagonShape):
                         heptN[0][4],
                         vec(0, 0, heptN[0][3][2]),
                     ]
-	    RegularTrianglePartN = RegularTrianglePartV[2]
+            RegularTrianglePartN = RegularTrianglePartV[2]
             # vt is the vertex that will be projected by a half turn on the
             # third vertex of the isosceles triangle.
             IsoscelesTriangleV = [

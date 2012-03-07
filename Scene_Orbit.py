@@ -42,10 +42,10 @@ LOG_WARN = 3
 LOG_ERR  = 4
 
 LOG_TXT  = {
-    LOG_DBG:	'DEBUG',
-    LOG_INFO:	'INFO',
-    LOG_WARN:	'WARNING',
-    LOG_ERR:	'ERROR',
+    LOG_DBG:    'DEBUG',
+    LOG_INFO:   'INFO',
+    LOG_WARN:   'WARNING',
+    LOG_ERR:    'ERROR',
 }
 
 LOG_STDOUT_LVL = LOG_INFO # or WARN?
@@ -137,25 +137,25 @@ class CtrlWin(wx.Frame):
                 id = this.showGui[-1].GetId())
         facesSizer.Add(this.showGui[-1], 0)
 
-	# Rotate Axis
+        # Rotate Axis
         this.showGui.append(GeomGui.Vector3DInput(this.panel,
-						"Rotate around Axis:"))
+                                                "Rotate around Axis:"))
         facesSizer.Add(this.showGui[-1], 0)
-	this.__AxisGuiIndex = len(this.showGui) - 1
-	this.showGui.append(wx.Slider(
-	    this.panel,
-	    value = 0,
-	    minValue = -180,
-	    maxValue = 180,
-	    style = wx.SL_HORIZONTAL | wx.SL_LABELS
-	))
-	this.__AngleGuiIndex = len(this.showGui) - 1
-	this.panel.Bind(wx.EVT_SLIDER,
-	    this.onAngleAdjust,
-	    id = this.showGui[-1].GetId()
+        this.__AxisGuiIndex = len(this.showGui) - 1
+        this.showGui.append(wx.Slider(
+            this.panel,
+            value = 0,
+            minValue = -180,
+            maxValue = 180,
+            style = wx.SL_HORIZONTAL | wx.SL_LABELS
+        ))
+        this.__AngleGuiIndex = len(this.showGui) - 1
+        this.panel.Bind(wx.EVT_SLIDER,
+            this.onAngleAdjust,
+            id = this.showGui[-1].GetId()
         )
         facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-	# TODO add set angle directly (enough with only one axis)
+        # TODO add set angle directly (enough with only one axis)
 
         # SYMMETRY
         this.showGui.append(
@@ -191,9 +191,9 @@ class CtrlWin(wx.Frame):
         ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         this.showGui[this.__FinalSymGuiIndex].SetSelected(0)
-	this.onSymmetrySelect(
-		this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
-	    )
+        this.onSymmetrySelect(
+                this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
+            )
 
         this.ctrlSizer = ctrlSizer
         return ctrlSizer
@@ -268,7 +268,7 @@ class CtrlWin(wx.Frame):
         Vs = this.showGui[this.__VsGuiIndex].get()
         Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
-	    this.statusText('No faces defined!', LOG_ERR)
+            this.statusText('No faces defined!', LOG_ERR)
             return
         finalSymGui   = this.showGui[this.__FinalSymGuiIndex]
         finalSym      = finalSymGui.GetSelected()
@@ -283,14 +283,14 @@ class CtrlWin(wx.Frame):
                     finalSym = finalSym, stabSym = stabSym, name = this.name
                 )
         except isometry.ImproperSubgroupError:
-	    this.statusText(
-		'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
+            this.statusText(
+                'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
             e.Skip()
             return
         this.FsOrbit = this.shape.getIsometries()['direct']
         this.FsOrbitOrg = True
         this.shape.recreateEdges()
-	this.updateOrientation()
+        this.updateOrientation()
         this.canvas.panel.setShape(this.shape)
         updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
         updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
@@ -302,7 +302,7 @@ class CtrlWin(wx.Frame):
         else:
             this.onNrColsSel(this.colGuis[this.__nrOfColsGuiId])
         this.panel.Layout()
-	this.statusText('Symmetry applied: choose colours!', LOG_INFO)
+        this.statusText('Symmetry applied: choose colours!', LOG_INFO)
         try:
             tst = this.cols
         except AttributeError:
@@ -310,39 +310,39 @@ class CtrlWin(wx.Frame):
         e.Skip()
 
     def statusText(this, txt, lvl = LOG_INFO):
-	txt = '%s: %s' % (LOG_TXT[lvl], txt)
-	if lvl >= LOG_STDOUT_LVL:
-	    print txt
-	if lvl >= LOG_BAR_LVL:
-	    this.statusBar.SetStatusText(txt)
+        txt = '%s: %s' % (LOG_TXT[lvl], txt)
+        if lvl >= LOG_STDOUT_LVL:
+            print txt
+        if lvl >= LOG_BAR_LVL:
+            this.statusBar.SetStatusText(txt)
 
     def updateOrientation(this):
-	aIndex = this.__AngleGuiIndex
-	vIndex = this.__AxisGuiIndex
-	v = this.showGui[vIndex].GetVertex()
-	if v == GeomTypes.Vec3([0, 0, 0]):
-	    rot = GeomTypes.E
-	    this.statusText(
-		'Rotation axis is the null-vector: applying identity',
-		LOG_INFO
-	    )
-	else:
-	    rot = GeomTypes.Rot3(
-		axis = v,
-		angle = Geom3D.Deg2Rad * this.showGui[aIndex].GetValue()
-	    )
-	try:
-	    this.shape.setBaseOrientation(rot)
-	except AttributeError:
-	    this.statusText(
-		'Apply symmetry first, before pulling the slide-bar',
-		LOG_WARN
-	    )
+        aIndex = this.__AngleGuiIndex
+        vIndex = this.__AxisGuiIndex
+        v = this.showGui[vIndex].GetVertex()
+        if v == GeomTypes.Vec3([0, 0, 0]):
+            rot = GeomTypes.E
+            this.statusText(
+                'Rotation axis is the null-vector: applying identity',
+                LOG_INFO
+            )
+        else:
+            rot = GeomTypes.Rot3(
+                axis = v,
+                angle = Geom3D.Deg2Rad * this.showGui[aIndex].GetValue()
+            )
+        try:
+            this.shape.setBaseOrientation(rot)
+        except AttributeError:
+            this.statusText(
+                'Apply symmetry first, before pulling the slide-bar',
+                LOG_WARN
+            )
 
     def onAngleAdjust(this, e):
-	this.updateOrientation()
-	this.canvas.panel.setShape(this.shape)
-	e.Skip()
+        this.updateOrientation()
+        this.canvas.panel.setShape(this.shape)
+        e.Skip()
 
     def onNrColsSel(this, e):
         try:
@@ -415,9 +415,9 @@ class CtrlWin(wx.Frame):
             this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
             selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
         this.nrOfCols = nrOfCols
-	# replace invalid index of colour alternative with the last possible
+        # replace invalid index of colour alternative with the last possible
         if this.colAlternative[1] >= len(this.colIsoms):
-	    this.colAlternative[1] = len(this.colIsoms) - 1
+            this.colAlternative[1] = len(this.colIsoms) - 1
         this.updatShapeColours()
         this.panel.Layout()
 
@@ -457,7 +457,7 @@ class CtrlWin(wx.Frame):
                 for col in colPerIsom
             ]
         this.shape.setFaceColors(cols)
-	this.statusText('Colour alternative %d of %d applied' % (
+        this.statusText('Colour alternative %d of %d applied' % (
                 this.colAlternative[1] + 1, len(this.colIsoms)
             ), LOG_INFO
         )
@@ -501,12 +501,12 @@ class CtrlWin(wx.Frame):
             fd = open(os.path.join(this.importDirName, filename), 'r')
             if filename[-3:] == '.py':
                 shape = Geom3D.readPyFile(fd)
-		# For Compound derived shapes (isinstance) use merge:
-		try:
-		    shape = shape.SimpleShape
-		except AttributeError:
-		    # probably a SimpleShape
-		    pass
+                # For Compound derived shapes (isinstance) use merge:
+                try:
+                    shape = shape.SimpleShape
+                except AttributeError:
+                    # probably a SimpleShape
+                    pass
             else:
                 shape = Geom3D.readOffFile(fd, recreateEdges = False)
             fd.close()
@@ -525,5 +525,5 @@ class CtrlWin(wx.Frame):
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
-	glFrontFace(GL_CW)
+        glFrontFace(GL_CW)
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)

@@ -76,8 +76,8 @@ class P2PCylinder:
         this.radius = radius
         this.slices = slices
         this.stacks = stacks
-	gluQuadricNormals(this.quad, GLU_SMOOTH)
-	#gluQuadricTexture(this.quad, GL_TRUE)
+        gluQuadricNormals(this.quad, GLU_SMOOTH)
+        #gluQuadricTexture(this.quad, GL_TRUE)
 
     def draw(this, v0 = [0, 0, 0], v1 = [0, 0, 1]):
         e = [v1[0]-v0[0], v1[1]-v0[1], v1[2]-v0[2]]
@@ -104,8 +104,8 @@ class VSphere:
         this.radius = radius
         this.slices = slices
         this.stacks = stacks
-	gluQuadricNormals(this.quad, GLU_SMOOTH)
-	#gluQuadricTexture(this.quad, GL_TRUE)
+        gluQuadricNormals(this.quad, GLU_SMOOTH)
+        #gluQuadricTexture(this.quad, GL_TRUE)
 
     def draw(this, v = [0, 0, 0]):
         glPushMatrix();
@@ -139,12 +139,12 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.zScaleFactor  = 1.0/100
         this.currentScale  = 1.0
         this.rScale = 0.8
-	# these repos are used internally and are related to the rotation
-	# caused by the mouse
-	# - modelRepos is used when calculating a new orientation. It expresses
-	#   the rotation caused by the mouse, before calculating the new one.
-	# - movingRepos is the newly calculated rotation after a mouse indicated
-	#   rotation is finished.
+        # these repos are used internally and are related to the rotation
+        # caused by the mouse
+        # - modelRepos is used when calculating a new orientation. It expresses
+        #   the rotation caused by the mouse, before calculating the new one.
+        # - movingRepos is the newly calculated rotation after a mouse indicated
+        #   rotation is finished.
         this.modelRepos = GeomTypes.E
         this.movingRepos = GeomTypes.E
         this.xAxis = GeomTypes.ux

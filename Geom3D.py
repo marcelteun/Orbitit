@@ -155,10 +155,10 @@ def readPyFile(fd):
 
 def isInt(str):
     try:
-	num = int(str)
-	return True
+        num = int(str)
+        return True
     except ValueError:
-	return False
+        return False
 
 def readOffFile(fd, recreateEdges = True, name = ''):
     """Reads an the std 'off' format of a 3D object and returns an object of the
@@ -230,41 +230,41 @@ def readOffFile(fd, recreateEdges = True, name = ''):
                 # the function assumes: no comments in beween "q i0 .. iq-1 r g b"
                 assert words[0].isdigit()
                 lenF = int(words[0])
-		if lenF > 0:
-		    assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
-		    face = [int(words[j]) for j in range(1, lenF + 1)]
-		    if lenF >= 3:
-			Fs.append(face)
-			if len(words) == lenF + 1:
-			    cols.append([0.8, 0.8, 0.8])
-			else:
-			    if isInt(words[lenF+1]):
-				cols.append(
-				    [float(words[j])/255 for j in range(lenF+1, lenF+4)]
-				)
-			    else:
-				cols.append(
-				    [float(words[j]) for j in range(lenF+1, lenF+4)]
-				)
-			if debug: print 'face[%d] =' % i,  Fs[-1]
-			if debug: print 'col[%d] =' % i,  cols[-1]
-		    else:
-			if lenF == 2:
-			    # this is an edge really...
-			    Es.extend(face)
-			    eRadius = 0.15
-			    if debug: print 'face[%d] =' % i,  face, '( = an edge)'
-			    # what about different edge colours?
-			else:
-			    # since vertices are defined explicitely, show them
-			    vRadius = 0.05
-			    print 'Note: ignoring face %d with only %d vertices' % (
-				i, lenF
-			    )
-		    i = i + 1
-		    if i == nrOfFs:
-			state = states['readOk']
-			break;
+                if lenF > 0:
+                    assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
+                    face = [int(words[j]) for j in range(1, lenF + 1)]
+                    if lenF >= 3:
+                        Fs.append(face)
+                        if len(words) == lenF + 1:
+                            cols.append([0.8, 0.8, 0.8])
+                        else:
+                            if isInt(words[lenF+1]):
+                                cols.append(
+                                    [float(words[j])/255 for j in range(lenF+1, lenF+4)]
+                                )
+                            else:
+                                cols.append(
+                                    [float(words[j]) for j in range(lenF+1, lenF+4)]
+                                )
+                        if debug: print 'face[%d] =' % i,  Fs[-1]
+                        if debug: print 'col[%d] =' % i,  cols[-1]
+                    else:
+                        if lenF == 2:
+                            # this is an edge really...
+                            Es.extend(face)
+                            eRadius = 0.15
+                            if debug: print 'face[%d] =' % i,  face, '( = an edge)'
+                            # what about different edge colours?
+                        else:
+                            # since vertices are defined explicitely, show them
+                            vRadius = 0.05
+                            print 'Note: ignoring face %d with only %d vertices' % (
+                                i, lenF
+                            )
+                    i = i + 1
+                    if i == nrOfFs:
+                        state = states['readOk']
+                        break;
             else:
                 break
     assert state == states['readOk'], """
@@ -432,9 +432,9 @@ class Line2D(Line):
         return this.getPoint(this.intersectLineGetFactor(l))
 
     def intersectWithFacet(this, FacetVs, iFacet,
-	z0 = 0.0,
-	margin = defaultFloatMargin ,
-	suppressWarn = False
+        z0 = 0.0,
+        margin = defaultFloatMargin ,
+        suppressWarn = False
     ):
         """
         Intersect the 2D line object in plane z = Z0 with a 3D facet and return
@@ -484,9 +484,9 @@ class Line2D(Line):
                 if (t >= 0 or tEq0) and (t <= 1 or tEq1):
                     if this.debug:
                         print 'edge intersects plane z =', z0,\
-			    'in a point (t = %f)' % (t)
-		    try:
-			s = this.getFactor(edgePV3D.getPoint(t),
+                            'in a point (t = %f)' % (t)
+                    try:
+                        s = this.getFactor(edgePV3D.getPoint(t),
                                                                 margin = margin)
                     except PrecisionError:
                         s = None
@@ -591,21 +591,21 @@ class Line2D(Line):
                 allowOddNrOfIntersections = True
             else:
                 # more than 2: complex cases.
-		if not suppressWarn:
-			print 'WARNING: intersections through more than 2',\
-						'vertices (not on one edge)'
-			print '         vertexIntersections',\
-							vertexIntersections
-			print '         pOnLineAtEdges', pOnLineAtEdges
-			print '         will draw one long line, instead of'\
-								'segments'
+                if not suppressWarn:
+                        print 'WARNING: intersections through more than 2',\
+                                                'vertices (not on one edge)'
+                        print '         vertexIntersections',\
+                                                        vertexIntersections
+                        print '         pOnLineAtEdges', pOnLineAtEdges
+                        print '         will draw one long line, instead of'\
+                                                                'segments'
                 #assert False, 'ToDo'
                 # if an assert is not wanted, choose pass.
                 #allowOddNrOfIntersections = True
                 pOnLineAtEdges.sort()
                 pOnLineAtEdges = [pOnLineAtEdges[0], pOnLineAtEdges[-1]]
-		if not suppressWarn:
-			print '         using pOnLineAtEdges', pOnLineAtEdges
+                if not suppressWarn:
+                        print '         using pOnLineAtEdges', pOnLineAtEdges
                 pass
         pOnLineAtEdges.sort()
 
@@ -839,9 +839,9 @@ class SimpleShape:
     This class decribes a simple 3D object consisting of faces and edges.
     """
     def __init__(this,
-	Vs, Fs, Es = [], Ns = [],
-	colors = ([], []), name = "SimpleShape",
-	orientation = None
+        Vs, Fs, Es = [], Ns = [],
+        colors = ([], []), name = "SimpleShape",
+        orientation = None
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -890,10 +890,10 @@ class SimpleShape:
             Fs = Fs, colors = colors, drawFaces = True
         )
         this.defaultColor = rgb.yellow
-	if orientation != None:
-	    this.orientation = orientation
-	else:
-	    this.orientation = GeomTypes.E
+        if orientation != None:
+            this.orientation = orientation
+        else:
+            this.orientation = GeomTypes.E
         if this.dbgPrn:
             print '%s.__init__' % this.name
             print 'this.colorData:'
@@ -923,33 +923,33 @@ class SimpleShape:
         return s
 
     def saveFile(this, fd):
-	"""
-	Save a shape in a file descriptor
+        """
+        Save a shape in a file descriptor
 
-	The caller still need to close the filde descriptor afterwards
-	"""
-	saveFile(fd, this)
+        The caller still need to close the filde descriptor afterwards
+        """
+        saveFile(fd, this)
 
     def cleanShape(this, precision):
-	"""Return a new shape for which vertices are merged and degenerated faces are deleted.
+        """Return a new shape for which vertices are merged and degenerated faces are deleted.
 
-	The shape will not have any edges.
-	"""
-	vProps = this.getVertexProperties()
-	fProps = this.getFaceProperties()
-	cpVs = copy.deepcopy(vProps['Vs'])
-	cpFs = copy.deepcopy(fProps['Fs'])
-	glue.mergeVs(cpVs, cpFs, precision)
-	# this may result on less faces, which breaks the colours!
-	# TODO either update the colors immediately or return an array with
-	# deleted face indices.
-	glue.cleanUpVsFs(cpVs, cpFs)
-	vProps['Vs'] = cpVs
-	fProps['Fs'] = cpFs
-	shape = SimpleShape([], [], [])
-	shape.setVertexProperties(vProps)
-	shape.setFaceProperties(fProps)
-	return shape
+        The shape will not have any edges.
+        """
+        vProps = this.getVertexProperties()
+        fProps = this.getFaceProperties()
+        cpVs = copy.deepcopy(vProps['Vs'])
+        cpFs = copy.deepcopy(fProps['Fs'])
+        glue.mergeVs(cpVs, cpFs, precision)
+        # this may result on less faces, which breaks the colours!
+        # TODO either update the colors immediately or return an array with
+        # deleted face indices.
+        glue.cleanUpVsFs(cpVs, cpFs)
+        vProps['Vs'] = cpVs
+        fProps['Fs'] = cpFs
+        shape = SimpleShape([], [], [])
+        shape.setVertexProperties(vProps)
+        shape.setFaceProperties(fProps)
+        return shape
 
     def setVs(this, Vs):
         this.setVertexProperties(Vs = Vs)
@@ -1283,16 +1283,16 @@ class SimpleShape:
             return this.createVertexNormals_vi
         this.nFs = [[inc() for i in face] for face in this.Fs]
         this.TriangulatedFs = this.triangulate(this.nFs)
-	# Now for the edge vertices. Note that edge vertices aren't necessarily
-	# part of the face vertices.
-	edgeIndexOffset = len(this.nVs)
-	this.nVs.extend(Vs)
-	if normalise:
-	    for v in Vs:
-		this.vNs.append(v.normalize())
-	else:
-	    for v in Vs:
-		this.vNs.append(v)
+        # Now for the edge vertices. Note that edge vertices aren't necessarily
+        # part of the face vertices.
+        edgeIndexOffset = len(this.nVs)
+        this.nVs.extend(Vs)
+        if normalise:
+            for v in Vs:
+                this.vNs.append(v.normalize())
+        else:
+            for v in Vs:
+                this.vNs.append(v)
         this.nEs = [oldVi + edgeIndexOffset for oldVi in this.Es]
 
     def createEdgeLengths(this, precision = 12):
@@ -1513,9 +1513,9 @@ class SimpleShape:
         # have this one here and not in glDraw, so that a client can call this
         # function as well (without having to think about this)
 
-	# Check if unity matrix?
-	glPushMatrix()
-	glMultMatrixd(this.orientation.glMatrix())
+        # Check if unity matrix?
+        glPushMatrix()
+        glMultMatrixd(this.orientation.glMatrix())
         if this.gl.updateVs:
             # calculate the gravitational centre. Only calculate the vertices
             # that are used:
@@ -1548,10 +1548,10 @@ class SimpleShape:
                 if Ns != []:
                     assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
                     glNormalPointerf(Ns)
-		    this.NsSaved = Ns
+                    this.NsSaved = Ns
                 else:
                     glNormalPointerf(Vs)
-		    this.NsSaved = Vs
+                    this.NsSaved = Vs
             elif this.Ns != [] and len(this.Ns) == len(Vs):
                 try:
                     glVertexPointerf(Vs)
@@ -1562,14 +1562,14 @@ class SimpleShape:
                     glVertexPointerf(Vs)
                     Ns = [ [n[0], n[1], n[2]] for n in this.Ns ]
                 glNormalPointerf(Ns)
-		this.NsSaved = Ns
+                this.NsSaved = Ns
             else:
                 this.createVertexNormals(True, Vs)
                 if this.nVs != []:
                     glVertexPointerf(this.nVs)
                 glNormalPointerf(this.vNs)
-		this.NsSaved = this.vNs
-		Vs = this.nVs
+                this.NsSaved = this.vNs
+                Vs = this.nVs
             this.gl.updateVs = False
             this.VsSaved = Vs
         else:
@@ -1657,7 +1657,7 @@ class SimpleShape:
                             glDepthMask(GL_TRUE)
                         # ready, disable stencil
                         glDisable(GL_STENCIL_TEST)
-	glPopMatrix()
+        glPopMatrix()
 
     def toX3dNode(this, id = 'SISH', precision = 5, edgeRadius = 0):
         """
@@ -1784,17 +1784,17 @@ class SimpleShape:
             d = this.createDihedralAngles()
             for a, Es in d.iteritems():
                 s = w('# Dihedral angle: %s rad (%s degrees) for %d edges' % (
-		    glue.f2s(a, precision),
-		    glue.f2s(a*Rad2Deg, precision),
-		    len(Es)
-		))
+                    glue.f2s(a, precision),
+                    glue.f2s(a*Rad2Deg, precision),
+                    len(Es)
+                ))
                 if len(Es) > 2:
                     s = w('#                 E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
             l2e = this.createEdgeLengths()
             for l, Es in l2e.iteritems():
                 s = w('# Length: %s for %d edges' % (
-		    glue.f2s(l, precision), len(Es)
-		))
+                    glue.f2s(l, precision), len(Es)
+                ))
                 if len(Es) > 2:
                     s = w('#         E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
         s = w('# Vertices Faces Edges')
@@ -1804,10 +1804,10 @@ class SimpleShape:
         s = w('# Vertices')
         for V in this.Vs:
             s = w('%s %s %s' % (
-		glue.f2s(V[0], precision),
-		glue.f2s(V[1], precision),
-		glue.f2s(V[2], precision)
-	    ))
+                glue.f2s(V[0], precision),
+                glue.f2s(V[1], precision),
+                glue.f2s(V[2], precision)
+            ))
         s = w('# Sides and colours')
         # this.colorData[1] = [] : use this.colorData[0][0]
         # this.colorData[1] = [c0, c1, .. cn] where ci is an index i
@@ -1840,8 +1840,8 @@ class SimpleShape:
                 s = '%s%s\n' % (s, faceStr(face))
                 fnStr = '%s %s %s' % (
                         glue.f2s(this.fNs[i][0], precision),
-			glue.f2s(this.fNs[i][1], precision),
-			glue.f2s(this.fNs[i][2], precision)
+                        glue.f2s(this.fNs[i][1], precision),
+                        glue.f2s(this.fNs[i][2], precision)
                     )
                 if info:
                     s = w('# face normal: %s' % fnStr)
@@ -1857,7 +1857,7 @@ class SimpleShape:
             precision = 7,
             margin = 1.0e5*defaultFloatMargin,
             pageSize = PS.PageSizeA4,
-	    suppressWarn = False
+            suppressWarn = False
         ):
         """
         Returns a string in PS format that shows the pieces of faces that can
@@ -1890,12 +1890,12 @@ class SimpleShape:
         orgMargin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
         try:
             for i in faceIndices:
-		if not debug:
-		    # write to stderr, since we might we writing the model
-		    # itself to stdout, which might be piped to a file
-		    sys.stderr.write( '\rchecking face %d (of %d)' % (
-						    i + 1, len(faceIndices))),
-		    sys.stderr.flush()
+                if not debug:
+                    # write to stderr, since we might we writing the model
+                    # itself to stdout, which might be piped to a file
+                    sys.stderr.write( '\rchecking face %d (of %d)' % (
+                                                    i + 1, len(faceIndices))),
+                    sys.stderr.flush()
                 Vs = []
                 pointsIn2D = []
                 Es  = []
@@ -2009,7 +2009,7 @@ class SimpleShape:
                         # know where it shares edges.
                         pInLoiFacet = loi2D.intersectWithFacet(Vs,
                                 intersectingFacet, Loi3D.p[2],
-				margin, suppressWarn)
+                                margin, suppressWarn)
                         if debug: print 'pInLoiFacet', pInLoiFacet
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
@@ -2092,7 +2092,7 @@ class SimpleShape:
     def intersectFacets(this,
             faceIndices = [],
             margin = 1.0e5*defaultFloatMargin,
-	    suppressWarn = False
+            suppressWarn = False
         ):
         """
         Returns a simple shape object for which the faces do not intersect
@@ -2274,7 +2274,7 @@ class SimpleShape:
                         # call. The line is in the plane of the facet and we want to
                         # know where it shares edges.
                         pInLoiFacet = loi2D.intersectWithFacet(Vs,
-			    intersectingFacet, Loi3D.p[2], margin, suppressWarn)
+                            intersectingFacet, Loi3D.p[2], margin, suppressWarn)
                         if debug: print 'pInLoiFacet', pInLoiFacet
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
@@ -2302,7 +2302,7 @@ class SimpleShape:
                 # Now Intersect loi with the baseFacets.
                 for baseFacet in baseFacets:
                     pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet,
-			loiData[2], margin, suppressWarn)
+                        loiData[2], margin, suppressWarn)
                     if debug: print 'pInLoiBase', pInLoiBase
                     # Now combine the results of pInLoiFacet and pInLoiBase:
                     # Only keep intersections that fall within 2 segments for
@@ -2459,34 +2459,34 @@ class CompoundShape():
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
-	this.name = name
+        this.name = name
         this.setShapes(simpleShapes)
 
     def __repr__(this):
-	"""
-	Returns a python string that can be interpreted by Python for the shape
-	"""
-	if len(this.shapeElements) == 1:
-	    return repr(this.shapeElements[0])
-	else:
-	    s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
-	    s = '%ssimpleShapes = [\n' % (s)
-	    for shape in this.shapeElements:
-		s = '%s    %s,\n' % (s, repr(shape))
-	    s = '%s  ],\n  ' % s
-	    s = '%sname = "%s"\n' % (s, this.name)
-	    s = '%s)\n' % (s)
-	    if __name__ != '__main__':
-		s = '%s.%s' % (__name__, s)
-	    return s
+        """
+        Returns a python string that can be interpreted by Python for the shape
+        """
+        if len(this.shapeElements) == 1:
+            return repr(this.shapeElements[0])
+        else:
+            s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+            s = '%ssimpleShapes = [\n' % (s)
+            for shape in this.shapeElements:
+                s = '%s    %s,\n' % (s, repr(shape))
+            s = '%s  ],\n  ' % s
+            s = '%sname = "%s"\n' % (s, this.name)
+            s = '%s)\n' % (s)
+            if __name__ != '__main__':
+                s = '%s.%s' % (__name__, s)
+            return s
 
     def saveFile(this, fd):
-	"""
-	Save a shape in a file descriptor
+        """
+        Save a shape in a file descriptor
 
-	The caller still need to close the filde descriptor afterwards
-	"""
-	saveFile(fd, this)
+        The caller still need to close the filde descriptor afterwards
+        """
+        saveFile(fd, this)
 
     def addShape(this, shape):
         """
@@ -2494,30 +2494,30 @@ class CompoundShape():
         """
         if this.dbgTrace:
             print '%s.addShape(%s,..):' % (this.__class__, this.name)
-	shape.gl.alwaysSetVertices = True
+        shape.gl.alwaysSetVertices = True
         this.shapeElements.append(shape)
-	if len(this.shapeElements) > 1:
-	    this.shapeElements[-1].generateNormals =\
-		this.shapeElements[0].generateNormals
-	this.mergeNeeded = True
+        if len(this.shapeElements) > 1:
+            this.shapeElements[-1].generateNormals =\
+                this.shapeElements[0].generateNormals
+        this.mergeNeeded = True
 
     @property
     def shapes(this):
-	return this.shapeElements
+        return this.shapeElements
 
     def setShapes(this, simpleShapes):
-	"""
-	Set the shapes all at once.
+        """
+        Set the shapes all at once.
 
-	Note: you need to make sure yourself to have the generateNormals set
-	consistently for all shapes.
-	"""
+        Note: you need to make sure yourself to have the generateNormals set
+        consistently for all shapes.
+        """
         if this.dbgTrace:
             print '%s.setShapes(%s,..):' % (this.__class__, this.name)
         this.shapeElements = simpleShapes
-	for shape in simpleShapes:
-	    shape.gl.alwaysSetVertices = True
-	this.mergeNeeded = True
+        for shape in simpleShapes:
+            shape.gl.alwaysSetVertices = True
+        this.mergeNeeded = True
 
     def mergeShapes(this):
         """Using the current array of shapes as defined in shapeElements,
@@ -2537,12 +2537,12 @@ class CompoundShape():
         for s in this.shapeElements:
             VsOffset  = len(Vs)
             colOffset = len(colorDefs)
-	    # Apply shape orientation here, needed, since the can be different
-	    # for the various shapes
+            # Apply shape orientation here, needed, since the can be different
+            # for the various shapes
             for v in s.Vs:
-		Vs.append(s.orientation * v)
+                Vs.append(s.orientation * v)
             for v in s.Ns:
-		Ns.append(s.orientation * v)
+                Ns.append(s.orientation * v)
             # offset all faces:
             Fs.extend([[ i+VsOffset for i in f] for f in s.Fs])
             Es.extend([ i+VsOffset for i in s.Es])
@@ -2552,45 +2552,45 @@ class CompoundShape():
                 Vs = Vs, Fs = Fs, Es = Es, Ns = Ns,
                 colors = (colorDefs, colorIndices)
             )
-	this.mergeNeeded = False
+        this.mergeNeeded = False
 
     @property
     def SimpleShape(this):
-	"""Return the compound shape as a simple merged and flat shape
-	"""
+        """Return the compound shape as a simple merged and flat shape
+        """
         if this.dbgTrace:
             print '%s.SimpleShape(%s,..):' % (this.__class__, this.name)
-	if this.mergeNeeded:
+        if this.mergeNeeded:
             this.mergeShapes()
-	return this.mergedShape
+        return this.mergedShape
 
     def glDraw(this):
-	"""Draws the compound shape as compound shape
+        """Draws the compound shape as compound shape
 
-	If you want to draw it as one, draw the SimpleShape instead
-	"""
+        If you want to draw it as one, draw the SimpleShape instead
+        """
         if this.dbgTrace:
             print '%s.SimpleShape(%s,..):' % (this.__class__, this.name)
-	for shape in this.shapeElements:
-	    shape.glDraw()
+        for shape in this.shapeElements:
+            shape.glDraw()
 
     def recreateEdges(this):
         if this.dbgTrace:
             print '%s.recreateEdges(%s,..):' % (this.__class__, this.name)
-	for shape in this.shapeElements:
-	    shape.recreateEdges()
-	this.mergeNeeded = True
+        for shape in this.shapeElements:
+            shape.recreateEdges()
+        this.mergeNeeded = True
 
     def setVertexProperties(this, dictPar = None, **kwargs):
-	"""Set the vertex properties for a whole compound shape at once
+        """Set the vertex properties for a whole compound shape at once
 
-	Vs: This is an array of Vs. One Vs array for each shape element
-	Ns: This is an array of Ns. One Ns array for each shape element
-	radius: one radius that is valid for all shape elements
-	color: one vertex color that is valid for all shape elements
+        Vs: This is an array of Vs. One Vs array for each shape element
+        Ns: This is an array of Ns. One Ns array for each shape element
+        radius: one radius that is valid for all shape elements
+        color: one vertex color that is valid for all shape elements
 
-	See the same function in SimpleShape.
-	"""
+        See the same function in SimpleShape.
+        """
         if this.dbgTrace:
             print '%s.setVertexProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
@@ -2599,54 +2599,54 @@ class CompoundShape():
             else:
                 dict = kwargs
             if 'Vs' in dict and dict['Vs'] != None:
-		Vs = dict['Vs']
-	    else:
-		Vs = [None for shape in this.shapeElements]
+                Vs = dict['Vs']
+            else:
+                Vs = [None for shape in this.shapeElements]
             if 'Ns' in dict and dict['Ns'] != None:
-		Ns = dict['Ns']
-	    else:
-		Ns = [None for shape in this.shapeElements]
+                Ns = dict['Ns']
+            else:
+                Ns = [None for shape in this.shapeElements]
             if 'radius' in dict:
                 radius = dict['radius']
-	    else:
+            else:
                 radius = None
             if 'color' in dict:
                 color = dict['color']
-	    else:
+            else:
                 color = None
-	assert len(Vs) == len(this.shapeElements)
-	assert len(Ns) == len(this.shapeElements)
-	for i in range(len(this.shapeElements)):
-	    this.shapeElements[i].setVertexProperties(
-		Vs = Vs[i], Ns = Ns[i], radius = radius, color = color
-	    )
-	this.mergeNeeded = True
+        assert len(Vs) == len(this.shapeElements)
+        assert len(Ns) == len(this.shapeElements)
+        for i in range(len(this.shapeElements)):
+            this.shapeElements[i].setVertexProperties(
+                Vs = Vs[i], Ns = Ns[i], radius = radius, color = color
+            )
+        this.mergeNeeded = True
 
     def getVertexProperties(this):
-	"""Return a dictionary of the vertex properties of the compound
+        """Return a dictionary of the vertex properties of the compound
 
-	See setVertexProperties what to expect.
-	"""
+        See setVertexProperties what to expect.
+        """
         if this.dbgTrace:
             print '%s.getVertexProperties(%s,..):' % (this.__class__, this.name)
-	# Note: cannot use the megedShape, since the Vs is not an array of Vs
-	d = this.shapeElements[0].getVertexProperties()
-	return {
+        # Note: cannot use the megedShape, since the Vs is not an array of Vs
+        d = this.shapeElements[0].getVertexProperties()
+        return {
             'Vs': this.Vs,
             'radius': d['radius'],
             'color': d['color'],
             'Ns': this.Ns
-	}
+        }
 
     def setEdgeProperties(this, dictPar = None, **kwargs):
-	"""Set the edge properties for a whole compound shape at once
+        """Set the edge properties for a whole compound shape at once
 
-	Es: This is an array of Es. One Es array for each shape element
-	radius: one radius that is valid for all shape elements
-	color: one vertex color that is valid for all shape elements
+        Es: This is an array of Es. One Es array for each shape element
+        radius: one radius that is valid for all shape elements
+        color: one vertex color that is valid for all shape elements
 
-	See the same function in SimpleShape.
-	"""
+        See the same function in SimpleShape.
+        """
         if this.dbgTrace:
             print '%s.setEdgeProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
@@ -2655,52 +2655,52 @@ class CompoundShape():
             else:
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
-		Es = dict['Es']
-	    else:
-		Es = [None for shape in this.shapeElements]
+                Es = dict['Es']
+            else:
+                Es = [None for shape in this.shapeElements]
             if 'radius' in dict:
                 radius = dict['radius']
-	    else:
+            else:
                 radius = None
             if 'color' in dict:
                 color = dict['color']
-	    else:
+            else:
                 color = None
             if 'drawEdges' in dict:
                 drawEdges = dict['drawEdges']
-	    else:
+            else:
                 drawEdges = None
-	for i in range(len(this.shapeElements)):
-	    this.shapeElements[i].setEdgeProperties(
-		Es = Es[i], radius = radius, color = color, drawEdges = drawEdges
-	    )
-	this.mergeNeeded = True
+        for i in range(len(this.shapeElements)):
+            this.shapeElements[i].setEdgeProperties(
+                Es = Es[i], radius = radius, color = color, drawEdges = drawEdges
+            )
+        this.mergeNeeded = True
 
     def getEdgeProperties(this):
-	"""Return a dictionary of the edge properties of the compound
+        """Return a dictionary of the edge properties of the compound
 
-	See setEdgeProperties what to expect.
-	"""
+        See setEdgeProperties what to expect.
+        """
         if this.dbgTrace:
             print '%s.getEdgeProperties(%s,..):' % (this.__class__, this.name)
-	d = this.shapeElements[0].getEdgeProperties()
-	return {
+        d = this.shapeElements[0].getEdgeProperties()
+        return {
             'Es': this.Es,
             'radius': d['radius'],
             'color': d['color'],
             'drawEdges': d['drawEdges']
-	}
+        }
 
     def setFaceProperties(this, dictPar = None, **kwargs):
-	"""Set the face properties for a whole compound shape at once
+        """Set the face properties for a whole compound shape at once
 
-	Fs: This is an array of Es. One Es array for each shape element
-	colors: This is an array of colors. One colors set for each shape
-	        element.
-	drawFaces: one drawFaces setting that is valid for all shape elements
+        Fs: This is an array of Es. One Es array for each shape element
+        colors: This is an array of colors. One colors set for each shape
+                element.
+        drawFaces: one drawFaces setting that is valid for all shape elements
 
-	See the same function in SimpleShape.
-	"""
+        See the same function in SimpleShape.
+        """
         if this.dbgTrace:
             print '%s.setFaceProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
@@ -2709,83 +2709,83 @@ class CompoundShape():
             else:
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
-		Fs = dict['Fs']
-	    else:
-		Fs = [None for shape in this.shapeElements]
+                Fs = dict['Fs']
+            else:
+                Fs = [None for shape in this.shapeElements]
             if 'colors' in dict and dict['colors'] != None:
-		colors = dict['colors']
-	    else:
-		colors = [None for shape in this.shapeElements]
+                colors = dict['colors']
+            else:
+                colors = [None for shape in this.shapeElements]
             if 'drawFaces' in dict:
                 drawFaces = dict['drawFaces']
-	    else:
+            else:
                 drawFaces = None
-	for i in range(len(this.shapeElements)):
-	    this.shapeElements[i].setEdgeProperties(
-		Fs = Fs[i], colors = colors[i], drawFaces = drawFaces
-	    )
-	this.mergeNeeded = True
+        for i in range(len(this.shapeElements)):
+            this.shapeElements[i].setEdgeProperties(
+                Fs = Fs[i], colors = colors[i], drawFaces = drawFaces
+            )
+        this.mergeNeeded = True
 
     def getFaceProperties(this):
-	"""Return a dictionary of the face properties of the compound
+        """Return a dictionary of the face properties of the compound
 
-	See setFaceProperties what to expect.
-	"""
+        See setFaceProperties what to expect.
+        """
         if this.dbgTrace:
             print '%s.getFaceProperties(%s,..):' % (this.__class__, this.name)
-	d = this.shapeElements[0].getFaceProperties()
-	return {
+        d = this.shapeElements[0].getFaceProperties()
+        return {
             'Fs': this.Fs,
             'colors': this.colorData,
             'drawFaces': d['drawFaces']
-	}
+        }
 
     @property
     def dimension(this):
         if this.dbgTrace:
             print '%s.dimension(%s,..):' % (this.__class__, this.name)
-	return this.shapeElements[0].dimension
+        return this.shapeElements[0].dimension
 
     @property
     def Vs(this):
         if this.dbgTrace:
             print '%s.Vs(%s,..):' % (this.__class__, this.name)
-	return [shape.Vs for shape in this.shapeElements]
+        return [shape.Vs for shape in this.shapeElements]
 
     @property
     def Ns(this):
         if this.dbgTrace:
             print '%s.Ns(%s,..):' % (this.__class__, this.name)
-	return [shape.Ns for shape in this.shapeElements]
+        return [shape.Ns for shape in this.shapeElements]
 
     @property
     def Es(this):
         if this.dbgTrace:
             print '%s.Es(%s,..):' % (this.__class__, this.name)
-	return [shape.Es for shape in this.shapeElements]
+        return [shape.Es for shape in this.shapeElements]
 
     @property
     def Fs(this):
         if this.dbgTrace:
             print '%s.Fs(%s,..):' % (this.__class__, this.name)
-	return [shape.Fs for shape in this.shapeElements]
+        return [shape.Fs for shape in this.shapeElements]
 
     @property
     def colorData(this):
         if this.dbgTrace:
             print '%s.colorData(%s,..):' % (this.__class__, this.name)
-	return [shape.colorData for shape in this.shapeElements]
+        return [shape.colorData for shape in this.shapeElements]
 
     @property
     def generateNormals(this):
         if this.dbgTrace:
             print '%s.generateNormals(%s,..):' % (this.__class__, this.name)
-	return this.shapeElements[0].generateNormals
+        return this.shapeElements[0].generateNormals
 
     def toOffStr(this, precision = 15, info = False):
         if this.dbgTrace:
             print '%s.toOffStr(%s,..):' % (this.__class__, this.name)
-	if this.mergeNeeded:
+        if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape.toOffStr(precision, info)
 
@@ -2795,11 +2795,11 @@ class CompoundShape():
             precision = 7,
             margin = 1.0e5*defaultFloatMargin,
             pageSize = PS.PageSizeA4,
-	    suppressWarn = False
+            suppressWarn = False
     ):
         if this.dbgTrace:
             print '%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name)
-	if this.mergeNeeded:
+        if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape.toPsPiecesStr(
             faceIndices, scaling, precision, margin, pageSize, suppressWarn)
@@ -2807,14 +2807,14 @@ class CompoundShape():
     def toX3dDoc(this, id = 'SISH', precision = 5, edgeRadius = 0):
         if this.dbgTrace:
             print '%s.toX3dDoc(%s,..):' % (this.__class__, this.name)
-	if this.mergeNeeded:
+        if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape.toX3dDoc(id, precision, edgeRadius)
 
     def getDome(this, level = 2):
         if this.dbgTrace:
             print '%s.getDome(%s,..):' % (this.__class__, this.name)
-	if this.mergeNeeded:
+        if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape.getDome(level)
 
@@ -2833,9 +2833,9 @@ class IsometricShape(CompoundShape):
         colors = [([], [])],
         directIsometries = [E], oppositeIsometry = None,
         unfoldOrbit = False,
-	name = "IsometricShape",
-	recreateEdges = True,
-	orientation = None,
+        name = "IsometricShape",
+        recreateEdges = True,
+        orientation = None,
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -2852,12 +2852,12 @@ class IsometricShape(CompoundShape):
                 SimpleShape; see the __init__ function of that class. The tuples
                 will be used to divide the colours over the different elements
                 of the orbit, first for all the direct isometries, then the
-		opposite. The array should at least contain one tuple to specify
-		the base element.
+                opposite. The array should at least contain one tuple to specify
+                the base element.
         directIsometries: the direct isometries that are needed to reproduce all
                           parts of the shape can can be transformed from the
                           specified base element through a direct isometry.
-			  See the setIsometries for more info.
+                          See the setIsometries for more info.
         oppositeIsometry: an opposite isometry that together with all the direct
                           isometries map the base element onto all elements.
                           See setIsometries for more info.
@@ -2866,7 +2866,7 @@ class IsometricShape(CompoundShape):
                      using glPushMatrix-glMultMatrix-glPopMatrix. This option is
                      provided for legacy scenes.
         name: a string identifier representing the model.
-	orientation: orientation of the base shape.
+        orientation: orientation of the base shape.
         """
         if this.dbgTrace:
             print '%s.__init__(%s,..):' % (this.__class__, name)
@@ -2881,12 +2881,12 @@ class IsometricShape(CompoundShape):
             print '  ]'
         # this is before creating the base shape, since it check "colors"
         this.baseShape = SimpleShape(Vs, Fs, Es, Ns = Ns,
-	    colors = colors[0], orientation = orientation)
-	if recreateEdges:
-	    this.baseShape.recreateEdges()
+            colors = colors[0], orientation = orientation)
+        if recreateEdges:
+            this.baseShape.recreateEdges()
         CompoundShape.__init__(this, [this.baseShape], name = name)
-	this.setFaceColors(colors)
-	this.setIsometries(directIsometries, oppositeIsometry)
+        this.setFaceColors(colors)
+        this.setIsometries(directIsometries, oppositeIsometry)
         this.showBaseOnly = False
         this.unfoldOrbit = unfoldOrbit
         if unfoldOrbit: this.mergeShapes()
@@ -2894,8 +2894,8 @@ class IsometricShape(CompoundShape):
     def __repr__(this):
         if this.dbgTrace:
             print '%s.__repr__(%s,..):' % (this.__class__, name)
-	# comment out class name, see comment at __fix_repr__ below:
-	#s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
+        # comment out class name, see comment at __fix_repr__ below:
+        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
         s = 'IsometricShape(\n  '
         s = '%sVs = [\n' % (s)
         for v in this.baseShape.Vs:
@@ -2929,7 +2929,7 @@ class IsometricShape(CompoundShape):
             s = '%s],\n  ' % (s)
         s = '%sunfoldOrbit = %s,\n  ' % (s, this.unfoldOrbit)
         s = '%sname = "%s",\n  ' % (s, this.name)
-	s = '%sorientation = %s\n' % (s, repr(this.baseShape.orientation))
+        s = '%sorientation = %s\n' % (s, repr(this.baseShape.orientation))
         s = '%s)\n' % (s)
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
@@ -2953,7 +2953,7 @@ class IsometricShape(CompoundShape):
         this.order = len(directIsometries)
         if oppositeIsometry != None:
             this.order = 2*this.order
-	this.applySymmetryNeeded = True
+        this.applySymmetryNeeded = True
 
     def getIsometries(this):
         """
@@ -2965,13 +2965,13 @@ class IsometricShape(CompoundShape):
 
     def mergeShapes(this):
         if this.showBaseOnly:
-	    # assuming that the base shape is a simple shape:
-	    this.mergedShape = this.baseShape
-	    this.mergeNeeded = False
-	elif this.applySymmetryNeeded:
-	    this.applySymmetry()
+            # assuming that the base shape is a simple shape:
+            this.mergedShape = this.baseShape
+            this.mergeNeeded = False
+        elif this.applySymmetryNeeded:
+            this.applySymmetry()
 
-	CompoundShape.mergeShapes(this)
+        CompoundShape.mergeShapes(this)
 
     def setFaceColors(this, colors):
         """
@@ -2983,11 +2983,11 @@ class IsometricShape(CompoundShape):
             colors = [([rgb.red[:]], [])]
         assert len(colors) > 0, 'colors should have at least one element'
         assert len(colors[0]) == 2, \
-	    'a colors element should be a tuple of 2 elements: (colors, fColors)'
+            'a colors element should be a tuple of 2 elements: (colors, fColors)'
         this.shapeColors = colors
         this.nrOfShapeColorDefs = len(colors)
         this.mergeNeeded = True
-	this.applySymmetryNeeded = True
+        this.applySymmetryNeeded = True
 
     def getFaceColors(this):
         if this.dbgTrace:
@@ -3000,7 +3000,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.applyColors(%s,..):' % (this.__class__, this.name)
-	print 'TESTED? %s.applyColors(%s,..):' % (this.__class__, this.name)
+        print 'TESTED? %s.applyColors(%s,..):' % (this.__class__, this.name)
         if this.dbgPrn:
             print 'this.shapeColors', this.shapeColors
             print 'this.nrOfShapeColorDefs =', this.nrOfShapeColorDefs, '?=', this.order, 'this.order'
@@ -3026,60 +3026,60 @@ class IsometricShape(CompoundShape):
     def applySymmetry(this):
         """
         Apply the isometry operations for the current properties, like Vs and
-	colour settings.
+        colour settings.
 
-	This will create all the individual shapes.
+        This will create all the individual shapes.
         """
 
         if this.dbgTrace:
             print '%s.applySymmetry(%s,..):' % (this.__class__, this.name)
-	if len(this.shapeColors) != this.order:
-	    this.applyColors()
-	# It is possible to use one loop, but oppositeIsometry is just legacy
+        if len(this.shapeColors) != this.order:
+            this.applyColors()
+        # It is possible to use one loop, but oppositeIsometry is just legacy
         i = 0
-	shapes = []
-	directIsoms = this.isometryOperations['direct']
-	oppositeIsom = this.isometryOperations['opposite']
+        shapes = []
+        directIsoms = this.isometryOperations['direct']
+        oppositeIsom = this.isometryOperations['opposite']
         for isom in directIsoms:
-	    shapes.append(
-		SimpleShape(
-		    this.baseShape.Vs,
-		    this.baseShape.Fs,
-		    this.baseShape.Es,
-		    Ns = this.baseShape.Ns,
-		    colors = this.shapeColors[i],
-		    orientation = isom * this.baseShape.orientation
-		)
-	    )
+            shapes.append(
+                SimpleShape(
+                    this.baseShape.Vs,
+                    this.baseShape.Fs,
+                    this.baseShape.Es,
+                    Ns = this.baseShape.Ns,
+                    colors = this.shapeColors[i],
+                    orientation = isom * this.baseShape.orientation
+                )
+            )
             i += 1
         if oppositeIsom != None:
             for isom in directIsoms:
-		shapes.append(
-		    SimpleShape(
-			this.baseShape.Vs,
-			this.baseShape.Fs,
-			this.baseShape.Es,
-			Ns = this.baseShape.Ns,
-			colors = this.shapeColors[i],
-			orientation = (oppositeIsom * isom *
-						this.baseShape.orientation)
-		    )
-		)
-		i += 1
-	this.setShapes(shapes)
-	this.applySymmetryNeeded = False
+                shapes.append(
+                    SimpleShape(
+                        this.baseShape.Vs,
+                        this.baseShape.Fs,
+                        this.baseShape.Es,
+                        Ns = this.baseShape.Ns,
+                        colors = this.shapeColors[i],
+                        orientation = (oppositeIsom * isom *
+                                                this.baseShape.orientation)
+                    )
+                )
+                i += 1
+        this.setShapes(shapes)
+        this.applySymmetryNeeded = False
 
     def setVs(this, Vs):
         if this.dbgTrace:
             print 'TODO %s.setVs(%s,..):' % (this.__class__, this.name)
-	print 'TEST RM or use parent %s.setVs(%s,..):' % (this.__class__, this.name)
-	assert len(Vs) == len(this.baseShape.Vs)
+        print 'TEST RM or use parent %s.setVs(%s,..):' % (this.__class__, this.name)
+        assert len(Vs) == len(this.baseShape.Vs)
         this.baseShape.setVertexProperties(Vs = Vs)
         this.mergeNeeded = True
 
     def setBaseOrientation(this, orientation):
-	this.baseShape.orientation = orientation
-	this.applySymmetryNeeded = True
+        this.baseShape.orientation = orientation
+        this.applySymmetryNeeded = True
 
     def setBaseVertexProperties(this, dictPar = None, **kwargs):
         """
@@ -3095,7 +3095,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
-	print 'TODO %s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
+        print 'TODO %s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3109,7 +3109,7 @@ class IsometricShape(CompoundShape):
             except KeyError: pass
             if not (Vs == None and Ns == None):
                 this.baseShape.setVertexProperties(Vs = Vs, Ns = Ns)
-		this.applySymmetryNeeded = True
+                this.applySymmetryNeeded = True
             radius = None
             try: radius = dict['radius']
             except KeyError: pass
@@ -3118,8 +3118,8 @@ class IsometricShape(CompoundShape):
             except KeyError: pass
             if not (radius == None and color == None):
                 this.setVertexProperties(radius = radius, color = color)
-	else:
-	    print 'oops'
+        else:
+            print 'oops'
 
     def getBaseVertexProperties(this):
         """
@@ -3129,7 +3129,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.getBaseVertexProperties(%s,..):' % (this.__class__, this.name)
-	print 'TODO %s.getBaseVertexProperties(%s,..):' % (this.__class__, this.name)
+        print 'TODO %s.getBaseVertexProperties(%s,..):' % (this.__class__, this.name)
         return this.baseShape.getVertexProperties()
 
     def setBaseEdgeProperties(this, dictPar = None, **kwargs):
@@ -3145,7 +3145,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
-	print 'TODO %s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
+        print 'TODO %s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3153,7 +3153,7 @@ class IsometricShape(CompoundShape):
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
                 this.baseShape.setEdgeProperties(Es = dict['Es'])
-		this.applySymmetryNeeded = True
+                this.applySymmetryNeeded = True
             radius = None
             try: radius = dict['radius']
             except KeyError: pass
@@ -3167,9 +3167,9 @@ class IsometricShape(CompoundShape):
                 this.setEdgeProperties(
                     radius = radius, color = color, drawEdges = drawEdges
                 )
-		CompoundShape.setEdgeProperties(this,
-			radius = radius, color = color, drawEdges = drawEdges)
-		print 'radius', radius
+                CompoundShape.setEdgeProperties(this,
+                        radius = radius, color = color, drawEdges = drawEdges)
+                print 'radius', radius
                 this.mergeNeeded = True
 
     def getBaseEdgeProperties(this):
@@ -3180,7 +3180,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.getBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
-	print 'TODO %s.getBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
+        print 'TODO %s.getBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
         return this.baseShape.getEdgeProperties()
 
     def setBaseFaceProperties(this, dictPar = None, **kwargs):
@@ -3195,7 +3195,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
-	print 'TODO %s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
+        print 'TODO %s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3203,7 +3203,7 @@ class IsometricShape(CompoundShape):
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
                 this.baseShape.setFaceProperties(Fs = dict['Fs'])
-		this.applySymmetryNeeded = True
+                this.applySymmetryNeeded = True
             if 'colors' in dict and dict['colors'] != None:
                 this.setFaceColors([dict['colors']])
                 # taken care of by the function above:
@@ -3219,7 +3219,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.getBaseFaceProperties(%s,..):' % (this.__class__, this.name)
-	print 'TODO %s.getBaseFaceProperties(%s,..):' % (this.__class__, this.name)
+        print 'TODO %s.getBaseFaceProperties(%s,..):' % (this.__class__, this.name)
         return this.baseShape.getFaceProperties()
 
     def glDraw(this):
@@ -3228,8 +3228,8 @@ class IsometricShape(CompoundShape):
         if this.showBaseOnly:
             this.baseShape.glDraw()
         else:
-	    if this.applySymmetryNeeded:
-		this.applySymmetry()
+            if this.applySymmetryNeeded:
+                this.applySymmetry()
             if this.unfoldOrbit:
                 if this.mergeNeeded:
                     this.mergeShapes()
@@ -3243,7 +3243,7 @@ class IsometricShape(CompoundShape):
             precision = 7,
             margin = 1.0e5*defaultFloatMargin,
             pageSize = PS.PageSizeA4,
-	    suppressWarn = False
+            suppressWarn = False
         ):
         if this.dbgTrace:
             print '%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name)
@@ -3274,7 +3274,7 @@ class SymmetricShape(IsometricShape):
         finalSym = isometry.E, stabSym = isometry.E,
         colors = [],
         name = "SymmetricShape",
-	recreateEdges = True
+        recreateEdges = True
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -3287,7 +3287,7 @@ class SymmetricShape(IsometricShape):
             which case the normalised vertices are used. If the value is set it
             is used by glDraw
         finalSym: the resulting symmetry of the shape.
-	stabSym: the symmetry of the stabiliser, which is a subgroup of finalSym
+        stabSym: the symmetry of the stabiliser, which is a subgroup of finalSym
 
         As an example: a square is used to define a cube. The square has a D4C4
         symmetry and the cube S4xI. The former is used as stabSym and the latter
@@ -3319,7 +3319,7 @@ class SymmetricShape(IsometricShape):
                 Vs, Fs, Es, Ns,
                 directIsometries = FsOrbit,
                 name = name,
-		recreateEdges = recreateEdges
+                recreateEdges = recreateEdges
             )
         this.finalSym = finalSym
         this.stabSym = stabSym
