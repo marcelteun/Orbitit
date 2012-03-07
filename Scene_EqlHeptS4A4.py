@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -65,39 +65,39 @@ class Shape(Heptagons.EqlHeptagonShape):
         # input this.h
         St = this.h / (4*this.h - 1)
         if this.heptPosAlt:
-            #                                         
+            #
             #    z
-            #     ^                                     
+            #     ^
             #     |
             #     ---> y
             #    /
             #   V_
             #  x
-            #                                         
+            #
             # There are vertices with more than one index, because the normals
             # will differ.
-            #                                              
-            #          '-,                            
-            #         /   '-,                         
-            #        /       -.2                      
-            #        |  5   -' \ 1, 11                   
-            #       /   3.-' 0  '-                    
-            #       |   /   4 8 __'-10                 
-            #      / ,-'  __--""                     
-            #     /,=---""  7                        
-            #    6          9                         
-            #                                         
+            #
+            #          '-,
+            #         /   '-,
+            #        /       -.2
+            #        |  5   -' \ 1, 11
+            #       /   3.-' 0  '-
+            #       |   /   4 8 __'-10
+            #      / ,-'  __--""
+            #     /,=---""  7
+            #    6          9
+            #
             # For tetrahedral position: 1, 3, and 5 are on the vertices of a
             # cube and 2, 4, 6, are on the face centres of that cube
             #
             Vs = [
                     vec( St,      St,     -St),        # 0
-                    vec( 0.0,     1.0,     0.0),   
+                    vec( 0.0,     1.0,     0.0),
                     vec( this.h,  this.h,  this.h),
                     vec( 1.0,     0.0,     0.0),       # 3
 
                     vec( St,      St,     -St),        # 4
-                    vec( 1.0,     0.0,     0.0),   
+                    vec( 1.0,     0.0,     0.0),
                     vec( this.h, -this.h, -this.h),
                     vec( 0.0,     0.0,    -1.0),       # 7
 
@@ -109,9 +109,9 @@ class Shape(Heptagons.EqlHeptagonShape):
             # Normals are set below, after calculating the heptagons
             #this.Ns = this.NsAlt
         else:
-            #                                         
+            #
             #    z
-            #     ^                                     
+            #     ^
             #     |
             #     ---> y
             #    /
@@ -120,19 +120,19 @@ class Shape(Heptagons.EqlHeptagonShape):
             #
             # There are vertices with more than one index, because the normals
             # will differ.
-            #                                         
-            #                    6                    
-            #              9    /                          
-            #          '-, 7   V_                      
-            #         /   '-,                         
+            #
+            #                    6
+            #              9    /
+            #          '-, 7   V_
+            #         /   '-,
             #        /       -.0, 4, 8
             #        | 10   -' \ 3, 5
-            #       /11,1.-'    '-                    
-            #       |   /    2  __'-                  
-            #      / ,-'  __--""                     
-            #     /,=---""                           
-            #                                         
-            #                                         
+            #       /11,1.-'    '-
+            #       |   /    2  __'-
+            #      / ,-'  __--""
+            #     /,=---""
+            #
+            #
             # For tetrahedral position: 1, 3, and 5 are on the vertices of a
             # cube and 2, 4, 6, are on the face centres of that cube
             #
@@ -331,7 +331,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         #    this.NsPref.append([0, 0, 1])
 
     # GUI PART
-    
+
 class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
         # a: angle

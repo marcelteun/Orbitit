@@ -3,17 +3,17 @@
 # Copyright (C) 2008 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -55,9 +55,9 @@ class RegularHeptagon:
         #
         #    5                 2
         #
-        #          
+        #
         #         4       3
-        #          
+        #
         #
         this.VsOrg = [
                 Vec([     0.0,            0.0, 0.0]),
@@ -90,9 +90,9 @@ class RegularHeptagon:
         #
         #    5 --------------- 2  axis b
         #
-        #          
+        #
         #         4       3
-        #          
+        #
         #
         this.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
         cosa = math.cos(a)
@@ -108,8 +108,8 @@ class RegularHeptagon:
             #                            /
             #                           / b _
             #                       V2 /_.-'  V3_
-            #                       _.-' 
-            #                   _.-'  a  
+            #                       _.-'
+            #                   _.-'  a
             #   (0, 0) .-------.-------.------.
             #   this. V[0]   V[1]    V[2]    V[3]
             dV2 = [
@@ -180,7 +180,7 @@ class RegularHeptagon:
                     V1[2] + cosb * dV0[1] + sinb * dV0[0]
                 ])
             this.Vs = [
-                    V0, 
+                    V0,
                     V1,
                     this.VsOrg[2],
                     this.VsOrg[3],
@@ -209,7 +209,7 @@ class RegularHeptagon:
         #        \        /
         #         "       "
         #         4       3
-        #          
+        #
         #
         this.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
         cosa = math.cos(a)
@@ -262,7 +262,7 @@ class RegularHeptagon:
             r = Rot(axis = V1V3axis, angle = b)
             V2 = V1V3 + r * (this.VsOrg[2] - V1V3)
             this.Vs = [
-                    V0, 
+                    V0,
                     this.VsOrg[1],
                     V2,
                     this.VsOrg[3],
@@ -290,7 +290,7 @@ class RegularHeptagon:
         #         V axes  a V
         #         "         "
         #         4         3
-        #          
+        #
         #
         pass
 
@@ -311,9 +311,9 @@ class RegularHeptagon:
         #     /               \
         #    5 --------------- 2  axis b
         #
-        #          
+        #
         #         4       3
-        #          
+        #
         #
         pass
 
@@ -329,14 +329,14 @@ class RegularHeptagon:
         #               0
         #              .^.
         #        6   _/| |\_   1
-        #          _/ /   \ \_  
+        #          _/ /   \ \_
         # axis a _/  |     |  \_ axis a
         #       /    |     |    \
         #      5    /       \    2
         #          | axes  b |
         #          "         "
         #          4         3
-        #          
+        #
         #
         pass
 
@@ -422,7 +422,7 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     m = V(1.0 + r*r) / 2
     k = m*(1.0 + 1.0/n)
 
-    qkpr = q * k + r 
+    qkpr = q * k + r
     root = (k*(2 - k) + r * r)
 
     #assert(root>=0)
@@ -615,7 +615,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         this.kiteAngleFactor = (max - min) / steps
         this.kiteAngleOffset = min
         # inverse:
-        # x = ( y - min ) /  this.kiteAngleFactor 
+        # x = ( y - min ) /  this.kiteAngleFactor
 
     def Slider2Angle(this, x):
         # angle in degrees
@@ -623,7 +623,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
     def Angle2Slider(this, y):
         # angle in degrees
-        return (y - this.kiteAngleOffset) / this.kiteAngleFactor 
+        return (y - this.kiteAngleOffset) / this.kiteAngleFactor
 
     def createControlsSizer(this):
         mainSizer = wx.BoxSizer(wx.VERTICAL)

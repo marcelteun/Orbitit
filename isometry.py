@@ -469,7 +469,7 @@ class C2nCn(Cn):
         the complete group. For the latter see the class initPars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
-        - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with 
+        - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with
           0 <= i < n)
         """
         #print 'isometries', isometries, 'setup', setup
@@ -572,7 +572,7 @@ class CnxI(Cn):
         the complete group. For the latter see the class initPars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
-        - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with 
+        - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with
           0 <= i < n)
         """
         #print 'isometries', isometries, 'setup', setup

@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -81,26 +81,26 @@ class Shape(Heptagons.EqlHeptagonShape):
         # input this.h
         St = this.h / (2*this.h - 1)
         if this.heptPosAlt:
-            #                                         
+            #
             #    z
-            #     ^                                     
+            #     ^
             #     |
             #     ---> y
             #    /
             #   V_
             #  x
-            #                                         
-            #         .------------.                       
-            #       ,'   2 _____1,'|                  
-            #     ,'     ,'    ,'11|                  
-            #    .-----3.----0'  | |                  
-            #    |     5|    4|8 | |                  
-            #    |      |     | ,' |                  
-            #    |      +-----+' 10-                  
-            #    |     6     7|9 ,'                  
-            #    |            |,'                    
-            #    '------------'                       
-            #                                         
+            #
+            #         .------------.
+            #       ,'   2 _____1,'|
+            #     ,'     ,'    ,'11|
+            #    .-----3.----0'  | |
+            #    |     5|    4|8 | |
+            #    |      |     | ,' |
+            #    |      +-----+' 10-
+            #    |     6     7|9 ,'
+            #    |            |,'
+            #    '------------'
+            #
             Vs = [
                     vec(St,     St,      St),    # 0
                     vec(0.0,    1.0,    1.0),
@@ -118,26 +118,26 @@ class Shape(Heptagons.EqlHeptagonShape):
                     vec(0.0,    1.0,    1.0)     # 11
                 ]
         else:
-            #                                         
+            #
             #    z
-            #     ^                                     
+            #     ^
             #     |
             #     ---> y
             #    /
             #   V_
             #  x
-            #                                         
-            #         .------------.                       
-            #       ,'   0 _____3,'|                  
-            #     ,'     ,'    ,'|9|                  
-            #    .-----1.----2'  | |                  
-            #    |     7|    6|10| |                  
-            #    |      |     | ,' |                  
-            #    |      +-----+' 8 -                  
-            #    |     4     5|11,'                  
-            #    |            |,'                    
-            #    '------------'                       
-            #                                         
+            #
+            #         .------------.
+            #       ,'   0 _____3,'|
+            #     ,'     ,'    ,'|9|
+            #    .-----1.----2'  | |
+            #    |     7|    6|10| |
+            #    |      |     | ,' |
+            #    |      +-----+' 8 -
+            #    |     4     5|11,'
+            #    |            |,'
+            #    '------------'
+            #
             Vs = [
                     vec(0.0,    0.0,    this.h), # 0
                     vec(1.0,    0.0,    1.0),
@@ -353,7 +353,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         this.xtraEs = []
 
     # GUI PART
-    
+
 class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
         # a: angle

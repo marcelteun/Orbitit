@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -204,7 +204,7 @@ Cubes1_Cs = [
     ],
     # shell 2 (12 cubes):
     [ # 1.2
-        [26, 60, 64, 29], [64, 29, 34, 68], [34, 68, 67, 30], [67, 30, 26, 60], 
+        [26, 60, 64, 29], [64, 29, 34, 68], [34, 68, 67, 30], [67, 30, 26, 60],
         [2+24, 6+24, 10+24, 5+24], [0+60, 4+60, 8+60, 7+60],                    # front layer South
     ],
     [ # 1.3
@@ -354,7 +354,7 @@ Cubos0_Cols = [
 Cubos1_Cs = [
     [
         # front bottom right (inner)
-        [14, 34, 68], [17, 83, 69], [29, 64, 79], [13, 33, 80], 
+        [14, 34, 68], [17, 83, 69], [29, 64, 79], [13, 33, 80],
         [13, 14, 17], [29, 34, 33], [64, 69, 68], [79, 80, 83],
         [9+24, 1+12, 2+12, 10+24], [11+72, 9+60, 4+60, 7+72],
         [1+12, 8+72, 11+72, 5+12], [64, 29, 34, 68],
@@ -378,7 +378,7 @@ Cubos1_Cs = [
     ],
     [
         # back bottom left (inner)
-        [23, 94, 47], [18, 71, 95], [22, 70, 46], [90, 66, 42], 
+        [23, 94, 47], [18, 71, 95], [22, 70, 46], [90, 66, 42],
         [18, 23, 22], [42, 47, 46], [66, 71, 70], [90, 95, 94],
         [10+12, 10+36, 11+36, 11+12], [6+84, 6+60, 11+60, 11+84],
         [11+84, 6+12, 11+12, 10+84], [6+36, 6+60, 10+60, 10+36],
@@ -402,7 +402,7 @@ Cubos1_Cs = [
     ],
     [
         # back top left (outer)
-        [54, 89, 43], [11, 86, 39], [8, 50, 36], [7, 51, 85], 
+        [54, 89, 43], [11, 86, 39], [8, 50, 36], [7, 51, 85],
         [7, 8, 11], [39, 36, 43], [50, 51, 54], [85, 86, 89],
         [1+84, 3+48, 6+48, 5+84], [11, 8, 36, 39],
         [7+36, 6+48, 2+48, 0+36], [7, 11, 86, 85],
@@ -410,7 +410,7 @@ Cubos1_Cs = [
     ],
     [
         # back bottom right (outer)
-        [10, 62, 38], [78, 65, 41], [5, 75, 61], [9, 74, 37], 
+        [10, 62, 38], [78, 65, 41], [5, 75, 61], [9, 74, 37],
         [5, 10, 9], [74, 75, 78], [61, 62, 65], [37, 38, 41],
         [3+72, 1+60, 5+60, 6+72], [9, 10, 38, 37],
         [5+36, 5+60, 2+60, 2+36], [5, 9, 74, 75],
@@ -435,7 +435,7 @@ Cubos2_Cs = [
         # front bottom left (inner)
         [15, 35, 92], [18, 71, 95], [14, 34, 68], [30, 91, 67],
         [14, 15, 18], [30, 35, 34], [67, 68, 71], [91, 92, 95],
-        [2+12, 10+24, 11+24, 3+12], [11+60, 11+84, 7+84, 7+60], 
+        [2+12, 10+24, 11+24, 3+12], [11+60, 11+84, 7+84, 7+60],
         [3+12, 8+84, 11+84, 6+12], [34, 68, 67, 30],
         [11+60, 6+12, 2+12, 8+60], [11+24, 8+84, 7+84, 6+24]
     ],
@@ -450,7 +450,7 @@ Cubos2_Cs = [
     [
         # back top left (inner)
         [23, 94, 47], [20, 58, 44], [19, 59, 93], [54, 89, 43],
-        [19, 20, 23], [43, 44, 47], [54, 59, 58], [89, 94, 93], 
+        [19, 20, 23], [43, 44, 47], [54, 59, 58], [89, 94, 93],
         [11+36, 11+12, 8+12, 8+36], [6+48, 5+84, 9+84, 11+48],
         [11+12, 10+84, 9+84, 7+12], [10+48, 8+36, 7+36, 6+48],
         [8+12, 10+48, 11+48, 7+12], [7+36, 5+84, 10+84, 11+36]
@@ -506,7 +506,7 @@ ColGroups = [
     Cubes0_Cols, Cubes1_Cols, Cubes2_Cols
 ]
 
-#FsOpaq = 
+#FsOpaq =
 #FsTransp_0 =  # Transparent Octahedra group 0
 #FsTransp_1 =  # Transparent Octahedra group 1
 
@@ -544,7 +544,7 @@ Es.extend(map(offsetIndexWith(84), Es_0))
 Es.extend(
     [
         # triangle edges from shell of cubes inside outer shell:
-        0, 24, 24, 48, 48, 0, 
+        0, 24, 24, 48, 48, 0,
         1, 25, 25, 72, 72, 1,
         4, 49, 49, 73, 73, 4,
         28, 52, 52, 76, 76, 28,

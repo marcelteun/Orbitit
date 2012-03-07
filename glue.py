@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -38,7 +38,7 @@ def ConvertVec3ToX3d(vertices, precision):
     Vs = []
     for v in vertices:
         Vs.append(X3D.FloatVec(v, precision))
-        #print v, X3D.FloatVec(v).vec, X3D.FloatVec(v).toVrmlStr() 
+        #print v, X3D.FloatVec(v).vec, X3D.FloatVec(v).toVrmlStr()
     return Vs
 
 def ConvertIndicesToX3d(indexVecs):
@@ -249,10 +249,10 @@ def cleanUpVsFs(Vs, Fs):
     It returns an array with tuples expressing which vertices are deleted. This
     array can be used as input to filterEs
     """
-    # The clean up is done as follows: 
-    # first construct an array of unused vertex indices 
+    # The clean up is done as follows:
+    # first construct an array of unused vertex indices
     # remove all unused indices from Vs and subtract the approproate amount
-    # from the indices in Fs that are bigger 
+    # from the indices in Fs that are bigger
     # vUsage contains for each vertex a tuple that expresses:
     # - how ofter the vertex is used:
     # After the unused vertices are deleted, vReoved will contain:

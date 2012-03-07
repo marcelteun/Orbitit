@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -85,25 +85,25 @@ class Shape(Heptagons.EqlHeptagonShape):
     def setV(this):
         # input this.h
         St = this.h / (2*math.sqrt(2*Cq)*this.h - Cq)
-        #                   
+        #
         #                  2
-        #           __..--'-_                     
-        #      1 -''    .    _"- 3                      
-        #         \       _-'                     
-        #          \   _-'                        
-        #           \-'                           
-        #           0                             
-        #     
+        #           __..--'-_
+        #      1 -''    .    _"- 3
+        #         \       _-'
+        #          \   _-'
+        #           \-'
+        #           0
+        #
         #    z    y
-        #     ^ 7\                                   
+        #     ^ 7\
         #     |/
         #     ---> x
-        #     
-        #                                         
+        #
+        #
         # The kite above is a 5th of the top face of dodecahedron
         # standing on 1 face, 2 is a vertex, 1 and 3, centres of two edges
         # and 0 a face centre.
-        #                                         
+        #
         Vs = [
                 vec(0.0,      0.0,    this.h),   # 0
                 Rl,
@@ -123,7 +123,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             Mr = Rot(axis = GeomTypes.Vec3(Vs[2]), angle = GeomTypes.turn(0.2))
 
             # p is a corner of the pentagon inside the pentagram
-            # p is rotated 1/5th turn to form a triangle 
+            # p is rotated 1/5th turn to form a triangle
             # together with 2 corners of the pentagram:
             # 5 of these triangles will cover the pentagram.
             # this is easier than finding the centre of the pentagram.
@@ -281,7 +281,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         else:
             return stdStr
     # GUI PART
-    
+
 class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
         # a: angle

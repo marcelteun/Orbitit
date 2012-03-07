@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -68,11 +68,11 @@ Vs = [
     ]
 
 # Inner octahedron: 8
-#                   | 
+#                   |
 #                   |,7
 #             11----|---10
 #                 6'|
-#                   | 
+#                   |
 #                   9
 #
 #
@@ -101,22 +101,22 @@ FsOpaq = [  # opaque faces
         # outer 0, (-20-), 3, (-21-) 4 (-16-) (above 6, 9, 10)
         [
             [0, 3, 4], [0, 20, 3], [3, 21, 4], [4, 16, 0],
-            [20, 0, 16], [16, 4, 21], [21, 3, 20], [20, 16, 21], 
+            [20, 0, 16], [16, 4, 21], [21, 3, 20], [20, 16, 21],
         ],
         # outer 1, (-14-), 2, (-13-) 4 (-17-) (above 7, 8, 10)
         [
-            [1, 2, 4], [1, 14, 2], [2, 13, 4], [4, 17, 1], 
-            [14, 1, 17], [17, 4, 13], [13, 2, 14], [14, 17, 13], 
+            [1, 2, 4], [1, 14, 2], [2, 13, 4], [4, 17, 1],
+            [14, 1, 17], [17, 4, 13], [13, 2, 14], [14, 17, 13],
         ],
         # outer 0, (-12-), 2, (-15-) 5 (-19-) (above 6, 8, 11)
         [
             [0, 2, 5], [0, 12, 2], [2, 15, 5], [5, 19, 0],
-            [12, 0, 19], [19, 5, 15], [15, 2, 12], [12, 19, 15], 
+            [12, 0, 19], [19, 5, 15], [15, 2, 12], [12, 19, 15],
         ],
         # outer 1, (-22-), 3, (-23-) 5 (-18-) (above 7, 9, 11)
         [
             [1, 3, 5], [1, 22, 3], [3, 23, 5], [5, 18, 1],
-            [22, 1, 18], [18, 5, 23], [23, 3, 22], [22, 18, 23], 
+            [22, 1, 18], [18, 5, 23], [23, 3, 22], [22, 18, 23],
         ],
     ]
 FsTransp_0 = [

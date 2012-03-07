@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -75,11 +75,11 @@ Fs_0 = [  #
     ]
 
 Cols_0 = [
-    [0, 0, 0, 0], 
-    [0, 0, 0, 0], 
-    [0, 0, 0, 0], 
-    [0, 0, 0, 0], 
-    [0, 0, 0, 0], 
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
 ]
 
 Col0  = rgb.orange[:]
@@ -94,7 +94,7 @@ Cols     = [Col0, Col1, Col2]
 Es = [
         0, 1, 0, 2, 0, 3, 0, 4,
         1, 2, 1, 3, 1, 4,
-        2, 3, 2, 4, 
+        2, 3, 2, 4,
         3, 4
     ]
 

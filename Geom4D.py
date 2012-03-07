@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -127,7 +127,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Vs' in dict and dict['Vs'] != None:
                 this.Vs  = [ GeomTypes.Vec4(v) for v in dict['Vs'] ]
@@ -185,7 +185,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Es' in dict and dict['Es'] != None:
                 this.Es = dict['Es']
@@ -206,7 +206,7 @@ class SimpleShape:
                             # if all the below are true, then the edges need
                             # extra Vs, which means we need to reproject.
                             this.c.scale < 1.0
-                            and 
+                            and
                             # .. and if the CURRENT settings is show unscaled
                             # (Though changes in this setting might mean that
                             # new projection was not needed)
@@ -230,7 +230,7 @@ class SimpleShape:
                         this.e.draw
                         and
                         this.c.scale < 1.0
-                        and 
+                        and
                         this.e.showUnscaled != dict['showUnscaled']
                     )
                 this.e.showUnscaled = dict['showUnscaled']
@@ -290,7 +290,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
                 print '%s: FS not supported, use Cs instead' % (loc)
@@ -355,7 +355,7 @@ class SimpleShape:
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
-            else: 
+            else:
                 dict = kwargs
             if 'Cs' in dict and dict['Cs'] != None:
                 this.Cs = dict['Cs']
@@ -754,7 +754,7 @@ if __name__ == '__main__':
         print '  Expected (-3, 3, 8, 0), got', t
 
     n = w.normalise()
-    
+
     # TODO Move some of these tests to GeomTypes, after cgtypes rm, any relevant?
 
     # check if n is still of type vec and not cgtypes.vec4 (which doesn't have

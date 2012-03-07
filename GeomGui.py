@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -180,7 +180,7 @@ class FloatInput(wx.TextCtrl):
                     e.Skip()
                 else:  # '+' or '-'
                     # only allow + and - in the beginning
-                    if this.GetInsertionPoint() == 0: 
+                    if this.GetInsertionPoint() == 0:
                         # don't allow - if there's already a + and the other way
                         # around:
                         if c == '+':
@@ -578,7 +578,7 @@ class Vector4DInput(wx.StaticBoxSizer):
                      default. Defines the orientation of the separate vector
                      items.
         relativeFloatSize: it defines the size of the input fields relative to
-                           the vector item labels 'x', 'y',..,'z' (with size 1) 
+                           the vector item labels 'x', 'y',..,'z' (with size 1)
         elementLabels: option labels for the vector items. It is an array
                        consisting of 4 strings On default ['x', 'y', 'z', 'w']
                        is used.

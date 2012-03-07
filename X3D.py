@@ -3,17 +3,17 @@
 # Copyright (C) 2010 Marcel Tunnissen
 #
 # License: GNU Public License version 2
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -446,7 +446,7 @@ class Doc:
 
 class Route(Node):
     def __init__(this, fromNode, fromField, toNode, toField):
-        Node.__init__(this, 'ROUTE', 
+        Node.__init__(this, 'ROUTE',
             fromNode = fromNode,
             fromField = fromField,
             toNode = toNode,
@@ -474,13 +474,13 @@ if __name__ == '__main__':
         )
     )
     unitC = Node('Coordinate', point = [
-            FloatVec([-1, -1, -1], 0), 
-            FloatVec([-1, -1,  1], 0), 
-            FloatVec([-1,  1, -1], 0), 
-            FloatVec([-1,  1,  1], 0), 
-            FloatVec([ 1, -1, -1], 0), 
-            FloatVec([ 1, -1,  1], 0), 
-            FloatVec([ 1,  1, -1], 0), 
+            FloatVec([-1, -1, -1], 0),
+            FloatVec([-1, -1,  1], 0),
+            FloatVec([-1,  1, -1], 0),
+            FloatVec([-1,  1,  1], 0),
+            FloatVec([ 1, -1, -1], 0),
+            FloatVec([ 1, -1,  1], 0),
+            FloatVec([ 1,  1, -1], 0),
             FloatVec([ 1,  1,  1], 0)
         ])
 
@@ -503,7 +503,7 @@ if __name__ == '__main__':
     material = Node('Material',
         diffuseColor = FloatVec([0.2, 0.2, 0.9], 1)
     )
-    shape = Node('Shape', 
+    shape = Node('Shape',
         appearance = Node('Appearance',
             material = Node('Material',
                 IS = Node('IS',
@@ -535,7 +535,7 @@ if __name__ == '__main__':
         ]
     ))
     # After the protoype declartion the rest may follow:
-    transform = Node('Transform', 
+    transform = Node('Transform',
         children = [
             Node('ProtoInstance',
                 name = 'Cube',
