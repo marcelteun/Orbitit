@@ -6,8 +6,11 @@ ccgray=$(echo -e "\033[1;30m")
 ccwhite=$(echo -e "\033[01;37m")
 ccdefault=$(echo -e "\033[0m")
 
+failed=0
+
 function fail()
 {
+	failed=$((failed + 1))
 	echo test $1 "$ccbred" failed"$ccgray"
 }
 
@@ -82,3 +85,13 @@ if [ -z $SKIP_PS_TST ]; then {
 	# clean up
 	rm tst/tst.ps
 } fi
+
+echo "$ccdefault============================================================="
+if [ $failed != 0 ]; then {
+	echo $ccbred
+	echo "ERROR: $failed test(s) failed!"
+} else {
+	echo $ccbgreen
+	echo "All tests passed"
+} fi
+echo $ccdefault

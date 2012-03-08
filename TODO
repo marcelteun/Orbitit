@@ -12,9 +12,6 @@ Implement a float slider with support for set
 fix empty OFF file read: make error message more readable than now.
 
 test:
-	2012-03-05 0:44
-	Add summery at the end of a complete test.
-
 	2012-03-05 0:45
 	Add some performance test, with a limit.
 
