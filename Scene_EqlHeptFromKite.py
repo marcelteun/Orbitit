@@ -25,6 +25,7 @@ import math
 import rgb
 import Heptagons
 import Geom3D
+import GeomTypes
 import Scenes3D
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -132,20 +133,20 @@ class Shape(Geom3D.SimpleShape):
                 #               1
                 #
         this.kiteVs = [
-                [Vr[0], Vr[1], Vr[2]],
-                [Vb[0], Vb[1], Vb[2]],
-                [Vl[0], Vl[1], Vl[2]],
-                [Vt[0], Vt[1], Vt[2]]
+                GeomTypes.Vec3([Vr[0], Vr[1], Vr[2]]),
+                GeomTypes.Vec3([Vb[0], Vb[1], Vb[2]]),
+                GeomTypes.Vec3([Vl[0], Vl[1], Vl[2]]),
+                GeomTypes.Vec3([Vt[0], Vt[1], Vt[2]])
            ]
         d = 1e-4
         this.heptaVs = [
-                [Vt[0], Vt[1], Vt[2] + d],
-                [h1[0], h1[1], h1[2] + d],
-                [h2[0], h2[1], h2[2] + d],
-                [h3[0], h3[1], h3[2] + d],
-                [h4[0], h4[1], h4[2] + d],
-                [h5[0], h5[1], h5[2] + d],
-                [h6[0], h6[1], h6[2] + d]
+                GeomTypes.Vec3([Vt[0], Vt[1], Vt[2] + d]),
+                GeomTypes.Vec3([h1[0], h1[1], h1[2] + d]),
+                GeomTypes.Vec3([h2[0], h2[1], h2[2] + d]),
+                GeomTypes.Vec3([h3[0], h3[1], h3[2] + d]),
+                GeomTypes.Vec3([h4[0], h4[1], h4[2] + d]),
+                GeomTypes.Vec3([h5[0], h5[1], h5[2] + d]),
+                GeomTypes.Vec3([h6[0], h6[1], h6[2] + d])
             ]
         # try to set the vertices array.
         # the failure occurs at init since showKite and showHepta don't exist
