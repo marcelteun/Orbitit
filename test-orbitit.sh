@@ -11,11 +11,13 @@ failed=0
 function fail()
 {
 	failed=$((failed + 1))
+	echo -n "$ccdefault"
 	echo test $1 "$ccbred" failed"$ccgray"
 }
 
 function pass()
 {
+	echo -n "$ccdefault"
 	echo "test $1 $ccbgreen"passed"$ccgray"
 }
 
@@ -26,6 +28,10 @@ function diff_test()
 }
 
 echo -n "$ccgray"
+
+# indent test
+tst="indent.py"
+python indent.py > /dev/null && pass "$tst" || fail "$tst"
 
 # test: output to Python
 if [ -z $SKIP_PY_TST ]; then {
