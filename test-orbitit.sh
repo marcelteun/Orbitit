@@ -61,7 +61,7 @@ if [ -z $SKIP_PS_TST ]; then {
 	# python: isometric shape with non-default orientation of base shape
 	obj="12cubes"
 	tst="export $obj to PS"
-	./Orbitit.py -P 12 -p tst/$obj.py tst/tst.ps
+	./Orbitit.py -P 11 -p tst/$obj.py tst/tst.ps
 	diff_test "tst/$obj.ps" "tst/tst.ps"
 
 	# a cube with a degenerate face
@@ -85,7 +85,7 @@ if [ -z $SKIP_PS_TST ]; then {
 
 	obj="MW119"
 	tst="export $obj to PS"
-	./Orbitit.py -m 9 -P 12 -p tst/$obj.off tst/tst.ps
+	./Orbitit.py -m 9 -P 11 -p tst/$obj.off tst/tst.ps
 	diff_test "tst/$obj.ps" "tst/tst.ps"
 
 	# clean up
