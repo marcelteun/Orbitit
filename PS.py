@@ -187,7 +187,7 @@ class doc:
                 if v[1] < minY: minY = v[1]
                 if v[1] > maxY: maxY = v[1]
                 oneFaceStr = '%s %d' % (oneFaceStr, vNr)
-            fStr = '%s [%s]' % (fStr, oneFaceStr)
+            fStr = '%s [%s]' % (fStr, oneFaceStr[1:])
         bboxStr = '/bbox [%s %s %s %s] def' % (
             glue.f2s(minX, precision),
             glue.f2s(minY, precision),
