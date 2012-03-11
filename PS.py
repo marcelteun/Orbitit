@@ -175,7 +175,7 @@ class doc:
                 i
             )
         vStr = '%s] def' % vStr
-        fStr = '/faces ['
+        fStr_ = ''
         maxX = maxY = -sys.maxint-1 # 2-complement
         minX = minY =  sys.maxint
         for partOfFace in Lines:
@@ -187,13 +187,23 @@ class doc:
                 if v[1] < minY: minY = v[1]
                 if v[1] > maxY: maxY = v[1]
                 oneFaceStr = '%s %d' % (oneFaceStr, vNr)
-            fStr = '%s [%s]' % (fStr, oneFaceStr[1:])
+            fStr_ = '%s[%s]' % (fStr_, oneFaceStr[1:])
         bboxStr = '/bbox [%s %s %s %s] def' % (
             glue.f2s(minX, precision),
             glue.f2s(minY, precision),
             glue.f2s(maxX, precision),
             glue.f2s(maxY, precision)
         )
+        fStr = '/faces [\n'
+        break_limit = 78
+        while len(fStr_) > break_limit:
+            break_at = break_limit
+            while fStr_[break_at] != '[':
+                break_at -= 1
+                assert break_at > 0, 'Not implemented, TODO: handle long line faces'
+            fStr = '%s  %s\n' % (fStr, fStr_[:break_at])
+            fStr_ = fStr_[break_at:]
+        fStr = '%s  %s\n' % (fStr, fStr_)
         fStr = '%s] def' % fStr
         scalingStr = '/scalingSize %d def' % scaling
         addBBoxStr = ""
