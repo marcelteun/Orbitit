@@ -35,17 +35,29 @@ python indent.py > /dev/null && pass "$tst" || fail "$tst"
 
 # test: output to Python
 if [ -z $SKIP_PY_TST ]; then {
+	# test simple shape
+	obj="cube.degenerate.face"
+	tst="export $obj to Python"
+	./Orbitit.py -y tst/$obj.py tst/tst.py
+	diff_test "tst/$obj.out.py" "tst/tst.py"
+
+	# test compound shape
+	obj="compound-shape"
+	tst="export $obj to Python"
+	./Orbitit.py -y tst/$obj.py tst/tst.py
+	diff_test "tst/$obj.out.py" "tst/tst.py"
+
 	# test isometric shape with default orientation of base shape
 	obj="5cubes"
 	tst="export $obj to Python"
 	./Orbitit.py -y tst/$obj.py tst/tst.py
-	diff_test "tst/$obj.py" "tst/tst.py"
+	diff_test "tst/$obj.out.py" "tst/tst.py"
 
 	# test isometric shape with a non-default orientation of base shape
 	obj="12cubes"
 	tst="export $obj to Python"
 	./Orbitit.py -y tst/$obj.py tst/tst.py
-	diff_test "tst/$obj.py" "tst/tst.py"
+	diff_test "tst/$obj.out.py" "tst/tst.py"
 
 	rm tst/tst.py
 } fi

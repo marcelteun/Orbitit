@@ -23,11 +23,13 @@
 
 class Str(str):
     def __new__(this, s = '', indent_step = 4, indent = 0):
+        return str.__new__(this, s)
+
+    def __init__(this, s = '', indent_step = 4, indent = 0):
         this.indent_step = indent_step
         this.indent = indent
         if this.indent < 0:
             this.indent = 0
-        return str.__new__(this, s)
 
     def _chk_indent(this):
         if this.indent < 0:
@@ -36,6 +38,14 @@ class Str(str):
     def cp_props(this, s):
         s.indent = this.indent
         s.indent_step = this.indent_step
+
+    def glue_line(this, s):
+        """add a line that already has indentation, i.e. don't indent"""
+        return Str(
+            "%s%s\n" % (this, s),
+            this.indent_step,
+            this.indent
+        )
 
     def add_line(this, s):
         return Str(
@@ -59,6 +69,25 @@ class Str(str):
         this.indent = this.indent - i * this.indent_step
         if this.indent < 0:
             this.indent = 0
+
+    def insert(this, s):
+        return Str(
+            "%s%s" % (s, this),
+            this.indent_step,
+            this.indent
+        )
+
+    def reindent(this, i):
+        """Indent the the whole block with i indent steps.
+
+        Currently only i >= 0 is supported
+        Note: newlines will not get an indentation.
+        """
+        return Str('\n'.join(
+                s if s == '' else (i * ' ') + s for s in this.splitlines()
+            )
+        )
+
 
 if __name__ == '__main__':
     c = """for one in all {

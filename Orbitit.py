@@ -1782,6 +1782,6 @@ else:
         frame.setScene(SceneList[DefaultScene])
     app.MainLoop()
 
-print "Done"
+sys.stderr.write("Done\n")
 
 if o_fd != None: o_fd.close()

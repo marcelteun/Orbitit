@@ -26,6 +26,7 @@ import copy
 import math
 import rgb
 import glue
+import indent
 import X3D
 import PS
 import Scenes3D
@@ -904,22 +905,30 @@ class SimpleShape:
             print this.colorData[1]
 
     def __repr__(this):
-        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
-        s = 'SimpleShape(\n  '
-        s = '%sVs = [\n' % (s)
-        for v in this.Vs:
-            s = '%s    %s,\n' % (s, repr(v))
-        s = '%s  ],\n  ' % s
-        s = '%sFs = [\n' % (s)
-        for f in this.Fs:
-            s = '%s    %s,\n' % (s, repr(f))
-        s = '%s  ],\n  ' % s
-        s = '%sEs = %s,\n  ' % (s, repr(this.Es))
-        s = '%scolors = %s,\n  ' % (s, repr(this.colorData))
-        s = '%sname = "%s"\n' % (s, this.name)
-        s = '%s)\n' % (s)
+        #s = indent.Str('%s(\n' % findModuleClassName(this.__class__, __name__))
+        s = indent.Str('SimpleShape(\n')
+        s = s.add_incr_line('Vs = [')
+        s.incr()
+        try:
+            s = s.glue_line(',\n'.join(
+                repr(v).reindent(s.indent) for v in this.Vs)
+            )
+        except AttributeError:
+            print 'ERROR: Are you sure the vertices are all of type GeomTypes.Vec3?'
+            raise
+        s = s.add_decr_line('],')
+        s = s.add_line('Fs = [')
+        s.incr()
+        s = s.glue_line(',\n'.join(
+            indent.Str(repr(f)).reindent(s.indent) for f in this.Fs)
+        )
+        s = s.add_decr_line('],')
+        s = s.add_line('Es = %s,' % repr(this.Es))
+        s = s.add_line('colors = %s,' % repr(this.colorData))
+        s = s.add_line('name = "%s"' % this.name)
+        s = s.add_decr_line(')')
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s = s.insert('%s.' % __name__)
         return s
 
     def saveFile(this, fd):
@@ -2469,15 +2478,18 @@ class CompoundShape():
         if len(this.shapeElements) == 1:
             return repr(this.shapeElements[0])
         else:
-            s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
-            s = '%ssimpleShapes = [\n' % (s)
-            for shape in this.shapeElements:
-                s = '%s    %s,\n' % (s, repr(shape))
-            s = '%s  ],\n  ' % s
-            s = '%sname = "%s"\n' % (s, this.name)
-            s = '%s)\n' % (s)
+            s = indent.Str(
+                '%s(\n' % findModuleClassName(this.__class__, __name__))
+            s = s.add_incr_line('simpleShapes = [')
+            s.incr()
+            s = s.glue_line(',\n'.join(
+                repr(shape).reindent(s.indent) for shape in this.shapeElements)
+            )
+            s = s.add_decr_line('],')
+            s = s.add_line('name = "%s"' % this.name)
+            s = s.add_decr_line(')')
             if __name__ != '__main__':
-                s = '%s.%s' % (__name__, s)
+                s = s.insert('%s.' % __name__)
             return s
 
     def saveFile(this, fd):
@@ -2895,44 +2907,70 @@ class IsometricShape(CompoundShape):
         if this.dbgTrace:
             print '%s.__repr__(%s,..):' % (this.__class__, name)
         # comment out class name, see comment at __fix_repr__ below:
-        #s = '%s(\n  ' % findModuleClassName(this.__class__, __name__)
-        s = 'IsometricShape(\n  '
-        s = '%sVs = [\n' % (s)
-        for v in this.baseShape.Vs:
-            s = '%s    %s,\n' % (s, repr(v))
-        s = '%s  ],\n  ' % s
-        s = '%sFs = [\n' % (s)
-        for f in this.baseShape.Fs:
-            s = '%s    %s,\n' % (s, repr(f))
-        s = '%s  ],\n  ' % s
+        #s = indent.Str('%s(\n' % findModuleClassName(this.__class__, __name__))
+        s = indent.Str('IsometricShape(\n')
+        s = s.add_incr_line('Vs = [')
+        s.incr()
+        try:
+            s = s.glue_line(',\n'.join(
+                repr(v).reindent(s.indent) for v in this.baseShape.Vs)
+            )
+        except AttributeError:
+            print 'ERROR: Are you sure the vertices are all of type GeomTypes.Vec3?'
+            raise
+        s = s.add_decr_line('],')
+        s = s.add_line('Fs = [')
+        s.incr()
+        s = s.glue_line(',\n'.join(
+            indent.Str(repr(f)).reindent(s.indent) for f in this.baseShape.Fs)
+        )
+        s = s.add_decr_line('],')
         if this.baseShape.Es != []:
-            s = '%sEs = %s,\n  ' % (s, repr(this.baseShape.Es))
+            s = s.add_line('Es = %s,' % repr(this.baseShape.Es))
         if this.baseShape.Ns != []:
-            s = '%sNs = [\n' % (s)
-            for v in this.baseShape.Ns:
-                s = '%s    %s,\n' % (s, repr(v))
-            s = '%s  ],\n  ' % s
+            s = s.add_incr_line('Ns = [')
+            s.incr()
+            try:
+                s = s.glue_line(',\n'.join(
+                    repr(n).reindent(s.indent) for n in this.baseShape.Ns)
+                )
+            except AttributeError:
+                print 'ERROR: Are you sure the normals are all of type GeomTypes.Vec3?'
+                raise
+            s = s.add_decr_line('],')
+        s = s.add_line('colors = [')
+        s.incr()
         cols = this.getFaceColors()
-        s = '%scolors = [\n  ' % (s)
-        for subShapeCols in cols:
-            s = '%s  %s,\n  ' % (s, repr(subShapeCols))
-        s = '%s],\n  ' % (s)
+        s = s.glue_line(',\n'.join(
+            indent.Str(repr(c)).reindent(s.indent) for c in cols)
+        )
+        s = s.add_decr_line('],')
         if this.isometryOperations['direct'] != None:
-            s = '%sdirectIsometries = [\n  ' % (s)
-            for isom in this.isometryOperations['direct']:
-                s = '%s  %s,\n  ' % (s, repr(isom))
-            s = '%s],\n  ' % (s)
+            s = s.add_line('directIsometries = [')
+            s.incr()
+            s = s.glue_line(',\n'.join(
+                repr(i).reindent(s.indent) for i in
+                    this.isometryOperations['direct']
+            ))
+            s = s.add_decr_line('],')
         if this.isometryOperations['opposite'] != None:
-            s = '%soppositeIsometry = [\n  ' % (s)
-            for isom in this.isometryOperations['opposite']:
-                s = '%s  %s,\n  ' % (s, repr(isom))
-            s = '%s],\n  ' % (s)
-        s = '%sunfoldOrbit = %s,\n  ' % (s, this.unfoldOrbit)
-        s = '%sname = "%s",\n  ' % (s, this.name)
-        s = '%sorientation = %s\n' % (s, repr(this.baseShape.orientation))
-        s = '%s)\n' % (s)
+            s = s.add_line('oppositeIsometry = [')
+            s.incr()
+            s = s.glue_line(',\n'.join(
+                repr(i).reindent(s.indent) for i in
+                    this.isometryOperations['opposite']
+            ))
+            s = s.add_decr_line('],')
+        s = s.add_line('unfoldOrbit = %s,' % this.unfoldOrbit)
+        s = s.add_line("name = '%s'," % this.name)
+        s = s.glue_line(
+            indent.Str(
+                'orientation = %s' % repr(this.baseShape.orientation)
+            ).reindent(s.indent)
+        )
+        s = s.add_decr_line(')')
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s = s.insert('%s.' % __name__)
         return s
 
     def setIsometries(this, directIsometries, oppositeIsometry = None):

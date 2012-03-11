@@ -50,6 +50,6 @@ shape = Geom3D.IsometricShape(
     GeomTypes.Rot3((GeomTypes.Quat([0.707106781187, 4.32963728536e-17, -0.707106781187, -1.04526690545e-16]), GeomTypes.Quat([0.707106781187, -4.32963728536e-17, 0.707106781187, 1.04526690545e-16]))),
   ],
   unfoldOrbit = False,
-  name = "4cubes1.py",
+  name = "12cubes.py",
   orientation = GeomTypes.Rot3((GeomTypes.Quat([0.953020613871, 0.214186495298, 0.0, 0.214186495298]), GeomTypes.Quat([0.953020613871, -0.214186495298, -0.0, -0.214186495298])))
 )

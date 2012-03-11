@@ -21,6 +21,7 @@
 #
 #------------------------------------------------------------------
 
+import indent
 import math
 
 turn      = lambda r: r * 2 * math.pi
@@ -53,9 +54,9 @@ class Vec(tuple):
         return tuple.__new__(this, [float(a) for a in v])
 
     def __repr__(v):
-        s = '%s(%s)' % (v.__class__.__name__, str(v))
+        s = indent.Str('%s(%s)' % (v.__class__.__name__, str(v)))
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s = s.insert('%s.' % __name__)
         return s
 
     def __str__(v):
@@ -291,12 +292,6 @@ class Quat(Vec):
         elif isinstance(w, int) or isinstance(w, float):
             return Vec.__mul__(v, w)
 
-    def __repr__(t):
-        s = '%s(%s)' % (t.__class__.__name__, str(t))
-        if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
-        return s
-
     def dot(v, w):
         return Vec.__mul__(v, w)
 
@@ -338,11 +333,12 @@ class Transform3(tuple):
         return tuple.__new__(this, quatPair)
 
     def __repr__(t):
-        s = '%s((%s, %s))' % (
-                transform3TypeStr(t.type()), repr(Quat(t[0])), repr(Quat(t[1]))
-            )
+        s = indent.Str('%s((\n' % (transform3TypeStr(t.type())))
+        s = s.add_incr_line('%s,' % repr(Quat(t[0])))
+        s = s.add_line('%s,' % repr(Quat(t[1])))
+        s = s.add_decr_line('))')
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s = s.insert('%s.' % __name__)
         return s
 
     def __hash__(t):
@@ -934,21 +930,6 @@ class Transform4(tuple):
             'oops, unknown angle; transform %s\n' % str(t) +
             'neither a rotation, nor a rotary-inversion (-reflection)'
         )
-
-    #def __repr__(t):
-    #    s = '%s([%s, %s])' % (
-    #            transform3TypeStr(t.type()), str(t[0]), str(t[1])
-    #        )
-    #    if __name__ != '__main__':
-    #        s = '%s.%s' % (__name__, s)
-    #    return s
-
-    #def __str__(t):
-    #    if t.isRot(): return t.__strRot()
-    #    elif t.isRefl(): return t.__strRefl()
-    #    elif t.isRotInv(): return t.__strRotInv()
-    #    else:
-    #        return '%s * .. * %s' % (str(t[0]), str(t[1]))
 
     def isRot(t):
         # print 't0', t[0].squareNorm() - 1
