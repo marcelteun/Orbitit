@@ -154,7 +154,7 @@ class TriangleAlt:
     arot_strip1loose = strip1_bas | loose_bit | alt_bit | rot_bit
     rot_star1loose   = star_bas   | loose_bit           | rot_bit
     arot_star1loose  = star_bas   | loose_bit | alt_bit | rot_bit
-    twisted          = 					  twist_bit
+    twisted          =					  twist_bit
     def __iter__(t):
 	return iter([
 	    t.refl_1,
@@ -1746,7 +1746,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    eq(v[4], numx.pi, this.prec_delta)
 	):
 	    v[4] = 0			# set pos angle to 0 instead
-	    v[0] = -v[0] 		# -translate
+	    v[0] = -v[0]		# -translate
 	    if v[1] < 0:
 		v[1] = -numx.pi - v[1]	# oppsite dihedral angle
 	    else:
@@ -2885,7 +2885,7 @@ if __name__ == '__main__':
 	Symmetry.A5xI: [],
 	Symmetry.S4  : [],
     }
-    
+
     sym_sup = [
 	Symmetry.A4xI, Symmetry.A4,
 	Symmetry.S4xI, Symmetry.S4,
@@ -3050,7 +3050,7 @@ if __name__ == '__main__':
 	print ']'
 	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
 	    randBatchYxI(symGrp, edgeLs, edgeAlts, nr_iterations,
-	    		nrThreads = 1, precision = precision, outDir = outDir)
+			nrThreads = 1, precision = precision, outDir = outDir)
 	elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
 	    randBatchY(symGrp, edgeLs, edgeAlts, nr_iterations,
 			nrThreads = 1, dynSols = dynamicSols[symGrp],
