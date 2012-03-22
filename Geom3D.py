@@ -1025,6 +1025,9 @@ class SimpleShape:
             'Ns': this.Ns
         }
 
+    def gl_alwaysSetVertices(this, do):
+        this.gl.alwaysSetVertices = do
+
     def setEdgeProperties(this, dictPar = None, **kwargs):
         """
         Specify the edges and set how they are drawn in OpenGL.
@@ -2517,6 +2520,10 @@ class CompoundShape():
     def shapes(this):
         return this.shapeElements
 
+    def gl_alwaysSetVertices(this, do):
+        for shape in this.shapeElements:
+            shape.gl_alwaysSetVertices(do)
+
     def setShapes(this, simpleShapes):
         """
         Set the shapes all at once.
@@ -2527,8 +2534,7 @@ class CompoundShape():
         if this.dbgTrace:
             print '%s.setShapes(%s,..):' % (this.__class__, this.name)
         this.shapeElements = simpleShapes
-        for shape in simpleShapes:
-            shape.gl.alwaysSetVertices = True
+        this.gl_alwaysSetVertices(True)
         this.mergeNeeded = True
 
     def mergeShapes(this):
