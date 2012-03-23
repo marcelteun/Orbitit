@@ -99,6 +99,7 @@ def rotate(v, q):
 class Symmetry:
 	# not efficient for comparing, but not a bottleneck
 	A4xI = "A4xI"
+	S4A4 = "S4A4"
 	A4   = "A4"
 	S4xI = "S4xI"
 	S4   = "S4"
@@ -106,7 +107,8 @@ class Symmetry:
 	A5xI = "A5xI"
 
 D_Dom =  {
-    Symmetry.A4xI: [0, numx.pi/4],
+    Symmetry.A4xI: [0, 0],
+    Symmetry.S4A4: [numx.pi/4, numx.pi/4],
     Symmetry.A4  : [0, numx.pi/4],
     Symmetry.S4xI: [0, numx.pi/2],
     Symmetry.S4  : [0, numx.pi/2],
@@ -116,6 +118,7 @@ D_Dom =  {
 
 T_Dom =  {
     Symmetry.A4xI: [-2., 3.],
+    Symmetry.S4A4: [-2., 3.],
     Symmetry.A4  : [-2., 3.],
     Symmetry.S4xI: [-4., 4.8],
     Symmetry.S4  : [-4., 4.8],
@@ -569,9 +572,9 @@ def FoldedRegularHeptagonsA4xI(c, params):
     c[3]: the angle of the first fold around 1-6 (8, 11)
     The vertices are positioned as follows:
     #          19                      18
-    #
-    #
-    #             16                14
+    #                      ^ y-axis
+    #                      |
+    #             16                14             . [1, 1, 1] o3 axis
     #                      12
     #
     #               9             2
@@ -579,7 +582,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
     #
     #                      3
     #
-    #   7                                     0
+    #   7                  . z-axis           0        --> x-axis
     #
     #                      4
     #
@@ -646,7 +649,7 @@ def FoldedRegularHeptagonsA4xI(c, params):
 
     edgeAlternative = params[par_tri_fill]
     if edgeAlternative & twist_bit == twist_bit:
-	delta = D_Dom[Symmetry.A4][1]
+        delta = D_Dom[Symmetry.A4][1]
 
     x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
 	    T, alpha, beta, beta, gamma, gamma, delta, params[par_fold])
@@ -1551,7 +1554,7 @@ def FindMultiRoot(initialValues,
 	    },
 	    nrOfIns
 	)
-    elif symmetry == Symmetry.A4xI:
+    elif symmetry == Symmetry.A4xI or symmetry == Symmetry.S4A4:
 	assert (nrOfIns == 4)
 	mysys = multiroots.gsl_multiroot_function(
 	    FoldedRegularHeptagonsA4xI,
@@ -2034,7 +2037,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			# again...
 			try:
 			    if len(this.edgeLengths) == 4:
-				if this.symmetry == Symmetry.A4xI:
+				if this.symmetry == Symmetry.A4xI or\
+                                                this.symmetry == Symmetry.S4A4:
 				    chk = FoldedRegularHeptagonsA4xI(result,
 					{
 					    Param.tri_fill: this.edgeAlternative,
@@ -2178,12 +2182,11 @@ if __name__ == '__main__':
     def testOneSolution(symGrp):
 
 	if symGrp == Symmetry.A4xI:
-	    #T  = 2.45
-	    #a  = Geom3D.Deg2Rad * 40
-	    #b0 = Geom3D.Deg2Rad * 25
-	    #g0 = Geom3D.Deg2Rad * 27
-	    #tmp = numx.array((T, a, b0, g0))
-	    tmp = numx.array((3., 0., 0.0, 0.0))
+	    T  = 2.45
+	    a  = Geom3D.Deg2Rad * 40
+	    b0 = Geom3D.Deg2Rad * 25
+	    g0 = Geom3D.Deg2Rad * 27
+	    tmp = numx.array((T, a, b0, g0))
 	    print 'input values: \n [',
 	    for t in tmp: print t, ',',
 	    print ']'
@@ -2191,10 +2194,32 @@ if __name__ == '__main__':
 		    {
 			Param.tri_fill: TriangleAlt.star1loose,
 			Param.edge_len: [0., 0., 0., 0.],
-			Param.h_fold:   Fold.w
+			Param.h_fold:   Fold.parallel
 		    }
 		)
-	if symGrp == Symmetry.A4:
+
+	elif symGrp == Symmetry.S4A4:
+	    T  = 0.72
+	    a  = Geom3D.Deg2Rad * 180
+	    b0 = Geom3D.Deg2Rad * 101
+	    g0 = Geom3D.Deg2Rad * -53
+	    tmp = numx.array((T, a, b0, g0))
+	    #tmp = numx.array((3., 0., 0.0, 0.0))
+            tmp = numx.array((0.01259577502021, 3.14159265358979, 1.76486301105478, -0.94170721928212, 0.78539816339745))
+            tmp = numx.array((0.01259577502021, 1.57, 0.0, 0.1, 0.78539816339745))
+            tmp = numx.array((0.01259577502021, 1.57, 0.2, 0.0, 0.78539816339745))
+	    print 'input values: \n [',
+	    for t in tmp: print t, ',',
+	    print ']'
+	    print FoldedRegularHeptagonsA4xI(tmp,
+		    {
+			Param.tri_fill: TriangleAlt.twisted,
+			Param.edge_len: [0., 0., 0., 0.],
+			Param.h_fold:   Fold.parallel
+		    }
+		)
+
+	elif symGrp == Symmetry.A4:
 	    T  = 2.3
 	    a  = Geom3D.Deg2Rad * 30
 	    b0 = Geom3D.Deg2Rad * 60
@@ -2403,9 +2428,6 @@ if __name__ == '__main__':
 	[0., 0., 0., 0., 0., 0., 0.],
 
 	[0., 0., 0., 1., 0., 0., 1.],
-		# should give solutions around
-		#	T=1.60, (0, -116, -16) for
-		#		parallel fold and twisted strip
 
 	[0., 0., 1., 0., 0., 1., 0.],
 
@@ -2754,7 +2776,6 @@ if __name__ == '__main__':
 		    TriangleAlt.alt_stripII,
 		    TriangleAlt.star,
 		    TriangleAlt.star1loose,
-		    TriangleAlt.twisted,
 		],
 	Symmetry.A4xI: [
 		    TriangleAlt.stripI,
@@ -2769,6 +2790,8 @@ if __name__ == '__main__':
 		    TriangleAlt.arot_strip1loose,
 		    TriangleAlt.rot_star1loose,
 		    TriangleAlt.arot_star1loose,
+		],
+	Symmetry.S4A4: [
 		    TriangleAlt.twisted,
 		],
 	Symmetry.S4xI: [
@@ -2871,6 +2894,7 @@ if __name__ == '__main__':
 
     pre_edgeLs = {
 	Symmetry.A4xI: pre_edgeLs_A4xI,
+	Symmetry.S4A4: pre_edgeLs_A4xI[:],
 	Symmetry.A4  : pre_edgeLs_A4,
 	Symmetry.S4xI: pre_edgeLs_S4xI,
 	Symmetry.S4  : pre_edgeLs_S4,
@@ -2879,6 +2903,7 @@ if __name__ == '__main__':
     }
     dynamicSols = {
 	Symmetry.A4xI: [],
+	Symmetry.S4A4: [],
 	Symmetry.A4  : dynamicSols_A4,
 	Symmetry.S4xI: [],
 	Symmetry.S4  : [],
@@ -2887,7 +2912,7 @@ if __name__ == '__main__':
     }
 
     sym_sup = [
-	Symmetry.A4xI, Symmetry.A4,
+	Symmetry.A4xI, Symmetry.S4A4, Symmetry.A4,
 	Symmetry.S4xI, Symmetry.S4,
 	Symmetry.A5xI, Symmetry.A5,
     ]
@@ -3048,7 +3073,8 @@ if __name__ == '__main__':
 	for e in edgeAlts:
 	    print '  %s,' % Stringify[e]
 	print ']'
-	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
+	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
+                        symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
 	    randBatchYxI(symGrp, edgeLs, edgeAlts, nr_iterations,
 			nrThreads = 1, precision = precision, outDir = outDir)
 	elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
