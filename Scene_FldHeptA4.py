@@ -330,34 +330,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	#this.correctEdgeAlternative()
 
     def setV(this):
-        #this.heptagon.foldParallel(this.fold1, this.fold2)
-        #this.heptagon.foldTrapezium(this.fold1, this.fold2)
-	# print 'T =', this.height
-	# print 'a =', this.dihedralAngle
-	# print 'd =', this.posAngle
-	# print 'b0 =', this.fold1
-	# print 'b1 =', this.oppFold1
-	# print 'g0 =', this.fold2
-	# print 'g1 =', this.oppFold2
-        # The angle has to be adjusted for historical reasons...
-	# TODO: fix me
-	if this.foldHeptagon == Heptagons.foldMethod.parallel:
-	    this.heptagon.foldParallel(-this.fold1, -this.fold2, keepV0 = False)
-	else:
-	    this.heptagon.fold(
-		this.fold1, this.fold2, this.oppFold1, this.oppFold2,
-		keepV0 = False, fold = this.foldHeptagon
-	    )
-	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
-	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
-	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
-	#print 'norm V3-V4: ', (this.heptagon.Vs[3]-this.heptagon.Vs[4]).squareNorm()
-        this.heptagon.translate(Heptagons.H*GeomTypes.uy)
-        # The angle has to be adjusted for historical reasons...
-        this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.dihedralAngle)
-        this.heptagon.translate(this.height*GeomTypes.uz)
-	if this.posAngle != 0:
-	    this.heptagon.rotate(-GeomTypes.uz, this.posAngle)
+        this.posHeptagon()
         Vs = this.heptagon.Vs[:]
 
 	#            5" = 18                 12 = 2"
@@ -1008,7 +981,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [-0.744610213721, -2.981881518271, 2.772201116514, -1.626936107939],
            },{
                'file': 'frh-roots-1_0_1_0-fld_parallel.0-shell.py',
-               'set': [2.05527791079771, 0.0, -1.17877572036290, -0.93053176681969, 0.],
+               'set': [2.05527791079771, 0.0, 1.17877572036290, 0.93053176681969, 0.],
            },{
                'file': 'frh-roots-0_0_0_0-fld_triangle.0-twisted.py',
                'set': [1.57625873995627, 0.0, 1.70780610035987, 0.69387894107559, 0.78539816339745],
@@ -1077,7 +1050,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [2.28349922775437, 0.06277160667564, -0.06286795681704, 1.46852003907435, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-0_0_0_1-fld_parallel.0-twisted.py',
-		'set': [1.57625873995627, 0.0, -2.05411520911343, -0.26432165270370, 0.78539816339745],
+		'set': [1.57625873995627, 0.0, 2.05411520911343, 0.26432165270370, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-1_0_0_0-fld_triangle.0-twisted.py',
 		'set': [1.74903011940493, 0.69387894107539, 1.01392715928449, 0.69387894107539, 0.78539816339745],
@@ -1173,10 +1146,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [0.51874726388437, 2.25653920053309, 0.20791586793685, -2.30660770631996, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-1_0_0_1-fld_parallel.0-twisted.py',
-		'set': [0.54693117675810, 2.44771371251441, 0.39359850340097, -0.26432165270381, 0.78539816339745],
+		'set': [0.54693117675810, 2.44771371251441, -0.39359850340097, 0.26432165270381, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-1_0_0_1-fld_parallel.0-twisted.py',
-		'set': [1.74903011940493, 0.69387894107539, -1.36023626803805, -0.26432165270370, 0.78539816339745],
+		'set': [1.74903011940493, 0.69387894107539, 1.36023626803805, 0.26432165270370, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-1_0_0_1-fld_triangle.0-twisted.py',
 		'set': [0.54693117675810, 2.44771371251441, -0.31206711291096, -0.19276642104807, 0.78539816339745],
@@ -1200,10 +1173,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [0.48540719864890, 2.26900223672547, -0.02757800836859, 0.44535720008269, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-0_1_0_1-fld_parallel.0-twisted.py',
-		'set': [2.28336552114282, 0.0, -1.37672964253502, -0.94170721928212, 0.78539816339745],
+		'set': [2.28336552114282, 0.0, 1.37672964253502, 0.94170721928212, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-0_1_0_1-fld_parallel.0-twisted.py',
-		'set': [2.28336552114282, 0.0, -1.37672964253501, 2.46420708701138, 0.78539816339745],
+		'set': [2.28336552114282, 0.0, 1.37672964253501, -2.46420708701138, 0.78539816339745],
 	    },{
 		'file': 'frh-roots-0_1_0_1-fld_shell.0-twisted.py',
 		'set': [1.84775911011892, 0.92575452409419, -1.72327793624487, 2.57828590634453, 0.78539816339745],
