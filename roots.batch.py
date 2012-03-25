@@ -2367,13 +2367,8 @@ if __name__ == '__main__':
 
     printStatus = False
 
-    def randBatchY(symGrp, edgeLs, edgeAlts, continueAfter = 100,
+    def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
 		nrThreads = 1, dynSols = None, precision = 14, outDir = "./"):
-	folds = [Fold.star, Fold.w]
-	# TODO: howto:
-	#folds = [Fold.star]
-	#folds = [Fold.w]
-	#folds = [Fold.trapezium]
 	oppEdgeAlts = edgeAlts[:]
 	dom = [
 	    T_Dom[symGrp],         # Translation
@@ -2812,15 +2807,8 @@ if __name__ == '__main__':
 		],
     }
 
-    def randBatchYxI(symGrp, edgeLs, edgeAlts, continueAfter = 100,
+    def randBatchYxI(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
 			    nrThreads = 1, precision = 14, outDir = "./"):
-	folds = [
-	    Fold.w,
-	    Fold.star,
-	    Fold.triangle,
-	    Fold.trapezium,
-	    Fold.parallel,
-	]
 	dom = [
 	    T_Dom[symGrp],       # Translation
 	    [-numx.pi, numx.pi], # angle alpha
@@ -2901,6 +2889,24 @@ if __name__ == '__main__':
 	Symmetry.A5xI: pre_edgeLs_A5xI,
 	Symmetry.A5  : pre_edgeLs_A5,
     }
+    batch_YxI_folds = [
+        Fold.w,
+        Fold.star,
+        Fold.triangle,
+        Fold.trapezium,
+        Fold.parallel,
+    ]
+    # TODO: howto: Fold.star, Fold.w, Fold.trapezium
+    batch_Y_folds = [Fold.star, Fold.w]
+    pre_folds = {
+	Symmetry.A4xI: batch_YxI_folds[:],
+	Symmetry.S4A4: batch_YxI_folds[:],
+	Symmetry.A4  : batch_Y_folds[:],
+	Symmetry.S4xI: batch_YxI_folds[:],
+	Symmetry.S4  : batch_Y_folds[:],
+	Symmetry.A5xI: batch_YxI_folds[:],
+	Symmetry.A5  : batch_Y_folds[:]
+    }
     dynamicSols = {
 	Symmetry.A4xI: [],
 	Symmetry.S4A4: [],
@@ -2926,12 +2932,19 @@ if __name__ == '__main__':
 	print 'Usage:'
 	print sys.argv[0], '[options] <symmetry group>'
 	print 'where options:'
-	print '     -a [x:y]: slice of edge alternative list to search'
+	print '     -a [x:y]: slice of edge alternative list to search. If nothing is specified,'
+        print '               then all alternatives from the -A option are searched.'
+	print '     -a x    : edge alternative to search'
 	print '     -A      : list the edge alternatives'
+	print '     -f [x:y]: slice of heptagon fold list to search. If nothing is'
+        print '               specified, then all folds from the -F option are searched.'
+	print '     -f x    : heptagon fold to search'
+	print '     -F      : list available heptagon folds'
 	print '     -h      : prints this help'
 	print '     -i <num>: number of iterations to use; default %d' % nr_iterations
 	print '     -l [x:y]: slice of edge lengths list to search. If nothing is specified,'
         print '               then all lengths from the -L option are searched.'
+	print '     -l x    : edge length to search'
 	print '     -L      : list the edge lengths of the predefined list'
 	print "     -o <out>: specifiy the output directory: don't use spaces; default"
 	print '               %s' % outDir
@@ -2960,6 +2973,7 @@ if __name__ == '__main__':
 	# can be set to true by cmd line
 	list_pre_edgeLs = False
 	list_edge_alts  = False
+	list_fold_alts  = False
 	set_edge_alts   = ''
 	set_edge_Ls     = ''
 
@@ -2984,6 +2998,12 @@ if __name__ == '__main__':
 		skipNext = True
 	    elif sys.argv[n] == '-A':
 		list_edge_alts = True
+	    elif sys.argv[n] == '-f':
+		errIfNoNxt('f', n)
+		set_fold_alts = sys.argv[n + 1]
+		skipNext = True
+	    elif sys.argv[n] == '-F':
+		list_fold_alts = True
 	    elif sys.argv[n] == '-h':
 		printUsage()
 		sys.exit(0)
@@ -3029,7 +3049,7 @@ if __name__ == '__main__':
 	printUsage()
 	sys.exit(-1)
     else:
-	if list_pre_edgeLs or list_edge_alts:
+	if list_pre_edgeLs or list_edge_alts or list_fold_alts:
 	    if list_pre_edgeLs:
                 print 'Possible edge lengths:'
 		for (i, e) in zip(range(len(pre_edgeLs[symGrp])),
@@ -3040,46 +3060,96 @@ if __name__ == '__main__':
 		for (i, e) in zip(range(len(edgeAltOpts[symGrp])),
 							edgeAltOpts[symGrp]):
 		    print '%3d: %s' % (i, Stringify[e])
+	    if list_fold_alts:
+                print 'Possible heptagon fold alternatives:'
+		for (i, e) in zip(range(len(pre_folds[symGrp])),
+							pre_folds[symGrp]):
+		    print '%3d: %s' % (i, str(Fold(e)))
 	    sys.exit(0)
 	if set_edge_Ls == '':
 	    edgeLs = pre_edgeLs[symGrp]
 	else:
-	    try:
-		edgeLs = eval('pre_edgeLs[Symmetry.%s]%s' % (symGrp,
+            if set_edge_Ls[0] != '[':
+                # try is slice is one element, ie an int
+                try:
+                    i = int(set_edge_Ls)
+                except ValueError:
+                    printError("value error for edge index %s\n", set_edge_Ls)
+                edgeLs = pre_edgeLs[symGrp][i:i+1]
+	    else:
+                try:
+                    edgeLs = eval('pre_edgeLs[Symmetry.%s]%s' % (symGrp,
 								set_edge_Ls))
-		# if just an index was used instead of a slice:
-		if type(edgeLs) == int:
-		    edgeLs = [edgeLs]
-	    except TypeError:
-		printError("type error for edge slice: '%s'\n" % set_edge_Ls)
-		printUsage()
-		sys.exit(0)
-	    except SyntaxError:
-		printError("syntax error for edge slice: '%s'\n" % set_edge_Ls)
-		printUsage()
-		sys.exit(0)
+                    # if just an index was used instead of a slice:
+                    if type(edgeLs) == int:
+                        edgeLs = [edgeLs]
+                except TypeError:
+                    printError("type error for edge slice: '%s'\n" % set_edge_Ls)
+                    printUsage()
+                    sys.exit(0)
+                except SyntaxError:
+                    printError("syntax error for edge slice: '%s'\n" % set_edge_Ls)
+                    printUsage()
+                    sys.exit(0)
 	if set_edge_alts == '':
 	    edgeAlts = edgeAltOpts[symGrp]
 	else:
-	    try:
-		edgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (symGrp,
-								set_edge_alts))
-		# if just an index was used instead of a slice:
-		if type(edgeAlts) == int:
-		    edgeAlts = [edgeAlts]
-	    except TypeError:
-		printError("type error for edge slice: '%s'\n" % set_edge_alts)
-		printUsage()
-		sys.exit(0)
-	    except SyntaxError:
-		printError("syntax error for edge slice: '%s'\n" % set_edge_alts)
-		printUsage()
-		sys.exit(0)
+            if set_edge_alts[0] != '[':
+                # try is slice is one element, ie an int
+                try:
+                    i = int(set_edge_alts)
+                except ValueError:
+                    printError("value error for edge index %s\n", set_edge_alts)
+                edgeAlts = edgeAltOpts[symGrp][i:i+1]
+	    else:
+                try:
+                    edgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (symGrp,
+                                                                    set_edge_alts))
+                    # if just an index was used instead of a slice:
+                    if type(edgeAlts) == int:
+                        edgeAlts = [edgeAlts]
+                except TypeError:
+                    printError("type error for edge slice: '%s'\n" % set_edge_alts)
+                    printUsage()
+                    sys.exit(0)
+                except SyntaxError:
+                    printError("syntax error for edge slice: '%s'\n" % set_edge_alts)
+                    printUsage()
+                    sys.exit(0)
+	if set_fold_alts == '':
+	    foldAlts = pre_folds[symGrp]
+	else:
+            if set_fold_alts[0] != '[':
+                # try is slice is one element, ie an int
+                try:
+                    i = int(set_fold_alts)
+                except ValueError:
+                    printError("value error for edge index %s\n", set_fold_alts)
+                foldAlts = pre_folds[symGrp][i:i+1]
+	    else:
+                try:
+                    foldAlts = eval('pre_folds[Symmetry.%s]%s' % (symGrp,
+                                                                    set_fold_alts))
+                    # if just an index was used instead of a slice:
+                    if type(foldAlts) == int:
+                        foldAlts = [foldAlts]
+                except TypeError:
+                    printError("type error for fold slice: '%s'\n" % set_fold_alts)
+                    printUsage()
+                    sys.exit(0)
+                except SyntaxError:
+                    printError("syntax error for fold slice: '%s'\n" % set_fold_alts)
+                    printUsage()
+                    sys.exit(0)
 	print 'Search solutions for symmetry group %s' % symGrp
 	print 'Switch setup after %d randomly selected begin values' % (
 							    nr_iterations)
 	print 'Save solutions in:', outDir
 	# TODO: specify fold by command line...
+	print 'heptagon folds = ['
+	for f in foldAlts:
+	    print '  %s,' % str(Fold(f))
+	print ']'
 	print 'Edge lengths slice %s:' % (set_edge_Ls)
 	for e in edgeLs:
 	    print '  -', e
@@ -3087,11 +3157,12 @@ if __name__ == '__main__':
 	for e in edgeAlts:
 	    print '  %s,' % Stringify[e]
 	print ']'
+
 	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
                         symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
-	    randBatchYxI(symGrp, edgeLs, edgeAlts, nr_iterations,
+	    randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
 			nrThreads = 1, precision = precision, outDir = outDir)
 	elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
-	    randBatchY(symGrp, edgeLs, edgeAlts, nr_iterations,
+	    randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
 			nrThreads = 1, dynSols = dynamicSols[symGrp],
 			precision = precision, outDir = outDir)
