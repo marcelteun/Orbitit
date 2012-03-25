@@ -2924,13 +2924,15 @@ if __name__ == '__main__':
 
     def printUsage():
 	print 'Usage:'
-	print sys.argv[0], '[options] <symmetry group> [i0] [i1]'
+	print sys.argv[0], '[options] <symmetry group>'
 	print 'where options:'
 	print '     -a [x:y]: slice of edge alternative list to search'
 	print '     -A      : list the edge alternatives'
 	print '     -h      : prints this help'
 	print '     -i <num>: number of iterations to use; default %d' % nr_iterations
-	print '     -l      : list the edge lengths of the predefined list'
+	print '     -l [x:y]: slice of edge lengths list to search. If nothing is specified,'
+        print '               then all lengths from the -L option are searched.'
+	print '     -L      : list the edge lengths of the predefined list'
 	print "     -o <out>: specifiy the output directory: don't use spaces; default"
 	print '               %s' % outDir
 	print '     -p <num>: precision, specify the amount of digits after the point; default'
@@ -2942,11 +2944,6 @@ if __name__ == '__main__':
 	for sym in sym_sup:
 	    print "%s" % sym,
 	print
-	print '    [i0]: begin slice'
-	print '    [i1]: end slice'
-	print '        search using the specified slice from the predefined list'
-	print '        If nothing is specified the whole list is searched'
-	print '        If only i0 is specified the list is searched from that index'
 
     # default values used by printUsage
     nr_iterations = 4000
@@ -2964,6 +2961,7 @@ if __name__ == '__main__':
 	list_pre_edgeLs = False
 	list_edge_alts  = False
 	set_edge_alts   = ''
+	set_edge_Ls     = ''
 
 	if sys.argv[1] == '-1':
 	    if len(sys.argv) <= 2:
@@ -2994,6 +2992,10 @@ if __name__ == '__main__':
 		nr_iterations = int(sys.argv[n + 1])
 		skipNext = True
 	    elif sys.argv[n] == '-l':
+		errIfNoNxt('l', n)
+		set_edge_Ls = sys.argv[n + 1]
+		skipNext = True
+	    elif sys.argv[n] == '-L':
 		list_pre_edgeLs = True
 	    elif sys.argv[n] == '-o':
 		errIfNoNxt('o', n)
@@ -3008,22 +3010,14 @@ if __name__ == '__main__':
 	    elif symGrp == '':
 		if sys.argv[n] in sym_sup:
 		    symGrp = sys.argv[n]
-		    edgeLs = pre_edgeLs[symGrp]
-		    i = 0
-		    j = len(edgeLs)
 		else:
 		    printError('Unknown symmetry group defined')
 		    printUsage()
 		    sys.exit(-1)
 	    else:
-		# last arguments slice i0, i1
-		i = int(sys.argv[n])
-		if len(sys.argv) > n + 1:
-		    j = int(sys.argv[n + 1])
-		else:
-		    j = len(edgeLs)
-		edgeLs = edgeLs[i:j]
-		break
+                printError('Unknown option: %s', sys.argv[n])
+                printUsage()
+                sys.exit(-1)
 
     if tstProg:
 	if tstDynamicSolutions():
@@ -3037,13 +3031,33 @@ if __name__ == '__main__':
     else:
 	if list_pre_edgeLs or list_edge_alts:
 	    if list_pre_edgeLs:
-		for (i, e) in zip(range(len(edgeLs)), edgeLs):
+                print 'Possible edge lengths:'
+		for (i, e) in zip(range(len(pre_edgeLs[symGrp])),
+                                                        pre_edgeLs[symGrp]):
 		    print '%3d:' % i, e
 	    if list_edge_alts:
+                print 'Possible edge alternatives:'
 		for (i, e) in zip(range(len(edgeAltOpts[symGrp])),
 							edgeAltOpts[symGrp]):
 		    print '%3d: %s' % (i, Stringify[e])
 	    sys.exit(0)
+	if set_edge_Ls == '':
+	    edgeLs = pre_edgeLs[symGrp]
+	else:
+	    try:
+		edgeLs = eval('pre_edgeLs[Symmetry.%s]%s' % (symGrp,
+								set_edge_Ls))
+		# if just an index was used instead of a slice:
+		if type(edgeLs) == int:
+		    edgeLs = [edgeLs]
+	    except TypeError:
+		printError("type error for edge slice: '%s'\n" % set_edge_Ls)
+		printUsage()
+		sys.exit(0)
+	    except SyntaxError:
+		printError("syntax error for edge slice: '%s'\n" % set_edge_Ls)
+		printUsage()
+		sys.exit(0)
 	if set_edge_alts == '':
 	    edgeAlts = edgeAltOpts[symGrp]
 	else:
@@ -3066,7 +3080,7 @@ if __name__ == '__main__':
 							    nr_iterations)
 	print 'Save solutions in:', outDir
 	# TODO: specify fold by command line...
-	print 'Edge lengths slice [%d:%d]:' % (i, j)
+	print 'Edge lengths slice %s:' % (set_edge_Ls)
 	for e in edgeLs:
 	    print '  -', e
 	print 'edgeAlts = ['
