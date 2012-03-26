@@ -2974,6 +2974,7 @@ if __name__ == '__main__':
 	list_pre_edgeLs = False
 	list_edge_alts  = False
 	list_fold_alts  = False
+	set_fold_alts   = ''
 	set_edge_alts   = ''
 	set_edge_Ls     = ''
 
