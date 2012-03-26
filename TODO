@@ -21,10 +21,26 @@ ROOTS:
 		tst/frh-roots/frh-roots-1_1_1_0-fld_parallel.0-rot_strip_1_loose.py
 		tst/frh-roots/frh-roots-1_1_1_0-fld_parallel.0-rot_shell_1_loose.py
 
-	2012-03-25 - 05
-	make sure to handle precision increase, ie read old values and apply new
-	iteration on these until required precision. Perhaps you want to have a
-	certain precision to go to, but another for values being equal...
+	2012-03-26 - 01
+	In RandFindMultiRootOnDomain.run you set maxIter in the loop depending
+	on the amount of solutions. It is a pity this happens in the loop.
+	Perhaps a constant would be better. It would be interesting to know to
+	see what the min, max and avg iter value is for a converged set up.
+	It seems these high maxes aren't reached anyway. Perhaps the max_iter
+	should increase depending on the precision.
+
+	2012-03-26 - 02
+	In RandFindMultiRootOnDomain.run you set find_prec_delta 1000 times
+	higher because of the length calculation, however, whether the solution
+	is accepted inside the solver is based on the return value of the system
+	anyway... Remove?
+
+	2012-03-26 - 03
+	Throw solutions as doublet if the difference between them < 10 * prec
+	Try eg this:
+	  $ python roots.batch.py -p 5 -i 100  -l 0 -f 1  S4A4
+	  $ python roots.batch.py -p 13 -i 100  -l 0 -f 1  S4A4
+
 
 PRIO
 2012-09-19 - Heptagons Scene: there is a shell fill that is the opposite of the
