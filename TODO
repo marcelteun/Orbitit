@@ -1,11 +1,4 @@
 ROOTS:
-	2012-03-25 - 01
-	make it possible to configure by command line which fold to search
-
-	2012-03-25 - 02
-	Also unpdate the command line to configure the edge lengths by std
-	option, like the -a and -A
-
 	2012-03-25 - 03
 	I noticed that a doublet that was thrown some time in
 		data/Data_FldHeptA4/frh-roots-0_0_1_1_0_1_1-fld_w.0-strip_1_loose-opp_shell_1_loose.py
