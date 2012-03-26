@@ -1785,6 +1785,13 @@ class RandFindMultiRootOnDomain(threading.Thread):
     def solutionAlreadyFound(this, sol):
 	found = False
 	lstRange = range(len(sol))
+        # the precision is used to accept a certain difference in the calculated
+        # edge length and the required edge length. As a consequence of the way
+        # this is calculated input settings that differ a bit more than this
+        # precision might still lead to acceptable edge length.
+        # Therefore to check whether settings are equal we will use a margin
+        # that is 10 times the precision:
+        margin = 10 * this.prec_delta
 	for old in this.results:
 	    allElemsEqual = True
 	    for i in lstRange:
@@ -1792,7 +1799,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    print 'Oops'
 		    print 'old', old
 		    print 'sol', sol
-		if abs(old[i] - sol[i]) > this.prec_delta:
+		if abs(old[i] - sol[i]) > margin:
 		    allElemsEqual = False
 		    break # for i loop, not for old
 	    if allElemsEqual:
@@ -1961,14 +1968,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    except IOError:
 		prev_refl_iterations = 0
 
-        # Try to find with much higher precision, since using the
-        # solution to calculate the edge lengths will decrease the
-        # precision (1000 times should be enough)
-        find_prec_delta = this.prec_delta
-        if find_prec_delta >= 1e-11:
-            find_prec_delta = find_prec_delta / 1000
-        # otherwise don't bother.
-
         # all solutions that are read might have less precision, check them
         # here and possibly increase precision (or reject them)
         reiterated_input_results = []
@@ -1981,7 +1980,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
                     this.fold,
                     this.method,
                     lambda v,l: this.cleanupResult(v, l),
-                    find_prec_delta,
+                    this.prec_delta,
                     maxIter,
                     printIter = False,
                     quiet     = True,
@@ -2011,7 +2010,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			this.fold,
 			this.method,
 			lambda v,l: this.cleanupResult(v, l),
-			find_prec_delta,
+			this.prec_delta,
 			maxIter,
 			printIter = False,
 			quiet     = True,

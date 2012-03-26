@@ -1,13 +1,8 @@
 ROOTS:
-	2012-03-25 - 03
-	I noticed that a doublet that was thrown some time in
-		data/Data_FldHeptA4/frh-roots-0_0_1_1_0_1_1-fld_w.0-strip_1_loose-opp_shell_1_loose.py
-	was the exact same solution. Could it be that when comparing
-	first you see difference then you write with a certain precision
-	and then they are equal?
 
-	When frh-roots-1_1_1_1-fld_parallel.0-alt_rot_strip_1_loose.py
-	it doesn't set the right triangle fill
+	2012-03-25 - 06
+	When frh-roots-1_1_1_1-fld_parallel.0-alt_rot_strip_1_loose.py is looded
+	into Orbitit it doesn't set the right triangle fill
 
 	2012-03-25 - 04
 	Why are these generated? What are these anyway?
@@ -28,19 +23,6 @@ ROOTS:
 	see what the min, max and avg iter value is for a converged set up.
 	It seems these high maxes aren't reached anyway. Perhaps the max_iter
 	should increase depending on the precision.
-
-	2012-03-26 - 02
-	In RandFindMultiRootOnDomain.run you set find_prec_delta 1000 times
-	higher because of the length calculation, however, whether the solution
-	is accepted inside the solver is based on the return value of the system
-	anyway... Remove?
-
-	2012-03-26 - 03
-	Throw solutions as doublet if the difference between them < 10 * prec
-	Try eg this:
-	  $ python roots.batch.py -p 5 -i 100  -l 0 -f 1  S4A4
-	  $ python roots.batch.py -p 13 -i 100  -l 0 -f 1  S4A4
-
 
 PRIO
 2012-09-19 - Heptagons Scene: there is a shell fill that is the opposite of the
