@@ -1555,6 +1555,10 @@ def FindMultiRoot(initialValues,
 	    nrOfIns
 	)
     elif symmetry == Symmetry.A4xI or symmetry == Symmetry.S4A4:
+        if nrOfIns == 5:
+            # the last value is a constant:
+            nrOfIns = 4
+            initialValues = initialValues[0:4]
 	assert (nrOfIns == 4)
 	mysys = multiroots.gsl_multiroot_function(
 	    FoldedRegularHeptagonsA4xI,
@@ -1615,11 +1619,12 @@ def FindMultiRoot(initialValues,
 	    f = solver.getf()
 	    status = multiroots.test_residual(f, prec_delta)
 	    if status == errno.GSL_SUCCESS and not quiet:
-		print "# Converged :"
+		print "# Converged after %5d iterations" % (iter + 1)
 	    if printIter:
-		print "  %5d % .7f % .7f % .7f % .7f  % .7f  % .7f  % .7f  % .7f" %(
+		print "  %5d % .15f % .15f % .15f % .15f" %(
 		    iter+1,
-		    x[0], x[1], x[2], x[3],
+		    x[0], x[1], x[2], x[3])
+		print "  ----> % .15f % .15f % .15f % .15f" %(
 		    f[0], f[1], f[2], f[3]
 		)
 	    if status == errno.GSL_SUCCESS:
@@ -1690,7 +1695,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.dynamicSols = dynSols
 	this.dynSols = dynSols
 	this.stopAfter = 100000
-	this.printStatus = False,
 	this.outDir = outDir
 	if not outDir[-1] == '/':
 	    this.outDir = "%s/" % outDir
@@ -1702,7 +1706,15 @@ class RandFindMultiRootOnDomain(threading.Thread):
     changeIterLimits = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     maxIters = [2 ** (6+8-i) for i in range(9)]
     def setMaxIter(this):
+        """return nr of trials of 1 value depending on amount of solutions
+
+        If there is no solution yet, you could just continue, since there is no
+        chance that if you continue that you'll find a solution that is already
+        found. Towards more solutions it is probably better to start with
+        another random value if it doesn't develop.
+        """
 	nrSols = len(this.results)
+        # note for performance it is better to start with [8]
 	if nrSols >= this.changeIterLimits[8]:
 	    return this.maxIters[8]
 	elif nrSols == this.changeIterLimits[7]:
@@ -1879,9 +1891,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
     def run(this):
 	if this.oppEdgeAlternative == None:
 	    this.oppEdgeAlternative = this.edgeAlternative
-	testValue = this.randTestvalue()
-	if printStatus:
-	    print testValue
 	# changeIterLimits depends a bit on the amount of solutions.
 	# 1. if you don't have a solution: just jump around until you get a
 	#    hit.
@@ -1952,26 +1961,50 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    except IOError:
 		prev_refl_iterations = 0
 
+        # Try to find with much higher precision, since using the
+        # solution to calculate the edge lengths will decrease the
+        # precision (1000 times should be enough)
+        find_prec_delta = this.prec_delta
+        if find_prec_delta >= 1e-11:
+            find_prec_delta = find_prec_delta / 1000
+        # otherwise don't bother.
+
+        # all solutions that are read might have less precision, check them
+        # here and possibly increase precision (or reject them)
+        reiterated_input_results = []
+        maxIter = 1000 # this can be high assuming it is a solution
+        for solution in this.results:
+            result = FindMultiRoot(solution,
+                    this.symmetry,
+                    this.edgeAlternative,
+                    this.edgeLengths,
+                    this.fold,
+                    this.method,
+                    lambda v,l: this.cleanupResult(v, l),
+                    find_prec_delta,
+                    maxIter,
+                    printIter = False,
+                    quiet     = True,
+                    oppEdgeAlternative = this.oppEdgeAlternative
+                )
+            if (result != None):
+                reiterated_input_results.append(result)
+        if (len(reiterated_input_results) != len(this.results)):
+            print 'Warning: %d solutions thrown after increasing the precision'\
+                % (len(this.results) - len(reiterated_input_results))
+        this.results = reiterated_input_results
+
 	nrOfIters = 0
+        # TODO: why is trapezium handled differently?
+        # TODO: why not use 50 always? will give better loop performance
 	if this.fold == Fold.trapezium:
 	    maxIter = 50
 	else:
 	    maxIter = this.setMaxIter()
+
 	while True:
 	    try:
-		#print '%s:' % time.strftime("%y%m%d %H%M%S", time.localtime()),
-		#print 'step'
-		find_prec_delta = this.prec_delta
-		# Try to find with much higher precisiona, since using the
-		# solution to calculate the edge lengths will decrease the
-		# precision (100 times should be enough)
-		if find_prec_delta >= 1e-15:
-		    find_prec_delta = find_prec_delta / 10
-		    if find_prec_delta >= 1e-15:
-			find_prec_delta = find_prec_delta / 10
-			if find_prec_delta >= 1e-15:
-			    find_prec_delta = find_prec_delta / 10
-		result = FindMultiRoot(testValue,
+		result = FindMultiRoot(this.randTestvalue(),
 			this.symmetry,
 			this.edgeAlternative,
 			this.edgeLengths,
@@ -2005,7 +2038,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		pass
 	    except pygsl.errors.gsl_JacobianEvaluationError:
 		pass
-	    testValue = this.randTestvalue()
 	    nrOfIters = nrOfIters + 1
 	    if nrOfIters >= this.stopAfter:
 		# always write the result, even when empty, so it is known how
@@ -2364,8 +2396,6 @@ if __name__ == '__main__':
 		    print 'oops', ds, "shouldn't be a dynamic solution"
 		    passed = False
 	return passed
-
-    printStatus = False
 
     def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
 		nrThreads = 1, dynSols = None, precision = 14, outDir = "./"):
