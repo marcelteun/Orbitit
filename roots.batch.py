@@ -1743,7 +1743,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    # move interval from [0, lim] to [-lim/2, lim/2]:
             if v[i] > hLim:
                 v[i] = v[i] - lim
-	    if eq(v[i], -hLim):
+	    if eq(v[i], -hLim, this.eq_margin):
                 # float rounding:
                 v[i] = v[i] + lim
             # shouldn't happen:
@@ -1758,7 +1758,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	if (
 	    len(v) >= 5
 	    and
-	    eq(v[4], numx.pi, this.prec_delta)
+	    eq(v[4], numx.pi, this.eq_margin)
 	):
 	    v[4] = 0			# set pos angle to 0 instead
 	    v[0] = -v[0]		# -translate
@@ -1781,17 +1781,20 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    for i in range(dLen)
 	]
 
-    # This can be optimised
-    def solutionAlreadyFound(this, sol):
-	found = False
-	lstRange = range(len(sol))
+    @property
+    def eq_margin(this):
         # the precision is used to accept a certain difference in the calculated
         # edge length and the required edge length. As a consequence of the way
         # this is calculated input settings that differ a bit more than this
         # precision might still lead to acceptable edge length.
         # Therefore to check whether settings are equal we will use a margin
         # that is 10 times the precision:
-        margin = 10 * this.prec_delta
+        return 10 * this.prec_delta
+
+    # This can be optimised
+    def solutionAlreadyFound(this, sol):
+	found = False
+	lstRange = range(len(sol))
 	for old in this.results:
 	    allElemsEqual = True
 	    for i in lstRange:
@@ -1799,7 +1802,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    print 'Oops'
 		    print 'old', old
 		    print 'sol', sol
-		if abs(old[i] - sol[i]) > margin:
+		if abs(old[i] - sol[i]) > this.eq_margin:
 		    allElemsEqual = False
 		    break # for i loop, not for old
 	    if allElemsEqual:
@@ -1825,7 +1828,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 			    for vs in d['sol_vector']:
 				sol_isEq = True
 				for i in range(len(vs)):
-				    if not eq(vs[i], this.edgeLengths[i]):
+				    if not eq(vs[i], this.edgeLengths[i],
+                                                            this.eq_margin):
 					sol_isEq = False
 					break # don't check other (i, v)
 				if sol_isEq:
@@ -1834,7 +1838,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
 				for vs in d['set_vector']:
 				    isEq = True
 				    for k, v in vs.iteritems():
-					if not eq(sol[k], v, this.prec_delta):
+					if not eq(sol[k], v, this.prec_delta,
+                                                            this.eq_margin):
 					    isEq = False
 					    break
 				    if isEq:
@@ -1845,8 +1850,10 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	el = this.edgeLengths
 	return (
 	    len(el) > 5 and (
-		eq(el[1], el[4]) and eq(el[2], el[5]) and eq(el[3], el[6])
-		and this.edgeAlternative == this.oppEdgeAlternative
+                this.edgeAlternative == this.oppEdgeAlternative and
+		eq(el[1], el[4], this.eq_margin) and
+                eq(el[2], el[5], this.eq_margin) and
+                eq(el[3], el[6], this.eq_margin)
 	    )
 	)
 

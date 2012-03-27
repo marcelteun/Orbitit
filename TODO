@@ -24,11 +24,6 @@ ROOTS:
 	It seems these high maxes aren't reached anyway. Perhaps the max_iter
 	should increase depending on the precision.
 
-	2012-03-27 - 01
-	Still doublet problems: eg run:
-	$ python roots.batch.py -p 5 -i 100  -l 0  S4A4
-	It might be that the doublets are opposite settings with a marginal
-	error. Check if pi-value takes into account the error margin.
 PRIO
 2012-09-19 - Heptagons Scene: there is a shell fill that is the opposite of the
              current one. I.e. the origin is opposite. Note that for a W-fold
