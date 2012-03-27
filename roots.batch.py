@@ -2397,7 +2397,8 @@ if __name__ == '__main__':
 	return passed
 
     def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
-		nrThreads = 1, dynSols = None, precision = 14, outDir = "./"):
+		nrThreads = 1, dynSols = None, precision = 14, outDir = "./",
+                loop = True):
 	oppEdgeAlts = edgeAlts[:]
 	dom = [
 	    T_Dom[symGrp],         # Translation
@@ -2447,6 +2448,8 @@ if __name__ == '__main__':
 					rndT[j].join()
 				    print '===threads finished===='
 				    i = 0
+	    if not loop:
+                break
 
     pre_edgeLs_A4 = [
 	[0., 0., 0., 0., 0., 0., 0.],
@@ -2837,7 +2840,8 @@ if __name__ == '__main__':
     }
 
     def randBatchYxI(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
-			    nrThreads = 1, precision = 14, outDir = "./"):
+			    nrThreads = 1, precision = 14, outDir = "./",
+                            loop = True):
 	dom = [
 	    T_Dom[symGrp],       # Translation
 	    [-numx.pi, numx.pi], # angle alpha
@@ -2873,6 +2877,8 @@ if __name__ == '__main__':
 				rndT[j].join()
 			    print '===threads finished===='
 			    i = 0
+	    if not loop:
+                break
 
     pre_edgeLs_A4xI = [
 	[0., 0., 0., 0.], # no 1
@@ -2977,6 +2983,8 @@ if __name__ == '__main__':
 	print '     -L      : list the edge lengths of the predefined list'
 	print "     -o <out>: specifiy the output directory: don't use spaces; default"
 	print '               %s' % outDir
+	print '     -s      : stop after having checked all. Default the program loops through'
+	print '               all folds, edges, etc and starts over.'
 	print '     -p <num>: precision, specify the amount of digits after the point; default'
 	print '               %d' % precision
 	print '     -1      : try one solution (for debugging/ testing): TODO: improve interface'
@@ -2988,6 +2996,7 @@ if __name__ == '__main__':
 	print
 
     # default values used by printUsage
+    loop = True
     nr_iterations = 4000
     outDir = "tst/frh-roots"
     precision = 10
@@ -3055,6 +3064,8 @@ if __name__ == '__main__':
 		errIfNoNxt('p', n)
 		precision = int(sys.argv[n + 1])
 		skipNext = True
+	    elif sys.argv[n] == '-s':
+		loop = False
 	    elif sys.argv[n] == '-t':
 		tstProg = True
 	    elif symGrp == '':
@@ -3191,8 +3202,9 @@ if __name__ == '__main__':
 	if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
                         symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
 	    randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
-			nrThreads = 1, precision = precision, outDir = outDir)
+			nrThreads = 1, precision = precision, outDir = outDir,
+                        loop = loop)
 	elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
 	    randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
 			nrThreads = 1, dynSols = dynamicSols[symGrp],
-			precision = precision, outDir = outDir)
+			precision = precision, outDir = outDir, loop = loop)
