@@ -27,11 +27,13 @@ import pygsl._numobj as numx
 from pygsl  import multiroots, errno
 import pygsl
 import copy
+import math
 import threading
 import gc
 
-import Heptagons
+import glue
 import GeomTypes
+import Heptagons
 
 import string
 import time
@@ -1684,10 +1686,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    write_precision = this.precision + 1
 	else:
 	    write_precision = this.precision
-	pf = '%%.%df' % write_precision
-	this.sol4 = '    [%s, %s, %s, %s],\n' % (pf, pf, pf, pf)
-	this.sol5 = '    [%s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf)
-	this.sol7 = '    [%s, %s, %s, %s, %s, %s, %s],\n' % (pf, pf, pf, pf, pf, pf, pf)
 	this.fold = fold
 	this.edgeAlternative = edgeAlternative
 	this.oppEdgeAlternative = oppEdgeAlternative
@@ -1702,6 +1700,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    os.mkdir(outDir, 0755)
 	random.seed()
 	threading.Thread.__init__(this)
+
+    def sol_str(this, r, n):
+        digs = this.precision
+        s = '[%s' % glue.f2s(r[0], digs)
+        for i in range(1, n):
+            s = '%s, %s' % (s, glue.f2s(r[i], digs))
+        s = '%s],\n' % s
+        return s
 
     changeIterLimits = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     maxIters = [2 ** (6+8-i) for i in range(9)]
@@ -1838,8 +1844,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 				for vs in d['set_vector']:
 				    isEq = True
 				    for k, v in vs.iteritems():
-					if not eq(sol[k], v, this.prec_delta,
-                                                            this.eq_margin):
+					if not eq(sol[k], v, this.eq_margin):
 					    isEq = False
 					    break
 				    if isEq:
@@ -2157,7 +2162,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		if len(this.edgeLengths) != 4:
 		    f.write('results = [\n')
 		    for r in results:
-			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+                        f.write(this.sol_str(r, 7))
 		if len(this.edgeLengths) == 4:
 		    if this.edgeAlternative == TriangleAlt.refl_1:
 			angle = D_Dom[this.symmetry][0]
@@ -2166,9 +2171,13 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    f.write('results = [\n')
 		    for r in results_refl:
 			if eq(angle, 0):
-			    f.write(this.sol4 % (r[0], r[1], r[2], r[3]))
+                            f.write(this.sol_str(r, 4))
 			else:
-			    f.write(this.sol5 % (r[0], r[1], r[2], r[3], angle))
+                            try:
+                                r[4] = angle
+                            except IndexError:
+                                r.append(angle)
+                            f.write(this.sol_str(r, 5))
 		elif this.symmetricEdges():
 		    f.write(']\n')
 		    # close this file open the relective file:
@@ -2186,12 +2195,12 @@ class RandFindMultiRootOnDomain(threading.Thread):
 		    f.write('results = [\n')
 		    for r in results_refl:
 			if eq(r[4], 0):
-			    f.write(this.sol4 % (r[0], r[1], r[2], r[3]))
+                            f.write(this.sol_str(r, 4))
 			else:
-			    f.write(this.sol5 % (r[0], r[1], r[2], r[3], r[4]))
+                            f.write(this.sol_str(r, 5))
 		else:
 		    for r in results_refl:
-			f.write(this.sol7 % (r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+                        f.write(this.sol_str(r, 7))
 		f.write(']\n')
 		f.close()
 		print '(thread %d) %s:' % (
