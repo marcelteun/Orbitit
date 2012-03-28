@@ -1676,16 +1676,28 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.symmetry = symmetry
 	this.threadId = threadId
 	this.method = method
+
+        # The way the system is set up the precision of the calculated edge
+        # length is much higher than the precision in the input data that setup
+        # the system. We will use the following variables:
+        # amount of digits to write the input values with
 	this.precision = precision
+        # how much the caculated edge length may differ:
 	this.prec_delta = pow(10, -precision)
-	# Try to write with a precision that is 1 higher than specified
-	# otherwise so that the edge length has the required precision,
-	# otherwise you might end throwing the solution later, because it
-	# ends up outside the valid boundaries when checking the edges.
-	if this.precision <= 14:
-	    write_precision = this.precision + 1
-	else:
-	    write_precision = this.precision
+        # Any delta of this size or bigger in the input vector should mean a
+        # different solution:
+        if precision > 4:
+            this.eq_margin = this.prec_delta * 1000
+        else:
+            this.eq_margin = this.prec_delta
+        # This means that we will write the final values with a higher precision
+        # than valid, ie. it is a fake precision, we fool the user.
+        # However to request a precision of 15 digits, to make sure that you
+        # don't have doublets, you need to require that the edgelengths don't
+        # differ more than 1e-18, which is not possible. Instead we will write
+        # 15 digits af the the floating point and interpred all solution that
+        # differ less the 1.e-12 as equal solutions.
+
 	this.fold = fold
 	this.edgeAlternative = edgeAlternative
 	this.oppEdgeAlternative = oppEdgeAlternative
@@ -1786,16 +1798,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	    random.random() * (this.domain[i][1] - this.domain[i][0]) + this.domain[i][0]
 	    for i in range(dLen)
 	]
-
-    @property
-    def eq_margin(this):
-        # the precision is used to accept a certain difference in the calculated
-        # edge length and the required edge length. As a consequence of the way
-        # this is calculated input settings that differ a bit more than this
-        # precision might still lead to acceptable edge length.
-        # Therefore to check whether settings are equal we will use a margin
-        # that is 10 times the precision:
-        return 10 * this.prec_delta
 
     # This can be optimised
     def solutionAlreadyFound(this, sol):
