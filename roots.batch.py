@@ -2003,7 +2003,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
             if (result != None):
                 reiterated_input_results.append(result)
         if (len(reiterated_input_results) != len(this.results)):
-            print 'Warning: %d solutions thrown after increasing the precision'\
+            print 'Warning: %d solution(s) thrown after increasing the precision'\
                 % (len(this.results) - len(reiterated_input_results))
         this.results = reiterated_input_results
 
