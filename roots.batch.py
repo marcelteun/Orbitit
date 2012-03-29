@@ -1677,17 +1677,20 @@ class RandFindMultiRootOnDomain(threading.Thread):
 	this.threadId = threadId
 	this.method = method
 
-        # The way the system is set up the precision of the calculated edge
-        # length is much higher than the precision in the input data that setup
-        # the system. We will use the following variables:
-        # amount of digits to write the input values with
-	this.precision = precision
+        # Amount of digits to write the input values with
+        this.precision = precision
         # how much the caculated edge length may differ:
-	this.prec_delta = pow(10, -precision)
+        # write with a bit higher precision, to prevent throwing solutions after
+        # reading these again because of rounding problems.
+        # e.g.
+        # python roots.batch.py -i 100 -p 12 -o ./ -l 9 -a 4 -f 0  A4xI
+        this.prec_delta = pow(10, -(precision - 1))
         # Any delta of this size or bigger in the input vector should mean a
         # different solution:
-        if precision > 4:
-            this.eq_margin = this.prec_delta * 1000
+        # Choose this quite bigger than the precision margin, to prevent getting
+        # doublets.
+        if precision > 3:
+            this.eq_margin = this.prec_delta * 100
         else:
             this.eq_margin = this.prec_delta
         # This means that we will write the final values with a higher precision
@@ -3004,7 +3007,7 @@ if __name__ == '__main__':
 	print '     -s      : stop after having checked all. Default the program loops through'
 	print '               all folds, edges, etc and starts over.'
 	print '     -p <num>: precision, specify the amount of digits after the point; default'
-	print '               %d' % precision
+	print '               %d. Suggested to use 4 <= precision <= 13' % precision
 	print '     -1      : try one solution (for debugging/ testing): TODO: improve interface'
 	print 'And'
 	print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
