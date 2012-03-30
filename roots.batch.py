@@ -2419,8 +2419,9 @@ if __name__ == '__main__':
 
     def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
                 nrThreads = 1, dynSols = None, precision = 14, outDir = "./",
-                loop = True):
-        oppEdgeAlts = edgeAlts[:]
+                loop = True, oppEdgeAlts = None):
+        if oppEdgeAlts == None:
+            oppEdgeAlts = edgeAlts[:]
         dom = [
             T_Dom[symGrp],         # Translation
             [-numx.pi, numx.pi],   # angle alpha
@@ -2987,28 +2988,35 @@ if __name__ == '__main__':
     def printUsage():
         print 'Usage:'
         print sys.argv[0], '[options] <symmetry group>'
-        print 'where options:'
-        print '     -a [x:y]: slice of edge alternative list to search. If nothing is specified,'
-        print '               then all alternatives from the -A option are searched.'
-        print '     -a x    : edge alternative to search'
-        print '     -A      : list the edge alternatives'
+        print 'Where options:'
+        print '     -A      : list the edge alternatives.'
+        print '     -a x    : edge alternative to search.'
+        print '     -a [x:y]: slice of edge alternative list to search. If nothing is'
+        print '               specified, then all alternatives from the -A option are'
+        print '               searched.'
+        print '     -b x    : opposite edge alternative to search, only for non-reflexive'
+        print '               symmetries.'
+        print '     -b [x:y]: slice of opposite edge alternative list to search. If nothing is'
+        print '               specified, then all alternatives from the -A option are'
+        print '               searched. Only for non-reflexive symmetries.'
         print '     -f [x:y]: slice of heptagon fold list to search. If nothing is'
         print '               specified, then all folds from the -F option are searched.'
-        print '     -f x    : heptagon fold to search'
-        print '     -F      : list available heptagon folds'
-        print '     -h      : prints this help'
-        print '     -i <num>: number of iterations to use; default %d' % nr_iterations
+        print '     -F      : list available heptagon folds.'
+        print '     -f x    : heptagon fold to search.'
+        print '     -h      : prints this help.'
+        print '     -i <num>: number of iterations to use; default %d.' % nr_iterations
         print '     -l [x:y]: slice of edge lengths list to search. If nothing is specified,'
         print '               then all lengths from the -L option are searched.'
-        print '     -l x    : edge length to search'
-        print '     -L      : list the edge lengths of the predefined list'
+        print '     -L      : list the edge lengths of the predefined list.'
+        print '     -l x    : edge length to search.'
         print "     -o <out>: specifiy the output directory: don't use spaces; default"
-        print '               %s' % outDir
+        print '               %s.' % outDir
         print '     -s      : stop after having checked all. Default the program loops through'
         print '               all folds, edges, etc and starts over.'
         print '     -p <num>: precision, specify the amount of digits after the point; default'
-        print '               %d. Suggested to use 4 <= precision <= 13' % precision
-        print '     -1      : try one solution (for debugging/ testing): TODO: improve interface'
+        print '               %d. Suggested to use 4 <= precision <= 13.' % precision
+        print '     -1      : try one solution (for debugging/ testing): TODO: improve'
+        print '               interface.'
         print 'And'
         print '    <symmetry group>: search solutions for the specified symmetry group. Valid'
         print '                      values are',
@@ -3030,12 +3038,13 @@ if __name__ == '__main__':
         skipNext = False # for options that take arguments
         symGrp = '' # which symmetry group to search: '' means not read yet
         # can be set to true by cmd line
-        list_pre_edgeLs = False
-        list_edge_alts  = False
-        list_fold_alts  = False
-        set_fold_alts   = ''
-        set_edge_alts   = ''
-        set_edge_Ls     = ''
+        list_pre_edgeLs   = False
+        list_edge_alts    = False
+        list_fold_alts    = False
+        set_fold_alts     = ''
+        set_edge_alts     = ''
+        set_opp_edge_alts = ''
+        set_edge_Ls       = ''
 
         if sys.argv[1] == '-1':
             if len(sys.argv) <= 2:
@@ -3058,6 +3067,10 @@ if __name__ == '__main__':
                 skipNext = True
             elif sys.argv[n] == '-A':
                 list_edge_alts = True
+            elif sys.argv[n] == '-b':
+                errIfNoNxt('b', n)
+                set_opp_edge_alts = sys.argv[n + 1]
+                skipNext = True
             elif sys.argv[n] == '-f':
                 errIfNoNxt('f', n)
                 set_fold_alts = sys.argv[n + 1]
@@ -3157,7 +3170,7 @@ if __name__ == '__main__':
             edgeAlts = edgeAltOpts[symGrp]
         else:
             if set_edge_alts[0] != '[':
-                # try is slice is one element, ie an int
+                # try if slice is one element, ie an int
                 try:
                     i = int(set_edge_alts)
                 except ValueError:
@@ -3167,9 +3180,6 @@ if __name__ == '__main__':
                 try:
                     edgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (symGrp,
                                                                     set_edge_alts))
-                    # if just an index was used instead of a slice:
-                    if type(edgeAlts) == int:
-                        edgeAlts = [edgeAlts]
                 except TypeError:
                     printError("type error for edge slice: '%s'\n" % set_edge_alts)
                     printUsage()
@@ -3178,6 +3188,32 @@ if __name__ == '__main__':
                     printError("syntax error for edge slice: '%s'\n" % set_edge_alts)
                     printUsage()
                     sys.exit(0)
+        if set_opp_edge_alts == '':
+            oppEdgeAlts = None
+        else:
+            if set_opp_edge_alts[0] != '[':
+                # try if slice is one element, ie an int
+                try:
+                    i = int(set_opp_edge_alts)
+                except ValueError:
+                    printError(
+                        "value error for edge index %s\n", set_opp_edge_alts)
+                oppEdgeAlts = edgeAltOpts[symGrp][i:i+1]
+            else:
+                try:
+                    oppEdgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (
+                                                    symGrp, set_opp_edge_alts))
+                except TypeError:
+                    printError("type error for edge slice: '%s'\n" %
+                                                            set_opp_edge_alts)
+                    printUsage()
+                    sys.exit(0)
+                except SyntaxError:
+                    printError("syntax error for edge slice: '%s'\n" %
+                                                            set_opp_edge_alts)
+                    printUsage()
+                    sys.exit(0)
+
         if set_fold_alts == '':
             foldAlts = pre_folds[symGrp]
         else:
@@ -3219,6 +3255,11 @@ if __name__ == '__main__':
         for e in edgeAlts:
             print '  %s,' % Stringify[e]
         print ']'
+        if oppEdgeAlts != None:
+            print 'oppEdgeAlts = ['
+            for e in oppEdgeAlts:
+                print '  %s,' % Stringify[e]
+            print ']'
 
         if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
                         symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
@@ -3228,4 +3269,5 @@ if __name__ == '__main__':
         elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
             randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, dynSols = dynamicSols[symGrp],
-                        precision = precision, outDir = outDir, loop = loop)
+                        precision = precision, outDir = outDir, loop = loop,
+                        oppEdgeAlts = oppEdgeAlts)
