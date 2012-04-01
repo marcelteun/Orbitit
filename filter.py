@@ -42,8 +42,6 @@ for fn in fl:
                 os.remove(lp)
                 os.symlink(linkto, lp)
         else:
-            print 'nr of solutions:', len(ed['results'])
-            print 'cp %s %s' % (fn, dstDir)
             shutil.copy2(fn, dstDir)
     else:
         # TODO: make optional: to do something here..., e.g. rm

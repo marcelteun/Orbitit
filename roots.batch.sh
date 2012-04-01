@@ -2,7 +2,7 @@
 GIT_DIR=$PWD/batch_search/frh-A4
 TMP_DIR=$PWD/batch_search/frh-A4/tmp
 #ITER=10000
-ITER=100
+ITER=20
 PRECISION=13
 SYMMETRY=A4
 SEARCH_SCRIPT=roots.batch.py
@@ -42,7 +42,9 @@ for SCRIPT in $SEARCH_SCRIPT $FILTER_SCRIPT ; do {
 } done
 
 # search
-python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 1 -b 7 -l [30:32] -f 1 -s $SYMMETRY || exit -1
+#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 4 -b 0 -l 6 -f 0 -s $SYMMETRY || exit -1
+python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 7 -s $SYMMETRY || exit -1
+#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s $SYMMETRY || exit -1
 
 # copy only the ones containing a solution
 python $FILTER_SCRIPT $GIT_DIR $TMP_DIR
@@ -103,7 +105,7 @@ if [[ (($NR_OF_NEW_SOLS > 0)) || (($NR_OF_RMED_SOLS > 0)) ]] ; then
 		echo "**** Warning: the commit removes $NR_OF_RMED_SOLS existing solution(s)"
 	fi
 else
-	echo "Nothing to be commited"
+	echo "Nothing to commit"
 fi
 
 # ignore all files that are just an increase of the nr of iterations:

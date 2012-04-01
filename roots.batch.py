@@ -1743,7 +1743,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
 
     def sol_str(this, r, n):
         digs = this.precision
-        s = '[%s' % glue.f2s(r[0], digs)
+        s = '    [%s' % glue.f2s(r[0], digs)
         for i in range(1, n):
             s = '%s, %s' % (s, glue.f2s(r[i], digs))
         s = '%s],\n' % s
@@ -2205,7 +2205,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
                 if len(this.edgeLengths) != 4:
                     f.write('results = [\n')
                     for r in results:
-                        f.write('    %s' % this.sol_str(r, 7))
+                        f.write('%s' % this.sol_str(r, 7))
                 if len(this.edgeLengths) == 4:
                     if this.edgeAlternative == TriangleAlt.refl_1:
                         angle = D_Dom[this.symmetry][0]

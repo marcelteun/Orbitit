@@ -1,5 +1,14 @@
 ROOTS:
 
+	2012-04-01
+	search shell:
+		loop
+		save history of nr of solutions
+		add options: e.g. iterations, nr of threads, symmetry, etc
+		search all
+		set iterations to 10,000
+		etc
+
 	2012-03-25 - 06
 	When frh-roots-1_1_1_1-fld_parallel.0-alt_rot_strip_1_loose.py is looded
 	into Orbitit it doesn't set the right triangle fill
