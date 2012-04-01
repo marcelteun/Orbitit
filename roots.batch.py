@@ -30,6 +30,7 @@ import copy
 import math
 import threading
 import gc
+import Queue
 
 import glue
 import GeomTypes
@@ -68,6 +69,28 @@ def eq(a, b, precision = eqFloatMargin):
             True is returned.
     """
     return abs(a - b) < precision
+
+def Veq(a, b, precision = eqFloatMargin):
+    """
+    Check if 2 floats vectors 'a' and 'b' are close enough to be called equal.
+
+    Note both vectors should have the same dimension, otherwise an assert will
+    be generated.
+    a: a floating point vector.
+    b: a floating point vector.
+    margin: if |a - b| < margin then the floats will be considered equal and
+            True is returned.
+    """
+    assert len(a) == len(b),\
+        'vecors have different dimenstions: len(a) = %d, len(b) == %d' % (
+            len(a), len(b)
+        )
+    is_eq = True
+    for i in range(len(a)):
+        if not eq(a[i], b[i], eqFloatMargin):
+            is_eq = False
+            break;
+    return is_eq
 
 # since GeomTypes.quat doesn't work well with multiroots...
 def quatRot(axis, angle):
@@ -1670,19 +1693,21 @@ class RandFindMultiRootOnDomain(threading.Thread):
         fold = Fold.parallel,
         dynSols = None,
         edgeLengths = [1., 1., 1., 1., 1., 1., 1.],
-        outDir = "frh-roots"
+        outDir = "frh-roots",
+        exceptQueue = None
     ):
         this.domain = domain
         this.symmetry = symmetry
         this.threadId = threadId
         this.method = method
+        this.exceptQueue = exceptQueue
 
-        # Amount of digits to write the input values with
+        # Amount of digits to write the input values (of the formula) with
         this.precision = precision
         # how much the caculated edge length may differ:
         # write with a bit higher precision, to prevent throwing solutions after
         # reading these again because of rounding problems.
-        # e.g.
+        # e.g. for this one:
         # python roots.batch.py -i 100 -p 12 -o ./ -l 9 -a 4 -f 0  A4xI
         this.prec_delta = pow(10, -(precision - 1))
         # Any delta of this size or bigger in the input vector should mean a
@@ -1913,6 +1938,14 @@ class RandFindMultiRootOnDomain(threading.Thread):
                 r.extend([r[2], r[3]])
 
     def run(this):
+        try:
+            this._run()
+        except:
+            if (this.exceptQueue != None):
+                this.exceptQueue.put(sys.exc_info())
+            raise
+
+    def _run(this):
         if this.oppEdgeAlternative == None:
             this.oppEdgeAlternative = this.edgeAlternative
         # changeIterLimits depends a bit on the amount of solutions.
@@ -2003,8 +2036,13 @@ class RandFindMultiRootOnDomain(threading.Thread):
                     quiet     = True,
                     oppEdgeAlternative = this.oppEdgeAlternative
                 )
-            if (result != None):
-                reiterated_input_results.append(result)
+            # write the previous solution if the difference is smaller than the
+            # precision (this since we write with on digit more)
+            if result != None:
+                if Veq(result, solution, this.prec_delta):
+                    reiterated_input_results.append(solution)
+                else:
+                    reiterated_input_results.append(result)
         if (len(reiterated_input_results) != len(this.results)):
             print 'Warning: %d solution(s) thrown after increasing the precision'\
                 % (len(this.results) - len(reiterated_input_results))
@@ -2167,7 +2205,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
                 if len(this.edgeLengths) != 4:
                     f.write('results = [\n')
                     for r in results:
-                        f.write(this.sol_str(r, 7))
+                        f.write('    %s' % this.sol_str(r, 7))
                 if len(this.edgeLengths) == 4:
                     if this.edgeAlternative == TriangleAlt.refl_1:
                         angle = D_Dom[this.symmetry][0]
@@ -2450,6 +2488,7 @@ if __name__ == '__main__':
                                 oea & loose_bit == 0
                             ):
                                 print '====set up thread %d===' % i
+                                exceptionQueue = Queue.Queue()
                                 rndT[i] = RandFindMultiRootOnDomain(dom,
                                     symGrp,
                                     threadId           = i,
@@ -2460,7 +2499,8 @@ if __name__ == '__main__':
                                     fold               = fold,
                                     precision          = precision,
                                     method             = Method.hybrids,
-                                    outDir             = outDir
+                                    outDir             = outDir,
+                                    exceptQueue        = exceptionQueue
                                 )
                                 rndT[i].stopAfter = continueAfter
                                 rndT[i].start()
@@ -2470,6 +2510,9 @@ if __name__ == '__main__':
                                         rndT[j].join()
                                     print '===threads finished===='
                                     i = 0
+                                assert (exceptionQueue.empty()),\
+                                    "An exception occurred in a child thread"
+                                del exceptionQueue
             if not loop:
                 break
 
