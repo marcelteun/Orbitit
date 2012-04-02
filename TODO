@@ -2,8 +2,6 @@ ROOTS:
 
 	2012-04-01
 	search shell:
-		loop
-		save history of nr of solutions
 		add options: e.g. iterations, nr of threads, symmetry, etc
 		search all
 		set iterations to 10,000

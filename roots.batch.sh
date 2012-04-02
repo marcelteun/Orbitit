@@ -8,6 +8,7 @@ PRECISION=13
 SYMMETRY=A4
 SEARCH_SCRIPT=roots.batch.py
 FILTER_SCRIPT=filter.py
+SOLS_COUNT_FILE=sols_count.csv
 
 check_and_create_dirs() {
 	for DIR in $GIT_DIR $TMP_DIR ; do {
@@ -96,6 +97,13 @@ git_create_commit_message() {
 }
 
 git_commit_if_needed() {
+	NETTO_NR_OF_SOLS=$(($NR_OF_NEW_SOLS - $NR_OF_RMED_SOLS))
+	if [ -z $GIT_INIT ] ; then {
+		echo "$ITER:$NETTO_NR_OF_SOLS" >> $SOLS_COUNT_FILE
+	} else {
+		echo "$ITER:$NETTO_NR_OF_SOLS" > $SOLS_COUNT_FILE
+	} fi
+	git add $SOLS_COUNT_FILE
 	if [[ (($NR_OF_NEW_SOLS > 0)) || (($NR_OF_RMED_SOLS > 0)) ]] ; then
 		git commit -m "$MSG"
 		echo "commited \"$MSG\""
@@ -104,6 +112,7 @@ git_commit_if_needed() {
 		fi
 		unset GIT_INIT
 	else
+		git commit --amend -C HEAD
 		echo "Nothing to commit"
 	fi
 }
