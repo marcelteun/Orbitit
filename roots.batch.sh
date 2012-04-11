@@ -3,7 +3,7 @@ GIT_DIR=$PWD/batch_search/frh-A4
 TMP_DIR=$PWD/batch_search/frh-A4/tmp
 PY_DIR=$PWD
 #ITER=10000
-ITER=20
+ITER=5000
 PRECISION=13
 SYMMETRY=A4
 SEARCH_SCRIPT=roots.batch.py
@@ -30,10 +30,27 @@ setup_py_script_links() {
 	} done
 }
 
-searc_for_solutions() {
-	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 4 -b 0 -l 6 -f 0 -s $SYMMETRY || exit -1
+# TODO: if SYMMETRRY==A4
+search_for_solutions() {
+	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 4 -b 0 -l 6 -f 0 -s $SYMMETRY || exit -1
+	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 4 -b 0  -s $SYMMETRY || exit -1
 	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 7 -s $SYMMETRY || exit -1
 	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s $SYMMETRY || exit -1
+	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l [0:11] $SYMMETRY &
+	PIDS=$!
+	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l [11:22] $SYMMETRY &
+	PIDS="$PIDS $!"
+	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l [22:] $SYMMETRY &
+	PIDS="$PIDS $!"
+	RETURN=0
+	CMD=wait
+	for PID in $PIDS ; do {
+		$CMD $PID || RETURN=$((RETURN+1))
+	} done
+	if [ $RETURN != "0" ] ; then {
+		echo "An error occurred in $RETURN of the search processes"
+		exit $((-RETURN))
+	} fi
 }
 
 copy_to_git_dir_if_sols_found() {
@@ -112,7 +129,7 @@ git_commit_if_needed() {
 		fi
 		unset GIT_INIT
 	else
-		git commit --amend -C HEAD
+		git commit --amend -C HEAD -n
 		echo "Nothing to commit"
 	fi
 }
@@ -136,7 +153,7 @@ setup_py_script_links
 
 while true; do {
 	# search
-	searc_for_solutions
+	search_for_solutions
 
 	# copy only the ones containing a solution
 	copy_to_git_dir_if_sols_found
