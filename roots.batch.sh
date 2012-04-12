@@ -66,8 +66,11 @@ git_init_if_none() {
 
 git_add_modified_with_new_sols() {
 	MOD_FILES=$(git status | grep modified | awk '{print $3}')
-	for FILE in $MOD_FILES $NEW_FILES; do
+	for FILE in $MOD_FILES; do
+		# grep addition of solutions
 		GREP_RES=$(git diff "$FILE" | grep -e '^\+    \[')
+		# grep deletion of solutions
+		GREP_RES="$GREP_RES$(git diff "$FILE" | grep -e '^\-    \[')"
 		if [ -n "$GREP_RES" ] ; then
 			IS_DYN=$(echo "$DYN_FILES" | grep "$FILE")
 			if [ -z $IS_DYN ] ; then
@@ -79,7 +82,7 @@ git_add_modified_with_new_sols() {
 
 git_add_new_files() {
 	NEW_FILES=$(git status | grep -e '#	frh-roots.*.py' | awk '{print $2}')
-	for FILE in $MOD_FILES $NEW_FILES; do
+	for FILE in $NEW_FILES; do
 		GREP_RES=$(grep -e '^    \[' "$FILE" )
 		if [ -n "$GREP_RES" ] ; then
 			IS_DYN=$(echo "$DYN_FILES" | grep "$FILE")
