@@ -1,6 +1,7 @@
 #!/bin/bash -x
 GIT_DIR=$PWD/batch_search/frh-A4
 TMP_DIR=$PWD/batch_search/frh-A4/tmp
+BAC_DIR=$TMP_DIR/.bac
 PY_DIR=$PWD
 #ITER=10000
 ITER=5000
@@ -28,6 +29,19 @@ setup_py_script_links() {
 			ln -s $PY_DIR/$SCRIPT || exit -1
 		} fi
 	} done
+}
+
+# This can be usefull if you want to change the script:
+# - interrupt the script by Ctrl-C,
+# - copy back the files from the back-up dir,
+# - change the script.
+# - restart the script.
+# If you don't do this, the problem is that the variable "iterations" becomes
+# incorrect, since not all files are copied to the git.
+backup_current_solutions() {
+	rm -fr $BAC_DIR
+	mkdir $BAC_DIR
+	cp $TMP_DIR/frh*.py $BAC_DIR
 }
 
 # TODO: if SYMMETRRY==A4
@@ -155,7 +169,7 @@ cd $TMP_DIR
 setup_py_script_links
 
 while true; do {
-	# search
+	backup_current_solutions
 	search_for_solutions
 
 	# copy only the ones containing a solution
