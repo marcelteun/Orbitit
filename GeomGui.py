@@ -53,8 +53,8 @@ class DisabledDropTarget(wx.TextDropTarget):
         return ''
 
 class IntInput(wx.TextCtrl):
-    def __init__(this, *args, **kwargs):
-        wx.TextCtrl.__init__(this, *args, **kwargs)
+    def __init__(this, parent, ident, value, *args, **kwargs):
+        wx.TextCtrl.__init__(this, parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         #this.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
         this.SetMaxLength(18)
@@ -116,12 +116,12 @@ class IntInput(wx.TextCtrl):
                 this.SetSelection(sel[0], sel[0]+1)
             if len(wx.TextCtrl.GetValue(this)) <= 1:
                 # do not allow an empt field, set to 0 instead:
-                this.SetValue('0')
+                this.SetValue(0)
                 this.SetSelection(0, 1)
             else:
                 e.Skip()
         elif k == wx.WXK_CLEAR:
-            this.SetValue('0')
+            this.SetValue(0)
         elif k in [
                 wx.WXK_RETURN, wx.WXK_TAB,
                 wx.WXK_LEFT, wx.WXK_RIGHT,
@@ -138,6 +138,9 @@ class IntInput(wx.TextCtrl):
         v = wx.TextCtrl.GetValue(this)
         if v == '': v = '0'
         return int(v)
+
+    def SetValue(this, i):
+        v = wx.TextCtrl.SetValue(this, str(i))
 
 class FloatInput(wx.TextCtrl):
     def __init__(this, parent, ident, value, *args, **kwargs):
@@ -274,12 +277,15 @@ class LabeledIntInput(wx.StaticBoxSizer):
                 )
             init = 0
         this.Boxes.append(IntInput(
-                panel, wx.ID_ANY, str(init), size = (width, -1)
+                panel, wx.ID_ANY, init, size = (width, -1)
             ))
         this.Add(this.Boxes[-1], 0, wx.EXPAND)
 
     def GetValue(this):
         return this.Boxes[-1].GetValue()
+
+    def SetValue(this, i):
+        return this.Boxes[-1].SetValue(i)
 
     def Destroy(this):
         for box in this.Boxes:
@@ -506,7 +512,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
         this.boxes.append(wx.Button(this, wx.ID_ANY, "Vertices Add nr:"))
         addSizer.Add(this.boxes[-1], 1, wx.EXPAND)
         this.Bind(wx.EVT_BUTTON, this.onAdd, id = this.boxes[-1].GetId())
-        this.boxes.append(IntInput(this, wx.ID_ANY, '1', size = (40, -1)))
+        this.boxes.append(IntInput(this, wx.ID_ANY, 1, size = (40, -1)))
         this.__addNroVIndex = len(this.boxes) - 1
         addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
         mainSizer.Add(addSizer, 1, wx.EXPAND)
@@ -705,11 +711,11 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         this.__f.append([faceSizer])
         for i in range(fLen):
             if (face != None):
-                f_i = "%d" % face[i]
+                ind = face[i]
             else:
-                f_i = "0"
+                ind = 0
             this.__f[-1].append(
-                IntInput(this, wx.ID_ANY, f_i, size = (this.width, -1))
+                IntInput(this, wx.ID_ANY, ind, size = (this.width, -1))
             )
             faceSizer.Add(this.__f[-1][-1], 0, wx.EXPAND)
         this.vertexIndexSizer.Add(faceSizer, 0, wx.EXPAND)
@@ -801,14 +807,14 @@ class FaceSetDynamicPanel(wx.Panel):
         # Add button:
         addSizer = wx.BoxSizer(orientation)
         this.boxes.append(IntInput(
-                this, wx.ID_ANY, "%d" % faceLen, size = (40, -1)
+                this, wx.ID_ANY, faceLen, size = (40, -1)
             ))
         this.__faceLenIndex = len(this.boxes) - 1
         addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
         this.boxes.append(wx.Button(this, wx.ID_ANY, "-Faces Add nr:"))
         addSizer.Add(this.boxes[-1], 1, wx.EXPAND)
         this.Bind(wx.EVT_BUTTON, this.onAdd, id = this.boxes[-1].GetId())
-        this.boxes.append(IntInput(this, wx.ID_ANY, '1', size = (40, -1)))
+        this.boxes.append(IntInput(this, wx.ID_ANY, 1, size = (40, -1)))
         this.__nroFsLenIndex = len(this.boxes) - 1
         addSizer.Add(this.boxes[-1], 0, wx.EXPAND)
         mainSizer.Add(addSizer, 0, wx.EXPAND)
@@ -1079,8 +1085,30 @@ class SymmetrySelect(wx.StaticBoxSizer):
         #print 'isUpdated', isUpdated
         return isUpdated
 
+    def SetSelectedClass(this, cl):
+        found = False
+        for i, cl_i in zip(range(len(this.groupsList)), this.groupsList):
+            if cl == cl_i:
+                found = True
+                break;
+        if found:
+            this.SetSelected(i)
+        else:
+            print 'Warning: SetSelectedClass: class not found'
+
     def SetSelected(this, i):
         this.Boxes[this.__SymmetryGuiIndex].SetSelection(i)
+
+    def SetupSymmetry(this, vec):
+        assert len(vec) == len(this.oriGuis),\
+                "Wrong nr of initialisers for this symmetry"
+        sym = this.getSymmetryClass(applyOrder = False)
+        for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
+            inputType = sym.initPars[i]['type']
+            if inputType == 'vec3':
+                v = gui.SetVertex(vec[i])
+            elif inputType == 'int':
+                v = gui.SetValue(vec[i])
 
     def GetSelected(this):
         """returns a symmetry instance"""

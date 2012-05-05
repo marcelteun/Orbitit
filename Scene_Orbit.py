@@ -295,7 +295,8 @@ class CtrlWin(wx.Frame):
         except isometry.ImproperSubgroupError:
             this.statusText(
                 'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
-            e.Skip()
+            if e != None:
+                e.Skip()
             return
         this.FsOrbit = this.shape.getIsometries()['direct']
         this.FsOrbitOrg = True
@@ -317,7 +318,8 @@ class CtrlWin(wx.Frame):
             tst = this.cols
         except AttributeError:
             this.cols = [(255, 100, 0)]
-        e.Skip()
+        if e != None:
+            e.Skip()
 
     def statusText(this, txt, lvl = LOG_INFO):
         txt = '%s: %s' % (LOG_TXT[lvl], txt)
@@ -362,7 +364,8 @@ class CtrlWin(wx.Frame):
     def onSharedAngleAdjust(this, e):
         this.updateOrientation()
         this.canvas.panel.setShape(this.shape)
-        e.Skip()
+        if e != None:
+            e.Skip()
 
     def onNrColsSel(this, e):
         try:
@@ -540,6 +543,104 @@ class CtrlWin(wx.Frame):
             print 'read ', len(Vs), ' Vs and ', len(Fs), ' Fs.'
             this.showGui[this.__VsGuiIndex].set(Vs)
             this.showGui[this.__FsGuiIndex].set(Fs)
+            # With a python file it is possible to set the other properties as
+            # well: e.g.
+            # finalSym = isometry.S4xI
+            # finalSymSetup = [ [1, 0, 0], [0, 0, 1] ]
+            # stabSym = isometry.C3xI
+            # stabSymSetup = [ [0, 0, 1] ]
+            # rotAxis = [1, 1, 1]
+            # rotAngle = 30
+            #   where the angle is in degrees (floating point)
+            if filename[-3:] == '.py':
+                fd = open(os.path.join(this.importDirName, filename), 'r')
+                ed = {'__name__': 'readPyFile'}
+                exec fd in ed
+                moreSettings = 0
+                keyErrStr = 'Note: KeyError while looking for'
+                key = 'finalSym'
+                # to prevent accepting keyErrors in other code than ed[key]:
+                keyDefined = False
+                try:
+                    finalSym = ed[key]
+                    keyDefined = True
+                except KeyError:
+                    print keyErrStr, key
+                    pass
+                if keyDefined:
+                    moreSettings += 1
+                    this.showGui[this.__FinalSymGuiIndex].SetSelectedClass(
+                        finalSym
+                    )
+                    this.showGui[this.__FinalSymGuiIndex].onSetSymmetry(None)
+                    key = 'finalSymSetup'
+                    keyDefined = False
+                    try:
+                        symSetup = ed[key]
+                        keyDefined = True
+                    except KeyError:
+                        print keyErrStr, key
+                        pass
+                    if keyDefined:
+                        moreSettings += 1
+                        this.showGui[this.__FinalSymGuiIndex].SetupSymmetry(
+                            symSetup
+                        )
+                key = 'stabSym'
+                keyDefined = False
+                try:
+                    stabSym = ed[key]
+                    keyDefined = True
+                except KeyError:
+                    print keyErrStr, key
+                    pass
+                if keyDefined:
+                    moreSettings += 1
+                    this.showGui[this.__StabSymGuiIndex].SetSelectedClass(
+                        stabSym
+                    )
+                    this.showGui[this.__StabSymGuiIndex].onSetSymmetry(None)
+                    key = 'stabSymSetup'
+                    keyDefined = False
+                    try:
+                        symSetup = ed[key]
+                        keyDefined = True
+                    except KeyError:
+                        print keyErrStr, key
+                        pass
+                    if keyDefined:
+                        moreSettings += 1
+                        this.showGui[this.__StabSymGuiIndex].SetupSymmetry(
+                            symSetup
+                        )
+                if moreSettings > 0:
+                    this.onApplySymmetry(None)
+                key = 'rotAxis'
+                keyDefined = False
+                try:
+                    axis = ed[key]
+                    keyDefined = True
+                except KeyError:
+                    print keyErrStr, key
+                    pass
+                if keyDefined:
+                    moreSettings += 1
+                    this.showGui[this.__AxisGuiIndex].SetVertex(axis)
+                key = 'rotAngle'
+                keyDefined = False
+                try:
+                    angle = ed[key]
+                    keyDefined = True
+                except KeyError:
+                    print keyErrStr, key
+                    pass
+                if keyDefined:
+                    moreSettings += 1
+                    this.showGui[this.__AngleGuiIndex].SetValue(angle)
+                    this.showGui[this.__DirAngleGuiIndex].SetValue(angle)
+                    this.currentAngle = angle
+                    this.onSharedAngleAdjust(None)
+                fd.close()
             this.name = filename
         dlg.Destroy()
 

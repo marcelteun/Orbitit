@@ -8,7 +8,7 @@ PRIO
 -------------------------------------------------------------------------------
 
 2012-03-08 - 2
-Implement a float slider with support for set
+Implement a float slider with support for set. Use Scene_Orbit as an example.
 
 2012-03-01 - 2
 fix empty OFF file read: make error message more readable than now.
@@ -68,6 +68,13 @@ Geom3D:
 	rounding.
 
 Scene_Orbit:
+	2012-05-06:
+		TODO: add GUI support for special mu_s:
+			- add special mu (button)
+			- reset special angles (button)
+		ERROR: assertion error for data/cubeCompounds/c_3B_D3xI_C2xI.py
+			even while setting up Dn (n=3) with std settings and
+			stabliliser E. It seems there is a wrong subgroup.
 	2012-02-26:
 		TODO set angle by copy paste
 		TODO fix the following orbit test: apply, rotate, then colour:
