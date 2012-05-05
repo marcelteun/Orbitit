@@ -142,9 +142,12 @@ class CtrlWin(wx.Frame):
                                                 "Rotate around Axis:"))
         facesSizer.Add(this.showGui[-1], 0)
         this.__AxisGuiIndex = len(this.showGui) - 1
+        rotateSizer = wx.BoxSizer(wx.HORIZONTAL)
+        facesSizer.Add(rotateSizer, 0, wx.EXPAND)
+        this.currentAngle = 0
         this.showGui.append(wx.Slider(
             this.panel,
-            value = 0,
+            value = this.currentAngle,
             minValue = -180,
             maxValue = 180,
             style = wx.SL_HORIZONTAL | wx.SL_LABELS
@@ -154,8 +157,15 @@ class CtrlWin(wx.Frame):
             this.onAngleAdjust,
             id = this.showGui[-1].GetId()
         )
-        facesSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-        # TODO add set angle directly (enough with only one axis)
+        rotateSizer.Add(this.showGui[-1], 1, wx.EXPAND)
+        this.showGui.append(GeomGui.FloatInput(this.panel, wx.ID_ANY,
+           this.currentAngle))
+        this.__DirAngleGuiIndex = len(this.showGui) - 1
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Set"))
+        this.panel.Bind(
+            wx.EVT_BUTTON, this.onDirAngleAdjust, id = this.showGui[-1].GetId())
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         # SYMMETRY
         this.showGui.append(
@@ -317,9 +327,7 @@ class CtrlWin(wx.Frame):
             this.statusBar.SetStatusText(txt)
 
     def updateOrientation(this):
-        aIndex = this.__AngleGuiIndex
-        vIndex = this.__AxisGuiIndex
-        v = this.showGui[vIndex].GetVertex()
+        v = this.showGui[this.__AxisGuiIndex].GetVertex()
         if v == GeomTypes.Vec3([0, 0, 0]):
             rot = GeomTypes.E
             this.statusText(
@@ -329,7 +337,7 @@ class CtrlWin(wx.Frame):
         else:
             rot = GeomTypes.Rot3(
                 axis = v,
-                angle = Geom3D.Deg2Rad * this.showGui[aIndex].GetValue()
+                angle = Geom3D.Deg2Rad * this.currentAngle
             )
         try:
             this.shape.setBaseOrientation(rot)
@@ -339,7 +347,19 @@ class CtrlWin(wx.Frame):
                 LOG_WARN
             )
 
+    def onDirAngleAdjust(this, e):
+        this.currentAngle = this.showGui[this.__DirAngleGuiIndex].GetValue()
+        this.showGui[this.__AngleGuiIndex].SetValue(this.currentAngle)
+        this.onSharedAngleAdjust(e)
+
     def onAngleAdjust(this, e):
+        # Do not update the direct float input for better user experience.
+        # In that case the user can set the value, use the slide bar and jump
+        # jump back to the old value, that is still in the float input.
+        this.currentAngle = this.showGui[this.__AngleGuiIndex].GetValue()
+        this.onSharedAngleAdjust(e)
+
+    def onSharedAngleAdjust(this, e):
         this.updateOrientation()
         this.canvas.panel.setShape(this.shape)
         e.Skip()

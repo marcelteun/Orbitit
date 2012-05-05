@@ -140,8 +140,8 @@ class IntInput(wx.TextCtrl):
         return int(v)
 
 class FloatInput(wx.TextCtrl):
-    def __init__(this, *args, **kwargs):
-        wx.TextCtrl.__init__(this, *args, **kwargs)
+    def __init__(this, parent, ident, value, *args, **kwargs):
+        wx.TextCtrl.__init__(this, parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         #this.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
         this.SetMaxLength(18)
@@ -208,7 +208,7 @@ class FloatInput(wx.TextCtrl):
             else:
                 e.Skip()
         elif k == wx.WXK_CLEAR:
-            this.SetValue('0')
+            this.SetValue(0)
         elif k in [
                 wx.WXK_RETURN, wx.WXK_TAB,
                 wx.WXK_LEFT, wx.WXK_RIGHT,
@@ -231,13 +231,16 @@ class FloatInput(wx.TextCtrl):
         #    e.Skip()
         if len(wx.TextCtrl.GetValue(this)) < 1:
             # do not allow an empty field, set to 0 instead:
-            this.SetValue('0')
+            this.SetValue(0)
             this.SetSelection(0, 1)
 
     def GetValue(this):
         v = wx.TextCtrl.GetValue(this)
         if v == '': v = '0'
         return float(v)
+
+    def SetValue(this, f):
+        v = wx.TextCtrl.SetValue(this, str(f))
 
 class LabeledIntInput(wx.StaticBoxSizer):
     def __init__(this,
@@ -317,7 +320,7 @@ class Vector3DInput(wx.StaticBoxSizer):
         this.Add(this.Boxes[-1], 1, wx.EXPAND)
         this.__v = []
         for i in range(3):
-            this.__v.append(FloatInput(this.panel, wx.ID_ANY, "0"))
+            this.__v.append(FloatInput(this.panel, wx.ID_ANY, 0))
             this.Add(this.__v[-1], 0, wx.EXPAND)
         if v != None:
             this.SetVertex(v)
@@ -336,9 +339,9 @@ class Vector3DInput(wx.StaticBoxSizer):
                         this.__class__, v.index(i), str(i)
                     )
                 return
-        this.__v[0].SetValue(str(v[0]))
-        this.__v[1].SetValue(str(v[1]))
-        this.__v[2].SetValue(str(v[2]))
+        this.__v[0].SetValue(v[0])
+        this.__v[1].SetValue(v[1])
+        this.__v[2].SetValue(v[2])
 
     def Destroy(this):
         for ctrl in this.__v: ctrl.Destroy()
@@ -409,10 +412,10 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             this.__v.append([])
             for i in range(1, len(this.__hlabels)):
                 if vs == None:
-                    c = "0"
+                    f = 0
                 else:
-                    c = str(vs[n][i-1])
-                this.__v[-1].append(FloatInput(this, wx.ID_ANY, c))
+                    f = vs[n][i-1]
+                this.__v[-1].append(FloatInput(this, wx.ID_ANY, f))
                 this.columnSizers[i].Add(this.__v[-1][-1], 1, wx.EXPAND)
         this.Layout()
 
@@ -593,10 +596,10 @@ class Vector4DInput(wx.StaticBoxSizer):
             wx.StaticText(panel, wx.ID_ANY, elementLabels[3], style = wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL)
         ]
         this.__v = [
-            FloatInput(panel, wx.ID_ANY, "0"),
-            FloatInput(panel, wx.ID_ANY, "0"),
-            FloatInput(panel, wx.ID_ANY, "0"),
-            FloatInput(panel, wx.ID_ANY, "0")
+            FloatInput(panel, wx.ID_ANY, 0),
+            FloatInput(panel, wx.ID_ANY, 0),
+            FloatInput(panel, wx.ID_ANY, 0),
+            FloatInput(panel, wx.ID_ANY, 0)
         ]
         for i in range(4):
             if orientation == wx.HORIZONTAL:
