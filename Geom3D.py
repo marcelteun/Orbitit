@@ -3055,7 +3055,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.applyColors(%s,..):' % (this.__class__, this.name)
-        print 'TESTED? %s.applyColors(%s,..):' % (this.__class__, this.name)
+        #print 'TESTED? %s.applyColors(%s,..):' % (this.__class__, this.name)
         if this.dbgPrn:
             print 'this.shapeColors', this.shapeColors
             print 'this.nrOfShapeColorDefs =', this.nrOfShapeColorDefs, '?=', this.order, 'this.order'
@@ -3150,7 +3150,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
-        print 'TODO %s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
+        #print 'TODO %s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3200,7 +3200,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
-        print 'TODO %s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
+        #print 'TODO %s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3250,7 +3250,7 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
-        print 'TODO %s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
+        #print 'TODO %s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
