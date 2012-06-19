@@ -26,7 +26,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 Requirements:
 -------------
 You will need:
-1. Python:  http://www.python.org
+1. Python 2.x:  http://www.python.org
 2. Wxpython: http://www.wxpython.org
 3. pyOpenGL: http://pyopengl.sourceforge.net/
 
@@ -39,6 +39,15 @@ E.g. for Ubuntu:
     e.g.
     sudo apt-get install python-wxgtk2.8
 3. sudo apt-get install python-opengl
+
+E.g. for Arch Linux:
+----------------
+1. sudo pacman -S python2
+    Make sure /usr/bin/python is linked to /usr/bin/python2
+    Make sure /usr/bin/python-config is linked to /usr/bin/python2-config
+    Make sure /usr/bin/pydoc is linked to /usr/bin/pydoc2
+2. sudo pacman -S wxpython
+3. sudo pacman -S python-opengl
 
 Run:
 ----
