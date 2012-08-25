@@ -2555,6 +2555,9 @@ class CompoundShape():
         for s in this.shapeElements:
             VsOffset  = len(Vs)
             colOffset = len(colorDefs)
+            # TODO: ai, ugly...:
+            if s.__class__.__name__ != 'SimpleShape':
+                s = s.SimpleShape
             # Apply shape orientation here, needed, since the can be different
             # for the various shapes
             for v in s.Vs:
@@ -2581,6 +2584,13 @@ class CompoundShape():
         if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape
+
+    def cleanShape(this, precision):
+        """Return a new shape for which vertices are merged and degenerated faces are deleted.
+
+        The shape will not have any edges.
+        """
+        this.SimpleShape.cleanShape(precision)
 
     def glDraw(this):
         """Draws the compound shape as compound shape
