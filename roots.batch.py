@@ -1400,7 +1400,6 @@ def FoldedRegularHeptagonsA5(c, params):
     #
     # EDGE B:
     #
-    plain_edge_alt = edgeAlternative & ~alt_bit
     if (edgeAlternative == TriangleAlt.refl_1):
         # V5 - Q-turn-around-o4(V2)
         V2_o4_x, V2_o4_y, V2_o4_z = A5_T_turn_o3(x2, y2, z2)
@@ -1409,18 +1408,10 @@ def FoldedRegularHeptagonsA5(c, params):
         # V10 - Q-turn-around-o4(V5), V10 = V2' = [-x2, -y2, z2]
         V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x5, y5, z5)
         cp[1] = v_delta(-x2, -y2, z2, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[1]
-    #TODO:
-    elif plain_edge_alt == TriangleAlt.stripII:
-        # V3 - V14:[y1, z1, x1], # V14 = V1'
-        cp[1] = numx.sqrt((x3-y1)*(x3-y1) + (y3-z1)*(y3-z1) + (z3-x1)*(z3-x1)) - edgeLengths[1]
-    else:
-        #V2 - V12:[y0, z0, x0], # V12 = V0'
-        cp[1] = numx.sqrt((x2-y0)*(x2-y0) + (y2-z0)*(y2-z0) + (z2-x0)*(z2-x0)) - edgeLengths[1]
 
     #
     # EDGE C
     #
-    #if (edgeAlternative & twist_bit) != 0:
     if (edgeAlternative == TriangleAlt.refl_1):
         # V6 - Q-turn-around-o4(V1)
         V1_o4_x, V1_o4_y, V1_o4_z = A5_T_turn_o3(x1, y1, z1)
