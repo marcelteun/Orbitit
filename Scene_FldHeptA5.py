@@ -372,10 +372,10 @@ class Shape(Heptagons.FldHeptagonShape):
         #         2' = 8                7 = 5'
 
 	I_loose   = [[2, 3, 7]]
-	noLoose   = [[2, 3, 8]]
-	stripI    = [[2, 8, 9]]
-	stripII   = [[2, 3, 9], [3, 8, 9]]
-	star      = [[1, 2, 8], [1, 8, 9]]
+	noLoose   = [[2, 3, 11]]
+	stripI    = [[2, 11, 18]]
+	stripII   = [[2, 3, 18], [3, 11, 18]]
+	star      = [[1, 2, 11], [1, 11, 18]]
 	refl_1    = [[2, 3, 7], [1, 2, 39, 16], [0, 1, 16, 9]]
 	refl_2    = [[4, 5, 8], [5, 6, 21, 34], [6, 0, 14, 21]]
 	crossed_2 = [[29, 4, 5, 35], [5, 26, 35], [5, 6, 20, 26], [6, 0, 13, 20]]
@@ -398,17 +398,17 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_2:             refl_2[:],
                 trisAlt.crossed_2:          crossed_2[:],
 	}
-	stdO3   = [1, 2, 9]
-	altO3   = [2, 9, 11]
+	stdO3   = [1, 2, 18]
+	altO3   = [2, 18, 11]
         this.triFs[trisAlt.strip_1_loose].append(stdO3)
         this.triFs[trisAlt.strip_I].append(stdO3)
         this.triFs[trisAlt.strip_II].append(stdO3)
         this.triFs[trisAlt.alt_strip_1_loose].append(altO3)
         this.triFs[trisAlt.alt_strip_I].append(altO3)
         this.triFs[trisAlt.alt_strip_II].append(altO3)
-	I_loose = [[5, 14, 13]]
-	noLoose = [[3, 7, 8]]
-	stripI  = [[5, 17, 14]]
+	I_loose = [[5, 15, 8]]
+	noLoose = [[3, 7, 11]]
+	stripI  = [[5, 17, 15]]
 	stripII = [[4, 5, 17], [4, 17, 14]]
 	star    = [[5, 6, 14], [6, 17, 14]]
 	rot     = [[13, 17, 14]]
@@ -485,7 +485,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:		crossed_2,
             }
 
-	std    = [1, 9, 10]
+	std    = [6, 16, 17]
 	alt    = [2, 11, 12]
 	refl_1 = [0, 9, 10]
 	refl_2 = [5, 34, 22, 35, 23, 8]
@@ -504,7 +504,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:		[crossed_2],
 	    }
 
-	std  = [6, 15, 16, 17]
+	std  = [1, 18, 19, 20, 21]
 	alt  = [5, 18, 19, 20]
 	refl_1 = [2, 7, 24, 36, 25, 37, 26, 38, 27, 39]
 	refl_2 = [0, 11, 12, 13, 14]
@@ -530,11 +530,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:		crossed_2,
 	    }
 
-	strip_1_loose = [2, 7, 2, 8, 2, 9]
-	stripI        = [3, 8, 2, 8, 2, 9]
-	stripII       = [3, 8, 3, 9, 2, 9]
-	star          = [3, 8, 2, 8, 1, 8]
-	star_1_loose  = [2, 7, 2, 8, 1, 8]
+	strip_1_loose = [2, 7, 2, 11, 2, 18]
+	stripI        = [3, 11, 2, 11, 2, 18]
+	stripII       = [3, 11, 3, 18, 2, 18]
+	star          = [3, 11, 2, 11, 1, 11]
+	star_1_loose  = [2, 7, 2, 11, 1, 11]
 	refl_1        = [2, 7, 2, 39, 1, 16, 0, 9]
 	refl_2        = [5, 8, 5, 34, 6, 21, 0, 14]
 	crossed_2     = [4, 28, 5, 35, 5, 26, 6, 20, 0, 13]
@@ -551,11 +551,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_2:            refl_2,
                 trisAlt.crossed_2:         crossed_2,
             }
-	strip_1_loose = [5, 14, 5, 17]
-	stripI        = [5, 14, 5, 17]
+	strip_1_loose = [5, 15, 5, 17]
+	stripI        = [5, 15, 5, 17]
 	stripII       = [4, 17, 5, 17]
-	star          = [5, 14, 6, 14]
-	star_1_loose  = [5, 14, 6, 14]
+	star          = [5, 15, 6, 14]
+	star_1_loose  = [5, 15, 6, 14]
 	rot_strip     = [13, 15, 5, 15]
 	rot_star      = [13, 15, 6, 13]
 	arot_star     = [13, 15, 13, 17]
@@ -578,7 +578,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:          refl,
             }
 
-	std  = [1, 9, 9, 10, 10, 1]
+	std  = [6, 16, 16, 17, 17, 6]
 	alt  = [2, 11, 11, 12, 12, 2]
 	refl = []
         this.o3triEs = {
@@ -595,7 +595,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:	    refl,
             }
 
-	std    = [6, 15, 15, 16, 16, 17, 17, 6]
+	std    = [1, 18, 18, 19, 19, 20, 20, 21, 21, 1]
 	alt    = [5, 18, 18, 19, 19, 20, 20, 5]
 	refl   = []
         this.o5triEs = {
