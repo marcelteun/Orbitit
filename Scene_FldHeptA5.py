@@ -149,7 +149,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    Vs = [], Fs = [],
 	    finalSym = isomA5, stabSym = isomO5,
 	    colors = [([rgb.cyan[:]], [])],
-            name = 'o5SquareA5',
+            name = 'o5PentasA5',
 	    recreateEdges = False
         )
 	Heptagons.FldHeptagonShape.__init__(this,
@@ -291,18 +291,18 @@ class Shape(Heptagons.FldHeptagonShape):
         this.heptagonsShape.setFaceColors(heptColPerIsom)
 	theShapes = [this.heptagonsShape]
 	if this.addXtraFs:
-	    Fs = this.o3triFs[this.edgeAlternative][:]
-	    Es = this.o3triEs[this.edgeAlternative][:]
-            this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
-            this.trisO3Shape.setBaseEdgeProperties(Es = Es)
-            this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
-            theShapes.append(this.trisO3Shape)
-	    Es = this.o5triEs[this.oppEdgeAlternative][:]
-	    Fs = this.o5triFs[this.oppEdgeAlternative][:]
+	    Fs = this.o5triFs[this.edgeAlternative][:]
+	    Es = this.o5triEs[this.edgeAlternative][:]
             this.trisO5Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO5Shape.setBaseEdgeProperties(Es = Es)
             this.trisO5Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO5Shape)
+	    Es = this.o3triEs[this.oppEdgeAlternative][:]
+	    Fs = this.o3triFs[this.oppEdgeAlternative][:]
+            this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
+            this.trisO3Shape.setBaseEdgeProperties(Es = Es)
+            this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
+            theShapes.append(this.trisO3Shape)
             if (not this.onlyRegFs):
 		# when you use the rot alternative the rot is leading for
 		# choosing the colours.
@@ -398,19 +398,20 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_2:             refl_2[:],
                 trisAlt.crossed_2:          crossed_2[:],
 	}
-	stdO3   = [1, 2, 18]
-	altO3   = [2, 18, 11]
-        this.triFs[trisAlt.strip_1_loose].append(stdO3)
-        this.triFs[trisAlt.strip_I].append(stdO3)
-        this.triFs[trisAlt.strip_II].append(stdO3)
-        this.triFs[trisAlt.alt_strip_1_loose].append(altO3)
-        this.triFs[trisAlt.alt_strip_I].append(altO3)
-        this.triFs[trisAlt.alt_strip_II].append(altO3)
+	stdO5   = [1, 2, 18]
+	altO5   = [2, 18, 24]
+        this.triFs[trisAlt.strip_1_loose].append(stdO5)
+        this.triFs[trisAlt.strip_I].append(stdO5)
+        this.triFs[trisAlt.strip_II].append(stdO5)
+        this.triFs[trisAlt.alt_strip_1_loose].append(altO5)
+        this.triFs[trisAlt.alt_strip_I].append(altO5)
+        this.triFs[trisAlt.alt_strip_II].append(altO5)
+
 	I_loose = [[5, 15, 8]]
 	noLoose = [[3, 7, 11]]
 	stripI  = [[5, 17, 15]]
-	stripII = [[4, 5, 17], [4, 17, 14]]
-	star    = [[5, 6, 14], [6, 17, 14]]
+	stripII = [[4, 5, 17], [4, 17, 15]]
+	star    = [[5, 6, 15], [6, 17, 15]]
 	rot     = [[13, 17, 14]]
 	strip_1_loose = stripI[:]
 	star_1_loose  = star[:]
@@ -444,7 +445,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	}
 	stdO3   = [6, 17, 5]
 	stdO3_x = [6, 17, 13]
-	altO3   = [5, 20, 17]
+	altO3   = [5, 23, 17]
 	altO3_x = [5, 17, 13]
         this.oppTriFs[trisAlt.strip_1_loose].append(stdO3)
         this.oppTriFs[trisAlt.strip_I].append(stdO3)
@@ -485,27 +486,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:		crossed_2,
             }
 
-	std    = [6, 16, 17]
-	alt    = [2, 11, 12]
-	refl_1 = [0, 9, 10]
-	refl_2 = [5, 34, 22, 35, 23, 8]
-	crossed_2 = [4, 28, 29]
-        this.o3triFs = {
-                trisAlt.strip_1_loose:		[std],
-                trisAlt.strip_I:		[std],
-                trisAlt.strip_II:		[std],
-                trisAlt.star:			[std],
-                trisAlt.star_1_loose:		[std],
-                trisAlt.alt_strip_I:		[alt],
-                trisAlt.alt_strip_II:		[alt],
-                trisAlt.alt_strip_1_loose:	[alt],
-                trisAlt.refl_1:		        [refl_1],
-                trisAlt.refl_2:		        [refl_2],
-                trisAlt.crossed_2:		[crossed_2],
-	    }
-
 	std  = [1, 18, 19, 20, 21]
-	alt  = [5, 18, 19, 20]
+	alt  = [2, 24, 25, 26, 27]
 	refl_1 = [2, 7, 24, 36, 25, 37, 26, 38, 27, 39]
 	refl_2 = [0, 11, 12, 13, 14]
 	crossed_2 = [
@@ -528,6 +510,25 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:		        [refl_1],
                 trisAlt.refl_2:		        [refl_2],
                 trisAlt.crossed_2:		crossed_2,
+	    }
+
+	std    = [6, 16, 17]
+	alt    = [5, 22, 23]
+	refl_1 = [0, 9, 10]
+	refl_2 = [5, 34, 22, 35, 23, 8]
+	crossed_2 = [4, 28, 29]
+        this.o3triFs = {
+                trisAlt.strip_1_loose:		[std],
+                trisAlt.strip_I:		[std],
+                trisAlt.strip_II:		[std],
+                trisAlt.star:			[std],
+                trisAlt.star_1_loose:		[std],
+                trisAlt.alt_strip_I:		[alt],
+                trisAlt.alt_strip_II:		[alt],
+                trisAlt.alt_strip_1_loose:	[alt],
+                trisAlt.refl_1:		        [refl_1],
+                trisAlt.refl_2:		        [refl_2],
+                trisAlt.crossed_2:		[crossed_2],
 	    }
 
 	strip_1_loose = [2, 7, 2, 11, 2, 18]
@@ -554,8 +555,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	strip_1_loose = [5, 15, 5, 17]
 	stripI        = [5, 15, 5, 17]
 	stripII       = [4, 17, 5, 17]
-	star          = [5, 15, 6, 14]
-	star_1_loose  = [5, 15, 6, 14]
+	star          = [5, 15, 6, 15]
+	star_1_loose  = [5, 15, 6, 15]
 	rot_strip     = [13, 15, 5, 15]
 	rot_star      = [13, 15, 6, 13]
 	arot_star     = [13, 15, 13, 17]
@@ -579,7 +580,7 @@ class Shape(Heptagons.FldHeptagonShape):
             }
 
 	std  = [6, 16, 16, 17, 17, 6]
-	alt  = [2, 11, 11, 12, 12, 2]
+	alt  = [5, 22, 22, 23, 23, 5]
 	refl = []
         this.o3triEs = {
                 trisAlt.strip_1_loose:	    std,
@@ -596,7 +597,7 @@ class Shape(Heptagons.FldHeptagonShape):
             }
 
 	std    = [1, 18, 18, 19, 19, 20, 20, 21, 21, 1]
-	alt    = [5, 18, 18, 19, 19, 20, 20, 5]
+	alt    = [2, 24, 24, 25, 25, 26, 26, 27, 27, 2]
 	refl   = []
         this.o5triEs = {
                 trisAlt.strip_1_loose:	    std,
