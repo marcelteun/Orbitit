@@ -626,6 +626,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
 	    ],
+            isometry.A5,
 	    trisAlt,
 	    Stringify,
 	    *args, **kwargs

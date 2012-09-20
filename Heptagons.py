@@ -23,6 +23,7 @@
 # $Log$
 #
 import wx
+import isometry
 import math
 import rgb
 import string
@@ -255,30 +256,30 @@ class TrisAlt:
 	stringify[star_alt_strip_I]:		star_alt_strip_I,
 	stringify[star_alt_strip_II]:		star_alt_strip_II,
 
-	stringify[alt_strip_I_strip_I]: 	alt_strip_I_strip_I,
-	stringify[alt_strip_I_strip_II]: 	alt_strip_I_strip_II,
+	stringify[alt_strip_I_strip_I]:		alt_strip_I_strip_I,
+	stringify[alt_strip_I_strip_II]:	alt_strip_I_strip_II,
 	stringify[alt_strip_I_star]:		alt_strip_I_star,
-	stringify[alt_strip_I_alt_strip_I]: 	alt_strip_I_alt_strip_I,
-	stringify[alt_strip_I_alt_strip_II]: 	alt_strip_I_alt_strip_II,
+	stringify[alt_strip_I_alt_strip_I]:	alt_strip_I_alt_strip_I,
+	stringify[alt_strip_I_alt_strip_II]:	alt_strip_I_alt_strip_II,
 
-	stringify[twist_strip_I_strip_I]: 	twist_strip_I_strip_I,
+	stringify[twist_strip_I_strip_I]:	twist_strip_I_strip_I,
 
-	stringify[alt_strip_II_strip_I]: 	alt_strip_II_strip_I,
-	stringify[alt_strip_II_strip_II]: 	alt_strip_II_strip_II,
+	stringify[alt_strip_II_strip_I]:	alt_strip_II_strip_I,
+	stringify[alt_strip_II_strip_II]:	alt_strip_II_strip_II,
 	stringify[alt_strip_II_star]:		alt_strip_II_star,
-	stringify[alt_strip_II_alt_strip_I]: 	alt_strip_II_alt_strip_I,
-	stringify[alt_strip_II_alt_strip_II]: 	alt_strip_II_alt_strip_II,
+	stringify[alt_strip_II_alt_strip_I]:	alt_strip_II_alt_strip_I,
+	stringify[alt_strip_II_alt_strip_II]:	alt_strip_II_alt_strip_II,
 
-	stringify[strip_1_loose_strip]: 	strip_1_loose_strip,
+	stringify[strip_1_loose_strip]:		strip_1_loose_strip,
 	stringify[strip_1_loose_star]:		strip_1_loose_star,
-	stringify[strip_1_loose_alt_strip]: 	strip_1_loose_alt_strip,
+	stringify[strip_1_loose_alt_strip]:	strip_1_loose_alt_strip,
 
 	stringify[star_1_loose_strip]:		star_1_loose_strip,
 	stringify[star_1_loose_star]:		star_1_loose_star,
-	stringify[star_1_loose_alt_strip]: 	star_1_loose_alt_strip,
+	stringify[star_1_loose_alt_strip]:	star_1_loose_alt_strip,
 
-	stringify[alt_strip_1_loose_strip]: 	alt_strip_1_loose_strip,
-	stringify[alt_strip_1_loose_star]: 	alt_strip_1_loose_star,
+	stringify[alt_strip_1_loose_strip]:	alt_strip_1_loose_strip,
+	stringify[alt_strip_1_loose_star]:	alt_strip_1_loose_star,
 	stringify[alt_strip_1_loose_alt_strip]:	alt_strip_1_loose_alt_strip,
 
 	stringify[star_1_loose_rot_strip]:	star_1_loose_rot_strip,
@@ -1066,8 +1067,9 @@ class FldHeptagonCtrlWin(wx.Frame):
     rot_min_size = (545, 600)
     def __init__(this,
 	    shape, canvas,
-	    maxHeight, 
+	    maxHeight,
 	    prePosStrLst,
+	    symmetryBase,
 	    trisAlt,
 	    stringify,
 	    parent,
@@ -1093,6 +1095,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.canvas = canvas
 	this.maxHeight = maxHeight
 	this.prePosStrLst = prePosStrLst
+	this.symBase = symmetryBase
 	this.stringify = stringify
 	if not open_file in stringify:
 		this.stringify[open_file] = "From File"
@@ -1688,8 +1691,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    if this.trisAlt.isBaseKey(c_key) or type(c_key) == type(1):
 			return False
 		    else:
-			# TODO: I think that all should be included for S4
-			return c_key[0] >= c_key[1]
+			if this.symBase == isometry.A4:
+			    return c_key[0] >= c_key[1]
+			else:
+			    return True
 		if not isValid(this.trisAlt.stringify[currentChoice]):
 		    try:
 			currentChoice = this.trisAlt.key[this.savTrisNoRefl]
