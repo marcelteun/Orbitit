@@ -1,4 +1,8 @@
 PRIO
+2012-09-19 - Heptagons Scene: there is a shell fill that is the opposite of the
+             current one. I.e. the origin is opposite. Note that for a W-fold
+	     and a trapezium fold this doesn't make much sense...
+
 2012-03-08 - 2 Implement a float slider with support for set
 
 2012-03-01 - 2 fix empty OFF file read
