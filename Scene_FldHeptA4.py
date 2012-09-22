@@ -412,6 +412,10 @@ class Shape(Heptagons.FldHeptagonShape):
 			    this.inclReflections
 			]
 		    )
+                    # only draw the folds of the hexagon for the twisted variant
+                    # if the hexagon isn't flat.
+                    if (not Geom3D.eq(abs(this.posAngle) % (math.pi/2), math.pi/4)):
+                        Es.extend(this.twistedEs_A4)
                     colIds = this.triColIds[eAlt][this.inclReflections]
 		else:
 		    Fs = this.triFs[this.edgeAlternative][:]
@@ -604,7 +608,13 @@ class Shape(Heptagons.FldHeptagonShape):
 	    }
 	std   = [6, 16, 15]
 	alt   = [5, 18, 17]
-	twist = [5, 23, 18, 22, 17, 13]
+        # Twisted leads to a hexagon, however only for +/- 45 degrees (mod 90)
+        # Otherise the hexagon isn't flat: then it is a folded one. Therefore
+        # draw the hexagon by the 4 triangles that are folded. Save the folds as
+        # separate edges in this.twistedEs_A4 that are only drawn if the hexagon
+        # isn't flat.
+	twist = [[23, 22, 13], [5, 23, 13], [18, 22, 23], [17, 13, 22]]
+        this.twistedEs_A4 = [23, 22, 22, 13, 13, 23]
         this.oppO3triFs = {
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
@@ -618,7 +628,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose:	[alt],
                 trisAlt.rot_star_1_loose:	[std],
                 trisAlt.arot_star_1_loose:	[alt],
-                trisAlt.twist_strip_I:		[twist],
+                trisAlt.twist_strip_I:		twist,
 	    }
 
 	#            5" = 18                 12 = 2"
