@@ -1849,6 +1849,18 @@ class FldHeptagonCtrlWin(wx.Frame):
     def stdPrePos(this):
 	assert False, "TODO: implement at offspring"
 
+    def openPrePosFile(this, filename):
+	try:
+	    print 'DBG open', filename
+	    fd = open(filename, 'r')
+	except IOError:
+	    print 'DBG file not found:\n %s' % filename
+	    return []
+	ed = {'__name__': 'readPyFile'}
+	exec fd in ed
+	fd.close()
+	return ed['results']
+
     def noPrePosFound(this):
 	s = 'Note: no valid positions found' 
 	print s

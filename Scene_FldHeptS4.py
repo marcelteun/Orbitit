@@ -728,19 +728,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	#    print 'DBG: NOT found %s' % files
 	return glob(files) != []
 
-    # TODO move to parent
-    def openPrePosFile(this, filename):
-	try:
-	    print 'DBG open', filename
-	    fd = open(filename, 'r')
-	except IOError:
-	    print 'DBG file not found:\n %s' % filename
-	    return []
-	ed = {'__name__': 'readPyFile'}
-	exec fd in ed
-	fd.close()
-	return ed['results']
-
     @property
     def specPosSetup(this):
 	prePosId = this.prePos
@@ -756,6 +743,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    return data
 
     @property
+    # move (part of this) to parent
     def stdPrePos(this):
 	try:
 	    return this.sav_stdPrePos
