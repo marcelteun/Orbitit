@@ -231,7 +231,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
 	    cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
-	    Es = this.o4triEs[this.edgeAlternative]
+	    Es = this.o3triEs[this.edgeAlternative]
 	    dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 
 	if this.inclReflections:
@@ -242,7 +242,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    Es = this.oppTriEs[this.oppEdgeAlternative]
 	    opp_bLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    opp_cLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
-	    #Es = this.oppO3triEs[this.oppEdgeAlternative]
+	    Es = this.o4triEs[this.oppEdgeAlternative]
 	    if this.oppEdgeAlternative != trisAlt.refl_1:
 		opp_dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    else:
