@@ -1706,7 +1706,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
         # write with a bit higher precision, to prevent throwing solutions after
         # reading these again because of rounding problems.
         # e.g. for this one:
-        # python roots.batch.py -i 100 -p 12 -o ./ -l 9 -a 4 -f 0  A4xI
+        # python roots_batch.py -i 100 -p 12 -o ./ -l 9 -a 4 -f 0  A4xI
         this.prec_delta = pow(10, -(precision - 1))
         # Any delta of this size or bigger in the input vector should mean a
         # different solution:

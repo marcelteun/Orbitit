@@ -7,7 +7,7 @@ PY_DIR=$PWD
 ITER=5000
 PRECISION=13
 SYMMETRY=A4
-SEARCH_SCRIPT=roots.batch.py
+SEARCH_SCRIPT=roots_batch.py
 FILTER_SCRIPT=filter.py
 SOLS_COUNT_FILE=sols_count.csv
 
