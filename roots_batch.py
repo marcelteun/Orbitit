@@ -2946,8 +2946,9 @@ if __name__ == '__main__':
                     TriangleAlt.refl_2,
                 ],
         Symmetry.S4: [
-                    TriangleAlt.refl_1,
-                    TriangleAlt.refl_2,
+                    # TODO: add refl? Might lead to folded squares? Investigate.
+                    #TriangleAlt.refl_1,
+                    #TriangleAlt.refl_2,
                     TriangleAlt.stripI,
                     TriangleAlt.strip1loose,
                     TriangleAlt.alt_stripI,
