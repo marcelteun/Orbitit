@@ -1879,7 +1879,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
                                         return isEq
         return False
 
-    def symmetricEdges(this):
+    def _symmetricEdges(this):
         el = this.edgeLengths
         return (
             len(el) > 5 and (
@@ -1889,6 +1889,22 @@ class RandFindMultiRootOnDomain(threading.Thread):
                 eq(el[3], el[6], this.eq_margin)
             )
         )
+
+    def symmetricEdges(this):
+        if this.symmetry == Symmetry.A4:
+            return this._symmetricEdges()
+        elif this.symmetry == Symmetry.S4:
+            return this._symmetricEdges() and (
+                        this.edgeAlternative == TriangleAlt.refl_1 or
+                        this.edgeAlternative == TriangleAlt.refl_2
+                    )
+        elif this.symmetry == Symmetry.A5:
+            return this._symmetricEdges() and (
+                        this.edgeAlternative == TriangleAlt.refl_1 or
+                        this.edgeAlternative == TriangleAlt.refl_2
+                    )
+        else:
+            return False
 
     def getOutName(this):
         if len(this.edgeLengths) == 4:
