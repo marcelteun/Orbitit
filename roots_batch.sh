@@ -1,15 +1,33 @@
 #!/bin/bash -x
-GIT_DIR=$PWD/batch_search/frh-A4
-TMP_DIR=$PWD/batch_search/frh-A4/tmp
-BAC_DIR=$TMP_DIR/.bac
 PY_DIR=$PWD
 #ITER=10000
-ITER=5000
-PRECISION=13
-SYMMETRY=A4
-SEARCH_SCRIPT=roots_batch.py
-FILTER_SCRIPT=filter.py
-SOLS_COUNT_FILE=sols_count.csv
+if [ -z $ITER ]; then
+	ITER=5000
+fi
+if [ -z $PRECISION ]; then
+	PRECISION=13
+fi
+if [ -z $SYMMETRY ]; then
+	SYMMETRY=A4
+fi
+if [ -z $GIT_DIR ]; then
+	GIT_DIR=$PWD/batch_search/frh-$SYMMETRY
+fi
+if [ -z $TMP_DIR ]; then
+	TMP_DIR=$GIT_DIR/tmp
+fi
+if [ -z $BAC_DIR ]; then
+	BAC_DIR=$TMP_DIR/.bac
+fi
+if [ -z $SEARCH_SCRIPT ]; then
+	SEARCH_SCRIPT=roots_batch.py
+fi
+if [ -z $FILTER_SCRIPT ]; then
+	FILTER_SCRIPT=filter.py
+fi
+if [ -z $SOLS_COUNT_FILE ]; then
+	SOLS_COUNT_FILE=sols_count.csv
+fi
 
 check_and_create_dirs() {
 	for DIR in $GIT_DIR $TMP_DIR ; do {
