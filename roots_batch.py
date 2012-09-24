@@ -3045,6 +3045,9 @@ if __name__ == '__main__':
                                         # regular (more requirements needed)
         ])
     pre_edgeLs_S4 = pre_edgeLs_A4[:]
+    pre_edgeLs_S4.extend([
+        [1., 1., 1., 0., 1., 1., 1.], # 6 squares, 120 triangles.
+    ])
 
     pre_edgeLs_A5xI = pre_edgeLs_A4xI[:]
     pre_edgeLs_A5 = pre_edgeLs_A4[:]
