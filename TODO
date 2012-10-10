@@ -1,4 +1,7 @@
 ROOTS:
+	2012-09-22
+	Perhaps precision should be interpreted/written for floating point
+	numbers, instead of writing the nrs in a classical way.
 
 	2012-09-22
 	You could ass searched for A4 for strip I - twisted - strip I. This
