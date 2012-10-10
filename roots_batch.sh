@@ -62,18 +62,19 @@ backup_current_solutions() {
 	cp $TMP_DIR/frh*.py $BAC_DIR
 }
 
-# TODO: if SYMMETRRY==A4
+set_doms_for_3_threads() {
+	if [ "$SYMMETRY" == "A4" ] ; then
+		DOMS="[0:9] [9:18] [18:]"
+	elif [ "$SYMMETRY" == "S4" ] ; then
+		DOMS="[0:10] [10:20] [20:]"
+	fi
+}
+
 search_for_solutions() {
-	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 4 -b 0 -l 6 -f 0 -s $SYMMETRY || exit -1
-	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 4 -b 0  -s $SYMMETRY || exit -1
-	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -a 7 -s $SYMMETRY || exit -1
-	#python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s $SYMMETRY || exit -1
-	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l [0:11] $SYMMETRY &
-	PIDS=$!
-	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l [11:22] $SYMMETRY &
-	PIDS="$PIDS $!"
-	python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l [22:] $SYMMETRY &
-	PIDS="$PIDS $!"
+	for DOM in $DOMS ; do {
+		python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l $DOM $SYMMETRY &
+		PIDS="$PIDS $!"
+	} done
 	RETURN=0
 	CMD=wait
 	for PID in $PIDS ; do {
@@ -169,25 +170,13 @@ git_commit_if_needed() {
 	fi
 }
 
-DYN_A4_FILES="frh-roots-0_1_0_1_1_0_1-fld_shell.0-shell_1_loose-opp_shell_1_loose.py
- frh-roots-0_1_0_1_1_0_1-fld_w.0-shell_1_loose-opp_shell_1_loose.py
- frh-roots-0_1_1_0_1_1_0-fld_w.0-shell_1_loose-opp_shell_1_loose.py
- frh-roots-0_1_1_0_1_1_0-fld_w.0-shell_1_loose-opp_strip_1_loose.py
- frh-roots-0_1_1_0_1_1_0-fld_w.0-strip_1_loose-opp_shell_1_loose.py
- frh-roots-0_1_1_0_1_1_0-fld_w.0-strip_1_loose-opp_strip_1_loose.py
- frh-roots-0_V2_1_0_V2_1_0-fld_w.0-alt_strip_1_loose-opp_alt_strip_1_loose.py
- frh-roots-0_V2_1_0_V2_1_0-fld_w.0-shell_1_loose-opp_shell_1_loose.py
- frh-roots-0_V2_1_0_V2_1_0-fld_w.0-shell_1_loose-opp_strip_1_loose.py
- frh-roots-0_V2_1_0_V2_1_0-fld_w.0-strip_1_loose-opp_shell_1_loose.py
- frh-roots-0_V2_1_0_V2_1_0-fld_w.0-strip_1_loose-opp_strip_1_loose.py
-"
-
 check_and_create_dirs
 cd $TMP_DIR
 setup_py_script_links
 
 while true; do {
 	backup_current_solutions
+	set_doms_for_3_threads
 	search_for_solutions
 
 	# copy only the ones containing a solution
