@@ -87,10 +87,10 @@ def Veq(a, b, precision = eqFloatMargin, log = False):
         )
     is_eq = True
     for i in range(len(a)):
-        if not eq(a[i], b[i], eqFloatMargin):
+        if not eq(a[i], b[i], precision):
             if log:
                 print '---> index %s difference too big: %.13f (margin: %.13f)\n' % (
-                                            i, abs(a[i]-b[i]), eqFloatMargin)
+                                            i, abs(a[i]-b[i]), precision)
             is_eq = False
             break;
     return is_eq
@@ -1715,7 +1715,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
         # different solution:
         # Choose this quite bigger than the precision margin, to prevent getting
         # doublets.
-        if precision > 3:
+        if precision > 5:
             this.eq_margin = this.prec_delta * 100
         else:
             this.eq_margin = this.prec_delta
