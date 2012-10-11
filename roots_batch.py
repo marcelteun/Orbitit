@@ -1732,7 +1732,6 @@ class RandFindMultiRootOnDomain(threading.Thread):
         this.oppEdgeAlternative = oppEdgeAlternative
         this.edgeLengths = edgeLengths
         this.dynamicSols = dynSols
-        this.dynSols = dynSols
         this.stopAfter = 100000
         this.outDir = outDir
         if not outDir[-1] == '/':
@@ -2055,15 +2054,15 @@ class RandFindMultiRootOnDomain(threading.Thread):
                 )
             # write the previous solution if the difference is smaller than the
             # precision (this since we write with one digit more)
-            if result != None:
-                if Veq(result, solution, this.prec_delta, log=True):
-                    reiterated_input_results.append(solution)
-                else:
-                    print 'Note, better precison for:\n-->', solution
-                    #print '-->', result
-                    reiterated_input_results.append(result)
-            else:
+            if result == None:
                 print 'Oops, dropping solution', solution
+            elif Veq(result, solution, this.prec_delta, log=False) or (
+                                                    this.isDynamicSol(result)):
+                reiterated_input_results.append(solution)
+            else:
+                print 'Note, better precison for:\n-->', solution
+                #print '-->', result
+                reiterated_input_results.append(result)
         if (len(reiterated_input_results) != len(this.results)):
             print 'Warning: %d solution(s) thrown after increasing the precision'\
                 % (len(this.results) - len(reiterated_input_results))
@@ -3443,7 +3442,7 @@ if __name__ == '__main__':
         Symmetry.S4xI: [],
         Symmetry.S4  : dynamicSols_S4,
         Symmetry.A5xI: [],
-        Symmetry.S4  : [],
+        Symmetry.A5  : [],
     }
 
     sym_sup = [
