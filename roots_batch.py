@@ -2045,6 +2045,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
                 this.exceptQueue.put(sys.exc_info())
             raise
 
+    def tst_solutions_exist(this):
+        this.solutions_exist = this._tst_solutions_exist()
+
     def _run(this):
         if this.oppEdgeAlternative == None:
             this.oppEdgeAlternative = this.edgeAlternative
@@ -2386,6 +2389,37 @@ class RandFindMultiRootOnDomain(threading.Thread):
                     print filename
                 break
 
+    def _tst_solutions_exist(this):
+        nrOfIters = 0
+        maxIter = 5000
+        while True:
+            try:
+                result = FindMultiRoot(this.randTestvalue(),
+                        this.symmetry,
+                        this.edgeAlternative,
+                        this.edgeLengths,
+                        this.fold,
+                        this.method,
+                        lambda v,l: this.cleanupResult(v, l),
+                        this.prec_delta,
+                        maxIter,
+                        printIter = False,
+                        quiet     = True,
+                        oppEdgeAlternative = this.oppEdgeAlternative
+                    )
+                if (result != None):
+                    break
+            except pygsl.errors.gsl_SingularityError:
+                pass
+            except pygsl.errors.gsl_NoProgressError:
+                pass
+            except pygsl.errors.gsl_JacobianEvaluationError:
+                pass
+            nrOfIters = nrOfIters + 1
+            if nrOfIters >= this.stopAfter:
+                break
+        return result != None
+
 if __name__ == '__main__':
     import sys
     import os
@@ -2621,11 +2655,7 @@ if __name__ == '__main__':
                     passed = False
         return passed
 
-    def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
-                nrThreads = 1, dynSols = None, precision = 14, outDir = "./",
-                loop = True, oppEdgeAlts = None):
-        if oppEdgeAlts == None:
-            oppEdgeAlts = edgeAlts[:]
+    def setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts = None):
         dom = [
             T_Dom[symGrp],         # Translation
             [-numx.pi, numx.pi],   # angle alpha
@@ -2635,11 +2665,67 @@ if __name__ == '__main__':
             [-numx.pi, numx.pi],   # fold 1 beta1
             [-numx.pi, numx.pi],   # fold 2 gamma1
         ]
+        if edgeLs == [] or folds == [] or edgeAlts ==[] or oppEdgeAlts == []:
+            print 'Warning: empty search specified!'
+            return None
+        else:
+            return dom
+
+    def tst_if_solutions_exist_Y(symGrp, edgeLs, edgeAlts, folds,
+                    continueAfter = 100, precision = 14, oppEdgeAlts = None):
+        if oppEdgeAlts == None:
+            oppEdgeAlts = edgeAlts[:]
+        dom = setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts)
+        if dom == None:
+            return []
+        trd = None
+        has_solutions = []
+        for edges in edgeLs:
+            print 'investigating', edges
+            edgeLs_has_solutions = False
+            for fold in folds:
+                print '  fold', str(Fold(fold))
+                for ea in edgeAlts:
+                    for oea in oppEdgeAlts:
+                        print '    edge alt', Stringify[ea], Stringify[oea]
+                        # loose_bit must be the same for both:
+                        if (
+                            ea & loose_bit == loose_bit and
+                            oea & loose_bit == loose_bit
+                        ) or (
+                            ea & loose_bit == 0 and
+                            oea & loose_bit == 0
+                        ):
+                            trd = RandFindMultiRootOnDomain(dom,
+                                symGrp,
+                                edgeAlternative    = ea,
+                                oppEdgeAlternative = oea,
+                                edgeLengths        = edges,
+                                fold               = fold,
+                                precision          = precision,
+                                method             = Method.hybrids
+                            )
+                            trd.stopAfter = continueAfter
+                            # we aren't using threads for this.
+                            trd.tst_solutions_exist()
+                            edgeLs_has_solutions = trd.solutions_exist
+                            if edgeLs_has_solutions: break
+                        if edgeLs_has_solutions: break
+                    if edgeLs_has_solutions: break
+                if edgeLs_has_solutions: break
+            if edgeLs_has_solutions:
+                has_solutions.append(edges)
+        return has_solutions
+
+    def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
+                nrThreads = 1, dynSols = None, precision = 14, outDir = "./",
+                loop = True, oppEdgeAlts = None):
+        if oppEdgeAlts == None:
+            oppEdgeAlts = edgeAlts[:]
+        if not setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts):
+            return
         rndT = [None for j in range(nrThreads)]
         i = 0
-        if edgeLs == [] or folds == [] or edgeAlts ==[] or oppEdgeAlts == []:
-            print 'Warning: empty search specified, bailing out'
-            return
         while True:
             for edges in edgeLs:
                 for fold in folds:
@@ -2682,12 +2768,33 @@ if __name__ == '__main__':
             if not loop:
                 break
 
+    pre_edgeLs_all_1s_opposite_syms = [
+        [
+            (i/2**3)%2,
+            (i/2**2)%2,
+            (i/2)%2,
+            i%2
+        ] for i in range(2**4)
+    ]
+
+    pre_edgeLs_all_1s_direct_syms = [
+        [
+            (i/2**6)%2,
+            (i/2**5)%2,
+            (i/2**4)%2,
+            (i/2**3)%2,
+            (i/2**2)%2,
+            (i/2)%2,
+            i%2
+        ] for i in range(2**7)
+    ]
+
     pre_edgeLs_A4 = [
         #[0., 0., 0., 0., 0., 0., 0.],
 
         #[0., 0., 0., 1., 0., 0., 1.],
 
-        #[0., 0., 1., 0., 0., 1., 0.],
+        [0., 0., 1., 0., 0., 1., 0.],
 
         [0., 0., 1., 1., 0., 1., 1.],
 
@@ -3447,20 +3554,60 @@ if __name__ == '__main__':
                 ],
     }
 
-    def randBatchYxI(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
-                            nrThreads = 1, precision = 14, outDir = "./",
-                            loop = True):
+    def setup_ok_YxI(symGrp, edgeLs, edgeAlts, folds):
         dom = [
             T_Dom[symGrp],       # Translation
             [-numx.pi, numx.pi], # angle alpha
             [-numx.pi, numx.pi], # fold 1 beta
             [-numx.pi, numx.pi], # fold 2 gamma
         ]
+        if edgeLs == [] or folds == [] or edgeAlts ==[]:
+            print 'Warning: empty search specified!'
+            return None
+        else:
+            return dom
+
+    def tst_if_solutions_exist_YxI(symGrp, edgeLs, edgeAlts, folds,
+                                        continueAfter = 100, precision = 14):
+        dom = setup_ok_YxI(symGrp, edgeLs, edgeAlts, folds)
+        if dom == None:
+            return []
+        trd = None
+        has_solutions = []
+        for edges in edgeLs:
+            print 'investigating', edges
+            edgeLs_has_solutions = False
+            for fold in folds:
+                print '  fold', str(Fold(fold))
+                for ea in edgeAlts:
+                    print '    edge alt', Stringify[ea]
+                    trd = RandFindMultiRootOnDomain(dom,
+                        symGrp,
+                        edgeAlternative    = ea,
+                        oppEdgeAlternative = ea,
+                        edgeLengths        = edges,
+                        fold               = fold,
+                        precision          = precision,
+                        method             = Method.hybrids,
+                    )
+                    trd.stopAfter = continueAfter
+                    # we aren't using threads for this.
+                    trd.tst_solutions_exist()
+                    edgeLs_has_solutions = trd.solutions_exist
+                    if edgeLs_has_solutions: break
+
+                if edgeLs_has_solutions: break
+            if edgeLs_has_solutions:
+                has_solutions.append(edges)
+        return has_solutions
+
+    def randBatchYxI(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
+                            nrThreads = 1, precision = 14, outDir = "./",
+                            loop = True):
+        if not setup_ok_Y(symGrp, edgeLs, edgeAlts, folds):
+            return
         rndT = [None for j in range(nrThreads)]
         i = 0
-        if edgeLs == [] or folds == [] or edgeAlts ==[]:
-            print 'Warning: empty search specified, bailing out'
-            return
         while True:
             for edges in edgeLs:
                 for fold in folds:
@@ -3489,24 +3636,19 @@ if __name__ == '__main__':
                 break
 
     pre_edgeLs_A4xI = [
-        [0., 0., 0., 0.], # no 1
-        [1., 0., 0., 0.], # one 1
-        [0., 1., 0., 0.],
-        [0., 0., 1., 0.],
-        [0., 0., 0., 1.],
-        [1., 1., 0., 0.], # pair of 1's (pair of 0's)
-        [1., 0., 1., 0.],
-        [1., 0., 0., 1.],
-        [0., 1., 1., 0.],
-        [0., 1., 0., 1.],
-        [0., 0., 1., 1.],
-        [1., 1., 1., 0.], # one 0
-        [1., 1., 0., 1.],
-        [1., 0., 1., 1.],
-        [0., 1., 1., 1.],
-        [1., 1., 1., 1.], # no 0
+        [0, 0, 1, 0],
+        [0, 0, 1, 1],
+        [0, 1, 0, 1],
+        [0, 1, 1, 0],
+        [0, 1, 1, 1],
+        [1, 0, 1, 0],
+        [1, 0, 1, 1],
+        [1, 1, 0, 1],
+        [1, 1, 1, 0],
+        [1, 1, 1, 1]
     ]
-    pre_edgeLs_S4xI = pre_edgeLs_A4xI[:]
+    pre_edgeLs_S4A4 = pre_edgeLs_all_1s_opposite_syms[:]
+    pre_edgeLs_S4xI = pre_edgeLs_all_1s_opposite_syms[:]
     V_2p2V2_ = numx.sqrt(2 + 2*V2)
     V3p1     = 1 + V3
     dogram   = V3p1 / (2 + V3)
@@ -3524,12 +3666,12 @@ if __name__ == '__main__':
         [1., 1., 1., 0., 1., 1., 1.], # 6 squares, 120 triangles.
     ])
 
-    pre_edgeLs_A5xI = pre_edgeLs_A4xI[:]
+    pre_edgeLs_A5xI = pre_edgeLs_all_1s_opposite_syms[:]
     pre_edgeLs_A5 = pre_edgeLs_A4[:]
 
     pre_edgeLs = {
         Symmetry.A4xI: pre_edgeLs_A4xI,
-        Symmetry.S4A4: pre_edgeLs_A4xI[:],
+        Symmetry.S4A4: pre_edgeLs_S4A4,
         Symmetry.A4  : pre_edgeLs_A4,
         Symmetry.S4xI: pre_edgeLs_S4xI,
         Symmetry.S4  : pre_edgeLs_S4,
@@ -3603,6 +3745,11 @@ if __name__ == '__main__':
         print '               %s.' % outDir
         print '     -s      : stop after having checked all. Default the program loops through'
         print '               all folds, edges, etc and starts over.'
+        print '     -t      : Test all possible combinations of 1 and 0 for the edge lengths.'
+        print '               This can be useful to investigate which edge lengths have'
+        print '               solutions. It is suggested to use a little precision then, e.g.'
+        print '               4 and a smaller amount of iterations, e.g. 100. This assumes -s'
+        print '               and overrides -l. Other options aren\'t usually needed'
         print '     -p <num>: precision, specify the amount of digits after the point; default'
         print '               %d. Suggested to use 4 <= precision <= 13.' % precision
         print '     -1      : try one solution (for debugging/ testing): TODO: improve'
@@ -3635,6 +3782,7 @@ if __name__ == '__main__':
         set_edge_alts     = ''
         set_opp_edge_alts = ''
         set_edge_Ls       = ''
+        tst_all_combos    = False
 
         if sys.argv[1] == '-1':
             if len(sys.argv) <= 2:
@@ -3691,6 +3839,8 @@ if __name__ == '__main__':
             elif sys.argv[n] == '-s':
                 loop = False
             elif sys.argv[n] == '-t':
+                tst_all_combos = True
+            elif sys.argv[n] == '-T':
                 tstProg = True
             elif symGrp == '':
                 if sys.argv[n] in sym_sup:
@@ -3731,7 +3881,14 @@ if __name__ == '__main__':
                                                         pre_folds[symGrp]):
                     print '%3d: %s' % (i, str(Fold(e)))
             sys.exit(0)
-        if set_edge_Ls == '':
+        if tst_all_combos:
+            loop = False
+            if symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or\
+                                                        symGrp == Symmetry.A5:
+                edgeLs = pre_edgeLs_all_1s_direct_syms[:]
+            else:
+                edgeLs = pre_edgeLs_all_1s_opposite_syms[:]
+        elif set_edge_Ls == '':
             edgeLs = pre_edgeLs[symGrp]
         else:
             if set_edge_Ls[0] != '[':
@@ -3853,11 +4010,26 @@ if __name__ == '__main__':
 
         if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
                         symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
-            randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
+            if tst_all_combos:
+                edges_with_solutons = tst_if_solutions_exist_YxI(symGrp, edgeLs,
+                                edgeAlts, foldAlts, nr_iterations, precision)
+                print 'Edges with solutions:'
+                for e in edges_with_solutons:
+                    print e
+            else:
+                randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, precision = precision, outDir = outDir,
                         loop = loop)
-        elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or symGrp == Symmetry.A5:
-            randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
+        elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or\
+                                                        symGrp == Symmetry.A5:
+            if tst_all_combos:
+                edges_with_solutons = tst_if_solutions_exist_Y(symGrp, edgeLs,
+                    edgeAlts, foldAlts, nr_iterations, precision, oppEdgeAlts)
+                print 'Edges with solutions:'
+                for e in edges_with_solutons:
+                    print e
+            else:
+                randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, dynSols = dynamicSols[symGrp],
                         precision = precision, outDir = outDir, loop = loop,
                         oppEdgeAlts = oppEdgeAlts)
