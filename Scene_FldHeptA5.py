@@ -198,7 +198,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	    Es = this.oppTriEs[this.oppEdgeAlternative]
 	    opp_bLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    opp_cLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
-	    #Es = this.oppO3triEs[this.oppEdgeAlternative]
+	    Es = this.o3triEs[this.oppEdgeAlternative]
 	    if this.oppEdgeAlternative != trisAlt.refl_1:
 		opp_dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 	    else:
@@ -330,13 +330,13 @@ class Shape(Heptagons.FldHeptagonShape):
 	#rad = this.getRadii()
 	#print 'min radius:', rad[0], 'max radius:', rad[1]
         this.updateShape = False
-	# print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][1], Vs[0][0], Vs[0][2])
-	# print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][1], Vs[1][0], Vs[1][2])
-	# print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][1], Vs[2][0], Vs[2][2])
-	# print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][1], Vs[3][0], Vs[3][2])
-	# print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][1], Vs[4][0], Vs[4][2])
-	# print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][1], Vs[5][0], Vs[5][2])
-	# print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][1], Vs[6][0], Vs[6][2])
+	#print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][0], Vs[0][1], Vs[0][2])
+	#print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][0], Vs[1][1], Vs[1][2])
+	#print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][0], Vs[2][1], Vs[2][2])
+	#print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][0], Vs[3][1], Vs[3][2])
+	#print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][0], Vs[4][1], Vs[4][2])
+	#print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][0], Vs[5][1], Vs[5][2])
+	#print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][0], Vs[6][1], Vs[6][2])
 
     def initArrs(this):
 
@@ -407,6 +407,7 @@ class Shape(Heptagons.FldHeptagonShape):
         this.triFs[trisAlt.alt_strip_I].append(altO5)
         this.triFs[trisAlt.alt_strip_II].append(altO5)
 
+        # TODO rot variants,.. also for roots_batch
 	I_loose = [[5, 15, 8]]
 	noLoose = [[3, 7, 11]]
 	stripI  = [[5, 17, 15]]
@@ -526,6 +527,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:		[alt],
                 trisAlt.alt_strip_II:		[alt],
                 trisAlt.alt_strip_1_loose:	[alt],
+                # TODO
+                trisAlt.rot_strip_1_loose:      [],
+                trisAlt.arot_strip_1_loose:     [],
+                trisAlt.rot_star_1_loose:       [],
+                trisAlt.arot_star_1_loose:      [],
                 trisAlt.refl_1:		        [refl_1],
                 trisAlt.refl_2:		        [refl_2],
                 trisAlt.crossed_2:		[crossed_2],
@@ -591,6 +597,11 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.alt_strip_I:	    alt,
                 trisAlt.alt_strip_II:	    alt,
                 trisAlt.alt_strip_1_loose:  alt,
+                # TODO
+                trisAlt.rot_strip_1_loose:  [],
+                trisAlt.arot_strip_1_loose: [],
+                trisAlt.rot_star_1_loose:   [],
+                trisAlt.arot_star_1_loose:  [],
                 trisAlt.refl_1:		    refl,
                 trisAlt.refl_2:		    refl,
                 trisAlt.crossed_2:	    refl,
