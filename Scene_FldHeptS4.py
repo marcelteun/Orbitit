@@ -358,13 +358,13 @@ class Shape(Heptagons.FldHeptagonShape):
 	    shape.showBaseOnly = not this.applySymmetry
         this.setShapes(theShapes)
         this.updateShape = False
-	# print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][1], Vs[0][0], Vs[0][2])
-	# print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][1], Vs[1][0], Vs[1][2])
-	# print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][1], Vs[2][0], Vs[2][2])
-	# print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][1], Vs[3][0], Vs[3][2])
-	# print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][1], Vs[4][0], Vs[4][2])
-	# print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][1], Vs[5][0], Vs[5][2])
-	# print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][1], Vs[6][0], Vs[6][2])
+	# print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][0], Vs[0][1], Vs[0][2])
+	# print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][0], Vs[1][1], Vs[1][2])
+	# print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][0], Vs[2][1], Vs[2][2])
+	# print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][0], Vs[3][1], Vs[3][2])
+	# print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][0], Vs[4][1], Vs[4][2])
+	# print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][0], Vs[5][1], Vs[5][2])
+	# print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][0], Vs[6][1], Vs[6][2])
 
     def initArrs(this):
 
@@ -444,7 +444,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	star_1_loose.extend(I_loose)
 	rot_strip.append([13, 5, 17])
 	rot_star.append([13, 5, 6])
-	arot_star.append([13, 17, 17]) # <----- oops cannot be right
+	arot_star.append([5, 20, 17])
         this.oppTriFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
@@ -564,9 +564,9 @@ class Shape(Heptagons.FldHeptagonShape):
 	stripII       = [4, 17, 5, 17]
 	star          = [5, 14, 6, 14]
 	star_1_loose  = [5, 14, 6, 14]
-	rot_strip     = [13, 15, 5, 15]
-	rot_star      = [13, 15, 6, 13]
-	arot_star     = [13, 15, 13, 17]
+	rot_strip     = [13, 17, 5, 17]
+	rot_star      = [13, 17, 6, 13]
+	arot_star     = [13, 17, 5, 17]
 	refl          = []
         this.oppTriEs = {
                 trisAlt.strip_1_loose:      strip_1_loose,
