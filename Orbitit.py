@@ -202,18 +202,18 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY)
 
-        matAmbient    = [0.3, 0.3, 0.3, 1.]
-        matDiffuse    = [0.2, 0.2, 0.2, 1.]
-        matSpecular   = [0.2, 0.2, 0.2, 1.]
+        matAmbient    = [0.2, 0.2, 0.2, 0.0]
+        matDiffuse    = [0.1, 0.6, 0.0, 0.0]
+        #matSpecular   = [0.2, 0.2, 0.2, 1.]
         matShininess  = 0.0
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient)
         glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse)
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
+        #glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
         glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess)
 
-        lightPosition = [-4., 5., 20., 0.]
-        lightAmbient  = [0.5, 0.5, 0.5, 1.]
-        lightDiffuse  = [.2, .2, .2, .2]
+        lightPosition = [-1.0, 3.0, 2.0, 0.0]#[-4., 5., 20., 0.]
+        lightAmbient  = [0.3, 0.3, 0.3, 1.0]#[0.5, 0.5, 0.5, 1.]
+        lightDiffuse  = [0.5, 0.5, 0.5, 1.0]#[.2, .2, .2, .2]
         # disable specular part:
         lightSpecular = [0., 0., 0., 1.]
         glLightfv(GL_LIGHT0, GL_POSITION, lightPosition)
@@ -222,20 +222,21 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular)
         glEnable(GL_LIGHT0)
 
-        #lightPosition = [4., 5., 1., 0.]
-        #lightAmbient  = [0.1, 0.1, 0.1, 1.]
-        #lightDiffuse  = [0.8, 0.8, 0.8, .1]
-        #lightSpecular = [0.1, 0.1, 0.1, 1.]
-        #glLightfv(GL_LIGHT1, GL_POSITION, lightPosition)
-        #glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbient)
-        #glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuse)
-        #glLightfv(GL_LIGHT1, GL_SPECULAR, lightSpecular)
-        #glEnable(GL_LIGHT1)
+        lightPosition = [0.0, -5.0, 3.0, 0.0]
+        lightAmbient  = [0.0, 0.0, 0.0, 1.]
+        lightDiffuse  = [0.08, 0.08, 0.08, 1.]
+        lightSpecular = [0.0, 0.0, 0.0, 1.]
+        glLightfv(GL_LIGHT1, GL_POSITION, lightPosition)
+        glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbient)
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuse)
+        glLightfv(GL_LIGHT1, GL_SPECULAR, lightSpecular)
+        glEnable(GL_LIGHT1)
 
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_LIGHTING)
         glEnable(GL_DEPTH_TEST)
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
         glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
 
     def setBgCol(this, bgCol):
