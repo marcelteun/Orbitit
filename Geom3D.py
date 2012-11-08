@@ -881,7 +881,7 @@ class SimpleShape:
         this.gl.cyl = None
         this.gl.alwaysSetVertices = False # set to true if a scene contains more than 1 shape
         if colors[0] == []:
-            colors = ([rgb.red[:]], [])
+            colors = ([rgb.gray95[:]], [])
         this.scalingFactor = 1.0
         this.setVertexProperties(Vs = Vs, Ns = Ns, radius = -1., color = [1. , 1. , .8 ])
         this.setEdgeProperties(
@@ -3034,7 +3034,7 @@ class IsometricShape(CompoundShape):
         if this.dbgTrace:
             print '%s.setFaceColors(%s,..):' % (this.__class__, this.name)
         if colors == [([], [])]:
-            colors = [([rgb.red[:]], [])]
+            colors = [([rgb.gray95[:]], [])]
         assert len(colors) > 0, 'colors should have at least one element'
         assert len(colors[0]) == 2, \
             'a colors element should be a tuple of 2 elements: (colors, fColors)'

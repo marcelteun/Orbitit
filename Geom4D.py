@@ -68,7 +68,7 @@ class SimpleShape:
         #print 'SimpleShape.Fs', Fs
         this.name = name
         if colors[0] == []:
-            colors = ([rgb.red[:]], [])
+            colors = ([rgb.gray95[:]], [])
         # if this.mapToSingeShape = False each cell is mapped to one 3D shape
         # and the edges are mapped to one shape as well. The disadvantage is
         # that for each shape glVertexPointer is set, while if
