@@ -385,7 +385,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	star.extend(noLoose)
 	strip_1_loose.extend(I_loose)
 	star_1_loose.extend(I_loose)
-	this.triFs = {
+        this.triFs_alts = []
+        triFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
                 trisAlt.strip_II:           stripII[:],
@@ -398,14 +399,15 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_2:             refl_2[:],
                 trisAlt.crossed_2:          crossed_2[:],
 	}
-	stdO5   = [1, 2, 18]
-	altO5   = [2, 18, 24]
-        this.triFs[trisAlt.strip_1_loose].append(stdO5)
-        this.triFs[trisAlt.strip_I].append(stdO5)
-        this.triFs[trisAlt.strip_II].append(stdO5)
-        this.triFs[trisAlt.alt_strip_1_loose].append(altO5)
-        this.triFs[trisAlt.alt_strip_I].append(altO5)
-        this.triFs[trisAlt.alt_strip_II].append(altO5)
+        stdO5 = [1, 2, 18]
+        altO5 = [2, 18, 24]
+        triFs[trisAlt.strip_1_loose].append(stdO5)
+        triFs[trisAlt.strip_I].append(stdO5)
+        triFs[trisAlt.strip_II].append(stdO5)
+        triFs[trisAlt.alt_strip_1_loose].append(altO5)
+        triFs[trisAlt.alt_strip_I].append(altO5)
+        triFs[trisAlt.alt_strip_II].append(altO5)
+        this.triFs_alts.append(triFs)
 
         # TODO rot variants,.. also for roots_batch
 	I_loose = [[5, 15, 8]]
@@ -427,7 +429,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_strip.append([13, 5, 17])
 	rot_star.append([13, 5, 6])
 	arot_star.append([13, 17, 17]) # <----- oops cannot be right
-        this.oppTriFs = {
+        this.oppTriFs_alts = []
+        oppTriFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
                 trisAlt.strip_II:           stripII[:],
@@ -448,16 +451,17 @@ class Shape(Heptagons.FldHeptagonShape):
 	stdO3_x = [6, 17, 13]
 	altO3   = [5, 23, 17]
 	altO3_x = [5, 17, 13]
-        this.oppTriFs[trisAlt.strip_1_loose].append(stdO3)
-        this.oppTriFs[trisAlt.strip_I].append(stdO3)
-        this.oppTriFs[trisAlt.strip_II].append(stdO3)
-        this.oppTriFs[trisAlt.alt_strip_1_loose].append(altO3)
-        this.oppTriFs[trisAlt.alt_strip_I].append(altO3)
-        this.oppTriFs[trisAlt.alt_strip_II].append(altO3)
-        this.oppTriFs[trisAlt.rot_strip_1_loose].append(stdO3)
-        this.oppTriFs[trisAlt.arot_strip_1_loose].append(altO3)
-        this.oppTriFs[trisAlt.rot_star_1_loose].append(stdO3_x)
-        this.oppTriFs[trisAlt.arot_star_1_loose].append(altO3_x)
+        oppTriFs[trisAlt.strip_1_loose].append(stdO3)
+        oppTriFs[trisAlt.strip_I].append(stdO3)
+        oppTriFs[trisAlt.strip_II].append(stdO3)
+        oppTriFs[trisAlt.alt_strip_1_loose].append(altO3)
+        oppTriFs[trisAlt.alt_strip_I].append(altO3)
+        oppTriFs[trisAlt.alt_strip_II].append(altO3)
+        oppTriFs[trisAlt.rot_strip_1_loose].append(stdO3)
+        oppTriFs[trisAlt.arot_strip_1_loose].append(altO3)
+        oppTriFs[trisAlt.rot_star_1_loose].append(stdO3_x)
+        oppTriFs[trisAlt.arot_star_1_loose].append(altO3_x)
+        this.oppTriFs_alts.append(oppTriFs)
 
 	strip      = [0, 1, 1, 1, 0, 0]
 	loose      = [0, 0, 1, 0, 1, 1]
@@ -469,7 +473,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	refl_2     = [1, 1, 0]
 	crossed_2  = [1, 0, 1, 0]
 
-        this.triColIds = {
+        this.triColIds_alts = []
+        this.triColIds_alts.append({
                 trisAlt.strip_1_loose:		loose,
                 trisAlt.strip_I:		strip,
                 trisAlt.strip_II:		strip,
@@ -485,7 +490,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:		        refl_1,
                 trisAlt.refl_2:		        refl_2,
                 trisAlt.crossed_2:		crossed_2,
-            }
+            })
 
 	std  = [1, 18, 19, 20, 21]
 	alt  = [2, 24, 25, 26, 27]
@@ -495,7 +500,8 @@ class Shape(Heptagons.FldHeptagonShape):
 		[0, 12, 40], [12, 14, 40], [14, 11, 40], [11, 13, 40],
 		[13, 0, 40]
 	]
-        this.o5triFs = {
+        this.o5triFs_alts = []
+        this.o5triFs_alts.append({
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
                 trisAlt.strip_II:		[std],
@@ -511,14 +517,15 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:		        [refl_1],
                 trisAlt.refl_2:		        [refl_2],
                 trisAlt.crossed_2:		crossed_2,
-	    }
+	    })
 
 	std    = [6, 16, 17]
 	alt    = [5, 22, 23]
 	refl_1 = [0, 9, 10]
 	refl_2 = [5, 34, 22, 35, 23, 8]
 	crossed_2 = [4, 28, 29]
-        this.o3triFs = {
+        this.o3triFs_alts = []
+        this.o3triFs_alts.append({
                 trisAlt.strip_1_loose:		[std],
                 trisAlt.strip_I:		[std],
                 trisAlt.strip_II:		[std],
@@ -535,7 +542,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:		        [refl_1],
                 trisAlt.refl_2:		        [refl_2],
                 trisAlt.crossed_2:		[crossed_2],
-	    }
+	    })
 
 	strip_1_loose = [2, 7, 2, 11, 2, 18]
 	stripI        = [3, 11, 2, 11, 2, 18]
@@ -545,7 +552,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	refl_1        = [2, 7, 2, 39, 1, 16, 0, 9]
 	refl_2        = [5, 8, 5, 34, 6, 21, 0, 14]
 	crossed_2     = [4, 28, 5, 35, 5, 26, 6, 20, 0, 13]
-        this.triEs = {
+        this.triEs_alts = []
+        this.triEs_alts.append({
                 trisAlt.strip_1_loose:     strip_1_loose,
                 trisAlt.strip_I:           stripI,
                 trisAlt.strip_II:          stripII,
@@ -557,7 +565,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:            refl_1,
                 trisAlt.refl_2:            refl_2,
                 trisAlt.crossed_2:         crossed_2,
-            }
+            })
+
 	strip_1_loose = [5, 15, 5, 17]
 	stripI        = [5, 15, 5, 17]
 	stripII       = [4, 17, 5, 17]
@@ -567,7 +576,8 @@ class Shape(Heptagons.FldHeptagonShape):
 	rot_star      = [13, 15, 6, 13]
 	arot_star     = [13, 15, 13, 17]
 	refl          = []
-        this.oppTriEs = {
+        this.oppTriEs_alts = []
+        this.oppTriEs_alts.append({
                 trisAlt.strip_1_loose:      strip_1_loose,
                 trisAlt.strip_I:            stripI,
                 trisAlt.strip_II:           stripII,
@@ -583,12 +593,13 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:             refl,
                 trisAlt.refl_2:             refl,
                 trisAlt.crossed_2:          refl,
-            }
+            })
 
 	std  = [6, 16, 16, 17, 17, 6]
 	alt  = [5, 22, 22, 23, 23, 5]
 	refl = []
-        this.o3triEs = {
+        this.o3triEs_alts = []
+        this.o3triEs_alts.append({
                 trisAlt.strip_1_loose:	    std,
                 trisAlt.strip_I:	    std,
                 trisAlt.strip_II:	    std,
@@ -605,12 +616,13 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:		    refl,
                 trisAlt.refl_2:		    refl,
                 trisAlt.crossed_2:	    refl,
-            }
+            })
 
 	std    = [1, 18, 18, 19, 19, 20, 20, 21, 21, 1]
 	alt    = [2, 24, 24, 25, 25, 26, 26, 27, 27, 2]
 	refl   = []
-        this.o5triEs = {
+        this.o5triEs_alts = []
+        this.o5triEs_alts.append({
                 trisAlt.strip_1_loose:	    std,
                 trisAlt.strip_I:	    std,
                 trisAlt.strip_II:	    std,
@@ -626,7 +638,16 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.refl_1:		    refl,
                 trisAlt.refl_2:		    refl,
                 trisAlt.crossed_2:	    refl,
-            }
+            })
+        this.triFs     = this.triFs_alts[0]
+        this.oppTriFs  = this.oppTriFs_alts[0]
+        this.triColIds = this.triColIds_alts[0]
+        this.o5triFs   = this.o5triFs_alts[0]
+        this.o3triFs   = this.o3triFs_alts[0]
+        this.triEs     = this.triEs_alts[0]
+        this.oppTriEs  = this.oppTriEs_alts[0]
+        this.o3triEs   = this.o3triEs_alts[0]
+        this.o5triEs   = this.o5triEs_alts[0]
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
