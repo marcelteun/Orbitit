@@ -226,16 +226,28 @@ egShape = Geom3D.IsometricShape(
 )
 #colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
 #colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
+useSimpleColours = False
 colStabiliser = isometry.C2(setup = {'axis': [1.0, 0.0, 0.0]})
 colQuotientSet = useIsom / colStabiliser
-useRgbCols = [
-    rgb.indianRed,
-    rgb.mediumBlue,
-    rgb.limeGreen,
-    rgb.cornflowerBlue,
-    rgb.mistyRose1,
-    rgb.gray20,
-]
+if useSimpleColours:
+    useRgbCols = [
+        rgb.gray95,
+        rgb.gray80,
+        rgb.gray65,
+        rgb.gray50,
+        rgb.gray35,
+        rgb.gray20,
+    ]
+else:
+    useRgbCols = [
+        rgb.indianRed,
+        rgb.mediumBlue,
+        rgb.limeGreen,
+        rgb.cornflowerBlue,
+        rgb.mistyRose1,
+        rgb.gray20,
+    ]
+
 heptColPerIsom = []
 for isom in useIsom:
     for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
