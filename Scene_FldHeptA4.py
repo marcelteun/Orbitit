@@ -900,6 +900,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		psp = this.predefReflSpecPos
 	    else:
 		psp = this.predefRotSpecPos
+            if this.specPosIndex >= len(psp[this.prePos]):
+                this.specPosIndex = -1
 	    in_data = psp[this.prePos][this.specPosIndex]
 	    fold_method_str = this.fileStrMapFoldMethodStr(in_data['file'])
 	    assert fold_method_str != None

@@ -737,6 +737,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		psp = this.predefReflSpecPos
 	    else:
 		psp = this.predefRotSpecPos
+            if this.specPosIndex >= len(psp[this.prePos]):
+                this.specPosIndex = -1
 	    data = psp[this.prePos][this.specPosIndex]
 	    if data.has_key('file'):
 		print 'see file %s/%s' % (this.rDir, data['file'])
