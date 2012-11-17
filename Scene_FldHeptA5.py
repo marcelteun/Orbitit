@@ -212,19 +212,11 @@ class Shape(Heptagons.FldHeptagonShape):
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
         # TODO: move this to its iwn special function and add GUI
         Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
-        if (this.oppEdgeAlternative == trisAlt.refl_1
-            or this.oppEdgeAlternative == trisAlt.refl_2
-            or this.oppEdgeAlternative == trisAlt.crossed_2
+        if (this.edgeAlternative == trisAlt.strip_I
+            or this.edgeAlternative == trisAlt.strip_II
+            or this.oppEdgeAlternative == trisAlt.strip_I
+            or this.oppEdgeAlternative == trisAlt.strip_II
         ):
-            this.triFs    = this.triFs_alts[0]
-            this.triEs    = this.triEs_alts[0]
-            this.oppTriFs = this.oppTriFs_alts[0]
-            this.oppTriEs = this.oppTriEs_alts[0]
-            this.o5triEs  = this.o5triEs_alts[0]
-            this.o5triFs  = this.o5triFs_alts[0]
-            this.o3triEs  = this.o3triEs_alts[0]
-            this.o3triFs  = this.o3triFs_alts[0]
-        else:
             this.triFs    = this.triFs_alts[1]
             this.triEs    = this.triEs_alts[1]
             this.oppTriFs = this.oppTriFs_alts[1]
@@ -233,6 +225,15 @@ class Shape(Heptagons.FldHeptagonShape):
             this.o5triFs  = this.o5triFs_alts[1]
             this.o3triEs  = this.o3triEs_alts[1]
             this.o3triFs  = this.o3triFs_alts[1]
+        else:
+            this.triFs    = this.triFs_alts[0]
+            this.triEs    = this.triEs_alts[0]
+            this.oppTriFs = this.oppTriFs_alts[0]
+            this.oppTriEs = this.oppTriEs_alts[0]
+            this.o5triEs  = this.o5triEs_alts[0]
+            this.o5triFs  = this.o5triFs_alts[0]
+            this.o3triEs  = this.o3triEs_alts[0]
+            this.o3triFs  = this.o3triFs_alts[0]
 
     def setV(this):
 	#
@@ -466,21 +467,17 @@ class Shape(Heptagons.FldHeptagonShape):
         stripI = [[1, 40, 11], [1, 2, 40], [0, 1, 11]] # middle, centre, o3
         stripII = [[2, 11, 1], [2, 40, 11], [0, 1, 11]]
         triFs = {
-                trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
                 trisAlt.strip_II:           stripII[:],
                 trisAlt.star:               star[:],
-                trisAlt.star_1_loose:       star_1_loose[:],
             }
         this.triFs_alts.append(triFs)
 	stripI = [2, 40, 1, 40, 1, 11]
 	stripII = [2, 40, 2, 11, 1, 11]
         this.triEs_alts.append({
-                trisAlt.strip_1_loose:      strip_1_loose,
                 trisAlt.strip_I:            stripI,
                 trisAlt.strip_II:           stripII,
                 trisAlt.star:               star,
-                trisAlt.star_1_loose:       star_1_loose,
             })
 
         # Triangles: opposite
@@ -569,21 +566,17 @@ class Shape(Heptagons.FldHeptagonShape):
         stripI = [[4, 23, 17], [2, 3, 40], [5, 23, 4]] # middle, centre, o5
         stripII = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
         oppTriFs = {
-                trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
                 trisAlt.strip_II:           stripII[:],
                 trisAlt.star:               star[:],
-                trisAlt.star_1_loose:       star_1_loose[:],
         }
         this.oppTriFs_alts.append(oppTriFs)
 	stripI        = [4, 17, 4, 23]
 	stripII       = [8, 23, 4, 23]
         this.oppTriEs_alts.append({
-                trisAlt.strip_1_loose:      strip_1_loose,
                 trisAlt.strip_I:            stripI,
                 trisAlt.strip_II:           stripII,
                 trisAlt.star:               star,
-                trisAlt.star_1_loose:       star_1_loose,
             })
 
         # Colours:
@@ -667,19 +660,15 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         o5 = [0, 11, 12, 13, 14]
         this.o5triFs_alts.append({
-                trisAlt.strip_1_loose:		[o5],
                 trisAlt.strip_I:		[o5],
                 trisAlt.strip_II:		[o5],
                 trisAlt.star:			[o5],
-                trisAlt.star_1_loose:		[o5],
             })
 	o5    = [0, 11, 11, 12, 12, 13, 13, 14, 14, 0]
         this.o5triEs_alts.append({
-                trisAlt.strip_1_loose:	    o5,
                 trisAlt.strip_I:	    o5,
                 trisAlt.strip_II:	    o5,
                 trisAlt.star:		    o5,
-                trisAlt.star_1_loose:	    o5,
             })
 
         # O3 ( = opposite)
@@ -733,19 +722,15 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         o3 = [5, 22, 23]
         this.o3triFs_alts.append({
-                trisAlt.strip_1_loose:		[o3],
                 trisAlt.strip_I:		[o3],
                 trisAlt.strip_II:		[o3],
                 trisAlt.star:			[o3],
-                trisAlt.star_1_loose:		[o3],
 	    })
 	o3  = [5, 22, 22, 23, 23, 5]
         this.o3triEs_alts.append({
-                trisAlt.strip_1_loose:	    o3,
                 trisAlt.strip_I:	    o3,
                 trisAlt.strip_II:	    o3,
                 trisAlt.star:		    o3,
-                trisAlt.star_1_loose:	    o3,
             })
 
         this.triColIds = this.triColIds_alts[0]
