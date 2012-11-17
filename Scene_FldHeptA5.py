@@ -166,7 +166,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.height = 2.7
 	this.dihedralAngle = Geom3D.Deg2Rad * 119
 	this.initArrs()
-        this.setEdgeAlternative(trisAlt.strip_I, trisAlt.strip_I)
+        this.setEdgeAlternative(trisAlt.strip_II, trisAlt.strip_II)
 	this.setV()
 
     def getStatusStr(this):
@@ -463,7 +463,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:         crossed_2,
             })
         # alternative fill 1:
-        stripI = [[1, 40, 11], [1, 2, 40], [0, 1, 11]]
+        stripI = [[1, 40, 11], [1, 2, 40], [0, 1, 11]] # middle, centre, o3
+        stripII = [[2, 11, 1], [2, 40, 11], [0, 1, 11]]
         triFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
@@ -473,6 +474,7 @@ class Shape(Heptagons.FldHeptagonShape):
             }
         this.triFs_alts.append(triFs)
 	stripI = [2, 40, 1, 40, 1, 11]
+	stripII = [2, 40, 2, 11, 1, 11]
         this.triEs_alts.append({
                 trisAlt.strip_1_loose:      strip_1_loose,
                 trisAlt.strip_I:            stripI,
@@ -564,7 +566,8 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:          refl,
             })
         # alternative fill 1:
-        stripI = [[4, 23, 17], [2, 3, 40], [5, 23, 4]] # 3
+        stripI = [[4, 23, 17], [2, 3, 40], [5, 23, 4]] # middle, centre, o5
+        stripII = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
         oppTriFs = {
                 trisAlt.strip_1_loose:      strip_1_loose[:],
                 trisAlt.strip_I:            stripI[:],
@@ -574,6 +577,7 @@ class Shape(Heptagons.FldHeptagonShape):
         }
         this.oppTriFs_alts.append(oppTriFs)
 	stripI        = [4, 17, 4, 23]
+	stripII       = [8, 23, 4, 23]
         this.oppTriEs_alts.append({
                 trisAlt.strip_1_loose:      strip_1_loose,
                 trisAlt.strip_I:            stripI,
