@@ -165,8 +165,8 @@ class Shape(Heptagons.FldHeptagonShape):
         this.posAngleMax = math.pi/2
 	this.height = 2.7
 	this.dihedralAngle = Geom3D.Deg2Rad * 119
-        this.setEdgeAlternative(trisAlt.crossed_2, trisAlt.crossed_2)
 	this.initArrs()
+        this.setEdgeAlternative(trisAlt.strip_I, trisAlt.strip_I)
 	this.setV()
 
     def getStatusStr(this):
@@ -209,8 +209,9 @@ class Shape(Heptagons.FldHeptagonShape):
 		)
         return s
 
-    def setV(this):
-        # TODO: move this to somewhere else:
+    def setEdgeAlternative(this, alt = None, oppositeAlt = None):
+        # TODO: move this to its iwn special function and add GUI
+        Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
         if (this.oppEdgeAlternative == trisAlt.refl_1
             or this.oppEdgeAlternative == trisAlt.refl_2
             or this.oppEdgeAlternative == trisAlt.crossed_2
@@ -233,6 +234,7 @@ class Shape(Heptagons.FldHeptagonShape):
             this.o3triEs  = this.o3triEs_alts[1]
             this.o3triFs  = this.o3triFs_alts[1]
 
+    def setV(this):
 	#
 	# o3:
 	#     0 -> 9 -> 10
