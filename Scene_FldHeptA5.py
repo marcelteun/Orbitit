@@ -467,6 +467,7 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         stripI = [[1, 40, 11], [1, 2, 40], [0, 1, 11]] # middle, centre, o3
         stripII = [[2, 11, 1], [2, 40, 11], [0, 1, 11]]
+        star = [[0, 1, 40], [1, 2, 40], [0, 40, 11]]
         triFs = {
                 trisAlt.strip_I:            stripI[:],
                 trisAlt.strip_II:           stripII[:],
@@ -475,6 +476,7 @@ class Shape(Heptagons.FldHeptagonShape):
         this.triFs_alts.append(triFs)
 	stripI = [2, 40, 1, 40, 1, 11]
 	stripII = [2, 40, 2, 11, 1, 11]
+	star = [2, 40, 1, 40, 0, 40]
         this.triEs_alts.append({
                 trisAlt.strip_I:            stripI,
                 trisAlt.strip_II:           stripII,
@@ -564,20 +566,23 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:          refl,
             })
         # alternative fill 1:
-        stripI = [[4, 23, 17], [2, 3, 40], [5, 23, 4]] # middle, centre, o5
-        stripII = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
+        # middle, centre, o5
+        stripI       = [[4, 23, 17], [2, 3, 40], [5, 23, 4]]
+        stripII      = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
+        star         = [[4, 5, 17], [8, 4, 17], [5, 23, 17]]
         oppTriFs = {
-                trisAlt.strip_I:            stripI[:],
-                trisAlt.strip_II:           stripII[:],
-                trisAlt.star:               star[:],
+                trisAlt.strip_I:      stripI[:],
+                trisAlt.strip_II:     stripII[:],
+                trisAlt.star:         star[:],
         }
         this.oppTriFs_alts.append(oppTriFs)
-	stripI        = [4, 17, 4, 23]
-	stripII       = [8, 23, 4, 23]
+	stripI       = [4, 17, 4, 23]
+	stripII      = [8, 23, 5, 17]
+	star         = [4, 17, 5, 17]
         this.oppTriEs_alts.append({
-                trisAlt.strip_I:            stripI,
-                trisAlt.strip_II:           stripII,
-                trisAlt.star:               star,
+                trisAlt.strip_I:      stripI,
+                trisAlt.strip_II:     stripII,
+                trisAlt.star:         star,
             })
 
         # Colours:
