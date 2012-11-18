@@ -184,8 +184,10 @@ class TrisAlt_base(object):
 	#print 'DBP map(%s) ==> %s' % (this.stringify[trisFillId], t)
 	return t
 
+    baseKey = {}
     def __init__(this):
-	this.baseKey = {}
+        # TODO? Note that only s that aren't primitives (isinstance(x, int))
+        # should be added here.
 	this.choiceList = [s for s in this.stringify.itervalues()]
 	this.mapKeyOnFileStr = {}
 	this.mapStrOnFileStr = {}
@@ -238,11 +240,17 @@ def Def_TrisAlt(name, tris_keys):
     class_dict = {
         'mixed':     False,
         'stringify': {},
-        'key':       {}
+        'key':       {},
+        'baseKey':   {}
     }
+    # Always add all primitives:
+    for (k, s) in TrisAlt_base.stringify.iteritems():
+        class_dict['stringify'][k] = s
+        class_dict['key'][s] = k
+        class_dict[toTrisAltKeyStr(k)] = k
     for k in tris_keys:
         if isinstance(k, int):
-            s = TrisAlt_base.stringify[k]
+            class_dict['baseKey'][k] = True
         else:
             # must be a tuple of 2
             assert len(k) == 2, 'Exptected 2 tuple, got: %s.' % k
@@ -258,9 +266,9 @@ def Def_TrisAlt(name, tris_keys):
                 s = '%s - %s' % (
                             TrisAlt_base.stringify[k[0]],
                             TrisAlt_base.stringify[k[1]])
-        class_dict['stringify'][k] = s
-        class_dict['key'][s] = k
-        class_dict[toTrisAltKeyStr(k)] = k
+            class_dict['stringify'][k] = s
+            class_dict['key'][s] = k
+            class_dict[toTrisAltKeyStr(k)] = k
     return Meta_TrisAlt(name, (TrisAlt_base,), class_dict)
 
 TrisAlt = Def_TrisAlt('TrisAlt', [
@@ -1706,7 +1714,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    else:
 		def isValid (c):
 		    c_key = this.trisAlt.key[c]
-		    if this.trisAlt.isBaseKey(c_key) or type(c_key) == type(1):
+		    if this.trisAlt.isBaseKey(c_key) or isinstance(c_key, int):
 			return False
 		    else:
 			if this.symBase == isometry.A4:
