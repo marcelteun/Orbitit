@@ -58,7 +58,7 @@ alt_bit = 8
 loose_bit = 16
 rot_bit   = 32
 twist_bit = 64
-class TrisAlt:
+class TrisAlt_base(object):
     # Note nrs should be different from below
     refl_1             = 0
     strip_I            = 1
@@ -75,147 +75,63 @@ class TrisAlt:
     arot_strip_1_loose = strip_I  | loose_bit | alt_bit | rot_bit
     rot_star_1_loose   = star     | loose_bit           | rot_bit
     arot_star_1_loose  = star     | loose_bit | alt_bit | rot_bit
+    rot_strip_I        = strip_I  |                       rot_bit
+    rot_star           = star     |                       rot_bit
+    arot_strip_I       = strip_I              | alt_bit | rot_bit
+    arot_star          = star                 | alt_bit | rot_bit
+    # TODO: this is a new position really
+    # TODO: rename to refl2 for S4A4
+    # TODO: rename to some 1 - loose variant for A4
     twist_strip_I      = strip_I                                  | twist_bit
-
-    strip_I_strip_I		= (strip_I, strip_I)
-    strip_I_strip_II		= (strip_I, strip_II)
-    strip_I_star		= (strip_I, star)
-    strip_I_alt_strip_I		= (strip_I, alt_strip_I)
-    strip_I_alt_strip_II	= (strip_I, alt_strip_II)
-
-    strip_II_strip_I		= (strip_II, strip_I)
-    strip_II_strip_II		= (strip_II, strip_II)
-    strip_II_star		= (strip_II, star)
-    strip_II_alt_strip_I	= (strip_II, alt_strip_I)
-    strip_II_alt_strip_II	= (strip_II, alt_strip_II)
-
-    star_strip_I		= (star, strip_I)
-    star_strip_II		= (star, strip_II)
-    star_star			= (star, star)
-    star_alt_strip_I		= (star, alt_strip_I)
-    star_alt_strip_II		= (star, alt_strip_II)
-
-    alt_strip_I_strip_I		= (alt_strip_I, strip_I)
-    alt_strip_I_strip_II	= (alt_strip_I, strip_II)
-    alt_strip_I_star		= (alt_strip_I, star)
-    alt_strip_I_alt_strip_I	= (alt_strip_I, alt_strip_I)
-    alt_strip_I_alt_strip_II	= (alt_strip_I, alt_strip_II)
-
-    twist_strip_I_strip_I	= (twist_strip_I, twist_strip_I)
-
-    alt_strip_II_strip_I	= (alt_strip_II, strip_I)
-    alt_strip_II_strip_II	= (alt_strip_II, strip_II)
-    alt_strip_II_star		= (alt_strip_II, star)
-    alt_strip_II_alt_strip_I	= (alt_strip_II, alt_strip_I)
-    alt_strip_II_alt_strip_II	= (alt_strip_II, alt_strip_II)
-
-    strip_1_loose_strip		= (strip_1_loose, strip_1_loose)
-    strip_1_loose_star		= (strip_1_loose, star_1_loose)
-    strip_1_loose_alt_strip	= (strip_1_loose, alt_strip_1_loose)
-
-    star_1_loose_strip		= (star_1_loose, strip_1_loose)
-    star_1_loose_star		= (star_1_loose, star_1_loose)
-    star_1_loose_alt_strip	= (star_1_loose, alt_strip_1_loose)
-
-    alt_strip_1_loose_strip	= (alt_strip_1_loose, strip_1_loose)
-    alt_strip_1_loose_star	= (alt_strip_1_loose, star_1_loose)
-    alt_strip_1_loose_alt_strip	= (alt_strip_1_loose, alt_strip_1_loose)
-
-    star_1_loose_rot_strip	= (star_1_loose, rot_strip_1_loose)
-    strip_1_loose_rot_strip	= (strip_1_loose, rot_strip_1_loose)
-    alt_strip_1_loose_rot_strip	= (alt_strip_1_loose, rot_strip_1_loose)
-
-    star_1_loose_arot_strip	= (star_1_loose, arot_strip_1_loose)
-    strip_1_loose_arot_strip	= (strip_1_loose, arot_strip_1_loose)
-    alt_strip_1_loose_arot_strip= (alt_strip_1_loose, arot_strip_1_loose)
-
-    star_1_loose_rot_star	= (star_1_loose, rot_star_1_loose)
-    strip_1_loose_rot_star	= (strip_1_loose, rot_star_1_loose)
-    alt_strip_1_loose_rot_star	= (alt_strip_1_loose, rot_star_1_loose)
-
-    star_1_loose_arot_star	= (star_1_loose, arot_star_1_loose)
-    strip_1_loose_arot_star	= (strip_1_loose, arot_star_1_loose)
-    alt_strip_1_loose_arot_star	= (alt_strip_1_loose, arot_star_1_loose)
 
     stringify = {
 	refl_1:			'refl 1',
 	refl_2:			'refl 2',
 	crossed_2:		'crossed',
-	strip_1_loose:		'Strip 1 Loose',
-	strip_I:		'Strip I',
-	strip_II:		'Strip II',
-	star:			'Shell',
-	star_1_loose:		'Shell 1 Loose',
-	alt_strip_I:		'Alternative Strip I',
-	alt_strip_II:		'Alternative Strip II',
-	alt_strip_1_loose:	'Alternative Strip 1 loose',
+	strip_1_loose:		'strip 1 Loose',
+	strip_I:		'strip I',
+	strip_II:		'strip II',
+	star:			'shell',
+	star_1_loose:		'shell 1 loose',
+	alt_strip_I:		'alt. strip I',
+	alt_strip_II:		'alt. strip II',
+	alt_strip_1_loose:	'alt. strip 1 loose',
 
-	twist_strip_I:		'Twisted',
+	twist_strip_I:		'twisted',
 
-	rot_strip_1_loose:	'Rot. Strip 1 loose',
-	rot_star_1_loose:	'Rot. Shell 1 loose',
-	arot_strip_1_loose:	'Alternative Rot. Strip 1 loose',
-	arot_star_1_loose:	'Alternative Rot. Shell 1 loose',
+	rot_strip_1_loose:	'rot. strip 1 loose',
+	rot_star_1_loose:	'rot. shell 1 loose',
+	arot_strip_1_loose:	'alt. rot. strip 1 loose',
+	arot_star_1_loose:	'alt. rot. shell 1 loose',
+	rot_strip_I:            'rot. strip I',
+	rot_star:               'rot. shell',
+	arot_strip_I:	        'alt. rot. strip I',
+	arot_star:	        'alt. rot. shell',
+    }
 
-	strip_I_strip_I:		'strip I - strip I',
-	strip_I_strip_II:		'strip I - strip II',
-	strip_I_star:			'strip I - shell',
-	strip_I_alt_strip_I:		'strip I - alt. strip I',
-	strip_I_alt_strip_II:		'strip I - alt. strip II',
+    class_key = {
+	'refl_1':            refl_1,
+	'refl_2':            refl_2,
+	'crossed_2':         crossed_2,
+	'strip_I':           strip_I,
+	'strip_II':          strip_II,
+	'star':              star,
+	'strip_1_loose':     strip_1_loose,
+	'star_1_loose':      star_1_loose,
+	'alt_strip_I':       alt_strip_I,
+	'alt_strip_II':      alt_strip_II,
+	'alt_strip_1_loose': alt_strip_1_loose,
 
-	strip_II_strip_I:		'strip II - strip I',
-	strip_II_strip_II:		'strip II - strip II',
-	strip_II_star:			'strip II - shell',
-	strip_II_alt_strip_I:		'strip II - alt. strip I',
-	strip_II_alt_strip_II:		'strip II - alt. strip II',
+	'twist_strip_I':     twist_strip_I,
 
-	star_strip_I:			'shell - strip I',
-	star_strip_II:			'shell - strip II',
-	star_star:			'shell - shell',
-	star_alt_strip_I:		'shell - alt. strip I',
-	star_alt_strip_II:		'shell - alt. strip II',
-
-	alt_strip_I_strip_I:		'alt. strip I - strip I',
-	alt_strip_I_strip_II:		'alt. strip I - strip II',
-	alt_strip_I_star:		'alt. strip I - shell',
-	alt_strip_I_alt_strip_I:	'alt. strip I - alt. strip I',
-	alt_strip_I_alt_strip_II:	'alt. strip I - alt. strip II',
-
-	twist_strip_I_strip_I:		'strip I - twisted - strip I',
-
-	alt_strip_II_strip_I:		'alt. strip II - strip I',
-	alt_strip_II_strip_II:		'alt. strip II - strip II',
-	alt_strip_II_star:		'alt. strip II - shell',
-	alt_strip_II_alt_strip_I:	'alt. strip II - alt. strip I',
-	alt_strip_II_alt_strip_II:	'alt. strip II - alt. strip II',
-
-	strip_1_loose_strip:		'strip - 1 loose - strip',
-	strip_1_loose_star:		'strip - 1 loose - shell',
-	strip_1_loose_alt_strip:	'strip - 1 loose - alt. strip',
-
-	star_1_loose_strip:		'shell - 1 loose - strip',
-	star_1_loose_star:		'shell - 1 loose - shell',
-	star_1_loose_alt_strip:		'shell - 1 loose - alt. strip',
-
-	alt_strip_1_loose_strip:	'alt. strip - 1 loose - strip',
-	alt_strip_1_loose_star:		'alt. strip - 1 loose - shell',
-	alt_strip_1_loose_alt_strip:	'alt. strip - 1 loose - alt. strip',
-
-	star_1_loose_rot_strip:		'shell - 1 loose - rot. strip',
-	strip_1_loose_rot_strip:	'strip - 1 loose - rot. strip',
-	alt_strip_1_loose_rot_strip:	'alt. strip - 1 loose - rot. strip',
-
-	star_1_loose_arot_strip:	'shell - 1 loose - alt. rot. strip',
-	strip_1_loose_arot_strip:	'strip - 1 loose - alt. rot. strip',
-	alt_strip_1_loose_arot_strip:	'alt. strip - 1 loose - alt. rot. strip',
-
-	star_1_loose_rot_star:		'shell - 1 loose - rot. shell',
-	strip_1_loose_rot_star:		'strip - 1 loose - rot. shell',
-	alt_strip_1_loose_rot_star:	'alt. strip - 1 loose - rot. shell',
-
-	star_1_loose_arot_star:		'shell - 1 loose - alt. rot. shell',
-	strip_1_loose_arot_star:	'strip - 1 loose - alt. rot. shell',
-	alt_strip_1_loose_arot_star:	'alt. strip - 1 loose - alt. rot. shell',
+	'rot_strip_1_loose':  rot_strip_1_loose,
+	'rot_star_1_loose':   rot_star_1_loose,
+	'arot_strip_1_loose': arot_strip_1_loose,
+	'arot_star_1_loose':  arot_star_1_loose,
+	'rot_strip_I':        rot_strip_I,
+	'rot_star':           rot_star,
+	'arot_strip_I':       arot_strip_I,
+	'arot_star':          arot_star
     }
 
     key = {
@@ -237,66 +153,10 @@ class TrisAlt:
 	stringify[rot_star_1_loose]:   rot_star_1_loose,
 	stringify[arot_strip_1_loose]: arot_strip_1_loose,
 	stringify[arot_star_1_loose]:  arot_star_1_loose,
-
-	stringify[strip_I_strip_I]:		strip_I_strip_I,
-	stringify[strip_I_strip_II]:		strip_I_strip_II,
-	stringify[strip_I_star]:		strip_I_star,
-	stringify[strip_I_alt_strip_I]:		strip_I_alt_strip_I,
-	stringify[strip_I_alt_strip_II]:	strip_I_alt_strip_II,
-
-	stringify[strip_II_strip_I]:		strip_II_strip_I,
-	stringify[strip_II_strip_II]:		strip_II_strip_II,
-	stringify[strip_II_star]:		strip_II_star,
-	stringify[strip_II_alt_strip_I]:	strip_II_alt_strip_I,
-	stringify[strip_II_alt_strip_II]:	strip_II_alt_strip_II,
-
-	stringify[star_strip_I]:		star_strip_I,
-	stringify[star_strip_II]:		star_strip_II,
-	stringify[star_star]:			star_star,
-	stringify[star_alt_strip_I]:		star_alt_strip_I,
-	stringify[star_alt_strip_II]:		star_alt_strip_II,
-
-	stringify[alt_strip_I_strip_I]:		alt_strip_I_strip_I,
-	stringify[alt_strip_I_strip_II]:	alt_strip_I_strip_II,
-	stringify[alt_strip_I_star]:		alt_strip_I_star,
-	stringify[alt_strip_I_alt_strip_I]:	alt_strip_I_alt_strip_I,
-	stringify[alt_strip_I_alt_strip_II]:	alt_strip_I_alt_strip_II,
-
-	stringify[twist_strip_I_strip_I]:	twist_strip_I_strip_I,
-
-	stringify[alt_strip_II_strip_I]:	alt_strip_II_strip_I,
-	stringify[alt_strip_II_strip_II]:	alt_strip_II_strip_II,
-	stringify[alt_strip_II_star]:		alt_strip_II_star,
-	stringify[alt_strip_II_alt_strip_I]:	alt_strip_II_alt_strip_I,
-	stringify[alt_strip_II_alt_strip_II]:	alt_strip_II_alt_strip_II,
-
-	stringify[strip_1_loose_strip]:		strip_1_loose_strip,
-	stringify[strip_1_loose_star]:		strip_1_loose_star,
-	stringify[strip_1_loose_alt_strip]:	strip_1_loose_alt_strip,
-
-	stringify[star_1_loose_strip]:		star_1_loose_strip,
-	stringify[star_1_loose_star]:		star_1_loose_star,
-	stringify[star_1_loose_alt_strip]:	star_1_loose_alt_strip,
-
-	stringify[alt_strip_1_loose_strip]:	alt_strip_1_loose_strip,
-	stringify[alt_strip_1_loose_star]:	alt_strip_1_loose_star,
-	stringify[alt_strip_1_loose_alt_strip]:	alt_strip_1_loose_alt_strip,
-
-	stringify[star_1_loose_rot_strip]:	star_1_loose_rot_strip,
-	stringify[strip_1_loose_rot_strip]:	strip_1_loose_rot_strip,
-	stringify[alt_strip_1_loose_rot_strip]:	alt_strip_1_loose_rot_strip,
-
-	stringify[star_1_loose_arot_strip]:	star_1_loose_arot_strip,
-	stringify[strip_1_loose_arot_strip]:	strip_1_loose_arot_strip,
-	stringify[alt_strip_1_loose_arot_strip]:alt_strip_1_loose_arot_strip,
-
-	stringify[star_1_loose_rot_star]:	star_1_loose_rot_star,
-	stringify[strip_1_loose_rot_star]:	strip_1_loose_rot_star,
-	stringify[alt_strip_1_loose_rot_star]:	alt_strip_1_loose_rot_star,
-
-	stringify[star_1_loose_arot_star]:	star_1_loose_arot_star,
-	stringify[strip_1_loose_arot_star]:	strip_1_loose_arot_star,
-	stringify[alt_strip_1_loose_arot_star]:	alt_strip_1_loose_arot_star,
+	stringify[rot_strip_I]:        rot_strip_I,
+	stringify[rot_star]:           rot_star,
+	stringify[arot_strip_I]:       arot_strip_I,
+	stringify[arot_star]:          arot_star,
     }
 
     def isBaseKey(this, k):
@@ -309,7 +169,7 @@ class TrisAlt:
 	assert(tId != None or tStr != None)
 	if (tId == None):
 	    tId = this.key[tStr]
-	if not type(tId) == int:
+	if not isinstance(tId, int):
 	    tStr0 = this.stringify[tId[0]]
 	    tStr1 = this.stringify[tId[1]]
 	    tStr = "%s-opp_%s" % (tStr0, tStr1)
@@ -319,7 +179,7 @@ class TrisAlt:
 	t = string.join(tStr.split(), '_').lower().replace('ernative', '')
 	t = t.replace('_ii', '_II')
 	t = t.replace('_i', '_I')
-	t = t.replace('_i', '_I')
+	t = t.replace('alt.', 'alt')
 	t = t.replace('rot.', 'rot')
 	#print 'DBP map(%s) ==> %s' % (this.stringify[trisFillId], t)
 	return t
@@ -337,6 +197,153 @@ class TrisAlt:
 	    this.mapStrOnFileStr[tStr]    = fileStr
 	    this.mapFileStrOnStr[fileStr] = tStr
 	    this.mapFileStrOnKey[fileStr] = tId
+
+def toTrisAltKeyStr(tId = None, tStr = None):
+    assert(tId != None or tStr != None)
+    if (tId == None):
+        tId = TrisAlt_base.key[tStr]
+    if not isinstance(tId, int):
+        if tId[0] & loose_bit and tId[1] & loose_bit:
+            tStr = '%s_1loose_%s' % (
+                        TrisAlt_base.stringify[tId[0] & ~loose_bit],
+                        TrisAlt_base.stringify[tId[1] & ~loose_bit])
+        elif tId[0] & loose_bit:
+            tStr = '%s__%s' % (
+                        TrisAlt_base.stringify[tId[0]],
+                        TrisAlt_base.stringify[tId[1]])
+        # TODO: remove share under new position
+        elif (tId[0] == TrisAlt_base.twist_strip_I and
+            tId[1] == TrisAlt_base.twist_strip_I
+        ):
+            tStr = 'twist_strip_I_strip_I'
+        else:
+            tStr = '%s_%s' % (
+                        TrisAlt_base.stringify[tId[0]],
+                        TrisAlt_base.stringify[tId[1]])
+    elif tStr == None:
+        tStr = TrisAlt_base.stringify[tId]
+    t = string.join(tStr.split(), '_')
+    t = t.replace('_ii', '_II')
+    t = t.replace('_i', '_I')
+    t = t.replace('alt._rot.', 'arot')
+    t = t.replace('rot.', 'rot')
+    t = t.replace('alt.', 'alt')
+    return t
+
+class Meta_TrisAlt(type):
+    def __init__(this, classname, bases, classdict):
+        type.__init__(this, classname, bases, classdict)
+
+def Def_TrisAlt(name, tris_keys):
+    class_dict = {
+        'mixed':     False,
+        'stringify': {},
+        'key':       {}
+    }
+    for k in tris_keys:
+        if isinstance(k, int):
+            s = TrisAlt_base.stringify[k]
+        else:
+            # must be a tuple of 2
+            assert len(k) == 2, 'Exptected 2 tuple, got: %s.' % k
+            if k[0] & loose_bit and k[1] & loose_bit:
+                s = '%s - 1 loose - %s' % (
+                            TrisAlt_base.stringify[k[0] & ~loose_bit],
+                            TrisAlt_base.stringify[k[1] & ~loose_bit])
+            elif (k[0] == TrisAlt_base.twist_strip_I and
+                k[1] == TrisAlt_base.twist_strip_I
+            ):
+                s = 'strip I - twisted - strip I'
+            else:
+                s = '%s - %s' % (
+                            TrisAlt_base.stringify[k[0]],
+                            TrisAlt_base.stringify[k[1]])
+        class_dict['stringify'][k] = s
+        class_dict['key'][s] = k
+        class_dict[toTrisAltKeyStr(k)] = k
+    return Meta_TrisAlt(name, (TrisAlt_base,), class_dict)
+
+TrisAlt = Def_TrisAlt('TrisAlt', [
+            TrisAlt_base.refl_1,
+            TrisAlt_base.refl_2,
+            TrisAlt_base.crossed_2,
+            TrisAlt_base.strip_1_loose,
+            TrisAlt_base.strip_I,
+            TrisAlt_base.strip_II,
+            TrisAlt_base.star,
+            TrisAlt_base.star_1_loose,
+            TrisAlt_base.alt_strip_I,
+            TrisAlt_base.alt_strip_II,
+            TrisAlt_base.alt_strip_1_loose,
+
+            TrisAlt_base.twist_strip_I,
+
+            TrisAlt_base.rot_strip_1_loose,
+            TrisAlt_base.rot_star_1_loose,
+            TrisAlt_base.arot_strip_1_loose,
+            TrisAlt_base.arot_star_1_loose,
+
+            (TrisAlt_base.strip_I, TrisAlt_base.strip_I),
+            (TrisAlt_base.strip_I, TrisAlt_base.strip_II),
+            (TrisAlt_base.strip_I, TrisAlt_base.star),
+            (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_I),
+            (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_II),
+
+            (TrisAlt_base.strip_II, TrisAlt_base.strip_I),
+            (TrisAlt_base.strip_II, TrisAlt_base.strip_II),
+            (TrisAlt_base.strip_II, TrisAlt_base.star),
+            (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_I),
+            (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_II),
+
+            (TrisAlt_base.star, TrisAlt_base.strip_I),
+            (TrisAlt_base.star, TrisAlt_base.strip_II),
+            (TrisAlt_base.star, TrisAlt_base.star),
+            (TrisAlt_base.star, TrisAlt_base.alt_strip_I),
+            (TrisAlt_base.star, TrisAlt_base.alt_strip_II),
+
+            (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_I),
+            (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_II),
+            (TrisAlt_base.alt_strip_I, TrisAlt_base.star),
+            (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_I),
+            (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_II),
+
+            (TrisAlt_base.twist_strip_I, TrisAlt_base.twist_strip_I),
+
+            (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_I),
+            (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_II),
+            (TrisAlt_base.alt_strip_II, TrisAlt_base.star),
+            (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_I),
+            (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_II),
+
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.strip_1_loose),
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.star_1_loose),
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.alt_strip_1_loose),
+
+            (TrisAlt_base.star_1_loose, TrisAlt_base.strip_1_loose),
+            (TrisAlt_base.star_1_loose, TrisAlt_base.star_1_loose),
+            (TrisAlt_base.star_1_loose, TrisAlt_base.alt_strip_1_loose),
+
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.strip_1_loose),
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.star_1_loose),
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.alt_strip_1_loose),
+
+            (TrisAlt_base.star_1_loose, TrisAlt_base.rot_strip_1_loose),
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_strip_1_loose),
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_strip_1_loose),
+
+            (TrisAlt_base.star_1_loose, TrisAlt_base.arot_strip_1_loose),
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_strip_1_loose),
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_strip_1_loose),
+
+            (TrisAlt_base.star_1_loose, TrisAlt_base.rot_star_1_loose),
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_star_1_loose),
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_star_1_loose),
+
+            (TrisAlt_base.star_1_loose, TrisAlt_base.arot_star_1_loose),
+            (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_star_1_loose),
+            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_star_1_loose),
+        ]
+    )
 
 class FoldMethod:
     parallel  = 0
@@ -1669,6 +1676,17 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    this.__sav_rotTrisFill = currentChoice
 
+    def setValidTrisFillItems(this, trisAlt):
+        """Sets which triangle fills are valid for the current settings
+
+        Note that you have to call setEnableTrisFillItems to apply these
+        settings to the GUI.
+
+        trisAlt: a TrisAlt_base decendent that has a choiceList definition that
+                 specifies the valid choices.
+        """
+        this.trisAlt = trisAlt
+
     def setEnableTrisFillItems(this, itemList = None):
 	# first time fails
 	if this.trisFillGui.GetStringSelection() == '':
@@ -1862,7 +1880,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	return ed['results']
 
     def noPrePosFound(this):
-	s = 'Note: no valid positions found' 
+	s = 'Note: no valid positions found'
 	print s
 	this.statusBar.SetStatusText(s)
 
@@ -1929,7 +1947,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.onTriangleFill()
 	# it's essential that prePosGui is set to dynamic be4 stdPrePos is read
 	# otherwise something else than dynamic might be read...
-	openFileStr = this.stringify[open_file] 
+	openFileStr = this.stringify[open_file]
 	if not openFileStr in this.prePosGui.GetItems():
 		this.prePosGui.Append(openFileStr)
 	this.prePosGui.SetStringSelection(openFileStr)

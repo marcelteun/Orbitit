@@ -40,10 +40,11 @@ from GeomTypes import Vec3      as Vec
 Title = 'Polyhedra with Folded Regular Heptagons and Icosahedral Symmetry'
 
 trisAlt = Heptagons.TrisAlt()
-trisAlt.baseKey[trisAlt.refl_1]        = True
-trisAlt.baseKey[trisAlt.refl_2]        = True
-trisAlt.baseKey[trisAlt.crossed_2]     = True
-#trisAlt.baseKey[trisAlt.twist_strip_I] = True
+trisAlt.baseKey = {
+    trisAlt.refl_1:    True,
+    trisAlt.refl_2:    True,
+    trisAlt.crossed_2: True
+}
 
 dyn_pos		=  Heptagons.dyn_pos
 open_file	=  Heptagons.open_file

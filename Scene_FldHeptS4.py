@@ -40,8 +40,10 @@ from GeomTypes import Vec3      as Vec
 Title = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 
 trisAlt = Heptagons.TrisAlt()
-trisAlt.baseKey[trisAlt.refl_1]        = True
-trisAlt.baseKey[trisAlt.refl_2]        = True
+trisAlt.baseKey = {
+    trisAlt.refl_1: True,
+    trisAlt.refl_2: True
+}
 #trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
 dyn_pos		=  Heptagons.dyn_pos
