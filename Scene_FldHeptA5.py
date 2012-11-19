@@ -469,18 +469,24 @@ class Shape(Heptagons.FldHeptagonShape):
         stripII = [[2, 11, 1], [2, 40, 11], [0, 1, 11]]
         star = [[0, 1, 40], [1, 2, 40], [0, 40, 11]]
         triFs = {
-                trisAlt.strip_I:            stripI[:],
-                trisAlt.strip_II:           stripII[:],
-                trisAlt.star:               star[:],
+                trisAlt.strip_I:     stripI[:],
+                trisAlt.strip_II:    stripII[:],
+                trisAlt.star:        star[:],
+                trisAlt.refl_1:      this.triFs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:      this.triFs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:   this.triFs_alts[0][trisAlt.crossed_2]
             }
         this.triFs_alts.append(triFs)
 	stripI = [2, 40, 1, 40, 1, 11]
 	stripII = [2, 40, 2, 11, 1, 11]
 	star = [2, 40, 1, 40, 0, 40]
         this.triEs_alts.append({
-                trisAlt.strip_I:            stripI,
-                trisAlt.strip_II:           stripII,
-                trisAlt.star:               star,
+                trisAlt.strip_I:     stripI,
+                trisAlt.strip_II:    stripII,
+                trisAlt.star:        star,
+                trisAlt.refl_1:      this.triEs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:      this.triEs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:   this.triEs_alts[0][trisAlt.crossed_2]
             })
 
         # Triangles: opposite
@@ -570,19 +576,29 @@ class Shape(Heptagons.FldHeptagonShape):
         stripI       = [[4, 23, 17], [2, 3, 40], [5, 23, 4]]
         stripII      = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
         star         = [[4, 5, 17], [8, 4, 17], [5, 23, 17]]
+        star_1_loose = [[8, 5, 17], [5, 8, 4], [5, 23, 17]]
         oppTriFs = {
                 trisAlt.strip_I:      stripI[:],
                 trisAlt.strip_II:     stripII[:],
                 trisAlt.star:         star[:],
+                trisAlt.star_1_loose: star_1_loose[:],
+                trisAlt.refl_1:       this.oppTriFs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:       this.oppTriFs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:    this.oppTriFs_alts[0][trisAlt.crossed_2]
         }
         this.oppTriFs_alts.append(oppTriFs)
 	stripI       = [4, 17, 4, 23]
 	stripII      = [8, 23, 5, 17]
 	star         = [4, 17, 5, 17]
+        star_1_loose = [5, 8, 5, 17]
         this.oppTriEs_alts.append({
                 trisAlt.strip_I:      stripI,
                 trisAlt.strip_II:     stripII,
                 trisAlt.star:         star,
+                trisAlt.star_1_loose: star_1_loose[:],
+                trisAlt.refl_1:       this.oppTriEs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:       this.oppTriEs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:    this.oppTriEs_alts[0][trisAlt.crossed_2]
             })
 
         # Colours:
@@ -609,6 +625,17 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.arot_strip_1_loose:	rot,
                 trisAlt.rot_star_1_loose:	rot_x,
                 trisAlt.arot_star_1_loose:	arot_x,
+                trisAlt.refl_1:                 refl_1,
+                trisAlt.refl_2:                 refl_2,
+                trisAlt.crossed_2:		crossed_2,
+            })
+        # alternative fill 1:
+	star1loose = [0, 1, 0, 0, 1, 1]
+        this.triColIds_alts.append({
+                trisAlt.strip_I:		strip,
+                trisAlt.strip_II:		strip,
+                trisAlt.star:			strip,
+                trisAlt.star_1_loose:		star1loose,
                 trisAlt.refl_1:		        refl_1,
                 trisAlt.refl_2:		        refl_2,
                 trisAlt.crossed_2:		crossed_2,
@@ -666,15 +693,21 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         o5 = [0, 11, 12, 13, 14]
         this.o5triFs_alts.append({
-                trisAlt.strip_I:		[o5],
-                trisAlt.strip_II:		[o5],
-                trisAlt.star:			[o5],
+                trisAlt.strip_I:      [o5],
+                trisAlt.strip_II:     [o5],
+                trisAlt.star:         [o5],
+                trisAlt.refl_1:       this.o5triFs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:       this.o5triFs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:    this.o5triFs_alts[0][trisAlt.crossed_2]
             })
 	o5    = [0, 11, 11, 12, 12, 13, 13, 14, 14, 0]
         this.o5triEs_alts.append({
-                trisAlt.strip_I:	    o5,
-                trisAlt.strip_II:	    o5,
-                trisAlt.star:		    o5,
+                trisAlt.strip_I:      o5,
+                trisAlt.strip_II:     o5,
+                trisAlt.star:         o5,
+                trisAlt.refl_1:       this.o5triEs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:       this.o5triEs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:    this.o5triEs_alts[0][trisAlt.crossed_2]
             })
 
         # O3 ( = opposite)
