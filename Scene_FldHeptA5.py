@@ -54,16 +54,19 @@ TA_1 = Heptagons.Def_TrisAlt('TA_1', [
         (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.strip_II),
         (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.star),
         (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.star_1_loose),
+        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.strip_1_loose),
 
         (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.strip_I),
         (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.strip_II),
         (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.star),
-        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.star_1_loose),
+        (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.star_1_loose),
+        (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.strip_1_loose),
 
         (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.strip_I),
         (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.strip_II),
         (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.star),
-        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.star_1_loose)
+        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.star_1_loose),
+        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.strip_1_loose)
     ]
 )
 trisAlts = [
@@ -591,32 +594,36 @@ class Shape(Heptagons.FldHeptagonShape):
             })
         # alternative fill 1:
         # middle, centre, o5
-        stripI       = [[4, 23, 17], [2, 3, 40], [5, 23, 4]]
-        stripII      = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
-        star         = [[4, 5, 17], [8, 4, 17], [5, 23, 17]]
-        star_1_loose = [[8, 5, 17], [5, 8, 4], [5, 23, 17]]
+        stripI        = [[4, 23, 17], [2, 3, 40], [5, 23, 4]]
+        stripII       = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
+        star          = [[4, 5, 17], [8, 4, 17], [5, 23, 17]]
+        star_1_loose  = [[8, 5, 17], [5, 8, 4], [5, 23, 17]]
+        strip_1_loose = [[8, 5, 23], [5, 8, 4], [8, 23, 17]]
         oppTriFs = {
-                trisAlt.strip_I:      stripI[:],
-                trisAlt.strip_II:     stripII[:],
-                trisAlt.star:         star[:],
-                trisAlt.star_1_loose: star_1_loose[:],
-                trisAlt.refl_1:       this.oppTriFs_alts[0][trisAlt.refl_1],
-                trisAlt.refl_2:       this.oppTriFs_alts[0][trisAlt.refl_2],
-                trisAlt.crossed_2:    this.oppTriFs_alts[0][trisAlt.crossed_2]
+                trisAlt.strip_I:       stripI[:],
+                trisAlt.strip_II:      stripII[:],
+                trisAlt.star:          star[:],
+                trisAlt.star_1_loose:  star_1_loose[:],
+                trisAlt.strip_1_loose: strip_1_loose[:],
+                trisAlt.refl_1:        this.oppTriFs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:        this.oppTriFs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:     this.oppTriFs_alts[0][trisAlt.crossed_2]
         }
         this.oppTriFs_alts.append(oppTriFs)
-	stripI       = [4, 17, 4, 23]
-	stripII      = [8, 23, 5, 17]
-	star         = [4, 17, 5, 17]
-        star_1_loose = [5, 8, 5, 17]
+	stripI        = [4, 17, 4, 23]
+	stripII       = [8, 23, 5, 17]
+	star          = [4, 17, 5, 17]
+        star_1_loose  = [5, 8, 5, 17]
+        strip_1_loose = [5, 8, 8, 23]
         this.oppTriEs_alts.append({
-                trisAlt.strip_I:      stripI,
-                trisAlt.strip_II:     stripII,
-                trisAlt.star:         star,
-                trisAlt.star_1_loose: star_1_loose[:],
-                trisAlt.refl_1:       this.oppTriEs_alts[0][trisAlt.refl_1],
-                trisAlt.refl_2:       this.oppTriEs_alts[0][trisAlt.refl_2],
-                trisAlt.crossed_2:    this.oppTriEs_alts[0][trisAlt.crossed_2]
+                trisAlt.strip_I:       stripI,
+                trisAlt.strip_II:      stripII,
+                trisAlt.star:          star,
+                trisAlt.star_1_loose:  star_1_loose[:],
+                trisAlt.strip_1_loose: strip_1_loose[:],
+                trisAlt.refl_1:        this.oppTriEs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:        this.oppTriEs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:     this.oppTriEs_alts[0][trisAlt.crossed_2]
             })
 
         # Colours:
@@ -650,13 +657,14 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
 	star1loose = [0, 1, 0, 0, 1, 1]
         this.triColIds_alts.append({
-                trisAlt.strip_I:		strip,
-                trisAlt.strip_II:		strip,
-                trisAlt.star:			strip,
-                trisAlt.star_1_loose:		star1loose,
-                trisAlt.refl_1:		        refl_1,
-                trisAlt.refl_2:		        refl_2,
-                trisAlt.crossed_2:		crossed_2,
+                trisAlt.strip_I:       strip,
+                trisAlt.strip_II:      strip,
+                trisAlt.star:          strip,
+                trisAlt.star_1_loose:  star1loose,
+                trisAlt.strip_1_loose: strip,
+                trisAlt.refl_1:        refl_1,
+                trisAlt.refl_2:        refl_2,
+                trisAlt.crossed_2:     crossed_2,
             })
 
         # O5
@@ -779,23 +787,25 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         o3 = [5, 22, 23]
         this.o3triFs_alts.append({
-                trisAlt.strip_I:      [o3],
-                trisAlt.strip_II:     [o3],
-                trisAlt.star:         [o3],
-                trisAlt.star_1_loose: [o3],
-                trisAlt.refl_1:       this.o3triFs_alts[0][trisAlt.refl_1],
-                trisAlt.refl_2:       this.o3triFs_alts[0][trisAlt.refl_2],
-                trisAlt.crossed_2:    this.o3triFs_alts[0][trisAlt.crossed_2]
+                trisAlt.strip_I:       [o3],
+                trisAlt.strip_II:      [o3],
+                trisAlt.star:          [o3],
+                trisAlt.star_1_loose:  [o3],
+                trisAlt.strip_1_loose: [o3],
+                trisAlt.refl_1:        this.o3triFs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:        this.o3triFs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:     this.o3triFs_alts[0][trisAlt.crossed_2]
 	    })
 	o3  = [5, 22, 22, 23, 23, 5]
         this.o3triEs_alts.append({
-                trisAlt.strip_I:      o3,
-                trisAlt.strip_II:     o3,
-                trisAlt.star:         o3,
-                trisAlt.star_1_loose: o3,
-                trisAlt.refl_1:       this.o3triEs_alts[0][trisAlt.refl_1],
-                trisAlt.refl_2:       this.o3triEs_alts[0][trisAlt.refl_2],
-                trisAlt.crossed_2:    this.o3triEs_alts[0][trisAlt.crossed_2]
+                trisAlt.strip_I:       o3,
+                trisAlt.strip_II:      o3,
+                trisAlt.star:          o3,
+                trisAlt.star_1_loose:  o3,
+                trisAlt.strip_1_loose: o3,
+                trisAlt.refl_1:        this.o3triEs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:        this.o3triEs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:     this.o3triEs_alts[0][trisAlt.crossed_2]
             })
 
         this.setTriangleFillPosition(0)
