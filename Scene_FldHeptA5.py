@@ -46,6 +46,31 @@ trisAlt.baseKey = {
     trisAlt.crossed_2: True
 }
 
+TA_1 = Heptagons.Def_TrisAlt('TA_1', [
+        Heptagons.TrisAlt_base.refl_1,
+        Heptagons.TrisAlt_base.refl_2,
+        Heptagons.TrisAlt_base.crossed_2,
+        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.strip_I),
+        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.strip_II),
+        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.star),
+        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.star_1_loose),
+
+        (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.strip_I),
+        (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.strip_II),
+        (Heptagons.TrisAlt_base.strip_II, Heptagons.TrisAlt_base.star),
+        (Heptagons.TrisAlt_base.strip_I, Heptagons.TrisAlt_base.star_1_loose),
+
+        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.strip_I),
+        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.strip_II),
+        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.star),
+        (Heptagons.TrisAlt_base.star, Heptagons.TrisAlt_base.star_1_loose)
+    ]
+)
+trisAlts = [
+    trisAlt,
+    TA_1()
+]
+
 dyn_pos		=  Heptagons.dyn_pos
 open_file	=  Heptagons.open_file
 only_hepts	=  Heptagons.only_hepts
@@ -210,31 +235,20 @@ class Shape(Heptagons.FldHeptagonShape):
 		)
         return s
 
+    def setTriangleFillPosition(this, i):
+        this.triangleFillPosition = i
+        this.triFs     = this.triFs_alts[i]
+        this.triEs     = this.triEs_alts[i]
+        this.oppTriFs  = this.oppTriFs_alts[i]
+        this.oppTriEs  = this.oppTriEs_alts[i]
+        this.o5triEs   = this.o5triEs_alts[i]
+        this.o5triFs   = this.o5triFs_alts[i]
+        this.o3triEs   = this.o3triEs_alts[i]
+        this.o3triFs   = this.o3triFs_alts[i]
+        this.triColIds = this.triColIds_alts[i]
+
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
-        # TODO: move this to its iwn special function and add GUI
         Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
-        if (this.edgeAlternative == trisAlt.strip_I
-            or this.edgeAlternative == trisAlt.strip_II
-            or this.oppEdgeAlternative == trisAlt.strip_I
-            or this.oppEdgeAlternative == trisAlt.strip_II
-        ):
-            this.triFs    = this.triFs_alts[1]
-            this.triEs    = this.triEs_alts[1]
-            this.oppTriFs = this.oppTriFs_alts[1]
-            this.oppTriEs = this.oppTriEs_alts[1]
-            this.o5triEs  = this.o5triEs_alts[1]
-            this.o5triFs  = this.o5triFs_alts[1]
-            this.o3triEs  = this.o3triEs_alts[1]
-            this.o3triFs  = this.o3triFs_alts[1]
-        else:
-            this.triFs    = this.triFs_alts[0]
-            this.triEs    = this.triEs_alts[0]
-            this.oppTriFs = this.oppTriFs_alts[0]
-            this.oppTriEs = this.oppTriEs_alts[0]
-            this.o5triEs  = this.o5triEs_alts[0]
-            this.o5triFs  = this.o5triFs_alts[0]
-            this.o3triEs  = this.o3triEs_alts[0]
-            this.o3triFs  = this.o3triFs_alts[0]
 
     def setV(this):
 	#
@@ -337,15 +351,19 @@ class Shape(Heptagons.FldHeptagonShape):
             if (not this.onlyRegFs):
 		# when you use the rot alternative the rot is leading for
 		# choosing the colours.
-		if this.oppEdgeAlternative & Heptagons.rot_bit:
-		    eAlt = this.oppEdgeAlternative
-		else:
-		    eAlt = this.edgeAlternative
+                if this.triangleFillPosition == 0:
+                    if this.oppEdgeAlternative & Heptagons.rot_bit:
+                        eAlt = this.oppEdgeAlternative
+                    else:
+                        eAlt = this.edgeAlternative
+                    colIds = this.triColIds[eAlt]
+                else:
+                    colIds = this.triColIds[this.edgeAlternative][:3]
+                    colIds.extend(this.triColIds[this.oppEdgeAlternative][3:])
 		Fs = this.triFs[this.edgeAlternative][:]
 		Fs.extend(this.oppTriFs[this.oppEdgeAlternative])
 		Es = this.triEs[this.edgeAlternative][:]
 		Es.extend(this.oppTriEs[this.oppEdgeAlternative])
-		colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
                 this.xtraTrisShape.setBaseFaceProperties(
@@ -761,26 +779,26 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         o3 = [5, 22, 23]
         this.o3triFs_alts.append({
-                trisAlt.strip_I:		[o3],
-                trisAlt.strip_II:		[o3],
-                trisAlt.star:			[o3],
+                trisAlt.strip_I:      [o3],
+                trisAlt.strip_II:     [o3],
+                trisAlt.star:         [o3],
+                trisAlt.star_1_loose: [o3],
+                trisAlt.refl_1:       this.o3triFs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:       this.o3triFs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:    this.o3triFs_alts[0][trisAlt.crossed_2]
 	    })
 	o3  = [5, 22, 22, 23, 23, 5]
         this.o3triEs_alts.append({
-                trisAlt.strip_I:	    o3,
-                trisAlt.strip_II:	    o3,
-                trisAlt.star:		    o3,
+                trisAlt.strip_I:      o3,
+                trisAlt.strip_II:     o3,
+                trisAlt.star:         o3,
+                trisAlt.star_1_loose: o3,
+                trisAlt.refl_1:       this.o3triEs_alts[0][trisAlt.refl_1],
+                trisAlt.refl_2:       this.o3triEs_alts[0][trisAlt.refl_2],
+                trisAlt.crossed_2:    this.o3triEs_alts[0][trisAlt.crossed_2]
             })
 
-        this.triColIds = this.triColIds_alts[0]
-        this.triFs     = this.triFs_alts[0]
-        this.triEs     = this.triEs_alts[0]
-        this.oppTriFs  = this.oppTriFs_alts[0]
-        this.oppTriEs  = this.oppTriEs_alts[0]
-        this.o5triFs   = this.o5triFs_alts[0]
-        this.o3triFs   = this.o3triFs_alts[0]
-        this.o3triEs   = this.o3triEs_alts[0]
-        this.o5triEs   = this.o5triEs_alts[0]
+        this.setTriangleFillPosition(0)
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
@@ -796,6 +814,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    Stringify,
 	    *args, **kwargs
 	)
+        # TODO: set this by GUI
+        shape.setTriangleFillPosition(1)
+        this.setValidTrisFillItems(trisAlts[1])
+        this.setEnableTrisFillItems()
 
     def showOnlyHepts(this):
 	return this.prePos == only_hepts and not (
