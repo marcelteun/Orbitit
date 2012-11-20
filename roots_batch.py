@@ -157,11 +157,13 @@ T_Dom =  {
 }
 
 class Param:
-    tri_fill = 0
-    opp_fill = 1
-    edge_len = 2
-    h_fold = 3
-    n_7_turn = 4
+    tri_fill       = 0
+    opp_fill       = 1
+    edge_len       = 2
+    h_fold         = 3
+    t_fill_pos     = 4
+    opp_t_fill_pos = 5
+    n_7_turn       = 6
 
 refl1_bas  = 0
 strip1_bas = 1
@@ -837,7 +839,11 @@ def FoldedRegularHeptagonsA4(c, params):
 
     params{'3'} defines which heptagon folding method is used.
 
-    params{'4'} rotate the folding with n/7 turn
+    params{'4'} start position of the triangle fill
+
+    params{'5'} start position of the opposite triangle fill
+
+    params{'6'} rotate the folding with n/7 turn
     """
 
     T      = c[0]
@@ -1099,7 +1105,11 @@ def FoldedRegularHeptagonsS4(c, params):
 
     params{'3'} defines which heptagon folding method is used.
 
-    params{'4'} rotate the folding with n/7 turn
+    params{'4'} start position of the triangle fill
+
+    params{'5'} start position of the opposite triangle fill
+
+    params{'6'} rotate the folding with n/7 turn
     """
 
     # params indices in text:
@@ -1334,151 +1344,36 @@ def A5_F_turn_o5(x, y, z, positive = True):
     y_, z_ =  A5_o5_cosa_1 * y_ + A5_o5_sina_1 * z_, -A5_o5_sina_1 * y_ + A5_o5_cosa_1 * z_
     return (x_, y_, z_)
 
-def FoldedRegularHeptagonsA5(c, params):
-    """Calculates the 4 variable edge lengths for the simplest A5 case of
-    folded heptagons.
+def FoldedRegularHeptagonsA5_t_fill_pos_0(c,
+    incl_reflections,
+    par_tri_fill,
+    par_opp_fill,
+    par_edge_len,
+    par_fold,
+    hept_coords
+):
+    """Calculates the edge lengths for the A5 case of folded heptagons.
 
-    The case contains
-    c[0]: a translation (towards the viewer)
-    c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
-    c[2]: the angle of the first fold (left)
-    c[3]: the angle of the second fold (left)
-    c[4]: rotation angle around z-axis
-    c[5]: the angle of the first fold (right)
-    c[6]: the angle of the second fold (right)
-    The vertices are positioned as follows:
-
-    #
-    #              10             5
-    #     11                               6
-    #
-    #                      4
-    #
-    #   7           z-axis . o2-axis          0       . o3-axis: [1/tau, 0, tau]
-    #
-    #                      3
-    #
-    #      8                               1          +---> x
-    #               9             2                   |
-    #                                                 v y
-    #
-    #                      . o5-axis: [0, 1, tau]
-    #
-    #
-    #             12 = o5(0)
-    #
-    #   13 = o5(6)        14 = o5(1)
-    #
-    # 15 = o5(5)             16 = o5(2)
-
-    And the relevant vertices are defined as follows:
-
-    The heptagons are regular, so
-    |0-1| = |1-2| = |2-3| = |3-4| = |4-5| = |5-6| = |6-0| = |12 - 14| = 1
-
-    For the param[0] constant TriangleAlt names can be used:
-    The alternatives for creatings triangles lead to the possible variable edge
-    lengths: refl_1, refl_2, which are for the A5xI symmetry.
-    The alternatives for creatings triangles for A5 leads to the following
-    possible variable edge lengths:
-    params{'0'} | edge a | edge b | edge c | edge d
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 12 - 2 | 2 - 14 | 1 - 14     strip 1 loose
-          opp.  |        | 12 - 9 | 9 - 13 | 8 - 13
-    ------------+--------+--------+--------+-------
-             ?  | 3 - 12 | 12 - 2 | 2 - 14 | 1 - 14     strip I
-          opp.  |        | 12 - 9 | 9 - 13 | 8 - 13
-    ------------+--------+--------+--------+-------
-             ?  | 3 - 12 | 3 - 14 | 2 - 14 | 1 - 14     strip II
-          opp.  |        | 3 - 13 | 9 - 13 | 8 - 13
-    ------------+--------+--------+--------+-------
-             ?  | 3 - 12 | 12 - 2 | 12 - 1 | 1 - 14     star
-          opp.  |        | 12 - 9 | 12 - 8 | 8 - 13
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 12 - 2 | 12 - 1 | 1 - 14     star 1 loose
-          opp.  |        | 12 - 9 | 12 - 8 | 8 - 13
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 12 - 2 | 2 - 14 | 2 - 16     alt strip 1 loose
-          opp.  |        | 12 - 9 | 9 - 13 | 9 - 15
-    ------------+--------+--------+--------+-------
-             ?  | 3 - 12 | 3 - 14 | 2 - 14 | 2 - 16     alt strip II
-          opp.  |        | 3 - 13 | 9 - 13 | 9 - 15
-    ------------+--------+--------+--------+-------
-             ?  | 3 - 12 | 12 - 2 | 2 - 14 | 2 - 16     alt strip I
-          opp.  |        | 12 - 9 | 9 - 13 | 9 - 15
-    ------------+--------+--------+--------+-------
-
-    only valid for opposites alternatives:
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 2 - 16 | 9 - 16 | 8 - 16     rot strip 1 loose
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 2 - 16 | 9 - 16 | 9 - 19     alt rot strip 1 loose
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 2 - 16 | 2 -  8 | 8 - 16     rot star 1 loose
-    ------------+--------+--------+--------+-------
-             ?  | 2 - 9  | 2 - 16 | 2 - 19 | 9 - 19     alt rot star 1 loose
-    ------------+--------+--------+--------+-------
-
-    params{'1'} alternatives for the opposite triangle fill.
-
-    params{'2'} steers the edge lengths. It is a vector of 4 or 7 floating point
-    numbers that expresses the edge lengths of [a, b, c, d] or
-    [a, b0, c0, d, b1, c1] resp. If length 4, then c[5] = c[2] and c[6] = c[3];
-    the value of c[4] is either 0 or pi/2 rad, depending on params[5].
-    If this params[2] is not given, the edge lengths are supposed to be 1.
-
-    params{'3'} defines which heptagon folding method is used.
-
-    params{'4'} rotate the folding with n/7 turn
+    This calculates for the triangle fill position 0 and refl_1 and refl_2.
+    c           : see FoldedRegularHeptagonsA5
+    incl_reflections: whether this is a model that includes reflections.
+    par_tri_fill: params[0], see FoldedRegularHeptagonsA5
+    par_opp_fill: params[1], see FoldedRegularHeptagonsA5
+    par_edge_len: params[2], see FoldedRegularHeptagonsA5
+    par_fold    : params[3], see FoldedRegularHeptagonsA5
+    hept_coords : a tuple (x0, y0, z0, x1,..) with the heptagon coordinates.
     """
-
-    # params indices in text:
-
-    T      = c[0]
-    alpha  = c[1]
-    beta0  = c[2]
-    gamma0 = c[3]
-
-    par_tri_fill       = Param.tri_fill
-    par_opp_fill       = Param.opp_fill
-    par_edge_len       = Param.edge_len
-    par_fold           = Param.h_fold
-
-    incl_reflections = len(params[par_edge_len]) == 4
-    if incl_reflections:
-        beta1  = beta0
-        gamma1 = gamma0
-        if params[par_tri_fill] == TriangleAlt.refl_2:
-            delta = D_Dom[Symmetry.A5xI][1]
-        else:
-            delta = D_Dom[Symmetry.A5xI][0]
-        oppoAlternative = params[par_tri_fill]
-    else:
-        delta  = c[4]
-        beta1  = c[5]
-        gamma1 = c[6]
-        oppoAlternative = params[par_opp_fill]
-    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
-            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
-    cp = copy.copy(params[par_edge_len])
-    edgeAlternative = params[par_tri_fill]
+    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = hept_coords
+    cp = copy.copy(par_edge_len)
+    edgeAlternative = par_tri_fill
     try:
-        edgeLengths = params[par_edge_len]
+        edgeLengths = par_edge_len
     except IndexError:
         edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
 
     # False, for right-hand coord. system
     x12, y12, z12 = A5_F_turn_o5(x0, y0, z0, False)
     x14, y14, z14 = A5_F_turn_o5(x1, y1, z1, False)
-
-    # print (y, 1x, z) to compare with Orbitit
-    #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (y0, x0, z0)
-    #print '[y1, x1, z1] = (%.4f, %.4f, %.4f)' % (y1, x1, z1)
-    #print '[y2, x2, z2] = (%.4f, %.4f, %.4f)' % (y2, x2, z2)
-    #print '[y3, x3, z3] = (%.4f, %.4f, %.4f)' % (y3, x3, z3)
-    #print '[y4, x4, z4] = (%.4f, %.4f, %.4f)' % (y4, x4, z4)
-    #print '[y5, x5, z5] = (%.4f, %.4f, %.4f)' % (y5, x5, z5)
-    #print '[y6, x6, z6] = (%.4f, %.4f, %.4f)' % (y6, x6, z6)
 
     #
     # EDGE A: only one for A5xI
@@ -1577,17 +1472,17 @@ def FoldedRegularHeptagonsA5(c, params):
         # OPPOSITE EDGE C
         #
         #
-        if oppoAlternative == TriangleAlt.arot_star1loose:
+        if par_opp_fill == TriangleAlt.arot_star1loose:
             # TODO
             # V2 - V19: V19 = V5' = [y5, z5, x5]
             cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
-        elif oppoAlternative == TriangleAlt.rot_star1loose:
+        elif par_opp_fill == TriangleAlt.rot_star1loose:
             # TODO
             # V2 - V8: V8 = V6' = [-x6, -y6, z6]
             cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
         elif (
-            oppoAlternative != TriangleAlt.star
-            and oppoAlternative != TriangleAlt.star1loose
+            par_opp_fill != TriangleAlt.star
+            and par_opp_fill != TriangleAlt.star1loose
         ):
             cp[5] = v_delta(x5, y5, z5, x13, y13, z13) - edgeLengths[5]
         else:
@@ -1598,7 +1493,7 @@ def FoldedRegularHeptagonsA5(c, params):
         #
         # OPPOSITE EDGE D
         #
-        if (oppoAlternative & alt_bit == 0):
+        if (par_opp_fill & alt_bit == 0):
             cp[6] = v_delta(x6, y6, z6, x13, y13, z13) - edgeLengths[6]
         else:
             x15, y15, z15 = A5_T_turn_o3(x5, y5, z5)
@@ -1606,6 +1501,153 @@ def FoldedRegularHeptagonsA5(c, params):
 
     #print cp
     return cp
+
+def FoldedRegularHeptagonsA5(c, params):
+    """Calculates the edge lengths for the A5 case of folded heptagons.
+
+    The case contains
+    c[0]: a translation (towards the viewer)
+    c[1]: half the angle between the 2 heptagons 0,1,2,3,4,5,6 and 7,8,9,3,4,10,11
+    c[2]: the angle of the first fold (left)
+    c[3]: the angle of the second fold (left)
+    c[4]: rotation angle around z-axis
+    c[5]: the angle of the first fold (right)
+    c[6]: the angle of the second fold (right)
+    The vertices are positioned as follows:
+
+    #
+    #              10             5
+    #     11                               6
+    #
+    #                      4
+    #
+    #   7           z-axis . o2-axis          0       . o3-axis: [1/tau, 0, tau]
+    #
+    #                      3
+    #
+    #      8                               1          +---> x
+    #               9             2                   |
+    #                                                 v y
+    #
+    #                      . o5-axis: [0, 1, tau]
+    #
+    #
+    #             12 = o5(0)
+    #
+    #   13 = o5(6)        14 = o5(1)
+    #
+    # 15 = o5(5)             16 = o5(2)
+
+    And the relevant vertices are defined as follows:
+
+    The heptagons are regular, so
+    |0-1| = |1-2| = |2-3| = |3-4| = |4-5| = |5-6| = |6-0| = |12 - 14| = 1
+
+    For the param[0] constant TriangleAlt names can be used:
+    The alternatives for creatings triangles lead to the possible variable edge
+    lengths: refl_1, refl_2, which are for the A5xI symmetry.
+    The alternatives for creatings triangles for A5 leads to the following
+    possible variable edge lengths:
+    params{'0'} | edge a | edge b | edge c | edge d
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 12 - 2 | 2 - 14 | 1 - 14     strip 1 loose
+          opp.  |        | 12 - 9 | 9 - 13 | 8 - 13
+    ------------+--------+--------+--------+-------
+             ?  | 3 - 12 | 12 - 2 | 2 - 14 | 1 - 14     strip I
+          opp.  |        | 12 - 9 | 9 - 13 | 8 - 13
+    ------------+--------+--------+--------+-------
+             ?  | 3 - 12 | 3 - 14 | 2 - 14 | 1 - 14     strip II
+          opp.  |        | 3 - 13 | 9 - 13 | 8 - 13
+    ------------+--------+--------+--------+-------
+             ?  | 3 - 12 | 12 - 2 | 12 - 1 | 1 - 14     star
+          opp.  |        | 12 - 9 | 12 - 8 | 8 - 13
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 12 - 2 | 12 - 1 | 1 - 14     star 1 loose
+          opp.  |        | 12 - 9 | 12 - 8 | 8 - 13
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 12 - 2 | 2 - 14 | 2 - 16     alt strip 1 loose
+          opp.  |        | 12 - 9 | 9 - 13 | 9 - 15
+    ------------+--------+--------+--------+-------
+             ?  | 3 - 12 | 3 - 14 | 2 - 14 | 2 - 16     alt strip II
+          opp.  |        | 3 - 13 | 9 - 13 | 9 - 15
+    ------------+--------+--------+--------+-------
+             ?  | 3 - 12 | 12 - 2 | 2 - 14 | 2 - 16     alt strip I
+          opp.  |        | 12 - 9 | 9 - 13 | 9 - 15
+    ------------+--------+--------+--------+-------
+
+    only valid for opposites alternatives:
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 2 - 16 | 9 - 16 | 8 - 16     rot strip 1 loose
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 2 - 16 | 9 - 16 | 9 - 19     alt rot strip 1 loose
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 2 - 16 | 2 -  8 | 8 - 16     rot star 1 loose
+    ------------+--------+--------+--------+-------
+             ?  | 2 - 9  | 2 - 16 | 2 - 19 | 9 - 19     alt rot star 1 loose
+    ------------+--------+--------+--------+-------
+
+    params{'1'} alternatives for the opposite triangle fill.
+
+    params{'2'} steers the edge lengths. It is a vector of 4 or 7 floating point
+    numbers that expresses the edge lengths of [a, b, c, d] or
+    [a, b0, c0, d, b1, c1] resp. If length 4, then c[5] = c[2] and c[6] = c[3];
+    the value of c[4] is either 0 or pi/2 rad, depending on params[5].
+    If this params[2] is not given, the edge lengths are supposed to be 1.
+
+    params{'3'} defines which heptagon folding method is used.
+
+    params{'4'} start position of the triangle fill
+
+    params{'5'} start position of the opposite triangle fill
+
+    params{'6'} rotate the folding with n/7 turn
+    """
+
+    # params indices in text:
+
+    T      = c[0]
+    alpha  = c[1]
+    beta0  = c[2]
+    gamma0 = c[3]
+
+    par_tri_fill = Param.tri_fill
+    par_opp_fill = Param.opp_fill
+    par_edge_len = Param.edge_len
+    par_fold     = Param.h_fold
+
+    incl_reflections = len(params[par_edge_len]) == 4
+    if incl_reflections:
+        beta1  = beta0
+        gamma1 = gamma0
+        if params[par_tri_fill] == TriangleAlt.refl_2:
+            delta = D_Dom[Symmetry.A5xI][1]
+        else:
+            delta = D_Dom[Symmetry.A5xI][0]
+        oppoAlternative = params[par_tri_fill]
+    else:
+        delta  = c[4]
+        beta1  = c[5]
+        gamma1 = c[6]
+        oppoAlternative = params[par_opp_fill]
+
+    # print (y, 1x, z) to compare with Orbitit
+    #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (y0, x0, z0)
+    #print '[y1, x1, z1] = (%.4f, %.4f, %.4f)' % (y1, x1, z1)
+    #print '[y2, x2, z2] = (%.4f, %.4f, %.4f)' % (y2, x2, z2)
+    #print '[y3, x3, z3] = (%.4f, %.4f, %.4f)' % (y3, x3, z3)
+    #print '[y4, x4, z4] = (%.4f, %.4f, %.4f)' % (y4, x4, z4)
+    #print '[y5, x5, z5] = (%.4f, %.4f, %.4f)' % (y5, x5, z5)
+    #print '[y6, x6, z6] = (%.4f, %.4f, %.4f)' % (y6, x6, z6)
+
+    return FoldedRegularHeptagonsA5_t_fill_pos_0(c,
+        incl_reflections,
+        params[par_tri_fill],
+        oppoAlternative,
+        params[par_edge_len],
+        params[par_fold],
+        GetBaseHeptagon(
+            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    )
 
 class Method:
     hybrids = 0
@@ -2722,8 +2764,9 @@ if __name__ == '__main__':
                 loop = True, oppEdgeAlts = None):
         if oppEdgeAlts == None:
             oppEdgeAlts = edgeAlts[:]
-        if not setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts):
-            return
+        dom = setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts)
+        if dom == None:
+            return []
         rndT = [None for j in range(nrThreads)]
         i = 0
         while True:
