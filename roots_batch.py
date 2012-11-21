@@ -864,7 +864,7 @@ def FoldedRegularHeptagonsA4(c, params):
             T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
     cp = copy.copy(c)
     edgeAlternative = params[par_tri_fill]
-    oppoAlternative = params[par_opp_fill]
+    oppAlternative = params[par_opp_fill]
     #
     # EDGE A: only one for A4
     #
@@ -918,7 +918,7 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # OPPOSITE EDGE B
     #
-    plain_edge_alt = oppoAlternative & ~alt_bit
+    plain_edge_alt = oppAlternative & ~alt_bit
     if plain_edge_alt == TriangleAlt.stripII:
         # V3 - V16:[y6, z6, x6], # V16 = V6'
         cp[4] = numx.sqrt((x3-y6)*(x3-y6) + (y3-z6)*(y3-z6) + (z3-x6)*(z3-x6)) - edgeLengths[4]
@@ -931,15 +931,15 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # OPPOSITE EDGE C
     #
-    if oppoAlternative == TriangleAlt.arot_star1loose:
+    if oppAlternative == TriangleAlt.arot_star1loose:
         # V2 - V19: V19 = V5' = [y5, z5, x5]
         cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
-    elif oppoAlternative == TriangleAlt.rot_star1loose:
+    elif oppAlternative == TriangleAlt.rot_star1loose:
         # V2 - V8: V8 = V6' = [-x6, -y6, z6]
         cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
     elif (
-        oppoAlternative != TriangleAlt.star
-        and oppoAlternative != TriangleAlt.star1loose
+        oppAlternative != TriangleAlt.star
+        and oppAlternative != TriangleAlt.star1loose
     ):
         # V9 - V16: V9 = V5' = [-x5, -y5, z5], V16 = V6' = [ y6, z6, x6]
         cp[5] = numx.sqrt((y6+x5)*(y6+x5) + (z6+y5)*(z6+y5) + (x6-z5)*(x6-z5)) - edgeLengths[5]
@@ -949,7 +949,7 @@ def FoldedRegularHeptagonsA4(c, params):
     #
     # OPPOSITE EDGE D
     #
-    if (oppoAlternative & alt_bit == 0):
+    if (oppAlternative & alt_bit == 0):
         # V8 - V16: V8 = V6' = [-x6, -y6, z6]; V16 = V6' = [y6, z6, x6]
         cp[6] = numx.sqrt((y6+x6)*(y6+x6) + (z6+y6)*(z6+y6) + (x6-z6)*(x6-z6)) - edgeLengths[6]
     else:
@@ -1132,12 +1132,12 @@ def FoldedRegularHeptagonsS4(c, params):
             delta = D_Dom[Symmetry.S4xI][1]
         else:
             delta = D_Dom[Symmetry.S4xI][0]
-        oppoAlternative = params[par_tri_fill]
+        oppAlternative = params[par_tri_fill]
     else:
         delta  = c[4]
         beta1  = c[5]
         gamma1 = c[6]
-        oppoAlternative = params[par_opp_fill]
+        oppAlternative = params[par_opp_fill]
     x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
             T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
 
@@ -1235,7 +1235,7 @@ def FoldedRegularHeptagonsS4(c, params):
         #
         # OPPOSITE EDGE B
         #
-        plain_edge_alt = oppoAlternative & ~alt_bit
+        plain_edge_alt = oppAlternative & ~alt_bit
         if plain_edge_alt == TriangleAlt.stripII:
             cp[4] = v_delta(x3, y3, z3, x13, y13, z13) - edgeLengths[4]
         elif plain_edge_alt & rot_bit == rot_bit:
@@ -1247,17 +1247,17 @@ def FoldedRegularHeptagonsS4(c, params):
         #
         # OPPOSITE EDGE C
         #
-        if oppoAlternative == TriangleAlt.arot_star1loose:
+        if oppAlternative == TriangleAlt.arot_star1loose:
             # TODO
             # V2 - V19: V19 = V5' = [y5, z5, x5]
             cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
-        elif oppoAlternative == TriangleAlt.rot_star1loose:
+        elif oppAlternative == TriangleAlt.rot_star1loose:
             # TODO
             # V2 - V8: V8 = V6' = [-x6, -y6, z6]
             cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
         elif (
-            oppoAlternative != TriangleAlt.star
-            and oppoAlternative != TriangleAlt.star1loose
+            oppAlternative != TriangleAlt.star
+            and oppAlternative != TriangleAlt.star1loose
         ):
             cp[5] = v_delta(x9, y9, z9, x13, y13, z13) - edgeLengths[5]
         else:
@@ -1267,7 +1267,7 @@ def FoldedRegularHeptagonsS4(c, params):
         #
         # OPPOSITE EDGE D
         #
-        if (oppoAlternative & alt_bit == 0):
+        if (oppAlternative & alt_bit == 0):
             # x8,  y8,  z8  = -x6, -y6, z6
             cp[6] = v_delta(-x6, -y6, z6, x13, y13, z13) - edgeLengths[6]
         else:
@@ -1623,12 +1623,12 @@ def FoldedRegularHeptagonsA5(c, params):
             delta = D_Dom[Symmetry.A5xI][1]
         else:
             delta = D_Dom[Symmetry.A5xI][0]
-        oppoAlternative = params[par_tri_fill]
+        oppAlternative = params[par_tri_fill]
     else:
         delta  = c[4]
         beta1  = c[5]
         gamma1 = c[6]
-        oppoAlternative = params[par_opp_fill]
+        oppAlternative = params[par_opp_fill]
 
     # print (y, 1x, z) to compare with Orbitit
     #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (y0, x0, z0)
@@ -1642,7 +1642,7 @@ def FoldedRegularHeptagonsA5(c, params):
     return FoldedRegularHeptagonsA5_t_fill_pos_0(c,
         incl_reflections,
         params[par_tri_fill],
-        oppoAlternative,
+        oppAlternative,
         params[par_edge_len],
         params[par_fold],
         GetBaseHeptagon(
