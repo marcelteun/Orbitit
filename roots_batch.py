@@ -260,7 +260,7 @@ fold = Fold()
 def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     """Returns the positioned base heptagon indepent on symmetry
 
-    Returns the tuple of 7 vertices.
+    Returns the array of 7 coordinates, which are tuples.
     T: translation of the heptagon
     alpha: half of the dihedral angle
     beta0: first fold left
@@ -582,7 +582,15 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     x6, y6 = x6 * cosd - y6 * sind, x6 * sind + y6 * cosd
 
     # comment out the return below if you want to see the prints
-    return (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6)
+    return [
+        (x0, y0, z0),
+        (x1, y1, z1),
+        (x2, y2, z2),
+        (x3, y3, z3),
+        (x4, y4, z4),
+        (x5, y5, z5),
+        (x6, y6, z6)
+    ]
 
     print 'v0 =', [x0, y0, z0]
     print 'v1 =', [x1, y1, z1]
@@ -592,7 +600,15 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
     print 'v5 =', [x5, y5, z5]
     print 'v6 =', [x6, y6, z6]
 
-    return (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6)
+    return [
+        (x0, y0, z0),
+        (x1, y1, z1),
+        (x2, y2, z2),
+        (x3, y3, z3),
+        (x4, y4, z4),
+        (x5, y5, z5),
+        (x6, y6, z6)
+    ]
 
 def FoldedRegularHeptagonsA4xI(c, params):
     """Calculates the 4 variable edge lengths - 1 for the simplest A4xI case of
@@ -684,8 +700,15 @@ def FoldedRegularHeptagonsA4xI(c, params):
     if edgeAlternative & twist_bit == twist_bit:
         delta = D_Dom[Symmetry.A4][1]
 
-    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+    coords = GetBaseHeptagon(
             T, alpha, beta, beta, gamma, gamma, delta, params[par_fold])
+    x0, y0, z0 = coords[0]
+    x1, y1, z1 = coords[1]
+    x2, y2, z2 = coords[2]
+    x3, y3, z3 = coords[3]
+    x4, y4, z4 = coords[4]
+    x5, y5, z5 = coords[5]
+    x6, y6, z6 = coords[6]
 
     #print 'v0', x0, y0, z0
     #print 'v1', x1, y1, z1
@@ -860,8 +883,16 @@ def FoldedRegularHeptagonsA4(c, params):
     par_fold     = Param.h_fold
     n_7_turn     = Param.n_7_turn
 
-    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+    coords = GetBaseHeptagon(
             T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    x0, y0, z0 = coords[0]
+    x1, y1, z1 = coords[1]
+    x2, y2, z2 = coords[2]
+    x3, y3, z3 = coords[3]
+    x4, y4, z4 = coords[4]
+    x5, y5, z5 = coords[5]
+    x6, y6, z6 = coords[6]
+
     cp = copy.copy(c)
     edgeAlternative = params[par_tri_fill]
     oppAlternative = params[par_opp_fill]
@@ -1138,8 +1169,16 @@ def FoldedRegularHeptagonsS4(c, params):
         beta1  = c[5]
         gamma1 = c[6]
         oppAlternative = params[par_opp_fill]
-    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = GetBaseHeptagon(
+
+    coords = GetBaseHeptagon(
             T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    x0, y0, z0 = coords[0]
+    x1, y1, z1 = coords[1]
+    x2, y2, z2 = coords[2]
+    x3, y3, z3 = coords[3]
+    x4, y4, z4 = coords[4]
+    x5, y5, z5 = coords[5]
+    x6, y6, z6 = coords[6]
 
     # print (y, 1x, z) to compare with Orbitit
     #print '[y0, x0, z0] =', y0, x0, z0
@@ -1361,9 +1400,16 @@ def FoldedRegularHeptagonsA5_t_fill_pos_0(c,
     par_opp_fill: params[1], see FoldedRegularHeptagonsA5
     par_edge_len: params[2], see FoldedRegularHeptagonsA5
     par_fold    : params[3], see FoldedRegularHeptagonsA5
-    hept_coords : a tuple (x0, y0, z0, x1,..) with the heptagon coordinates.
+    hept_coords : an array of tuples: [(x0, y0, z0), (x1, y1, y2),..] with the
+                  heptagon coordinates.
     """
-    x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5, x6, y6, z6 = hept_coords
+    x0, y0, z0 = hept_coords[0]
+    x1, y1, z1 = hept_coords[1]
+    x2, y2, z2 = hept_coords[2]
+    x3, y3, z3 = hept_coords[3]
+    x4, y4, z4 = hept_coords[4]
+    x5, y5, z5 = hept_coords[5]
+    x6, y6, z6 = hept_coords[6]
     cp = copy.copy(par_edge_len)
     edgeAlternative = par_tri_fill
     try:
@@ -1489,6 +1535,169 @@ def FoldedRegularHeptagonsA5_t_fill_pos_0(c,
             # x8,  y8,  z8  = -x6, -y6, z6
             cp[5] = v_delta(-x6, -y6, z6, x12, y12, z12) - edgeLengths[5]
 
+        #
+        # OPPOSITE EDGE D
+        #
+        if (par_opp_fill & alt_bit == 0):
+            cp[6] = v_delta(x6, y6, z6, x13, y13, z13) - edgeLengths[6]
+        else:
+            x15, y15, z15 = A5_T_turn_o3(x5, y5, z5)
+            cp[6] = v_delta(x5, y5, z5, x15, y15, z15) - edgeLengths[6]
+
+    #print cp
+    return cp
+
+def FoldedRegularHeptagonsA5_t_fill_pos_1(c,
+    incl_reflections,
+    par_tri_fill,
+    par_opp_fill,
+    par_edge_len,
+    par_fold,
+    hept_coords
+):
+    """Calculates the edge lengths for the A5 case of folded heptagons.
+
+    This calculates for the triangle fill position 0 and refl_1 and refl_2.
+    c           : see FoldedRegularHeptagonsA5
+    incl_reflections: whether this is a model that includes reflections.
+    par_tri_fill: params[0], see FoldedRegularHeptagonsA5
+    par_opp_fill: params[1], see FoldedRegularHeptagonsA5
+    par_edge_len: params[2], see FoldedRegularHeptagonsA5
+    par_fold    : params[3], see FoldedRegularHeptagonsA5
+    hept_coords : an array of tuples: [(x0, y0, z0), (x1, y1, y2),..] with the
+                  heptagon coordinates.
+    """
+    x0, y0, z0 = hept_coords[0]
+    x1, y1, z1 = hept_coords[1]
+    x2, y2, z2 = hept_coords[2]
+    x3, y3, z3 = hept_coords[3]
+    x4, y4, z4 = hept_coords[4]
+    x5, y5, z5 = hept_coords[5]
+    x6, y6, z6 = hept_coords[6]
+    cp = copy.copy(par_edge_len)
+    edgeAlternative = par_tri_fill
+    try:
+        edgeLengths = par_edge_len
+    except IndexError:
+        edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
+
+    # False, for right-hand coord. system
+    x12, y12, z12 = A5_F_turn_o5(x0, y0, z0, False)
+    x14, y14, z14 = A5_F_turn_o5(x1, y1, z1, False)
+
+    #
+    # EDGE A: only one for A5xI
+    #
+    #if ((edgeAlternative & loose_bit) != 0 or
+    #   (edgeAlternative & twist_bit) != 0
+    #):
+    if (edgeAlternative == TriangleAlt.refl_1 or
+                                edgeAlternative == TriangleAlt.refl_2 or
+                                (edgeAlternative & loose_bit) != 0
+    ):
+        # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
+        cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
+    else:
+        # V3 - V12, V12 = V0'
+        cp[0] = v_delta(x3, y3, z3, x12, y12, z12) - edgeLengths[0]
+
+    #
+    # EDGE B:
+    #
+    plain_edge_alt = edgeAlternative & ~alt_bit
+    if (edgeAlternative == TriangleAlt.refl_1):
+        # V5 - Third-turn-around-o3(V2)
+        # True: opposite turn and right-hand coord system
+        V2_o4_x, V2_o4_y, V2_o4_z = A5_T_turn_o3(x2, y2, z2)
+        cp[1] = v_delta(x5, y5, z5, V2_o4_x, V2_o4_y, V2_o4_z) - edgeLengths[1]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+        # V10 - Third-turn-around-o3(V5), V10 = V2' = [-x2, -y2, z2]
+        # True: opposite turn and right-hand coord system
+        V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x5, y5, z5)
+        cp[1] = v_delta(-x2, -y2, z2, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[1]
+    elif plain_edge_alt == TriangleAlt.stripII:
+        cp[1] = v_delta(x3, y3, z3, x14, y14, z14) - edgeLengths[1]
+    else:
+        cp[1] = v_delta(x2, y2, z2, x12, y12, z12) - edgeLengths[1]
+
+    #
+    # EDGE C
+    #
+    if (edgeAlternative == TriangleAlt.refl_1):
+        # V6 - Q-turn-around-o4(V1)
+        # True: opposite turn and right-hand coord system
+        V1_o4_x, V1_o4_y, V1_o4_z = A5_T_turn_o3(x1, y1, z1)
+        cp[2] = v_delta(x6, y6, z6, V1_o4_x, V1_o4_y, V1_o4_z) - edgeLengths[2]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+        # V11 - Q-turn-around-o4(V6), V11 = V1' = [-x1, -y1, z1]
+        # True: opposite turn and right-hand coord system
+        V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x6, y6, z6)
+        cp[2] = v_delta(-x1, -y1, z1, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[2]
+    #TODO:
+    elif (
+        edgeAlternative != TriangleAlt.star
+        and edgeAlternative != TriangleAlt.star1loose
+    ):
+        cp[2] = v_delta(x2, y2, z2, x14, y14, z14) - edgeLengths[2]
+    else:
+        cp[2] = v_delta(x1, y1, z1, x12, y12, z12) - edgeLengths[2]
+
+    #
+    # EDGE D
+    #
+    #if (edgeAlternative & twist_bit) != 0:
+    if (edgeAlternative == TriangleAlt.refl_1):
+        # V0 - T-turn-around-o4(V9:[x0,   y0,    z0])
+        # True: opposite turn and right-hand coord system
+        V0_o4_x, V0_o4_y, V0_o4_z = A5_T_turn_o3(x0, y0, z0)
+        cp[3] = v_delta(x0, y0, z0, V0_o4_x, V0_o4_y, V0_o4_z) - edgeLengths[3]
+    elif (edgeAlternative == TriangleAlt.refl_2):
+        # V7 - Q-turn-around-o4(V0), V7 = o2(v0) = [-x0, -y0, z0]
+        # True: opposite turn and right-hand coord system
+        V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x0, y0, z0)
+        cp[3] = v_delta(-x0, -y0, z0, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[3]
+    elif (edgeAlternative & alt_bit == 0):
+        cp[3] = v_delta(x1, y1, z1, x14, y14, z14) - edgeLengths[3]
+    else:
+        x16, y16, z16 = A5_F_turn_o5(x2, y2, z2)
+        cp[3] = v_delta(x2, y2, z2, x16, y16, z16) - edgeLengths[3]
+
+    if not incl_reflections:
+        # True: opposite turn and right-hand coord system
+        x13, y13, z13 = A5_T_turn_o3(x6, y6, z6)
+        #
+        # OPPOSITE EDGE B
+        #
+        if plain_edge_alt == TriangleAlt.stripII:
+            cp[4] = v_delta(x4, y4, z4, x13, y13, z13) - edgeLengths[4]
+        elif plain_edge_alt & rot_bit == rot_bit:
+            # TODO TODO TODO
+            # V2 - V16:[y6, z6, x6], # V16 = V6'
+            cp[4] = numx.sqrt((x2-y6)*(x2-y6) + (y2-z6)*(y2-z6) + (z2-x6)*(z2-x6)) - edgeLengths[4]
+        else:
+            # V9 = O2(V5)
+            cp[4] = v_delta(-x5, -y5, z5, x12, y12, z12) - edgeLengths[4]
+
+        #
+        # OPPOSITE EDGE C
+        #
+        #
+        if par_opp_fill == TriangleAlt.arot_star1loose:
+            # TODO
+            # V2 - V19: V19 = V5' = [y5, z5, x5]
+            cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
+        elif par_opp_fill == TriangleAlt.rot_star1loose:
+            # TODO
+            # V2 - V8: V8 = V6' = [-x6, -y6, z6]
+            cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
+        elif (
+            par_opp_fill != TriangleAlt.star
+            and par_opp_fill != TriangleAlt.star1loose
+        ):
+            cp[5] = v_delta(x5, y5, z5, x13, y13, z13) - edgeLengths[5]
+        else:
+            # x8,  y8,  z8  = -x6, -y6, z6
+            cp[5] = v_delta(-x6, -y6, z6, x12, y12, z12) - edgeLengths[5]
 
         #
         # OPPOSITE EDGE D
@@ -1639,15 +1848,26 @@ def FoldedRegularHeptagonsA5(c, params):
     #print '[y5, x5, z5] = (%.4f, %.4f, %.4f)' % (y5, x5, z5)
     #print '[y6, x6, z6] = (%.4f, %.4f, %.4f)' % (y6, x6, z6)
 
-    return FoldedRegularHeptagonsA5_t_fill_pos_0(c,
-        incl_reflections,
-        params[par_tri_fill],
-        oppAlternative,
-        params[par_edge_len],
-        params[par_fold],
-        GetBaseHeptagon(
-            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
-    )
+    if len(params) <= Param.t_fill_pos or params[Param.t_fill_pos] == 0:
+        return FoldedRegularHeptagonsA5_t_fill_pos_0(c,
+            incl_reflections,
+            params[par_tri_fill],
+            oppAlternative,
+            params[par_edge_len],
+            params[par_fold],
+            GetBaseHeptagon(
+                T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+        )
+    else:
+        return FoldedRegularHeptagonsA5_t_fill_pos_1(c,
+            incl_reflections,
+            params[par_tri_fill],
+            oppAlternative,
+            params[par_edge_len],
+            params[par_fold],
+            GetBaseHeptagon(
+                T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+        )
 
 class Method:
     hybrids = 0
