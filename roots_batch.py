@@ -1575,138 +1575,75 @@ def FoldedRegularHeptagonsA5_t_fill_pos_1(c,
     x5, y5, z5 = hept_coords[5]
     x6, y6, z6 = hept_coords[6]
     cp = copy.copy(par_edge_len)
-    edgeAlternative = par_tri_fill
     try:
         edgeLengths = par_edge_len
     except IndexError:
         edgeLengths = [1., 1., 1., 1., 1., 1., 1.]
 
+    # Use nrs from Orbitit:
     # False, for right-hand coord. system
-    x12, y12, z12 = A5_F_turn_o5(x0, y0, z0, False)
-    x14, y14, z14 = A5_F_turn_o5(x1, y1, z1, False)
+    x40, y40, z40 = A5_F_turn_o5(x6, y6, z6, False)
+    x11, y11, z11 = A5_F_turn_o5(x0, y0, z0, False)
+    # True: opposite turn and right-hand coord system
+    x23, y23, z23 = A5_T_turn_o3(x5, y5, z5)
+    x17, y17, z17 = A5_T_turn_o3(x6, y6, z6)
 
     #
     # EDGE A: only one for A5xI
     #
-    #if ((edgeAlternative & loose_bit) != 0 or
-    #   (edgeAlternative & twist_bit) != 0
-    #):
-    if (edgeAlternative == TriangleAlt.refl_1 or
-                                edgeAlternative == TriangleAlt.refl_2 or
-                                (edgeAlternative & loose_bit) != 0
-    ):
-        # V2 - V9:[-x5,   -y5,    z5], # V9 = V5'
-        cp[0] = numx.sqrt((x2+x5)*(x2+x5) + (y2+y5)*(y2+y5) + (z2-z5)*(z2-z5)) - edgeLengths[0]
-    else:
-        # V3 - V12, V12 = V0'
-        cp[0] = v_delta(x3, y3, z3, x12, y12, z12) - edgeLengths[0]
+    cp[0] = v_delta(x2, y2, z2, x40, y40, z40) - edgeLengths[0]
 
     #
     # EDGE B:
     #
-    plain_edge_alt = edgeAlternative & ~alt_bit
-    if (edgeAlternative == TriangleAlt.refl_1):
-        # V5 - Third-turn-around-o3(V2)
-        # True: opposite turn and right-hand coord system
-        V2_o4_x, V2_o4_y, V2_o4_z = A5_T_turn_o3(x2, y2, z2)
-        cp[1] = v_delta(x5, y5, z5, V2_o4_x, V2_o4_y, V2_o4_z) - edgeLengths[1]
-    elif (edgeAlternative == TriangleAlt.refl_2):
-        # V10 - Third-turn-around-o3(V5), V10 = V2' = [-x2, -y2, z2]
-        # True: opposite turn and right-hand coord system
-        V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x5, y5, z5)
-        cp[1] = v_delta(-x2, -y2, z2, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[1]
-    elif plain_edge_alt == TriangleAlt.stripII:
-        cp[1] = v_delta(x3, y3, z3, x14, y14, z14) - edgeLengths[1]
+    if (par_tri_fill == TriangleAlt.stripII):
+        cp[1] = v_delta(x2, y2, z2, x11, y11, z11) - edgeLengths[1]
     else:
-        cp[1] = v_delta(x2, y2, z2, x12, y12, z12) - edgeLengths[1]
+        cp[1] = v_delta(x1, y1, z1, x40, y40, z40) - edgeLengths[1]
 
     #
     # EDGE C
     #
-    if (edgeAlternative == TriangleAlt.refl_1):
-        # V6 - Q-turn-around-o4(V1)
-        # True: opposite turn and right-hand coord system
-        V1_o4_x, V1_o4_y, V1_o4_z = A5_T_turn_o3(x1, y1, z1)
-        cp[2] = v_delta(x6, y6, z6, V1_o4_x, V1_o4_y, V1_o4_z) - edgeLengths[2]
-    elif (edgeAlternative == TriangleAlt.refl_2):
-        # V11 - Q-turn-around-o4(V6), V11 = V1' = [-x1, -y1, z1]
-        # True: opposite turn and right-hand coord system
-        V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x6, y6, z6)
-        cp[2] = v_delta(-x1, -y1, z1, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[2]
-    #TODO:
-    elif (
-        edgeAlternative != TriangleAlt.star
-        and edgeAlternative != TriangleAlt.star1loose
-    ):
-        cp[2] = v_delta(x2, y2, z2, x14, y14, z14) - edgeLengths[2]
+    if (par_tri_fill == TriangleAlt.star):
+        cp[2] = v_delta(x0, y0, z0, x40, y40, z40) - edgeLengths[2]
     else:
-        cp[2] = v_delta(x1, y1, z1, x12, y12, z12) - edgeLengths[2]
+        cp[2] = v_delta(x1, y1, z1, x11, y11, z11) - edgeLengths[2]
 
     #
     # EDGE D
     #
-    #if (edgeAlternative & twist_bit) != 0:
-    if (edgeAlternative == TriangleAlt.refl_1):
-        # V0 - T-turn-around-o4(V9:[x0,   y0,    z0])
-        # True: opposite turn and right-hand coord system
-        V0_o4_x, V0_o4_y, V0_o4_z = A5_T_turn_o3(x0, y0, z0)
-        cp[3] = v_delta(x0, y0, z0, V0_o4_x, V0_o4_y, V0_o4_z) - edgeLengths[3]
-    elif (edgeAlternative == TriangleAlt.refl_2):
-        # V7 - Q-turn-around-o4(V0), V7 = o2(v0) = [-x0, -y0, z0]
-        # True: opposite turn and right-hand coord system
-        V_o4_x, V_o4_y, V_o4_z = A5_T_turn_o3(x0, y0, z0)
-        cp[3] = v_delta(-x0, -y0, z0, V_o4_x, V_o4_y, V_o4_z) - edgeLengths[3]
-    elif (edgeAlternative & alt_bit == 0):
-        cp[3] = v_delta(x1, y1, z1, x14, y14, z14) - edgeLengths[3]
+    cp[3] = v_delta(x0, y0, z0, x11, y11, z11) - edgeLengths[3]
+
+    # always: not incl_reflections:
+    #
+    # OPPOSITE EDGE B
+    #
+    if (par_opp_fill & loose_bit) == loose_bit:
+        cp[4] = v_delta(-x5, -y5, z5, x2, y2, z2) - edgeLengths[4]
+    elif par_opp_fill == TriangleAlt.stripI:
+        cp[4] = v_delta(x4, y4, z4, x17, y17, z17) - edgeLengths[4]
+    elif par_opp_fill == TriangleAlt.stripII:
+        cp[4] = v_delta(-x2, -y2, z2, x23, y23, z23) - edgeLengths[4]
     else:
-        x16, y16, z16 = A5_F_turn_o5(x2, y2, z2)
-        cp[3] = v_delta(x2, y2, z2, x16, y16, z16) - edgeLengths[3]
+        cp[4] = v_delta(x4, y4, z4, x17, y17, z17) - edgeLengths[4]
 
-    if not incl_reflections:
-        # True: opposite turn and right-hand coord system
-        x13, y13, z13 = A5_T_turn_o3(x6, y6, z6)
-        #
-        # OPPOSITE EDGE B
-        #
-        if plain_edge_alt == TriangleAlt.stripII:
-            cp[4] = v_delta(x4, y4, z4, x13, y13, z13) - edgeLengths[4]
-        elif plain_edge_alt & rot_bit == rot_bit:
-            # TODO TODO TODO
-            # V2 - V16:[y6, z6, x6], # V16 = V6'
-            cp[4] = numx.sqrt((x2-y6)*(x2-y6) + (y2-z6)*(y2-z6) + (z2-x6)*(z2-x6)) - edgeLengths[4]
-        else:
-            # V9 = O2(V5)
-            cp[4] = v_delta(-x5, -y5, z5, x12, y12, z12) - edgeLengths[4]
+    #
+    # OPPOSITE EDGE C
+    #
+    #
+    if par_opp_fill == TriangleAlt.strip1loose:
+        cp[5] = v_delta(-x2, -y2, z2, x23, y23, z23) - edgeLengths[5]
+    elif (par_opp_fill & star_bas) == star_bas:
+        # star and star_1_loose
+        cp[5] = v_delta(x5, y5, z5, x17, y17, z17) - edgeLengths[5]
+    else:
+        # strip I and strip II
+        cp[5] = v_delta(x4, y4, z4, x23, y23, z23) - edgeLengths[5]
 
-        #
-        # OPPOSITE EDGE C
-        #
-        #
-        if par_opp_fill == TriangleAlt.arot_star1loose:
-            # TODO
-            # V2 - V19: V19 = V5' = [y5, z5, x5]
-            cp[5] = numx.sqrt((x2-y5)*(x2-y5) + (y2-z5)*(y2-z5) + (z2-x5)*(z2-x5)) - edgeLengths[5]
-        elif par_opp_fill == TriangleAlt.rot_star1loose:
-            # TODO
-            # V2 - V8: V8 = V6' = [-x6, -y6, z6]
-            cp[5] = numx.sqrt((x2+x6)*(x2+x6) + (y2+y6)*(y2+y6) + (z2-z6)*(z2-z6)) - edgeLengths[5]
-        elif (
-            par_opp_fill != TriangleAlt.star
-            and par_opp_fill != TriangleAlt.star1loose
-        ):
-            cp[5] = v_delta(x5, y5, z5, x13, y13, z13) - edgeLengths[5]
-        else:
-            # x8,  y8,  z8  = -x6, -y6, z6
-            cp[5] = v_delta(-x6, -y6, z6, x12, y12, z12) - edgeLengths[5]
-
-        #
-        # OPPOSITE EDGE D
-        #
-        if (par_opp_fill & alt_bit == 0):
-            cp[6] = v_delta(x6, y6, z6, x13, y13, z13) - edgeLengths[6]
-        else:
-            x15, y15, z15 = A5_T_turn_o3(x5, y5, z5)
-            cp[6] = v_delta(x5, y5, z5, x15, y15, z15) - edgeLengths[6]
+    #
+    # OPPOSITE EDGE D
+    #
+    cp[6] = v_delta(x5, y5, z5, x23, y23, z23) - edgeLengths[6]
 
     #print cp
     return cp
@@ -1839,14 +1776,15 @@ def FoldedRegularHeptagonsA5(c, params):
         gamma1 = c[6]
         oppAlternative = params[par_opp_fill]
 
-    # print (y, 1x, z) to compare with Orbitit
-    #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (y0, x0, z0)
-    #print '[y1, x1, z1] = (%.4f, %.4f, %.4f)' % (y1, x1, z1)
-    #print '[y2, x2, z2] = (%.4f, %.4f, %.4f)' % (y2, x2, z2)
-    #print '[y3, x3, z3] = (%.4f, %.4f, %.4f)' % (y3, x3, z3)
-    #print '[y4, x4, z4] = (%.4f, %.4f, %.4f)' % (y4, x4, z4)
-    #print '[y5, x5, z5] = (%.4f, %.4f, %.4f)' % (y5, x5, z5)
-    #print '[y6, x6, z6] = (%.4f, %.4f, %.4f)' % (y6, x6, z6)
+    hept_coords = GetBaseHeptagon(
+            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (hept_coords[0][1], hept_coords[0][0], hept_coords[0][2])
+    #print '[y1, x1, z1] = (%.4f, %.4f, %.4f)' % (hept_coords[1][1], hept_coords[1][0], hept_coords[1][2])
+    #print '[y2, x2, z2] = (%.4f, %.4f, %.4f)' % (hept_coords[2][1], hept_coords[2][0], hept_coords[2][2])
+    #print '[y3, x3, z3] = (%.4f, %.4f, %.4f)' % (hept_coords[3][1], hept_coords[3][0], hept_coords[3][2])
+    #print '[y4, x4, z4] = (%.4f, %.4f, %.4f)' % (hept_coords[4][1], hept_coords[4][0], hept_coords[4][2])
+    #print '[y5, x5, z5] = (%.4f, %.4f, %.4f)' % (hept_coords[5][1], hept_coords[5][0], hept_coords[5][2])
+    #print '[y6, x6, z6] = (%.4f, %.4f, %.4f)' % (hept_coords[6][1], hept_coords[6][0], hept_coords[6][2])
 
     if len(params) <= Param.t_fill_pos or params[Param.t_fill_pos] == 0:
         return FoldedRegularHeptagonsA5_t_fill_pos_0(c,
@@ -1855,8 +1793,7 @@ def FoldedRegularHeptagonsA5(c, params):
             oppAlternative,
             params[par_edge_len],
             params[par_fold],
-            GetBaseHeptagon(
-                T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+            hept_coords
         )
     else:
         return FoldedRegularHeptagonsA5_t_fill_pos_1(c,
@@ -1865,8 +1802,7 @@ def FoldedRegularHeptagonsA5(c, params):
             oppAlternative,
             params[par_edge_len],
             params[par_fold],
-            GetBaseHeptagon(
-                T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+            hept_coords
         )
 
 class Method:
@@ -1886,7 +1822,8 @@ def FindMultiRoot(initialValues,
         maxIter = 100,
         printIter = False,
         quiet     = False,
-        oppEdgeAlternative = None
+        oppEdgeAlternative = None,
+        triangle_fill_pos = 0
     ):
     if oppEdgeAlternative == None:
         oppEdgeAlternative = edgeAlternative
@@ -1904,26 +1841,23 @@ def FindMultiRoot(initialValues,
             print 'triangle star, 1 loose:'
 
     nrOfIns = len(initialValues)
+    params = {
+            Param.tri_fill: edgeAlternative,
+            Param.opp_fill: oppEdgeAlternative,
+            Param.edge_len: edgeLengths,
+            Param.h_fold:   fold,
+        }
+    if triangle_fill_pos > 0:
+        params[Param.t_fill_pos] = triangle_fill_pos
     if symmetry == Symmetry.A5 or symmetry == Symmetry.A5xI:
         mysys = multiroots.gsl_multiroot_function(
             FoldedRegularHeptagonsA5,
-            {
-                Param.tri_fill: edgeAlternative,
-                Param.opp_fill: oppEdgeAlternative,
-                Param.edge_len: edgeLengths,
-                Param.h_fold:   fold,
-            },
+            params,
             nrOfIns
         )
     elif symmetry == Symmetry.S4 or symmetry == Symmetry.S4xI:
         mysys = multiroots.gsl_multiroot_function(
             FoldedRegularHeptagonsS4,
-            {
-                Param.tri_fill: edgeAlternative,
-                Param.opp_fill: oppEdgeAlternative,
-                Param.edge_len: edgeLengths,
-                Param.h_fold:   fold,
-            },
             nrOfIns
         )
     elif symmetry == Symmetry.A4xI or symmetry == Symmetry.S4A4:
@@ -1945,12 +1879,7 @@ def FindMultiRoot(initialValues,
         assert (nrOfIns == 7)
         mysys = multiroots.gsl_multiroot_function(
             FoldedRegularHeptagonsA4,
-            {
-                Param.tri_fill: edgeAlternative,
-                Param.opp_fill: oppEdgeAlternative,
-                Param.edge_len: edgeLengths,
-                Param.h_fold:   fold
-            },
+            params,
             nrOfIns
         )
     else:
@@ -2041,13 +1970,15 @@ class RandFindMultiRootOnDomain(threading.Thread):
         dynSols = None,
         edgeLengths = [1., 1., 1., 1., 1., 1., 1.],
         outDir = "frh-roots",
-        exceptQueue = None
+        exceptQueue = None,
+        triangle_fill_pos = 0
     ):
         this.domain = domain
         this.symmetry = symmetry
         this.threadId = threadId
         this.method = method
         this.exceptQueue = exceptQueue
+        this.triangle_fill_pos = triangle_fill_pos
 
         # Amount of digits to write the input values (of the formula) with
         this.precision = precision
@@ -2268,11 +2199,13 @@ class RandFindMultiRootOnDomain(threading.Thread):
             else:
                 es = '%s_%.1f' % (es, l)
         es = es[1:]
-        return '%sfrh-roots-%s-fld_%s.0-%s-opp_%s.py' % (
+        return '%sfrh-roots-%s-fld_%s.0-%s_%d-opp_%s_%d.py' % (
                 this.outDir,
                 es, Fold(this.fold),
                 string.join(Stringify[this.edgeAlternative].split(), '_'),
-                string.join(Stringify[this.oppEdgeAlternative].split(), '_')
+                triangle_fill_pos,
+                string.join(Stringify[this.oppEdgeAlternative].split(), '_'),
+                triangle_fill_pos
             )
 
     def getOutReflName(this):
@@ -2399,7 +2332,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                     maxIter,
                     printIter = False,
                     quiet     = True,
-                    oppEdgeAlternative = this.oppEdgeAlternative
+                    oppEdgeAlternative = this.oppEdgeAlternative,
+                    triangle_fill_pos = this.triangle_fill_pos
                 )
             # write the previous solution if the difference is smaller than the
             # precision (this since we write with one digit more)
@@ -2438,7 +2372,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                         maxIter,
                         printIter = False,
                         quiet     = True,
-                        oppEdgeAlternative = this.oppEdgeAlternative
+                        oppEdgeAlternative = this.oppEdgeAlternative,
+                        triangle_fill_pos = this.triangle_fill_pos
                     )
                 if (
                     result != None
@@ -2533,6 +2468,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
                                         Param.opp_fill: this.oppEdgeAlternative,
                                         Param.edge_len: this.edgeLengths,
                                         Param.h_fold:   this.fold,
+                                        Param.t_fill_pos: triangle_fill_pos
                                     }
                                 )
                             else: # A5
@@ -2541,7 +2477,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                                         Param.tri_fill: this.edgeAlternative,
                                         Param.opp_fill: this.oppEdgeAlternative,
                                         Param.edge_len: this.edgeLengths,
-                                        Param.h_fold:   this.fold
+                                        Param.h_fold:   this.fold,
+                                        Param.t_fill_pos: triangle_fill_pos
                                     }
                                 )
                         except IndexError:
@@ -2667,7 +2604,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                         maxIter,
                         printIter = False,
                         quiet     = True,
-                        oppEdgeAlternative = this.oppEdgeAlternative
+                        oppEdgeAlternative = this.oppEdgeAlternative,
+                        triangle_fill_pos = this.triangle_fill_pos
                     )
                 if (result != None):
                     break
@@ -2810,11 +2748,11 @@ if __name__ == '__main__':
         elif symGrp == Symmetry.A5:
             T  = 5.1 #8.38
             a  = 119 * Geom3D.Deg2Rad# * 60
-            b0 = Geom3D.Deg2Rad * 36
-            g0 = Geom3D.Deg2Rad * 72
-            d  = Geom3D.Deg2Rad * 36
-            b1 = Geom3D.Deg2Rad * 36
-            g1 = Geom3D.Deg2Rad * -36
+            b0 = 0*Geom3D.Deg2Rad * 36
+            g0 = 0*Geom3D.Deg2Rad * 72
+            d  = Geom3D.Deg2Rad * 72
+            b1 = 0*Geom3D.Deg2Rad * 36
+            g1 = 0*Geom3D.Deg2Rad * -36
             tmp = numx.array((T, a, b0, g0, d, b1, g1))
             print 'input values: \n [',
             for t in tmp: print t, ',',
@@ -2822,9 +2760,10 @@ if __name__ == '__main__':
             print FoldedRegularHeptagonsA5(tmp,
                 {
                     Param.tri_fill: TriangleAlt.stripI,
-                    Param.opp_fill: TriangleAlt.stripI,
+                    Param.opp_fill: TriangleAlt.star,
                     Param.edge_len: [0., 0., 0., 0., 0., 0., 0.],
                     Param.h_fold:   Fold.star,
+                    Param.t_fill_pos: 1
                 }
             )
 
@@ -2934,7 +2873,8 @@ if __name__ == '__main__':
             return dom
 
     def tst_if_solutions_exist_Y(symGrp, edgeLs, edgeAlts, folds,
-                    continueAfter = 100, precision = 14, oppEdgeAlts = None):
+                    continueAfter = 100, precision = 14, oppEdgeAlts = None,
+                    triangle_fill_pos = 0):
         if oppEdgeAlts == None:
             oppEdgeAlts = edgeAlts[:]
         dom = setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts)
@@ -2965,7 +2905,8 @@ if __name__ == '__main__':
                                 edgeLengths        = edges,
                                 fold               = fold,
                                 precision          = precision,
-                                method             = Method.hybrids
+                                method             = Method.hybrids,
+                                triangle_fill_pos  = triangle_fill_pos
                             )
                             trd.stopAfter = continueAfter
                             # we aren't using threads for this.
@@ -2981,7 +2922,7 @@ if __name__ == '__main__':
 
     def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
                 nrThreads = 1, dynSols = None, precision = 14, outDir = "./",
-                loop = True, oppEdgeAlts = None):
+                loop = True, oppEdgeAlts = None, triangle_fill_pos = 0):
         if oppEdgeAlts == None:
             oppEdgeAlts = edgeAlts[:]
         dom = setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts)
@@ -3015,7 +2956,8 @@ if __name__ == '__main__':
                                     precision          = precision,
                                     method             = Method.hybrids,
                                     outDir             = outDir,
-                                    exceptQueue        = exceptionQueue
+                                    exceptQueue        = exceptionQueue,
+                                    triangle_fill_pos  = triangle_fill_pos
                                 )
                                 rndT[i].stopAfter = continueAfter
                                 rndT[i].start()
@@ -3743,18 +3685,26 @@ if __name__ == '__main__':
         dynamicSol_A4_S4
     ]
 
-    edgeAltOpts = {
-        Symmetry.A4: [
-                    TriangleAlt.stripI,
-                    TriangleAlt.strip1loose,
-                    TriangleAlt.alt_stripI,
-                    TriangleAlt.alt_strip1loose,
-                    TriangleAlt.stripII,
-                    TriangleAlt.alt_stripII,
-                    TriangleAlt.star,
-                    TriangleAlt.star1loose,
-                ],
-        Symmetry.A4xI: [
+    edgeAltOpts = {}
+    edgeAltOpts[Symmetry.A4] = [
+        [ # position 0
+            [ # normal edge alternative
+                TriangleAlt.stripI,
+                TriangleAlt.strip1loose,
+                TriangleAlt.alt_stripI,
+                TriangleAlt.alt_strip1loose,
+                TriangleAlt.stripII,
+                TriangleAlt.alt_stripII,
+                TriangleAlt.star,
+                TriangleAlt.star1loose,
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.A4][0].append(edgeAltOpts[Symmetry.A4][0][0])
+    edgeAltOpts[Symmetry.A4xI] = [
+        [ # position 0
+            [ # normal edge alternative
                     TriangleAlt.stripI,
                     TriangleAlt.strip1loose,
                     TriangleAlt.alt_stripI,
@@ -3767,15 +3717,33 @@ if __name__ == '__main__':
                     #TriangleAlt.arot_strip1loose,
                     #TriangleAlt.rot_star1loose,
                     #TriangleAlt.arot_star1loose,
-                ],
-        Symmetry.S4A4: [
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.A4xI][0].append(edgeAltOpts[Symmetry.A4xI][0][0])
+    edgeAltOpts[Symmetry.S4A4] = [
+        [ # position 0
+            [ # normal edge alternative
                     TriangleAlt.twisted,
-                ],
-        Symmetry.S4xI: [
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.S4A4][0].append(edgeAltOpts[Symmetry.S4A4][0][0])
+    edgeAltOpts[Symmetry.S4xI] = [
+        [ # position 0
+            [ # normal edge alternative
                     TriangleAlt.refl_1,
                     TriangleAlt.refl_2,
-                ],
-        Symmetry.S4: [
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.S4xI][0].append(edgeAltOpts[Symmetry.S4xI][0][0])
+    edgeAltOpts[Symmetry.S4] = [
+        [ # position 0
+            [ # normal edge alternative
                     # TODO: add refl? Might lead to folded squares? Investigate.
                     #TriangleAlt.refl_1,
                     #TriangleAlt.refl_2,
@@ -3787,17 +3755,24 @@ if __name__ == '__main__':
                     TriangleAlt.alt_stripII,
                     TriangleAlt.star,
                     TriangleAlt.star1loose,
-                    # TODO:
-                    #TriangleAlt.rot_strip1loose,
-                    #TriangleAlt.arot_strip1loose,
-                    #TriangleAlt.rot_star1loose,
-                    #TriangleAlt.arot_star1loose,
-                ],
-        Symmetry.A5xI: [
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.S4][0].append(edgeAltOpts[Symmetry.S4][0][0])
+    edgeAltOpts[Symmetry.A5xI] = [
+        [ # position 0
+            [ # normal edge alternative
                     TriangleAlt.refl_1,
                     TriangleAlt.refl_2,
-                ],
-        Symmetry.A5: [
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.A5xI][0].append(edgeAltOpts[Symmetry.A5xI][0][0])
+    edgeAltOpts[Symmetry.A5] = [
+        [ # position 0
+            [ # normal edge alternative
                     # TODO: add refl? Might lead to folded squares? Investigate.
                     #TriangleAlt.refl_1,
                     #TriangleAlt.refl_2,
@@ -3809,13 +3784,27 @@ if __name__ == '__main__':
                     TriangleAlt.alt_stripII,
                     TriangleAlt.star,
                     TriangleAlt.star1loose,
-                    # TODO:
-                    #TriangleAlt.rot_strip1loose,
-                    #TriangleAlt.arot_strip1loose,
-                    #TriangleAlt.rot_star1loose,
-                    #TriangleAlt.arot_star1loose,
-                ],
-    }
+            ]
+        ]
+    ]
+    # the same for the opposite edge alts
+    edgeAltOpts[Symmetry.A5][0].append(edgeAltOpts[Symmetry.A5][0][0])
+    edgeAltOpts[Symmetry.A5].append(
+        [
+            [ # std edge alternative
+                TriangleAlt.stripI,
+                TriangleAlt.stripII,
+                TriangleAlt.star,
+            ],
+            [ # opposite edge alternative
+                TriangleAlt.strip1loose,
+                TriangleAlt.stripI,
+                TriangleAlt.stripII,
+                TriangleAlt.star,
+                TriangleAlt.star1loose,
+            ]
+        ]
+    )
 
     def setup_ok_YxI(symGrp, edgeLs, edgeAlts, folds):
         dom = [
@@ -3931,6 +3920,34 @@ if __name__ == '__main__':
 
     pre_edgeLs_A5xI = pre_edgeLs_all_1s_opposite_syms[:]
     pre_edgeLs_A5 = pre_edgeLs_A4[:]
+    pre_edgeLs_A5_1 = [
+        [0, 1, 0, 1, 1, 0, 1],
+        [0, 1, 0, 1, 1, 1, 0],
+        [0, 1, 0, 1, 1, 1, 1],
+        [0, 1, 1, 1, 1, 0, 1],
+        [0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1],
+        [1, 0, 1, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0, 1, 1],
+        [1, 0, 1, 0, 1, 1, 0],
+        [1, 0, 1, 0, 1, 1, 1],
+        [1, 0, 1, 1, 0, 1, 0],
+        [1, 0, 1, 1, 0, 1, 1],
+        [1, 0, 1, 1, 1, 1, 0],
+        [1, 0, 1, 1, 1, 1, 1],
+        [1, 1, 0, 1, 1, 0, 1],
+        [1, 1, 0, 1, 1, 1, 0],
+        [1, 1, 0, 1, 1, 1, 1],
+        [1, 1, 1, 0, 0, 1, 0],
+        [1, 1, 1, 0, 0, 1, 1],
+        [1, 1, 1, 0, 1, 1, 0],
+        [1, 1, 1, 0, 1, 1, 1],
+        [1, 1, 1, 1, 0, 1, 0],
+        [1, 1, 1, 1, 0, 1, 1],
+        [1, 1, 1, 1, 1, 0, 1],
+        [1, 1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1]
+    ]
 
     pre_edgeLs = {
         Symmetry.A4xI: pre_edgeLs_A4xI,
@@ -3984,16 +4001,23 @@ if __name__ == '__main__':
         print 'Usage:'
         print sys.argv[0], '[options] <symmetry group>'
         print 'Where options:'
-        print '     -A      : list the edge alternatives.'
+        print '     -A      : list the edge alternatives. Depends on -v option.'
         print '     -a x    : edge alternative to search.'
         print '     -a [x:y]: slice of edge alternative list to search. If nothing is'
         print '               specified, then all alternatives from the -A option are'
         print '               searched.'
+        print '     -B      : list the opposite edge alternatives. Depends on -v option.'
         print '     -b x    : opposite edge alternative to search, only for non-reflexive'
         print '               symmetries.'
         print '     -b [x:y]: slice of opposite edge alternative list to search. If nothing is'
-        print '               specified, then all alternatives from the -A option are'
+        print '               specified, then all alternatives from the -B option are'
         print '               searched. Only for non-reflexive symmetries.'
+        print '     -v x    : vertex position. Whether some triangle fills make sense depends'
+        print '               a bit on the angle that positions a pair of heptagons. This'
+        print '               decides how a certain triangle fill is positioned.'
+        print '               Valid values are: 0 .. %d. Defaults to 0.' % (
+            max_triangle_fill_pos - 1
+        )
         print '     -f [x:y]: slice of heptagon fold list to search. If nothing is'
         print '               specified, then all folds from the -F option are searched.'
         print '     -F      : list available heptagon folds.'
@@ -4006,6 +4030,8 @@ if __name__ == '__main__':
         print '     -l x    : edge length to search.'
         print "     -o <out>: specifiy the output directory: don't use spaces; default"
         print '               %s.' % outDir
+        print '     -p <num>: precision, specify the amount of digits after the point; default'
+        print '               %d. Suggested to use 4 <= precision <= 13.' % precision
         print '     -s      : stop after having checked all. Default the program loops through'
         print '               all folds, edges, etc and starts over.'
         print '     -t      : Test all possible combinations of 1 and 0 for the edge lengths.'
@@ -4013,8 +4039,6 @@ if __name__ == '__main__':
         print '               solutions. It is suggested to use a little precision then, e.g.'
         print '               4 and a smaller amount of iterations, e.g. 100. This assumes -s'
         print '               and overrides -l. Other options aren\'t usually needed'
-        print '     -p <num>: precision, specify the amount of digits after the point; default'
-        print '               %d. Suggested to use 4 <= precision <= 13.' % precision
         print '     -1      : try one solution (for debugging/ testing): TODO: improve'
         print '               interface.'
         print 'And'
@@ -4029,6 +4053,7 @@ if __name__ == '__main__':
     nr_iterations = 4000
     outDir = "tst/frh-roots"
     precision = 10
+    max_triangle_fill_pos = 2 # TODO: fill in per symmetry
 
     # Handle command line arguments:
     if len(sys.argv) <= 1:
@@ -4040,6 +4065,7 @@ if __name__ == '__main__':
         # can be set to true by cmd line
         list_pre_edgeLs   = False
         list_edge_alts    = False
+        list_opp_edge_alts= False
         list_fold_alts    = False
         set_fold_alts     = ''
         set_edge_alts     = ''
@@ -4068,9 +4094,15 @@ if __name__ == '__main__':
                 skipNext = True
             elif sys.argv[n] == '-A':
                 list_edge_alts = True
+            elif sys.argv[n] == '-B':
+                list_opp_edge_alts = True
             elif sys.argv[n] == '-b':
                 errIfNoNxt('b', n)
                 set_opp_edge_alts = sys.argv[n + 1]
+                skipNext = True
+            elif sys.argv[n] == '-v':
+                errIfNoNxt('v', n)
+                set_triangle_fill_pos = sys.argv[n + 1]
                 skipNext = True
             elif sys.argv[n] == '-f':
                 errIfNoNxt('f', n)
@@ -4127,7 +4159,24 @@ if __name__ == '__main__':
         printUsage()
         sys.exit(-1)
     else:
-        if list_pre_edgeLs or list_edge_alts or list_fold_alts:
+        if set_triangle_fill_pos == '':
+            triangle_fill_pos = 0
+        else:
+            triangle_fill_pos = int(set_triangle_fill_pos)
+            if (triangle_fill_pos >= max_triangle_fill_pos or
+                triangle_fill_pos < 0
+            ):
+                print 'WARNING: illegal triangle fill position: %d' % (
+                    triangle_fill_pos
+                )
+                print '         Valid are 0 .. %d' % (max_triangle_fill_pos - 1)
+                printUsage()
+                sys.exit(0)
+        if (list_pre_edgeLs or
+            list_edge_alts or
+            list_opp_edge_alts or
+            list_fold_alts
+        ):
             if list_pre_edgeLs:
                 print 'Possible edge lengths:'
                 for (i, e) in zip(range(len(pre_edgeLs[symGrp])),
@@ -4135,8 +4184,17 @@ if __name__ == '__main__':
                     print '%3d:' % i, e
             if list_edge_alts:
                 print 'Possible edge alternatives:'
-                for (i, e) in zip(range(len(edgeAltOpts[symGrp])),
-                                                        edgeAltOpts[symGrp]):
+                for (i, e) in zip(
+                    range(len(edgeAltOpts[symGrp][triangle_fill_pos][0])),
+                    edgeAltOpts[symGrp][triangle_fill_pos][0]
+                ):
+                    print '%3d: %s' % (i, Stringify[e])
+            if list_opp_edge_alts:
+                print 'Possible opposite edge alternatives:'
+                for (i, e) in zip(
+                    range(len(edgeAltOpts[symGrp][triangle_fill_pos][1])),
+                    edgeAltOpts[symGrp][triangle_fill_pos][1]
+                ):
                     print '%3d: %s' % (i, Stringify[e])
             if list_fold_alts:
                 print 'Possible heptagon fold alternatives:'
@@ -4177,7 +4235,7 @@ if __name__ == '__main__':
                     printUsage()
                     sys.exit(0)
         if set_edge_alts == '':
-            edgeAlts = edgeAltOpts[symGrp]
+            edgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][0]
         else:
             if set_edge_alts[0] != '[':
                 # try if slice is one element, ie an int
@@ -4185,11 +4243,15 @@ if __name__ == '__main__':
                     i = int(set_edge_alts)
                 except ValueError:
                     printError("value error for edge index %s\n", set_edge_alts)
-                edgeAlts = edgeAltOpts[symGrp][i:i+1]
+                edgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][0][i:i+1]
             else:
                 try:
-                    edgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (symGrp,
-                                                                    set_edge_alts))
+                    edgeAlts = eval('edgeAltOpts[Symmetry.%s][%d][0]%s' % (
+                            symGrp,
+                            triangle_fill_pos,
+                            set_edge_alts
+                        )
+                    )
                 except TypeError:
                     printError("type error for edge slice: '%s'\n" % set_edge_alts)
                     printUsage()
@@ -4199,7 +4261,7 @@ if __name__ == '__main__':
                     printUsage()
                     sys.exit(0)
         if set_opp_edge_alts == '':
-            oppEdgeAlts = None
+            oppEdgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][1][:]
         else:
             if set_opp_edge_alts[0] != '[':
                 # try if slice is one element, ie an int
@@ -4208,11 +4270,15 @@ if __name__ == '__main__':
                 except ValueError:
                     printError(
                         "value error for edge index %s\n", set_opp_edge_alts)
-                oppEdgeAlts = edgeAltOpts[symGrp][i:i+1]
+                oppEdgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][1][i:i+1]
             else:
                 try:
-                    oppEdgeAlts = eval('edgeAltOpts[Symmetry.%s]%s' % (
-                                                    symGrp, set_opp_edge_alts))
+                    oppEdgeAlts = eval('edgeAltOpts[Symmetry.%s][%d][1]%s' % (
+                            symGrp,
+                            triangle_fill_pos,
+                            set_opp_edge_alts
+                        )
+                    )
                 except TypeError:
                     printError("type error for edge slice: '%s'\n" %
                                                             set_opp_edge_alts)
@@ -4249,6 +4315,7 @@ if __name__ == '__main__':
                     printError("syntax error for fold slice: '%s'\n" % set_fold_alts)
                     printUsage()
                     sys.exit(0)
+
         print 'Search solutions for symmetry group %s' % symGrp
         print 'Switch setup after %d randomly selected begin values' % (
                                                             nr_iterations)
@@ -4287,7 +4354,8 @@ if __name__ == '__main__':
                                                         symGrp == Symmetry.A5:
             if tst_all_combos:
                 edges_with_solutons = tst_if_solutions_exist_Y(symGrp, edgeLs,
-                    edgeAlts, foldAlts, nr_iterations, precision, oppEdgeAlts)
+                    edgeAlts, foldAlts, nr_iterations, precision, oppEdgeAlts,
+                    triangle_fill_pos = triangle_fill_pos)
                 print 'Edges with solutions:'
                 for e in edges_with_solutons:
                     print e
@@ -4295,4 +4363,5 @@ if __name__ == '__main__':
                 randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, dynSols = dynamicSols[symGrp],
                         precision = precision, outDir = outDir, loop = loop,
-                        oppEdgeAlts = oppEdgeAlts)
+                        oppEdgeAlts = oppEdgeAlts,
+                        triangle_fill_pos = triangle_fill_pos)
