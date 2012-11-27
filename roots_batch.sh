@@ -28,6 +28,9 @@ fi
 if [ -z $SOLS_COUNT_FILE ]; then
 	SOLS_COUNT_FILE=sols_count.csv
 fi
+if [ -z $EXIT_CODE_FILE ]; then
+	EXIT_CODE_FILE=exit_codes
+fi
 
 check_and_create_dirs() {
 	for DIR in $GIT_DIR $TMP_DIR ; do {
@@ -70,20 +73,24 @@ set_doms_for_3_threads() {
 	fi
 }
 
+run_and_check_result() {
+	# ignores race condition
+	$CMD || echo $((`cat $EXIT_CODE_FILE`+1)) > $EXIT_CODE_FILE
+}
+
 search_for_solutions() {
+	echo 0 > $EXIT_CODE_FILE
 	for DOM in $DOMS ; do {
-		python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l $DOM $SYMMETRY &
-		PIDS="$PIDS $!"
+		CMD="python $SEARCH_SCRIPT -i $ITER -o $TMP_DIR -p $PRECISION -s -l $DOM $SYMMETRY"
+		run_and_check_result &
 	} done
-	RETURN=0
-	CMD=wait
-	for PID in $PIDS ; do {
-		$CMD $PID || RETURN=$((RETURN+1))
-	} done
+	wait
+	RETURN=`cat $EXIT_CODE_FILE`
 	if [ $RETURN != "0" ] ; then {
 		echo "An error occurred in $RETURN of the search processes"
 		exit $((-RETURN))
 	} fi
+	rm $EXIT_CODE_FILE
 }
 
 copy_to_git_dir_if_sols_found() {
