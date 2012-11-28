@@ -338,6 +338,9 @@ class Shape(Heptagons.FldHeptagonShape):
 	    else:
 		this.edgeAlternative = this.edgeAlternative & ~alt2_bit
 
+    def setTriangleFillPosition(this, i):
+        print "TODO implement setTriangleFillPosition"
+
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
 	Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
 	# TODO
@@ -812,7 +815,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[dyn_pos],
 	    ],
             isometry.A4,
-	    trisAlt,
+	    [trisAlt],
 	    Stringify,
 	    *args, **kwargs
 	)

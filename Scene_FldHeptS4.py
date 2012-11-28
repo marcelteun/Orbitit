@@ -255,6 +255,9 @@ class Shape(Heptagons.FldHeptagonShape):
 		)
         return s
 
+    def setTriangleFillPosition(this, i):
+        print "TODO implement setTriangleFillPosition"
+
     def setV(this):
 
 	#
@@ -633,7 +636,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[dyn_pos],
 	    ],
             isometry.S4,
-	    trisAlt,
+	    [trisAlt],
 	    Stringify,
 	    *args, **kwargs
 	)

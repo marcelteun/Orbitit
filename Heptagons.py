@@ -1020,6 +1020,9 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.posAngle = angle
         this.updateShape = True
 
+    def setTriangleFillPosition(this, position):
+        print "WARNING: implement in derived class"
+
     def setFold1(this, angle = None, oppositeAngle = None):
         if angle != None:
 	    this.fold1 = angle
@@ -1085,7 +1088,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    maxHeight,
 	    prePosStrLst,
 	    symmetryBase,
-	    trisAlt,
+	    trisAlts,
 	    stringify,
 	    parent,
 	    *args, **kwargs
@@ -1097,7 +1100,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	maxHeight: max translation height to be used for the heptagon
 	prePosStrLst: string list that expresses which special positions can be
 	              found, e.g. where all holes disappear.
-	trisAlt: the TrisAlt object that is valid for this scene.
+	trisAlts: an array consisting of TrisAlt_base derived objects. Each
+                  element in the array expresses which triangle fills are valid
+                  for the position with the same index as the element.
 	stringify: hash table that maps enums on strings.
 	*args: standard wx Frame *args
 	**kwargs: standard wx Frame **kwargs
@@ -1106,7 +1111,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         wx.Frame.__init__(this, parent, *args, **kwargs)
 	this.parent = parent
         this.shape = shape
-        this.trisAlt = trisAlt
+        this.trisAlts = trisAlts
+        this.nr_of_positions = len(trisAlts)
+        this.setTriangleFillPosition(0)
         this.canvas = canvas
 	this.maxHeight = maxHeight
 	this.prePosStrLst = prePosStrLst
@@ -1148,6 +1155,18 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.Guis.append(this.trisFillGui)
         this.trisFillGui.Bind(wx.EVT_CHOICE, this.onTriangleFill)
 	this.setEnableTrisFillItems()
+
+        this.trisPosGui = wx.Choice(this.panel,
+                style = wx.RA_VERTICAL,
+                choices = [
+                        'Position %d' % i for i in range(
+                            this.nr_of_positions
+                        )
+                ]
+        )
+        this.Guis.append(this.trisPosGui)
+        this.trisPosGui.Bind(wx.EVT_CHOICE, this.onTrisPosition)
+        this.setEnableTrisFillItems()
 
         this.reflGui = wx.CheckBox(this.panel, label = 'Reflections Required')
         this.Guis.append(this.reflGui)
@@ -1343,6 +1362,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 					label = 'Triangle Fill Alternative'))
         fillSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
         fillSizer.Add(this.trisFillGui, 0, wx.EXPAND)
+        fillSizer.Add(this.trisPosGui, 0, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
         statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
@@ -1621,6 +1641,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def disableGuisNoRefl(this):
 	if this.__guisNoReflEnabled:
 	    this.setEnableTrisFillItems()
+	    this.trisPosGui.Disable()
 	    this.rotateFldGui.Disable()
 	    this.shape.setRotateFold(0)
 	    this.disableSlidersNoRefl()
@@ -1629,6 +1650,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def enableGuisNoRefl(this, restore = True):
 	if not this.__guisNoReflEnabled:
 	    this.setEnableTrisFillItems()
+	    this.trisPosGui.Enable()
 	    this.rotateFldGui.Enable()
 	    this.shape.setRotateFold(this.rotateFld)
 	    this.enableSlidersNoRefl(restore)
@@ -1684,16 +1706,21 @@ class FldHeptagonCtrlWin(wx.Frame):
 	else:
 	    this.__sav_rotTrisFill = currentChoice
 
-    def setValidTrisFillItems(this, trisAlt):
+    def setTriangleFillPosition(this, position):
         """Sets which triangle fills are valid for the current settings
 
         Note that you have to call setEnableTrisFillItems to apply these
         settings to the GUI.
 
-        trisAlt: a TrisAlt_base decendent that has a choiceList definition that
-                 specifies the valid choices.
+        position: an index in this.trisAlts
         """
-        this.trisAlt = trisAlt
+        if position < 0:
+            position = 0
+        if position >= this.nr_of_positions:
+            position = this.nr_of_positions - 1
+        this.position = position
+        this.trisAlt = this.trisAlts[this.position]
+        this.shape.setTriangleFillPosition(position)
 
     def setEnableTrisFillItems(this, itemList = None):
 	# first time fails
@@ -1836,6 +1863,16 @@ class FldHeptagonCtrlWin(wx.Frame):
 		    this.setReflPosAngle()
 		this.statusBar.SetStatusText(this.shape.getStatusStr())
 	    this.updateShape()
+
+    @property
+    def tris_position(this):
+        # Note these are called "Position <int>"
+	return int(this.trisPosGui.GetStringSelection().split()[1])
+
+    def onTrisPosition(this, event = None):
+        this.setTriangleFillPosition(this.tris_position)
+        this.setEnableTrisFillItems()
+        this.updateShape()
 
     def onFoldMethod(this, event = None):
         this.foldMethod = this.foldMethodListItems[

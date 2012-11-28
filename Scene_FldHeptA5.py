@@ -195,6 +195,7 @@ class Shape(Heptagons.FldHeptagonShape):
 	this.height = 2.7
 	this.dihedralAngle = Geom3D.Deg2Rad * 119
 	this.initArrs()
+        this.setTriangleFillPosition(0)
         this.setEdgeAlternative(trisAlt.strip_II, trisAlt.strip_II)
 	this.setV()
 
@@ -237,6 +238,10 @@ class Shape(Heptagons.FldHeptagonShape):
 		    aLen, bLen, opp_bLen, cLen, opp_cLen, dLen, opp_dLen
 		)
         return s
+
+    @property
+    def nr_of_positions(this):
+        return len(this.triFs_alts)
 
     def setTriangleFillPosition(this, i):
         this.triangleFillPosition = i
@@ -595,7 +600,7 @@ class Shape(Heptagons.FldHeptagonShape):
         # alternative fill 1:
         # middle, centre, o5
         stripI        = [[4, 23, 17], [2, 3, 40], [5, 23, 4]]
-        stripII       = [[8, 3, 23], [23, 17, 8], [5, 23, 4]]
+        stripII       = [[8, 4, 23], [23, 17, 8], [5, 23, 4]]
         star          = [[4, 5, 17], [8, 4, 17], [5, 23, 17]]
         star_1_loose  = [[8, 5, 17], [5, 8, 4], [5, 23, 17]]
         strip_1_loose = [[8, 5, 23], [5, 8, 4], [8, 23, 17]]
@@ -611,7 +616,7 @@ class Shape(Heptagons.FldHeptagonShape):
         }
         this.oppTriFs_alts.append(oppTriFs)
 	stripI        = [4, 17, 4, 23]
-	stripII       = [8, 23, 5, 17]
+	stripII       = [8, 23, 4, 23]
 	star          = [4, 17, 5, 17]
         star_1_loose  = [5, 8, 5, 17]
         strip_1_loose = [5, 8, 8, 23]
@@ -808,8 +813,6 @@ class Shape(Heptagons.FldHeptagonShape):
                 trisAlt.crossed_2:     this.o3triEs_alts[0][trisAlt.crossed_2]
             })
 
-        this.setTriangleFillPosition(0)
-
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
 	Heptagons.FldHeptagonCtrlWin.__init__(this,
@@ -820,14 +823,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[dyn_pos],
 	    ],
             isometry.A5,
-	    trisAlt,
+	    trisAlts,
 	    Stringify,
 	    *args, **kwargs
 	)
-        # TODO: set this by GUI
-        shape.setTriangleFillPosition(1)
-        this.setValidTrisFillItems(trisAlts[1])
-        this.setEnableTrisFillItems()
 
     def showOnlyHepts(this):
 	return this.prePos == only_hepts and not (
