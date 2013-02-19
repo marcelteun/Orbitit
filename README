@@ -47,7 +47,7 @@ E.g. for Arch Linux:
     Make sure /usr/bin/python-config is linked to /usr/bin/python2-config
     Make sure /usr/bin/pydoc is linked to /usr/bin/pydoc2
 2. sudo pacman -S wxpython
-3. sudo pacman -S python-opengl
+3. sudo pacman -S python2-opengl
 
 Run:
 ----
