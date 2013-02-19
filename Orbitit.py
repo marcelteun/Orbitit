@@ -476,8 +476,9 @@ class MainWindow(wx.Frame):
             style = wx.SAVE | wx.OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
+            filepath = fileDlg.GetPath()
             this.filename = dlg.GetFilename()
-            this.exportDirName  = dlg.GetDirectory()
+            this.exportDirName  = filepath.split(filepath)[0]
             NameExt = this.filename.split('.')
             if len(NameExt) == 1:
                 this.filename = '%s.py' % this.filename
@@ -486,7 +487,8 @@ class MainWindow(wx.Frame):
                     this.filename = '%s.py' % this.filename
                 else:
                     this.filename = '%spy' % this.filename
-            fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+            fd = open(filepath, 'w')
+            print "writing to file %s" % filepath
             # TODO precision through setting:
             shape = this.panel.getShape()
             shape.name = this.filename
@@ -510,8 +512,9 @@ class MainWindow(wx.Frame):
                 )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
+                    filepath = fileDlg.GetPath()
                     this.filename = fileDlg.GetFilename()
-                    this.exportDirName  = fileDlg.GetDirectory()
+                    this.exportDirName  = filepath.split(filepath)[0]
                     NameExt = this.filename.split('.')
                     if len(NameExt) == 1:
                         this.filename = '%s.off' % this.filename
@@ -520,7 +523,8 @@ class MainWindow(wx.Frame):
                             this.filename = '%s.off' % this.filename
                         else:
                             this.filename = '%soff' % this.filename
-                    fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+                    fd = open(filepath, 'w')
+                    print "writing to file %s" % filepath
                     shape = this.panel.getShape()
                     try:
                         shape = shape.SimpleShape
@@ -556,8 +560,9 @@ class MainWindow(wx.Frame):
                 )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
+                    filepath = fileDlg.GetPath()
                     this.filename = fileDlg.GetFilename()
-                    this.exportDirName  = fileDlg.GetDirectory()
+                    this.exportDirName  = filepath.split(filepath)[0]
                     NameExt = this.filename.split('.')
                     if len(NameExt) == 1:
                         this.filename = '%s.ps' % this.filename
@@ -567,7 +572,8 @@ class MainWindow(wx.Frame):
                         else:
                             this.filename = '%sps' % this.filename
                     # Note: if file exists is part of file dlg...
-                    fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+                    fd = open(filepath, 'w')
+                    print "writing to file %s" % filepath
                     shape = this.panel.getShape()
                     try:
                         shape = shape.SimpleShape
@@ -603,8 +609,9 @@ class MainWindow(wx.Frame):
             style = wx.SAVE | wx.OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
+            filepath = fileDlg.GetPath()
             this.filename = dlg.GetFilename()
-            this.exportDirName  = dlg.GetDirectory()
+            this.exportDirName  = filepath.split(filepath)[0]
             NameExt = this.filename.split('.')
             if len(NameExt) == 1:
                 this.filename = '%s.wrl' % this.filename
@@ -613,8 +620,8 @@ class MainWindow(wx.Frame):
                     this.filename = '%s.wrl' % this.filename
                 else:
                     this.filename = '%swrl' % this.filename
-            # TODO: check if file exists... do not overwrite on default
-            fd = open(os.path.join(this.exportDirName, this.filename), 'w')
+            fd = open(filepath, 'w')
+            print "writing to file %s" % filepath
             # TODO precision through setting:
             r = this.panel.getShape().getEdgeProperties()['radius']
             x3dObj = this.panel.getShape().toX3dDoc(edgeRadius = r)

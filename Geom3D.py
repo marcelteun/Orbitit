@@ -2099,6 +2099,7 @@ class SimpleShape:
         # restore margin
         GeomTypes.eqFloatMargin = orgMargin
 
+        #print PsDoc.toStr()
         return PsDoc.toStr()
 
     def intersectFacets(this,
