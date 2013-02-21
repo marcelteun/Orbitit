@@ -153,44 +153,7 @@ from OpenGL.GL import *
 
 import os
 
-import Scene_EqlHeptFromKite
-import Scene_EqlHeptS4A4
-import Scene_EqlHeptS4xI
-import Scene_EqlHeptA5xI
-import Scene_EqlHeptA5xI_GD
-import Scene_EqlHeptA5xI_GI
-import Scene_FldHeptA4
-import Scene_FldHeptS4
-import Scene_FldHeptA5
-
-import Scene_5Cell
-import Scene_8Cell
-import Scene_24Cell
-import Scene_Rectified8Cell
-import Scene_Rectified24Cell
-
-import Scene_Orbit
-
-SceneList = [
-        {'lab': Scene_EqlHeptFromKite.Title, 'class': Scene_EqlHeptFromKite.Scene},
-        {'lab': Scene_EqlHeptS4A4.Title,     'class': Scene_EqlHeptS4A4.Scene},
-        {'lab': Scene_EqlHeptS4xI.Title,     'class': Scene_EqlHeptS4xI.Scene},
-        {'lab': Scene_EqlHeptA5xI.Title,     'class': Scene_EqlHeptA5xI.Scene},
-        {'lab': Scene_EqlHeptA5xI_GD.Title,  'class': Scene_EqlHeptA5xI_GD.Scene},
-        {'lab': Scene_EqlHeptA5xI_GI.Title,  'class': Scene_EqlHeptA5xI_GI.Scene},
-        {'lab': Scene_FldHeptA4.Title,  'class': Scene_FldHeptA4.Scene},
-        {'lab': Scene_FldHeptS4.Title,  'class': Scene_FldHeptS4.Scene},
-        {'lab': Scene_FldHeptA5.Title,  'class': Scene_FldHeptA5.Scene},
-        {'lab': Scene_5Cell.Title,  'class': Scene_5Cell.Scene},
-        {'lab': Scene_8Cell.Title,  'class': Scene_8Cell.Scene},
-        {'lab': Scene_24Cell.Title,  'class': Scene_24Cell.Scene},
-        {'lab': Scene_Rectified8Cell.Title,  'class': Scene_Rectified8Cell.Scene},
-        {'lab': Scene_Rectified24Cell.Title,  'class': Scene_Rectified24Cell.Scene},
-        {'lab': Scene_Orbit.Title,  'class': Scene_Orbit.Scene},
-    ]
-
-DefaultScene = -1 # Start with this scene
-DefaultScene = 8 # Start with this scene
+DefaultScene = './Scene_Orbit.py'
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def __init__(this, shape, *args, **kwargs):
@@ -265,6 +228,7 @@ class MainWindow(wx.Frame):
         this.scene = None
         this.exportDirName = '.'
         this.importDirName = '.'
+        this.sceneDirName = '.'
         this.viewSettingsWindow = None
         this.scene = None
         if len(p_args) > 0 and (
@@ -393,18 +357,13 @@ class MainWindow(wx.Frame):
             )
         this.Bind(wx.EVT_MENU, this.onResetView, id = reset.GetId())
         menu.AppendItem(reset)
-        sceneMenu = wx.Menu()
-        for scene in SceneList:
-            sceneMenuItem = wx.MenuItem(
-                    sceneMenu,
-                    wx.ID_ANY,
-                    text = scene['lab']
-                )
-            id = sceneMenuItem.GetId()
-            scene['menuId'] = id
-            this.Bind(wx.EVT_MENU, this.onScene, id = id)
-            sceneMenu.AppendItem(sceneMenuItem)
-        menu.AppendMenu(wx.ID_ANY, "&Scene", sceneMenu)
+        scene = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                text = "&Scene..."
+            )
+        this.Bind(wx.EVT_MENU, this.onOpenScene, id = scene.GetId())
+        menu.AppendItem(scene)
         return menu
 
     def onOpen(this, e):
@@ -486,9 +445,9 @@ class MainWindow(wx.Frame):
             style = wx.SAVE | wx.OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
-            filepath = fileDlg.GetPath()
+            filepath = dlg.GetPath()
             this.filename = dlg.GetFilename()
-            this.exportDirName  = filepath.split(filepath)[0]
+            this.exportDirName  = filepath.rsplit('/', 1)[0]
             NameExt = this.filename.split('.')
             if len(NameExt) == 1:
                 this.filename = '%s.py' % this.filename
@@ -524,7 +483,7 @@ class MainWindow(wx.Frame):
                 if fileChoosen:
                     filepath = fileDlg.GetPath()
                     this.filename = fileDlg.GetFilename()
-                    this.exportDirName  = filepath.split(filepath)[0]
+                    this.exportDirName  = filepath.rsplit('/', 1)[0]
                     NameExt = this.filename.split('.')
                     if len(NameExt) == 1:
                         this.filename = '%s.off' % this.filename
@@ -572,7 +531,7 @@ class MainWindow(wx.Frame):
                 if fileChoosen:
                     filepath = fileDlg.GetPath()
                     this.filename = fileDlg.GetFilename()
-                    this.exportDirName  = filepath.split(filepath)[0]
+                    this.exportDirName  = filepath.rsplit('/', 1)[0]
                     NameExt = this.filename.split('.')
                     if len(NameExt) == 1:
                         this.filename = '%s.ps' % this.filename
@@ -621,7 +580,7 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             filepath = fileDlg.GetPath()
             this.filename = dlg.GetFilename()
-            this.exportDirName  = filepath.split(filepath)[0]
+            this.exportDirName  = filepath.rsplit('/', 1)[0]
             NameExt = this.filename.split('.')
             if len(NameExt) == 1:
                 this.filename = '%s.wrl' % this.filename
@@ -662,18 +621,27 @@ class MainWindow(wx.Frame):
             this.panel.setShape(shape)
             this.SetTitle("Dome %s" % this.GetTitle())
 
-    def onScene(this, e):
-        id = e.GetId()
-        thisScene = None
-        for scene in SceneList:
-            if scene['menuId'] == id:
-                thisScene = scene
-        if thisScene != None:
-            this.setScene(thisScene)
-            try:
-                this.viewSettingsWindow.reBuild()
-            except AttributeError:
-                pass
+    def onOpenScene(this, e):
+        wildcard = "Scene plugin (Scene_*.py)|Scene_*.py"
+        dlg = wx.FileDialog(this, 'New: Choose a Scene',
+                this.sceneDirName, '', wildcard, wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            filepath = dlg.GetPath()
+            print 'filepath', filepath
+            this.sceneDirName = filepath.rsplit('/', 1)[0]
+            print 'sceneDirName', this.sceneDirName
+            shape = this.readSceneFile(filepath)
+        dlg.Destroy()
+
+    def readSceneFile(this, filename):
+        fd = open(filename, 'r')
+        ed = {'__name__': 'readSceneFile'}
+        exec fd in ed
+        scene = {
+            'lab': ed['Title'],
+            'class': ed['Scene']
+        }
+        this.setScene(scene)
 
     def setScene(this, scene):
         this.closeCurrentScene()
@@ -683,6 +651,10 @@ class MainWindow(wx.Frame):
         this.panel.setShape(this.scene.shape)
         this.SetTitle(scene['lab'])
         canvas.resetOrientation()
+        try:
+            this.viewSettingsWindow.reBuild()
+        except AttributeError:
+            pass
 
     def onResetView(this, e):
         this.panel.getCanvas().resetOrientation()
@@ -1699,9 +1671,11 @@ usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
 Without any specified options ut starts the program in the default scene.
 Options:
 
-        -P <int>
-        --precision <int> Write the number with <int> number of decimals.
-        -p --ps      export to PS. The input file is either a python scrypt,
+        --precision <int>
+        -P <int>          Write the number with <int> number of decimals.
+
+        -p
+        --ps         export to PS. The input file is either a python scrypt,
                      specified by -y or an off file, specified by -f. If no
                      argument is specified, the the result is piped to stdout.
         -y <file>
@@ -1716,6 +1690,10 @@ Options:
         --margin=<int> set the margin for floating point numbers to be
                        considered equal. All numbers with a difference that is
                        smaller than 1.0e-<int> will be considered equal.
+
+        -s <file>
+        --scene=<file> Start the program with the scene as specified by the
+                       file parameter.
     """
     sys.exit(exit_nr)
 
@@ -1729,7 +1707,7 @@ import getopt
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],
-        'fm:P:psy', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
+        'fm:P:ps:y', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
 except getopt.GetoptError, err:
     print str(err)
     usage(2)
@@ -1751,6 +1729,8 @@ for opt, opt_arg in opts:
         oper = Oper.toPs
     elif opt in ('-s', '--scene'):
         oper = Oper.openScene
+        scene_file = opt_arg
+        print 'DBG scene_file', scene_file
     elif opt in ('-y', '--py'):
         oper = Oper.toPy
     else:
@@ -1759,6 +1739,7 @@ for opt, opt_arg in opts:
 
 o_fd = None
 a_ind = 0
+print 'DBG args', args
 if oper != None:
     if len(args) <= a_ind:
         print "reading python format from std input"
@@ -1785,8 +1766,8 @@ elif oper == Oper.toPy:
     if shape != None:
         shape.saveFile(o_fd)
 else:
-    if oper == Oper.openScene:
-        print "TODO"
+    if oper != Oper.openScene:
+        scene_file = DefaultScene
     app = wx.PySimpleApp()
     frame = MainWindow(
             Canvas3DScene,
@@ -1798,7 +1779,7 @@ else:
             pos = wx.Point(980, 0)
         )
     if (len(args) == 0):
-        frame.setScene(SceneList[DefaultScene])
+        frame.readSceneFile(scene_file)
     app.MainLoop()
 
 sys.stderr.write("Done\n")
