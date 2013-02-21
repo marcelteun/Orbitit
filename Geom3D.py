@@ -144,7 +144,7 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
         result = result and eq(Va[i], Vb[i], margin)
     return result
 
-def readPyFile(fd):
+def readPyFile(fd, recreateEdges = True):
     """Reads an the python file a 3D shape and returns an instance of that class
 
     fd: the file descriptor of a file that is opened with read permissions.
@@ -152,7 +152,10 @@ def readPyFile(fd):
     """
     ed = {'__name__': 'readPyFile'}
     exec fd in ed
-    return ed['shape']
+    shape = ed['shape']
+    if recreateEdges and len(shape.Es) == 0:
+        shape.recreateEdges()
+    return shape
 
 def isInt(str):
     try:
@@ -285,7 +288,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
         shape.name = name
     # If the file defines edges (faces of length 2) then don't recreate any
     # edges, even if requested
-    if recreateEdges and len(Es) ==0:
+    if recreateEdges and len(Es) == 0:
         shape.recreateEdges()
     return shape
 
