@@ -481,6 +481,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
     def __init__(this,
         parent,
         length = 3,
+        relExtraSpace = 5,
         orientation = wx.HORIZONTAL,
         elementLabels = None
         # TODO: what about the std keywords
@@ -506,7 +507,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
 
         # Add vertex list
         this.boxes.append(Vector3DSetStaticPanel(this, length, orientation))
-        mainSizer.Add(this.boxes[-1], 10, wx.EXPAND)
+        mainSizer.Add(this.boxes[-1], relExtraSpace, wx.EXPAND)
         # Add button:
         addSizer = wx.BoxSizer(orientation)
         this.boxes.append(wx.Button(this, wx.ID_ANY, "Vertices Add nr:"))

@@ -81,7 +81,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((582, 921))
+        this.setDefaultSize((582, 741))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -115,7 +115,9 @@ class CtrlWin(wx.Frame):
         #VERTICES
         this.showGui.append(wx.StaticBox(this.panel, label = 'Vertices'))
         bSizer = wx.StaticBoxSizer(this.showGui[-1])
-        this.showGui.append(GeomGui.Vector3DSetDynamicPanel(this.panel))
+        this.showGui.append(GeomGui.Vector3DSetDynamicPanel(
+            this.panel, relExtraSpace = 3
+        ))
         this.__VsGuiIndex = len(this.showGui) - 1
         bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
         dataSizer.Add(bSizer, 1, wx.EXPAND)
