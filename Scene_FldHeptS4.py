@@ -744,9 +744,18 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		psp = this.predefRotSpecPos
             if this.specPosIndex >= len(psp[this.prePos]):
                 this.specPosIndex = -1
-	    data = psp[this.prePos][this.specPosIndex]
-	    if data.has_key('file'):
-		print 'see file %s/%s' % (this.rDir, data['file'])
+	    in_data = psp[this.prePos][this.specPosIndex]
+            fold_method_str = this.fileStrMapFoldMethodStr(in_data['file'])
+	    assert fold_method_str != None
+	    tris_str = this.fileStrMapTrisStr(in_data['file'])
+	    assert tris_str != None
+	    tris_str = trisAlt.key[tris_str]
+	    data = {
+		    'set': in_data['set'],
+		    '7fold': Heptagons.foldMethod.get(fold_method_str),
+		    'tris': tris_str
+	    }
+	    print 'see file %s/%s' % (this.rDir, in_data['file'])
 	    return data
 
     @property
@@ -790,80 +799,66 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     predefReflSpecPos = {
 	only_hepts: [
 	    {
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py',
 		'set': [0.0194846506, 2.5209776869, 0.7387578325, -0.2490014706, 1.5707963268],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py',
 		'set': [1.9046884810, -0.0895860579, 0.0898667459, -0.8043880107, 1.5707963268],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
+		'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py',
 		'set': [2.3689660916, 0.0851258971, -0.0853666149, 2.1212284837],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2.py',
 		'set': [0.1801294042, -0.5679882382, 2.7691714565, -0.1647931959, 1.5707963268],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py'
+		'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1.py',
 		'set': [0.1985558264, -0.7212633593, 2.5993674146, -0.2638659586],
-		'7fold': Heptagons.foldMethod.star,
-		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
+		'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py',
 		'set': [2.3706859974, -0., 1.4330985471, 1.1300265566],
-		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py',
 		'set': [1.9053212843, 0.0000000000, 2.0476430098, 0.6938789411, 1.5707963268],
-		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py'
+		'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1.py',
 		'set': [2.3706859974, 0., 0.1376977796, 2.0115660970],
-		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_2.py',
 		'set': [1.9053212843, 0.0000000000, -0.1370097736, -0.6938789411, 1.5707963268],
-		'7fold': Heptagons.foldMethod.triangle,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py'
+		'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py',
 		'set': [0.2144969422, -0.7161063284, 2.4479090034, 0.2591004995],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py'
+		'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1.py',
 		'set': [1.82916035932, -0.15381215148, -0.73341848407, 2.31852723230],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.refl_1,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py',
 		'set': [1.8797513382, -0.0971685207, -0.3990474779, 0.9416509246, 1.5707963268],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py',
 		'set': [0.0078461298, 2.5240450735, 0.6010013359, 0.2588481477, 1.5707963268],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.refl_2,
 	    },{
-		#'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py'
+		'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2.py',
 		'set': [1.4801185612, -0.2147509348, -0.4352845433, 2.4498730531, 1.5707963268],
-		'7fold': Heptagons.foldMethod.w,
-		'tris': trisAlt.refl_2,
 	    }
 	],
     }
     predefRotSpecPos = {
-	only_hepts: [],
+	only_hepts: [
+	    {
+		'file': 'frh-roots-0_0_1_0_0_1_0-fld_w.0-shell_1_loose-opp_shell_1_loose.py',
+		'set': [2.134874485396, -0.583925900536, 2.114788565317, -0.848112522958, -2.338772404203, 2.787521022442, -2.374081458163],
+	    },{
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
+		'set': [1.642456721956, 1.402279094735, -1.646522348731, -1.956656738624, 0.982920989544, -0.249747722020, -2.643294872695],
+	    },{
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
+		'set': [1.582941969693, 1.309072560855, -1.650557370807, -2.447899234189, 0.891424433510, -1.350012782042, -2.738031681676],
+	    },{
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
+		'set': [-0.866025403784, -2.222676713307, -2.064570332814, -1.619344079087, 0.555984796217, -2.064570332814, 2.696366399863],
+	    }
+        ],
     }
 
 class Scene(Geom3D.Scene):
