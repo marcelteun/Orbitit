@@ -30,7 +30,7 @@ You will need:
 2. Wxpython: http://www.wxpython.org
 3. pyOpenGL: http://pyopengl.sourceforge.net/
 
-E.g. for Ubuntu:
+E.g. for Ubuntu or other Debian based Linux dist:
 ----------------
 1. sudo apt-get install python
 2. sudo apt-get install python-wxgtk<x.x>
