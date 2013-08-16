@@ -58,6 +58,7 @@ alt_bit = 8
 loose_bit = 16
 rot_bit   = 32
 twist_bit = 64
+tris_offset = 128
 class TrisAlt_base(object):
     # Note nrs should be different from below
     refl_1             = 0
@@ -1444,6 +1445,13 @@ class FldHeptagonCtrlWin(wx.Frame):
     def isTrisFillValid(this, trisFillId):
 	assert False, "TODO: implement at offspring"
 
+    def fileStrMapTrisPos(this, filename):
+	"""get the triangle alternative position from filename
+
+        Defaults here to 0, if others are used the offspring should implement
+        """
+        return '0'
+
     def setEnablePrePosItems(this):
 	currentPrePos = this.prePos
 	this.prePosGui.Clear()
@@ -1990,6 +1998,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.trisFillGui.SetStringSelection(
 	    this.fileStrMapTrisStr(this.prePosFileName))
 	this.onTriangleFill()
+        this.trisPosGui.SetStringSelection(
+            'Position %s' % this.fileStrMapTrisPos(this.prePosFileName))
+        this.onTrisPosition()
 	# it's essential that prePosGui is set to dynamic be4 stdPrePos is read
 	# otherwise something else than dynamic might be read...
 	openFileStr = this.stringify[open_file]
@@ -2072,7 +2083,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	# remove the "From File" from the pull down list as soon as it is
 	# deselected
         if event != None and this.prePos != open_file:
-	    openFileStr = this.stringify[open_file] 
+	    openFileStr = this.stringify[open_file]
 	    n = this.prePosGui.FindString(openFileStr)
 	    if n >= 0:
 		# deleting will reset the selectio, so save and reselect:
@@ -2092,7 +2103,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.shape.updateShape = True
 	    this.nrTxt.SetLabel('---')
         elif not this.prePos == open_file:
-	    # this block is run for predefined sped pos only:
+	    # this block is run for predefined spec pos only:
             oppFld1 = fld1 = this.fld1None
             oppFld2 = fld2 = this.fld2None
 	    posVal = this.aNone
@@ -2114,12 +2125,19 @@ class FldHeptagonCtrlWin(wx.Frame):
 #		print 'DBG key eror for trisFill: "%s"' % this.trisFillGui.GetStringSelection()
 #	        pass
 
-	    # get fold, tris als
+	    # get fold, tris alt
 	    sps = this.specPosSetup
 	    this.foldMethodGui.SetStringSelection(FoldName[sps['7fold']])
 	    this.trisFillGui.SetStringSelection(this.trisAlt.stringify[sps['tris']])
+            try:
+                tris_pos = sps['tris-pos']
+            except KeyError:
+                tris_pos = 0
+            this.trisPosGui.SetStringSelection('Position %d' % tris_pos)
+
 	    this.onFoldMethod()
 	    this.onTriangleFill()
+            this.onTrisPosition()
 
 	    for gui in [
 		this.dihedralAngleGui, this.posAngleGui,
