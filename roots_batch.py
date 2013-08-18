@@ -1614,36 +1614,36 @@ def FoldedRegularHeptagonsA5_t_fill_pos_1(c,
     #
     cp[3] = v_delta(x0, y0, z0, x11, y11, z11) - edgeLengths[3]
 
-    # always: not incl_reflections:
-    #
-    # OPPOSITE EDGE B
-    #
-    if (par_opp_fill & loose_bit) == loose_bit:
-        cp[4] = v_delta(-x5, -y5, z5, x2, y2, z2) - edgeLengths[4]
-    elif par_opp_fill == TriangleAlt.stripI:
-        cp[4] = v_delta(x4, y4, z4, x17, y17, z17) - edgeLengths[4]
-    elif par_opp_fill == TriangleAlt.stripII:
-        cp[4] = v_delta(-x2, -y2, z2, x23, y23, z23) - edgeLengths[4]
-    else:
-        cp[4] = v_delta(x4, y4, z4, x17, y17, z17) - edgeLengths[4]
+    if not incl_reflections:
+        #
+        # OPPOSITE EDGE B
+        #
+        if (par_opp_fill & loose_bit) == loose_bit:
+            cp[4] = v_delta(-x5, -y5, z5, x2, y2, z2) - edgeLengths[4]
+        elif par_opp_fill == TriangleAlt.stripI:
+            cp[4] = v_delta(x4, y4, z4, x17, y17, z17) - edgeLengths[4]
+        elif par_opp_fill == TriangleAlt.stripII:
+            cp[4] = v_delta(-x2, -y2, z2, x23, y23, z23) - edgeLengths[4]
+        else:
+            cp[4] = v_delta(x4, y4, z4, x17, y17, z17) - edgeLengths[4]
 
-    #
-    # OPPOSITE EDGE C
-    #
-    #
-    if par_opp_fill == TriangleAlt.strip1loose:
-        cp[5] = v_delta(-x2, -y2, z2, x23, y23, z23) - edgeLengths[5]
-    elif (par_opp_fill & star_bas) == star_bas:
-        # star and star_1_loose
-        cp[5] = v_delta(x5, y5, z5, x17, y17, z17) - edgeLengths[5]
-    else:
-        # strip I and strip II
-        cp[5] = v_delta(x4, y4, z4, x23, y23, z23) - edgeLengths[5]
+        #
+        # OPPOSITE EDGE C
+        #
+        #
+        if par_opp_fill == TriangleAlt.strip1loose:
+            cp[5] = v_delta(-x2, -y2, z2, x23, y23, z23) - edgeLengths[5]
+        elif (par_opp_fill & star_bas) == star_bas:
+            # star and star_1_loose
+            cp[5] = v_delta(x5, y5, z5, x17, y17, z17) - edgeLengths[5]
+        else:
+            # strip I and strip II
+            cp[5] = v_delta(x4, y4, z4, x23, y23, z23) - edgeLengths[5]
 
-    #
-    # OPPOSITE EDGE D
-    #
-    cp[6] = v_delta(x5, y5, z5, x23, y23, z23) - edgeLengths[6]
+        #
+        # OPPOSITE EDGE D
+        #
+        cp[6] = v_delta(x5, y5, z5, x23, y23, z23) - edgeLengths[6]
 
     #print cp
     return cp
@@ -1858,6 +1858,7 @@ def FindMultiRoot(initialValues,
     elif symmetry == Symmetry.S4 or symmetry == Symmetry.S4xI:
         mysys = multiroots.gsl_multiroot_function(
             FoldedRegularHeptagonsS4,
+            params,
             nrOfIns
         )
     elif symmetry == Symmetry.A4xI or symmetry == Symmetry.S4A4:
@@ -2199,13 +2200,12 @@ class RandFindMultiRootOnDomain(threading.Thread):
             else:
                 es = '%s_%.1f' % (es, l)
         es = es[1:]
-        return '%sfrh-roots-%s-fld_%s.0-%s_%d-opp_%s_%d.py' % (
+        return '%sfrh-roots-%s-fld_%s.0-%s-opp_%s-pos-%d.py' % (
                 this.outDir,
                 es, Fold(this.fold),
                 string.join(Stringify[this.edgeAlternative].split(), '_'),
-                triangle_fill_pos,
                 string.join(Stringify[this.oppEdgeAlternative].split(), '_'),
-                triangle_fill_pos
+                this.triangle_fill_pos
             )
 
     def getOutReflName(this):
@@ -2219,10 +2219,11 @@ class RandFindMultiRootOnDomain(threading.Thread):
             else:
                 es = '%s_%.1f' % (es, l)
         es = es[1:]
-        return '%sfrh-roots-%s-fld_%s.0-%s.py' % (
+        return '%sfrh-roots-%s-fld_%s.0-%s-pos-%d.py' % (
                 this.outDir,
                 es, Fold(this.fold),
-                string.join(Stringify[this.edgeAlternative].split(), '_')
+                string.join(Stringify[this.edgeAlternative].split(), '_'),
+                this.triangle_fill_pos
             )
 
     def _extend_refl_results(this, refl_results):
@@ -2321,6 +2322,17 @@ class RandFindMultiRootOnDomain(threading.Thread):
         reiterated_input_results = []
         maxIter = 1000 # this can be high assuming it is a solution
         for solution in this.results:
+            # for the twisted triangle alternative (S4A4) or refl2 (S4xI and
+            # A5xI) the solution saves the position angle, while this one is
+            # hard coded. Do not send this in into FindMultiRoot, since it will
+            # lead to an error.
+            if len(solution) == 5:
+                assert (
+                    this.edgeAlternative == TriangleAlt.refl_2
+                    or
+                    this.edgeAlternative == TriangleAlt.twisted
+                )
+                solution = solution[0:-1]
             result = FindMultiRoot(solution,
                     this.symmetry,
                     this.edgeAlternative,
@@ -3766,10 +3778,16 @@ if __name__ == '__main__':
                     TriangleAlt.refl_1,
                     TriangleAlt.refl_2,
             ]
+        ], [ # position 1
+            [ # normal edge alternative
+                    TriangleAlt.refl_1,
+                    TriangleAlt.refl_2,
+            ]
         ]
     ]
     # the same for the opposite edge alts
     edgeAltOpts[Symmetry.A5xI][0].append(edgeAltOpts[Symmetry.A5xI][0][0])
+    edgeAltOpts[Symmetry.A5xI][1].append(edgeAltOpts[Symmetry.A5xI][1][0])
     edgeAltOpts[Symmetry.A5] = [
         [ # position 0
             [ # normal edge alternative
@@ -3855,9 +3873,10 @@ if __name__ == '__main__':
 
     def randBatchYxI(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
                             nrThreads = 1, precision = 14, outDir = "./",
-                            loop = True):
-        if not setup_ok_Y(symGrp, edgeLs, edgeAlts, folds):
-            return
+                            loop = True, triangle_fill_pos = 0):
+        dom = setup_ok_YxI(symGrp, edgeLs, edgeAlts, folds)
+        if dom == None:
+            return []
         rndT = [None for j in range(nrThreads)]
         i = 0
         while True:
@@ -3874,7 +3893,8 @@ if __name__ == '__main__':
                             fold               = fold,
                             precision          = precision,
                             method             = Method.hybrids,
-                            outDir             = outDir
+                            outDir             = outDir,
+                            triangle_fill_pos  = triangle_fill_pos
                         )
                         rndT[i].stopAfter = continueAfter
                         rndT[i].start()
@@ -3919,7 +3939,6 @@ if __name__ == '__main__':
     ])
 
     pre_edgeLs_A5xI = pre_edgeLs_all_1s_opposite_syms[:]
-    pre_edgeLs_A5 = pre_edgeLs_A4[:]
     pre_edgeLs_A5_1 = [
         [0, 1, 0, 1, 1, 0, 1],
         [0, 1, 0, 1, 1, 1, 0],
@@ -3948,6 +3967,7 @@ if __name__ == '__main__':
         [1, 1, 1, 1, 1, 1, 0],
         [1, 1, 1, 1, 1, 1, 1]
     ]
+    pre_edgeLs_A5 = pre_edgeLs_A5_1[:]
 
     pre_edgeLs = {
         Symmetry.A4xI: pre_edgeLs_A4xI,
@@ -4063,15 +4083,16 @@ if __name__ == '__main__':
         skipNext = False # for options that take arguments
         symGrp = '' # which symmetry group to search: '' means not read yet
         # can be set to true by cmd line
-        list_pre_edgeLs   = False
-        list_edge_alts    = False
-        list_opp_edge_alts= False
-        list_fold_alts    = False
-        set_fold_alts     = ''
-        set_edge_alts     = ''
-        set_opp_edge_alts = ''
-        set_edge_Ls       = ''
-        tst_all_combos    = False
+        list_pre_edgeLs       = False
+        list_edge_alts        = False
+        list_opp_edge_alts    = False
+        list_fold_alts        = False
+        tst_all_combos        = False
+        set_fold_alts         = ''
+        set_edge_alts         = ''
+        set_opp_edge_alts     = ''
+        set_edge_Ls           = ''
+        set_triangle_fill_pos = ''
 
         if sys.argv[1] == '-1':
             if len(sys.argv) <= 2:
@@ -4099,10 +4120,6 @@ if __name__ == '__main__':
             elif sys.argv[n] == '-b':
                 errIfNoNxt('b', n)
                 set_opp_edge_alts = sys.argv[n + 1]
-                skipNext = True
-            elif sys.argv[n] == '-v':
-                errIfNoNxt('v', n)
-                set_triangle_fill_pos = sys.argv[n + 1]
                 skipNext = True
             elif sys.argv[n] == '-f':
                 errIfNoNxt('f', n)
@@ -4137,6 +4154,10 @@ if __name__ == '__main__':
                 tst_all_combos = True
             elif sys.argv[n] == '-T':
                 tstProg = True
+            elif sys.argv[n] == '-v':
+                errIfNoNxt('v', n)
+                set_triangle_fill_pos = sys.argv[n + 1]
+                skipNext = True
             elif symGrp == '':
                 if sys.argv[n] in sym_sup:
                     symGrp = sys.argv[n]
@@ -4349,7 +4370,8 @@ if __name__ == '__main__':
             else:
                 randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, precision = precision, outDir = outDir,
-                        loop = loop)
+                        loop = loop,
+                        triangle_fill_pos = triangle_fill_pos)
         elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or\
                                                         symGrp == Symmetry.A5:
             if tst_all_combos:
