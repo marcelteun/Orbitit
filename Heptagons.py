@@ -2086,7 +2086,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    openFileStr = this.stringify[open_file]
 	    n = this.prePosGui.FindString(openFileStr)
 	    if n >= 0:
-		# deleting will reset the selectio, so save and reselect:
+		# deleting will reset the selection, so save and reselect:
 		selStr = this.prePosGui.GetSelection()
 		this.prePosGui.Delete(this.prePosGui.FindString(openFileStr))
 		this.prePosGui.SetSelection(selStr)
@@ -2102,7 +2102,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.shape.onlyRegFs = False
 		this.shape.updateShape = True
 	    this.nrTxt.SetLabel('---')
-        elif not this.prePos == open_file:
+        elif this.prePos != open_file:
 	    # this block is run for predefined spec pos only:
             oppFld1 = fld1 = this.fld1None
             oppFld2 = fld2 = this.fld2None
