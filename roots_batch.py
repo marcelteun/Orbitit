@@ -2127,17 +2127,29 @@ class RandFindMultiRootOnDomain(threading.Thread):
     def isDynamicSol(this, sol):
         if this.dynamicSols != None:
             for d in this.dynamicSols:
+                #print 'DBGDBG', 'sol', sol
+                try:
+                    pos_eq = this.triangle_fill_pos == d['pos']
+                except KeyError:
+                    pos_eq = True
+                #print 'pos_eq', pos_eq
                 ea_ok = False
-                for ea in d['edgeAlternative']:
-                    ea_ok = (this.edgeAlternative == ea) or ea_ok
+                if pos_eq:
+                    for ea in d['edgeAlternative']:
+                        ea_ok = (this.edgeAlternative == ea) or ea_ok
+                else:
+                    ea_ok = False
+                #print 'ea_ok', ea_ok
                 if ea_ok:
                     oa_ok = False
                     for oa in d['oppEdgeAlternative']:
                         oa_ok = (this.oppEdgeAlternative == oa) or oa_ok
+                    #print 'oa_ok', oa_ok
                     if oa_ok:
                         fld_ok = False
                         for fld in d['fold']:
                             fld_ok = (this.fold == fld) or fld_ok
+                        #print 'fld_ok', fld_ok
                         if fld_ok:
                             for vs in d['sol_vector']:
                                 sol_isEq = True
@@ -2148,15 +2160,20 @@ class RandFindMultiRootOnDomain(threading.Thread):
                                         break # don't check other (i, v)
                                 if sol_isEq:
                                     break # from vs in d['sol_vector']
+                            #print 'sol_v', sol_isEq
                             if sol_isEq:
                                 for vs in d['set_vector']:
                                     isEq = True
                                     for k, v in vs.iteritems():
                                         if not eq(sol[k], v, this.eq_margin):
                                             isEq = False
+                                            #print 'DBGDBG', 'v', v
+                                            #print 'DBGDBG', 'w', sol[k]
+                                            #print 'margin', this.eq_margin
                                             break
                                     if isEq:
                                         return isEq
+        #print '------------------> FALSE'
         return False
 
     def _symmetricEdges(this):
@@ -3692,9 +3709,68 @@ if __name__ == '__main__':
                         5:  1.753834771439
                     }
                 ]
-
         },
         dynamicSol_A4_S4
+    ]
+    dynamicSols_A5 = [
+        {
+            'edgeAlternative': [TriangleAlt.star1loose],
+            'oppEdgeAlternative': [TriangleAlt.star1loose],
+            'fold': [Fold.w],
+            'sol_vector': [[0, 1, 0, 1, 1, 0, 1]],
+            'pos': 0,
+            'set_vector': [
+                    {
+                        0:  3.789291569187,
+                        1:  0.433772330467,
+                        2: -1.304749610628,
+                        4:  0.676853301095,
+                        5: -1.304749610628
+                    },{
+                        0:  3.457263650644,
+                        1: -0.450826588264,
+                        2:  1.905066529104,
+                        4: -2.540817664423,
+                        5:  1.905066529104
+                    },{
+                        0:  2.887748212636,
+                        1:  0.424976617124,
+                        2: -2.09487458135,
+                        4:  0.396690228142,
+                        5: -2.09487458135
+                    },{
+                        0:  2.494531816603,
+                        1: -0.364633450983,
+                        2:  0.963523760393,
+                        4:  2.931708297552,
+                        5:  0.963523760393,
+                    },{
+                        0: -2.494531816603,
+                        1: -2.776959202607,
+                        2: -0.963523760393,
+                        4: -0.209884356038,
+                        5: -0.963523760393
+                    },{
+                        0: -2.887748212636,
+                        1:  2.716616036466,
+                        2:  2.09487458135,
+                        4: -2.744902425448,
+                        5:  2.09487458135
+                    },{
+                        0: -3.457263650644,
+                        1: -2.690766065326,
+                        2: -1.905066529104,
+                        4:  0.600774989167,
+                        5: -1.905066529104
+                    },{
+                        0: -3.789291569187,
+                        1:  2.707820323123,
+                        2:  1.304749610628,
+                        4: -2.464739352495,
+                        5:  1.304749610628
+                    }
+                ]
+        },
     ]
 
     edgeAltOpts = {}
@@ -4003,7 +4079,7 @@ if __name__ == '__main__':
         Symmetry.S4xI: [],
         Symmetry.S4  : dynamicSols_S4,
         Symmetry.A5xI: [],
-        Symmetry.A5  : [],
+        Symmetry.A5  : dynamicSols_A5,
     }
 
     sym_sup = [
