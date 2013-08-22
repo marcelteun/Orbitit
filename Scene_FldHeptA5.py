@@ -79,31 +79,40 @@ open_file	=  Heptagons.open_file
 only_hepts	=  Heptagons.only_hepts
 all_eq_tris	=  0
 no_o3_tris	=  1
-edge_0101111    =  Heptagons.tris_offset + 0
+edge_0001       =  Heptagons.tris_offset + 0
+edge_0101110    =  Heptagons.tris_offset + 1
+edge_0101111    =  Heptagons.tris_offset + 2
+edge_1010111    =  Heptagons.tris_offset + 3
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
     only_hepts:		'Just Heptagons',
     all_eq_tris:	'All 80 Triangles Equilateral',
     no_o3_tris:		'48 Triangles',
+    edge_0101110:       '60 Triangles and 12 Pentagons',
     edge_0101111:       '140 Triangles and 12 Pentagons',
+    edge_1010111:       '200 Triangles',
+    edge_0001:          '60 Triangles and 12 Pentagons ',
     trisAlt.strip_1_loose:	'Strip, 1 Loose ',
     trisAlt.strip_I:		'Strip I',
     trisAlt.strip_II:		'Strip II',
     trisAlt.star:		'Shell',
     trisAlt.star_1_loose:	'Shell, 1 Loose',
-    trisAlt.alt_strip_I:	'Alternative Strip I',
+    trisAlt.alt_strip_I:	'Alternative Strip',
     trisAlt.alt_strip_II:	'Alternative Strip II',
     trisAlt.alt_strip_1_loose:	'Alternative Strip, 1 loose',
 }
 
 prePosStrToReflFileStrMap = {
     only_hepts: '1_0_1_0',
+    edge_0001:  '0_0_0_1',
 }
 prePosStrToFileStrMap = {
     # symmetric edge lengths:
     only_hepts:         '1_0_1_0_0_1_0',
+    edge_0101110:       '0_1_0_1_1_1_0',
     edge_0101111:       '0_1_0_1_1_1_1',
+    edge_1010111:       '1_0_1_0_1_1_1',
 }
 
 def Vlen(v0, v1):
@@ -293,6 +302,15 @@ class Shape(Heptagons.FldHeptagonShape):
         #                      o2
         #
         #         2' = 8                7 = 5'
+
+        #print '  --> triangle fill alt', this.edgeAlternative, this.oppEdgeAlternative
+        #print '  --> triangle fill pos', this.triangleFillPosition
+        #print '  --> fold1', this.fold1, this.oppFold1
+        #print '  --> fold2', this.fold2, this.oppFold2
+        #print '  --> height', this.height
+        #print '  --> dihedralAngle', this.dihedralAngle
+        #print '  --> posAngle', this.posAngle
+        #print '------Shape.setV--------------------'
 
 	this.posHeptagon()
 	Vs = this.heptagon.Vs[:]
@@ -824,7 +842,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    [ # prePosLst
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
+		Stringify[edge_0101110],
 		Stringify[edge_0101111],
+		Stringify[edge_1010111],
+		Stringify[edge_0001],
 	    ],
             isometry.A5,
 	    trisAlts,
@@ -1033,17 +1054,77 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'tris': trisAlt.refl_2,
 	    }
 	],
+	edge_0001: [
+	    {
+		#'file': 'frh-roots-0_0_0_1-fld_w.0-refl_2-pos-0.py'
+		'set': [1.596941118660, 2.593080381370, 0.403913171960, 0.449605194880, 1.5707963268
+                ],
+		'7fold': Heptagons.foldMethod.w,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.py'
+		'set': [1.655881786380, 2.578935099880, 0.646433762790, -0.461827521280, 1.5707963268
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.py'
+		'set': [1.655881786380, 2.578935099880, 0.646433762790, -2.317062680690, 1.5707963268
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_2,
+	    },{
+		#'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.py'
+		'set': [3.722764049900, -0.024061600030, 0.024067017100, 1.458692444820, 1.5707963268
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.refl_2,
+	    }
+	],
     }
     predefRotSpecPos = {
 	only_hepts: [
 	    {
-		#'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_trip_II-pos-1.py '
-		'set': [-2.190643133768, 3.141592653590, -1.327501379252, -1.320518652643, -0.080811779365, 2.750194494869, -1.320518652643
-                ],
+		#'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_strip_II-pos-1.py '
+		'set': [2.190643133767, 0.0, -2.750194494870, 1.320518652645, 0.080811779365, 1.327501379252, 1.320518652644],
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.shell_strip_II,
                 'tris-pos': 1
 	    }
+	],
+	edge_0101110: [
+	    {
+		#'file': 'frh-roots-0_1_0_1_1_1_0-fld_shell.0-strip_II-opp_shell-pos-1.py'
+		'set': [3.567397972268, 0.577608713844, -0.805085622072, -1.564973557413, 0.802103304585, 0.794585079662, 2.557585428357
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1
+	    }
+	],
+	edge_1010111: [
+	    {
+		#'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
+		'set': [4.142695742002, 1.124949218194, 0.821407938281, 3.141592653589, 1.570796326795, -0.566349943870, 0.910396047071
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.shell_strip_II,
+                'tris-pos': 1
+	    },{
+		#'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
+		'set': [4.142695742003, 1.124949218194, -1.954107826020, 1.286357494175, 1.570796326795, -0.566349943869, -0.944839112344
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.shell_strip_II,
+                'tris-pos': 1
+	    },{
+		#'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
+		'set': [2.504073272511, 1.943327879806, 2.108843675970, -1.286357494175, 1.570796326795, 0.721085793819, -0.509380996152
+                ],
+		'7fold': Heptagons.foldMethod.star,
+		'tris': trisAlt.shell_strip_II,
+                'tris-pos': 1
+	    },
 	],
 	edge_0101111: [
 	    {
