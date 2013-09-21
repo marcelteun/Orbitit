@@ -879,6 +879,37 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    },{
 		'file': 'frh-roots-0_1_0_0-fld_w.0-refl_1.py',
 		'set': [3.092923453320, 0.727933307540, -0.999726774000, 0.098142305430]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_parallel.0-refl_2.py',
+		'set': [1.905321284300, 0., 2.393952118600, 0.264321652700, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_parallel.0-refl_2.py',
+		'set': [1.905321284300, 0., 2.393952118600, -3.141592653600, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2.py',
+		'set': [0.2179969435, 2.7336997789, 0.436861266, -0.7278977049, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2.py',
+		'set': [0.2179969436, 2.7336997789, 0.436861266, -2.5831328643, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_trapezium.0-refl_2.py',
+		'set': [0.1349389146, 2.780603028, -0.1223292567, 0.7819930312, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-refl_2.py',
+		'set': [1.9053212843, 0., 2.4754835091, -2.0480015805, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-refl_2.py',
+		'set': [1.9053212843, 0., 2.4754835091, -0.192766421, pos_angle_refl_2]
+	    },{
+                # This can be investigated more, 4 triangles could be replaced
+                # by one; could this be a new triangle fill alternative.
+                # By increasing the translation to ~2.88 you get 3 triangles
+                # that can be replaced by an hexagon: interesting,..
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-refl_2.py',
+		'set': [1.9053212843, 0., 1.4704335102, 1.7538347714, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_w.0-refl_2.py',
+		'set': [0.1338474664, 2.7564205113, 0.0542587182, 0.7283276276]
 	    }
         ],
 	T24_S6_0: [
