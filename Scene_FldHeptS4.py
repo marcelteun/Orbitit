@@ -59,6 +59,7 @@ only_hepts	= Heptagons.only_hepts
 T32_0           = next_counter()
 T24_S6_0        = next_counter()
 T24_S30_0       = next_counter()
+T32_S24_0       = next_counter()
 T56_S6_0        = next_counter()
 S_T8_S6_0       = next_counter()
 all_eq_tris	= next_counter()
@@ -85,6 +86,7 @@ Stringify = {
     T32_0:		'32 Triangles',
     T24_S6_0:           '24 Triangles and 6 Squares',
     T24_S30_0:          '24 Triangles and 30 Squares',
+    T32_S24_0:          '32 Triangles and 24 Squares',
     T56_S6_0:           '56 Triangles and 6 Squares',
     S_T8_S6_0:		'SEL: 8 Triangles and 6 Squares',
     no_o3_tris:		'48 Triangles',
@@ -112,6 +114,7 @@ prePosStrToReflFileStrMap = {
     T32_0:      '0_1_0_0',
     T24_S6_0:   '0_1_0_0',
     T24_S30_0:  '0_0_1_1',
+    T32_S24_0:  '0_0_1_1',
     T56_S6_0:   '0_1_0_1',
 }
 prePosStrToFileStrMap = {
@@ -652,6 +655,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[T32_0],
 		Stringify[T24_S6_0],
 		Stringify[T24_S30_0],
+		Stringify[T32_S24_0],
 		Stringify[T56_S6_0],
 		Stringify[S_T8_S6_0],
 	    ],
@@ -917,6 +921,18 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    },{
 		'file': 'frh-roots-0_0_1_1-fld_w.0-refl_1.py',
 		'set': [0.381107235470, 2.557316971200, 1.008389980790, -0.521296594410]
+	    }
+        ],
+	T32_S24_0: [
+	    {
+		'file': 'frh-roots-0_0_1_1-fld_shell.0-refl_2.py',
+		'set': [0.2179969435, 2.7336997789, 0.436861266, 0.5584597893, pos_angle_refl_2]
+	    }, {
+		'file': 'frh-roots-0_0_1_1-fld_triangle.0-refl_2.py',
+		'set': [1.9053212843, 0., 2.4754835091, 1.0935910731, pos_angle_refl_2]
+	    }, {
+		'file': 'frh-roots-0_0_1_1-fld_w.0-refl_2.py',
+		'set': [0.1742788711, 2.7454895051, 0.7338481676, -0.5214493418, pos_angle_refl_2]
 	    }
         ],
 	T56_S6_0: [
