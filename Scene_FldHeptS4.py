@@ -58,6 +58,7 @@ open_file	= Heptagons.open_file
 only_hepts	= Heptagons.only_hepts
 T32_0           = next_counter()
 T24_S6_0        = next_counter()
+T56_S6_0        = next_counter()
 S_T8_S6_0       = next_counter()
 all_eq_tris	= next_counter()
 no_o3_tris	= next_counter()
@@ -82,6 +83,7 @@ Stringify = {
     dyn_pos:		'Enable Sliders',
     T32_0:		'32 Triangles',
     T24_S6_0:           '24 Triangles and 6 Squares',
+    T56_S6_0:           '56 Triangles and 6 Squares',
     S_T8_S6_0:		'SEL: 8 Triangles and 6 Squares',
     no_o3_tris:		'48 Triangles',
     all_eq_tris:	'All 80 Triangles Equilateral',
@@ -107,6 +109,7 @@ prePosStrToReflFileStrMap = {
     only_hepts:	'1_0_1_0',
     T32_0:      '0_1_0_0',
     T24_S6_0:   '0_1_0_0',
+    T56_S6_0:   '0_1_0_1',
 }
 prePosStrToFileStrMap = {
     # symmetric edge lengths:
@@ -645,6 +648,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		Stringify[dyn_pos],
 		Stringify[T32_0],
 		Stringify[T24_S6_0],
+		Stringify[T56_S6_0],
 		Stringify[S_T8_S6_0],
 	    ],
             isometry.S4,
@@ -900,6 +904,30 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    },{
 		'file': 'frh-roots-0_1_0_0-fld_triangle.0-refl_2.py',
 		'set': [2.905321284300, 0., 0.440199726000, 1.387757882200, pos_angle_refl_2]
+	    }
+        ],
+	T56_S6_0: [
+	    {
+		'file': 'frh-roots-0_1_0_1-fld_trapezium.0-refl_1.py',
+		'set': [3.350523864960, 0.204096577780, 1.688905367760, -0.385851963150]
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_trapezium.0-refl_1.py',
+		'set': [3.350523864960, 0.204096577780, -0.526302196540, -0.385851963150]
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_w.0-refl_1.py',
+		'set': [3.321209142030, 0.061533063700, 0.400357498920, -0.860656783220]
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_parallel.0-refl_1.py',
+		'set': [3.370685997440, 0., 1.091435866210, 0.801566079340]
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_parallel.0-refl_1.py',
+		'set': [3.370685997440, 0., 1.091435866210, -1.413641484960]
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_parallel.0-refl_1.py',
+		'set': [3.370685997440, 0., 0.479360460590, -0.801566079340]
+	    },{
+		'file': 'frh-roots-0_1_0_1-fld_parallel.0-refl_1.py',
+		'set': [3.370685997440, 0., 0.479360460590, 1.413641484960]
 	    }
         ],
     }
