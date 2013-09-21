@@ -912,6 +912,27 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    },{
 		'file': 'frh-roots-0_1_0_0-fld_triangle.0-refl_2.py',
 		'set': [2.905321284300, 0., 0.440199726000, 1.387757882200, pos_angle_refl_2]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_parallel.0-refl_1.py',
+		'set': [2.37068599744, 0., 2.12592133774, -0.23291939219]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_parallel.0-refl_1.py',
+		'set': [2.37068599744, 0., 2.12592133774, -2.44812695649]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_1.py',
+		'set': [0.43294725225, 2.54026836305, 0.70692391148, -2.57893149341]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_trapezium.0-refl_1.py',
+		'set': [0.3906376173, 2.71977645634, -0.82677451079, 1.02947405206]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_trapezium.0-refl_1.py',
+		'set': [0.3906376173, 2.71977645634, -3.0419820751, 1.02947405206]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-refl_1.py',
+		'set': [2.37068599744, 0., 2.05615681203, -1.70740415397]
+	    },{
+		'file': 'frh-roots-0_0_0_1-fld_triangle.0-refl_1.py',
+		'set': [2.37068599744, 0., 2.05615681203, 0.14783100544]
 	    }
         ],
 	T24_S30_0: [
