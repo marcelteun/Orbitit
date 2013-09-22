@@ -74,45 +74,25 @@ trisAlts = [
     TA_1()
 ]
 
-dyn_pos		=  Heptagons.dyn_pos
-open_file	=  Heptagons.open_file
-only_hepts	=  Heptagons.only_hepts
-all_eq_tris	=  0
-no_o3_tris	=  1
-edge_0001       =  Heptagons.tris_offset + 0
-edge_0101110    =  Heptagons.tris_offset + 1
-edge_0101111    =  Heptagons.tris_offset + 2
-edge_1010111    =  Heptagons.tris_offset + 3
+counter = Heptagons.Tris_counter()
+
+dyn_pos	      =  Heptagons.dyn_pos
+open_file     =  Heptagons.open_file
+only_hepts    =  Heptagons.only_hepts
+all_eq_tris   =  counter.pp()
+no_o3_tris    =  counter.pp()
+T60_P12       =  counter.pp()
+T140_P12      =  counter.pp()
+T200          =  counter.pp()
 
 Stringify = {
-    dyn_pos:		'Enable Sliders',
-    only_hepts:		'Just Heptagons',
-    all_eq_tris:	'All 80 Triangles Equilateral',
-    no_o3_tris:		'48 Triangles',
-    edge_0101110:       '60 Triangles and 12 Pentagons',
-    edge_0101111:       '140 Triangles and 12 Pentagons',
-    edge_1010111:       '200 Triangles',
-    edge_0001:          '60 Triangles and 12 Pentagons ',
-    trisAlt.strip_1_loose:	'Strip, 1 Loose ',
-    trisAlt.strip_I:		'Strip I',
-    trisAlt.strip_II:		'Strip II',
-    trisAlt.star:		'Shell',
-    trisAlt.star_1_loose:	'Shell, 1 Loose',
-    trisAlt.alt_strip_I:	'Alternative Strip',
-    trisAlt.alt_strip_II:	'Alternative Strip II',
-    trisAlt.alt_strip_1_loose:	'Alternative Strip, 1 loose',
-}
-
-prePosStrToReflFileStrMap = {
-    only_hepts: '1_0_1_0',
-    edge_0001:  '0_0_0_1',
-}
-prePosStrToFileStrMap = {
-    # symmetric edge lengths:
-    only_hepts:         '1_0_1_0_0_1_0',
-    edge_0101110:       '0_1_0_1_1_1_0',
-    edge_0101111:       '0_1_0_1_1_1_1',
-    edge_1010111:       '1_0_1_0_1_1_1',
+    dyn_pos:	  'Enable Sliders',
+    only_hepts:	  'Just Heptagons',
+    all_eq_tris:  'All 80 Triangles Equilateral',
+    no_o3_tris:	  '48 Triangles',
+    T60_P12:      '60 Triangles and 12 Pentagons',
+    T140_P12:     '140 Triangles and 12 Pentagons',
+    T200:         '200 Triangles',
 }
 
 def Vlen(v0, v1):
@@ -842,10 +822,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    [ # prePosLst
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
-		Stringify[edge_0101110],
-		Stringify[edge_0101111],
-		Stringify[edge_1010111],
-		Stringify[edge_0001],
+		Stringify[T60_P12],
+		Stringify[T140_P12],
+		Stringify[T200],
 	    ],
             isometry.A5,
 	    trisAlts,
@@ -873,17 +852,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     rDir = 'data/Data_FldHeptA5'
     rPre = 'frh-roots'
-
-    def mapPrePosStrToFileStr(this, prePosId):
-	try:
-	    if this.shape.inclReflections:
-		s = prePosStrToReflFileStrMap[prePosId]
-	    else:
-		s = prePosStrToFileStrMap[prePosId]
-	except KeyError:
-	    print 'info: no file name mapping found for prepos:', prePosId
-	    s = this.stringify[prePosId]
-	return s
 
     def printFileStrMapWarning(this, filename, funcname):
 	print '%s:' % funcname
@@ -922,40 +890,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
             this.printFileStrMapWarning(filename, 'fileStrMapTrisPos')
             assert(False)
 
-    def isPrePosValid(this, prePosId):
-	# This means that files with empty results should be filtered out from
-	# the directory.
-	s = this.mapPrePosStrToFileStr(prePosId)
-	return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
-
-    def isFoldValid(this, foldMethod):
-	p = this.mapPrePosStrToFileStr(this.prePos)
-	f = Heptagons.FoldName[foldMethod].lower()
-	return glob(
-		'%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
-	    ) != []
-
-    def isTrisFillValid(this, trisFillId):
-	if this.shape.inclReflections:
-	    if type(trisFillId) != int:
-		return False
-	    oppFill = ''
-	    t = trisAlt.mapKeyOnFileStr[trisFillId]
-	else:
-	    if type(trisFillId) == int:
-		return False
-	    oppFill = '-opp_%s' % trisAlt.mapKeyOnFileStr[trisFillId[1]]
-	    t = trisAlt.mapKeyOnFileStr[trisFillId[0]]
-	p = this.mapPrePosStrToFileStr(this.prePos)
-	f = Heptagons.FoldName[this.foldMethod].lower()
-	files = '%s/%s-%s-fld_%s.?-%s%s.*' % (
-		this.rDir, this.rPre, p, f, t, oppFill)
-	#if glob(files) != []:
-	#    print 'DBG: found %s' % files
-	#else:
-	#    print 'DBG: NOT found %s' % files
-	return glob(files) != []
-
     @property
     def specPosSetup(this):
 	prePosId = this.prePos
@@ -971,44 +905,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    if data.has_key('file'):
 		print 'see file %s/%s' % (this.rDir, data['file'])
 	    return data
-
-    @property
-    # move (part of this) to parent
-    def stdPrePos(this):
-	try:
-	    return this.sav_stdPrePos
-	except AttributeError:
-	    prePosId = this.prePos
-	    assert prePosId != dyn_pos
-	    if prePosId == open_file:
-		filename = this.prePosFileName
-		if filename == None:
-		    return []
-	    else:
-		# use correct predefined special positions
-		if this.shape.inclReflections:
-		    psp = this.predefReflSpecPos
-		else:
-		    psp = this.predefRotSpecPos
-		# Oops not good for performance:
-		# TODO only return correct one en add length func
-		return [sp['set'] for sp in psp[this.prePos]]
-		#this.predefSpecPos[this.prePos]['set']
-		if this.trisFill == None:
-		    return []
-		if this.shape.inclReflections:
-		    oppFill = ''
-		else:
-		    oppFill = '-opp_%s' % trisAlt.mapKeyOnFileStr[this.oppTrisFill]
-		filename = '%s/%s-%s-fld_%s.0-%s%s.py' % (
-			    this.rDir, this.rPre,
-			    this.mapPrePosStrToFileStr(this.prePos),
-			    Heptagons.FoldName[this.foldMethod].lower(),
-			    trisAlt.mapKeyOnFileStr[this.trisFill],
-			    oppFill
-			)
-	    this.sav_stdPrePos = this.openPrePosFile(filename)
-	    return this.sav_stdPrePos
 
     predefReflSpecPos = {
 	only_hepts: [
@@ -1054,7 +950,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'tris': trisAlt.refl_2,
 	    }
 	],
-	edge_0001: [
+	T60_P12: [
 	    {
 		#'file': 'frh-roots-0_0_0_1-fld_w.0-refl_2-pos-0.py'
 		'set': [1.596941118660, 2.593080381370, 0.403913171960, 0.449605194880, 1.5707963268
@@ -1092,7 +988,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 'tris-pos': 1
 	    }
 	],
-	edge_0101110: [
+	T60_P12: [
 	    {
 		#'file': 'frh-roots-0_1_0_1_1_1_0-fld_shell.0-strip_II-opp_shell-pos-1.py'
 		'set': [3.567397972268, 0.577608713844, -0.805085622072, -1.564973557413, 0.802103304585, 0.794585079662, 2.557585428357
@@ -1102,7 +998,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 'tris-pos': 1
 	    }
 	],
-	edge_1010111: [
+	T200: [
 	    {
 		#'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
 		'set': [4.142695742002, 1.124949218194, 0.821407938281, 3.141592653589, 1.570796326795, -0.566349943870, 0.910396047071
@@ -1126,7 +1022,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 'tris-pos': 1
 	    },
 	],
-	edge_0101111: [
+	T140_P12: [
 	    {
 		#'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.py'
 		'set': [4.389693800678, 1.613882084912, 0.259202620907, -0.178125410980, 1.279825824143, -0.703784937696, 1.377596588777

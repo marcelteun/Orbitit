@@ -46,49 +46,44 @@ trisAlt.baseKey = {
 }
 #trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
-_counter = 0
-def next_counter():
-    global _counter
-    i = _counter
-    _counter += 1
-    return i
+counter = Heptagons.Tris_counter()
 
 dyn_pos		= Heptagons.dyn_pos
 open_file	= Heptagons.open_file
 only_hepts	= Heptagons.only_hepts
-T32_0           = next_counter()
-T24_S6_0        = next_counter()
-T24_S30_0       = next_counter()
-T32_S24_0       = next_counter()
-T56_S6_0        = next_counter()
-S_T8_S6_0       = next_counter()
-all_eq_tris	= next_counter()
-no_o3_tris	= next_counter()
-edge_1_1_V2_1	= next_counter()
-edge_1_V2_1_1	= next_counter()
-edge_V2_1_1_1	= next_counter()
-edge_V2_1_V2_1	= next_counter()
-squares_24	= next_counter()
-edge_0_1_1_1	= next_counter()
-edge_0_1_V2_1	= next_counter()
-tris_24		= next_counter()
-only_xtra_o3s	= next_counter()
-only_xtra_o3s	= next_counter()
-edge_1_1_0_1	= next_counter()
-edge_1_0_1_1	= next_counter()
-edge_V2_1_0_1	= next_counter()
-edge_V2_1_1_0	= next_counter()
-square_12	= next_counter()
-edge_0_V2_1_1   = next_counter()
+T32             = counter.pp()
+T24_S6          = counter.pp()
+T24_S30         = counter.pp()
+T32_S24         = counter.pp()
+T56_S6          = counter.pp()
+S_T8_S6         = counter.pp()
+all_eq_tris	= counter.pp()
+no_o3_tris	= counter.pp()
+edge_1_1_V2_1	= counter.pp()
+edge_1_V2_1_1	= counter.pp()
+edge_V2_1_1_1	= counter.pp()
+edge_V2_1_V2_1	= counter.pp()
+squares_24	= counter.pp()
+edge_0_1_1_1	= counter.pp()
+edge_0_1_V2_1	= counter.pp()
+tris_24		= counter.pp()
+only_xtra_o3s	= counter.pp()
+only_xtra_o3s	= counter.pp()
+edge_1_1_0_1	= counter.pp()
+edge_1_0_1_1	= counter.pp()
+edge_V2_1_0_1	= counter.pp()
+edge_V2_1_1_0	= counter.pp()
+square_12	= counter.pp()
+edge_0_V2_1_1   = counter.pp()
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
-    T32_0:		'32 Triangles',
-    T24_S6_0:           '24 Triangles and 6 Squares',
-    T24_S30_0:          '24 Triangles and 30 Squares',
-    T32_S24_0:          '32 Triangles and 24 Squares',
-    T56_S6_0:           '56 Triangles and 6 Squares',
-    S_T8_S6_0:		'SEL: 8 Triangles and 6 Squares',
+    T32:		'32 Triangles',
+    T24_S6:             '24 Triangles and 6 Squares',
+    T24_S30:            '24 Triangles and 30 Squares',
+    T32_S24:            '32 Triangles and 24 Squares',
+    T56_S6:             '56 Triangles and 6 Squares',
+    S_T8_S6:		'SEL: 8 Triangles and 6 Squares',
     no_o3_tris:		'48 Triangles',
     all_eq_tris:	'All 80 Triangles Equilateral',
     only_xtra_o3s:	'8 Triangles (O3)',
@@ -109,19 +104,6 @@ Stringify = {
     only_hepts:		'Just Heptagons',
 }
 
-prePosStrToReflFileStrMap = {
-    only_hepts:	'1_0_1_0',
-    T32_0:      '0_1_0_0',
-    T24_S6_0:   '0_1_0_0',
-    T24_S30_0:  '0_0_1_1',
-    T32_S24_0:  '0_0_1_1',
-    T56_S6_0:   '0_1_0_1',
-}
-prePosStrToFileStrMap = {
-    # symmetric edge lengths:
-    only_hepts:	'1_0_1_0_0_1_0',
-    S_T8_S6_0:	'0_1_0_1_1_0_1',
-}
 pos_angle_refl_2 = math.pi/2
 
 def Vlen(v0, v1):
@@ -652,12 +634,12 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    [ # prePosLst
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
-		Stringify[T32_0],
-		Stringify[T24_S6_0],
-		Stringify[T24_S30_0],
-		Stringify[T32_S24_0],
-		Stringify[T56_S6_0],
-		Stringify[S_T8_S6_0],
+		Stringify[T32],
+		Stringify[T24_S6],
+		Stringify[T24_S30],
+		Stringify[T32_S24],
+		Stringify[T56_S6],
+		Stringify[S_T8_S6],
 	    ],
             isometry.S4,
 	    [trisAlt],
@@ -683,17 +665,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     rDir = 'data/Data_FldHeptS4'
     rPre = 'frh-roots'
-
-    def mapPrePosStrToFileStr(this, prePosId):
-	try:
-	    if this.shape.inclReflections:
-		s = prePosStrToReflFileStrMap[prePosId]
-	    else:
-		s = prePosStrToFileStrMap[prePosId]
-	except KeyError:
-	    print 'info: no file name mapping found for prepos:', prePosId
-	    s = this.stringify[prePosId]
-	return s
 
     def printFileStrMapWarning(this, filename, funcname):
 	print '%s:' % funcname
@@ -723,40 +694,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	else:
 	    this.printFileStrMapWarning(filename, 'fileStrMapTrisStr')
 
-    def isPrePosValid(this, prePosId):
-	# This means that files with empty results should be filtered out from
-	# the directory.
-	s = this.mapPrePosStrToFileStr(prePosId)
-	return glob('%s/%s-%s-*' % (this.rDir, this.rPre, s)) != []
-
-    def isFoldValid(this, foldMethod):
-	p = this.mapPrePosStrToFileStr(this.prePos)
-	f = Heptagons.FoldName[foldMethod].lower()
-	return glob(
-		'%s/%s-%s-fld_%s.*' % (this.rDir, this.rPre, p, f)
-	    ) != []
-
-    def isTrisFillValid(this, trisFillId):
-	if this.shape.inclReflections:
-	    if type(trisFillId) != int:
-		return False
-	    oppFill = ''
-	    t = trisAlt.mapKeyOnFileStr[trisFillId]
-	else:
-	    if type(trisFillId) == int:
-		return False
-	    oppFill = '-opp_%s' % trisAlt.mapKeyOnFileStr[trisFillId[1]]
-	    t = trisAlt.mapKeyOnFileStr[trisFillId[0]]
-	p = this.mapPrePosStrToFileStr(this.prePos)
-	f = Heptagons.FoldName[this.foldMethod].lower()
-	files = '%s/%s-%s-fld_%s.?-%s%s.*' % (
-		this.rDir, this.rPre, p, f, t, oppFill)
-	#if glob(files) != []:
-	#    print 'DBG: found %s' % files
-	#else:
-	#    print 'DBG: NOT found %s' % files
-	return glob(files) != []
-
     @property
     def specPosSetup(this):
 	prePosId = this.prePos
@@ -781,44 +718,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    }
 	    print 'see file %s/%s' % (this.rDir, in_data['file'])
 	    return data
-
-    @property
-    # move (part of this) to parent
-    def stdPrePos(this):
-	try:
-	    return this.sav_stdPrePos
-	except AttributeError:
-	    prePosId = this.prePos
-	    assert prePosId != dyn_pos
-	    if prePosId == open_file:
-		filename = this.prePosFileName
-		if filename == None:
-		    return []
-	    else:
-		# use correct predefined special positions
-		if this.shape.inclReflections:
-		    psp = this.predefReflSpecPos
-		else:
-		    psp = this.predefRotSpecPos
-		# Oops not good for performance:
-		# TODO only return correct one en add length func
-		return [sp['set'] for sp in psp[this.prePos]]
-		#this.predefSpecPos[this.prePos]['set']
-		if this.trisFill == None:
-		    return []
-		if this.shape.inclReflections:
-		    oppFill = ''
-		else:
-		    oppFill = '-opp_%s' % trisAlt.mapKeyOnFileStr[this.oppTrisFill]
-		filename = '%s/%s-%s-fld_%s.0-%s%s.py' % (
-			    this.rDir, this.rPre,
-			    this.mapPrePosStrToFileStr(this.prePos),
-			    Heptagons.FoldName[this.foldMethod].lower(),
-			    trisAlt.mapKeyOnFileStr[this.trisFill],
-			    oppFill
-			)
-	    this.sav_stdPrePos = this.openPrePosFile(filename)
-	    return this.sav_stdPrePos
 
     predefReflSpecPos = {
 	only_hepts: [
@@ -866,7 +765,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [1.4801185612, -0.2147509348, -0.4352845433, 2.4498730531, 1.5707963268],
 	    }
 	],
-	T32_0: [
+	T32: [
 	    {
 		'file': 'frh-roots-0_1_0_0-fld_shell.0-refl_1.py',
 		'set': [3.093153915430, 0.729243464900, -0.945924630830, -0.096403292160],
@@ -909,10 +808,10 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [1.9053212843, 0., 1.4704335102, 1.7538347714, pos_angle_refl_2]
 	    },{
 		'file': 'frh-roots-0_0_0_1-fld_w.0-refl_2.py',
-		'set': [0.1338474664, 2.7564205113, 0.0542587182, 0.7283276276]
+		'set': [0.1338474664, 2.7564205113, 0.0542587182, 0.7283276276, pos_angle_refl_2]
 	    }
         ],
-	T24_S6_0: [
+	T24_S6: [
 	    {
 		'file': 'frh-roots-0_1_0_0-fld_shell.0-refl_2.py',
 		'set': [2.8994205035, 0.2542437305, -0.2608593723, -0.1061100151, pos_angle_refl_2]
@@ -966,7 +865,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [2.37068599744, 0., 2.05615681203, 0.14783100544]
 	    }
         ],
-	T24_S30_0: [
+	T24_S30: [
 	    {
 		'file': 'frh-roots-0_0_1_1-fld_triangle.0-refl_1.py',
 		'set': [2.370685997440, 0., 2.056156812030, 1.434188499620]
@@ -975,7 +874,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [0.381107235470, 2.557316971200, 1.008389980790, -0.521296594410]
 	    }
         ],
-	T32_S24_0: [
+	T32_S24: [
 	    {
 		'file': 'frh-roots-0_0_1_1-fld_shell.0-refl_2.py',
 		'set': [0.2179969435, 2.7336997789, 0.436861266, 0.5584597893, pos_angle_refl_2]
@@ -987,7 +886,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [0.1742788711, 2.7454895051, 0.7338481676, -0.5214493418, pos_angle_refl_2]
 	    }
         ],
-	T56_S6_0: [
+	T56_S6: [
 	    {
 		'file': 'frh-roots-0_1_0_1-fld_trapezium.0-refl_1.py',
 		'set': [3.350523864960, 0.204096577780, 1.688905367760, -0.385851963150]
@@ -1028,7 +927,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'set': [-0.866025403784, -2.222676713307, -2.064570332814, -1.619344079087, 0.555984796217, -2.064570332814, 2.696366399863],
 	    }
         ],
-	S_T8_S6_0: [
+	S_T8_S6: [
 	    {
 		'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.0-alt_strip_II-opp_alt_strip_I.py',
 		'set': [2.590217278372, 1.158363623026, -1.475190229349, 0.0, 0.888168913304, -1.245429246161, 0.0],

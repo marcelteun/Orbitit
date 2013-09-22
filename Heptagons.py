@@ -59,6 +59,19 @@ loose_bit = 16
 rot_bit   = 32
 twist_bit = 64
 tris_offset = 128
+
+class Tris_counter():
+    def __init__(this):
+        this.reset(tris_offset)
+
+    def reset(this, v):
+        this.counter = v;
+
+    def pp(this):
+        i = this.counter
+        this.counter += 1
+        return i
+
 class TrisAlt_base(object):
     # Note nrs should be different from below
     refl_1             = 0
@@ -1437,13 +1450,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         return mainSizer
 
     def isPrePosValid(this, prePosId):
-	assert False, "TODO: implement at offspring"
-
-    def isFoldValid(this, foldMethod):
-	assert False, "TODO: implement at offspring"
-
-    def isTrisFillValid(this, trisFillId):
-	assert False, "TODO: implement at offspring"
+        if this.shape.inclReflections:
+            psp = this.predefReflSpecPos
+        else:
+            psp = this.predefRotSpecPos
+        return psp.has_key(prePosId)
 
     def fileStrMapTrisPos(this, filename):
 	"""get the triangle alternative position from filename
@@ -1936,6 +1947,30 @@ class FldHeptagonCtrlWin(wx.Frame):
 	s = 'Note: no valid positions found'
 	print s
 	this.statusBar.SetStatusText(s)
+
+    @property
+    def stdPrePos(this):
+	try:
+	    return this.sav_stdPrePos
+	except AttributeError:
+	    prePosId = this.prePos
+	    assert prePosId != dyn_pos
+	    if prePosId == open_file:
+		filename = this.prePosFileName
+		if filename == None:
+		    return []
+                this.sav_stdPrePos = this.openPrePosFile(filename)
+                return this.sav_stdPrePos
+	    else:
+		# use correct predefined special positions
+		if this.shape.inclReflections:
+		    psp = this.predefReflSpecPos
+		else:
+		    psp = this.predefRotSpecPos
+		# Oops not good for performance:
+		# TODO only return correct one en add length func
+                this.sav_stdPrePos = [sp['set'] for sp in psp[this.prePos]]
+		return this.sav_stdPrePos
 
     def onPrev(this, event = None):
         prePosId = this.prePos
