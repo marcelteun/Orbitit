@@ -4009,9 +4009,11 @@ if __name__ == '__main__':
                                         # regular (more requirements needed)
         ])
     pre_edgeLs_S4 = pre_edgeLs_A4[:]
+    octagon_diag = 2*numx.cos(numx.pi * 22.5 / 180)
     pre_edgeLs_S4.extend([
         [1., 0., 1., 0., 0., 0., 1.], # 6 squares
         [1., 1., 1., 0., 1., 1., 1.], # 6 squares, 120 triangles.
+        [1., 0., 1., 0., 0., 1., octagon_diag], # r folded octagons
     ])
 
     pre_edgeLs_A5xI = pre_edgeLs_all_1s_opposite_syms[:]
