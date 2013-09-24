@@ -51,6 +51,7 @@ counter = Heptagons.Tris_counter()
 dyn_pos		= Heptagons.dyn_pos
 open_file	= Heptagons.open_file
 only_hepts	= Heptagons.only_hepts
+O6              = counter.pp()
 T32             = counter.pp()
 T24_S6          = counter.pp()
 T24_S30         = counter.pp()
@@ -78,6 +79,7 @@ edge_0_V2_1_1   = counter.pp()
 
 Stringify = {
     dyn_pos:		'Enable Sliders',
+    O6:		        '6 Folded Octagons',
     T32:		'32 Triangles',
     T24_S6:             '24 Triangles and 6 Squares',
     T24_S30:            '24 Triangles and 30 Squares',
@@ -634,6 +636,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    [ # prePosLst
 		Stringify[only_hepts],
 		Stringify[dyn_pos],
+		Stringify[O6],
 		Stringify[T32],
 		Stringify[T24_S6],
 		Stringify[T24_S30],
@@ -982,6 +985,15 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    }, {
 		'file': 'frh-roots-0_0_1_1_0_1_1-fld_w.0-shell_1_loose-opp_shell_1_loose.py',
 		'set': [3.112096816216, 0.78432621749, -1.707364893904, 0.903431422151, 0.881057789442, -1.473905662151, 0.3936303937]
+	    }
+        ],
+	O6: [
+	    {
+		'file': 'frh-roots-1_0_1_0_0_1_1.8-fld_shell.0-alt_strip_II-opp_strip_I.py',
+		'set': [2.185434158696, 1.514092033328, -0.393265132210, -1.035923121424, 0.613632866194, 1.030378124732, 1.144840494750],
+	    }, {
+		'file': 'frh-roots-1_0_1_0_0_1_1.8-fld_shell.0-alt_strip_II-opp_strip_I.py',
+		'set': [1.863979769045, 1.428464818300, 0.222069333254, -2.176752860496, 0.623239886239, 1.617590079465, 0.634261622370],
 	    }
         ],
     }
