@@ -785,6 +785,12 @@ class RegularHeptagon:
 		]
 
     def foldW(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
+        if rotate == 0:
+            this.foldW_0(a0, b0, a1, b1, keepV0)
+        else:
+            this.foldW_1(a0, b0, a1, b1, keepV0)
+
+    def foldW_0(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -801,7 +807,7 @@ class RegularHeptagon:
         #               ^
         #        6     | |     1
         #        .    /   \    .
-        # axis b0 \  |     |  / axis b1
+        # axis b1 \  |     |  / axis b0
         #          " |     | "
         #      5   |/       \|   2
         #          V axes  a V
@@ -840,6 +846,80 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
+
+    def foldW_1(this, a0, b0, a1, b1, keepV0 = True):
+        """
+        Fold around 4 diagonals in the shape of the character 'W'.
+
+        the fold angle a0 refers the the axes V1-V4,
+        the fold angle a1 refers the the axes V1-V5,
+        The fold angle b0 refers the the axes V2-V4,
+        The fold angle b1 refers the the axes V0-V5 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #               1
+        #               ^
+        #        0     | |     2
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      6   |/       \|   3
+        #          V axes  a V
+        #          "         "
+        #          5         4
+        #
+        this.Fs = [[2, 4, 3], [2, 1, 4], [1, 5, 4], [1, 0, 5], [0, 6, 5]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		2, 4, 4, 1, 1, 5, 5, 0
+	    ]
+        if (keepV0):
+            assert(False, "TODO")
+        else:
+            # rot b0
+            V2V4 = (this.VsOrg[2] + this.VsOrg[4])/2
+            V2V4axis = Vec(this.VsOrg[2] - this.VsOrg[4])
+            rot_b0 = Rot(axis = V2V4axis, angle = b0)
+            V1V5  = (this.VsOrg[1] + this.VsOrg[5])/2
+            V1V5_ = V2V4 + rot_b0 * (V1V5 - V2V4)
+            V1  = V1V5_ + (this.VsOrg[1] - V1V5)
+            V5_ = V1V5_ + (this.VsOrg[5] - V1V5)
+            V0V6 = (this.VsOrg[0] + this.VsOrg[6])/2
+            V0V6_ = V2V4 + rot_b0 * (V0V6 - V2V4)
+            V0_ = V0V6_ + (this.VsOrg[0] - V0V6)
+            V6_ = V0V6_ + (this.VsOrg[6] - V0V6)
+            # rot a0
+            V1V4 = (V1 + this.VsOrg[4])/2
+            V1V4axis = Vec(V1 - this.VsOrg[4])
+            rot_a0 = Rot(axis = V1V4axis, angle = a0)
+            V0V5  = (V0_ + V5_)/2
+            V0V5_ = V1V4 + rot_a0 * (V0V5 - V1V4)
+            V0_ = V0V5_ + (V0_ - V0V5)
+            V5  = V0V5_ + (V5_ - V0V5)
+            V6_ = V1V4 + rot_a0 * (V6_ - V1V4)
+            # rot a1
+            V1V5 = (V1 + V5)/2
+            V1V5axis = Vec(V1 - V5)
+            rot_a1 = Rot(axis = V1V5axis, angle = a1)
+            V0V6  = (V0_ + V6_)/2
+            V0V6_ = V1V5 + rot_a1 * (V0V6 - V1V5)
+            V0  = V0V6_ + (V0_ - V0V6)
+            V6_ = V0V6_ + (V6_ - V0V6)
+            # rot b1
+            V0V5 = (V0 + V5)/2
+            V0V5axis = Vec(V0 - V5)
+            rot_b1 = Rot(axis = V0V5axis, angle = b1)
+            V6 = V0V5 + rot_b1 * (V6_ - V0V5)
+            this.Vs = [
+                    V0,
+                    V1,
+                    this.VsOrg[2],
+                    this.VsOrg[3],
+                    this.VsOrg[4],
+                    V5,
+                    V6,
+                ]
 
     def foldStar(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
         """
