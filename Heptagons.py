@@ -431,24 +431,30 @@ class RegularHeptagon:
 						rotate = 0
     ):
 	if fold == FoldMethod.parallel:
-	    this.foldParallel(a0, b0, keepV0) #, rotate)
+	    this.foldParallel(a0, b0, keepV0, rotate) #, rotate)
 	elif fold == FoldMethod.trapezium:
-	    this.foldTrapezium(a0, b0, b1, keepV0) #, rotate)
+	    this.foldTrapezium(a0, b0, b1, keepV0, rotate) #, rotate)
 	elif fold == FoldMethod.w:
-	    this.foldW(a0, b0, a1, b1, keepV0) #, rotate)
+	    this.foldW(a0, b0, a1, b1, keepV0, rotate) #, rotate)
 	elif fold == FoldMethod.triangle:
-	    this.foldTriangle(a0, b0, b1, keepV0) #, rotate)
+	    this.foldTriangle(a0, b0, b1, keepV0, rotate) #, rotate)
 	elif fold == FoldMethod.star:
-	    this.foldStar(a0, b0, a1, b1, keepV0) #, rotate)
+	    this.foldStar(a0, b0, a1, b1, keepV0, rotate) #, rotate)
 	else:
 	    raise TypeError, 'Unknown fold'
 
-    def foldParallel(this, a, b, keepV0 = True):
+    def foldParallel(this, a, b, keepV0 = True, rotate = 0):
+        if rotate == 0:
+            this.foldParallel_0(a, b, keepV0)
+        else:
+            this.foldParallel_1(a, b, keepV0)
+
+    def foldParallel_0(this, a, b, keepV0 = True):
         """
         Fold around the 2 parallel diagonals V1-V6 and V2-V5.
 
-        The fold angle a refers the the axis V1-V6 and
-        the fold angle b refers the the axis V2-V5.
+        The fold angle a refers the the axis V2-V5 and
+        the fold angle b refers the the axis V1-V6.
         If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
         folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
 	It assumes that the heptagon is in the original position.
@@ -565,7 +571,58 @@ class RegularHeptagon:
                     Vec([-V1[0], V1[1], V1[2]])
                 ]
 
-    def foldTrapezium(this, a, b0, b1 = None, keepV0 = True):
+    def foldParallel_1(this, a, b, keepV0 = True):
+        """
+        Fold around the 2 parallel diagonals parallel to the edge opposite of
+        vertex 1
+
+        The fold angle a refers the the axis V3-V6 and
+        the fold angle b refers the the axis V2-V0.
+        If keepV0 = True then the vertex V0, and V2 are kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #             1
+        #
+        #      0 ----------- 2    axis b
+        #
+        #
+        #
+        #    6 --------------- 3  axis a
+        #
+        #
+        #         5       4
+        #
+        this.Fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		2, 0, 3, 6,
+	    ]
+        if (keepV0):
+            assert(False, "TODO")
+        else:
+            V3V6 = (this.VsOrg[3] + this.VsOrg[6])/2
+            V3V6axis = Vec(this.VsOrg[3] - this.VsOrg[6])
+            V0V2 = (this.VsOrg[0] + this.VsOrg[2])/2
+            rot_a = Rot(axis = V3V6axis, angle = a)
+            V0V2_ = V3V6 + rot_a * (V0V2 - V3V6)
+            V0 = V0V2_ + (this.VsOrg[0] - V0V2)
+            V2 = V0V2_ + (this.VsOrg[2] - V0V2)
+            V1_ = V3V6 + rot_a * (this.VsOrg[1] - V3V6)
+
+            V0V2axis = Vec(V2 - V0)
+            rot_b = Rot(axis = V0V2axis, angle = b)
+            V1 = V0V2 + rot_b * (V1_ - V0V2)
+            this.Vs = [
+                    V0,
+                    V1,
+                    V2,
+                    this.VsOrg[3],
+                    this.VsOrg[4],
+                    this.VsOrg[5],
+                    this.VsOrg[6],
+                ]
+
+    def foldTrapezium(this, a, b0, b1 = None, keepV0 = True, rotate = 0):
         """
         Fold around 4 diagonals in the shape of a trapezium (trapezoid)
 
@@ -667,7 +724,7 @@ class RegularHeptagon:
                     this.VsOrg[6]
                 ]
 
-    def foldTriangle(this, a, b0, b1, keepV0 = True):
+    def foldTriangle(this, a, b0, b1, keepV0 = True, rotate = 0):
         """
         Fold around 3 triangular diagonals from V0.
 
@@ -727,7 +784,7 @@ class RegularHeptagon:
 		    V6,
 		]
 
-    def foldW(this, a0, b0, a1, b1, keepV0 = True):
+    def foldW(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -784,7 +841,7 @@ class RegularHeptagon:
 		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
 
-    def foldStar(this, a0, b0, a1, b1, keepV0 = True):
+    def foldStar(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
         """
         Fold around the 4 diagonals from V0.
 
@@ -1078,7 +1135,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 
     def posHeptagon(this):
 	this.heptagon.fold(this.fold1, this.fold2, this.oppFold1, this.oppFold2,
-		keepV0 = False, fold = this.foldHeptagon)
+            keepV0 = False, fold = this.foldHeptagon, rotate = this.rotateFold)
 	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
 	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
 	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
@@ -1712,7 +1769,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.rotateFld = (this.rotateFld + 1) % 7
 	this.shape.setRotateFold(this.rotateFld)
 	this.rotateFldGui.SetLabel('Rotate Fold %d/7' % this.rotateFld)
-	print '************* TODO ******************'
+        this.updateShape()
 
     def isPrePos(this):
 	# TODO: move to offspring
