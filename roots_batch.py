@@ -120,7 +120,7 @@ def quatMult(v, w):
         v[0]*w[3] + v[1]*w[2] - v[2] * w[1] + v[3] * w[0]
     ]
 
-def rotate(v, q):
+def rotate(q, v):
     w = [0, v[0], v[1], v[2]]
     r = quatMult(q[0], w)
     r = quatMult(r, q[1])
@@ -257,7 +257,8 @@ class Fold:
 
 fold = Fold()
 
-def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
+def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
+        rotate_fold = 0):
     """Returns the positioned base heptagon indepent on symmetry
 
     Returns the array of 7 coordinates, which are tuples.
@@ -486,69 +487,137 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type):
         z0 =           sinb0 * H
 
     elif (fold_type == Fold.w):
-        #
-        #               0
-        #              .^.
-        #        1     | |     6
-        #        .    /   \    .
-        # axis g0 \  |     |  / axis g1
-        #          " |a   a| "
-        #      2   |/ x   x \|   5
-        #          V  i   i  V
-        #          "  s   s  "
-        #          3         4
-        #             b   b              ^ X
-        #             0   1              |
-        #                                |
-        #                       Y <------+
-        #
-        # ROTATE V2 around axis g:
-        # ------------------------------------
-        # refer to V2 as if centre is origon:
-        # rotate around axis b as if centre -> V2 is x-axis:
-        x = (R - H) + cosg0 * H
-        z =           sing0 * H
-        # prepare for next: rotate V5 onto -x with angle d0
-        cosd0 = -Tx / R
-        sind0 = H # = sin(pi/7)
-        # Then later: correction for V5 not on -x: rotate d around z-axis
-        # with d: angle of heptagon centre to V2 with -x-as
-        cosd1 = -(x2 + Tx) / R
-        sind1 = SigmaH # = sin(3pi/7)
-        x2, y2, z2 = (cosd0 * x, sind0 * x, z)
+        if rotate_fold == 0:
+            #
+            #               0
+            #              .^.
+            #        1     | |     6
+            #        .    /   \    .
+            # axis g0 \  |     |  / axis g1
+            #          " |a   a| "
+            #      2   |/ x   x \|   5
+            #          V  i   i  V
+            #          "  s   s  "
+            #          3         4
+            #             b   b              ^ X
+            #             0   1              |
+            #                                |
+            #                       Y <------+
+            #
+            # ROTATE V2 around axis g:
+            # ------------------------------------
+            # refer to V2 as if centre is origon:
+            # rotate around axis b as if centre -> V2 is x-axis:
+            x = (R - H) + cosg0 * H
+            z =           sing0 * H
+            # prepare for next: rotate V5 onto -x with angle d0
+            cosd0 = -Tx / R
+            sind0 = H # = sin(pi/7)
+            # Then later: correction for V5 not on -x: rotate d around z-axis
+            # with d: angle of heptagon centre to V2 with -x-as
+            cosd1 = -(x2 + Tx) / R
+            sind1 = SigmaH # = sin(3pi/7)
+            x2, y2, z2 = (cosd0 * x, sind0 * x, z)
 
-        # use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
-        x = (R - H) + cosg1 * H
-        z =           sing1 * H
-        x5, y5, z5 = (cosd0 * x, sind0 * x, z)
+            # use similar calc for different angle for x5, -y5, z5 = x2, y2, z2
+            x = (R - H) + cosg1 * H
+            z =           sing1 * H
+            x5, y5, z5 = (cosd0 * x, sind0 * x, z)
 
-        # ROTATE V1 and V2 around axis b
-        # ------------------------------------
-        # refer to V1 as if centre in origon and as if V5 in -x:
-        d0_3 = x0 - R - RhoH
-        # rotate around axis b:
-        x1, y1, z1 = (d0_3 + cosb0 * RhoH, -0.5, sinb0 * RhoH)
-        # correct for V5 not on -x: rotate d around z-axis
-        # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-        x1, y1 = (cosd1 * x1 - sind1 * y1 - Tx, sind1 * x1 + cosd1 * y1)
-        # Similarly for V2:
-        # rotate around axis b:
-        dx = x2 - d0_3
-        x2, z2 = (d0_3 + cosb0 * dx - sinb0 * z2, sinb0 * dx + cosb0 * z2)
-        # correct for V5 not on -x: rotate d around z-axis
-        # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-        x2, y2 = (cosd1 * x2 - sind1 * y2 - Tx, sind1 * x2 + cosd1 * y2)
+            # ROTATE V1 and V2 around axis b
+            # ------------------------------------
+            # refer to V1 as if centre in origon and as if V5 in -x:
+            d0_3 = x0 - R - RhoH
+            # rotate around axis b:
+            x1, y1, z1 = (d0_3 + cosb0 * RhoH, -0.5, sinb0 * RhoH)
+            # correct for V5 not on -x: rotate d around z-axis
+            # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+            x1, y1 = (cosd1 * x1 - sind1 * y1 - Tx, sind1 * x1 + cosd1 * y1)
+            # Similarly for V2:
+            # rotate around axis b:
+            dx = x2 - d0_3
+            x2, z2 = (d0_3 + cosb0 * dx - sinb0 * z2, sinb0 * dx + cosb0 * z2)
+            # correct for V5 not on -x: rotate d around z-axis
+            # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+            x2, y2 = (cosd1 * x2 - sind1 * y2 - Tx, sind1 * x2 + cosd1 * y2)
 
-        # use similar calc for different angle for
-        # x5, y5, z5 = x2, -y2, z2
-        # x6, y6, z6 = x1, -y1, z1
-        x6, y6, z6 = (d0_3 + cosb1 * RhoH, -0.5, sinb1 * RhoH)
-        x6, y6 = (cosd1 * x6 - sind1 * y6 - Tx, sind1 * x6 + cosd1 * y6)
-        dx = x5 - d0_3
-        x5, z5 = (d0_3 + cosb1 * dx - sinb1 * z5, sinb1 * dx + cosb1 * z5)
-        x5, y5 = (cosd1 * x5 - sind1 * y5 - Tx, sind1 * x5 + cosd1 * y5)
-        # x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
-        y5, y6 = -y5, -y6
+            # use similar calc for different angle for
+            # x5, y5, z5 = x2, -y2, z2
+            # x6, y6, z6 = x1, -y1, z1
+            x6, y6, z6 = (d0_3 + cosb1 * RhoH, -0.5, sinb1 * RhoH)
+            x6, y6 = (cosd1 * x6 - sind1 * y6 - Tx, sind1 * x6 + cosd1 * y6)
+            dx = x5 - d0_3
+            x5, z5 = (d0_3 + cosb1 * dx - sinb1 * z5, sinb1 * dx + cosb1 * z5)
+            x5, y5 = (cosd1 * x5 - sind1 * y5 - Tx, sind1 * x5 + cosd1 * y5)
+            # x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
+            y5, y6 = -y5, -y6
+
+        elif rotate_fold == 1:
+            #
+            #               1
+            #               ^
+            #        0     | |     2
+            #        .    /   \    .
+            # axis b1 \  |     |  / axis b0
+            #          " |     | "
+            #      6   |/       \|   3
+            #          V axes  a V
+            #          "         "
+            #          5         4
+            #
+            # map to Heptagons.py setup:
+            a0 = beta0
+            b0 = gamma0
+            a1 = beta1
+            b1 = gamma1
+            VsOrg = [
+                GeomTypes.Vec([y0, x0, z0]),
+                GeomTypes.Vec([y1, x1, z1]),
+                GeomTypes.Vec([y2, x2, z2]),
+                GeomTypes.Vec([y3, x3, z3]),
+                GeomTypes.Vec([y4, x4, z4]),
+                GeomTypes.Vec([y5, x5, z5]),
+                GeomTypes.Vec([y6, x6, z6])
+            ]
+            # rot b0
+            V2V4 = GeomTypes.Vec(VsOrg[2] + VsOrg[4])/2
+            V2V4axis = GeomTypes.Vec(VsOrg[2] - VsOrg[4])
+            rot_b0 = quatRot(axis = V2V4axis, angle = b0)
+            V1V5  = (VsOrg[1] + VsOrg[5])/2
+            V1V5_ = V2V4 + rotate(rot_b0, (V1V5 - V2V4))
+            V1  = V1V5_ + (VsOrg[1] - V1V5)
+            V5_ = V1V5_ + (VsOrg[5] - V1V5)
+            V0V6 = (VsOrg[0] + VsOrg[6])/2
+            V0V6_ = V2V4 + rotate(rot_b0, (V0V6 - V2V4))
+            V0_ = V0V6_ + (VsOrg[0] - V0V6)
+            V6_ = V0V6_ + (VsOrg[6] - V0V6)
+            # rot a0
+            V1V4 = (V1 + VsOrg[4])/2
+            V1V4axis = GeomTypes.Vec(V1 - VsOrg[4])
+            rot_a0 = quatRot(axis = V1V4axis, angle = a0)
+            V0V5  = (V0_ + V5_)/2
+            V0V5_ = V1V4 + rotate(rot_a0, (V0V5 - V1V4))
+            V0_ = V0V5_ + (V0_ - V0V5)
+            V5  = V0V5_ + (V5_ - V0V5)
+            V6_ = V1V4 + rotate(rot_a0, (V6_ - V1V4))
+            # rot a1
+            V1V5 = (V1 + V5)/2
+            V1V5axis = GeomTypes.Vec(V1 - V5)
+            rot_a1 = quatRot(axis = V1V5axis, angle = a1)
+            V0V6  = (V0_ + V6_)/2
+            V0V6_ = V1V5 + rotate(rot_a1, (V0V6 - V1V5))
+            V0  = V0V6_ + (V0_ - V0V6)
+            V6_ = V0V6_ + (V6_ - V0V6)
+            # rot b1
+            V0V5 = (V0 + V5)/2
+            V0V5axis = GeomTypes.Vec(V0 - V5)
+            rot_b1 = quatRot(axis = V0V5axis, angle = b1)
+            V6 = V0V5 + rotate(rot_b1, (V6_ - V0V5))
+            # map back from Heptagons.py:
+            x0, y0, z0 = V0[1], V0[0], V0[2]
+            x1, y1, z1 = V1[1], V1[0], V1[2]
+            x5, y5, z5 = V5[1], V5[0], V5[2]
+            x6, y6, z6 = V6[1], V6[0], V6[2]
 
     # rotate around 3-4; angle a
     # ------------------------------------
@@ -884,7 +953,8 @@ def FoldedRegularHeptagonsA4(c, params):
     n_7_turn     = Param.n_7_turn
 
     coords = GetBaseHeptagon(
-            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+            T, alpha, beta0, beta1, gamma0, gamma1, delta,
+            params[par_fold], params[n_7_turn])
     x0, y0, z0 = coords[0]
     x1, y1, z1 = coords[1]
     x2, y2, z2 = coords[2]
@@ -1171,7 +1241,8 @@ def FoldedRegularHeptagonsS4(c, params):
         oppAlternative = params[par_opp_fill]
 
     coords = GetBaseHeptagon(
-            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+            T, alpha, beta0, beta1, gamma0, gamma1, delta,
+            params[par_fold], Param.n_7_turn)
     x0, y0, z0 = coords[0]
     x1, y1, z1 = coords[1]
     x2, y2, z2 = coords[2]
@@ -1776,8 +1847,9 @@ def FoldedRegularHeptagonsA5(c, params):
         gamma1 = c[6]
         oppAlternative = params[par_opp_fill]
 
-    hept_coords = GetBaseHeptagon(
-            T, alpha, beta0, beta1, gamma0, gamma1, delta, params[par_fold])
+    coords = GetBaseHeptagon(
+            T, alpha, beta0, beta1, gamma0, gamma1, delta,
+            params[par_fold], Param.n_7_turn)
     #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (hept_coords[0][1], hept_coords[0][0], hept_coords[0][2])
     #print '[y1, x1, z1] = (%.4f, %.4f, %.4f)' % (hept_coords[1][1], hept_coords[1][0], hept_coords[1][2])
     #print '[y2, x2, z2] = (%.4f, %.4f, %.4f)' % (hept_coords[2][1], hept_coords[2][0], hept_coords[2][2])
@@ -1823,7 +1895,8 @@ def FindMultiRoot(initialValues,
         printIter = False,
         quiet     = False,
         oppEdgeAlternative = None,
-        triangle_fill_pos = 0
+        triangle_fill_pos = 0,
+        rotate_fold = 0
     ):
     if oppEdgeAlternative == None:
         oppEdgeAlternative = edgeAlternative
@@ -1846,6 +1919,7 @@ def FindMultiRoot(initialValues,
             Param.opp_fill: oppEdgeAlternative,
             Param.edge_len: edgeLengths,
             Param.h_fold:   fold,
+            Param.n_7_turn: rotate_fold,
         }
     if triangle_fill_pos > 0:
         params[Param.t_fill_pos] = triangle_fill_pos
@@ -1972,7 +2046,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
         edgeLengths = [1., 1., 1., 1., 1., 1., 1.],
         outDir = "frh-roots",
         exceptQueue = None,
-        triangle_fill_pos = 0
+        triangle_fill_pos = 0,
+        rotate_fold = 0
     ):
         this.domain = domain
         this.symmetry = symmetry
@@ -2012,6 +2087,7 @@ class RandFindMultiRootOnDomain(threading.Thread):
         this.dynamicSols = dynSols
         this.stopAfter = 100000
         this.outDir = outDir
+        this.rotate_fold = rotate_fold
         if not outDir[-1] == '/':
             this.outDir = "%s/" % outDir
         if not os.path.isdir(outDir):
@@ -2217,9 +2293,9 @@ class RandFindMultiRootOnDomain(threading.Thread):
             else:
                 es = '%s_%.1f' % (es, l)
         es = es[1:]
-        return '%sfrh-roots-%s-fld_%s.0-%s-opp_%s-pos-%d.py' % (
+        return '%sfrh-roots-%s-fld_%s.%d-%s-opp_%s-pos-%d.py' % (
                 this.outDir,
-                es, Fold(this.fold),
+                es, Fold(this.fold), this.rotate_fold,
                 string.join(Stringify[this.edgeAlternative].split(), '_'),
                 string.join(Stringify[this.oppEdgeAlternative].split(), '_'),
                 this.triangle_fill_pos
@@ -2362,7 +2438,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                     printIter = False,
                     quiet     = True,
                     oppEdgeAlternative = this.oppEdgeAlternative,
-                    triangle_fill_pos = this.triangle_fill_pos
+                    triangle_fill_pos = this.triangle_fill_pos,
+                    rotate_fold = this.rotate_fold
                 )
             # write the previous solution if the difference is smaller than the
             # precision (this since we write with one digit more)
@@ -2402,7 +2479,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                         printIter = False,
                         quiet     = True,
                         oppEdgeAlternative = this.oppEdgeAlternative,
-                        triangle_fill_pos = this.triangle_fill_pos
+                        triangle_fill_pos = this.triangle_fill_pos,
+                        rotate_fold = this.rotate_fold
                     )
                 if (
                     result != None
@@ -2487,27 +2565,30 @@ class RandFindMultiRootOnDomain(threading.Thread):
                                         Param.tri_fill: this.edgeAlternative,
                                         Param.opp_fill: this.oppEdgeAlternative,
                                         Param.edge_len: this.edgeLengths,
-                                        Param.h_fold:   this.fold
+                                        Param.h_fold:   this.fold,
+                                        Param.n_7_turn: this.rotate_fold,
                                     }
                                 )
                             elif this.symmetry == Symmetry.S4:
                                 chk = FoldedRegularHeptagonsS4(result,
                                     {
-                                        Param.tri_fill: this.edgeAlternative,
-                                        Param.opp_fill: this.oppEdgeAlternative,
-                                        Param.edge_len: this.edgeLengths,
-                                        Param.h_fold:   this.fold,
-                                        Param.t_fill_pos: triangle_fill_pos
+                                        Param.tri_fill:   this.edgeAlternative,
+                                        Param.opp_fill:   this.oppEdgeAlternative,
+                                        Param.edge_len:   this.edgeLengths,
+                                        Param.h_fold:     this.fold,
+                                        Param.t_fill_pos: triangle_fill_pos,
+                                        Param.n_7_turn:   this.rotate_fold,
                                     }
                                 )
                             else: # A5
                                 chk = FoldedRegularHeptagonsA5(result,
                                     {
-                                        Param.tri_fill: this.edgeAlternative,
-                                        Param.opp_fill: this.oppEdgeAlternative,
-                                        Param.edge_len: this.edgeLengths,
-                                        Param.h_fold:   this.fold,
-                                        Param.t_fill_pos: triangle_fill_pos
+                                        Param.tri_fill:   this.edgeAlternative,
+                                        Param.opp_fill:   this.oppEdgeAlternative,
+                                        Param.edge_len:   this.edgeLengths,
+                                        Param.h_fold:     this.fold,
+                                        Param.t_fill_pos: triangle_fill_pos,
+                                        Param.n_7_turn:   this.rotate_fold,
                                     }
                                 )
                         except IndexError:
@@ -2634,7 +2715,8 @@ class RandFindMultiRootOnDomain(threading.Thread):
                         printIter = False,
                         quiet     = True,
                         oppEdgeAlternative = this.oppEdgeAlternative,
-                        triangle_fill_pos = this.triangle_fill_pos
+                        triangle_fill_pos = this.triangle_fill_pos,
+                        rotate_fold = this.rotate_fold
                     )
                 if (result != None):
                     break
@@ -2696,22 +2778,24 @@ if __name__ == '__main__':
         elif symGrp == Symmetry.A4:
             T  = 2.3
             a  = Geom3D.Deg2Rad * 30
-            b0 = Geom3D.Deg2Rad * 60
-            g0 = Geom3D.Deg2Rad * 50
-            d  = Geom3D.Deg2Rad * 40
-            b1 = Geom3D.Deg2Rad * 50
+            b0 = Geom3D.Deg2Rad * 50
+            g0 = Geom3D.Deg2Rad * 60
+            d  = Geom3D.Deg2Rad * 0
+            b1 = Geom3D.Deg2Rad * 90
             g1 = Geom3D.Deg2Rad * 100
             tmp = numx.array((T, a, b0, g0, d, b1, g1))
-            tmp = [2.42367662112328, 0.73523867591239, -0.95915637221717, -1.30440374966920, 0.00000000000000, -0.95915637221717, g1]
+            #  from cat frh-roots-1_0_1_0_0_1_0-fld_w.0-strip_I-opp_strip_I.py
+            tmp = [2.3803849307, 0.6930737332, -0.5687463007, -0.8824362367, 0, -0.5687463012, -0.8824362372]
             print 'input values: \n [',
             for t in tmp: print t, ',',
             print ']'
             print FoldedRegularHeptagonsA4(tmp,
                     {
-                        Param.tri_fill: TriangleAlt.star1loose,
-                        Param.opp_fill: TriangleAlt.strip1loose,
+                        Param.tri_fill: TriangleAlt.stripI,
+                        Param.opp_fill: TriangleAlt.stripI,
                         Param.edge_len: [0., 0., 0., 0., 0., 0., 0.],
-                        Param.h_fold:   Fold.w
+                        Param.h_fold:   Fold.w,
+                        Param.n_7_turn: 1
                     }
                 )
 
@@ -2903,7 +2987,7 @@ if __name__ == '__main__':
 
     def tst_if_solutions_exist_Y(symGrp, edgeLs, edgeAlts, folds,
                     continueAfter = 100, precision = 14, oppEdgeAlts = None,
-                    triangle_fill_pos = 0):
+                    triangle_fill_pos = 0, rotate_fold = 0):
         if oppEdgeAlts == None:
             oppEdgeAlts = edgeAlts[:]
         dom = setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts)
@@ -2935,7 +3019,8 @@ if __name__ == '__main__':
                                 fold               = fold,
                                 precision          = precision,
                                 method             = Method.hybrids,
-                                triangle_fill_pos  = triangle_fill_pos
+                                triangle_fill_pos  = triangle_fill_pos,
+                                rotate_fold        = rotate_fold
                             )
                             trd.stopAfter = continueAfter
                             # we aren't using threads for this.
@@ -2951,7 +3036,8 @@ if __name__ == '__main__':
 
     def randBatchY(symGrp, edgeLs, edgeAlts, folds, continueAfter = 100,
                 nrThreads = 1, dynSols = None, precision = 14, outDir = "./",
-                loop = True, oppEdgeAlts = None, triangle_fill_pos = 0):
+                loop = True, oppEdgeAlts = None, triangle_fill_pos = 0,
+                rotate_fold = 0):
         if oppEdgeAlts == None:
             oppEdgeAlts = edgeAlts[:]
         dom = setup_ok_Y(symGrp, edgeLs, edgeAlts, folds, oppEdgeAlts)
@@ -2986,7 +3072,8 @@ if __name__ == '__main__':
                                     method             = Method.hybrids,
                                     outDir             = outDir,
                                     exceptQueue        = exceptionQueue,
-                                    triangle_fill_pos  = triangle_fill_pos
+                                    triangle_fill_pos  = triangle_fill_pos,
+                                    rotate_fold        = rotate_fold
                                 )
                                 rndT[i].stopAfter = continueAfter
                                 rndT[i].start()
@@ -4130,6 +4217,8 @@ if __name__ == '__main__':
         print '               %s.' % outDir
         print '     -p <num>: precision, specify the amount of digits after the point; default'
         print '               %d. Suggested to use 4 <= precision <= 13.' % precision
+        print '     -r n    : fold position, with 0 <= n <= 6 rotate the fold n * 360/7'
+        print '               degrees'
         print '     -s      : stop after having checked all. Default the program loops through'
         print '               all folds, edges, etc and starts over.'
         print '     -t      : Test all possible combinations of 1 and 0 for the edge lengths.'
@@ -4149,6 +4238,7 @@ if __name__ == '__main__':
     # default values used by printUsage
     loop = True
     nr_iterations = 4000
+    rotate_fold = 0
     outDir = "tst/frh-roots"
     precision = 10
     max_triangle_fill_pos = 2 # TODO: fill in per symmetry
@@ -4226,6 +4316,10 @@ if __name__ == '__main__':
                 errIfNoNxt('p', n)
                 precision = int(sys.argv[n + 1])
                 skipNext = True
+            elif sys.argv[n] == '-r':
+                errIfNoNxt('r', n)
+                rotate_fold = int(sys.argv[n + 1])
+                skipNext = True
             elif sys.argv[n] == '-s':
                 loop = False
             elif sys.argv[n] == '-t':
@@ -4255,6 +4349,10 @@ if __name__ == '__main__':
             print 'test FAILED'
     elif symGrp == '':
         printError('Error: No symmetry group defined')
+        printUsage()
+        sys.exit(-1)
+    elif rotate_fold < 0 or rotate_fold > 6:
+        printError('Rotate fold: illegal value for rotate_fold: %d' % rotate_fold)
         printUsage()
         sys.exit(-1)
     else:
@@ -4439,6 +4537,8 @@ if __name__ == '__main__':
 
         if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
                         symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
+            if rotate_fold != 0:
+                print "No solutions for rotate fold != 0 and indirect isometries"
             if tst_all_combos:
                 edges_with_solutons = tst_if_solutions_exist_YxI(symGrp, edgeLs,
                                 edgeAlts, foldAlts, nr_iterations, precision)
@@ -4455,7 +4555,8 @@ if __name__ == '__main__':
             if tst_all_combos:
                 edges_with_solutons = tst_if_solutions_exist_Y(symGrp, edgeLs,
                     edgeAlts, foldAlts, nr_iterations, precision, oppEdgeAlts,
-                    triangle_fill_pos = triangle_fill_pos)
+                    triangle_fill_pos = triangle_fill_pos,
+                    rotate_fold = rotate_fold)
                 print 'Edges with solutions:'
                 for e in edges_with_solutons:
                     print e
@@ -4464,4 +4565,5 @@ if __name__ == '__main__':
                         nrThreads = 1, dynSols = dynamicSols[symGrp],
                         precision = precision, outDir = outDir, loop = loop,
                         oppEdgeAlts = oppEdgeAlts,
-                        triangle_fill_pos = triangle_fill_pos)
+                        triangle_fill_pos = triangle_fill_pos,
+                        rotate_fold = rotate_fold)
