@@ -1847,7 +1847,7 @@ def FoldedRegularHeptagonsA5(c, params):
         gamma1 = c[6]
         oppAlternative = params[par_opp_fill]
 
-    coords = GetBaseHeptagon(
+    hept_coords = GetBaseHeptagon(
             T, alpha, beta0, beta1, gamma0, gamma1, delta,
             params[par_fold], Param.n_7_turn)
     #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (hept_coords[0][1], hept_coords[0][0], hept_coords[0][2])
@@ -1915,14 +1915,13 @@ def FindMultiRoot(initialValues,
 
     nrOfIns = len(initialValues)
     params = {
-            Param.tri_fill: edgeAlternative,
-            Param.opp_fill: oppEdgeAlternative,
-            Param.edge_len: edgeLengths,
-            Param.h_fold:   fold,
-            Param.n_7_turn: rotate_fold,
+            Param.tri_fill:   edgeAlternative,
+            Param.opp_fill:   oppEdgeAlternative,
+            Param.edge_len:   edgeLengths,
+            Param.h_fold:     fold,
+            Param.n_7_turn:   rotate_fold,
+            Param.t_fill_pos: triangle_fill_pos
         }
-    if triangle_fill_pos > 0:
-        params[Param.t_fill_pos] = triangle_fill_pos
     if symmetry == Symmetry.A5 or symmetry == Symmetry.A5xI:
         mysys = multiroots.gsl_multiroot_function(
             FoldedRegularHeptagonsA5,
@@ -4334,7 +4333,7 @@ if __name__ == '__main__':
                 if sys.argv[n] in sym_sup:
                     symGrp = sys.argv[n]
                 else:
-                    printError('Unknown symmetry group defined')
+                    printError('Unknown symmetry group defined <%s>' % symGrp)
                     printUsage()
                     sys.exit(-1)
             else:
