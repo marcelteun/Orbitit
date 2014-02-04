@@ -857,39 +857,6 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	print '%s:' % funcname
 	print '  WARNING: unable to interprete filename', filename
 
-    def fileStrMapFoldMethodStr(this, filename):
-	res = re.search("-fld_([^.]*)\.", filename)
-	if res:
-	    return res.groups()[0]
-	else:
-	    this.printFileStrMapWarning(filename, 'fileStrMapFoldMethodStr')
-
-    def fileStrMapHasReflections(this, filename):
-	res = re.search(".*frh-roots-(.*)-fld_.*", filename)
-	if res:
-	    pos_vals = res.groups()[0].split('_')
-	    nr_pos = len(pos_vals)
-	    return (nr_pos == 4) or (nr_pos == 5 and pos_vals[4] == '0')
-	else:
-	    this.printFileStrMapWarning(filename, 'fileStrMapHasReflections')
-
-    def fileStrMapTrisStr(this, filename):
-	res = re.search("-fld_[^.]*\.[0-7]-([^.]*)-pos-.*\.py", filename)
-	if res:
-	    tris_str = res.groups()[0]
-	    return trisAlt.mapFileStrOnStr[tris_str]
-	else:
-	    this.printFileStrMapWarning(filename, 'fileStrMapTrisStr')
-
-    def fileStrMapTrisPos(this, filename):
-        res = re.search("-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.py", filename)
-        if res:
-            tris_pos = res.groups()[0]
-            return tris_pos
-        else:
-            this.printFileStrMapWarning(filename, 'fileStrMapTrisPos')
-            assert(False)
-
     @property
     def specPosSetup(this):
 	prePosId = this.prePos

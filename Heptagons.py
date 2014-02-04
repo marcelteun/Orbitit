@@ -25,6 +25,7 @@
 import wx
 import isometry
 import math
+import re
 import rgb
 import string
 import Geom3D
@@ -598,7 +599,7 @@ class RegularHeptagon:
 		2, 0, 3, 6,
 	    ]
         if (keepV0):
-            assert(False, "TODO")
+            assert False, "TODO"
         else:
             V3V6 = (this.VsOrg[3] + this.VsOrg[6])/2
             V3V6axis = Vec(this.VsOrg[3] - this.VsOrg[6])
@@ -875,7 +876,7 @@ class RegularHeptagon:
 		2, 4, 4, 1, 1, 5, 5, 0
 	    ]
         if (keepV0):
-            assert(False, "TODO")
+            assert False, "TODO"
         else:
             # rot b0
             V2V4 = (this.VsOrg[2] + this.VsOrg[4])/2
@@ -1593,12 +1594,54 @@ class FldHeptagonCtrlWin(wx.Frame):
             psp = this.predefRotSpecPos
         return psp.has_key(prePosId)
 
-    def fileStrMapTrisPos(this, filename):
-	"""get the triangle alternative position from filename
+    def fileStrMapFoldMethodStr(this, filename):
+	res = re.search("-fld_([^.]*)\.", filename)
+	if res:
+	    return res.groups()[0]
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapFoldMethodStr')
 
-        Defaults here to 0, if others are used the offspring should implement
-        """
-        return '0'
+    def fileStrMapFoldPosStr(this, filename):
+	res = re.search("-fld_[^.]*\.([0-6])-.*", filename)
+	if res:
+	    return res.groups()[0]
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapFoldPosStr')
+
+    def fileStrMapHasReflections(this, filename):
+	res = re.search(".*frh-roots-(.*)-fld_.*", filename)
+	if res:
+	    pos_vals = res.groups()[0].split('_')
+	    nr_pos = len(pos_vals)
+	    return (nr_pos == 4) or (nr_pos == 5 and pos_vals[4] == '0')
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapHasReflections')
+
+    def fileStrMapTrisStr(this, filename):
+        # New format: incl -pos:
+	res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.py", filename)
+	if res == None:
+            # try old method:
+            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
+	if res:
+	    tris_str = res.groups()[0]
+	    return this.trisAlt.mapFileStrOnStr[tris_str]
+	else:
+	    this.printFileStrMapWarning(filename, 'fileStrMapTrisStr')
+
+    def fileStrMapTrisPos(this, filename):
+        res = re.search("-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.py", filename)
+        if res:
+            tris_pos = res.groups()[0]
+            return tris_pos
+        else:
+            # try old syntax:
+            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
+            if res:
+                return '0'
+            else:
+                this.printFileStrMapWarning(filename, 'fileStrMapTrisPos')
+                assert(False)
 
     def setEnablePrePosItems(this):
 	currentPrePos = this.prePos
@@ -1845,11 +1888,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 		this.statusBar.SetStatusText(this.shape.getStatusStr())
 		this.updateShape()
 
-    def onRotateFld(this, event):
-	this.rotateFld = (this.rotateFld + 1) % 7
+    def setRotateFld(this, rotateFld):
+	this.rotateFld = int(rotateFld) % 7
 	this.shape.setRotateFold(this.rotateFld)
 	this.rotateFldGui.SetLabel('Rotate Fold %d/7' % this.rotateFld)
         this.updateShape()
+
+    def onRotateFld(this, event):
+        this.setRotateFld(this.rotateFld + 1)
 
     def isPrePos(this):
 	# TODO: move to offspring
@@ -2160,6 +2206,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.foldMethodGui.SetStringSelection(
 	    this.fileStrMapFoldMethodStr(this.prePosFileName))
 	this.onFoldMethod()
+        this.setRotateFld(this.fileStrMapFoldPosStr(this.prePosFileName))
 	# Note: Reflections need to be set before triangle fill, otherwise the
 	# right triangle fills are not available
 	has_reflections = this.fileStrMapHasReflections(this.prePosFileName)
