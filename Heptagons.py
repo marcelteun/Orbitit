@@ -786,10 +786,12 @@ class RegularHeptagon:
 		]
 
     def foldW(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
-        if rotate == 0:
-            this.foldW_0(a0, b0, a1, b1, keepV0)
-        else:
-            this.foldW_1(a0, b0, a1, b1, keepV0)
+        prj = {
+            0: this.foldW_0,
+            1: this.foldW_1,
+            6: this.foldW_6
+        }
+        prj[rotate](a0, b0, a1, b1, keepV0)
 
     def foldW_0(this, a0, b0, a1, b1, keepV0 = True):
         """
@@ -848,6 +850,59 @@ class RegularHeptagon:
 		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
 
+    def foldW_1_help(this, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for foldW_1, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            V2V4 = (Vs[2] + Vs[4])/2
+            V2V4axis = Vec(Vs[2] - Vs[4])
+            rot_b0 = Rot(axis = V2V4axis, angle = b0)
+            V1V5  = (Vs[1] + Vs[5])/2
+            V1V5_ = V2V4 + rot_b0 * (V1V5 - V2V4)
+            V1  = V1V5_ + (Vs[1] - V1V5)
+            V5_ = V1V5_ + (Vs[5] - V1V5)
+            V0V6 = (Vs[0] + Vs[6])/2
+            V0V6_ = V2V4 + rot_b0 * (V0V6 - V2V4)
+            V0_ = V0V6_ + (Vs[0] - V0V6)
+            V6_ = V0V6_ + (Vs[6] - V0V6)
+            # rot a0
+            V1V4 = (V1 + Vs[4])/2
+            V1V4axis = Vec(V1 - Vs[4])
+            rot_a0 = Rot(axis = V1V4axis, angle = a0)
+            V0V5  = (V0_ + V5_)/2
+            V0V5_ = V1V4 + rot_a0 * (V0V5 - V1V4)
+            V0_ = V0V5_ + (V0_ - V0V5)
+            V5  = V0V5_ + (V5_ - V0V5)
+            V6_ = V1V4 + rot_a0 * (V6_ - V1V4)
+            # rot a1
+            V1V5 = (V1 + V5)/2
+            V1V5axis = Vec(V1 - V5)
+            rot_a1 = Rot(axis = V1V5axis, angle = a1)
+            V0V6  = (V0_ + V6_)/2
+            V0V6_ = V1V5 + rot_a1 * (V0V6 - V1V5)
+            V0  = V0V6_ + (V0_ - V0V6)
+            V6_ = V0V6_ + (V6_ - V0V6)
+            # rot b1
+            V0V5 = (V0 + V5)/2
+            V0V5axis = Vec(V0 - V5)
+            rot_b1 = Rot(axis = V0V5axis, angle = b1)
+            V6 = V0V5 + rot_b1 * (V6_ - V0V5)
+            return [
+                    V0,
+                    V1,
+                    Vs[2],
+                    Vs[3],
+                    Vs[4],
+                    V5,
+                    V6,
+                ]
+
     def foldW_1(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
@@ -875,52 +930,56 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		2, 4, 4, 1, 1, 5, 5, 0
 	    ]
-        if (keepV0):
-            assert False, "TODO"
-        else:
-            # rot b0
-            V2V4 = (this.VsOrg[2] + this.VsOrg[4])/2
-            V2V4axis = Vec(this.VsOrg[2] - this.VsOrg[4])
-            rot_b0 = Rot(axis = V2V4axis, angle = b0)
-            V1V5  = (this.VsOrg[1] + this.VsOrg[5])/2
-            V1V5_ = V2V4 + rot_b0 * (V1V5 - V2V4)
-            V1  = V1V5_ + (this.VsOrg[1] - V1V5)
-            V5_ = V1V5_ + (this.VsOrg[5] - V1V5)
-            V0V6 = (this.VsOrg[0] + this.VsOrg[6])/2
-            V0V6_ = V2V4 + rot_b0 * (V0V6 - V2V4)
-            V0_ = V0V6_ + (this.VsOrg[0] - V0V6)
-            V6_ = V0V6_ + (this.VsOrg[6] - V0V6)
-            # rot a0
-            V1V4 = (V1 + this.VsOrg[4])/2
-            V1V4axis = Vec(V1 - this.VsOrg[4])
-            rot_a0 = Rot(axis = V1V4axis, angle = a0)
-            V0V5  = (V0_ + V5_)/2
-            V0V5_ = V1V4 + rot_a0 * (V0V5 - V1V4)
-            V0_ = V0V5_ + (V0_ - V0V5)
-            V5  = V0V5_ + (V5_ - V0V5)
-            V6_ = V1V4 + rot_a0 * (V6_ - V1V4)
-            # rot a1
-            V1V5 = (V1 + V5)/2
-            V1V5axis = Vec(V1 - V5)
-            rot_a1 = Rot(axis = V1V5axis, angle = a1)
-            V0V6  = (V0_ + V6_)/2
-            V0V6_ = V1V5 + rot_a1 * (V0V6 - V1V5)
-            V0  = V0V6_ + (V0_ - V0V6)
-            V6_ = V0V6_ + (V6_ - V0V6)
-            # rot b1
-            V0V5 = (V0 + V5)/2
-            V0V5axis = Vec(V0 - V5)
-            rot_b1 = Rot(axis = V0V5axis, angle = b1)
-            V6 = V0V5 + rot_b1 * (V6_ - V0V5)
-            this.Vs = [
-                    V0,
-                    V1,
-                    this.VsOrg[2],
-                    this.VsOrg[3],
-                    this.VsOrg[4],
-                    V5,
-                    V6,
-                ]
+        this.Vs = this.foldW_1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+
+    def foldW_6(this, a0, b0, a1, b1, keepV0 = True):
+        """
+        Fold around 4 diagonals in the shape of the character 'W'.
+
+        the fold angle a0 refers the the axes V1-V5,
+        the fold angle a1 refers the the axes V1-V4,
+        The fold angle b0 refers the the axes V0-V5 and
+        The fold angle b1 refers the the axes V2-V4,
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #               6
+        #               ^
+        #        5     | |     0
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      4   |/       \|   1
+        #          V axes  a V
+        #          "         "
+        #          3         2
+        #
+        this.Fs = [[1, 0, 2], [2, 0, 6], [2, 6, 3], [3, 6, 5], [3, 5, 4]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		0, 2, 2, 6, 6, 3, 3, 5
+	    ]
+        # opposite angle, because of opposite isometry
+        Vs = this.foldW_1_help(-a1, -b1, -a0, -b0, keepV0,
+            [
+                this.VsOrg[0],
+                this.VsOrg[6],
+                this.VsOrg[5],
+                this.VsOrg[4],
+                this.VsOrg[3],
+                this.VsOrg[2],
+                this.VsOrg[1]
+            ]
+        )
+        this.Vs = [
+            Vs[0],
+            Vs[6],
+            Vs[5],
+            Vs[4],
+            Vs[3],
+            Vs[2],
+            Vs[1]
+        ]
 
     def foldStar(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
         """
@@ -935,7 +994,7 @@ class RegularHeptagon:
         #                0
         #               .^.
         #         6   _/| |\_   1
-        #          _/ /   \ \_
+        #           _/ /   \ \_
         # axis b0 _/  |     |  \_ axis b1
         #        /    |     |    \
         #       5    /       \    2
@@ -1325,7 +1384,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.reflGui.SetValue(this.shape.inclReflections)
         this.reflGui.Bind(wx.EVT_CHECKBOX, this.onRefl)
 
-	this.rotateFldGui = wx.Button(this.panel, label = 'Rotate Fold 0/7')
+	this.rotateFldGui = wx.Button(this.panel, label = 'Rotate Fold 1/7')
 	this.rotateFld = 0
         this.Guis.append(this.rotateFldGui)
         this.rotateFldGui.Bind(wx.EVT_BUTTON, this.onRotateFld)
@@ -1891,7 +1950,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def setRotateFld(this, rotateFld):
 	this.rotateFld = int(rotateFld) % 7
 	this.shape.setRotateFold(this.rotateFld)
-	this.rotateFldGui.SetLabel('Rotate Fold %d/7' % this.rotateFld)
+	this.rotateFldGui.SetLabel('Rotate Fold %d/7' % (this.rotateFld + 1))
         this.updateShape()
 
     def onRotateFld(this, event):
