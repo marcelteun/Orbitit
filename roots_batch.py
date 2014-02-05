@@ -3106,6 +3106,8 @@ if __name__ == '__main__':
                 for fold in folds:
                     for ea in edgeAlts:
                         for oea in oppEdgeAlts:
+                            # TODO: remove all oea > ea (though use some index
+                            # compared to Heptagons.py, don't use the value.
                             # loose_bit must be the same for both:
                             if (
                                 ea & loose_bit == loose_bit and
