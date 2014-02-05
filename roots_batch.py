@@ -257,6 +257,66 @@ class Fold:
 
 fold = Fold()
 
+def fold_w_pos_1_6(a0, b0, a1, b1, Vs):
+    """Fold using Heptagons.py terms and coordinate system setup"""
+    #
+    #               1
+    #               ^
+    #        0     | |     2
+    #        .    /   \    .
+    # axis b1 \  |     |  / axis b0
+    #          " |     | "
+    #      6   |/       \|   3
+    #          V axes  a V
+    #          "         "
+    #          5         4
+    #
+
+    # rot b0
+    V2V4 = GeomTypes.Vec(Vs[2] + Vs[4])/2
+    V2V4axis = GeomTypes.Vec(Vs[2] - Vs[4])
+    rot_b0 = quatRot(axis = V2V4axis, angle = b0)
+    V1V5  = (Vs[1] + Vs[5])/2
+    V1V5_ = V2V4 + rotate(rot_b0, (V1V5 - V2V4))
+    V1  = V1V5_ + (Vs[1] - V1V5)
+    V5_ = V1V5_ + (Vs[5] - V1V5)
+    V0V6 = (Vs[0] + Vs[6])/2
+    V0V6_ = V2V4 + rotate(rot_b0, (V0V6 - V2V4))
+    V0_ = V0V6_ + (Vs[0] - V0V6)
+    V6_ = V0V6_ + (Vs[6] - V0V6)
+    # rot a0
+    V1V4 = (V1 + Vs[4])/2
+    V1V4axis = GeomTypes.Vec(V1 - Vs[4])
+    rot_a0 = quatRot(axis = V1V4axis, angle = a0)
+    V0V5  = (V0_ + V5_)/2
+    V0V5_ = V1V4 + rotate(rot_a0, (V0V5 - V1V4))
+    V0_ = V0V5_ + (V0_ - V0V5)
+    V5  = V0V5_ + (V5_ - V0V5)
+    V6_ = V1V4 + rotate(rot_a0, (V6_ - V1V4))
+    # rot a1
+    V1V5 = (V1 + V5)/2
+    V1V5axis = GeomTypes.Vec(V1 - V5)
+    rot_a1 = quatRot(axis = V1V5axis, angle = a1)
+    V0V6  = (V0_ + V6_)/2
+    V0V6_ = V1V5 + rotate(rot_a1, (V0V6 - V1V5))
+    V0  = V0V6_ + (V0_ - V0V6)
+    V6_ = V0V6_ + (V6_ - V0V6)
+    # rot b1
+    V0V5 = (V0 + V5)/2
+    V0V5axis = GeomTypes.Vec(V0 - V5)
+    rot_b1 = quatRot(axis = V0V5axis, angle = b1)
+    V6 = V0V5 + rotate(rot_b1, (V6_ - V0V5))
+    # map back from Heptagons.py:
+    return [
+        V0,
+        V1,
+        Vs[2],
+        Vs[3],
+        Vs[4],
+        V5,
+        V6
+    ]
+
 def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
         rotate_fold = 0):
     """Returns the positioned base heptagon indepent on symmetry
@@ -566,58 +626,55 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
             #          5         4
             #
             # map to Heptagons.py setup:
-            a0 = beta0
-            b0 = gamma0
-            a1 = beta1
-            b1 = gamma1
-            VsOrg = [
-                GeomTypes.Vec([y0, x0, z0]),
-                GeomTypes.Vec([y1, x1, z1]),
-                GeomTypes.Vec([y2, x2, z2]),
-                GeomTypes.Vec([y3, x3, z3]),
-                GeomTypes.Vec([y4, x4, z4]),
-                GeomTypes.Vec([y5, x5, z5]),
-                GeomTypes.Vec([y6, x6, z6])
-            ]
-            # rot b0
-            V2V4 = GeomTypes.Vec(VsOrg[2] + VsOrg[4])/2
-            V2V4axis = GeomTypes.Vec(VsOrg[2] - VsOrg[4])
-            rot_b0 = quatRot(axis = V2V4axis, angle = b0)
-            V1V5  = (VsOrg[1] + VsOrg[5])/2
-            V1V5_ = V2V4 + rotate(rot_b0, (V1V5 - V2V4))
-            V1  = V1V5_ + (VsOrg[1] - V1V5)
-            V5_ = V1V5_ + (VsOrg[5] - V1V5)
-            V0V6 = (VsOrg[0] + VsOrg[6])/2
-            V0V6_ = V2V4 + rotate(rot_b0, (V0V6 - V2V4))
-            V0_ = V0V6_ + (VsOrg[0] - V0V6)
-            V6_ = V0V6_ + (VsOrg[6] - V0V6)
-            # rot a0
-            V1V4 = (V1 + VsOrg[4])/2
-            V1V4axis = GeomTypes.Vec(V1 - VsOrg[4])
-            rot_a0 = quatRot(axis = V1V4axis, angle = a0)
-            V0V5  = (V0_ + V5_)/2
-            V0V5_ = V1V4 + rotate(rot_a0, (V0V5 - V1V4))
-            V0_ = V0V5_ + (V0_ - V0V5)
-            V5  = V0V5_ + (V5_ - V0V5)
-            V6_ = V1V4 + rotate(rot_a0, (V6_ - V1V4))
-            # rot a1
-            V1V5 = (V1 + V5)/2
-            V1V5axis = GeomTypes.Vec(V1 - V5)
-            rot_a1 = quatRot(axis = V1V5axis, angle = a1)
-            V0V6  = (V0_ + V6_)/2
-            V0V6_ = V1V5 + rotate(rot_a1, (V0V6 - V1V5))
-            V0  = V0V6_ + (V0_ - V0V6)
-            V6_ = V0V6_ + (V6_ - V0V6)
-            # rot b1
-            V0V5 = (V0 + V5)/2
-            V0V5axis = GeomTypes.Vec(V0 - V5)
-            rot_b1 = quatRot(axis = V0V5axis, angle = b1)
-            V6 = V0V5 + rotate(rot_b1, (V6_ - V0V5))
+            Vs = fold_w_pos_1_6(beta0, gamma0, beta1, gamma1,
+                [
+                    GeomTypes.Vec([y0, x0, z0]),
+                    GeomTypes.Vec([y1, x1, z1]),
+                    GeomTypes.Vec([y2, x2, z2]),
+                    GeomTypes.Vec([y3, x3, z3]),
+                    GeomTypes.Vec([y4, x4, z4]),
+                    GeomTypes.Vec([y5, x5, z5]),
+                    GeomTypes.Vec([y6, x6, z6])
+                ]
+            )
+
             # map back from Heptagons.py:
-            x0, y0, z0 = V0[1], V0[0], V0[2]
-            x1, y1, z1 = V1[1], V1[0], V1[2]
-            x5, y5, z5 = V5[1], V5[0], V5[2]
-            x6, y6, z6 = V6[1], V6[0], V6[2]
+            x0, y0, z0 = Vs[0][1], Vs[0][0], Vs[0][2]
+            x1, y1, z1 = Vs[1][1], Vs[1][0], Vs[1][2]
+            x5, y5, z5 = Vs[5][1], Vs[5][0], Vs[5][2]
+            x6, y6, z6 = Vs[6][1], Vs[6][0], Vs[6][2]
+
+        elif rotate_fold == 6:
+            #
+            #               6
+            #               ^
+            #        5     | |     0
+            #        .    /   \    .
+            # axis b1 \  |     |  / axis b0
+            #          " |     | "
+            #      4   |/       \|   1
+            #          V axes  a V
+            #          "         "
+            #          3         2
+            #
+            # map to Heptagons.py setup:
+            Vs = fold_w_pos_1_6(-beta1, -gamma1, -beta0, -gamma0,
+                [
+                    GeomTypes.Vec([y0, x0, z0]),
+                    GeomTypes.Vec([y6, x6, z6]),
+                    GeomTypes.Vec([y5, x5, z5]),
+                    GeomTypes.Vec([y4, x4, z4]),
+                    GeomTypes.Vec([y3, x3, z3]),
+                    GeomTypes.Vec([y2, x2, z2]),
+                    GeomTypes.Vec([y1, x1, z1])
+                ]
+            )
+
+            # map back from Heptagons.py:
+            x0, y0, z0 = Vs[0][1], Vs[0][0], Vs[0][2]
+            x1, y1, z1 = Vs[6][1], Vs[6][0], Vs[6][2]
+            x2, y2, z2 = Vs[5][1], Vs[5][0], Vs[5][2]
+            x6, y6, z6 = Vs[1][1], Vs[1][0], Vs[1][2]
 
     # rotate around 3-4; angle a
     # ------------------------------------
