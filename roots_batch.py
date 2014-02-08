@@ -351,6 +351,25 @@ def fold_w_pos_2(a0, b0, a1, b1, Vs):
     )
     return [Vs[6], Vs[0], Vs[1], Vs[2], Vs[3], Vs[4], Vs[5]]
 
+def fold_w_pos_5(a0, b0, a1, b1, Vs):
+    #
+    #               5
+    #               ^
+    #        4     | |     6
+    #        .    /   \    .
+    # axis b1 \  |     |  / axis b0
+    #          " |     | "
+    #      3   |/       \|   0
+    #          V axes  a V
+    #          "         "
+    #          2         1
+    #
+    # map to Heptagons.py setup:
+    Vs = fold_w_pos_helper(-a1, -b1, -a0, -b0,
+        [Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1], Vs[0]]
+    )
+    return [Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1], Vs[0]]
+
 def fold_w_pos_6(a0, b0, a1, b1, Vs):
     #
     #               6
@@ -673,7 +692,7 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
                 fold_w_pos_2,
                 None,
                 None,
-                None,
+                fold_w_pos_5,
                 fold_w_pos_6
             ]
             # map to Heptagons.py setup: (alph, beta and [y,x,z])
