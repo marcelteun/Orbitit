@@ -257,7 +257,7 @@ class Fold:
 
 fold = Fold()
 
-def fold_w_pos_1_6(a0, b0, a1, b1, Vs):
+def fold_w_pos_helper(a0, b0, a1, b1, Vs):
     """Fold using Heptagons.py terms and coordinate system setup"""
     #
     #               1
@@ -316,6 +316,59 @@ def fold_w_pos_1_6(a0, b0, a1, b1, Vs):
         V5,
         V6
     ]
+
+def fold_w_pos_1(a0, b0, a1, b1, Vs):
+    #
+    #               1
+    #               ^
+    #        0     | |     2
+    #        .    /   \    .
+    # axis b1 \  |     |  / axis b0
+    #          " |     | "
+    #      6   |/       \|   3
+    #          V axes  a V
+    #          "         "
+    #          5         4
+    #
+    Vs = fold_w_pos_helper(a0, b0, a1, b1, Vs)
+    return Vs
+
+def fold_w_pos_2(a0, b0, a1, b1, Vs):
+    #
+    #               2
+    #               ^
+    #        1     | |     3
+    #        .    /   \    .
+    # axis b1 \  |     |  / axis b0
+    #          " |     | "
+    #      0   |/       \|   4
+    #          V axes  a V
+    #          "         "
+    #          6         5
+    #
+    Vs = fold_w_pos_helper(a0, b0, a1, b1,
+        [Vs[1], Vs[2], Vs[3], Vs[4], Vs[5], Vs[6], Vs[0]]
+    )
+    return [Vs[6], Vs[0], Vs[1], Vs[2], Vs[3], Vs[4], Vs[5]]
+
+def fold_w_pos_6(a0, b0, a1, b1, Vs):
+    #
+    #               6
+    #               ^
+    #        5     | |     0
+    #        .    /   \    .
+    # axis b1 \  |     |  / axis b0
+    #          " |     | "
+    #      4   |/       \|   1
+    #          V axes  a V
+    #          "         "
+    #          3         2
+    #
+    # map to Heptagons.py setup:
+    Vs = fold_w_pos_helper(-a1, -b1, -a0, -b0,
+        [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]]
+    )
+    return [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]]
 
 def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
         rotate_fold = 0):
@@ -548,6 +601,7 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
 
     elif (fold_type == Fold.w):
         if rotate_fold == 0:
+            # Position nr 0 is optimised:
             #
             #               0
             #              .^.
@@ -612,21 +666,18 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
             # x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
             y5, y6 = -y5, -y6
 
-        elif rotate_fold == 1:
-            #
-            #               1
-            #               ^
-            #        0     | |     2
-            #        .    /   \    .
-            # axis b1 \  |     |  / axis b0
-            #          " |     | "
-            #      6   |/       \|   3
-            #          V axes  a V
-            #          "         "
-            #          5         4
-            #
-            # map to Heptagons.py setup:
-            Vs = fold_w_pos_1_6(beta0, gamma0, beta1, gamma1,
+        else:
+            w_map = [
+                None,
+                fold_w_pos_1,
+                fold_w_pos_2,
+                None,
+                None,
+                None,
+                fold_w_pos_6
+            ]
+            # map to Heptagons.py setup: (alph, beta and [y,x,z])
+            Vs = w_map[rotate_fold](beta0, gamma0, beta1, gamma1,
                 [
                     GeomTypes.Vec([y0, x0, z0]),
                     GeomTypes.Vec([y1, x1, z1]),
@@ -641,40 +692,11 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
             # map back from Heptagons.py:
             x0, y0, z0 = Vs[0][1], Vs[0][0], Vs[0][2]
             x1, y1, z1 = Vs[1][1], Vs[1][0], Vs[1][2]
+            x2, y2, z2 = Vs[2][1], Vs[2][0], Vs[2][2]
+            x3, y3, z3 = Vs[3][1], Vs[3][0], Vs[3][2]
+            x4, y4, z4 = Vs[4][1], Vs[4][0], Vs[4][2]
             x5, y5, z5 = Vs[5][1], Vs[5][0], Vs[5][2]
             x6, y6, z6 = Vs[6][1], Vs[6][0], Vs[6][2]
-
-        elif rotate_fold == 6:
-            #
-            #               6
-            #               ^
-            #        5     | |     0
-            #        .    /   \    .
-            # axis b1 \  |     |  / axis b0
-            #          " |     | "
-            #      4   |/       \|   1
-            #          V axes  a V
-            #          "         "
-            #          3         2
-            #
-            # map to Heptagons.py setup:
-            Vs = fold_w_pos_1_6(-beta1, -gamma1, -beta0, -gamma0,
-                [
-                    GeomTypes.Vec([y0, x0, z0]),
-                    GeomTypes.Vec([y6, x6, z6]),
-                    GeomTypes.Vec([y5, x5, z5]),
-                    GeomTypes.Vec([y4, x4, z4]),
-                    GeomTypes.Vec([y3, x3, z3]),
-                    GeomTypes.Vec([y2, x2, z2]),
-                    GeomTypes.Vec([y1, x1, z1])
-                ]
-            )
-
-            # map back from Heptagons.py:
-            x0, y0, z0 = Vs[0][1], Vs[0][0], Vs[0][2]
-            x1, y1, z1 = Vs[6][1], Vs[6][0], Vs[6][2]
-            x2, y2, z2 = Vs[5][1], Vs[5][0], Vs[5][2]
-            x6, y6, z6 = Vs[1][1], Vs[1][0], Vs[1][2]
 
     # rotate around 3-4; angle a
     # ------------------------------------
