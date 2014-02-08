@@ -790,6 +790,7 @@ class RegularHeptagon:
             0: this.foldW_0,
             1: this.foldW_1,
             2: this.foldW_2,
+            5: this.foldW_5,
             6: this.foldW_6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
@@ -798,10 +799,10 @@ class RegularHeptagon:
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers the the axes V0-V3,
-        the fold angle a1 refers the the axes V0-V4,
-        The fold angle b0 refers the the axes V1-V3,
-        The fold angle b1 refers the the axes V6-V4 and
+        the fold angle a0 refers to the axes V0-V3,
+        the fold angle a1 refers to the axes V0-V4,
+        The fold angle b0 refers to the axes V1-V3,
+        The fold angle b1 refers to the axes V6-V4 and
         The vertex V0 is kept invariant during folding
         The keepV0 variable is ignored here (it is provided to be consistent
 	with the other fold functions.)
@@ -908,10 +909,10 @@ class RegularHeptagon:
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers the the axes V1-V4,
-        the fold angle a1 refers the the axes V1-V5,
-        The fold angle b0 refers the the axes V2-V4,
-        The fold angle b1 refers the the axes V0-V5 and
+        the fold angle a0 refers to the axes V1-V4,
+        the fold angle a1 refers to the axes V1-V5,
+        The fold angle b0 refers to the axes V2-V4,
+        The fold angle b1 refers to the axes V0-V5 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -937,10 +938,10 @@ class RegularHeptagon:
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers the the axes V1-V4,
-        the fold angle a1 refers the the axes V1-V5,
-        The fold angle b0 refers the the axes V2-V4,
-        The fold angle b1 refers the the axes V0-V5 and
+        the fold angle a0 refers to the axes V2-V5,
+        the fold angle a1 refers to the axes V2-V6,
+        The fold angle b0 refers to the axes V3-V5,
+        The fold angle b1 refers to the axes V1-V6 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -981,14 +982,62 @@ class RegularHeptagon:
             Vs[5]
         ]
 
+    def foldW_5(this, a0, b0, a1, b1, keepV0 = True):
+        """
+        Fold around 4 diagonals in the shape of the character 'W'.
+
+        the fold angle a0 refers to the axes V1-V4,
+        the fold angle a1 refers to the axes V1-V5,
+        The fold angle b0 refers to the axes V2-V4,
+        The fold angle b1 refers to the axes V0-V5 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #               5
+        #               ^
+        #        4     | |     6
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      3   |/       \|   0
+        #          V axes  a V
+        #          "         "
+        #          2         1
+        #
+        this.Fs = [[0, 6, 1], [6, 5, 1], [5, 2, 1], [5, 4, 2], [4, 3, 2]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		6, 1, 1, 5, 5, 2, 2, 4
+	    ]
+        Vs = this.foldW_1_help(-a1, -b1, -a0, -b0, keepV0,
+            [
+                this.VsOrg[6],
+                this.VsOrg[5],
+                this.VsOrg[4],
+                this.VsOrg[3],
+                this.VsOrg[2],
+                this.VsOrg[1],
+                this.VsOrg[0]
+            ]
+        )
+        this.Vs = [
+            Vs[6],
+            Vs[5],
+            Vs[4],
+            Vs[3],
+            Vs[2],
+            Vs[1],
+            Vs[0]
+        ]
+
     def foldW_6(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers the the axes V1-V5,
-        the fold angle a1 refers the the axes V1-V4,
-        The fold angle b0 refers the the axes V0-V5 and
-        The fold angle b1 refers the the axes V2-V4,
+        the fold angle a0 refers to the axes V6-V2,
+        the fold angle a1 refers to the axes V6-V3,
+        The fold angle b0 refers to the axes V2-V0 and
+        The fold angle b1 refers to the axes V3-V5,
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
