@@ -789,6 +789,7 @@ class RegularHeptagon:
         prj = {
             0: this.foldW_0,
             1: this.foldW_1,
+            2: this.foldW_2,
             6: this.foldW_6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
@@ -931,6 +932,54 @@ class RegularHeptagon:
 		2, 4, 4, 1, 1, 5, 5, 0
 	    ]
         this.Vs = this.foldW_1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+
+    def foldW_2(this, a0, b0, a1, b1, keepV0 = True):
+        """
+        Fold around 4 diagonals in the shape of the character 'W'.
+
+        the fold angle a0 refers the the axes V1-V4,
+        the fold angle a1 refers the the axes V1-V5,
+        The fold angle b0 refers the the axes V2-V4,
+        The fold angle b1 refers the the axes V0-V5 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #               2
+        #               ^
+        #        1     | |     3
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      0   |/       \|   4
+        #          V axes  a V
+        #          "         "
+        #          6         5
+        #
+        this.Fs = [[3, 5, 4], [3, 2, 5], [2, 6, 5], [2, 1, 6], [1, 0, 6]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		3, 5, 5, 2, 2, 6, 6, 1
+	    ]
+        Vs = this.foldW_1_help(a0, b0, a1, b1, keepV0,
+            [
+                this.VsOrg[1],
+                this.VsOrg[2],
+                this.VsOrg[3],
+                this.VsOrg[4],
+                this.VsOrg[5],
+                this.VsOrg[6],
+                this.VsOrg[0]
+            ]
+        )
+        this.Vs = [
+            Vs[6],
+            Vs[0],
+            Vs[1],
+            Vs[2],
+            Vs[3],
+            Vs[4],
+            Vs[5]
+        ]
 
     def foldW_6(this, a0, b0, a1, b1, keepV0 = True):
         """
