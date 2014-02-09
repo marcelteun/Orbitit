@@ -1504,10 +1504,11 @@ def FoldedRegularHeptagonsS4(c, params):
     beta0  = c[2]
     gamma0 = c[3]
 
-    par_tri_fill       = Param.tri_fill
-    par_opp_fill       = Param.opp_fill
-    par_edge_len       = Param.edge_len
-    par_fold           = Param.h_fold
+    par_tri_fill = Param.tri_fill
+    par_opp_fill = Param.opp_fill
+    par_edge_len = Param.edge_len
+    par_fold     = Param.h_fold
+    n_7_turn     = Param.n_7_turn
 
     incl_reflections = len(params[par_edge_len]) == 4
     if incl_reflections:
@@ -1526,7 +1527,7 @@ def FoldedRegularHeptagonsS4(c, params):
 
     coords = GetBaseHeptagon(
             T, alpha, beta0, beta1, gamma0, gamma1, delta,
-            params[par_fold], Param.n_7_turn)
+            params[par_fold], params[n_7_turn])
     x0, y0, z0 = coords[0]
     x1, y1, z1 = coords[1]
     x2, y2, z2 = coords[2]
@@ -2115,6 +2116,7 @@ def FoldedRegularHeptagonsA5(c, params):
     par_opp_fill = Param.opp_fill
     par_edge_len = Param.edge_len
     par_fold     = Param.h_fold
+    n_7_turn     = Param.n_7_turn
 
     incl_reflections = len(params[par_edge_len]) == 4
     if incl_reflections:
@@ -2133,7 +2135,7 @@ def FoldedRegularHeptagonsA5(c, params):
 
     hept_coords = GetBaseHeptagon(
             T, alpha, beta0, beta1, gamma0, gamma1, delta,
-            params[par_fold], Param.n_7_turn)
+            params[par_fold], params[n_7_turn])
     #print '[y0, x0, z0] = (%.4f, %.4f, %.4f)' % (hept_coords[0][1], hept_coords[0][0], hept_coords[0][2])
     #print '[y1, x1, z1] = (%.4f, %.4f, %.4f)' % (hept_coords[1][1], hept_coords[1][0], hept_coords[1][2])
     #print '[y2, x2, z2] = (%.4f, %.4f, %.4f)' % (hept_coords[2][1], hept_coords[2][0], hept_coords[2][2])
