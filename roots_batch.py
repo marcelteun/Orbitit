@@ -519,6 +519,24 @@ def fold_w_pos_3(a0, b0, a1, b1, Vs):
     Vs = fold_w_pos_3_helper(a0, b0, a1, b1, Vs)
     return Vs
 
+def fold_w_pos_4(a0, b0, a1, b1, Vs):
+    #
+    #               4
+    #               ^
+    #        3     | |     5
+    #        .    /   \    .
+    # axis b1 \  |     |  / axis b0
+    #          " |     | "
+    #      2   |/       \|   6
+    #          V axes  a V
+    #          "         "
+    #          1         0
+    #
+    Vs = fold_w_pos_3_helper(-a1, -b1, -a0, -b0,
+        [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]]
+    )
+    return [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]]
+
 def fold_w_pos_5(a0, b0, a1, b1, Vs):
     #
     #               5
@@ -859,7 +877,7 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
                 fold_w_pos_1,
                 fold_w_pos_2,
                 fold_w_pos_3,
-                None,
+                fold_w_pos_4,
                 fold_w_pos_5,
                 fold_w_pos_6
             ]
