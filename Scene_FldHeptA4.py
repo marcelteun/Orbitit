@@ -1040,7 +1040,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
 		'set': [-0.866025403784, -2.222676713307, -2.064570332814, -0.827255867832, -0.884416238250, -2.064570332813, 1.904278188607],
 	    },{
-		'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-strip_I-opp_shell.py',
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py',
 		'set': [1.731178674695, -0.460140302443, 1.753834771439, -0.784585557814, 2.512070703819, 1.753834771439, -2.488945590745],
 	    },
 	],
