@@ -1913,7 +1913,7 @@ def FoldedRegularHeptagonsA5_t_fill_pos_1(c,
 ):
     """Calculates the edge lengths for the A5 case of folded heptagons.
 
-    This calculates for the triangle fill position 0 and refl_1 and refl_2.
+    This calculates for the triangle fill position 1 and refl_1 and refl_2.
     c           : see FoldedRegularHeptagonsA5
     incl_reflections: whether this is a model that includes reflections.
     par_tri_fill: params[0], see FoldedRegularHeptagonsA5
