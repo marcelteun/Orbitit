@@ -3398,58 +3398,252 @@ if __name__ == '__main__':
     ]
 
     pre_edgeLs_A4 = [
-        #[0., 0., 0., 0., 0., 0., 0.],
-
-        #[0., 0., 0., 1., 0., 0., 1.],
-
-        [0., 0., 1., 0., 0., 1., 0.],
-
-        [0., 0., 1., 1., 0., 1., 1.],
-
-        #[0., 1., 0., 0., 1., 0., 0.],
-
-        [0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
-        [0., 1., 0., 1., 1., 0., 1.],
-
-        [0., 1., 1., 0., 1., 1., 0.],
-
-        #[1., 0., 0., 0., 0., 0., 0.],
-
-        [1., 0., 0., 1., 0., 0., 1.],
-
-        [1., 0., 1., 0., 0., 1., 0.], # only hepts
-                # it seems that
-                # frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_shell.py
-                # needs to find nr 11 (has 10 now)
-        [1., 0., 1., 0., 0., 1., 0.],
-        [1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
-        [1., 0., 1., 0., 1., 0., 0.], # no sols
-        [1., 0., 1., 0., 1., 0., 1.], # 16 triangles (1)
-        [1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
-        [1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
-
-        [1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
-        [1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
-        [1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
-
-        [1., 1., 0., 0., 1., 0., 0.],
-
-        [1., 1., 0., 1., 0., 0., 0.], # for rot 0
-        [1., 1., 0., 1., 0., 0., 1.], # for rot 0
-        [1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
-        [1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
-
-        [1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
-        [1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
-        [1., 1., 1., 0., 1., 0., 0.], # no sols
-        [1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
-
-        [1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
-        [1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
-        [1., 1., 1., 1., 1., 1., 1.], # all equilateral
-
-        [0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
-        [1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+        [ # 0
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0], # only hepts
+            [1, 0, 1, 0, 0, 1, 1], # 16 triangles (0)
+            [1, 0, 1, 0, 1, 0, 1], # 16 triangles (1)
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+# The arrya above is only valid for w fold
+#            [0., 0., 1., 0., 0., 1., 0.],
+#            [0., 0., 1., 1., 0., 1., 1.],
+#            [0., 1., 0., 1., 0., 1., 0.], # no sols. Check again..
+#            [0., 1., 0., 1., 1., 0., 1.],
+#            [0., 1., 1., 0., 1., 1., 0.],
+#            [1., 0., 0., 1., 0., 0., 1.],
+#            [1., 0., 1., 0., 0., 1., 0.],
+#            [1., 0., 1., 0., 0., 1., 0.],
+#            [1., 0., 1., 0., 0., 1., 1.], # 16 triangles (0)
+#            [1., 0., 1., 0., 1., 0., 0.], # no sols
+#            [1., 0., 1., 0., 1., 0., 1.],
+#            [1., 0., 1., 0., 1., 1., 0.], # 24 triangles (0)
+#            [1., 0., 1., 0., 1., 1., 1.], # 40 triangles (0)
+#            [1., 0., 1., 1., 0., 1., 0.], # 16 triangles (3)
+#            [1., 0., 1., 1., 0., 1., 1.], # 32 triangles (1)
+#            [1., 0., 1., 1., 1., 1., 0.], # 40 triangles (2)
+#            [1., 1., 0., 0., 1., 0., 0.],
+#            [1., 1., 0., 1., 0., 0., 0.], # for rot 0
+#            [1., 1., 0., 1., 0., 0., 1.], # for rot 0
+#            [1., 1., 0., 1., 0., 1., 0.], # 16 triangles (1)
+#            [1., 1., 0., 1., 0., 1., 1.], # 32 triangles (0)
+#            [1., 1., 1., 0., 0., 1., 0.], # 24 triangles (1)
+#            [1., 1., 1., 0., 0., 1., 1.], # 40 triangles (3)
+#            [1., 1., 1., 0., 1., 0., 0.], # no sols
+#            [1., 1., 1., 0., 1., 1., 0.], # no O3's: 48 triangles
+#            [1., 1., 1., 1., 0., 1., 0.], # 40 triangles (1)
+#            [1., 1., 1., 1., 1., 1., 0.], # 64 triangles (0)
+#            [1., 1., 1., 1., 1., 1., 1.], # all equilateral
+#            [0., V2, 1., 0., V2, 1., 0.], # 12 folded squares
+#            [1., V2, 1., 0., V2, 1., 0.], # 24 folded squares
+        ], [ # 1
+        ], [ # 2
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 3
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 4
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 5
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 6
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ]
     ]
 
     dynamicSol_A4_S4 = {
@@ -4382,7 +4576,256 @@ if __name__ == '__main__':
                                         # there is no guarantee it will be
                                         # regular (more requirements needed)
         ])
-    pre_edgeLs_S4 = pre_edgeLs_A4[:]
+    pre_edgeLs_S4 = [
+        [ # 0
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 1
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 2
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 3
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 4
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 5
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 1, 1],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 6
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+
+        ]
+    ]
     octagon_diag = 2*numx.cos(numx.pi * 22.5 / 180)
     pre_edgeLs_S4.extend([
         [1., 0., 1., 0., 0., 0., 1.], # 6 squares
@@ -4391,43 +4834,109 @@ if __name__ == '__main__':
     ])
 
     pre_edgeLs_A5xI = pre_edgeLs_all_1s_opposite_syms[:]
-    pre_edgeLs_A5_1 = [
-        [0, 1, 0, 1, 1, 0, 1],
-        [0, 1, 0, 1, 1, 1, 0],
-        [0, 1, 0, 1, 1, 1, 1],
-        [0, 1, 1, 1, 1, 0, 1],
-        [0, 1, 1, 1, 1, 1, 0],
-        [0, 1, 1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 0, 1, 0],
-        [1, 0, 1, 0, 0, 1, 1],
-        [1, 0, 1, 0, 1, 1, 0],
-        [1, 0, 1, 0, 1, 1, 1],
-        [1, 0, 1, 1, 0, 1, 0],
-        [1, 0, 1, 1, 0, 1, 1],
-        [1, 0, 1, 1, 1, 1, 0],
-        [1, 0, 1, 1, 1, 1, 1],
-        [1, 1, 0, 1, 1, 0, 1],
-        [1, 1, 0, 1, 1, 1, 0],
-        [1, 1, 0, 1, 1, 1, 1],
-        [1, 1, 1, 0, 0, 1, 0],
-        [1, 1, 1, 0, 0, 1, 1],
-        [1, 1, 1, 0, 1, 1, 0],
-        [1, 1, 1, 0, 1, 1, 1],
-        [1, 1, 1, 1, 0, 1, 0],
-        [1, 1, 1, 1, 0, 1, 1],
-        [1, 1, 1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1, 1, 1]
+    pre_edgeLs_A5 = [
+        [ # 0
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0, 1, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 1
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+        ], [ # 2
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0, 1, 1],
+            [0, 1, 0, 1, 1, 0, 1],
+            [0, 1, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1],
+            [0, 1, 1, 0, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 0, 1, 1, 1],
+            [0, 1, 1, 1, 1, 0, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 1, 0, 1, 0],
+            [1, 0, 1, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 1, 0, 1, 0, 1, 0],
+            [1, 1, 0, 1, 0, 1, 1],
+            [1, 1, 0, 1, 1, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 0, 1, 0, 1],
+            [1, 1, 1, 0, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1]
+
+        ], [ # 3
+        ], [ # 4
+        ], [ # 5
+        ], [ # 6
+        ]
     ]
-    pre_edgeLs_A5 = pre_edgeLs_A5_1[:]
 
     pre_edgeLs = {
-        Symmetry.A4xI: pre_edgeLs_A4xI,
-        Symmetry.S4A4: pre_edgeLs_S4A4,
+        Symmetry.A4xI: [pre_edgeLs_A4xI],
+        Symmetry.S4A4: [pre_edgeLs_S4A4],
         Symmetry.A4  : pre_edgeLs_A4,
-        Symmetry.S4xI: pre_edgeLs_S4xI,
+        Symmetry.S4xI: [pre_edgeLs_S4xI],
         Symmetry.S4  : pre_edgeLs_S4,
-        Symmetry.A5xI: pre_edgeLs_A5xI,
+        Symmetry.A5xI: [pre_edgeLs_A5xI],
         Symmetry.A5  : pre_edgeLs_A5,
     }
     batch_YxI_folds = [
@@ -4498,14 +5007,15 @@ if __name__ == '__main__':
         print '     -i <num>: number of iterations to use; default %d.' % nr_iterations
         print '     -l [x:y]: slice of edge lengths list to search. If nothing is specified,'
         print '               then all lengths from the -L option are searched.'
-        print '     -L      : list the edge lengths of the predefined list.'
+        print '     -L      : list the edge lengths of the predefined list. This requires that'
+        print '               the fold position is specified (-r)'
         print '     -l x    : edge length to search.'
         print "     -o <out>: specifiy the output directory: don't use spaces; default"
         print '               %s.' % outDir
         print '     -p <num>: precision, specify the amount of digits after the point; default'
         print '               %d. Suggested to use 4 <= precision <= 13.' % precision
         print '     -r n    : fold position, with 0 <= n <= 6 rotate the fold n * 360/7'
-        print '               degrees'
+        print '               degrees. Only makes sense for direct symmetries.'
         print '     -s      : stop after having checked all. Default the program loops through'
         print '               all folds, edges, etc and starts over.'
         print '     -t      : Test all possible combinations of 1 and 0 for the edge lengths.'
@@ -4525,7 +5035,7 @@ if __name__ == '__main__':
     # default values used by printUsage
     loop = True
     nr_iterations = 4000
-    rotate_fold = 0
+    rotate_fold = None
     outDir = "tst/frh-roots"
     precision = 10
     max_triangle_fill_pos = 2 # TODO: fill in per symmetry
@@ -4546,7 +5056,7 @@ if __name__ == '__main__':
         set_fold_alts         = ''
         set_edge_alts         = ''
         set_opp_edge_alts     = ''
-        set_edge_Ls           = ''
+        set_edge_Ls           = None
         set_triangle_fill_pos = ''
 
         if sys.argv[1] == '-1':
@@ -4638,167 +5148,179 @@ if __name__ == '__main__':
         printError('Error: No symmetry group defined')
         printUsage()
         sys.exit(-1)
+    else:
+        direct_syms = symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or\
+                                                        symGrp == Symmetry.A5
+    if rotate_fold == None:
+        if direct_syms:
+            rotate_fold = 0
+        elif list_pre_edgeLs:
+            print 'please specify the fold position (using -r) when listing the edge lengths of'
+            print 'the predefined list'
+            printUsage()
+            sys.exit(-1)
+        else:
+            rotate_fold = 0
     elif rotate_fold < 0 or rotate_fold > 6:
         printError('Rotate fold: illegal value for rotate_fold: %d' % rotate_fold)
         printUsage()
         sys.exit(-1)
+
+    if set_triangle_fill_pos == '':
+        triangle_fill_pos = 0
     else:
-        if set_triangle_fill_pos == '':
-            triangle_fill_pos = 0
-        else:
-            triangle_fill_pos = int(set_triangle_fill_pos)
-            if (triangle_fill_pos >= max_triangle_fill_pos or
-                triangle_fill_pos < 0
+        triangle_fill_pos = int(set_triangle_fill_pos)
+        if (triangle_fill_pos >= max_triangle_fill_pos or
+            triangle_fill_pos < 0
+        ):
+            print 'WARNING: illegal triangle fill position: %d' % (
+                triangle_fill_pos
+            )
+            print '         Valid are 0 .. %d' % (max_triangle_fill_pos - 1)
+            printUsage()
+            sys.exit(0)
+    if (list_pre_edgeLs or
+        list_edge_alts or
+        list_opp_edge_alts or
+        list_fold_alts
+    ):
+        if list_pre_edgeLs:
+            print 'Possible edge lengths:'
+            for (i, e) in zip(range(len(pre_edgeLs[symGrp][rotate_fold])),
+                                        pre_edgeLs[symGrp][rotate_fold]):
+                print '%3d:' % i, e
+        if list_edge_alts:
+            print 'Possible edge alternatives:'
+            for (i, e) in zip(
+                range(len(edgeAltOpts[symGrp][triangle_fill_pos][0])),
+                edgeAltOpts[symGrp][triangle_fill_pos][0]
             ):
-                print 'WARNING: illegal triangle fill position: %d' % (
-                    triangle_fill_pos
-                )
-                print '         Valid are 0 .. %d' % (max_triangle_fill_pos - 1)
+                print '%3d: %s' % (i, Stringify[e])
+        if list_opp_edge_alts:
+            print 'Possible opposite edge alternatives:'
+            for (i, e) in zip(
+                range(len(edgeAltOpts[symGrp][triangle_fill_pos][1])),
+                edgeAltOpts[symGrp][triangle_fill_pos][1]
+            ):
+                print '%3d: %s' % (i, Stringify[e])
+        if list_fold_alts:
+            print 'Possible heptagon fold alternatives:'
+            for (i, e) in zip(range(len(pre_folds[symGrp])),
+                                                    pre_folds[symGrp]):
+                print '%3d: %s' % (i, str(Fold(e)))
+        sys.exit(0)
+    if tst_all_combos:
+        loop = False
+        if direct_syms:
+            edgeLs = pre_edgeLs_all_1s_direct_syms[:]
+        else:
+            edgeLs = pre_edgeLs_all_1s_opposite_syms[:]
+    elif set_edge_Ls == None:
+        edgeLs = pre_edgeLs[symGrp][rotate_fold]
+    else:
+        if set_edge_Ls[0] != '[':
+            # try is slice is one element, ie an int
+            try:
+                i = int(set_edge_Ls)
+            except ValueError:
+                printError("value error for edge index %s\n", set_edge_Ls)
+            edgeLs = pre_edgeLs[symGrp][rotate_fold][i:i+1]
+        else:
+            try:
+                edgeLs = eval('pre_edgeLs[Symmetry.%s][rotate_fold]%s' % (
+                                                    symGrp, set_edge_Ls))
+                # if just an index was used instead of a slice:
+                if type(edgeLs) == int:
+                    edgeLs = [edgeLs]
+            except TypeError:
+                printError("type error for edge slice: '%s'\n" % set_edge_Ls)
                 printUsage()
                 sys.exit(0)
-        if (list_pre_edgeLs or
-            list_edge_alts or
-            list_opp_edge_alts or
-            list_fold_alts
-        ):
-            if list_pre_edgeLs:
-                print 'Possible edge lengths:'
-                for (i, e) in zip(range(len(pre_edgeLs[symGrp])),
-                                                        pre_edgeLs[symGrp]):
-                    print '%3d:' % i, e
-            if list_edge_alts:
-                print 'Possible edge alternatives:'
-                for (i, e) in zip(
-                    range(len(edgeAltOpts[symGrp][triangle_fill_pos][0])),
-                    edgeAltOpts[symGrp][triangle_fill_pos][0]
-                ):
-                    print '%3d: %s' % (i, Stringify[e])
-            if list_opp_edge_alts:
-                print 'Possible opposite edge alternatives:'
-                for (i, e) in zip(
-                    range(len(edgeAltOpts[symGrp][triangle_fill_pos][1])),
-                    edgeAltOpts[symGrp][triangle_fill_pos][1]
-                ):
-                    print '%3d: %s' % (i, Stringify[e])
-            if list_fold_alts:
-                print 'Possible heptagon fold alternatives:'
-                for (i, e) in zip(range(len(pre_folds[symGrp])),
-                                                        pre_folds[symGrp]):
-                    print '%3d: %s' % (i, str(Fold(e)))
-            sys.exit(0)
-        if tst_all_combos:
-            loop = False
-            if symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or\
-                                                        symGrp == Symmetry.A5:
-                edgeLs = pre_edgeLs_all_1s_direct_syms[:]
-            else:
-                edgeLs = pre_edgeLs_all_1s_opposite_syms[:]
-        elif set_edge_Ls == '':
-            edgeLs = pre_edgeLs[symGrp]
+            except SyntaxError:
+                printError("syntax error for edge slice: '%s'\n" % set_edge_Ls)
+                printUsage()
+                sys.exit(0)
+    if set_edge_alts == '':
+        edgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][0]
+    else:
+        if set_edge_alts[0] != '[':
+            # try if slice is one element, ie an int
+            try:
+                i = int(set_edge_alts)
+            except ValueError:
+                printError("value error for edge index %s\n", set_edge_alts)
+            edgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][0][i:i+1]
         else:
-            if set_edge_Ls[0] != '[':
-                # try is slice is one element, ie an int
-                try:
-                    i = int(set_edge_Ls)
-                except ValueError:
-                    printError("value error for edge index %s\n", set_edge_Ls)
-                edgeLs = pre_edgeLs[symGrp][i:i+1]
-            else:
-                try:
-                    edgeLs = eval('pre_edgeLs[Symmetry.%s]%s' % (symGrp,
-                                                                set_edge_Ls))
-                    # if just an index was used instead of a slice:
-                    if type(edgeLs) == int:
-                        edgeLs = [edgeLs]
-                except TypeError:
-                    printError("type error for edge slice: '%s'\n" % set_edge_Ls)
-                    printUsage()
-                    sys.exit(0)
-                except SyntaxError:
-                    printError("syntax error for edge slice: '%s'\n" % set_edge_Ls)
-                    printUsage()
-                    sys.exit(0)
-        if set_edge_alts == '':
-            edgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][0]
-        else:
-            if set_edge_alts[0] != '[':
-                # try if slice is one element, ie an int
-                try:
-                    i = int(set_edge_alts)
-                except ValueError:
-                    printError("value error for edge index %s\n", set_edge_alts)
-                edgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][0][i:i+1]
-            else:
-                try:
-                    edgeAlts = eval('edgeAltOpts[Symmetry.%s][%d][0]%s' % (
-                            symGrp,
-                            triangle_fill_pos,
-                            set_edge_alts
-                        )
+            try:
+                edgeAlts = eval('edgeAltOpts[Symmetry.%s][%d][0]%s' % (
+                        symGrp,
+                        triangle_fill_pos,
+                        set_edge_alts
                     )
-                except TypeError:
-                    printError("type error for edge slice: '%s'\n" % set_edge_alts)
-                    printUsage()
-                    sys.exit(0)
-                except SyntaxError:
-                    printError("syntax error for edge slice: '%s'\n" % set_edge_alts)
-                    printUsage()
-                    sys.exit(0)
-        if set_opp_edge_alts == '':
-            oppEdgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][1][:]
+                )
+            except TypeError:
+                printError("type error for edge slice: '%s'\n" % set_edge_alts)
+                printUsage()
+                sys.exit(0)
+            except SyntaxError:
+                printError("syntax error for edge slice: '%s'\n" % set_edge_alts)
+                printUsage()
+                sys.exit(0)
+    if set_opp_edge_alts == '':
+        oppEdgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][1][:]
+    else:
+        if set_opp_edge_alts[0] != '[':
+            # try if slice is one element, ie an int
+            try:
+                i = int(set_opp_edge_alts)
+            except ValueError:
+                printError(
+                    "value error for edge index %s\n", set_opp_edge_alts)
+            oppEdgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][1][i:i+1]
         else:
-            if set_opp_edge_alts[0] != '[':
-                # try if slice is one element, ie an int
-                try:
-                    i = int(set_opp_edge_alts)
-                except ValueError:
-                    printError(
-                        "value error for edge index %s\n", set_opp_edge_alts)
-                oppEdgeAlts = edgeAltOpts[symGrp][triangle_fill_pos][1][i:i+1]
-            else:
-                try:
-                    oppEdgeAlts = eval('edgeAltOpts[Symmetry.%s][%d][1]%s' % (
-                            symGrp,
-                            triangle_fill_pos,
-                            set_opp_edge_alts
-                        )
+            try:
+                oppEdgeAlts = eval('edgeAltOpts[Symmetry.%s][%d][1]%s' % (
+                        symGrp,
+                        triangle_fill_pos,
+                        set_opp_edge_alts
                     )
-                except TypeError:
-                    printError("type error for edge slice: '%s'\n" %
-                                                            set_opp_edge_alts)
-                    printUsage()
-                    sys.exit(0)
-                except SyntaxError:
-                    printError("syntax error for edge slice: '%s'\n" %
-                                                            set_opp_edge_alts)
-                    printUsage()
-                    sys.exit(0)
+                )
+            except TypeError:
+                printError("type error for edge slice: '%s'\n" %
+                                                        set_opp_edge_alts)
+                printUsage()
+                sys.exit(0)
+            except SyntaxError:
+                printError("syntax error for edge slice: '%s'\n" %
+                                                        set_opp_edge_alts)
+                printUsage()
+                sys.exit(0)
 
-        if set_fold_alts == '':
-            foldAlts = pre_folds[symGrp]
+    if set_fold_alts == '':
+        foldAlts = pre_folds[symGrp]
+    else:
+        if set_fold_alts[0] != '[':
+            # try is slice is one element, ie an int
+            try:
+                i = int(set_fold_alts)
+            except ValueError:
+                printError("value error for edge index %s\n", set_fold_alts)
+            foldAlts = pre_folds[symGrp][i:i+1]
         else:
-            if set_fold_alts[0] != '[':
-                # try is slice is one element, ie an int
-                try:
-                    i = int(set_fold_alts)
-                except ValueError:
-                    printError("value error for edge index %s\n", set_fold_alts)
-                foldAlts = pre_folds[symGrp][i:i+1]
-            else:
-                try:
-                    foldAlts = eval('pre_folds[Symmetry.%s]%s' % (symGrp,
-                                                                    set_fold_alts))
-                    # if just an index was used instead of a slice:
-                    if type(foldAlts) == int:
-                        foldAlts = [foldAlts]
-                except TypeError:
-                    printError("type error for fold slice: '%s'\n" % set_fold_alts)
-                    printUsage()
-                    sys.exit(0)
-                except SyntaxError:
-                    printError("syntax error for fold slice: '%s'\n" % set_fold_alts)
-                    printUsage()
-                    sys.exit(0)
+            try:
+                foldAlts = eval('pre_folds[Symmetry.%s]%s' % (symGrp,
+                                                                set_fold_alts))
+                # if just an index was used instead of a slice:
+                if type(foldAlts) == int:
+                    foldAlts = [foldAlts]
+            except TypeError:
+                printError("type error for fold slice: '%s'\n" % set_fold_alts)
+                printUsage()
+                sys.exit(0)
+            except SyntaxError:
+                printError("syntax error for fold slice: '%s'\n" % set_fold_alts)
+                printUsage()
+                sys.exit(0)
 
         print 'Search solutions for symmetry group %s' % symGrp
         print 'Switch setup after %d randomly selected begin values' % (
@@ -4822,23 +5344,7 @@ if __name__ == '__main__':
                 print '  %s,' % Stringify[e]
             print ']'
 
-        if symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
-                        symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
-            if rotate_fold != 0:
-                print "No solutions for rotate fold != 0 and indirect isometries"
-            if tst_all_combos:
-                edges_with_solutons = tst_if_solutions_exist_YxI(symGrp, edgeLs,
-                                edgeAlts, foldAlts, nr_iterations, precision)
-                print 'Edges with solutions:'
-                for e in edges_with_solutons:
-                    print e
-            else:
-                randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
-                        nrThreads = 1, precision = precision, outDir = outDir,
-                        loop = loop,
-                        triangle_fill_pos = triangle_fill_pos)
-        elif symGrp == Symmetry.A4 or symGrp == Symmetry.S4 or\
-                                                        symGrp == Symmetry.A5:
+        if direct_syms:
             if tst_all_combos:
                 edges_with_solutons = tst_if_solutions_exist_Y(symGrp, edgeLs,
                     edgeAlts, foldAlts, nr_iterations, precision, oppEdgeAlts,
@@ -4854,3 +5360,18 @@ if __name__ == '__main__':
                         oppEdgeAlts = oppEdgeAlts,
                         triangle_fill_pos = triangle_fill_pos,
                         rotate_fold = rotate_fold)
+        elif symGrp == Symmetry.A4xI or symGrp == Symmetry.S4A4 or\
+                        symGrp == Symmetry.S4xI or symGrp == Symmetry.A5xI:
+            if rotate_fold != 0:
+                print "No solutions for rotate fold != 0 and indirect isometries"
+            if tst_all_combos:
+                edges_with_solutons = tst_if_solutions_exist_YxI(symGrp, edgeLs,
+                                edgeAlts, foldAlts, nr_iterations, precision)
+                print 'Edges with solutions:'
+                for e in edges_with_solutons:
+                    print e
+            else:
+                randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
+                        nrThreads = 1, precision = precision, outDir = outDir,
+                        loop = loop,
+                        triangle_fill_pos = triangle_fill_pos)
