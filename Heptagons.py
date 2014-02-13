@@ -799,10 +799,10 @@ class RegularHeptagon:
         #               .^.
         #       i+6   _/| |\_   i+1
         #           _/ /   \ \_
-        # axis b0 _/  |     |  \_ axis b1
+        # axis b1 _/  |     |  \_ axis b0
         #        /    |     |    \
         #     i+5    /       \    i+2
-        #   axis a0 |         | axis a1
+        #   axis a1 |         | axis a0
         #           "         "
         #         i+4         i+3
         #
@@ -832,41 +832,116 @@ class RegularHeptagon:
         #               .^.
         #         6   _/| |\_   1
         #           _/ /   \ \_
-        # axis b0 _/  |     |  \_ axis b1
+        # axis b1 _/  |     |  \_ axis b0
         #        /    |     |    \
         #       5    /       \    2
-        #   axis a0 |         | axis a1
+        #   axis a1 |         | axis a0
         #           "         "
         #           4         3
         #
-	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
-	V0 = this.VsOrg[0]
-	V1_ = Rot0_3 * this.VsOrg[1]
-	V2 = Rot0_3 * this.VsOrg[2]
-	Rot0_2 = Rot(axis = V2 - V0, angle = b0)
-	V1 = Rot0_2 * V1_
-	if (Geom3D.eq(a0, a1)):
-	    V5 = Vec([-V2[0], V2[1], V2[2]])
-	    if (Geom3D.eq(b0, b1)):
-		V6 = Vec([-V1[0], V1[1], V1[2]])
-	    else:
-		V6 = Vec([-V1_[0], V1_[1], V1_[2]])
-		Rot5_0 = Rot(axis = V0 - V5, angle = b1)
-		V6 = Rot5_0 * (V6 - V0) + V0
-	else:
-	    Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
-	    V6 = Rot4_0 * this.VsOrg[6]
-	    V5 = Rot4_0 * this.VsOrg[5]
-	    Rot5_0 = Rot(axis = V0 - V5, angle = b1)
-	    V6 = Rot5_0 * (V6 - V0) + V0
-	this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
-        this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-		0, 2, 0, 3, 0, 4, 0, 5
-	    ]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
+            V0 = this.VsOrg[0]
+            V1_ = Rot0_3 * this.VsOrg[1]
+            V2 = Rot0_3 * this.VsOrg[2]
+            Rot0_2 = Rot(axis = V2 - V0, angle = b0)
+            V1 = Rot0_2 * V1_
+            if (Geom3D.eq(a0, a1)):
+                V5 = Vec([-V2[0], V2[1], V2[2]])
+                if (Geom3D.eq(b0, b1)):
+                    V6 = Vec([-V1[0], V1[1], V1[2]])
+                else:
+                    V6 = Vec([-V1_[0], V1_[1], V1_[2]])
+                    Rot5_0 = Rot(axis = V0 - V5, angle = b1)
+                    V6 = Rot5_0 * (V6 - V0) + V0
+            else:
+                Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
+                V6 = Rot4_0 * this.VsOrg[6]
+                V5 = Rot4_0 * this.VsOrg[5]
+                Rot5_0 = Rot(axis = V0 - V5, angle = b1)
+                V6 = Rot5_0 * (V6 - V0) + V0
+            this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
+            this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
+            this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+                    0, 2, 0, 3, 0, 4, 0, 5
+                ]
+
+    def fold_star_1_help(this, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_star_1, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            V1V3 = (Vs[1] + Vs[3])/2
+            V1V3axis = Vec(Vs[2] - Vs[4])
+            rot_b0 = Rot(axis = V1V3axis, angle = b0)
+            V2 = V1V3 + rot_b0 * (Vs[2] - V1V3)
+            # rot a0
+            V1V4 = (Vs[1] + Vs[4])/2
+            V1V4axis = Vec(Vs[1] - Vs[4])
+            rot_a0 = Rot(axis = V1V4axis, angle = a0)
+            V0V5  = (Vs[0] + Vs[5])/2
+            V0V5_ = V1V4 + rot_a0 * (V0V5 - V1V4)
+            V0_ = V0V5_ + (Vs[0] - V0V5)
+            V5  = V0V5_ + (Vs[5] - V0V5)
+            V6_ = V1V4 + rot_a0 * (Vs[6] - V1V4)
+            # rot a1
+            V1V5 = (Vs[1] + V5)/2
+            V1V5axis = Vec(Vs[1] - V5)
+            rot_a1 = Rot(axis = V1V5axis, angle = a1)
+            V0V6  = (V0_ + V6_)/2
+            V0V6_ = V1V5 + rot_a1 * (V0V6 - V1V5)
+            V0_ = V0V6_ + (V0_ - V0V6)
+            V6  = V0V6_ + (V6_ - V0V6)
+            # rot b1
+            V1V6 = (Vs[1] + V6)/2
+            V1V6axis = Vec(Vs[1] - V6)
+            rot_b1 = Rot(axis = V1V6axis, angle = b1)
+            V0 = V1V6 + rot_b1 * (V0_ - V1V6)
+            return [
+                    V0,
+                    Vs[1],
+                    V2,
+                    Vs[3],
+                    Vs[4],
+                    V5,
+                    V6,
+                ]
 
     def fold_star_1(this, a0, b0, a1, b1, keepV0 = True):
-        pass
+        """
+        Fold around 4 diagonals in the shape of the character 'shell'.
+
+        the fold angle a0 refers to the axes V1-V4,
+        The fold angle b0 refers to the axes V1-V3,
+        the fold angle a1 refers to the axes V1-V5,
+        The fold angle b1 refers to the axes V1-V6 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #                1
+        #               .^.
+        #         0   _/| |\_   2
+        #           _/ /   \ \_
+        # axis b1 _/  |     |  \_ axis b0
+        #        /    |     |    \
+        #       6    /       \    3
+        #   axis a1 |         | axis a0
+        #           "         "
+        #           5         4
+        #
+        this.Fs = [[1, 3, 2], [1, 4, 3], [1, 5, 4], [1, 6, 5], [1, 0, 6]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		1, 3, 1, 4, 1, 5, 1, 6
+	    ]
+        this.Vs = this.fold_star_1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
 
     def fold_star_2(this, a0, b0, a1, b1, keepV0 = True):
         pass
