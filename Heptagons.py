@@ -432,15 +432,15 @@ class RegularHeptagon:
 						rotate = 0
     ):
 	if fold == FoldMethod.parallel:
-	    this.foldParallel(a0, b0, keepV0, rotate) #, rotate)
+	    this.foldParallel(a0, b0, keepV0, rotate)
 	elif fold == FoldMethod.trapezium:
-	    this.foldTrapezium(a0, b0, b1, keepV0, rotate) #, rotate)
+	    this.foldTrapezium(a0, b0, b1, keepV0, rotate)
 	elif fold == FoldMethod.w:
-	    this.foldW(a0, b0, a1, b1, keepV0, rotate) #, rotate)
+	    this.fold_W(a0, b0, a1, b1, keepV0, rotate)
 	elif fold == FoldMethod.triangle:
-	    this.foldTriangle(a0, b0, b1, keepV0, rotate) #, rotate)
+	    this.foldTriangle(a0, b0, b1, keepV0, rotate)
 	elif fold == FoldMethod.star:
-	    this.foldStar(a0, b0, a1, b1, keepV0, rotate) #, rotate)
+	    this.fold_star(a0, b0, a1, b1, keepV0, rotate)
 	else:
 	    raise TypeError, 'Unknown fold'
 
@@ -785,19 +785,117 @@ class RegularHeptagon:
 		    V6,
 		]
 
-    def foldW(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
+    def fold_star(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a refers the the axes V0-V2 and V0-V5 and
+        the fold angle b0 refers the the axes V0-V3 and V0-V4.
+        The keepV0 variable is ignored here (it is provided to be consistent
+	with the other fold functions.)
+        """
+        #
+        #               Vi
+        #               .^.
+        #       i+6   _/| |\_   i+1
+        #           _/ /   \ \_
+        # axis b0 _/  |     |  \_ axis b1
+        #        /    |     |    \
+        #     i+5    /       \    i+2
+        #   axis a0 |         | axis a1
+        #           "         "
+        #         i+4         i+3
+        #
+
         prj = {
-            0: this.foldW_0,
-            1: this.foldW_1,
-            2: this.foldW_2,
-            3: this.foldW_3,
-            4: this.foldW_4,
-            5: this.foldW_5,
-            6: this.foldW_6
+            0: this.fold_star_0,
+            1: this.fold_star_1,
+            2: this.fold_star_2,
+            3: this.fold_star_3,
+            4: this.fold_star_4,
+            5: this.fold_star_5,
+            6: this.fold_star_6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
-    def foldW_0(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_0(this, a0, b0, a1, b1, keepV0 = True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a refers the the axes V0-V2 and V0-V5 and
+        the fold angle b0 refers the the axes V0-V3 and V0-V4.
+        The keepV0 variable is ignored here (it is provided to be consistent
+	with the other fold functions.)
+        """
+        #
+        #                0
+        #               .^.
+        #         6   _/| |\_   1
+        #           _/ /   \ \_
+        # axis b0 _/  |     |  \_ axis b1
+        #        /    |     |    \
+        #       5    /       \    2
+        #   axis a0 |         | axis a1
+        #           "         "
+        #           4         3
+        #
+	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
+	V0 = this.VsOrg[0]
+	V1_ = Rot0_3 * this.VsOrg[1]
+	V2 = Rot0_3 * this.VsOrg[2]
+	Rot0_2 = Rot(axis = V2 - V0, angle = b0)
+	V1 = Rot0_2 * V1_
+	if (Geom3D.eq(a0, a1)):
+	    V5 = Vec([-V2[0], V2[1], V2[2]])
+	    if (Geom3D.eq(b0, b1)):
+		V6 = Vec([-V1[0], V1[1], V1[2]])
+	    else:
+		V6 = Vec([-V1_[0], V1_[1], V1_[2]])
+		Rot5_0 = Rot(axis = V0 - V5, angle = b1)
+		V6 = Rot5_0 * (V6 - V0) + V0
+	else:
+	    Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
+	    V6 = Rot4_0 * this.VsOrg[6]
+	    V5 = Rot4_0 * this.VsOrg[5]
+	    Rot5_0 = Rot(axis = V0 - V5, angle = b1)
+	    V6 = Rot5_0 * (V6 - V0) + V0
+	this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
+        this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		0, 2, 0, 3, 0, 4, 0, 5
+	    ]
+
+    def fold_star_1(this, a0, b0, a1, b1, keepV0 = True):
+        pass
+
+    def fold_star_2(this, a0, b0, a1, b1, keepV0 = True):
+        pass
+
+    def fold_star_3(this, a0, b0, a1, b1, keepV0 = True):
+        pass
+
+    def fold_star_4(this, a0, b0, a1, b1, keepV0 = True):
+        pass
+
+    def fold_star_5(this, a0, b0, a1, b1, keepV0 = True):
+        pass
+
+    def fold_star_6(this, a0, b0, a1, b1, keepV0 = True):
+        pass
+
+    def fold_W(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
+        prj = {
+            0: this.fold_W0,
+            1: this.fold_W1,
+            2: this.fold_W2,
+            3: this.fold_W3,
+            4: this.fold_W4,
+            5: this.fold_W5,
+            6: this.fold_W6
+        }
+        prj[rotate](a0, b0, a1, b1, keepV0)
+
+    def fold_W0(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -854,8 +952,8 @@ class RegularHeptagon:
 		1, 3, 3, 0, 0, 4, 4, 6
 	    ]
 
-    def foldW_1_help(this, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for foldW_1, see that one for more info
+    def fold_W1_help(this, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_W1, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -907,8 +1005,8 @@ class RegularHeptagon:
                     V6,
                 ]
 
-    def foldW_3_help(this, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for foldW_3, see that one for more info
+    def fold_W3_help(this, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_W3, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -965,7 +1063,7 @@ class RegularHeptagon:
                     Vs[6],
                 ]
 
-    def foldW_1(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W1(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -992,9 +1090,9 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		2, 4, 4, 1, 1, 5, 5, 0
 	    ]
-        this.Vs = this.foldW_1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+        this.Vs = this.fold_W1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
 
-    def foldW_2(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W2(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1021,7 +1119,7 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		3, 5, 5, 2, 2, 6, 6, 1
 	    ]
-        Vs = this.foldW_1_help(a0, b0, a1, b1, keepV0,
+        Vs = this.fold_W1_help(a0, b0, a1, b1, keepV0,
             [
                 this.VsOrg[1],
                 this.VsOrg[2],
@@ -1042,7 +1140,7 @@ class RegularHeptagon:
             Vs[5]
         ]
 
-    def foldW_3(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W3(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1069,9 +1167,9 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		4, 6, 6, 3, 3, 0, 0, 2
 	    ]
-        this.Vs = this.foldW_3_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+        this.Vs = this.fold_W3_help(a0, b0, a1, b1, keepV0, this.VsOrg)
 
-    def foldW_4(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W4(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1098,7 +1196,7 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		5, 0, 0, 4, 4, 1, 1, 3
 	    ]
-        Vs = this.foldW_3_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = this.fold_W3_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 this.VsOrg[0],
                 this.VsOrg[6],
@@ -1119,7 +1217,7 @@ class RegularHeptagon:
             Vs[1]
         ]
 
-    def foldW_5(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W5(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1146,7 +1244,7 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
 		6, 1, 1, 5, 5, 2, 2, 4
 	    ]
-        Vs = this.foldW_1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = this.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 this.VsOrg[6],
                 this.VsOrg[5],
@@ -1167,7 +1265,7 @@ class RegularHeptagon:
             Vs[0]
         ]
 
-    def foldW_6(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W6(this, a0, b0, a1, b1, keepV0 = True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1195,7 +1293,7 @@ class RegularHeptagon:
 		0, 2, 2, 6, 6, 3, 3, 5
 	    ]
         # opposite angle, because of opposite isometry
-        Vs = this.foldW_1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = this.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 this.VsOrg[0],
                 this.VsOrg[6],
@@ -1215,76 +1313,6 @@ class RegularHeptagon:
             Vs[2],
             Vs[1]
         ]
-
-    def foldStar(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
-        """
-        Fold around the 4 diagonals from V0.
-
-        The fold angle a refers the the axes V0-V2 and V0-V5 and
-        the fold angle b0 refers the the axes V0-V3 and V0-V4.
-        The keepV0 variable is ignored here (it is provided to be consistent
-	with the other fold functions.)
-        """
-        #
-        #                0
-        #               .^.
-        #         6   _/| |\_   1
-        #           _/ /   \ \_
-        # axis b0 _/  |     |  \_ axis b1
-        #        /    |     |    \
-        #       5    /       \    2
-        #   axis a0 |         | axis a1
-        #           "         "
-        #           4         3
-        #
-        #
-	Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
-	V0 = this.VsOrg[0]
-	V1_ = Rot0_3 * this.VsOrg[1]
-	V2 = Rot0_3 * this.VsOrg[2]
-	Rot0_2 = Rot(axis = V2 - V0, angle = b0)
-	V1 = Rot0_2 * V1_
-	if (Geom3D.eq(a0, a1)):
-	    V5 = Vec([-V2[0], V2[1], V2[2]])
-	    if (Geom3D.eq(b0, b1)):
-		V6 = Vec([-V1[0], V1[1], V1[2]])
-	    else:
-		V6 = Vec([-V1_[0], V1_[1], V1_[2]])
-		Rot5_0 = Rot(axis = V0 - V5, angle = b1)
-		V6 = Rot5_0 * (V6 - V0) + V0
-	else:
-	    Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
-	    V6 = Rot4_0 * this.VsOrg[6]
-	    V5 = Rot4_0 * this.VsOrg[5]
-	    Rot5_0 = Rot(axis = V0 - V5, angle = b1)
-	    V6 = Rot5_0 * (V6 - V0) + V0
-	this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
-        this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-		0, 2, 0, 3, 0, 4, 0, 5
-	    ]
-
-#    3 don't fit in one vertex. highest is hexagon...  Dooh...
-#    def transform_2_3inV0(this):
-#        """
-#        Transform the {7} to fit 3 in vertex 0.
-#
-#        Transform the regular heptagon in such a way that:
-#         o has V0 in the origin
-#         o and a y-z slope that is suited for fitting 3 {7}s in V0, by just
-#           rotating the resulting {7} around the z-axis.
-#        """
-#        # Angle a refers to the slope of a {7} to fit three in a vertex:
-#        cosa = Rho/(2*V3*h)
-#        print cosa
-#        print (math.acos(cosa))
-#        sina = math.sin(math.acos(cosa))
-#        for i in range(len(this.Vs)):
-#            this.Vs[i] = Vec([
-#                    this.Vs[i][0],
-#                    cosa*this.Vs[i][1] - sina*this.Vs[i][2],
-#                    sina*this.Vs[i][1] + cosa*this.Vs[i][2]
-#                ])
 
     def translate(this, T):
         for i in range(len(this.Vs)):
