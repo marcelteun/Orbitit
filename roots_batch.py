@@ -5454,7 +5454,7 @@ if __name__ == '__main__':
                     rotate_fold = rotate_fold)
                 print 'Edges with solutions:'
                 for e in edges_with_solutons:
-                    print e
+                    print '%s,' % str(e)
             else:
                 randBatchY(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, dynSols = dynamicSols[symGrp],
@@ -5471,7 +5471,7 @@ if __name__ == '__main__':
                                 edgeAlts, foldAlts, nr_iterations, precision)
                 print 'Edges with solutions:'
                 for e in edges_with_solutons:
-                    print e
+                    print '%s,' % str(e)
             else:
                 randBatchYxI(symGrp, edgeLs, edgeAlts, foldAlts, nr_iterations,
                         nrThreads = 1, precision = precision, outDir = outDir,
