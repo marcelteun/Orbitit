@@ -366,6 +366,58 @@ def fold_w_pos_3_helper(a0, b0, a1, b1, Vs):
             Vs[6],
         ]
 
+def fold_star_pos_1_helper(a0, b0, a1, b1, Vs):
+    """Fold using Heptagons.py terms and coordinate system setup"""
+    #
+    #                1
+    #               .^.
+    #         0   _/| |\_   2
+    #           _/ /   \ \_
+    # axis b1 _/  |     |  \_ axis b0
+    #        /    |     |    \
+    #       6    /       \    3
+    #   axis a1 |         | axis a0
+    #           "         "
+    #           5         4
+    #
+    # rot b0
+    V1V3 = (Vs[1] + Vs[3])/2
+    V1V3axis = GeomTypes.Vec(Vs[2] - Vs[4])
+    rot_b0 = quatRot(axis = V1V3axis, angle = b0)
+    V2 = V1V3 + rotate(rot_b0, (Vs[2] - V1V3))
+    # rot a0
+    V1V4 = (Vs[1] + Vs[4])/2
+    V1V4axis = GeomTypes.Vec(Vs[1] - Vs[4])
+    rot_a0 = quatRot(axis = V1V4axis, angle = a0)
+    V0V5  = (Vs[0] + Vs[5])/2
+    V0V5_ = V1V4 + rotate(rot_a0, (V0V5 - V1V4))
+    V0_ = V0V5_ + (Vs[0] - V0V5)
+    V5  = V0V5_ + (Vs[5] - V0V5)
+    V6_ = V1V4 + rotate(rot_a0, (Vs[6] - V1V4))
+    # rot a1
+    V1V5 = (Vs[1] + V5)/2
+    V1V5axis = GeomTypes.Vec(Vs[1] - V5)
+    rot_a1 = quatRot(axis = V1V5axis, angle = a1)
+    V0V6  = (V0_ + V6_)/2
+    V0V6_ = V1V5 + rotate(rot_a1, (V0V6 - V1V5))
+    V0_ = V0V6_ + (V0_ - V0V6)
+    V6  = V0V6_ + (V6_ - V0V6)
+    # rot b1
+    V1V6 = (Vs[1] + V6)/2
+    V1V6axis = GeomTypes.Vec(Vs[1] - V6)
+    rot_b1 = quatRot(axis = V1V6axis, angle = b1)
+    V0 = V1V6 + rotate(rot_b1, (V0_ - V1V6))
+    return [
+            V0,
+            Vs[1],
+            V2,
+            Vs[3],
+            Vs[4],
+            V5,
+            V6,
+        ]
+
+
 def fold_w_pos_1_helper(a0, b0, a1, b1, Vs):
     """Fold using Heptagons.py terms and coordinate system setup"""
     #
@@ -414,7 +466,6 @@ def fold_w_pos_1_helper(a0, b0, a1, b1, Vs):
     V0V5axis = GeomTypes.Vec(V0 - V5)
     rot_b1 = quatRot(axis = V0V5axis, angle = b1)
     V6 = V0V5 + rotate(rot_b1, (V6_ - V0V5))
-    # map back from Heptagons.py:
     return [
         V0,
         V1,
@@ -468,6 +519,25 @@ def fold_w_pos_1_helper(a0, b0, a1, b1, Vs):
         V5,
         V6
     ]
+
+def fold_star_pos_1(a0, b0, a1, b1, Vs):
+    Vs = fold_star_pos_1_helper(a0, b0, a1, b1, Vs)
+    return Vs
+
+def fold_star_pos_2(a0, b0, a1, b1, Vs):
+    pass
+
+def fold_star_pos_3(a0, b0, a1, b1, Vs):
+    pass
+
+def fold_star_pos_4(a0, b0, a1, b1, Vs):
+    pass
+
+def fold_star_pos_5(a0, b0, a1, b1, Vs):
+    pass
+
+def fold_star_pos_6(a0, b0, a1, b1, Vs):
+    pass
 
 def fold_w_pos_1(a0, b0, a1, b1, Vs):
     #
@@ -681,80 +751,112 @@ def GetBaseHeptagon(T, alpha, beta0, beta1, gamma0, gamma1, delta, fold_type,
         x5, y5, z5 = x2, -y2, z2
 
     elif (fold_type == Fold.star):
-        #
-        #               0
-        #              .^.
-        #        1   _/| |\_   6
-        #          _/ /   \ \_
-        # axis g0_/  |     |  \_ axis g1
-        #       /    |a   a|    \
-        #      2    / x   x \    5
-        #          |  i   i  |
-        #          "  s   s  "
-        #          3         4
-        #             b   b
-        #             0   1              ^ X
-        #                                |
-        #                                |
-        #                       Y <------+
-        #
-        # rotate gamma around b
-        # rotate beta  around a
-        #
-        # ROTATE V1 around axis g
-        # ------------------------------------
-        # refer to V1 as if centre is origon:
-        # rotate around axis g as if centre -> V1 is x-axis:
-        x = (R - H) + cosg0 * H
-        z =           sing0 * H
-        # now correct for V1 not on x-axis: rotate d around z-axis
-        # with d: angle of heptagon centre to V1 with x-as
-        cosd = (x1 + Tx) / R
-        sind = RhoH # = sin(2pi/7)
-        x1, y1, z1 = (cosd * x, sind * x, z)
+        if rotate_fold == 0:
+            #
+            #               0
+            #              .^.
+            #        1   _/| |\_   6
+            #          _/ /   \ \_
+            # axis g0_/  |     |  \_ axis g1
+            #       /    |a   a|    \
+            #      2    / x   x \    5
+            #          |  i   i  |
+            #          "  s   s  "
+            #          3         4
+            #             b   b
+            #             0   1              ^ X
+            #                                |
+            #                                |
+            #                       Y <------+
+            #
+            # rotate gamma around b
+            # rotate beta  around a
+            #
+            # ROTATE V1 around axis g
+            # ------------------------------------
+            # refer to V1 as if centre is origon:
+            # rotate around axis g as if centre -> V1 is x-axis:
+            x = (R - H) + cosg0 * H
+            z =           sing0 * H
+            # now correct for V1 not on x-axis: rotate d around z-axis
+            # with d: angle of heptagon centre to V1 with x-as
+            cosd = (x1 + Tx) / R
+            sind = RhoH # = sin(2pi/7)
+            x1, y1, z1 = (cosd * x, sind * x, z)
 
-        # use similar calc for different angle and x6, y6, z6 = x1, -y1, z1
-        x = (R - H) + cosg1 * H
-        z =           sing1 * H
-        x6, y6, z6 = (cosd * x, sind * x, z)
+            # use similar calc for different angle and x6, y6, z6 = x1, -y1, z1
+            x = (R - H) + cosg1 * H
+            z =           sing1 * H
+            x6, y6, z6 = (cosd * x, sind * x, z)
 
-        # ROTATE V1 and V2 around axis b
-        # ------------------------------------
-        # correction for V5 not on -x: rotate d around z-axis
-        # with d: angle of heptagon centre to V2 with -x-as
-        cosd = -(x2 + Tx) / R
-        sind = SigmaH # = sin(3pi/7)
-        # refer to V2 as if centre in origon and as if V5 in -x:
-        x2, y2, z2 = (x0 - R, 0.5, 0.0)
-        d0_3 = x2 - RhoH
-        # rotate around axis b:
-        # TODO: above: rm x2, y2 assignment, mv y2 assignment down.
-        x2, z2 = (d0_3 + cosb0 * RhoH, sinb0 * RhoH)
-        # correct for V5 not on -x: rotate d around z-axis
-        # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-        x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
-        # Similarly for V1:
-        # for V1 rotate V5 into -x: * (cosd, -sind)
-        x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
-        # rotate around axis b:
-        dx = x1 - d0_3
-        x1, z1 = (d0_3 + cosb0 * dx - sinb0 * z1, sinb0 * dx + cosb0 * z1)
-        # correct for V5 not on -x: rotate d around z-axis
-        # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
-        x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
+            # ROTATE V1 and V2 around axis b
+            # ------------------------------------
+            # correction for V5 not on -x: rotate d around z-axis
+            # with d: angle of heptagon centre to V2 with -x-as
+            cosd = -(x2 + Tx) / R
+            sind = SigmaH # = sin(3pi/7)
+            # refer to V2 as if centre in origon and as if V5 in -x:
+            x2, y2, z2 = (x0 - R, 0.5, 0.0)
+            d0_3 = x2 - RhoH
+            # rotate around axis b:
+            # TODO: above: rm x2, y2 assignment, mv y2 assignment down.
+            x2, z2 = (d0_3 + cosb0 * RhoH, sinb0 * RhoH)
+            # correct for V5 not on -x: rotate d around z-axis
+            # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+            x2, y2 = (cosd * x2 - sind * y2 - Tx, sind * x2 + cosd * y2)
+            # Similarly for V1:
+            # for V1 rotate V5 into -x: * (cosd, -sind)
+            x1, y1 = (cosd * x1 + sind * y1, -sind * x1 + cosd * y1)
+            # rotate around axis b:
+            dx = x1 - d0_3
+            x1, z1 = (d0_3 + cosb0 * dx - sinb0 * z1, sinb0 * dx + cosb0 * z1)
+            # correct for V5 not on -x: rotate d around z-axis
+            # and translate V3 - V4 back onto x-axis: [-Tx, 0, 0]
+            x1, y1 = (cosd * x1 - sind * y1 - Tx, sind * x1 + cosd * y1)
 
-        # use similar calc for different angle for
-        # x5, y5, z5 = x2, -y2, z2
-        # x6, y6, z6 = x1, -y1, z1
-        y5 = 0.5
-        x5, z5 = (d0_3 + cosb1 * RhoH, sinb1 * RhoH)
-        x5, y5 = (cosd * x5 - sind * y5 - Tx, sind * x5 + cosd * y5)
-        x6, y6 = (cosd * x6 + sind * y6, -sind * x6 + cosd * y6)
-        dx = x6 - d0_3
-        x6, z6 = (d0_3 + cosb1 * dx - sinb1 * z6, sinb1 * dx + cosb1 * z6)
-        x6, y6 = (cosd * x6 - sind * y6 - Tx, sind * x6 + cosd * y6)
-        # x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
-        y5, y6 = -y5, -y6
+            # use similar calc for different angle for
+            # x5, y5, z5 = x2, -y2, z2
+            # x6, y6, z6 = x1, -y1, z1
+            y5 = 0.5
+            x5, z5 = (d0_3 + cosb1 * RhoH, sinb1 * RhoH)
+            x5, y5 = (cosd * x5 - sind * y5 - Tx, sind * x5 + cosd * y5)
+            x6, y6 = (cosd * x6 + sind * y6, -sind * x6 + cosd * y6)
+            dx = x6 - d0_3
+            x6, z6 = (d0_3 + cosb1 * dx - sinb1 * z6, sinb1 * dx + cosb1 * z6)
+            x6, y6 = (cosd * x6 - sind * y6 - Tx, sind * x6 + cosd * y6)
+            # x5, y5, z5 = x2, -y2, z2  and  x6, y6, z6 = x1, -y1, z1
+            y5, y6 = -y5, -y6
+        else:
+            w_map = [
+                None,
+                fold_star_pos_1,
+                fold_star_pos_2,
+                fold_star_pos_3,
+                fold_star_pos_4,
+                fold_star_pos_5,
+                fold_star_pos_6
+            ]
+            # map to Heptagons.py setup: (alph, beta and [y,x,z])
+            Vs = w_map[rotate_fold](beta0, gamma0, beta1, gamma1,
+                [
+                    GeomTypes.Vec([y0, x0, z0]),
+                    GeomTypes.Vec([y1, x1, z1]),
+                    GeomTypes.Vec([y2, x2, z2]),
+                    GeomTypes.Vec([y3, x3, z3]),
+                    GeomTypes.Vec([y4, x4, z4]),
+                    GeomTypes.Vec([y5, x5, z5]),
+                    GeomTypes.Vec([y6, x6, z6])
+                ]
+            )
+
+            # map back from Heptagons.py:
+            x0, y0, z0 = Vs[0][1], Vs[0][0], Vs[0][2]
+            x1, y1, z1 = Vs[1][1], Vs[1][0], Vs[1][2]
+            x2, y2, z2 = Vs[2][1], Vs[2][0], Vs[2][2]
+            x3, y3, z3 = Vs[3][1], Vs[3][0], Vs[3][2]
+            x4, y4, z4 = Vs[4][1], Vs[4][0], Vs[4][2]
+            x5, y5, z5 = Vs[5][1], Vs[5][0], Vs[5][2]
+            x6, y6, z6 = Vs[6][1], Vs[6][0], Vs[6][2]
 
     elif (fold_type == Fold.trapezium):
         #
