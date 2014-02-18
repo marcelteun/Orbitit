@@ -3499,8 +3499,8 @@ if __name__ == '__main__':
         ] for i in range(2**7)
     ]
 
-    pre_edgeLs_A4 = {
-        Fold.w: [
+    pre_edgeLs_A4_tripos_0 = {
+        Fold.w: [ # fold rotation:
             [ # 0
                 [0, 0, 1, 0, 0, 1, 0],
                 [0, 0, 1, 0, 0, 1, 1],
@@ -3752,7 +3752,7 @@ if __name__ == '__main__':
                 [1, 1, 1, 1, 1, 1, 1]
             ]
         ],
-        Fold.star: [
+        Fold.star: [ # fold rotation:
             [ # 0
             ], [ # 1
                 [0, 1, 0, 1, 1, 1, 1],
@@ -3791,6 +3791,9 @@ if __name__ == '__main__':
             ]
         ]
     }
+    pre_edgeLs_A4 = [
+        pre_edgeLs_A4_tripos_0
+    ]
 
     dynamicSol_A4_S4 = {
         'edgeAlternative': [TriangleAlt.alt_strip1loose],
@@ -4722,8 +4725,8 @@ if __name__ == '__main__':
                                         # there is no guarantee it will be
                                         # regular (more requirements needed)
         ])
-    pre_edgeLs_S4 = {
-        Fold.w: [
+    pre_edgeLs_S4_tripos_0 = {
+        Fold.w: [ # fold rotation:
             [ # 0
                 [0, 0, 1, 0, 0, 1, 0],
                 [0, 0, 1, 0, 0, 1, 1],
@@ -4973,7 +4976,7 @@ if __name__ == '__main__':
 
             ]
         ],
-        Fold.star: [
+        Fold.star: [ # fold rotation:
             [ # 0
             ], [ # 1
                 [0, 0, 1, 1, 0, 1, 1],
@@ -5007,10 +5010,13 @@ if __name__ == '__main__':
             ]
         ]
     }
+    pre_edgeLs_S4 = [
+        pre_edgeLs_S4_tripos_0
+    ]
 
     pre_edgeLs_A5xI = pre_edgeLs_all_1s_opposite_syms[:]
-    pre_edgeLs_A5 = {
-        Fold.w: [
+    pre_edgeLs_A5_tripos_0 = {
+        Fold.w: [ # fold rotation:
             [ # 0
                 [0, 1, 0, 1, 1, 0, 1],
                 [0, 1, 0, 1, 1, 1, 0],
@@ -5222,7 +5228,7 @@ if __name__ == '__main__':
                 [1, 1, 1, 1, 1, 1, 1]
             ]
         ],
-        Fold.star: [
+        Fold.star: [ # fold rotation:
             [ # 0
             ], [ # 1
                 [0, 1, 0, 1, 1, 0, 1],
@@ -5256,6 +5262,33 @@ if __name__ == '__main__':
             ]
         ]
     }
+    pre_edgeLs_A5_tripos_1 = {
+        Fold.w: [ # fold rotation:
+            [ # 0
+            ], [ # 1
+                [1, 0, 1, 0, 0, 1, 0],
+            ], [ # 2
+            ], [ # 3
+            ], [ # 4
+            ], [ # 5
+            ], [ # 6
+            ]
+        ],
+        Fold.star: [ # fold rotation:
+            [ # 0
+            ], [ # 1
+            ], [ # 2
+            ], [ # 3
+            ], [ # 4
+            ], [ # 5
+            ], [ # 6
+            ]
+        ],
+    }
+    pre_edgeLs_A5 = [
+        pre_edgeLs_A5_tripos_0,
+        pre_edgeLs_A5_tripos_1
+    ]
 
     pre_edgeLs = {
         Symmetry.A4xI: pre_edgeLs_A4xI,
@@ -5522,25 +5555,6 @@ if __name__ == '__main__':
         printUsage()
         sys.exit(-1)
 
-    # create array with possible edge lengths
-    if only_direct_syms:
-        # only one fold
-        # The aray depends on the symmetry, fold and fold rotation
-        if len(foldAlts) == 1:
-            possible_edge_lengths = pre_edgeLs[symGrp][foldAlts[0]][
-                                                            fold_rotation]
-        else:
-            # use a union of the arrays
-            possible_edge_lengths = pre_edgeLs[symGrp][foldAlts[0]][
-                                                            fold_rotation][:]
-            for i in range(1, len(foldAlts)):
-                for lens in pre_edgeLs[symGrp][foldAlts[i]][fold_rotation]:
-                    if lens not in possible_edge_lengths:
-                        possible_edge_lengths.append(lens)
-    else:
-        # there is just one array per symmetry defined
-        possible_edge_lengths = pre_edgeLs[symGrp]
-
     # set which position of a triangle fill is being used
     if set_triangle_fill_pos == '':
         triangle_fill_pos = 0
@@ -5555,6 +5569,27 @@ if __name__ == '__main__':
             print '         Valid are 0 .. %d' % (max_triangle_fill_pos - 1)
             printUsage()
             sys.exit(0)
+
+    # create array with possible edge lengths
+    if only_direct_syms:
+        # only one fold
+        # The aray depends on the symmetry, triangle fill position, fold and
+        # fold rotation.
+        if len(foldAlts) == 1:
+            possible_edge_lengths = pre_edgeLs[symGrp][triangle_fill_pos][
+                                                foldAlts[0]][fold_rotation]
+        else:
+            # use a union of the arrays
+            possible_edge_lengths = pre_edgeLs[symGrp][triangle_fill_pos][
+                                                foldAlts[0]][fold_rotation][:]
+            for i in range(1, len(foldAlts)):
+                for lens in pre_edgeLs[symGrp][triangle_fill_pos][foldAlts[i]][
+                                                                fold_rotation]:
+                    if lens not in possible_edge_lengths:
+                        possible_edge_lengths.append(lens)
+    else:
+        # there is just one array per symmetry defined
+        possible_edge_lengths = pre_edgeLs[symGrp]
 
     # print lists if so requested
     if (list_pre_edgeLs or
