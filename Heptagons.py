@@ -956,7 +956,53 @@ class RegularHeptagon:
         pass
 
     def fold_star_6(this, a0, b0, a1, b1, keepV0 = True):
-        pass
+        """
+        Fold around 4 diagonals in the shape of the character 'shell'.
+
+        the fold angle a0 refers to the axes V1-V4,
+        The fold angle b0 refers to the axes V1-V3,
+        the fold angle a1 refers to the axes V1-V5,
+        The fold angle b1 refers to the axes V1-V6 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #                6
+        #               .^.
+        #         5   _/| |\_   0
+        #           _/ /   \ \_
+        # axis b1 _/  |     |  \_ axis b0
+        #        /    |     |    \
+        #       4    /       \    1
+        #   axis a1 |         | axis a0
+        #           "         "
+        #           3         2
+        #
+        this.Fs = [[6, 1, 0], [6, 2, 1], [6, 3, 2], [6, 4, 3], [6, 5, 4]]
+        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+		6, 1, 6, 2, 6, 3, 6, 4
+	    ]
+        # opposite angle, because of opposite isometry
+        Vs = this.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+            [
+                this.VsOrg[0],
+                this.VsOrg[6],
+                this.VsOrg[5],
+                this.VsOrg[4],
+                this.VsOrg[3],
+                this.VsOrg[2],
+                this.VsOrg[1]
+            ]
+        )
+        this.Vs = [
+            Vs[0],
+            Vs[6],
+            Vs[5],
+            Vs[4],
+            Vs[3],
+            Vs[2],
+            Vs[1]
+        ]
 
     def fold_W(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
         prj = {
