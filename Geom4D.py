@@ -625,7 +625,7 @@ class SimpleShape:
                 )
             this.cell.setVertexProperties(radius = this.v.radius, color = this.v.col)
             this.cell.setEdgeProperties(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
-            this.cell.setFaceProperties(drawFace = this.f.draw)
+            this.cell.setFaceProperties(drawFaces = this.f.draw)
             this.cell.glInitialised = True # done as first step in this func
             this.projectedTo3D = True
             this.updateTransparency = False

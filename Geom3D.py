@@ -2753,7 +2753,7 @@ class CompoundShape():
             else:
                 drawFaces = None
         for i in range(len(this.shapeElements)):
-            this.shapeElements[i].setEdgeProperties(
+            this.shapeElements[i].setFaceProperties(
                 Fs = Fs[i], colors = colors[i], drawFaces = drawFaces
             )
         this.mergeNeeded = True
