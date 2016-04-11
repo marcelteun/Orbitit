@@ -127,6 +127,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
                     wx.glcanvas.WX_GL_STENCIL_SIZE, 8
                 ]
             )
+        this.context = glcanvas.GLContext(this)
         this.cyl = P2PCylinder(radius = 0.05)
         this.sphere = VSphere(radius = 0.1)
         this.init = False
@@ -200,10 +201,9 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         size.height = size.width = wOrH
         this.SetClientSize(size)
         this.size = size
-        if this.GetContext():
-            this.SetCurrent()
-            glViewport(0, 0, this.size.width, this.size.height)
-            #glViewport(0, 0, wOrH, wOrH)
+        this.SetCurrent(this.context)
+        glViewport(0, 0, this.size.width, this.size.height)
+        #glViewport(0, 0, wOrH, wOrH)
         event.Skip()
 
     def OnPaint(this, event):
@@ -221,7 +221,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
                 spherePos = GeomTypes.Vec3([x, y, 0])
             return spherePos
         dc = wx.PaintDC(this)
-        this.SetCurrent()
+        this.SetCurrent(this.context)
         if not this.init:
             this.initGl()
             this.init = True
