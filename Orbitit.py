@@ -1768,7 +1768,7 @@ elif oper == Oper.toPy:
 else:
     if oper != Oper.openScene:
         scene_file = DefaultScene
-    app = wx.PySimpleApp()
+    app = wx.App(False)
     frame = MainWindow(
             Canvas3DScene,
             Geom3D.SimpleShape([], []),
