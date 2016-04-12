@@ -220,7 +220,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         this.shape.glDraw()
 
 class MainWindow(wx.Frame):
-    wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py|"
+    wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
     def __init__(this, TstScene, shape, p_args, *args, **kwargs):
         wx.Frame.__init__(this, *args, **kwargs)
         this.addMenuBar()
