@@ -178,9 +178,9 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         #glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
         glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess)
 
-        lightPosition = [-1.0, 3.0, 2.0, 0.0]#[-4., 5., 20., 0.]
-        lightAmbient  = [0.3, 0.3, 0.3, 1.0]#[0.5, 0.5, 0.5, 1.]
-        lightDiffuse  = [0.5, 0.5, 0.5, 1.0]#[.2, .2, .2, .2]
+        lightPosition = [10.0, -30.0, -20.0, 0.0]
+        lightAmbient  = [0.3, 0.3, 0.3, 1.0]
+        lightDiffuse  = [0.5, 0.5, 0.5, 1.0]
         # disable specular part:
         lightSpecular = [0., 0., 0., 1.]
         glLightfv(GL_LIGHT0, GL_POSITION, lightPosition)
@@ -189,7 +189,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular)
         glEnable(GL_LIGHT0)
 
-        lightPosition = [0.0, -5.0, 3.0, 0.0]
+        lightPosition = [-30.0, 0.0, -20.0, 0.0]
         lightAmbient  = [0.0, 0.0, 0.0, 1.]
         lightDiffuse  = [0.08, 0.08, 0.08, 1.]
         lightSpecular = [0.0, 0.0, 0.0, 1.]
