@@ -119,6 +119,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         # Ensure double buffered to prevent flashing on systems where double buffering is not default.
         if this.dbgTrace:
             print 'Interactive3DCanvas.__init__(this,..):'
+        this.parent = parent
         glcanvas.GLCanvas.__init__(this, parent, -1,
                 size = size,
                 attribList = [
@@ -201,7 +202,10 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         size.height = size.width = wOrH
         this.SetClientSize(size)
         this.size = size
-        this.SetCurrent(this.context)
+        try:
+            this.SetCurrent(this.context)
+        except wx._core.PyAssertionError:
+            pass
         glViewport(0, 0, this.size.width, this.size.height)
         #glViewport(0, 0, wOrH, wOrH)
         event.Skip()
