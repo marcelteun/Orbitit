@@ -232,14 +232,12 @@ class FloatInput(wx.TextCtrl):
             print this.__class__, 'ignores key event with code:', k
         #elif k >= 256:
         #    e.Skip()
-        if len(wx.TextCtrl.GetValue(this)) < 1:
-            # do not allow an empty field, set to 0 instead:
-            this.SetValue(0)
-            this.SetSelection(0, 1)
 
     def GetValue(this):
         v = wx.TextCtrl.GetValue(this)
-        if v == '': v = '0'
+        if v == '':
+            v = '0'
+            this.SetValue(v)
         return float(v)
 
     def SetValue(this, f):
