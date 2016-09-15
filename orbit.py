@@ -91,7 +91,7 @@ class Orbit(list):
         for subGroup in v.final.subgroups:
             #print 'subGroup', subGroup.__class__.__name__
             #print '...contains stabiliser', v.stabiliser, '...??..',
-            assert subGroup.order != 0
+            assert subGroup.order != 0, str(subGroup)
             if v.stabiliser.__class__ in subGroup.subgroups:
                 #print 'yes'
 
