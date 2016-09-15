@@ -647,5 +647,4 @@ class CtrlWin(wx.Frame):
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
-        glFrontFace(GL_CW)
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
