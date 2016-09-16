@@ -155,6 +155,13 @@ import os
 
 DefaultScene = './Scene_Orbit.py'
 
+def onSwitchFrontBack(canvas):
+    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
+        glFrontFace(GL_CW)
+    else:
+        glFrontFace(GL_CCW)
+    canvas.paint()
+
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def __init__(this, shape, *args, **kwargs):
         this.shape = shape
@@ -238,12 +245,12 @@ class MainWindow(wx.Frame):
         this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
-        this.switchFrontAndBack = wx.NewId()
+        this.keySwitchFronBack = wx.NewId()
         ac = [
-            (wx.ACCEL_NORMAL, wx.WXK_F3, this.switchFrontAndBack)
+            (wx.ACCEL_NORMAL, wx.WXK_F3, this.keySwitchFronBack)
         ]
-        this.Bind(wx.EVT_MENU, this.onKeyDown, id=this.switchFrontAndBack)
-	this.SetAcceleratorTable(wx.AcceleratorTable(ac))
+        this.Bind(wx.EVT_MENU, this.onKeyDown, id=this.keySwitchFronBack)
+        this.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
     def addMenuBar(this):
         menuBar = wx.MenuBar()
@@ -687,14 +694,9 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.Close()
 
     def onKeyDown(this, e):
-	print 'DBG onKeyDown', e
-        key = e.GetKeyCode()
-        if key == wx.WXK_F3:
-            if glGetIntegerv(GL_FRONT_FACE) == GL_CW:
-                glFrontFace(GL_CCW)
-            else:
-                glFrontFace(GL_CW)
-            this.panel.getCanvas().paint()
+        id = e.GetId()
+        if id == this.keySwitchFronBack:
+            onSwitchFrontBack(this.panel.getCanvas())
 
 class MainPanel(wx.Panel):
     def __init__(this, parent, TstScene, shape, *args, **kwargs):
@@ -711,10 +713,8 @@ class MainPanel(wx.Panel):
         this.canvasSizer.Add(this.canvas)
 
         # Ctrl Panel:
-        #this.ctrlSizer = ViewSettingsSizer(parent, this, this.canvas)
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         mainSizer.Add(this.canvas, 3, wx.EXPAND)
-        #mainSizer.Add(this.ctrlSizer, 2, wx.EXPAND)
         this.SetSizer(mainSizer)
         this.SetAutoLayout(True)
         this.Layout()
@@ -1269,11 +1269,7 @@ class ViewSettingsSizer(wx.BoxSizer):
     def onOgl(this, e):
         id = e.GetId()
         if id == this.oglFrontFaceGui.GetId():
-            if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
-                glFrontFace(GL_CW)
-            else:
-                glFrontFace(GL_CCW)
-        this.canvas.paint()
+            onSwitchFrontBack(this.canvas)
 
     def onBgCol(this, e):
         col = e.GetValue().Get()
