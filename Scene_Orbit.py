@@ -140,13 +140,25 @@ class CtrlWin(wx.Frame):
         facesSizer.Add(this.showGui[-1], 0)
 
         # Rotate Axis
+        # - rotate axis and set angle (button and float input)
+        rotateSizerTop = wx.BoxSizer(wx.HORIZONTAL)
+        facesSizer.Add(rotateSizerTop, 0, wx.EXPAND)
         this.showGui.append(GeomGui.Vector3DInput(this.panel,
                                                 "Rotate around Axis:"))
-        facesSizer.Add(this.showGui[-1], 0)
+        rotateSizerTop.Add(this.showGui[-1], 0)
         this.__AxisGuiIndex = len(this.showGui) - 1
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Angle:"))
+        this.panel.Bind(
+            wx.EVT_BUTTON, this.onDirAngleAdjust, id = this.showGui[-1].GetId())
+        rotateSizerTop.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.currentAngle = 0
+        this.showGui.append(GeomGui.FloatInput(this.panel, wx.ID_ANY,
+           this.currentAngle))
+        this.__DirAngleGuiIndex = len(this.showGui) - 1
+        rotateSizerTop.Add(this.showGui[-1], 0, wx.EXPAND)
+        # - slidebar and +/- step (incl. float input)
         rotateSizer = wx.BoxSizer(wx.HORIZONTAL)
         facesSizer.Add(rotateSizer, 0, wx.EXPAND)
-        this.currentAngle = 0
         this.showGui.append(wx.Slider(
             this.panel,
             value = this.currentAngle,
@@ -154,19 +166,22 @@ class CtrlWin(wx.Frame):
             maxValue = 180,
             style = wx.SL_HORIZONTAL | wx.SL_LABELS
         ))
-        this.__AngleGuiIndex = len(this.showGui) - 1
+        this.__SlideAngleGuiIndex = len(this.showGui) - 1
         this.panel.Bind(wx.EVT_SLIDER,
-            this.onAngleAdjust,
+            this.onSlideAngleAdjust,
             id = this.showGui[-1].GetId()
         )
         rotateSizer.Add(this.showGui[-1], 1, wx.EXPAND)
-        this.showGui.append(GeomGui.FloatInput(this.panel, wx.ID_ANY,
-           this.currentAngle))
-        this.__DirAngleGuiIndex = len(this.showGui) - 1
-        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Set"))
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "-"))
         this.panel.Bind(
-            wx.EVT_BUTTON, this.onDirAngleAdjust, id = this.showGui[-1].GetId())
+            wx.EVT_BUTTON, this.onDirAngleStepDown, id = this.showGui[-1].GetId())
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "+"))
+        this.panel.Bind(
+            wx.EVT_BUTTON, this.onDirAngleStepUp, id = this.showGui[-1].GetId())
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.showGui.append(GeomGui.FloatInput(this.panel, wx.ID_ANY, 0.1))
+        this.__DirAngleStepIndex = len(this.showGui) - 1
         rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
 
         # SYMMETRY
@@ -353,14 +368,28 @@ class CtrlWin(wx.Frame):
 
     def onDirAngleAdjust(this, e):
         this.currentAngle = this.showGui[this.__DirAngleGuiIndex].GetValue()
-        this.showGui[this.__AngleGuiIndex].SetValue(this.currentAngle)
+        this.showGui[this.__SlideAngleGuiIndex].SetValue(this.currentAngle)
         this.onSharedAngleAdjust(e)
 
-    def onAngleAdjust(this, e):
+    def onDirAngleStep(this, e, step):
+        this.currentAngle += step
+        # Update input float with precise input
+        this.showGui[this.__DirAngleGuiIndex].SetValue(this.currentAngle)
+        # Update slide bar (which rounds to integer
+        this.showGui[this.__SlideAngleGuiIndex].SetValue(this.currentAngle)
+        this.onSharedAngleAdjust(e)
+
+    def onDirAngleStepDown(this, e):
+        this.onDirAngleStep(e, -this.showGui[this.__DirAngleStepIndex].GetValue())
+
+    def onDirAngleStepUp(this, e):
+        this.onDirAngleStep(e, this.showGui[this.__DirAngleStepIndex].GetValue())
+
+    def onSlideAngleAdjust(this, e):
         # Do not update the direct float input for better user experience.
         # In that case the user can set the value, use the slide bar and jump
         # jump back to the old value, that is still in the float input.
-        this.currentAngle = this.showGui[this.__AngleGuiIndex].GetValue()
+        this.currentAngle = this.showGui[this.__SlideAngleGuiIndex].GetValue()
         this.onSharedAngleAdjust(e)
 
     def onSharedAngleAdjust(this, e):
@@ -637,7 +666,7 @@ class CtrlWin(wx.Frame):
                     pass
                 if keyDefined:
                     moreSettings += 1
-                    this.showGui[this.__AngleGuiIndex].SetValue(angle)
+                    this.showGui[this.__SlideAngleGuiIndex].SetValue(angle)
                     this.showGui[this.__DirAngleGuiIndex].SetValue(angle)
                     this.currentAngle = angle
                     this.onSharedAngleAdjust(None)

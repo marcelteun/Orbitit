@@ -238,12 +238,11 @@ class MainWindow(wx.Frame):
         this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
-        #this.Bind(wx.EVT_KEY_DOWN, this.onKeyDown)
-	_id = wx.NewId()
-	ac = [
-		(wx.ACCEL_NORMAL, wx.WXK_F3, _id)
-	    ]
-        this.Bind(wx.EVT_MENU, this.onKeyDown, id=_id)
+        this.switchFrontAndBack = wx.NewId()
+        ac = [
+            (wx.ACCEL_NORMAL, wx.WXK_F3, this.switchFrontAndBack)
+        ]
+        this.Bind(wx.EVT_MENU, this.onKeyDown, id=this.switchFrontAndBack)
 	this.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
     def addMenuBar(this):
