@@ -306,6 +306,7 @@ class Set(set):
             if not found:
                 print "Warning: unknown setup parameter %s for class %s" % (
                         k, this.__class__.__name__)
+                assert False, 'Got setup = %s' % str(setup)
         this.generator = setup
 
     @property
@@ -391,7 +392,12 @@ class Cn(Set):
                 if 'n' in keys: n = setup['n']
                 else:           n = copy(this.defaultSetup['n'])
                 if n == 0: n = 1
-                this.n = n
+                # If this.n is hard-code (e.g. for C3)
+                # then if you specify n it should be the correct value
+                if this.n != 0:
+                    assert n == this.n
+                else:
+                    this.n = n
 
             angle = 2 * math.pi / n
             try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
@@ -441,8 +447,14 @@ def C(n):
                                 'type': 'vec3',
                                 'par': 'axis',
                                 'lab': "%d-fold axis" % n
-                            }],
-                        'defaultSetup': {'axis': Cn.defaultSetup['axis']}
+                            },
+                            # You might specify the following parameter, but it
+                            # should have the correct value.
+                            # This happens for instance when generating the
+                            # colours in Scene_Orbit for S4xI/C3xI
+                            {'type': 'int', 'par': 'n', 'lab': "order"}
+                        ],
+                        'defaultSetup': {'axis': Cn.defaultSetup['axis'], 'n': n}
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -538,7 +550,7 @@ def C2nC(n):
                             'par': 'axis',
                             'lab': "%d-fold axis" % n
                         }],
-                    'defaultSetup': {'axis': C2nCn.defaultSetup['axis']}
+                    'defaultSetup': {'axis': C2nCn.defaultSetup['axis'], 'n': n}
                 }
             )
         C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
@@ -643,7 +655,7 @@ def CxI(n):
                                 'par': 'axis',
                                 'lab': "%d-fold axis" % n
                             }],
-                        'defaultSetup': {'axis': CnxI.defaultSetup['axis']}
+                        'defaultSetup': {'axis': CnxI.defaultSetup['axis'], 'n': n}
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -769,7 +781,7 @@ def DnC(n):
                                 'lab': "normal of reflection"
                             }],
                         'defaultSetup': {
-                                'axis_n': DnCn.defaultSetup['axis_n'],
+                                'axis_n': DnCn.defaultSetup['axis_n'], 'n': n,
                                 'normal_r': DnCn.defaultSetup['normal_r']
                             }
                     }
@@ -894,7 +906,7 @@ def D(n):
                                 }
                             ],
                         'defaultSetup': {
-                                'axis_n': Dn.defaultSetup['axis_n'],
+                                'axis_n': Dn.defaultSetup['axis_n'], 'n': n,
                                 'axis_2': Dn.defaultSetup['axis_2']
                             }
                     }
@@ -1047,7 +1059,7 @@ def DxI(n):
                                 }
                             ],
                         'defaultSetup': {
-                                'axis_n': DnxI.defaultSetup['axis_n'],
+                                'axis_n': DnxI.defaultSetup['axis_n'], 'n': n,
                                 'axis_2': DnxI.defaultSetup['axis_2']
                             }
                     }
@@ -1192,7 +1204,7 @@ def D2nD(n):
                             }
                         ],
                     'defaultSetup': {
-                            'axis_n': D2nDn.defaultSetup['axis_n'],
+                            'axis_n': D2nDn.defaultSetup['axis_n'], 'n': n,
                             'axis_2': D2nDn.defaultSetup['axis_2']
                         }
                 }
