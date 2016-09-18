@@ -159,7 +159,7 @@ class Set(set):
 
     def isSubgroup(this, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
-        if this.debug: print this.__class__.__name__, 'isSubgroup'
+        if this.debug: print this.__class__.__name__, 'isSubgroup of', o
         if len(this) > len(o): return False # optimisation
         if this.debug:
             print '(not checkGroup or this.isGroup()', (
@@ -357,6 +357,11 @@ class ExI(Set):
 
 ExI.subgroups = [ExI, E]
 
+def _Cn_getExtraSubgroups(n):
+    # Cannot add Cn, since it leads to eternal recursion
+    G = [C(i) for i in range(2, n/2 + 1) if n % i == 0]
+    return G
+
 class MetaCn(type):
     def __init__(this, classname, bases, classdict):
         type.__init__(this, classname, bases, classdict)
@@ -411,6 +416,10 @@ class Cn(Set):
             Set.__init__(this, isometries)
             this.order = n
             this.rotAxes = {'n': axis}
+            this.subgroups = _Cn_getExtraSubgroups(n)
+            this.subgroups.insert(0, E)
+            this.subgroups.append(C(n))
+            print this.subgroups
 
     def realiseSubgroups(this, sg):
         """
@@ -423,7 +432,8 @@ class Cn(Set):
             elif sg.n > this.n:
                 return []
             else:
-                TODO
+                print 'realised', repr(sg(setup = this.setup))
+                return[sg(setup = this.setup)]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
@@ -457,8 +467,9 @@ def C(n):
                         'defaultSetup': {'axis': Cn.defaultSetup['axis'], 'n': n}
                     }
                 )
-            # TODO: fix subgroups depending on n:
-            C_n.subgroups = [C_n, E]
+            C_n.subgroups = _Cn_getExtraSubgroups(n)
+            C_n.subgroups.insert(0, E)
+            C_n.subgroups.append(C_n)
             CnMetas[n] = C_n
         return CnMetas[n]
 

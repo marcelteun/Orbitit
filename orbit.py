@@ -89,9 +89,9 @@ class Orbit(list):
         v.hoStabs                    = []
         v.indexCovered               = {}
         for subGroup in v.final.subgroups:
-            #print 'subGroup', subGroup.__class__.__name__
+            #print 'subGroup %s (%s)' % (subGroup, subGroup.__class__.__name__)
             #print '...contains stabiliser', v.stabiliser, '...??..',
-            assert subGroup.order != 0, str(subGroup)
+            assert subGroup.order != 0, "%s (%s)" % (str(subGroup), subGroup.__class__.__name__)
             if v.stabiliser.__class__ in subGroup.subgroups:
                 #print 'yes'
 
