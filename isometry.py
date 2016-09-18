@@ -399,10 +399,8 @@ class Cn(Set):
                 if n == 0: n = 1
                 # If this.n is hard-code (e.g. for C3)
                 # then if you specify n it should be the correct value
-                if this.n != 0:
-                    assert n == this.n
-                else:
-                    this.n = n
+                assert this.n == 0 or n == this.n
+                this.n = n
 
             angle = 2 * math.pi / n
             try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
@@ -506,6 +504,9 @@ class C2nCn(Cn):
             # only C2nC(n) and rename this to an __
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
+            # If this.n is hard-code (e.g. for C6C3)
+            # then if you specify n it should be the correct value
+            assert this.n == 0 or s['n'] == this.n
             # TODO use direct parent here... (no dep on n)
             cn = Cn(setup = s)
             this.directParentSetup = copy(s)
@@ -560,7 +561,13 @@ def C2nC(n):
                             'type': 'vec3',
                             'par': 'axis',
                             'lab': "%d-fold axis" % n
-                        }],
+                        },
+                        # You might specify the following parameter, but it
+                        # should have the correct value.
+                        # This happens for instance when generating the
+                        # colours in Scene_Orbit for S4xI/C3xI
+                        {'type': 'int', 'par': 'n', 'lab': "order"}
+                    ],
                     'defaultSetup': {'axis': C2nCn.defaultSetup['axis'], 'n': n}
                 }
             )
@@ -607,6 +614,9 @@ class CnxI(Cn):
             s = copy(setup)
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
+            # If this.n is hard-code (e.g. for C3xI)
+            # then if you specify n it should be the correct value
+            assert this.n == 0 or s['n'] == this.n
             cn = Cn(setup = s)
             this.directParentSetup = copy(s)
             this.n = cn.n
@@ -665,7 +675,13 @@ def CxI(n):
                                 'type': 'vec3',
                                 'par': 'axis',
                                 'lab': "%d-fold axis" % n
-                            }],
+                            },
+                            # You might specify the following parameter, but it
+                            # should have the correct value.
+                            # This happens for instance when generating the
+                            # colours in Scene_Orbit for S4xI/C3xI
+                            {'type': 'int', 'par': 'n', 'lab': "order"}
+                        ],
                         'defaultSetup': {'axis': CnxI.defaultSetup['axis'], 'n': n}
                     }
                 )
@@ -721,6 +737,9 @@ class DnCn(Cn):
                     s['n'] = copy(this.defaultSetup['n'])
             else:
                 s['n'] = setup['n']
+                # If this.n is hard-code (e.g. for D3C3)
+                # then if you specify n it should be the correct value
+                assert this.n == 0 or s['n'] == this.n
             if 'axis_n' in setup:
                 s['axis'] = setup['axis_n']
             else:
@@ -790,7 +809,13 @@ def DnC(n):
                                 'type': 'vec3',
                                 'par': 'normal_r',
                                 'lab': "normal of reflection"
-                            }],
+                            },
+                            # You might specify the following parameter, but it
+                            # should have the correct value.
+                            # This happens for instance when generating the
+                            # colours in Scene_Orbit for S4xI/C3xI
+                            {'type': 'int', 'par': 'n', 'lab': "order"}
+                        ],
                         'defaultSetup': {
                                 'axis_n': DnCn.defaultSetup['axis_n'], 'n': n,
                                 'normal_r': DnCn.defaultSetup['normal_r']
@@ -842,7 +867,11 @@ class Dn(Set):
             else:                axis_n = copy(this.defaultSetup['axis_n'])
             if 'axis_2' in keys: axis_2 = setup['axis_2']
             else:                axis_2 = copy(this.defaultSetup['axis_2'])
-            if this.n != 0     : n = this.n
+            if this.n != 0:
+                # If this.n is hard-code (e.g. for D3)
+                # then if you specify n it should be the correct value
+                assert 'n' not in setup or setup['n'] == this.n
+                n = this.n
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
@@ -856,7 +885,12 @@ class Dn(Set):
             isometries.extend(hs)
             this.rotAxes = {'n': axis_n, 2: [h.axis() for h in hs]}
             Set.__init__(this, isometries)
-            this.n     = n
+            # If this.n is hard-code (e.g. for C3)
+            # then if you specify n it should be the correct value
+            if this.n != 0:
+                assert n == this.n
+            else:
+                this.n = n
             this.order = 2 * n
 
     def realiseSubgroups(this, sg):
@@ -914,7 +948,12 @@ def D(n):
                                     'type': 'vec3',
                                     'par': 'axis_2',
                                     'lab': "axis of halfturn"
-                                }
+                                },
+                                # You might specify the following parameter, but it
+                                # should have the correct value.
+                                # This happens for instance when generating the
+                                # colours in Scene_Orbit for S4xI/C3xI
+                                {'type': 'int', 'par': 'n', 'lab': "order"}
                             ],
                         'defaultSetup': {
                                 'axis_n': Dn.defaultSetup['axis_n'], 'n': n,
@@ -961,9 +1000,16 @@ class DnxI(Dn):
             Set.__init__(this, isometries)
         else:
             this.checkSetup(setup)
+            keys = setup.keys()
+            if 'axis_n' in keys: axis_n = setup['axis_n']
+            else:                axis_n = copy(this.defaultSetup['axis_n'])
+            this.checkSetup(setup)
             s = copy(setup)
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
+            # If this.n is hard-code (e.g. for D3xI)
+            # then if you specify n it should be the correct value
+            assert this.n == 0 or s['n'] == this.n
             dn = Dn(setup = s)
             this.directParentSetup = copy(s)
             Set.__init__(this, dn * ExI())
@@ -1067,7 +1113,12 @@ def DxI(n):
                                     'type': 'vec3',
                                     'par': 'axis_2',
                                     'lab': "axis of halfturn"
-                                }
+                                },
+                                # You might specify the following parameter, but it
+                                # should have the correct value.
+                                # This happens for instance when generating the
+                                # colours in Scene_Orbit for S4xI/C3xI
+                                {'type': 'int', 'par': 'n', 'lab': "order"}
                             ],
                         'defaultSetup': {
                                 'axis_n': DnxI.defaultSetup['axis_n'], 'n': n,
@@ -1120,6 +1171,9 @@ class D2nDn(Dn):
             s = copy(setup)
             if 'n' not in s and this.n != 0:
                 s['n'] = this.n
+            # If this.n is hard-code (e.g. for D6D3)
+            # then if you specify n it should be the correct value
+            assert this.n == 0 or s['n'] == this.n
             dn = Dn(setup = s)
             this.n = dn.n
             s['n'] = 2 * s['n']
@@ -1212,7 +1266,12 @@ def D2nD(n):
                                 'type': 'vec3',
                                 'par': 'axis_2',
                                 'lab': "axis of halfturn"
-                            }
+                            },
+                            # You might specify the following parameter, but it
+                            # should have the correct value.
+                            # This happens for instance when generating the
+                            # colours in Scene_Orbit for S4xI/C3xI
+                            {'type': 'int', 'par': 'n', 'lab': "order"}
                         ],
                     'defaultSetup': {
                             'axis_n': D2nDn.defaultSetup['axis_n'], 'n': n,
