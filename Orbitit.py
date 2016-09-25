@@ -23,6 +23,7 @@
 
 import glue
 import math
+import os
 import rgb
 import re
 import sys
@@ -151,8 +152,6 @@ from OpenGL.GL import *
 #             intersections should be even, are all edges unique and do they
 #             form one closed face?"
 
-import os
-
 DefaultScene = './Scene_Orbit.py'
 
 def onSwitchFrontBack(canvas):
@@ -238,11 +237,11 @@ class MainWindow(wx.Frame):
         this.sceneDirName = '.'
         this.viewSettingsWindow = None
         this.scene = None
+        this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         if len(p_args) > 0 and (
             p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
         ):
-            shape = this.openFile(p_args[0])
-        this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
+            this.openFile(p_args[0])
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
         this.keySwitchFronBack = wx.NewId()
@@ -269,6 +268,14 @@ class MainWindow(wx.Frame):
                 text = "&Open\tCtrl+O"
             )
         this.Bind(wx.EVT_MENU, this.onOpen, id = openGui.GetId())
+        menu.AppendItem(openGui)
+
+        openGui = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                text = "&Reload\tCtrl+R"
+            )
+        this.Bind(wx.EVT_MENU, this.onReload, id = openGui.GetId())
         menu.AppendItem(openGui)
 
         add = wx.MenuItem(
@@ -372,61 +379,69 @@ class MainWindow(wx.Frame):
         menu.AppendItem(scene)
         return menu
 
+    def onReload(this, e):
+        if this.currentFile != None:
+            this.openFile(this.currentFile)
+        elif this.currentScene != None:
+            this.setScene(this.currentScene)
+
     def onOpen(this, e):
         dlg = wx.FileDialog(this, 'New: Choose a file',
                 this.importDirName, '', this.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            shape = this.openFile(dlg.GetFilename(), dlg.GetDirectory())
-            this.panel.setShape(shape)
-            # overwrite the view properties, if the shape doesn't have any
-            # faces and would be invisible to the user otherwise
-            if len(shape.getFaceProperties()['Fs']) == 0 and (
-                this.panel.getShape().getVertexProperties()['radius'] <= 0
-            ):
-                this.panel.getShape().setVertexProperties(radius = 0.05)
-            this.SetTitle('%s (%s)' % (this.filename, this.importDirName))
+            filename = dlg.GetFilename()
+            dirname = dlg.GetDirectory()
+            if dirname != None:
+                filename = os.path.join(dirname, filename)
+            this.openFile(filename)
         dlg.Destroy()
 
-    def readShapeFile(this, filename, dirname = None):
-            isOffModel = filename[-3:] == 'off'
-            print "opening file:", filename
-            if dirname != None:
-                this.importDirName  = dirname
-                fd = open(os.path.join(this.importDirName, filename), 'r')
-            else:
-                fd = open(filename, 'r')
-                m = re.match(r'.*\/', filename)
-                if m != None:
-                    this.importDirName = m.group()
-            if isOffModel:
-                shape = Geom3D.readOffFile(fd, recreateEdges = True)
-            else:
-                assert filename[-2:] == 'py'
-                shape = Geom3D.readPyFile(fd)
-            this.setStatusStr("file opened")
-            fd.close()
-            return shape
+    def readShapeFile(this, filename):
+        isOffModel = filename[-3:] == 'off'
+        print "opening file:", filename
+        fd = open(filename, 'r')
+        if isOffModel:
+            shape = Geom3D.readOffFile(fd, recreateEdges = True)
+        else:
+            assert filename[-2:] == 'py'
+            shape = Geom3D.readPyFile(fd)
+        this.setStatusStr("file opened")
+        fd.close()
+        return shape
 
-    def openFile(this, filename, dirname = None):
-            this.closeCurrentScene()
-            this.filename = filename
-            shape = this.readShapeFile(filename, dirname)
-            if isinstance(shape, Geom3D.CompoundShape):
-                # convert to SimpleShape first, since adding to IsometricShape
-                # will not work.
-                shape = shape.SimpleShape
-            # Create a compound shape to be able to add shapes later.
-            return Geom3D.CompoundShape([shape], name = this.filename)
+    def openFile(this, filename):
+        this.closeCurrentScene()
+        dirname = os.path.dirname(filename)
+        if dirname != "":
+            this.importDirName = dirname
+        shape = this.readShapeFile(filename)
+        if isinstance(shape, Geom3D.CompoundShape):
+            # convert to SimpleShape first, since adding to IsometricShape
+            # will not work.
+            shape = shape.SimpleShape
+        # Create a compound shape to be able to add shapes later.
+        shape = Geom3D.CompoundShape([shape], name = filename)
+        this.panel.setShape(shape)
+        # overwrite the view properties, if the shape doesn't have any
+        # faces and would be invisible to the user otherwise
+        if len(shape.getFaceProperties()['Fs']) == 0 and (
+            this.panel.getShape().getVertexProperties()['radius'] <= 0
+        ):
+            this.panel.getShape().setVertexProperties(radius = 0.05)
+        this.SetTitle('%s' % os.path.basename(filename))
+        # Save for reload:
+        this.currentFile = filename
+        this.currentScene = None
 
     def onAdd(this, e):
         dlg = wx.FileDialog(this, 'Add: Choose a file',
                 this.importDirName, '', this.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            this.filename = dlg.GetFilename()
-            isOffModel = this.filename[-3:] == 'off'
+            filename = dlg.GetFilename()
+            isOffModel = filename[-3:] == 'off'
             this.importDirName  = dlg.GetDirectory()
-            print "adding file:", this.filename
-            fd = open(os.path.join(this.importDirName, this.filename), 'r')
+            print "adding file:", filename
+            fd = open(os.path.join(this.importDirName, filename), 'r')
             if isOffModel:
                 shape = Geom3D.readOffFile(fd, recreateEdges = True)
             else:
@@ -442,7 +457,7 @@ class MainWindow(wx.Frame):
             this.setStatusStr("OFF file added")
             fd.close()
             # TODO: set better title
-            this.SetTitle('Added: %s (%s)' % (this.filename, this.importDirName))
+            this.SetTitle('Added: %s' % os.path.basename(filename))
         dlg.Destroy()
 
     def onSaveAsPy(this, e):
@@ -452,24 +467,23 @@ class MainWindow(wx.Frame):
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
-            this.filename = dlg.GetFilename()
+            filename = dlg.GetFilename()
             this.exportDirName  = filepath.rsplit('/', 1)[0]
-            NameExt = this.filename.split('.')
+            NameExt = filename.split('.')
             if len(NameExt) == 1:
-                this.filename = '%s.py' % this.filename
+                filename = '%s.py' % filename
             elif NameExt[-1].lower() != 'py':
                 if NameExt[-1] != '':
-                    this.filename = '%s.py' % this.filename
+                    filename = '%s.py' % filename
                 else:
-                    this.filename = '%spy' % this.filename
+                    filename = '%spy' % filename
             fd = open(filepath, 'w')
             print "writing to file %s" % filepath
             # TODO precision through setting:
             shape = this.panel.getShape()
-            shape.name = this.filename
+            shape.name = filename
             shape.saveFile(fd)
             this.setStatusStr("Python file written")
-            this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
 
     def onSaveAsOff(this, e):
@@ -488,16 +502,16 @@ class MainWindow(wx.Frame):
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
                     filepath = fileDlg.GetPath()
-                    this.filename = fileDlg.GetFilename()
+                    filename = fileDlg.GetFilename()
                     this.exportDirName  = filepath.rsplit('/', 1)[0]
-                    NameExt = this.filename.split('.')
+                    NameExt = filename.split('.')
                     if len(NameExt) == 1:
-                        this.filename = '%s.off' % this.filename
+                        filename = '%s.off' % filename
                     elif NameExt[-1].lower() != 'off':
                         if NameExt[-1] != '':
-                            this.filename = '%s.off' % this.filename
+                            filename = '%s.off' % filename
                         else:
-                            this.filename = '%soff' % this.filename
+                            filename = '%soff' % filename
                     fd = open(filepath, 'w')
                     print "writing to file %s" % filepath
                     shape = this.panel.getShape()
@@ -511,7 +525,6 @@ class MainWindow(wx.Frame):
                     print "OFF file written"
                     this.setStatusStr("OFF file written")
                     fd.close()
-                    this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
                 else:
                     dlg.Show()
                 fileDlg.Destroy()
@@ -536,16 +549,16 @@ class MainWindow(wx.Frame):
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
                     filepath = fileDlg.GetPath()
-                    this.filename = fileDlg.GetFilename()
+                    filename = fileDlg.GetFilename()
                     this.exportDirName  = filepath.rsplit('/', 1)[0]
-                    NameExt = this.filename.split('.')
+                    NameExt = filename.split('.')
                     if len(NameExt) == 1:
-                        this.filename = '%s.ps' % this.filename
+                        filename = '%s.ps' % filename
                     elif NameExt[-1].lower() != 'ps':
                         if NameExt[-1] != '':
-                            this.filename = '%s.ps' % this.filename
+                            filename = '%s.ps' % filename
                         else:
-                            this.filename = '%sps' % this.filename
+                            filename = '%sps' % filename
                     # Note: if file exists is part of file dlg...
                     fd = open(filepath, 'w')
                     print "writing to file %s" % filepath
@@ -569,7 +582,6 @@ class MainWindow(wx.Frame):
                             "Precision error, try to decrease float margin")
 
                     fd.close()
-                    this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
                 else:
                     dlg.Show()
                 fileDlg.Destroy()
@@ -585,16 +597,16 @@ class MainWindow(wx.Frame):
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = fileDlg.GetPath()
-            this.filename = dlg.GetFilename()
+            filename = dlg.GetFilename()
             this.exportDirName  = filepath.rsplit('/', 1)[0]
-            NameExt = this.filename.split('.')
+            NameExt = filename.split('.')
             if len(NameExt) == 1:
-                this.filename = '%s.wrl' % this.filename
+                filename = '%s.wrl' % filename
             elif NameExt[-1].lower() != 'wrl':
                 if NameExt[-1] != '':
-                    this.filename = '%s.wrl' % this.filename
+                    filename = '%s.wrl' % filename
                 else:
-                    this.filename = '%swrl' % this.filename
+                    filename = '%swrl' % filename
             fd = open(filepath, 'w')
             print "writing to file %s" % filepath
             # TODO precision through setting:
@@ -604,7 +616,6 @@ class MainWindow(wx.Frame):
             fd.write(x3dObj.toStr())
             this.setStatusStr("VRML file written")
             fd.close()
-            this.SetTitle('%s (%s)' % (this.filename, this.exportDirName))
         dlg.Destroy()
 
     def onViewSettings(this, e):
@@ -640,6 +651,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def readSceneFile(this, filename):
+        print "Starting scene", filename
         fd = open(filename, 'r')
         ed = {'__name__': 'readSceneFile'}
         exec fd in ed
@@ -661,6 +673,9 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.reBuild()
         except AttributeError:
             pass
+        # save for reload:
+        this.currentScene = scene
+        this.currentFile = None
 
     def onResetView(this, e):
         this.panel.getCanvas().resetOrientation()
