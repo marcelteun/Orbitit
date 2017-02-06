@@ -414,7 +414,11 @@ class MainWindow(wx.Frame):
         dirname = os.path.dirname(filename)
         if dirname != "":
             this.importDirName = dirname
-        shape = this.readShapeFile(filename)
+        try:
+            shape = this.readShapeFile(filename)
+        except AssertionError:
+            this.setStatusStr("ERROR reading file")
+            raise
         if isinstance(shape, Geom3D.CompoundShape):
             # convert to SimpleShape first, since adding to IsometricShape
             # will not work.
