@@ -835,10 +835,16 @@ def facePlane(Vs, face):
                     break
     return plane
 
+TRI_CW = 1 # clockwise triangle vertices to get outer normal
+TRI_CCW = 2 # counter-clockwise triangle vertices to get outer normal
+TRI_OUT = 3  # the normal pointing away from the origin is the normal
+TRI_IN = 4 # the normal pointing towards from the origin is the normal
+
 class SimpleShape:
     dbgPrn = False
     dbgTrace = False
     bgCol     = rgb.midnightBlue[:]
+    normal_direction = TRI_OUT
     """
     This class decribes a simple 3D object consisting of faces and edges.
     """
@@ -896,6 +902,8 @@ class SimpleShape:
         this.defaultColor = rgb.yellow
         if orientation != None:
             this.orientation = orientation
+            if not orientation.isRot():
+                this.normal_direction = TRI_IN
         else:
             this.orientation = GeomTypes.E
         if this.dbgPrn:
@@ -1272,14 +1280,30 @@ class SimpleShape:
             print '%s.setEnableDrawFaces(%s,..):' % (this.__class__, this.name)
         this.gl.drawFaces = draw
 
+    def generate_face_normal(this, f, normalise):
+        l = len(f)
+        assert l > 2, 'An face should at least have 2 vertices'
+        if l < 3:
+            assert False, 'Normal for digons not implemented'
+            # TODO: what to do here?
+        normal = Triangle(
+            this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
+        ).normal(normalise)
+        if this.normal_direction == TRI_OUT or this.normal_direction == TRI_IN:
+            v0 = GeomTypes.Vec3(this.Vs[f[0]])
+            outwards = v0.norm() < (v0 + normal).norm()
+            if ((outwards and this.normal_direction == TRI_IN) or
+                (not outwards and this.normal_direction == TRI_OUT)
+            ):
+                normal = -normal
+        return normal
+
     def createFaceNormals(this, normalise):
         # TODO use smarter sol than this.fNsNormalised != normalise:
         # if already normalised, you never need to recalc
         # if not yet normalised, but required, just normalise.
         if not this.fNsUp2date or this.fNsNormalised != normalise:
-            this.fNs = [Triangle(
-                    this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
-                ).normal(normalise) for f in this.Fs]
+            this.fNs = [this.generate_face_normal(f, normalise) for f in this.Fs]
             this.fNsUp2date = True
             this.fNsNormalised = normalise
 
