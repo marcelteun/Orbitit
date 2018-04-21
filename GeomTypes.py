@@ -349,7 +349,7 @@ class Transform3(tuple):
             elif t.isRefl():   t.__hash_nr__ =  t.__hashRefl__()
             elif t.isRotInv(): t.__hash_nr__ =  t.__hashRotInv__()
             else:
-                raise TypeError, "Not a (supported) transfor)"
+                raise TypeError, "Not a (supported) transform)"
             return t.__hash_nr__
 
     def __str__(t):
