@@ -236,6 +236,7 @@ class MainWindow(wx.Frame):
         this.importDirName = '.'
         this.sceneDirName = '.'
         this.viewSettingsWindow = None
+        this.colourSettingsWindow = None
         this.scene = None
         this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         if len(p_args) > 0 and (
@@ -332,6 +333,7 @@ class MainWindow(wx.Frame):
 
     def createEditMenu(this):
         menu = wx.Menu()
+
         viewSettings = wx.MenuItem(
                 menu,
                 wx.ID_ANY,
@@ -339,6 +341,15 @@ class MainWindow(wx.Frame):
             )
         this.Bind(wx.EVT_MENU, this.onViewSettings, id = viewSettings.GetId())
         menu.AppendItem(viewSettings)
+
+        colourSettings = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                text = "&Colours\tCtrl+C"
+            )
+        this.Bind(wx.EVT_MENU, this.onColourSettings, id = colourSettings.GetId())
+        menu.AppendItem(colourSettings)
+
         return menu
 
     def createToolsMenu(this):
@@ -634,6 +645,16 @@ class MainWindow(wx.Frame):
             this.viewSettingsWindow.SetFocus()
             this.viewSettingsWindow.Raise()
 
+    def onColourSettings(this, e):
+        if not this.colourSettingsWindow is None:
+            # Don't reuse, the colours might be wrong after loading a new model
+            this.colourSettingsWindow.Destroy()
+        this.colourSettingsWindow = ColourSettingsWindow(
+            this.panel.getCanvas(), 5, None, wx.ID_ANY,
+            title = 'Colour Settings',
+        )
+        this.colourSettingsWindow.Bind(wx.EVT_CLOSE, this.onColourSettingsClose)
+
     def onDome(this, event):
         if this.dome1.GetId() == event.GetId(): level = 1
         else: level = 2
@@ -706,11 +727,17 @@ class MainWindow(wx.Frame):
         this.viewSettingsWindow.Destroy()
         this.viewSettingsWindow = None
 
+    def onColourSettingsClose(this, event):
+        this.colourSettingsWindow.Destroy()
+        this.colourSettingsWindow = None
+
     def onClose(this, event):
         print 'main onclose'
         this.Destroy()
         if this.viewSettingsWindow != None:
             this.viewSettingsWindow.Close()
+        if this.colourSettingsWindow != None:
+            this.colourSettingsWindow.Close()
 
     def onKeyDown(this, e):
         id = e.GetId()
@@ -787,6 +814,114 @@ class MainPanel(wx.Panel):
         """Return the current shape object
         """
         return this.canvas.shape
+
+class ColourSettingsWindow(wx.Frame):
+    def __init__(this, canvas, width, *args, **kwargs):
+        wx.Frame.__init__(this, *args, **kwargs)
+        this.canvas    = canvas
+        this.col_width = width
+        this.statusBar = this.CreateStatusBar()
+        this.panel     = wx.Panel(this, wx.ID_ANY)
+        this.cols = this.canvas.shape.getFaceProperties()['colors']
+        # take a copy for reset
+        this.org_cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.cols]
+        this.addContents()
+
+    def addContents(this):
+        this.colSizer = wx.BoxSizer(wx.VERTICAL)
+
+        this.selColGuis = []
+        i = 0
+        shape_idx = 0
+        # assume compound shape
+        for shape_cols in this.cols:
+            # use one colour select per colour for each sub-shape
+            added_cols = []
+            col_idx = 0
+            for col in shape_cols[0]:
+                wxcol = wx.Colour(256*col[0], 256*col[1], 256*col[2])
+                if not wxcol in added_cols:
+                    if i % this.col_width == 0:
+                        selColSizerRow = wx.BoxSizer(wx.HORIZONTAL)
+                        this.colSizer.Add(selColSizerRow, 0, wx.EXPAND)
+                    this.selColGuis.append(
+                        wx.ColourPickerCtrl(
+                            this.panel, wx.ID_ANY, wxcol))
+                    this.panel.Bind(wx.EVT_COLOURPICKER_CHANGED, this.onColSel)
+                    selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
+                    i += 1
+                    # connect GUI to shape_idx and col_idx
+                    this.selColGuis[-1].my_shape_idx = shape_idx
+                    this.selColGuis[-1].my_cols = [col_idx]
+                    # connect wxcolour to GUI
+                    wxcol.my_gui = this.selColGuis[-1]
+                    added_cols.append(wxcol)
+                else:
+                    gui = added_cols[added_cols.index(wxcol)].my_gui
+                    # must be same shape_id
+                    gui.my_cols.append(col_idx)
+                col_idx += 1
+            shape_idx += 1
+
+        this.noOfCols = i
+        this.Guis = []
+
+        this.subSizer = wx.BoxSizer(wx.HORIZONTAL)
+        this.colSizer.Add(this.subSizer)
+
+        this.Guis.append(wx.Button(this.panel, label='Cancel'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onCancel)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.Guis.append(wx.Button(this.panel, label='Reset'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onReset)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.Guis.append(wx.Button(this.panel, label='Done'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onDone)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.panel.SetSizer(this.colSizer)
+        this.panel.SetAutoLayout(True)
+        this.panel.Layout()
+        this.Show(True)
+
+    def onReset(this, e):
+        for colgui in this.selColGuis:
+             shape_idx = colgui.my_shape_idx
+             col_idx = colgui.my_cols[0]
+             c = this.org_cols[shape_idx][0][col_idx]
+             wxcol = wx.Colour(256*c[0], 256*c[1], 256*c[2])
+             colgui.SetColour(wxcol)
+        this.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.org_cols]
+        this.updatShapeColours()
+
+    def onCancel(this, e):
+        this.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.org_cols]
+        this.updatShapeColours()
+        this.Close()
+
+    def onDone(this, e):
+        this.Close()
+
+    def onColSel(this, e):
+        wxcol = e.GetColour().Get()
+        col = (float(wxcol[0])/256, float(wxcol[1])/256, float(wxcol[2])/256)
+        gui_id = e.GetId()
+        for gui in this.selColGuis:
+            if gui.GetId() == gui_id:
+                shape_cols = this.cols[gui.my_shape_idx][0]
+                for col_idx in gui.my_cols:
+                    shape_cols[col_idx] = col
+                this.updatShapeColours()
+
+    def updatShapeColours(this):
+        this.canvas.shape.setFaceProperties(colors=this.cols)
+        this.canvas.paint()
+
+    def close(this):
+        for Gui in this.Guis:
+            Gui.Destroy()
 
 class ViewSettingsWindow(wx.Frame):
     def __init__(this, canvas, *args, **kwargs):
