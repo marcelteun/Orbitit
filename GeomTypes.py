@@ -801,6 +801,8 @@ class Rot3(Transform3):
     def __new__(this, q = None, axis = Vec3([1, 0, 0]), angle = 0):
         """
         Initialise a 3D rotation
+        axis: axis to rotate around: doesn't need to be normalised
+        angle: angle in radians to rotate
         """
         if isQuatPair(q):
             t = Transform3.__new__(this, q)

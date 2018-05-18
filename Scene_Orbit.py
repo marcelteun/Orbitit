@@ -141,48 +141,14 @@ class CtrlWin(wx.Frame):
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
-        rotateSizerTop = wx.BoxSizer(wx.HORIZONTAL)
-        facesSizer.Add(rotateSizerTop, 0, wx.EXPAND)
-        this.showGui.append(GeomGui.Vector3DInput(this.panel,
-                                                "Rotate around Axis:"))
-        rotateSizerTop.Add(this.showGui[-1], 0)
-        this.__AxisGuiIndex = len(this.showGui) - 1
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Angle:"))
-        this.panel.Bind(
-            wx.EVT_BUTTON, this.onDirAngleAdjust, id = this.showGui[-1].GetId())
-        rotateSizerTop.Add(this.showGui[-1], 0, wx.EXPAND)
-        this.currentAngle = 0
-        this.showGui.append(GeomGui.FloatInput(this.panel, wx.ID_ANY,
-           this.currentAngle))
-        this.__DirAngleGuiIndex = len(this.showGui) - 1
-        rotateSizerTop.Add(this.showGui[-1], 0, wx.EXPAND)
-        # - slidebar and +/- step (incl. float input)
-        rotateSizer = wx.BoxSizer(wx.HORIZONTAL)
-        facesSizer.Add(rotateSizer, 0, wx.EXPAND)
-        this.showGui.append(wx.Slider(
+        this.rotateSizer = GeomGui.AxisRotateSizer(
             this.panel,
-            value = this.currentAngle,
-            minValue = -180,
-            maxValue = 180,
-            style = wx.SL_HORIZONTAL | wx.SL_LABELS
-        ))
-        this.__SlideAngleGuiIndex = len(this.showGui) - 1
-        this.panel.Bind(wx.EVT_SLIDER,
-            this.onSlideAngleAdjust,
-            id = this.showGui[-1].GetId()
+            this.on_rot,
+            min_angle=-180,
+            max_angle=180,
+            initial_angle=0
         )
-        rotateSizer.Add(this.showGui[-1], 1, wx.EXPAND)
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "-"))
-        this.panel.Bind(
-            wx.EVT_BUTTON, this.onDirAngleStepDown, id = this.showGui[-1].GetId())
-        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "+"))
-        this.panel.Bind(
-            wx.EVT_BUTTON, this.onDirAngleStepUp, id = this.showGui[-1].GetId())
-        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-        this.showGui.append(GeomGui.FloatInput(this.panel, wx.ID_ANY, 0.1))
-        this.__DirAngleStepIndex = len(this.showGui) - 1
-        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        facesSizer.Add(this.rotateSizer)
 
         # SYMMETRY
         this.showGui.append(
@@ -318,7 +284,8 @@ class CtrlWin(wx.Frame):
         this.FsOrbit = this.shape.getIsometries()['direct']
         this.FsOrbitOrg = True
         this.shape.recreateEdges()
-        this.updateOrientation()
+        this.updateOrientation(
+            this.rotateSizer.get_angle(), this.rotateSizer.get_axis())
         this.canvas.panel.setShape(this.shape)
         updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
         updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
@@ -345,9 +312,8 @@ class CtrlWin(wx.Frame):
         if lvl >= LOG_BAR_LVL:
             this.statusBar.SetStatusText(txt)
 
-    def updateOrientation(this):
-        v = this.showGui[this.__AxisGuiIndex].GetVertex()
-        if v == GeomTypes.Vec3([0, 0, 0]):
+    def updateOrientation(this, angle, axis):
+        if axis == GeomTypes.Vec3([0, 0, 0]):
             rot = GeomTypes.E
             this.statusText(
                 'Rotation axis is the null-vector: applying identity',
@@ -355,8 +321,8 @@ class CtrlWin(wx.Frame):
             )
         else:
             rot = GeomTypes.Rot3(
-                axis = v,
-                angle = Geom3D.Deg2Rad * this.currentAngle
+                axis=axis,
+                angle=Geom3D.Deg2Rad * angle
             )
         try:
             this.shape.setBaseOrientation(rot)
@@ -366,37 +332,9 @@ class CtrlWin(wx.Frame):
                 LOG_WARN
             )
 
-    def onDirAngleAdjust(this, e):
-        this.currentAngle = this.showGui[this.__DirAngleGuiIndex].GetValue()
-        this.showGui[this.__SlideAngleGuiIndex].SetValue(this.currentAngle)
-        this.onSharedAngleAdjust(e)
-
-    def onDirAngleStep(this, e, step):
-        this.currentAngle += step
-        # Update input float with precise input
-        this.showGui[this.__DirAngleGuiIndex].SetValue(this.currentAngle)
-        # Update slide bar (which rounds to integer
-        this.showGui[this.__SlideAngleGuiIndex].SetValue(this.currentAngle)
-        this.onSharedAngleAdjust(e)
-
-    def onDirAngleStepDown(this, e):
-        this.onDirAngleStep(e, -this.showGui[this.__DirAngleStepIndex].GetValue())
-
-    def onDirAngleStepUp(this, e):
-        this.onDirAngleStep(e, this.showGui[this.__DirAngleStepIndex].GetValue())
-
-    def onSlideAngleAdjust(this, e):
-        # Do not update the direct float input for better user experience.
-        # In that case the user can set the value, use the slide bar and jump
-        # jump back to the old value, that is still in the float input.
-        this.currentAngle = this.showGui[this.__SlideAngleGuiIndex].GetValue()
-        this.onSharedAngleAdjust(e)
-
-    def onSharedAngleAdjust(this, e):
-        this.updateOrientation()
+    def on_rot(this, angle, axis):
+        this.updateOrientation(angle, axis)
         this.canvas.panel.setShape(this.shape)
-        if e != None:
-            e.Skip()
 
     def onNrColsSel(this, e):
         try:
@@ -655,7 +593,7 @@ class CtrlWin(wx.Frame):
                     pass
                 if keyDefined:
                     moreSettings += 1
-                    this.showGui[this.__AxisGuiIndex].SetVertex(axis)
+                    this.rotateSizer.set_axis(axis)
                 key = 'rotAngle'
                 keyDefined = False
                 try:
@@ -666,10 +604,9 @@ class CtrlWin(wx.Frame):
                     pass
                 if keyDefined:
                     moreSettings += 1
-                    this.showGui[this.__SlideAngleGuiIndex].SetValue(angle)
-                    this.showGui[this.__DirAngleGuiIndex].SetValue(angle)
-                    this.currentAngle = angle
-                    this.onSharedAngleAdjust(None)
+                    this.rotateSizer.set_angle(angle)
+                    this.updateOrientation(
+                        this.rotateSizer.get_angle(), this.rotateSizer.get_axis())
                 fd.close()
             this.name = filename
         dlg.Destroy()

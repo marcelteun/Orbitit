@@ -150,6 +150,16 @@ class FloatInput(wx.TextCtrl):
         this.SetMaxLength(18)
         this.SetDropTarget(DisabledDropTarget(reason = 'may break string format for floating point'))
         this.Bind(wx.EVT_CHAR, this.onChar)
+        this.on_set = None
+
+    def bind_on_set(this, on_set):
+        """
+        Bind the function on_set to be called with the current value when the
+        field is set
+
+        The field is set when ENTER / TAB is pressed
+        """
+        this.on_set = on_set
 
     def onChar(this, e):
         #print this.__class__, 'onChar'
@@ -212,8 +222,11 @@ class FloatInput(wx.TextCtrl):
                 e.Skip()
         elif k == wx.WXK_CLEAR:
             this.SetValue(0)
+        elif k in [wx.WXK_RETURN, wx.WXK_TAB]:
+            if not this.on_set is None:
+                this.on_set(this.GetValue())
+            e.Skip()
         elif k in [
-                wx.WXK_RETURN, wx.WXK_TAB,
                 wx.WXK_LEFT, wx.WXK_RIGHT,
                 wx.WXK_INSERT,
                 wx.WXK_HOME, wx.WXK_END
@@ -1136,3 +1149,127 @@ class SymmetrySelect(wx.StaticBoxSizer):
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         #wx.StaticBoxSizer.Destroy(this)
 
+class AxisRotateSizer(wx.BoxSizer):
+    def __init__(this,
+        panel,
+        on_angle_callback,
+        min_angle=-180,
+        max_angle=180,
+        initial_angle=0
+    ):
+        """
+        Create a sizer for setting a rotation.
+
+        The GUI contains some fields to set the axis and the angle. The latter
+        can be set directly, by slide-bar or step by step for which the step can
+        be defined through a floating point number.
+
+        panel: the panel to add the widgets to
+        on_angle_callback: call-back the will be called with the new angle and
+                           axis every time the angle is updated.
+        min_angle: minimum of the angle domain for the slide bar.
+        max_angle: maximum of the angle domain for the slide bar.
+        initial_angle: the angle that will be used from the beginning.
+        """
+        this.currentAngle = initial_angle
+        this.on_angle = on_angle_callback
+        this.panel = panel
+        this.showGui = []
+        wx.BoxSizer.__init__(this, wx.VERTICAL)
+
+        # Rotate Axis
+        # - rotate axis and set angle (button and float input)
+        rotateSizerTop = wx.BoxSizer(wx.HORIZONTAL)
+        this.Add(rotateSizerTop, 0, wx.EXPAND)
+        this.showGui.append(Vector3DInput(panel, "Rotate around Axis:"))
+        rotateSizerTop.Add(this.showGui[-1], 0)
+        this.__AxisGuiIndex = len(this.showGui) - 1
+        this.showGui.append(wx.Button(panel, wx.ID_ANY, "Angle:"))
+        panel.Bind(
+            wx.EVT_BUTTON, this.onDirAngleAdjust, id = this.showGui[-1].GetId())
+        rotateSizerTop.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.showGui.append(FloatInput(panel, wx.ID_ANY, initial_angle))
+        this.showGui[-1].bind_on_set(this.on_angle_set)
+        this.__DirAngleGuiIndex = len(this.showGui) - 1
+        rotateSizerTop.Add(this.showGui[-1], 0, wx.EXPAND)
+        # - slidebar and +/- step (incl. float input)
+        rotateSizer = wx.BoxSizer(wx.HORIZONTAL)
+        this.Add(rotateSizer, 0, wx.EXPAND)
+        this.showGui.append(wx.Slider(
+            panel,
+            value = initial_angle,
+            minValue = min_angle,
+            maxValue = max_angle,
+            style = wx.SL_HORIZONTAL | wx.SL_LABELS
+        ))
+        this.__SlideAngleGuiIndex = len(this.showGui) - 1
+        panel.Bind(wx.EVT_SLIDER,
+            this.onSlideAngleAdjust,
+            id = this.showGui[-1].GetId()
+        )
+        rotateSizer.Add(this.showGui[-1], 1, wx.EXPAND)
+        this.showGui.append(wx.Button(panel, wx.ID_ANY, "-"))
+        panel.Bind(
+            wx.EVT_BUTTON, this.onDirAngleStepDown, id = this.showGui[-1].GetId())
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.showGui.append(wx.Button(panel, wx.ID_ANY, "+"))
+        panel.Bind(
+            wx.EVT_BUTTON, this.onDirAngleStepUp, id = this.showGui[-1].GetId())
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        this.showGui.append(FloatInput(panel, wx.ID_ANY, 0.1))
+        this.__DirAngleStepIndex = len(this.showGui) - 1
+        rotateSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+
+    def get_axis(this):
+        return this.showGui[this.__AxisGuiIndex].GetVertex()
+
+    def set_axis(this, axis):
+        this.showGui[this.__AxisGuiIndex].SetVertex(axis)
+
+    def get_angle(this):
+        return this.currentAngle
+
+    def set_angle(this, angle):
+        this.showGui[this.__SlideAngleGuiIndex].SetValue(angle)
+        this.showGui[this.__DirAngleGuiIndex].SetValue(angle)
+
+    def on_angle_set(this, angle):
+        this.currentAngle = angle
+        this.showGui[this.__SlideAngleGuiIndex].SetValue(angle)
+        this.on_angle(this.currentAngle, this.get_axis())
+
+    def onDirAngleAdjust(this, e):
+        this.currentAngle = this.showGui[this.__DirAngleGuiIndex].GetValue()
+        this.showGui[this.__SlideAngleGuiIndex].SetValue(this.currentAngle)
+        this.on_angle(this.currentAngle, this.get_axis())
+        if e != None:
+            e.Skip()
+
+    def onDirAngleStep(this, e, step):
+        this.currentAngle += step
+        # Update input float with precise input
+        this.showGui[this.__DirAngleGuiIndex].SetValue(this.currentAngle)
+        # Update slide bar (which rounds to integer
+        this.showGui[this.__SlideAngleGuiIndex].SetValue(this.currentAngle)
+        this.on_angle(this.currentAngle, this.get_axis())
+        if e != None:
+            e.Skip()
+
+    def onDirAngleStepDown(this, e):
+        this.onDirAngleStep(e, -this.showGui[this.__DirAngleStepIndex].GetValue())
+        if e != None:
+            e.Skip()
+
+    def onDirAngleStepUp(this, e):
+        this.onDirAngleStep(e, this.showGui[this.__DirAngleStepIndex].GetValue())
+        if e != None:
+            e.Skip()
+
+    def onSlideAngleAdjust(this, e):
+        # Do not update the direct float input for better user experience.
+        # In that case the user can set the value, use the slide bar and jump
+        # jump back to the old value, that is still in the float input.
+        this.currentAngle = this.showGui[this.__SlideAngleGuiIndex].GetValue()
+        this.on_angle(this.currentAngle, this.get_axis())
+        if e != None:
+            e.Skip()
