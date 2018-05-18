@@ -40,6 +40,8 @@ import wx.lib.colourselect
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
+DEG2RAD = Geom3D.Deg2Rad
+
 # TODO
 # 20100405: clean up: get rid of Geom3D.IsometricShape.unfoldOrbit parameter
 # introduced for legacy code. The new way by using glMultMatrix is better, since
@@ -237,6 +239,7 @@ class MainWindow(wx.Frame):
         this.sceneDirName = '.'
         this.viewSettingsWindow = None
         this.colourSettingsWindow = None
+        this.transformSettingsWindow = None
         this.scene = None
         this.panel = MainPanel(this, TstScene, shape, wx.ID_ANY)
         if len(p_args) > 0 and (
@@ -349,6 +352,14 @@ class MainWindow(wx.Frame):
             )
         this.Bind(wx.EVT_MENU, this.onColourSettings, id = colourSettings.GetId())
         menu.AppendItem(colourSettings)
+
+        transformSettings = wx.MenuItem(
+                menu,
+                wx.ID_ANY,
+                text = "&Transform\tCtrl+T"
+            )
+        this.Bind(wx.EVT_MENU, this.onTransform, id = transformSettings.GetId())
+        menu.AppendItem(transformSettings)
 
         return menu
 
@@ -655,6 +666,17 @@ class MainWindow(wx.Frame):
         )
         this.colourSettingsWindow.Bind(wx.EVT_CLOSE, this.onColourSettingsClose)
 
+    def onTransform(this, e):
+        if this.transformSettingsWindow == None:
+            this.transformSettingsWindow = TransformSettingsWindow(
+                this.panel.getCanvas(), None, wx.ID_ANY,
+                title = 'Transform Settings',
+            )
+            this.transformSettingsWindow.Bind(wx.EVT_CLOSE, this.onTransformSettingsClose)
+        else:
+            this.transformSettingsWindow.SetFocus()
+            this.transformSettingsWindow.Raise()
+
     def onDome(this, event):
         if this.dome1.GetId() == event.GetId(): level = 1
         else: level = 2
@@ -731,13 +753,19 @@ class MainWindow(wx.Frame):
         this.colourSettingsWindow.Destroy()
         this.colourSettingsWindow = None
 
+    def onTransformSettingsClose(this, event):
+        this.transformSettingsWindow.Destroy()
+        this.transformSettingsWindow = None
+
     def onClose(this, event):
         print 'main onclose'
-        this.Destroy()
         if this.viewSettingsWindow != None:
             this.viewSettingsWindow.Close()
         if this.colourSettingsWindow != None:
             this.colourSettingsWindow.Close()
+        if this.transformSettingsWindow != None:
+            this.transformSettingsWindow.Close()
+        this.Destroy()
 
     def onKeyDown(this, e):
         id = e.GetId()
@@ -922,6 +950,95 @@ class ColourSettingsWindow(wx.Frame):
     def close(this):
         for Gui in this.Guis:
             Gui.Destroy()
+
+class TransformSettingsWindow(wx.Frame):
+    def __init__(this, canvas, *args, **kwargs):
+        wx.Frame.__init__(this, *args, **kwargs)
+        this.canvas    = canvas
+        this.statusBar = this.CreateStatusBar()
+        this.panel     = wx.Panel(this, wx.ID_ANY)
+        this.addContents()
+        this.orgVs = this.canvas.shape.getVertexProperties()['Vs']
+        this.org_orgVs = this.orgVs # for cancel
+        this.set_status("")
+
+    def addContents(this):
+        this.mainSizer = wx.BoxSizer(wx.VERTICAL)
+
+        this.rotateSizer = GeomGui.AxisRotateSizer(
+            this.panel,
+            this.on_rot,
+            min_angle=-180,
+            max_angle=180,
+            initial_angle=0
+        )
+        this.mainSizer.Add(this.rotateSizer)
+
+        # TODO: Add scale to transform
+        # TODO: Add reflection
+
+        this.Guis = []
+
+        this.subSizer = wx.BoxSizer(wx.HORIZONTAL)
+        this.mainSizer.Add(this.subSizer)
+
+        this.Guis.append(wx.Button(this.panel, label='Apply'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onApply)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.Guis.append(wx.Button(this.panel, label='Cancel'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onCancel)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.Guis.append(wx.Button(this.panel, label='Reset'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onReset)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.Guis.append(wx.Button(this.panel, label='Done'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onDone)
+        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+
+        this.panel.SetSizer(this.mainSizer)
+        this.panel.SetAutoLayout(True)
+        this.panel.Layout()
+        this.Show(True)
+
+    def on_rot(this, angle, axis):
+        if Geom3D.eq(axis.norm(), 0):
+            this.set_status("Please define a proper axis")
+            return
+        transform = GeomTypes.Rot3(angle=DEG2RAD*angle, axis=axis)
+        # Assume compound shape
+        newVs = [
+            [transform * GeomTypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
+        this.canvas.shape.setVertexProperties(Vs=newVs)
+        this.canvas.paint()
+        this.set_status("Use 'Apply' to define a subsequent transform")
+
+    def onApply(this, e=None):
+        this.orgVs = this.canvas.shape.getVertexProperties()['Vs']
+        # reset the angle
+        this.rotateSizer.set_angle(0)
+        this.set_status("applied, now you can define another axis")
+
+    def onReset(this, e=None):
+        this.canvas.shape.setVertexProperties(Vs=this.org_orgVs)
+        this.canvas.paint()
+        this.orgVs = this.org_orgVs
+
+    def onCancel(this, e=None):
+        this.onReset()
+        this.Close()
+
+    def onDone(this, e):
+        this.Close()
+
+    def close(this):
+        for Gui in this.Guis:
+            Gui.Destroy()
+
+    def set_status(this, str):
+        this.statusBar.SetStatusText(str)
 
 class ViewSettingsWindow(wx.Frame):
     def __init__(this, canvas, *args, **kwargs):
