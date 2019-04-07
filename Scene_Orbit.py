@@ -364,6 +364,7 @@ class CtrlWin(wx.Frame):
         colDivNr = e.GetSelection()
         this.colAlternative[0] = colDivNr
         l0 = len(this.orbit.higherOrderStabiliserProps)
+        assert l0 != 0, 'no higher order stabilisers found'
         if colDivNr < l0:
             this.colFinalSym = this.orbit.final
             this.colIsoms = this.orbit.higherOrderStabiliser(colDivNr)

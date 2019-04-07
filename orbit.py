@@ -155,6 +155,7 @@ class Orbit(list):
         props = v.higherOrderStabiliserProps
 
         # filter rest if needed:
+        if props == []: return []
         if (props[n]['filtered'] > 0):
             # Now filter out the stabilisers that are not a subgroup for this
             # orientation.
