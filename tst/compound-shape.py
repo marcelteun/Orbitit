@@ -1,6 +1,5 @@
 import Geom3D
 import GeomTypes
-import math
 
 Vs = [
 	GeomTypes.Vec3([ 1,  1,  1]),
@@ -16,7 +15,7 @@ Vs = [
 ]
 
 Fs = [
-        [0, 1, 2, 3],
+	[0, 1, 2, 3],
 	[0, 3, 7, 4],
 	[1, 0, 4, 5],
 	[2, 1, 5, 6],

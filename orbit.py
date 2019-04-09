@@ -64,13 +64,13 @@ class Orbit(list):
         stabiliser requires a sub orbit. Practically this is used for colouring
         of polyhedra. E.g. The polyhedra is defined by one face with some
         symmetry. Then the higher order stabiliser is the set of faces with the
-        same colour. SUch a set has there own symmetry. The different groups of
+        same colour. Such a set has their own symmetry. The different groups of
         coloured faces are mapped onto each other by a sub orbit. The norm of
         this sub-orbit equals to the amount of colours used. With this a list of
         dictionaries is obtained. Each dictionary holds:
             'class': higher order stabiliser classes is obtained.
             'index': the length of the subgroups in the final group, or the
-                     norme of the coset.
+                     norm of the coset.
         """
         try:
             assert v.__hospCalled == True, 'if this exists it should be true'
