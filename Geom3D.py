@@ -1795,13 +1795,16 @@ class SimpleShape:
         return doc
 
 
-    def toOffStr(this, precision = 15, info = False):
+    def toOffStr(this, precision = 15, info = False,
+                 color_floats=False):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
 
         precision: the precision that will be used for printing the coordinates
                    of the vertices.
+        color_floats: whether to export the colours as floating point numbers
+                      between 0 and 1. If False an integer 0 to 255 is used.
         """
         if this.dbgTrace:
             print '%s.toOffStr(%s,..):' % (this.__class__, this.name)
@@ -1862,9 +1865,11 @@ class SimpleShape:
             s = ('%d  ' % (len(face)))
             for fi in face:
                 s = ('%s%d ' % (s, fi))
-            s = '%s %d %d %d' % (
-                    s, color[0] * 255, color[1]*255, color[2]*255
-                )
+            if color_floats:
+                s = '{} {:g} {:g} {:g}'.format(s, color[0], color[1], color[2])
+            else:
+                s = '%s %d %d %d' % (
+                        s, color[0] * 255, color[1]*255, color[2]*255)
             return s
         if oneColor:
             for face in this.Fs:
