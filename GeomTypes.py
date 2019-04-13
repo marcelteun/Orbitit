@@ -47,6 +47,20 @@ def eq(a, b):
     """
     return abs(a - b) < eqFloatMargin
 
+def float2str(f, prec):
+    """Convert float to string only using prec decimals
+
+    Doesn't use unnecessary 0s
+
+    prec: the amount of digits to use
+    """
+    fmt = '{{:.{}g}}'.format(prec)
+    s = fmt.format(round(f, prec))
+    # FIXME: there must be a better way of doing this:
+    if s == "-0":
+        s = "0"
+    return s
+
 # Use tuples instead of lists to enable building sets used for isometries
 
 class Vec(tuple):
@@ -538,10 +552,12 @@ class Transform3(tuple):
         )
 
     def __strRot(t):
-        str = 'Rotation of %s degrees around %s' % (
-                degrees(t.angleRot()), t.axisRot()
-            )
-        return str
+        axis = t.axisRot()
+        return 'Rotation of {} degrees around [{}, {}, {}]'.format(
+            float2str(degrees(t.angleRot()), roundFloatMargin),
+            float2str(axis[0], roundFloatMargin),
+            float2str(axis[1], roundFloatMargin),
+            float2str(axis[2], roundFloatMargin))
 
     def angleRot(t):
         try:
@@ -684,7 +700,11 @@ class Transform3(tuple):
         )
 
     def __strRefl(t):
-        return 'Reflection in plane with normal %s' % (str(t.planeN()))
+        norm = t.planeN()
+        return 'Reflection in plane with normal [{}, {}, {}]'.format(
+            float2str(norm[0], roundFloatMargin),
+            float2str(norm[1], roundFloatMargin),
+            float2str(norm[2], roundFloatMargin))
 
     def planeN(t):
         try:
@@ -757,9 +777,12 @@ class Transform3(tuple):
 
     def __strRotInv(t):
         r = t.I()
-        str = 'Rotary inversion of %s degrees around %s' % (
-                degrees(r.angleRot()), r.axisRot()
-            )
+        axis = r.axisRot()
+        return 'Rotary inversion of {} degrees around [{}, {}, {}]'.format(
+            float2str(degrees(r.angleRot()), roundFloatMargin),
+            float2str(axis[0], roundFloatMargin),
+            float2str(axis[1], roundFloatMargin),
+            float2str(axis[2], roundFloatMargin))
         return str
 
     def angleRotInv(t):
