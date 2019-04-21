@@ -373,6 +373,12 @@ class Transform3(tuple):
         else:
             return '%s * .. * %s' % (str(t[0]), str(t[1]))
 
+    def to_orbit_str(t, prec=roundFloatMargin):
+        if t.isRot(): return t.__rot2orbit(prec)
+        elif t.isRefl(): return t.__refl2orbit(prec)
+        elif t.isRotInv(): return t.__rotinv2orbit(prec)
+        else: return "Unknown transform"
+
     def __mul__(t, u):
         if isinstance(u, Transform3):
             # t * u =  wLeft * vLeft .. vRight * wRight
@@ -559,6 +565,14 @@ class Transform3(tuple):
             float2str(axis[1], roundFloatMargin),
             float2str(axis[2], roundFloatMargin))
 
+    def __rot2orbit(t, prec=roundFloatMargin):
+        axis = t.axisRot()
+        return 'R {} {} {} {}'.format(
+            float2str(t.angleRot(), prec),
+            float2str(axis[0], prec),
+            float2str(axis[1], prec),
+            float2str(axis[2], prec))
+
     def angleRot(t):
         try:
             return t.__angleRot__
@@ -706,6 +720,13 @@ class Transform3(tuple):
             float2str(norm[1], roundFloatMargin),
             float2str(norm[2], roundFloatMargin))
 
+    def __refl2orbit(t, prec=roundFloatMargin):
+        norm = t.planeN()
+        return 'S {} {} {}'.format(
+            float2str(norm[0], prec),
+            float2str(norm[1], prec),
+            float2str(norm[2], prec))
+
     def planeN(t):
         try:
             return t.__plane_normal__
@@ -784,6 +805,10 @@ class Transform3(tuple):
             float2str(axis[1], roundFloatMargin),
             float2str(axis[2], roundFloatMargin))
         return str
+
+    def __rotinv2orbit(t, prec=roundFloatMargin):
+        r = t.I()
+        return 'I' + r.__rot2orbit(prec)[1:]
 
     def angleRotInv(t):
         return t.I().angleRot()

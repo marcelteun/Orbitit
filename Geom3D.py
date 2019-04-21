@@ -3472,6 +3472,62 @@ class SymmetricShape(IsometricShape):
         """
         pass
 
+    def export_as_orbit(self, angle_domain, axis, prec=15):
+        """
+        Export object in the orbit file format
+        angle_domain: sorted array of angles in radians
+        axis: and array specifying the rotation axis
+        """
+        no_of_transforms = 1
+        s = "#orbit1.n\n"
+        syms = self.getIsometries()
+        no_of_syms = 0
+        dir_syms = syms['direct']
+        if dir_syms is not None:
+            no_of_syms += len(dir_syms)
+        opp_syms = syms['opposite']
+        if opp_syms is not None:
+            no_of_syms += len(opp_syms)
+        s += "3 {} {} {} {} {}\n".format(len(self.baseShape.Vs),
+                                         len(self.baseShape.Fs),
+                                         no_of_syms,
+                                         no_of_transforms,
+                                         no_of_transforms)
+
+        prec_str = '{{:.{}g}}'.format(prec)
+        for vertex in self.baseShape.Vs:
+            s += "{} {} {}\n".format(prec_str, prec_str, prec_str).format(
+                vertex[0], vertex[1], vertex[2])
+        for face in self.baseShape.Fs:
+            line = '{}'.format(len(face))
+            for i in face:
+                line += ' {}'.format(i)
+            line += '\n'
+            s += line
+        # only direct is used (includes 'opposite' as well)
+        isoms = self.getIsometries()['direct']
+        cols = self.getFaceColors()
+        if isoms is not None:
+            if len(cols) == 1:
+                col = cols[0]
+                cols = [col for isom in isoms]
+            for i, isom in enumerate(isoms):
+                s += "c {} {} {} ".format(
+                    GeomTypes.float2str(cols[i][0][0][0], prec),
+                    GeomTypes.float2str(cols[i][0][0][1], prec),
+                    GeomTypes.float2str(cols[i][0][0][2], prec))
+                s += isom.to_orbit_str(prec)
+                s += '\n'
+        s += "{}".format(no_of_transforms)
+        for angle in angle_domain:
+            s += ' {}'.format(GeomTypes.float2str(angle, prec))
+        s += "\nR _0 {} {} {}\n".format(
+            GeomTypes.float2str(axis[0], prec),
+            GeomTypes.float2str(axis[1], prec),
+            GeomTypes.float2str(axis[2], prec))
+
+        return s
+
 class Scene():
     """
     Used for creating scenes in the PolyhedraBrowser.
