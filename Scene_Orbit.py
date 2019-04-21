@@ -71,6 +71,13 @@ class CtrlWin(wx.Frame):
         wx.Frame.__init__(this, *args, **kwargs)
         this.setDefaultColours()
         this.nrOfCols = 1
+        # save which colour alternative was chosen per final symmetry and
+        # stabiliser symmetry. This to be able to switch to the one that was
+        # chosen before when the user changes back to one that was chosen
+        # previously.
+        # Each selection contains two indices:
+        # - the index of the symmetry of the colour stabiliser
+        # - the index of the alternative
         this.colSelection = None
         this.finalSymSetup = None
         this.stabSymSetup = None
@@ -443,7 +450,7 @@ class CtrlWin(wx.Frame):
             for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
                 if isom in subSet:
                     colPerIsom.append(this.cols[i])
-                    break;
+                    break
         #print 'colPerIsom', colPerIsom
         cols = [
                 ([[float(colCh)/255 for colCh in col]], [])
