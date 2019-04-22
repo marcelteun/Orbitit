@@ -877,7 +877,7 @@ class Dn(Set):
                 else:           n = 2
                 if n == 0: n = 1
 
-            h = GeomTypes.HalfTurn3(axis_2)
+            h = GeomTypes.HalfTurn3(axis=axis_2)
             cn = Cn(setup = {'axis': axis_n, 'n': n})
             isometries = [isom for isom in cn]
             hs = [isom * h for isom in cn]
@@ -1943,7 +1943,7 @@ def generateD2(o2axis0, o2axis1):
         o2axis1 = o2axis1.axis()
     assert GeomTypes.eq(GeomTypes.Vec3(o2axis0) * GeomTypes.Vec3(o2axis1), 0), (
             "Error: axes not orthogonal")
-    H0 = GeomTypes.HalfTurn3(o2axis0)
+    H0 = GeomTypes.HalfTurn3(axis=o2axis0)
     H1 = GeomTypes.Rot3(axis = o2axis1, angle = hTurn)
     return (H0, H1, H1 * H0)
 
@@ -2412,7 +2412,7 @@ if __name__ == '__main__':
                 # try list argument
                 o2axis0 = [1, 1, 1],
                 # try Rot3 argument
-                o2axis1 = GeomTypes.HalfTurn3([1, -1, 0])
+                o2axis1 = GeomTypes.HalfTurn3(axis=[1, -1, 0])
             )
         )
     #print 'A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
@@ -2424,9 +2424,9 @@ if __name__ == '__main__':
     print 'checking result',
     assert len(a4) == 12
     assert GeomTypes.E in a4
-    assert GeomTypes.HalfTurn3(r*X) in a4
-    assert GeomTypes.HalfTurn3(r*Y) in a4
-    assert GeomTypes.HalfTurn3(r*Z) in a4
+    assert GeomTypes.HalfTurn3(axis=r*X) in a4
+    assert GeomTypes.HalfTurn3(axis=r*Y) in a4
+    assert GeomTypes.HalfTurn3(axis=r*Z) in a4
     assert GeomTypes.Rot3(axis = r * t0.axis(), angle =   tTurn) in a4
     assert GeomTypes.Rot3(axis = r * t1.axis(), angle = 2*tTurn) in a4
     assert GeomTypes.Rot3(axis = r * t2.axis(), angle =   tTurn) in a4

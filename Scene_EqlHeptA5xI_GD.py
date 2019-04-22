@@ -53,7 +53,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         t2 = Rot(axis = vec(0, 0, 1), angle = GeomTypes.turn(0.4))
         t3 = Rot(axis = vec(0, 0, 1), angle = GeomTypes.turn(0.6))
         t4 = Rot(axis = vec(0, 0, 1), angle = GeomTypes.turn(0.8))
-        h0 = HalfTurn(vec(0, 1, tau))
+        h0 = HalfTurn(axis=vec(0, 1, tau))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     GeomTypes.E, t1, t2, t3, t4,
@@ -112,7 +112,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             ]
 
         # add heptagons
-        H = HalfTurn(Vs[3])
+        H = HalfTurn(axis=Vs[3])
         this.errorStr = ''
         if this.heptPosAlt:
             Ns = Vs

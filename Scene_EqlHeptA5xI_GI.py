@@ -47,7 +47,7 @@ Ca   = 1.0/V3
 H0   = 2.0*Ca/tau2
 Rl   = vec(1.0, -Ca, H0)
 
-halfTurn = HalfTurn(GeomTypes.ux)
+halfTurn = HalfTurn(axis=GeomTypes.ux)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
@@ -55,7 +55,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         t2 = Rot(angle = GeomTypes.turn(0.4), axis = vec(0, -Dtau2, 1))
         t3 = Rot(angle = GeomTypes.turn(0.6), axis = vec(0, -Dtau2, 1))
         t4 = Rot(angle = GeomTypes.turn(0.8), axis = vec(0, -Dtau2, 1))
-        h0 = HalfTurn(vec(0, -1, tau2))
+        h0 = HalfTurn(axis=vec(0, -1, tau2))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     GeomTypes.E, t1, t2, t3, t4,
@@ -114,7 +114,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             ]
 
         # add heptagons
-        H = HalfTurn(Vs[3])
+        H = HalfTurn(axis=Vs[3])
         this.errorStr = ''
         if not this.heptPosAlt:
             Ns = Vs

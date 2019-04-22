@@ -33,9 +33,8 @@ from glob import glob
 from OpenGL.GL import *
 
 import GeomTypes
-from GeomTypes import Rot3      as Rot
-from GeomTypes import HalfTurn3 as HalfTurn
-from GeomTypes import Vec3      as Vec
+from GeomTypes import Rot3 as Rot
+from GeomTypes import Vec3 as Vec
 
 Title = 'Polyhedra with Folded Regular Heptagons and Tetrahedral Symmetry'
 

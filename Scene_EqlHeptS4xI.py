@@ -39,7 +39,7 @@ V2  = math.sqrt(2)
 hV2 = 1.0/V2
 tV3 = 1.0/math.sqrt(3)
 
-halfTurn = HalfTurn(GeomTypes.ux)
+halfTurn = HalfTurn(axis=GeomTypes.ux)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
