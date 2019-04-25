@@ -68,6 +68,10 @@ class NoRotation(Exception):
     """The transform doesn't represent a rotation"""
     pass
 
+class UnsupportedTransform(Exception):
+    """This isn't a transform or it isn't supported."""
+    pass
+
 # Use tuples instead of lists to enable building sets used for isometries
 class Vec(tuple):
     """Define a Euclidean vector"""
@@ -89,19 +93,19 @@ class Vec(tuple):
             return '[]'
 
     def __add__(self, w):
-        return self.__class__([a+b for a, b in zip(self, w)])
+        return self.__class__([_a + _b for _a, _b in zip(self, w)])
 
     def __radd__(self, w):
         # provide __radd__ for [..] + Vec([..])
         # print 'v', self, 'w', w
-        return self.__class__([a+b for a, b in zip(self, w)])
+        return self.__class__([_a + _b for _a, _b in zip(self, w)])
 
     def __sub__(self, w):
-        return self.__class__([a-b for a, b in zip(self, w)])
+        return self.__class__([_a - _b for _a, _b in zip(self, w)])
 
     def __rsub__(self, w):
         # provide __rsub__ for [..] + Vec([..])
-        return self.__class__([b-a for a, b in zip(self, w)])
+        return self.__class__([_b - _a for _a, _b in zip(self, w)])
 
     def __eq__(self, w):
         #print '%s ?= %s' % (self, w)
@@ -113,7 +117,8 @@ class Vec(tuple):
             #    )
             return False
         for a, b in zip(self, w):
-            if not r: break
+            if not r:
+                break
             r = r and eq(a, b)
             #print '%s ?= %s : %s (d = %s)' % (a, b, eq(a, b), a-b)
         return r
@@ -128,7 +133,8 @@ class Vec(tuple):
         if isinstance(w, tuple):
             # dot product
             r = 0
-            for a, b in zip(self, w): r += a*b
+            for a, b in zip(self, w):
+                r += a*b
             return r
         elif isinstance(w, int) or isinstance(w, float):
             return self.__class__([w*a for a in self])
@@ -138,7 +144,8 @@ class Vec(tuple):
             # provide __rmul__ for [..] + Vec([..])
             # dot product
             r = 0
-            for a, b in zip(self, w): r += a*b
+            for a, b in zip(self, w):
+                r += a*b
             return r
         if isinstance(w, int) or isinstance(w, float):
             return self.__class__([w*a for a in self])
@@ -285,7 +292,8 @@ class Quat(Vec):
     """Define a quarternion"""
     def __new__(cls, v=None):
         # if 3D vector, use it to set vector part only and use 0 for scalar part
-        if len(v) == 3: v = [0, v[0], v[1], v[2]]
+        if len(v) == 3:
+            v = [0, v[0], v[1], v[2]]
         return Vec.__new__(cls, [float(v[i]) for i in range(4)])
 
     def conjugate(v):
@@ -322,9 +330,12 @@ class Quat(Vec):
     V = vector
 
 def transform3TypeStr(i):
-    if i == Transform3.Rot: return 'Rot3'
-    if i == Transform3.Refl: return 'Refl3'
-    if i == Transform3.RotInv: return 'RotInv3'
+    if i == Transform3.Rot:
+        return 'Rot3'
+    if i == Transform3.Refl:
+        return 'Refl3'
+    if i == Transform3.RotInv:
+        return 'RotInv3'
     else: return 'Transform3'
 
 def isQuatPair(q):
@@ -343,6 +354,9 @@ class Transform3(tuple):
         assert isinstance(quatPair[1], Quat), assertStr + str(quatPair)
         return tuple.__new__(cls, quatPair)
 
+    def __init__(self, *args, **kwargs):
+        self.__cache__ = {}
+
     def __repr__(self):
         s = indent.Str('%s((\n' % (transform3TypeStr(self.type())))
         s = s.add_incr_line('%s,' % repr(Quat(self[0])))
@@ -353,27 +367,35 @@ class Transform3(tuple):
         return s
 
     def __hash__(self):
-        try:
-            return self.__hash_nr__
-        except AttributeError:
-            if self.isRot(): self.__hash_nr__ = self.__hashRot__()
-            elif self.isRefl(): self.__hash_nr__ = self.__hashRefl__()
-            elif self.isRotInv(): self.__hash_nr__ = self.__hashRotInv__()
+        if  'hash_nr' not in self.__cache__:
+            if self.isRot():
+                self.__cache__['hash_nr'] = self.__hashRot__()
+            elif self.isRefl():
+                self.__cache__['hash_nr'] = self.__hashRefl__()
+            elif self.isRotInv():
+                self.__cache__['hash_nr'] = self.__hashRotInv__()
             else:
-                raise TypeError, "Not a (supported) transform"
-            return self.__hash_nr__
+                raise UnsupportedTransform(
+                    "Not a (supported) transform")
+        return self.__cache__['hash_nr']
 
     def __str__(self):
-        if self.isRot(): return self.__strRot()
-        elif self.isRefl(): return self.__strRefl()
-        elif self.isRotInv(): return self.__strRotInv()
+        if self.isRot():
+            return self.__strRot()
+        elif self.isRefl():
+            return self.__strRefl()
+        elif self.isRotInv():
+            return self.__strRotInv()
         else:
             return '%s * .. * %s' % (str(self[0]), str(self[1]))
 
     def to_orbit_str(self, prec=roundFloatMargin):
-        if self.isRot(): return self.__rot2orbit(prec)
-        elif self.isRefl(): return self.__refl2orbit(prec)
-        elif self.isRotInv(): return self.__rotinv2orbit(prec)
+        if self.isRot():
+            return self.__rot2orbit(prec)
+        elif self.isRefl():
+            return self.__refl2orbit(prec)
+        elif self.isRotInv():
+            return self.__rotinv2orbit(prec)
         else: return "Unknown transform"
 
     def __mul__(self, u):
@@ -392,7 +414,8 @@ class Transform3(tuple):
             #    )
 
     def __eq__(self, u):
-        if not isinstance(u, Transform3): return False
+        if not isinstance(u, Transform3):
+            return False
         if self.isRot() and u.isRot():
             #if self.__eqRot(u): print 'equal Rot:', self, u
             eq = self.__eqRot(u)
@@ -423,31 +446,42 @@ class Transform3(tuple):
     RotRefl = RotInv
 
     def type(self):
-        if self.isRot(): return self.Rot
-        if self.isRefl(): return self.Refl
-        if self.isRotInv(): return self.RotInv
+        if self.isRot():
+            return self.Rot
+        if self.isRefl():
+            return self.Refl
+        if self.isRotInv():
+            return self.RotInv
         raise TypeError, 'oops, unknown type of Transform: %s ?= 1' % (
             self[1].norm())
 
     def angle(self):
-        if self.isRot(): return self.angleRot()
-        if self.isRotInv(): return self.angleRotInv()
+        if self.isRot():
+            return self.angleRot()
+        if self.isRotInv():
+            return self.angleRotInv()
         raise TypeError, (
             'oops, unknown angle; transform %s\n' % str(self) +
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def axis(self):
-        if self.isRot(): return self.axisRot()
-        if self.isRotInv(): return self.axisRotInv()
+        if self.isRot():
+            return self.axisRot()
+        if self.isRotInv():
+            return self.axisRotInv()
         raise TypeError, (
             'oops, unknown angle; transform %s\n' % str(self) +
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def glMatrix(self):
-        if self.isRot(): m = self.glMatrixRot()
-        elif self.isRefl(): m = self.matrixRefl()
-        elif self.isRotInv(): m = self.glMatrixRotInv()
-        else: raise AssertionError
+        if self.isRot():
+            m = self.glMatrixRot()
+        elif self.isRefl():
+            m = self.matrixRefl()
+        elif self.isRotInv():
+            m = self.glMatrixRotInv()
+        else:
+            raise AssertionError
         return Mat([Vec([m[0][0], m[0][1], m[0][2], 0]),
                     Vec([m[1][0], m[1][1], m[1][2], 0]),
                     Vec([m[2][0], m[2][1], m[2][2], 0]),
@@ -455,9 +489,12 @@ class Transform3(tuple):
 
     def matrix(self):
         # TODO: test this
-        if self.isRot(): return self.matrixRot()
-        if self.isRefl(): return self.matrixRefl()
-        if self.isRotInv(): return self.matrixRotInv()
+        if self.isRot():
+            return self.matrixRot()
+        if self.isRefl():
+            return self.matrixRefl()
+        if self.isRotInv():
+            return self.matrixRotInv()
         assert False, (
             'oops, unknown matrix; transform %s\n' % str(self) +
             'not a rotation')
@@ -472,9 +509,12 @@ class Transform3(tuple):
 #            ])
 
     def inverse(self):
-        if self.isRot(): return self.inverseRot()
-        if self.isRefl(): return self.inverseRefl()
-        if self.isRotInv(): return self.inverseRotInv()
+        if self.isRot():
+            return self.inverseRot()
+        if self.isRefl():
+            return self.inverseRefl()
+        if self.isRotInv():
+            return self.inverseRotInv()
         assert False, (
             'oops, unknown matrix; transform %s\n' % str(self) +
             'not a rotation')
@@ -566,28 +606,24 @@ class Transform3(tuple):
             float2str(axis[2], prec))
 
     def angleRot(self):
-        try:
-            return self.__angleRot__
-        except AttributeError:
+        if  'angleRot' not in self.__cache__:
             self.defUniqueAngleAxis()
-            return self.__angleRot__
+        return self.__cache__['angleRot']
 
     def axisRot(self):
-        try:
-            return self.__axisRot__
-        except AttributeError:
+        if 'axisRot' not in self.__cache__:
             self.defUniqueAngleAxis()
-            return self.__axisRot__
+        return self.__cache__['axisRot']
 
     def defUniqueAngleAxis(self):
         # rotation axis
         try:
-            self.__axisRot__ = self[0].V().normalise()
+            self.__cache__['axisRot']= self[0].V().normalise()
         except ZeroDivisionError:
             assert self[0] == Quat([1, 0, 0, 0]) or \
                 self[0] == Quat([-1, 0, 0, 0]), \
                 "{} doesn'self represent a rotation".format(self.__repr__())
-            self.__axisRot__ = self[0].V()
+            self.__cache__['axisRot'] = self[0].V()
         # rotation angle
         cos = self[0][0]
         for i in range(3):
@@ -603,41 +639,47 @@ class Transform3(tuple):
                     sin = 0
         #print 'reconstructed cos =', cos
         #print 'reconstructed sin =', sin
-        self.__angleRot__ = 2 * math.atan2(sin, cos)
+        self.__cache__['angleRot'] = 2 * math.atan2(sin, cos)
 
         # make unique: -pi < angle < pi
-        if not (self.__angleRot__ < math.pi or eq(self.__angleRot__, math.pi)):
-            self.__angleRot__ = self.__angleRot__ - 2 * math.pi
-        if not (self.__angleRot__ > -math.pi or eq(self.__angleRot__, -math.pi)):
-            self.__angleRot__ = self.__angleRot__ + 2 * math.pi
+        if not (self.__cache__['angleRot'] < math.pi \
+                or eq(self.__cache__['angleRot'], math.pi)):
+            self.__cache__['angleRot'] = self.__cache__['angleRot'] - \
+                2 * math.pi
+        if not (self.__cache__['angleRot'] > -math.pi \
+                or eq(self.__cache__['angleRot'], -math.pi)):
+            self.__cache__['angleRot'] = self.__cache__['angleRot'] + \
+                2 * math.pi
 
         # make unique: 0 < angle < pi
-        if eq(self.__angleRot__, 0):
-            self.__angleRot__ = 0.0
-        if self.__angleRot__ < 0:
-            self.__angleRot__ = -self.__angleRot__
-            self.__axisRot__ = -self.__axisRot__
-        if eq(self.__angleRot__, math.pi):
+        if eq(self.__cache__['angleRot'], 0):
+            self.__cache__['angleRot'] = 0.0
+        if self.__cache__['angleRot'] < 0:
+            self.__cache__['angleRot'] = -self.__cache__['angleRot']
+            self.__cache__['axisRot'] = -self.__cache__['axisRot']
+        if eq(self.__cache__['angleRot'], math.pi):
             # if halfturn, make axis unique: make the first non-zero element
             # positive:
-            if eq(self.__axisRot__[0], 0):
-                self.__axisRot__ = Vec3([0.0,
-                                         self.__axisRot__[1],
-                                         self.__axisRot__[2]])
-            if self.__axisRot__[0] < 0:
-                self.__axisRot__ = -self.__axisRot__
-            elif self.__axisRot__[0] == 0:
-                if eq(self.__axisRot__[1], 0):
-                    self.__axisRot__ = Vec3([0.0, 0.0, self.__axisRot__[2]])
-                if self.__axisRot__[1] < 0:
-                    self.__axisRot__ = -self.__axisRot__
-                elif self.__axisRot__[1] == 0:
-                    # not valid axis: if eq(self.__axisRot__[2], 0):
-                    if self.__axisRot__[2] < 0:
-                        self.__axisRot__ = -self.__axisRot__
-        elif eq(self.__angleRot__, 0):
-            self.__angleRot__ = 0.0
-            self.__axisRot__ = Vec3([1.0, 0.0, 0.0])
+            if eq(self.__cache__['axisRot'][0], 0):
+                self.__cache__['axisRot'] = Vec3(
+                    [0.0,
+                     self.__cache__['axisRot'][1],
+                     self.__cache__['axisRot'][2]])
+            if self.__cache__['axisRot'][0] < 0:
+                self.__cache__['axisRot'] = -self.__cache__['axisRot']
+            elif self.__cache__['axisRot'][0] == 0:
+                if eq(self.__cache__['axisRot'][1], 0):
+                    self.__cache__['axisRot'] = Vec3(
+                        [0.0, 0.0, self.__cache__['axisRot'][2]])
+                if self.__cache__['axisRot'][1] < 0:
+                    self.__cache__['axisRot'] = -self.__cache__['axisRot']
+                elif self.__cache__['axisRot'][1] == 0:
+                    # not valid axis: if eq(self.__cache__['axisRot'][2], 0):
+                    if self.__cache__['axisRot'][2] < 0:
+                        self.__cache__['axisRot'] = -self.__cache__['axisRot']
+        elif eq(self.__cache__['angleRot'], 0):
+            self.__cache__['angleRot'] = 0.0
+            self.__cache__['axisRot'] = Vec3([1.0, 0.0, 0.0])
 
     def getMatrixRot(self, w, x, y, z, sign=1):
         dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
@@ -649,27 +691,23 @@ class Transform3(tuple):
             Vec([sign*(dxz-dyw), sign*(dyz+dxw), sign*(1-dx2-dy2)])]
 
     def matrixRot(self):
-        try:
-            return self.__matrix_rot__
-        except AttributeError:
-            w, x, y, z = self[0]
-            self.__matrix_rot__ = self.getMatrixRot(w, x, y, z)
-            return self.__matrix_rot__
+        if 'matrix_rot' not in self.__cache__:
+            _w, _x, _y, _z = self[0]
+            self.__cache__['matrix_rot'] = self.getMatrixRot(_w, _x, _y, _z)
+        return self.__cache__['matrix_rot']
 
     def glMatrixRot(self):
-        try:
-            return self.__gl_matrix_rot__
-        except AttributeError:
-            w, x, y, z = self[0]
-            self.__gl_matrix_rot__ = self.getMatrixRot(-w, x, y, z)
-            return self.__gl_matrix_rot__
+        if 'gl_matrix_rot' not in self.__cache__:
+            _w, _x, _y, _z = self[0]
+            self.__cache__['gl_matrix_rot'] = self.getMatrixRot(
+                -_w, _x, _y, _z)
+        return self.__cache__['gl_matrix_rot']
 
     def inverseRot(self):
-        try:
-            return self.__inverse_rot__
-        except AttributeError:
-            self.__inverse_rot__ = Rot3(axis=self.axis(), angle=-self.angle())
-            return self.__inverse_rot__
+        if 'inverse_rot' not in self.__cache__:
+            self.__cache__['inverse_rot'] = Rot3(axis=self.axis(),
+                                                 angle=-self.angle())
+        return self.__cache__['inverse_rot']
 
     ## REFLECTION specific functions:
     def isRefl(self):
@@ -717,42 +755,43 @@ class Transform3(tuple):
             float2str(norm[2], prec))
 
     def planeN(self):
-        try:
-            return self.__plane_normal__
-        except AttributeError:
-            self.__plane_normal__ = self[0].V()
+        if  'plane_normal' not in self.__cache__:
+            self.__cache__['plane_normal'] = self[0].V()
             # make normal unique: make the first non-zero element positive:
-            if eq(self.__plane_normal__[0], 0):
-                self.__plane_normal__ = Vec3(
-                    [0.0, self.__plane_normal__[1], self.__plane_normal__[2]])
-            if self.__plane_normal__[0] < 0:
-                self.__plane_normal__ = -self.__plane_normal__
-            elif self.__plane_normal__[0] == 0:
-                if eq(self.__plane_normal__[1], 0):
-                    self.__plane_normal__ = Vec3([0.0,
-                                                  0.0,
-                                                  self.__plane_normal__[2]])
-                if self.__plane_normal__[1] < 0:
-                    self.__plane_normal__ = -self.__plane_normal__
-                elif self.__plane_normal__[1] == 0:
-                    # not valid axis: if eq(self.__plane_normal__[2], 0):
-                    if self.__plane_normal__[2] < 0:
-                        self.__plane_normal__ = -self.__plane_normal__
-            return self.__plane_normal__
+            if eq(self.__cache__['plane_normal'][0], 0):
+                self.__cache__['plane_normal'] = Vec3(
+                    [0.0,
+                     self.__cache__['plane_normal'][1],
+                     self.__cache__['plane_normal'][2]])
+            if self.__cache__['plane_normal'][0] < 0:
+                self.__cache__['plane_normal'] = -self.__cache__[
+                    'plane_normal']
+            elif self.__cache__['plane_normal'][0] == 0:
+                if eq(self.__cache__['plane_normal'][1], 0):
+                    self.__cache__['plane_normal'] = Vec3(
+                        [0.0, 0.0, self.__cache__['plane_normal'][2]])
+                if self.__cache__['plane_normal'][1] < 0:
+                    self.__cache__['plane_normal'] = -self.__cache__[
+                        'plane_normal']
+                elif self.__cache__['plane_normal'][1] == 0:
+                    # not needed (since not valid axis):
+                    # if eq(self.__cache__['plane_normal'][2], 0):
+                    if self.__cache__['plane_normal'][2] < 0:
+                        self.__cache__['plane_normal'] = -self.__cache__[
+                            'plane_normal']
+        return self.__cache__['plane_normal']
 
     def matrixRefl(self):
-        try:
-            return self.__matrix_refl__
-        except AttributeError:
-            w, x, y, z = self[0]
-            dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
-            dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
-            self.__matrix_refl__ = [
+        if 'matrix_refl' not in self.__cache__:
+            _, _x, _y, _z = self[0]
+            dxy, dxz, dyz = 2*_x*_y, 2*_x*_z, 2*_y*_z
+            dx2, dy2, dz2 = 2*_x*_x, 2*_y*_y, 2*_z*_z
+            self.__cache__['matrix_refl'] = [
                 Vec([1-dx2, -dxy, -dxz]),
                 Vec([-dxy, 1-dy2, -dyz]),
                 Vec([-dxz, -dyz, 1-dz2]),
             ]
-            return self.__matrix_refl__
+        return self.__cache__['matrix_refl']
 
     def inverseRefl(self):
         return self
@@ -762,17 +801,16 @@ class Transform3(tuple):
         """
         Apply a central inversion
         """
-        try:
-            return self.__central_inverted__
-        except AttributeError:
-            self.__central_inverted__ = Transform3([-self[0], self[1]])
-            return self.__central_inverted__
+        if 'central_inverted' not in self.__cache__:
+            self.__cache__['central_inverted'] = Transform3(
+                [-self[0], self[1]])
+        return self.__cache__['central_inverted']
 
     def isRotInv(self):
         return self.I().isRot() and not self.isRefl()
 
     def __eqRotInv(self, u):
-        return self.I().__eqRot(u.I())
+        return self.I() == u.I()
 
     def __hashRotInv__(self):
         axis = self.axisRotInv()
@@ -790,11 +828,10 @@ class Transform3(tuple):
             float2str(axis[0], roundFloatMargin),
             float2str(axis[1], roundFloatMargin),
             float2str(axis[2], roundFloatMargin))
-        return str
 
     def __rotinv2orbit(self, prec=roundFloatMargin):
         r = self.I()
-        return 'I' + r.__rot2orbit(prec)[1:]
+        return 'I' + r.to_orbit_str(prec)[1:]
 
     def angleRotInv(self):
         return self.I().angleRot()
@@ -803,33 +840,30 @@ class Transform3(tuple):
         return self.I().axisRot()
 
     def matrixRotInv(self):
-        try:
-            return self.__matrix_rot_inv__
-        except AttributeError:
-            w, x, y, z = self[0]
-            self.__matrix_rot_inv__ = self.getMatrixRot(w, x, y, z, -1)
-            return self.__matrix_rot_inv__
+        if 'matrix_rot_inv' not in self.__cache__:
+            _w, _x, _y, _z = self[0]
+            self.__cache__['matrix_rot_inv'] = self.getMatrixRot(
+                _w, _x, _y, _z, -1)
+        return self.__cache__['matrix_rot_inv']
 
     def glMatrixRotInv(self):
-        try:
-            return self.__gl_matrix_rot_inv__
-        except AttributeError:
-            w, x, y, z = self[0]
-            self.__gl_matrix_rot_inv__ = self.getMatrixRot(-w, x, y, z, -1)
-            return self.__gl_matrix_rot_inv__
+        if 'gl_matrix_rot_inv' not in self.__cache__:
+            _w, _x, _y, _z = self[0]
+            self.__cache__['gl_matrix_rot_inv'] = self.getMatrixRot(
+                -_w, _x, _y, _z, -1)
+        return self.__cache__['gl_matrix_rot_inv']
 
     def inverseRotInv(self):
-        try:
-            return self.__inverse_rot_inv__
-        except AttributeError:
-            self.__inverse_rot_inv__ = RotInv3(axis=self.axis(),
-                                               angle=-self.angle())
-            return self.__inverse_rot_inv__
+        if 'inverse_rot_inv' not in self.__cache__:
+            self.__cache__['inverse_rot_inv'] = RotInv3(axis=self.axis(),
+                                                        angle=-self.angle())
+        return self.__cache__['inverse_rot_inv']
 
-        isRotRefl = isRotInv
-        axisRotRefl = axisRotInv
+    isRotRefl = isRotInv
+    axisRotRefl = axisRotInv
 
     def angleRotRefl(self):
+        """Return the angle of a rotary reflection."""
         return self.angleRotInv() - hTurn
 
 class Rot3(Transform3):
@@ -2139,6 +2173,7 @@ if __name__ == '__main__':
     assert not R.isRot()
     assert not R.isRefl()
     assert R.isRotInv()
+    assert R.isRotRefl()
     assert R == I
 
     # test order: 2 refl planes with 45 degrees in between: 90 rotation
