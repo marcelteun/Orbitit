@@ -113,7 +113,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         if this.heptPosAlt:
             heptN = Heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None: return
-            Mr = Rot(angle = GeomTypes.tTurn, axis = Vs[2])
+            Mr = Rot(angle = GeomTypes.THIRD_TURN, axis = Vs[2])
 
             v = Mr*heptN[0][4]
             if this.triangleAlt:

@@ -114,7 +114,7 @@ _o5fld = Rot(axis = o5axis, angle = GeomTypes.turn(-1.0/5))
 isomO5 = isometry.C5(setup = {'axis': o5axis})
 
 o3axis = GeomTypes.Vec([0, dtau, tau])
-o3fld = Rot(axis = o3axis, angle = GeomTypes.tTurn)
+o3fld = Rot(axis = o3axis, angle = GeomTypes.THIRD_TURN)
 isomO3 = isometry.C3(setup = {'axis': o3axis})
 
 # get the col faces array by using a similar shape here, so it is calculated

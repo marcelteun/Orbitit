@@ -30,10 +30,10 @@ X = GeomTypes.ux
 Y = GeomTypes.uy
 Z = GeomTypes.uz
 
-hTurn = math.pi         # half turn
-qTurn = math.pi/2       # quarter turn
+hTurn = GeomTypes.HALF_TURN
+qTurn = GeomTypes.QUARTER_TURN
 eTurn = qTurn/2         # one eighth turn
-tTurn = 2*math.pi/3     # third turn
+tTurn = GeomTypes.THIRD_TURN
 
 acos_1_V3  = math.acos(1.0 / math.sqrt(3))
 asin_1_V3  = math.asin(1.0 / math.sqrt(3))

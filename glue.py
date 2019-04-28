@@ -289,8 +289,7 @@ def mergeVs(Vs, Fs, precision = 12):
     replace_by = [-1 for v in Vs]
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
-    org_margin = GeomTypes.eqFloatMargin
-    GeomTypes.eqFloatMargin = math.pow(10, -precision)
+    GeomTypes.set_eq_float_margin(math.pow(10, -precision))
     print 'Find multiple occurences of vertices\n',
     for i in range(len(Vs) - 1, -1, -1):
         print '\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)),
@@ -300,7 +299,7 @@ def mergeVs(Vs, Fs, precision = 12):
                 replaced = True
                 replace_by[i] = j
                 break
-    GeomTypes.eqFloatMargin = org_margin
+    GeomTypes.reset_eq_float_margin()
     # Apply the changes now. Don't delete the vertices, since that means
     # re-indexing
     print '\nClean up Fs'

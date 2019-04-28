@@ -454,7 +454,7 @@ class SimpleShape:
 
         plane: one of Plane.XY, Plane.XZ, Plane.XW, Plane.YZ,
                Plane.YW, Plane.ZW
-        angle: the angle in radials in counter-clockwise direction, while the
+        angle: the angle in radians in counter-clockwise direction, while the
                Plane.PQ has a horizontal axis P pointing to the right and a
                vertical axis Q pointing up.
         successive: specify if this is applied on any previous transform, i.e.
@@ -739,10 +739,10 @@ if __name__ == '__main__':
     v = vec(1, 1, 0, 0)
     w = vec(0, 3, 4, 0)
     z = 0.1 * w
-    p = z.isParallel(w)
+    p = z.is_parallel(w)
     if not p:
-        printError('in function isParallel')
-    t = w.makeOrthogonalTo(v)
+        printError('in function is_parallel')
+    t = w.make_orthogonal_to(v)
     #print 'check if [-3, 3, 8, 0] ==', w
     if not (
         Geom3D.eq(t.x, -3) and
@@ -750,7 +750,7 @@ if __name__ == '__main__':
         Geom3D.eq(t.z, 8) and
         Geom3D.eq(t.w, 0)
     ):
-        printError('in function makeOrthogonalTo')
+        printError('in function make_orthogonal_to')
         print '  Expected (-3, 3, 8, 0), got', t
 
     n = w.normalise()
@@ -758,9 +758,9 @@ if __name__ == '__main__':
     # TODO Move some of these tests to GeomTypes, after cgtypes rm, any relevant?
 
     # check if n is still of type vec and not cgtypes.vec4 (which doesn't have
-    # a isParallel)
-    if not n.isParallel(w):
-        printError('in function isParallel after norm')
+    # a is_parallel)
+    if not n.is_parallel(w):
+        printError('in function is_parallel after norm')
 
     def testOrthogonalVectors (R, margin = Geom3D.defaultFloatMargin):
         if not Geom3D.eq(R.e0 * R.e1, 0.0, margin):

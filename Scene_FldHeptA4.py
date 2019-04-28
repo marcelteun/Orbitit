@@ -289,8 +289,8 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #             2' = 13                7 = 5'
 
-        Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.tTurn)
-        Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.tTurn)
+        Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.THIRD_TURN)
+        Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.THIRD_TURN)
         Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))       # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]

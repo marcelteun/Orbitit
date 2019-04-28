@@ -1638,7 +1638,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             )
         if GeomTypes.eq(angle, 0): return
         try:
-            v1 = v1.makeOrthogonalTo(v0)
+            v1 = v1.make_orthogonal_to(v0)
             # if vectors are exchange, you actually specify the axial plane
             if this.exchangeGui.IsChecked():
                 if GeomTypes.eq(scale, 0):

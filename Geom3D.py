@@ -1931,7 +1931,7 @@ class SimpleShape:
             print '********toPsPiecesStr********'
             for i in range(len(this.Vs)):
                 print 'V[', i, '] =', this.Vs[i]
-        orgMargin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
+        GeomTypes.set_eq_float_margin(margin)
         try:
             for i in faceIndices:
                 if not debug:
@@ -2124,12 +2124,12 @@ class SimpleShape:
                 PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
         except AssertionError, PrecisionError:
             # catching assertion errors, to be able to set back margin
-            GeomTypes.eqFloatMargin = margin
+            GeomTypes.set_eq_float_margin(margin)
             raise
         print # print a line feed
 
         # restore margin
-        GeomTypes.eqFloatMargin = orgMargin
+        GeomTypes.reset_eq_float_margin()
 
         #print PsDoc.toStr()
         return PsDoc.toStr()
@@ -2200,7 +2200,7 @@ class SimpleShape:
         debug = True
         debug = False
         if debug: print '********intersectFacets********'
-        margin, GeomTypes.eqFloatMargin = GeomTypes.eqFloatMargin, margin
+        margin, GeomTypes.eq_float_margin = GeomTypes.eq_float_margin, margin
         for i in faceIndices:
             # TODO: problem Vs is calculated per face...
             #       clean up later...?
@@ -2419,7 +2419,7 @@ class SimpleShape:
                 )
 
         # restore margin
-        GeomTypes.eqFloatMargin = margin
+        GeomTypes.eq_float_margin = margin
 
     def getDome(this, level = 2):
         shape = None

@@ -1660,13 +1660,10 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def posHeptagon(this):
 	this.heptagon.fold(this.fold1, this.fold2, this.oppFold1, this.oppFold2,
             keepV0 = False, fold = this.foldHeptagon, rotate = this.rotateFold)
-	#print 'norm V0-V1: ', (this.heptagon.Vs[1]-this.heptagon.Vs[0]).squareNorm()
-	#print 'norm V1-V2: ', (this.heptagon.Vs[1]-this.heptagon.Vs[2]).squareNorm()
-	#print 'norm V2-V3: ', (this.heptagon.Vs[3]-this.heptagon.Vs[2]).squareNorm()
-	#print 'norm V3-V4: ', (this.heptagon.Vs[3]-this.heptagon.Vs[4]).squareNorm()
         this.heptagon.translate(H * GeomTypes.uy)
         # Note: the rotation angle != the dihedral angle
-	this.heptagon.rotate(-GeomTypes.ux, GeomTypes.qTurn - this.dihedralAngle)
+        this.heptagon.rotate(
+            -GeomTypes.ux, GeomTypes.QUARTER_TURN - this.dihedralAngle)
         this.heptagon.translate(this.height*GeomTypes.uz)
 	if this.posAngle != 0:
 	    this.heptagon.rotate(-GeomTypes.uz, this.posAngle)
