@@ -605,11 +605,11 @@ class Transform3(tuple):
     def glMatrix(self):
         """Return the glMatrix representation of this transform"""
         if self.is_rot():
-            m = self._glMatrixRot()
+            m = self.__glMatrix_rot()
         elif self.is_refl():
             m = self.__matrix_refl()
         elif self.is_rot_inv():
-            m = self._glMatrixRotInv()
+            m = self.__glMatrix_rot_inv()
         else:
             raise UnsupportedTransform(
                 'oops, unknown matrix; transform {}\n'.format(str(self)))
@@ -791,7 +791,7 @@ class Transform3(tuple):
             self.__cache__['matrix_rot'] = _get_mat_rot(w, x, y, z)
         return self.__cache__['matrix_rot']
 
-    def _glMatrixRot(self):
+    def __glMatrix_rot(self):
         if 'gl_matrix_rot' not in self.__cache__:
             w, x, y, z = self[0]
             self.__cache__['gl_matrix_rot'] = _get_mat_rot(-w, x, y, z)
@@ -956,7 +956,7 @@ class Transform3(tuple):
             self.__cache__['matrix_rot_inv'] = _get_mat_rot(w, x, y, z, -1)
         return self.__cache__['matrix_rot_inv']
 
-    def _glMatrixRotInv(self):
+    def __glMatrix_rot_inv(self):
         """If this is a rotary inversion, return the glMatrix.
 
         Should only be called when this is a rotary inversion
