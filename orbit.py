@@ -207,7 +207,7 @@ class Orbit(list):
                     )
             else:
                 v.altFinal = v.final.directParent(isometries = [
-                        isom for isom in v.final if isom.isDirect()
+                        isom for isom in v.final if isom.is_direct()
                     ])
             if v.stabiliser.generator != {}:
                 v.altStab = v.stabiliser.directParent(setup =
@@ -215,7 +215,7 @@ class Orbit(list):
                     )
             else:
                 v.altStab = v.stabiliser.directParent(isometries = [
-                        isom for isom in v.stabiliser if isom.isDirect()
+                        isom for isom in v.stabiliser if isom.is_direct()
                     ])
 
             # TODO: fix; don't copy above code...
