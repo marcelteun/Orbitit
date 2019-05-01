@@ -26,9 +26,9 @@ import re
 import GeomTypes
 from copy import copy
 
-X = GeomTypes.ux
-Y = GeomTypes.uy
-Z = GeomTypes.uz
+X = GeomTypes.UX
+Y = GeomTypes.UY
+Z = GeomTypes.UZ
 
 hTurn = GeomTypes.HALF_TURN
 qTurn = GeomTypes.QUARTER_TURN

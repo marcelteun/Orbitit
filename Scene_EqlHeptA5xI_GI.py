@@ -47,7 +47,7 @@ Ca   = 1.0/V3
 H0   = 2.0*Ca/tau2
 Rl   = vec(1.0, -Ca, H0)
 
-halfTurn = HalfTurn(axis=GeomTypes.ux)
+halfTurn = HalfTurn(axis=GeomTypes.UX)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):

@@ -39,7 +39,7 @@ V2  = math.sqrt(2)
 hV2 = 1.0/V2
 tV3 = 1.0/math.sqrt(3)
 
-halfTurn = HalfTurn(axis=GeomTypes.ux)
+halfTurn = HalfTurn(axis=GeomTypes.UX)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
@@ -47,9 +47,9 @@ class Shape(Heptagons.EqlHeptagonShape):
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     GeomTypes.E,
-                    Rot(angle = GeomTypes.turn(0.25), axis = GeomTypes.uz),
-                    Rot(angle = GeomTypes.turn(0.50), axis = GeomTypes.uz),
-                    Rot(angle = GeomTypes.turn(0.75), axis = GeomTypes.uz)
+                    Rot(angle = GeomTypes.turn(0.25), axis = GeomTypes.UZ),
+                    Rot(angle = GeomTypes.turn(0.50), axis = GeomTypes.UZ),
+                    Rot(angle = GeomTypes.turn(0.75), axis = GeomTypes.UZ)
                 ],
             # abuse the opposite isometry (even though this is not an opposite
             # isometry really) But for historical reasons I used a half turn

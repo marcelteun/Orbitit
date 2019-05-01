@@ -101,7 +101,7 @@ def cylinderEdgeToX3d(
         radius = 0.1,
         precision = 5
     ):
-    vz = GeomTypes.uy
+    vz = GeomTypes.UY
     dv = v1 - v0
     l = dv.norm()
     if l == 0:

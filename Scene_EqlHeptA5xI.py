@@ -41,14 +41,14 @@ tau2 = tau + 1.0
 w    = math.sqrt(tau2 + 1.0)/2
 
 atanH0d2 = Geom3D.Rad2Deg * math.atan(tau2/2)
-halfTurn = HalfTurn(axis=GeomTypes.uy)
+halfTurn = HalfTurn(axis=GeomTypes.UY)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
-        t1 = Rot(angle = GeomTypes.turn(0.2), axis = GeomTypes.uz)
-        t2 = Rot(angle = GeomTypes.turn(0.4), axis = GeomTypes.uz)
-        t3 = Rot(angle = GeomTypes.turn(0.6), axis = GeomTypes.uz)
-        t4 = Rot(angle = GeomTypes.turn(0.8), axis = GeomTypes.uz)
+        t1 = Rot(angle = GeomTypes.turn(0.2), axis = GeomTypes.UZ)
+        t2 = Rot(angle = GeomTypes.turn(0.4), axis = GeomTypes.UZ)
+        t3 = Rot(angle = GeomTypes.turn(0.6), axis = GeomTypes.UZ)
+        t4 = Rot(angle = GeomTypes.turn(0.8), axis = GeomTypes.UZ)
         h0 = HalfTurn(axis=vec(1, 0, tau))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [

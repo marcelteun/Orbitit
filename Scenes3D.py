@@ -37,7 +37,7 @@ def getAxis2AxisRotation(a0, a1):
     assert (type(a0) == vec3Type) and (type(a1) == vec3Type)
     if a0 == a1:
         # if both axis are in fact the same no roation is needed
-        axis = GeomTypes.uz
+        axis = GeomTypes.UZ
         angle = 0
     if a0 == -a1:
         # if one axis should be rotated in its opposite axis, handle
@@ -149,8 +149,8 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         #   rotation is finished.
         this.modelRepos = GeomTypes.E
         this.movingRepos = GeomTypes.E
-        this.xAxis = GeomTypes.ux
-        this.yAxis = GeomTypes.uy
+        this.xAxis = GeomTypes.UX
+        this.yAxis = GeomTypes.UY
         this.angleAroundYaxis = 0
         this.angleAroundXaxis = 0
         this.bgCol = [0.097656, 0.097656, 0.437500] # midnightBlue
