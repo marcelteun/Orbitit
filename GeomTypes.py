@@ -77,13 +77,21 @@ def get_mat_rot(w, x, y, z, sign=1):
         Vec([sign*(dxy+dzw), sign*(1-dx2-dz2), sign*(dyz-dxw)]),
         Vec([sign*(dxz-dyw), sign*(dyz+dxw), sign*(1-dx2-dy2)])]
 
+
 class NoRotation(Exception):
     """The transform doesn't represent a rotation"""
     pass
 
+
 class UnsupportedTransform(Exception):
     """This isn't a transform or it isn't supported."""
     pass
+
+
+class UnsupportedOperand(Exception):
+    """One of the operand aren't supported for this operation"""
+    pass
+
 
 # Use tuples instead of lists to enable building sets used for isometries
 class Vec(tuple):
@@ -351,7 +359,7 @@ def transform3TypeStr(i):
         return 'Refl3'
     if i == Transform3.RotInv:
         return 'RotInv3'
-    else: return 'Transform3'
+    return 'Transform3'
 
 def isQuatPair(q):
     return (
@@ -435,13 +443,10 @@ class Transform3(tuple):
         if not isinstance(u, Transform3):
             return False
         if self.isRot() and u.isRot():
-            #if self.__eqRot(u): print 'equal Rot:', self, u
             eq = self.__eqRot(u)
         elif self.isRefl() and u.isRefl():
-            #if self.__eqRefl(u): print 'equal Refl:', self, u
             eq = self.__eqRefl(u)
         elif self.isRotInv() and u.isRotInv():
-            #if self.__eqRotInv(u): print 'equal RotInv:', self, u
             eq = self.__eqRotInv(u)
         else:
             eq = self[0] == u[0] and self[1] == u[1]
@@ -512,13 +517,14 @@ class Transform3(tuple):
     def glMatrix(self):
         """Return the glMatrix representation of this transform"""
         if self.isRot():
-            m = self.glMatrixRot()
+            m = self._glMatrixRot()
         elif self.isRefl():
-            m = self.matrixRefl()
+            m = self._matrixRefl()
         elif self.isRotInv():
-            m = self.glMatrixRotInv()
+            m = self._glMatrixRotInv()
         else:
-            raise AssertionError
+            raise UnsupportedTransform(
+                'oops, unknown matrix; transform {}\n'.format(str(self)))
         return Mat([Vec([m[0][0], m[0][1], m[0][2], 0]),
                     Vec([m[1][0], m[1][1], m[1][2], 0]),
                     Vec([m[2][0], m[2][1], m[2][2], 0]),
@@ -527,11 +533,11 @@ class Transform3(tuple):
     def matrix(self):
         """Return the matrix representation of this transform"""
         if self.isRot():
-            return self.matrixRot()
+            return self._matrixRot()
         if self.isRefl():
-            return self.matrixRefl()
+            return self._matrixRefl()
         if self.isRotInv():
-            return self.matrixRotInv()
+            return self._matrixRotInv()
         raise UnsupportedTransform(
             'oops, unknown matrix; transform {}\n'.format(str(self)))
 
@@ -547,11 +553,11 @@ class Transform3(tuple):
     def inverse(self):
         """Return a new object with the inverse of this transform"""
         if self.isRot():
-            return self.inverseRot()
+            return self._inverseRot()
         if self.isRefl():
-            return self.inverseRefl()
+            return self._inverseRefl()
         if self.isRotInv():
-            return self.inverseRotInv()
+            return self._inverseRotInv()
         raise UnsupportedTransform(
             'oops, unknown matrix; transform {}\n'.format(str(self)))
 
@@ -696,13 +702,13 @@ class Transform3(tuple):
             self.__cache__['matrix_rot'] = get_mat_rot(w, x, y, z)
         return self.__cache__['matrix_rot']
 
-    def glMatrixRot(self):
+    def _glMatrixRot(self):
         if 'gl_matrix_rot' not in self.__cache__:
             w, x, y, z = self[0]
             self.__cache__['gl_matrix_rot'] = get_mat_rot(-w, x, y, z)
         return self.__cache__['gl_matrix_rot']
 
-    def inverseRot(self):
+    def _inverseRot(self):
         if 'inverse_rot' not in self.__cache__:
             self.__cache__['inverse_rot'] = Rot3(axis=self.axis(),
                                                  angle=-self.angle())
@@ -782,7 +788,7 @@ class Transform3(tuple):
                             'plane_normal']
         return self.__cache__['plane_normal']
 
-    def matrixRefl(self):
+    def _matrixRefl(self):
         if 'matrix_refl' not in self.__cache__:
             _, x, y, z = self[0]
             dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
@@ -794,7 +800,7 @@ class Transform3(tuple):
             ]
         return self.__cache__['matrix_refl']
 
-    def inverseRefl(self):
+    def _inverseRefl(self):
         return self
 
     # *** ROTARY INVERSION (= ROTARY RELECTION) specific functions:
@@ -843,13 +849,17 @@ class Transform3(tuple):
     def axisRotInv(self):
         return self.I().axisRot()
 
-    def matrixRotInv(self):
+    def _matrixRotInv(self):
+        """If this is a rotary inversion, return the matrix representation.
+
+        Should only be called when this is a rotary inversion
+        """
         if 'matrix_rot_inv' not in self.__cache__:
             w, x, y, z = self[0]
             self.__cache__['matrix_rot_inv'] = get_mat_rot(w, x, y, z, -1)
         return self.__cache__['matrix_rot_inv']
 
-    def glMatrixRotInv(self):
+    def _glMatrixRotInv(self):
         """If this is a rotary inversion, return the glMatrix.
 
         Should only be called when this is a rotary inversion
@@ -859,7 +869,7 @@ class Transform3(tuple):
             self.__cache__['gl_matrix_rot_inv'] = get_mat_rot(-w, x, y, z, -1)
         return self.__cache__['gl_matrix_rot_inv']
 
-    def inverseRotInv(self):
+    def _inverseRotInv(self):
         """If this is a rotary inversion, return the reverse.
 
         Should only be called when this is a rotary inversion
@@ -1239,12 +1249,11 @@ def findOrthoPlane(plane):
     # Use cross product for e3:
     v3 = e0.cross(e1, e2)
     # Normalisation should not be needed, but improves precision.
-    #print '__findOrthoPlane: v3', v3
     # TODO
     # Prehaps this should only steered by caller by setting high precision.
     e3 = v3.normalise()
-    #print 'e3', self.e3
     return (e2, e3)
+
 
 class DoubleRot4(Transform4):
     """Define the general (double) rotation in 4D"""
@@ -1961,7 +1970,7 @@ if __name__ == '__main__':
     # test order
     R0 = Rot3(axis=uz, angle=qTurn)
     R1 = Rot3(axis=ux, angle=qTurn)
-    R = (R1 * R0) * ux # expected: R1(R0(X))
+    R = (R1 * R0) * ux  # expected: R1(R0(X))
     assert R == uz, 'Expected: %s, got %s' % (uz, R)
     R = (R1 * R0)
     X = Rot3(axis=Vec3([1, -1, 1]), angle=tTurn)
@@ -2067,7 +2076,7 @@ if __name__ == '__main__':
     X = Vec3([0, -1, 0])
     assert R[2] == X, 'Expected: %s, got %s' % (X, R[2])
 
-    seed(700114) # constant seed to be able to catch errors
+    seed(700114)  # constant seed to be able to catch errors
     for K in range(100):
         R0 = Rot3(axis=[2*random()-1, 2*random()-1, 2*random()-1],
                   angle=random() * 2 * math.pi)
