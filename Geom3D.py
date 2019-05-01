@@ -902,7 +902,7 @@ class SimpleShape:
         this.defaultColor = rgb.yellow
         if orientation != None:
             this.orientation = orientation
-            if not orientation.isRot():
+            if not orientation.is_rot():
                 this.normal_direction = TRI_IN
         else:
             this.orientation = GeomTypes.E

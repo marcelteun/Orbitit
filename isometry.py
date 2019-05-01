@@ -1183,7 +1183,7 @@ class D2nDn(Dn):
             this.rotAxes = dn.rotAxes
             this.reflNormals = []
             for isom in this:
-                if isom.isRefl():
+                if isom.is_refl():
                     this.reflNormals.append(isom.planeN())
             this.order = d2n.order
 
