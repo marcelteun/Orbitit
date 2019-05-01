@@ -1184,7 +1184,7 @@ class D2nDn(Dn):
             this.reflNormals = []
             for isom in this:
                 if isom.is_refl():
-                    this.reflNormals.append(isom.planeN())
+                    this.reflNormals.append(isom.plane_normal())
             this.order = d2n.order
 
     def realiseSubgroups(this, sg):
@@ -1427,12 +1427,12 @@ class S4A4(A4):
             pn3 = GeomTypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0
             pn4 = GeomTypes.Rot3(axis = ax2, angle = eTurn) * ax0
             pn5 = GeomTypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0
-            s0 = GeomTypes.Refl3(planeN = pn0)
-            s1 = GeomTypes.Refl3(planeN = pn1)
-            s2 = GeomTypes.Refl3(planeN = pn2)
-            s3 = GeomTypes.Refl3(planeN = pn3)
-            s4 = GeomTypes.Refl3(planeN = pn4)
-            s5 = GeomTypes.Refl3(planeN = pn5)
+            s0 = GeomTypes.Refl3(normal=pn0)
+            s1 = GeomTypes.Refl3(normal=pn1)
+            s2 = GeomTypes.Refl3(normal=pn2)
+            s3 = GeomTypes.Refl3(normal=pn3)
+            s4 = GeomTypes.Refl3(normal=pn4)
+            s5 = GeomTypes.Refl3(normal=pn5)
             Set.__init__(this, [
                     GeomTypes.E,
                     h0, h1, h2,

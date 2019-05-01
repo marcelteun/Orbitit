@@ -815,7 +815,7 @@ class Transform3(tuple):
         return (self[0] == u[0]) or (self[0] == -u[0])
 
     def __has_refl(self):
-        normal = self.planeN()
+        normal = self.plane_normal()
         return hash(
             (
                 self.Refl,
@@ -827,20 +827,20 @@ class Transform3(tuple):
         )
 
     def __str_refl(self):
-        norm = self.planeN()
+        norm = self.plane_normal()
         return 'Reflection in plane with normal [{}, {}, {}]'.format(
             float2str(norm[0], DEFAULT_ROUND_FLOAT_MARGIN),
             float2str(norm[1], DEFAULT_ROUND_FLOAT_MARGIN),
             float2str(norm[2], DEFAULT_ROUND_FLOAT_MARGIN))
 
     def __refl2orbit(self, prec=DEFAULT_ROUND_FLOAT_MARGIN):
-        norm = self.planeN()
+        norm = self.plane_normal()
         return 'S {} {} {}'.format(
             float2str(norm[0], prec),
             float2str(norm[1], prec),
             float2str(norm[2], prec))
 
-    def planeN(self):
+    def plane_normal(self):
         """If this is a reflection, return the plane normal.
 
         Should only be called when this is a reflection.
@@ -1064,14 +1064,14 @@ class Rotz(Rot3):
 
 class Refl3(Transform3):
     """Define a rotation in 3D"""
-    def __new__(cls, quat=None, planeN=None):
+    def __new__(cls, quat=None, normal=None):
         """Define a 3D reflection is a plane
 
         Either define
         quat: quaternion representing the left (and right) quaternion
         multiplication for a reflection
         or
-        planeN: the 3D normal of the plane in which the reflection takes place.
+        normal: the 3D normal of the plane in which the reflection takes place.
         """
         result = None
         if _is_quat_pair(quat):
@@ -1088,14 +1088,14 @@ class Refl3(Transform3):
                 quat)
         else:
             try:
-                normal = planeN.normalise()
+                normal = normal.normalise()
                 quat = Quat(normal)
             except ZeroDivisionError:
-                quat = Quat(planeN)  # will fail on assert below:
+                quat = Quat(normal)  # will fail on assert below:
             result = Transform3.__new__(cls, [quat, quat])
             assert result.is_refl(), \
                 "normal {} doesn't define a valid 3D plane normal".format(
-                    str(planeN))
+                    str(normal))
         return result
 
 
@@ -2203,29 +2203,29 @@ if __name__ == '__main__':
 
     try:
         V = Vec3([0, 0, 0])
-        Refl3(planeN=V)
+        Refl3(normal=V)
         assert False
     except AssertionError:
         pass
 
     try:
         V = Vec3([1, 0, 0, 0])
-        Refl3(planeN=V)
+        Refl3(normal=V)
         assert False
     except AssertionError:
         pass
 
     try:
         V = Vec([1, 0])
-        Refl3(planeN=V)
+        Refl3(normal=V)
         assert False
     except IndexError:
         pass
 
     seed(700114)  # constant seed to be able to catch errors
     for K in range(100):
-        S0 = Refl3(planeN=Vec3([2*random()-1, 2*random()-1, 2*random()-1]))
-        S1 = Refl3(planeN=Vec3([2*random()-1, 2*random()-1, 2*random()-1]))
+        S0 = Refl3(normal=Vec3([2*random()-1, 2*random()-1, 2*random()-1]))
+        S1 = Refl3(normal=Vec3([2*random()-1, 2*random()-1, 2*random()-1]))
         R = S0 * S1
         assert not S0.is_rot()
         assert S0.is_refl()
@@ -2241,8 +2241,8 @@ if __name__ == '__main__':
         assert R * R.inverse() == E
 
     # border cases
-    S0 = Refl3(planeN=UX)
-    S1 = Refl3(planeN=UY)
+    S0 = Refl3(normal=UX)
+    S1 = Refl3(normal=UY)
     R = S0 * S1
     assert R.is_rot()
     assert not R.is_refl()
@@ -2254,8 +2254,8 @@ if __name__ == '__main__':
     assert not R.is_rot_inv()
     assert R == HalfTurn3(axis=UZ)
 
-    S0 = Refl3(planeN=UX)
-    S1 = Refl3(planeN=UZ)
+    S0 = Refl3(normal=UX)
+    S1 = Refl3(normal=UZ)
     R = S0 * S1
     assert R.is_rot()
     assert not R.is_refl()
@@ -2267,8 +2267,8 @@ if __name__ == '__main__':
     assert not R.is_rot_inv()
     assert R == HalfTurn3(axis=UY)
 
-    S0 = Refl3(planeN=UY)
-    S1 = Refl3(planeN=UZ)
+    S0 = Refl3(normal=UY)
+    S1 = Refl3(normal=UZ)
     R = S0 * S1
     assert R.is_rot()
     assert not R.is_refl()
@@ -2280,9 +2280,9 @@ if __name__ == '__main__':
     assert not R.is_rot_inv()
     assert R == HalfTurn3(axis=UX)
 
-    S0 = Refl3(planeN=UX)
-    S1 = Refl3(planeN=UY)
-    S2 = Refl3(planeN=UZ)
+    S0 = Refl3(normal=UX)
+    S1 = Refl3(normal=UY)
+    S2 = Refl3(normal=UZ)
     R = S0 * S1 * S2
     assert not R.is_rot()
     assert not R.is_refl()
@@ -2291,8 +2291,8 @@ if __name__ == '__main__':
     assert R == I
 
     # test order: 2 refl planes with 45 degrees in between: 90 rotation
-    S0 = Refl3(planeN=Vec3([0, 3, 0]))
-    S1 = Refl3(planeN=Vec3([-1, 1, 0]))
+    S0 = Refl3(normal=Vec3([0, 3, 0]))
+    S1 = Refl3(normal=Vec3([-1, 1, 0]))
     R = (S1 * S0)
     X = Rot3(axis=UZ, angle=QUARTER_TURN)
     assert R == X, 'Expected: %s, got %s' % (X, R)
@@ -2304,8 +2304,8 @@ if __name__ == '__main__':
     seed(760117)  # constant seed to be able to catch errors
     for K in range(100):
         N = Vec3([2*random()-1, 2*random()-1, 2*random()-1])
-        S0 = Refl3(planeN=N)
-        S1 = Refl3(planeN=-N)
+        S0 = Refl3(normal=N)
+        S1 = Refl3(normal=-N)
         assert S0 == S1, '{} should == {} (i={})'.format(S0, S1, K)
         R = S0 * S1
         assert R == E, 'refl*refl: {} should == {} (i={})'.format(R, E, K)
@@ -2313,8 +2313,8 @@ if __name__ == '__main__':
     # reflection in same plane: border cases
     BORDER_CASES = [UX, UY, UZ]
     for N in BORDER_CASES:
-        S0 = Refl3(planeN=N)
-        S1 = Refl3(planeN=-N)
+        S0 = Refl3(normal=N)
+        S1 = Refl3(normal=-N)
         assert S0 == S1, '{} should == {} (i={})'.format(S0, S1, N)
         R = S0 * S1
         assert R == E, 'refl*refl: {} should == {} (i={})'.format(R, E, N)
