@@ -24,7 +24,7 @@
 
 #import math
 import wx
-import GeomTypes
+import geomtypes
 import isometry
 import wx.lib.scrolledpanel as wxXtra
 
@@ -343,7 +343,7 @@ class Vector3DInput(wx.StaticBoxSizer):
             this.SetVertex(v)
 
     def GetVertex(this):
-        return GeomTypes.Vec3([
+        return geomtypes.Vec3([
                 this.__v[0].GetValue(),
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
@@ -454,7 +454,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             print '%s warning: nothing to delete.' % this.__class__.__name__
 
     def getVector(this, i):
-        return GeomTypes.Vec3([
+        return geomtypes.Vec3([
                 this.__v[i][0].GetValue(),
                 this.__v[i][1].GetValue(),
                 this.__v[i][2].GetValue(),
@@ -637,7 +637,7 @@ class Vector4DInput(wx.StaticBoxSizer):
         #ctrlId = e.GetId()
         vEvent = VectorUpdatedEvent(myEVT_VECTOR_UPDATED, this.GetId())
         vEvent.SetEventObject(this)
-        vEvent.SetVector(GeomTypes.Vec4([
+        vEvent.SetVector(geomtypes.Vec4([
                 this.__v[0].GetValue(),
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
@@ -646,7 +646,7 @@ class Vector4DInput(wx.StaticBoxSizer):
         this.__v[this.__ctrlIdIndex].GetEventHandler().ProcessEvent(vEvent)
 
     def GetValue(this):
-        return GeomTypes.Vec4([
+        return geomtypes.Vec4([
                 this.__v[0].GetValue(),
                 this.__v[1].GetValue(),
                 this.__v[2].GetValue(),
@@ -1130,7 +1130,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             inputType = sym.initPars[i]['type']
             if inputType == 'vec3':
                 v = gui.GetVertex()
-                if v != GeomTypes.Vec3([0, 0, 0]):
+                if v != geomtypes.Vec3([0, 0, 0]):
                     setup[sym.initPars[i]['par']] = v
             elif inputType == 'int':
                 v = gui.GetValue()

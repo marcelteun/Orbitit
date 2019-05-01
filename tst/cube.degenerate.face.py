@@ -1,18 +1,18 @@
 import Geom3D
-import GeomTypes
+import geomtypes
 import math
 
 Vs = [
-	GeomTypes.Vec3([ 1,  1,  1]),
-	GeomTypes.Vec3([-1,  1,  1]),
-	GeomTypes.Vec3([-1, -1,  1]),
-	GeomTypes.Vec3([ 1, -1,  1]),
-	GeomTypes.Vec3([ 1,  1, -1]),
-	GeomTypes.Vec3([-1,  1, -1]),
-	GeomTypes.Vec3([-1, -1, -1]),
-	GeomTypes.Vec3([ 1, -1, -1]),
-	GeomTypes.Vec3([ 1,  1, -2]),
-	GeomTypes.Vec3([.5,  1,  1]),
+	geomtypes.Vec3([ 1,  1,  1]),
+	geomtypes.Vec3([-1,  1,  1]),
+	geomtypes.Vec3([-1, -1,  1]),
+	geomtypes.Vec3([ 1, -1,  1]),
+	geomtypes.Vec3([ 1,  1, -1]),
+	geomtypes.Vec3([-1,  1, -1]),
+	geomtypes.Vec3([-1, -1, -1]),
+	geomtypes.Vec3([ 1, -1, -1]),
+	geomtypes.Vec3([ 1,  1, -2]),
+	geomtypes.Vec3([.5,  1,  1]),
 ]
 
 Fs = [

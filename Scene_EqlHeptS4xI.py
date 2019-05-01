@@ -26,12 +26,12 @@ import rgb
 import Heptagons
 import Geom3D
 import Scenes3D
-import GeomTypes
+import geomtypes
 
-from GeomTypes import HalfTurn3 as HalfTurn
-from GeomTypes import Rot3      as Rot
+from geomtypes import HalfTurn3 as HalfTurn
+from geomtypes import Rot3      as Rot
 
-vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
+vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
 Title = 'Equilateral Heptagons from Cube - Octahedron'
 
@@ -39,22 +39,22 @@ V2  = math.sqrt(2)
 hV2 = 1.0/V2
 tV3 = 1.0/math.sqrt(3)
 
-halfTurn = HalfTurn(axis=GeomTypes.UX)
+halfTurn = HalfTurn(axis=geomtypes.UX)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
         this.atanHV2 = Geom3D.Rad2Deg * math.atan(1/V2)
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
-                    GeomTypes.E,
-                    Rot(angle = GeomTypes.turn(0.25), axis = GeomTypes.UZ),
-                    Rot(angle = GeomTypes.turn(0.50), axis = GeomTypes.UZ),
-                    Rot(angle = GeomTypes.turn(0.75), axis = GeomTypes.UZ)
+                    geomtypes.E,
+                    Rot(angle = geomtypes.turn(0.25), axis = geomtypes.UZ),
+                    Rot(angle = geomtypes.turn(0.50), axis = geomtypes.UZ),
+                    Rot(angle = geomtypes.turn(0.75), axis = geomtypes.UZ)
                 ],
             # abuse the opposite isometry (even though this is not an opposite
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
-            #oppositeIsometry = GeomTypes.I,
+            #oppositeIsometry = geomtypes.I,
             oppositeIsometry = halfTurn,
             name = 'EglHeptS4xI'
         )

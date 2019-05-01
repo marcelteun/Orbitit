@@ -30,7 +30,7 @@ import sys
 import X3D
 import Scenes3D
 import Geom3D
-import GeomTypes
+import geomtypes
 import GeomGui
 import wx
 import pprint
@@ -1007,10 +1007,10 @@ class TransformSettingsWindow(wx.Frame):
         if Geom3D.eq(axis.norm(), 0):
             this.set_status("Please define a proper axis")
             return
-        transform = GeomTypes.Rot3(angle=DEG2RAD*angle, axis=axis)
+        transform = geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis)
         # Assume compound shape
         newVs = [
-            [transform * GeomTypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
+            [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
         this.canvas.shape.setVertexProperties(Vs=newVs)
         this.canvas.paint()
         this.set_status("Use 'Apply' to define a subsequent transform")
@@ -1636,20 +1636,20 @@ class ViewSettingsSizer(wx.BoxSizer):
                 this.angleScaleOffset,
                 this.angleScaleGui.GetValue()
             )
-        if GeomTypes.eq(angle, 0): return
+        if geomtypes.eq(angle, 0): return
         try:
             v1 = v1.make_orthogonal_to(v0)
             # if vectors are exchange, you actually specify the axial plane
             if this.exchangeGui.IsChecked():
-                if GeomTypes.eq(scale, 0):
-                    r = GeomTypes.Rot4(axialPlane = (v1, v0), angle = angle)
+                if geomtypes.eq(scale, 0):
+                    r = geomtypes.Rot4(axialPlane = (v1, v0), angle = angle)
                 else:
-                    r = GeomTypes.DoubleRot4(
+                    r = geomtypes.DoubleRot4(
                             axialPlane = (v1, v0),
                             angle = (angle, scale*angle)
                         )
             else:
-                    r = GeomTypes.DoubleRot4(
+                    r = geomtypes.DoubleRot4(
                             axialPlane = (v1, v0),
                             angle = (scale*angle, angle)
                         )
@@ -1665,7 +1665,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
             pass
         #except AssertionError:
-        #    zV = GeomTypes.Vec4([0, 0, 0, 0])
+        #    zV = geomtypes.Vec4([0, 0, 0, 0])
         #    if v0 == zV or v1 == zV:
         #        this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
         #    else:

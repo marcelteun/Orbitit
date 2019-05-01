@@ -24,13 +24,13 @@ import wx
 import math
 import rgb
 import Heptagons
-import GeomTypes
+import geomtypes
 import Geom3D
 import Scenes3D
 
 Title = 'Equilateral Heptagons Tetrahedron'
 
-vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
+vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
 V2  = math.sqrt(2)
 hV2 = 1.0/V2
@@ -40,10 +40,10 @@ class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this):
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
-                    GeomTypes.E,
-                    GeomTypes.HX,
-                    GeomTypes.HY,
-                    GeomTypes.HZ
+                    geomtypes.E,
+                    geomtypes.HX,
+                    geomtypes.HY,
+                    geomtypes.HZ
                 ],
             name = 'EglHeptS4A4'
         )

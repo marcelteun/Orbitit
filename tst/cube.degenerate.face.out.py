@@ -1,18 +1,18 @@
-import GeomTypes
+import geomtypes
 import Geom3D
 import isometry
 shape = Geom3D.SimpleShape(
     Vs = [
-        GeomTypes.Vec3([1.0, 1.0, 1.0]),
-        GeomTypes.Vec3([-1.0, 1.0, 1.0]),
-        GeomTypes.Vec3([-1.0, -1.0, 1.0]),
-        GeomTypes.Vec3([1.0, -1.0, 1.0]),
-        GeomTypes.Vec3([1.0, 1.0, -1.0]),
-        GeomTypes.Vec3([-1.0, 1.0, -1.0]),
-        GeomTypes.Vec3([-1.0, -1.0, -1.0]),
-        GeomTypes.Vec3([1.0, -1.0, -1.0]),
-        GeomTypes.Vec3([1.0, 1.0, -2.0]),
-        GeomTypes.Vec3([0.5, 1.0, 1.0])
+        geomtypes.Vec3([1.0, 1.0, 1.0]),
+        geomtypes.Vec3([-1.0, 1.0, 1.0]),
+        geomtypes.Vec3([-1.0, -1.0, 1.0]),
+        geomtypes.Vec3([1.0, -1.0, 1.0]),
+        geomtypes.Vec3([1.0, 1.0, -1.0]),
+        geomtypes.Vec3([-1.0, 1.0, -1.0]),
+        geomtypes.Vec3([-1.0, -1.0, -1.0]),
+        geomtypes.Vec3([1.0, -1.0, -1.0]),
+        geomtypes.Vec3([1.0, 1.0, -2.0]),
+        geomtypes.Vec3([0.5, 1.0, 1.0])
     ],
     Fs = [
         [0, 4, 8],

@@ -23,7 +23,7 @@
 
 import math
 #import re
-import GeomTypes
+import geomtypes
 import isometry
 
 def setup(**kwargs): return kwargs

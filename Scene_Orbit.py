@@ -28,7 +28,7 @@ import rgb
 import Geom3D
 import Geom4D
 import GeomGui
-import GeomTypes
+import geomtypes
 import Scenes3D
 import isometry
 import orbit
@@ -320,14 +320,14 @@ class CtrlWin(wx.Frame):
             this.statusBar.SetStatusText(txt)
 
     def updateOrientation(this, angle, axis):
-        if axis == GeomTypes.Vec3([0, 0, 0]):
-            rot = GeomTypes.E
+        if axis == geomtypes.Vec3([0, 0, 0]):
+            rot = geomtypes.E
             this.statusText(
                 'Rotation axis is the null-vector: applying identity',
                 LOG_INFO
             )
         else:
-            rot = GeomTypes.Rot3(
+            rot = geomtypes.Rot3(
                 axis=axis,
                 angle=Geom3D.Deg2Rad * angle
             )

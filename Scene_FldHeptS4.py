@@ -31,9 +31,9 @@ import Scenes3D
 from glob import glob
 from OpenGL.GL import *
 
-import GeomTypes
-from GeomTypes import Rot3 as Rot
-from GeomTypes import Vec3 as Vec
+import geomtypes
+from geomtypes import Rot3 as Rot
+from geomtypes import Vec3 as Vec
 
 Title = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 
@@ -116,14 +116,14 @@ V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 hV2 = V2/2
 
-o4_fld_0 = GeomTypes.Vec3([1, 0, 0])
-o4_fld_1 = GeomTypes.Vec3([0, 1, 1])
+o4_fld_0 = geomtypes.Vec3([1, 0, 0])
+o4_fld_1 = geomtypes.Vec3([0, 1, 1])
 isomS4 = isometry.S4(setup = {'o4axis0': o4_fld_0, 'o4axis1': o4_fld_1})
-o4fld = Rot(axis = o4_fld_1, angle = GeomTypes.qTurn)
+o4fld = Rot(axis = o4_fld_1, angle = geomtypes.qTurn)
 isomO4 = isometry.C4(setup = {'axis': o4_fld_1})
 
-o3axis = GeomTypes.Vec3([1/V3, 0, V2/V3])
-o3fld = Rot(axis = o3axis, angle = GeomTypes.THIRD_TURN)
+o3axis = geomtypes.Vec3([1/V3, 0, V2/V3])
+o3fld = Rot(axis = o3axis, angle = geomtypes.THIRD_TURN)
 isomO3 = isometry.C3(setup = {'axis': o3axis})
 
 # get the col faces array by using a similar shape here, so it is calculated

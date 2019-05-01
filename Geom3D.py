@@ -33,7 +33,7 @@ import Scenes3D
 import wx
 import sys
 import os
-import GeomTypes
+import geomtypes
 import isometry
 
 from OpenGL.GLU import *
@@ -67,10 +67,10 @@ from OpenGL.GL import *
 # Done
 # - edges after reading off file
 
-vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
+vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
-E = GeomTypes.E     # Identity
-I = GeomTypes.I     # Central inversion
+E = geomtypes.E     # Identity
+I = geomtypes.I     # Central inversion
 
 # constant that have deal with angles
 Rad2Deg = 180.0/math.pi
@@ -217,7 +217,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
                 if debug: print 'will read', nrOfVs, 'Vs', nrOfFs, 'Fs (', nrOfEs, 'edges)'
             elif state == states['readVs']:
                 # the function assumes: no comments in beween (x, y, z) of Vs
-                Vs.append(GeomTypes.Vec3(words[0:3]))
+                Vs.append(geomtypes.Vec3(words[0:3]))
                 if debug: print 'V[%d] =' % i,  Vs[-1]
                 i = i + 1
                 if i == nrOfVs:
@@ -298,7 +298,7 @@ def saveFile(fd, shape):
 
     The caller still need to close the filde descriptor afterwards
     """
-    fd.write("import GeomTypes\n")
+    fd.write("import geomtypes\n")
     fd.write("import Geom3D\n")
     fd.write("import isometry\n")
     fd.write("shape = %s" % repr(shape))
@@ -472,8 +472,8 @@ class Line2D(Line):
         for vertexNr in range(nrOfVs):
             v0 = FacetVs[iFacet[vertexNr]]
             v1 = FacetVs[iFacet[(vertexNr + 1) % nrOfVs]]
-            v0 = GeomTypes.Vec(v0)
-            v1 = GeomTypes.Vec(v1)
+            v0 = geomtypes.Vec(v0)
+            v1 = geomtypes.Vec(v1)
             if this.debug:
                 print '==> intersect line with edge nr', vertexNr, '=', v0, '->', v1
                 print '(with this current line obect: {', this.p, ' + t*', this.v, ')'
@@ -660,14 +660,14 @@ class Line3D(Line):
         a length of 3 and may be vec.
         """
         # make sure to have vec types internally
-        p0 = GeomTypes.Vec3(p0)
+        p0 = geomtypes.Vec3(p0)
         if p1 == None:
             assert v != None
-            v = GeomTypes.Vec3(v)
+            v = geomtypes.Vec3(v)
             Line.__init__(this, p0, v = v, d = 3, isSegment = isSegment)
         else:
             assert v == None
-            p1 = GeomTypes.Vec3(p1)
+            p1 = geomtypes.Vec3(p1)
             Line.__init__(this, p0, p1, d = 3, isSegment = isSegment)
 
     # redefine to get vec3 types:
@@ -756,13 +756,13 @@ class Plane:
         assert(not P0 == P2), '\n  P0 = %s,\n  P2 = %s' % (str(P0), str(P2))
         assert(not P1 == P2), '\n  P1 = %s,\n  P2 = %s' % (str(P1), str(P2))
         this.N = this.norm(P0, P1, P2)
-        this.D = -this.N * GeomTypes.Vec3(P0)
+        this.D = -this.N * geomtypes.Vec3(P0)
 
     def norm(this, P0, P1, P2):
         """calculate the norm for the plane
         """
-        v1 = GeomTypes.Vec3(P0) - GeomTypes.Vec3(P1)
-        v2 = GeomTypes.Vec3(P0) - GeomTypes.Vec3(P2)
+        v1 = geomtypes.Vec3(P0) - geomtypes.Vec3(P1)
+        v2 = geomtypes.Vec3(P0) - geomtypes.Vec3(P2)
         return v1.cross(v2).normalize()
 
     def intersectWithPlane(this, plane):
@@ -780,20 +780,20 @@ class Plane:
         V = N0.cross(N1)
         #V = V.normalise()
         # for toPsPiecesStr this.N == [0, 0, 1]; hanlde more efficiently.
-        if N0 == GeomTypes.Vec([0, 0, 1]):
+        if N0 == geomtypes.Vec([0, 0, 1]):
             # simplified situation from below:
             z = -this.D
-            M = GeomTypes.Mat([GeomTypes.Vec(N1[0:2]), GeomTypes.Vec(V[0:2])])
+            M = geomtypes.Mat([geomtypes.Vec(N1[0:2]), geomtypes.Vec(V[0:2])])
             #print 'M', M
-            #print 'V', GeomTypes.Vec([-plane.D - N1[2]*z, -V[2]*z])
-            Q = M.solve(GeomTypes.Vec([-plane.D - N1[2]*z, -V[2]*z]))
-            Q = GeomTypes.Vec([Q[0], Q[1], z])
+            #print 'V', geomtypes.Vec([-plane.D - N1[2]*z, -V[2]*z])
+            Q = M.solve(geomtypes.Vec([-plane.D - N1[2]*z, -V[2]*z]))
+            Q = geomtypes.Vec([Q[0], Q[1], z])
         else:
             # See bottom of page 86 of Maths for 3D Game Programming.
-            M = GeomTypes.Mat([N0, N1, V])
+            M = geomtypes.Mat([N0, N1, V])
             #print 'M', M
-            #print 'V', GeomTypes.Vec([-this.D, -plane.D, 0])
-            Q = M.solve(GeomTypes.Vec([-this.D, -plane.D, 0]))
+            #print 'V', geomtypes.Vec([-this.D, -plane.D, 0])
+            Q = M.solve(geomtypes.Vec([-this.D, -plane.D, 0]))
         return Line3D(Q, v = V)
 
     def toStr(this, precision = 2):
@@ -905,7 +905,7 @@ class SimpleShape:
             if not orientation.is_rot():
                 this.normal_direction = TRI_IN
         else:
-            this.orientation = GeomTypes.E
+            this.orientation = geomtypes.E
         if this.dbgPrn:
             print '%s.__init__' % this.name
             print 'this.colorData:'
@@ -925,7 +925,7 @@ class SimpleShape:
                 repr(v).reindent(s.indent) for v in this.Vs)
             )
         except AttributeError:
-            print 'ERROR: Are you sure the vertices are all of type GeomTypes.Vec3?'
+            print 'ERROR: Are you sure the vertices are all of type geomtypes.Vec3?'
             raise
         s = s.add_decr_line('],')
         s = s.add_line('Fs = [')
@@ -1290,7 +1290,7 @@ class SimpleShape:
             this.Vs[f[0]], this.Vs[f[1]], this.Vs[f[2]]
         ).normal(normalise)
         if this.normal_direction == TRI_OUT or this.normal_direction == TRI_IN:
-            v0 = GeomTypes.Vec3(this.Vs[f[0]])
+            v0 = geomtypes.Vec3(this.Vs[f[0]])
             outwards = v0.norm() < (v0 + normal).norm()
             if ((outwards and this.normal_direction == TRI_IN) or
                 (not outwards and this.normal_direction == TRI_OUT)
@@ -1342,7 +1342,7 @@ class SimpleShape:
             vi1 = this.Es[ei+1]
             if vi0 < vi1: t = (vi0, vi1)
             else:         t = (vi1, vi0)
-            l = (GeomTypes.Vec3(this.Vs[vi1]) - GeomTypes.Vec3(this.Vs[vi0])
+            l = (geomtypes.Vec3(this.Vs[vi1]) - geomtypes.Vec3(this.Vs[vi0])
                 ).norm()
             e2l[t] = l
             l = round(l, precision)
@@ -1931,7 +1931,7 @@ class SimpleShape:
             print '********toPsPiecesStr********'
             for i in range(len(this.Vs)):
                 print 'V[', i, '] =', this.Vs[i]
-        GeomTypes.set_eq_float_margin(margin)
+        geomtypes.set_eq_float_margin(margin)
         try:
             for i in faceIndices:
                 if not debug:
@@ -1970,7 +1970,7 @@ class SimpleShape:
                     if debug: print 'to2DAngle:', to2DAngle
                     to2Daxis = norm.cross(zAxis)
                     if debug: print 'to2Daxis:', to2Daxis
-                    Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
+                    Mrot = geomtypes.Rot3(angle = to2DAngle, axis = to2Daxis)
                     # add vertices to vertex array
                     for v in this.Vs:
                         Vs.append(Mrot*v)
@@ -2124,12 +2124,12 @@ class SimpleShape:
                 PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
         except AssertionError, PrecisionError:
             # catching assertion errors, to be able to set back margin
-            GeomTypes.set_eq_float_margin(margin)
+            geomtypes.set_eq_float_margin(margin)
             raise
         print # print a line feed
 
         # restore margin
-        GeomTypes.reset_eq_float_margin()
+        geomtypes.reset_eq_float_margin()
 
         #print PsDoc.toStr()
         return PsDoc.toStr()
@@ -2200,7 +2200,7 @@ class SimpleShape:
         debug = True
         debug = False
         if debug: print '********intersectFacets********'
-        margin, GeomTypes.eq_float_margin = GeomTypes.eq_float_margin, margin
+        margin, geomtypes.eq_float_margin = geomtypes.eq_float_margin, margin
         for i in faceIndices:
             # TODO: problem Vs is calculated per face...
             #       clean up later...?
@@ -2225,7 +2225,7 @@ class SimpleShape:
             PsPoints = []
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = GeomTypes.Rot3(angle = to2DAngle, axis = to2Daxis)
+                Mrot = geomtypes.Rot3(angle = to2DAngle, axis = to2Daxis)
                 # add vertices to vertex array
                 for v in this.Vs:
                     Vs.append(Mrot*vec(v))
@@ -2419,7 +2419,7 @@ class SimpleShape:
                 )
 
         # restore margin
-        GeomTypes.eq_float_margin = margin
+        geomtypes.eq_float_margin = margin
 
     def getDome(this, level = 2):
         shape = None
@@ -2965,7 +2965,7 @@ class IsometricShape(CompoundShape):
                 repr(v).reindent(s.indent) for v in this.baseShape.Vs)
             )
         except AttributeError:
-            print 'ERROR: Are you sure the vertices are all of type GeomTypes.Vec3?'
+            print 'ERROR: Are you sure the vertices are all of type geomtypes.Vec3?'
             raise
         s = s.add_decr_line('],')
         s = s.add_line('Fs = [')
@@ -2984,7 +2984,7 @@ class IsometricShape(CompoundShape):
                     repr(n).reindent(s.indent) for n in this.baseShape.Ns)
                 )
             except AttributeError:
-                print 'ERROR: Are you sure the normals are all of type GeomTypes.Vec3?'
+                print 'ERROR: Are you sure the normals are all of type geomtypes.Vec3?'
                 raise
             s = s.add_decr_line('],')
         s = s.add_line('colors = [')
@@ -3035,8 +3035,8 @@ class IsometricShape(CompoundShape):
             }
         assert (
                 oppositeIsometry == None or
-                isinstance(oppositeIsometry, GeomTypes.Transform3)
-            ), 'Either oppositeIsometry should be None or it should have be of type GeomTypes.Transform3'
+                isinstance(oppositeIsometry, geomtypes.Transform3)
+            ), 'Either oppositeIsometry should be None or it should have be of type geomtypes.Transform3'
         this.order = len(directIsometries)
         if oppositeIsometry != None:
             this.order = 2*this.order
@@ -3380,7 +3380,7 @@ class SymmetricShape(IsometricShape):
         symmetry and the cube S4xI. The former is used as stabSym and the latter
         as finalSym.
         The following parameters can be used:
-        with v = lambda x, y, z: GeomTypes.Vec3([x, y, z])
+        with v = lambda x, y, z: geomtypes.Vec3([x, y, z])
         Vs = [v(1, 1, 1), v(1, -1, 1), v(1, -1, -1), v(1, 1, -1)] and
         Fs = [[0, 1, 2, 3]]
         finalSym = S4xI(setup = {'o4axis0': v(0, 0, 1), 'o4axis1': v(0, 1, 0)})
@@ -3513,18 +3513,18 @@ class SymmetricShape(IsometricShape):
                 cols = [col for isom in isoms]
             for i, isom in enumerate(isoms):
                 s += "c {} {} {} ".format(
-                    GeomTypes.float2str(cols[i][0][0][0], prec),
-                    GeomTypes.float2str(cols[i][0][0][1], prec),
-                    GeomTypes.float2str(cols[i][0][0][2], prec))
+                    geomtypes.float2str(cols[i][0][0][0], prec),
+                    geomtypes.float2str(cols[i][0][0][1], prec),
+                    geomtypes.float2str(cols[i][0][0][2], prec))
                 s += isom.to_orbit_str(prec)
                 s += '\n'
         s += "{}".format(no_of_transforms)
         for angle in angle_domain:
-            s += ' {}'.format(GeomTypes.float2str(angle, prec))
+            s += ' {}'.format(geomtypes.float2str(angle, prec))
         s += "\nR _0 {} {} {}\n".format(
-            GeomTypes.float2str(axis[0], prec),
-            GeomTypes.float2str(axis[1], prec),
-            GeomTypes.float2str(axis[2], prec))
+            geomtypes.float2str(axis[0], prec),
+            geomtypes.float2str(axis[1], prec),
+            geomtypes.float2str(axis[2], prec))
 
         return s
 

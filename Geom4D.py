@@ -27,7 +27,7 @@ import glue
 import X3D
 import PS
 import Scenes3D
-import GeomTypes
+import geomtypes
 import Geom3D
 import wx
 
@@ -130,9 +130,9 @@ class SimpleShape:
             else:
                 dict = kwargs
             if 'Vs' in dict and dict['Vs'] != None:
-                this.Vs  = [ GeomTypes.Vec4(v) for v in dict['Vs'] ]
+                this.Vs  = [ geomtypes.Vec4(v) for v in dict['Vs'] ]
             if 'Ns' in dict and dict['Ns'] != None:
-                this.Ns  = [ GeomTypes.Vec4(n) for n in dict['Ns'] ]
+                this.Ns  = [ geomtypes.Vec4(n) for n in dict['Ns'] ]
                 #assert len(this.Ns) == len(this.Vs)
             if 'radius' in dict and dict['radius'] != None:
                 this.v.radius = dict['radius']
@@ -440,7 +440,7 @@ class SimpleShape:
         """
         Rotate the polychoron by the specified rotation.
 
-        rotation: a rotation of type GeomTypes.Rot4.
+        rotation: a rotation of type geomtypes.Rot4.
         successive: specify if this is applied on any previous transform, i.e.
                     if this is not a new transforma.
         """
@@ -474,7 +474,7 @@ class SimpleShape:
                 q1 = Vec4([0, 0, 1, 0])
         if Axis.W & plane:
             q1 = Vec4([0, 0, 0, 1])
-        r = GeomTypes.Rot4(axialPlane = (q0, q1), angle = angle)
+        r = geomtypes.Rot4(axialPlane = (q0, q1), angle = angle)
         if not successive or this.rot4 == None: this.rot4 = r
         else: this.rot4 = r * this.rot4
         this.projectedTo3D = False
@@ -604,15 +604,15 @@ class SimpleShape:
                 cellFs = [[vIndex + offset for vIndex in f] for f in cellFs]
                 # Now scale from gravitation centre:
                 if isScaledDown:
-                    g = GeomTypes.Vec3([0, 0, 0])
+                    g = geomtypes.Vec3([0, 0, 0])
                     sum = 0
                     for vIndex in range(len(cellVs)):
-                        g = g + nrUsed[vIndex] * GeomTypes.Vec3(cellVs[vIndex])
+                        g = g + nrUsed[vIndex] * geomtypes.Vec3(cellVs[vIndex])
                         sum = sum + nrUsed[vIndex]
                     if sum != 0:
                         g = g / sum
                     #print this.name, 'g:', g
-                    cellVs = [this.c.scale * (GeomTypes.Vec3(v) - g) + g for v in cellVs]
+                    cellVs = [this.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs]
 
 
                 shapeVs.extend(cellVs)
@@ -755,7 +755,7 @@ if __name__ == '__main__':
 
     n = w.normalise()
 
-    # TODO Move some of these tests to GeomTypes, after cgtypes rm, any relevant?
+    # TODO Move some of these tests to geomtypes, after cgtypes rm, any relevant?
 
     # check if n is still of type vec and not cgtypes.vec4 (which doesn't have
     # a is_parallel)

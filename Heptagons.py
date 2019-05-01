@@ -31,10 +31,10 @@ import string
 import Geom3D
 from OpenGL.GL import *
 
-import GeomTypes
-from GeomTypes import Rot3      as Rot
-from GeomTypes import HalfTurn3 as HalfTurn
-from GeomTypes import Vec3      as Vec
+import geomtypes
+from geomtypes import Rot3      as Rot
+from geomtypes import HalfTurn3 as HalfTurn
+from geomtypes import Vec3      as Vec
 
 V3 = math.sqrt(3)
 
@@ -1660,13 +1660,13 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def posHeptagon(this):
 	this.heptagon.fold(this.fold1, this.fold2, this.oppFold1, this.oppFold2,
             keepV0 = False, fold = this.foldHeptagon, rotate = this.rotateFold)
-        this.heptagon.translate(H * GeomTypes.UY)
+        this.heptagon.translate(H * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
         this.heptagon.rotate(
-            -GeomTypes.UX, GeomTypes.QUARTER_TURN - this.dihedralAngle)
-        this.heptagon.translate(this.height*GeomTypes.UZ)
+            -geomtypes.UX, geomtypes.QUARTER_TURN - this.dihedralAngle)
+        this.heptagon.translate(this.height*geomtypes.UZ)
 	if this.posAngle != 0:
-	    this.heptagon.rotate(-GeomTypes.UZ, this.posAngle)
+	    this.heptagon.rotate(-geomtypes.UZ, this.posAngle)
 
     def setV(this):
         #print this.name, "setV"
@@ -2850,7 +2850,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 class EqlHeptagonShape(Geom3D.IsometricShape):
     def __init__(this,
-        directIsometries = [GeomTypes.E],
+        directIsometries = [geomtypes.E],
         oppositeIsometry = None,
         name = 'EqlHeptagonShape'
     ):

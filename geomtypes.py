@@ -3,7 +3,7 @@
 Module with geometrical types.
 """
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2019 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #

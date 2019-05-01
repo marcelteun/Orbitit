@@ -1,16 +1,16 @@
-import GeomTypes
+import geomtypes
 import Geom3D
 import isometry
 shape = Geom3D.IsometricShape(
   Vs = [
-    GeomTypes.Vec3([1.0, 1.0, 1.0]),
-    GeomTypes.Vec3([-1.0, 1.0, 1.0]),
-    GeomTypes.Vec3([-1.0, -1.0, 1.0]),
-    GeomTypes.Vec3([1.0, -1.0, 1.0]),
-    GeomTypes.Vec3([1.0, 1.0, -1.0]),
-    GeomTypes.Vec3([-1.0, 1.0, -1.0]),
-    GeomTypes.Vec3([-1.0, -1.0, -1.0]),
-    GeomTypes.Vec3([1.0, -1.0, -1.0]),
+    geomtypes.Vec3([1.0, 1.0, 1.0]),
+    geomtypes.Vec3([-1.0, 1.0, 1.0]),
+    geomtypes.Vec3([-1.0, -1.0, 1.0]),
+    geomtypes.Vec3([1.0, -1.0, 1.0]),
+    geomtypes.Vec3([1.0, 1.0, -1.0]),
+    geomtypes.Vec3([-1.0, 1.0, -1.0]),
+    geomtypes.Vec3([-1.0, -1.0, -1.0]),
+    geomtypes.Vec3([1.0, -1.0, -1.0]),
   ],
   Fs = [
     [0, 1, 2, 3],
@@ -29,13 +29,13 @@ shape = Geom3D.IsometricShape(
     ([[0.54296900000000003, 0.52343799999999996, 0.30468800000000001]], []),
   ],
   directIsometries = [
-    GeomTypes.Rot3((GeomTypes.Quat([-0.809016994375, -0.5, 0.309016994375, -3.08426926158e-14]), GeomTypes.Quat([-0.809016994375, 0.5, -0.309016994375, 3.08426926158e-14]))),
-    GeomTypes.Rot3((GeomTypes.Quat([0.809016994375, -0.309016994375, -4.98739097981e-14, -0.5]), GeomTypes.Quat([0.809016994375, 0.309016994375, 4.98739097981e-14, 0.5]))),
-    GeomTypes.Rot3((GeomTypes.Quat([0.5, 0.5, -0.5, -0.5]), GeomTypes.Quat([0.5, -0.5, 0.5, 0.5]))),
-    GeomTypes.Rot3((GeomTypes.Quat([0.5, -4.53526105559e-14, -0.309016994375, 0.809016994375]), GeomTypes.Quat([0.5, 4.53526105559e-14, 0.309016994375, -0.809016994375]))),
-    GeomTypes.Rot3((GeomTypes.Quat([4.582785177e-15, -0.5, 0.809016994375, 0.309016994375]), GeomTypes.Quat([4.582785177e-15, 0.5, -0.809016994375, -0.309016994375]))),
+    geomtypes.Rot3((geomtypes.Quat([-0.809016994375, -0.5, 0.309016994375, -3.08426926158e-14]), geomtypes.Quat([-0.809016994375, 0.5, -0.309016994375, 3.08426926158e-14]))),
+    geomtypes.Rot3((geomtypes.Quat([0.809016994375, -0.309016994375, -4.98739097981e-14, -0.5]), geomtypes.Quat([0.809016994375, 0.309016994375, 4.98739097981e-14, 0.5]))),
+    geomtypes.Rot3((geomtypes.Quat([0.5, 0.5, -0.5, -0.5]), geomtypes.Quat([0.5, -0.5, 0.5, 0.5]))),
+    geomtypes.Rot3((geomtypes.Quat([0.5, -4.53526105559e-14, -0.309016994375, 0.809016994375]), geomtypes.Quat([0.5, 4.53526105559e-14, 0.309016994375, -0.809016994375]))),
+    geomtypes.Rot3((geomtypes.Quat([4.582785177e-15, -0.5, 0.809016994375, 0.309016994375]), geomtypes.Quat([4.582785177e-15, 0.5, -0.809016994375, -0.309016994375]))),
   ],
   unfoldOrbit = False,
   name = "5cubes.py",
-  orientation = GeomTypes.Rot3((GeomTypes.Quat([1.0, 0.0, 0.0, 0.0]), GeomTypes.Quat([1.0, -0.0, -0.0, -0.0])))
+  orientation = geomtypes.Rot3((geomtypes.Quat([1.0, 0.0, 0.0, 0.0]), geomtypes.Quat([1.0, -0.0, -0.0, -0.0])))
 )

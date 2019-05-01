@@ -3,7 +3,7 @@ from __future__ import print_function
 import math
 import os
 
-import GeomTypes
+import geomtypes
 import Geom3D
 import isometry
 import orbit
@@ -14,10 +14,10 @@ col_green = [0, 1, 0]
 
 if False:
     Vs = [
-        GeomTypes.Vec3([1, 1, 1]),
-        GeomTypes.Vec3([-1, -1, 1]),
-        GeomTypes.Vec3([1, -1, -1]),
-        GeomTypes.Vec3([-1, 1, -1])
+        geomtypes.Vec3([1, 1, 1]),
+        geomtypes.Vec3([-1, -1, 1]),
+        geomtypes.Vec3([1, -1, -1]),
+        geomtypes.Vec3([-1, 1, -1])
     ]
     Fs = [
         [0, 2, 1],
@@ -27,25 +27,25 @@ if False:
     ]
 
     final_sym = isometry.S4(
-        setup={'o4axis0': GeomTypes.Vec3([1.0, 0.0, 0.0]),
-               'o4axis1': GeomTypes.Vec3([0.0, 1.0, 0.0])})
+        setup={'o4axis0': geomtypes.Vec3([1.0, 0.0, 0.0]),
+               'o4axis1': geomtypes.Vec3([0.0, 1.0, 0.0])})
     stab_sym = isometry.C2(
         setup={'n': 2,
-               'axis': GeomTypes.Vec3([0.0, 0.0, 1.0])})
+               'axis': geomtypes.Vec3([0.0, 0.0, 1.0])})
     col_sym = isometry.D4
     col_alt = 2
     cols = [col_red, col_yellow, col_green]
 else:
     Vs = [
-        GeomTypes.Vec3([0, 0, 0]),
-        GeomTypes.Vec3([2, 2, 2]),
-        GeomTypes.Vec3([2, 0, 2]),
-        GeomTypes.Vec3([2, -2, 2]),
-        GeomTypes.Vec3([0, -2, 2]),
-        GeomTypes.Vec3([-2, -2, 2]),
-        GeomTypes.Vec3([-2, 0, 2]),
-        GeomTypes.Vec3([-2, 2, 2]),
-        GeomTypes.Vec3([0, 2, 2]),
+        geomtypes.Vec3([0, 0, 0]),
+        geomtypes.Vec3([2, 2, 2]),
+        geomtypes.Vec3([2, 0, 2]),
+        geomtypes.Vec3([2, -2, 2]),
+        geomtypes.Vec3([0, -2, 2]),
+        geomtypes.Vec3([-2, -2, 2]),
+        geomtypes.Vec3([-2, 0, 2]),
+        geomtypes.Vec3([-2, 2, 2]),
+        geomtypes.Vec3([0, 2, 2]),
     ]
     Fs = [
         [0, 2, 1],
@@ -54,11 +54,11 @@ else:
         [2, 3, 1]
     ]
     final_sym = isometry.S4xI(
-        setup={'o4axis0': GeomTypes.Vec3([1.0, 0.0, 0.0]),
-               'o4axis1': GeomTypes.Vec3([0.0, 1.0, 0.0])})
+        setup={'o4axis0': geomtypes.Vec3([1.0, 0.0, 0.0]),
+               'o4axis1': geomtypes.Vec3([0.0, 1.0, 0.0])})
     stab_sym = isometry.C4(
         setup={'n': 4,
-               'axis': GeomTypes.Vec3([0.0, 0.0, 1.0])})
+               'axis': geomtypes.Vec3([0.0, 0.0, 1.0])})
     col_sym = isometry.S4
     col_alt = 0
     cols = [col_red, col_yellow]

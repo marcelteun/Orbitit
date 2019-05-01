@@ -27,12 +27,12 @@ import rgb
 import Heptagons
 import Geom3D
 import Scenes3D
-import GeomTypes
+import geomtypes
 
-from GeomTypes import HalfTurn3 as HalfTurn
-from GeomTypes import Rot3      as Rot
+from geomtypes import HalfTurn3 as HalfTurn
+from geomtypes import Rot3      as Rot
 
-vec = lambda x, y, z: GeomTypes.Vec3([x, y, z])
+vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
 Title = 'Equilateral Heptagons from Great Icosahedron - Great Stellated Dodecahedron'
 
@@ -47,18 +47,18 @@ Ca   = 1.0/V3
 H0   = 2.0*Ca/tau2
 Rl   = vec(1.0, -Ca, H0)
 
-halfTurn = HalfTurn(axis=GeomTypes.UX)
+halfTurn = HalfTurn(axis=geomtypes.UX)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
-        t1 = Rot(angle = GeomTypes.turn(0.2), axis = vec(0, -Dtau2, 1))
-        t2 = Rot(angle = GeomTypes.turn(0.4), axis = vec(0, -Dtau2, 1))
-        t3 = Rot(angle = GeomTypes.turn(0.6), axis = vec(0, -Dtau2, 1))
-        t4 = Rot(angle = GeomTypes.turn(0.8), axis = vec(0, -Dtau2, 1))
+        t1 = Rot(angle = geomtypes.turn(0.2), axis = vec(0, -Dtau2, 1))
+        t2 = Rot(angle = geomtypes.turn(0.4), axis = vec(0, -Dtau2, 1))
+        t3 = Rot(angle = geomtypes.turn(0.6), axis = vec(0, -Dtau2, 1))
+        t4 = Rot(angle = geomtypes.turn(0.8), axis = vec(0, -Dtau2, 1))
         h0 = HalfTurn(axis=vec(0, -1, tau2))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
-                    GeomTypes.E, t1, t2, t3, t4,
+                    geomtypes.E, t1, t2, t3, t4,
                     h0, h0*t1, h0*t2, h0*t3, h0*t4,
                     t1*h0, t1*h0*t1, t1*h0*t2, t1*h0*t3, t1*h0*t4,
                     t2*h0, t2*h0*t1, t2*h0*t2, t2*h0*t3, t2*h0*t4,
@@ -68,7 +68,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             # abuse the opposite isometry (even though this is not an opposite
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
-            #oppositeIsometry = GeomTypes.I,
+            #oppositeIsometry = geomtypes.I,
             oppositeIsometry = halfTurn,
             name = 'EglHeptA5xI_GI'
         )
@@ -122,7 +122,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             if heptN == None:
               this.errorStr = 'No valid equilateral heptagon for this position'
               return
-            Mr = Rot(axis = GeomTypes.Vec3(Vs[2]), angle = GeomTypes.turn(0.2))
+            Mr = Rot(axis = geomtypes.Vec3(Vs[2]), angle = geomtypes.turn(0.2))
 
             # p is a corner of the pentagon inside the pentagram
             # p is rotated 1/5th turn to form a triangle

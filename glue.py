@@ -27,7 +27,7 @@
 import math
 import X3D
 import PS
-import GeomTypes
+import geomtypes
 
 X3D_DEFAULT_V_NAME     = 'coords'
 X3D_DEFAULT_PROTO_NAME = 'proto'
@@ -101,7 +101,7 @@ def cylinderEdgeToX3d(
         radius = 0.1,
         precision = 5
     ):
-    vz = GeomTypes.UY
+    vz = geomtypes.UY
     dv = v1 - v0
     l = dv.norm()
     if l == 0:
@@ -289,7 +289,7 @@ def mergeVs(Vs, Fs, precision = 12):
     replace_by = [-1 for v in Vs]
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
-    GeomTypes.set_eq_float_margin(math.pow(10, -precision))
+    geomtypes.set_eq_float_margin(math.pow(10, -precision))
     print 'Find multiple occurences of vertices\n',
     for i in range(len(Vs) - 1, -1, -1):
         print '\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)),
@@ -299,7 +299,7 @@ def mergeVs(Vs, Fs, precision = 12):
                 replaced = True
                 replace_by[i] = j
                 break
-    GeomTypes.reset_eq_float_margin()
+    geomtypes.reset_eq_float_margin()
     # Apply the changes now. Don't delete the vertices, since that means
     # re-indexing
     print '\nClean up Fs'

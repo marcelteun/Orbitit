@@ -32,9 +32,9 @@ import Scenes3D
 from glob import glob
 from OpenGL.GL import *
 
-import GeomTypes
-from GeomTypes import Rot3 as Rot
-from GeomTypes import Vec3 as Vec
+import geomtypes
+from geomtypes import Rot3 as Rot
+from geomtypes import Vec3 as Vec
 
 Title = 'Polyhedra with Folded Regular Heptagons and Icosahedral Symmetry'
 
@@ -108,13 +108,13 @@ tau2 = tau + 1
 dtau = 1.0/tau
 
 isomA5 = isometry.A5()
-o5axis = GeomTypes.Vec([1, 0, tau])
-o5fld = Rot(axis = o5axis, angle = GeomTypes.turn(1.0/5))
-_o5fld = Rot(axis = o5axis, angle = GeomTypes.turn(-1.0/5))
+o5axis = geomtypes.Vec([1, 0, tau])
+o5fld = Rot(axis = o5axis, angle = geomtypes.turn(1.0/5))
+_o5fld = Rot(axis = o5axis, angle = geomtypes.turn(-1.0/5))
 isomO5 = isometry.C5(setup = {'axis': o5axis})
 
-o3axis = GeomTypes.Vec([0, dtau, tau])
-o3fld = Rot(axis = o3axis, angle = GeomTypes.THIRD_TURN)
+o3axis = geomtypes.Vec([0, dtau, tau])
+o3fld = Rot(axis = o3axis, angle = geomtypes.THIRD_TURN)
 isomO3 = isometry.C3(setup = {'axis': o3axis})
 
 # get the col faces array by using a similar shape here, so it is calculated

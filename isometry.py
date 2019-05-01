@@ -23,24 +23,24 @@
 
 import math
 import re
-import GeomTypes
+import geomtypes
 from copy import copy
 
-X = GeomTypes.UX
-Y = GeomTypes.UY
-Z = GeomTypes.UZ
+X = geomtypes.UX
+Y = geomtypes.UY
+Z = geomtypes.UZ
 
-hTurn = GeomTypes.HALF_TURN
-qTurn = GeomTypes.QUARTER_TURN
+hTurn = geomtypes.HALF_TURN
+qTurn = geomtypes.QUARTER_TURN
 eTurn = qTurn/2         # one eighth turn
-tTurn = GeomTypes.THIRD_TURN
+tTurn = geomtypes.THIRD_TURN
 
 acos_1_V3  = math.acos(1.0 / math.sqrt(3))
 asin_1_V3  = math.asin(1.0 / math.sqrt(3))
 asin_V2_V3 = acos_1_V3
 acos_V2_V3 = asin_1_V3
 
-I  = GeomTypes.I       # central inversion
+I  = geomtypes.I       # central inversion
 
 class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
@@ -122,7 +122,7 @@ class Set(set):
                 new.update(this * d)
             return new
         else:
-            # Set * GeomTypes.Transform3
+            # Set * geomtypes.Transform3
             return Set([e * o for e in this])
 
     def __rmul__(this, o):
@@ -150,7 +150,7 @@ class Set(set):
 
         return isGroup
         # the following is not needed to check, is done implicitly:
-        # and (GeomTypes.E in this)
+        # and (geomtypes.E in this)
 
     def isSubgroup(this, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
@@ -168,7 +168,7 @@ class Set(set):
         #this.debug = True
         if this.debug: print this.__class__.__name__, 'subgroup'
         try:
-            if isinstance(o, GeomTypes.Transform3):
+            if isinstance(o, geomtypes.Transform3):
                 # generate the quotient set THIS / o
                 assert o in this
                 subgroup = Set([o])
@@ -261,7 +261,7 @@ class Set(set):
         result = copy(this)
         for e in this:
             result.add(e.inverse())
-        result.add(GeomTypes.E)
+        result.add(geomtypes.E)
         this.clear()
         this.update(result.close(maxIter))
 
@@ -316,7 +316,7 @@ class E(Set):
     mixed = False
     def __init__(this, isometries = None, setup = {}):
             this.checkSetup(setup)
-            Set.__init__(this, [GeomTypes.E])
+            Set.__init__(this, [geomtypes.E])
 
     def realiseSubgroups(this, sg):
         """
@@ -336,7 +336,7 @@ class ExI(Set):
     directParentSetup = {}
     def __init__(this, isometries = None, setup = {}):
             this.checkSetup(setup)
-            Set.__init__(this, [GeomTypes.E, GeomTypes.I])
+            Set.__init__(this, [geomtypes.E, geomtypes.I])
 
     def realiseSubgroups(this, sg):
         """
@@ -398,10 +398,10 @@ class Cn(Set):
                 this.n = n
 
             angle = 2 * math.pi / n
-            try:   r = GeomTypes.Rot3(axis = axis, angle = angle)
+            try:   r = geomtypes.Rot3(axis = axis, angle = angle)
             except TypeError:
                 # assume axis has Rot3 type
-                r = GeomTypes.Rot3(axis = axis.axis(), angle = angle)
+                r = geomtypes.Rot3(axis = axis.axis(), angle = angle)
 
             isometries = [r]
             for i in range(n-1):
@@ -508,7 +508,7 @@ class C2nCn(Cn):
             this.n = cn.n
             s['n'] = 2 * s['n']
             c2n = Cn(setup = s)
-            Set.__init__(this, cn | ((c2n-cn) * GeomTypes.I))
+            Set.__init__(this, cn | ((c2n-cn) * geomtypes.I))
             this.rotAxes = {'n': cn.rotAxes['n']}
             this.order = c2n.order
 
@@ -748,7 +748,7 @@ class DnCn(Cn):
             s['axis_n'] = s['axis']
             del s['axis']
             dn = Dn(setup = s)
-            Set.__init__(this, cn | ((dn-cn) * GeomTypes.I))
+            Set.__init__(this, cn | ((dn-cn) * geomtypes.I))
             this.n = s['n']
             this.rotAxes = {'n': cn.rotAxes['n']}
             this.reflNormals = dn.rotAxes[2]
@@ -872,7 +872,7 @@ class Dn(Set):
                 else:           n = 2
                 if n == 0: n = 1
 
-            h = GeomTypes.HalfTurn3(axis=axis_2)
+            h = geomtypes.HalfTurn3(axis=axis_2)
             cn = Cn(setup = {'axis': axis_n, 'n': n})
             isometries = [isom for isom in cn]
             hs = [isom * h for isom in cn]
@@ -1174,7 +1174,7 @@ class D2nDn(Dn):
             s['n'] = 2 * s['n']
             d2n = Dn(setup = s)
             this.directParentSetup = copy(s)
-            Set.__init__(this, dn | ((d2n-dn) * GeomTypes.I))
+            Set.__init__(this, dn | ((d2n-dn) * geomtypes.I))
             this.rotAxes = dn.rotAxes
             this.reflNormals = []
             for isom in this:
@@ -1328,7 +1328,7 @@ class A4(Set):
             R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
 
             Set.__init__(this, [
-                    GeomTypes.E,
+                    geomtypes.E,
                     H0, H1, H2,
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2
                 ])
@@ -1410,26 +1410,26 @@ class S4A4(A4):
             ax0 = h0.axis()
             ax1 = h1.axis()
             ax2 = h2.axis()
-            ri0_1 = GeomTypes.RotInv3(axis = ax0, angle = qTurn)
-            ri0_3 = GeomTypes.RotInv3(axis = ax0, angle = 3*qTurn)
-            ri1_1 = GeomTypes.RotInv3(axis = ax1, angle = qTurn)
-            ri1_3 = GeomTypes.RotInv3(axis = ax1, angle = 3*qTurn)
-            ri2_1 = GeomTypes.RotInv3(axis = ax2, angle = qTurn)
-            ri2_3 = GeomTypes.RotInv3(axis = ax2, angle = 3*qTurn)
-            pn0 = GeomTypes.Rot3(axis = ax0, angle = eTurn) * ax1
-            pn1 = GeomTypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1
-            pn2 = GeomTypes.Rot3(axis = ax1, angle = eTurn) * ax0
-            pn3 = GeomTypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0
-            pn4 = GeomTypes.Rot3(axis = ax2, angle = eTurn) * ax0
-            pn5 = GeomTypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0
-            s0 = GeomTypes.Refl3(normal=pn0)
-            s1 = GeomTypes.Refl3(normal=pn1)
-            s2 = GeomTypes.Refl3(normal=pn2)
-            s3 = GeomTypes.Refl3(normal=pn3)
-            s4 = GeomTypes.Refl3(normal=pn4)
-            s5 = GeomTypes.Refl3(normal=pn5)
+            ri0_1 = geomtypes.RotInv3(axis = ax0, angle = qTurn)
+            ri0_3 = geomtypes.RotInv3(axis = ax0, angle = 3*qTurn)
+            ri1_1 = geomtypes.RotInv3(axis = ax1, angle = qTurn)
+            ri1_3 = geomtypes.RotInv3(axis = ax1, angle = 3*qTurn)
+            ri2_1 = geomtypes.RotInv3(axis = ax2, angle = qTurn)
+            ri2_3 = geomtypes.RotInv3(axis = ax2, angle = 3*qTurn)
+            pn0 = geomtypes.Rot3(axis = ax0, angle = eTurn) * ax1
+            pn1 = geomtypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1
+            pn2 = geomtypes.Rot3(axis = ax1, angle = eTurn) * ax0
+            pn3 = geomtypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0
+            pn4 = geomtypes.Rot3(axis = ax2, angle = eTurn) * ax0
+            pn5 = geomtypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0
+            s0 = geomtypes.Refl3(normal=pn0)
+            s1 = geomtypes.Refl3(normal=pn1)
+            s2 = geomtypes.Refl3(normal=pn2)
+            s3 = geomtypes.Refl3(normal=pn3)
+            s4 = geomtypes.Refl3(normal=pn4)
+            s5 = geomtypes.Refl3(normal=pn5)
             Set.__init__(this, [
-                    GeomTypes.E,
+                    geomtypes.E,
                     h0, h1, h2,
                     r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2,
                     s0, s1, s2, s3, s4, s5,
@@ -1464,7 +1464,7 @@ class S4A4(A4):
             isoms = []
             for o3 in this.rotAxes[3]:
                 for rn in this.reflNormals:
-                    if GeomTypes.eq(rn*o3, 0):
+                    if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
@@ -1554,7 +1554,7 @@ class A4xI(A4):
             isoms = []
             for o2 in this.rotAxes[2]:
                 for rn in this.rotAxes[2]:
-                    if GeomTypes.eq(rn*o2, 0):
+                    if geomtypes.eq(rn*o2, 0):
                         isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 3, 'len(isoms) == %d != 3' % len(isoms)
@@ -1641,38 +1641,38 @@ class S4(Set):
             ax0 = q0_2.axis()
             ax1 = q1_2.axis()
             ax2 = q2_2.axis()
-            q0_1 = GeomTypes.Rot3(axis = ax0, angle = qTurn)
-            q0_3 = GeomTypes.Rot3(axis = ax0, angle = 3*qTurn)
-            q1_1 = GeomTypes.Rot3(axis = ax1, angle = qTurn)
-            q1_3 = GeomTypes.Rot3(axis = ax1, angle = 3*qTurn)
-            q2_1 = GeomTypes.Rot3(axis = ax2, angle = qTurn)
-            q2_3 = GeomTypes.Rot3(axis = ax2, angle = 3*qTurn)
-            h0 = GeomTypes.Rot3(
-                    axis = GeomTypes.Rot3(axis = ax0, angle = eTurn) * ax1,
+            q0_1 = geomtypes.Rot3(axis = ax0, angle = qTurn)
+            q0_3 = geomtypes.Rot3(axis = ax0, angle = 3*qTurn)
+            q1_1 = geomtypes.Rot3(axis = ax1, angle = qTurn)
+            q1_3 = geomtypes.Rot3(axis = ax1, angle = 3*qTurn)
+            q2_1 = geomtypes.Rot3(axis = ax2, angle = qTurn)
+            q2_3 = geomtypes.Rot3(axis = ax2, angle = 3*qTurn)
+            h0 = geomtypes.Rot3(
+                    axis = geomtypes.Rot3(axis = ax0, angle = eTurn) * ax1,
                     angle = hTurn
                 )
-            h1 = GeomTypes.Rot3(
-                    axis = GeomTypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1,
+            h1 = geomtypes.Rot3(
+                    axis = geomtypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1,
                     angle = hTurn
                 )
-            h2 = GeomTypes.Rot3(
-                    axis = GeomTypes.Rot3(axis = ax1, angle = eTurn) * ax0,
+            h2 = geomtypes.Rot3(
+                    axis = geomtypes.Rot3(axis = ax1, angle = eTurn) * ax0,
                     angle = hTurn
                 )
-            h3 = GeomTypes.Rot3(
-                    axis = GeomTypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0,
+            h3 = geomtypes.Rot3(
+                    axis = geomtypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0,
                     angle = hTurn
                 )
-            h4 = GeomTypes.Rot3(
-                    axis = GeomTypes.Rot3(axis = ax2, angle = eTurn) * ax0,
+            h4 = geomtypes.Rot3(
+                    axis = geomtypes.Rot3(axis = ax2, angle = eTurn) * ax0,
                     angle = hTurn
                 )
-            h5 = GeomTypes.Rot3(
-                    axis = GeomTypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0,
+            h5 = geomtypes.Rot3(
+                    axis = geomtypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0,
                     angle = hTurn
                 )
             Set.__init__(this, [
-                    GeomTypes.E,
+                    geomtypes.E,
                     q0_1, q0_2, q0_3, q1_1, q1_2, q1_3, q2_1, q2_2, q2_3,
                     r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2,
                     h0, h1, h2, h3, h4, h5
@@ -1713,7 +1713,7 @@ class S4(Set):
             isoms = []
             for o3 in this.rotAxes[3]:
                 for o2 in this.rotAxes[2]:
-                    if GeomTypes.eq(o2*o3, 0):
+                    if geomtypes.eq(o2*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
@@ -1728,7 +1728,7 @@ class S4(Set):
             isoms = [sg(setup = {'axis_n': o4a[0], 'axis_2': o4a[1]})]
             for o4 in this.rotAxes[4]:
                 for o2 in this.rotAxes[2]:
-                    if GeomTypes.eq(o2*o4, 0):
+                    if geomtypes.eq(o2*o4, 0):
                         isoms.append(sg(setup = {'axis_n': o4, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
@@ -1828,7 +1828,7 @@ class S4xI(S4):
             isoms = []
             for o3 in this.rotAxes[3]:
                 for o2 in this.rotAxes[2]:
-                    if GeomTypes.eq(o2*o3, 0):
+                    if geomtypes.eq(o2*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
@@ -1837,7 +1837,7 @@ class S4xI(S4):
             isoms = []
             for a4 in this.rotAxes[4]:
                 for rn in this.rotAxes[2]:
-                    if GeomTypes.eq(rn*a4, 0):
+                    if geomtypes.eq(rn*a4, 0):
                         isoms.append(sg(setup = {'axis_n': a4, 'normal_r': rn}))
                         break
             return isoms
@@ -1850,7 +1850,7 @@ class S4xI(S4):
             o2a = this.rotAxes[2]
             for a4 in o4a:
                 for a2 in o2a:
-                    if GeomTypes.eq(a2*a4, 0):
+                    if geomtypes.eq(a2*a4, 0):
                         isoms.append(sg(setup = {'axis_n': a4, 'axis_2': a2}))
                         break
             return isoms
@@ -1860,7 +1860,7 @@ class S4xI(S4):
             o2a = this.rotAxes[2]
             for a4 in o4a:
                 for a2 in o2a:
-                    if GeomTypes.eq(a2*a4, 0):
+                    if geomtypes.eq(a2*a4, 0):
                         isoms.append(sg(setup = {'axis_n': a4, 'axis_2': a2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
@@ -1869,7 +1869,7 @@ class S4xI(S4):
             isoms = []
             for o3 in this.rotAxes[3]:
                 for rn in this.rotAxes[2]:
-                    if GeomTypes.eq(rn*o3, 0):
+                    if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
@@ -1886,12 +1886,12 @@ class S4xI(S4):
             o2a = this.rotAxes[2]
             for a4 in o4a:
                 for a2 in o2a:
-                    if GeomTypes.eq(a2*a4, 0):
+                    if geomtypes.eq(a2*a4, 0):
                         isoms.append(sg(setup = {'axis_n': a4, 'normal_r': a2}))
                         break
             for o2 in this.rotAxes[2]:
                 for rn in this.rotAxes[4]:
-                    if GeomTypes.eq(rn*o2, 0):
+                    if geomtypes.eq(rn*o2, 0):
                         isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 12, 'len(isoms) == %d != 12' % len(isoms)
@@ -1932,14 +1932,14 @@ def generateD2(o2axis0, o2axis1):
     Returns 3 orthogonal halfturns for D2
     """
     # if axes is specified as a transform:
-    if isinstance(o2axis0, GeomTypes.Transform3):
+    if isinstance(o2axis0, geomtypes.Transform3):
         o2axis0 = o2axis0.axis()
-    if isinstance(o2axis1, GeomTypes.Transform3):
+    if isinstance(o2axis1, geomtypes.Transform3):
         o2axis1 = o2axis1.axis()
-    assert GeomTypes.eq(GeomTypes.Vec3(o2axis0) * GeomTypes.Vec3(o2axis1), 0), (
+    assert geomtypes.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1), 0), (
             "Error: axes not orthogonal")
-    H0 = GeomTypes.HalfTurn3(axis=o2axis0)
-    H1 = GeomTypes.Rot3(axis = o2axis1, angle = hTurn)
+    H0 = geomtypes.HalfTurn3(axis=o2axis0)
+    H1 = geomtypes.Rot3(axis = o2axis1, angle = hTurn)
     return (H0, H1, H1 * H0)
 
 def generateA4O3(D2HalfTurns):
@@ -1955,19 +1955,19 @@ def generateA4O3(D2HalfTurns):
     # imagine A4 is part of S4 positioned in a cube
     # H0, H1, H2 go through the cube face centres
     # define a quarter turn around H2
-    Q = GeomTypes.Rot3(axis = H2.axis(), angle = qTurn)
+    Q = geomtypes.Rot3(axis = H2.axis(), angle = qTurn)
     # h0 and h1 go through cube edge centres
     h0 = Q * H0
     h1 = Q * H1
     # o3axis goes through 1 of the 2 cube vertices that form the edge
     # between the faces which centres are on H0 and H1
-    o3axis = GeomTypes.Rot3(
+    o3axis = geomtypes.Rot3(
             axis = h0.axis(), angle = asin_1_V3
         ) * h1.axis()
     # R1_1_3: 1/3 rotation around the first order 3 axis
     # R1_2_3: 2/3 rotation around the first order 3 axis
-    R1_1_3 = GeomTypes.Rot3(axis = o3axis, angle = tTurn)
-    R1_2_3 = GeomTypes.Rot3(axis = o3axis, angle = 2*tTurn)
+    R1_1_3 = geomtypes.Rot3(axis = o3axis, angle = tTurn)
+    R1_2_3 = geomtypes.Rot3(axis = o3axis, angle = 2*tTurn)
     R4_1_3 = R1_1_3 * H0
     R3_1_3 = R1_1_3 * H1
     R2_1_3 = R1_1_3 * H2
@@ -1990,8 +1990,8 @@ class A5(Set):
         {'type': 'vec3', 'par': 'o5axis', 'lab': "5-fold axis (nearest)"}
     ]
     defaultSetup = {
-        'o3axis': GeomTypes.Vec3([1, 1, 1]),
-        'o5axis': GeomTypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
+        'o3axis': geomtypes.Vec3([1, 1, 1]),
+        'o5axis': geomtypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
     }
     order = 60
     mixed = False
@@ -2023,8 +2023,8 @@ class A5(Set):
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
-            R0_1_5 = GeomTypes.Rot3(axis = o5axis, angle = turn5)
-            R0_1_3 = GeomTypes.Rot3(axis = o3axis, angle = turn3)
+            R0_1_5 = geomtypes.Rot3(axis = o5axis, angle = turn5)
+            R0_1_3 = geomtypes.Rot3(axis = o3axis, angle = turn3)
             o3axes = [o3axis]                           # o3[0]
             o5axes = [R0_1_3 * o5axis]                  # o5[0]
             for i in range(4):
@@ -2040,22 +2040,22 @@ class A5(Set):
                     for i in range(5)
                 ])                                      # o2[5:10]
             o3axes.extend([
-                    GeomTypes.HalfTurn3(axis = o2axes[i+5]) * o3axes[i]
+                    geomtypes.HalfTurn3(axis = o2axes[i+5]) * o3axes[i]
                     for i in range(5)
                 ])                                      # o3[5:10] ... done
             o2axes.extend([
-                    GeomTypes.HalfTurn3(axis = o2axes[i]) * o2axes[(i+2) % 5]
+                    geomtypes.HalfTurn3(axis = o2axes[i]) * o2axes[(i+2) % 5]
                     for i in range(5)
                 ])                                      # o2[10:15] ... done
-            transforms = [GeomTypes.E]
+            transforms = [geomtypes.E]
             for a in o5axes:
                 transforms.extend([
-                    GeomTypes.Rot3(axis = a, angle = i * turn5)
+                    geomtypes.Rot3(axis = a, angle = i * turn5)
                     for i in range(1, 5)
                 ])
             for a in o3axes:
                 transforms.extend([
-                    GeomTypes.Rot3(axis = a, angle = i * turn3)
+                    geomtypes.Rot3(axis = a, angle = i * turn3)
                     for i in range(1, 3)
                 ])
 
@@ -2075,7 +2075,7 @@ class A5(Set):
 #         |
 #       o2_11
 
-            transforms.extend([GeomTypes.HalfTurn3(axis = a) for a in o2axes])
+            transforms.extend([geomtypes.HalfTurn3(axis = a) for a in o2axes])
             Set.__init__(this, transforms)
             #for i in range(len(transforms)):
             #    print 'transform %d: %s' % (i, transforms[i])
@@ -2338,40 +2338,40 @@ DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
 if __name__ == '__main__':
 
     print 'testing creation of set',
-    g = Set([GeomTypes.HX, GeomTypes.HY])
+    g = Set([geomtypes.HX, geomtypes.HY])
     print '....ok'
     #print 'Initialised set g:', g
     print "testing 'in' relation",
-    assert GeomTypes.Rot3(axis = [1, 0, 0], angle = hTurn) in g
-    assert GeomTypes.Rot3(axis = [-1, 0, 0], angle = -hTurn) in g
+    assert geomtypes.Rot3(axis = [1, 0, 0], angle = hTurn) in g
+    assert geomtypes.Rot3(axis = [-1, 0, 0], angle = -hTurn) in g
     print '......ok'
     print "testing 'close' function",
     cg = g.close()
     #print 'Set g after closing:'
     #print cg
     assert len(cg) == 4
-    assert GeomTypes.HX in cg
-    assert GeomTypes.HY in cg
-    assert GeomTypes.HZ in cg
-    assert GeomTypes.E in cg
+    assert geomtypes.HX in cg
+    assert geomtypes.HY in cg
+    assert geomtypes.HZ in cg
+    assert geomtypes.E in cg
     print '...ok'
 
     print 'testing creation of set',
-    g = Set([GeomTypes.Rot3(axis = X, angle = qTurn)])
+    g = Set([geomtypes.Rot3(axis = X, angle = qTurn)])
     print '....ok'
     print "testing 'in' relation",
-    GeomTypes.Rot3(axis =  X, angle = qTurn)  in g
-    GeomTypes.Rot3(axis = -X, angle = -qTurn) in g
+    geomtypes.Rot3(axis =  X, angle = qTurn)  in g
+    geomtypes.Rot3(axis = -X, angle = -qTurn) in g
     print '......ok'
     print "testing 'close' function",
     cg = g.close()
     #print 'Set g after closing:'
     #print cg
     assert len(cg) == 4
-    GeomTypes.Rot3(axis =  GeomTypes.Vec3([1, 0, 0]), angle = qTurn)  in cg
-    GeomTypes.Rot3(axis = -GeomTypes.Vec3([1, 0, 0]), angle = -qTurn) in cg
-    assert GeomTypes.HX in cg
-    assert GeomTypes.E in cg
+    geomtypes.Rot3(axis =  geomtypes.Vec3([1, 0, 0]), angle = qTurn)  in cg
+    geomtypes.Rot3(axis = -geomtypes.Vec3([1, 0, 0]), angle = -qTurn) in cg
+    assert geomtypes.HX in cg
+    assert geomtypes.E in cg
     print '...ok'
 
     print 'testing creation of A4',
@@ -2379,25 +2379,25 @@ if __name__ == '__main__':
     print '.....ok'
     print 'checking result',
     assert len(a4) == 12
-    assert GeomTypes.E in a4
-    assert GeomTypes.HX in a4
-    assert GeomTypes.HY in a4
-    assert GeomTypes.HZ in a4
-    t0 = GeomTypes.Rot3(axis = [1,  1,  1], angle =   tTurn)
+    assert geomtypes.E in a4
+    assert geomtypes.HX in a4
+    assert geomtypes.HY in a4
+    assert geomtypes.HZ in a4
+    t0 = geomtypes.Rot3(axis = [1,  1,  1], angle =   tTurn)
     assert t0 in a4
-    t1 = GeomTypes.Rot3(axis = [1,  1,  1], angle = 2*tTurn)
+    t1 = geomtypes.Rot3(axis = [1,  1,  1], angle = 2*tTurn)
     assert t1 in a4
-    t2 = GeomTypes.Rot3(axis = [1, -1,  1], angle =   tTurn)
+    t2 = geomtypes.Rot3(axis = [1, -1,  1], angle =   tTurn)
     assert t2 in a4
-    t3 = GeomTypes.Rot3(axis = [1, -1,  1], angle = 2*tTurn)
+    t3 = geomtypes.Rot3(axis = [1, -1,  1], angle = 2*tTurn)
     assert t3 in a4
-    t4 = GeomTypes.Rot3(axis = [1, -1, -1], angle =   tTurn)
+    t4 = geomtypes.Rot3(axis = [1, -1, -1], angle =   tTurn)
     assert t4 in a4
-    t5 = GeomTypes.Rot3(axis = [1, -1, -1], angle = 2*tTurn)
+    t5 = geomtypes.Rot3(axis = [1, -1, -1], angle = 2*tTurn)
     assert t5 in a4
-    t6 = GeomTypes.Rot3(axis = [1,  1, -1], angle =   tTurn)
+    t6 = geomtypes.Rot3(axis = [1,  1, -1], angle =   tTurn)
     assert t6 in a4
-    t7 = GeomTypes.Rot3(axis = [1,  1, -1], angle = 2*tTurn)
+    t7 = geomtypes.Rot3(axis = [1,  1, -1], angle = 2*tTurn)
     assert t7 in a4
     print '............ok'
 
@@ -2407,29 +2407,29 @@ if __name__ == '__main__':
                 # try list argument
                 o2axis0 = [1, 1, 1],
                 # try Rot3 argument
-                o2axis1 = GeomTypes.HalfTurn3(axis=[1, -1, 0])
+                o2axis1 = geomtypes.HalfTurn3(axis=[1, -1, 0])
             )
         )
     #print 'A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
     print '.....ok'
     # this a4 is the above a4 repositioned as follows:
-    r0 = GeomTypes.Rot3(axis = Z, angle = eTurn)
-    r1 = GeomTypes.Rot3(axis = [1, -1, 0], angle = math.atan(1/math.sqrt(2)))
+    r0 = geomtypes.Rot3(axis = Z, angle = eTurn)
+    r1 = geomtypes.Rot3(axis = [1, -1, 0], angle = math.atan(1/math.sqrt(2)))
     r = r1 * r0
     print 'checking result',
     assert len(a4) == 12
-    assert GeomTypes.E in a4
-    assert GeomTypes.HalfTurn3(axis=r*X) in a4
-    assert GeomTypes.HalfTurn3(axis=r*Y) in a4
-    assert GeomTypes.HalfTurn3(axis=r*Z) in a4
-    assert GeomTypes.Rot3(axis = r * t0.axis(), angle =   tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t1.axis(), angle = 2*tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t2.axis(), angle =   tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t3.axis(), angle = 2*tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t4.axis(), angle =   tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t5.axis(), angle = 2*tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t6.axis(), angle =   tTurn) in a4
-    assert GeomTypes.Rot3(axis = r * t7.axis(), angle = 2*tTurn) in a4
+    assert geomtypes.E in a4
+    assert geomtypes.HalfTurn3(axis=r*X) in a4
+    assert geomtypes.HalfTurn3(axis=r*Y) in a4
+    assert geomtypes.HalfTurn3(axis=r*Z) in a4
+    assert geomtypes.Rot3(axis = r * t0.axis(), angle =   tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t1.axis(), angle = 2*tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t2.axis(), angle =   tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t3.axis(), angle = 2*tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t4.axis(), angle =   tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t5.axis(), angle = 2*tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t6.axis(), angle =   tTurn) in a4
+    assert geomtypes.Rot3(axis = r * t7.axis(), angle = 2*tTurn) in a4
     print '............ok'
     #print a4
     print 'test grouping this',
@@ -2444,7 +2444,7 @@ if __name__ == '__main__':
     assert len(a4) == 12
     # print 'group a4:'
     # print a4
-    d2 = Set([GeomTypes.HX, GeomTypes.HY])
+    d2 = Set([geomtypes.HX, geomtypes.HY])
     d2.group()
     assert len(d2) == 4
     # print 'has a subgroup D2:'
@@ -2475,7 +2475,7 @@ if __name__ == '__main__':
     a4 = A4()
     assert a4.isSubgroup(s4)
     assert not s4.isSubgroup(a4)
-    a4.add(GeomTypes.I)
+    a4.add(geomtypes.I)
     assert not a4.isSubgroup(s4)
     print '....ok'
 

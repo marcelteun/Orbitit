@@ -1,17 +1,17 @@
 import Geom3D
-import GeomTypes
+import geomtypes
 
 Vs = [
-	GeomTypes.Vec3([ 1,  1,  1]),
-	GeomTypes.Vec3([-1,  1,  1]),
-	GeomTypes.Vec3([-1, -1,  1]),
-	GeomTypes.Vec3([ 1, -1,  1]),
-	GeomTypes.Vec3([ 1,  1, -1]),
-	GeomTypes.Vec3([-1,  1, -1]),
-	GeomTypes.Vec3([-1, -1, -1]),
-	GeomTypes.Vec3([ 1, -1, -1]),
-	GeomTypes.Vec3([ 1,  1, -2]),
-	GeomTypes.Vec3([.5,  1,  1]),
+	geomtypes.Vec3([ 1,  1,  1]),
+	geomtypes.Vec3([-1,  1,  1]),
+	geomtypes.Vec3([-1, -1,  1]),
+	geomtypes.Vec3([ 1, -1,  1]),
+	geomtypes.Vec3([ 1,  1, -1]),
+	geomtypes.Vec3([-1,  1, -1]),
+	geomtypes.Vec3([-1, -1, -1]),
+	geomtypes.Vec3([ 1, -1, -1]),
+	geomtypes.Vec3([ 1,  1, -2]),
+	geomtypes.Vec3([.5,  1,  1]),
 ]
 
 Fs = [
@@ -26,12 +26,12 @@ Fs = [
 shape0 = Geom3D.SimpleShape(Vs = Vs, Fs = Fs)
 
 Vs = [
-	GeomTypes.Vec3([ 0,  0,  2]),
-	GeomTypes.Vec3([ 2,  0,  0]),
-	GeomTypes.Vec3([ 0,  2,  0]),
-	GeomTypes.Vec3([-2,  0,  0]),
-	GeomTypes.Vec3([ 0, -2,  0]),
-	GeomTypes.Vec3([ 0,  0,  2]),
+	geomtypes.Vec3([ 0,  0,  2]),
+	geomtypes.Vec3([ 2,  0,  0]),
+	geomtypes.Vec3([ 0,  2,  0]),
+	geomtypes.Vec3([-2,  0,  0]),
+	geomtypes.Vec3([ 0, -2,  0]),
+	geomtypes.Vec3([ 0,  0,  2]),
 ]
 
 Fs = [

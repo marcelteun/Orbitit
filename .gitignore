@@ -22,6 +22,7 @@ Data_FldHeptA4
 *bac
 *.patch
 !.gitignore
+!.pylintrc
 
 # Files:
 # not a part of the browser, used to calculate special positions that will be

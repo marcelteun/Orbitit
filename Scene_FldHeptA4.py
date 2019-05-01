@@ -32,9 +32,9 @@ import Scenes3D
 from glob import glob
 from OpenGL.GL import *
 
-import GeomTypes
-from GeomTypes import Rot3 as Rot
-from GeomTypes import Vec3 as Vec
+import geomtypes
+from geomtypes import Rot3 as Rot
+from geomtypes import Vec3 as Vec
 
 Title = 'Polyhedra with Folded Regular Heptagons and Tetrahedral Symmetry'
 
@@ -141,9 +141,9 @@ def Vlen(v0, v1):
 useIsom = isometry.A4()
 egShape = Geom3D.IsometricShape(
     Vs = [
-	GeomTypes.Vec3([0, 0, 1]),
-	GeomTypes.Vec3([0, 1, 1]),
-	GeomTypes.Vec3([1, 1, 1])
+	geomtypes.Vec3([0, 0, 1]),
+	geomtypes.Vec3([0, 1, 1]),
+	geomtypes.Vec3([1, 1, 1])
     ],
     Fs = [[0, 1, 2]],
     directIsometries = useIsom,
@@ -289,8 +289,8 @@ class Shape(Heptagons.FldHeptagonShape):
         #
         #             2' = 13                7 = 5'
 
-        Rr = Rot(axis = Vec([ 1, 1, 1]), angle = GeomTypes.THIRD_TURN)
-        Rl = Rot(axis = Vec([-1, 1, 1]), angle = -GeomTypes.THIRD_TURN)
+        Rr = Rot(axis = Vec([ 1, 1, 1]), angle = geomtypes.THIRD_TURN)
+        Rl = Rot(axis = Vec([-1, 1, 1]), angle = -geomtypes.THIRD_TURN)
         Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))       # Vs[7]
         Vs.append(Rr * Vs[0])                                  # Vs[8]
         Vs.append(Rr * Vs[1])                                  # Vs[9]
