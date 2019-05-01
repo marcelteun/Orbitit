@@ -22,7 +22,7 @@ Module with geometrical types.
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 from __future__ import print_function
 import math
@@ -30,7 +30,7 @@ import indent
 
 turn = lambda r: r * 2 * math.pi
 radials = lambda r: math.pi * r / 180
-degrees = lambda r: 180.0 * r   / math.pi
+degrees = lambda r: 180.0 * r / math.pi
 
 fullTurn = turn(1)
 hTurn = turn(0.5)
@@ -39,6 +39,7 @@ tTurn = turn(1.0/3)
 
 eqFloatMargin = 1.0e-10
 roundFloatMargin = 10
+
 
 def eq(a, b, margin=eqFloatMargin):
     """
@@ -50,6 +51,7 @@ def eq(a, b, margin=eqFloatMargin):
             True is returned.
     """
     return abs(a - b) < margin
+
 
 def float2str(f, prec):
     """Convert float to string only using prec decimals
@@ -64,6 +66,7 @@ def float2str(f, prec):
     if s == "-0":
         s = "0"
     return s
+
 
 def get_mat_rot(w, x, y, z, sign=1):
     dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
@@ -97,7 +100,8 @@ class Vec(tuple):
     def __str__(self):
         try:
             s = '[%s' % self[0]
-            for i in range(1, len(self)): s = '%s, %s' % (s, self[i])
+            for i in range(1, len(self)):
+                s = '%s, %s' % (s, self[i])
             return '%s]' % s
         except IndexError:
             return '[]'
@@ -118,19 +122,14 @@ class Vec(tuple):
         return self.__class__([b - a for a, b in zip(self, w)])
 
     def __eq__(self, w):
-        #print '%s ?= %s' % (self, w)
         try:
             r = len(self) == len(w)
         except TypeError:
-            #print 'info: comparing different types in Vec (%s and %s)' % (
-            #        self.__class__.__name__, w.__class__.__name__
-            #    )
             return False
         for a, b in zip(self, w):
             if not r:
                 break
             r = r and eq(a, b)
-            #print '%s ?= %s : %s (d = %s)' % (a, b, eq(a, b), a-b)
         return r
 
     def __ne__(self, w):
@@ -166,7 +165,8 @@ class Vec(tuple):
 
     def squareNorm(self):
         r = 0
-        for a in self: r += a*a
+        for a in self:
+            r += a*a
         return r
 
     def norm(self):
@@ -182,6 +182,7 @@ class Vec(tuple):
 
     # TODO cross product from GA?
 
+
 class Vec3(Vec):
     """Define a Euclidean vector in 3D"""
     def __new__(cls, v):
@@ -195,9 +196,11 @@ class Vec3(Vec):
 
     # TODO implement Scenes3D.getAxis2AxisRotation here
 
+
 ux = Vec3([1, 0, 0])
 uy = Vec3([0, 1, 0])
 uz = Vec3([0, 0, 1])
+
 
 class Vec4(Vec):
     """Define a Euclidean vector in 4D"""
@@ -205,8 +208,8 @@ class Vec4(Vec):
         return Vec.__new__(cls, [float(v[i]) for i in range(4)])
 
     def isParallel(self, v):
-        z0 = z1 = z2 = z3 = False # expresses whether self[i] == v[i] == 0
-        q0, q1, q2, q3 = 1, 2, 3, 4 # initialise all differently
+        z0 = z1 = z2 = z3 = False  # expresses whether self[i] == v[i] == 0
+        q0, q1, q2, q3 = 1, 2, 3, 4  # initialise all differently
         try:
             q0 = self[0]/v[0]
         except ZeroDivisionError:
@@ -251,8 +254,8 @@ class Vec4(Vec):
         """
         # say v = [vx, vy, vz, vw]
         # and w = [wx, wy, wz, ww]
-        # Now we change w into w' by a linear combination of v and w, so that w'
-        # still lies in the plane spanned by v and w:
+        # Now we change w into w' by a linear combination of v and w, so that
+        # w' still lies in the plane spanned by v and w:
         # w' = p*v + q*w  with p,q are reals
         # i.e. w' = [p*vx + q*wx, p*vy + q*wy, p*vz + q*wz, p*vw + q*ww]
         #
@@ -287,21 +290,23 @@ class Vec4(Vec):
         vw_yw = v[1] * w[3] - v[3] * w[1]
         vw_zw = v[2] * w[3] - v[3] * w[2]
         return Vec4([
-            self[1]  * vw_zw -  self[2] * vw_yw  +  self[3] * vw_yz,
-            -self[0] * vw_zw +  self[2] * vw_xw  -  self[3] * vw_xz,
-            self[0]  * vw_yw -  self[1] * vw_xw  +  self[3] * vw_xy,
-            -self[0] * vw_yz +  self[1] * vw_xz  -  self[2] * vw_xy
+            +self[1] * vw_zw - self[2] * vw_yw + self[3] * vw_yz,
+            -self[0] * vw_zw + self[2] * vw_xw - self[3] * vw_xz,
+            +self[0] * vw_yw - self[1] * vw_xw + self[3] * vw_xy,
+            -self[0] * vw_yz + self[1] * vw_xz - self[2] * vw_xy
         ])
+
 
 def unitVec4(i):
     v = [0, 0, 0, 0]
     v[i] = 1
     return Vec4(v)
 
+
 class Quat(Vec):
     """Define a quarternion"""
     def __new__(cls, v=None):
-        # if 3D vector, use it to set vector part only and use 0 for scalar part
+        # if 3D vector, use it to set vector part only and use 0 for scalar
         if len(v) == 3:
             v = [0, v[0], v[1], v[2]]
         return Vec.__new__(cls, [float(v[i]) for i in range(4)])
@@ -350,9 +355,10 @@ def transform3TypeStr(i):
 
 def isQuatPair(q):
     return (
-        q != None and
+        q is not None and
         len(q) == 2 and isinstance(q[0], Quat) and isinstance(q[1], Quat)
     )
+
 
 class Transform3(tuple):
     """Define a 3D tranformation using quarternions"""
@@ -380,7 +386,7 @@ class Transform3(tuple):
         return s
 
     def __hash__(self):
-        if  'hash_nr' not in self.__cache__:
+        if 'hash_nr' not in self.__cache__:
             if self.isRot():
                 self.__cache__['hash_nr'] = self.__hashRot__()
             elif self.isRefl():
@@ -388,26 +394,29 @@ class Transform3(tuple):
             elif self.isRotInv():
                 self.__cache__['hash_nr'] = self.__hashRotInv__()
             else:
-                raise UnsupportedTransform(
-                    "Not a (supported) transform")
+                raise UnsupportedTransform("Not a (supported) transform")
         return self.__cache__['hash_nr']
 
     def __str__(self):
         if self.isRot():
             return self.__strRot()
-        elif self.isRefl():
+        if self.isRefl():
             return self.__strRefl()
-        elif self.isRotInv():
+        if self.isRotInv():
             return self.__strRotInv()
-        else:
-            return '%s * .. * %s' % (str(self[0]), str(self[1]))
+        # non-proper transform: show the quaternion pair.
+        return '%s * .. * %s' % (str(self[0]), str(self[1]))
 
     def to_orbit_str(self, prec=roundFloatMargin):
+        """Return the orbit file format representation for this transform.
+
+        If this is not a proper transform, then UnsupportedTransform is raised
+        """
         if self.isRot():
             return self.__rot2orbit(prec)
-        elif self.isRefl():
+        if self.isRefl():
             return self.__refl2orbit(prec)
-        elif self.isRotInv():
+        if self.isRotInv():
             return self.__rotinv2orbit(prec)
         else: return "Unknown transform"
 
@@ -419,11 +428,8 @@ class Transform3(tuple):
         if isinstance(u, Vec) and len(u) == 3:
             return (self[0] * Quat([0, u[0], u[1], u[2]]) * self[1]).V()
         if isinstance(u, Quat):
-            return (self[0] * u                           * self[1]).V()
+            return (self[0] * u * self[1]).V()
         return u.__rmul__(self)
-        #raise TypeError, "unsupported op type(s) for *: '%s' and '%s'" % (
-        #        self.__class__.__name__, u.__class__.__name__
-        #    )
 
     def __eq__(self, u):
         if not isinstance(u, Transform3):
@@ -459,6 +465,14 @@ class Transform3(tuple):
     RotRefl = RotInv
 
     def type(self):
+        """Return what kind of transform this is.
+
+        This can be any of:
+            self.Rot: for a rotation
+            self.Refl: for a reflection
+            self.RotInv: for a rotary inversion (which is the same as a rotary
+                         reflection.
+        """
         if self.isRot():
             return self.Rot
         if self.isRefl():
@@ -469,6 +483,11 @@ class Transform3(tuple):
             self[1].norm())
 
     def angle(self):
+        """In case this transform contains a rotation, return the angle
+
+        Otherwise raise a NoRotation exception
+        The angle is returned in radians.
+        """
         if self.isRot():
             return self.angleRot()
         if self.isRotInv():
@@ -478,6 +497,10 @@ class Transform3(tuple):
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def axis(self):
+        """In case this transform contains a rotation, return the axis
+
+        Otherwise raise a NoRotation exception
+        """
         if self.isRot():
             return self.axisRot()
         if self.isRotInv():
@@ -487,6 +510,7 @@ class Transform3(tuple):
             'neither a rotation, nor a rotary-inversion (-reflection)')
 
     def glMatrix(self):
+        """Return the glMatrix representation of this transform"""
         if self.isRot():
             m = self.glMatrixRot()
         elif self.isRefl():
@@ -501,7 +525,7 @@ class Transform3(tuple):
                     Vec([0, 0, 0, 1])])
 
     def matrix(self):
-        # TODO: test this
+        """Return the matrix representation of this transform"""
         if self.isRot():
             return self.matrixRot()
         if self.isRefl():
@@ -521,6 +545,7 @@ class Transform3(tuple):
 #            ])
 
     def inverse(self):
+        """Return a new object with the inverse of this transform"""
         if self.isRot():
             return self.inverseRot()
         if self.isRefl():
@@ -531,39 +556,19 @@ class Transform3(tuple):
             'oops, unknown matrix; transform {}\n'.format(str(self)))
 
     def isDirect(self):
+        """Return whether this is an opposite transform (i.e. not direct)"""
         return self.isRot()
 
     def isOpposite(self):
+        """Return whether this is an opposite transform (i.e. not direct)"""
         return not self.isDirect()
 
-    ## ROTATION specific functions:
+    # *** ROTATION specific functions:
     def isRot(self):
+        """Return whether this tranform is a rotation."""
         d = 1 - self.eqFloatMargin
         _margin = 1 - d * d
         eqSquareNorm = eq(self[1].squareNorm(), 1, margin=_margin)
-        #print (
-        #        self[1].conjugate() == self[0]
-        #        and
-        #        eqSquareNorm
-        #        and
-        #        (self[1].S() < 1 or eq(self[1].S(), 1))
-        #        and
-        #        (self[1].S() > -1 or eq(self[1].S(), -1))
-        #    ),
-        #print 'isRot: %s..%s' % (str(self[0]), str(self[1]))
-        #print  self[1].conjugate() == self[0], ': self[1].conjugate() == self[0]'
-        #print '%s = self[1].conjugate() == self[0] %s ' % (
-        #        self[1].conjugate(), self[0]
-        #    )
-        #print eq(self[1].squareNorm(), 1),
-        #print '    1 ?= self[1].norm() = %0.17f' % self[1].squareNorm(),
-        #print  '(d =', 1 - self[1].squareNorm(), '>', _margin, ')'
-        #print (
-        #        (self[1].S() < 1 or eq(self[1].S(), 1))
-        #        and
-        #        (self[1].S() > -1 or eq(self[1].S(), -1))
-        #    ), ':'
-        #print '   -1 ?<= self.S() = %0.17f ?<= 1' % self[1].S()
         return (
             self[1].conjugate() == self[0]
             and
@@ -577,9 +582,6 @@ class Transform3(tuple):
     def __eqRot(self, u):
         """Compare two transforms that represent rotations
         """
-        #print '__eqRot'
-        #print '%s ?= %s' % (str(self[0]), str(u[0]))
-        #print '%s ?= %s' % (str(self[1]), str(u[1]))
         return (
             (self[0] == u[0] and self[1] == u[1])
             or
@@ -627,7 +629,7 @@ class Transform3(tuple):
     def defUniqueAngleAxis(self):
         # rotation axis
         try:
-            self.__cache__['axisRot']= self[0].V().normalise()
+            self.__cache__['axisRot'] = self[0].V().normalise()
         except ZeroDivisionError:
             assert self[0] == Quat([1, 0, 0, 0]) or \
                 self[0] == Quat([-1, 0, 0, 0]), \
@@ -646,16 +648,14 @@ class Transform3(tuple):
                         "{} doesn'self represent a rotation".format(
                             self.__repr__())
                     sin = 0
-        #print 'reconstructed cos =', cos
-        #print 'reconstructed sin =', sin
         self.__cache__['angleRot'] = 2 * math.atan2(sin, cos)
 
         # make unique: -pi < angle < pi
-        if not (self.__cache__['angleRot'] < math.pi \
+        if not (self.__cache__['angleRot'] < math.pi
                 or eq(self.__cache__['angleRot'], math.pi)):
             self.__cache__['angleRot'] = self.__cache__['angleRot'] - \
                 2 * math.pi
-        if not (self.__cache__['angleRot'] > -math.pi \
+        if not (self.__cache__['angleRot'] > -math.pi
                 or eq(self.__cache__['angleRot'], -math.pi)):
             self.__cache__['angleRot'] = self.__cache__['angleRot'] + \
                 2 * math.pi
@@ -690,7 +690,7 @@ class Transform3(tuple):
             self.__cache__['angleRot'] = 0.0
             self.__cache__['axisRot'] = Vec3([1.0, 0.0, 0.0])
 
-    def matrixRot(self):
+    def _matrixRot(self):
         if 'matrix_rot' not in self.__cache__:
             w, x, y, z = self[0]
             self.__cache__['matrix_rot'] = get_mat_rot(w, x, y, z)
@@ -708,11 +708,9 @@ class Transform3(tuple):
                                                  angle=-self.angle())
         return self.__cache__['inverse_rot']
 
-    ## REFLECTION specific functions:
+    # *** REFLECTION specific functions:
     def isRefl(self):
-        #print 'self[1] == self[0]:', self[1] == self[0]
-        #print '1 ?= self[1].norm() = %0.17f' % self[1].norm()
-        #print '0 ?= self[1].S() = %0.17f' % self[1].S()
+        """Return whether this tranform is a reflection."""
         return (
             self[1] == self[0]
             and
@@ -732,7 +730,7 @@ class Transform3(tuple):
         return hash(
             (
                 self.Refl,
-                self.Refl, # to use a tuple of 5 elements for all types
+                self.Refl,  # to use a tuple of 5 elements for all types
                 round(normal[0], roundFloatMargin),
                 round(normal[1], roundFloatMargin),
                 round(normal[2], roundFloatMargin)
@@ -754,7 +752,11 @@ class Transform3(tuple):
             float2str(norm[2], prec))
 
     def planeN(self):
-        if  'plane_normal' not in self.__cache__:
+        """If this is a reflection, return the plane normal.
+
+        Should only be called when this is a reflection.
+        """
+        if 'plane_normal' not in self.__cache__:
             self.__cache__['plane_normal'] = self[0].V()
             # make normal unique: make the first non-zero element positive:
             if eq(self.__cache__['plane_normal'][0], 0):
@@ -795,17 +797,16 @@ class Transform3(tuple):
     def inverseRefl(self):
         return self
 
-    ## ROTARY INVERSION (= ROTARY RELECTION) specific functions:
+    # *** ROTARY INVERSION (= ROTARY RELECTION) specific functions:
     def I(self):
-        """
-        Apply a central inversion
-        """
+        """Apply a central inversion on this transform."""
         if 'central_inverted' not in self.__cache__:
             self.__cache__['central_inverted'] = Transform3(
                 [-self[0], self[1]])
         return self.__cache__['central_inverted']
 
     def isRotInv(self):
+        """Return whether the transform is a rotary inversion."""
         return self.I().isRot() and not self.isRefl()
 
     def __eqRotInv(self, u):
@@ -829,6 +830,10 @@ class Transform3(tuple):
             float2str(axis[2], roundFloatMargin))
 
     def __rotinv2orbit(self, prec=roundFloatMargin):
+        """If this is a rotary inversion, return orbit file format string repr.
+
+        Should only be called when this is a rotary inversion
+        """
         r = self.I()
         return 'I' + r.to_orbit_str(prec)[1:]
 
@@ -845,12 +850,20 @@ class Transform3(tuple):
         return self.__cache__['matrix_rot_inv']
 
     def glMatrixRotInv(self):
+        """If this is a rotary inversion, return the glMatrix.
+
+        Should only be called when this is a rotary inversion
+        """
         if 'gl_matrix_rot_inv' not in self.__cache__:
             w, x, y, z = self[0]
             self.__cache__['gl_matrix_rot_inv'] = get_mat_rot(-w, x, y, z, -1)
         return self.__cache__['gl_matrix_rot_inv']
 
     def inverseRotInv(self):
+        """If this is a rotary inversion, return the reverse.
+
+        Should only be called when this is a rotary inversion
+        """
         if 'inverse_rot_inv' not in self.__cache__:
             self.__cache__['inverse_rot_inv'] = RotInv3(axis=self.axis(),
                                                         angle=-self.angle())
@@ -879,7 +892,7 @@ class Rot3(Transform3):
             try:
                 quat = quat.normalise()
             except ZeroDivisionError:
-                pass # will fail on assert below:
+                pass  # will fail on assert below:
             trans = Transform3.__new__(cls, [quat, quat.conjugate()])
             assert trans.isRot(), "%s doesn't represent a rotation" % str(quat)
             return trans
@@ -893,9 +906,8 @@ class Rot3(Transform3):
                 axis = axis.normalise()
             quat = math.sin(alpha) * axis
             quat = Quat([math.cos(alpha), quat[0], quat[1], quat[2]])
-            #print 'cos =', math.cos(alpha)
-            #print 'sin =', math.sin(alpha)
             return Transform3.__new__(cls, [quat, quat.conjugate()])
+
 
 class HalfTurn3(Rot3):
     """Define a half-turn (rotation)
@@ -909,6 +921,7 @@ class HalfTurn3(Rot3):
         assert axis is not None, "You must specify an axis"
         return Rot3.__new__(cls, axis=axis, angle=hTurn)
 
+
 class Rotx(Rot3):
     """Define a rotation around the x-axis
 
@@ -919,6 +932,7 @@ class Rotx(Rot3):
     def __new__(cls, qLeft=None, axis=None, angle=0):
         del qLeft, axis
         return Rot3.__new__(cls, axis=ux, angle=angle)
+
 
 class Roty(Rot3):
     """Define a rotation around the y-axis
@@ -931,6 +945,7 @@ class Roty(Rot3):
         del qLeft, axis
         return Rot3.__new__(cls, axis=uy, angle=angle)
 
+
 class Rotz(Rot3):
     """Define a rotation around the z-axis
 
@@ -941,6 +956,7 @@ class Rotz(Rot3):
     def __new__(cls, qLeft=None, axis=None, angle=0):
         del qLeft, axis
         return Rot3.__new__(cls, axis=uz, angle=angle)
+
 
 class Refl3(Transform3):
     """Define a rotation in 3D"""
@@ -962,7 +978,7 @@ class Refl3(Transform3):
             try:
                 quat = quat.normalise()
             except ZeroDivisionError:
-                pass # will fail on assert below:
+                pass  # will fail on assert below:
             result = Transform3.__new__(cls, [quat, quat])
             assert result.isRefl(), "%s doesn't represent a reflection" % str(
                 quat)
@@ -971,12 +987,13 @@ class Refl3(Transform3):
                 normal = planeN.normalise()
                 quat = Quat(normal)
             except ZeroDivisionError:
-                quat = Quat(planeN) # will fail on assert below:
+                quat = Quat(planeN)  # will fail on assert below:
             result = Transform3.__new__(cls, [quat, quat])
-            assert result.isRefl(), (
-                "normal %s doesn't define a valid 3D plane normal" % str(planeN)
-            )
+            assert result.isRefl(), \
+                "normal {} doesn't define a valid 3D plane normal".format(
+                    str(planeN))
         return result
+
 
 class RotInv3(Transform3):
     """Define a rotary inversion"""
@@ -989,12 +1006,13 @@ class RotInv3(Transform3):
         result = None
         if isQuatPair(qLeft):
             result = Transform3.__new__(cls, qLeft)
-            assert result.isRotInv(), "%s doesn't represent a rotary inversion" % (
-                str(qLeft))
+            assert result.isRotInv(), \
+                "{} doesn't represent a rotary inversion".format(str(qLeft))
         else:
             ri = Rot3(qLeft, axis, angle).I()
             result = Transform3.__new__(cls, [ri[0], ri[1]])
         return result
+
 
 RotRefl = RotInv3
 Hx = HalfTurn3(axis=ux)
@@ -1002,6 +1020,7 @@ Hy = HalfTurn3(axis=uy)
 Hz = HalfTurn3(axis=uz)
 I = RotInv3(Quat([1, 0, 0, 0]))
 E = Rot3(Quat([1, 0, 0, 0]))
+
 
 # TODO: make the 3D case a special case of 4D...
 class Transform4(tuple):
@@ -1028,14 +1047,12 @@ class Transform4(tuple):
         if isinstance(u, Vec) and len(u) == 4:
             return self[0] * Quat(u) * self[1]
         return u.__rmul__(self)
-        #raise TypeError, "unsupported op type(s) for *: '%s' and '%s'" % (
-        #        self.__class__.__name__, u.__class__.__name__
-        #    )
 
     def angle(self):
         """return the angle of a rotation or raise NoRotation"""
         if self.isRot():
             return self.angleRot()
+        # TODO: Add support for rotary inversion to Transform4
         #if self.isRotInv(): return self.angleRotInv()
         raise NoRotation(
             'oops, unknown angle; transform {}\n'.format(str(self)) +
@@ -1044,8 +1061,6 @@ class Transform4(tuple):
 
     def isRot(self):
         """Whether self represents a rotation"""
-        # print 't0', self[0].squareNorm() - 1
-        # print 't1', self[1].squareNorm() - 1
         return eq(self[0].squareNorm(), 1) and eq(self[1].squareNorm(), 1)
 
     def angleRot(self):
@@ -1062,9 +1077,8 @@ class Transform4(tuple):
                         "{} doesn't represent a rotation".format(
                             self.__repr__())
                     return 0
-        #print 'reconstructed cos =', cos
-        #print 'reconstructed sin =', sin
         return 2 * math.atan2(sin, cos)
+
 
 class Rot4(Transform4):
     """Define a rotation in 4D"""
@@ -1133,7 +1147,6 @@ def findOrthoPlane(plane):
         s: start with (incl) position s
         """
         zeroIndex = -1
-        #print 'getZeroIndex', v, s
         for i in range(s, 4):
             if eq(v[i], 0):
                 zeroIndex = i
@@ -1168,7 +1181,7 @@ def findOrthoPlane(plane):
 
     # Now define e2,..
     zi = getZeroIndex(e0)
-    if zi > -1: # if e0 contains a 0 (zero)
+    if zi > -1:  # if e0 contains a 0 (zero)
         v2 = unitVec4(zi)
         if v2.isParallel(e1):
             # exchange e0 and e1 and repeat, since we know that e1 has 3 0's
@@ -1206,14 +1219,15 @@ def findOrthoPlane(plane):
                 # this might be used later for e3:
                 Vec4([vnIni[0], -vnIni[1], -vnIni[2], vnIni[3]]),
                 # I don't think these are necessary:
-                #Vec4([-vnIni[0],  vnIni[1], -vnIni[2],  vnIni[3]]),
-                #Vec4([-vnIni[0], -vnIni[1],  vnIni[2],  vnIni[3]])
+                # Vec4([-vnIni[0],  vnIni[1], -vnIni[2],  vnIni[3]]),
+                # Vec4([-vnIni[0], -vnIni[1],  vnIni[2],  vnIni[3]])
             ]
             v2Found = False
             i = -1
             while not v2Found:
                 i += 1
-                assert i < len(possiblePermuations), "Oops, more permutations needed"
+                assert i < len(possiblePermuations), \
+                    "Oops, more permutations needed"
                 v2 = possiblePermuations[i]
                 v2Found = not v2.isParallel(e1)
             status['sp'] = i + 1
@@ -1248,6 +1262,7 @@ class DoubleRot4(Transform4):
 # forced to use some matrix functions and don't want to add a dependency on a
 # big python package.
 
+
 class Mat(list):
     """Contruct matrix"""
     def __init__(self, m=None, dim=3):
@@ -1260,7 +1275,8 @@ class Mat(list):
                 for j in range(dim):
                     if i == j:
                         v.append(1)
-                    else: v.append(0)
+                    else:
+                        v.append(0)
                 m.append(Vec(v))
         self.rows = len(m)
         assert self.rows > 0
@@ -1343,7 +1359,7 @@ class Mat(list):
             return self[0][0] * self[1][1] - self[0][1]*self[1][0]
         if self.rows == 1:
             return self[0][0]
-        #else:
+        # else:
         r = 0
         sign = 1
         for i in range(self.cols):
@@ -1396,6 +1412,7 @@ class Mat(list):
         """Not implemented: put matrix in standard row shape"""
         pass
 
+
 if __name__ == '__main__':
     from random import seed, random
 
@@ -1432,17 +1449,13 @@ if __name__ == '__main__':
     assert R == Vec([0.5, 1.0, 2.0]), 'got %s instead' % str(R)
     assert isinstance(R, Vec)
 
-    #V[1] = 5.0
-    #assert V == Vec([1.0, 5.0, 4.0]), 'got %s instead' % V
-    #assert type(V) == type(Vec([]))
-
     V = Vec([1.0, 5.0, 4.0])
     R = V[1:]
     assert R == Vec([5.0, 4.0]), 'got %s instead' % str(R)
     # TODO: howto without using deprecated __setslice__ ?
     # currently no problem, since R + W becomes a Vec anyway,
     # though 3 * R gives unexpected result
-    #assert type(R) == type(Vec([]))
+    # assert type(R) == type(Vec([]))
 
     V = Vec([1, 2, 4])
     R = V.norm()
