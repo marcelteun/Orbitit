@@ -67,7 +67,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
             #oppositeIsometry = GeomTypes.I,
-            oppositeIsometry = GeomTypes.Hx,
+            oppositeIsometry = GeomTypes.HX,
             name = 'EglHeptA5xI_GD'
         )
         this.initArrs()

@@ -571,12 +571,18 @@ class Transform3(tuple):
         """In case this transform contains a rotation, return the angle
 
         Otherwise raise a NoRotation exception
+
         The angle is returned in radians.
+
+        If the transform is a rotary inversion, which is the same as an rotary
+        reflection, then the angle for the rotary inversion is returned. If you
+        want to know the angle for the rotary reflection, you can either call
+        angle_rot_refl or subtract a halft turn.
         """
         if self.is_rot():
             return self.__angle_rot()
         if self.is_rot_inv():
-            return self._angleRotInv()
+            return self.__angle_rot_inv()
         raise NoRotation(
             'oops, unknown angle; transform {}\n'.format(str(self)) +
             'neither a rotation, nor a rotary-inversion (-reflection)'
@@ -904,7 +910,7 @@ class Transform3(tuple):
     def __hash_rot_inv(self):
         axis = self.__axis_rot_inv()
         return hash((self.Rot,
-                     round(self._angleRotInv(), DEFAULT_ROUND_FLOAT_MARGIN),
+                     round(self.__angle_rot_inv(), DEFAULT_ROUND_FLOAT_MARGIN),
                      round(axis[0], DEFAULT_ROUND_FLOAT_MARGIN),
                      round(axis[1], DEFAULT_ROUND_FLOAT_MARGIN),
                      round(axis[2], DEFAULT_ROUND_FLOAT_MARGIN)))
@@ -926,7 +932,7 @@ class Transform3(tuple):
         r = self.I()
         return 'I' + r.to_orbit_str(prec)[1:]
 
-    def _angleRotInv(self):
+    def __angle_rot_inv(self):
         """If this is a rotary inversion, return the angle.
 
         Make sure to only call this method when this is a rotary inversion
@@ -971,11 +977,18 @@ class Transform3(tuple):
         return self.__cache__['inverse_rot_inv']
 
     is_rot_refl = is_rot_inv
-    # __axis_rot_refl = __axis_rot_inv
+    # not needed: since they are the same (you can use the axis method):
+    # axis_rot_refl = __axis_rot_inv
 
-    def angleRotRefl(self):
-        """Return the angle of a rotary reflection."""
-        return self._angleRotInv() - HALF_TURN
+    def angle_rot_refl(self):
+        """Return the angle of a rotary reflection.
+
+        A public method is provided in case one prefers to use rotary
+        reflections instead of rotary inversion. These transforms are the same,
+        but they differ in angle, i.e. the standard method angle cannot be
+        used.
+        """
+        return self.__angle_rot_inv() - HALF_TURN
 
 
 class Rot3(Transform3):
@@ -1119,9 +1132,9 @@ class RotInv3(Transform3):
 
 
 RotRefl = RotInv3
-Hx = HalfTurn3(axis=UX)
-Hy = HalfTurn3(axis=UY)
-Hz = HalfTurn3(axis=UZ)
+HX = HalfTurn3(axis=UX)
+HY = HalfTurn3(axis=UY)
+HZ = HalfTurn3(axis=UZ)
 I = RotInv3(Quat([1, 0, 0, 0]))
 E = Rot3(Quat([1, 0, 0, 0]))
 
@@ -1157,7 +1170,7 @@ class Transform4(tuple):
         if self.is_rot():
             return self.__angle_rot()
         # TODO: Add support for rotary inversion to Transform4
-        # if self.is_rot_inv(): return self._angleRotInv()
+        # if self.is_rot_inv(): return self.__angle_rot_inv()
         raise NoRotation(
             'oops, unknown angle; transform {}\n'.format(str(self)) +
             'neither a rotation, nor a rotary-inversion (-reflection)'
@@ -1244,21 +1257,21 @@ def find_orthogonal_plane(plane):
     # Choose that t for which v2 not parallel to e1
     #
     # There we go:
-    def getZeroIndex(v, s=0):
+    def get_zero_index(v, s=0):
         """
         Get the index of the element that equals to 0 in vec v. If there
         none, -1 is returned.
 
         s: start with (incl) position s
         """
-        zeroIndex = -1
+        zero_index = -1
         for i in range(s, 4):
             if eq(v[i], 0):
-                zeroIndex = i
+                zero_index = i
                 break
-        return zeroIndex
+        return zero_index
 
-    oopsMsg = "Ooops, this shouldn't happen!!"
+    oops_msg = "Ooops, this shouldn't happen!!"
 
     # status: a status dict that expresses the status after previous
     #         calls. The dict contains the fields:
@@ -1285,30 +1298,30 @@ def find_orthogonal_plane(plane):
     e1 = plane[1].normalise()
 
     # Now define e2,..
-    zi = getZeroIndex(e0)
+    zi = get_zero_index(e0)
     if zi > -1:  # if e0 contains a 0 (zero)
         v2 = unit_vec4(zi)
         if v2.is_parallel(e1):
             # exchange e0 and e1 and repeat, since we know that e1 has 3 0's
             e0, e1 = e1, e0
             status['e0_z_e1'] = 1
-            zi = getZeroIndex(e0)
+            zi = get_zero_index(e0)
             if zi > -1:
                 v2 = unit_vec4(zi)
                 if v2.is_parallel(e1):
                     # ok, e0 had 3 zeros as well,...
-                    zi = getZeroIndex(e0, zi+1)
+                    zi = get_zero_index(e0, zi+1)
                     if zi > -1:
                         v2 = unit_vec4(zi)
-                        assert not v2.is_parallel(e1), oopsMsg
+                        assert not v2.is_parallel(e1), oops_msg
                     else:
-                        assert False, oopsMsg
+                        assert False, oops_msg
             else:
-                assert False, oopsMsg
+                assert False, oops_msg
         status['sz_e0'] = zi
     else:
         status['sz_e0'] = 3
-        zi = getZeroIndex(e1)
+        zi = get_zero_index(e1)
         if zi > -1:  # if e1 contains a 0 (zero)
             v2 = unit_vec4(zi)
             e0, e1 = e1, e0
@@ -1316,25 +1329,25 @@ def find_orthogonal_plane(plane):
             assert not v2.is_parallel(e1), "Ooops, this shouldn't happen!!"
             status['sz_e1'] = zi
         else:
-            vnIni = Vec4([1/e0[0], 1/e0[1], 1/e0[2], 1/e0[3]])
-            possiblePermuations = [
-                Vec4([vnIni[0], vnIni[1], -vnIni[2], -vnIni[3]]),
-                Vec4([vnIni[0], -vnIni[1], vnIni[2], -vnIni[3]]),
-                Vec4([-vnIni[0], vnIni[1], vnIni[2], -vnIni[3]]),
+            vn_ini = Vec4([1/e0[0], 1/e0[1], 1/e0[2], 1/e0[3]])
+            possible_permutations = [
+                Vec4([vn_ini[0], vn_ini[1], -vn_ini[2], -vn_ini[3]]),
+                Vec4([vn_ini[0], -vn_ini[1], vn_ini[2], -vn_ini[3]]),
+                Vec4([-vn_ini[0], vn_ini[1], vn_ini[2], -vn_ini[3]]),
                 # this might be used later for e3:
-                Vec4([vnIni[0], -vnIni[1], -vnIni[2], vnIni[3]]),
+                Vec4([vn_ini[0], -vn_ini[1], -vn_ini[2], vn_ini[3]]),
                 # I don't think these are necessary:
-                # Vec4([-vnIni[0],  vnIni[1], -vnIni[2],  vnIni[3]]),
-                # Vec4([-vnIni[0], -vnIni[1],  vnIni[2],  vnIni[3]])
+                # Vec4([-vn_ini[0],  vn_ini[1], -vn_ini[2],  vn_ini[3]]),
+                # Vec4([-vn_ini[0], -vn_ini[1],  vn_ini[2],  vn_ini[3]])
             ]
-            v2Found = False
+            v2_found = False
             i = -1
-            while not v2Found:
+            while not v2_found:
                 i += 1
-                assert i < len(possiblePermuations), \
+                assert i < len(possible_permutations), \
                     "Oops, more permutations needed"
-                v2 = possiblePermuations[i]
-                v2Found = not v2.is_parallel(e1)
+                v2 = possible_permutations[i]
+                v2_found = not v2.is_parallel(e1)
             status['sp'] = i + 1
 
     # Now the plane spanned by e1 and v2 is orthogonal to e0, as a
@@ -1356,9 +1369,9 @@ class DoubleRot4(Transform4):
                 quatPair=None,
                 axialPlane=(Vec4([0, 0, 1, 0]), Vec4([0, 0, 0, 1])),
                 angle=(0, 0)):
-        orthoPlane = find_orthogonal_plane(axialPlane)
+        ortho_plane = find_orthogonal_plane(axialPlane)
         r0 = Rot4(axialPlane=axialPlane, angle=angle[0])
-        r1 = Rot4(axialPlane=orthoPlane, angle=angle[1])
+        r1 = Rot4(axialPlane=ortho_plane, angle=angle[1])
         return Transform4.__new__(cls, [r1[0]*r0[0], r0[1]*r1[1]])
 
 # TODO implement Geom3D.Line3D here (in this file)
@@ -1411,7 +1424,7 @@ class Mat(list):
 
     T = transpose
 
-    def deleteRow(self, i):
+    def rm_row(self, i):
         """Delete row i"""
         # don't use self.pop(i), it changes self, while the result should be
         # returned instead.
@@ -1422,7 +1435,7 @@ class Mat(list):
         n.extend(self[i+1:])
         return Mat(n)
 
-    def deleteCol(self, i):
+    def rm_col(self, i):
         """Delete column i"""
         if i < 0:
             i += self.cols
@@ -1434,7 +1447,7 @@ class Mat(list):
             n.append(Vec(r))
         return Mat(n)
 
-    def replaceCol(self, i, v):
+    def replace_col(self, i, v):
         """Replace column i with vector v"""
         assert len(v) == self.rows
         if i < 0:
@@ -1450,7 +1463,7 @@ class Mat(list):
 
     def minor(self, i, j):
         """Return minor matrix by deleting row i and column j"""
-        return self.deleteRow(i).deleteCol(j).det()
+        return self.rm_row(i).rm_col(j).det()
 
     def orthogonal(self):
         """Check whether this is an orthogonal matrix"""
@@ -1510,7 +1523,7 @@ class Mat(list):
         assert len(v) == self.rows
         det = self.det()
         return Vec(
-            [self.replaceCol(i, v).det() / det for i in range(self.cols)])
+            [self.replace_col(i, v).det() / det for i in range(self.cols)])
 
 
 if __name__ == '__main__':
@@ -2479,25 +2492,25 @@ if __name__ == '__main__':
     T = M.T()
 
     for K in range(L):
-        R = M.deleteRow(K)
+        R = M.rm_row(K)
         assert R.rows == L-1
         assert R.cols == W
-        assert R == M.deleteRow(-(L-K))
+        assert R == M.rm_row(-(L-K))
         N = T.T()
         N.pop(K)
         assert R == N
 
     for K in range(W):
-        R = M.deleteCol(K)
+        R = M.rm_col(K)
         assert R.rows == L
         assert R.cols == W-1
-        assert R == M.deleteCol(-(W-K))
+        assert R == M.rm_col(-(W-K))
         T = M.T()
         T.pop(K)
         assert R == T.T()
 
     # don't want to test an orthogonal matrix,
-    # since then the inverse method calls: det, deleteRow, -Col, and transpose.
+    # since then the inverse method calls: det, rm_row, -Col, and transpose.
     assert not M.orthogonal()
     M_I = M.inverse()
     assert M * M_I == Mat()

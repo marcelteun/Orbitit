@@ -41,9 +41,9 @@ class Shape(Heptagons.EqlHeptagonShape):
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     GeomTypes.E,
-                    GeomTypes.Hx,
-                    GeomTypes.Hy,
-                    GeomTypes.Hz
+                    GeomTypes.HX,
+                    GeomTypes.HY,
+                    GeomTypes.HZ
                 ],
             name = 'EglHeptS4A4'
         )
@@ -197,16 +197,16 @@ class Shape(Heptagons.EqlHeptagonShape):
             Vs.extend([Vs[27], Vs[28], Vs[28]]) # V42 - V44
             if this.heptPosAlt:
                 v = Vs[38]
-                Vs[38] = vec(-v[0],  v[1], -v[2])    # Hy * V9
+                Vs[38] = vec(-v[0],  v[1], -v[2])    # HY * V9
                 v = Vs[41]
-                Vs[41] = vec( v[0], -v[1], -v[2])    # Hx * V23
+                Vs[41] = vec( v[0], -v[1], -v[2])    # HX * V23
             else:
                 v = Vs[38]
-                Vs[38] = vec( v[0], -v[1], -v[2])    # Hx * V9
+                Vs[38] = vec( v[0], -v[1], -v[2])    # HX * V9
                 v = Vs[41]
-                Vs[41] = vec(-v[0],  v[1], -v[2])    # Hy * V23
+                Vs[41] = vec(-v[0],  v[1], -v[2])    # HY * V23
             v = Vs[44]
-            Vs[44] = vec(-v[0], -v[1],  v[2])    # Hz * V16
+            Vs[44] = vec(-v[0], -v[1],  v[2])    # HZ * V16
             if this.addXtraEdge:
                 this.xtraEs = [37, 38, 40, 41, 43, 44]
 

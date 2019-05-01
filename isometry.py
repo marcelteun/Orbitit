@@ -40,11 +40,6 @@ asin_1_V3  = math.asin(1.0 / math.sqrt(3))
 asin_V2_V3 = acos_1_V3
 acos_V2_V3 = asin_1_V3
 
-# halfturn around x-, y-, and z-axis
-Hx = GeomTypes.Hx
-Hy = GeomTypes.Hy
-Hz = GeomTypes.Hz
-
 I  = GeomTypes.I       # central inversion
 
 class ImproperSubgroupError(ValueError):
@@ -2343,7 +2338,7 @@ DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
 if __name__ == '__main__':
 
     print 'testing creation of set',
-    g = Set([Hx, Hy])
+    g = Set([GeomTypes.HX, GeomTypes.HY])
     print '....ok'
     #print 'Initialised set g:', g
     print "testing 'in' relation",
@@ -2355,9 +2350,9 @@ if __name__ == '__main__':
     #print 'Set g after closing:'
     #print cg
     assert len(cg) == 4
-    assert Hx in cg
-    assert Hy in cg
-    assert Hz in cg
+    assert GeomTypes.HX in cg
+    assert GeomTypes.HY in cg
+    assert GeomTypes.HZ in cg
     assert GeomTypes.E in cg
     print '...ok'
 
@@ -2375,7 +2370,7 @@ if __name__ == '__main__':
     assert len(cg) == 4
     GeomTypes.Rot3(axis =  GeomTypes.Vec3([1, 0, 0]), angle = qTurn)  in cg
     GeomTypes.Rot3(axis = -GeomTypes.Vec3([1, 0, 0]), angle = -qTurn) in cg
-    assert Hx in cg
+    assert GeomTypes.HX in cg
     assert GeomTypes.E in cg
     print '...ok'
 
@@ -2385,9 +2380,9 @@ if __name__ == '__main__':
     print 'checking result',
     assert len(a4) == 12
     assert GeomTypes.E in a4
-    assert Hx in a4
-    assert Hy in a4
-    assert Hz in a4
+    assert GeomTypes.HX in a4
+    assert GeomTypes.HY in a4
+    assert GeomTypes.HZ in a4
     t0 = GeomTypes.Rot3(axis = [1,  1,  1], angle =   tTurn)
     assert t0 in a4
     t1 = GeomTypes.Rot3(axis = [1,  1,  1], angle = 2*tTurn)
@@ -2449,7 +2444,7 @@ if __name__ == '__main__':
     assert len(a4) == 12
     # print 'group a4:'
     # print a4
-    d2 = Set([Hx, Hy])
+    d2 = Set([GeomTypes.HX, GeomTypes.HY])
     d2.group()
     assert len(d2) == 4
     # print 'has a subgroup D2:'
