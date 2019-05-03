@@ -21,10 +21,10 @@
 #
 #------------------------------------------------------------------
 
-import math
-import re
-import geomtypes
 from copy import copy
+import math
+
+import geomtypes
 
 X = geomtypes.UX
 Y = geomtypes.UY
@@ -53,95 +53,95 @@ class Set(set):
                   # is a group.
     defaultSetup = None
 
-    def __init__(this, *args):
+    def __init__(self, *args):
         try:
-            this.generator
+            self.generator
         except AttributeError:
-            this.generator = {}
-        set.__init__(this, *args)
-        this.short_string = True
+            self.generator = {}
+        set.__init__(self, *args)
+        self.short_string = True
 
-    def __repr__(this):
-        s = '%s([\n' % (this.__class__.__name__)
-        for e in this:
+    def __repr__(self):
+        s = '%s([\n' % (self.__class__.__name__)
+        for e in self:
             s = '%s  %s,\n' % (s, repr(e))
         s = '%s])' % s
         if __name__ != '__main__':
             s = '%s.%s' % (__name__, s)
         return s
 
-    def __str__(this):
+    def __str__(self):
         def to_s():
-            s = '%s([\n' % (this.__class__.__name__)
-            for e in this:
+            s = '%s([\n' % (self.__class__.__name__)
+            for e in self:
                 s = '%s  %s,\n' % (s, str(e))
             s = '%s])' % s
             if __name__ != '__main__':
                 s = '%s.%s' % (__name__, s)
             return s
-        if this.generator != {}:
-            if this.short_string:
-                s = '%s(setup = %s)' % (this.__class__.__name__,
-                        this.generator)
+        if self.generator != {}:
+            if self.short_string:
+                s = '%s(setup = %s)' % (self.__class__.__name__,
+                        self.generator)
             else:
                 s = to_s()
         else:
             s = to_s()
         return s
 
-    def __eq__(this, o):
-        if this.debug: print this.__class__.__name__, '__eq__'
-        eq = (len(this) == len(o))
+    def __eq__(self, o):
+        if self.debug: print self.__class__.__name__, '__eq__'
+        eq = (len(self) == len(o))
         if eq:
-            for e in this:
+            for e in self:
                 eq = e in o
                 if not eq: break
         return eq
 
-    def __sub__(this, o):
-        if this.debug: print this.__class__.__name__, '__sub__'
+    def __sub__(self, o):
+        if self.debug: print self.__class__.__name__, '__sub__'
         new = Set([])
-        for e in this:
+        for e in self:
             if e not in o:
                 set.add(new, e)
         return new
 
-    def __or__(this, o):
-        if this.debug: print this.__class__.__name__, '__or__'
-        new = Set(this)
+    def __or__(self, o):
+        if self.debug: print self.__class__.__name__, '__or__'
+        new = Set(self)
         for e in o:
             new.add(e)
         return new
 
-    def __mul__(this, o):
-        if this.debug: print this.__class__.__name__, '__mul__'
+    def __mul__(self, o):
+        if self.debug: print self.__class__.__name__, '__mul__'
         if isinstance(o, Set):
-            # Set(this) * Set(o)
+            # Set(self) * Set(o)
             new = Set([])
             for d in o:
-                new.update(this * d)
+                new.update(self * d)
             return new
         else:
             # Set * geomtypes.Transform3
-            return Set([e * o for e in this])
+            return Set([e * o for e in self])
 
-    def __rmul__(this, o):
-        if this.debug: print this.__class__.__name__, '__rmul__'
+    def __rmul__(self, o):
+        if self.debug: print self.__class__.__name__, '__rmul__'
         # Note rotation Set * Set is caught by __mul__
         # rotation Rot * Set
-        return Set([o * e for e in this])
+        return Set([o * e for e in self])
 
-    def isGroup(this):
-        if this.debug: print this.__class__.__name__, 'isGroup'
-        if len(this) == 0: return False
+    def isGroup(self):
+        if self.debug: print self.__class__.__name__, 'isGroup'
+        if len(self) == 0: return False
         isGroup = True
-        for e in this:
+        for e in self:
             # optimised away, done as part of next loop:
-            # if not (e.inverse() in this):
+            # if not (e.inverse() in self):
             thisHasInverse = False
-            for o in this:
+            for o in self:
                 thisHasInverse  = thisHasInverse | (e.inverse() == o)
-                isClosedForThis = e*o in this and o*e in this
+                isClosedForThis = e*o in self and o*e in self
                 if not isClosedForThis:
                     break;
             if not thisHasInverse or not isClosedForThis:
@@ -150,62 +150,62 @@ class Set(set):
 
         return isGroup
         # the following is not needed to check, is done implicitly:
-        # and (geomtypes.E in this)
+        # and (geomtypes.E in self)
 
-    def isSubgroup(this, o, checkGroup = True):
+    def isSubgroup(self, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
-        if this.debug: print this.__class__.__name__, 'isSubgroup of', o
-        if len(this) > len(o): return False # optimisation
-        if this.debug:
-            print '(not checkGroup or this.isGroup()', (
-                    not checkGroup, this.isGroup())
-            print ' and this.issubset(o)', this.issubset(o)
+        if self.debug: print self.__class__.__name__, 'isSubgroup of', o
+        if len(self) > len(o): return False # optimisation
+        if self.debug:
+            print '(not checkGroup or self.isGroup()', (
+                    not checkGroup, self.isGroup())
+            print ' and self.issubset(o)', self.issubset(o)
         return (
-                (not checkGroup) or this.isGroup()
-            ) and this.issubset(o)
+                (not checkGroup) or self.isGroup()
+            ) and self.issubset(o)
 
-    def subgroup(this, o):
-        #this.debug = True
-        if this.debug: print this.__class__.__name__, 'subgroup'
+    def subgroup(self, o):
+        #self.debug = True
+        if self.debug: print self.__class__.__name__, 'subgroup'
         try:
             if isinstance(o, geomtypes.Transform3):
                 # generate the quotient set THIS / o
-                assert o in this
+                assert o in self
                 subgroup = Set([o])
                 subgroup.group()
                 return subgroup
             else:
                 # o is already a set
-                #print 'subgroup: this:', this
+                #print 'subgroup: self:', self
                 #print 'subgroup: o:', o
                 for e in o:
-                    assert e in this, '%s not in %s' % (e,
-                        this.__class__.__name__)
+                    assert e in self, '%s not in %s' % (e,
+                        self.__class__.__name__)
                 subgroup = copy(o)
-                # for optimisation: don't call group (slow) for this == o:
-                if len(subgroup) < len(this):
+                # for optimisation: don't call group (slow) for self == o:
+                if len(subgroup) < len(self):
                     subgroup.group()
-                elif len(subgroup) > len(this):
+                elif len(subgroup) > len(self):
                     raise ImproperSubgroupError, '%s not <= %s (with this orientation)' % (
-                        o.__class__.__name__, this.__class__.__name__)
+                        o.__class__.__name__, self.__class__.__name__)
                 return subgroup
         #except ImproperSubgroupError:
         except AssertionError:
             raise ImproperSubgroupError, '%s not <= %s (with this orientation)' % (
-                o.__class__.__name__, this.__class__.__name__)
+                o.__class__.__name__, self.__class__.__name__)
 
-    def __div__(this, o):
-        if this.debug: print this.__class__.__name__, '__div__'
+    def __div__(self, o):
+        if self.debug: print self.__class__.__name__, '__div__'
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
-        if (len(o) > len(this)): return o.__div__(this)
-        o = this.subgroup(o)
-        assert len(o) <= len(this)
+        if (len(o) > len(self)): return o.__div__(self)
+        o = self.subgroup(o)
+        assert len(o) <= len(self)
         # use a list of sets, since sets are unhashable
         quotientSet = []
         # use a big set for all elems found so for
         foundSoFar = Set([])
-        for te in this:
+        for te in self:
             q = te * o
             if q.getOne() not in foundSoFar:
                 quotientSet.append(q)
@@ -214,63 +214,63 @@ class Set(set):
 
     quotientSet = __div__
 
-    def __rdiv__(this, o):
-        if this.debug: print this.__class__.__name__, '__rdiv__'
-        #  subgroup * this: left quotient set
+    def __rdiv__(self, o):
+        if self.debug: print self.__class__.__name__, '__rdiv__'
+        #  subgroup * self: left quotient set
         pass # TODO
 
-    def __contains__(this, o):
+    def __contains__(self, o):
         # Needed for 'in' relationship: default doesn't work, it seems to
         # compare the elements id.
-        #print this.__class__.__name__, '__contains__'
-        for e in this:
+        #print self.__class__.__name__, '__contains__'
+        for e in self:
             if e == o:
                 #print 'e == o'
                 #print '  - with e:', e
                 #print '           ', e.__repr__()
                 #print '  - with o:', o
                 #print '           ', o.__repr__()
-                #print this.__class__.__name__, '__contains__', True
+                #print self.__class__.__name__, '__contains__', True
                 return True
-        #print this.__class__.__name__, '__contains__', False
+        #print self.__class__.__name__, '__contains__', False
         return False
 
-    def add(this, e):
-        if this.debug: print this.__class__.__name__, 'add'
-        l = len(this)
-        if e not in this:
-            set.add(this, e)
+    def add(self, e):
+        if self.debug: print self.__class__.__name__, 'add'
+        l = len(self)
+        if e not in self:
+            set.add(self, e)
 
-    def update(this, o):
-        if this.debug: print this.__class__.__name__, 'update'
+    def update(self, o):
+        if self.debug: print self.__class__.__name__, 'update'
         for e in o:
-            this.add(e)
+            self.add(e)
 
-    def getOne(this):
-        if this.debug: print this.__class__.__name__, 'getOne'
-        for e in this: return e
+    def getOne(self):
+        if self.debug: print self.__class__.__name__, 'getOne'
+        for e in self: return e
 
-    def group(this, maxIter = 50):
+    def group(self, maxIter = 50):
         """
         Tries to make a group out of the set of isometries
 
         If it succeeds within maxiter step this set is closed, contains the unit
         element and the set contains for every elements its inverse
         """
-        if this.debug: print this.__class__.__name__, 'group'
-        result = copy(this)
-        for e in this:
+        if self.debug: print self.__class__.__name__, 'group'
+        result = copy(self)
+        for e in self:
             result.add(e.inverse())
         result.add(geomtypes.E)
-        this.clear()
-        this.update(result.close(maxIter))
+        self.clear()
+        self.update(result.close(maxIter))
 
-    def close(this, maxIter = 5):
+    def close(self, maxIter = 5):
         """
         Return a set that is closed, if it can be generated within maxIter steps.
         """
-        if this.debug: print this.__class__.__name__, 'close'
-        result = copy(this)
+        if self.debug: print self.__class__.__name__, 'close'
+        result = copy(self)
         for i in range(maxIter):
             lPrev = len(result)
             #print 'close step', i, 'len:', lPrev
@@ -280,7 +280,7 @@ class Set(set):
                 break
             # print '  --> new group with len', l, ':\n', result
         #if not l == lPrev:
-        #    for i in this: print i
+        #    for i in self: print i
         #    print '---------------'
         #    for i in result: print i
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
@@ -288,25 +288,25 @@ class Set(set):
         #    print "close group, warning: maxIter (%d) reached (group closed)"% maxIter
         return result
 
-    def checkSetup(this, setup):
-        if this.debug: print this.__class__.__name__, 'checkSetup'
-        if setup != {} and this.initPars == []:
+    def checkSetup(self, setup):
+        if self.debug: print self.__class__.__name__, 'checkSetup'
+        if setup != {} and self.initPars == []:
             print "Warning: class %s doesn't handle any setup pars" % (
-                    this.__class__.__name__), setup.keys()
+                    self.__class__.__name__), setup.keys()
         for k in setup.keys():
             found = False
-            for p in this.initPars:
+            for p in self.initPars:
                 found |= p['par'] == k
                 if found: break
             if not found:
                 print "Warning: unknown setup parameter %s for class %s" % (
-                        k, this.__class__.__name__)
+                        k, self.__class__.__name__)
                 assert False, 'Got setup = %s' % str(setup)
-        this.generator = setup
+        self.generator = setup
 
     @property
-    def setup(this):
-        return this.generator
+    def setup(self):
+        return self.generator
 
 def setup(**kwargs): return kwargs
 
@@ -314,11 +314,11 @@ class E(Set):
     initPars = []
     order = 1
     mixed = False
-    def __init__(this, isometries = None, setup = {}):
-            this.checkSetup(setup)
-            Set.__init__(this, [geomtypes.E])
+    def __init__(self, isometries = None, setup = {}):
+            self.checkSetup(setup)
+            Set.__init__(self, [geomtypes.E])
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -334,21 +334,21 @@ class ExI(Set):
     mixed = True
     directParent = E
     directParentSetup = {}
-    def __init__(this, isometries = None, setup = {}):
-            this.checkSetup(setup)
-            Set.__init__(this, [geomtypes.E, geomtypes.I])
+    def __init__(self, isometries = None, setup = {}):
+            self.checkSetup(setup)
+            Set.__init__(self, [geomtypes.E, geomtypes.I])
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == ExI:
-            return [this]
+            return [self]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 ExI.subgroups = [ExI, E]
 
@@ -358,8 +358,8 @@ def _Cn_getExtraSubgroups(n):
     return G
 
 class MetaCn(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class Cn(Set):
     __metaclass__ = MetaCn
     initPars = [
@@ -369,7 +369,7 @@ class Cn(Set):
     defaultSetup = {'n': 2, 'axis': Z[:]}
     order = 0
     n = 0
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group Cn, consisting of n rotations
 
@@ -381,21 +381,21 @@ class Cn(Set):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
-            else:              axis = copy(this.defaultSetup['axis'])
-            if this.n != 0   : n = this.n
+            else:              axis = copy(self.defaultSetup['axis'])
+            if self.n != 0   : n = self.n
             else:
                 if 'n' in keys: n = setup['n']
-                else:           n = copy(this.defaultSetup['n'])
+                else:           n = copy(self.defaultSetup['n'])
                 if n == 0: n = 1
-                # If this.n is hard-code (e.g. for C3)
+                # If self.n is hard-code (e.g. for C3)
                 # then if you specify n it should be the correct value
-                assert this.n == 0 or n == this.n
-                this.n = n
+                assert self.n == 0 or n == self.n
+                self.n = n
 
             angle = 2 * math.pi / n
             try:   r = geomtypes.Rot3(axis = axis, angle = angle)
@@ -406,31 +406,31 @@ class Cn(Set):
             isometries = [r]
             for i in range(n-1):
                 isometries.append(r * isometries[-1])
-            Set.__init__(this, isometries)
-            this.order = n
-            this.rotAxes = {'n': axis}
-            this.subgroups = _Cn_getExtraSubgroups(n)
-            this.subgroups.insert(0, E)
-            this.subgroups.append(C(n))
-            print this.subgroups
+            Set.__init__(self, isometries)
+            self.order = n
+            self.rotAxes = {'n': axis}
+            self.subgroups = _Cn_getExtraSubgroups(n)
+            self.subgroups.insert(0, E)
+            self.subgroups.append(C(n))
+            print self.subgroups
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaCn):
-            if sg.n == this.n: # Cn
-                return [this]
-            elif sg.n > this.n:
+            if sg.n == self.n: # Cn
+                return [self]
+            elif sg.n > self.n:
                 return []
             else:
-                print 'realised', repr(sg(setup = this.setup))
-                return[sg(setup = this.setup)]
+                print 'realised', repr(sg(setup = self.setup))
+                return[sg(setup = self.setup)]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create Cn classes:
 CnMetas = {}
@@ -472,11 +472,11 @@ C4 = C(4)
 C5 = C(5)
 
 class MetaC2nCn(MetaCn):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class C2nCn(Cn):
     __metaclass__ = MetaC2nCn
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group C2nCn, consisting of n rotations and of n rotary
         inversions (reflections)
@@ -491,54 +491,54 @@ class C2nCn(Cn):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             s = copy(setup)
             # TODO remove dependency on n, make this class C2nCn internal, use
             # only C2nC(n) and rename this to an __
-            if 'n' not in s and this.n != 0:
-                s['n'] = this.n
-            # If this.n is hard-code (e.g. for C6C3)
+            if 'n' not in s and self.n != 0:
+                s['n'] = self.n
+            # If self.n is hard-code (e.g. for C6C3)
             # then if you specify n it should be the correct value
-            assert this.n == 0 or s['n'] == this.n
+            assert self.n == 0 or s['n'] == self.n
             # TODO use direct parent here... (no dep on n)
             cn = Cn(setup = s)
-            this.directParentSetup = copy(s)
-            this.n = cn.n
+            self.directParentSetup = copy(s)
+            self.n = cn.n
             s['n'] = 2 * s['n']
             c2n = Cn(setup = s)
-            Set.__init__(this, cn | ((c2n-cn) * geomtypes.I))
-            this.rotAxes = {'n': cn.rotAxes['n']}
-            this.order = c2n.order
+            Set.__init__(self, cn | ((c2n-cn) * geomtypes.I))
+            self.rotAxes = {'n': cn.rotAxes['n']}
+            self.order = c2n.order
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaC2nCn):
-            if sg.n == this.n: # C2cCn
-                return [this]
+            if sg.n == self.n: # C2cCn
+                return [self]
             elif sg.n == 1: # C2C1 = {E, Reflection}
-                assert this.n % 2 == 1, 'Improper subgroup'
+                assert self.n % 2 == 1, 'Improper subgroup'
                 # only one orientation: reflection normal parallel to n-fold
                 # axis.
-                return [sg(setup = {'axis': this.rotAxes['n']})]
-            elif sg.n > this.n:
+                return [sg(setup = {'axis': self.rotAxes['n']})]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaCn):
-            if sg.n == this.n: # C2cCn
+            if sg.n == self.n: # C2cCn
                 # only one orientation:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             else:
                 TODO
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create C2nCn classes:
 C2nCnMetas = {}
@@ -584,11 +584,11 @@ C6C3 = C2nC(3)
 C8C4 = C2nC(4)
 
 class MetaCnxI(MetaCn):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class CnxI(Cn):
     __metaclass__ = MetaCnxI
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group CnxI, consisting of n rotations and of n rotary
         inversions (reflections)
@@ -603,53 +603,53 @@ class CnxI(Cn):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             s = copy(setup)
-            if 'n' not in s and this.n != 0:
-                s['n'] = this.n
-            # If this.n is hard-code (e.g. for C3xI)
+            if 'n' not in s and self.n != 0:
+                s['n'] = self.n
+            # If self.n is hard-code (e.g. for C3xI)
             # then if you specify n it should be the correct value
-            assert this.n == 0 or s['n'] == this.n
+            assert self.n == 0 or s['n'] == self.n
             cn = Cn(setup = s)
-            this.directParentSetup = copy(s)
-            this.n = cn.n
-            Set.__init__(this, cn * ExI())
-            this.rotAxes = {'n': cn.rotAxes['n']}
-            this.order = 2 * cn.order
+            self.directParentSetup = copy(s)
+            self.n = cn.n
+            Set.__init__(self, cn * ExI())
+            self.rotAxes = {'n': cn.rotAxes['n']}
+            self.order = 2 * cn.order
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaCnxI):
-            if sg.n == this.n: # CnxI
-                return [this]
-            elif sg.n > this.n:
+            if sg.n == self.n: # CnxI
+                return [self]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaC2nCn):
             if sg.n == 1: # C2C1
                 # only one orientation:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             else:
                 TODO
         elif isinstance(sg, MetaCn):
-            if sg.n == this.n: # Cn
+            if sg.n == self.n: # Cn
                 # only one orientation:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             else:
-                print sg, sg.n, this.n
+                print sg, sg.n, self.n
                 TODO
         elif sg == ExI:
             return [ExI()]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create CnxI classes:
 CnxIMetas = {}
@@ -696,8 +696,8 @@ C4xI = CxI(4)
 C5xI = CxI(5)
 
 class MetaDnCn(MetaCn):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class DnCn(Cn):
     __metaclass__ = MetaDnCn
     initPars = [
@@ -707,7 +707,7 @@ class DnCn(Cn):
     ]
     defaultSetup = {'n': 2, 'axis_n': Z[:], 'normal_r': X[:]}
 
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group DnCn, consisting of n rotations and of n rotary
         inversions (reflections)
@@ -721,65 +721,65 @@ class DnCn(Cn):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
             s = {}
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             if 'n' not in setup:
-                if this.n != 0:
-                    s['n'] = this.n
+                if self.n != 0:
+                    s['n'] = self.n
                 else:
-                    s['n'] = copy(this.defaultSetup['n'])
+                    s['n'] = copy(self.defaultSetup['n'])
             else:
                 s['n'] = setup['n']
-                # If this.n is hard-code (e.g. for D3C3)
+                # If self.n is hard-code (e.g. for D3C3)
                 # then if you specify n it should be the correct value
-                assert this.n == 0 or s['n'] == this.n
+                assert self.n == 0 or s['n'] == self.n
             if 'axis_n' in setup:
                 s['axis'] = setup['axis_n']
             else:
-                s['axis'] = copy(this.defaultSetup['axis_n'])
+                s['axis'] = copy(self.defaultSetup['axis_n'])
             cn = Cn(setup = s)
-            this.directParentSetup = copy(s)
+            self.directParentSetup = copy(s)
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
             else:
-                s['axis_2'] = copy(this.defaultSetup['normal_r'])
+                s['axis_2'] = copy(self.defaultSetup['normal_r'])
             s['axis_n'] = s['axis']
             del s['axis']
             dn = Dn(setup = s)
-            Set.__init__(this, cn | ((dn-cn) * geomtypes.I))
-            this.n = s['n']
-            this.rotAxes = {'n': cn.rotAxes['n']}
-            this.reflNormals = dn.rotAxes[2]
-            this.order = dn.order
+            Set.__init__(self, cn | ((dn-cn) * geomtypes.I))
+            self.n = s['n']
+            self.rotAxes = {'n': cn.rotAxes['n']}
+            self.reflNormals = dn.rotAxes[2]
+            self.order = dn.order
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaDnCn):
-            if sg.n == this.n:
-                return [this]
-            elif sg.n > this.n:
+            if sg.n == self.n:
+                return [self]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaC2nCn):
             if sg.n == 1: # C2C1
-                return [sg(setup = {'axis': rn}) for rn in this.reflNormals]
+                return [sg(setup = {'axis': rn}) for rn in self.reflNormals]
             else:
                 TODO
         elif isinstance(sg, MetaCn):
-            if sg.n == this.n:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+            if sg.n == self.n:
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             else:
                 TODO
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create DnCn classes:
 DnCnMetas = {}
@@ -829,8 +829,8 @@ D4C4 = DnC(4)
 D5C5 = DnC(5)
 
 class MetaDn(type):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class Dn(Set):
     __metaclass__ = MetaDn
     initPars = [
@@ -841,7 +841,7 @@ class Dn(Set):
     defaultSetup = {'n': 2, 'axis_n': Z[:], 'axis_2': X[:]}
     order = 0
     n = 0
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group Dn, consisting of 2n rotations
 
@@ -854,19 +854,19 @@ class Dn(Set):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             keys = setup.keys()
             if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = copy(this.defaultSetup['axis_n'])
+            else:                axis_n = copy(self.defaultSetup['axis_n'])
             if 'axis_2' in keys: axis_2 = setup['axis_2']
-            else:                axis_2 = copy(this.defaultSetup['axis_2'])
-            if this.n != 0:
-                # If this.n is hard-code (e.g. for D3)
+            else:                axis_2 = copy(self.defaultSetup['axis_2'])
+            if self.n != 0:
+                # If self.n is hard-code (e.g. for D3)
                 # then if you specify n it should be the correct value
-                assert 'n' not in setup or setup['n'] == this.n
-                n = this.n
+                assert 'n' not in setup or setup['n'] == self.n
+                n = self.n
             else:
                 if 'n' in keys: n = setup['n']
                 else:           n = 2
@@ -878,42 +878,42 @@ class Dn(Set):
             hs = [isom * h for isom in cn]
             #for isom in hs: print isom
             isometries.extend(hs)
-            this.rotAxes = {'n': axis_n, 2: [h.axis() for h in hs]}
-            Set.__init__(this, isometries)
-            # If this.n is hard-code (e.g. for C3)
+            self.rotAxes = {'n': axis_n, 2: [h.axis() for h in hs]}
+            Set.__init__(self, isometries)
+            # If self.n is hard-code (e.g. for C3)
             # then if you specify n it should be the correct value
-            if this.n != 0:
-                assert n == this.n
+            if self.n != 0:
+                assert n == self.n
             else:
-                this.n = n
-            this.order = 2 * n
+                self.n = n
+            self.order = 2 * n
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaDn):
-            if sg.n == this.n:
-                return [this]
-            elif sg.n > this.n:
+            if sg.n == self.n:
+                return [self]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaCn):
-            if sg.n == this.n:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+            if sg.n == self.n:
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             elif sg.n == 2: # sg = C2
                 isoms = [
-                    sg(setup = {'axis':this.rotAxes[2][i]})
-                    for i in range(len(this.rotAxes[2]))
+                    sg(setup = {'axis':self.rotAxes[2][i]})
+                    for i in range(len(self.rotAxes[2]))
                 ]
-                if this.n % 2 == 0: # if D2, D4, etc
+                if self.n % 2 == 0: # if D2, D4, etc
                     isoms.append(
-                        sg(setup = {'axis': this.rotAxes['n']})
+                        sg(setup = {'axis': self.rotAxes['n']})
                     )
                 return isoms
-            elif sg.n > this.n:
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
@@ -970,11 +970,11 @@ D4 = D(4)
 D5 = D(5)
 
 class MetaDnxI(MetaDn):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class DnxI(Dn):
     __metaclass__ = MetaDnxI
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group DnxI, of order 4n.
 
@@ -992,57 +992,57 @@ class DnxI(Dn):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             keys = setup.keys()
             if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = copy(this.defaultSetup['axis_n'])
-            this.checkSetup(setup)
+            else:                axis_n = copy(self.defaultSetup['axis_n'])
+            self.checkSetup(setup)
             s = copy(setup)
-            if 'n' not in s and this.n != 0:
-                s['n'] = this.n
-            # If this.n is hard-code (e.g. for D3xI)
+            if 'n' not in s and self.n != 0:
+                s['n'] = self.n
+            # If self.n is hard-code (e.g. for D3xI)
             # then if you specify n it should be the correct value
-            assert this.n == 0 or s['n'] == this.n
+            assert self.n == 0 or s['n'] == self.n
             dn = Dn(setup = s)
-            this.directParentSetup = copy(s)
-            Set.__init__(this, dn * ExI())
-            this.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
-            this.n     = dn.n
-            this.order = 2 * dn.order
+            self.directParentSetup = copy(s)
+            Set.__init__(self, dn * ExI())
+            self.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
+            self.n     = dn.n
+            self.order = 2 * dn.order
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         #print 'realiseSubgroups', sgName
         if isinstance(sg, MetaDnxI):
-            if sg.n == this.n:
-                return [this]
-            elif sg.n > this.n:
+            if sg.n == self.n:
+                return [self]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaDn):
-            if sg.n == this.n:
+            if sg.n == self.n:
                 return [
                     sg(setup = {
-                        'axis_n': this.rotAxes['n'],
-                        'axis_2': this.rotAxes[2][0]
+                        'axis_n': self.rotAxes['n'],
+                        'axis_2': self.rotAxes[2][0]
                     })
                     # choosing other 2-fold axes leads essentially to the same.
                 ]
-            elif sg.n > this.n:
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaDnCn):
-            if sg.n == this.n and this.n > 1: # DnCn
+            if sg.n == self.n and self.n > 1: # DnCn
                 return [
-                    sg(setup = {'axis_n':this.rotAxes['n'],
-                            'normal_r': this.rotAxes[2][0]
+                    sg(setup = {'axis_n':self.rotAxes['n'],
+                            'normal_r': self.rotAxes[2][0]
                         }
                     )
                 ]
@@ -1051,28 +1051,28 @@ class DnxI(Dn):
         elif isinstance(sg, MetaC2nCn):
             if sg.n == 1: # C2C1: {E, Reflection}
                 isoms = [
-                    sg(setup = {'axis':this.rotAxes[2][i]})
-                    for i in range(len(this.rotAxes[2]))
+                    sg(setup = {'axis':self.rotAxes[2][i]})
+                    for i in range(len(self.rotAxes[2]))
                 ]
-                if this.n % 2 == 0: # if D2xI, D4xI, etc
+                if self.n % 2 == 0: # if D2xI, D4xI, etc
                     isoms.append(
-                        sg(setup = {'axis': this.rotAxes['n']})
+                        sg(setup = {'axis': self.rotAxes['n']})
                     )
                 return isoms
             else:
                 TODO
         elif isinstance(sg, MetaCnxI) or type(sg) == MetaCn:
-            if sg.n == this.n:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+            if sg.n == self.n:
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             elif sg.n == 2: # C2xI or C2
                 isoms = [
-                    sg(setup = {'axis':this.rotAxes[2][i]})
-                    for i in range(len(this.rotAxes[2]))
+                    sg(setup = {'axis':self.rotAxes[2][i]})
+                    for i in range(len(self.rotAxes[2]))
                 ]
-                if this.n % 2 == 0: # if D2xI, D4xI, etc
-                    isoms.append(sg(setup = {'axis': this.rotAxes['n']}))
+                if self.n % 2 == 0: # if D2xI, D4xI, etc
+                    isoms.append(sg(setup = {'axis': self.rotAxes['n']}))
                 return isoms
-            elif sg.n > this.n:
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
@@ -1081,7 +1081,7 @@ class DnxI(Dn):
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s(%s)' % (
-                this.__class__.__name__, sg.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__name__, sg.__class__.__name__)
 
 # dynamically create DnxI classes:
 DnxIMetas = {}
@@ -1137,11 +1137,11 @@ D4xI = DxI(4)
 D5xI = DxI(5)
 
 class MetaD2nDn(MetaDn):
-    def __init__(this, classname, bases, classdict):
-        type.__init__(this, classname, bases, classdict)
+    def __init__(self, classname, bases, classdict):
+        type.__init__(self, classname, bases, classdict)
 class D2nDn(Dn):
     __metaclass__ = MetaD2nDn
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group D2nDn, consisting of n rotations, n half turns, n
         rotary inversions (reflections) and n reflections.
@@ -1160,84 +1160,84 @@ class D2nDn(Dn):
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             # TODO: add some asserts
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             s = copy(setup)
-            if 'n' not in s and this.n != 0:
-                s['n'] = this.n
-            # If this.n is hard-code (e.g. for D6D3)
+            if 'n' not in s and self.n != 0:
+                s['n'] = self.n
+            # If self.n is hard-code (e.g. for D6D3)
             # then if you specify n it should be the correct value
-            assert this.n == 0 or s['n'] == this.n
+            assert self.n == 0 or s['n'] == self.n
             dn = Dn(setup = s)
-            this.n = dn.n
+            self.n = dn.n
             s['n'] = 2 * s['n']
             d2n = Dn(setup = s)
-            this.directParentSetup = copy(s)
-            Set.__init__(this, dn | ((d2n-dn) * geomtypes.I))
-            this.rotAxes = dn.rotAxes
-            this.reflNormals = []
-            for isom in this:
+            self.directParentSetup = copy(s)
+            Set.__init__(self, dn | ((d2n-dn) * geomtypes.I))
+            self.rotAxes = dn.rotAxes
+            self.reflNormals = []
+            for isom in self:
                 if isom.is_refl():
-                    this.reflNormals.append(isom.plane_normal())
-            this.order = d2n.order
+                    self.reflNormals.append(isom.plane_normal())
+            self.order = d2n.order
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaD2nDn):
-            if sg.n == this.n: # D2cDn
-                return [this]
-            elif sg.n > this.n:
+            if sg.n == self.n: # D2cDn
+                return [self]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaDn):
-            if sg.n == this.n:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
-            elif sg.n > this.n:
+            if sg.n == self.n:
+                return [sg(setup = {'axis': self.rotAxes['n']})]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaDnCn):
-            if sg.n == this.n and this.n > 1: # DnCn
-                return [sg(setup = {'axis_n':this.rotAxes['n'],
-                        'normal_r': this.reflNormals[0]
+            if sg.n == self.n and self.n > 1: # DnCn
+                return [sg(setup = {'axis_n':self.rotAxes['n'],
+                        'normal_r': self.reflNormals[0]
                     }
                 )]
             else:
                 TODO
         elif isinstance(sg, MetaC2nCn):
-            if sg.n == this.n: # D2nDn
-                return [sg(setup = {'axis': this.rotAxes['n']})]
+            if sg.n == self.n: # D2nDn
+                return [sg(setup = {'axis': self.rotAxes['n']})]
             elif sg.n == 1: # C2C1 = {E, Reflection}
                 isoms = [
-                    sg(setup = {'axis':this.reflNormals[i]})
-                    for i in range(len(this.reflNormals))
+                    sg(setup = {'axis':self.reflNormals[i]})
+                    for i in range(len(self.reflNormals))
                 ]
                 # included in previous:
-                #if this.n % 2 == 1 and this.n > 1: # if D3xI, D5xI, etc
+                #if self.n % 2 == 1 and self.n > 1: # if D3xI, D5xI, etc
                 #    isoms.append(
-                #        sg(setup = {'axis': this.rotAxes['n']})
+                #        sg(setup = {'axis': self.rotAxes['n']})
                 #    )
                 return isoms
-            elif sg.n > this.n:
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif isinstance(sg, MetaCn):
-            if sg.n == this.n:
-                return [sg(setup = {'axis': this.rotAxes['n']})]
-            elif sg.n > this.n:
+            if sg.n == self.n:
+                return [sg(setup = {'axis': self.rotAxes['n']})]
+            elif sg.n > self.n:
                 return []
             else:
                 TODO
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # dynamically create C2nCn classes:
 D2nDnMetas = {}
@@ -1294,7 +1294,7 @@ class A4(Set):
     defaultSetup = {'o2axis0': X[:], 'o2axis1': Y[:]}
     order = 12
     mixed = False
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 12 rotations
 
@@ -1312,52 +1312,52 @@ class A4(Set):
         # 1. A subgroup D2: E, and half turns H0, H1, H2
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = copy(this.defaultSetup['o2axis0'])
+            else:                 o2axis0 = copy(self.defaultSetup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = copy(this.defaultSetup['o2axis1'])
+            else:                 o2axis1 = copy(self.defaultSetup['o2axis1'])
             d2 = generateD2(o2axis0, o2axis1)
             H0, H1, H2 = d2
             R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
 
-            Set.__init__(this, [
+            Set.__init__(self, [
                     geomtypes.E,
                     H0, H1, H2,
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2
                 ])
 
-            this.rotAxes = {
+            self.rotAxes = {
                     2: [H0.axis(), H1.axis(), H2.axis()],
                     3: [R1_1.axis(), R2_1.axis(), R3_1.axis(), R4_1.axis()],
                 }
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == A4:
-            return [this]
+            return [self]
         elif sg == D2:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [D2(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
         elif sg == C2:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [C2(setup = {'axis': a}) for a in o2a]
         elif sg == C3:
-            o3a = this.rotAxes[3]
+            o3a = self.rotAxes[3]
             return [C3(setup = {'axis': a}) for a in o3a]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
@@ -1370,7 +1370,7 @@ class S4A4(A4):
     order = 24
     mixed = True
     directParent = A4
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group A4, consisting of 24 isometries, 12 direct, 12
         opposite.
@@ -1391,18 +1391,18 @@ class S4A4(A4):
         # 1. A subgroup D2: E, and half turns H0, H1, H2
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = copy(this.defaultSetup['o2axis0'])
+            else:                 o2axis0 = copy(self.defaultSetup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = copy(this.defaultSetup['o2axis1'])
-            this.directParentSetup = copy(setup)
+            else:                 o2axis1 = copy(self.defaultSetup['o2axis1'])
+            self.directParentSetup = copy(setup)
             d2 = generateD2(o2axis0, o2axis1)
             h0, h1, h2 = d2
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
@@ -1428,7 +1428,7 @@ class S4A4(A4):
             s3 = geomtypes.Refl3(normal=pn3)
             s4 = geomtypes.Refl3(normal=pn4)
             s5 = geomtypes.Refl3(normal=pn5)
-            Set.__init__(this, [
+            Set.__init__(self, [
                     geomtypes.E,
                     h0, h1, h2,
                     r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2,
@@ -1436,13 +1436,13 @@ class S4A4(A4):
                     ri0_1, ri0_3, ri1_1, ri1_3, ri2_1, ri2_3,
                 ])
 
-            this.reflNormals = [pn0, pn1, pn2, pn3, pn4, pn5]
-            this.rotAxes = {
+            self.reflNormals = [pn0, pn1, pn2, pn3, pn4, pn5]
+            self.rotAxes = {
                     2: [h0.axis(), h1.axis(), h2.axis()],
                     3: [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
                 }
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1450,37 +1450,37 @@ class S4A4(A4):
         #S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
         #C3, C2, E
         if sg == S4A4:
-            return [this]
+            return [self]
         elif sg == A4:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [sg(setup = {'o2axis0': o2a[0], 'o2axis1': o2a[1]})]
         elif sg == D4D2:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             l = len(o2a)
             return [sg(setup = {'axis_n': o2a[i], 'axis_2': o2a[(i+1)%l]})
                     for i in range(l)
                 ]
         elif sg == D3C3:
             isoms = []
-            for o3 in this.rotAxes[3]:
-                for rn in this.reflNormals:
+            for o3 in self.rotAxes[3]:
+                for rn in self.reflNormals:
                     if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C4C2:
-            return [C4C2(setup = {'axis': a}) for a in this.rotAxes[2]]
+            return [C4C2(setup = {'axis': a}) for a in self.rotAxes[2]]
         elif sg == C3:
-            return [sg(setup = {'axis': a}) for a in this.rotAxes[3]]
+            return [sg(setup = {'axis': a}) for a in self.rotAxes[3]]
         elif sg == C2:
-            return [sg(setup = {'axis': a}) for a in this.rotAxes[2]]
+            return [sg(setup = {'axis': a}) for a in self.rotAxes[2]]
         elif sg == C2C1:
-            return [sg(setup = {'axis': normal}) for normal in this.reflNormals]
+            return [sg(setup = {'axis': normal}) for normal in self.reflNormals]
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
@@ -1500,7 +1500,7 @@ class A4xI(A4):
     order = 24
     mixed = True
     directParent = A4
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group A4xI, consisting of 12 rotations and 12 rotary
         inversions.
@@ -1515,68 +1515,68 @@ class A4xI(A4):
         The group can be generated by the axes of 2 half turns
         """
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             a4 = A4(setup = setup)
-            this.directParentSetup = copy(setup)
-            Set.__init__(this, a4 * ExI())
-            this.rotAxes = a4.rotAxes
+            self.directParentSetup = copy(setup)
+            Set.__init__(self, a4 * ExI())
+            self.rotAxes = a4.rotAxes
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == A4xI:
-            return [this]
+            return [self]
         elif sg == A4:
             # other ways of orienting A4 into A4xI don't give anything new
             return [ A4( setup = {
-                        'o2axis0': this.rotAxes[2][0],
-                        'o2axis1': this.rotAxes[2][1]
+                        'o2axis0': self.rotAxes[2][0],
+                        'o2axis1': self.rotAxes[2][1]
                     }
                 )
             ]
         elif sg == D2xI:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [sg(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
         elif sg == C3xI:
-            o3a = this.rotAxes[3]
+            o3a = self.rotAxes[3]
             return [sg(setup = {'axis': a}) for a in o3a]
         elif sg == D2:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [sg(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
         elif sg == D2C2:
             isoms = []
-            for o2 in this.rotAxes[2]:
-                for rn in this.rotAxes[2]:
+            for o2 in self.rotAxes[2]:
+                for rn in self.rotAxes[2]:
                     if geomtypes.eq(rn*o2, 0):
                         isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 3, 'len(isoms) == %d != 3' % len(isoms)
             return isoms
         if sg == C2xI:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [sg(setup = {'axis': a}) for a in o2a]
         elif sg == C3:
-            o3a = this.rotAxes[3]
+            o3a = self.rotAxes[3]
             return [sg(setup = {'axis': a}) for a in o3a]
         elif sg == C2:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [sg(setup = {'axis': a}) for a in o2a]
         elif sg == C2C1:
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             return [sg(setup = {'axis': a}) for a in o2a]
         elif sg == ExI:
             return [sg()]
         elif sg == E:
             return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # Diagram 4, 14
 # 24            A4xI
@@ -1610,7 +1610,7 @@ class S4(Set):
     defaultSetup = {'o4axis0': X[:], 'o4axis1': Y[:]}
     order = 24
     mixed = False
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group S4, consisting of 24 rotations
 
@@ -1624,17 +1624,17 @@ class S4(Set):
         The group can be generated by the axes of 2 quarter turns,
         """
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             axes = setup.keys()
             if 'o4axis0' in axes: o4axis0 = setup['o4axis0']
-            else:                 o4axis0 = copy(this.defaultSetup['o4axis0'])
+            else:                 o4axis0 = copy(self.defaultSetup['o4axis0'])
             if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
-            else:                 o4axis1 = copy(this.defaultSetup['o4axis1'])
+            else:                 o4axis1 = copy(self.defaultSetup['o4axis1'])
             d2 = generateD2(o4axis0, o4axis1)
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
             q0_2, q1_2, q2_2 = d2
@@ -1671,13 +1671,13 @@ class S4(Set):
                     axis = geomtypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0,
                     angle = hTurn
                 )
-            Set.__init__(this, [
+            Set.__init__(self, [
                     geomtypes.E,
                     q0_1, q0_2, q0_3, q1_1, q1_2, q1_3, q2_1, q2_2, q2_3,
                     r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2,
                     h0, h1, h2, h3, h4, h5
                 ])
-            this.rotAxes = {
+            self.rotAxes = {
                     2: [h0.axis(), h1.axis(), h2.axis(),
                             h3.axis(), h4.axis(), h5.axis()
                         ],
@@ -1685,25 +1685,25 @@ class S4(Set):
                     4: [ax0, ax1, ax2]
                 }
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == S4:
-            return [this]
+            return [self]
         elif sg == A4:
             # other ways of orienting A4 into S4 don't give anything new
             return [
                 A4(
                     setup = {
-                        'o2axis0': this.rotAxes[4][0],
-                        'o2axis1': this.rotAxes[4][1]
+                        'o2axis0': self.rotAxes[4][0],
+                        'o2axis1': self.rotAxes[4][1]
                     }
                 )
             ]
         elif sg == D4:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             l = len(o4a)
             return [sg(
                     setup = {'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]}
@@ -1711,8 +1711,8 @@ class S4(Set):
             ]
         elif sg == D3:
             isoms = []
-            for o3 in this.rotAxes[3]:
-                for o2 in this.rotAxes[2]:
+            for o3 in self.rotAxes[3]:
+                for o2 in self.rotAxes[2]:
                     if geomtypes.eq(o2*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
                         break
@@ -1723,32 +1723,32 @@ class S4(Set):
             # There are 2 kinds of D2:
             # 1. one consisting of the three 4-fold axes
             # 2. 3 consisting of a 4 fold axis and two 2-fold axes.
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             l = len(o4a)
             isoms = [sg(setup = {'axis_n': o4a[0], 'axis_2': o4a[1]})]
-            for o4 in this.rotAxes[4]:
-                for o2 in this.rotAxes[2]:
+            for o4 in self.rotAxes[4]:
+                for o2 in self.rotAxes[2]:
                     if geomtypes.eq(o2*o4, 0):
                         isoms.append(sg(setup = {'axis_n': o4, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C4:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             return [sg(setup = {'axis': a}) for a in o4a]
         elif sg == C3:
-            o3a = this.rotAxes[3]
+            o3a = self.rotAxes[3]
             return [sg(setup = {'axis': a}) for a in o3a]
         elif sg == C2:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             isoms = [sg(setup = {'axis': a}) for a in o4a]
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             isoms.extend([sg(setup = {'axis': a}) for a in o2a])
             return isoms
         elif sg == E:
             return [E()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # Dn = D4, D3, D2 (2x), D1 (~C2)
 # Cn = C4, C3, C2 (2x @ 2-fold and 4-fold axes)
@@ -1764,7 +1764,7 @@ class S4xI(S4):
     order = 48
     mixed = True
     directParent = S4
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group S4xI, consisting of 12 rotations and 12 rotary
         inversions.
@@ -1784,41 +1784,41 @@ class S4xI(S4):
         The group can be generated by the axes of 2 quarter turns,
         """
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             s4 = S4(setup = setup)
-            this.directParentSetup = copy(setup)
-            Set.__init__(this, s4 * ExI())
-            this.rotAxes = s4.rotAxes
+            self.directParentSetup = copy(setup)
+            Set.__init__(self, s4 * ExI())
+            self.rotAxes = s4.rotAxes
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == S4xI:
-            return [this]
+            return [self]
         elif sg == S4:
             # other ways of orienting S4 into S4xI don't give anything new
             return [ sg( setup = {
-                        'o4axis0': this.rotAxes[4][0],
-                        'o4axis1': this.rotAxes[4][1]
+                        'o4axis0': self.rotAxes[4][0],
+                        'o4axis1': self.rotAxes[4][1]
                     }
                 )
             ]
         elif sg == A4xI or sg == A4 or sg == S4A4:
             return [ sg( setup = {
-                        'o2axis0': this.rotAxes[4][0],
-                        'o2axis1': this.rotAxes[4][1]
+                        'o2axis0': self.rotAxes[4][0],
+                        'o2axis1': self.rotAxes[4][1]
                     }
                 )
             ]
         elif sg == D4xI or sg == D8D4 or sg == D4:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             l = len(o4a)
             return [sg(
                     setup = {'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]}
@@ -1826,8 +1826,8 @@ class S4xI(S4):
             ]
         elif sg == D3xI or sg == D3:
             isoms = []
-            for o3 in this.rotAxes[3]:
-                for o2 in this.rotAxes[2]:
+            for o3 in self.rotAxes[3]:
+                for o2 in self.rotAxes[2]:
                     if geomtypes.eq(o2*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
                         break
@@ -1835,19 +1835,19 @@ class S4xI(S4):
             return isoms
         elif sg == D4C4:
             isoms = []
-            for a4 in this.rotAxes[4]:
-                for rn in this.rotAxes[2]:
+            for a4 in self.rotAxes[4]:
+                for rn in self.rotAxes[2]:
                     if geomtypes.eq(rn*a4, 0):
                         isoms.append(sg(setup = {'axis_n': a4, 'normal_r': rn}))
                         break
             return isoms
         elif sg == D4D2:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             l = len(o4a)
             isoms = [sg(setup = {'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]})
                     for i in range(l)
                 ]
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             for a4 in o4a:
                 for a2 in o2a:
                     if geomtypes.eq(a2*a4, 0):
@@ -1855,9 +1855,9 @@ class S4xI(S4):
                         break
             return isoms
         elif sg == D2xI or sg == D2:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             isoms = [sg(setup = {'axis_n': o4a[0], 'axis_2': o4a[1]})]
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             for a4 in o4a:
                 for a2 in o2a:
                     if geomtypes.eq(a2*a4, 0):
@@ -1867,52 +1867,52 @@ class S4xI(S4):
             return isoms
         elif sg == D3C3:
             isoms = []
-            for o3 in this.rotAxes[3]:
-                for rn in this.rotAxes[2]:
+            for o3 in self.rotAxes[3]:
+                for rn in self.rotAxes[2]:
                     if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C3xI or sg == C3:
-            o3a = this.rotAxes[3]
+            o3a = self.rotAxes[3]
             return [sg(setup = {'axis': a}) for a in o3a]
         elif sg == D2C2:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             l = len(o4a)
             isoms = [sg(setup = {'axis_n': o4a[i], 'normal_r': o4a[(i+1)%l]})
                     for i in range(l)
                 ]
-            o2a = this.rotAxes[2]
+            o2a = self.rotAxes[2]
             for a4 in o4a:
                 for a2 in o2a:
                     if geomtypes.eq(a2*a4, 0):
                         isoms.append(sg(setup = {'axis_n': a4, 'normal_r': a2}))
                         break
-            for o2 in this.rotAxes[2]:
-                for rn in this.rotAxes[4]:
+            for o2 in self.rotAxes[2]:
+                for rn in self.rotAxes[4]:
                     if geomtypes.eq(rn*o2, 0):
                         isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 12, 'len(isoms) == %d != 12' % len(isoms)
             return isoms
         elif sg == C4xI or sg == C4 or sg == C4C2:
-            o4a = this.rotAxes[4]
+            o4a = self.rotAxes[4]
             return [sg(setup = {'axis': a}) for a in o4a]
         elif sg == C2xI or sg == D1xI or sg == C2 or sg == D1:
-            o2a = this.rotAxes[4]
-            o2a.extend(this.rotAxes[2])
+            o2a = self.rotAxes[4]
+            o2a.extend(self.rotAxes[2])
             return [sg(setup = {'axis': a}) for a in o2a]
         elif sg == C2C1:
-            isoms = [sg(setup = {'axis': a}) for a in this.rotAxes[2]]
-            isoms.extend([sg(setup = {'axis': a}) for a in this.rotAxes[4]])
+            isoms = [sg(setup = {'axis': a}) for a in self.rotAxes[2]]
+            isoms.extend([sg(setup = {'axis': a}) for a in self.rotAxes[4]])
             return isoms
         elif sg == ExI:
             return [sg()]
         elif sg == E:
             return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 S4xI.subgroups = [S4xI,                 # 48
         S4, S4A4, A4xI,                 # 24
@@ -1995,7 +1995,7 @@ class A5(Set):
     }
     order = 60
     mixed = False
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group A5, consisting of 60 rotations
 
@@ -2009,17 +2009,17 @@ class A5(Set):
         The group can be generated by the axes of 2 quarter turns,
         """
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             axes = setup.keys()
             if 'o3axis' in axes: o3axis = setup['o3axis']
-            else: o3axis = copy(this.defaultSetup['o3axis'])
+            else: o3axis = copy(self.defaultSetup['o3axis'])
             if 'o5axis' in axes: o5axis = setup['o5axis']
-            else: o5axis = copy(this.defaultSetup['o5axis'])
+            else: o5axis = copy(self.defaultSetup['o5axis'])
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
@@ -2076,57 +2076,57 @@ class A5(Set):
 #       o2_11
 
             transforms.extend([geomtypes.HalfTurn3(axis = a) for a in o2axes])
-            Set.__init__(this, transforms)
+            Set.__init__(self, transforms)
             #for i in range(len(transforms)):
             #    print 'transform %d: %s' % (i, transforms[i])
-            this.rotAxes = { 2: o2axes, 3: o3axes, 5: o5axes }
-            #for i in range(len(this.rotAxes[2])):
-            #    print i, this.rotAxes[2][i]
+            self.rotAxes = { 2: o2axes, 3: o3axes, 5: o5axes }
+            #for i in range(len(self.rotAxes[2])):
+            #    print i, self.rotAxes[2][i]
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == A5:
-            return [this]
+            return [self]
         elif sg == A4:
             return [
                 # Essentially these lead to 3 different colourings, of which 2
                 # pairs are mirrors images.
                 sg(setup = {
-                    'o2axis0': this.rotAxes[2][i],
-                    'o2axis1': this.rotAxes[2][((i+3) % 5) + 5]
+                    'o2axis0': self.rotAxes[2][i],
+                    'o2axis1': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
         elif sg == D5:
             isoms = [
                 sg(setup = {
-                    'axis_n': this.rotAxes[5][i],
-                    'axis_2': this.rotAxes[2][(i+2) % 5]
+                    'axis_n': self.rotAxes[5][i],
+                    'axis_2': self.rotAxes[2][(i+2) % 5]
                 })
                 for i in range(5)
             ]
             isoms.append(
                 sg(setup = {
-                    'axis_n': this.rotAxes[5][5],
-                    'axis_2': this.rotAxes[2][10]
+                    'axis_n': self.rotAxes[5][5],
+                    'axis_2': self.rotAxes[2][10]
                 })
             )
             return isoms
         elif sg == D3:
             isoms = [
                 sg(setup = {
-                    'axis_n': this.rotAxes[3][i],
-                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                    'axis_n': self.rotAxes[3][i],
+                    'axis_2': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
             isoms.extend([
                 sg(setup = {
-                    'axis_n': this.rotAxes[3][i + 5],
-                    'axis_2': this.rotAxes[2][(i+3) % 5]
+                    'axis_n': self.rotAxes[3][i + 5],
+                    'axis_2': self.rotAxes[2][(i+3) % 5]
                 })
                 for i in range(5)
             ])
@@ -2134,21 +2134,21 @@ class A5(Set):
         elif sg == D2:
             return [
                 sg(setup = {
-                    'axis_n': this.rotAxes[2][i],
-                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                    'axis_n': self.rotAxes[2][i],
+                    'axis_2': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
         elif sg == C5:
-            return [ sg(setup = {'axis': a}) for a in this.rotAxes[5] ]
+            return [ sg(setup = {'axis': a}) for a in self.rotAxes[5] ]
         elif sg == C3:
-            return [ sg(setup = {'axis': a}) for a in this.rotAxes[3] ]
+            return [ sg(setup = {'axis': a}) for a in self.rotAxes[3] ]
         elif sg == C2:
-            return [ sg(setup = {'axis': a}) for a in this.rotAxes[2] ]
+            return [ sg(setup = {'axis': a}) for a in self.rotAxes[2] ]
         elif sg == E:
             return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 # Diagram 15
 A5.subgroups = [A5,
@@ -2166,7 +2166,7 @@ class A5xI(A5):
     order = 120
     mixed = True
     directParent = A5
-    def __init__(this, isometries = None, setup = {}):
+    def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group A5xI, which is the complete symmetry of an
         icosahedron, It consists of 120 isometries.
@@ -2184,29 +2184,29 @@ class A5xI(A5):
         - 15 reflections
         """
         if isometries != None:
-            assert len(isometries) == this.order, "%d != %d" % (
-                                                this.order, len(isometries))
+            assert len(isometries) == self.order, "%d != %d" % (
+                                                self.order, len(isometries))
             # TODO: more asserts?
-            Set.__init__(this, isometries)
+            Set.__init__(self, isometries)
         else:
-            this.checkSetup(setup)
+            self.checkSetup(setup)
             a5 = A5(setup = setup)
-            this.directParentSetup = copy(setup)
-            Set.__init__(this, a5 * ExI())
-            this.rotAxes = a5.rotAxes
+            self.directParentSetup = copy(setup)
+            Set.__init__(self, a5 * ExI())
+            self.rotAxes = a5.rotAxes
 
-    def realiseSubgroups(this, sg):
+    def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
         if sg == A5xI:
-            return [this]
+            return [self]
         elif sg == A5:
             # other ways of orienting A5 into A5xI don't give anything new
             return [ sg( setup = {
-                        'o3axis': this.rotAxes[3][0],
-                        'o5axis': this.rotAxes[5][0]
+                        'o3axis': self.rotAxes[3][0],
+                        'o5axis': self.rotAxes[5][0]
                     }
                 )
             ]
@@ -2216,53 +2216,53 @@ class A5xI(A5):
                 # pairs are mirrors images. For A4xI the mirrors should lead to
                 # to equal solutions.
                 sg(setup = {
-                    'o2axis0': this.rotAxes[2][i],
-                    'o2axis1': this.rotAxes[2][((i+3) % 5) + 5]
+                    'o2axis0': self.rotAxes[2][i],
+                    'o2axis1': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
         elif sg == D5xI or sg == D5:
             isoms = [
                 sg(setup = {
-                    'axis_n': this.rotAxes[5][i],
-                    'axis_2': this.rotAxes[2][(i+2) % 5]
+                    'axis_n': self.rotAxes[5][i],
+                    'axis_2': self.rotAxes[2][(i+2) % 5]
                 })
                 for i in range(5)
             ]
             isoms.append(
                 sg(setup = {
-                    'axis_n': this.rotAxes[5][5],
-                    'axis_2': this.rotAxes[2][10]
+                    'axis_n': self.rotAxes[5][5],
+                    'axis_2': self.rotAxes[2][10]
                 })
             )
             return isoms
         elif sg == D5C5:
             isoms = [
                 sg(setup = {
-                    'axis_n': this.rotAxes[5][i],
-                    'normal_r': this.rotAxes[2][(i+2) % 5]
+                    'axis_n': self.rotAxes[5][i],
+                    'normal_r': self.rotAxes[2][(i+2) % 5]
                 })
                 for i in range(5)
             ]
             isoms.append(
                 sg(setup = {
-                    'axis_n': this.rotAxes[5][5],
-                    'normal_r': this.rotAxes[2][10]
+                    'axis_n': self.rotAxes[5][5],
+                    'normal_r': self.rotAxes[2][10]
                 })
             )
             return isoms
         elif sg == D3xI or sg == D3:
             isoms = [
                 sg(setup = {
-                    'axis_n': this.rotAxes[3][i],
-                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                    'axis_n': self.rotAxes[3][i],
+                    'axis_2': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
             isoms.extend([
                 sg(setup = {
-                    'axis_n': this.rotAxes[3][i + 5],
-                    'axis_2': this.rotAxes[2][(i+3) % 5]
+                    'axis_n': self.rotAxes[3][i + 5],
+                    'axis_2': self.rotAxes[2][(i+3) % 5]
                 })
                 for i in range(5)
             ])
@@ -2270,15 +2270,15 @@ class A5xI(A5):
         elif sg == D3C3:
             isoms = [
                 sg(setup = {
-                    'axis_n': this.rotAxes[3][i],
-                    'normal_r': this.rotAxes[2][((i+3) % 5) + 5]
+                    'axis_n': self.rotAxes[3][i],
+                    'normal_r': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
             isoms.extend([
                 sg(setup = {
-                    'axis_n': this.rotAxes[3][i + 5],
-                    'normal_r': this.rotAxes[2][(i+3) % 5]
+                    'axis_n': self.rotAxes[3][i + 5],
+                    'normal_r': self.rotAxes[2][(i+3) % 5]
                 })
                 for i in range(5)
             ])
@@ -2286,31 +2286,31 @@ class A5xI(A5):
         elif sg == D2xI or sg == D2:
             return [
                 sg(setup = {
-                    'axis_n': this.rotAxes[2][i],
-                    'axis_2': this.rotAxes[2][((i+3) % 5) + 5]
+                    'axis_n': self.rotAxes[2][i],
+                    'axis_2': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
         elif sg == D2C2:
             return [
                 sg(setup = {
-                    'axis_n': this.rotAxes[2][i],
-                    'normal_r': this.rotAxes[2][((i+3) % 5) + 5]
+                    'axis_n': self.rotAxes[2][i],
+                    'normal_r': self.rotAxes[2][((i+3) % 5) + 5]
                 })
                 for i in range(5)
             ]
         elif sg == C5xI or sg == C5:
-            return [ sg(setup = {'axis': a}) for a in this.rotAxes[5] ]
+            return [ sg(setup = {'axis': a}) for a in self.rotAxes[5] ]
         elif sg == C3xI or sg == C3:
-            return [ sg(setup = {'axis': a}) for a in this.rotAxes[3] ]
+            return [ sg(setup = {'axis': a}) for a in self.rotAxes[3] ]
         elif sg == C2xI or sg == C2 or sg == C2C1 or sg == D1xI or sg == D1:
-            return [ sg(setup = {'axis': a}) for a in this.rotAxes[2] ]
+            return [ sg(setup = {'axis': a}) for a in self.rotAxes[2] ]
         elif sg == ExI:
             return [sg()]
         elif sg == E:
             return [sg()]
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                this.__class__.__name__, sg.__class__.__name__)
+                self.__class__.__name__, sg.__class__.__name__)
 
 A5xI.subgroups = [A5xI,                 # 120
         A5,                             #  60
@@ -2325,9 +2325,6 @@ A5xI.subgroups = [A5xI,                 # 120
         C2, C2C1, ExI,                  #   2
         E
     ]
-
-def order(isometry):
-    return isometry.order
 
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, ExI, E]
