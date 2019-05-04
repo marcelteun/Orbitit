@@ -21,7 +21,7 @@
 #
 #------------------------------------------------------------------
 
-from copy import copy
+from copy import copy, deepcopy
 import math
 
 import geomtypes
@@ -29,6 +29,58 @@ import geomtypes
 X = geomtypes.UX
 Y = geomtypes.UY
 Z = geomtypes.UZ
+
+INIT_PARS = {
+    'Cn': [
+        {'type': 'int', 'par': 'n', 'lab': "order"},
+        {'type': 'vec3', 'par': 'axis', 'lab': "{}-fold axis"}
+    ],
+    'DnCn': [
+        {'type': 'int',  'par': 'n', 'lab': "order"},
+        {'type': 'vec3', 'par': 'axis_n', 'lab': "{}-fold axis"},
+        {'type': 'vec3', 'par': 'normal_r', 'lab': "normal of reflection"}
+    ],
+    'Dn': [
+        {'type': 'int',  'par': 'n', 'lab': "order"},
+        {'type': 'vec3', 'par': 'axis_n', 'lab': "{}-fold axis"},
+        {'type': 'vec3', 'par': 'axis_2', 'lab': "axis of halfturn"}
+    ],
+    'A4': [
+        {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
+        {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
+    ],
+    'A5': [
+        {'type': 'vec3', 'par': 'o3axis', 'lab': "3-fold axis"},
+        {'type': 'vec3', 'par': 'o5axis', 'lab': "5-fold axis (nearest)"}
+    ],
+    'S4': [
+        {'type': 'vec3', 'par': 'o4axis0', 'lab': "4-fold axis"},
+        {'type': 'vec3', 'par': 'o4axis1', 'lab': "orthogonal 4-fold axis"}
+    ]
+}
+
+STD_SETUP = {
+    'Cn': {'n': None, 'axis': Z[:]},
+    'DnCn': {'n': None, 'axis_n': Z[:], 'normal_r': X[:]},
+    'Dn': {'n': None, 'axis_n': Z[:], 'axis_2': X[:]},
+    'A4': {'o2axis0': X[:], 'o2axis1': Y[:]},
+    'A5': {'o3axis': geomtypes.Vec3([1, 1, 1]),
+           'o5axis': geomtypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
+    },
+    'S4': {'o4axis0': X[:], 'o4axis1': Y[:]}
+}
+
+def _init_pars(sym, order=None):
+    pars = deepcopy(INIT_PARS[sym])
+    if order:
+        pars[1]['lab'] =  pars[1]['lab'].format(order)
+    return pars
+
+def _std_setup(sym, order=None):
+    setup = deepcopy(STD_SETUP[sym])
+    if order:
+        setup['n'] =  order
+    return setup
 
 hTurn = geomtypes.HALF_TURN
 qTurn = geomtypes.QUARTER_TURN
@@ -51,7 +103,7 @@ class Set(set):
     mixed = False # if True the isometry set consists of direct and indirect
                   # isometries else it consists of direct isometries only if it
                   # is a group.
-    defaultSetup = None
+    std_setup = None
 
     def __init__(self, *args):
         try:
@@ -290,12 +342,12 @@ class Set(set):
 
     def checkSetup(self, setup):
         if self.debug: print self.__class__.__name__, 'checkSetup'
-        if setup != {} and self.initPars == []:
+        if setup != {} and self.init_pars == []:
             print "Warning: class %s doesn't handle any setup pars" % (
                     self.__class__.__name__), setup.keys()
         for k in setup.keys():
             found = False
-            for p in self.initPars:
+            for p in self.init_pars:
                 found |= p['par'] == k
                 if found: break
             if not found:
@@ -311,7 +363,7 @@ class Set(set):
 def setup(**kwargs): return kwargs
 
 class E(Set):
-    initPars = []
+    init_pars = []
     order = 1
     mixed = False
     def __init__(self, isometries = None, setup = {}):
@@ -329,7 +381,7 @@ E.subgroups = [E]
 C1 = E
 
 class ExI(Set):
-    initPars = []
+    init_pars = []
     order = 2
     mixed = True
     directParent = E
@@ -362,11 +414,8 @@ class MetaCn(type):
         type.__init__(self, classname, bases, classdict)
 class Cn(Set):
     __metaclass__ = MetaCn
-    initPars = [
-        {'type': 'int', 'par': 'n',    'lab': "order"},
-        {'type': 'vec3', 'par': 'axis', 'lab': "n-fold axis"}
-    ]
-    defaultSetup = {'n': 2, 'axis': Z[:]}
+    init_pars = _init_pars('Cn', 'n')
+    std_setup = _std_setup('Cn', 2)
     order = 0
     n = 0
     def __init__(self, isometries = None, setup = {}):
@@ -374,7 +423,7 @@ class Cn(Set):
         The algebraic group Cn, consisting of n rotations
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         """
@@ -386,11 +435,11 @@ class Cn(Set):
             self.checkSetup(setup)
             keys = setup.keys()
             if 'axis' in keys: axis = setup['axis']
-            else:              axis = copy(self.defaultSetup['axis'])
+            else:              axis = copy(self.std_setup['axis'])
             if self.n != 0   : n = self.n
             else:
                 if 'n' in keys: n = setup['n']
-                else:           n = copy(self.defaultSetup['n'])
+                else:           n = copy(self.std_setup['n'])
                 if n == 0: n = 1
                 # If self.n is hard-code (e.g. for C3)
                 # then if you specify n it should be the correct value
@@ -446,18 +495,8 @@ def C(n):
                         'n'    : n,
                         'order': n,
                         'mixed': False,
-                        'initPars': [{
-                                'type': 'vec3',
-                                'par': 'axis',
-                                'lab': "%d-fold axis" % n
-                            },
-                            # You might specify the following parameter, but it
-                            # should have the correct value.
-                            # This happens for instance when generating the
-                            # colours in Scene_Orbit for S4xI/C3xI
-                            {'type': 'int', 'par': 'n', 'lab': "order"}
-                        ],
-                        'defaultSetup': {'axis': Cn.defaultSetup['axis'], 'n': n}
+                        'init_pars': _init_pars('Cn', n),
+                        'std_setup': _std_setup('Cn', n)
                     }
                 )
             C_n.subgroups = _Cn_getExtraSubgroups(n)
@@ -474,15 +513,19 @@ C5 = C(5)
 class MetaC2nCn(MetaCn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
-class C2nCn(Cn):
+class C2nCn(Set):
     __metaclass__ = MetaC2nCn
+    init_pars = _init_pars('Cn', 'n')
+    std_setup = _std_setup('Cn', 2)
+    order = 0
+    n = 0
     def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group C2nCn, consisting of n rotations and of n rotary
         inversions (reflections)
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with
@@ -552,18 +595,8 @@ def C2nC(n):
                     'order': 2 * n,
                     'mixed': True,
                     'directParent': C(n),
-                    'initPars': [{
-                            'type': 'vec3',
-                            'par': 'axis',
-                            'lab': "%d-fold axis" % n
-                        },
-                        # You might specify the following parameter, but it
-                        # should have the correct value.
-                        # This happens for instance when generating the
-                        # colours in Scene_Orbit for S4xI/C3xI
-                        {'type': 'int', 'par': 'n', 'lab': "order"}
-                    ],
-                    'defaultSetup': {'axis': C2nCn.defaultSetup['axis'], 'n': n}
+                    'init_pars': _init_pars('Cn', n),
+                    'std_setup': _std_setup('Cn', n)
                 }
             )
         C_2n_C_n.subgroups = [C_2n_C_n, C(n), E]
@@ -586,15 +619,20 @@ C8C4 = C2nC(4)
 class MetaCnxI(MetaCn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
-class CnxI(Cn):
+
+class CnxI(Set):
     __metaclass__ = MetaCnxI
+    init_pars = _init_pars('Cn', 'n')
+    std_setup = _std_setup('Cn', 2)
+    order = 0
+    n = 0
     def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group CnxI, consisting of n rotations and of n rotary
         inversions (reflections)
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with
@@ -666,18 +704,8 @@ def CxI(n):
                         'order': 2 * n,
                         'mixed': True,
                         'directParent': C(n),
-                        'initPars': [{
-                                'type': 'vec3',
-                                'par': 'axis',
-                                'lab': "%d-fold axis" % n
-                            },
-                            # You might specify the following parameter, but it
-                            # should have the correct value.
-                            # This happens for instance when generating the
-                            # colours in Scene_Orbit for S4xI/C3xI
-                            {'type': 'int', 'par': 'n', 'lab': "order"}
-                        ],
-                        'defaultSetup': {'axis': CnxI.defaultSetup['axis'], 'n': n}
+                        'init_pars': _init_pars('Cn', n),
+                        'std_setup': _std_setup('Cn', n)
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -698,14 +726,13 @@ C5xI = CxI(5)
 class MetaDnCn(MetaCn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
-class DnCn(Cn):
+
+class DnCn(Set):
     __metaclass__ = MetaDnCn
-    initPars = [
-        {'type': 'int',  'par': 'n',    'lab': "order"},
-        {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
-        {'type': 'vec3', 'par': 'normal_r', 'lab': "normal of reflection"}
-    ]
-    defaultSetup = {'n': 2, 'axis_n': Z[:], 'normal_r': X[:]}
+    init_pars = _init_pars('DnCn', 'n')
+    std_setup = _std_setup('DnCn', 2)
+    order = 0
+    n = 0
 
     def __init__(self, isometries = None, setup = {}):
         """
@@ -713,7 +740,7 @@ class DnCn(Cn):
         inversions (reflections)
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n reflections in planes that share the n-fold axis.
@@ -729,7 +756,7 @@ class DnCn(Cn):
                 if self.n != 0:
                     s['n'] = self.n
                 else:
-                    s['n'] = copy(self.defaultSetup['n'])
+                    s['n'] = copy(self.std_setup['n'])
             else:
                 s['n'] = setup['n']
                 # If self.n is hard-code (e.g. for D3C3)
@@ -738,13 +765,13 @@ class DnCn(Cn):
             if 'axis_n' in setup:
                 s['axis'] = setup['axis_n']
             else:
-                s['axis'] = copy(self.defaultSetup['axis_n'])
+                s['axis'] = copy(self.std_setup['axis_n'])
             cn = Cn(setup = s)
             self.directParentSetup = copy(s)
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
             else:
-                s['axis_2'] = copy(self.defaultSetup['normal_r'])
+                s['axis_2'] = copy(self.std_setup['normal_r'])
             s['axis_n'] = s['axis']
             del s['axis']
             dn = Dn(setup = s)
@@ -796,25 +823,8 @@ def DnC(n):
                         'order': 2 * n,
                         'mixed': True,
                         'directParent': C(n),
-                        'initPars': [{
-                                'type': 'vec3',
-                                'par': 'axis_n',
-                                'lab': "%d-fold axis" % n
-                            }, {
-                                'type': 'vec3',
-                                'par': 'normal_r',
-                                'lab': "normal of reflection"
-                            },
-                            # You might specify the following parameter, but it
-                            # should have the correct value.
-                            # This happens for instance when generating the
-                            # colours in Scene_Orbit for S4xI/C3xI
-                            {'type': 'int', 'par': 'n', 'lab': "order"}
-                        ],
-                        'defaultSetup': {
-                                'axis_n': DnCn.defaultSetup['axis_n'], 'n': n,
-                                'normal_r': DnCn.defaultSetup['normal_r']
-                            }
+                        'init_pars': _init_pars('DnCn', n),
+                        'std_setup': _std_setup('DnCn', n)
                     }
                 )
             D_n_C_n.subgroups = [D_n_C_n, C(n), C2C1, E]
@@ -833,12 +843,8 @@ class MetaDn(type):
         type.__init__(self, classname, bases, classdict)
 class Dn(Set):
     __metaclass__ = MetaDn
-    initPars = [
-        {'type': 'int',  'par': 'n',    'lab': "order"},
-        {'type': 'vec3', 'par': 'axis_n', 'lab': "n-fold axis"},
-        {'type': 'vec3', 'par': 'axis_2', 'lab': "axis of halfturn"}
-    ]
-    defaultSetup = {'n': 2, 'axis_n': Z[:], 'axis_2': X[:]}
+    init_pars = _init_pars('Dn', 'n')
+    std_setup = _std_setup('Dn', 2)
     order = 0
     n = 0
     def __init__(self, isometries = None, setup = {}):
@@ -846,7 +852,7 @@ class Dn(Set):
         The algebraic group Dn, consisting of 2n rotations
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
@@ -859,9 +865,9 @@ class Dn(Set):
             self.checkSetup(setup)
             keys = setup.keys()
             if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = copy(self.defaultSetup['axis_n'])
+            else:                axis_n = copy(self.std_setup['axis_n'])
             if 'axis_2' in keys: axis_2 = setup['axis_2']
-            else:                axis_2 = copy(self.defaultSetup['axis_2'])
+            else:                axis_2 = copy(self.std_setup['axis_2'])
             if self.n != 0:
                 # If self.n is hard-code (e.g. for D3)
                 # then if you specify n it should be the correct value
@@ -934,26 +940,8 @@ def D(n):
                         'n'    : n,
                         'order': 2 * n,
                         'mixed': False,
-                        'initPars': [
-                                {
-                                    'type': 'vec3',
-                                    'par': 'axis_n',
-                                    'lab': "%d-fold axis" % n
-                                }, {
-                                    'type': 'vec3',
-                                    'par': 'axis_2',
-                                    'lab': "axis of halfturn"
-                                },
-                                # You might specify the following parameter, but it
-                                # should have the correct value.
-                                # This happens for instance when generating the
-                                # colours in Scene_Orbit for S4xI/C3xI
-                                {'type': 'int', 'par': 'n', 'lab': "order"}
-                            ],
-                        'defaultSetup': {
-                                'axis_n': Dn.defaultSetup['axis_n'], 'n': n,
-                                'axis_2': Dn.defaultSetup['axis_2']
-                            }
+                        'init_pars': _init_pars('Dn', n),
+                        'std_setup': _std_setup('Dn', n)
                     }
                 )
             # TODO: fix subgroups depending on n:
@@ -972,14 +960,18 @@ D5 = D(5)
 class MetaDnxI(MetaDn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
-class DnxI(Dn):
+class DnxI(Set):
     __metaclass__ = MetaDnxI
+    init_pars = _init_pars('Dn', 'n')
+    std_setup = _std_setup('Dn', 2)
+    order = 0
+    n = 0
     def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group DnxI, of order 4n.
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
@@ -997,7 +989,7 @@ class DnxI(Dn):
             self.checkSetup(setup)
             keys = setup.keys()
             if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = copy(self.defaultSetup['axis_n'])
+            else:                axis_n = copy(self.std_setup['axis_n'])
             self.checkSetup(setup)
             s = copy(setup)
             if 'n' not in s and self.n != 0:
@@ -1099,26 +1091,8 @@ def DxI(n):
                         'order': 4 * n,
                         'mixed': True,
                         'directParent': D(n),
-                        'initPars': [
-                                {
-                                    'type': 'vec3',
-                                    'par': 'axis_n',
-                                    'lab': "%d-fold axis" % n
-                                }, {
-                                    'type': 'vec3',
-                                    'par': 'axis_2',
-                                    'lab': "axis of halfturn"
-                                },
-                                # You might specify the following parameter, but it
-                                # should have the correct value.
-                                # This happens for instance when generating the
-                                # colours in Scene_Orbit for S4xI/C3xI
-                                {'type': 'int', 'par': 'n', 'lab': "order"}
-                            ],
-                        'defaultSetup': {
-                                'axis_n': DnxI.defaultSetup['axis_n'], 'n': n,
-                                'axis_2': DnxI.defaultSetup['axis_2']
-                            }
+                        'init_pars': _init_pars('Dn', n),
+                        'std_setup': _std_setup('Dn', n)
                     }
                 )
             D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
@@ -1139,15 +1113,19 @@ D5xI = DxI(5)
 class MetaD2nDn(MetaDn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
-class D2nDn(Dn):
+class D2nDn(Set):
     __metaclass__ = MetaD2nDn
+    init_pars = _init_pars('Dn', 'n')
+    std_setup = _std_setup('Dn', 2)
+    order = 0
+    n = 0
     def __init__(self, isometries = None, setup = {}):
         """
         The algebraic group D2nDn, consisting of n rotations, n half turns, n
         rotary inversions (reflections) and n reflections.
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
@@ -1239,7 +1217,7 @@ class D2nDn(Dn):
         else: raise ImproperSubgroupError, '%s ! <= %s' % (
                 self.__class__.__name__, sg.__class__.__name__)
 
-# dynamically create C2nCn classes:
+# dynamically create D2nDn classes:
 D2nDnMetas = {}
 def D2nD(n):
     assert n != 0
@@ -1252,26 +1230,8 @@ def D2nD(n):
                     'order': 4 * n,
                     'mixed': True,
                     'directParent': D(n),
-                    'initPars': [
-                            {
-                                'type': 'vec3',
-                                'par': 'axis_n',
-                                'lab': "%d-fold axis" % n
-                            }, {
-                                'type': 'vec3',
-                                'par': 'axis_2',
-                                'lab': "axis of halfturn"
-                            },
-                            # You might specify the following parameter, but it
-                            # should have the correct value.
-                            # This happens for instance when generating the
-                            # colours in Scene_Orbit for S4xI/C3xI
-                            {'type': 'int', 'par': 'n', 'lab': "order"}
-                        ],
-                    'defaultSetup': {
-                            'axis_n': D2nDn.defaultSetup['axis_n'], 'n': n,
-                            'axis_2': D2nDn.defaultSetup['axis_2']
-                        }
+                    'init_pars': _init_pars('Dn', n),
+                    'std_setup': _std_setup('Dn', n)
                 }
             )
         D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
@@ -1287,11 +1247,8 @@ D6D3 = D2nD(3)
 D8D4 = D2nD(4)
 
 class A4(Set):
-    initPars = [
-        {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
-        {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
-    ]
-    defaultSetup = {'o2axis0': X[:], 'o2axis1': Y[:]}
+    init_pars = _init_pars('A4')
+    std_setup = _std_setup('A4')
     order = 12
     mixed = False
     def __init__(self, isometries = None, setup = {}):
@@ -1299,7 +1256,7 @@ class A4(Set):
         The algebraic group A4, consisting of 12 rotations
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E, and 3 orthogonal halfturns
         - 8 order 3 isometries.
@@ -1320,9 +1277,9 @@ class A4(Set):
             self.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = copy(self.defaultSetup['o2axis0'])
+            else:                 o2axis0 = copy(self.std_setup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = copy(self.defaultSetup['o2axis1'])
+            else:                 o2axis1 = copy(self.std_setup['o2axis1'])
             d2 = generateD2(o2axis0, o2axis1)
             H0, H1, H2 = d2
             R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
@@ -1366,7 +1323,9 @@ A4.subgroups = [A4,
         C3, C2, E
     ]
 
-class S4A4(A4):
+class S4A4(Set):
+    init_pars = _init_pars('A4')
+    std_setup = _std_setup('A4')
     order = 24
     mixed = True
     directParent = A4
@@ -1376,7 +1335,7 @@ class S4A4(A4):
         opposite.
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E, and 3 orthogonal halfturns
         - 8 order 3 isometries.
@@ -1399,9 +1358,9 @@ class S4A4(A4):
             self.checkSetup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes: o2axis0 = setup['o2axis0']
-            else:                 o2axis0 = copy(self.defaultSetup['o2axis0'])
+            else:                 o2axis0 = copy(self.std_setup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
-            else:                 o2axis1 = copy(self.defaultSetup['o2axis1'])
+            else:                 o2axis1 = copy(self.std_setup['o2axis1'])
             self.directParentSetup = copy(setup)
             d2 = generateD2(o2axis0, o2axis1)
             h0, h1, h2 = d2
@@ -1496,7 +1455,9 @@ S4A4.subgroups = [S4A4,
         E
     ]
 
-class A4xI(A4):
+class A4xI(Set):
+    init_pars = _init_pars('A4')
+    std_setup = _std_setup('A4')
     order = 24
     mixed = True
     directParent = A4
@@ -1506,7 +1467,7 @@ class A4xI(A4):
         inversions.
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E, and 3 orthogonal halfturns
         - 8 order 3 rotations.
@@ -1603,11 +1564,8 @@ A4xI.subgroups = [A4xI, A4,
     ]
 
 class S4(Set):
-    initPars = [
-        {'type': 'vec3', 'par': 'o4axis0', 'lab': "4-fold axis"},
-        {'type': 'vec3', 'par': 'o4axis1', 'lab': "orthogonal 4-fold axis"}
-    ]
-    defaultSetup = {'o4axis0': X[:], 'o4axis1': Y[:]}
+    init_pars = _init_pars('S4')
+    std_setup = _std_setup('S4')
     order = 24
     mixed = False
     def __init__(self, isometries = None, setup = {}):
@@ -1615,7 +1573,7 @@ class S4(Set):
         The algebraic group S4, consisting of 24 rotations
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E,
         - and 9 orthogonal turns based on quarter turns (1/4, 1/2, 3/4)
@@ -1632,9 +1590,9 @@ class S4(Set):
             self.checkSetup(setup)
             axes = setup.keys()
             if 'o4axis0' in axes: o4axis0 = setup['o4axis0']
-            else:                 o4axis0 = copy(self.defaultSetup['o4axis0'])
+            else:                 o4axis0 = copy(self.std_setup['o4axis0'])
             if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
-            else:                 o4axis1 = copy(self.defaultSetup['o4axis1'])
+            else:                 o4axis1 = copy(self.std_setup['o4axis1'])
             d2 = generateD2(o4axis0, o4axis1)
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
             q0_2, q1_2, q2_2 = d2
@@ -1761,6 +1719,8 @@ S4.subgroups = [S4, A4,
     ]
 
 class S4xI(S4):
+    init_pars = _init_pars('S4')
+    std_setup = _std_setup('S4')
     order = 48
     mixed = True
     directParent = S4
@@ -1770,7 +1730,7 @@ class S4xI(S4):
         inversions.
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E,
         - and 9 orthogonal turns based on quarter turns (1/4, 1/2, 3/4)
@@ -1985,14 +1945,8 @@ def generateA4O3(D2HalfTurns):
     return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
 
 class A5(Set):
-    initPars = [
-        {'type': 'vec3', 'par': 'o3axis', 'lab': "3-fold axis"},
-        {'type': 'vec3', 'par': 'o5axis', 'lab': "5-fold axis (nearest)"}
-    ]
-    defaultSetup = {
-        'o3axis': geomtypes.Vec3([1, 1, 1]),
-        'o5axis': geomtypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
-    }
+    init_pars = _init_pars('A5')
+    std_setup = _std_setup('A5')
     order = 60
     mixed = False
     def __init__(self, isometries = None, setup = {}):
@@ -2000,7 +1954,7 @@ class A5(Set):
         The algebraic group A5, consisting of 60 rotations
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E,
         - 24 turns based on the  6  5-fold turns (1/5, 2/5, 3/5, 4/5)
@@ -2017,9 +1971,9 @@ class A5(Set):
             self.checkSetup(setup)
             axes = setup.keys()
             if 'o3axis' in axes: o3axis = setup['o3axis']
-            else: o3axis = copy(self.defaultSetup['o3axis'])
+            else: o3axis = copy(self.std_setup['o3axis'])
             if 'o5axis' in axes: o5axis = setup['o5axis']
-            else: o5axis = copy(self.defaultSetup['o5axis'])
+            else: o5axis = copy(self.std_setup['o5axis'])
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
@@ -2162,7 +2116,9 @@ A5.subgroups = [A5,
         E
     ]
 
-class A5xI(A5):
+class A5xI(Set):
+    init_pars = _init_pars('A5')
+    std_setup = _std_setup('A5')
     order = 120
     mixed = True
     directParent = A5
@@ -2172,7 +2128,7 @@ class A5xI(A5):
         icosahedron, It consists of 120 isometries.
 
         either provide the complete set or provide setup that generates
-        the complete group. For the latter see the class initPars argument.
+        the complete group. For the latter see the class init_pars argument.
         Contains:
         - the identity E,
         - 24 turns based on the  6  5-fold turns (1/5, 2/5, 3/5, 4/5)
@@ -2329,5 +2285,7 @@ A5xI.subgroups = [A5xI,                 # 120
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, ExI, E]
 C2nCn.subgroups = [C2nCn, Cn, E]
+DnCn.subgroups = [DnCn, Cn, E]
 Dn.subgroups = [Dn, Cn, C2, E]
 DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
+D2nDn.subgroups = [D2nDn, Dn, C2nCn, Cn, E]

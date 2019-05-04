@@ -962,7 +962,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 isometry.DnxI,
                 isometry.D2nDn
             ]:
-                assert selClass.initPars[0]['type'] == 'int', (
+                assert selClass.init_pars[0]['type'] == 'int', (
                     'The first index should specify the n-order')
                 n = this.oriGuis[0].GetValue()
                 if selClass == isometry.Cn:
@@ -1034,12 +1034,12 @@ class SymmetrySelect(wx.StaticBoxSizer):
         this.oriGuis = []
         sym = this.getSymmetryClass(applyOrder = False)
         if this.onGetSymSetup == None:
-            symSetup = sym.defaultSetup
+            symSetup = sym.std_setup
         else:
             symSetup = this.onGetSymSetup(this.getSelectedIndex())
             if symSetup == None:
-                symSetup = sym.defaultSetup
-        for init in sym.initPars:
+                symSetup = sym.std_setup
+        for init in sym.init_pars:
             inputType = init['type']
             if inputType == 'vec3':
                 gui = Vector3DInput(this.panel, init['lab'],
@@ -1076,7 +1076,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         curSetup = []
         sym = this.getSymmetryClass(applyOrder = False)
         for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
-            inputType = sym.initPars[i]['type']
+            inputType = sym.init_pars[i]['type']
             if inputType == 'vec3':
                 v = gui.GetVertex()
             elif inputType == 'int':
@@ -1116,7 +1116,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 "Wrong nr of initialisers for this symmetry"
         sym = this.getSymmetryClass(applyOrder = False)
         for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
-            inputType = sym.initPars[i]['type']
+            inputType = sym.init_pars[i]['type']
             if inputType == 'vec3':
                 v = gui.SetVertex(vec[i])
             elif inputType == 'int':
@@ -1127,14 +1127,14 @@ class SymmetrySelect(wx.StaticBoxSizer):
         sym = this.getSymmetryClass(applyOrder = False)
         setup = {}
         for i, gui in zip(range(len(this.oriGuis)), this.oriGuis):
-            inputType = sym.initPars[i]['type']
+            inputType = sym.init_pars[i]['type']
             if inputType == 'vec3':
                 v = gui.GetVertex()
                 if v != geomtypes.Vec3([0, 0, 0]):
-                    setup[sym.initPars[i]['par']] = v
+                    setup[sym.init_pars[i]['par']] = v
             elif inputType == 'int':
                 v = gui.GetValue()
-                setup[sym.initPars[i]['par']] = v
+                setup[sym.init_pars[i]['par']] = v
         #print 'GetSelected; setup:', setup
         #print 'class:', sym
         sym = sym(setup = setup)
