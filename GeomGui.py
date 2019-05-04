@@ -1022,17 +1022,16 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return selClass
 
     def addSetupGui(this):
-        # TODO: save initial values and reapply if selected again...
         try:
                 for gui in this.oriGuis:
                     gui.Destroy()
                 this.oriGuiBox.Destroy()
                 this.Remove(this.oriSizer)
         except AttributeError: pass
-        this.oriGuiBox = wx.StaticBox(this.panel, label = 'Symmetry Setup')
+        this.oriGuiBox = wx.StaticBox(this.panel, label='Symmetry Setup')
         this.oriSizer = wx.StaticBoxSizer(this.oriGuiBox, wx.VERTICAL)
         this.oriGuis = []
-        sym = this.getSymmetryClass(applyOrder = False)
+        sym = this.getSymmetryClass(applyOrder=False)
         if this.onGetSymSetup == None:
             symSetup = sym.std_setup
         else:
