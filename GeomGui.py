@@ -53,17 +53,18 @@ class DisabledDropTarget(wx.TextDropTarget):
         return ''
 
 class IntInput(wx.TextCtrl):
-    def __init__(this, parent, ident, value, *args, **kwargs):
-        wx.TextCtrl.__init__(this, parent, ident, str(value), *args, **kwargs)
+    def __init__(self, parent, ident, value, *args, **kwargs):
+        wx.TextCtrl.__init__(self, parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
-        #this.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
-        this.SetMaxLength(18)
-        this.SetDropTarget(DisabledDropTarget(reason = 'may break string format for floating point'))
-        this.Bind(wx.EVT_CHAR, this.onChar)
+        #self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
+        self.val_updated = False
+        self.SetMaxLength(18)
+        self.SetDropTarget(DisabledDropTarget(reason = 'may break string format for floating point'))
+        self.Bind(wx.EVT_CHAR, self.onChar)
 
-    def onChar(this, e):
-        #print this.__class__, 'onChar'
+    def onChar(self, e):
         k = e.GetKeyCode() # ASCII is returned for ASCII values
+        updated = True  # except for some cases below
         try:
             c = chr(k)
         except ValueError:
@@ -74,23 +75,23 @@ class IntInput(wx.TextCtrl):
         elif c in ['+', '-']:
             # Handle selected text by replacing it by a '0', otherwise it may
             # prevent from overwriting a sign:
-            ss = this.GetStringSelection()
+            ss = self.GetStringSelection()
             if not ss == '':
-                sel = this.GetSelection()
+                sel = self.GetSelection()
                 if sel[0] == 0:
-                    this.Replace(sel[0], sel[1], '0')
+                    self.Replace(sel[0], sel[1], '0')
                     endSel  = sel[0]+1
                 else:
-                    this.Replace(sel[0], sel[1], '')
+                    self.Replace(sel[0], sel[1], '')
                     endSel  = sel[0]
-                this.SetSelection(sel[0], endSel)
-                #this.SetInsertionPoint(sel[0])
-            s = wx.TextCtrl.GetValue(this)
-            # only allow one +, -, or .
+                self.SetSelection(sel[0], endSel)
+                #self.SetInsertionPoint(sel[0])
+            s = wx.TextCtrl.GetValue(self)
+            # only allow one +, -
             if not c in s:
                 # only allow + and - in the beginning
-                print ' not c in s:', this.GetInsertionPoint()
-                if this.GetInsertionPoint() == 0:
+                print ' not c in s:', self.GetInsertionPoint()
+                if self.GetInsertionPoint() == 0:
                     # don't allow - if there's already a + and the other way
                     # around:
                     if c == '+':
@@ -101,45 +102,50 @@ class IntInput(wx.TextCtrl):
                             e.Skip()
                 else:
                     # allow selected whole string start with -
-                    if this.GetSelection()[0] == 0 and c == '-':
-                        this.Replace(0, 1, '-0')
-                        this.SetSelection(1, 2)
+                    if self.GetSelection()[0] == 0 and c == '-':
+                        self.Replace(0, 1, '-0')
+                        self.SetSelection(1, 2)
         elif k in [
                 wx.WXK_BACK, wx.WXK_DELETE,
             ]:
-            ss = this.GetStringSelection()
+            ss = self.GetStringSelection()
             # Handle selected text by replacing it by a '0' the field might
             # become completely empty if all is selected
             if not ss == '':
-                sel = this.GetSelection()
-                this.Replace(sel[0], sel[1], '0')
-                this.SetSelection(sel[0], sel[0]+1)
-            if len(wx.TextCtrl.GetValue(this)) <= 1:
+                sel = self.GetSelection()
+                self.Replace(sel[0], sel[1], '0')
+                self.SetSelection(sel[0], sel[0]+1)
+            if len(wx.TextCtrl.GetValue(self)) <= 1:
                 # do not allow an empt field, set to 0 instead:
-                this.SetValue(0)
-                this.SetSelection(0, 1)
+                self.SetValue(0)
+                self.SetSelection(0, 1)
             else:
                 e.Skip()
         elif k == wx.WXK_CLEAR:
-            this.SetValue(0)
+            self.SetValue(0)
         elif k in [
                 wx.WXK_RETURN, wx.WXK_TAB,
                 wx.WXK_LEFT, wx.WXK_RIGHT,
                 wx.WXK_INSERT,
                 wx.WXK_HOME, wx.WXK_END
             ]:
+            updated = False
             e.Skip()
         else:
-            print this.__class__, 'ignores key event with code:', k
+            updated = False
+            print self.__class__, 'ignores key event with code:', k
         #elif k >= 256:
         #    e.Skip()
+        self.val_updated = updated
 
     def GetValue(this):
         v = wx.TextCtrl.GetValue(this)
+        this.val_updated = False
         if v == '': v = '0'
         return int(v)
 
     def SetValue(this, i):
+        this.val_updated = True
         v = wx.TextCtrl.SetValue(this, str(i))
 
 class FloatInput(wx.TextCtrl):
@@ -257,7 +263,7 @@ class FloatInput(wx.TextCtrl):
         v = wx.TextCtrl.SetValue(this, str(f))
 
 class LabeledIntInput(wx.StaticBoxSizer):
-    def __init__(this,
+    def __init__(self,
         panel,
         label = '',
         init = 0,
@@ -274,23 +280,28 @@ class LabeledIntInput(wx.StaticBoxSizer):
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
                      default. Defines the orientation of the label - int input.
         """
-        this.Boxes = []
-        wx.BoxSizer.__init__(this, orientation)
-        this.Boxes.append(
+        self.Boxes = []
+        wx.BoxSizer.__init__(self, orientation)
+        self.Boxes.append(
             wx.StaticText(panel, wx.ID_ANY, label + ' ',
                 style = wx.ALIGN_RIGHT
             )
         )
-        this.Add(this.Boxes[-1], 1, wx.EXPAND)
+        self.Add(self.Boxes[-1], 1, wx.EXPAND)
         if not isinstance(init, int):
             print '%s warning: initialiser not an int (%s)' % (
-                    this.__class__, str(init)
+                    self.__class__, str(init)
                 )
             init = 0
-        this.Boxes.append(IntInput(
+        self.Boxes.append(IntInput(
                 panel, wx.ID_ANY, init, size = (width, -1)
             ))
-        this.Add(this.Boxes[-1], 0, wx.EXPAND)
+        self.Add(self.Boxes[-1], 0, wx.EXPAND)
+        self.int_gui_idx = len(self.Boxes) - 1
+
+    @property
+    def val_updated(self):
+        return self.Boxes[self.int_gui_idx].val_updated
 
     def GetValue(this):
         return this.Boxes[-1].GetValue()
@@ -1022,6 +1033,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return selClass
 
     def addSetupGui(this):
+        this.chk_if_updated = []
         try:
                 for gui in this.oriGuis:
                     gui.Destroy()
@@ -1048,6 +1060,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 gui = LabeledIntInput(this.panel, init['lab'],
                         init = symSetup[init['par']]
                     )
+                this.chk_if_updated.append(gui)
             else:
                 assert False, "oops unimplemented input type"
             this.oriGuis.append(gui)
@@ -1060,15 +1073,19 @@ class SymmetrySelect(wx.StaticBoxSizer):
         if this.onSymSelect != None:
             this.onSymSelect(this.getSymmetryClass(applyOrder = False))
 
-    def isSymClassUpdated(this):
+    def isSymClassUpdated(self):
         try:
-            curId = this.getSelectedIndex()
-            isUpdated = this.__prev['selectedId'] != curId
+            curId = self.getSelectedIndex()
+            is_updated = self.__prev['selectedId'] != curId
+            if self.chk_if_updated and not is_updated:
+                for gui in self.chk_if_updated:
+                    is_updated = gui.val_updated
+                    if is_updated:
+                        break
         except KeyError:
-            isUpdated = True
-        this.__prev['selectedId'] = curId
-        #print 'isSymClassUpdated', isUpdated
-        return isUpdated
+            is_updated = True
+        self.__prev['selectedId'] = curId
+        return is_updated
 
     def isUpdated(this):
         isUpdated = this.isSymClassUpdated()

@@ -264,7 +264,11 @@ class CtrlWin(wx.Frame):
             this.stabSymSetup[i] = [None for j in range(nrStabilisers)]
 
     def onApplySymmetry(this, e):
-        print this.GetSize()
+        # Check these first before you retrieve values. E.g. if the 'n' in Cn
+        # symmetry is updated, then the class is updated. As soon as you
+        # retrieve the value, val_updated will be reset.
+        updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
+        updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
         Vs = this.showGui[this.__VsGuiIndex].get()
         Fs = this.showGui[this.__FsGuiIndex].get()
         if Fs == []:
@@ -294,8 +298,6 @@ class CtrlWin(wx.Frame):
         this.updateOrientation(
             this.rotateSizer.get_angle(), this.rotateSizer.get_axis())
         this.canvas.panel.setShape(this.shape)
-        updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
-        updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.

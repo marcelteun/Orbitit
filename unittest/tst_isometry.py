@@ -18,7 +18,6 @@
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
-#
 #------------------------------------------------------------------
 
 from copy import copy
@@ -28,14 +27,69 @@ import unittest
 import geomtypes
 import isometry
 
-class TestVec(unittest.TestCase):
+class TestSubGroups(unittest.TestCase):
     """Unit test subgroups"""
+
+    def _chk_groups(self, g_tst, g_exp):
+        g_subs = g_tst.subgroups
+        for g in g_subs:
+            self.assertTrue(g in g_exp,
+                            msg='Extra subgroup {} in {}'.format(g, g_tst))
+        for g in g_exp:
+            self.assertTrue(g in g_subs,
+                            msg='Missing subgroup {} in {}'.format(g, g_tst))
+        self.assertTrue(len(g_subs) == len(g_exp),
+                        msg='Duplicates subgroups in {}'.format(
+                            'expected' if len(g_exp) > len(g_subs) else g_tst))
+
+    def test_c(self):
+        """Test some subgroups of C"""
+        # Test one even with even and odd divisors:
+        h = isometry.C(12)
+        expect = [
+            # trivial:
+            isometry.C(12),
+            isometry.E,
+            # all divisors Cn:
+            isometry.C(6),
+            isometry.C(4),
+            isometry.C(3),
+            isometry.C(2),
+            # isometry.C(1) ~= E
+        ]
+        self._chk_groups(h, expect)
+        # Test one odd
+        h = isometry.C(15)
+        expect = [
+            # trivial:
+            isometry.C(15),
+            isometry.E,
+            # all divisors Cn:
+            isometry.C(5),
+            isometry.C(3),
+            # isometry.C(1) ~= E
+        ]
+        self._chk_groups(h, expect)
+        # Test lower limit: n = 2, n = 1
+        h = isometry.C(2)
+        expect = [
+            # trivial:
+            isometry.C(2),
+            isometry.E,
+        ]
+        self._chk_groups(h, expect)
+        h = isometry.C(1)
+        expect = [
+            # trivial:
+            # isometry.C(1) ~= E
+            isometry.E,
+        ]
+        self._chk_groups(h, expect)
 
     def test_cnxi(self):
         """Test some subgroups in CnxI"""
         # Test one even with even and odd divisors:
         h = isometry.CxI(12)
-        subgroups = h.subgroups
         expect = [
             # trivial:
             isometry.CxI(12),
@@ -59,18 +113,9 @@ class TestVec(unittest.TestCase):
             isometry.C2nC(2),
             isometry.C2nC(1),
         ]
-        # You could test the length, but that is less helpful in case of
-        # failures
-        for g in subgroups:
-            self.assertTrue(g in expect,
-                            msg='Extra subgroup {} in {}'.format(g, h))
-        for g in expect:
-            self.assertTrue(g in subgroups,
-                            msg='Missing subgroup {} in {}'.format(g, h))
-
+        self._chk_groups(h, expect)
         # Test one odd with divisors:
         h = isometry.CxI(9)
-        subgroups = h.subgroups
         expect = [
             # trivial:
             isometry.CxI(9),
@@ -82,19 +127,12 @@ class TestVec(unittest.TestCase):
             isometry.C(9),
             isometry.C(3),
         ]
-        for g in subgroups:
-            self.assertTrue(g in expect,
-                            msg='Extra subgroup {} in {}'.format(g, h))
-        for g in expect:
-            self.assertTrue(g in subgroups,
-                            msg='Missing subgroup {} in {}'.format(g, h))
+        self._chk_groups(h, expect)
 
     def test_c2ncn(self):
         """Test some subgroups of C2nCn"""
         # Test one even with even and odd divisors:
-        # Even C2nCn don't have reflections
         h = isometry.C2nC(12)
-        subgroups = h.subgroups
         expect = [
             # trivial:
             isometry.C2nC(12),
@@ -114,18 +152,10 @@ class TestVec(unittest.TestCase):
             #  - odd divisors: since n even, n / odd is even. I.e. not mapped
             #    on rotated one.
         ]
-        # You could test the length, but that is less helpful in case of
-        # failures
-        for g in subgroups:
-            self.assertTrue(g in expect,
-                            msg='Extra subgroup {} in {}'.format(g, h))
-        for g in expect:
-            self.assertTrue(g in subgroups,
-                            msg='Missing subgroup {} in {}'.format(g, h))
+        self._chk_groups(h, expect)
         # Test one odd
         # Odd C2nCn have reflections
         h = isometry.C2nC(15)
-        subgroups = h.subgroups
         expect = [
             # trivial:
             isometry.C2nC(15),
@@ -136,82 +166,211 @@ class TestVec(unittest.TestCase):
             isometry.C(3),
             # C2nCn:
             #  - add all divisors, since all are odd (since n is odd)
-            isometry.C2nC(15),
             isometry.C2nC(5),
             isometry.C2nC(3),
             # CnxI: no subgroups:
             #  - all divisors are odd (since n odd), i.e. no reflections
         ]
-        # You could test the length, but that is less helpful in case of
-        # failures
-        for g in subgroups:
-            self.assertTrue(g in expect,
-                            msg='Extra subgroup {} in {}'.format(g, h))
-        for g in expect:
-            self.assertTrue(g in subgroups,
-                            msg='Missing subgroup {} in {}'.format(g, h))
+        self._chk_groups(h, expect)
 
-    def test_dncn(self):
-        """Test some subgroups of C2nCn"""
+    def test_d(self):
+        """Test some subgroups of D"""
         # Test one even with even and odd divisors:
-        # Even C2nCn don't have reflections
-        h = isometry.DnC(12)
-        subgroups = h.subgroups
+        h = isometry.D(12)
         expect = [
             # trivial:
-            isometry.DnC(12),
+            isometry.D(12),
             isometry.E,
-            # all divisors:
-            isometry.DnC(6),
-            isometry.DnC(4),
-            isometry.DnC(3),
-            isometry.DnC(2),
-            # isometry.DnC(2) ~= C2
-            # E plus reflection:
-            isometry.C2nC(1),
-            # All Cn:
+            # all divisors Dn, Cn:
+            isometry.D(6),
+            isometry.D(4),
+            isometry.D(3),
+            isometry.D(2),
+            # isometry.D(1) ~= C2
             isometry.C(12),
             isometry.C(6),
             isometry.C(4),
             isometry.C(3),
             isometry.C(2),
+            # isometry.C(1) ~= E
         ]
-        # You could test the length, but that is less helpful in case of
-        # failures
-        for g in subgroups:
-            self.assertTrue(g in expect,
-                            msg='Extra subgroup {} in {}'.format(g, h))
-        for g in expect:
-            self.assertTrue(g in subgroups,
-                            msg='Missing subgroup {} in {}'.format(g, h))
+        self._chk_groups(h, expect)
         # Test one odd
-        # Odd C2nCn have reflections
-        h = isometry.C2nC(15)
-        subgroups = h.subgroups
+        h = isometry.D(15)
         expect = [
             # trivial:
-            isometry.C2nC(15),
+            isometry.D(15),
             isometry.E,
-            # All Cn:
+            # all divisors Dn, Cn:
+            isometry.D(5),
+            isometry.D(3),
+            isometry.D(1),  # ~= C2
             isometry.C(15),
             isometry.C(5),
             isometry.C(3),
-            # C2nCn:
-            #  - add all divisors, since all are odd (since n is odd)
+            # isometry.C(1) ~= E
+        ]
+        self._chk_groups(h, expect)
+        # Test lower limit: n = 2, n = 1
+        h = isometry.D(2)
+        expect = [
+            # trivial:
+            isometry.D(2),
+            isometry.E,
+            # all divisors Dn, Cn:
+            #isometry.D(1),  # ~= C2
+            isometry.C(2),
+        ]
+        self._chk_groups(h, expect)
+        h = isometry.D(1)
+        expect = [
+            # trivial:
+            isometry.C(2),
+            #isometry.D(1),  # ~= C2
+            isometry.E,
+            # no divisors..
+        ]
+        self._chk_groups(h, expect)
+
+    def test_dxi(self):
+        """Test some subgroups of DxI"""
+        # Test one even with even and odd divisors:
+        h = isometry.DxI(12)
+        expect = [
+            # trivial:
+            isometry.DxI(12),
+            isometry.E,
+            # all divisors D2nCn, Cn, Dn:
+            isometry.DnC(12),
+            isometry.DnC(6),
+            isometry.DnC(4),
+            isometry.DnC(3),
+            isometry.DnC(2),
+            # isometry.DnC(1) ~= C2C1
+            isometry.D(12),
+            isometry.D(6),
+            isometry.D(4),
+            isometry.D(3),
+            isometry.D(2),
+            # isometry.D(1) ~= C2
+            isometry.C(12),
+            isometry.C(6),
+            isometry.C(4),
+            isometry.C(3),
+            isometry.C(2),
+            # isometry.C(1) ~= E
+            # even divisors: DnxI, CnxI
+            isometry.DxI(6),
+            isometry.DxI(4),
+            isometry.DxI(2),
+            isometry.CxI(12),
+            isometry.CxI(6),
+            isometry.CxI(4),
+            isometry.CxI(2),
+            # odd divisors: D2nDn, C2nCn
+            isometry.D2nD(3),
+            # D2nD(1) ~= D2C2
+            isometry.C2nC(3),
+            isometry.C2nC(1),
+        ]
+        self._chk_groups(h, expect)
+        # Test one odd
+        # Odd C2nCn have reflections
+        h = isometry.DxI(15)
+        expect = [
+            # trivial:
+            isometry.DxI(15),
+            isometry.E,
+            # all divisors D2nCn, Cn, Dn:
+            isometry.DnC(15),
+            isometry.DnC(5),
+            isometry.DnC(3),
+            isometry.DnC(1),  # ~= C2C1
+            isometry.D(15),
+            isometry.D(5),
+            isometry.D(3),
+            isometry.D(1),  # ~= C2
+            isometry.C(15),
+            isometry.C(5),
+            isometry.C(3),
+            # isometry.C(1) ~= E
+            # odd divisors: DnxI, CnxI
+            isometry.DxI(5),
+            isometry.DxI(3),
+            isometry.DxI(1),  # ~= C2xI
+            isometry.CxI(15),
+            isometry.CxI(5),
+            isometry.CxI(3),
+            isometry.CxI(1),  # ~= ExI
+            # no even divisors: no D2nDn or C2nCn
+        ]
+        self._chk_groups(h, expect)
+
+    def test_d2ndn(self):
+        """Test some subgroups of D2nDn"""
+        # Test one even with even and odd divisors:
+        h = isometry.D2nD(12)
+        expect = [
+            # trivial:
+            isometry.D2nD(12),
+            isometry.E,
+            # all divisors D2nCn, Cn, Dn:
+            isometry.DnC(12),
+            isometry.DnC(6),
+            isometry.DnC(4),
+            isometry.DnC(3),
+            isometry.DnC(2),
+            isometry.DnC(1),  # ~= C2C1
+            isometry.D(12),
+            isometry.D(6),
+            isometry.D(4),
+            isometry.D(3),
+            isometry.D(2),
+            # isometry.D(1) ~= C2
+            isometry.C(12),
+            isometry.C(6),
+            isometry.C(4),
+            isometry.C(3),
+            isometry.C(2),
+            # isometry.C(1) ~= E
+            # even divisors i if n/i odd: D2nDn, C2nCn
+            isometry.D2nD(4),
+            isometry.C2nC(12),
+            isometry.C2nC(4),
+            # no DxI, CxI
+        ]
+        self._chk_groups(h, expect)
+        # Test one odd
+        # Odd C2nCn have reflections
+        h = isometry.D2nD(15)
+        expect = [
+            # trivial:
+            isometry.D2nD(15),
+            isometry.E,
+            # all divisors D2nCn, Cn, Dn:
+            isometry.DnC(15),
+            isometry.DnC(5),
+            isometry.DnC(3),
+            # isometry.DnC(1),  # ~= C2C1
+            isometry.D(15),
+            isometry.D(5),
+            isometry.D(3),
+            isometry.D(1),  # ~= C2
+            isometry.C(15),
+            isometry.C(5),
+            isometry.C(3),
+            # isometry.C(1) ~= E
+            # odd divisors: D2nDn or C2nCn
+            isometry.D2nD(5),
+            isometry.D2nD(3),
+            isometry.D2nD(1),  # ~= D2C2
             isometry.C2nC(15),
             isometry.C2nC(5),
             isometry.C2nC(3),
-            # CnxI: no subgroups:
-            #  - all divisors are odd (since n odd), i.e. no reflections
+            isometry.C2nC(1),  # ~= E + S
+            # no DnxI, CnxI
         ]
-        # You could test the length, but that is less helpful in case of
-        # failures
-        for g in subgroups:
-            self.assertTrue(g in expect,
-                            msg='Extra subgroup {} in {}'.format(g, h))
-        for g in expect:
-            self.assertTrue(g in subgroups,
-                            msg='Missing subgroup {} in {}'.format(g, h))
+        self._chk_groups(h, expect)
 
 print 'testing creation of set',
 g = isometry.Set([geomtypes.HX, geomtypes.HY])

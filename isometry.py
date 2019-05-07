@@ -94,6 +94,13 @@ acos_V2_V3 = asin_1_V3
 
 I  = geomtypes.I       # central inversion
 
+def _sort_and_del_dups(g):
+    """Sort list of isometry classes and remove duplicates"""
+    # remove duplicates first (unsorts the list):
+    g = list(dict.fromkeys(g))
+    g.sort(key = lambda x: x.order, reverse=True)
+    return g
+
 class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
 
@@ -238,13 +245,14 @@ class Set(set):
                 if len(subgroup) < len(self):
                     subgroup.group()
                 elif len(subgroup) > len(self):
-                    raise ImproperSubgroupError, '%s not <= %s (with this orientation)' % (
-                        o.__class__.__name__, self.__class__.__name__)
+                    raise ImproperSubgroupError, \
+                        '{} not subgroup of {} (with this orientation)'.format(
+                            o.__class__.__name__, self.__class__.__name__)
                 return subgroup
         #except ImproperSubgroupError:
         except AssertionError:
             raise ImproperSubgroupError, \
-                '{} not <= {} (with this orientation)'.format(
+                '{} not subgroup of {} (with this orientation)'.format(
                     o.__class__.__name__, self.__class__.__name__)
 
     def __div__(self, o):
@@ -399,12 +407,13 @@ class ExI(Set):
             return [self]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 ExI.subgroups = [ExI, E]
 
-def _Cn_get_sub_groups(n):
+def _Cn_get_subgroups(n):
     """Add subgroup classes of Cn (with specific n, except own class)
 
     The own class (by calling C(n) cannot be added, since it leads to
@@ -416,6 +425,7 @@ def _Cn_get_sub_groups(n):
 class MetaCn(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
+
 class Cn(Set):
     __metaclass__ = MetaCn
     init_pars = _init_pars('Cn', 'n')
@@ -463,7 +473,7 @@ class Cn(Set):
             Set.__init__(self, isometries)
             self.order = n
             self.rotAxes = {'n': axis}
-            self.subgroups = _Cn_get_sub_groups(n)
+            self.subgroups = _Cn_get_subgroups(n)
             self.subgroups.insert(0, C(n))
 
     def realiseSubgroups(self, sg):
@@ -481,8 +491,9 @@ class Cn(Set):
                 return[sg(setup = self.setup)]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 # dynamically create Cn classes:
 CnMetas = {}
@@ -502,18 +513,12 @@ def C(n):
                         'std_setup': _std_setup('Cn', n)
                     }
                 )
-            C_n.subgroups = _Cn_get_sub_groups(n)
+            C_n.subgroups = _Cn_get_subgroups(n)
             C_n.subgroups.insert(0, C_n)
             CnMetas[n] = C_n
         return CnMetas[n]
 
-C1 = E
-C2 = C(2)
-C3 = C(3)
-C4 = C(4)
-C5 = C(5)
-
-def _C2nCn_get_sub_groups(n):
+def _C2nCn_get_subgroups(n):
     """Add subgroup classes of C2nCn (with specific n, except own class)
 
     The own class (by calling C(n) cannot be added, since it leads to
@@ -521,15 +526,13 @@ def _C2nCn_get_sub_groups(n):
     """
     # divisors (incl 1)
     divs = [i for i in range(n/2, 0, -1) if n % i == 0]
-    divs.insert(0, n)
-    g = [C(i) for i in divs]
     m = n / 2
     if n % 2 != 0:
         # n odd: group has a reflection
         # CnxI: all divisors are also odd, i.e. they miss reflection
         # C2nCn: all divisors are also odd, i.e. the contain a reflection
         g_c2ici = [C2nC(i) for i in range(2, m) if n % i == 0]
-        g.extend(g_c2ici)
+        g = (g_c2ici)
     else:
         # n even: group has no reflection
         # CnxI: only add divisors that are odd if n/i is odd too
@@ -537,9 +540,10 @@ def _C2nCn_get_sub_groups(n):
         # C2nCn: only add divisors that are even if n/i is odd.
         g_c2ici = [C2nC(i) for i in range(2, m + 1)
                    if n % i == 0 and i % 2 == 0 and (n / i) % 2 != 0]
-        g.extend(g_c2ici)
-    g.sort(key = lambda x: x.order, reverse=True)
-    return g
+        g = (g_c2ici)
+    divs.insert(0, n)
+    g.extend([C(i) for i in divs])
+    return _sort_and_del_dups(g)
 
 class MetaC2nCn(MetaCn):
     def __init__(self, classname, bases, classdict):
@@ -586,7 +590,7 @@ class C2nCn(Set):
             Set.__init__(self, cn | ((c2n-cn) * geomtypes.I))
             self.rotAxes = {'n': cn.rotAxes['n']}
             self.order = c2n.order
-            self.subgroups = _C2nCn_get_sub_groups(self.n)
+            self.subgroups = _C2nCn_get_subgroups(self.n)
             self.subgroups.insert(0, C2nC(self.n))
 
     def realiseSubgroups(self, sg):
@@ -603,8 +607,9 @@ class C2nCn(Set):
             return [sg(setup = {'axis': self.rotAxes['n']})]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 # dynamically create C2nCn classes:
 C2nCnMetas = {}
@@ -622,12 +627,12 @@ def C2nC(n):
                     'std_setup': _std_setup('Cn', n)
                 }
             )
-        C_2n_C_n.subgroups = _C2nCn_get_sub_groups(n)
+        C_2n_C_n.subgroups = _C2nCn_get_subgroups(n)
         C_2n_C_n.subgroups.insert(0, C_2n_C_n)
         C2nCnMetas[n] = C_2n_C_n
         return C2nCnMetas[n]
 
-def _CnxI_get_sub_groups(n):
+def _CnxI_get_subgroups(n):
     """Add subgroup classes of CnxI (with specific n, except own class)
 
     The own class (by calling C(n) cannot be added, since it leads to
@@ -656,8 +661,7 @@ def _CnxI_get_sub_groups(n):
         g.extend(g_c2ici)
     # else: n odd: all divisors are odd as well: all C2iCi for divisors i will
     # have a reflection, while CnxI doesn't
-    g.sort(key = lambda x: x.order, reverse=True)
-    return g
+    return _sort_and_del_dups(g)
 
 class MetaCnxI(MetaCn):
     def __init__(self, classname, bases, classdict):
@@ -699,7 +703,7 @@ class CnxI(Set):
             Set.__init__(self, cn * ExI())
             self.rotAxes = {'n': cn.rotAxes['n']}
             self.order = 2 * cn.order
-            self.subgroups = _CnxI_get_sub_groups(self.n)
+            self.subgroups = _CnxI_get_subgroups(self.n)
             self.subgroups.insert(0, CxI(self.n))
 
     def realiseSubgroups(self, sg):
@@ -711,17 +715,15 @@ class CnxI(Set):
             if sg.n == self.n: # CnxI
                 return [self]
             return [sg(setup = {'axis': self.rotAxes['n']})]
-        elif isinstance(sg, MetaC2nCn):
-            return [sg(setup = {'axis': self.rotAxes['n']})]
-        elif isinstance(sg, MetaCn):
-            # only one orientation:
+        elif isinstance(sg, (MetaC2nCn, MetaCn)):
             return [sg(setup = {'axis': self.rotAxes['n']})]
         elif sg == ExI:
             return [ExI()]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 # dynamically create CnxI classes:
 CnxIMetas = {}
@@ -742,12 +744,12 @@ def CxI(n):
                         'std_setup': _std_setup('Cn', n)
                     }
                 )
-            C_nxI.subgroups = _CnxI_get_sub_groups(n)
+            C_nxI.subgroups = _CnxI_get_subgroups(n)
             C_nxI.subgroups.insert(0, C_nxI)
             CnxIMetas[n] = C_nxI
         return CnxIMetas[n]
 
-def _DnCn_get_sub_groups(n):
+def _DnCn_get_subgroups(n):
     """Add subgroup classes of DnCn (with specific n, except own class)
 
     The own class (by calling DnC(n) cannot be added, since it leads to
@@ -758,8 +760,7 @@ def _DnCn_get_sub_groups(n):
     g = [DnC(i) for i in divs]
     divs.insert(0, n)
     g.extend([C(i) for i in divs])
-    g.sort(key = lambda x: x.order, reverse=True)
-    return g
+    return _sort_and_del_dups(g)
 
 class MetaDnCn(MetaCn):
     def __init__(self, classname, bases, classdict):
@@ -816,10 +817,9 @@ class DnCn(Set):
             Set.__init__(self, cn | ((dn-cn) * geomtypes.I))
             self.n = s['n']
             self.rotAxes = {'n': cn.rotAxes['n']}
-            self.org_refl_axis = s['axis_2']
             self.reflNormals = dn.rotAxes[2]
             self.order = dn.order
-            self.subgroups = _DnCn_get_sub_groups(self.n)
+            self.subgroups = _DnCn_get_subgroups(self.n)
             self.subgroups.insert(0, DnC(self.n))
 
     def realiseSubgroups(self, sg):
@@ -832,19 +832,20 @@ class DnCn(Set):
                 return [self]
             else:
                 return [sg(setup = {'axis_n': self.rotAxes['n'],
-                                    'normal_r': self.org_refl_axis})]
+                                    'normal_r': self.reflNormals[0]})]
         elif isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
                 'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
             # C2C1 ~= E, plus reflection, with normal == rotation axis (0)
             # provide the normal of the one reflection:
-            return [sg(setup = {'axis': self.org_refl_axis})]
+            return [sg(setup = {'axis': self.reflNormals[0]})]
         elif isinstance(sg, MetaCn):
             return [sg(setup = {'axis': self.rotAxes['n']})]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 # dynamically create DnCn classes:
 DnCnMetas = {}
@@ -853,7 +854,7 @@ def DnC(n):
         return DnCnMetas[n]
     except KeyError:
         if n == 1:
-            DnCnMetas[n] = C2nC(1)
+            DnCnMetas[n] = C2C1
         else:
             D_n_C_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
                     {
@@ -865,14 +866,28 @@ def DnC(n):
                         'std_setup': _std_setup('DnCn', n)
                     }
                 )
-            D_n_C_n.subgroups = _DnCn_get_sub_groups(n)
+            D_n_C_n.subgroups = _DnCn_get_subgroups(n)
             D_n_C_n.subgroups.insert(0, D_n_C_n)
             DnCnMetas[n] = D_n_C_n
         return DnCnMetas[n]
 
+def _Dn_get_subgroups(n):
+    """Add subgroup classes of Dn (with specific n, except own class)
+
+    The own class (by calling D2nD(n) cannot be added, since it leads to
+    recursion.
+    """
+    # divisors (incl 1)
+    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    g = [D(i) for i in divs]
+    divs.insert(0, n)
+    g.extend([C(i) for i in divs])
+    return _sort_and_del_dups(g)
+
 class MetaDn(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
+
 class Dn(Set):
     __metaclass__ = MetaDn
     init_pars = _init_pars('Dn', 'n')
@@ -925,23 +940,20 @@ class Dn(Set):
             else:
                 self.n = n
             self.order = 2 * n
+            self.subgroups = _Dn_get_subgroups(self.n)
+            self.subgroups.insert(0, D(self.n))
 
     def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        if isinstance(sg, MetaDn):
-            if sg.n == self.n:
-                return [self]
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif isinstance(sg, MetaCn):
+        if sg == E:
+            return [E()]
+        if isinstance(sg, MetaCn):
             if sg.n == self.n:
                 return [sg(setup = {'axis': self.rotAxes['n']})]
-            elif sg.n == 2: # sg = C2
+            if sg.n == 2: # sg = C2
                 isoms = [
                     sg(setup = {'axis':self.rotAxes[2][i]})
                     for i in range(len(self.rotAxes[2]))
@@ -951,12 +963,14 @@ class Dn(Set):
                         sg(setup = {'axis': self.rotAxes['n']})
                     )
                 return isoms
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif sg == E:
-            return [E()]
+            return [sg(setup = {'axis': self.rotAxes['n']})]
+        if sg.n > self.n:
+            return []
+        if isinstance(sg, MetaDn):
+            if sg.n == self.n:
+                return [self]
+            return [sg(setup = {'axis_n': self.rotAxes['n'],
+                                'axis_2': self.rotAxes[2][0]})]
 
 # dynamically create Dn classes:
 DnMetas = {}
@@ -976,22 +990,39 @@ def D(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            # TODO: fix subgroups depending on n:
-            D_n.subgroups = [D_n, C2, E]
-            if n != 2:
-                D_n.subgroups.insert(-2, C(n))
+            D_n.subgroups = _Dn_get_subgroups(n)
+            D_n.subgroups.insert(0, D_n)
             DnMetas[n] = D_n
         return DnMetas[n]
 
-D1 = D(1)
-D2 = D(2)
-D3 = D(3)
-D4 = D(4)
-D5 = D(5)
+def _DnxI_get_subgroups(n):
+    """Add subgroup classes of DnxI (with specific n, except own class)
+
+    The own class (by calling DxI(n) cannot be added, since it leads to
+    recursion.
+    """
+    # divisors (incl 1)
+    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    # DxI if n odd and divisor odd, or n even and divisor even
+    g = [DxI(i) for i in divs if n % 2 == i % 2]
+    divs.insert(0, n)
+    # CxI if n odd and divisor odd, or n even and divisor even
+    g.extend([CxI(i) for i in divs if n % 2 == i % 2])
+    # only needed for n even, since
+    # if n odd, there are no even divisors
+    if n % 2 == 0:
+        # since n even: "i % 2 != n % 2" => "i % 2 != 0"
+        g.extend([D2nD(i) for i in divs if i % 2 != 0])
+        g.extend([C2nC(i) for i in divs if i % 2 != 0])
+    g.extend([D(i) for i in divs])
+    g.extend([C(i) for i in divs])
+    g.extend([DnC(i) for i in divs])
+    return _sort_and_del_dups(g)
 
 class MetaDnxI(MetaDn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
+
 class DnxI(Set):
     __metaclass__ = MetaDnxI
     init_pars = _init_pars('Dn', 'n')
@@ -1034,78 +1065,59 @@ class DnxI(Set):
             Set.__init__(self, dn * ExI())
             self.rotAxes = {'n': dn.rotAxes['n'], 2: dn.rotAxes[2][:]}
             self.n     = dn.n
+            self.reflNormals = []
+            for isom in self:
+                if isom.is_refl():
+                    self.reflNormals.append(isom.plane_normal())
             self.order = 2 * dn.order
+            self.subgroups = _DnxI_get_subgroups(self.n)
+            self.subgroups.insert(0, DxI(self.n))
 
     def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        #print 'realiseSubgroups', sgName
+        if sg == ExI:
+            return [ExI()]
+        if sg == E:
+            return [E()]
+        if sg.n > self.n:
+            return []
         if isinstance(sg, MetaDnxI):
             if sg.n == self.n:
                 return [self]
-            elif sg.n > self.n:
-                return []
+            return [sg(setup = {'axis_n': self.rotAxes['n'],
+                                'axis_2': self.rotAxes[2][0]})]
+        if isinstance(sg, (MetaDn, MetaD2nDn)):
+            return [
+                sg(setup = {'axis_n': self.rotAxes['n'],
+                            'axis_2': self.rotAxes[2][0]})
+                # choosing other 2-fold axes leads essentially to the same.
+            ]
+        if isinstance(sg, MetaDnCn):
+            return [sg(setup = {'axis_n':self.rotAxes['n'],
+                                'normal_r': self.rotAxes[2][0]})]
+        if isinstance(sg, MetaC2nCn):
+            if sg.n == 1:
+                sg1 = sg(setup = {'axis':self.reflNormals[0]})
+                if self.n % 2 == 1:
+                    return [sg1]
+                return [sg1, sg(setup = {'axis':self.rotAxes['n']})]
+            return [sg(setup = {'axis':self.rotAxes['n']})]
+        if isinstance(sg, (MetaCn, MetaCnxI)):
+            real_std = sg(setup = {'axis':self.rotAxes['n']})
+            if sg.n == 2:
+                # special case: D1xI ~= C2xI or D1 ~= C2
+                real_spec = sg(setup = {'axis':self.rotAxes[2][0]})
+                if self.n % 2 != 0:
+                    return [real_spec]
+                else:
+                    return [real_spec, real_std]
             else:
-                TODO
-        elif isinstance(sg, MetaDn):
-            if sg.n == self.n:
-                return [
-                    sg(setup = {
-                        'axis_n': self.rotAxes['n'],
-                        'axis_2': self.rotAxes[2][0]
-                    })
-                    # choosing other 2-fold axes leads essentially to the same.
-                ]
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif isinstance(sg, MetaDnCn):
-            if sg.n == self.n and self.n > 1: # DnCn
-                return [
-                    sg(setup = {'axis_n':self.rotAxes['n'],
-                            'normal_r': self.rotAxes[2][0]
-                        }
-                    )
-                ]
-            else:
-                TODO
-        elif isinstance(sg, MetaC2nCn):
-            if sg.n == 1: # C2C1: {E, Reflection}
-                isoms = [
-                    sg(setup = {'axis':self.rotAxes[2][i]})
-                    for i in range(len(self.rotAxes[2]))
-                ]
-                if self.n % 2 == 0: # if D2xI, D4xI, etc
-                    isoms.append(
-                        sg(setup = {'axis': self.rotAxes['n']})
-                    )
-                return isoms
-            else:
-                TODO
-        elif isinstance(sg, MetaCnxI) or type(sg) == MetaCn:
-            if sg.n == self.n:
-                return [sg(setup = {'axis': self.rotAxes['n']})]
-            elif sg.n == 2: # C2xI or C2
-                isoms = [
-                    sg(setup = {'axis':self.rotAxes[2][i]})
-                    for i in range(len(self.rotAxes[2]))
-                ]
-                if self.n % 2 == 0: # if D2xI, D4xI, etc
-                    isoms.append(sg(setup = {'axis': self.rotAxes['n']}))
-                return isoms
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif sg == ExI:
-            return [ExI()]
-        elif sg == E:
-            return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s(%s)' % (
-                self.__class__.__name__, sg.__name__, sg.__class__.__name__)
+                return [real_std]
+        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+            sg.__name__, self.__class__.__name__)
 
 # dynamically create DnxI classes:
 DnxIMetas = {}
@@ -1127,18 +1139,42 @@ def DxI(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            D_nxI.subgroups = [D_nxI, DnC(n), D(n), CxI(n), C2, C2C1, ExI, E]
-            if n != 2:
-                D_nxI.subgroups.insert(-4, C(n))
-            if n % 2 == 0:
-                D_nxI.subgroups.insert(-4, D2C2)
-            # TODO: fix more subgroups depending on n:
+            D_nxI.subgroups = _DnxI_get_subgroups(n)
+            D_nxI.subgroups.insert(0, D_nxI)
             DnxIMetas[n] = D_nxI
         return DnxIMetas[n]
+
+def _D2nDn_get_subgroups(n):
+    """Add subgroup classes of D2nDn (with specific n, except own class)
+
+    The own class (by calling D2nD(n) cannot be added, since it leads to
+    recursion.
+    """
+    # divisors (incl 1)
+    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    # D2nxDn if n odd and divisor odd, or n even and divisor even
+    if n % 2 == 0:
+        g = [D2nD(i) for i in divs if i % 2 == 0 and (n / i) % 2 == 1]
+    else:
+        g = [D2nD(i) for i in divs if i % 2 == 1]
+    divs.insert(0, n)
+    if n % 2 == 0:
+        # C2nxCn if n even and divisor even, and n/i odd
+        g.extend([C2nC(i) for i in divs if i % 2 == 0 and (n / i) % 2 == 1])
+    else:
+        # TODO: this ok for all odd?
+        # C2nxCn if n odd and divisor odd
+        g.extend([C2nC(i) for i in divs if i % 2 == 1])
+    # DnxI and CnxI cannot be aligned if i % 2 != n % 2
+    g.extend([D(i) for i in divs])
+    g.extend([C(i) for i in divs])
+    g.extend([DnC(i) for i in divs])
+    return _sort_and_del_dups(g)
 
 class MetaD2nDn(MetaDn):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
+
 class D2nDn(Set):
     __metaclass__ = MetaD2nDn
     init_pars = _init_pars('Dn', 'n')
@@ -1185,63 +1221,54 @@ class D2nDn(Set):
                 if isom.is_refl():
                     self.reflNormals.append(isom.plane_normal())
             self.order = d2n.order
+            self.subgroups = _D2nDn_get_subgroups(self.n)
+            self.subgroups.insert(0, D2nD(self.n))
 
     def realiseSubgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        if isinstance(sg, MetaD2nDn):
-            if sg.n == self.n: # D2cDn
-                return [self]
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif isinstance(sg, MetaDn):
-            if sg.n == self.n:
-                return [sg(setup = {'axis': self.rotAxes['n']})]
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif isinstance(sg, MetaDnCn):
-            if sg.n == self.n and self.n > 1: # DnCn
-                return [sg(setup = {'axis_n':self.rotAxes['n'],
-                        'normal_r': self.reflNormals[0]
-                    }
-                )]
-            else:
-                TODO
-        elif isinstance(sg, MetaC2nCn):
-            if sg.n == self.n: # D2nDn
-                return [sg(setup = {'axis': self.rotAxes['n']})]
-            elif sg.n == 1: # C2C1 = {E, Reflection}
-                isoms = [
-                    sg(setup = {'axis':self.reflNormals[i]})
-                    for i in range(len(self.reflNormals))
-                ]
-                # included in previous:
-                #if self.n % 2 == 1 and self.n > 1: # if D3xI, D5xI, etc
-                #    isoms.append(
-                #        sg(setup = {'axis': self.rotAxes['n']})
-                #    )
-                return isoms
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif isinstance(sg, MetaCn):
-            if sg.n == self.n:
-                return [sg(setup = {'axis': self.rotAxes['n']})]
-            elif sg.n > self.n:
-                return []
-            else:
-                TODO
-        elif sg == E:
+        if sg == ExI:
+            return [ExI()]
+        if sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        if sg.n > self.n:
+            return []
+        if isinstance(sg, MetaD2nDn):
+            if sg.n == self.n:
+                return [self]
+            return [sg(setup = {'axis_n': self.rotAxes['n'],
+                                'axis_2': self.rotAxes[2][0]})]
+        if isinstance(sg, MetaDn):
+            return [
+                sg(setup = {'axis_n': self.rotAxes['n'],
+                            'axis_2': self.rotAxes[2][0]})
+            ]
+        if isinstance(sg, MetaDnCn):
+            if sg.n == 2 and self.n % 2 != 0:
+                return [sg(setup = {'axis_n':self.rotAxes[2][0],
+                                    'normal_r': self.rotAxes['n']})]
+            return [sg(setup = {'axis_n':self.rotAxes['n'],
+                                'normal_r': self.reflNormals[0]})]
+        if isinstance(sg, MetaC2nCn):
+            if sg.n == 1:
+                sg1 = sg(setup = {'axis':self.reflNormals[0]})
+                if self.n % 2 == 0:
+                    return [sg1]
+                return [sg1, sg(setup = {'axis':self.rotAxes['n']})]
+            return [sg(setup = {'axis':self.rotAxes['n']})]
+        if isinstance(sg, MetaCn):
+            if sg.n == 2:
+                sg1 = sg(setup = {'axis':self.rotAxes[2][0]})
+                if self.n % 2 == 0:
+                    return [sg1, sg(setup = {'axis': self.rotAxes['n']})]
+                return [sg1]
+            return [sg(setup = {'axis': self.rotAxes['n']})]
+        # Note: no DnxI, CnxI subgroups exist, see _D2nDn_get_subgroups
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 # dynamically create D2nDn classes:
 D2nDnMetas = {}
@@ -1250,21 +1277,23 @@ def D2nD(n):
     try:
         return D2nDnMetas[n]
     except KeyError:
-        D_2n_D_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
-                {
-                    'n'    : n,
-                    'order': 4 * n,
-                    'mixed': True,
-                    'directParent': D(n),
-                    'init_pars': _init_pars('Dn', n),
-                    'std_setup': _std_setup('Dn', n)
-                }
-            )
-        D_2n_D_n.subgroups = [D_2n_D_n, DnC(n), D(n), C2nC(n), C(n), C2C1, E]
-        if n % 2 == 1 and n > 1:
-            D_2n_D_n.subgroups.insert(-2, D2C2)
-        # TODO: fix more subgroups depending on n, e.g.:
-        D2nDnMetas[n] = D_2n_D_n
+        if n == 1:
+            # D2D1 ~= D2C2
+            D2nDnMetas[n] = D2C2
+        else:
+            D_2n_D_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
+                    {
+                        'n'    : n,
+                        'order': 4 * n,
+                        'mixed': True,
+                        'directParent': D(n),
+                        'init_pars': _init_pars('Dn', n),
+                        'std_setup': _std_setup('Dn', n)
+                    }
+                )
+            D_2n_D_n.subgroups = _D2nDn_get_subgroups(n)
+            D_2n_D_n.subgroups.insert(0, D_2n_D_n)
+            D2nDnMetas[n] = D_2n_D_n
         return D2nDnMetas[n]
 
 class A4(Set):
@@ -1334,8 +1363,9 @@ class A4(Set):
             return [C3(setup = {'axis': a}) for a in o3a]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 class S4A4(Set):
     init_pars = _init_pars('A4')
@@ -1452,8 +1482,9 @@ class S4A4(Set):
             return [sg(setup = {'axis': normal}) for normal in self.reflNormals]
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 class A4xI(Set):
     init_pars = _init_pars('A4')
@@ -1536,8 +1567,9 @@ class A4xI(Set):
             return [sg()]
         elif sg == E:
             return [sg()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 class S4(Set):
     init_pars = _init_pars('S4')
@@ -1681,8 +1713,9 @@ class S4(Set):
             return isoms
         elif sg == E:
             return [E()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 class S4xI(S4):
     init_pars = _init_pars('S4')
@@ -1837,8 +1870,9 @@ class S4xI(S4):
             return [sg()]
         elif sg == E:
             return [sg()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 def generateD2(o2axis0, o2axis1):
     """
@@ -2054,8 +2088,9 @@ class A5(Set):
             return [ sg(setup = {'axis': a}) for a in self.rotAxes[2] ]
         elif sg == E:
             return [sg()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
 
 class A5xI(Set):
     init_pars = _init_pars('A5')
@@ -2206,8 +2241,15 @@ class A5xI(Set):
             return [sg()]
         elif sg == E:
             return [sg()]
-        else: raise ImproperSubgroupError, '%s ! <= %s' % (
-                self.__class__.__name__, sg.__class__.__name__)
+        else:
+            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__)
+
+C1 = E
+C2 = C(2)
+C3 = C(3)
+C4 = C(4)
+C5 = C(5)
 
 C1xI = ExI
 C2xI = CxI(2)
@@ -2225,6 +2267,12 @@ D2C2 = DnC(2)
 D3C3 = DnC(3)
 D4C4 = DnC(4)
 D5C5 = DnC(5)
+
+D1 = D(1)
+D2 = D(2)
+D3 = D(3)
+D4 = D(4)
+D5 = D(5)
 
 D1xI = DxI(1)
 D2xI = DxI(2)
