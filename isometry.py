@@ -480,6 +480,7 @@ class Cn(Set):
 # dynamically create Cn classes:
 CnMetas = {}
 def C(n):
+    """Create class for Cn with specific n"""
     try:
         return CnMetas[n]
     except KeyError:
@@ -527,7 +528,7 @@ def _C2nCn_get_subgroups(n):
     g.extend([C(i) for i in divs])
     return _sort_and_del_dups(g)
 
-class MetaC2nCn(MetaCn):
+class MetaC2nCn(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
 
@@ -597,6 +598,7 @@ class C2nCn(Set):
 # dynamically create C2nCn classes:
 C2nCnMetas = {}
 def C2nC(n):
+    """Create class for CnxI with specific n"""
     try:
         return C2nCnMetas[n]
     except KeyError:
@@ -646,7 +648,7 @@ def _CnxI_get_subgroups(n):
     # have a reflection, while CnxI doesn't
     return _sort_and_del_dups(g)
 
-class MetaCnxI(MetaCn):
+class MetaCnxI(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
 
@@ -712,6 +714,7 @@ class CnxI(Set):
 # dynamically create CnxI classes:
 CnxIMetas = {}
 def CxI(n):
+    """Create class for CnxI with specific n"""
     try:
         return CnxIMetas[n]
     except KeyError:
@@ -746,7 +749,7 @@ def _DnCn_get_subgroups(n):
     g.extend([C(i) for i in divs])
     return _sort_and_del_dups(g)
 
-class MetaDnCn(MetaCn):
+class MetaDnCn(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
 
@@ -802,7 +805,7 @@ class DnCn(Set):
             Set.__init__(self, cn | ((dn-cn) * geomtypes.I))
             self.n = s['n']
             self.rot_axes = {'n': cn.rot_axes['n']}
-            self.reflNormals = dn.rot_axes[2]
+            self.refl_normals = dn.rot_axes[2]
             self.order = dn.order
             self.subgroups = _DnCn_get_subgroups(self.n)
             self.subgroups.insert(0, DnC(self.n))
@@ -818,13 +821,13 @@ class DnCn(Set):
             if sg.n == self.n:
                 return [self]
             return [sg(setup={'axis_n': self.rot_axes['n'],
-                              'normal_r': self.reflNormals[0]})]
+                              'normal_r': self.refl_normals[0]})]
         if isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
                 'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
             # C2C1 ~= E, plus reflection, with normal == rotation axis (0)
             # provide the normal of the one reflection:
-            return [sg(setup={'axis': self.reflNormals[0]})]
+            return [sg(setup={'axis': self.refl_normals[0]})]
         if isinstance(sg, MetaCn):
             return [sg(setup={'axis': self.rot_axes['n']})]
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
@@ -833,6 +836,7 @@ class DnCn(Set):
 # dynamically create DnCn classes:
 DnCnMetas = {}
 def DnC(n):
+    """Create class for DnCn with specific n"""
     try:
         return DnCnMetas[n]
     except KeyError:
@@ -895,10 +899,14 @@ class Dn(Set):
         else:
             self.checkSetup(setup)
             keys = setup.keys()
-            if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = copy(self.std_setup['axis_n'])
-            if 'axis_2' in keys: axis_2 = setup['axis_2']
-            else:                axis_2 = copy(self.std_setup['axis_2'])
+            if 'axis_n' in keys:
+                axis_n = setup['axis_n']
+            else:
+                axis_n = copy(self.std_setup['axis_n'])
+            if 'axis_2' in keys:
+                axis_2 = setup['axis_2']
+            else:
+                axis_2 = copy(self.std_setup['axis_2'])
             if self.n != 0:
                 # If self.n is hard-code (e.g. for D3)
                 # then if you specify n it should be the correct value
@@ -957,6 +965,7 @@ class Dn(Set):
 # dynamically create Dn classes:
 DnMetas = {}
 def D(n):
+    """Create class for Dn with specific n"""
     try:
         return DnMetas[n]
     except KeyError:
@@ -1001,7 +1010,7 @@ def _DnxI_get_subgroups(n):
     g.extend([DnC(i) for i in divs])
     return _sort_and_del_dups(g)
 
-class MetaDnxI(MetaDn):
+class MetaDnxI(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
 
@@ -1048,10 +1057,10 @@ class DnxI(Set):
             Set.__init__(self, dn * ExI())
             self.rot_axes = {'n': dn.rot_axes['n'], 2: dn.rot_axes[2][:]}
             self.n     = dn.n
-            self.reflNormals = []
+            self.refl_normals = []
             for isom in self:
                 if isom.is_refl():
-                    self.reflNormals.append(isom.plane_normal())
+                    self.refl_normals.append(isom.plane_normal())
             self.order = 2 * dn.order
             self.subgroups = _DnxI_get_subgroups(self.n)
             self.subgroups.insert(0, DxI(self.n))
@@ -1083,7 +1092,7 @@ class DnxI(Set):
                               'normal_r': self.rot_axes[2][0]})]
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup={'axis':self.reflNormals[0]})
+                sg1 = sg(setup={'axis':self.refl_normals[0]})
                 if self.n % 2 == 1:
                     return [sg1]
                 return [sg1, sg(setup={'axis':self.rot_axes['n']})]
@@ -1105,6 +1114,7 @@ class DnxI(Set):
 # dynamically create DnxI classes:
 DnxIMetas = {}
 def DxI(n):
+    """Create class for DnxI with specific n"""
     assert n != 0
     try:
         return DnxIMetas[n]
@@ -1154,7 +1164,7 @@ def _D2nDn_get_subgroups(n):
     g.extend([DnC(i) for i in divs])
     return _sort_and_del_dups(g)
 
-class MetaD2nDn(MetaDn):
+class MetaD2nDn(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
 
@@ -1200,10 +1210,10 @@ class D2nDn(Set):
             self.direct_parent_setup = copy(s)
             Set.__init__(self, dn | ((d2n-dn) * geomtypes.I))
             self.rot_axes = dn.rot_axes
-            self.reflNormals = []
+            self.refl_normals = []
             for isom in self:
                 if isom.is_refl():
-                    self.reflNormals.append(isom.plane_normal())
+                    self.refl_normals.append(isom.plane_normal())
             self.order = d2n.order
             self.subgroups = _D2nDn_get_subgroups(self.n)
             self.subgroups.insert(0, D2nD(self.n))
@@ -1234,10 +1244,10 @@ class D2nDn(Set):
                 return [sg(setup={'axis_n':self.rot_axes[2][0],
                                   'normal_r': self.rot_axes['n']})]
             return [sg(setup={'axis_n':self.rot_axes['n'],
-                              'normal_r': self.reflNormals[0]})]
+                              'normal_r': self.refl_normals[0]})]
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup={'axis':self.reflNormals[0]})
+                sg1 = sg(setup={'axis':self.refl_normals[0]})
                 if self.n % 2 == 0:
                     return [sg1]
                 return [sg1, sg(setup={'axis':self.rot_axes['n']})]
@@ -1257,6 +1267,7 @@ class D2nDn(Set):
 # dynamically create D2nDn classes:
 D2nDnMetas = {}
 def D2nD(n):
+    """Create class for D2nDn with specific n"""
     assert n != 0
     try:
         return D2nDnMetas[n]
@@ -1442,7 +1453,7 @@ class S4A4(Set):
                     ri0_1, ri0_3, ri1_1, ri1_3, ri2_1, ri2_3,
                 ])
 
-            self.reflNormals = [pn0, pn1, pn2, pn3, pn4, pn5]
+            self.refl_normals = [pn0, pn1, pn2, pn3, pn4, pn5]
             self.rot_axes = {
                     2: [h0.axis(), h1.axis(), h2.axis()],
                     3: [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
@@ -1469,7 +1480,7 @@ class S4A4(Set):
         elif sg == D3C3:
             isoms = []
             for o3 in self.rot_axes[3]:
-                for rn in self.reflNormals:
+                for rn in self.refl_normals:
                     if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
@@ -1482,7 +1493,7 @@ class S4A4(Set):
         elif sg == C2:
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         elif sg == C2C1:
-            return [sg(setup={'axis': normal}) for normal in self.reflNormals]
+            return [sg(setup={'axis': normal}) for normal in self.refl_normals]
         elif sg == E:
             return [E()]
         else:
@@ -1614,10 +1625,14 @@ class S4(Set):
         else:
             self.checkSetup(setup)
             axes = setup.keys()
-            if 'o4axis0' in axes: o4axis0 = setup['o4axis0']
-            else:                 o4axis0 = copy(self.std_setup['o4axis0'])
-            if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
-            else:                 o4axis1 = copy(self.std_setup['o4axis1'])
+            if 'o4axis0' in axes:
+                o4axis0 = setup['o4axis0']
+            else:
+                o4axis0 = copy(self.std_setup['o4axis0'])
+            if 'o4axis1' in axes:
+                o4axis1 = setup['o4axis1']
+            else:
+                o4axis1 = copy(self.std_setup['o4axis1'])
             d2 = generate_d2(o4axis0, o4axis1)
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generate_a4_o3(d2)
             q0_2, q1_2, q2_2 = d2
