@@ -2320,7 +2320,6 @@ S4.subgroups = [S4, A4,
 S4xI.subgroups = [S4xI,                 # 48
         S4, S4A4, A4xI,                 # 24
         D4xI,                           # 18
-        D8D4,                           # 16
         A4, D3xI,                       # 12
         D4D2, D2xI, D4, C4xI, D4C4,     #  8
         D3, D3C3, C3xI,                 #  6
