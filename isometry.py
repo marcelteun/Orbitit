@@ -87,10 +87,7 @@ QUARTER_TURN = geomtypes.QUARTER_TURN
 EIGHTH_TURN = QUARTER_TURN / 2
 THIRD_TURN = geomtypes.THIRD_TURN
 
-acos_1_V3 = math.acos(1.0 / math.sqrt(3))
-asin_1_V3 = math.asin(1.0 / math.sqrt(3))
-asin_V2_V3 = acos_1_V3
-acos_V2_V3 = asin_1_V3
+asin_1_v3 = math.asin(1.0 / math.sqrt(3))
 
 I = geomtypes.I  # central inversion
 
@@ -216,11 +213,11 @@ class Set(set):
         # the following is not needed to check, is done implicitly:
         # and (geomtypes.E in self)
 
-    def is_subgroup(self, o, checkGroup=True):
+    def is_subgroup(self, o, check_group=True):
         """returns whether this is a subgroup of o)"""
         if len(self) > len(o):
             return False # optimisation
-        return (not checkGroup or self.is_group()) and self.issubset(o)
+        return (not check_group or self.is_group()) and self.issubset(o)
 
     def subgroup(self, o):
         try:
@@ -258,17 +255,17 @@ class Set(set):
         o = self.subgroup(o)
         assert len(o) <= len(self)
         # use a list of sets, since sets are unhashable
-        quotientSet = []
+        quotient_set = []
         # use a big set for all elems found so for
-        foundSoFar = Set([])
+        found_so_far = Set([])
         for te in self:
             q = te * o
-            if q.get_one() not in foundSoFar:
-                quotientSet.append(q)
-                foundSoFar = foundSoFar.union(q)
-        return quotientSet
+            if q.get_one() not in found_so_far:
+                quotient_set.append(q)
+                found_so_far = found_so_far.union(q)
+        return quotient_set
 
-    quotientSet = __div__
+    quotient_set = __div__
 
     def __rdiv__(self, o):
         #  subgroup * self: left quotient set
@@ -294,7 +291,7 @@ class Set(set):
         for e in self:
             return e
 
-    def group(self, maxIter=50):
+    def group(self, max_iter=50):
         """
         Tries to make a group out of the set of isometries
 
@@ -306,23 +303,24 @@ class Set(set):
             result.add(e.inverse())
         result.add(geomtypes.E)
         self.clear()
-        self.update(result.close(maxIter))
+        self.update(result.close(max_iter))
 
-    def close(self, maxIter=5):
+    def close(self, max_iter=5):
         """
-        Return a set that is closed, if it can be generated within maxIter steps.
+        Return a closed set, if it can be generated within max_iter steps.
         """
         result = copy(self)
-        for i in range(maxIter):
-            lPrev = len(result)
+        for i in range(max_iter):
+            l_prev = len(result)
             result.update(result * result)
             l = len(result)
-            if l == lPrev:
+            if l == l_prev:
                 break
-        assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
+        assert l == l_prev, \
+            "Couldn't close group after {} iterations".format(max_iter)
         return result
 
-    def checkSetup(self, setup):
+    def chk_setup(self, setup):
         if setup != {} and self.init_pars == []:
             print("Warning: class {} doesn't handle any setup pars {}".format(
                 self.__class__.__name__, setup.keys()))
@@ -352,7 +350,7 @@ class E(Set):
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
-        self.checkSetup(setup)
+        self.chk_setup(setup)
         Set.__init__(self, [geomtypes.E])
 
     def realise_subgroups(self, sg):
@@ -373,7 +371,7 @@ class ExI(Set):
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
-        self.checkSetup(setup)
+        self.chk_setup(setup)
         Set.__init__(self, [geomtypes.E, geomtypes.I])
 
     def realise_subgroups(self, sg):
@@ -427,7 +425,7 @@ class Cn(Set):
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             keys = setup.keys()
             if 'axis' in keys:
                 axis = setup['axis']
@@ -559,7 +557,7 @@ class C2nCn(Set):
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             s = copy(setup)
             # TODO remove dependency on n, make this class C2nCn internal, use
             # only C2nC(n) and rename this to an __
@@ -679,7 +677,7 @@ class CnxI(Set):
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             s = copy(setup)
             if 'n' not in s and self.n != 0:
                 s['n'] = self.n
@@ -781,7 +779,7 @@ class DnCn(Set):
             Set.__init__(self, isometries)
         else:
             s = {}
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             if 'n' not in setup:
                 if self.n != 0:
                     s['n'] = self.n
@@ -900,7 +898,7 @@ class Dn(Set):
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             keys = setup.keys()
             if 'axis_n' in keys:
                 axis_n = setup['axis_n']
@@ -1046,13 +1044,13 @@ class DnxI(Set):
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             keys = setup.keys()
             if 'axis_n' in keys:
                 axis_n = setup['axis_n']
             else:
                 axis_n = copy(self.std_setup['axis_n'])
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             s = copy(setup)
             if 'n' not in s and self.n != 0:
                 s['n'] = self.n
@@ -1203,7 +1201,7 @@ class D2nDn(Set):
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             s = copy(setup)
             if 'n' not in s and self.n != 0:
                 s['n'] = self.n
@@ -1328,7 +1326,7 @@ class A4(Set):
                 self.order, len(isometries))
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes:
                 o2axis0 = setup['o2axis0']
@@ -1409,7 +1407,7 @@ class S4A4(Set):
                 self.order, len(isometries))
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             axes = setup.keys()
             if 'o2axis0' in axes:
                 o2axis0 = setup['o2axis0']
@@ -1528,7 +1526,7 @@ class A4xI(Set):
                 self.order, len(isometries))
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             a4 = A4(setup=setup)
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a4 * ExI())
@@ -1613,7 +1611,7 @@ class S4(Set):
                 self.order, len(isometries))
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             axes = setup.keys()
             if 'o4axis0' in axes:
                 o4axis0 = setup['o4axis0']
@@ -1760,7 +1758,7 @@ class S4xI(Set):
                 self.order, len(isometries))
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             s4 = S4(setup=setup)
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, s4 * ExI())
@@ -1910,7 +1908,7 @@ def generate_a4_o3(d2_half_turns):
     # o3axis goes through 1 of the 2 cube vertices that form the edge
     # between the faces which centres are on h0 and h1
     o3axis = geomtypes.Rot3(axis=cube_h0.axis(),
-                            angle=asin_1_V3) * cube_h1.axis()
+                            angle=asin_1_v3) * cube_h1.axis()
     # r1_1_3: 1/3 rotation around the first order 3 axis
     # r1_2_3: 2/3 rotation around the first order 3 axis
     r1_1_3 = geomtypes.Rot3(axis=o3axis, angle=THIRD_TURN)
@@ -1953,7 +1951,7 @@ class A5(Set):
             # TODO: more asserts?
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             axes = setup.keys()
             if 'o3axis' in axes:
                 o3axis = setup['o3axis']
@@ -2092,7 +2090,7 @@ class A5xI(Set):
             # TODO: more asserts?
             Set.__init__(self, isometries)
         else:
-            self.checkSetup(setup)
+            self.chk_setup(setup)
             a5 = A5(setup=setup)
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a5 * ExI())
