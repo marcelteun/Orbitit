@@ -161,7 +161,8 @@ class Set(set):
         if eq:
             for e in self:
                 eq = e in o
-                if not eq: break
+                if not eq:
+                    break
         return eq
 
     def __sub__(self, o):
@@ -194,7 +195,8 @@ class Set(set):
         return Set([o * e for e in self])
 
     def is_group(self):
-        if len(self) == 0: return False
+        if len(self) == 0:
+            return False
         this_is_group = True
         for e in self:
             # optimised away, done as part of next loop:
@@ -215,7 +217,8 @@ class Set(set):
 
     def is_subgroup(self, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
-        if len(self) > len(o): return False # optimisation
+        if len(self) > len(o):
+            return False # optimisation
         return (
                 (not checkGroup) or self.is_group()
             ) and self.issubset(o)
@@ -251,7 +254,8 @@ class Set(set):
     def __div__(self, o):
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
-        if (len(o) > len(self)): return o.__div__(self)
+        if (len(o) > len(self)):
+            return o.__div__(self)
         o = self.subgroup(o)
         assert len(o) <= len(self)
         # use a list of sets, since sets are unhashable
@@ -280,7 +284,6 @@ class Set(set):
         return False
 
     def add(self, e):
-        l = len(self)
         if e not in self:
             set.add(self, e)
 
@@ -289,7 +292,8 @@ class Set(set):
             self.add(e)
 
     def get_one(self):
-        for e in self: return e
+        for e in self:
+            return e
 
     def group(self, maxIter = 50):
         """
@@ -327,7 +331,8 @@ class Set(set):
             found = False
             for p in self.init_pars:
                 found |= p['par'] == k
-                if found: break
+                if found:
+                    break
             if not found:
                 print("Warning: unknown setup parameter {} "
                     "for class {}".format(k, self.__class__.__name__))
@@ -338,7 +343,8 @@ class Set(set):
     def setup(self):
         return self.generator
 
-def init_dict(**kwargs): return kwargs
+def init_dict(**kwargs):
+    return kwargs
 
 class E(Set):
     init_pars = []
@@ -386,7 +392,7 @@ class ExI(Set):
 
 ExI.subgroups = [ExI, E]
 
-def _Cn_get_subgroups(n):
+def _cn_get_subgroups(n):
     """Add subgroup classes of Cn (with specific n, except own class)
 
     The own class (by calling C(n) cannot be added, since it leads to
@@ -424,13 +430,19 @@ class Cn(Set):
         else:
             self.checkSetup(setup)
             keys = setup.keys()
-            if 'axis' in keys: axis = setup['axis']
-            else:              axis = copy(self.std_setup['axis'])
-            if self.n != 0   : n = self.n
+            if 'axis' in keys:
+                axis = setup['axis']
             else:
-                if 'n' in keys: n = setup['n']
-                else:           n = copy(self.std_setup['n'])
-                if n == 0: n = 1
+                axis = copy(self.std_setup['axis'])
+            if self.n != 0:
+                n = self.n
+            else:
+                if 'n' in keys:
+                    n = setup['n']
+                else:
+                    n = copy(self.std_setup['n'])
+                if n == 0:
+                    n = 1
                 # If self.n is hard-code (e.g. for C3)
                 # then if you specify n it should be the correct value
                 assert self.n == 0 or n == self.n
@@ -444,12 +456,12 @@ class Cn(Set):
                 r = geomtypes.Rot3(axis=axis.axis(), angle=angle)
 
             isometries = [r]
-            for i in range(n-1):
+            for _ in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(self, isometries)
             self.order = n
             self.rot_axes = {'n': axis}
-            self.subgroups = _Cn_get_subgroups(n)
+            self.subgroups = _cn_get_subgroups(n)
             self.subgroups.insert(0, C(n))
 
     def realise_subgroups(self, sg):
@@ -489,12 +501,12 @@ def C(n):
                         'std_setup': _std_setup('Cn', n)
                     }
                 )
-            c_n.subgroups = _Cn_get_subgroups(n)
+            c_n.subgroups = _cn_get_subgroups(n)
             c_n.subgroups.insert(0, c_n)
             __Cn_metas[n] = c_n
         return __Cn_metas[n]
 
-def _C2nCn_get_subgroups(n):
+def _c2ncn_get_subgroups(n):
     """Add subgroup classes of C2nCn (with specific n, except own class)
 
     The own class (by calling C(n) cannot be added, since it leads to
@@ -502,7 +514,6 @@ def _C2nCn_get_subgroups(n):
     """
     # divisors (incl 1)
     divs = [i for i in range(n/2, 0, -1) if n % i == 0]
-    m = n / 2
     if n % 2 != 0:
         # n odd: group has a reflection
         # CnxI: all divisors are also odd, i.e. they miss reflection
@@ -569,7 +580,7 @@ class C2nCn(Set):
             Set.__init__(self, cn | ((c2n-cn) * geomtypes.I))
             self.rot_axes = {'n': cn.rot_axes['n']}
             self.order = c2n.order
-            self.subgroups = _C2nCn_get_subgroups(self.n)
+            self.subgroups = _c2ncn_get_subgroups(self.n)
             self.subgroups.insert(0, C2nC(self.n))
 
     def realise_subgroups(self, sg):
@@ -607,12 +618,12 @@ def C2nC(n):
                     'std_setup': _std_setup('Cn', n)
                 }
             )
-        c_2n_c_n.subgroups = _C2nCn_get_subgroups(n)
+        c_2n_c_n.subgroups = _c2ncn_get_subgroups(n)
         c_2n_c_n.subgroups.insert(0, c_2n_c_n)
         __C2nCn_metas[n] = c_2n_c_n
         return __C2nCn_metas[n]
 
-def _CnxI_get_subgroups(n):
+def _cnxi_get_subgroups(n):
     """Add subgroup classes of CnxI (with specific n, except own class)
 
     The own class (by calling C(n) cannot be added, since it leads to
@@ -686,7 +697,7 @@ class CnxI(Set):
             Set.__init__(self, cn * ExI())
             self.rot_axes = {'n': cn.rot_axes['n']}
             self.order = 2 * cn.order
-            self.subgroups = _CnxI_get_subgroups(self.n)
+            self.subgroups = _cnxi_get_subgroups(self.n)
             self.subgroups.insert(0, CxI(self.n))
 
     def realise_subgroups(self, sg):
@@ -728,12 +739,12 @@ def CxI(n):
                         'std_setup': _std_setup('Cn', n)
                     }
                 )
-            c_nxi.subgroups = _CnxI_get_subgroups(n)
+            c_nxi.subgroups = _cnxi_get_subgroups(n)
             c_nxi.subgroups.insert(0, c_nxi)
             __CnxI_metas[n] = c_nxi
         return __CnxI_metas[n]
 
-def _DnCn_get_subgroups(n):
+def _dncn_get_subgroups(n):
     """Add subgroup classes of DnCn (with specific n, except own class)
 
     The own class (by calling DnC(n) cannot be added, since it leads to
@@ -806,7 +817,7 @@ class DnCn(Set):
             self.rot_axes = {'n': cn.rot_axes['n']}
             self.refl_normals = dn.rot_axes[2]
             self.order = dn.order
-            self.subgroups = _DnCn_get_subgroups(self.n)
+            self.subgroups = _dncn_get_subgroups(self.n)
             self.subgroups.insert(0, DnC(self.n))
 
     def realise_subgroups(self, sg):
@@ -852,12 +863,12 @@ def DnC(n):
                         'std_setup': _std_setup('DnCn', n)
                     }
                 )
-            d_n_c_n.subgroups = _DnCn_get_subgroups(n)
+            d_n_c_n.subgroups = _dncn_get_subgroups(n)
             d_n_c_n.subgroups.insert(0, d_n_c_n)
             __DnCn_metas[n] = d_n_c_n
         return __DnCn_metas[n]
 
-def _Dn_get_subgroups(n):
+def _dn_get_subgroups(n):
     """Add subgroup classes of Dn (with specific n, except own class)
 
     The own class (by calling D2nD(n) cannot be added, since it leads to
@@ -914,9 +925,12 @@ class Dn(Set):
                 assert 'n' not in setup or setup['n'] == self.n
                 n = self.n
             else:
-                if 'n' in keys: n = setup['n']
-                else:           n = 2
-                if n == 0: n = 1
+                if 'n' in keys:
+                    n = setup['n']
+                else:
+                    n = 2
+                if n == 0:
+                    n = 1
 
             h = geomtypes.HalfTurn3(axis=axis_2)
             cn = Cn(setup={'axis': axis_n, 'n': n})
@@ -932,7 +946,7 @@ class Dn(Set):
             else:
                 self.n = n
             self.order = 2 * n
-            self.subgroups = _Dn_get_subgroups(self.n)
+            self.subgroups = _dn_get_subgroups(self.n)
             self.subgroups.insert(0, D(self.n))
 
     def realise_subgroups(self, sg):
@@ -981,12 +995,12 @@ def D(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            d_n.subgroups = _Dn_get_subgroups(n)
+            d_n.subgroups = _dn_get_subgroups(n)
             d_n.subgroups.insert(0, d_n)
             __Dn_metas[n] = d_n
         return __Dn_metas[n]
 
-def _DnxI_get_subgroups(n):
+def _dnxi_get_subgroups(n):
     """Add subgroup classes of DnxI (with specific n, except own class)
 
     The own class (by calling DxI(n) cannot be added, since it leads to
@@ -1045,8 +1059,10 @@ class DnxI(Set):
         else:
             self.checkSetup(setup)
             keys = setup.keys()
-            if 'axis_n' in keys: axis_n = setup['axis_n']
-            else:                axis_n = copy(self.std_setup['axis_n'])
+            if 'axis_n' in keys:
+                axis_n = setup['axis_n']
+            else:
+                axis_n = copy(self.std_setup['axis_n'])
             self.checkSetup(setup)
             s = copy(setup)
             if 'n' not in s and self.n != 0:
@@ -1064,7 +1080,7 @@ class DnxI(Set):
                 if isom.is_refl():
                     self.refl_normals.append(isom.plane_normal())
             self.order = 2 * dn.order
-            self.subgroups = _DnxI_get_subgroups(self.n)
+            self.subgroups = _dnxi_get_subgroups(self.n)
             self.subgroups.insert(0, DxI(self.n))
 
     def realise_subgroups(self, sg):
@@ -1134,12 +1150,12 @@ def DxI(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            dnxi.subgroups = _DnxI_get_subgroups(n)
+            dnxi.subgroups = _dnxi_get_subgroups(n)
             dnxi.subgroups.insert(0, dnxi)
             __DnxI_metas[n] = dnxi
         return __DnxI_metas[n]
 
-def _D2nDn_get_subgroups(n):
+def _d2ndn_get_subgroups(n):
     """Add subgroup classes of D2nDn (with specific n, except own class)
 
     The own class (by calling D2nD(n) cannot be added, since it leads to
@@ -1219,7 +1235,7 @@ class D2nDn(Set):
                 if isom.is_refl():
                     self.refl_normals.append(isom.plane_normal())
             self.order = d2n.order
-            self.subgroups = _D2nDn_get_subgroups(self.n)
+            self.subgroups = _d2ndn_get_subgroups(self.n)
             self.subgroups.insert(0, D2nD(self.n))
 
     def realise_subgroups(self, sg):
@@ -1263,7 +1279,7 @@ class D2nDn(Set):
                     return [sg1, sg(setup={'axis': self.rot_axes['n']})]
                 return [sg1]
             return [sg(setup={'axis': self.rot_axes['n']})]
-        # Note: no DnxI, CnxI subgroups exist, see _D2nDn_get_subgroups
+        # Note: no DnxI, CnxI subgroups exist, see _d2ndn_get_subgroups
         else:
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
@@ -1290,7 +1306,7 @@ def D2nD(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            d_2n_d_n.subgroups = _D2nDn_get_subgroups(n)
+            d_2n_d_n.subgroups = _d2ndn_get_subgroups(n)
             d_2n_d_n.subgroups.insert(0, d_2n_d_n)
             __D2nDn_metas[n] = d_2n_d_n
         return __D2nDn_metas[n]

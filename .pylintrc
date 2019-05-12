@@ -12,7 +12,7 @@ good-names=I,glMatrix,__glMatrix_rot,__glMatrix_rot_inv,
   D2xI,D3xI,D4xI,D5xI,
   C1xI,C2xI,C3xI,C4xI,C5xI,
   D1xI,D2xI,D3xI,D4xI,D5xI,
-  C,C2nC,CxI,DnC,D,DnxI,D2nD,
+  E,C,C2nC,CxI,DnC,D,DxI,D2nD,
   __Cn_metas,__C2nCn_metas,__CnxI_metas,__DnCn_metas,
   __Dn_metas,__DnxI_metas,__D2nDn_metas
 
