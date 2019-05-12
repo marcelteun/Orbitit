@@ -93,6 +93,14 @@ acos_V2_V3 = asin_1_V3
 
 I = geomtypes.I  # central inversion
 
+__Cn_metas = {}
+__C2nCn_metas = {}
+__CnxI_metas = {}
+__DnCn_metas = {}
+__Dn_metas = {}
+__DnxI_metas = {}
+__D2nDn_metas = {}
+
 
 def _sort_and_del_dups(g):
     """Sort list of isometry classes and remove duplicates"""
@@ -477,17 +485,17 @@ class Cn(Set):
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
 
+
 # dynamically create Cn classes:
-CnMetas = {}
 def C(n):
     """Create class for Cn with specific n"""
     try:
-        return CnMetas[n]
+        return __Cn_metas[n]
     except KeyError:
         if n == 1:
-            CnMetas[n] = E
+            __Cn_metas[n] = E
         else:
-            C_n = MetaCn('C%d' % n, (Cn,),
+            c_n = MetaCn('C%d' % n, (Cn,),
                     {
                         'n'    : n,
                         'order': n,
@@ -496,10 +504,10 @@ def C(n):
                         'std_setup': _std_setup('Cn', n)
                     }
                 )
-            C_n.subgroups = _Cn_get_subgroups(n)
-            C_n.subgroups.insert(0, C_n)
-            CnMetas[n] = C_n
-        return CnMetas[n]
+            c_n.subgroups = _Cn_get_subgroups(n)
+            c_n.subgroups.insert(0, c_n)
+            __Cn_metas[n] = c_n
+        return __Cn_metas[n]
 
 def _C2nCn_get_subgroups(n):
     """Add subgroup classes of C2nCn (with specific n, except own class)
@@ -595,14 +603,14 @@ class C2nCn(Set):
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
 
+
 # dynamically create C2nCn classes:
-C2nCnMetas = {}
 def C2nC(n):
     """Create class for CnxI with specific n"""
     try:
-        return C2nCnMetas[n]
+        return __C2nCn_metas[n]
     except KeyError:
-        C_2n_C_n = MetaC2nCn('C%dC%d' % (2*n, n), (C2nCn,),
+        c_2n_c_n = MetaC2nCn('C%dC%d' % (2*n, n), (C2nCn,),
                 {
                     'n'    : n,
                     'order': 2 * n,
@@ -612,10 +620,10 @@ def C2nC(n):
                     'std_setup': _std_setup('Cn', n)
                 }
             )
-        C_2n_C_n.subgroups = _C2nCn_get_subgroups(n)
-        C_2n_C_n.subgroups.insert(0, C_2n_C_n)
-        C2nCnMetas[n] = C_2n_C_n
-        return C2nCnMetas[n]
+        c_2n_c_n.subgroups = _C2nCn_get_subgroups(n)
+        c_2n_c_n.subgroups.insert(0, c_2n_c_n)
+        __C2nCn_metas[n] = c_2n_c_n
+        return __C2nCn_metas[n]
 
 def _CnxI_get_subgroups(n):
     """Add subgroup classes of CnxI (with specific n, except own class)
@@ -711,17 +719,17 @@ class CnxI(Set):
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
 
+
 # dynamically create CnxI classes:
-CnxIMetas = {}
 def CxI(n):
     """Create class for CnxI with specific n"""
     try:
-        return CnxIMetas[n]
+        return __CnxI_metas[n]
     except KeyError:
         if n == 1:
-            CnxIMetas[n] = ExI
+            __CnxI_metas[n] = ExI
         else:
-            C_nxI = MetaCnxI('C%dxI' % n, (CnxI,),
+            c_nxi = MetaCnxI('C%dxI' % n, (CnxI,),
                     {
                         'n'    : n,
                         'order': 2 * n,
@@ -731,10 +739,10 @@ def CxI(n):
                         'std_setup': _std_setup('Cn', n)
                     }
                 )
-            C_nxI.subgroups = _CnxI_get_subgroups(n)
-            C_nxI.subgroups.insert(0, C_nxI)
-            CnxIMetas[n] = C_nxI
-        return CnxIMetas[n]
+            c_nxi.subgroups = _CnxI_get_subgroups(n)
+            c_nxi.subgroups.insert(0, c_nxi)
+            __CnxI_metas[n] = c_nxi
+        return __CnxI_metas[n]
 
 def _DnCn_get_subgroups(n):
     """Add subgroup classes of DnCn (with specific n, except own class)
@@ -833,17 +841,17 @@ class DnCn(Set):
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
             sg.__class__.__name__, self.__class__.__name__)
 
+
 # dynamically create DnCn classes:
-DnCnMetas = {}
 def DnC(n):
     """Create class for DnCn with specific n"""
     try:
-        return DnCnMetas[n]
+        return __DnCn_metas[n]
     except KeyError:
         if n == 1:
-            DnCnMetas[n] = C2C1
+            __DnCn_metas[n] = C2C1
         else:
-            D_n_C_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
+            d_n_c_n = MetaDnCn('D%dC%d' % (n, n), (DnCn,),
                     {
                         'n'    : n,
                         'order': 2 * n,
@@ -853,10 +861,10 @@ def DnC(n):
                         'std_setup': _std_setup('DnCn', n)
                     }
                 )
-            D_n_C_n.subgroups = _DnCn_get_subgroups(n)
-            D_n_C_n.subgroups.insert(0, D_n_C_n)
-            DnCnMetas[n] = D_n_C_n
-        return DnCnMetas[n]
+            d_n_c_n.subgroups = _DnCn_get_subgroups(n)
+            d_n_c_n.subgroups.insert(0, d_n_c_n)
+            __DnCn_metas[n] = d_n_c_n
+        return __DnCn_metas[n]
 
 def _Dn_get_subgroups(n):
     """Add subgroup classes of Dn (with specific n, except own class)
@@ -962,17 +970,17 @@ class Dn(Set):
             return [sg(setup={'axis_n': self.rot_axes['n'],
                               'axis_2': self.rot_axes[2][0]})]
 
+
 # dynamically create Dn classes:
-DnMetas = {}
 def D(n):
     """Create class for Dn with specific n"""
     try:
-        return DnMetas[n]
+        return __Dn_metas[n]
     except KeyError:
         if n == 1:
-            DnMetas[n] = C2
+            __Dn_metas[n] = C2
         else:
-            D_n = MetaDn('D%d' % n, (Dn,),
+            d_n = MetaDn('D%d' % n, (Dn,),
                     {
                         'n'    : n,
                         'order': 2 * n,
@@ -981,10 +989,10 @@ def D(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            D_n.subgroups = _Dn_get_subgroups(n)
-            D_n.subgroups.insert(0, D_n)
-            DnMetas[n] = D_n
-        return DnMetas[n]
+            d_n.subgroups = _Dn_get_subgroups(n)
+            d_n.subgroups.insert(0, d_n)
+            __Dn_metas[n] = d_n
+        return __Dn_metas[n]
 
 def _DnxI_get_subgroups(n):
     """Add subgroup classes of DnxI (with specific n, except own class)
@@ -1111,18 +1119,18 @@ class DnxI(Set):
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
             sg.__name__, self.__class__.__name__)
 
+
 # dynamically create DnxI classes:
-DnxIMetas = {}
 def DxI(n):
     """Create class for DnxI with specific n"""
     assert n != 0
     try:
-        return DnxIMetas[n]
+        return __DnxI_metas[n]
     except KeyError:
         if n == 1:
-            DnxIMetas[n] = C2xI
+            __DnxI_metas[n] = C2xI
         else:
-            D_nxI = MetaDnxI('D%dxI' % n, (DnxI,),
+            dnxi = MetaDnxI('D%dxI' % n, (DnxI,),
                     {
                         'n'    : n,
                         'order': 4 * n,
@@ -1132,10 +1140,10 @@ def DxI(n):
                         'std_setup': _std_setup('Dn', n)
                     }
                 )
-            D_nxI.subgroups = _DnxI_get_subgroups(n)
-            D_nxI.subgroups.insert(0, D_nxI)
-            DnxIMetas[n] = D_nxI
-        return DnxIMetas[n]
+            dnxi.subgroups = _DnxI_get_subgroups(n)
+            dnxi.subgroups.insert(0, dnxi)
+            __DnxI_metas[n] = dnxi
+        return __DnxI_metas[n]
 
 def _D2nDn_get_subgroups(n):
     """Add subgroup classes of D2nDn (with specific n, except own class)
@@ -1264,17 +1272,17 @@ class D2nDn(Set):
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
 
+
 # dynamically create D2nDn classes:
-D2nDnMetas = {}
 def D2nD(n):
     """Create class for D2nDn with specific n"""
     assert n != 0
     try:
-        return D2nDnMetas[n]
+        return __D2nDn_metas[n]
     except KeyError:
         if n == 1:
             # D2D1 ~= D2C2
-            D2nDnMetas[n] = D2C2
+            __D2nDn_metas[n] = D2C2
         else:
             d_2n_d_n = MetaD2nDn('D%dD%d' % (2*n, n), (D2nDn,),
                     {
@@ -1288,8 +1296,8 @@ def D2nD(n):
                 )
             d_2n_d_n.subgroups = _D2nDn_get_subgroups(n)
             d_2n_d_n.subgroups.insert(0, d_2n_d_n)
-            D2nDnMetas[n] = d_2n_d_n
-        return D2nDnMetas[n]
+            __D2nDn_metas[n] = d_2n_d_n
+        return __D2nDn_metas[n]
 
 class A4(Set):
     """Class for the A4 symmetry group
