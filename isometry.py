@@ -81,10 +81,10 @@ def _std_setup(sym, order=None):
         setup['n'] = order
     return setup
 
-hTurn = geomtypes.HALF_TURN
-qTurn = geomtypes.QUARTER_TURN
-eTurn = qTurn/2  # one eighth turn
-tTurn = geomtypes.THIRD_TURN
+HALFTURN = geomtypes.HALF_TURN
+QUARTER_TURN = geomtypes.QUARTER_TURN
+EIGHTH_TURN = QUARTER_TURN / 2
+THIRD_TURN = geomtypes.THIRD_TURN
 
 acos_1_V3 = math.acos(1.0 / math.sqrt(3))
 asin_1_V3 = math.asin(1.0 / math.sqrt(3))
@@ -1389,18 +1389,18 @@ class S4A4(Set):
             ax0 = h0.axis()
             ax1 = h1.axis()
             ax2 = h2.axis()
-            ri0_1 = geomtypes.RotInv3(axis = ax0, angle = qTurn)
-            ri0_3 = geomtypes.RotInv3(axis = ax0, angle = 3*qTurn)
-            ri1_1 = geomtypes.RotInv3(axis = ax1, angle = qTurn)
-            ri1_3 = geomtypes.RotInv3(axis = ax1, angle = 3*qTurn)
-            ri2_1 = geomtypes.RotInv3(axis = ax2, angle = qTurn)
-            ri2_3 = geomtypes.RotInv3(axis = ax2, angle = 3*qTurn)
-            pn0 = geomtypes.Rot3(axis = ax0, angle = eTurn) * ax1
-            pn1 = geomtypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1
-            pn2 = geomtypes.Rot3(axis = ax1, angle = eTurn) * ax0
-            pn3 = geomtypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0
-            pn4 = geomtypes.Rot3(axis = ax2, angle = eTurn) * ax0
-            pn5 = geomtypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0
+            ri0_1 = geomtypes.RotInv3(axis=ax0, angle=QUARTER_TURN)
+            ri0_3 = geomtypes.RotInv3(axis=ax0, angle=3*QUARTER_TURN)
+            ri1_1 = geomtypes.RotInv3(axis=ax1, angle=QUARTER_TURN)
+            ri1_3 = geomtypes.RotInv3(axis=ax1, angle=3*QUARTER_TURN)
+            ri2_1 = geomtypes.RotInv3(axis=ax2, angle=QUARTER_TURN)
+            ri2_3 = geomtypes.RotInv3(axis=ax2, angle=3*QUARTER_TURN)
+            pn0 = geomtypes.Rot3(axis=ax0, angle=EIGHTH_TURN) * ax1
+            pn1 = geomtypes.Rot3(axis=ax0, angle=3*EIGHTH_TURN) * ax1
+            pn2 = geomtypes.Rot3(axis=ax1, angle=EIGHTH_TURN) * ax0
+            pn3 = geomtypes.Rot3(axis=ax1, angle=3*EIGHTH_TURN) * ax0
+            pn4 = geomtypes.Rot3(axis=ax2, angle=EIGHTH_TURN) * ax0
+            pn5 = geomtypes.Rot3(axis=ax2, angle=3*EIGHTH_TURN) * ax0
             s0 = geomtypes.Refl3(normal=pn0)
             s1 = geomtypes.Refl3(normal=pn1)
             s2 = geomtypes.Refl3(normal=pn2)
@@ -1583,35 +1583,35 @@ class S4(Set):
             ax0 = q0_2.axis()
             ax1 = q1_2.axis()
             ax2 = q2_2.axis()
-            q0_1 = geomtypes.Rot3(axis = ax0, angle = qTurn)
-            q0_3 = geomtypes.Rot3(axis = ax0, angle = 3*qTurn)
-            q1_1 = geomtypes.Rot3(axis = ax1, angle = qTurn)
-            q1_3 = geomtypes.Rot3(axis = ax1, angle = 3*qTurn)
-            q2_1 = geomtypes.Rot3(axis = ax2, angle = qTurn)
-            q2_3 = geomtypes.Rot3(axis = ax2, angle = 3*qTurn)
+            q0_1 = geomtypes.Rot3(axis=ax0, angle=QUARTER_TURN)
+            q0_3 = geomtypes.Rot3(axis=ax0, angle=3*QUARTER_TURN)
+            q1_1 = geomtypes.Rot3(axis=ax1, angle=QUARTER_TURN)
+            q1_3 = geomtypes.Rot3(axis=ax1, angle=3*QUARTER_TURN)
+            q2_1 = geomtypes.Rot3(axis=ax2, angle=QUARTER_TURN)
+            q2_3 = geomtypes.Rot3(axis=ax2, angle=3*QUARTER_TURN)
             h0 = geomtypes.Rot3(
-                    axis = geomtypes.Rot3(axis = ax0, angle = eTurn) * ax1,
-                    angle = hTurn
+                    axis=geomtypes.Rot3(axis=ax0, angle=EIGHTH_TURN) * ax1,
+                    angle=HALFTURN
                 )
             h1 = geomtypes.Rot3(
-                    axis = geomtypes.Rot3(axis = ax0, angle = 3*eTurn) * ax1,
-                    angle = hTurn
+                    axis=geomtypes.Rot3(axis=ax0, angle=3*EIGHTH_TURN) * ax1,
+                    angle=HALFTURN
                 )
             h2 = geomtypes.Rot3(
-                    axis = geomtypes.Rot3(axis = ax1, angle = eTurn) * ax0,
-                    angle = hTurn
+                    axis=geomtypes.Rot3(axis=ax1, angle=EIGHTH_TURN) * ax0,
+                    angle=HALFTURN
                 )
             h3 = geomtypes.Rot3(
-                    axis = geomtypes.Rot3(axis = ax1, angle = 3*eTurn) * ax0,
-                    angle = hTurn
+                    axis=geomtypes.Rot3(axis=ax1, angle=3*EIGHTH_TURN) * ax0,
+                    angle=HALFTURN
                 )
             h4 = geomtypes.Rot3(
-                    axis = geomtypes.Rot3(axis = ax2, angle = eTurn) * ax0,
-                    angle = hTurn
+                    axis=geomtypes.Rot3(axis=ax2, angle=EIGHTH_TURN) * ax0,
+                    angle=HALFTURN
                 )
             h5 = geomtypes.Rot3(
-                    axis = geomtypes.Rot3(axis = ax2, angle = 3*eTurn) * ax0,
-                    angle = hTurn
+                    axis=geomtypes.Rot3(axis=ax2, angle=3*EIGHTH_TURN) * ax0,
+                    angle=HALFTURN
                 )
             Set.__init__(self, [
                     geomtypes.E,
@@ -1862,7 +1862,7 @@ def generateD2(o2axis0, o2axis1):
     assert geomtypes.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1), 0), (
             "Error: axes not orthogonal")
     H0 = geomtypes.HalfTurn3(axis=o2axis0)
-    H1 = geomtypes.Rot3(axis = o2axis1, angle = hTurn)
+    H1 = geomtypes.Rot3(axis = o2axis1, angle = HALFTURN)
     return (H0, H1, H1 * H0)
 
 def generateA4O3(D2HalfTurns):
@@ -1878,7 +1878,7 @@ def generateA4O3(D2HalfTurns):
     # imagine A4 is part of S4 positioned in a cube
     # H0, H1, H2 go through the cube face centres
     # define a quarter turn around H2
-    Q = geomtypes.Rot3(axis = H2.axis(), angle = qTurn)
+    Q = geomtypes.Rot3(axis=H2.axis(), angle=QUARTER_TURN)
     # h0 and h1 go through cube edge centres
     h0 = Q * H0
     h1 = Q * H1
@@ -1889,8 +1889,8 @@ def generateA4O3(D2HalfTurns):
         ) * h1.axis()
     # R1_1_3: 1/3 rotation around the first order 3 axis
     # R1_2_3: 2/3 rotation around the first order 3 axis
-    R1_1_3 = geomtypes.Rot3(axis = o3axis, angle = tTurn)
-    R1_2_3 = geomtypes.Rot3(axis = o3axis, angle = 2*tTurn)
+    R1_1_3 = geomtypes.Rot3(axis=o3axis, angle=THIRD_TURN)
+    R1_2_3 = geomtypes.Rot3(axis=o3axis, angle=2*THIRD_TURN)
     R4_1_3 = R1_1_3 * H0
     R3_1_3 = R1_1_3 * H1
     R2_1_3 = R1_1_3 * H2
