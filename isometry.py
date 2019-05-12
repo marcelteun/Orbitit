@@ -481,16 +481,15 @@ class Cn(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
+        if sg == E:
+            return [E()]
+        if sg.n > self.n:
+            return []
         if isinstance(sg, MetaCn):
             if sg.n == self.n: # Cn
                 return [self]
-            elif sg.n > self.n:
-                return []
             else:
-                print 'realised', repr(sg(setup = self.setup))
-                return[sg(setup = self.setup)]
-        elif sg == E:
-            return [E()]
+                return[sg(setup = {'axis': self.rotAxes['n']})]
         else:
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
@@ -530,16 +529,16 @@ def _C2nCn_get_subgroups(n):
     if n % 2 != 0:
         # n odd: group has a reflection
         # CnxI: all divisors are also odd, i.e. they miss reflection
-        # C2nCn: all divisors are also odd, i.e. the contain a reflection
-        g_c2ici = [C2nC(i) for i in range(2, m) if n % i == 0]
+        # C2nCn: none, there are no even divisors
+        g_c2ici = [C2nC(i) for i in divs if i % 2 != 0]
         g = (g_c2ici)
     else:
         # n even: group has no reflection
         # CnxI: only add divisors that are odd if n/i is odd too
-        # but since n even, n/i even too.
+        #       but since n even, n/i even too. No such subgroup.
         # C2nCn: only add divisors that are even if n/i is odd.
-        g_c2ici = [C2nC(i) for i in range(2, m + 1)
-                   if n % i == 0 and i % 2 == 0 and (n / i) % 2 != 0]
+        g_c2ici = [C2nC(i) for i in divs
+                   if i % 2 == 0 and (n / i) % 2 != 0]
         g = (g_c2ici)
     divs.insert(0, n)
     g.extend([C(i) for i in divs])
@@ -827,25 +826,23 @@ class DnCn(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
+        if sg == E:
+            return [E()]
         if isinstance(sg, MetaDnCn):
             if sg.n == self.n:
                 return [self]
-            else:
-                return [sg(setup = {'axis_n': self.rotAxes['n'],
-                                    'normal_r': self.reflNormals[0]})]
-        elif isinstance(sg, MetaC2nCn):
+            return [sg(setup = {'axis_n': self.rotAxes['n'],
+                                'normal_r': self.reflNormals[0]})]
+        if isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
                 'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
             # C2C1 ~= E, plus reflection, with normal == rotation axis (0)
             # provide the normal of the one reflection:
             return [sg(setup = {'axis': self.reflNormals[0]})]
-        elif isinstance(sg, MetaCn):
+        if isinstance(sg, MetaCn):
             return [sg(setup = {'axis': self.rotAxes['n']})]
-        elif sg == E:
-            return [E()]
-        else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__)
 
 # dynamically create DnCn classes:
 DnCnMetas = {}

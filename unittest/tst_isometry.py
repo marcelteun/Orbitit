@@ -168,6 +168,7 @@ class TestSubGroups(unittest.TestCase):
             #  - add all divisors, since all are odd (since n is odd)
             isometry.C2nC(5),
             isometry.C2nC(3),
+            isometry.C2nC(1),
             # CnxI: no subgroups:
             #  - all divisors are odd (since n odd), i.e. no reflections
         ]
