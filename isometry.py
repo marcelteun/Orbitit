@@ -140,8 +140,7 @@ class Set(set):
             return s
         if self.generator != {}:
             if self.short_string:
-                s = '%s(setup = %s)' % (self.__class__.__name__,
-                                        self.generator)
+                s = '%s(setup=%s)' % (self.__class__.__name__,self.generator)
             else:
                 s = to_s()
         else:
@@ -441,10 +440,10 @@ class Cn(Set):
 
             angle = 2 * math.pi / n
             try:
-                r = geomtypes.Rot3(axis = axis, angle = angle)
+                r = geomtypes.Rot3(axis=axis, angle=angle)
             except TypeError:
                 # assume axis has Rot3 type
-                r = geomtypes.Rot3(axis = axis.axis(), angle = angle)
+                r = geomtypes.Rot3(axis=axis.axis(), angle=angle)
 
             isometries = [r]
             for i in range(n-1):
@@ -468,7 +467,7 @@ class Cn(Set):
             if sg.n == self.n: # Cn
                 return [self]
             else:
-                return[sg(setup = {'axis': self.rot_axes['n']})]
+                return[sg(setup={'axis': self.rot_axes['n']})]
         else:
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
@@ -560,11 +559,11 @@ class C2nCn(Set):
             # then if you specify n it should be the correct value
             assert self.n == 0 or s['n'] == self.n
             # TODO use direct parent here... (no dep on n)
-            cn = Cn(setup = s)
+            cn = Cn(setup=s)
             self.direct_parent_setup = copy(s)
             self.n = cn.n
             s['n'] = 2 * s['n']
-            c2n = Cn(setup = s)
+            c2n = Cn(setup=s)
             Set.__init__(self, cn | ((c2n-cn) * geomtypes.I))
             self.rot_axes = {'n': cn.rot_axes['n']}
             self.order = c2n.order
@@ -580,9 +579,9 @@ class C2nCn(Set):
             if sg.n == self.n: # C2cCn
                 return [self]
             else:
-                return [sg(setup = {'axis': self.rot_axes['n']})]
+                return [sg(setup={'axis': self.rot_axes['n']})]
         elif isinstance(sg, MetaCn):
-            return [sg(setup = {'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         elif sg == E:
             return [E()]
         else:
@@ -675,7 +674,7 @@ class CnxI(Set):
             # If self.n is hard-code (e.g. for C3xI)
             # then if you specify n it should be the correct value
             assert self.n == 0 or s['n'] == self.n
-            cn = Cn(setup = s)
+            cn = Cn(setup=s)
             self.direct_parent_setup = copy(s)
             self.n = cn.n
             Set.__init__(self, cn * ExI())
@@ -692,9 +691,9 @@ class CnxI(Set):
         if isinstance(sg, MetaCnxI):
             if sg.n == self.n: # CnxI
                 return [self]
-            return [sg(setup = {'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         elif isinstance(sg, (MetaC2nCn, MetaCn)):
-            return [sg(setup = {'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         elif sg == ExI:
             return [ExI()]
         elif sg == E:
@@ -783,7 +782,7 @@ class DnCn(Set):
                 s['axis'] = setup['axis_n']
             else:
                 s['axis'] = copy(self.std_setup['axis_n'])
-            cn = Cn(setup = s)
+            cn = Cn(setup=s)
             self.direct_parent_setup = copy(s)
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
@@ -791,7 +790,7 @@ class DnCn(Set):
                 s['axis_2'] = copy(self.std_setup['normal_r'])
             s['axis_n'] = s['axis']
             del s['axis']
-            dn = Dn(setup = s)
+            dn = Dn(setup=s)
             Set.__init__(self, cn | ((dn-cn) * geomtypes.I))
             self.n = s['n']
             self.rot_axes = {'n': cn.rot_axes['n']}
@@ -810,16 +809,16 @@ class DnCn(Set):
         if isinstance(sg, MetaDnCn):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup = {'axis_n': self.rot_axes['n'],
-                                'normal_r': self.reflNormals[0]})]
+            return [sg(setup={'axis_n': self.rot_axes['n'],
+                              'normal_r': self.reflNormals[0]})]
         if isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
                 'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
             # C2C1 ~= E, plus reflection, with normal == rotation axis (0)
             # provide the normal of the one reflection:
-            return [sg(setup = {'axis': self.reflNormals[0]})]
+            return [sg(setup={'axis': self.reflNormals[0]})]
         if isinstance(sg, MetaCn):
-            return [sg(setup = {'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
             sg.__class__.__name__, self.__class__.__name__)
 
@@ -902,7 +901,7 @@ class Dn(Set):
                 if n == 0: n = 1
 
             h = geomtypes.HalfTurn3(axis=axis_2)
-            cn = Cn(setup = {'axis': axis_n, 'n': n})
+            cn = Cn(setup={'axis': axis_n, 'n': n})
             isometries = [isom for isom in cn]
             hs = [isom * h for isom in cn]
             #for isom in hs: print isom
@@ -928,25 +927,23 @@ class Dn(Set):
             return [E()]
         if isinstance(sg, MetaCn):
             if sg.n == self.n:
-                return [sg(setup = {'axis': self.rot_axes['n']})]
+                return [sg(setup={'axis': self.rot_axes['n']})]
             if sg.n == 2: # sg = C2
                 isoms = [
-                    sg(setup = {'axis':self.rot_axes[2][i]})
+                    sg(setup={'axis':self.rot_axes[2][i]})
                     for i in range(len(self.rot_axes[2]))
                 ]
                 if self.n % 2 == 0: # if D2, D4, etc
-                    isoms.append(
-                        sg(setup = {'axis': self.rot_axes['n']})
-                    )
+                    isoms.append(sg(setup={'axis': self.rot_axes['n']}))
                 return isoms
-            return [sg(setup = {'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         if sg.n > self.n:
             return []
         if isinstance(sg, MetaDn):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup = {'axis_n': self.rot_axes['n'],
-                                'axis_2': self.rot_axes[2][0]})]
+            return [sg(setup={'axis_n': self.rot_axes['n'],
+                              'axis_2': self.rot_axes[2][0]})]
 
 # dynamically create Dn classes:
 DnMetas = {}
@@ -1036,7 +1033,7 @@ class DnxI(Set):
             # If self.n is hard-code (e.g. for D3xI)
             # then if you specify n it should be the correct value
             assert self.n == 0 or s['n'] == self.n
-            dn = Dn(setup = s)
+            dn = Dn(setup=s)
             self.direct_parent_setup = copy(s)
             Set.__init__(self, dn * ExI())
             self.rot_axes = {'n': dn.rot_axes['n'], 2: dn.rot_axes[2][:]}
@@ -1063,29 +1060,29 @@ class DnxI(Set):
         if isinstance(sg, MetaDnxI):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup = {'axis_n': self.rot_axes['n'],
-                                'axis_2': self.rot_axes[2][0]})]
+            return [sg(setup={'axis_n': self.rot_axes['n'],
+                              'axis_2': self.rot_axes[2][0]})]
         if isinstance(sg, (MetaDn, MetaD2nDn)):
             return [
-                sg(setup = {'axis_n': self.rot_axes['n'],
-                            'axis_2': self.rot_axes[2][0]})
+                sg(setup={'axis_n': self.rot_axes['n'],
+                          'axis_2': self.rot_axes[2][0]})
                 # choosing other 2-fold axes leads essentially to the same.
             ]
         if isinstance(sg, MetaDnCn):
-            return [sg(setup = {'axis_n':self.rot_axes['n'],
-                                'normal_r': self.rot_axes[2][0]})]
+            return [sg(setup={'axis_n':self.rot_axes['n'],
+                              'normal_r': self.rot_axes[2][0]})]
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup = {'axis':self.reflNormals[0]})
+                sg1 = sg(setup={'axis':self.reflNormals[0]})
                 if self.n % 2 == 1:
                     return [sg1]
-                return [sg1, sg(setup = {'axis':self.rot_axes['n']})]
-            return [sg(setup = {'axis':self.rot_axes['n']})]
+                return [sg1, sg(setup={'axis':self.rot_axes['n']})]
+            return [sg(setup={'axis':self.rot_axes['n']})]
         if isinstance(sg, (MetaCn, MetaCnxI)):
-            real_std = sg(setup = {'axis':self.rot_axes['n']})
+            real_std = sg(setup={'axis':self.rot_axes['n']})
             if sg.n == 2:
                 # special case: D1xI ~= C2xI or D1 ~= C2
-                real_spec = sg(setup = {'axis':self.rot_axes[2][0]})
+                real_spec = sg(setup={'axis':self.rot_axes[2][0]})
                 if self.n % 2 != 0:
                     return [real_spec]
                 else:
@@ -1185,10 +1182,10 @@ class D2nDn(Set):
             # If self.n is hard-code (e.g. for D6D3)
             # then if you specify n it should be the correct value
             assert self.n == 0 or s['n'] == self.n
-            dn = Dn(setup = s)
+            dn = Dn(setup=s)
             self.n = dn.n
             s['n'] = 2 * s['n']
-            d2n = Dn(setup = s)
+            d2n = Dn(setup=s)
             self.direct_parent_setup = copy(s)
             Set.__init__(self, dn | ((d2n-dn) * geomtypes.I))
             self.rot_axes = dn.rot_axes
@@ -1214,33 +1211,33 @@ class D2nDn(Set):
         if isinstance(sg, MetaD2nDn):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup = {'axis_n': self.rot_axes['n'],
-                                'axis_2': self.rot_axes[2][0]})]
+            return [sg(setup={'axis_n': self.rot_axes['n'],
+                              'axis_2': self.rot_axes[2][0]})]
         if isinstance(sg, MetaDn):
             return [
-                sg(setup = {'axis_n': self.rot_axes['n'],
-                            'axis_2': self.rot_axes[2][0]})
+                sg(setup={'axis_n': self.rot_axes['n'],
+                          'axis_2': self.rot_axes[2][0]})
             ]
         if isinstance(sg, MetaDnCn):
             if sg.n == 2 and self.n % 2 != 0:
-                return [sg(setup = {'axis_n':self.rot_axes[2][0],
-                                    'normal_r': self.rot_axes['n']})]
-            return [sg(setup = {'axis_n':self.rot_axes['n'],
-                                'normal_r': self.reflNormals[0]})]
+                return [sg(setup={'axis_n':self.rot_axes[2][0],
+                                  'normal_r': self.rot_axes['n']})]
+            return [sg(setup={'axis_n':self.rot_axes['n'],
+                              'normal_r': self.reflNormals[0]})]
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup = {'axis':self.reflNormals[0]})
+                sg1 = sg(setup={'axis':self.reflNormals[0]})
                 if self.n % 2 == 0:
                     return [sg1]
-                return [sg1, sg(setup = {'axis':self.rot_axes['n']})]
-            return [sg(setup = {'axis':self.rot_axes['n']})]
+                return [sg1, sg(setup={'axis':self.rot_axes['n']})]
+            return [sg(setup={'axis':self.rot_axes['n']})]
         if isinstance(sg, MetaCn):
             if sg.n == 2:
-                sg1 = sg(setup = {'axis':self.rot_axes[2][0]})
+                sg1 = sg(setup={'axis':self.rot_axes[2][0]})
                 if self.n % 2 == 0:
-                    return [sg1, sg(setup = {'axis': self.rot_axes['n']})]
+                    return [sg1, sg(setup={'axis': self.rot_axes['n']})]
                 return [sg1]
-            return [sg(setup = {'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         # Note: no DnxI, CnxI subgroups exist, see _D2nDn_get_subgroups
         else:
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
@@ -1335,13 +1332,13 @@ class A4(Set):
             return [self]
         elif sg == D2:
             o2a = self.rot_axes[2]
-            return [D2(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
+            return [D2(setup={'axis_n': o2a[0], 'axis_2': o2a[1]})]
         elif sg == C2:
             o2a = self.rot_axes[2]
-            return [C2(setup = {'axis': a}) for a in o2a]
+            return [C2(setup={'axis': a}) for a in o2a]
         elif sg == C3:
             o3a = self.rot_axes[3]
-            return [C3(setup = {'axis': a}) for a in o3a]
+            return [C3(setup={'axis': a}) for a in o3a]
         elif sg == E:
             return [E()]
         else:
@@ -1443,11 +1440,11 @@ class S4A4(Set):
             return [self]
         elif sg == A4:
             o2a = self.rot_axes[2]
-            return [sg(setup = {'o2axis0': o2a[0], 'o2axis1': o2a[1]})]
+            return [sg(setup={'o2axis0': o2a[0], 'o2axis1': o2a[1]})]
         elif sg == D4D2:
             o2a = self.rot_axes[2]
             l = len(o2a)
-            return [sg(setup = {'axis_n': o2a[i], 'axis_2': o2a[(i+1)%l]})
+            return [sg(setup={'axis_n': o2a[i], 'axis_2': o2a[(i+1)%l]})
                     for i in range(l)
                 ]
         elif sg == D3C3:
@@ -1455,18 +1452,18 @@ class S4A4(Set):
             for o3 in self.rot_axes[3]:
                 for rn in self.reflNormals:
                     if geomtypes.eq(rn*o3, 0):
-                        isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
+                        isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C4C2:
-            return [C4C2(setup = {'axis': a}) for a in self.rot_axes[2]]
+            return [C4C2(setup={'axis': a}) for a in self.rot_axes[2]]
         elif sg == C3:
-            return [sg(setup = {'axis': a}) for a in self.rot_axes[3]]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[3]]
         elif sg == C2:
-            return [sg(setup = {'axis': a}) for a in self.rot_axes[2]]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         elif sg == C2C1:
-            return [sg(setup = {'axis': normal}) for normal in self.reflNormals]
+            return [sg(setup={'axis': normal}) for normal in self.reflNormals]
         elif sg == E:
             return [E()]
         else:
@@ -1507,7 +1504,7 @@ class A4xI(Set):
             Set.__init__(self, isometries)
         else:
             self.checkSetup(setup)
-            a4 = A4(setup = setup)
+            a4 = A4(setup=setup)
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a4 * ExI())
             self.rot_axes = a4.rot_axes
@@ -1529,34 +1526,34 @@ class A4xI(Set):
             ]
         elif sg == D2xI:
             o2a = self.rot_axes[2]
-            return [sg(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
+            return [sg(setup={'axis_n': o2a[0], 'axis_2': o2a[1]})]
         elif sg == C3xI:
             o3a = self.rot_axes[3]
-            return [sg(setup = {'axis': a}) for a in o3a]
+            return [sg(setup={'axis': a}) for a in o3a]
         elif sg == D2:
             o2a = self.rot_axes[2]
-            return [sg(setup = {'axis_n': o2a[0], 'axis_2': o2a[1]})]
+            return [sg(setup={'axis_n': o2a[0], 'axis_2': o2a[1]})]
         elif sg == D2C2:
             isoms = []
             for o2 in self.rot_axes[2]:
                 for rn in self.rot_axes[2]:
                     if geomtypes.eq(rn*o2, 0):
-                        isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
+                        isoms.append(sg(setup={'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 3, 'len(isoms) == %d != 3' % len(isoms)
             return isoms
         if sg == C2xI:
             o2a = self.rot_axes[2]
-            return [sg(setup = {'axis': a}) for a in o2a]
+            return [sg(setup={'axis': a}) for a in o2a]
         elif sg == C3:
             o3a = self.rot_axes[3]
-            return [sg(setup = {'axis': a}) for a in o3a]
+            return [sg(setup={'axis': a}) for a in o3a]
         elif sg == C2:
             o2a = self.rot_axes[2]
-            return [sg(setup = {'axis': a}) for a in o2a]
+            return [sg(setup={'axis': a}) for a in o2a]
         elif sg == C2C1:
             o2a = self.rot_axes[2]
-            return [sg(setup = {'axis': a}) for a in o2a]
+            return [sg(setup={'axis': a}) for a in o2a]
         elif sg == ExI:
             return [sg()]
         elif sg == E:
@@ -1681,7 +1678,7 @@ class S4(Set):
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
                     if geomtypes.eq(o2*o3, 0):
-                        isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
+                        isoms.append(sg(setup={'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
@@ -1692,25 +1689,25 @@ class S4(Set):
             # 2. 3 consisting of a 4 fold axis and two 2-fold axes.
             o4a = self.rot_axes[4]
             l = len(o4a)
-            isoms = [sg(setup = {'axis_n': o4a[0], 'axis_2': o4a[1]})]
+            isoms = [sg(setup={'axis_n': o4a[0], 'axis_2': o4a[1]})]
             for o4 in self.rot_axes[4]:
                 for o2 in self.rot_axes[2]:
                     if geomtypes.eq(o2*o4, 0):
-                        isoms.append(sg(setup = {'axis_n': o4, 'axis_2': o2}))
+                        isoms.append(sg(setup={'axis_n': o4, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C4:
             o4a = self.rot_axes[4]
-            return [sg(setup = {'axis': a}) for a in o4a]
+            return [sg(setup={'axis': a}) for a in o4a]
         elif sg == C3:
             o3a = self.rot_axes[3]
-            return [sg(setup = {'axis': a}) for a in o3a]
+            return [sg(setup={'axis': a}) for a in o3a]
         elif sg == C2:
             o4a = self.rot_axes[4]
-            isoms = [sg(setup = {'axis': a}) for a in o4a]
+            isoms = [sg(setup={'axis': a}) for a in o4a]
             o2a = self.rot_axes[2]
-            isoms.extend([sg(setup = {'axis': a}) for a in o2a])
+            isoms.extend([sg(setup={'axis': a}) for a in o2a])
             return isoms
         elif sg == E:
             return [E()]
@@ -1756,7 +1753,7 @@ class S4xI(S4):
             Set.__init__(self, isometries)
         else:
             self.checkSetup(setup)
-            s4 = S4(setup = setup)
+            s4 = S4(setup=setup)
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, s4 * ExI())
             self.rot_axes = s4.rot_axes
@@ -1795,7 +1792,7 @@ class S4xI(S4):
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
                     if geomtypes.eq(o2*o3, 0):
-                        isoms.append(sg(setup = {'axis_n': o3, 'axis_2': o2}))
+                        isoms.append(sg(setup={'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
@@ -1804,30 +1801,30 @@ class S4xI(S4):
             for a4 in self.rot_axes[4]:
                 for rn in self.rot_axes[2]:
                     if geomtypes.eq(rn*a4, 0):
-                        isoms.append(sg(setup = {'axis_n': a4, 'normal_r': rn}))
+                        isoms.append(sg(setup={'axis_n': a4, 'normal_r': rn}))
                         break
             return isoms
         elif sg == D4D2:
             o4a = self.rot_axes[4]
             l = len(o4a)
-            isoms = [sg(setup = {'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]})
+            isoms = [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]})
                     for i in range(l)
                 ]
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
                     if geomtypes.eq(a2*a4, 0):
-                        isoms.append(sg(setup = {'axis_n': a4, 'axis_2': a2}))
+                        isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
             return isoms
         elif sg == D2xI or sg == D2:
             o4a = self.rot_axes[4]
-            isoms = [sg(setup = {'axis_n': o4a[0], 'axis_2': o4a[1]})]
+            isoms = [sg(setup={'axis_n': o4a[0], 'axis_2': o4a[1]})]
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
                     if geomtypes.eq(a2*a4, 0):
-                        isoms.append(sg(setup = {'axis_n': a4, 'axis_2': a2}))
+                        isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
@@ -1836,42 +1833,42 @@ class S4xI(S4):
             for o3 in self.rot_axes[3]:
                 for rn in self.rot_axes[2]:
                     if geomtypes.eq(rn*o3, 0):
-                        isoms.append(sg(setup = {'axis_n': o3, 'normal_r': rn}))
+                        isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
             return isoms
         elif sg == C3xI or sg == C3:
             o3a = self.rot_axes[3]
-            return [sg(setup = {'axis': a}) for a in o3a]
+            return [sg(setup={'axis': a}) for a in o3a]
         elif sg == D2C2:
             o4a = self.rot_axes[4]
             l = len(o4a)
-            isoms = [sg(setup = {'axis_n': o4a[i], 'normal_r': o4a[(i+1)%l]})
+            isoms = [sg(setup={'axis_n': o4a[i], 'normal_r': o4a[(i+1)%l]})
                     for i in range(l)
                 ]
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
                     if geomtypes.eq(a2*a4, 0):
-                        isoms.append(sg(setup = {'axis_n': a4, 'normal_r': a2}))
+                        isoms.append(sg(setup={'axis_n': a4, 'normal_r': a2}))
                         break
             for o2 in self.rot_axes[2]:
                 for rn in self.rot_axes[4]:
                     if geomtypes.eq(rn*o2, 0):
-                        isoms.append(sg(setup = {'axis_n': o2, 'normal_r': rn}))
+                        isoms.append(sg(setup={'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 12, 'len(isoms) == %d != 12' % len(isoms)
             return isoms
         elif sg == C4xI or sg == C4 or sg == C4C2:
             o4a = self.rot_axes[4]
-            return [sg(setup = {'axis': a}) for a in o4a]
+            return [sg(setup={'axis': a}) for a in o4a]
         elif sg == C2xI or sg == D1xI or sg == C2 or sg == D1:
             o2a = self.rot_axes[4]
             o2a.extend(self.rot_axes[2])
-            return [sg(setup = {'axis': a}) for a in o2a]
+            return [sg(setup={'axis': a}) for a in o2a]
         elif sg == C2C1:
-            isoms = [sg(setup = {'axis': a}) for a in self.rot_axes[2]]
-            isoms.extend([sg(setup = {'axis': a}) for a in self.rot_axes[4]])
+            isoms = [sg(setup={'axis': a}) for a in self.rot_axes[2]]
+            isoms.extend([sg(setup={'axis': a}) for a in self.rot_axes[4]])
             return isoms
         elif sg == ExI:
             return [sg()]
@@ -1893,7 +1890,7 @@ def generate_d2(o2axis0, o2axis1):
     assert geomtypes.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1), 0), (
             "Error: axes not orthogonal")
     h0 = geomtypes.HalfTurn3(axis=o2axis0)
-    h1 = geomtypes.Rot3(axis = o2axis1, angle = HALFTURN)
+    h1 = geomtypes.Rot3(axis=o2axis1, angle=HALFTURN)
     return (h0, h1, h1 * h0)
 
 def generate_a4_o3(d2_half_turns):
@@ -1989,22 +1986,22 @@ class A5(Set):
                     for i in range(5)
                 ])                                      # o2[5:10]
             o3axes.extend([
-                    geomtypes.HalfTurn3(axis = o2axes[i+5]) * o3axes[i]
+                    geomtypes.HalfTurn3(axis=o2axes[i+5]) * o3axes[i]
                     for i in range(5)
                 ])                                      # o3[5:10] ... done
             o2axes.extend([
-                    geomtypes.HalfTurn3(axis = o2axes[i]) * o2axes[(i+2) % 5]
+                    geomtypes.HalfTurn3(axis=o2axes[i]) * o2axes[(i+2) % 5]
                     for i in range(5)
                 ])                                      # o2[10:15] ... done
             transforms = [geomtypes.E]
             for a in o5axes:
                 transforms.extend([
-                    geomtypes.Rot3(axis = a, angle = i * turn5)
+                    geomtypes.Rot3(axis=a, angle=i * turn5)
                     for i in range(1, 5)
                 ])
             for a in o3axes:
                 transforms.extend([
-                    geomtypes.Rot3(axis = a, angle = i * turn3)
+                    geomtypes.Rot3(axis=a, angle=i * turn3)
                     for i in range(1, 3)
                 ])
 
@@ -2024,7 +2021,7 @@ class A5(Set):
 #         |
 #       o2_11
 
-            transforms.extend([geomtypes.HalfTurn3(axis = a) for a in o2axes])
+            transforms.extend([geomtypes.HalfTurn3(axis=a) for a in o2axes])
             Set.__init__(self, transforms)
             #for i in range(len(transforms)):
             #    print 'transform %d: %s' % (i, transforms[i])
@@ -2043,57 +2040,45 @@ class A5(Set):
             return [
                 # Essentially these lead to 3 different colourings, of which 2
                 # pairs are mirrors images.
-                sg(setup = {
-                    'o2axis0': self.rot_axes[2][i],
-                    'o2axis1': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'o2axis0': self.rot_axes[2][i],
+                          'o2axis1': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
         elif sg == D5:
             isoms = [
-                sg(setup = {
-                    'axis_n': self.rot_axes[5][i],
-                    'axis_2': self.rot_axes[2][(i+2) % 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[5][i],
+                          'axis_2': self.rot_axes[2][(i+2) % 5]})
                 for i in range(5)
             ]
             isoms.append(
-                sg(setup = {
-                    'axis_n': self.rot_axes[5][5],
-                    'axis_2': self.rot_axes[2][10]
-                })
+                sg(setup={'axis_n': self.rot_axes[5][5],
+                          'axis_2': self.rot_axes[2][10]})
             )
             return isoms
         elif sg == D3:
             isoms = [
-                sg(setup = {
-                    'axis_n': self.rot_axes[3][i],
-                    'axis_2': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[3][i],
+                          'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
             isoms.extend([
-                sg(setup = {
-                    'axis_n': self.rot_axes[3][i + 5],
-                    'axis_2': self.rot_axes[2][(i+3) % 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[3][i + 5],
+                          'axis_2': self.rot_axes[2][(i+3) % 5]})
                 for i in range(5)
             ])
             return isoms
         elif sg == D2:
             return [
-                sg(setup = {
-                    'axis_n': self.rot_axes[2][i],
-                    'axis_2': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[2][i],
+                          'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
         elif sg == C5:
-            return [ sg(setup = {'axis': a}) for a in self.rot_axes[5] ]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[5]]
         elif sg == C3:
-            return [ sg(setup = {'axis': a}) for a in self.rot_axes[3] ]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[3]]
         elif sg == C2:
-            return [ sg(setup = {'axis': a}) for a in self.rot_axes[2] ]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         elif sg == E:
             return [sg()]
         else:
@@ -2136,7 +2121,7 @@ class A5xI(Set):
             Set.__init__(self, isometries)
         else:
             self.checkSetup(setup)
-            a5 = A5(setup = setup)
+            a5 = A5(setup=setup)
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a5 * ExI())
             self.rot_axes = a5.rot_axes
@@ -2161,96 +2146,74 @@ class A5xI(Set):
                 # Essentially these lead to 3 different colourings, of which 2
                 # pairs are mirrors images. For A4xI the mirrors should lead to
                 # to equal solutions.
-                sg(setup = {
-                    'o2axis0': self.rot_axes[2][i],
-                    'o2axis1': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'o2axis0': self.rot_axes[2][i],
+                          'o2axis1': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
         elif sg == D5xI or sg == D5:
             isoms = [
-                sg(setup = {
-                    'axis_n': self.rot_axes[5][i],
-                    'axis_2': self.rot_axes[2][(i+2) % 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[5][i],
+                          'axis_2': self.rot_axes[2][(i+2) % 5]})
                 for i in range(5)
             ]
             isoms.append(
-                sg(setup = {
-                    'axis_n': self.rot_axes[5][5],
-                    'axis_2': self.rot_axes[2][10]
-                })
+                sg(setup={'axis_n': self.rot_axes[5][5],
+                          'axis_2': self.rot_axes[2][10]})
             )
             return isoms
         elif sg == D5C5:
             isoms = [
-                sg(setup = {
-                    'axis_n': self.rot_axes[5][i],
-                    'normal_r': self.rot_axes[2][(i+2) % 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[5][i],
+                          'normal_r': self.rot_axes[2][(i+2) % 5]})
                 for i in range(5)
             ]
             isoms.append(
-                sg(setup = {
-                    'axis_n': self.rot_axes[5][5],
-                    'normal_r': self.rot_axes[2][10]
-                })
+                sg(setup={'axis_n': self.rot_axes[5][5],
+                          'normal_r': self.rot_axes[2][10]})
             )
             return isoms
         elif sg == D3xI or sg == D3:
             isoms = [
-                sg(setup = {
-                    'axis_n': self.rot_axes[3][i],
-                    'axis_2': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[3][i],
+                          'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
             isoms.extend([
-                sg(setup = {
-                    'axis_n': self.rot_axes[3][i + 5],
-                    'axis_2': self.rot_axes[2][(i+3) % 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[3][i + 5],
+                          'axis_2': self.rot_axes[2][(i+3) % 5]})
                 for i in range(5)
             ])
             return isoms
         elif sg == D3C3:
             isoms = [
-                sg(setup = {
-                    'axis_n': self.rot_axes[3][i],
-                    'normal_r': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[3][i],
+                          'normal_r': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
             isoms.extend([
-                sg(setup = {
-                    'axis_n': self.rot_axes[3][i + 5],
-                    'normal_r': self.rot_axes[2][(i+3) % 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[3][i + 5],
+                          'normal_r': self.rot_axes[2][(i+3) % 5]})
                 for i in range(5)
             ])
             return isoms
         elif sg == D2xI or sg == D2:
             return [
-                sg(setup = {
-                    'axis_n': self.rot_axes[2][i],
-                    'axis_2': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[2][i],
+                          'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
         elif sg == D2C2:
             return [
-                sg(setup = {
-                    'axis_n': self.rot_axes[2][i],
-                    'normal_r': self.rot_axes[2][((i+3) % 5) + 5]
-                })
+                sg(setup={'axis_n': self.rot_axes[2][i],
+                          'normal_r': self.rot_axes[2][((i+3) % 5) + 5]})
                 for i in range(5)
             ]
         elif sg == C5xI or sg == C5:
-            return [ sg(setup = {'axis': a}) for a in self.rot_axes[5] ]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[5]]
         elif sg == C3xI or sg == C3:
-            return [ sg(setup = {'axis': a}) for a in self.rot_axes[3] ]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[3]]
         elif sg == C2xI or sg == C2 or sg == C2C1 or sg == D1xI or sg == D1:
-            return [ sg(setup = {'axis': a}) for a in self.rot_axes[2] ]
+            return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         elif sg == ExI:
             return [sg()]
         elif sg == E:
