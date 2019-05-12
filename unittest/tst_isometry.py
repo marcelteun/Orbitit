@@ -507,13 +507,13 @@ print '...ok'
 
 ########################################################################
 # Quotient isometry.Set:
-print 'test isSubgroup: isometry.A4, isometry.S4',
+print 'test is_subgroup: isometry.A4, isometry.S4',
 s4 = isometry.S4()
 a4 = isometry.A4()
-assert a4.isSubgroup(s4)
-assert not s4.isSubgroup(a4)
+assert a4.is_subgroup(s4)
+assert not s4.is_subgroup(a4)
 a4.add(geomtypes.I)
-assert not a4.isSubgroup(s4)
+assert not a4.is_subgroup(s4)
 print '....ok'
 
 if __name__ == '__main__':

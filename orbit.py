@@ -108,8 +108,8 @@ class Orbit(list):
                 #print 'check list of len:', len(hoStabs)
                 # from end to beginning, because elements will be filtered out:
                 for i in range(len(hoStabs)-1, -1, -1):
-                    #print 'isSubgroup', v.stabiliser, hoStabs[i]
-                    if v.stabiliser.isSubgroup(hoStabs[i]):
+                    #print 'is_subgroup', v.stabiliser, hoStabs[i]
+                    if v.stabiliser.is_subgroup(hoStabs[i]):
                         #print 'yes, break at index', i
                         break
                     else:
@@ -167,7 +167,7 @@ class Orbit(list):
             # but not necessarily this orientation. In fact only one of the
             # three possible D4xI will have this D2C2 as subgroup.
             for i in range(props[n]['filtered']-1, -1, -1):
-                if not v.stabiliser.isSubgroup(v.hoStabs[n][i]):
+                if not v.stabiliser.is_subgroup(v.hoStabs[n][i]):
                     del v.hoStabs[n][i]
             assert len(v.hoStabs[n]) != 0, (
                 "This case should have been checked in __hosp"
@@ -221,7 +221,7 @@ class Orbit(list):
                 if v.altStab.__class__ in subGroup.subgroups:
                     loStabs = v.altFinal.realise_subgroups(subGroup)
                     for i in range(len(loStabs)-1, -1, -1):
-                        if v.altStab.isSubgroup(loStabs[i]):
+                        if v.altStab.is_subgroup(loStabs[i]):
                             break
                         else:
                             del loStabs[i]
@@ -256,7 +256,7 @@ class Orbit(list):
         # filter rest if needed:
         if (props[n]['filtered'] > 0):
             for i in range(props[n]['filtered']-1, -1, -1):
-                if not v.altStab.isSubgroup(v.loStabs[n][i]):
+                if not v.altStab.is_subgroup(v.loStabs[n][i]):
                     del v.loStabs[n][i]
             assert len(v.loStabs[n]) != 0, (
                 "This case should have been checked in __losp"

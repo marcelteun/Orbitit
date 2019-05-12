@@ -192,31 +192,31 @@ class Set(set):
         # rotation Rot * Set
         return Set([o * e for e in self])
 
-    def isGroup(self):
+    def is_group(self):
         if len(self) == 0: return False
-        isGroup = True
+        this_is_group = True
         for e in self:
             # optimised away, done as part of next loop:
             # if not (e.inverse() in self):
-            thisHasInverse = False
+            this_has_inverse = False
             for o in self:
-                thisHasInverse  = thisHasInverse | (e.inverse() == o)
-                isClosedForThis = e*o in self and o*e in self
-                if not isClosedForThis:
+                this_has_inverse  = this_has_inverse | (e.inverse() == o)
+                is_closed_for_this = e*o in self and o*e in self
+                if not is_closed_for_this:
                     break;
-            if not thisHasInverse or not isClosedForThis:
-                isGroup = False
+            if not this_has_inverse or not is_closed_for_this:
+                this_is_group = False
                 break;
 
-        return isGroup
+        return this_is_group
         # the following is not needed to check, is done implicitly:
         # and (geomtypes.E in self)
 
-    def isSubgroup(self, o, checkGroup = True):
+    def is_subgroup(self, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
         if len(self) > len(o): return False # optimisation
         return (
-                (not checkGroup) or self.isGroup()
+                (not checkGroup) or self.is_group()
             ) and self.issubset(o)
 
     def subgroup(self, o):
@@ -261,7 +261,7 @@ class Set(set):
         foundSoFar = Set([])
         for te in self:
             q = te * o
-            if q.getOne() not in foundSoFar:
+            if q.get_one() not in foundSoFar:
                 quotientSet.append(q)
                 foundSoFar = foundSoFar.union(q)
         return quotientSet
@@ -297,7 +297,7 @@ class Set(set):
         for e in o:
             self.add(e)
 
-    def getOne(self):
+    def get_one(self):
         for e in self: return e
 
     def group(self, maxIter = 50):
@@ -2306,10 +2306,7 @@ D8D4 = D2nD(4)
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
-A4.subgroups = [A4,
-        D2, # D1
-        C3, C2, E
-    ]
+A4.subgroups = [A4, D2, C3, C2, E]
 
 # Diagram 4, 14
 # 24            A4xI
@@ -2329,11 +2326,10 @@ A4.subgroups = [A4,
 #         '-._|__..--' ____....''''
 #  1          E----''''
 A4xI.subgroups = [A4xI, A4,
-        D2xI, C3xI,
-        D2, D2C2, C2xI,
-        C3,
-        C2, C2C1, ExI, E
-    ]
+                  D2xI, C3xI,
+                  D2, D2C2, C2xI,
+                  C3,
+                  C2, C2C1, ExI, E]
 
 # Dn = D2, (D1~C2)
 # Cn = C3, C2
@@ -2342,60 +2338,55 @@ A4xI.subgroups = [A4xI, A4,
 # C2nCn = C4C2, C2C1
 # Diagram 1.
 S4A4.subgroups = [S4A4,
-        A4, D4D2, D3C3,
-        C4C2,
-        C3,
-        C2C1, C2,
-        E
-    ]
+                  A4, D4D2, D3C3,
+                  C4C2,
+                  C3,
+                  C2C1, C2,
+                  E]
 
 # Dn = D4, D3, D2 (2x), D1 (~C2)
 # Cn = C4, C3, C2 (2x @ 2-fold and 4-fold axes)
 S4.subgroups = [S4, A4,
-        D4, D3,
-        D2, C4,
-        C3,
-        C2,
-        E
-    ]
+                D4, D3,
+                D2, C4,
+                C3,
+                C2,
+                E]
 
-S4xI.subgroups = [S4xI,                 # 48
-        S4, S4A4, A4xI,                 # 24
-        D4xI,                           # 18
-        A4, D3xI,                       # 12
-        D4D2, D2xI, D4, C4xI, D4C4,     #  8
-        D3, D3C3, C3xI,                 #  6
-        D2, D2C2, C2xI, C4, C4C2,       #  4
-        C3,                             #  3
-        C2, C2C1, ExI,                  #  2
-        E
-    ]
+S4xI.subgroups = [S4xI,                        # 48
+                  S4, S4A4, A4xI,              # 24
+                  D4xI,                        # 18
+                  A4, D3xI,                    # 12
+                  D4D2, D2xI, D4, C4xI, D4C4,  #  8
+                  D3, D3C3, C3xI,              #  6
+                  D2, D2C2, C2xI, C4, C4C2,    #  4
+                  C3,                          #  3
+                  C2, C2C1, ExI,               #  2
+                  E]
 
 # Diagram 15
 A5.subgroups = [A5,
-        A4,     # 12
-        D5,     # 10
-        D3,     #  6
-        C5,     #  5
-        D2,     #  4
-        C3,     #  3
-        C2,     #  2
-        E
-    ]
+                A4,  # 12
+                D5,  # 10
+                D3,  #  6
+                C5,  #  5
+                D2,  #  4
+                C3,  #  3
+                C2,  #  2
+                E]
 
-A5xI.subgroups = [A5xI,                 # 120
-        A5,                             #  60
-        A4xI,                           #  24
-        D5xI,                           #  20
-        A4, D3xI,                       #  12
-        D5, D5C5, C5xI,                 #  10
-        D3, D3C3, C3xI,                 #   6
-        C5,                             #   5
-        D2, D2C2, C2xI,                 #   4
-        C3,                             #   3
-        C2, C2C1, ExI,                  #   2
-        E
-    ]
+A5xI.subgroups = [A5xI,            # 120
+                  A5,              #  60
+                  A4xI,            #  24
+                  D5xI,            #  20
+                  A4, D3xI,        #  12
+                  D5, D5C5, C5xI,  #  10
+                  D3, D3C3, C3xI,  #   6
+                  C5,              #   5
+                  D2, D2C2, C2xI,  #   4
+                  C3,              #   3
+                  C2, C2C1, ExI,   #   2
+                  E]
 
 Cn.subgroups = [Cn, E]
 CnxI.subgroups = [CnxI, Cn, ExI, E]

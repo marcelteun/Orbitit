@@ -3398,7 +3398,7 @@ class SymmetricShape(IsometricShape):
             for coset in fsQuotientSet:
                 print '  - len(%d)' % len(coset)
                 for isom in coset: print '   ', isom
-        FsOrbit = [coset.getOne() for coset in fsQuotientSet]
+        FsOrbit = [coset.get_one() for coset in fsQuotientSet]
         print 'Applying an orbit of order %d' % len(FsOrbit)
         if this.dbgTrace:
             for isom in FsOrbit: print isom

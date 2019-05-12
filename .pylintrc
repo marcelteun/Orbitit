@@ -2,6 +2,7 @@
 function-rgx=^[_a-z][a-z0-9]*((_[a-z0-9]+)*)?$
 variable-rgx=^[_a-z][a-z0-9]*((_[a-z0-9]+)*)?$
 argument-rgx=^[_a-z][a-z0-9]*((_[a-z0-9]+)*)?$
+attr-rgx=^[_a-z][a-z0-9]*((_[a-z0-9]+)*)?$
 
 # I: standard names for transforms in geometry: R for rotation, S for
 # reflection, and I for inversion. Keep standard from geometry.
