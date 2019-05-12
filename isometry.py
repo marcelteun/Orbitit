@@ -1292,7 +1292,7 @@ class A4(Set):
         turns decides which position is obtained.
         """
         # A4 consists of:
-        # 1. A subgroup D2: E, and half turns H0, H1, H2
+        # 1. A subgroup D2: E, and half turns h0, h1, h2
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             assert len(isometries) == self.order, "%d != %d" % (
@@ -1306,18 +1306,18 @@ class A4(Set):
             else:                 o2axis0 = copy(self.std_setup['o2axis0'])
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
             else:                 o2axis1 = copy(self.std_setup['o2axis1'])
-            d2 = generateD2(o2axis0, o2axis1)
-            H0, H1, H2 = d2
-            R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generateA4O3(d2)
+            d2 = generate_d2(o2axis0, o2axis1)
+            h0, h1, h2 = d2
+            R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2 = generate_a4_o3(d2)
 
             Set.__init__(self, [
                     geomtypes.E,
-                    H0, H1, H2,
+                    h0, h1, h2,
                     R1_1, R1_2, R2_1, R2_2, R3_1, R3_2, R4_1, R4_2
                 ])
 
             self.rot_axes = {
-                    2: [H0.axis(), H1.axis(), H2.axis()],
+                    2: [h0.axis(), h1.axis(), h2.axis()],
                     3: [R1_1.axis(), R2_1.axis(), R3_1.axis(), R4_1.axis()],
                 }
 
@@ -1367,7 +1367,7 @@ class S4A4(Set):
         turns decides which position is obtained.
         """
         # A4 consists of:
-        # 1. A subgroup D2: E, and half turns H0, H1, H2
+        # 1. A subgroup D2: E, and half turns h0, h1, h2
         #print 'isometries', isometries, 'setup', setup
         if isometries != None:
             assert len(isometries) == self.order, "%d != %d" % (
@@ -1382,9 +1382,9 @@ class S4A4(Set):
             if 'o2axis1' in axes: o2axis1 = setup['o2axis1']
             else:                 o2axis1 = copy(self.std_setup['o2axis1'])
             self.direct_parent_setup = copy(setup)
-            d2 = generateD2(o2axis0, o2axis1)
+            d2 = generate_d2(o2axis0, o2axis1)
             h0, h1, h2 = d2
-            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
+            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generate_a4_o3(d2)
 
             ax0 = h0.axis()
             ax1 = h1.axis()
@@ -1577,8 +1577,8 @@ class S4(Set):
             else:                 o4axis0 = copy(self.std_setup['o4axis0'])
             if 'o4axis1' in axes: o4axis1 = setup['o4axis1']
             else:                 o4axis1 = copy(self.std_setup['o4axis1'])
-            d2 = generateD2(o4axis0, o4axis1)
-            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generateA4O3(d2)
+            d2 = generate_d2(o4axis0, o4axis1)
+            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generate_a4_o3(d2)
             q0_2, q1_2, q2_2 = d2
             ax0 = q0_2.axis()
             ax1 = q1_2.axis()
@@ -1850,7 +1850,7 @@ class S4xI(S4):
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
 
-def generateD2(o2axis0, o2axis1):
+def generate_d2(o2axis0, o2axis1):
     """
     Returns 3 orthogonal halfturns for D2
     """
@@ -1861,58 +1861,55 @@ def generateD2(o2axis0, o2axis1):
         o2axis1 = o2axis1.axis()
     assert geomtypes.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1), 0), (
             "Error: axes not orthogonal")
-    H0 = geomtypes.HalfTurn3(axis=o2axis0)
-    H1 = geomtypes.Rot3(axis = o2axis1, angle = HALFTURN)
-    return (H0, H1, H1 * H0)
+    h0 = geomtypes.HalfTurn3(axis=o2axis0)
+    h1 = geomtypes.Rot3(axis = o2axis1, angle = HALFTURN)
+    return (h0, h1, h1 * h0)
 
-def generateA4O3(D2HalfTurns):
+def generate_a4_o3(d2_half_turns):
     """
-    Returns a tuple (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3,
-    R4_2_3)
+    Return all order 3 rotations from A4 except E
 
-    D2HalfTurns: tuple containing H0, H1, H2
+    d2_half_turns: tuple containing h0, h1, h2
+    Return a tuple (r1_1_3, r1_2_3, r2_1_3, r2_2_3, r3_1_3, r3_2_3, r4_1_3,
+    r4_2_3)
     """
-    H0, H1, H2 = D2HalfTurns
+    h0, h1, h2 = d2_half_turns
 
     # the one order 3 rotation axis, is obtained as follows:
     # imagine A4 is part of S4 positioned in a cube
-    # H0, H1, H2 go through the cube face centres
-    # define a quarter turn around H2
-    Q = geomtypes.Rot3(axis=H2.axis(), angle=QUARTER_TURN)
-    # h0 and h1 go through cube edge centres
-    h0 = Q * H0
-    h1 = Q * H1
+    # h0, h1, h2 go through the cube face centres
+    # define a quarter turn around h2
+    Q = geomtypes.Rot3(axis=h2.axis(), angle=QUARTER_TURN)
+    # cube_h0 and cube_h1 go through cube edge centres
+    cube_h0 = Q * h0
+    cube_h1 = Q * h1
     # o3axis goes through 1 of the 2 cube vertices that form the edge
-    # between the faces which centres are on H0 and H1
+    # between the faces which centres are on h0 and h1
     o3axis = geomtypes.Rot3(
-            axis = h0.axis(), angle = asin_1_V3
-        ) * h1.axis()
-    # R1_1_3: 1/3 rotation around the first order 3 axis
-    # R1_2_3: 2/3 rotation around the first order 3 axis
-    R1_1_3 = geomtypes.Rot3(axis=o3axis, angle=THIRD_TURN)
-    R1_2_3 = geomtypes.Rot3(axis=o3axis, angle=2*THIRD_TURN)
-    R4_1_3 = R1_1_3 * H0
-    R3_1_3 = R1_1_3 * H1
-    R2_1_3 = R1_1_3 * H2
-    R2_2_3 = R1_2_3 * H0
-    R4_2_3 = R1_2_3 * H1
-    R3_2_3 = R1_2_3 * H2
-    # print 'R1_1_3', R1_1_3
-    # print 'R1_2_3', R1_2_3
-    # print 'R2_1_3', R2_1_3
-    # print 'R2_2_3', R2_2_3
-    # print 'R3_1_3', R3_1_3
-    # print 'R3_2_3', R3_2_3
-    # print 'R4_1_3', R4_1_3
-    # print 'R5_2_3', R4_2_3
-    return (R1_1_3, R1_2_3, R2_1_3, R2_2_3, R3_1_3, R3_2_3, R4_1_3, R4_2_3)
+            axis=cube_h0.axis(), angle=asin_1_V3
+        ) * cube_h1.axis()
+    # r1_1_3: 1/3 rotation around the first order 3 axis
+    # r1_2_3: 2/3 rotation around the first order 3 axis
+    r1_1_3 = geomtypes.Rot3(axis=o3axis, angle=THIRD_TURN)
+    r1_2_3 = geomtypes.Rot3(axis=o3axis, angle=2*THIRD_TURN)
+    r4_1_3 = r1_1_3 * h0
+    r3_1_3 = r1_1_3 * h1
+    r2_1_3 = r1_1_3 * h2
+    r2_2_3 = r1_2_3 * h0
+    r4_2_3 = r1_2_3 * h1
+    r3_2_3 = r1_2_3 * h2
+    return (r1_1_3, r1_2_3, r2_1_3, r2_2_3, r3_1_3, r3_2_3, r4_1_3, r4_2_3)
 
 class A5(Set):
+    """Class for the A5 symmetry group
+
+    This contain only the direct symmetries of the icosaheron or dodecahedron
+    """
     init_pars = _init_pars('A5')
     std_setup = _std_setup('A5')
     order = 60
     mixed = False
-    def __init__(self, isometries = None, setup = {}):
+    def __init__(self, isometries=None, setup=None):
         """
         The algebraic group A5, consisting of 60 rotations
 
@@ -1925,6 +1922,8 @@ class A5(Set):
         - 15 halfturns
         The group can be generated by the axes of 2 quarter turns,
         """
+        assert isometries is not None or setup is not None, \
+            "Must choose one way to initialise: 'isometries' or 'setup'"
         if isometries != None:
             assert len(isometries) == self.order, "%d != %d" % (
                                                 self.order, len(isometries))
@@ -1933,20 +1932,22 @@ class A5(Set):
         else:
             self.checkSetup(setup)
             axes = setup.keys()
-            if 'o3axis' in axes: o3axis = setup['o3axis']
+            if 'o3axis' in axes:
+                o3axis = setup['o3axis']
             else: o3axis = copy(self.std_setup['o3axis'])
-            if 'o5axis' in axes: o5axis = setup['o5axis']
+            if 'o5axis' in axes:
+                o5axis = setup['o5axis']
             else: o5axis = copy(self.std_setup['o5axis'])
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
-            R0_1_5 = geomtypes.Rot3(axis = o5axis, angle = turn5)
-            R0_1_3 = geomtypes.Rot3(axis = o3axis, angle = turn3)
+            r0_1_5 = geomtypes.Rot3(axis=o5axis, angle=turn5)
+            r0_1_3 = geomtypes.Rot3(axis=o3axis, angle=turn3)
             o3axes = [o3axis]                           # o3[0]
-            o5axes = [R0_1_3 * o5axis]                  # o5[0]
+            o5axes = [r0_1_3 * o5axis]                  # o5[0]
             for i in range(4):
-                o3axes.append(R0_1_5 * o3axes[-1])      # o3[1:5]
-                o5axes.append(R0_1_5 * o5axes[-1])      # o5[1:5]
+                o3axes.append(r0_1_5 * o3axes[-1])      # o3[1:5]
+                o5axes.append(r0_1_5 * o5axes[-1])      # o5[1:5]
             o5axes.append(o5axis)                       # o5[5] ... done
             o2axes = [
                     (o5axis + o5axes[i]) / 2
