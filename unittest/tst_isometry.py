@@ -411,7 +411,8 @@ assert geomtypes.E in cg
 print '...ok'
 
 print 'testing creation of isometry.A4',
-a4 = isometry.A4(setup = isometry.setup(o2axis0 = geomtypes.UX, o2axis1= geomtypes.UY))
+a4 = isometry.A4(setup = isometry.init_dict(o2axis0=geomtypes.UX,
+                                            o2axis1=geomtypes.UY))
 print '.....ok'
 print 'checking result',
 assert len(a4) == 12
@@ -439,12 +440,11 @@ print '............ok'
 
 print 'testing creation of isometry.A4',
 a4 = isometry.A4(
-        setup = isometry.setup(
+        setup = isometry.init_dict(
             # try list argument
-            o2axis0 = [1, 1, 1],
+            o2axis0=[1, 1, 1],
             # try Rot3 argument
-            o2axis1 = geomtypes.HalfTurn3(axis=[1, -1, 0])
-        )
+            o2axis1=geomtypes.HalfTurn3(axis=[1, -1, 0]))
     )
 #print 'isometry.A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
 print '.....ok'
@@ -476,7 +476,8 @@ print '.........ok'
 
 ########################################################################
 # Quotient isometry.Set:
-a4 = isometry.A4(setup = isometry.setup(o2axis0 = geomtypes.UX, o2axis1= geomtypes.UY))
+a4 = isometry.A4(setup = isometry.init_dict(o2axis0=geomtypes.UX,
+                                            o2axis1=geomtypes.UY))
 assert len(a4) == 12
 # print 'group a4:'
 # print a4

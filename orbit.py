@@ -26,8 +26,6 @@ import math
 import geomtypes
 import isometry
 
-def setup(**kwargs): return kwargs
-
 class Orbit(list):
     def __new__(this, v):
         assert len(v) == 2
@@ -106,7 +104,7 @@ class Orbit(list):
                 # However the D2C2 that is a subgroup of the A4xI subgroup of
                 # S4xI has a principle axis that is a 4-fold axis of S4xI.
 
-                hoStabs = v.final.realiseSubgroups(subGroup)
+                hoStabs = v.final.realise_subgroups(subGroup)
                 #print 'check list of len:', len(hoStabs)
                 # from end to beginning, because elements will be filtered out:
                 for i in range(len(hoStabs)-1, -1, -1):
@@ -202,17 +200,16 @@ class Orbit(list):
             assert v.final.mixed
             #print '__losp: final class', v.final.__class__.__name__
             if v.final.generator != {}:
-                v.altFinal = v.final.directParent(
-                        setup = v.final.directParentSetup
+                v.altFinal=v.final.directParent(
+                        setup=v.final.directParentSetup
                     )
             else:
                 v.altFinal = v.final.directParent(isometries = [
                         isom for isom in v.final if isom.is_direct()
                     ])
             if v.stabiliser.generator != {}:
-                v.altStab = v.stabiliser.directParent(setup =
-                        v.stabiliser.directParentSetup
-                    )
+                v.altStab = v.stabiliser.directParent(
+                    setup=v.stabiliser.directParentSetup)
             else:
                 v.altStab = v.stabiliser.directParent(isometries = [
                         isom for isom in v.stabiliser if isom.is_direct()
@@ -222,7 +219,7 @@ class Orbit(list):
             for subGroup in v.altFinal.subgroups:
                 assert subGroup.order != 0
                 if v.altStab.__class__ in subGroup.subgroups:
-                    loStabs = v.altFinal.realiseSubgroups(subGroup)
+                    loStabs = v.altFinal.realise_subgroups(subGroup)
                     for i in range(len(loStabs)-1, -1, -1):
                         if v.altStab.isSubgroup(loStabs[i]):
                             break

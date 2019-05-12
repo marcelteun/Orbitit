@@ -36,12 +36,12 @@ INIT_PARS = {
         {'type': 'vec3', 'par': 'axis', 'lab': "{}-fold axis"}
     ],
     'DnCn': [
-        {'type': 'int',  'par': 'n', 'lab': "order"},
+        {'type': 'int', 'par': 'n', 'lab': "order"},
         {'type': 'vec3', 'par': 'axis_n', 'lab': "{}-fold axis"},
         {'type': 'vec3', 'par': 'normal_r', 'lab': "normal of reflection"}
     ],
     'Dn': [
-        {'type': 'int',  'par': 'n', 'lab': "order"},
+        {'type': 'int', 'par': 'n', 'lab': "order"},
         {'type': 'vec3', 'par': 'axis_n', 'lab': "{}-fold axis"},
         {'type': 'vec3', 'par': 'axis_2', 'lab': "axis of halfturn"}
     ],
@@ -65,40 +65,40 @@ STD_SETUP = {
     'Dn': {'n': None, 'axis_n': Z[:], 'axis_2': X[:]},
     'A4': {'o2axis0': X[:], 'o2axis1': Y[:]},
     'A5': {'o3axis': geomtypes.Vec3([1, 1, 1]),
-           'o5axis': geomtypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])
-    },
+           'o5axis': geomtypes.Vec3([0, (1.0 + math.sqrt(5))/2, 1])},
     'S4': {'o4axis0': X[:], 'o4axis1': Y[:]}
 }
 
 def _init_pars(sym, order=None):
     pars = deepcopy(INIT_PARS[sym])
     if order:
-        pars[1]['lab'] =  pars[1]['lab'].format(order)
+        pars[1]['lab'] = pars[1]['lab'].format(order)
     return pars
 
 def _std_setup(sym, order=None):
     setup = deepcopy(STD_SETUP[sym])
     if order:
-        setup['n'] =  order
+        setup['n'] = order
     return setup
 
 hTurn = geomtypes.HALF_TURN
 qTurn = geomtypes.QUARTER_TURN
-eTurn = qTurn/2         # one eighth turn
+eTurn = qTurn/2  # one eighth turn
 tTurn = geomtypes.THIRD_TURN
 
-acos_1_V3  = math.acos(1.0 / math.sqrt(3))
-asin_1_V3  = math.asin(1.0 / math.sqrt(3))
+acos_1_V3 = math.acos(1.0 / math.sqrt(3))
+asin_1_V3 = math.asin(1.0 / math.sqrt(3))
 asin_V2_V3 = acos_1_V3
 acos_V2_V3 = asin_1_V3
 
-I  = geomtypes.I       # central inversion
+I = geomtypes.I  # central inversion
+
 
 def _sort_and_del_dups(g):
     """Sort list of isometry classes and remove duplicates"""
     # remove duplicates first (unsorts the list):
     g = list(dict.fromkeys(g))
-    g.sort(key = lambda x: x.order, reverse=True)
+    g.sort(key=lambda x: x.order, reverse=True)
     return g
 
 class ImproperSubgroupError(ValueError):
@@ -141,7 +141,7 @@ class Set(set):
         if self.generator != {}:
             if self.short_string:
                 s = '%s(setup = %s)' % (self.__class__.__name__,
-                        self.generator)
+                                        self.generator)
             else:
                 s = to_s()
         else:
@@ -149,7 +149,6 @@ class Set(set):
         return s
 
     def __eq__(self, o):
-        if self.debug: print self.__class__.__name__, '__eq__'
         eq = (len(self) == len(o))
         if eq:
             for e in self:
@@ -158,7 +157,6 @@ class Set(set):
         return eq
 
     def __sub__(self, o):
-        if self.debug: print self.__class__.__name__, '__sub__'
         new = Set([])
         for e in self:
             if e not in o:
@@ -166,14 +164,12 @@ class Set(set):
         return new
 
     def __or__(self, o):
-        if self.debug: print self.__class__.__name__, '__or__'
         new = Set(self)
         for e in o:
             new.add(e)
         return new
 
     def __mul__(self, o):
-        if self.debug: print self.__class__.__name__, '__mul__'
         if isinstance(o, Set):
             # Set(self) * Set(o)
             new = Set([])
@@ -185,13 +181,11 @@ class Set(set):
             return Set([e * o for e in self])
 
     def __rmul__(self, o):
-        if self.debug: print self.__class__.__name__, '__rmul__'
         # Note rotation Set * Set is caught by __mul__
         # rotation Rot * Set
         return Set([o * e for e in self])
 
     def isGroup(self):
-        if self.debug: print self.__class__.__name__, 'isGroup'
         if len(self) == 0: return False
         isGroup = True
         for e in self:
@@ -213,19 +207,12 @@ class Set(set):
 
     def isSubgroup(self, o, checkGroup = True):
         """returns whether this is a subgroup of o)"""
-        if self.debug: print self.__class__.__name__, 'isSubgroup of', o
         if len(self) > len(o): return False # optimisation
-        if self.debug:
-            print '(not checkGroup or self.isGroup()', (
-                    not checkGroup, self.isGroup())
-            print ' and self.issubset(o)', self.issubset(o)
         return (
                 (not checkGroup) or self.isGroup()
             ) and self.issubset(o)
 
     def subgroup(self, o):
-        #self.debug = True
-        if self.debug: print self.__class__.__name__, 'subgroup'
         try:
             if isinstance(o, geomtypes.Transform3):
                 # generate the quotient set THIS / o
@@ -256,7 +243,6 @@ class Set(set):
                     o.__class__.__name__, self.__class__.__name__)
 
     def __div__(self, o):
-        if self.debug: print self.__class__.__name__, '__div__'
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
         if (len(o) > len(self)): return o.__div__(self)
@@ -276,7 +262,6 @@ class Set(set):
     quotientSet = __div__
 
     def __rdiv__(self, o):
-        if self.debug: print self.__class__.__name__, '__rdiv__'
         #  subgroup * self: left quotient set
         pass # TODO
 
@@ -297,18 +282,15 @@ class Set(set):
         return False
 
     def add(self, e):
-        if self.debug: print self.__class__.__name__, 'add'
         l = len(self)
         if e not in self:
             set.add(self, e)
 
     def update(self, o):
-        if self.debug: print self.__class__.__name__, 'update'
         for e in o:
             self.add(e)
 
     def getOne(self):
-        if self.debug: print self.__class__.__name__, 'getOne'
         for e in self: return e
 
     def group(self, maxIter = 50):
@@ -318,7 +300,6 @@ class Set(set):
         If it succeeds within maxiter step this set is closed, contains the unit
         element and the set contains for every elements its inverse
         """
-        if self.debug: print self.__class__.__name__, 'group'
         result = copy(self)
         for e in self:
             result.add(e.inverse())
@@ -330,7 +311,6 @@ class Set(set):
         """
         Return a set that is closed, if it can be generated within maxIter steps.
         """
-        if self.debug: print self.__class__.__name__, 'close'
         result = copy(self)
         for i in range(maxIter):
             lPrev = len(result)
@@ -350,7 +330,6 @@ class Set(set):
         return result
 
     def checkSetup(self, setup):
-        if self.debug: print self.__class__.__name__, 'checkSetup'
         if setup != {} and self.init_pars == []:
             print "Warning: class %s doesn't handle any setup pars" % (
                     self.__class__.__name__), setup.keys()
@@ -369,7 +348,7 @@ class Set(set):
     def setup(self):
         return self.generator
 
-def setup(**kwargs): return kwargs
+def init_dict(**kwargs): return kwargs
 
 class E(Set):
     init_pars = []
@@ -379,7 +358,7 @@ class E(Set):
             self.checkSetup(setup)
             Set.__init__(self, [geomtypes.E])
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -398,7 +377,7 @@ class ExI(Set):
             self.checkSetup(setup)
             Set.__init__(self, [geomtypes.E, geomtypes.I])
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -476,7 +455,7 @@ class Cn(Set):
             self.subgroups = _Cn_get_subgroups(n)
             self.subgroups.insert(0, C(n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -592,7 +571,7 @@ class C2nCn(Set):
             self.subgroups = _C2nCn_get_subgroups(self.n)
             self.subgroups.insert(0, C2nC(self.n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -705,7 +684,7 @@ class CnxI(Set):
             self.subgroups = _CnxI_get_subgroups(self.n)
             self.subgroups.insert(0, CxI(self.n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -821,7 +800,7 @@ class DnCn(Set):
             self.subgroups = _DnCn_get_subgroups(self.n)
             self.subgroups.insert(0, DnC(self.n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -940,7 +919,7 @@ class Dn(Set):
             self.subgroups = _Dn_get_subgroups(self.n)
             self.subgroups.insert(0, D(self.n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1070,7 +1049,7 @@ class DnxI(Set):
             self.subgroups = _DnxI_get_subgroups(self.n)
             self.subgroups.insert(0, DxI(self.n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1221,7 +1200,7 @@ class D2nDn(Set):
             self.subgroups = _D2nDn_get_subgroups(self.n)
             self.subgroups.insert(0, D2nD(self.n))
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1342,7 +1321,7 @@ class A4(Set):
                     3: [R1_1.axis(), R2_1.axis(), R3_1.axis(), R4_1.axis()],
                 }
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1442,7 +1421,7 @@ class S4A4(Set):
                     3: [r1_1.axis(), r2_1.axis(), r3_1.axis(), r4_1.axis()],
                 }
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1515,7 +1494,7 @@ class A4xI(Set):
             Set.__init__(self, a4 * ExI())
             self.rotAxes = a4.rotAxes
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1648,7 +1627,7 @@ class S4(Set):
                     4: [ax0, ax1, ax2]
                 }
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -1751,7 +1730,7 @@ class S4xI(S4):
             Set.__init__(self, s4 * ExI())
             self.rotAxes = s4.rotAxes
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -2021,7 +2000,7 @@ class A5(Set):
             #for i in range(len(self.rotAxes[2])):
             #    print i, self.rotAxes[2][i]
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
@@ -2095,7 +2074,7 @@ class A5xI(Set):
     order = 120
     mixed = True
     directParent = A5
-    def __init__(self, isometries = None, setup = {}):
+    def __init__(self, isometries=None, setup=None):
         """
         The algebraic group A5xI, which is the complete symmetry of an
         icosahedron, It consists of 120 isometries.
@@ -2112,6 +2091,8 @@ class A5xI(Set):
         - 20 rotary inversions based on the 10  3-fold axes (1/3, 2/3)
         - 15 reflections
         """
+        assert isometries is not None or setup is not None, \
+            "Must choose one way to initialise: 'isometries' or 'setup'"
         if isometries != None:
             assert len(isometries) == self.order, "%d != %d" % (
                                                 self.order, len(isometries))
@@ -2124,7 +2105,7 @@ class A5xI(Set):
             Set.__init__(self, a5 * ExI())
             self.rotAxes = a5.rotAxes
 
-    def realiseSubgroups(self, sg):
+    def realise_subgroups(self, sg):
         """
         realise an array of possible oriented subgroups for non-oriented sg
         """
