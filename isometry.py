@@ -20,6 +20,7 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
+from __future__ import print_function
 
 from copy import copy, deepcopy
 import math
@@ -229,8 +230,6 @@ class Set(set):
                 return subgroup
             else:
                 # o is already a set
-                #print 'subgroup: self:', self
-                #print 'subgroup: o:', o
                 for e in o:
                     assert e in self, '%s not in %s' % (e,
                         self.__class__.__name__)
@@ -275,17 +274,9 @@ class Set(set):
     def __contains__(self, o):
         # Needed for 'in' relationship: default doesn't work, it seems to
         # compare the elements id.
-        #print self.__class__.__name__, '__contains__'
         for e in self:
             if e == o:
-                #print 'e == o'
-                #print '  - with e:', e
-                #print '           ', e.__repr__()
-                #print '  - with o:', o
-                #print '           ', o.__repr__()
-                #print self.__class__.__name__, '__contains__', True
                 return True
-        #print self.__class__.__name__, '__contains__', False
         return False
 
     def add(self, e):
@@ -321,33 +312,25 @@ class Set(set):
         result = copy(self)
         for i in range(maxIter):
             lPrev = len(result)
-            #print 'close step', i, 'len:', lPrev
             result.update(result * result)
             l = len(result)
             if l == lPrev:
                 break
-            # print '  --> new group with len', l, ':\n', result
-        #if not l == lPrev:
-        #    for i in self: print i
-        #    print '---------------'
-        #    for i in result: print i
         assert (l == lPrev), "couldn't close group after %d iterations"% maxIter
-        #if (i == maxIter):
-        #    print "close group, warning: maxIter (%d) reached (group closed)"% maxIter
         return result
 
     def checkSetup(self, setup):
         if setup != {} and self.init_pars == []:
-            print "Warning: class %s doesn't handle any setup pars" % (
-                    self.__class__.__name__), setup.keys()
+            print("Warning: class {} doesn't handle any setup pars {}".format(
+                    self.__class__.__name__, setup.keys()))
         for k in setup.keys():
             found = False
             for p in self.init_pars:
                 found |= p['par'] == k
                 if found: break
             if not found:
-                print "Warning: unknown setup parameter %s for class %s" % (
-                        k, self.__class__.__name__)
+                print("Warning: unknown setup parameter {} "
+                    "for class {}".format(k, self.__class__.__name__))
                 assert False, 'Got setup = %s' % str(setup)
         self.generator = setup
 
@@ -413,10 +396,12 @@ def _Cn_get_subgroups(n):
     return G
 
 class MetaCn(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class Cn"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class Cn(Set):
+    """Class for the C2 symmetry group"""
     __metaclass__ = MetaCn
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
@@ -537,10 +522,12 @@ def _C2nCn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 class MetaC2nCn(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class C2nCn"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class C2nCn(Set):
+    """Class for the C2nCn symmetry group"""
     __metaclass__ = MetaC2nCn
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
@@ -657,10 +644,12 @@ def _CnxI_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 class MetaCnxI(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class CnxI"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class CnxI(Set):
+    """Class for the CnxI symmetry group"""
     __metaclass__ = MetaCnxI
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
@@ -758,10 +747,12 @@ def _DnCn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 class MetaDnCn(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class DnCn"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class DnCn(Set):
+    """Class for the DnCn symmetry group"""
     __metaclass__ = MetaDnCn
     init_pars = _init_pars('DnCn', 'n')
     std_setup = _std_setup('DnCn', 2)
@@ -880,10 +871,12 @@ def _Dn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 class MetaDn(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class Dn"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class Dn(Set):
+    """Class for the Dn symmetry group"""
     __metaclass__ = MetaDn
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
@@ -929,7 +922,6 @@ class Dn(Set):
             cn = Cn(setup={'axis': axis_n, 'n': n})
             isometries = [isom for isom in cn]
             hs = [isom * h for isom in cn]
-            #for isom in hs: print isom
             isometries.extend(hs)
             self.rot_axes = {'n': axis_n, 2: [h.axis() for h in hs]}
             Set.__init__(self, isometries)
@@ -1019,10 +1011,12 @@ def _DnxI_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 class MetaDnxI(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class DnxI"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class DnxI(Set):
+    """Class for the DnxI symmetry group"""
     __metaclass__ = MetaDnxI
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
@@ -1173,10 +1167,12 @@ def _D2nDn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 class MetaD2nDn(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    """Meta class for the algebraic group of class D2nDn"""
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 class D2nDn(Set):
+    """Class for the D2nDn symmetry group"""
     __metaclass__ = MetaD2nDn
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
@@ -1408,7 +1404,6 @@ class S4A4(Set):
         """
         # A4 consists of:
         # 1. A subgroup D2: E, and half turns h0, h1, h2
-        #print 'isometries', isometries, 'setup', setup
         if isometries is None and setup is None:
             setup = {}
         if isometries != None:
@@ -2054,11 +2049,7 @@ class A5(Set):
 
             transforms.extend([geomtypes.HalfTurn3(axis=a) for a in o2axes])
             Set.__init__(self, transforms)
-            #for i in range(len(transforms)):
-            #    print 'transform %d: %s' % (i, transforms[i])
             self.rot_axes = { 2: o2axes, 3: o3axes, 5: o5axes }
-            #for i in range(len(self.rot_axes[2])):
-            #    print i, self.rot_axes[2][i]
 
     def realise_subgroups(self, sg):
         """
