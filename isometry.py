@@ -51,7 +51,8 @@ INIT_PARS = {
     ],
     'A4': [
         {'type': 'vec3', 'par': 'o2axis0', 'lab': "half turn axis"},
-        {'type': 'vec3', 'par': 'o2axis1', 'lab': "half turn of orthogonal axis"}
+        {'type': 'vec3', 'par': 'o2axis1',
+         'lab': "half turn of orthogonal axis"}
     ],
     'A5': [
         {'type': 'vec3', 'par': 'o3axis', 'lab': "3-fold axis"},
@@ -73,17 +74,20 @@ STD_SETUP = {
     'S4': {'o4axis0': X[:], 'o4axis1': Y[:]}
 }
 
+
 def _init_pars(sym, order=None):
     pars = deepcopy(INIT_PARS[sym])
     if order:
         pars[1]['lab'] = pars[1]['lab'].format(order)
     return pars
 
+
 def _std_setup(sym, order=None):
     setup = deepcopy(STD_SETUP[sym])
     if order:
         setup['n'] = order
     return setup
+
 
 HALFTURN = geomtypes.HALF_TURN
 QUARTER_TURN = geomtypes.QUARTER_TURN
@@ -143,9 +147,9 @@ class Set(set):
     """
     init_pars = []
     debug = False
-    mixed = False # if True the isometry set consists of direct and indirect
-                  # isometries else it consists of direct isometries only if it
-                  # is a group.
+    # if True the isometry set consists of direct and indirect isometries else
+    # it consists of direct isometries only if it is a group:
+    mixed = False
     std_setup = None
 
     def __init__(self, *args):
@@ -248,7 +252,7 @@ class Set(set):
     def is_subgroup(self, o, check_group=True):
         """returns whether this is a subgroup of o)"""
         if len(self) > len(o):
-            return False # optimisation
+            return False  # optimisation
         return (not check_group or self.is_group()) and self.issubset(o)
 
     def subgroup(self, o):
@@ -274,7 +278,7 @@ class Set(set):
                         '{} not subgroup of {} (with this orientation)'.format(
                             o.__class__.__name__, self.__class__.__name__))
                 return subgroup
-        #except ImproperSubgroupError:
+        # except ImproperSubgroupError:
         except AssertionError:
             raise ImproperSubgroupError(
                 '{} not subgroup of {} (with this orientation)'.format(
@@ -302,7 +306,7 @@ class Set(set):
 
     def __rdiv__(self, o):
         #  subgroup * self: left quotient set
-        pass # TODO
+        pass  # TODO
 
     def __contains__(self, o):
         # Needed for 'in' relationship: default doesn't work, it seems to
@@ -331,8 +335,8 @@ class Set(set):
         """
         Tries to make a group out of the set of isometries
 
-        If it succeeds within maxiter step this set is closed, contains the unit
-        element and the set contains for every elements its inverse
+        If it succeeds within maxiter step this set is closed, contains the
+        unit element and the set contains for every elements its inverse
         """
         result = copy(self)
         for e in self:
@@ -349,10 +353,10 @@ class Set(set):
         for _ in range(max_iter):
             l_prev = len(result)
             result.update(result * result)
-            l = len(result)
-            if l == l_prev:
+            l_new = len(result)
+            if l_new == l_prev:
                 break
-        assert l == l_prev, \
+        assert l_new == l_prev, \
             "Couldn't close group after {} iterations".format(max_iter)
         return result
 
@@ -1452,7 +1456,7 @@ class S4A4(Set):
         # 1. A subgroup D2: E, and half turns h0, h1, h2
         if isometries is None and setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
@@ -1518,9 +1522,9 @@ class S4A4(Set):
             return [sg(setup={'o2axis0': o2a[0], 'o2axis1': o2a[1]})]
         elif sg == D4D2:
             o2a = self.rot_axes[2]
-            l = len(o2a)
-            return [sg(setup={'axis_n': o2a[i], 'axis_2': o2a[(i+1)%l]})
-                    for i in range(l)]
+            l_o2a = len(o2a)
+            return [sg(setup={'axis_n': o2a[i], 'axis_2': o2a[(i+1)%l_o2a]})
+                    for i in range(l_o2a)]
         elif sg == D3C3:
             isoms = []
             for o3 in self.rot_axes[3]:
@@ -1727,9 +1731,9 @@ class S4(Set):
                               'o2axis1': self.rot_axes[4][1]})]
         elif sg == D4:
             o4a = self.rot_axes[4]
-            l = len(o4a)
-            return [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]})
-                    for i in range(l)]
+            l_o4a = len(o4a)
+            return [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l_o4a]})
+                    for i in range(l_o4a)]
         elif sg == D3:
             isoms = []
             for o3 in self.rot_axes[3]:
@@ -1745,7 +1749,6 @@ class S4(Set):
             # 1. one consisting of the three 4-fold axes
             # 2. 3 consisting of a 4 fold axis and two 2-fold axes.
             o4a = self.rot_axes[4]
-            l = len(o4a)
             isoms = [sg(setup={'axis_n': o4a[0], 'axis_2': o4a[1]})]
             for o4 in self.rot_axes[4]:
                 for o2 in self.rot_axes[2]:
@@ -1771,6 +1774,7 @@ class S4(Set):
         else:
             raise ImproperSubgroupError('{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__))
+
 
 class S4xI(Set):
     """Class for the S4xI symmetry group
@@ -1830,9 +1834,10 @@ class S4xI(Set):
                               'o2axis1': self.rot_axes[4][1]})]
         elif sg == D4xI or sg == D8D4 or sg == D4:
             o4a = self.rot_axes[4]
-            l = len(o4a)
-            return [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]})
-                    for i in range(l)]
+            l_o4a = len(o4a)
+            return [sg(setup={'axis_n': o4a[i],
+                              'axis_2': o4a[(i + 1) % l_o4a]})
+                    for i in range(l_o4a)]
         elif sg == D3xI or sg == D3:
             isoms = []
             for o3 in self.rot_axes[3]:
@@ -1852,9 +1857,10 @@ class S4xI(Set):
             return isoms
         elif sg == D4D2:
             o4a = self.rot_axes[4]
-            l = len(o4a)
-            isoms = [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l]})
-                     for i in range(l)]
+            l_o4a = len(o4a)
+            isoms = [sg(setup={'axis_n': o4a[i],
+                               'axis_2': o4a[(i + 1) % l_o4a]})
+                     for i in range(l_o4a)]
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
@@ -1887,9 +1893,10 @@ class S4xI(Set):
             return [sg(setup={'axis': a}) for a in o3a]
         elif sg == D2C2:
             o4a = self.rot_axes[4]
-            l = len(o4a)
-            isoms = [sg(setup={'axis_n': o4a[i], 'normal_r': o4a[(i+1)%l]})
-                     for i in range(l)]
+            l_o4a = len(o4a)
+            isoms = [sg(setup={'axis_n': o4a[i],
+                               'normal_r': o4a[(i + 1) % l_o4a]})
+                     for i in range(l_o4a)]
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
