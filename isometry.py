@@ -1,7 +1,5 @@
 #! /usr/bin/python
-"""
-Module that contains classes for symmetry groups using group algebra.
-"""
+"""Module that contains classes for symmetry groups using group algebra."""
 #
 # Copyright (C) 2010-2019 Marcel Tunnissen
 #
@@ -22,7 +20,7 @@ Module that contains classes for symmetry groups using group algebra.
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 # pylint: disable=too-many-lines,too-many-return-statements,too-many-branches
 # pylint: disable=too-many-locals,too-many-statements
 from __future__ import print_function
@@ -272,15 +270,15 @@ class Set(set):
                 if len(subgroup) < len(self):
                     subgroup.group()
                 elif len(subgroup) > len(self):
-                    raise ImproperSubgroupError, \
+                    raise ImproperSubgroupError(
                         '{} not subgroup of {} (with this orientation)'.format(
-                            o.__class__.__name__, self.__class__.__name__)
+                            o.__class__.__name__, self.__class__.__name__))
                 return subgroup
         #except ImproperSubgroupError:
         except AssertionError:
-            raise ImproperSubgroupError, \
+            raise ImproperSubgroupError(
                 '{} not subgroup of {} (with this orientation)'.format(
-                    o.__class__.__name__, self.__class__.__name__)
+                    o.__class__.__name__, self.__class__.__name__))
 
     def __div__(self, o):
         # this * subgroup: right quotient set
@@ -408,8 +406,8 @@ class E(Set):
         assert isinstance(sg, type)
         if sg == E:
             return [E()]
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__))
 
 E.subgroups = [E]
 
@@ -439,8 +437,8 @@ class ExI(Set):
             return [self]
         if sg == E:
             return [E()]
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__))
 
 ExI.subgroups = [ExI, E]
 
@@ -528,8 +526,8 @@ class Cn(Set):
             if sg.n == self.n: # Cn
                 return [self]
             return[sg(setup={'axis': self.rot_axes['n']})]
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__))
 
 
 # dynamically create Cn classes:
@@ -644,8 +642,8 @@ class C2nCn(Set):
         elif sg == E:
             return [E()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 
 # dynamically create C2nCn classes:
@@ -760,8 +758,8 @@ class CnxI(Set):
         elif sg == E:
             return [E()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 
 # dynamically create CnxI classes:
@@ -885,8 +883,8 @@ class DnCn(Set):
             return [sg(setup={'axis': self.refl_normals[0]})]
         if isinstance(sg, MetaCn):
             return [sg(setup={'axis': self.rot_axes['n']})]
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__))
 
 
 # dynamically create DnCn classes:
@@ -1022,8 +1020,8 @@ class Dn(Set):
                 lambda r, p: p in r.rot_axes[2],
                 lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
                                         'axis_2': p}))
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__name__, self.__class__.__name__))
 
 
 # dynamically create Dn classes:
@@ -1165,8 +1163,8 @@ class DnxI(Set):
                     return [real_spec]
                 return [real_spec, real_std]
             return [real_std]
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__name__, self.__class__.__name__))
 
 
 # dynamically create DnxI classes:
@@ -1318,8 +1316,8 @@ class D2nDn(Set):
             return [sg(setup={'axis': self.rot_axes['n']})]
         # Note: no DnxI, CnxI subgroups exist, see _d2ndn_get_subgroups
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 
 # dynamically create D2nDn classes:
@@ -1420,8 +1418,8 @@ class A4(Set):
         elif sg == E:
             return [E()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 class S4A4(Set):
     """Class for the S4A4 symmetry group
@@ -1543,8 +1541,8 @@ class S4A4(Set):
         elif sg == E:
             return [E()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 class A4xI(Set):
     """Class for the A4xI symmetry group
@@ -1630,8 +1628,8 @@ class A4xI(Set):
         elif sg == E:
             return [sg()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 class S4(Set):
     """Class for the S4 symmetry group
@@ -1771,8 +1769,8 @@ class S4(Set):
         elif sg == E:
             return [E()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 class S4xI(Set):
     """Class for the S4xI symmetry group
@@ -1921,8 +1919,8 @@ class S4xI(Set):
         elif sg == E:
             return [sg()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 def _gen_d2(o2axis0, o2axis1):
     """Return orthogonal halfturns for D2"""
@@ -2102,8 +2100,8 @@ class A5(Set):
         if sg == E:
             return [sg()]
         else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            raise ImproperSubgroupError('{} not subgroup of {}'.format(
+                sg.__class__.__name__, self.__class__.__name__))
 
 class A5xI(Set):
     """Class for the A5xI symmetry group
@@ -2214,8 +2212,8 @@ class A5xI(Set):
             return [sg()]
         if sg == E:
             return [sg()]
-        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__))
 
 C1 = E
 C2 = C(2)
