@@ -990,7 +990,7 @@ class Dn(Set):
                     for i in range(len(self.rot_axes[2]))
                 ]
                 if self.n % 2 == 0: # if D2, D4, etc
-                    isoms.append(sg(setup={'axis': self.rot_axes['n']}))
+                    isoms.insert(0, sg(setup={'axis': self.rot_axes['n']}))
                 return isoms
             return [sg(setup={'axis': self.rot_axes['n']})]
         if sg.n > self.n:
@@ -998,8 +998,17 @@ class Dn(Set):
         if isinstance(sg, MetaDn):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup={'axis_n': self.rot_axes['n'],
-                              'axis_2': self.rot_axes[2][0]})]
+            result = []
+            for ht in self.rot_axes[2]:
+                add = True
+                for r in result:
+                    if ht in r.rot_axes[2]:
+                        add = False
+                        break
+                if add:
+                    result.append(sg(setup={'axis_n': self.rot_axes['n'],
+                                            'axis_2': ht}))
+            return result
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
             sg.__name__, self.__class__.__name__)
 
