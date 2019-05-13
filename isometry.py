@@ -848,8 +848,17 @@ class DnCn(Set):
         if isinstance(sg, MetaDnCn):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup={'axis_n': self.rot_axes['n'],
-                              'normal_r': self.refl_normals[0]})]
+            result = []
+            for n in self.refl_normals:
+                add = True
+                for r in result:
+                    if n in r.refl_normals:
+                        add = False
+                        break
+                if add:
+                    result.append(sg(setup={'axis_n': self.rot_axes['n'],
+                                            'normal_r': n}))
+            return result
         if isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
                 'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
