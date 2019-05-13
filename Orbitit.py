@@ -328,7 +328,7 @@ class MainWindow(wx.Frame):
         exit = wx.MenuItem(
                 menu,
                 wx.ID_ANY,
-                text = "E&xit\tCtrl+X"
+                text = "E&xit\tCtrl+Q"
             )
         this.Bind(wx.EVT_MENU, this.onExit, id = exit.GetId())
         menu.AppendItem(exit)
