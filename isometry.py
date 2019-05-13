@@ -1,4 +1,7 @@
 #! /usr/bin/python
+"""
+Module that contains classes for symmetry groups using group algebra.
+"""
 #
 # Copyright (C) 2010-2019 Marcel Tunnissen
 #
@@ -20,6 +23,8 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
+# pylint: disable=too-many-lines,too-many-return-statements,too-many-branches
+# pylint: disable=too-many-locals,too-many-statements
 from __future__ import print_function
 
 from copy import copy, deepcopy
@@ -87,7 +92,7 @@ QUARTER_TURN = geomtypes.QUARTER_TURN
 EIGHTH_TURN = QUARTER_TURN / 2
 THIRD_TURN = geomtypes.THIRD_TURN
 
-asin_1_v3 = math.asin(1.0 / math.sqrt(3))
+ASIN_1_V3 = math.asin(1.0 / math.sqrt(3))
 
 I = geomtypes.I  # central inversion
 
@@ -111,7 +116,10 @@ class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
 
 class Set(set):
-
+    """
+    Base class for the symmetry groups, which are sets of isometries.
+    """
+    init_pars = []
     debug = False
     mixed = False # if True the isometry set consists of direct and indirect
                   # isometries else it consists of direct isometries only if it
@@ -137,6 +145,7 @@ class Set(set):
 
     def __str__(self):
         def to_s():
+            """Convert to string"""
             s = '%s([\n' % (self.__class__.__name__)
             for e in self:
                 s = '%s  %s,\n' % (s, str(e))
@@ -183,9 +192,8 @@ class Set(set):
             for d in o:
                 new.update(self * d)
             return new
-        else:
-            # Set * geomtypes.Transform3
-            return Set([e * o for e in self])
+        # Set * geomtypes.Transform3
+        return Set([e * o for e in self])
 
     def __rmul__(self, o):
         # Note rotation Set * Set is caught by __mul__
@@ -193,7 +201,9 @@ class Set(set):
         return Set([o * e for e in self])
 
     def is_group(self):
-        if len(self) == 0:
+        """Check whether self is a algebraic group"""
+        # A group should at least have 'E', it cannot be empty
+        if not self:
             return False
         this_is_group = True
         for e in self:
@@ -220,6 +230,7 @@ class Set(set):
         return (not check_group or self.is_group()) and self.issubset(o)
 
     def subgroup(self, o):
+        """Make subgroup of self out of set of isometries or one isometry"""
         try:
             if isinstance(o, geomtypes.Transform3):
                 # generate the quotient set THIS / o
@@ -280,14 +291,17 @@ class Set(set):
         return False
 
     def add(self, e):
+        """Add element e to the set"""
         if e not in self:
             set.add(self, e)
 
     def update(self, o):
+        """Update the set with new elements in o"""
         for e in o:
             self.add(e)
 
     def get_one(self):
+        """Just get any element in the set"""
         for e in self:
             return e
 
@@ -310,7 +324,7 @@ class Set(set):
         Return a closed set, if it can be generated within max_iter steps.
         """
         result = copy(self)
-        for i in range(max_iter):
+        for _ in range(max_iter):
             l_prev = len(result)
             result.update(result * result)
             l = len(result)
@@ -321,6 +335,7 @@ class Set(set):
         return result
 
     def chk_setup(self, setup):
+        """Check whether all keys in setup are legitimate"""
         if setup != {} and self.init_pars == []:
             print("Warning: class {} doesn't handle any setup pars {}".format(
                 self.__class__.__name__, setup.keys()))
@@ -338,19 +353,28 @@ class Set(set):
 
     @property
     def setup(self):
+        """Fetch the original setup"""
         return self.generator
 
 def init_dict(**kwargs):
+    """Create a dict with kwargs"""
     return kwargs
 
 class E(Set):
-    init_pars = []
+    """Class representing the trivial symmetry that maps something on itself"""
+    # TODO: make singular
+    # Use method 2: https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
     order = 1
     mixed = False
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
         self.chk_setup(setup)
+        if isometries:
+            assert len(isometries) == 1, \
+                'Class E should contain exactly one isometry'
+            assert isometries[0] == geomtypes.E, \
+                'Class E should only contain the isometry E'
         Set.__init__(self, [geomtypes.E])
 
     def realise_subgroups(self, sg):
@@ -358,12 +382,15 @@ class E(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        return [E()]
+        if sg == E:
+            return [E()]
+        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__)
 
 E.subgroups = [E]
 
 class ExI(Set):
-    init_pars = []
+    """Symmetry class containing E and the central inversion"""
     order = 2
     mixed = True
     directParent = E
@@ -372,6 +399,11 @@ class ExI(Set):
         if setup is None:
             setup = {}
         self.chk_setup(setup)
+        if isometries:
+            assert len(isometries) == 2, \
+                'Class ExI should contain exactly two isometries'
+            assert geomtypes.E in isometries and geomtypes.I in isometries, \
+                'Class ExI should only contain the isometry E and I'
         Set.__init__(self, [geomtypes.E, geomtypes.I])
 
     def realise_subgroups(self, sg):
@@ -381,11 +413,10 @@ class ExI(Set):
         assert isinstance(sg, type)
         if sg == ExI:
             return [self]
-        elif sg == E:
+        if sg == E:
             return [E()]
-        else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__)
 
 ExI.subgroups = [ExI, E]
 
@@ -395,8 +426,7 @@ def _cn_get_subgroups(n):
     The own class (by calling C(n) cannot be added, since it leads to
     recursion.
     """
-    G = [C(i) for i in range(n/2, 0, -1) if n % i == 0]
-    return G
+    return [C(i) for i in range(n/2, 0, -1) if n % i == 0]
 
 class MetaCn(type):
     """Meta class for the algebraic group of class Cn"""
@@ -473,11 +503,9 @@ class Cn(Set):
         if isinstance(sg, MetaCn):
             if sg.n == self.n: # Cn
                 return [self]
-            else:
-                return[sg(setup={'axis': self.rot_axes['n']})]
-        else:
-            raise ImproperSubgroupError, '{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__)
+            return[sg(setup={'axis': self.rot_axes['n']})]
+        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__)
 
 
 # dynamically create Cn classes:
@@ -586,8 +614,7 @@ class C2nCn(Set):
         if isinstance(sg, MetaC2nCn):
             if sg.n == self.n: # C2cCn
                 return [self]
-            else:
-                return [sg(setup={'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         elif isinstance(sg, MetaCn):
             return [sg(setup={'axis': self.rot_axes['n']})]
         elif sg == E:
@@ -964,6 +991,8 @@ class Dn(Set):
                 return [self]
             return [sg(setup={'axis_n': self.rot_axes['n'],
                               'axis_2': self.rot_axes[2][0]})]
+        raise ImproperSubgroupError, '{} not subgroup of {}'.format(
+            sg.__name__, self.__class__.__name__)
 
 
 # dynamically create Dn classes:
@@ -1045,12 +1074,6 @@ class DnxI(Set):
             Set.__init__(self, isometries)
         else:
             self.chk_setup(setup)
-            keys = setup.keys()
-            if 'axis_n' in keys:
-                axis_n = setup['axis_n']
-            else:
-                axis_n = copy(self.std_setup['axis_n'])
-            self.chk_setup(setup)
             s = copy(setup)
             if 'n' not in s and self.n != 0:
                 s['n'] = self.n
@@ -1109,10 +1132,8 @@ class DnxI(Set):
                 real_spec = sg(setup={'axis':self.rot_axes[2][0]})
                 if self.n % 2 != 0:
                     return [real_spec]
-                else:
-                    return [real_spec, real_std]
-            else:
-                return [real_std]
+                return [real_spec, real_std]
+            return [real_std]
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
             sg.__name__, self.__class__.__name__)
 
@@ -1336,9 +1357,9 @@ class A4(Set):
                 o2axis1 = setup['o2axis1']
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
-            d2 = generate_d2(o2axis0, o2axis1)
+            d2 = _gen_d2(o2axis0, o2axis1)
             h0, h1, h2 = d2
-            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generate_a4_o3(d2)
+            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)
 
             Set.__init__(self,
                          [geomtypes.E,
@@ -1418,9 +1439,9 @@ class S4A4(Set):
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
             self.direct_parent_setup = copy(setup)
-            d2 = generate_d2(o2axis0, o2axis1)
+            d2 = _gen_d2(o2axis0, o2axis1)
             h0, h1, h2 = d2
-            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generate_a4_o3(d2)
+            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)
 
             ax0 = h0.axis()
             ax1 = h1.axis()
@@ -1621,8 +1642,8 @@ class S4(Set):
                 o4axis1 = setup['o4axis1']
             else:
                 o4axis1 = copy(self.std_setup['o4axis1'])
-            d2 = generate_d2(o4axis0, o4axis1)
-            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = generate_a4_o3(d2)
+            d2 = _gen_d2(o4axis0, o4axis1)
+            r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)
             q0_2, q1_2, q2_2 = d2
             ax0 = q0_2.axis()
             ax1 = q1_2.axis()
@@ -1872,10 +1893,8 @@ class S4xI(Set):
             raise ImproperSubgroupError, '{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__)
 
-def generate_d2(o2axis0, o2axis1):
-    """
-    Returns 3 orthogonal halfturns for D2
-    """
+def _gen_d2(o2axis0, o2axis1):
+    """Return orthogonal halfturns for D2"""
     # if axes is specified as a transform:
     if isinstance(o2axis0, geomtypes.Transform3):
         o2axis0 = o2axis0.axis()
@@ -1887,7 +1906,7 @@ def generate_d2(o2axis0, o2axis1):
     h1 = geomtypes.Rot3(axis=o2axis1, angle=HALFTURN)
     return (h0, h1, h1 * h0)
 
-def generate_a4_o3(d2_half_turns):
+def _gen_a4_o3(d2_half_turns):
     """
     Return all order 3 rotations from A4 except E
 
@@ -1908,7 +1927,7 @@ def generate_a4_o3(d2_half_turns):
     # o3axis goes through 1 of the 2 cube vertices that form the edge
     # between the faces which centres are on h0 and h1
     o3axis = geomtypes.Rot3(axis=cube_h0.axis(),
-                            angle=asin_1_v3) * cube_h1.axis()
+                            angle=ASIN_1_V3) * cube_h1.axis()
     # r1_1_3: 1/3 rotation around the first order 3 axis
     # r1_2_3: 2/3 rotation around the first order 3 axis
     r1_1_3 = geomtypes.Rot3(axis=o3axis, angle=THIRD_TURN)
