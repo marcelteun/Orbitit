@@ -112,8 +112,32 @@ def _sort_and_del_dups(g):
     g.sort(key=lambda x: x.order, reverse=True)
     return g
 
+
+def _get_alternative_subgroups(sg, pars, chk, realise):
+    """Generate alternative subgroup realisations for sg in g
+
+    sg: class of subgroup to be realised (instantiated)
+    pars: list of possible parameters in the setup for sg realisation
+    chk: function to check whether a sg object already is added. The parameters
+         of this function is (g, p), where g is a subgroup object and p is the
+         parameter from pars that is being checked.
+    realise: function to call to instantiate sg with a p in the setup
+    """
+    result = []
+    for p in pars:
+        add = True
+        for r in result:
+            if chk(r, p):
+                add = False
+                break
+        if add:
+            result.append(realise(sg, p))
+    return result
+
+
 class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
+
 
 class Set(set):
     """
@@ -848,17 +872,11 @@ class DnCn(Set):
         if isinstance(sg, MetaDnCn):
             if sg.n == self.n:
                 return [self]
-            result = []
-            for n in self.refl_normals:
-                add = True
-                for r in result:
-                    if n in r.refl_normals:
-                        add = False
-                        break
-                if add:
-                    result.append(sg(setup={'axis_n': self.rot_axes['n'],
-                                            'normal_r': n}))
-            return result
+            return _get_alternative_subgroups(
+                sg, self.refl_normals,
+                lambda r, p: p in r.refl_normals,
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'normal_r': p}))
         if isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
                 'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
@@ -995,20 +1013,15 @@ class Dn(Set):
             return [sg(setup={'axis': self.rot_axes['n']})]
         if sg.n > self.n:
             return []
+
         if isinstance(sg, MetaDn):
             if sg.n == self.n:
                 return [self]
-            result = []
-            for ht in self.rot_axes[2]:
-                add = True
-                for r in result:
-                    if ht in r.rot_axes[2]:
-                        add = False
-                        break
-                if add:
-                    result.append(sg(setup={'axis_n': self.rot_axes['n'],
-                                            'axis_2': ht}))
-            return result
+            return _get_alternative_subgroups(
+                sg, self.rot_axes[2],
+                lambda r, p: p in r.rot_axes[2],
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'axis_2': p}))
         raise ImproperSubgroupError, '{} not subgroup of {}'.format(
             sg.__name__, self.__class__.__name__)
 
