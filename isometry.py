@@ -382,9 +382,11 @@ class Set(set):
         """Fetch the original setup"""
         return self.generator
 
+
 def init_dict(**kwargs):
     """Create a dict with kwargs"""
     return kwargs
+
 
 class E(Set):
     """Class representing the trivial symmetry that maps something on itself"""
@@ -392,6 +394,7 @@ class E(Set):
     # Use method 2: https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
     order = 1
     mixed = False
+
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
@@ -413,7 +416,9 @@ class E(Set):
         raise ImproperSubgroupError('{} not subgroup of {}'.format(
             sg.__class__.__name__, self.__class__.__name__))
 
+
 E.subgroups = [E]
+
 
 class ExI(Set):
     """Symmetry class containing E and the central inversion"""
@@ -421,6 +426,7 @@ class ExI(Set):
     mixed = True
     directParent = E
     direct_parent_setup = {}
+
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
@@ -444,7 +450,9 @@ class ExI(Set):
         raise ImproperSubgroupError('{} not subgroup of {}'.format(
             sg.__class__.__name__, self.__class__.__name__))
 
+
 ExI.subgroups = [ExI, E]
+
 
 def _cn_get_subgroups(n):
     """Add subgroup classes of Cn (with specific n, except own class)
@@ -454,10 +462,12 @@ def _cn_get_subgroups(n):
     """
     return [C(i) for i in range(n/2, 0, -1) if n % i == 0]
 
+
 class MetaCn(type):
     """Meta class for the algebraic group of class Cn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class Cn(Set):
     """Class for the C2 symmetry group"""
@@ -466,6 +476,7 @@ class Cn(Set):
     std_setup = _std_setup('Cn', 2)
     order = 0
     n = 0
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group Cn, consisting of n rotations
@@ -473,11 +484,12 @@ class Cn(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -527,7 +539,7 @@ class Cn(Set):
         if sg.n > self.n:
             return []
         if isinstance(sg, MetaCn):
-            if sg.n == self.n: # Cn
+            if sg.n == self.n:
                 return [self]
             return[sg(setup={'axis': self.rot_axes['n']})]
         raise ImproperSubgroupError('{} not subgroup of {}'.format(
@@ -555,6 +567,7 @@ def C(n):
             __Cn_metas[n] = c_n
         return __Cn_metas[n]
 
+
 def _c2ncn_get_subgroups(n):
     """Add subgroup classes of C2nCn (with specific n, except own class)
 
@@ -581,10 +594,12 @@ def _c2ncn_get_subgroups(n):
     g.extend([C(i) for i in divs])
     return _sort_and_del_dups(g)
 
+
 class MetaC2nCn(type):
     """Meta class for the algebraic group of class C2nCn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class C2nCn(Set):
     """Class for the C2nCn symmetry group"""
@@ -593,6 +608,7 @@ class C2nCn(Set):
     std_setup = _std_setup('Cn', 2)
     order = 0
     n = 0
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group C2nCn, consisting of n rotations and of n rotary
@@ -601,13 +617,14 @@ class C2nCn(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with
           0 <= i < n)
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -638,7 +655,7 @@ class C2nCn(Set):
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaC2nCn):
-            if sg.n == self.n: # C2cCn
+            if sg.n == self.n:
                 return [self]
             return [sg(setup={'axis': self.rot_axes['n']})]
         elif isinstance(sg, MetaCn):
@@ -668,6 +685,7 @@ def C2nC(n):
         c_2n_c_n.subgroups.insert(0, c_2n_c_n)
         __C2nCn_metas[n] = c_2n_c_n
         return __C2nCn_metas[n]
+
 
 def _cnxi_get_subgroups(n):
     """Add subgroup classes of CnxI (with specific n, except own class)
@@ -700,10 +718,12 @@ def _cnxi_get_subgroups(n):
     # have a reflection, while CnxI doesn't
     return _sort_and_del_dups(g)
 
+
 class MetaCnxI(type):
     """Meta class for the algebraic group of class CnxI"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class CnxI(Set):
     """Class for the CnxI symmetry group"""
@@ -712,6 +732,7 @@ class CnxI(Set):
     std_setup = _std_setup('Cn', 2)
     order = 0
     n = 0
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group CnxI, consisting of n rotations and of n rotary
@@ -720,13 +741,14 @@ class CnxI(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with
           0 <= i < n)
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -752,7 +774,7 @@ class CnxI(Set):
         """
         assert isinstance(sg, type)
         if isinstance(sg, MetaCnxI):
-            if sg.n == self.n: # CnxI
+            if sg.n == self.n:
                 return [self]
             return [sg(setup={'axis': self.rot_axes['n']})]
         elif isinstance(sg, (MetaC2nCn, MetaCn)):
@@ -788,6 +810,7 @@ def CxI(n):
             __CnxI_metas[n] = c_nxi
         return __CnxI_metas[n]
 
+
 def _dncn_get_subgroups(n):
     """Add subgroup classes of DnCn (with specific n, except own class)
 
@@ -801,10 +824,12 @@ def _dncn_get_subgroups(n):
     g.extend([C(i) for i in divs])
     return _sort_and_del_dups(g)
 
+
 class MetaDnCn(type):
     """Meta class for the algebraic group of class DnCn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class DnCn(Set):
     """Class for the DnCn symmetry group"""
@@ -822,12 +847,13 @@ class DnCn(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         - n reflections in planes that share the n-fold axis.
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -913,6 +939,7 @@ def DnC(n):
             __DnCn_metas[n] = d_n_c_n
         return __DnCn_metas[n]
 
+
 def _dn_get_subgroups(n):
     """Add subgroup classes of Dn (with specific n, except own class)
 
@@ -926,10 +953,12 @@ def _dn_get_subgroups(n):
     g.extend([C(i) for i in divs])
     return _sort_and_del_dups(g)
 
+
 class MetaDn(type):
     """Meta class for the algebraic group of class Dn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class Dn(Set):
     """Class for the Dn symmetry group"""
@@ -938,6 +967,7 @@ class Dn(Set):
     std_setup = _std_setup('Dn', 2)
     order = 0
     n = 0
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group Dn, consisting of 2n rotations
@@ -945,12 +975,13 @@ class Dn(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -1004,12 +1035,12 @@ class Dn(Set):
         if isinstance(sg, MetaCn):
             if sg.n == self.n:
                 return [sg(setup={'axis': self.rot_axes['n']})]
-            if sg.n == 2: # sg = C2
+            if sg.n == 2:  # sg = C2
                 isoms = [
-                    sg(setup={'axis':self.rot_axes[2][i]})
+                    sg(setup={'axis': self.rot_axes[2][i]})
                     for i in range(len(self.rot_axes[2]))
                 ]
-                if self.n % 2 == 0: # if D2, D4, etc
+                if self.n % 2 == 0:  # if D2, D4, etc
                     isoms.insert(0, sg(setup={'axis': self.rot_axes['n']}))
                 return isoms
             return [sg(setup={'axis': self.rot_axes['n']})]
@@ -1049,6 +1080,7 @@ def D(n):
             __Dn_metas[n] = d_n
         return __Dn_metas[n]
 
+
 def _dnxi_get_subgroups(n):
     """Add subgroup classes of DnxI (with specific n, except own class)
 
@@ -1073,10 +1105,12 @@ def _dnxi_get_subgroups(n):
     g.extend([DnC(i) for i in divs])
     return _sort_and_del_dups(g)
 
+
 class MetaDnxI(type):
     """Meta class for the algebraic group of class DnxI"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class DnxI(Set):
     """Class for the DnxI symmetry group"""
@@ -1085,6 +1119,7 @@ class DnxI(Set):
     std_setup = _std_setup('Dn', 2)
     order = 0
     n = 0
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group DnxI, of order 4n.
@@ -1092,7 +1127,8 @@ class DnxI(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
         - n rotary inversions around one n-fold axis (angle: i * 2pi/n, with
           0 <= i < n). For n even one of these becomes a reflection in a plane
@@ -1102,7 +1138,7 @@ class DnxI(Set):
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -1199,6 +1235,7 @@ def DxI(n):
             __DnxI_metas[n] = dnxi
         return __DnxI_metas[n]
 
+
 def _d2ndn_get_subgroups(n):
     """Add subgroup classes of D2nDn (with specific n, except own class)
 
@@ -1226,10 +1263,12 @@ def _d2ndn_get_subgroups(n):
     g.extend([DnC(i) for i in divs])
     return _sort_and_del_dups(g)
 
+
 class MetaD2nDn(type):
     """Meta class for the algebraic group of class D2nDn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
+
 
 class D2nDn(Set):
     """Class for the D2nDn symmetry group"""
@@ -1238,6 +1277,7 @@ class D2nDn(Set):
     std_setup = _std_setup('Dn', 2)
     order = 0
     n = 0
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group D2nDn, consisting of n rotations, n half turns, n
@@ -1246,7 +1286,8 @@ class D2nDn(Set):
         either provide the complete set or provide setup that generates
         the complete group. For the latter see the class init_pars argument.
         Contains:
-        - n rotations around one n-fold axis (angle: i * 2pi/n, with 0 <= i < n)
+        - n rotations around one n-fold axis
+          (angle: i * 2pi/n, with 0 <= i < n)
         - n halfturns around axes perpendicular to the n-fold axis
         - n rotary inversions around one n-fold axis (angle: pi(1 + 2i)/n, with
           0 <= i < n). For n odd one of these becomes a reflection in a plane
@@ -1256,7 +1297,7 @@ class D2nDn(Set):
         """
         if setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             # TODO: add some asserts
             Set.__init__(self, isometries)
         else:
@@ -1305,20 +1346,20 @@ class D2nDn(Set):
             ]
         if isinstance(sg, MetaDnCn):
             if sg.n == 2 and self.n % 2 != 0:
-                return [sg(setup={'axis_n':self.rot_axes[2][0],
+                return [sg(setup={'axis_n': self.rot_axes[2][0],
                                   'normal_r': self.rot_axes['n']})]
-            return [sg(setup={'axis_n':self.rot_axes['n'],
+            return [sg(setup={'axis_n': self.rot_axes['n'],
                               'normal_r': self.refl_normals[0]})]
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup={'axis':self.refl_normals[0]})
+                sg1 = sg(setup={'axis': self.refl_normals[0]})
                 if self.n % 2 == 0:
                     return [sg1]
-                return [sg1, sg(setup={'axis':self.rot_axes['n']})]
-            return [sg(setup={'axis':self.rot_axes['n']})]
+                return [sg1, sg(setup={'axis': self.rot_axes['n']})]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         if isinstance(sg, MetaCn):
             if sg.n == 2:
-                sg1 = sg(setup={'axis':self.rot_axes[2][0]})
+                sg1 = sg(setup={'axis': self.rot_axes[2][0]})
                 if self.n % 2 == 0:
                     return [sg1, sg(setup={'axis': self.rot_axes['n']})]
                 return [sg1]
@@ -1353,6 +1394,7 @@ def D2nD(n):
             __D2nDn_metas[n] = d_2n_d_n
         return __D2nDn_metas[n]
 
+
 class A4(Set):
     """Class for the A4 symmetry group
 
@@ -1362,6 +1404,7 @@ class A4(Set):
     std_setup = _std_setup('A4')
     order = 12
     mixed = False
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group A4, consisting of 12 rotations
@@ -1380,7 +1423,7 @@ class A4(Set):
             setup = {}
         # A4 consists of:
         # 1. A subgroup D2: E, and half turns h0, h1, h2
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
@@ -1430,6 +1473,7 @@ class A4(Set):
             raise ImproperSubgroupError('{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__))
 
+
 class S4A4(Set):
     """Class for the S4A4 symmetry group
 
@@ -1440,6 +1484,7 @@ class S4A4(Set):
     order = 24
     mixed = True
     directParent = A4
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group S4A4, consisting of 24 isometries, 12 direct, 12
@@ -1518,8 +1563,8 @@ class S4A4(Set):
         realise an array of possible oriented subgroups for non-oriented sg
         """
         assert isinstance(sg, type)
-        #S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
-        #C3, C2, E
+        # S4A4, A4, D2nDn, DnCn, C2nCn, Dn, Cn
+        # C3, C2, E
         if sg == S4A4:
             return [self]
         elif sg == A4:
@@ -1528,7 +1573,7 @@ class S4A4(Set):
         elif sg == D4D2:
             o2a = self.rot_axes[2]
             l_o2a = len(o2a)
-            return [sg(setup={'axis_n': o2a[i], 'axis_2': o2a[(i+1)%l_o2a]})
+            return [sg(setup={'axis_n': o2a[i], 'axis_2': o2a[(i+1) % l_o2a]})
                     for i in range(l_o2a)]
         elif sg == D3C3:
             isoms = []
@@ -1553,6 +1598,7 @@ class S4A4(Set):
             raise ImproperSubgroupError('{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__))
 
+
 class A4xI(Set):
     """Class for the A4xI symmetry group
 
@@ -1564,6 +1610,7 @@ class A4xI(Set):
     order = 24
     mixed = True
     directParent = A4
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group A4xI, consisting of 12 rotations and 12 rotary
@@ -1580,7 +1627,7 @@ class A4xI(Set):
         """
         if isometries is None and setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
@@ -1640,6 +1687,7 @@ class A4xI(Set):
             raise ImproperSubgroupError('{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__))
 
+
 class S4(Set):
     """Class for the S4 symmetry group
 
@@ -1650,6 +1698,7 @@ class S4(Set):
     std_setup = _std_setup('S4')
     order = 24
     mixed = False
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group S4, consisting of 24 rotations
@@ -1665,7 +1714,7 @@ class S4(Set):
         """
         if isometries is None and setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
@@ -1737,7 +1786,7 @@ class S4(Set):
         elif sg == D4:
             o4a = self.rot_axes[4]
             l_o4a = len(o4a)
-            return [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1)%l_o4a]})
+            return [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1) % l_o4a]})
                     for i in range(l_o4a)]
         elif sg == D3:
             isoms = []
@@ -1791,6 +1840,7 @@ class S4xI(Set):
     order = 48
     mixed = True
     directParent = S4
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group S4xI, consisting of 12 rotations and 12 rotary
@@ -1812,7 +1862,7 @@ class S4xI(Set):
         """
         if isometries is None and setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
@@ -1934,6 +1984,7 @@ class S4xI(Set):
             raise ImproperSubgroupError('{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__))
 
+
 def _gen_d2(o2axis0, o2axis1):
     """Return orthogonal halfturns for D2"""
     # if axes is specified as a transform:
@@ -1946,6 +1997,7 @@ def _gen_d2(o2axis0, o2axis1):
     h0 = geomtypes.HalfTurn3(axis=o2axis0)
     h1 = geomtypes.Rot3(axis=o2axis1, angle=HALFTURN)
     return (h0, h1, h1 * h0)
+
 
 def _gen_a4_o3(d2_half_turns):
     """
@@ -1981,6 +2033,7 @@ def _gen_a4_o3(d2_half_turns):
     r3_2_3 = r1_2_3 * h2
     return (r1_1_3, r1_2_3, r2_1_3, r2_2_3, r3_1_3, r3_2_3, r4_1_3, r4_2_3)
 
+
 class A5(Set):
     """Class for the A5 symmetry group
 
@@ -1990,6 +2043,7 @@ class A5(Set):
     std_setup = _std_setup('A5')
     order = 60
     mixed = False
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group A5, consisting of 60 rotations
@@ -2005,7 +2059,7 @@ class A5(Set):
         """
         if isometries is None and setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             # TODO: more asserts?
@@ -2015,10 +2069,12 @@ class A5(Set):
             axes = setup.keys()
             if 'o3axis' in axes:
                 o3axis = setup['o3axis']
-            else: o3axis = copy(self.std_setup['o3axis'])
+            else:
+                o3axis = copy(self.std_setup['o3axis'])
             if 'o5axis' in axes:
                 o5axis = setup['o5axis']
-            else: o5axis = copy(self.std_setup['o5axis'])
+            else:
+                o5axis = copy(self.std_setup['o5axis'])
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
@@ -2115,6 +2171,7 @@ class A5(Set):
             raise ImproperSubgroupError('{} not subgroup of {}'.format(
                 sg.__class__.__name__, self.__class__.__name__))
 
+
 class A5xI(Set):
     """Class for the A5xI symmetry group
 
@@ -2125,6 +2182,7 @@ class A5xI(Set):
     order = 120
     mixed = True
     directParent = A5
+
     def __init__(self, isometries=None, setup=None):
         """
         The algebraic group A5xI, which is the complete symmetry of an
@@ -2138,13 +2196,13 @@ class A5xI(Set):
         - 20 turns based on the 10  3-fold turns (1/3, 2/3)
         - 15 halfturns
         - the central inversion I
-        - 24 rotary inversions based on the  6  5-fold axes (1/5, 2/5, 3/5, 4/5)
-        - 20 rotary inversions based on the 10  3-fold axes (1/3, 2/3)
+        - 24 rotary inversions based on the 6 5-fold axes (1/5, 2/5, 3/5, 4/5)
+        - 20 rotary inversions based on the 10 3-fold axes (1/3, 2/3)
         - 15 reflections
         """
         if isometries is None and setup is None:
             setup = {}
-        if isometries != None:
+        if isometries is not None:
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             # TODO: more asserts?
@@ -2226,6 +2284,7 @@ class A5xI(Set):
             return [sg()]
         raise ImproperSubgroupError('{} not subgroup of {}'.format(
             sg.__class__.__name__, self.__class__.__name__))
+
 
 C1 = E
 C2 = C(2)
