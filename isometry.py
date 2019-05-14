@@ -1140,32 +1140,37 @@ class DnxI(Set):
         if isinstance(sg, MetaDnxI):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup={'axis_n': self.rot_axes['n'],
-                              'axis_2': self.rot_axes[2][0]})]
+            return _get_alternative_subgroups(
+                sg, self.rot_axes[2],
+                lambda r, p: p in r.rot_axes[2],
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'axis_2': p}))
         if isinstance(sg, (MetaDn, MetaD2nDn)):
-            return [
-                sg(setup={'axis_n': self.rot_axes['n'],
-                          'axis_2': self.rot_axes[2][0]})
-                # choosing other 2-fold axes leads essentially to the same.
-            ]
+            return _get_alternative_subgroups(
+                sg, self.rot_axes[2],
+                lambda r, p: p in r.rot_axes[2],
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'axis_2': p}))
         if isinstance(sg, MetaDnCn):
-            return [sg(setup={'axis_n':self.rot_axes['n'],
-                              'normal_r': self.rot_axes[2][0]})]
+            return _get_alternative_subgroups(
+                sg, self.rot_axes[2],
+                lambda r, p: p in r.refl_normals,
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'normal_r': p}))
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup={'axis':self.refl_normals[0]})
-                if self.n % 2 == 1:
-                    return [sg1]
-                return [sg1, sg(setup={'axis':self.rot_axes['n']})]
-            return [sg(setup={'axis':self.rot_axes['n']})]
+                return [sg(setup={'axis': r}) for r in self.refl_normals]
+            return [sg(setup={'axis': self.rot_axes['n']})]
         if isinstance(sg, (MetaCn, MetaCnxI)):
-            real_std = sg(setup={'axis':self.rot_axes['n']})
+            # standard realisation:
+            real_std = sg(setup={'axis': self.rot_axes['n']})
             if sg.n == 2:
-                # special case: D1xI ~= C2xI or D1 ~= C2
-                real_spec = sg(setup={'axis':self.rot_axes[2][0]})
+                # special realisation (note D1xI ~= C2xI or D1 ~= C2)
+                real_spc = [sg(setup={'axis': r}) for r in self.rot_axes[2]]
                 if self.n % 2 != 0:
-                    return [real_spec]
-                return [real_spec, real_std]
+                    return real_spc
+                real_spc.insert(0, real_std)
+                return real_spc
             return [real_std]
         raise ImproperSubgroupError('{} not subgroup of {}'.format(
             sg.__name__, self.__class__.__name__))
