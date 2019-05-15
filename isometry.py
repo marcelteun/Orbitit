@@ -1337,32 +1337,40 @@ class D2nDn(Set):
         if isinstance(sg, MetaD2nDn):
             if sg.n == self.n:
                 return [self]
-            return [sg(setup={'axis_n': self.rot_axes['n'],
-                              'axis_2': self.rot_axes[2][0]})]
+            return _get_alternative_subgroups(
+                sg, self.rot_axes[2],
+                lambda r, p: p in r.rot_axes[2],
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'axis_2': p}))
         if isinstance(sg, MetaDn):
-            return [
-                sg(setup={'axis_n': self.rot_axes['n'],
-                          'axis_2': self.rot_axes[2][0]})
-            ]
+            return _get_alternative_subgroups(
+                sg, self.rot_axes[2],
+                lambda r, p: p in r.rot_axes[2],
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'axis_2': p}))
         if isinstance(sg, MetaDnCn):
             if sg.n == 2 and self.n % 2 != 0:
-                return [sg(setup={'axis_n': self.rot_axes[2][0],
-                                  'normal_r': self.rot_axes['n']})]
-            return [sg(setup={'axis_n': self.rot_axes['n'],
-                              'normal_r': self.refl_normals[0]})]
+                return [sg(setup={'axis_n': h,
+                                  'normal_r': self.rot_axes['n']})
+                        for h in self.rot_axes[2]]
+            return _get_alternative_subgroups(
+                sg, self.refl_normals,
+                lambda r, p: p in r.refl_normals,
+                lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
+                                        'normal_r': p}))
         if isinstance(sg, MetaC2nCn):
             if sg.n == 1:
-                sg1 = sg(setup={'axis': self.refl_normals[0]})
-                if self.n % 2 == 0:
-                    return [sg1]
-                return [sg1, sg(setup={'axis': self.rot_axes['n']})]
+                sg_base = [sg(setup={'axis': r}) for r in self.refl_normals]
+                if self.n % 2 != 0:
+                    sg_base.insert(0, sg(setup={'axis': self.rot_axes['n']}))
+                return sg_base
             return [sg(setup={'axis': self.rot_axes['n']})]
         if isinstance(sg, MetaCn):
             if sg.n == 2:
-                sg1 = sg(setup={'axis': self.rot_axes[2][0]})
+                sg_base = [sg(setup={'axis': h}) for h in self.rot_axes[2]]
                 if self.n % 2 == 0:
-                    return [sg1, sg(setup={'axis': self.rot_axes['n']})]
-                return [sg1]
+                    sg_base.insert(0, sg(setup={'axis': self.rot_axes['n']}))
+                return sg_base
             return [sg(setup={'axis': self.rot_axes['n']})]
         # Note: no DnxI, CnxI subgroups exist, see _d2ndn_get_subgroups
         else:
