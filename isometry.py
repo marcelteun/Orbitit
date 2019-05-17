@@ -21,6 +21,7 @@
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+# Old sins:
 # pylint: disable=too-many-lines,too-many-return-statements,too-many-branches
 # pylint: disable=too-many-locals,too-many-statements
 from __future__ import print_function

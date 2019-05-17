@@ -23,6 +23,8 @@ Module with geometrical types.
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+# Old sins:
+# pylint: disable=too-many-lines,too-many-branches
 
 from __future__ import print_function
 import math
@@ -382,7 +384,7 @@ class Quat(Vec):
 
     def __init__(self, *args, **kwargs):
         super(Quat, self).__init__(*args, **kwargs)
-        self.__cache__ = {}
+        self._cache = {}
 
     def conjugate(self):
         """Return conjugate for this quarternion"""
@@ -413,9 +415,9 @@ class Quat(Vec):
 
     def vector(self):
         """Return the vector part of self (as a Vec3)"""
-        if 'vector_part' not in self.__cache__:
-            self.__cache__['vector_part'] = Vec3(self[1:])
-        return self.__cache__['vector_part']
+        if 'vector_part' not in self._cache:
+            self._cache['vector_part'] = Vec3(self[1:])
+        return self._cache['vector_part']
 
     inner = dot
     S = scalar
@@ -461,7 +463,7 @@ class Transform3(tuple):
 
     def __init__(self, *args, **kwargs):
         super(Transform3, self).__init__(*args, **kwargs)
-        self.__cache__ = {}
+        self._cache = {}
 
     def __repr__(self):
         s = indent.Str('%s((\n' % (_transform3_type_str(self.type())))
@@ -473,16 +475,16 @@ class Transform3(tuple):
         return s
 
     def __hash__(self):
-        if 'hash_nr' not in self.__cache__:
+        if 'hash_nr' not in self._cache:
             if self.is_rot():
-                self.__cache__['hash_nr'] = self.__hash_rot()
+                self._cache['hash_nr'] = self.__hash_rot()
             elif self.is_refl():
-                self.__cache__['hash_nr'] = self.__has_refl()
+                self._cache['hash_nr'] = self.__has_refl()
             elif self.is_rot_inv():
-                self.__cache__['hash_nr'] = self.__hash_rot_inv()
+                self._cache['hash_nr'] = self.__hash_rot_inv()
             else:
                 raise UnsupportedTransform("Not a (supported) transform")
-        return self.__cache__['hash_nr']
+        return self._cache['hash_nr']
 
     def __str__(self):
         if self.is_rot():
@@ -712,24 +714,24 @@ class Transform3(tuple):
             float2str(axis[2], prec))
 
     def __angle_rot(self):
-        if 'angleRot' not in self.__cache__:
+        if 'angleRot' not in self._cache:
             self._define_unique_angle_axis()
-        return self.__cache__['angleRot']
+        return self._cache['angleRot']
 
     def __axis_rot(self):
-        if 'axisRot' not in self.__cache__:
+        if 'axisRot' not in self._cache:
             self._define_unique_angle_axis()
-        return self.__cache__['axisRot']
+        return self._cache['axisRot']
 
     def _define_unique_angle_axis(self):
         # rotation axis
         try:
-            self.__cache__['axisRot'] = self[0].V().normalise()
+            self._cache['axisRot'] = self[0].V().normalise()
         except ZeroDivisionError:
             assert self[0] == Quat([1, 0, 0, 0]) or \
                 self[0] == Quat([-1, 0, 0, 0]), \
                 "{} doesn'self represent a rotation".format(self.__repr__())
-            self.__cache__['axisRot'] = self[0].V()
+            self._cache['axisRot'] = self[0].V()
         # rotation angle
         cos = self[0][0]
         for i in range(3):
@@ -743,65 +745,65 @@ class Transform3(tuple):
                         "{} doesn'self represent a rotation".format(
                             self.__repr__())
                     sin = 0
-        self.__cache__['angleRot'] = 2 * math.atan2(sin, cos)
+        self._cache['angleRot'] = 2 * math.atan2(sin, cos)
 
         # make unique: -pi < angle < pi
-        if not (self.__cache__['angleRot'] < math.pi
-                or eq(self.__cache__['angleRot'], math.pi)):
-            self.__cache__['angleRot'] = self.__cache__['angleRot'] - \
+        if not (self._cache['angleRot'] < math.pi
+                or eq(self._cache['angleRot'], math.pi)):
+            self._cache['angleRot'] = self._cache['angleRot'] - \
                 2 * math.pi
-        if not (self.__cache__['angleRot'] > -math.pi
-                or eq(self.__cache__['angleRot'], -math.pi)):
-            self.__cache__['angleRot'] = self.__cache__['angleRot'] + \
+        if not (self._cache['angleRot'] > -math.pi
+                or eq(self._cache['angleRot'], -math.pi)):
+            self._cache['angleRot'] = self._cache['angleRot'] + \
                 2 * math.pi
 
         # make unique: 0 < angle < pi
-        if eq(self.__cache__['angleRot'], 0):
-            self.__cache__['angleRot'] = 0.0
-        if self.__cache__['angleRot'] < 0:
-            self.__cache__['angleRot'] = -self.__cache__['angleRot']
-            self.__cache__['axisRot'] = -self.__cache__['axisRot']
-        if eq(self.__cache__['angleRot'], math.pi):
+        if eq(self._cache['angleRot'], 0):
+            self._cache['angleRot'] = 0.0
+        if self._cache['angleRot'] < 0:
+            self._cache['angleRot'] = -self._cache['angleRot']
+            self._cache['axisRot'] = -self._cache['axisRot']
+        if eq(self._cache['angleRot'], math.pi):
             # if halfturn, make axis unique: make the first non-zero element
             # positive:
-            if eq(self.__cache__['axisRot'][0], 0):
-                self.__cache__['axisRot'] = Vec3(
+            if eq(self._cache['axisRot'][0], 0):
+                self._cache['axisRot'] = Vec3(
                     [0.0,
-                     self.__cache__['axisRot'][1],
-                     self.__cache__['axisRot'][2]])
-            if self.__cache__['axisRot'][0] < 0:
-                self.__cache__['axisRot'] = -self.__cache__['axisRot']
-            elif self.__cache__['axisRot'][0] == 0:
-                if eq(self.__cache__['axisRot'][1], 0):
-                    self.__cache__['axisRot'] = Vec3(
-                        [0.0, 0.0, self.__cache__['axisRot'][2]])
-                if self.__cache__['axisRot'][1] < 0:
-                    self.__cache__['axisRot'] = -self.__cache__['axisRot']
-                elif self.__cache__['axisRot'][1] == 0:
-                    # not valid axis: if eq(self.__cache__['axisRot'][2], 0):
-                    if self.__cache__['axisRot'][2] < 0:
-                        self.__cache__['axisRot'] = -self.__cache__['axisRot']
-        elif eq(self.__cache__['angleRot'], 0):
-            self.__cache__['angleRot'] = 0.0
-            self.__cache__['axisRot'] = Vec3([1.0, 0.0, 0.0])
+                     self._cache['axisRot'][1],
+                     self._cache['axisRot'][2]])
+            if self._cache['axisRot'][0] < 0:
+                self._cache['axisRot'] = -self._cache['axisRot']
+            elif self._cache['axisRot'][0] == 0:
+                if eq(self._cache['axisRot'][1], 0):
+                    self._cache['axisRot'] = Vec3(
+                        [0.0, 0.0, self._cache['axisRot'][2]])
+                if self._cache['axisRot'][1] < 0:
+                    self._cache['axisRot'] = -self._cache['axisRot']
+                elif self._cache['axisRot'][1] == 0:
+                    # not valid axis: if eq(self._cache['axisRot'][2], 0):
+                    if self._cache['axisRot'][2] < 0:
+                        self._cache['axisRot'] = -self._cache['axisRot']
+        elif eq(self._cache['angleRot'], 0):
+            self._cache['angleRot'] = 0.0
+            self._cache['axisRot'] = Vec3([1.0, 0.0, 0.0])
 
     def __matrix_rot(self):
-        if 'matrix_rot' not in self.__cache__:
+        if 'matrix_rot' not in self._cache:
             w, x, y, z = self[0]
-            self.__cache__['matrix_rot'] = _get_mat_rot(w, x, y, z)
-        return self.__cache__['matrix_rot']
+            self._cache['matrix_rot'] = _get_mat_rot(w, x, y, z)
+        return self._cache['matrix_rot']
 
     def __glMatrix_rot(self):
-        if 'gl_matrix_rot' not in self.__cache__:
+        if 'gl_matrix_rot' not in self._cache:
             w, x, y, z = self[0]
-            self.__cache__['gl_matrix_rot'] = _get_mat_rot(-w, x, y, z)
-        return self.__cache__['gl_matrix_rot']
+            self._cache['gl_matrix_rot'] = _get_mat_rot(-w, x, y, z)
+        return self._cache['gl_matrix_rot']
 
     def __inverse_rot(self):
-        if 'inverse_rot' not in self.__cache__:
-            self.__cache__['inverse_rot'] = Rot3(axis=self.axis(),
-                                                 angle=-self.angle())
-        return self.__cache__['inverse_rot']
+        if 'inverse_rot' not in self._cache:
+            self._cache['inverse_rot'] = Rot3(axis=self.axis(),
+                                              angle=-self.angle())
+        return self._cache['inverse_rot']
 
     # *** REFLECTION specific functions:
     def is_refl(self):
@@ -851,43 +853,43 @@ class Transform3(tuple):
 
         Should only be called when this is a reflection.
         """
-        if 'plane_normal' not in self.__cache__:
-            self.__cache__['plane_normal'] = self[0].V()
+        if 'plane_normal' not in self._cache:
+            self._cache['plane_normal'] = self[0].V()
             # make normal unique: make the first non-zero element positive:
-            if eq(self.__cache__['plane_normal'][0], 0):
-                self.__cache__['plane_normal'] = Vec3(
+            if eq(self._cache['plane_normal'][0], 0):
+                self._cache['plane_normal'] = Vec3(
                     [0.0,
-                     self.__cache__['plane_normal'][1],
-                     self.__cache__['plane_normal'][2]])
-            if self.__cache__['plane_normal'][0] < 0:
-                self.__cache__['plane_normal'] = -self.__cache__[
+                     self._cache['plane_normal'][1],
+                     self._cache['plane_normal'][2]])
+            if self._cache['plane_normal'][0] < 0:
+                self._cache['plane_normal'] = -self._cache[
                     'plane_normal']
-            elif self.__cache__['plane_normal'][0] == 0:
-                if eq(self.__cache__['plane_normal'][1], 0):
-                    self.__cache__['plane_normal'] = Vec3(
-                        [0.0, 0.0, self.__cache__['plane_normal'][2]])
-                if self.__cache__['plane_normal'][1] < 0:
-                    self.__cache__['plane_normal'] = -self.__cache__[
+            elif self._cache['plane_normal'][0] == 0:
+                if eq(self._cache['plane_normal'][1], 0):
+                    self._cache['plane_normal'] = Vec3(
+                        [0.0, 0.0, self._cache['plane_normal'][2]])
+                if self._cache['plane_normal'][1] < 0:
+                    self._cache['plane_normal'] = -self._cache[
                         'plane_normal']
-                elif self.__cache__['plane_normal'][1] == 0:
+                elif self._cache['plane_normal'][1] == 0:
                     # not needed (since not valid axis):
-                    # if eq(self.__cache__['plane_normal'][2], 0):
-                    if self.__cache__['plane_normal'][2] < 0:
-                        self.__cache__['plane_normal'] = -self.__cache__[
+                    # if eq(self._cache['plane_normal'][2], 0):
+                    if self._cache['plane_normal'][2] < 0:
+                        self._cache['plane_normal'] = -self._cache[
                             'plane_normal']
-        return self.__cache__['plane_normal']
+        return self._cache['plane_normal']
 
     def __matrix_refl(self):
-        if 'matrix_refl' not in self.__cache__:
+        if 'matrix_refl' not in self._cache:
             _, x, y, z = self[0]
             dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
             dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
-            self.__cache__['matrix_refl'] = [
+            self._cache['matrix_refl'] = [
                 Vec([1-dx2, -dxy, -dxz]),
                 Vec([-dxy, 1-dy2, -dyz]),
                 Vec([-dxz, -dyz, 1-dz2]),
             ]
-        return self.__cache__['matrix_refl']
+        return self._cache['matrix_refl']
 
     def __inverse_refl(self):
         return self
@@ -895,10 +897,10 @@ class Transform3(tuple):
     # *** ROTARY INVERSION (= ROTARY RELECTION) specific functions:
     def I(self):
         """Apply a central inversion on this transform."""
-        if 'central_inverted' not in self.__cache__:
-            self.__cache__['central_inverted'] = Transform3(
+        if 'central_inverted' not in self._cache:
+            self._cache['central_inverted'] = Transform3(
                 [-self[0], self[1]])
-        return self.__cache__['central_inverted']
+        return self._cache['central_inverted']
 
     def is_rot_inv(self):
         """Return whether the transform is a rotary inversion."""
@@ -951,30 +953,30 @@ class Transform3(tuple):
 
         Should only be called when this is a rotary inversion
         """
-        if 'matrix_rot_inv' not in self.__cache__:
+        if 'matrix_rot_inv' not in self._cache:
             w, x, y, z = self[0]
-            self.__cache__['matrix_rot_inv'] = _get_mat_rot(w, x, y, z, -1)
-        return self.__cache__['matrix_rot_inv']
+            self._cache['matrix_rot_inv'] = _get_mat_rot(w, x, y, z, -1)
+        return self._cache['matrix_rot_inv']
 
     def __glMatrix_rot_inv(self):
         """If this is a rotary inversion, return the glMatrix.
 
         Should only be called when this is a rotary inversion
         """
-        if 'gl_matrix_rot_inv' not in self.__cache__:
+        if 'gl_matrix_rot_inv' not in self._cache:
             w, x, y, z = self[0]
-            self.__cache__['gl_matrix_rot_inv'] = _get_mat_rot(-w, x, y, z, -1)
-        return self.__cache__['gl_matrix_rot_inv']
+            self._cache['gl_matrix_rot_inv'] = _get_mat_rot(-w, x, y, z, -1)
+        return self._cache['gl_matrix_rot_inv']
 
     def __inverse_rot_inv(self):
         """If this is a rotary inversion, return the reverse.
 
         Should only be called when this is a rotary inversion
         """
-        if 'inverse_rot_inv' not in self.__cache__:
-            self.__cache__['inverse_rot_inv'] = RotInv3(axis=self.axis(),
-                                                        angle=-self.angle())
-        return self.__cache__['inverse_rot_inv']
+        if 'inverse_rot_inv' not in self._cache:
+            self._cache['inverse_rot_inv'] = RotInv3(axis=self.axis(),
+                                                     angle=-self.angle())
+        return self._cache['inverse_rot_inv']
 
     is_rot_refl = is_rot_inv
     # not needed: since they are the same (you can use the axis method):
