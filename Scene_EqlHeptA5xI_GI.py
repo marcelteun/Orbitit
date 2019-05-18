@@ -34,7 +34,7 @@ from geomtypes import Rot3      as Rot
 
 vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
-Title = 'Equilateral Heptagons from Great Icosahedron - Great Stellated Dodecahedron'
+TITLE = 'Equilateral Heptagons from Great Icosahedron - Great Stellated Dodecahedron'
 
 V3   = math.sqrt(3)
 V5   = math.sqrt(5)
@@ -318,7 +318,7 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
                 this.prefHeptSpecAngles[1]['a'],
                 this.altHeptSpecAngles[2]['a']
             )
-        kwargs['title'] = Title
+        kwargs['title'] = TITLE
         Heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (332, 638),
             *args, **kwargs

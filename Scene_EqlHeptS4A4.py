@@ -28,7 +28,7 @@ import geomtypes
 import Geom3D
 import Scenes3D
 
-Title = 'Equilateral Heptagons Tetrahedron'
+TITLE = 'Equilateral Heptagons Tetrahedron'
 
 vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
@@ -350,7 +350,7 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
             {'a':  45.464238739313160, 's': 'Three Triangles in One Plane', 't': True,'e': True},
         ]
         this.setKiteAngleExtremes(this.specialAngles[3]['a'], this.specialAngles[2]['a'], 168)
-        kwargs['title'] = Title
+        kwargs['title'] = TITLE
         Heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (338, 570),
             *args, **kwargs

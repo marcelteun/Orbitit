@@ -33,7 +33,7 @@ from geomtypes import Rot3      as Rot
 
 vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
-Title = 'Equilateral Heptagons from Cube - Octahedron'
+TITLE = 'Equilateral Heptagons from Cube - Octahedron'
 
 V2  = math.sqrt(2)
 hV2 = 1.0/V2
@@ -383,7 +383,7 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
             {'a':  14.020488654174214, 's': 'Equilateral Triangles', 't': False, 'e': True},
         ]
         this.setKiteAngleExtremes(2.4, 115.24)
-        kwargs['title'] = Title
+        kwargs['title'] = TITLE
         Heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (340, 570),
             *args, **kwargs

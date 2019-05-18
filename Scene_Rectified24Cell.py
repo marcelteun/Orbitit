@@ -28,7 +28,7 @@ import Geom4D
 import Scenes3D
 from OpenGL.GL import *
 
-Title = 'Rectified 24-Cell'
+TITLE = 'Rectified 24-Cell'
 
 #V2 = 1.0
 V2  = math.sqrt(2)
@@ -591,7 +591,7 @@ class Shape(Geom4D.SimpleShape):
         Geom4D.SimpleShape.__init__(this,
             Vs, Cs = Cs, Es = Es, Ns = [],
             colors = (Cols, cols),
-            name = Title
+            name = TITLE
         )
         this.showGroup = [True for i in range(len(Cells))]
         this.showWhichCells = []
@@ -640,7 +640,7 @@ class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
         this.shape = shape
         this.canvas = canvas
-        kwargs['title'] = Title
+        kwargs['title'] = TITLE
         wx.Frame.__init__(this, *args, **kwargs)
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)

@@ -30,7 +30,7 @@ import Scenes3D
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
-Title = 'Equilateral Heptagons from Kite'
+TITLE = 'Equilateral Heptagons from Kite'
 
 class Shape(Geom3D.SimpleShape):
     def __init__(this):
@@ -440,7 +440,7 @@ class CtrlWin(wx.Frame):
 class Scene():
     def __init__(this, parent, canvas):
         this.shape = Shape()
-        this.ctrlWin = CtrlWin(this.shape, canvas, parent, wx.ID_ANY, Title)
+        this.ctrlWin = CtrlWin(this.shape, canvas, parent, wx.ID_ANY, TITLE)
 
     def close(this):
         try:

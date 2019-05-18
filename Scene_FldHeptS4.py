@@ -35,7 +35,7 @@ import geomtypes
 from geomtypes import Rot3 as Rot
 from geomtypes import Vec3 as Vec
 
-Title = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
+TITLE = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 
 trisAlt = Heptagons.TrisAlt()
 trisAlt.baseKey = {

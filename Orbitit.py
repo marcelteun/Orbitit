@@ -703,7 +703,7 @@ class MainWindow(wx.Frame):
         ed = {}
         exec(fd.read(), ed)
         scene = {
-            'lab': ed['Title'],
+            'lab': ed['TITLE'],
             'class': ed['Scene']
         }
         this.setScene(scene)

@@ -19,22 +19,24 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #-------------------------------------------------------------------
+# Old sins:
+# pylint: disable=unused-wildcard-import
+from __future__ import print_function
 
 import os
 import wx
 import wx.lib.colourselect as wxLibCS
-import math
-import rgb
-import Geom3D
-import Geom4D
-import GeomGui
-import geomtypes
-import Scenes3D
-import isometry
-import orbit
+
 from OpenGL.GL import *
 
-Title = 'Create Polyhedron by Orbiting'
+import rgb
+import Geom3D
+import GeomGui
+import geomtypes
+import isometry
+import orbit
+
+TITLE = 'Create Polyhedron by Orbiting'
 
 LOG_DBG  = 1
 LOG_INFO = 2
@@ -67,10 +69,10 @@ class CtrlWin(wx.Frame):
         this.shape = shape
         this.name = shape.name
         this.canvas = canvas
-        kwargs['title'] = Title
+        kwargs['title'] = TITLE
         wx.Frame.__init__(this, *args, **kwargs)
-        this.setDefaultColours()
-        this.nrOfCols = 1
+        this.set_default_cols()
+        this.no_of_cols = 1
         # save which colour alternative was chosen per final symmetry and
         # stabiliser symmetry. This to be able to switch to the one that was
         # chosen before when the user changes back to one that was chosen
@@ -78,25 +80,25 @@ class CtrlWin(wx.Frame):
         # Each selection contains two indices:
         # - the index of the symmetry of the colour stabiliser
         # - the index of the alternative
-        this.colSelection = None
-        this.finalSymSetup = None
-        this.stabSymSetup = None
-        this.statusBar = this.CreateStatusBar()
+        this.col_select = None
+        this.final_sym_setup = None
+        this.stab_sym_setup = None
+        this.stat_bar = this.CreateStatusBar()
         this.panel = wx.Panel(this, -1)
-        this.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        this.mainSizer.Add(
-                this.createControlsSizer(),
+        this.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        this.main_sizer.Add(
+                this.create_ctrl_sizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((582, 741))
+        this.set_default_size((582, 741))
         this.panel.SetAutoLayout(True)
-        this.panel.SetSizer(this.mainSizer)
+        this.panel.SetSizer(this.main_sizer)
         this.Show(True)
         this.panel.Layout()
-        this.importDirName = '.'
+        this.import_dir_name = '.'
 
-    def setDefaultColours(this):
-        c = lambda rgbCol: [c*255 for c in rgbCol]
+    def set_default_cols(this):
+        c = lambda rgb_col: [c*255 for c in rgb_col]
         this.cols = [
                 c(rgb.gold),       c(rgb.forestGreen),
                 c(rgb.red4),       c(rgb.deepSkyBlue),
@@ -106,207 +108,205 @@ class CtrlWin(wx.Frame):
                 c(rgb.aquamarine), c(rgb.indianRed1)
             ]
 
-    def createControlsSizer(this):
-        ctrlSizer = wx.BoxSizer(wx.VERTICAL)
+    def create_ctrl_sizer(this):
+        ctrl_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        this.showGui = []
+        this.show_gui = []
 
-        facesSizer = wx.StaticBoxSizer(
+        face_sizer = wx.StaticBoxSizer(
             wx.StaticBox(this.panel, label = 'Face(s) Definition'),
             wx.VERTICAL
         )
-        ctrlSizer.Add(facesSizer, 0, wx.EXPAND)
+        ctrl_sizer.Add(face_sizer, 0, wx.EXPAND)
 
-        dataSizer = wx.BoxSizer(wx.HORIZONTAL)
+        data_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         #VERTICES
-        this.showGui.append(wx.StaticBox(this.panel, label = 'Vertices'))
-        bSizer = wx.StaticBoxSizer(this.showGui[-1])
-        this.showGui.append(GeomGui.Vector3DSetDynamicPanel(
+        this.show_gui.append(wx.StaticBox(this.panel, label = 'Vertices'))
+        b_sizer = wx.StaticBoxSizer(this.show_gui[-1])
+        this.show_gui.append(GeomGui.Vector3DSetDynamicPanel(
             this.panel, relExtraSpace = 3
         ))
-        this.__VsGuiIndex = len(this.showGui) - 1
-        bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
-        dataSizer.Add(bSizer, 1, wx.EXPAND)
+        this._vs_gui_idx = len(this.show_gui) - 1
+        b_sizer.Add(this.show_gui[-1], 1, wx.EXPAND)
+        data_sizer.Add(b_sizer, 1, wx.EXPAND)
 
         # FACES
-        this.showGui.append(wx.StaticBox(this.panel, label = 'Faces'))
-        bSizer = wx.StaticBoxSizer(this.showGui[-1])
-        this.showGui.append(
+        this.show_gui.append(wx.StaticBox(this.panel, label = 'Faces'))
+        b_sizer = wx.StaticBoxSizer(this.show_gui[-1])
+        this.show_gui.append(
             GeomGui.FaceSetDynamicPanel(this.panel, 0, faceLen = 3)
         )
-        this.__FsGuiIndex = len(this.showGui) - 1
-        bSizer.Add(this.showGui[-1], 1, wx.EXPAND)
-        dataSizer.Add(bSizer, 1, wx.EXPAND)
-        facesSizer.Add(dataSizer, 0, wx.EXPAND)
+        this._fs_gui_idx = len(this.show_gui) - 1
+        b_sizer.Add(this.show_gui[-1], 1, wx.EXPAND)
+        data_sizer.Add(b_sizer, 1, wx.EXPAND)
+        face_sizer.Add(data_sizer, 0, wx.EXPAND)
 
         # Import
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Import"))
-        this.panel.Bind(wx.EVT_BUTTON, this.onImport,
-                id = this.showGui[-1].GetId())
-        facesSizer.Add(this.showGui[-1], 0)
+        this.show_gui.append(wx.Button(this.panel, wx.ID_ANY, "Import"))
+        this.panel.Bind(wx.EVT_BUTTON, this.on_import,
+                id = this.show_gui[-1].GetId())
+        face_sizer.Add(this.show_gui[-1], 0)
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
-        this.rotateSizer = GeomGui.AxisRotateSizer(
+        this.rot_sizer = GeomGui.AxisRotateSizer(
             this.panel,
             this.on_rot,
             min_angle=-180,
             max_angle=180,
             initial_angle=0
         )
-        facesSizer.Add(this.rotateSizer)
+        face_sizer.Add(this.rot_sizer)
 
         # SYMMETRY
-        this.showGui.append(
+        this.show_gui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Final Symmetry',
-                onSymSelect   = lambda a: this.onSymmetrySelect(a),
-                onGetSymSetup = lambda a: this.onGetFinalSymSetup(a)
+                onSymSelect   = lambda a: this.on_sym_select(a),
+                onGetSymSetup = lambda a: this.on_final_sym_select(a)
             )
         )
-        this.__FinalSymGuiIndex = len(this.showGui) - 1
-        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
-        if this.colSelection == None:
-            this.colSelection = [None for i in range(this.showGui[-1].length)]
-            this.finalSymSetup = this.colSelection[:]
-            this.stabSymSetup = this.colSelection[:]
+        this._final_sym_gui_idx = len(this.show_gui) - 1
+        ctrl_sizer.Add(this.show_gui[-1], 0, wx.EXPAND)
+        if this.col_select == None:
+            this.col_select = [None for i in range(this.show_gui[-1].length)]
+            this.final_sym_setup = this.col_select[:]
+            this.stab_sym_setup = this.col_select[:]
 
         # Stabiliser
-        this.showGui.append(
+        this.show_gui.append(
             GeomGui.SymmetrySelect(this.panel,
                 'Stabiliser Symmetry',
-                this.showGui[
-                    this.__FinalSymGuiIndex
+                this.show_gui[
+                    this._final_sym_gui_idx
                 ].getSymmetryClass(applyOrder = True).subgroups,
-                onGetSymSetup = lambda a: this.onGetStabSymSetup(a)
+                onGetSymSetup = lambda a: this.on_stab_sym_select(a)
             )
         )
-        this.__StabSymGuiIndex = len(this.showGui) - 1
-        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+        this._stab_sym_gui_idx = len(this.show_gui) - 1
+        ctrl_sizer.Add(this.show_gui[-1], 0, wx.EXPAND)
 
-        this.showGui.append(wx.Button(this.panel, wx.ID_ANY, "Apply Symmetry"))
+        this.show_gui.append(wx.Button(this.panel, wx.ID_ANY, "Apply Symmetry"))
         this.panel.Bind(
-            wx.EVT_BUTTON, this.onApplySymmetry, id = this.showGui[-1].GetId())
-        ctrlSizer.Add(this.showGui[-1], 0, wx.EXPAND)
+            wx.EVT_BUTTON, this.on_apply_sym, id = this.show_gui[-1].GetId())
+        ctrl_sizer.Add(this.show_gui[-1], 0, wx.EXPAND)
 
-        this.showGui[this.__FinalSymGuiIndex].SetSelected(0)
-        this.onSymmetrySelect(
-                this.showGui[this.__FinalSymGuiIndex].getSymmetryClass()
+        this.show_gui[this._final_sym_gui_idx].SetSelected(0)
+        this.on_sym_select(
+                this.show_gui[this._final_sym_gui_idx].getSymmetryClass()
             )
 
-        this.ctrlSizer = ctrlSizer
-        return ctrlSizer
+        this.ctrl_sizer = ctrl_sizer
+        return ctrl_sizer
 
-    def addColourGui(this):
+    def add_col_gui(this):
         try:
-            this.colSizer.Clear(True)
+            this.col_sizer.Clear(True)
         except AttributeError:
-            this.colGuiBox = wx.StaticBox(this.panel, label = 'Colour Setup')
-            this.colSizer = wx.StaticBoxSizer(this.colGuiBox, wx.VERTICAL)
-            this.ctrlSizer.Add(this.colSizer, 0, wx.EXPAND)
+            this.col_gui_box = wx.StaticBox(this.panel, label = 'Colour Setup')
+            this.col_sizer = wx.StaticBoxSizer(this.col_gui_box, wx.VERTICAL)
+            this.ctrl_sizer.Add(this.col_sizer, 0, wx.EXPAND)
         this.orbit = orbit.Orbit((
-            this.showGui[this.__FinalSymGuiIndex].GetSelected(),
-            this.showGui[this.__StabSymGuiIndex].GetSelected()
+            this.show_gui[this._final_sym_gui_idx].GetSelected(),
+            this.show_gui[this._stab_sym_gui_idx].GetSelected()
         ))
-        #print 'addColourGui check sub-groups'
-        nrOfColsChoiceList = [
+        no_of_cols_choice_lst = [
             '%d (based on %s)' % (p['index'], p['class'].__name__)
             for p in this.orbit.higherOrderStabiliserProps
         ]
-        nrOfColsChoiceList.extend([
+        no_of_cols_choice_lst.extend([
             '%d (based on %s)' % (p['index'], p['class'].__name__)
             for p in this.orbit.lowerOrderStabiliserProps
         ])
-        #print 'nrOfColsChoiceList', nrOfColsChoiceList
-        this.colGuis = []
-        this.colGuis.append(
-            wx.Choice(this.panel, wx.ID_ANY, choices = nrOfColsChoiceList)
+        this.col_guis = []
+        this.col_guis.append(
+            wx.Choice(this.panel, wx.ID_ANY, choices = no_of_cols_choice_lst)
         )
-        this.colSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
+        this.col_sizer.Add(this.col_guis[-1], 0, wx.EXPAND)
         this.panel.Bind(wx.EVT_CHOICE,
-            this.onNrColsSel, id = this.colGuis[-1].GetId())
-        this.colAlternative = this.colSelection[
-            this.showGui[this.__FinalSymGuiIndex].getSelectedIndex()
+            this.on_no_of_col_select, id = this.col_guis[-1].GetId())
+        this.col_alt = this.col_select[
+            this.show_gui[this._final_sym_gui_idx].getSelectedIndex()
         ][
-            this.showGui[this.__StabSymGuiIndex].getSelectedIndex()
+            this.show_gui[this._stab_sym_gui_idx].getSelectedIndex()
         ]
-        this.colGuis[-1].SetSelection(this.colAlternative[0])
-        this.__nrOfColsGuiId = len(this.colGuis)-1
-        this.onNrColsSel(this.colGuis[-1])
+        this.col_guis[-1].SetSelection(this.col_alt[0])
+        this._no_of_cols_gui_idx = len(this.col_guis)-1
+        this.on_no_of_col_select(this.col_guis[-1])
 
-    def onGetFinalSymSetup(this, symIndex):
+    def on_final_sym_select(this, sym_idx):
         try:
-            return this.finalSymSetup[symIndex]
+            return this.final_sym_setup[sym_idx]
         except TypeError:
-            print 'Note: ignoring error at onGetFinalSymSetup: 1st time = ok'
+            print('Note: ignoring error at on_final_sym_select: 1st time = ok')
             return None
 
-    def onGetStabSymSetup(this, symIndex):
-        finalSymId = this.showGui[this.__FinalSymGuiIndex].getSelectedIndex()
+    def on_stab_sym_select(this, sym_idx):
+        final_sym_idx = this.show_gui[this._final_sym_gui_idx].getSelectedIndex()
         try:
-            return this.stabSymSetup[finalSymId][symIndex]
+            return this.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
-            print 'Note: ignoring error at onGetStabSymSetup: 1st time = ok'
+            print('Note: ignoring error at on_stab_sym_select: 1st time = ok')
             return None
 
-    def onSymmetrySelect(this, sym):
-        finalSymGui = this.showGui[this.__FinalSymGuiIndex]
-        stabSyms = sym.subgroups
-        i = finalSymGui.getSelectedIndex()
+    def on_sym_select(this, sym):
+        final_sym_gui = this.show_gui[this._final_sym_gui_idx]
+        stab_syms = sym.subgroups
+        i = final_sym_gui.getSelectedIndex()
         # initialise stabiliser setup before setting the list.
-        if this.stabSymSetup[i] == None:
-            this.stabSymSetup[i] = [None for x in stabSyms]
-        this.showGui[this.__StabSymGuiIndex].setList(stabSyms)
-        nrStabilisers = this.showGui[this.__StabSymGuiIndex].length
-        if this.colSelection[i] == None:
-            this.colSelection[i] = [[0, 0] for j in range(nrStabilisers)]
-            this.stabSymSetup[i] = [None for j in range(nrStabilisers)]
+        if this.stab_sym_setup[i] == None:
+            this.stab_sym_setup[i] = [None for x in stab_syms]
+        this.show_gui[this._stab_sym_gui_idx].setList(stab_syms)
+        no_of_stabs = this.show_gui[this._stab_sym_gui_idx].length
+        if this.col_select[i] == None:
+            this.col_select[i] = [[0, 0] for j in range(no_of_stabs)]
+            this.stab_sym_setup[i] = [None for j in range(no_of_stabs)]
 
-    def onApplySymmetry(this, e):
+    def on_apply_sym(this, e):
         # Check these first before you retrieve values. E.g. if the 'n' in Cn
         # symmetry is updated, then the class is updated. As soon as you
         # retrieve the value, val_updated will be reset.
-        updated0 = this.showGui[this.__FinalSymGuiIndex].isSymClassUpdated()
-        updated1 = this.showGui[this.__StabSymGuiIndex].isSymClassUpdated()
-        Vs = this.showGui[this.__VsGuiIndex].get()
-        Fs = this.showGui[this.__FsGuiIndex].get()
-        if Fs == []:
-            this.statusText('No faces defined!', LOG_ERR)
+        updated0 = this.show_gui[this._final_sym_gui_idx].isSymClassUpdated()
+        updated1 = this.show_gui[this._stab_sym_gui_idx].isSymClassUpdated()
+        verts = this.show_gui[this._vs_gui_idx].get()
+        faces = this.show_gui[this._fs_gui_idx].get()
+        if faces == []:
+            this.status_text('No faces defined!', LOG_ERR)
             return
-        finalSymGui   = this.showGui[this.__FinalSymGuiIndex]
-        finalSym      = finalSymGui.GetSelected()
-        finalSymIndex = finalSymGui.getSelectedIndex()
-        stabSymGui    = this.showGui[this.__StabSymGuiIndex]
-        stabSym       = stabSymGui.GetSelected()
-        stabSymIndex  = stabSymGui.getSelectedIndex()
-        this.finalSymSetup[finalSymIndex] = finalSym.setup             # copy?
-        this.stabSymSetup[finalSymIndex][stabSymIndex] = stabSym.setup # copy?
+        final_sym_gui = this.show_gui[this._final_sym_gui_idx]
+        final_sym = final_sym_gui.GetSelected()
+        final_sym_idx = final_sym_gui.getSelectedIndex()
+        stab_sym_gui = this.show_gui[this._stab_sym_gui_idx]
+        stab_sym = stab_sym_gui.GetSelected()
+        stab_sym_idx = stab_sym_gui.getSelectedIndex()
+        this.final_sym_setup[final_sym_idx] = final_sym.setup             # copy?
+        this.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup # copy?
         try:
-            this.shape = Geom3D.SymmetricShape(Vs, Fs,
-                    finalSym = finalSym, stabSym = stabSym, name = this.name
+            this.shape = Geom3D.SymmetricShape(verts, faces,
+                    finalSym=final_sym, stabSym=stab_sym, name=this.name
                 )
         except isometry.ImproperSubgroupError:
-            this.statusText(
+            this.status_text(
                 'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
             if e != None:
                 e.Skip()
             return
-        this.FsOrbit = this.shape.getIsometries()['direct']
-        this.FsOrbitOrg = True
+        this.fs_orbit = this.shape.getIsometries()['direct']
+        this.fs_orbit_org = True
         this.shape.recreateEdges()
-        this.updateOrientation(
-            this.rotateSizer.get_angle(), this.rotateSizer.get_axis())
+        this.update_orientation(
+            this.rot_sizer.get_angle(), this.rot_sizer.get_axis())
         this.canvas.panel.setShape(this.shape)
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.
         if (updated0 or updated1):
-            this.addColourGui()
+            this.add_col_gui()
         else:
-            this.onNrColsSel(this.colGuis[this.__nrOfColsGuiId])
+            this.on_no_of_col_select(this.col_guis[this._no_of_cols_gui_idx])
         this.panel.Layout()
-        this.statusText('Symmetry applied: choose colours!', LOG_INFO)
+        this.status_text('Symmetry applied: choose colours!', LOG_INFO)
         try:
             tst = this.cols
         except AttributeError:
@@ -314,17 +314,17 @@ class CtrlWin(wx.Frame):
         if e != None:
             e.Skip()
 
-    def statusText(this, txt, lvl = LOG_INFO):
+    def status_text(this, txt, lvl = LOG_INFO):
         txt = '%s: %s' % (LOG_TXT[lvl], txt)
         if lvl >= LOG_STDOUT_LVL:
-            print txt
+            print(txt)
         if lvl >= LOG_BAR_LVL:
-            this.statusBar.SetStatusText(txt)
+            this.stat_bar.SetStatusText(txt)
 
-    def updateOrientation(this, angle, axis):
+    def update_orientation(this, angle, axis):
         if axis == geomtypes.Vec3([0, 0, 0]):
             rot = geomtypes.E
-            this.statusText(
+            this.status_text(
                 'Rotation axis is the null-vector: applying identity',
                 LOG_INFO
             )
@@ -336,170 +336,159 @@ class CtrlWin(wx.Frame):
         try:
             this.shape.setBaseOrientation(rot)
         except AttributeError:
-            this.statusText(
+            this.status_text(
                 'Apply symmetry first, before pulling the slide-bar',
                 LOG_WARN
             )
 
     def on_rot(this, angle, axis):
-        this.updateOrientation(angle, axis)
+        this.update_orientation(angle, axis)
         this.canvas.panel.setShape(this.shape)
 
-    def onNrColsSel(this, e):
+    def on_no_of_col_select(this, e):
         try:
-            this.selColSizer.Clear(True)
+            this.select_col_sizer.Clear(True)
         except AttributeError:
-            this.selColSizer = wx.BoxSizer(wx.VERTICAL)
-            this.colSizer.Add(this.selColSizer, 0, wx.EXPAND)
-            nextPrevColSizer = wx.BoxSizer(wx.HORIZONTAL)
-            this.colGuis.append(
+            this.select_col_sizer = wx.BoxSizer(wx.VERTICAL)
+            this.col_sizer.Add(this.select_col_sizer, 0, wx.EXPAND)
+            next_prev_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
+            this.col_guis.append(
                 wx.Button(this.panel, wx.ID_ANY, "Previous Alternative"))
             this.panel.Bind(
-                wx.EVT_BUTTON, this.onPrevColAlt, id = this.colGuis[-1].GetId())
-            nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
-            this.colGuis.append(
+                wx.EVT_BUTTON, this.on_prev_col_alt, id = this.col_guis[-1].GetId())
+            next_prev_col_sizer.Add(this.col_guis[-1], 0, wx.EXPAND)
+            this.col_guis.append(
                 wx.Button(this.panel, wx.ID_ANY, "Next Alternative"))
             this.panel.Bind(
-                wx.EVT_BUTTON, this.onNextColAlt, id = this.colGuis[-1].GetId())
-            nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
-            nextPrevColSizer.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
-            this.colGuis.append(
+                wx.EVT_BUTTON, this.on_next_col_alt, id = this.col_guis[-1].GetId())
+            next_prev_col_sizer.Add(this.col_guis[-1], 0, wx.EXPAND)
+            next_prev_col_sizer.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
+            this.col_guis.append(
                 wx.Button(this.panel, wx.ID_ANY, "Reset Colours"))
             this.panel.Bind(
-                wx.EVT_BUTTON, this.onResetCols, id = this.colGuis[-1].GetId())
-            nextPrevColSizer.Add(this.colGuis[-1], 0, wx.EXPAND)
-            this.colSizer.Add(nextPrevColSizer, 0, wx.EXPAND)
+                wx.EVT_BUTTON, this.on_reset_cols, id = this.col_guis[-1].GetId())
+            next_prev_col_sizer.Add(this.col_guis[-1], 0, wx.EXPAND)
+            this.col_sizer.Add(next_prev_col_sizer, 0, wx.EXPAND)
 
-        colDivNr = e.GetSelection()
-        this.colAlternative[0] = colDivNr
+        col_div_no = e.GetSelection()
+        this.col_alt[0] = col_div_no
         l0 = len(this.orbit.higherOrderStabiliserProps)
         assert l0 != 0, 'no higher order stabilisers found'
-        if colDivNr < l0:
-            this.colFinalSym = this.orbit.final
-            this.colIsoms = this.orbit.higherOrderStabiliser(colDivNr)
-            nrOfCols = this.orbit.higherOrderStabiliserProps[colDivNr]['index']
+        if col_div_no < l0:
+            this.col_final_sym = this.orbit.final
+            this.col_syms = this.orbit.higherOrderStabiliser(col_div_no)
+            no_of_cols = this.orbit.higherOrderStabiliserProps[col_div_no]['index']
         else:
-            this.colFinalSym = this.orbit.altFinal
-            this.colIsoms = this.orbit.lowerOrderStabiliser(colDivNr - l0)
-            nrOfCols = this.orbit.lowerOrderStabiliserProps[colDivNr - l0]['index']
-            # now the FsOrbit might contain isometries that are not part of the
+            this.col_final_sym = this.orbit.altFinal
+            this.col_syms = this.orbit.lowerOrderStabiliser(col_div_no - l0)
+            no_of_cols = this.orbit.lowerOrderStabiliserProps[col_div_no - l0]['index']
+            # now the fs_orbit might contain isometries that are not part of the
             # colouring isometries. Recreate the shape with isometries that only
             # have these:
-            if this.FsOrbitOrg:
-                finalSym = this.orbit.altFinal
-                stabSym = this.orbit.altStab
-                Vs = this.shape.getBaseVertexProperties()['Vs']
-                Fs = this.shape.getBaseFaceProperties()['Fs']
-                this.shape = Geom3D.SymmetricShape(Vs, Fs,
-                        finalSym = finalSym, stabSym = stabSym, name = this.name
+            if this.fs_orbit_org:
+                final_sym = this.orbit.altFinal
+                stab_sym = this.orbit.altStab
+                verts = this.shape.getBaseVertexProperties()['Vs']
+                faces = this.shape.getBaseFaceProperties()['Fs']
+                this.shape = Geom3D.SymmetricShape(verts, faces,
+                        finalSym=final_sym, stabSym=stab_sym, name=this.name
                     )
-                this.FsOrbit = this.shape.getIsometries()['direct']
+                this.fs_orbit = this.shape.getIsometries()['direct']
                 this.shape.recreateEdges()
                 this.canvas.panel.setShape(this.shape)
-                this.FsOrbitOrg = False # and do this only once
-        assert len(this.colIsoms) != 0
-        this.selColGuis = []
-        initColour = (255, 255, 255)
+                this.fs_orbit_org = False # and do this only once
+        assert len(this.col_syms) != 0
+        this.select_col_guis = []
+        init_col = (255, 255, 255)
         maxColPerRow = 12
         # Add buttons for choosing individual colours:
-        for i in range(nrOfCols):
+        for i in range(no_of_cols):
             try:
                 col = this.cols[i]
             except IndexError:
-                col = initColour
+                col = init_col
                 this.cols.append(col)
             if i % maxColPerRow == 0:
-                selColSizerRow = wx.BoxSizer(wx.HORIZONTAL)
-                this.selColSizer.Add(selColSizerRow, 0, wx.EXPAND)
-            this.selColGuis.append(
+                sel_col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
+                this.select_col_sizer.Add(sel_col_sizer_row, 0, wx.EXPAND)
+            this.select_col_guis.append(
                 wxLibCS.ColourSelect(this.panel, wx.ID_ANY, colour = col)
             )
-            this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.onColSel)
-            selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
-        this.nrOfCols = nrOfCols
+            this.panel.Bind(wxLibCS.EVT_COLOURSELECT, this.on_col_select)
+            sel_col_sizer_row.Add(this.select_col_guis[-1], 0, wx.EXPAND)
+        this.no_of_cols = no_of_cols
         # replace invalid index of colour alternative with the last possible
-        if this.colAlternative[1] >= len(this.colIsoms):
-            this.colAlternative[1] = len(this.colIsoms) - 1
-        this.updatShapeColours()
+        if this.col_alt[1] >= len(this.col_syms):
+            this.col_alt[1] = len(this.col_syms) - 1
+        this.update_shape_cols()
         this.panel.Layout()
 
-    def onColSel(this, e):
+    def on_col_select(this, e):
         col = e.GetValue().Get()
-        guiId = e.GetId()
-        for i, gui in zip(range(len(this.selColGuis)), this.selColGuis):
-            if gui.GetId() == guiId:
-                #print 'update %d with colour %s.' % (i, col)
+        gui_idx = e.GetId()
+        for i, gui in zip(range(len(this.select_col_guis)), this.select_col_guis):
+            if gui.GetId() == gui_idx:
                 this.cols[i] = col
-                this.updatShapeColours()
+                this.update_shape_cols()
                 break
 
-    def updatShapeColours(this):
+    def update_shape_cols(this):
         """apply symmetry on colours
         """
-        finalSym = this.colFinalSym
-        #print 'finalSym', finalSym
-        #print 'this.colAlternative', this.colAlternative[1]
-        #print 'subGroup', this.colIsoms[this.colAlternative[1]]
-        colQuotientSet = finalSym  / this.colIsoms[this.colAlternative[1]]
-        #print '-----colQuotientSet-----------'
-        #for isom in colQuotientSet: print isom
-        #print '------------------------------'
-        #print '--------FsOrbit---------------'
-        #for isom in this.FsOrbit: print isom
-        #print '------------------------------'
-        colPerIsom = []
-        for isom in this.FsOrbit:
-            for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
-                if isom in subSet:
-                    colPerIsom.append(this.cols[i])
+        final_sym = this.col_final_sym
+        col_quotient_set = final_sym  / this.col_syms[this.col_alt[1]]
+        col_per_isom = []
+        for isom in this.fs_orbit:
+            for sub_set, i in zip(col_quotient_set,
+                                 range(len(col_quotient_set))):
+                if isom in sub_set:
+                    col_per_isom.append(this.cols[i])
                     break
-        #print 'colPerIsom', colPerIsom
         cols = [
                 ([[float(colCh)/255 for colCh in col]], [])
-                for col in colPerIsom
+                for col in col_per_isom
             ]
         this.shape.setFaceColors(cols)
-        this.statusText('Colour alternative %d of %d applied' % (
-                this.colAlternative[1] + 1, len(this.colIsoms)
+        this.status_text('Colour alternative %d of %d applied' % (
+                this.col_alt[1] + 1, len(this.col_syms)
             ), LOG_INFO
         )
         this.canvas.paint()
-        #print 'TODO: gen colour quotientset and compare with face quotient set'
 
     # move to general class
-    def setDefaultSize(this, size):
+    def set_default_size(this, size):
         this.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
         this.SetSize(size)
 
-    def onNextColAlt(this, e):
-        this.colAlternative[1] += 1
-        if this.colAlternative[1] >= len(this.colIsoms):
-            this.colAlternative[1] -= len(this.colIsoms)
-        this.updatShapeColours()
+    def on_next_col_alt(this, e):
+        this.col_alt[1] += 1
+        if this.col_alt[1] >= len(this.col_syms):
+            this.col_alt[1] -= len(this.col_syms)
+        this.update_shape_cols()
 
-    def onResetCols(this, e):
-        this.setDefaultColours()
-        for i in range(this.nrOfCols):
-            this.selColGuis[i].SetColour(this.cols[i])
-        this.updatShapeColours()
+    def on_reset_cols(this, e):
+        this.set_default_cols()
+        for i in range(this.no_of_cols):
+            this.select_col_guis[i].SetColour(this.cols[i])
+        this.update_shape_cols()
 
-    def onPrevColAlt(this, e):
-        this.colAlternative[1] -= 1
-        if this.colAlternative[1] < 0:
-            this.colAlternative[1] += len(this.colIsoms)
-        this.updatShapeColours()
+    def on_prev_col_alt(this, e):
+        this.col_alt[1] -= 1
+        if this.col_alt[1] < 0:
+            this.col_alt[1] += len(this.col_syms)
+        this.update_shape_cols()
 
-    def onImport(this, e):
+    def on_import(this, e):
         wildcard = "OFF shape (*.off)|*.off|Python shape (*.py)|*.py"
         dlg = wx.FileDialog(this,
-            'New: Choose a file', this.importDirName, '', wildcard, wx.OPEN)
+            'New: Choose a file', this.import_dir_name, '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
-            this.importDirName  = dlg.GetDirectory()
-            print "opening file:", filename
-            fd = open(os.path.join(this.importDirName, filename), 'r')
+            this.import_dir_name  = dlg.GetDirectory()
+            print("opening file:", filename)
+            fd = open(os.path.join(this.import_dir_name, filename), 'r')
             if filename[-3:] == '.py':
                 shape = Geom3D.readPyFile(fd)
                 # For Compound derived shapes (isinstance) use merge:
@@ -512,111 +501,110 @@ class CtrlWin(wx.Frame):
                 shape = Geom3D.readOffFile(fd, recreateEdges = False)
             fd.close()
             if isinstance(shape, Geom3D.IsometricShape):
-                Vs = shape.baseShape.Vs
-                Fs = shape.baseShape.Fs
+                verts = shape.baseShape.Vs
+                faces = shape.baseShape.Fs
             else:
-                #print 'no isometry'
-                Vs = shape.Vs
-                Fs = shape.Fs
-            print 'read ', len(Vs), ' Vs and ', len(Fs), ' Fs.'
-            this.showGui[this.__VsGuiIndex].set(Vs)
-            this.showGui[this.__FsGuiIndex].set(Fs)
+                verts = shape.Vs
+                faces = shape.Fs
+            print('read ', len(verts), ' Vs and ', len(faces), ' Fs.')
+            this.show_gui[this._vs_gui_idx].set(verts)
+            this.show_gui[this._fs_gui_idx].set(faces)
             # With a python file it is possible to set the other properties as
             # well: e.g.
-            # finalSym = isometry.S4xI
-            # finalSymSetup = [ [1, 0, 0], [0, 0, 1] ]
-            # stabSym = isometry.C3xI
-            # stabSymSetup = [ [0, 0, 1] ]
+            # final_sym = isometry.S4xI
+            # final_sym_setup = [ [1, 0, 0], [0, 0, 1] ]
+            # stab_sym = isometry.C3xI
+            # stab_sym_setup = [ [0, 0, 1] ]
             # rotAxis = [1, 1, 1]
             # rotAngle = 30
             #   where the angle is in degrees (floating point)
             if filename[-3:] == '.py':
-                fd = open(os.path.join(this.importDirName, filename), 'r')
+                fd = open(os.path.join(this.import_dir_name, filename), 'r')
                 ed = {}
                 exec(fd.read(), ed)
-                moreSettings = 0
-                keyErrStr = 'Note: KeyError while looking for'
-                key = 'finalSym'
+                more_settings = 0
+                key_err_str = 'Note: KeyError while looking for'
+                key = 'final_sym'
                 # to prevent accepting keyErrors in other code than ed[key]:
-                keyDefined = False
+                key_defined = False
                 try:
-                    finalSym = ed[key]
-                    keyDefined = True
+                    final_sym = ed[key]
+                    key_defined = True
                 except KeyError:
-                    print keyErrStr, key
+                    print(key_err_str, key)
                     pass
-                if keyDefined:
-                    moreSettings += 1
-                    this.showGui[this.__FinalSymGuiIndex].SetSelectedClass(
-                        finalSym
+                if key_defined:
+                    more_settings += 1
+                    this.show_gui[this._final_sym_gui_idx].SetSelectedClass(
+                        final_sym
                     )
-                    this.showGui[this.__FinalSymGuiIndex].onSetSymmetry(None)
-                    key = 'finalSymSetup'
-                    keyDefined = False
+                    this.show_gui[this._final_sym_gui_idx].onSetSymmetry(None)
+                    key = 'final_sym_setup'
+                    key_defined = False
                     try:
-                        symSetup = ed[key]
-                        keyDefined = True
+                        sym_setup = ed[key]
+                        key_defined = True
                     except KeyError:
-                        print keyErrStr, key
+                        print(key_err_str, key)
                         pass
-                    if keyDefined:
-                        moreSettings += 1
-                        this.showGui[this.__FinalSymGuiIndex].SetupSymmetry(
-                            symSetup
+                    if key_defined:
+                        more_settings += 1
+                        this.show_gui[this._final_sym_gui_idx].SetupSymmetry(
+                            sym_setup
                         )
-                key = 'stabSym'
-                keyDefined = False
+                key = 'stab_sym'
+                key_defined = False
                 try:
-                    stabSym = ed[key]
-                    keyDefined = True
+                    stab_sym = ed[key]
+                    key_defined = True
                 except KeyError:
-                    print keyErrStr, key
+                    print(key_err_str, key)
                     pass
-                if keyDefined:
-                    moreSettings += 1
-                    this.showGui[this.__StabSymGuiIndex].SetSelectedClass(
-                        stabSym
+                if key_defined:
+                    more_settings += 1
+                    this.show_gui[this._stab_sym_gui_idx].SetSelectedClass(
+                        stab_sym
                     )
-                    this.showGui[this.__StabSymGuiIndex].onSetSymmetry(None)
-                    key = 'stabSymSetup'
-                    keyDefined = False
+                    this.show_gui[this._stab_sym_gui_idx].onSetSymmetry(None)
+                    key = 'stab_sym_setup'
+                    key_defined = False
                     try:
-                        symSetup = ed[key]
-                        keyDefined = True
+                        sym_setup = ed[key]
+                        key_defined = True
                     except KeyError:
-                        print keyErrStr, key
+                        print(key_err_str, key)
                         pass
-                    if keyDefined:
-                        moreSettings += 1
-                        this.showGui[this.__StabSymGuiIndex].SetupSymmetry(
-                            symSetup
+                    if key_defined:
+                        more_settings += 1
+                        this.show_gui[this._stab_sym_gui_idx].SetupSymmetry(
+                            sym_setup
                         )
-                if moreSettings > 0:
-                    this.onApplySymmetry(None)
+                if more_settings > 0:
+                    this.on_apply_sym(None)
                 key = 'rotAxis'
-                keyDefined = False
+                key_defined = False
                 try:
                     axis = ed[key]
-                    keyDefined = True
+                    key_defined = True
                 except KeyError:
-                    print keyErrStr, key
+                    print(key_err_str, key)
                     pass
-                if keyDefined:
-                    moreSettings += 1
-                    this.rotateSizer.set_axis(axis)
+                if key_defined:
+                    more_settings += 1
+                    this.rot_sizer.set_axis(axis)
                 key = 'rotAngle'
-                keyDefined = False
+                key_defined = False
                 try:
                     angle = ed[key]
-                    keyDefined = True
+                    key_defined = True
                 except KeyError:
-                    print keyErrStr, key
+                    print(key_err_str, key)
                     pass
-                if keyDefined:
-                    moreSettings += 1
-                    this.rotateSizer.set_angle(angle)
-                    this.updateOrientation(
-                        this.rotateSizer.get_angle(), this.rotateSizer.get_axis())
+                if key_defined:
+                    more_settings += 1
+                    this.rot_sizer.set_angle(angle)
+                    this.update_orientation(
+                        this.rot_sizer.get_angle(), this.rot_sizer.get_axis())
                 fd.close()
             this.name = filename
         dlg.Destroy()
