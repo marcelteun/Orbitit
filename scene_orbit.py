@@ -1,4 +1,20 @@
 #!/usr/bin/python
+"""
+The main scene: create 3D objects by using symmetry orbits
+
+Import an 3D object or define it by vertices and faces. Then add symmetry by
+defining and orienting the symmetry. If the initial object itself (aka the
+descriptive) shares symmetries with the final symmetry, you will need to define
+and orient that as the stabiliser symmetry.
+
+Then you can divide colours regularly by using the symmetry. The symmetry you
+choose will be the symmetry group of one colour. Each different colour can also
+be mapped another colour by a symmetry of the final symmetry..
+
+Finally you can rotate the descriptive around an axis (while it still shared
+the same symmetries with the final symmetry as specified in the stabiliser
+symmetry)
+"""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -27,8 +43,6 @@ import os
 import wx
 import wx.lib.colourselect as wxLibCS
 
-from OpenGL.GL import *
-
 import rgb
 import Geom3D
 import GeomGui
@@ -55,6 +69,7 @@ LOG_BAR_LVL = LOG_INFO
 
 
 class Shape(Geom3D.SimpleShape):
+    """Simple wrapper for the Shape being used."""
     def __init__(self):
         Geom3D.SimpleShape.__init__(self, [], [])
 
@@ -66,6 +81,15 @@ class Shape(Geom3D.SimpleShape):
 
 
 class CtrlWin(wx.Frame):
+    """Window with all the controls for the symmetry orbit
+
+    Here you can define (or import):
+      - the vertices and faces.
+      - the symmetry of the final object
+      - the stabiliser symmetry
+      - the colours
+      - any rotation for the stabiliser
+    """
     def __init__(self, shape, canvas, *args, **kwargs):
         self.shape = shape
         self.name = shape.name
@@ -88,9 +112,8 @@ class CtrlWin(wx.Frame):
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(
-                self.create_ctrl_sizer(),
-                1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
-            )
+            self.create_ctrl_sizer(),
+            1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT)
         self.set_default_size((582, 741))
         self.panel.SetAutoLayout(True)
         self.panel.SetSizer(self.main_sizer)
@@ -99,18 +122,26 @@ class CtrlWin(wx.Frame):
         self.import_dir_name = '.'
 
     def set_default_cols(self):
+        """Fill colours with some default values"""
         def c(rgb_col):
+            """Map rgb colour on wxWidgets colour"""
             return [c*255 for c in rgb_col]
         self.cols = [
-                c(rgb.gold),       c(rgb.forestGreen),
-                c(rgb.red4),       c(rgb.deepSkyBlue),
-                c(rgb.khaki4),     c(rgb.midnightBlue),
-                c(rgb.chocolate1), c(rgb.burlywood1),
-                c(rgb.chocolate4), c(rgb.yellow),
-                c(rgb.aquamarine), c(rgb.indianRed1)
-            ]
+            c(rgb.gold),
+            c(rgb.forestGreen),
+            c(rgb.red4),
+            c(rgb.deepSkyBlue),
+            c(rgb.khaki4),
+            c(rgb.midnightBlue),
+            c(rgb.chocolate1),
+            c(rgb.burlywood1),
+            c(rgb.chocolate4),
+            c(rgb.yellow),
+            c(rgb.aquamarine),
+            c(rgb.indianRed1)]
 
     def create_ctrl_sizer(self):
+        """Create and return a wxWidget sizer with all the controls"""
         ctrl_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.show_gui = []
@@ -147,7 +178,7 @@ class CtrlWin(wx.Frame):
         # Import
         self.show_gui.append(wx.Button(self.panel, wx.ID_ANY, "Import"))
         self.panel.Bind(wx.EVT_BUTTON, self.on_import,
-                id=self.show_gui[-1].GetId())
+                        id=self.show_gui[-1].GetId())
         face_sizer.Add(self.show_gui[-1], 0)
 
         # Rotate Axis
@@ -164,8 +195,8 @@ class CtrlWin(wx.Frame):
         # SYMMETRY
         self.show_gui.append(GeomGui.SymmetrySelect(
             self.panel, 'Final Symmetry',
-            onSymSelect=lambda a: self.on_sym_select(a),
-            onGetSymSetup=lambda a: self.on_final_sym_select(a)))
+            onSymSelect=lambda a: self.on_final_sym_select(a),
+            onGetSymSetup=lambda a: self.on_get_final_sym_setup(a)))
         self._final_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         if self.col_select is None:
@@ -179,7 +210,7 @@ class CtrlWin(wx.Frame):
             'Stabiliser Symmetry',
             self.show_gui[self._final_sym_gui_idx].getSymmetryClass(
                 applyOrder=True).subgroups,
-            onGetSymSetup=lambda a: self.on_stab_sym_select(a)))
+            onGetSymSetup=lambda a: self.on_get_stab_sy_setup(a)))
         self._stab_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
@@ -191,14 +222,19 @@ class CtrlWin(wx.Frame):
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
         self.show_gui[self._final_sym_gui_idx].SetSelected(0)
-        self.on_sym_select(
-                self.show_gui[self._final_sym_gui_idx].getSymmetryClass()
-            )
+        self.on_final_sym_select(
+            self.show_gui[self._final_sym_gui_idx].getSymmetryClass())
 
         self.ctrl_sizer = ctrl_sizer
         return ctrl_sizer
 
     def add_col_gui(self):
+        """
+        Add colour GUI to the control window
+
+        The colour GUI can be added as soon as the final symmetry and the
+        stabiliser symmetries are known.
+        """
         try:
             self.col_sizer.Clear(True)
         except AttributeError:
@@ -234,23 +270,26 @@ class CtrlWin(wx.Frame):
         self._no_of_cols_gui_idx = len(self.col_guis)-1
         self.on_no_of_col_select(self.col_guis[-1])
 
-    def on_final_sym_select(self, sym_idx):
+    def on_get_final_sym_setup(self, sym_idx):
+        """Return the orientation of the final symmetry"""
         try:
             return self.final_sym_setup[sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_final_sym_select: 1st time = ok')
+            print('Note: ignoring error at on_get_final_sym_setup: 1st time = ok')
             return None
 
-    def on_stab_sym_select(self, sym_idx):
+    def on_get_stab_sy_setup(self, sym_idx):
+        """Return the orientation of the stabiliser symmetry"""
         final_sym_idx = self.show_gui[
             self._final_sym_gui_idx].getSelectedIndex()
         try:
             return self.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_stab_sym_select: 1st time = ok')
+            print('Note: ignoring error at on_get_stab_sy_setup: 1st time = ok')
             return None
 
-    def on_sym_select(self, sym):
+    def on_final_sym_select(self, sym):
+        """Handle when the final symmetry is selected"""
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
         stab_syms = sym.subgroups
         i = final_sym_gui.getSelectedIndex()
@@ -264,6 +303,7 @@ class CtrlWin(wx.Frame):
             self.stab_sym_setup[i] = [None for j in range(no_of_stabs)]
 
     def on_apply_sym(self, e):
+        """Apply the symmetries to the descriptive"""
         # Check these first before you retrieve values. E.g. if the 'n' in Cn
         # symmetry is updated, then the class is updated. As soon as you
         # retrieve the value, val_updated will be reset.
@@ -315,6 +355,7 @@ class CtrlWin(wx.Frame):
             e.Skip()
 
     def status_text(self, txt, lvl=LOG_INFO):
+        """Set the status bar log to specified text"""
         txt = '%s: %s' % (LOG_TXT[lvl], txt)
         if lvl >= LOG_STDOUT_LVL:
             print(txt)
@@ -322,6 +363,7 @@ class CtrlWin(wx.Frame):
             self.stat_bar.SetStatusText(txt)
 
     def update_orientation(self, angle, axis):
+        """Handle when the orientation of a symmetry is updated"""
         if axis == geomtypes.Vec3([0, 0, 0]):
             rot = geomtypes.E
             self.status_text(
@@ -342,10 +384,12 @@ class CtrlWin(wx.Frame):
             )
 
     def on_rot(self, angle, axis):
+        """Handle when the descriptive is rotated"""
         self.update_orientation(angle, axis)
         self.canvas.panel.setShape(self.shape)
 
     def on_no_of_col_select(self, e):
+        """Handle when the colour symmetry is chosen"""
         try:
             self.select_col_sizer.Clear(True)
         except AttributeError:
@@ -432,6 +476,11 @@ class CtrlWin(wx.Frame):
         self.panel.Layout()
 
     def on_col_select(self, e):
+        """
+        Handle when a colour is selected.
+
+        Update the shape with correct colours
+        """
         col = e.GetValue().Get()
         gui_idx = e.GetId()
         for i, gui in zip(range(len(self.select_col_guis)),
@@ -442,8 +491,7 @@ class CtrlWin(wx.Frame):
                 break
 
     def update_shape_cols(self):
-        """apply symmetry on colours
-        """
+        """Apply symmetry on colours"""
         final_sym = self.col_final_sym
         col_quotient_set = final_sym / self.col_syms[self.col_alt[1]]
         col_per_isom = []
@@ -454,42 +502,50 @@ class CtrlWin(wx.Frame):
                     col_per_isom.append(self.cols[i])
                     break
         cols = [
-                ([[float(colCh)/255 for colCh in col]], [])
-                for col in col_per_isom
-            ]
+            ([[float(colCh)/255 for colCh in col]], [])
+            for col in col_per_isom]
         self.shape.setFaceColors(cols)
-        self.status_text('Colour alternative %d of %d applied' % (
-                self.col_alt[1] + 1, len(self.col_syms)
-            ), LOG_INFO
-        )
+        self.status_text(
+            'Colour alternative {} of {} applied'.format(self.col_alt[1] + 1,
+                                                         len(self.col_syms)),
+            LOG_INFO)
         self.canvas.paint()
 
     # move to general class
     def set_default_size(self, size):
+        """Set the default window size"""
         self.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
         self.SetSize(size)
 
     def on_next_col_alt(self, e):
+        """Handle when the next colour setup is chosen"""
         self.col_alt[1] += 1
         if self.col_alt[1] >= len(self.col_syms):
             self.col_alt[1] -= len(self.col_syms)
         self.update_shape_cols()
 
     def on_reset_cols(self, e):
+        """Handle a that the button "Reset Colours" is pressed"""
         self.set_default_cols()
         for i in range(self.no_of_cols):
             self.select_col_guis[i].SetColour(self.cols[i])
         self.update_shape_cols()
 
     def on_prev_col_alt(self, e):
+        """Handle when the previous colour setup is chosen"""
         self.col_alt[1] -= 1
         if self.col_alt[1] < 0:
             self.col_alt[1] += len(self.col_syms)
         self.update_shape_cols()
 
     def on_import(self, e):
+        """Handle the import of a file
+
+        The file can specify the descriptive and its orientation and the
+        symmetries
+        """
         wildcard = "OFF shape (*.off)|*.off|Python shape (*.py)|*.py"
         dlg = wx.FileDialog(self,
                             'New: Choose a file', self.import_dir_name,
@@ -615,5 +671,6 @@ class CtrlWin(wx.Frame):
 
 
 class Scene(Geom3D.Scene):
+    """Implementation of the scene: control window and the shape"""
     def __init__(self, parent, canvas):
         Geom3D.Scene.__init__(self, Shape, CtrlWin, parent, canvas)
