@@ -1,4 +1,9 @@
 #!/usr/bin/python
+"""
+GUI widgets related to objects with geometry
+
+Like vertices, faecs, symmetries, etc.
+"""
 #
 # Copyright (C) 2010-2019 Marcel Tunnissen
 #
@@ -264,12 +269,11 @@ class FloatInput(wx.TextCtrl):
 
 class LabeledIntInput(wx.StaticBoxSizer):
     def __init__(self,
-        panel,
-        label='',
-        init=0,
-        width=-1,
-        orientation=wx.HORIZONTAL,
-    ):
+                 panel,
+                 label='',
+                 init=0,
+                 width=-1,
+                 orientation=wx.HORIZONTAL):
         """
         Create a control embedded in a sizer for defining an int.
 
@@ -284,18 +288,16 @@ class LabeledIntInput(wx.StaticBoxSizer):
         wx.BoxSizer.__init__(self, orientation)
         self.Boxes.append(
             wx.StaticText(panel, wx.ID_ANY, label + ' ',
-                style=wx.ALIGN_RIGHT
+                          style=wx.ALIGN_RIGHT
             )
         )
         self.Add(self.Boxes[-1], 1, wx.EXPAND)
         if not isinstance(init, int):
-            print '%s warning: initialiser not an int (%s)' % (
-                    self.__class__, str(init)
-                )
+            print '{} warning: initialiser not an int ({})'.format(
+                self.__class__, str(init))
             init = 0
         self.Boxes.append(IntInput(
-                panel, wx.ID_ANY, init, size=(width, -1)
-            ))
+            panel, wx.ID_ANY, init, size=(width, -1)))
         self.Add(self.Boxes[-1], 0, wx.EXPAND)
         self.int_gui_idx = len(self.Boxes) - 1
 
@@ -319,11 +321,10 @@ class LabeledIntInput(wx.StaticBoxSizer):
 
 class Vector3DInput(wx.StaticBoxSizer):
     def __init__(self,
-        panel,
-        label='',
-        v=None,
-        orientation=wx.HORIZONTAL,
-    ):
+                 panel,
+                 label='',
+                 v=None,
+                 orientation=wx.HORIZONTAL):
         """
         Create a control embedded in a sizer for defining a 3D vector
 
@@ -383,9 +384,8 @@ class Vector3DInput(wx.StaticBoxSizer):
 class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
     __hlabels = ['index', 'x', 'y', 'z']
     def __init__(self, parent,
-        length,
-        orientation=wx.HORIZONTAL,
-    ):
+                 length,
+                 orientation=wx.HORIZONTAL):
         """
         Create a panel defining a set of 3D vectors
 
@@ -410,7 +410,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             )
             self.columnSizers.append(wx.BoxSizer(oppOri))
             self.columnSizers[i].Add(self.boxes[-1], 0,
-                wx.ALIGN_CENTRE_HORIZONTAL)
+                                     wx.ALIGN_CENTRE_HORIZONTAL)
             vectorsSizer.Add(self.columnSizers[i], scale, wx.EXPAND)
             scale = 1
         # vectors:
@@ -465,11 +465,9 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             print '%s warning: nothing to delete.' % self.__class__.__name__
 
     def getVector(self, i):
-        return geomtypes.Vec3([
-                self.__v[i][0].GetValue(),
-                self.__v[i][1].GetValue(),
-                self.__v[i][2].GetValue(),
-            ])
+        return geomtypes.Vec3([self.__v[i][0].GetValue(),
+                               self.__v[i][1].GetValue(),
+                               self.__v[i][2].GetValue()])
 
     def get(self):
         return [
@@ -501,13 +499,11 @@ class Vector3DSetDynamicPanel(wx.Panel):
     __defaultLabels = ['index', 'x', 'y', 'z']
     __nrOfColumns = 4
     def __init__(self,
-        parent,
-        length=3,
-        relExtraSpace=5,
-        orientation=wx.HORIZONTAL,
-        elementLabels=None
-        # TODO: what about the std keywords
-    ):
+                 parent,
+                 length=3,
+                 relExtraSpace=5,
+                 orientation=wx.HORIZONTAL,
+                 elementLabels=None):
         """
         Create a control embedded in a sizer for defining a set of 3D vectors
 
@@ -595,12 +591,11 @@ class Vector4DInput(wx.StaticBoxSizer):
     __ctrlIdIndex = 0
     __defaultLabels = ['x', 'y', 'z', 'w']
     def __init__(self,
-        panel,
-        label='',
-        orientation=wx.HORIZONTAL,
-        relativeFloatSize=4,
-        elementLabels=None
-    ):
+                 panel,
+                 label='',
+                 orientation=wx.HORIZONTAL,
+                 relativeFloatSize=4,
+                 elementLabels=None):
         """
         Create a control embedded in a sizer for defining 4D vectors
 
@@ -648,21 +643,17 @@ class Vector4DInput(wx.StaticBoxSizer):
         #ctrlId = e.GetId()
         vEvent = VectorUpdatedEvent(myEVT_VECTOR_UPDATED, self.GetId())
         vEvent.SetEventObject(self)
-        vEvent.SetVector(geomtypes.Vec4([
-                self.__v[0].GetValue(),
-                self.__v[1].GetValue(),
-                self.__v[2].GetValue(),
-                self.__v[3].GetValue()
-            ]))
+        vEvent.SetVector(geomtypes.Vec4([self.__v[0].GetValue(),
+                                         self.__v[1].GetValue(),
+                                         self.__v[2].GetValue(),
+                                         self.__v[3].GetValue()]))
         self.__v[self.__ctrlIdIndex].GetEventHandler().ProcessEvent(vEvent)
 
     def GetValue(self):
-        return geomtypes.Vec4([
-                self.__v[0].GetValue(),
-                self.__v[1].GetValue(),
-                self.__v[2].GetValue(),
-                self.__v[3].GetValue()
-            ])
+        return geomtypes.Vec4([self.__v[0].GetValue(),
+                               self.__v[1].GetValue(),
+                               self.__v[2].GetValue(),
+                               self.__v[3].GetValue()])
 
     def Destroy(self):
         for ctrl in self.__vLabel: ctrl.Destroy()
@@ -676,12 +667,11 @@ class Vector4DInput(wx.StaticBoxSizer):
 
 class FaceSetStaticPanel(wxXtra.ScrolledPanel):
     def __init__(self,
-        parent,
-        nrOfFaces=0,
-        faceLen=0,
-        width=40,
-        orientation=wx.HORIZONTAL,
-    ):
+                 parent,
+                 nrOfFaces=0,
+                 faceLen=0,
+                 width=40,
+                 orientation=wx.HORIZONTAL):
         """
         Create a control embedded in a sizer for defining a set of faces
 
@@ -728,7 +718,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         j = len(self.__fLabels)
         self.__fLabels.append(wx.StaticText(self, wx.ID_ANY, '%d ' % j))
         self.faceIndexSizer.Add(self.__fLabels[-1],
-                1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
+                                1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
 
         faceSizer = wx.BoxSizer(self.orientation)
         self.__f.append([faceSizer])
@@ -761,10 +751,8 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
             self.Layout()
 
     def getFace(self, index):
-        return [
-                self.__f[index][i].GetValue()
-                    for i in range(1, len(self.__f[index]))
-            ]
+        return [self.__f[index][i].GetValue()
+                for i in range(1, len(self.__f[index]))]
 
     def grow(self, nr, fLen):
         for i in range(nr):
@@ -795,11 +783,10 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
 
 class FaceSetDynamicPanel(wx.Panel):
     def __init__(self,
-        parent,
-        nrOfFaces=0,
-        faceLen=0,
-        orientation=wx.HORIZONTAL,
-    ):
+                 parent,
+                 nrOfFaces=0,
+                 faceLen=0,
+                 orientation=wx.HORIZONTAL):
         """
         Create a control for defining a set of faces, which can grow and shrink
         in size.
@@ -823,15 +810,14 @@ class FaceSetDynamicPanel(wx.Panel):
 
         # Add face list
         self.boxes.append(FaceSetStaticPanel(self, nrOfFaces, faceLen,
-            orientation=orientation))
+                                             orientation=orientation))
         self.__faceListIndex = len(self.boxes) - 1
         mainSizer.Add(self.boxes[-1], 10, wx.EXPAND)
 
         # Add button:
         addSizer = wx.BoxSizer(orientation)
         self.boxes.append(IntInput(
-                self, wx.ID_ANY, faceLen, size=(40, -1)
-            ))
+            self, wx.ID_ANY, faceLen, size=(40, -1)))
         self.__faceLenIndex = len(self.boxes) - 1
         addSizer.Add(self.boxes[-1], 0, wx.EXPAND)
         self.boxes.append(wx.Button(self, wx.ID_ANY, "-Faces Add nr:"))
@@ -878,27 +864,26 @@ class FaceSetDynamicPanel(wx.Panel):
 
 class SymmetrySelect(wx.StaticBoxSizer):
     def __init__(self,
-        panel,
-        label='',
-        groupsList=[
-            isometry.E,
-            isometry.ExI,
-            isometry.Cn,
-            isometry.CnxI,
-            isometry.C2nCn,
-            isometry.DnCn,
-            isometry.Dn,
-            isometry.DnxI,
-            isometry.D2nDn,
-            isometry.A4,
-            isometry.A4xI,
-            isometry.S4A4,
-            isometry.S4,
-            isometry.S4xI,
-            isometry.A5,
-            isometry.A5xI],
-        onSymSelect= None,
-        onGetSymSetup= None):
+                 panel,
+                 label='',
+                 groupsList=[isometry.E,
+                             isometry.ExI,
+                             isometry.Cn,
+                             isometry.CnxI,
+                             isometry.C2nCn,
+                             isometry.DnCn,
+                             isometry.Dn,
+                             isometry.DnxI,
+                             isometry.D2nDn,
+                             isometry.A4,
+                             isometry.A4xI,
+                             isometry.S4A4,
+                             isometry.S4,
+                             isometry.S4xI,
+                             isometry.A5,
+                             isometry.A5xI],
+                 onSymSelect= None,
+                 onGetSymSetup= None):
         """
         Create a control embedded in a sizer for defining a symmetry.
 
@@ -931,7 +916,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.Boxes[-1].SetSelection(0)
         self.__SymmetryGuiIndex = len(self.Boxes) - 1
         self.panel.Bind(wx.EVT_CHOICE,
-            self.onSetSymmetry, id=self.Boxes[-1].GetId())
+                        self.onSetSymmetry, id=self.Boxes[-1].GetId())
         self.Add(self.Boxes[-1], 0, wx.EXPAND)
 
         self.addSetupGui()
@@ -961,15 +946,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
         selClass = self.groupsList[Id]
         #print 'getSymmetryClass: nr:', Id, 'class:', selClass.__name__, selClass
         if applyOrder:
-            if selClass in [
-                isometry.Cn,
-                isometry.CnxI,
-                isometry.C2nCn,
-                isometry.DnCn,
-                isometry.Dn,
-                isometry.DnxI,
-                isometry.D2nDn
-            ]:
+            if selClass in [isometry.Cn,
+                            isometry.CnxI,
+                            isometry.C2nCn,
+                            isometry.DnCn,
+                            isometry.Dn,
+                            isometry.DnxI,
+                            isometry.D2nDn]:
                 assert selClass.init_pars[0]['type'] == 'int', (
                     'The first index should specify the n-order')
                 n = self.oriGuis[0].GetValue()
@@ -989,39 +972,37 @@ class SymmetrySelect(wx.StaticBoxSizer):
                     C = isometry.DxI
                 assert n > 0, 'warning'
                 selClass = C(n)
-            elif selClass in [
-                isometry.E,
-                isometry.ExI,
-                isometry.C2C1,
-                isometry.C4C2,
-                isometry.C2,
-                isometry.C2xI,
-                isometry.C3,
-                isometry.C3xI,
-                isometry.C4,
-                isometry.C4xI,
-                isometry.C5,
-                isometry.C5xI,
-                isometry.D5C5,
-                isometry.D5xI,
-                isometry.D5,
-                isometry.D4C4,
-                isometry.D4xI,
-                isometry.D4,
-                isometry.D3C3,
-                isometry.D3xI,
-                isometry.D3,
-                isometry.D2C2,
-                isometry.D2xI,
-                isometry.D2,
-                isometry.A4,
-                isometry.A4xI,
-                isometry.S4A4,
-                isometry.S4,
-                isometry.S4xI,
-                isometry.A5,
-                isometry.A5xI,
-            ]:
+            elif selClass in [isometry.E,
+                              isometry.ExI,
+                              isometry.C2C1,
+                              isometry.C4C2,
+                              isometry.C2,
+                              isometry.C2xI,
+                              isometry.C3,
+                              isometry.C3xI,
+                              isometry.C4,
+                              isometry.C4xI,
+                              isometry.C5,
+                              isometry.C5xI,
+                              isometry.D5C5,
+                              isometry.D5xI,
+                              isometry.D5,
+                              isometry.D4C4,
+                              isometry.D4xI,
+                              isometry.D4,
+                              isometry.D3C3,
+                              isometry.D3xI,
+                              isometry.D3,
+                              isometry.D2C2,
+                              isometry.D2xI,
+                              isometry.D2,
+                              isometry.A4,
+                              isometry.A4xI,
+                              isometry.S4A4,
+                              isometry.S4,
+                              isometry.S4xI,
+                              isometry.A5,
+                              isometry.A5xI]:
                 pass
             else:
                 assert False, 'unknown class %s' % selClass
@@ -1051,12 +1032,10 @@ class SymmetrySelect(wx.StaticBoxSizer):
             inputType = init['type']
             if inputType == 'vec3':
                 gui = Vector3DInput(self.panel, init['lab'],
-                        v=symSetup[init['par']]
-                    )
+                                    v=symSetup[init['par']])
             elif inputType == 'int':
                 gui = LabeledIntInput(self.panel, init['lab'],
-                        init=symSetup[init['par']]
-                    )
+                                      init=symSetup[init['par']])
                 self.chk_if_updated.append(gui)
             else:
                 assert False, "oops unimplemented input type"
@@ -1164,12 +1143,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
 class AxisRotateSizer(wx.BoxSizer):
     def __init__(self,
-        panel,
-        on_angle_callback,
-        min_angle=-180,
-        max_angle=180,
-        initial_angle=0
-    ):
+                 panel,
+                 on_angle_callback,
+                 min_angle=-180,
+                 max_angle=180,
+                 initial_angle=0):
         """
         Create a sizer for setting a rotation.
 
@@ -1217,9 +1195,8 @@ class AxisRotateSizer(wx.BoxSizer):
         ))
         self.__SlideAngleGuiIndex = len(self.showGui) - 1
         panel.Bind(wx.EVT_SLIDER,
-            self.onSlideAngleAdjust,
-            id=self.showGui[-1].GetId()
-        )
+                   self.onSlideAngleAdjust,
+                   id=self.showGui[-1].GetId())
         rotateSizer.Add(self.showGui[-1], 1, wx.EXPAND)
         self.showGui.append(wx.Button(panel, wx.ID_ANY, "-"))
         panel.Bind(
