@@ -532,8 +532,8 @@ class CtrlWin(wx.Frame):
             #   where the angle is in degrees (floating point)
             if filename[-3:] == '.py':
                 fd = open(os.path.join(this.importDirName, filename), 'r')
-                ed = {'__name__': 'readPyFile'}
-                exec fd in ed
+                ed = {}
+                exec(fd.read(), ed)
                 moreSettings = 0
                 keyErrStr = 'Note: KeyError while looking for'
                 key = 'finalSym'

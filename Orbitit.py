@@ -700,8 +700,8 @@ class MainWindow(wx.Frame):
     def readSceneFile(this, filename):
         print "Starting scene", filename
         fd = open(filename, 'r')
-        ed = {'__name__': 'readSceneFile'}
-        exec fd in ed
+        ed = {}
+        exec(fd.read(), ed)
         scene = {
             'lab': ed['Title'],
             'class': ed['Scene']
