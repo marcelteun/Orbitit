@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2019 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -31,7 +31,7 @@ import X3D
 import Scenes3D
 import Geom3D
 import geomtypes
-import GeomGui
+import geom_gui
 import wx
 import pprint
 import wx.lib.intctrl
@@ -965,7 +965,7 @@ class TransformSettingsWindow(wx.Frame):
     def addContents(this):
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        this.rotateSizer = GeomGui.AxisRotateSizer(
+        this.rotateSizer = geom_gui.AxisRotateSizer(
             this.panel,
             this.on_rot,
             min_angle=-180,
@@ -1355,23 +1355,23 @@ class ViewSettingsSizer(wx.BoxSizer):
             rotationSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
             this.Boxes.append(wx.StaticBox(parentPanel, label = 'In a Plane Spanned by'))
             planeSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-            this.v0Gui = GeomGui.Vector4DInput(
+            this.v0Gui = geom_gui.Vector4DInput(
                     this.parentPanel,
                     #label = 'Vector 1',
                     relativeFloatSize = 4,
                     elementLabels = ['x0', 'y0', 'z0', 'w0']
                 )
             this.parentPanel.Bind(
-                GeomGui.EVT_VECTOR_UPDATED, this.onV, id = this.v0Gui.GetId()
+                geom_gui.EVT_VECTOR_UPDATED, this.onV, id = this.v0Gui.GetId()
             )
-            this.v1Gui = GeomGui.Vector4DInput(
+            this.v1Gui = geom_gui.Vector4DInput(
                     this.parentPanel,
                     #label = 'Vector 1',
                     relativeFloatSize = 4,
                     elementLabels = ['x1', 'y1', 'z1', 'w1']
                 )
             this.parentPanel.Bind(
-                GeomGui.EVT_VECTOR_UPDATED, this.onV, id = this.v1Gui.GetId()
+                geom_gui.EVT_VECTOR_UPDATED, this.onV, id = this.v1Gui.GetId()
             )
             # Exchange planes
             this.exchangeGui = wx.CheckBox(this.parentPanel, label = "Use Orthogonal Plane instead")

@@ -16,7 +16,7 @@ the same symmetries with the final symmetry as specified in the stabiliser
 symmetry)
 """
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2019 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -46,7 +46,7 @@ import wx.lib.colourselect as wxLibCS
 
 import rgb
 import Geom3D
-import GeomGui
+import geom_gui
 import geomtypes
 import isometry
 import orbit
@@ -170,7 +170,7 @@ class CtrlWin(wx.Frame):
         # VERTICES
         self.show_gui.append(wx.StaticBox(self.panel, label='Vertices'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
-        self.show_gui.append(GeomGui.Vector3DSetDynamicPanel(
+        self.show_gui.append(geom_gui.Vector3DSetDynamicPanel(
             self.panel, relExtraSpace=3
         ))
         self._vs_gui_idx = len(self.show_gui) - 1
@@ -181,7 +181,7 @@ class CtrlWin(wx.Frame):
         self.show_gui.append(wx.StaticBox(self.panel, label='Faces'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
         self.show_gui.append(
-            GeomGui.FaceSetDynamicPanel(self.panel, 0, faceLen=3)
+            geom_gui.FaceSetDynamicPanel(self.panel, 0, faceLen=3)
         )
         self._fs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
@@ -196,7 +196,7 @@ class CtrlWin(wx.Frame):
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
-        self.rot_sizer = GeomGui.AxisRotateSizer(
+        self.rot_sizer = geom_gui.AxisRotateSizer(
             self.panel,
             self.on_rot,
             min_angle=-180,
@@ -206,7 +206,7 @@ class CtrlWin(wx.Frame):
         face_sizer.Add(self.rot_sizer)
 
         # SYMMETRY
-        self.show_gui.append(GeomGui.SymmetrySelect(
+        self.show_gui.append(geom_gui.SymmetrySelect(
             self.panel, 'Final Symmetry',
             onSymSelect=self.on_final_sym_select,
             onGetSymSetup=self.on_get_final_sym_setup))
@@ -218,7 +218,7 @@ class CtrlWin(wx.Frame):
             self.stab_sym_setup = self.col_select[:]
 
         # Stabiliser
-        self.show_gui.append(GeomGui.SymmetrySelect(
+        self.show_gui.append(geom_gui.SymmetrySelect(
             self.panel,
             'Stabiliser Symmetry',
             self.show_gui[self._final_sym_gui_idx].getSymmetryClass(
