@@ -181,7 +181,7 @@ class CtrlWin(wx.Frame):
         self.show_gui.append(wx.StaticBox(self.panel, label='Faces'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
         self.show_gui.append(
-            geom_gui.FaceSetDynamicPanel(self.panel, 0, faceLen=3)
+            geom_gui.FaceSetDynamicPanel(self.panel, 0, face_len=3)
         )
         self._fs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
@@ -208,8 +208,8 @@ class CtrlWin(wx.Frame):
         # SYMMETRY
         self.show_gui.append(geom_gui.SymmetrySelect(
             self.panel, 'Final Symmetry',
-            onSymSelect=self.on_final_sym_select,
-            onGetSymSetup=self.on_get_final_sym_setup))
+            on_sym_select=self.on_final_sym_select,
+            on_get_sym_setup=self.on_get_final_sym_setup))
         self._final_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         if self.col_select is None:
@@ -221,9 +221,9 @@ class CtrlWin(wx.Frame):
         self.show_gui.append(geom_gui.SymmetrySelect(
             self.panel,
             'Stabiliser Symmetry',
-            self.show_gui[self._final_sym_gui_idx].getSymmetryClass(
-                applyOrder=True).subgroups,
-            onGetSymSetup=self.on_get_stab_sy_setup))
+            self.show_gui[self._final_sym_gui_idx].get_sym_class(
+                apply_order=True).subgroups,
+            on_get_sym_setup=self.on_get_stab_sy_setup))
         self._stab_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
@@ -234,9 +234,9 @@ class CtrlWin(wx.Frame):
                         id=self.show_gui[-1].GetId())
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
-        self.show_gui[self._final_sym_gui_idx].SetSelected(0)
+        self.show_gui[self._final_sym_gui_idx].set_selected(0)
         self.on_final_sym_select(
-            self.show_gui[self._final_sym_gui_idx].getSymmetryClass())
+            self.show_gui[self._final_sym_gui_idx].get_sym_class())
 
         self.ctrl_sizer = ctrl_sizer
         return ctrl_sizer
@@ -255,8 +255,8 @@ class CtrlWin(wx.Frame):
             self.col_sizer = wx.StaticBoxSizer(self.col_gui_box, wx.VERTICAL)
             self.ctrl_sizer.Add(self.col_sizer, 0, wx.EXPAND)
         self.orbit = orbit.Orbit((
-            self.show_gui[self._final_sym_gui_idx].GetSelected(),
-            self.show_gui[self._stab_sym_gui_idx].GetSelected()
+            self.show_gui[self._final_sym_gui_idx].get_selected(),
+            self.show_gui[self._stab_sym_gui_idx].get_selected()
         ))
         no_of_cols_choice_lst = [
             '%d (based on %s)' % (p['index'], p['class'].__name__)
@@ -275,9 +275,9 @@ class CtrlWin(wx.Frame):
                         self.on_no_of_col_select,
                         id=self.col_guis[-1].GetId())
         self.col_alt = self.col_select[
-            self.show_gui[self._final_sym_gui_idx].getSelectedIndex()
+            self.show_gui[self._final_sym_gui_idx].get_selected_idx()
         ][
-            self.show_gui[self._stab_sym_gui_idx].getSelectedIndex()
+            self.show_gui[self._stab_sym_gui_idx].get_selected_idx()
         ]
         self.col_guis[-1].SetSelection(self.col_alt[0])
         self._no_of_cols_gui_idx = len(self.col_guis)-1
@@ -295,7 +295,7 @@ class CtrlWin(wx.Frame):
     def on_get_stab_sy_setup(self, sym_idx):
         """Return the orientation of the stabiliser symmetry"""
         final_sym_idx = self.show_gui[
-            self._final_sym_gui_idx].getSelectedIndex()
+            self._final_sym_gui_idx].get_selected_idx()
         try:
             return self.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
@@ -307,11 +307,11 @@ class CtrlWin(wx.Frame):
         """Handle when the final symmetry is selected"""
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
         stab_syms = sym.subgroups
-        i = final_sym_gui.getSelectedIndex()
+        i = final_sym_gui.get_selected_idx()
         # initialise stabiliser setup before setting the list.
         if self.stab_sym_setup[i] is None:
             self.stab_sym_setup[i] = [None for _ in stab_syms]
-        self.show_gui[self._stab_sym_gui_idx].setList(stab_syms)
+        self.show_gui[self._stab_sym_gui_idx].set_lst(stab_syms)
         no_of_stabs = self.show_gui[self._stab_sym_gui_idx].length
         if self.col_select[i] is None:
             self.col_select[i] = [[0, 0] for _ in range(no_of_stabs)]
@@ -322,19 +322,21 @@ class CtrlWin(wx.Frame):
         # Check these first before you retrieve values. E.g. if the 'n' in Cn
         # symmetry is updated, then the class is updated. As soon as you
         # retrieve the value, val_updated will be reset.
-        updated0 = self.show_gui[self._final_sym_gui_idx].isSymClassUpdated()
-        updated1 = self.show_gui[self._stab_sym_gui_idx].isSymClassUpdated()
+        updated0 = self.show_gui[
+            self._final_sym_gui_idx].is_sym_class_updated()
+        updated1 = self.show_gui[
+            self._stab_sym_gui_idx].is_sym_class_updated()
         verts = self.show_gui[self._vs_gui_idx].get()
         faces = self.show_gui[self._fs_gui_idx].get()
         if faces == []:
             self.status_text('No faces defined!', LOG_ERR)
             return
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
-        final_sym = final_sym_gui.GetSelected()
-        final_sym_idx = final_sym_gui.getSelectedIndex()
+        final_sym = final_sym_gui.get_selected()
+        final_sym_idx = final_sym_gui.get_selected_idx()
         stab_sym_gui = self.show_gui[self._stab_sym_gui_idx]
-        stab_sym = stab_sym_gui.GetSelected()
-        stab_sym_idx = stab_sym_gui.getSelectedIndex()
+        stab_sym = stab_sym_gui.get_selected()
+        stab_sym_idx = stab_sym_gui.get_selected_idx()
         self.final_sym_setup[final_sym_idx] = final_sym.setup
         self.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup
         try:
@@ -615,10 +617,10 @@ class CtrlWin(wx.Frame):
                     print(key_err_str, key)
                 if key_defined:
                     more_settings += 1
-                    self.show_gui[self._final_sym_gui_idx].SetSelectedClass(
+                    self.show_gui[self._final_sym_gui_idx].set_selected_class(
                         final_sym
                     )
-                    self.show_gui[self._final_sym_gui_idx].onSetSymmetry(None)
+                    self.show_gui[self._final_sym_gui_idx].on_set_sym(None)
                     key = 'final_sym_setup'
                     key_defined = False
                     try:
@@ -628,7 +630,7 @@ class CtrlWin(wx.Frame):
                         print(key_err_str, key)
                     if key_defined:
                         more_settings += 1
-                        self.show_gui[self._final_sym_gui_idx].SetupSymmetry(
+                        self.show_gui[self._final_sym_gui_idx].setup_sym(
                             sym_setup
                         )
                 key = 'stab_sym'
@@ -640,10 +642,10 @@ class CtrlWin(wx.Frame):
                     print(key_err_str, key)
                 if key_defined:
                     more_settings += 1
-                    self.show_gui[self._stab_sym_gui_idx].SetSelectedClass(
+                    self.show_gui[self._stab_sym_gui_idx].set_selected_class(
                         stab_sym
                     )
-                    self.show_gui[self._stab_sym_gui_idx].onSetSymmetry(None)
+                    self.show_gui[self._stab_sym_gui_idx].on_set_sym(None)
                     key = 'stab_sym_setup'
                     key_defined = False
                     try:
@@ -653,7 +655,7 @@ class CtrlWin(wx.Frame):
                         print(key_err_str, key)
                     if key_defined:
                         more_settings += 1
-                        self.show_gui[self._stab_sym_gui_idx].SetupSymmetry(
+                        self.show_gui[self._stab_sym_gui_idx].setup_sym(
                             sym_setup
                         )
                 if more_settings > 0:

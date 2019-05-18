@@ -34,7 +34,7 @@ import isometry
 import wx.lib.scrolledpanel as wxXtra
 
 # TODO:
-# - filter Fs for FacesInput.GetFace (negative nrs, length 2, etc)
+# - filter faces for FacesInput.GetFace (negative nrs, length 2, etc)
 
 def oppositeOrientation(orientation):
     if orientation == wx.HORIZONTAL:
@@ -284,35 +284,35 @@ class LabeledIntInput(wx.StaticBoxSizer):
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
                      default. Defines the orientation of the label - int input.
         """
-        self.Boxes = []
+        self.boxes = []
         wx.BoxSizer.__init__(self, orientation)
-        self.Boxes.append(
+        self.boxes.append(
             wx.StaticText(panel, wx.ID_ANY, label + ' ',
                           style=wx.ALIGN_RIGHT
             )
         )
-        self.Add(self.Boxes[-1], 1, wx.EXPAND)
+        self.Add(self.boxes[-1], 1, wx.EXPAND)
         if not isinstance(init, int):
             print '{} warning: initialiser not an int ({})'.format(
                 self.__class__, str(init))
             init = 0
-        self.Boxes.append(IntInput(
+        self.boxes.append(IntInput(
             panel, wx.ID_ANY, init, size=(width, -1)))
-        self.Add(self.Boxes[-1], 0, wx.EXPAND)
-        self.int_gui_idx = len(self.Boxes) - 1
+        self.Add(self.boxes[-1], 0, wx.EXPAND)
+        self.int_gui_idx = len(self.boxes) - 1
 
     @property
     def val_updated(self):
-        return self.Boxes[self.int_gui_idx].val_updated
+        return self.boxes[self.int_gui_idx].val_updated
 
     def GetValue(self):
-        return self.Boxes[-1].GetValue()
+        return self.boxes[-1].GetValue()
 
     def SetValue(self, i):
-        return self.Boxes[-1].SetValue(i)
+        return self.boxes[-1].SetValue(i)
 
     def Destroy(self):
-        for box in self.Boxes:
+        for box in self.boxes:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError: pass
@@ -339,14 +339,14 @@ class Vector3DInput(wx.StaticBoxSizer):
                        ['index', 'x', 'y', 'z'] is used.
         """
         self.panel = panel
-        self.Boxes = []
+        self.boxes = []
         wx.BoxSizer.__init__(self, orientation)
-        self.Boxes.append(
+        self.boxes.append(
             wx.StaticText(self.panel, wx.ID_ANY, label + ' ',
                 style=wx.ALIGN_RIGHT
             )
         )
-        self.Add(self.Boxes[-1], 1, wx.EXPAND)
+        self.Add(self.boxes[-1], 1, wx.EXPAND)
         self.__v = []
         for i in range(3):
             self.__v.append(FloatInput(self.panel, wx.ID_ANY, 0))
@@ -374,7 +374,7 @@ class Vector3DInput(wx.StaticBoxSizer):
 
     def Destroy(self):
         for ctrl in self.__v: ctrl.Destroy()
-        for box in self.Boxes:
+        for box in self.boxes:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError: pass
@@ -399,7 +399,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         wxXtra.ScrolledPanel.__init__(self, parent)
 
         self.boxes = []
-        oppOri = oppositeOrientation(orientation)
+        opp_orient = oppositeOrientation(orientation)
         vectorsSizer = wx.BoxSizer(orientation)
         self.columnSizers = [] # align vector columns
         # header:
@@ -408,7 +408,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             self.boxes.append(
                 wx.StaticText(self, wx.ID_ANY, self.__hlabels[i])
             )
-            self.columnSizers.append(wx.BoxSizer(oppOri))
+            self.columnSizers.append(wx.BoxSizer(opp_orient))
             self.columnSizers[i].Add(self.boxes[-1], 0,
                                      wx.ALIGN_CENTRE_HORIZONTAL)
             vectorsSizer.Add(self.columnSizers[i], scale, wx.EXPAND)
@@ -421,11 +421,11 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         # use a list sizer to be able to fill white space for list with vectors
         # that are too small (cannot remove the wx.EXPAND above since the
         # vector columns need to be aligned.
-        listSizer = wx.BoxSizer(oppOri)
-        listSizer.Add(vectorsSizer, 0)
-        listSizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
+        list_sizer = wx.BoxSizer(opp_orient)
+        list_sizer.Add(vectorsSizer, 0)
+        list_sizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
 
-        self.SetSizer(listSizer)
+        self.SetSizer(list_sizer)
         self.SetAutoLayout(True)
         self.SetupScrolling()
 
@@ -520,21 +520,21 @@ class Vector3DSetDynamicPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self.boxes = []
-        oppOri = oppositeOrientation(orientation)
-        mainSizer = wx.BoxSizer(oppOri)
+        opp_orient = oppositeOrientation(orientation)
+        main_sizer = wx.BoxSizer(opp_orient)
 
         # Add vertex list
         self.boxes.append(Vector3DSetStaticPanel(self, length, orientation))
-        mainSizer.Add(self.boxes[-1], relExtraSpace, wx.EXPAND)
+        main_sizer.Add(self.boxes[-1], relExtraSpace, wx.EXPAND)
         # Add button:
-        addSizer = wx.BoxSizer(orientation)
-        self.boxes.append(wx.Button(self, wx.ID_ANY, "Vertices Add nr:"))
-        addSizer.Add(self.boxes[-1], 1, wx.EXPAND)
-        self.Bind(wx.EVT_BUTTON, self.onAdd, id=self.boxes[-1].GetId())
+        add_sizer = wx.BoxSizer(orientation)
+        self.boxes.append(wx.Button(self, wx.ID_ANY, "Vertices Add Times:"))
+        add_sizer.Add(self.boxes[-1], 1, wx.EXPAND)
+        self.Bind(wx.EVT_BUTTON, self.on_add, id=self.boxes[-1].GetId())
         self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1)))
         self.__addNroVIndex = len(self.boxes) - 1
-        addSizer.Add(self.boxes[-1], 0, wx.EXPAND)
-        mainSizer.Add(addSizer, 1, wx.EXPAND)
+        add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
+        main_sizer.Add(add_sizer, 1, wx.EXPAND)
 
         # Clear and Delete buttons:
         rmSizer = wx.BoxSizer(orientation)
@@ -544,20 +544,20 @@ class Vector3DSetDynamicPanel(wx.Panel):
         rmSizer.Add(self.boxes[-1], 1, wx.EXPAND)
         # Delete:
         self.boxes.append(wx.Button(self, wx.ID_ANY, "Delete Vertex"))
-        self.Bind(wx.EVT_BUTTON, self.onRm, id=self.boxes[-1].GetId())
+        self.Bind(wx.EVT_BUTTON, self.on_rm, id=self.boxes[-1].GetId())
         rmSizer.Add(self.boxes[-1], 1, wx.EXPAND)
-        mainSizer.Add(rmSizer, 1, wx.EXPAND)
+        main_sizer.Add(rmSizer, 1, wx.EXPAND)
 
-        self.SetSizer(mainSizer)
+        self.SetSizer(main_sizer)
         self.SetAutoLayout(True)
 
-    def onAdd(self, e):
+    def on_add(self, e):
         l = self.boxes[self.__addNroVIndex].GetValue()
         self.boxes[0].grow(l)
         self.Layout()
         e.Skip()
 
-    def onRm(self, e):
+    def on_rm(self, e):
         self.boxes[0].rmVector(-1)
         self.Layout()
         e.Skip()
@@ -610,8 +610,8 @@ class Vector4DInput(wx.StaticBoxSizer):
                        consisting of 4 strings On default ['x', 'y', 'z', 'w']
                        is used.
         """
-        self.Boxes = [wx.StaticBox(panel, label = label)]
-        wx.StaticBoxSizer.__init__(self, self.Boxes[-1], orientation)
+        self.boxes = [wx.StaticBox(panel, label = label)]
+        wx.StaticBoxSizer.__init__(self, self.boxes[-1], orientation)
         if elementLabels == None: elementLabels = self.__defaultLabels
         self.__vLabel = [
             wx.StaticText(panel, wx.ID_ANY, elementLabels[0], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
@@ -658,7 +658,7 @@ class Vector4DInput(wx.StaticBoxSizer):
     def Destroy(self):
         for ctrl in self.__vLabel: ctrl.Destroy()
         for ctrl in self.__v: ctrl.Destroy()
-        for box in self.Boxes:
+        for box in self.boxes:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError: pass
@@ -668,17 +668,17 @@ class Vector4DInput(wx.StaticBoxSizer):
 class FaceSetStaticPanel(wxXtra.ScrolledPanel):
     def __init__(self,
                  parent,
-                 nrOfFaces=0,
-                 faceLen=0,
+                 no_of_faces=0,
+                 face_len=0,
                  width=40,
                  orientation=wx.HORIZONTAL):
         """
         Create a control embedded in a sizer for defining a set of faces
 
         parent: the parent widget.
-        nrOfFaces: initialise the input with nrOfFaces amount of faces.
-        faceLen: initialise the faces with faceLen vertices. Also the default
-                 value for adding faces.
+        no_of_faces: initialise the input with no_of_faces amount of faces.
+        face_len: initialise the faces with face_len vertices. Also the default
+                  value for adding faces.
         width: width of the face index fields.
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
                      default. Defines the orientation of the separate face
@@ -687,114 +687,114 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         wxXtra.ScrolledPanel.__init__(self, parent)
         self.parent = parent
         self.width = width
-        self.faceLen = faceLen
+        self.face_len = face_len
         self.orientation = orientation
-        oppOri = oppositeOrientation(orientation)
+        opp_orient = oppositeOrientation(orientation)
 
-        self.__f = []
-        self.__fLabels = []
-        self.faceIndexSizer = wx.BoxSizer(oppOri) # align face indices
-        self.vertexIndexSizer = wx.BoxSizer(oppOri)
-        facesSizer = wx.BoxSizer(orientation)
-        facesSizer.Add(self.faceIndexSizer, 0, wx.EXPAND)
-        facesSizer.Add(self.vertexIndexSizer, 0, wx.EXPAND)
+        self._faces = []
+        self._faces_labels = []
+        self.face_idx_sizer = wx.BoxSizer(opp_orient) # align face indices
+        self.vertex_idx_sizer = wx.BoxSizer(opp_orient)
+        faces_sizer = wx.BoxSizer(orientation)
+        faces_sizer.Add(self.face_idx_sizer, 0, wx.EXPAND)
+        faces_sizer.Add(self.vertex_idx_sizer, 0, wx.EXPAND)
 
-        self.grow(nrOfFaces, faceLen)
+        self.grow(no_of_faces, face_len)
 
         # use a list sizer to be able to fill white space if the face list
         #word is too small
-        listSizer = wx.BoxSizer(oppOri)
-        listSizer.Add(facesSizer, 0)
-        listSizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
+        list_sizer = wx.BoxSizer(opp_orient)
+        list_sizer.Add(faces_sizer, 0)
+        list_sizer.Add(wx.BoxSizer(orientation), 0, wx.EXPAND)
 
-        self.SetSizer(listSizer)
+        self.SetSizer(list_sizer)
         self.SetAutoLayout(True)
         self.SetupScrolling()
 
-    def addFace(self, fLen=0, face=None):
-        assert fLen != 0 or face is not None
+    def add_face(self, face_len=0, face=None):
+        assert face_len != 0 or face is not None
         if face != None:
-            fLen = len(face)
-        j = len(self.__fLabels)
-        self.__fLabels.append(wx.StaticText(self, wx.ID_ANY, '%d ' % j))
-        self.faceIndexSizer.Add(self.__fLabels[-1],
+            face_len = len(face)
+        j = len(self._faces_labels)
+        self._faces_labels.append(wx.StaticText(self, wx.ID_ANY, '%d ' % j))
+        self.face_idx_sizer.Add(self._faces_labels[-1],
                                 1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
 
-        faceSizer = wx.BoxSizer(self.orientation)
-        self.__f.append([faceSizer])
-        for i in range(fLen):
+        face_sizer = wx.BoxSizer(self.orientation)
+        self._faces.append([face_sizer])
+        for i in range(face_len):
             if (face != None):
                 ind = face[i]
             else:
                 ind = 0
-            self.__f[-1].append(
+            self._faces[-1].append(
                 IntInput(self, wx.ID_ANY, ind, size=(self.width, -1))
             )
-            faceSizer.Add(self.__f[-1][-1], 0, wx.EXPAND)
-        self.vertexIndexSizer.Add(faceSizer, 0, wx.EXPAND)
+            face_sizer.Add(self._faces[-1][-1], 0, wx.EXPAND)
+        self.vertex_idx_sizer.Add(face_sizer, 0, wx.EXPAND)
 
         self.Layout()
 
-    def rmFace(self, i):
-        if len(self.__fLabels) > 0:
-            assert i < len(self.__fLabels)
-            assert len(self.__f) > 0
-            g = self.__fLabels[i]
-            del self.__fLabels[i]
+    def rm_face(self, i):
+        if len(self._faces_labels) > 0:
+            assert i < len(self._faces_labels)
+            assert len(self._faces) > 0
+            g = self._faces_labels[i]
+            del self._faces_labels[i]
             g.Destroy()
-            f = self.__f[i]
-            del self.__f[i]
-            self.vertexIndexSizer.Remove(f[0])
+            f = self._faces[i]
+            del self._faces[i]
+            self.vertex_idx_sizer.Remove(f[0])
             del f[0]
             for g in f:
                 g.Destroy()
             self.Layout()
 
-    def getFace(self, index):
-        return [self.__f[index][i].GetValue()
-                for i in range(1, len(self.__f[index]))]
+    def get_face(self, index):
+        return [self._faces[index][i].GetValue()
+                for i in range(1, len(self._faces[index]))]
 
-    def grow(self, nr, fLen):
+    def grow(self, nr, face_len):
         for i in range(nr):
-            self.addFace(fLen)
+            self.add_face(face_len)
 
-    def extend(self, Fs):
-        for f in Fs:
-            self.addFace(face=f)
+    def extend(self, faces):
+        for f in faces:
+            self.add_face(face=f)
 
     def get(self):
         return [
-            self.getFace(i) for i in range(len(self.__f))
+            self.get_face(i) for i in range(len(self._faces))
         ]
 
     def clear(self):
-        for l in range(len(self.__f)):
-            self.rmFace(-1)
+        for l in range(len(self._faces)):
+            self.rm_face(-1)
 
-    def set(self, Fs):
+    def set(self, faces):
         self.clear()
-        self.extend(Fs)
+        self.extend(faces)
 
     def Destroy(self):
-        for ctrl in self.__fLabels: ctrl.Destroy()
-        for ctrl in self.__f: ctrl.Destroy()
+        for ctrl in self._faces_labels: ctrl.Destroy()
+        for ctrl in self._faces: ctrl.Destroy()
 
     # TODO Insert?
 
 class FaceSetDynamicPanel(wx.Panel):
     def __init__(self,
                  parent,
-                 nrOfFaces=0,
-                 faceLen=0,
+                 no_of_faces=0,
+                 face_len=0,
                  orientation=wx.HORIZONTAL):
         """
         Create a control for defining a set of faces, which can grow and shrink
         in size.
 
         parent: the parent widget.
-        nrOfFaces: initialise the input with nrOfFaces amount of faces.
-        faceLen: initialise the faces with faceLen vertices. Also the default
-                 value for adding faces.
+        no_of_faces: initialise the input with no_of_faces amount of faces.
+        face_len: initialise the faces with face_len vertices. Also the default
+                  value for adding faces.
         width: width of the face index fields.
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
                      default. Defines the orientation of the separate face
@@ -802,58 +802,58 @@ class FaceSetDynamicPanel(wx.Panel):
         """
         self.parent = parent
         wx.Panel.__init__(self, parent)
-        self.faceLen = faceLen
+        self.face_len = face_len
 
         self.boxes = []
-        oppOri = oppositeOrientation(orientation)
-        mainSizer = wx.BoxSizer(oppOri)
+        opp_orient = oppositeOrientation(orientation)
+        main_sizer = wx.BoxSizer(opp_orient)
 
         # Add face list
-        self.boxes.append(FaceSetStaticPanel(self, nrOfFaces, faceLen,
+        self.boxes.append(FaceSetStaticPanel(self, no_of_faces, face_len,
                                              orientation=orientation))
-        self.__faceListIndex = len(self.boxes) - 1
-        mainSizer.Add(self.boxes[-1], 10, wx.EXPAND)
+        self._face_lst_idx = len(self.boxes) - 1
+        main_sizer.Add(self.boxes[-1], 10, wx.EXPAND)
 
         # Add button:
-        addSizer = wx.BoxSizer(orientation)
+        add_sizer = wx.BoxSizer(orientation)
         self.boxes.append(IntInput(
-            self, wx.ID_ANY, faceLen, size=(40, -1)))
-        self.__faceLenIndex = len(self.boxes) - 1
-        addSizer.Add(self.boxes[-1], 0, wx.EXPAND)
-        self.boxes.append(wx.Button(self, wx.ID_ANY, "-Faces Add nr:"))
-        addSizer.Add(self.boxes[-1], 1, wx.EXPAND)
-        self.Bind(wx.EVT_BUTTON, self.onAdd, id=self.boxes[-1].GetId())
+            self, wx.ID_ANY, face_len, size=(40, -1)))
+        self._face_len_idx = len(self.boxes) - 1
+        add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
+        self.boxes.append(wx.Button(self, wx.ID_ANY, "-Faces Add Times:"))
+        add_sizer.Add(self.boxes[-1], 1, wx.EXPAND)
+        self.Bind(wx.EVT_BUTTON, self.on_add, id=self.boxes[-1].GetId())
         self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1)))
-        self.__nroFsLenIndex = len(self.boxes) - 1
-        addSizer.Add(self.boxes[-1], 0, wx.EXPAND)
-        mainSizer.Add(addSizer, 0, wx.EXPAND)
+        self._nr_of_faces_idx = len(self.boxes) - 1
+        add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
+        main_sizer.Add(add_sizer, 0, wx.EXPAND)
         # Delete button:
         self.boxes.append(wx.Button(self, wx.ID_ANY, "Delete Face"))
-        self.Bind(wx.EVT_BUTTON, self.onRm, id = self.boxes[-1].GetId())
-        mainSizer.Add(self.boxes[-1], 0, wx.EXPAND)
+        self.Bind(wx.EVT_BUTTON, self.on_rm, id = self.boxes[-1].GetId())
+        main_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
 
-        self.SetSizer(mainSizer)
+        self.SetSizer(main_sizer)
         self.SetAutoLayout(True)
 
-    def onAdd(self, e):
-        n = self.boxes[self.__nroFsLenIndex].GetValue()
-        l = self.boxes[self.__faceLenIndex].GetValue()
+    def on_add(self, e):
+        n = self.boxes[self._nr_of_faces_idx].GetValue()
+        l = self.boxes[self._face_len_idx].GetValue()
         if l < 1:
-            l = self.faceLen
+            l = self.face_len
             if l < 1: l = 3
-        self.boxes[self.__faceListIndex].grow(n, l)
+        self.boxes[self._face_lst_idx].grow(n, l)
         self.Layout()
 
-    def onRm(self, e):
-        self.boxes[self.__faceListIndex].rmFace(-1)
+    def on_rm(self, e):
+        self.boxes[self._face_lst_idx].rm_face(-1)
         self.Layout()
         e.Skip()
 
     def get(self):
-        return self.boxes[self.__faceListIndex].get()
+        return self.boxes[self._face_lst_idx].get()
 
-    def set(self, Fs):
-        self.boxes[self.__faceListIndex].set(Fs)
+    def set(self, faces):
+        self.boxes[self._face_lst_idx].set(faces)
         self.Layout()
 
     def Destroy(self):
@@ -866,7 +866,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
     def __init__(self,
                  panel,
                  label='',
-                 groupsList=[isometry.E,
+                 groups_lst=[isometry.E,
                              isometry.ExI,
                              isometry.Cn,
                              isometry.CnxI,
@@ -882,97 +882,95 @@ class SymmetrySelect(wx.StaticBoxSizer):
                              isometry.S4xI,
                              isometry.A5,
                              isometry.A5xI],
-                 onSymSelect= None,
-                 onGetSymSetup= None):
+                 on_sym_select=None,
+                 on_get_sym_setup=None):
         """
         Create a control embedded in a sizer for defining a symmetry.
 
         panel: the panel the input will be a part of.
         label: the label to be used for the box, default ''
-        groupsList: the list of symmetries that one can choose from.
-        onSymSelect: This function will be called after a user selected the
-                     symmetry from the list. The first and only parameter of the
-                     function is the symmetry class that was selected.
-        onGetSymSetup: This function will also be called after a user selected a
-                       symmetry from the list, but before onSymSelect. With self
-                       function you can return the default setup for the
-                       selected symmetry class. The first parameter of self
-                       function is the index in the symmetries list. If self
-                       function is not set, the class default is used. The class
-                       default is also used if the function returns None.
+        groups_lst: the list of symmetries that one can choose from.
+        on_sym_select: This function will be called after a user selected the
+                       symmetry from the list. The first and only parameter of
+                       the function is the symmetry class that was selected.
+        on_get_sym_setup: This function will also be called after a user
+                          selected a symmetry from the list, but before
+                          on_sym_select. With self function you can return the
+                          default setup for the selected symmetry class. The
+                          first parameter of self function is the index in the
+                          symmetries list. If self function is not set, the
+                          class default is used. The class default is also used
+                          if the function returns None.
         """
-        self.groupsList = groupsList
-        self.onSymSelect = onSymSelect
-        self.onGetSymSetup = onGetSymSetup
+        self.groups_lst = groups_lst
+        self.on_sym_select = on_sym_select
+        self.on_get_sym_setup = on_get_sym_setup
         self.panel = panel
-        self.Boxes = [wx.StaticBox(panel, label = label)]
+        self.boxes = [wx.StaticBox(panel, label = label)]
         self.__prev = {}
-        wx.StaticBoxSizer.__init__(self, self.Boxes[-1], wx.VERTICAL)
-
-        self.groupsStrList = [c.__name__ for c in self.groupsList]
-        self.Boxes.append(
-            wx.Choice(self.panel, wx.ID_ANY, choices=self.groupsStrList)
+        wx.StaticBoxSizer.__init__(self, self.boxes[-1], wx.VERTICAL)
+        self.boxes.append(
+            wx.Choice(self.panel,
+                      wx.ID_ANY,
+                      choices=[c.__name__ for c in self.groups_lst])
         )
-        self.Boxes[-1].SetSelection(0)
-        self.__SymmetryGuiIndex = len(self.Boxes) - 1
+        self.boxes[-1].SetSelection(0)
+        self._sym_gui_idx = len(self.boxes) - 1
         self.panel.Bind(wx.EVT_CHOICE,
-                        self.onSetSymmetry, id=self.Boxes[-1].GetId())
-        self.Add(self.Boxes[-1], 0, wx.EXPAND)
+                        self.on_set_sym, id=self.boxes[-1].GetId())
+        self.Add(self.boxes[-1], 0, wx.EXPAND)
 
-        self.addSetupGui()
+        self.add_setup_gui()
 
     @property
     def length(self):
-        return len(self.groupsList)
+        return len(self.groups_lst)
 
-    def setList(self, groupsList):
-        self.groupsList = groupsList
+    def set_lst(self, groups_lst):
+        self.groups_lst = groups_lst
         # would be nice is wx.Choice has a SetItems()
-        self.Boxes[self.__SymmetryGuiIndex].Clear()
-        for c in groupsList:
-            self.Boxes[self.__SymmetryGuiIndex].Append(c.__name__)
+        self.boxes[self._sym_gui_idx].Clear()
+        for c in groups_lst:
+            self.boxes[self._sym_gui_idx].Append(c.__name__)
         # Not so good: self requires that E should be last...
-        self.Boxes[self.__SymmetryGuiIndex].SetSelection(len(groupsList)-1)
-        self.addSetupGui()
+        self.boxes[self._sym_gui_idx].SetSelection(len(groups_lst)-1)
+        self.add_setup_gui()
         self.panel.Layout()
 
-    def getSelectedIndex(self):
-        return self.Boxes[self.__SymmetryGuiIndex].GetSelection()
+    def get_selected_idx(self):
+        return self.boxes[self._sym_gui_idx].GetSelection()
 
-    def getSymmetryClass(self, applyOrder=True):
+    def get_sym_class(self, apply_order=True):
         """returns a symmetry class"""
-        #print 'getSymmetryClass'bad-whitespace
-        Id = self.getSelectedIndex()
-        selClass = self.groupsList[Id]
-        #print 'getSymmetryClass: nr:', Id, 'class:', selClass.__name__, selClass
-        if applyOrder:
-            if selClass in [isometry.Cn,
-                            isometry.CnxI,
-                            isometry.C2nCn,
-                            isometry.DnCn,
-                            isometry.Dn,
-                            isometry.DnxI,
-                            isometry.D2nDn]:
-                assert selClass.init_pars[0]['type'] == 'int', (
+        selected_class = self.groups_lst[self.get_selected_idx()]
+        if apply_order:
+            if selected_class in [isometry.Cn,
+                                  isometry.CnxI,
+                                  isometry.C2nCn,
+                                  isometry.DnCn,
+                                  isometry.Dn,
+                                  isometry.DnxI,
+                                  isometry.D2nDn]:
+                assert selected_class.init_pars[0]['type'] == 'int', (
                     'The first index should specify the n-order')
-                n = self.oriGuis[0].GetValue()
-                if selClass == isometry.Cn:
+                n = self.orient_guis[0].GetValue()
+                if selected_class == isometry.Cn:
                     C = isometry.C
-                elif selClass == isometry.CnxI:
+                elif selected_class == isometry.CnxI:
                     C = isometry.CxI
-                elif selClass == isometry.C2nCn:
+                elif selected_class == isometry.C2nCn:
                     C = isometry.C2nC
-                elif selClass == isometry.DnCn:
+                elif selected_class == isometry.DnCn:
                     C = isometry.DnC
-                elif selClass == isometry.Dn:
-                    C = isometry.D
-                elif selClass == isometry.D2nDn:
+                elif selected_class == isometry.Dn:
+                    C = isomeaddSetupGuitry.D
+                elif selected_class == isometry.D2nDn:
                     C = isometry.D2nD
-                elif selClass == isometry.DnxI:
+                elif selected_class == isometry.DnxI:
                     C = isometry.DxI
                 assert n > 0, 'warning'
-                selClass = C(n)
-            elif selClass in [isometry.E,
+                selected_class = C(n)
+            elif selected_class in [isometry.E,
                               isometry.ExI,
                               isometry.C2C1,
                               isometry.C4C2,
@@ -1005,54 +1003,52 @@ class SymmetrySelect(wx.StaticBoxSizer):
                               isometry.A5xI]:
                 pass
             else:
-                assert False, 'unknown class %s' % selClass
-                #print 'warning: unknown class', selClass
-        #print 'selClass', selClass, 'n:', selClass.n
-        return selClass
+                assert False, 'unknown class {}'.format(selected_class)
+        return selected_class
 
-    def addSetupGui(self):
+    def add_setup_gui(self):
         self.chk_if_updated = []
         try:
-                for gui in self.oriGuis:
+                for gui in self.orient_guis:
                     gui.Destroy()
-                self.oriGuiBox.Destroy()
-                self.Remove(self.oriSizer)
+                self.orient_gui_box.Destroy()
+                self.Remove(self.orient_sizer)
         except AttributeError: pass
-        self.oriGuiBox = wx.StaticBox(self.panel, label='Symmetry Setup')
-        self.oriSizer = wx.StaticBoxSizer(self.oriGuiBox, wx.VERTICAL)
-        self.oriGuis = []
-        sym = self.getSymmetryClass(applyOrder=False)
-        if self.onGetSymSetup == None:
-            symSetup = sym.std_setup
+        self.orient_gui_box = wx.StaticBox(self.panel, label='Symmetry Setup')
+        self.orient_sizer = wx.StaticBoxSizer(self.orient_gui_box, wx.VERTICAL)
+        self.orient_guis = []
+        sym = self.get_sym_class(apply_order=False)
+        if self.on_get_sym_setup == None:
+            sym_setup = sym.std_setup
         else:
-            symSetup = self.onGetSymSetup(self.getSelectedIndex())
-            if symSetup == None:
-                symSetup = sym.std_setup
+            sym_setup = self.on_get_sym_setup(self.get_selected_idx())
+            if sym_setup == None:
+                sym_setup = sym.std_setup
         for init in sym.init_pars:
-            inputType = init['type']
-            if inputType == 'vec3':
+            input_type = init['type']
+            if input_type == 'vec3':
                 gui = Vector3DInput(self.panel, init['lab'],
-                                    v=symSetup[init['par']])
-            elif inputType == 'int':
+                                    v=sym_setup[init['par']])
+            elif input_type == 'int':
                 gui = LabeledIntInput(self.panel, init['lab'],
-                                      init=symSetup[init['par']])
+                                      init=sym_setup[init['par']])
                 self.chk_if_updated.append(gui)
             else:
                 assert False, "oops unimplemented input type"
-            self.oriGuis.append(gui)
-            self.oriSizer.Add(self.oriGuis[-1], 1, wx.EXPAND)
-        self.Add(self.oriSizer, 1, wx.EXPAND)
+            self.orient_guis.append(gui)
+            self.orient_sizer.Add(self.orient_guis[-1], 1, wx.EXPAND)
+        self.Add(self.orient_sizer, 1, wx.EXPAND)
 
-    def onSetSymmetry(self, e):
-        self.addSetupGui()
+    def on_set_sym(self, e):
+        self.add_setup_gui()
         self.panel.Layout()
-        if self.onSymSelect != None:
-            self.onSymSelect(self.getSymmetryClass(applyOrder=False))
+        if self.on_sym_select != None:
+            self.on_sym_select(self.get_sym_class(apply_order=False))
 
-    def isSymClassUpdated(self):
+    def is_sym_class_updated(self):
         try:
-            curId = self.getSelectedIndex()
-            is_updated = self.__prev['selectedId'] != curId
+            cur_idx = self.get_selected_idx()
+            is_updated = self.__prev['selectedId'] != cur_idx
             if self.chk_if_updated and not is_updated:
                 for gui in self.chk_if_updated:
                     is_updated = gui.val_updated
@@ -1060,81 +1056,78 @@ class SymmetrySelect(wx.StaticBoxSizer):
                         break
         except KeyError:
             is_updated = True
-        self.__prev['selectedId'] = curId
+        self.__prev['selectedId'] = cur_idx
         return is_updated
 
-    def isUpdated(self):
-        isUpdated = self.isSymClassUpdated()
-        curSetup = []
-        sym = self.getSymmetryClass(applyOrder=False)
-        for i, gui in zip(range(len(self.oriGuis)), self.oriGuis):
-            inputType = sym.init_pars[i]['type']
-            if inputType == 'vec3':
+    def is_updated(self):
+        is_updated = self.is_sym_class_updated()
+        cur_setup = []
+        sym = self.get_sym_class(apply_order=False)
+        for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
+            input_type = sym.init_pars[i]['type']
+            if input_type == 'vec3':
                 v = gui.GetVertex()
-            elif inputType == 'int':
+            elif input_type == 'int':
                 v = gui.GetValue()
-            curSetup.append(v)
+            cur_setup.append(v)
         try:
-            prevSetup = self.__prev['setup']
-            if len(prevSetup) == len(curSetup):
-                for i in range(len(prevSetup)):
-                    if prevSetup[i] != curSetup[i]:
-                        isUpdated = True
+            prev_setup = self.__prev['setup']
+            if len(prev_setup) == len(cur_setup):
+                for i in range(len(prev_setup)):
+                    if prev_setup[i] != cur_setup[i]:
+                        is_updated = True
                         break
             else:
-                isUpdated = True
+                is_updated = True
         except KeyError:
-            isUpdated = True
-        self.__prev['setup'] = curSetup
-        #print 'isUpdated', isUpdated
-        return isUpdated
+            is_updated = True
+        self.__prev['setup'] = cur_setup
+        return is_updated
 
-    def SetSelectedClass(self, cl):
+    def set_selected_class(self, cl):
         found = False
-        for i, cl_i in zip(range(len(self.groupsList)), self.groupsList):
+        for i, cl_i in zip(range(len(self.groups_lst)), self.groups_lst):
             if cl == cl_i:
                 found = True
                 break;
         if found:
-            self.SetSelected(i)
+            self.set_selected(i)
         else:
-            print 'Warning: SetSelectedClass: class not found'
+            print 'Warning: set_selected_class: class not found'
 
-    def SetSelected(self, i):
-        self.Boxes[self.__SymmetryGuiIndex].SetSelection(i)
+    def set_selected(self, i):
+        self.boxes[self._sym_gui_idx].SetSelection(i)
 
-    def SetupSymmetry(self, vec):
-        assert len(vec) == len(self.oriGuis),\
+    def setup_sym(self, vec):
+        assert len(vec) == len(self.orient_guis),\
                 "Wrong nr of initialisers for self symmetry"
-        sym = self.getSymmetryClass(applyOrder=False)
-        for i, gui in zip(range(len(self.oriGuis)), self.oriGuis):
-            inputType = sym.init_pars[i]['type']
-            if inputType == 'vec3':
+        sym = self.get_sym_class(apply_order=False)
+        for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
+            input_type = sym.init_pars[i]['type']
+            if input_type == 'vec3':
                 v = gui.SetVertex(vec[i])
-            elif inputType == 'int':
+            elif input_type == 'int':
                 v = gui.SetValue(vec[i])
 
-    def GetSelected(self):
+    def get_selected(self):
         """returns a symmetry instance"""
-        sym = self.getSymmetryClass(applyOrder=False)
+        sym = self.get_sym_class(apply_order=False)
         setup = {}
-        for i, gui in zip(range(len(self.oriGuis)), self.oriGuis):
-            inputType = sym.init_pars[i]['type']
-            if inputType == 'vec3':
+        for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
+            input_type = sym.init_pars[i]['type']
+            if input_type == 'vec3':
                 v = gui.GetVertex()
                 if v != geomtypes.Vec3([0, 0, 0]):
                     setup[sym.init_pars[i]['par']] = v
-            elif inputType == 'int':
+            elif input_type == 'int':
                 v = gui.GetValue()
                 setup[sym.init_pars[i]['par']] = v
-        #print 'GetSelected; setup:', setup
-        #print 'class:', sym
         sym = sym(setup=setup)
 
         return sym
 
     def Destroy(self):
-        for box in self.Boxes + self.oriGuis + self.stabGuis:
+        for box in self.boxes + self.orient_guis + self.stabGuis:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError: pass
@@ -1162,104 +1155,111 @@ class AxisRotateSizer(wx.BoxSizer):
         max_angle: maximum of the angle domain for the slide bar.
         initial_angle: the angle that will be used from the beginning.
         """
-        self.currentAngle = initial_angle
+        self.current_angle = initial_angle
         self.on_angle = on_angle_callback
         self.panel = panel
-        self.showGui = []
+        self.show_gui = []
         wx.BoxSizer.__init__(self, wx.VERTICAL)
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
-        rotateSizerTop = wx.BoxSizer(wx.HORIZONTAL)
-        self.Add(rotateSizerTop, 0, wx.EXPAND)
-        self.showGui.append(Vector3DInput(panel, "Rotate around Axis:"))
-        rotateSizerTop.Add(self.showGui[-1], 0)
-        self.__AxisGuiIndex = len(self.showGui) - 1
-        self.showGui.append(wx.Button(panel, wx.ID_ANY, "Angle:"))
+        rot_sizer_top = wx.BoxSizer(wx.HORIZONTAL)
+        self.Add(rot_sizer_top, 0, wx.EXPAND)
+        self.show_gui.append(Vector3DInput(panel, "Rotate around Axis:"))
+        rot_sizer_top.Add(self.show_gui[-1], 0)
+        self._axis_gui_idx = len(self.show_gui) - 1
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "Angle:"))
         panel.Bind(
-            wx.EVT_BUTTON, self.onDirAngleAdjust, id=self.showGui[-1].GetId())
-        rotateSizerTop.Add(self.showGui[-1], 0, wx.EXPAND)
-        self.showGui.append(FloatInput(panel, wx.ID_ANY, initial_angle))
-        self.showGui[-1].bind_on_set(self.on_angle_set)
-        self.__DirAngleGuiIndex = len(self.showGui) - 1
-        rotateSizerTop.Add(self.showGui[-1], 0, wx.EXPAND)
+            wx.EVT_BUTTON,
+            self.on_dir_angle_adjust,
+            id=self.show_gui[-1].GetId())
+        rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
+        self.show_gui.append(FloatInput(panel, wx.ID_ANY, initial_angle))
+        self.show_gui[-1].bind_on_set(self.on_angle_set)
+        self._dir_angle_gui_idx = len(self.show_gui) - 1
+        rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
         # - slidebar and +/- step (incl. float input)
-        rotateSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.Add(rotateSizer, 0, wx.EXPAND)
-        self.showGui.append(wx.Slider(
-            panel,
-            value=initial_angle,
-            minValue=min_angle,
-            maxValue=max_angle,
-            style=wx.SL_HORIZONTAL | wx.SL_LABELS
-        ))
-        self.__SlideAngleGuiIndex = len(self.showGui) - 1
+        rot_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.Add(rot_sizer, 0, wx.EXPAND)
+        self.show_gui.append(wx.Slider(panel,
+                                       value=initial_angle,
+                                       minValue=min_angle,
+                                       maxValue=max_angle,
+                                       style=wx.SL_HORIZONTAL | wx.SL_LABELS))
+        self._slide_angle_gui_idx = len(self.show_gui) - 1
         panel.Bind(wx.EVT_SLIDER,
-                   self.onSlideAngleAdjust,
-                   id=self.showGui[-1].GetId())
-        rotateSizer.Add(self.showGui[-1], 1, wx.EXPAND)
-        self.showGui.append(wx.Button(panel, wx.ID_ANY, "-"))
+                   self.on_slide_angle_adjust,
+                   id=self.show_gui[-1].GetId())
+        rot_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-"))
         panel.Bind(
-            wx.EVT_BUTTON, self.onDirAngleStepDown, id=self.showGui[-1].GetId())
-        rotateSizer.Add(self.showGui[-1], 0, wx.EXPAND)
-        self.showGui.append(wx.Button(panel, wx.ID_ANY, "+"))
+            wx.EVT_BUTTON,
+            self.on_dir_angle_step_down,
+            id=self.show_gui[-1].GetId())
+        rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "+"))
         panel.Bind(
-            wx.EVT_BUTTON, self.onDirAngleStepUp, id=self.showGui[-1].GetId())
-        rotateSizer.Add(self.showGui[-1], 0, wx.EXPAND)
-        self.showGui.append(FloatInput(panel, wx.ID_ANY, 0.1))
-        self.__DirAngleStepIndex = len(self.showGui) - 1
-        rotateSizer.Add(self.showGui[-1], 0, wx.EXPAND)
+            wx.EVT_BUTTON,
+            self.on_dir_angle_setup,
+            id=self.show_gui[-1].GetId())
+        rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        self.show_gui.append(FloatInput(panel, wx.ID_ANY, 0.1))
+        self._dir_angle_step_idx = len(self.show_gui) - 1
+        rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
     def get_axis(self):
-        return self.showGui[self.__AxisGuiIndex].GetVertex()
+        return self.show_gui[self._axis_gui_idx].GetVertex()
 
     def set_axis(self, axis):
-        self.showGui[self.__AxisGuiIndex].SetVertex(axis)
+        self.show_gui[self._axis_gui_idx].SetVertex(axis)
 
     def get_angle(self):
-        return self.currentAngle
+        return self.current_angle
 
     def set_angle(self, angle):
-        self.showGui[self.__SlideAngleGuiIndex].SetValue(angle)
-        self.showGui[self.__DirAngleGuiIndex].SetValue(angle)
+        self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
+        self.show_gui[self._dir_angle_gui_idx].SetValue(angle)
 
     def on_angle_set(self, angle):
-        self.currentAngle = angle
-        self.showGui[self.__SlideAngleGuiIndex].SetValue(angle)
-        self.on_angle(self.currentAngle, self.get_axis())
+        self.current_angle = angle
+        self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
+        self.on_angle(self.current_angle, self.get_axis())
 
-    def onDirAngleAdjust(self, e):
-        self.currentAngle = self.showGui[self.__DirAngleGuiIndex].GetValue()
-        self.showGui[self.__SlideAngleGuiIndex].SetValue(self.currentAngle)
-        self.on_angle(self.currentAngle, self.get_axis())
+    def on_dir_angle_adjust(self, e):
+        self.current_angle = self.show_gui[self._dir_angle_gui_idx].GetValue()
+        self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
+        self.on_angle(self.current_angle, self.get_axis())
         if e != None:
             e.Skip()
 
-    def onDirAngleStep(self, e, step):
-        self.currentAngle += step
+    def on_dir_angle_step(self, e, step):
+        self.current_angle += step
         # Update input float with precise input
-        self.showGui[self.__DirAngleGuiIndex].SetValue(self.currentAngle)
+        self.show_gui[self._dir_angle_gui_idx].SetValue(self.current_angle)
         # Update slide bar (which rounds to integer
-        self.showGui[self.__SlideAngleGuiIndex].SetValue(self.currentAngle)
-        self.on_angle(self.currentAngle, self.get_axis())
+        self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
+        self.on_angle(self.current_angle, self.get_axis())
         if e != None:
             e.Skip()
 
-    def onDirAngleStepDown(self, e):
-        self.onDirAngleStep(e, -self.showGui[self.__DirAngleStepIndex].GetValue())
+    def on_dir_angle_step_down(self, e):
+        self.on_dir_angle_step(e, -self.show_gui[
+            self._dir_angle_step_idx].GetValue())
         if e != None:
             e.Skip()
 
-    def onDirAngleStepUp(self, e):
-        self.onDirAngleStep(e, self.showGui[self.__DirAngleStepIndex].GetValue())
+    def on_dir_angle_setup(self, e):
+        self.on_dir_angle_step(e, self.show_gui[
+            self._dir_angle_step_idx].GetValue())
         if e != None:
             e.Skip()
 
-    def onSlideAngleAdjust(self, e):
+    def on_slide_angle_adjust(self, e):
         # Do not update the direct float input for better user experience.
         # In that case the user can set the value, use the slide bar and jump
         # jump back to the old value, that is still in the float input.
-        self.currentAngle = self.showGui[self.__SlideAngleGuiIndex].GetValue()
-        self.on_angle(self.currentAngle, self.get_axis())
+        self.current_angle = self.show_gui[
+            self._slide_angle_gui_idx].GetValue()
+        self.on_angle(self.current_angle, self.get_axis())
         if e != None:
             e.Skip()

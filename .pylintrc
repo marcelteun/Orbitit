@@ -7,6 +7,7 @@ attr-rgx=^[_a-z][a-z0-9]*((_[a-z0-9]+)*)?$
 # I: standard names for transforms in geometry: R for rotation, S for
 # reflection, and I for inversion. Keep standard from geometry.
 # glMatrix*: standard naming convention from OpenGL.
+# GetValue, SetValue from wxWidgets
 good-names=I,glMatrix,__glMatrix_rot,__glMatrix_rot_inv,
   C2xI,C3xI,C4xI,C5xI,
   D2xI,D3xI,D4xI,D5xI,
@@ -14,7 +15,8 @@ good-names=I,glMatrix,__glMatrix_rot,__glMatrix_rot_inv,
   D1xI,D2xI,D3xI,D4xI,D5xI,
   E,C,C2nC,CxI,DnC,D,DxI,D2nD,
   __Cn_metas,__C2nCn_metas,__CnxI_metas,__DnCn_metas,
-  __Dn_metas,__DnxI_metas,__D2nDn_metas
+  __Dn_metas,__DnxI_metas,__D2nDn_metas,
+  GetValue, SetValue
 
 [MESSAGES CONTROL]
 # Disable the message, report, category or checker with the given id(s). You
