@@ -36,7 +36,8 @@ symmetry)
 # or write to the Free Software Foundation,
 # ------------------------------------------------------------------
 # Old sins:
-# pylint: disable=unused-wildcard-import,exec-used
+# pylint: disable=exec-used,too-many-instance-attributes,too-few-public-methods
+# pylint: disable=too-many-statements,too-many-locals,too-many-branches
 from __future__ import print_function
 
 import os
@@ -77,7 +78,6 @@ class Shape(Geom3D.SimpleShape):
         Geom3D.SimpleShape.glInit(self)
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         # glEnable(GL_BLEND)
-        pass
 
 
 class CtrlWin(wx.Frame):
@@ -96,7 +96,6 @@ class CtrlWin(wx.Frame):
         self.canvas = canvas
         kwargs['title'] = TITLE
         wx.Frame.__init__(self, *args, **kwargs)
-        self.set_default_cols()
         self.no_of_cols = 1
         # save which colour alternative was chosen per final symmetry and
         # stabiliser symmetry. This to be able to switch to the one that was
@@ -120,6 +119,20 @@ class CtrlWin(wx.Frame):
         self.Show(True)
         self.panel.Layout()
         self.import_dir_name = '.'
+        self.cols = []
+        self.select_col_guis = []
+        self.orbit = None
+        self.fs_orbit = None
+        self.fs_orbit_org = None
+        self.col_final_sym = None
+        self.col_sizer = None
+        self.col_guis = None
+        self.col_gui_box = None
+        self.col_syms = None
+        self.col_alt = None
+        self.select_col_sizer = None
+        self._no_of_cols_gui_idx = None
+        self.set_default_cols()
 
     def set_default_cols(self):
         """Fill colours with some default values"""
@@ -195,12 +208,12 @@ class CtrlWin(wx.Frame):
         # SYMMETRY
         self.show_gui.append(GeomGui.SymmetrySelect(
             self.panel, 'Final Symmetry',
-            onSymSelect=lambda a: self.on_final_sym_select(a),
-            onGetSymSetup=lambda a: self.on_get_final_sym_setup(a)))
+            onSymSelect=self.on_final_sym_select,
+            onGetSymSetup=self.on_get_final_sym_setup))
         self._final_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         if self.col_select is None:
-            self.col_select = [None for i in range(self.show_gui[-1].length)]
+            self.col_select = [None for _ in range(self.show_gui[-1].length)]
             self.final_sym_setup = self.col_select[:]
             self.stab_sym_setup = self.col_select[:]
 
@@ -210,7 +223,7 @@ class CtrlWin(wx.Frame):
             'Stabiliser Symmetry',
             self.show_gui[self._final_sym_gui_idx].getSymmetryClass(
                 applyOrder=True).subgroups,
-            onGetSymSetup=lambda a: self.on_get_stab_sy_setup(a)))
+            onGetSymSetup=self.on_get_stab_sy_setup))
         self._stab_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
@@ -275,7 +288,8 @@ class CtrlWin(wx.Frame):
         try:
             return self.final_sym_setup[sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_get_final_sym_setup: 1st time = ok')
+            print('Note: ignoring error at on_get_final_sym_setup: '
+                  '1st time = ok')
             return None
 
     def on_get_stab_sy_setup(self, sym_idx):
@@ -285,7 +299,8 @@ class CtrlWin(wx.Frame):
         try:
             return self.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_get_stab_sy_setup: 1st time = ok')
+            print('Note: ignoring error at on_get_stab_sy_setup: '
+                  '1st time = ok')
             return None
 
     def on_final_sym_select(self, sym):
@@ -295,12 +310,12 @@ class CtrlWin(wx.Frame):
         i = final_sym_gui.getSelectedIndex()
         # initialise stabiliser setup before setting the list.
         if self.stab_sym_setup[i] is None:
-            self.stab_sym_setup[i] = [None for x in stab_syms]
+            self.stab_sym_setup[i] = [None for _ in stab_syms]
         self.show_gui[self._stab_sym_gui_idx].setList(stab_syms)
         no_of_stabs = self.show_gui[self._stab_sym_gui_idx].length
         if self.col_select[i] is None:
-            self.col_select[i] = [[0, 0] for j in range(no_of_stabs)]
-            self.stab_sym_setup[i] = [None for j in range(no_of_stabs)]
+            self.col_select[i] = [[0, 0] for _ in range(no_of_stabs)]
+            self.stab_sym_setup[i] = [None for _ in range(no_of_stabs)]
 
     def on_apply_sym(self, e):
         """Apply the symmetries to the descriptive"""
@@ -347,9 +362,7 @@ class CtrlWin(wx.Frame):
             self.on_no_of_col_select(self.col_guis[self._no_of_cols_gui_idx])
         self.panel.Layout()
         self.status_text('Symmetry applied: choose colours!', LOG_INFO)
-        try:
-            _ = self.cols
-        except AttributeError:
+        if not self.cols:
             self.cols = [(255, 100, 0)]
         if e is not None:
             e.Skip()
@@ -449,10 +462,9 @@ class CtrlWin(wx.Frame):
                 self.shape.recreateEdges()
                 self.canvas.panel.setShape(self.shape)
                 self.fs_orbit_org = False  # and do this only once
-        assert len(self.col_syms) != 0
-        self.select_col_guis = []
+        assert self.col_syms
         init_col = (255, 255, 255)
-        maxColPerRow = 12
+        max_col_per_row = 20
         # Add buttons for choosing individual colours:
         for i in range(no_of_cols):
             try:
@@ -460,7 +472,7 @@ class CtrlWin(wx.Frame):
             except IndexError:
                 col = init_col
                 self.cols.append(col)
-            if i % maxColPerRow == 0:
+            if i % max_col_per_row == 0:
                 sel_col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
                 self.select_col_sizer.Add(sel_col_sizer_row, 0, wx.EXPAND)
             self.select_col_guis.append(
@@ -519,28 +531,31 @@ class CtrlWin(wx.Frame):
         # (I believe it is needed for Windows as well)
         self.SetSize(size)
 
-    def on_next_col_alt(self, e):
+    def on_next_col_alt(self, _):
         """Handle when the next colour setup is chosen"""
         self.col_alt[1] += 1
         if self.col_alt[1] >= len(self.col_syms):
             self.col_alt[1] -= len(self.col_syms)
         self.update_shape_cols()
 
-    def on_reset_cols(self, e):
-        """Handle a that the button "Reset Colours" is pressed"""
+    def on_reset_cols(self, _):
+        """Handle a that the button "Reset Colours" is pressed
+
+        In this case the default palette of colours is used.
+        """
         self.set_default_cols()
         for i in range(self.no_of_cols):
             self.select_col_guis[i].SetColour(self.cols[i])
         self.update_shape_cols()
 
-    def on_prev_col_alt(self, e):
+    def on_prev_col_alt(self, _):
         """Handle when the previous colour setup is chosen"""
         self.col_alt[1] -= 1
         if self.col_alt[1] < 0:
             self.col_alt[1] += len(self.col_syms)
         self.update_shape_cols()
 
-    def on_import(self, e):
+    def on_import(self, _):
         """Handle the import of a file
 
         The file can specify the descriptive and its orientation and the
