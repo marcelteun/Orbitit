@@ -154,7 +154,7 @@ DEG2RAD = Geom3D.Deg2Rad
 #             intersections should be even, are all edges unique and do they
 #             form one closed face?"
 
-DefaultScene = './Scene_Orbit.py'
+DefaultScene = './scene_orbit.py'
 
 def onSwitchFrontBack(canvas):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
