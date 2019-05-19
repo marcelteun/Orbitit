@@ -440,7 +440,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.grow(len(verts), verts)
 
     def rm_vector(self, i):
-        if len(self._vec_labels) > 0:
+        if self._vec_labels:
             assert i < len(self._vec_labels)
             g = self._vec_labels[i]
             del self._vec_labels[i]
@@ -728,9 +728,9 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self.Layout()
 
     def rm_face(self, i):
-        if len(self._faces_labels) > 0:
+        if self._faces_labels:
             assert i < len(self._faces_labels)
-            assert len(self._faces) > 0
+            assert self._faces
             g = self._faces_labels[i]
             del self._faces_labels[i]
             g.Destroy()
