@@ -304,7 +304,7 @@ class LabeledIntInput(wx.StaticBoxSizer):
     def SetValue(self, i):
         return self.boxes[-1].SetValue(i)
 
-    def Destroy(self):
+    def Destroy(self, *args, **kwargs):
         for box in self.boxes:
             try:
                 box.Destroy()
@@ -362,7 +362,7 @@ class Vector3DInput(wx.StaticBoxSizer):
         self._vec[1].SetValue(v[1])
         self._vec[2].SetValue(v[2])
 
-    def Destroy(self):
+    def Destroy(self, *args, **kwargs):
         for ctrl in self._vec:
             ctrl.Destroy()
         for box in self.boxes:
@@ -477,7 +477,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.clear()
         self.extend(verts)
 
-    def Destroy(self):
+    def Destroy(self, *args, **kwargs):
         for ctrl in self._vec:
             ctrl.Destroy()
         for ctrl in self._vec_labels:
@@ -666,7 +666,7 @@ class Vector4DInput(wx.StaticBoxSizer):
                                self._vec[2].GetValue(),
                                self._vec[3].GetValue()])
 
-    def Destroy(self):
+    def Destroy(self, *args, **kwargs):
         for ctrl in self._vec_label:
             ctrl.Destroy()
         for ctrl in self._vec:
@@ -791,7 +791,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self.clear()
         self.extend(faces)
 
-    def Destroy(self):
+    def Destroy(self, *args, **kwargs):
         for ctrl in self._faces_labels:
             ctrl.Destroy()
         for ctrl in self._faces:
@@ -876,7 +876,7 @@ class FaceSetDynamicPanel(wx.Panel):
         self.boxes[self._face_lst_idx].set(faces)
         self.Layout()
 
-    def Destroy(self):
+    def Destroy(self, *args, **kwargs):
         for box in self.boxes:
             try:
                 box.Destroy()
@@ -888,22 +888,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
     def __init__(self,
                  panel,
                  label='',
-                 groups_lst=[isometry.E,
-                             isometry.ExI,
-                             isometry.Cn,
-                             isometry.CnxI,
-                             isometry.C2nCn,
-                             isometry.DnCn,
-                             isometry.Dn,
-                             isometry.DnxI,
-                             isometry.D2nDn,
-                             isometry.A4,
-                             isometry.A4xI,
-                             isometry.S4A4,
-                             isometry.S4,
-                             isometry.S4xI,
-                             isometry.A5,
-                             isometry.A5xI],
+                 groups_lst=None,
                  on_sym_select=None,
                  on_get_sym_setup=None):
         """
@@ -924,7 +909,25 @@ class SymmetrySelect(wx.StaticBoxSizer):
                           class default is used. The class default is also used
                           if the function returns None.
         """
-        self.groups_lst = groups_lst
+        if groups_lst:
+            self.groups_lst = groups_lst
+        else:
+            self.groups_lst = [isometry.E,
+                               isometry.ExI,
+                               isometry.Cn,
+                               isometry.CnxI,
+                               isometry.C2nCn,
+                               isometry.DnCn,
+                               isometry.Dn,
+                               isometry.DnxI,
+                               isometry.D2nDn,
+                               isometry.A4,
+                               isometry.A4xI,
+                               isometry.S4A4,
+                               isometry.S4,
+                               isometry.S4xI,
+                               isometry.A5,
+                               isometry.A5xI]
         self.on_sym_select = on_sym_select
         self.on_get_sym_setup = on_get_sym_setup
         self.panel = panel
@@ -943,6 +946,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.Add(self.boxes[-1], 0, wx.EXPAND)
 
         self.orient_guis = []
+        self.orient_gui_box = None
+        self.orient_sizer = None
         self.add_setup_gui()
 
     @property
@@ -1031,13 +1036,13 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def add_setup_gui(self):
         self.chk_if_updated = []
-        try:
+        if self.orient_guis:
             for gui in self.orient_guis:
                 gui.Destroy()
+        if self.orient_gui_box:
             self.orient_gui_box.Destroy()
+        if self.orient_sizer:
             self.Remove(self.orient_sizer)
-        except AttributeError:
-            pass
         self.orient_gui_box = wx.StaticBox(self.panel, label='Symmetry Setup')
         self.orient_sizer = wx.StaticBoxSizer(self.orient_gui_box, wx.VERTICAL)
         self.orient_guis = []
@@ -1063,7 +1068,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             self.orient_sizer.Add(self.orient_guis[-1], 1, wx.EXPAND)
         self.Add(self.orient_sizer, 1, wx.EXPAND)
 
-    def on_set_sym(self, e):
+    def on_set_sym(self, _):
         self.add_setup_gui()
         self.panel.Layout()
         if self.on_sym_select is not None:
@@ -1110,7 +1115,9 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def set_selected_class(self, cl):
         found = False
-        for i, cl_i in zip(range(len(self.groups_lst)), self.groups_lst):
+        # to shut-up pylint: undefined-loop-variable:
+        i = 0
+        for i, cl_i in enumerate(self.groups_lst):
             if cl == cl_i:
                 found = True
                 break
@@ -1150,8 +1157,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
         return sym
 
-    def Destroy(self):
-        for box in self.boxes + self.orient_guis + self.stabGuis:
+    def Destroy(self, *args, **kwargs):
+        for box in self.boxes + self.orient_guis:
             try:
                 box.Destroy()
             except wx._core.PyDeadObjectError:
