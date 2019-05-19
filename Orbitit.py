@@ -1359,7 +1359,7 @@ class ViewSettingsSizer(wx.BoxSizer):
                     this.parentPanel,
                     #label = 'Vector 1',
                     relativeFloatSize = 4,
-                    elementLabels = ['x0', 'y0', 'z0', 'w0']
+                    elem_labels = ['x0', 'y0', 'z0', 'w0']
                 )
             this.parentPanel.Bind(
                 geom_gui.EVT_VECTOR_UPDATED, this.onV, id = this.v0Gui.GetId()
@@ -1368,7 +1368,7 @@ class ViewSettingsSizer(wx.BoxSizer):
                     this.parentPanel,
                     #label = 'Vector 1',
                     relativeFloatSize = 4,
-                    elementLabels = ['x1', 'y1', 'z1', 'w1']
+                    elem_labels = ['x1', 'y1', 'z1', 'w1']
                 )
             this.parentPanel.Bind(
                 geom_gui.EVT_VECTOR_UPDATED, this.onV, id = this.v1Gui.GetId()
@@ -1615,12 +1615,6 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.rotate()
 
     def onV(this, event):
-        #guiId = event.GetId()
-        #if guiId == this.v0Gui.GetId():
-        #    print 'Vector 0:'
-        #else:
-        #    print 'Vector 1:'
-        #print this.__class__, 'onFloat v:', event.GetVector()
         this.rotate()
 
     def rotate(this):

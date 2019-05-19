@@ -171,8 +171,7 @@ class CtrlWin(wx.Frame):
         self.show_gui.append(wx.StaticBox(self.panel, label='Vertices'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
         self.show_gui.append(geom_gui.Vector3DSetDynamicPanel(
-            self.panel, relExtraSpace=3
-        ))
+            self.panel, rel_xtra_space=3))
         self._vs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         data_sizer.Add(b_sizer, 1, wx.EXPAND)
@@ -181,8 +180,7 @@ class CtrlWin(wx.Frame):
         self.show_gui.append(wx.StaticBox(self.panel, label='Faces'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
         self.show_gui.append(
-            geom_gui.FaceSetDynamicPanel(self.panel, 0, face_len=3)
-        )
+            geom_gui.FaceSetDynamicPanel(self.panel, 0, face_len=3))
         self._fs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         data_sizer.Add(b_sizer, 1, wx.EXPAND)
