@@ -397,7 +397,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             )
             self.column_sizers.append(wx.BoxSizer(opp_orient))
             self.column_sizers[i].Add(self.boxes[-1], 0,
-                                     wx.ALIGN_CENTRE_HORIZONTAL)
+                                      wx.ALIGN_CENTRE_HORIZONTAL)
             vectors_sizer.Add(self.column_sizers[i], scale, wx.EXPAND)
             scale = 1
         # vectors:
@@ -605,10 +605,14 @@ class Vector4DInput(wx.StaticBoxSizer):
         if elem_labels is None:
             elem_labels = self.__defaultLabels
         self._vec_label = [
-            wx.StaticText(panel, wx.ID_ANY, elem_labels[0], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
-            wx.StaticText(panel, wx.ID_ANY, elem_labels[1], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
-            wx.StaticText(panel, wx.ID_ANY, elem_labels[2], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
-            wx.StaticText(panel, wx.ID_ANY, elem_labels[3], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL)
+            wx.StaticText(panel, wx.ID_ANY, elem_labels[0],
+                          style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
+            wx.StaticText(panel, wx.ID_ANY, elem_labels[1],
+                          style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
+            wx.StaticText(panel, wx.ID_ANY, elem_labels[2],
+                          style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
+            wx.StaticText(panel, wx.ID_ANY, elem_labels[3],
+                          style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL)
         ]
         self._vec = [
             FloatInput(panel, wx.ID_ANY, 0),
