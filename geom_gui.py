@@ -417,7 +417,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.SetupScrolling()
 
     def grow(self, nr=1, vs=None):
-        assert vs == None or len(vs) == nr
+        assert vs is None or len(vs) == nr
         for n in range(nr):
             j = len(self._vec)
             self._vec_labels.append(
@@ -428,7 +428,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             self.column_sizers[0].Add(self._vec_labels[-1], 1)
             self._vec.append([])
             for i in range(1, len(self.__hlabels)):
-                if vs == None:
+                if vs is None:
                     f = 0
                 else:
                     f = vs[n][i-1]
@@ -591,8 +591,8 @@ class Vector4DInput(wx.StaticBoxSizer):
 
         panel: the panel the input will be a part of.
         label: the label to be used for the box, default ''
-        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is
-                     default. Defines the orientation of the separate vector
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
+                     is default. Defines the orientation of the separate vector
                      items.
         rel_float_size: it defines the size of the input fields relative to
                            the vector item labels 'x', 'y',..,'z' (with size 1)
@@ -602,7 +602,8 @@ class Vector4DInput(wx.StaticBoxSizer):
         """
         self.boxes = [wx.StaticBox(panel, label=label)]
         wx.StaticBoxSizer.__init__(self, self.boxes[-1], orientation)
-        if elem_labels == None: elem_labels = self.__defaultLabels
+        if elem_labels is None:
+            elem_labels = self.__defaultLabels
         self._vec_label = [
             wx.StaticText(panel, wx.ID_ANY, elem_labels[0], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
             wx.StaticText(panel, wx.ID_ANY, elem_labels[1], style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL),
@@ -1009,11 +1010,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.orient_sizer = wx.StaticBoxSizer(self.orient_gui_box, wx.VERTICAL)
         self.orient_guis = []
         sym = self.get_sym_class(apply_order=False)
-        if self.on_get_sym_setup == None:
+        if self.on_get_sym_setup is None:
             sym_setup = sym.std_setup
         else:
             sym_setup = self.on_get_sym_setup(self.get_selected_idx())
-            if sym_setup == None:
+            if sym_setup is None:
                 sym_setup = sym.std_setup
         for init in sym.init_pars:
             input_type = init['type']
