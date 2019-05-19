@@ -942,6 +942,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                         self.on_set_sym, id=self.boxes[-1].GetId())
         self.Add(self.boxes[-1], 0, wx.EXPAND)
 
+        self.orient_guis = []
         self.add_setup_gui()
 
     @property
