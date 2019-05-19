@@ -25,9 +25,8 @@ Like vertices, faecs, symmetries, etc.
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+from __future__ import print_function
 
-
-#import math
 import wx
 import geomtypes
 import isometry
@@ -50,7 +49,7 @@ class DisabledDropTarget(wx.TextDropTarget):
 
     def OnDragOver(self, x, y, d):
         if self.enable_reason:
-            print self.__class__, 'drag from text disabled 0:', self.reason
+            print(self.__class__, 'drag from text disabled 0:', self.reason)
         return ''
 
 class IntInput(wx.TextCtrl):
@@ -91,7 +90,7 @@ class IntInput(wx.TextCtrl):
             # only allow one +, -
             if not c in s:
                 # only allow + and - in the beginning
-                print ' not c in s:', self.GetInsertionPoint()
+                print(' not c in s:', self.GetInsertionPoint())
                 if self.GetInsertionPoint() == 0:
                     # don't allow - if there's already a + and the other way
                     # around:
@@ -134,7 +133,7 @@ class IntInput(wx.TextCtrl):
             e.Skip()
         else:
             updated = False
-            print self.__class__, 'ignores key event with code:', k
+            print(self.__class__, 'ignores key event with code:', k)
         #elif k >= 256:
         #    e.Skip()
         self.val_updated = updated
@@ -246,9 +245,9 @@ class FloatInput(wx.TextCtrl):
             elif rkc == ord('x'):
                 self.Cut()
             else:
-                print self.__class__, 'ignores Ctrl-key event with code:', rkc
+                print(self.__class__, 'ignores Ctrl-key event with code:', rkc)
         else:
-            print self.__class__, 'ignores key event with code:', k
+            print(self.__class__, 'ignores key event with code:', k)
         #elif k >= 256:
         #    e.Skip()
 
@@ -286,8 +285,8 @@ class LabeledIntInput(wx.StaticBoxSizer):
                           style=wx.ALIGN_RIGHT))
         self.Add(self.boxes[-1], 1, wx.EXPAND)
         if not isinstance(init, int):
-            print '{} warning: initialiser not an int ({})'.format(
-                self.__class__, str(init))
+            print('{} warning: initialiser not an int ({})'.format(
+                self.__class__, str(init)))
             init = 0
         self.boxes.append(IntInput(
             panel, wx.ID_ANY, init, size=(width, -1)))
@@ -353,8 +352,8 @@ class Vector3DInput(wx.StaticBoxSizer):
     def set_vertex(self, v):
         for i in v:
             if not (isinstance(i, float) or isinstance(i, int)):
-                print '{} warning: v[{}] not a float ({})'.format(
-                    self.__class__, v.index(i), str(i))
+                print('{} warning: v[{}] not a float ({})'.format(
+                    self.__class__, v.index(i), str(i)))
                 return
         self._vec[0].SetValue(v[0])
         self._vec[1].SetValue(v[1])
@@ -422,7 +421,9 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         for n in range(nr):
             j = len(self._vec)
             self._vec_labels.append(
-                wx.StaticText(self, wx.ID_ANY, '%d ' % j, style=wx.TE_CENTRE)
+                wx.StaticText(self, wx.ID_ANY,
+                              '{} '.format(j),
+                              style=wx.TE_CENTRE)
             )
             self.column_sizers[0].Add(self._vec_labels[-1], 1)
             self._vec.append([])
@@ -450,7 +451,8 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
                 g.Destroy()
             self.Layout()
         else:
-            print '%s warning: nothing to delete.' % self.__class__.__name__
+            print('{} warning: nothing to delete.'.format(
+                self.__class__.__name__))
 
     def get_vector(self, i):
         return geomtypes.Vec3([self._vec[i][0].GetValue(),
@@ -704,7 +706,8 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         if face != None:
             face_len = len(face)
         j = len(self._faces_labels)
-        self._faces_labels.append(wx.StaticText(self, wx.ID_ANY, '%d ' % j))
+        self._faces_labels.append(wx.StaticText(self, wx.ID_ANY,
+                                                '{} '.format(j)))
         self.face_idx_sizer.Add(self._faces_labels[-1],
                                 1, wx.EXPAND  | wx.ALIGN_CENTRE_VERTICAL)
 
@@ -1077,11 +1080,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
         for i, cl_i in zip(range(len(self.groups_lst)), self.groups_lst):
             if cl == cl_i:
                 found = True
-                break;
+                break
         if found:
             self.set_selected(i)
         else:
-            print 'Warning: set_selected_class: class not found'
+            print('Warning: set_selected_class: class not found')
 
     def set_selected(self, i):
         self.boxes[self._sym_gui_idx].SetSelection(i)
