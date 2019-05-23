@@ -28,9 +28,10 @@ Like vertices, faecs, symmetries, etc.
 from __future__ import print_function
 
 import wx
+import wx.lib.scrolledpanel as wxXtra
+
 import geomtypes
 import isometry
-import wx.lib.scrolledpanel as wxXtra
 
 # TODO:
 # - filter faces for FacesInput.GetFace (negative nrs, length 2, etc)
@@ -39,8 +40,7 @@ import wx.lib.scrolledpanel as wxXtra
 def opposite_orientation(orientation):
     if orientation == wx.HORIZONTAL:
         return wx.VERTICAL
-    else:
-        return wx.HORIZONTAL
+    return wx.HORIZONTAL
 
 
 class DisabledDropTarget(wx.TextDropTarget):
@@ -73,7 +73,6 @@ class IntInput(wx.TextCtrl):
             c = chr(k)
         except ValueError:
             c = 0
-            pass
         if c >= '0' and c <= '9':
             e.Skip()
         elif c in ['+', '-']:
@@ -341,7 +340,7 @@ class Vector3DInput(wx.StaticBoxSizer):
                           style=wx.ALIGN_RIGHT))
         self.Add(self.boxes[-1], 1, wx.EXPAND)
         self._vec = []
-        for i in range(3):
+        for _ in range(3):
             self._vec.append(FloatInput(self.panel, wx.ID_ANY, 0))
             self.Add(self._vec[-1], 0, wx.EXPAND)
         if v is not None:
@@ -354,8 +353,8 @@ class Vector3DInput(wx.StaticBoxSizer):
 
     def set_vertex(self, v):
         for i in v:
-            if not (isinstance(i, float) or isinstance(i, int)):
-                print('{} warning: v[{}] not a float ({})'.format(
+            if not isinstance(i, (float, int)):
+                print('{} warning: v[{}] not a number ({})'.format(
                     self.__class__, v.index(i), str(i)))
                 return
         self._vec[0].SetValue(v[0])
@@ -580,8 +579,9 @@ EVT_VECTOR_UPDATED = wx.PyEventBinder(MY_EVT_VECTOR_UPDATED, 1)
 
 
 class VectorUpdatedEvent(wx.PyCommandEvent):
-    def __init__(self, evtType, id):
-        wx.PyCommandEvent.__init__(self, evtType, id)
+    def __init__(self, evtType, i_d):
+        wx.PyCommandEvent.__init__(self, evtType, i_d)
+        self.vector = None
 
     def set_vector(self, vector):
         self.vector = vector
@@ -650,7 +650,7 @@ class Vector4DInput(wx.StaticBoxSizer):
     def GetId(self):
         return self._vec[self.__ctrlIdIndex].GetId()
 
-    def on_float(self, e):
+    def on_float(self, _):
         # ctrlId = e.GetId()
         vec_event = VectorUpdatedEvent(MY_EVT_VECTOR_UPDATED, self.GetId())
         vec_event.SetEventObject(self)
@@ -770,8 +770,13 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         return [self._faces[index][i].GetValue()
                 for i in range(1, len(self._faces[index]))]
 
-    def grow(self, nr, face_len):
-        for i in range(nr):
+    def grow(self, times, face_len):
+        """Add faces to the face list
+
+        times: how many times to add a face
+        face_len: the length of the faces to add
+        """
+        for _ in range(times):
             self.add_face(face_len)
 
     def extend(self, faces):
@@ -854,7 +859,7 @@ class FaceSetDynamicPanel(wx.Panel):
         self.SetSizer(main_sizer)
         self.SetAutoLayout(True)
 
-    def on_add(self, e):
+    def on_add(self, _):
         n = self.boxes[self._nr_of_faces_idx].GetValue()
         no = self.boxes[self._face_len_idx].GetValue()
         if no < 1:
@@ -1102,8 +1107,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
         try:
             prev_setup = self.__prev['setup']
             if len(prev_setup) == len(cur_setup):
-                for i in range(len(prev_setup)):
-                    if prev_setup[i] != cur_setup[i]:
+                for i, ps_i in enumerate(prev_setup):
+                    if ps_i != cur_setup[i]:
                         is_updated = True
                         break
             else:
