@@ -897,6 +897,7 @@ class FaceSetDynamicPanel(wx.Panel):
 
 
 class SymmetrySelect(wx.StaticBoxSizer):
+    """A control embedded in a sizer for defining a symmetry"""
     def __init__(self,
                  panel,
                  label='',
@@ -964,9 +965,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     @property
     def length(self):
+        """Return the amount of symmetry classes that can be selected"""
         return len(self.groups_lst)
 
     def set_lst(self, groups_lst):
+        """Set the list with the symmetry classes that can be selected"""
         self.groups_lst = groups_lst
         # would be nice is wx.Choice has a SetItems()
         self.boxes[self._sym_gui_idx].Clear()
@@ -978,10 +981,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.panel.Layout()
 
     def get_selected_idx(self):
+        """Return the index of the selected symmetry class"""
         return self.boxes[self._sym_gui_idx].GetSelection()
 
     def get_sym_class(self, apply_order=True):
-        """returns a symmetry class"""
+        """Return the selected symmetry class"""
         selected_class = self.groups_lst[self.get_selected_idx()]
         if apply_order:
             if selected_class in [isometry.Cn,
@@ -1047,6 +1051,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return selected_class
 
     def add_setup_gui(self):
+        """Add the GUI that will set up a certain symmetry class
+
+        With set up here is meant how a certain symmetry is oriented of for the
+        cyclic and dihedral symmetries the order 'n 'as well
+        """
         self.chk_if_updated = []
         if self.orient_guis:
             for gui in self.orient_guis:
@@ -1081,12 +1090,16 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.Add(self.orient_sizer, 1, wx.EXPAND)
 
     def on_set_sym(self, _):
+        """Function that will set the symmetry"""
         self.add_setup_gui()
         self.panel.Layout()
         if self.on_sym_select is not None:
             self.on_sym_select(self.get_sym_class(apply_order=False))
 
     def is_sym_class_updated(self):
+        """Checks whether the selected symmetry class was updated
+
+        Compared to the previous time this was checked"""
         try:
             cur_idx = self.get_selected_idx()
             is_updated = self.__prev['selectedId'] != cur_idx
@@ -1101,6 +1114,9 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return is_updated
 
     def is_updated(self):
+        """Check whether any property of the symmetry was updated
+
+        Compared to the previous time that was checked"""
         is_updated = self.is_sym_class_updated()
         cur_setup = []
         sym = self.get_sym_class(apply_order=False)
@@ -1126,6 +1142,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return is_updated
 
     def set_selected_class(self, cl):
+        """Set the selected symmetry in the drop down menu by class"""
         found = False
         # to shut-up pylint: undefined-loop-variable:
         i = 0
@@ -1139,9 +1156,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
             print('Warning: set_selected_class: class not found')
 
     def set_selected(self, i):
+        """Set the selected symmetry in the drop down menu by index"""
         self.boxes[self._sym_gui_idx].SetSelection(i)
 
     def setup_sym(self, vec):
+        """Fill in the symmetry setup fields in the GUI"""
         assert len(vec) == len(self.orient_guis),\
             "Wrong nr of initialisers for self symmetry"\
             "(got {}, expected {})".format(len(vec), len(self.orient_guis))
