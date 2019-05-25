@@ -501,6 +501,10 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
 
 
 class Vector3DSetDynamicPanel(wx.Panel):
+    """Create a control embedded in a sizer for defining a set of 3D vectors
+
+    The set can dynamically grow and shrink by using the GUI.
+    """
     __defaultLabels = ['index', 'x', 'y', 'z']
     __nrOfColumns = 4
 
@@ -532,6 +536,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
         # Add vertex list
         self.boxes.append(Vector3DSetStaticPanel(self, length, orientation))
         main_sizer.Add(self.boxes[-1], rel_xtra_space, wx.EXPAND)
+        self._vertex_list_panel = len(self.boxes) - 1
         # Add button:
         add_sizer = wx.BoxSizer(orientation)
         self.boxes.append(wx.Button(self, wx.ID_ANY, "Vertices Add Times:"))
@@ -558,27 +563,35 @@ class Vector3DSetDynamicPanel(wx.Panel):
         self.SetAutoLayout(True)
 
     def on_add(self, e):
+        """Add a certain amount of vertices to the end of the list of vertices
+
+        The number of vertices to be added will be taken from the GUI itself.
+        """
         no = self.boxes[self._add_no_of_v_idx].GetValue()
-        self.boxes[0].grow(no)
+        self.boxes[self._vertex_list_panel].grow(no)
         self.Layout()
         e.Skip()
 
     def on_rm(self, e):
-        self.boxes[0].rm_vector(-1)
+        """Remove the list item in the list of vertices"""
+        self.boxes[self._vertex_list_panel].rm_vector(-1)
         self.Layout()
         e.Skip()
 
     def on_clear(self, e):
-        self.boxes[0].clear()
+        """Make the list of vertices empty"""
+        self.boxes[self._vertex_list_panel].clear()
         self.Layout()
         e.Skip()
 
     def set(self, verts):
-        self.boxes[0].set(verts)
+        """Set the list for vertices"""
+        self.boxes[self._vertex_list_panel].set(verts)
         self.Layout()
 
     def get(self):
-        return self.boxes[0].get()
+        """Get the list of vertices"""
+        return self.boxes[self._vertex_list_panel].get()
 
 
 MY_EVT_VECTOR_UPDATED = wx.NewEventType()
