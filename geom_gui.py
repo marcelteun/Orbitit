@@ -381,6 +381,10 @@ class Vector3DInput(wx.StaticBoxSizer):
 
 
 class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
+    """A panel defining a list of 3D vectors
+
+    The panel doesn't contain any widgets to grow or shrink this list
+    """
     __hlabels = ['index', 'x', 'y', 'z']
 
     def __init__(self, parent, length, orientation=wx.HORIZONTAL):
@@ -427,15 +431,23 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.SetAutoLayout(True)
         self.SetupScrolling()
 
-    def grow(self, nr=1, vs=None):
-        assert vs is None or len(vs) == nr
-        for n in range(nr):
+    def grow(self, no=1, vs=None):
+        """To the end of the list of vertices add undefined or defined vertices
+
+        Either specify 'no' of 'vs' to add extra vertices to the list. If both
+        are specified then vs takes precedence.
+        no: the number of undefined vertices to add.
+        vs: add the specified vertices
+        """
+        assert vs is None or len(vs) == no
+        if vs is not None:
+            no = len(vs)
+        for n in range(no):
             j = len(self._vec)
             self._vec_labels.append(
                 wx.StaticText(self, wx.ID_ANY,
                               '{} '.format(j),
-                              style=wx.TE_CENTRE)
-            )
+                              style=wx.TE_CENTRE))
             self.column_sizers[0].Add(self._vec_labels[-1], 1)
             self._vec.append([])
             for i in range(1, len(self.__hlabels)):
@@ -448,9 +460,11 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.Layout()
 
     def extend(self, verts):
+        """Add to the end of the list of vertices the vertices from 'verts'"""
         self.grow(len(verts), verts)
 
     def rm_vector(self, i):
+        """Remove the vertex with index 'i' from the list of vertices"""
         if self._vec_labels:
             assert i < len(self._vec_labels)
             g = self._vec_labels[i]
@@ -466,20 +480,24 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
                 self.__class__.__name__))
 
     def get_vector(self, i):
+        """Get the vertex with index 'i' from the list of vertices"""
         return geomtypes.Vec3([self._vec[i][0].GetValue(),
                                self._vec[i][1].GetValue(),
                                self._vec[i][2].GetValue()])
 
     def get(self):
+        """Get the list of vertices as defined by the GUI"""
         return [
             self.get_vector(i) for i in range(len(self._vec))
         ]
 
     def clear(self):
+        """Remove all vertices from the list of vertices"""
         for _ in range(len(self._vec)):
             self.rm_vector(-1)
 
     def set(self, verts):
+        """Set the list of vertices in the GUI to the specified list"""
         self.clear()
         self.extend(verts)
 
@@ -1211,7 +1229,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
     def setup_sym(self, vec):
         """Fill in the symmetry setup fields in the GUI"""
         assert len(vec) == len(self.orient_guis),\
-            "Wrong nr of initialisers for self symmetry"\
+            "Wrong no. of initialisers for self symmetry"\
             "(got {}, expected {})".format(len(vec), len(self.orient_guis))
         sym = self.get_sym_class(apply_order=False)
         for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
