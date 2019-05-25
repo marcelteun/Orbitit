@@ -268,7 +268,7 @@ class FloatInput(wx.TextCtrl):
 
 
 class LabeledIntInput(wx.StaticBoxSizer):
-    """A control embedded in a sizer for defining an integer"""
+    """A control embedded in a sizer for providing an integer with a label"""
     def __init__(self,
                  panel,
                  label='',
@@ -276,8 +276,9 @@ class LabeledIntInput(wx.StaticBoxSizer):
                  width=-1,
                  orientation=wx.HORIZONTAL):
         """
-        Create a control embedded in a sizer for defining an integer.
+        Create a control embedded in a sizer for providing an integer.
 
+        It consists of an integer input field and a label next to it.
         panel: the panel the input will be a part of.
         label: the label to be used for the box, default ''
         init: initial value used in input
