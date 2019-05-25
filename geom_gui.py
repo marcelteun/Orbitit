@@ -321,6 +321,7 @@ class LabeledIntInput(wx.StaticBoxSizer):
 
 
 class Vector3DInput(wx.StaticBoxSizer):
+    """A control embedded in a sizer for defining a 3D vector"""
     def __init__(self,
                  panel,
                  label='',
@@ -354,11 +355,13 @@ class Vector3DInput(wx.StaticBoxSizer):
             self.set_vertex(v)
 
     def get_vertex(self):
+        """Get the currently defined vertex from the GUI"""
         return geomtypes.Vec3([self._vec[0].GetValue(),
                                self._vec[1].GetValue(),
                                self._vec[2].GetValue()])
 
     def set_vertex(self, v):
+        """Set the vertex in the GUI to be the one specified"""
         for i in v:
             if not isinstance(i, (float, int)):
                 print('{} warning: v[{}] not a number ({})'.format(
