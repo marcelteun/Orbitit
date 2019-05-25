@@ -63,7 +63,9 @@ class DisabledDropTarget(wx.TextDropTarget):
 
 
 class IntInput(wx.TextCtrl):
+    """An input field for typing integer numbers"""
     def __init__(self, parent, ident, value, *args, **kwargs):
+        """Create an input field for typing integer numbers"""
         wx.TextCtrl.__init__(self, parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         # self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
@@ -74,6 +76,7 @@ class IntInput(wx.TextCtrl):
         self.Bind(wx.EVT_CHAR, self.on_char)
 
     def on_char(self, e):
+        """Handle character input in the float input field"""
         k = e.GetKeyCode()  # ASCII is returned for ASCII values
         updated = True  # except for some cases below
         try:
