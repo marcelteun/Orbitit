@@ -688,6 +688,10 @@ class Vector4DInput(wx.StaticBoxSizer):
 
 
 class FaceSetStaticPanel(wxXtra.ScrolledPanel):
+    """A control embedded in a sizer for defining a set of faces
+
+    This cannot grow or shrink in size through a GUI itself
+    """
     def __init__(self,
                  parent,
                  no_of_faces=0,
@@ -734,6 +738,14 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self.SetupScrolling()
 
     def add_face(self, face_len=0, face=None):
+        """Add a face to the list, either undefined or one specific face.
+
+        face_len: specify this if you want to add an undefined face (indices
+                  will equal to 0)
+        face: if this list of indices is specified, face_len will be ignored.
+              This list of indices will be added to the GUI at the end of the
+              list.
+        """
         assert face_len != 0 or face is not None
         if face is not None:
             face_len = len(face)
@@ -747,11 +759,11 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self._faces.append([face_sizer])
         for i in range(face_len):
             if face is not None:
-                ind = face[i]
+                val = face[i]
             else:
-                ind = 0
+                val = 0
             self._faces[-1].append(
-                IntInput(self, wx.ID_ANY, ind, size=(self.width, -1))
+                IntInput(self, wx.ID_ANY, val, size=(self.width, -1))
             )
             face_sizer.Add(self._faces[-1][-1], 0, wx.EXPAND)
         self.vertex_idx_sizer.Add(face_sizer, 0, wx.EXPAND)
@@ -759,6 +771,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self.Layout()
 
     def rm_face(self, i):
+        """Remove the face with index i from the list of faces"""
         if self._faces_labels:
             assert i < len(self._faces_labels)
             assert self._faces
@@ -774,11 +787,12 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
             self.Layout()
 
     def get_face(self, index):
+        """Get the face (a list) with index 'index'"""
         return [self._faces[index][i].GetValue()
                 for i in range(1, len(self._faces[index]))]
 
     def grow(self, times, face_len):
-        """Add faces to the face list
+        """Add undefined faces to the face list
 
         times: how many times to add a face
         face_len: the length of the faces to add
@@ -787,19 +801,23 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
             self.add_face(face_len)
 
     def extend(self, faces):
+        """To the end of the list of faces add these specified faces"""
         for f in faces:
             self.add_face(face=f)
 
     def get(self):
+        """Get the list of faces specified"""
         return [
             self.get_face(i) for i in range(len(self._faces))
         ]
 
     def clear(self):
+        """Remove all faces from the list"""
         for _ in range(len(self._faces)):
             self.rm_face(-1)
 
     def set(self, faces):
+        """Set the list of faces"""
         self.clear()
         self.extend(faces)
 
