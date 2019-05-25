@@ -813,15 +813,16 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
 
 
 class FaceSetDynamicPanel(wx.Panel):
+    """A control for defining a set of faces, which can grow and shrink"""
     def __init__(self,
                  parent,
                  no_of_faces=0,
                  face_len=0,
                  orientation=wx.HORIZONTAL):
         """
-        Create a control for defining a set of faces, which can grow and shrink
-        in size.
+        Create a control for defining a set of faces
 
+        The control can grow and shrink in size.
         parent: the parent widget.
         no_of_faces: initialise the input with no_of_faces amount of faces.
         face_len: initialise the faces with face_len vertices. Also the default
@@ -860,13 +861,14 @@ class FaceSetDynamicPanel(wx.Panel):
         main_sizer.Add(add_sizer, 0, wx.EXPAND)
         # Delete button:
         self.boxes.append(wx.Button(self, wx.ID_ANY, "Delete Face"))
-        self.Bind(wx.EVT_BUTTON, self.on_rm, id=self.boxes[-1].GetId())
+        self.Bind(wx.EVT_BUTTON, self._on_rm, id=self.boxes[-1].GetId())
         main_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
 
         self.SetSizer(main_sizer)
         self.SetAutoLayout(True)
 
     def on_add(self, _):
+        """Add a certain number of faces with some size as defined by GUI"""
         n = self.boxes[self._nr_of_faces_idx].GetValue()
         no = self.boxes[self._face_len_idx].GetValue()
         if no < 1:
@@ -876,15 +878,18 @@ class FaceSetDynamicPanel(wx.Panel):
         self.boxes[self._face_lst_idx].grow(n, no)
         self.Layout()
 
-    def on_rm(self, e):
+    def _on_rm(self, e):
+        """Remove the last face from list"""
         self.boxes[self._face_lst_idx].rm_face(-1)
         self.Layout()
         e.Skip()
 
     def get(self):
+        """Get the list of faces"""
         return self.boxes[self._face_lst_idx].get()
 
     def set(self, faces):
+        """Set the list of faces"""
         self.boxes[self._face_lst_idx].set(faces)
         self.Layout()
 
