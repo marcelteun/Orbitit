@@ -157,7 +157,9 @@ class IntInput(wx.TextCtrl):
 
 
 class FloatInput(wx.TextCtrl):
+    """An input field for typing floating point numbers"""
     def __init__(self, parent, ident, value, *args, **kwargs):
+        """Create an input field for typing floating point numbers"""
         wx.TextCtrl.__init__(self, parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         # self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
@@ -177,12 +179,12 @@ class FloatInput(wx.TextCtrl):
         self.on_set = on_set
 
     def on_char(self, e):
+        """Handle character input in the float input field"""
         k = e.GetKeyCode()  # ASCII is returned for ASCII values
         try:
             c = chr(k)
         except ValueError:
             c = 0
-            pass
         rkc = e.GetRawKeyCode()
         if c >= '0' and c <= '9':
             e.Skip()
@@ -347,6 +349,7 @@ class Vector3DInput(wx.StaticBoxSizer):
         """
         self.panel = panel
         self.boxes = []
+        # Calling wx.StaticBoxSizer fails on type checking (?? bug?)
         wx.BoxSizer.__init__(self, orientation)
         self.boxes.append(
             wx.StaticText(self.panel, wx.ID_ANY, label + ' ',
