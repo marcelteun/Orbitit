@@ -177,7 +177,7 @@ class FloatInput(wx.TextCtrl):
         self.on_set = on_set
 
     def on_char(self, e):
-        k = e.GetKeyCode() # ASCII is returned for ASCII values
+        k = e.GetKeyCode()  # ASCII is returned for ASCII values
         try:
             c = chr(k)
         except ValueError:
@@ -1143,7 +1143,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def setup_sym(self, vec):
         assert len(vec) == len(self.orient_guis),\
-                "Wrong nr of initialisers for self symmetry"
+            "Wrong nr of initialisers for self symmetry"\
+            "(got {}, expected {})".format(len(vec), len(self.orient_guis))
         sym = self.get_sym_class(apply_order=False)
         for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
             input_type = sym.init_pars[i]['type']
@@ -1180,6 +1181,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
 
 class AxisRotateSizer(wx.BoxSizer):
+    """Class with sizer for defining a rotation"""
     def __init__(self,
                  panel,
                  on_angle_callback,
@@ -1216,12 +1218,12 @@ class AxisRotateSizer(wx.BoxSizer):
         self.show_gui.append(wx.Button(panel, wx.ID_ANY, "Angle:"))
         panel.Bind(
             wx.EVT_BUTTON,
-            self.on_dir_angle_adjust,
+            self._on_angle_set,
             id=self.show_gui[-1].GetId())
         rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
         self.show_gui.append(FloatInput(panel, wx.ID_ANY, initial_angle))
-        self.show_gui[-1].bind_on_set(self.on_angle_set)
-        self._dir_angle_gui_idx = len(self.show_gui) - 1
+        self.show_gui[-1].bind_on_set(self._on_angle_typed)
+        self._typed_angle_gui_idx = len(self.show_gui) - 1
         rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
         # - slidebar and +/- step (incl. float input)
         rot_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1233,19 +1235,19 @@ class AxisRotateSizer(wx.BoxSizer):
                                        style=wx.SL_HORIZONTAL | wx.SL_LABELS))
         self._slide_angle_gui_idx = len(self.show_gui) - 1
         panel.Bind(wx.EVT_SLIDER,
-                   self.on_slide_angle_adjust,
+                   self._on_slide_angle_adjust,
                    id=self.show_gui[-1].GetId())
         rot_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-"))
         panel.Bind(
             wx.EVT_BUTTON,
-            self.on_dir_angle_step_down,
+            self._on_angle_step_down,
             id=self.show_gui[-1].GetId())
         rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         self.show_gui.append(wx.Button(panel, wx.ID_ANY, "+"))
         panel.Bind(
             wx.EVT_BUTTON,
-            self.on_dir_angle_setup,
+            self._on_angle_step_up,
             id=self.show_gui[-1].GetId())
         rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         self.show_gui.append(FloatInput(panel, wx.ID_ANY, 0.1))
@@ -1253,53 +1255,66 @@ class AxisRotateSizer(wx.BoxSizer):
         rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
     def get_axis(self):
+        """Get the direction of the rotation axis in the GUI"""
         return self.show_gui[self._axis_gui_idx].get_vertex()
 
     def set_axis(self, axis):
+        """Set the direction of the rotation axis in the GUI"""
         self.show_gui[self._axis_gui_idx].set_vertex(axis)
 
     def get_angle(self):
+        """Get the current rotation angle"""
         return self.current_angle
 
     def set_angle(self, angle):
+        """Define the angle to be used"""
+        self.current_angle = angle
         self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
-        self.show_gui[self._dir_angle_gui_idx].SetValue(angle)
+        self.show_gui[self._typed_angle_gui_idx].SetValue(angle)
+        self.on_angle(angle, self.get_axis())
 
-    def on_angle_set(self, angle):
+    def _on_angle_typed(self, angle):
+        """Called when user types a new angle in the input field"""
         self.current_angle = angle
         self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
         self.on_angle(self.current_angle, self.get_axis())
 
-    def on_dir_angle_adjust(self, e):
-        self.current_angle = self.show_gui[self._dir_angle_gui_idx].GetValue()
+    def _on_angle_set(self, e):
+        """Called when when user presses button to applied typed angle"""
+        self.current_angle = self.show_gui[
+            self._typed_angle_gui_idx].GetValue()
         self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
 
-    def on_dir_angle_step(self, e, step):
+    def _on_angle_step(self, e, step):
+        """Shared function for '+' and '-' button for angle adjust"""
         self.current_angle += step
         # Update input float with precise input
-        self.show_gui[self._dir_angle_gui_idx].SetValue(self.current_angle)
+        self.show_gui[self._typed_angle_gui_idx].SetValue(self.current_angle)
         # Update slide bar (which rounds to integer
         self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
 
-    def on_dir_angle_step_down(self, e):
-        self.on_dir_angle_step(e, -self.show_gui[
+    def _on_angle_step_down(self, e):
+        """Called when '-' button is pressed to decrease angle"""
+        self._on_angle_step(e, -self.show_gui[
             self._dir_angle_step_idx].GetValue())
         if e is not None:
             e.Skip()
 
-    def on_dir_angle_setup(self, e):
-        self.on_dir_angle_step(e, self.show_gui[
+    def _on_angle_step_up(self, e):
+        """Called when '+' button is pressed to increase angle"""
+        self._on_angle_step(e, self.show_gui[
             self._dir_angle_step_idx].GetValue())
         if e is not None:
             e.Skip()
 
-    def on_slide_angle_adjust(self, e):
+    def _on_slide_angle_adjust(self, e):
+        """Called when the angle adjust slider is changed"""
         # Do not update the direct float input for better user experience.
         # In that case the user can set the value, use the slide bar and jump
         # jump back to the old value, that is still in the float input.
