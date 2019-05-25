@@ -586,14 +586,18 @@ EVT_VECTOR_UPDATED = wx.PyEventBinder(MY_EVT_VECTOR_UPDATED, 1)
 
 
 class VectorUpdatedEvent(wx.PyCommandEvent):
+    """Event to express that a vector (element) was updated"""
     def __init__(self, evtType, i_d):
+        """Initialise the event with type and ID of window"""
         wx.PyCommandEvent.__init__(self, evtType, i_d)
         self.vector = None
 
     def set_vector(self, vector):
+        """Set the whole resulting vector from the update"""
         self.vector = vector
 
     def get_vector(self):
+        """Get the whole resulting vector after the update"""
         return self.vector
 
 
