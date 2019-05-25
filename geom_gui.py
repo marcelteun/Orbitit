@@ -45,12 +45,14 @@ import isometry
 
 
 def opposite_orientation(orientation):
+    """Exchange wx.HORIZONTAL for wx.VERTICAL and vice versa"""
     if orientation == wx.HORIZONTAL:
         return wx.VERTICAL
     return wx.HORIZONTAL
 
 
 class DisabledDropTarget(wx.TextDropTarget):
+    """A drop target that doesn't allow dropping anything"""
     def __init__(self, reason='for some reason', enable_reason=True):
         self.reason = reason
         self.enable_reason = enable_reason
