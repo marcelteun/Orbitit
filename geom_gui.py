@@ -25,6 +25,13 @@ Like vertices, faecs, symmetries, etc.
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+# Old sins:
+# pylint: disable=too-many-lines,too-many-return-statements,
+# pylint: disable=too-many-locals,too-many-statements,too-many-ancestors
+# pylint: disable=too-many-instance-attributes,too-many-arguments
+# pylint: disable=too-many-branches,too-many-nested-blocks
+# pylint: disable=protected-access
+
 from __future__ import print_function
 
 import wx
