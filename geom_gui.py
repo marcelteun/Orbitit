@@ -598,6 +598,9 @@ class VectorUpdatedEvent(wx.PyCommandEvent):
 
 
 class Vector4DInput(wx.StaticBoxSizer):
+    """A control embedded in a sizer for defining 4D vectors"""
+    # To be able to connect event, add an ID, use the ID of one of the
+    # elements. Always use the same with the following index:
     __ctrlIdIndex = 0
     __defaultLabels = ['x', 'y', 'z', 'w']
 
@@ -655,9 +658,14 @@ class Vector4DInput(wx.StaticBoxSizer):
             panel.Bind(wx.EVT_TEXT, self.on_float, id=self._vec[i].GetId())
 
     def GetId(self):
+        """Returns the identifier of the 'window'"""
         return self._vec[self.__ctrlIdIndex].GetId()
 
     def on_float(self, _):
+        """Update the complete 4D vector
+
+        This creats a MY_EVT_VECTOR_UPDATED event
+        """
         # ctrlId = e.GetId()
         vec_event = VectorUpdatedEvent(MY_EVT_VECTOR_UPDATED, self.GetId())
         vec_event.SetEventObject(self)
@@ -668,6 +676,7 @@ class Vector4DInput(wx.StaticBoxSizer):
         self._vec[self.__ctrlIdIndex].GetEventHandler().ProcessEvent(vec_event)
 
     def GetValue(self):
+        """Get the defined 4D vector"""
         return geomtypes.Vec4([self._vec[0].GetValue(),
                                self._vec[1].GetValue(),
                                self._vec[2].GetValue(),
