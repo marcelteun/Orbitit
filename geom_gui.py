@@ -58,7 +58,7 @@ class DisabledDropTarget(wx.TextDropTarget):
         self.enable_reason = enable_reason
         wx.TextDropTarget.__init__(self)
 
-    def OnDragOver(self, x, y, d):
+    def OnDragOver(self, *args, **kwargs):
         if self.enable_reason:
             print(self.__class__, 'drag from text disabled 0:', self.reason)
         return ''
@@ -74,7 +74,7 @@ class IntInput(wx.TextCtrl):
         self.val_updated = False
         self.SetMaxLength(18)
         self.SetDropTarget(DisabledDropTarget(
-            reason='may break string format for floating point'))
+            reason='may break string format for signed integer'))
         self.Bind(wx.EVT_CHAR, self.on_char)
 
     def on_char(self, e):
@@ -149,14 +149,20 @@ class IntInput(wx.TextCtrl):
         #     e.Skip()
         self.val_updated = updated
 
-    def GetValue(self):
+    # doc-string for
+    # wx.TextCtrl.GetValue(*args, **kwargs)
+    #     GetValue(self) -> String
+    def GetValue(self):  # pylint: disable=arguments-differ
         v = wx.TextCtrl.GetValue(self)
         self.val_updated = False
         if v == '':
             v = '0'
         return int(v)
 
-    def SetValue(self, i):
+    # doc-string for
+    # wx.TextCtrl.SetValue(*args, **kwargs)
+    #     SetValue(self, String value)
+    def SetValue(self, i):  # pylint: disable=arguments-differ
         self.val_updated = True
         wx.TextCtrl.SetValue(self, str(i))
 
@@ -263,14 +269,20 @@ class FloatInput(wx.TextCtrl):
         # elif k >= 256:
         #     e.Skip()
 
-    def GetValue(self):
+    # doc-string for
+    # wx.TextCtrl.GetValue(*args, **kwargs)
+    #     GetValue(self) -> String
+    def GetValue(self):  # pylint: disable=arguments-differ
         v = wx.TextCtrl.GetValue(self)
         if v == '':
             v = '0'
             self.SetValue(v)
         return float(v)
 
-    def SetValue(self, f):
+    # doc-string for
+    # wx.TextCtrl.SetValue(*args, **kwargs)
+    #     SetValue(self, String value)
+    def SetValue(self, f):  # pylint: disable=arguments-differ
         wx.TextCtrl.SetValue(self, str(f))
 
 
@@ -546,8 +558,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
                  parent,
                  length=3,
                  rel_xtra_space=5,
-                 orientation=wx.HORIZONTAL,
-                 elem_labels=None):
+                 orientation=wx.HORIZONTAL):
         """
         Create a control embedded in a sizer for defining a set of 3D vectors
 
@@ -556,9 +567,6 @@ class Vector3DSetDynamicPanel(wx.Panel):
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
                      is default. Defines the orientation of the separate vector
                      items.
-        elem_labels: option labels for the vector items. It is an array
-                       consisting of 4 strings On default
-                       ['index', 'x', 'y', 'z'] is used.
         """
         self.parent = parent
         wx.Panel.__init__(self, parent)
@@ -1035,7 +1043,9 @@ class SymmetrySelect(wx.StaticBoxSizer):
                       wx.ID_ANY,
                       choices=[c.__name__ for c in self.groups_lst])
         )
-        self.boxes[-1].SetSelection(0)
+        # pylint false-positive:
+        # Instance of 'StaticBox' has no 'SetSelection' member (no-member)
+        self.boxes[-1].SetSelection(0)  # pylint: disable=no-member
         self._sym_gui_idx = len(self.boxes) - 1
         self.panel.Bind(wx.EVT_CHOICE,
                         self.on_set_sym, id=self.boxes[-1].GetId())
