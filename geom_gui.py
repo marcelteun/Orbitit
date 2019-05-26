@@ -286,7 +286,7 @@ class FloatInput(wx.TextCtrl):
         wx.TextCtrl.SetValue(self, str(f))
 
 
-class LabeledIntInput(wx.StaticBoxSizer):
+class LabeledIntInput(wx.BoxSizer):
     """A control embedded in a sizer for providing an integer with a label"""
     def __init__(self,
                  panel,
@@ -344,7 +344,7 @@ class LabeledIntInput(wx.StaticBoxSizer):
         # wx.StaticBoxSizer.Destroy(self)
 
 
-class Vector3DInput(wx.StaticBoxSizer):
+class Vector3DInput(wx.BoxSizer):
     """A control embedded in a sizer for defining a 3D vector"""
     def __init__(self,
                  panel,
