@@ -221,7 +221,7 @@ class CtrlWin(wx.Frame):
             'Stabiliser Symmetry',
             self.show_gui[self._final_sym_gui_idx].get_sym_class(
                 apply_order=True).subgroups,
-            on_get_sym_setup=self.on_get_stab_sy_setup))
+            on_get_sym_setup=self.on_get_stab_sym_setup))
         self._stab_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
@@ -290,14 +290,14 @@ class CtrlWin(wx.Frame):
                   '1st time = ok')
             return None
 
-    def on_get_stab_sy_setup(self, sym_idx):
+    def on_get_stab_sym_setup(self, sym_idx):
         """Return the orientation of the stabiliser symmetry"""
         final_sym_idx = self.show_gui[
             self._final_sym_gui_idx].get_selected_idx()
         try:
             return self.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_get_stab_sy_setup: '
+            print('Note: ignoring error at on_get_stab_sym_setup: '
                   '1st time = ok')
             return None
 
