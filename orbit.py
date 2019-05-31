@@ -19,12 +19,10 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 
-import math
-#import re
-import geomtypes
 import isometry
+
 
 class Orbit(list):
     def __new__(this, v):
@@ -57,42 +55,37 @@ class Orbit(list):
     def higherOrderStabiliserProps(v):
         """Get possible sub orbit classes for higher order stabilisers
 
-        A sub-orbit is used if a group of isometries are used on the
-        stabiliser to obtain a higher order stabiliser. This higher order
-        stabiliser requires a sub orbit. Practically this is used for colouring
+        A higher order stabiliser is a subgroup of G that has the stabiliser as
+        a subgroup. Practically this is used for colouring
         of polyhedra. E.g. The polyhedra is defined by one face with some
         symmetry. Then the higher order stabiliser is the set of faces with the
-        same colour. Such a set has their own symmetry. The different groups of
-        coloured faces are mapped onto each other by a sub orbit. The norm of
-        this sub-orbit equals to the amount of colours used. With this a list of
-        dictionaries is obtained. Each dictionary holds:
+        same colour. The groups of different coloured faces are mapped onto
+        each other by the orbit that is derived from the higher order
+        stabiliser. This orbit is a sub-orbit of the original orbit. The norm
+        of this sub-orbit equals to the amount of colours used.
+        Returns: a list of dictionaries with properties of higher order
+        stabilisers. Each dictionary holds:
             'class': higher order stabiliser classes is obtained.
             'index': the length of the subgroups in the final group, or the
                      norm of the coset.
         """
         try:
-            assert v.__hospCalled == True, 'if this exists it should be true'
+            assert v.__hospCalled, 'if this exists it should be true'
         except AttributeError:
             v.__hosProps = v.__hosp()
             v.__hospCalled = True
-        #print 'higherOrderStabiliserProps', v.__hosProps
         return v.__hosProps
-
 
     def __hosp(v):
         """See higherOrderStabiliserProps"""
-
-        #print '%s.getSubOrbitClasses' % v.__class__.__name__
-        higherOrderStabiliserProps   = []
-        v.hoStabs                    = []
-        v.indexCovered               = {}
+        higherOrderStabiliserProps = []
+        v.hoStabs = []
+        v.indexCovered = {}
         for subGroup in v.final.subgroups:
-            #print 'subGroup %s (%s)' % (subGroup, subGroup.__class__.__name__)
-            #print '...contains stabiliser', v.stabiliser, '...??..',
-            assert subGroup.order != 0, "%s (%s)" % (str(subGroup), subGroup.__class__.__name__)
+            assert subGroup.order != 0, "{} ({})".format(
+                (str(subGroup),
+                 subGroup.__class__.__name__))
             if v.stabiliser.__class__ in subGroup.subgroups:
-                #print 'yes'
-
                 # Check if the stabiliser can really be a subgroup for this
                 # orientation.
                 # E.g.
@@ -105,40 +98,26 @@ class Orbit(list):
                 # S4xI has a principle axis that is a 4-fold axis of S4xI.
 
                 hoStabs = v.final.realise_subgroups(subGroup)
-                #print 'check list of len:', len(hoStabs)
                 # from end to beginning, because elements will be filtered out:
                 for i in range(len(hoStabs)-1, -1, -1):
-                    #print 'is_subgroup', v.stabiliser, hoStabs[i]
                     if v.stabiliser.is_subgroup(hoStabs[i]):
-                        #print 'yes, break at index', i
                         break
                     else:
-                        # remove this from the list, this is part of the work of
-                        # filtering the list. This is not done completely here
-                        # since it costs time, and the user might not choose
-                        # this sub orbit anyway (hence the break above). But to
-                        # save time later, remove it already.
-                        #print 'no'
-                        #print 'higher order stabiliser:'
-                        #print '%s' % (str(hoStabs[i]))
-                        #print 'has no subgroup:'
-                        #print '%s' % (str(v.stabiliser))
+                        # remove this from the list, this is part of the work
+                        # of filtering the list. This is not done completely
+                        # here since it costs time, and the user might not
+                        # choose this sub orbit anyway (hence the break above).
+                        # But to save time later, remove it already.
                         del hoStabs[i]
                 index = v.final.order/subGroup.order
-                if hoStabs != []:
-                    #print 'add True'
-                    higherOrderStabiliserProps.append({
-                            'class': subGroup, 'index': index, 'filtered': i
-                        }
-                    )
+                if hoStabs:
+                    higherOrderStabiliserProps.append({'class': subGroup,
+                                                       'index': index,
+                                                       'filtered': i})
                     v.hoStabs.append(hoStabs)
                     v.indexCovered[index] = True
-                    #print 'subOrbitsLengths, finalSymClass', v.final.__class__
-                #else:
-                #    print 'filetered out subgroup', subGroup
-                #    print 'add False'
-            #else:
-            #    print 'no'
+                # else filter out, since no real subgroup
+            # else: this subgroup of G doesn't have the stabiliser as subgroup
         return higherOrderStabiliserProps
 
     def higherOrderStabiliser(v, n):
@@ -153,7 +132,8 @@ class Orbit(list):
         props = v.higherOrderStabiliserProps
 
         # filter rest if needed:
-        if props == []: return []
+        if not props:
+            return []
         if (props[n]['filtered'] > 0):
             # Now filter out the stabilisers that are not a subgroup for this
             # orientation.
@@ -177,45 +157,49 @@ class Orbit(list):
 
     @property
     def lowerOrderStabiliserProps(v):
-        """Get possible sub orbit classes for alternative higher order stabilisers
+        """Get possible sub orbit classes for lower order stabilisers
 
-        TODO
+        Lower order stabiliser are very similar to higher order stabiliser.
+        These are called lower, since they are lower than higher. For groups
+        that have both direct and opposite isometries only the direct
+        isometries are considered. Then for this only-direct stabiliser and the
+        only-direct final group the higher order stabilisers are generated.
+
+        The same list of dictionaries is returned as in
+        higherOrderStabiliserProps
         """
         try:
-            assert v.__lospCalled == True, 'if this exists it should be true'
+            assert v.__lospCalled, 'if this exists it should be true'
         except AttributeError:
             v.__losProps = v.__losp()
             v.__lospCalled = True
         return v.__losProps
 
-
     def __losp(v):
         """See lowerOrderStabiliserProps"""
 
         lowerOrderStabiliserProps = []
-        v.loStabs                 = []
-        if v.stabiliser.mixed == True:
-            # alternative way of colouring by using the direct parents.
-            # TODO explain more
+        v.loStabs = []
+        # if stabiliser has both direct and opposite isometries
+        if v.stabiliser.mixed:
+            # alternative way of colouring by using the direct parents; i.e.
+            # the parent with only direct isometries
             assert v.final.mixed
-            #print '__losp: final class', v.final.__class__.__name__
-            if v.final.generator != {}:
-                v.altFinal=v.final.directParent(
-                        setup=v.final.direct_parent_setup
-                    )
+            if v.final.generator:
+                v.altFinal = v.final.directParent(
+                        setup=v.final.direct_parent_setup)
             else:
-                v.altFinal = v.final.directParent(isometries = [
-                        isom for isom in v.final if isom.is_direct()
-                    ])
-            if v.stabiliser.generator != {}:
+                v.altFinal = v.final.directParent(
+                    isometries=[isom for isom in v.final if isom.is_direct()])
+            if v.stabiliser.generator:
                 v.altStab = v.stabiliser.directParent(
                     setup=v.stabiliser.direct_parent_setup)
             else:
-                v.altStab = v.stabiliser.directParent(isometries = [
-                        isom for isom in v.stabiliser if isom.is_direct()
-                    ])
+                v.altStab = v.stabiliser.directParent(
+                    isometries=[
+                        isom for isom in v.stabiliser if isom.is_direct()])
 
-            # TODO: fix; don't copy above code...
+            # TODO: fix; don't copy above code from hosp__
             for subGroup in v.altFinal.subgroups:
                 assert subGroup.order != 0
                 if v.altStab.__class__ in subGroup.subgroups:
@@ -238,7 +222,7 @@ class Orbit(list):
                             )
                             v.loStabs.append(loStabs)
                             # don't add to v.indexCovered, it means covered by
-                            # ho, really
+                            # __hosp, really
 
         return lowerOrderStabiliserProps
 
