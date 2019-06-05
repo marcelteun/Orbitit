@@ -1098,9 +1098,9 @@ def _dnxi_get_subgroups(n):
     # only needed for n even, since
     # if n odd, there are no even divisors
     if n % 2 == 0:
-        # since n even: "i % 2 != n % 2" => "i % 2 != 0"
-        g.extend([D2nD(i) for i in divs if i % 2 != 0])
-        g.extend([C2nC(i) for i in divs if i % 2 != 0])
+        # as long as n / divisor is even (then the half-turns are covered)
+        g.extend([D2nD(i) for i in divs if (n / i) % 2 == 0])
+        g.extend([C2nC(i) for i in divs if (n / i) % 2 == 0])
     g.extend([D(i) for i in divs])
     g.extend([C(i) for i in divs])
     g.extend([DnC(i) for i in divs])

@@ -273,6 +273,11 @@ class TestSubGroups(unittest.TestCase):
             # D2nD(1) ~= D2C2
             isometry.C2nC(3),
             isometry.C2nC(1),
+            # even divisors: D2nDn, C2nCn if 12/n even
+            isometry.D2nD(6),
+            isometry.D2nD(2),
+            isometry.C2nC(6),
+            isometry.C2nC(2),
         ]
         self._chk_groups(h, expect)
         # Test one odd
