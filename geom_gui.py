@@ -989,6 +989,9 @@ class FaceSetDynamicPanel(wx.Panel):
 
 class SymmetrySelect(wx.StaticBoxSizer):
     """A control embedded in a sizer for defining a symmetry"""
+    HIDE_LAB = "Hide Setup"
+    SHOW_LAB = "Setup"
+
     def __init__(self,
                  panel,
                  label='',
@@ -1054,6 +1057,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.orient_guis = []
         self.orient_gui_box = None
         self.orient_sizer = None
+        self.setup_sizer = None
+        self.hide = None
         self.add_setup_gui()
 
     @property
@@ -1157,6 +1162,11 @@ class SymmetrySelect(wx.StaticBoxSizer):
             self.orient_gui_box.Destroy()
         if self.orient_sizer:
             self.Remove(self.orient_sizer)
+        if self.setup_sizer:
+            self.Remove(self.setup_sizer)
+        if self.hide:
+            self.hide.Destroy()
+        self.setup_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.orient_gui_box = wx.StaticBox(self.panel, label='Symmetry Setup')
         self.orient_sizer = wx.StaticBoxSizer(self.orient_gui_box, wx.VERTICAL)
         self.orient_guis = []
@@ -1180,7 +1190,21 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 assert False, "oops unimplemented input type"
             self.orient_guis.append(gui)
             self.orient_sizer.Add(self.orient_guis[-1], 1, wx.EXPAND)
-        self.Add(self.orient_sizer, 1, wx.EXPAND)
+        self.hide = wx.Button(self.panel, wx.ID_ANY, self.HIDE_LAB)
+        self.boxes.append(self.hide)
+        self.on_hide(None)  # hide one default
+        self.panel.Bind(wx.EVT_BUTTON, self.on_hide, id=self.hide.GetId())
+        self.setup_sizer.Add(self.hide, flag=wx.LEFT)
+        self.setup_sizer.Add(self.orient_sizer, flag=wx.RIGHT | wx.EXPAND)
+        self.Add(self.setup_sizer, wx.EXPAND)
+
+    def on_hide(self, _):
+        """Hide or show the setup part"""
+        show_items = self.hide.GetLabel() == self.SHOW_LAB
+        new_label = self.HIDE_LAB if show_items else self.SHOW_LAB
+        self.orient_sizer.ShowItems(show_items)
+        self.hide.SetLabel(new_label)
+        self.panel.Layout()
 
     def on_set_sym(self, _):
         """Function that will set the symmetry"""
@@ -1266,7 +1290,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 _ = gui.SetValue(vec[i])
 
     def get_selected(self):
-        """returns a symmetry instance"""
+        """return a symmetry instance"""
         sym = self.get_sym_class(apply_order=False)
         setup = {}
         for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
