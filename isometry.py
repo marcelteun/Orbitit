@@ -425,7 +425,7 @@ class ExI(Set):
     """Symmetry class containing E and the central inversion"""
     order = 2
     mixed = True
-    directParent = E
+    direct_parent = E
     direct_parent_setup = {}
 
     def __init__(self, isometries=None, setup=None):
@@ -679,7 +679,7 @@ def C2nC(n):
                              {'n': n,
                               'order': 2 * n,
                               'mixed': True,
-                              'directParent': C(n),
+                              'direct_parent': C(n),
                               'init_pars': _init_pars('Cn', n),
                               'std_setup': _std_setup('Cn', n)})
         c_2n_c_n.subgroups = _c2ncn_get_subgroups(n)
@@ -803,7 +803,7 @@ def CxI(n):
                              {'n': n,
                               'order': 2 * n,
                               'mixed': True,
-                              'directParent': C(n),
+                              'direct_parent': C(n),
                               'init_pars': _init_pars('Cn', n),
                               'std_setup': _std_setup('Cn', n)})
             c_nxi.subgroups = _cnxi_get_subgroups(n)
@@ -932,7 +932,7 @@ def DnC(n):
                                {'n': n,
                                 'order': 2 * n,
                                 'mixed': True,
-                                'directParent': C(n),
+                                'direct_parent': C(n),
                                 'init_pars': _init_pars('DnCn', n),
                                 'std_setup': _std_setup('DnCn', n)})
             d_n_c_n.subgroups = _dncn_get_subgroups(n)
@@ -1118,6 +1118,8 @@ class DnxI(Set):
     __metaclass__ = MetaDnxI
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
+    mixed = True
+    direct_parent = D
     order = 0
     n = 0
 
@@ -1151,6 +1153,7 @@ class DnxI(Set):
             # then if you specify n it should be the correct value
             assert self.n == 0 or s['n'] == self.n
             dn = Dn(setup=s)
+            self.direct_parent = D(self.n)
             self.direct_parent_setup = copy(s)
             Set.__init__(self, dn * ExI())
             self.rot_axes = {'n': dn.rot_axes['n'], 2: dn.rot_axes[2][:]}
@@ -1228,7 +1231,7 @@ def DxI(n):
                             {'n': n,
                              'order': 4 * n,
                              'mixed': True,
-                             'directParent': D(n),
+                             'direct_parent': D(n),
                              'init_pars': _init_pars('Dn', n),
                              'std_setup': _std_setup('Dn', n)})
             dnxi.subgroups = _dnxi_get_subgroups(n)
@@ -1395,7 +1398,7 @@ def D2nD(n):
                                  {'n': n,
                                   'order': 4 * n,
                                   'mixed': True,
-                                  'directParent': D(n),
+                                  'direct_parent': D(n),
                                   'init_pars': _init_pars('Dn', n),
                                   'std_setup': _std_setup('Dn', n)})
             d_2n_d_n.subgroups = _d2ndn_get_subgroups(n)
@@ -1492,7 +1495,7 @@ class S4A4(Set):
     std_setup = _std_setup('A4')
     order = 24
     mixed = True
-    directParent = A4
+    direct_parent = A4
 
     def __init__(self, isometries=None, setup=None):
         """
@@ -1618,7 +1621,7 @@ class A4xI(Set):
     std_setup = _std_setup('A4')
     order = 24
     mixed = True
-    directParent = A4
+    direct_parent = A4
 
     def __init__(self, isometries=None, setup=None):
         """
@@ -1848,7 +1851,7 @@ class S4xI(Set):
     std_setup = _std_setup('S4')
     order = 48
     mixed = True
-    directParent = S4
+    direct_parent = S4
 
     def __init__(self, isometries=None, setup=None):
         """
@@ -2190,7 +2193,7 @@ class A5xI(Set):
     std_setup = _std_setup('A5')
     order = 120
     mixed = True
-    directParent = A5
+    direct_parent = A5
 
     def __init__(self, isometries=None, setup=None):
         """

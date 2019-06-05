@@ -187,16 +187,16 @@ class Orbit(list):
             # the parent with only direct isometries
             assert v.final.mixed
             if v.final.generator:
-                v.altFinal = v.final.directParent(
+                v.altFinal = v.final.direct_parent(
                         setup=v.final.direct_parent_setup)
             else:
-                v.altFinal = v.final.directParent(
+                v.altFinal = v.final.direct_parent(
                     isometries=[isom for isom in v.final if isom.is_direct()])
             if v.stabiliser.generator:
-                v.altStab = v.stabiliser.directParent(
+                v.altStab = v.stabiliser.direct_parent(
                     setup=v.stabiliser.direct_parent_setup)
             else:
-                v.altStab = v.stabiliser.directParent(
+                v.altStab = v.stabiliser.direct_parent(
                     isometries=[
                         isom for isom in v.stabiliser if isom.is_direct()])
 
