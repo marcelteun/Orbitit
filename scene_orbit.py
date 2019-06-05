@@ -216,6 +216,14 @@ class CtrlWin(wx.Frame):
             self.stab_sym_setup = self.col_select[:]
 
         # Stabiliser
+        stab_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.show_gui.append(wx.Button(self.panel,
+                                       wx.ID_ANY,
+                                       "Regenerate Stabiliser List"))
+        self.panel.Bind(wx.EVT_BUTTON,
+                        self.on_regenerate_stab_list,
+                        id=self.show_gui[-1].GetId())
+        stab_sizer.Add(self.show_gui[-1], 1, wx.TOP)
         self.show_gui.append(geom_gui.SymmetrySelect(
             self.panel,
             'Stabiliser Symmetry',
@@ -223,7 +231,8 @@ class CtrlWin(wx.Frame):
                 apply_order=True).subgroups,
             on_get_sym_setup=self.on_get_stab_sym_setup))
         self._stab_sym_gui_idx = len(self.show_gui) - 1
-        ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        stab_sizer.Add(self.show_gui[-1], 2, wx.EXPAND)
+        ctrl_sizer.Add(stab_sizer, 0, wx.EXPAND)
 
         self.show_gui.append(wx.Button(self.panel,
                                        wx.ID_ANY, "Apply Symmetry"))
@@ -315,6 +324,22 @@ class CtrlWin(wx.Frame):
             self.col_select[i] = [[0, 0] for _ in range(no_of_stabs)]
             self.stab_sym_setup[i] = [None for _ in range(no_of_stabs)]
 
+    def on_regenerate_stab_list(self, _):
+        """Generate which subgroups there are for the selected symmetries
+
+        This is only important for the cyclic and the dihedral groups where the
+        subgroups and thus the stabilisers are dependent on the order n.
+        """
+        # get the subgroups again since the setup of cyclic and dihedral groups
+        # might have been updated
+        final_sym_gui = self.show_gui[self._final_sym_gui_idx]
+        final_sym_obj = final_sym_gui.get_selected()
+        final_sym_idx = final_sym_gui.get_selected_idx()
+        stab_syms = final_sym_obj.subgroups
+        self.stab_sym_setup[final_sym_idx] = [None for _ in stab_syms]
+        self.col_select[final_sym_idx] = [[0, 0] for _ in stab_syms]
+        self.show_gui[self._stab_sym_gui_idx].set_lst(stab_syms)
+
     def on_apply_sym(self, e):
         """Apply the symmetries to the descriptive"""
         # Check these first before you retrieve values. E.g. if the 'n' in Cn
@@ -330,17 +355,17 @@ class CtrlWin(wx.Frame):
             self.status_text('No faces defined!', LOG_ERR)
             return
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
-        final_sym = final_sym_gui.get_selected()
+        final_sym_obj = final_sym_gui.get_selected()
         final_sym_idx = final_sym_gui.get_selected_idx()
         stab_sym_gui = self.show_gui[self._stab_sym_gui_idx]
         stab_sym = stab_sym_gui.get_selected()
         stab_sym_idx = stab_sym_gui.get_selected_idx()
-        self.final_sym_setup[final_sym_idx] = final_sym.setup
+        self.final_sym_setup[final_sym_idx] = final_sym_obj.setup
         self.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup
         try:
             self.shape = Geom3D.SymmetricShape(
                 verts, faces,
-                finalSym=final_sym, stabSym=stab_sym, name=self.name)
+                finalSym=final_sym_obj, stabSym=stab_sym, name=self.name)
         except isometry.ImproperSubgroupError:
             self.status_text(
                 'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
