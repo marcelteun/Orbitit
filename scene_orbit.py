@@ -107,6 +107,7 @@ class CtrlWin(wx.Frame):
         self.col_select = None
         self.final_sym_setup = None
         self.stab_sym_setup = None
+        self.cur_sym_idx = None
         self.stat_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -323,11 +324,16 @@ class CtrlWin(wx.Frame):
         if self.col_select[i] is None:
             self.col_select[i] = [[0, 0] for _ in range(no_of_stabs)]
             self.stab_sym_setup[i] = [None for _ in range(no_of_stabs)]
+        final_sym_idx = final_sym_gui.get_selected_idx()
+        if self.cur_sym_idx != final_sym_idx or not self.cur_sym_idx:
+            self.cur_sym_idx = final_sym_idx
+            self.hide_stab_list()
 
     def hide_stab_list(self):
         self.show_gui[self._stab_sym_gui_idx].ShowItems(False)
         self.show_gui[self._gen_stab_sym_gui_idx].SetLabel(
             "Show Stabilisers")
+        self.panel.Layout()
 
     def on_generate_stab_list(self, _):
         """Generate which subgroups there are for the selected symmetries
