@@ -686,7 +686,7 @@ class MainWindow(wx.Frame):
             this.SetTitle("Dome %s" % this.GetTitle())
 
     def onOpenScene(this, e):
-        wildcard = "Scene plugin (Scene_*.py)|Scene_*.py"
+        wildcard = "Scene plugin (Scene_*.py)|?cene_*.py"
         dlg = wx.FileDialog(this, 'New: Choose a Scene',
                 this.sceneDirName, '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
