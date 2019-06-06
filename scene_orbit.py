@@ -396,7 +396,9 @@ class CtrlWin(wx.Frame):
         else:
             self.on_no_of_col_select(self.col_guis[self._no_of_cols_gui_idx])
         self.panel.Layout()
-        self.status_text('Symmetry applied: choose colours!', LOG_INFO)
+        self.status_text(
+            '{} symmetries applied: choose colours!'.format(self.shape.order),
+            LOG_INFO)
         if not self.cols:
             self.cols = [(255, 100, 0)]
         if e is not None:
