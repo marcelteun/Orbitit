@@ -999,7 +999,9 @@ class Dn(Set):
             if self.n != 0:
                 # If self.n is hard-code (e.g. for D3)
                 # then if you specify n it should be the correct value
-                assert 'n' not in setup or setup['n'] == self.n
+                assert 'n' not in setup or setup['n'] == self.n, \
+                    'Ooops: n not defined right for {}'.format(
+                        self.__class__.__name__)
                 n = self.n
             else:
                 if 'n' in keys:
@@ -1314,9 +1316,9 @@ class D2nDn(Set):
             assert self.n == 0 or s['n'] == self.n
             dn = Dn(setup=s)
             self.n = dn.n
+            self.direct_parent_setup = copy(s)
             s['n'] = 2 * s['n']
             d2n = Dn(setup=s)
-            self.direct_parent_setup = copy(s)
             Set.__init__(self, dn | ((d2n-dn) * geomtypes.I))
             self.rot_axes = dn.rot_axes
             self.refl_normals = []
