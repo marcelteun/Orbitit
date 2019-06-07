@@ -36,8 +36,7 @@ import os
 import geomtypes
 import isometry
 
-from OpenGL.GLU import *
-from OpenGL.GL import *
+from OpenGL import GL
 
 # TODO:
 # - Test the gl stuf of SimpleShape: create an Interactive3DCanvas
@@ -1520,12 +1519,12 @@ class SimpleShape:
         """
         if this.dbgTrace:
             print '%s.glInit(%s,..):' % (this.__class__, this.name)
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_NORMALIZE)
-        glDisable(GL_CULL_FACE)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glEnable(GL.GL_NORMALIZE)
+        GL.glDisable(GL.GL_CULL_FACE)
 
         this.glInitialised = True
 
@@ -1553,8 +1552,8 @@ class SimpleShape:
         # function as well (without having to think about this)
 
         # Check if unity matrix?
-        glPushMatrix()
-        glMultMatrixd(this.orientation.glMatrix())
+        GL.glPushMatrix()
+        GL.glMultMatrixd(this.orientation.glMatrix())
         if this.gl.updateVs:
             # calculate the gravitational centre. Only calculate the vertices
             # that are used:
@@ -1577,47 +1576,47 @@ class SimpleShape:
             # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
             if not this.generateNormals:
                 try:
-                    glVertexPointerf(Vs)
+                    GL.glVertexPointerf(Vs)
                     Ns = this.Ns
                 except TypeError:
                     Vs = [ [v[0], v[1], v[2]] for v in Vs ]
                     print "glDraw: converting Vs(Ns); vec3 type not accepted"
-                    glVertexPointerf(Vs)
+                    GL.glVertexPointerf(Vs)
                     Ns = [ [v[0], v[1], v[2]] for v in this.Ns ]
                 if Ns != []:
                     assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
-                    glNormalPointerf(Ns)
+                    GL.glNormalPointerf(Ns)
                     this.NsSaved = Ns
                 else:
-                    glNormalPointerf(Vs)
+                    GL.glNormalPointerf(Vs)
                     this.NsSaved = Vs
             elif this.Ns != [] and len(this.Ns) == len(Vs):
                 try:
-                    glVertexPointerf(Vs)
+                    GL.glVertexPointerf(Vs)
                     Ns = this.Ns
                 except TypeError:
                     Vs = [ [v[0], v[1], v[2]] for v in Vs ]
                     print "glDraw: converting Vs(Ns); vec3 type not accepted"
-                    glVertexPointerf(Vs)
+                    GL.glVertexPointerf(Vs)
                     Ns = [ [n[0], n[1], n[2]] for n in this.Ns ]
-                glNormalPointerf(Ns)
+                GL.glNormalPointerf(Ns)
                 this.NsSaved = Ns
             else:
                 this.createVertexNormals(True, Vs)
                 if this.nVs != []:
-                    glVertexPointerf(this.nVs)
-                glNormalPointerf(this.vNs)
+                    GL.glVertexPointerf(this.nVs)
+                GL.glNormalPointerf(this.vNs)
                 this.NsSaved = this.vNs
                 Vs = this.nVs
             this.gl.updateVs = False
             this.VsSaved = Vs
         else:
             if this.gl.alwaysSetVertices:
-                glVertexPointerf(this.VsSaved)
-                glNormalPointerf(this.NsSaved)
+                GL.glVertexPointerf(this.VsSaved)
+                GL.glNormalPointerf(this.NsSaved)
         # VERTICES
         if this.gl.addSphereVs:
-            glColor(this.gl.vCol[0], this.gl.vCol[1], this.gl.vCol[2])
+            GL.glColor(this.gl.vCol[0], this.gl.vCol[1], this.gl.vCol[2])
             for i in this.VsRange:
                 this.gl.sphere.draw(this.Vs[i])
         # EDGES
@@ -1629,7 +1628,7 @@ class SimpleShape:
             else:
                 Es = this.Es
                 Vs = this.Vs
-            glColor(this.gl.eCol[0], this.gl.eCol[1], this.gl.eCol[2])
+            GL.glColor(this.gl.eCol[0], this.gl.eCol[1], this.gl.eCol[2])
             if this.gl.useCylinderEs:
                 # draw edges as cylinders
                 #for i in range(0, len(this.Es), 2):
@@ -1640,63 +1639,65 @@ class SimpleShape:
                         )
             else:
                 # draw edges as lines
-                glPolygonOffset(1.0, 3.)
-                glDisable(GL_POLYGON_OFFSET_FILL)
-                glDrawElementsui(GL_LINES, Es)
-                glEnable(GL_POLYGON_OFFSET_FILL)
+                GL.glPolygonOffset(1.0, 3.)
+                GL.glDisable(GL.GL_POLYGON_OFFSET_FILL)
+                GL.glDrawElementsui(GL.GL_LINES, Es)
+                GL.glEnable(GL.GL_POLYGON_OFFSET_FILL)
 
         # FACES
         if this.gl.drawFaces:
             for colIndex in this.colRange:
                 c = this.colorData[0][colIndex]
                 if len(c) == 3:
-                    glColor(c[0], c[1], c[2])
+                    GL.glColor(c[0], c[1], c[2])
                 else:
-                    glColor(c[0], c[1], c[2], c[3])
+                    GL.glColor(c[0], c[1], c[2], c[3])
                 for faceIndex in this.EqColFs[colIndex]:
                     triangles = this.TriangulatedFs[faceIndex]
                     # Note triangles is a flat (ie 1D) array
                     if len(triangles) == 3:
-                        glDrawElementsui(GL_TRIANGLES, triangles)
+                        GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
                     else:
                         # TODO: This part belongs to a GLinit:
-                        glClearStencil(0)
-                        stencilBits = glGetIntegerv(GL_STENCIL_BITS)
+                        GL.glClearStencil(0)
+                        stencilBits = GL.glGetIntegerv(GL.GL_STENCIL_BITS)
                         assert stencilBits > 0, 'Only triangle faces are supported, since there is no stencil bit'
                         # << TODO: end part that belongs to a GLinit
-                        glClear(GL_STENCIL_BUFFER_BIT)
+                        GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
                         # use stecil buffer to triangulate.
-                        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE)
-                        glDepthMask(GL_FALSE)
-                        #glDepthFunc(GL_ALWAYS)
+                        GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE,
+                                       GL.GL_FALSE, GL.GL_FALSE)
+                        GL.glDepthMask(GL.GL_FALSE)
+                        #glDepthFunc(GL.GL_ALWAYS)
                         # Enable Stencil, always pass test
-                        glEnable(GL_STENCIL_TEST)
+                        GL.glEnable(GL.GL_STENCIL_TEST)
                         # always pass stencil test
-                        glStencilFunc(GL_ALWAYS, 1, 1)
+                        GL.glStencilFunc(GL.GL_ALWAYS, 1, 1)
                         # stencil fail: don't care, never fails
                         # z-fail: zero
                         # both pass: invert stencil values
-                        glStencilOp(GL_KEEP, GL_ZERO, GL_INVERT)
+                        GL.glStencilOp(GL.GL_KEEP, GL.GL_ZERO, GL.GL_INVERT)
                         # Create triangulated stencil:
-                        glDrawElementsui(GL_TRIANGLES, triangles)
+                        GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
                         # Reset colour mask and depth settings.
-                        #glDepthFunc(GL_LESS)
+                        #glDepthFunc(GL.GL_LESS)
                         if len(c) == 3:
-                            glDepthMask(GL_TRUE)
-                        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
+                            GL.glDepthMask(GL.GL_TRUE)
+                        GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE,
+                                       GL.GL_TRUE, GL.GL_TRUE)
                         # Draw only where stencil equals 1 (masked to 1)
                         # GL_INVERT was used, i.e. in case of e.g. 8 bits the value is
                         # either 0 or 0xff, but only the last bit is checked.
-                        glStencilFunc(GL_EQUAL, 1, 1)
+                        GL.glStencilFunc(GL.GL_EQUAL, 1, 1)
                         # make stencil read only:
-                        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)
+                        GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
                         # Now, write according to stencil
-                        glDrawElementsui(GL_TRIANGLES, triangles)
+                        GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
                         if len(c) > 3:
-                            glDepthMask(GL_TRUE)
+                            GL.glDepthMask(GL.GL_TRUE)
                         # ready, disable stencil
-                        glDisable(GL_STENCIL_TEST)
-        glPopMatrix()
+                        GL.glDisable(GL.GL_STENCIL_TEST)
+        GL.glPopMatrix()
 
     def toX3dNode(this, id = 'SISH', precision = 5, edgeRadius = 0):
         """
