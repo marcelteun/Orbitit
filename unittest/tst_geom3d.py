@@ -82,58 +82,38 @@ def get_path(filename):
 
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for Geom3D.CompoundShape"""
+    shape = get_cube()
+    name = "simple_shape"
 
     def test_export_to_ps(self):
-        shape = get_cube()
-        tst_str = shape.toPsPiecesStr()
-        org = get_path("simple_shape.ps")
+        tst_str = self.shape.toPsPiecesStr()
+        org = get_path(self.name + ".ps")
         with open(org, 'r') as fd:
             org_str = fd.read()
+        if tst_str != org_str:
+            with open(org + '.diff', 'w') as fd:
+                fd.write(tst_str)
         self.assertEqual(tst_str, org_str)
 
     def test_export_to_off(self):
-        shape = get_cube()
-        tst_str = shape.toOffStr()
-        org = get_path("simple_shape.off")
+        tst_str = self.shape.toOffStr()
+        org = get_path(self.name + ".off")
         with open(org, 'r') as fd:
             org_str = fd.read()
         self.assertEqual(tst_str, org_str)
 
     def test_repr(self):
-        shape = get_cube()
-        tst_str = repr(shape)
-        org = get_path("simple_shape.repr")
+        tst_str = repr(self.shape)
+        org = get_path(self.name + ".repr")
         with open(org, 'r') as fd:
             org_str = fd.read()
         self.assertEqual(tst_str, org_str)
 
 
-class TestCompoundShape(unittest.TestCase):
+class TestCompoundShape(TestSimpleShape):
     """Unit tests for Geom3D.CompoundShape"""
-
-    def test_export_to_off(self):
-        shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
-        tst_str = shape.toOffStr()
-        org = get_path("compound_shape.off")
-        with open(org, 'r') as fd:
-            org_str = fd.read()
-        self.assertEqual(tst_str, org_str)
-
-    def test_export_to_ps(self):
-        shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
-        tst_str = shape.toPsPiecesStr()
-        org = get_path("compound_shape.ps")
-        with open(org, 'r') as fd:
-            org_str = fd.read()
-        self.assertEqual(tst_str, org_str)
-
-    def test_repr(self):
-        shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
-        tst_str = repr(shape)
-        org = get_path("compound_shape.repr")
-        with open(org, 'r') as fd:
-            org_str = fd.read()
-        self.assertEqual(tst_str, org_str)
+    shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
+    name = "compound_shape"
 
 
 if __name__ == '__main__':
