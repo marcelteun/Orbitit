@@ -1,0 +1,26 @@
+OFF
+#
+# SimpleShape
+#
+# file generated with python script by Marcel Tunnissen
+# Vertices Faces Edges
+10 6 0
+# Vertices
+1 1 1
+-1 1 1
+-1 -1 1
+1 -1 1
+1 1 -1
+-1 1 -1
+-1 -1 -1
+1 -1 -1
+1 1 -2
+0.5 1 1
+# Sides and colours
+4  0 1 2 3  204 25 25
+4  0 3 7 4  204 25 25
+4  1 0 4 5  204 25 25
+4  2 1 5 6  204 25 25
+4  3 2 6 7  204 25 25
+4  7 6 5 4  204 25 25
+# END
