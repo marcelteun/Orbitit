@@ -949,6 +949,15 @@ class SimpleShape:
         """
         saveFile(fd, this)
 
+    @property
+    def simple_shape(self):
+        """To be compatible: derivatives of this class will have this property
+
+        Some classes that inherit from this class need to implement this.
+        Implement here to be compatible.
+        """
+        return self
+
     def cleanShape(this, precision):
         """Return a new shape for which vertices are merged and degenerated faces are deleted.
 
@@ -2589,9 +2598,7 @@ class CompoundShape():
         for s in this.shapeElements:
             VsOffset  = len(Vs)
             colOffset = len(colorDefs)
-            # TODO: ai, ugly...:
-            if s.__class__.__name__ != 'SimpleShape':
-                s = s.SimpleShape
+            s = s.simple_shape
             # Apply shape orientation here, needed, since the can be different
             # for the various shapes
             for v in s.Vs:
@@ -2610,11 +2617,9 @@ class CompoundShape():
         this.mergeNeeded = False
 
     @property
-    def SimpleShape(this):
+    def simple_shape(this):
         """Return the compound shape as a simple merged and flat shape
         """
-        if this.dbgTrace:
-            print '%s.SimpleShape(%s,..):' % (this.__class__, this.name)
         if this.mergeNeeded:
             this.mergeShapes()
         return this.mergedShape
@@ -2624,15 +2629,13 @@ class CompoundShape():
 
         The shape will not have any edges.
         """
-        this.SimpleShape.cleanShape(precision)
+        this.simple_shape.cleanShape(precision)
 
     def glDraw(this):
         """Draws the compound shape as compound shape
 
         If you want to draw it as one, draw the SimpleShape instead
         """
-        if this.dbgTrace:
-            print '%s.SimpleShape(%s,..):' % (this.__class__, this.name)
         for shape in this.shapeElements:
             shape.glDraw()
 
@@ -3321,7 +3324,7 @@ class IsometricShape(CompoundShape):
             if this.unfoldOrbit:
                 if this.mergeNeeded:
                     this.mergeShapes()
-                this.SimpleShape.glDraw()
+                this.simple_shape.glDraw()
             else:
                 CompoundShape.glDraw(this)
 
@@ -3340,7 +3343,7 @@ class IsometricShape(CompoundShape):
         if faceIndices == []:
             # no need to print all faces in orbited, because of symmetry
             faceIndices = range(len(this.baseShape.Fs))
-        return this.SimpleShape.toPsPiecesStr(
+        return this.simple_shape.toPsPiecesStr(
             faceIndices, scaling, precision, margin, pageSize, suppressWarn)
 
 class SymmetricShape(IsometricShape):

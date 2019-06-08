@@ -444,7 +444,7 @@ class MainWindow(wx.Frame):
         if isinstance(shape, Geom3D.CompoundShape):
             # convert to SimpleShape first, since adding to IsometricShape
             # will not work.
-            shape = shape.SimpleShape
+            shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
         shape = Geom3D.CompoundShape([shape], name = filename)
         this.panel.setShape(shape)
@@ -475,7 +475,7 @@ class MainWindow(wx.Frame):
             if isinstance(shape, Geom3D.CompoundShape):
                 # convert to SimpleShape first, since adding a IsometricShape
                 # will not work.
-                shape = shape.SimpleShape
+                shape = shape.simple_shape
             try:
                 this.panel.getShape().addShape(shape)
             except AttributeError:
@@ -542,7 +542,7 @@ class MainWindow(wx.Frame):
                     print "writing to file %s" % filepath
                     shape = this.panel.getShape()
                     try:
-                        shape = shape.SimpleShape
+                        shape = shape.simple_shape
                     except AttributeError:
                         pass
                     if cleanUp:
@@ -590,7 +590,7 @@ class MainWindow(wx.Frame):
                     print "writing to file %s" % filepath
                     shape = this.panel.getShape()
                     try:
-                        shape = shape.SimpleShape
+                        shape = shape.simple_shape
                     except AttributeError:
                         pass
                     shape = shape.cleanShape(margin)
@@ -1916,7 +1916,7 @@ def convertToOff(shape, o_fd, precision, margin = 0):
             Neither are faces with the same coordinates filtered out.
     """
     try:
-        shape = shape.SimpleShape
+        shape = shape.simple_shape
     except AttributeError:
         pass
     if margin != 0:
