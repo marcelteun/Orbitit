@@ -41,12 +41,6 @@ if [ -z $SKIP_PY_TST ]; then {
 	./Orbitit.py -y tst/$obj.py tst/tst.py
 	diff_test "tst/tst.py" "tst/$obj.out.py"
 
-	# test compound shape
-	obj="compound-shape"
-	tst="export $obj to Python"
-	./Orbitit.py -y tst/$obj.py tst/tst.py
-	diff_test "tst/tst.py" "tst/$obj.out.py"
-
 	# test isometric shape with default orientation of base shape
 	obj="5cubes"
 	tst="export $obj to Python"

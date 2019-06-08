@@ -99,6 +99,14 @@ class TestSimpleShape(unittest.TestCase):
             org_str = fd.read()
         self.assertEqual(tst_str, org_str)
 
+    def test_repr(self):
+        shape = get_cube()
+        tst_str = repr(shape)
+        org = get_path("simple_shape.repr")
+        with open(org, 'r') as fd:
+            org_str = fd.read()
+        self.assertEqual(tst_str, org_str)
+
 
 class TestCompoundShape(unittest.TestCase):
     """Unit tests for Geom3D.CompoundShape"""
@@ -115,6 +123,14 @@ class TestCompoundShape(unittest.TestCase):
         shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
         tst_str = shape.toPsPiecesStr()
         org = get_path("compound_shape.ps")
+        with open(org, 'r') as fd:
+            org_str = fd.read()
+        self.assertEqual(tst_str, org_str)
+
+    def test_repr(self):
+        shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
+        tst_str = repr(shape)
+        org = get_path("compound_shape.repr")
         with open(org, 'r') as fd:
             org_str = fd.read()
         self.assertEqual(tst_str, org_str)
