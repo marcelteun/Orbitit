@@ -78,76 +78,6 @@ def get_octahedron():
                               colors=([yellow], []))
 
 
-def cube_compound():
-    v2_div_2 = math.sqrt(2) / 2
-    return Geom3D.IsometricShape(
-        Vs=[
-            geomtypes.Vec3([1.0, 1.0, 1.0]),
-            geomtypes.Vec3([-1.0, 1.0, 1.0]),
-            geomtypes.Vec3([-1.0, -1.0, 1.0]),
-            geomtypes.Vec3([1.0, -1.0, 1.0]),
-            geomtypes.Vec3([1.0, 1.0, -1.0]),
-            geomtypes.Vec3([-1.0, 1.0, -1.0]),
-            geomtypes.Vec3([-1.0, -1.0, -1.0]),
-            geomtypes.Vec3([1.0, -1.0, -1.0]),
-        ],
-        Fs=[
-            [0, 1, 2, 3],
-            [0, 3, 7, 4],
-            [1, 0, 4, 5],
-            [2, 1, 5, 6],
-            [3, 2, 6, 7],
-            [7, 6, 5, 4],
-        ],
-        Es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2, 6,
-            6, 7],
-        colors=[
-            ([[0.996094, 0.839844, 0.0]], []),
-            ([[0.132812, 0.542969, 0.132812]], []),
-            ([[0.542969, 0.0, 0.0]], []),
-            ([[0.0, 0.746094, 0.996094]], []),
-            ([[0.542969, 0.0, 0.0]], []),
-            ([[0.132812, 0.542969, 0.132812]], []),
-            ([[0.0, 0.746094, 0.996094]], []),
-            ([[0.0, 0.746094, 0.996094]], []),
-            ([[0.996094, 0.839844, 0.0]], []),
-            ([[0.542969, 0.0, 0.0]], []),
-            ([[0.132812, 0.542969, 0.132812]], []),
-            ([[0.996094, 0.839844, 0.0]], []),
-        ],
-        directIsometries=[
-            geomtypes.Rot3((geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
-                            geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]))),
-            geomtypes.Rot3((geomtypes.Quat([-v2_div_2, 0, -v2_div_2, 0]),
-                            geomtypes.Quat([-v2_div_2, 0, v2_div_2, 0]))),
-            geomtypes.Rot3((geomtypes.Quat([0, 0, -v2_div_2, -v2_div_2]),
-                            geomtypes.Quat([0, 0, v2_div_2, v2_div_2]))),
-            geomtypes.Rot3((geomtypes.Quat([v2_div_2, -v2_div_2, 0, 0]),
-                            geomtypes.Quat([v2_div_2, v2_div_2, 0, 0]))),
-            geomtypes.Rot3((geomtypes.Quat([0, -v2_div_2, v2_div_2, 0]),
-                            geomtypes.Quat([0, v2_div_2, -v2_div_2, 0]))),
-            geomtypes.Rot3((geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
-                            geomtypes.Quat([0.5, 0.5, 0.5, 0.5]))),
-            geomtypes.Rot3((geomtypes.Quat([-0.5, -0.5, 0.5, -0.5]),
-                            geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]))),
-            geomtypes.Rot3((geomtypes.Quat([0, v2_div_2, 0, -v2_div_2]),
-                            geomtypes.Quat([0, -v2_div_2, 0, v2_div_2]))),
-            geomtypes.Rot3((geomtypes.Quat([-v2_div_2, -v2_div_2, 0, 0]),
-                            geomtypes.Quat([-v2_div_2, v2_div_2, 0, 0]))),
-            geomtypes.Rot3((geomtypes.Quat([0, v2_div_2, 0, v2_div_2]),
-                            geomtypes.Quat([0, -v2_div_2, 0, -v2_div_2]))),
-            geomtypes.Rot3((geomtypes.Quat([0, 0, -v2_div_2, v2_div_2]),
-                            geomtypes.Quat([0, 0, v2_div_2, -v2_div_2]))),
-            geomtypes.Rot3((geomtypes.Quat([v2_div_2, 0, -v2_div_2, 0]),
-                            geomtypes.Quat([v2_div_2, 0, v2_div_2, 0]))),
-        ],
-        unfoldOrbit=False,
-        name="12cubes",
-        orientation=geomtypes.Rot3((
-            geomtypes.Quat([0.953020613871, 0.214186495298, 0.0, 0.214186495298]),
-            geomtypes.Quat([0.953020613871, -0.214186495298, -0.0, -0.214186495298])))
-        )
-
 
 def get_path(filename):
     """Return path to test file to compare with"""
@@ -164,6 +94,8 @@ class TestSimpleShape(unittest.TestCase):
     """Unit tests for Geom3D.CompoundShape"""
     shape = get_cube()
     name = "simple_shape"
+    ps_margin = 10
+    ps_precision = 7
     scale = 1
 
     def chk_with_org(self, org, chk_str):
@@ -181,20 +113,31 @@ class TestSimpleShape(unittest.TestCase):
             self.assertTrue(False, 'Unexpected content {} != {}'.format(
                 org, chk_file))
 
+    def ensure_shape(self):
+        """Make sure the shape is defined"""
+        if not self.shape:
+            self.def_shape()
+
     def test_export_to_ps(self):
         """Test export to PostScript function"""
-        tst_str = self.shape.toPsPiecesStr(scaling=self.scale)
+        self.ensure_shape()
+        tst_str = self.shape.toPsPiecesStr(scaling=self.scale,
+                                           precision=self.ps_precision,
+                                           margin=math.pow(10, -self.ps_margin),
+                                           suppressWarn=True)
         org = get_path(self.name + ".ps")
         self.chk_with_org(org, tst_str)
 
     def test_export_to_off(self):
         """Test export to off-format function"""
+        self.ensure_shape()
         tst_str = self.shape.toOffStr()
         org = get_path(self.name + ".off")
         self.chk_with_org(org, tst_str)
 
     def test_repr(self):
         """Test repr-format function"""
+        self.ensure_shape()
         tst_str = repr(self.shape)
         org = get_path(self.name + ".repr")
         self.chk_with_org(org, tst_str)
@@ -208,9 +151,80 @@ class TestCompoundShape(TestSimpleShape):
 
 class TestIsometricShape(TestSimpleShape):
     """Unit tests for Geom3D.IsometricShape"""
-    shape = cube_compound()
+    shape = None
     name = "isometric_shape"
     scale = 50
+
+    def def_shape(self):
+        """Define an IsometricShape describing a compound of 12 cubes"""
+        v2_div_2 = math.sqrt(2) / 2
+        self.shape = Geom3D.IsometricShape(
+            Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+                geomtypes.Vec3([-1.0, 1.0, 1.0]),
+                geomtypes.Vec3([-1.0, -1.0, 1.0]),
+                geomtypes.Vec3([1.0, -1.0, 1.0]),
+                geomtypes.Vec3([1.0, 1.0, -1.0]),
+                geomtypes.Vec3([-1.0, 1.0, -1.0]),
+                geomtypes.Vec3([-1.0, -1.0, -1.0]),
+                geomtypes.Vec3([1.0, -1.0, -1.0])],
+            Fs=[[0, 1, 2, 3],
+                [0, 3, 7, 4],
+                [1, 0, 4, 5],
+                [2, 1, 5, 6],
+                [3, 2, 6, 7],
+                [7, 6, 5, 4]],
+            Es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2,
+                6, 6, 7],
+            colors=[([[0.996094, 0.839844, 0.0]], []),
+                    ([[0.132812, 0.542969, 0.132812]], []),
+                    ([[0.542969, 0.0, 0.0]], []),
+                    ([[0.0, 0.746094, 0.996094]], []),
+                    ([[0.542969, 0.0, 0.0]], []),
+                    ([[0.132812, 0.542969, 0.132812]], []),
+                    ([[0.0, 0.746094, 0.996094]], []),
+                    ([[0.0, 0.746094, 0.996094]], []),
+                    ([[0.996094, 0.839844, 0.0]], []),
+                    ([[0.542969, 0.0, 0.0]], []),
+                    ([[0.132812, 0.542969, 0.132812]], []),
+                    ([[0.996094, 0.839844, 0.0]], [])],
+            directIsometries=[
+                geomtypes.Rot3((geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
+                                geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]))),
+                geomtypes.Rot3((geomtypes.Quat([-v2_div_2, 0, -v2_div_2, 0]),
+                                geomtypes.Quat([-v2_div_2, 0, v2_div_2, 0]))),
+                geomtypes.Rot3((geomtypes.Quat([0, 0, -v2_div_2, -v2_div_2]),
+                                geomtypes.Quat([0, 0, v2_div_2, v2_div_2]))),
+                geomtypes.Rot3((geomtypes.Quat([v2_div_2, -v2_div_2, 0, 0]),
+                                geomtypes.Quat([v2_div_2, v2_div_2, 0, 0]))),
+                geomtypes.Rot3((geomtypes.Quat([0, -v2_div_2, v2_div_2, 0]),
+                                geomtypes.Quat([0, v2_div_2, -v2_div_2, 0]))),
+                geomtypes.Rot3((geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
+                                geomtypes.Quat([0.5, 0.5, 0.5, 0.5]))),
+                geomtypes.Rot3((geomtypes.Quat([-0.5, -0.5, 0.5, -0.5]),
+                                geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]))),
+                geomtypes.Rot3((geomtypes.Quat([0, v2_div_2, 0, -v2_div_2]),
+                                geomtypes.Quat([0, -v2_div_2, 0, v2_div_2]))),
+                geomtypes.Rot3((geomtypes.Quat([-v2_div_2, -v2_div_2, 0, 0]),
+                                geomtypes.Quat([-v2_div_2, v2_div_2, 0, 0]))),
+                geomtypes.Rot3((geomtypes.Quat([0, v2_div_2, 0, v2_div_2]),
+                                geomtypes.Quat([0, -v2_div_2, 0, -v2_div_2]))),
+                geomtypes.Rot3((geomtypes.Quat([0, 0, -v2_div_2, v2_div_2]),
+                                geomtypes.Quat([0, 0, v2_div_2, -v2_div_2]))),
+                geomtypes.Rot3((geomtypes.Quat([v2_div_2, 0, -v2_div_2, 0]),
+                                geomtypes.Quat([v2_div_2, 0, v2_div_2, 0]))),
+            ],
+            unfoldOrbit=False,
+            name="12cubes",
+            orientation=geomtypes.Rot3((
+                geomtypes.Quat([0.953020613871,
+                                0.214186495298,
+                                0.0,
+                                0.214186495298]),
+                geomtypes.Quat([0.953020613871,
+                                -0.214186495298,
+                                0.0,
+                                -0.214186495298])))
+            )
 
 
 if __name__ == '__main__':
