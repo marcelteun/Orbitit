@@ -1906,12 +1906,12 @@ class SimpleShape:
         return s
 
     def toPsPiecesStr(this,
-            faceIndices = [],
-            scaling = 1,
-            precision = 7,
-            margin = 1.0e5*defaultFloatMargin,
-            pageSize = PS.PageSizeA4,
-            suppressWarn = False
+            faceIndices=[],
+            scaling=1,
+            precision=7,
+            margin=1.0e5*defaultFloatMargin,
+            pageSize=PS.PageSizeA4,
+            suppressWarn=False
         ):
         """
         Returns a string in PS format that shows the pieces of faces that can
