@@ -135,7 +135,7 @@ class doc:
                     this.leftMargin, this.rightMargin,
                     pageStr,
                 )
-        str = '%s\n%s\n%%%%EOF' %(str, this.tailerStr)
+        str = '%s\n%s\n%%%%EOF\n' %(str, this.tailerStr)
         return str
 
     def addLineSegments(this,

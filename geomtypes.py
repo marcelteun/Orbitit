@@ -146,9 +146,16 @@ class Vec(tuple):
         return tuple.__new__(cls, [float(a) for a in v])
 
     def __repr__(self):
-        s = indent.Str('%s(%s)' % (self.__class__.__name__, str(self)))
+        vec_str = "["
+        if self:
+            vec_str += float2str(self[0], DEFAULT_ROUND_FLOAT_MARGIN)
+            for e in self[1:]:
+                vec_str += ', {}'.format(float2str(e,
+                                                   DEFAULT_ROUND_FLOAT_MARGIN))
+        vec_str += "]"
+        s = indent.Str('{}({})'.format(self.__class__.__name__, vec_str))
         if __name__ != '__main__':
-            s = s.insert('%s.' % __name__)
+            s = s.insert('{}.'.format(__name__))
         return s
 
     def __str__(self):

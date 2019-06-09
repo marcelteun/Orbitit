@@ -1,15 +1,15 @@
 Geom3D.SimpleShape(
     Vs=[
-        geomtypes.Vec3([1.0, 1.0, 1.0]),
-        geomtypes.Vec3([-1.0, 1.0, 1.0]),
-        geomtypes.Vec3([-1.0, -1.0, 1.0]),
-        geomtypes.Vec3([1.0, -1.0, 1.0]),
-        geomtypes.Vec3([1.0, 1.0, -1.0]),
-        geomtypes.Vec3([-1.0, 1.0, -1.0]),
-        geomtypes.Vec3([-1.0, -1.0, -1.0]),
-        geomtypes.Vec3([1.0, -1.0, -1.0]),
-        geomtypes.Vec3([1.0, 1.0, -2.0]),
-        geomtypes.Vec3([0.5, 1.0, 1.0])
+        geomtypes.Vec3([1, 1, 1]),
+        geomtypes.Vec3([-1, 1, 1]),
+        geomtypes.Vec3([-1, -1, 1]),
+        geomtypes.Vec3([1, -1, 1]),
+        geomtypes.Vec3([1, 1, -1]),
+        geomtypes.Vec3([-1, 1, -1]),
+        geomtypes.Vec3([-1, -1, -1]),
+        geomtypes.Vec3([1, -1, -1]),
+        geomtypes.Vec3([1, 1, -2]),
+        geomtypes.Vec3([0.5, 1, 1])
     ],
     Fs=[
         [0, 1, 2, 3],

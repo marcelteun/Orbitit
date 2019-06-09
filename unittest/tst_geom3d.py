@@ -37,6 +37,7 @@ DIR = "unittest"
 
 
 def get_cube():
+    """Return a shape describing one cube"""
     Vs = [geomtypes.Vec3([ 1,  1,  1]),
           geomtypes.Vec3([-1,  1,  1]),
           geomtypes.Vec3([-1, -1,  1]),
@@ -58,6 +59,7 @@ def get_cube():
 
 
 def get_octahedron():
+    """Return a shape describing one octahedron"""
     Vs = [geomtypes.Vec3([ 0,  0,  2]),
           geomtypes.Vec3([ 2,  0,  0]),
           geomtypes.Vec3([ 0,  2,  0]),
@@ -180,16 +182,19 @@ class TestSimpleShape(unittest.TestCase):
                 org, chk_file))
 
     def test_export_to_ps(self):
+        """Test export to PostScript function"""
         tst_str = self.shape.toPsPiecesStr(scaling=self.scale)
         org = get_path(self.name + ".ps")
         self.chk_with_org(org, tst_str)
 
     def test_export_to_off(self):
+        """Test export to off-format function"""
         tst_str = self.shape.toOffStr()
         org = get_path(self.name + ".off")
         self.chk_with_org(org, tst_str)
 
     def test_repr(self):
+        """Test repr-format function"""
         tst_str = repr(self.shape)
         org = get_path(self.name + ".repr")
         self.chk_with_org(org, tst_str)

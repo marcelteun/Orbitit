@@ -1,13 +1,13 @@
 Geom3D.IsometricShape(
     Vs=[
-        geomtypes.Vec3([1.0, 1.0, 1.0]),
-        geomtypes.Vec3([-1.0, 1.0, 1.0]),
-        geomtypes.Vec3([-1.0, -1.0, 1.0]),
-        geomtypes.Vec3([1.0, -1.0, 1.0]),
-        geomtypes.Vec3([1.0, 1.0, -1.0]),
-        geomtypes.Vec3([-1.0, 1.0, -1.0]),
-        geomtypes.Vec3([-1.0, -1.0, -1.0]),
-        geomtypes.Vec3([1.0, -1.0, -1.0])
+        geomtypes.Vec3([1, 1, 1]),
+        geomtypes.Vec3([-1, 1, 1]),
+        geomtypes.Vec3([-1, -1, 1]),
+        geomtypes.Vec3([1, -1, 1]),
+        geomtypes.Vec3([1, 1, -1]),
+        geomtypes.Vec3([-1, 1, -1]),
+        geomtypes.Vec3([-1, -1, -1]),
+        geomtypes.Vec3([1, -1, -1])
     ],
     Fs=[
         [0, 1, 2, 3],
@@ -38,20 +38,20 @@ Geom3D.IsometricShape(
             geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([-0.707106781187, 0.0, -0.707106781187, 0.0]),
-            geomtypes.Quat([-0.707106781187, 0.0, 0.707106781187, 0.0]),
+            geomtypes.Quat([-0.7071067812, 0, -0.7071067812, 0]),
+            geomtypes.Quat([-0.7071067812, 0, 0.7071067812, 0]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.0, 0.0, -0.707106781187, -0.707106781187]),
-            geomtypes.Quat([0.0, 0.0, 0.707106781187, 0.707106781187]),
+            geomtypes.Quat([0, 0, -0.7071067812, -0.7071067812]),
+            geomtypes.Quat([0, 0, 0.7071067812, 0.7071067812]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.707106781187, -0.707106781187, 0.0, 0.0]),
-            geomtypes.Quat([0.707106781187, 0.707106781187, 0.0, 0.0]),
+            geomtypes.Quat([0.7071067812, -0.7071067812, 0, 0]),
+            geomtypes.Quat([0.7071067812, 0.7071067812, 0, 0]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.0, -0.707106781187, 0.707106781187, 0.0]),
-            geomtypes.Quat([0.0, 0.707106781187, -0.707106781187, 0.0]),
+            geomtypes.Quat([0, -0.7071067812, 0.7071067812, 0]),
+            geomtypes.Quat([0, 0.7071067812, -0.7071067812, 0]),
         )),
         geomtypes.Rot3((
             geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
@@ -62,30 +62,30 @@ Geom3D.IsometricShape(
             geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.0, 0.707106781187, 0.0, -0.707106781187]),
-            geomtypes.Quat([0.0, -0.707106781187, 0.0, 0.707106781187]),
+            geomtypes.Quat([0, 0.7071067812, 0, -0.7071067812]),
+            geomtypes.Quat([0, -0.7071067812, 0, 0.7071067812]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([-0.707106781187, -0.707106781187, 0.0, 0.0]),
-            geomtypes.Quat([-0.707106781187, 0.707106781187, 0.0, 0.0]),
+            geomtypes.Quat([-0.7071067812, -0.7071067812, 0, 0]),
+            geomtypes.Quat([-0.7071067812, 0.7071067812, 0, 0]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.0, 0.707106781187, 0.0, 0.707106781187]),
-            geomtypes.Quat([0.0, -0.707106781187, 0.0, -0.707106781187]),
+            geomtypes.Quat([0, 0.7071067812, 0, 0.7071067812]),
+            geomtypes.Quat([0, -0.7071067812, 0, -0.7071067812]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.0, 0.0, -0.707106781187, 0.707106781187]),
-            geomtypes.Quat([0.0, 0.0, 0.707106781187, -0.707106781187]),
+            geomtypes.Quat([0, 0, -0.7071067812, 0.7071067812]),
+            geomtypes.Quat([0, 0, 0.7071067812, -0.7071067812]),
         )),
         geomtypes.Rot3((
-            geomtypes.Quat([0.707106781187, 0.0, -0.707106781187, 0.0]),
-            geomtypes.Quat([0.707106781187, 0.0, 0.707106781187, 0.0]),
+            geomtypes.Quat([0.7071067812, 0, -0.7071067812, 0]),
+            geomtypes.Quat([0.7071067812, 0, 0.7071067812, 0]),
         ))
     ],
     unfoldOrbit=False,
     name='12cubes',
     orientation=geomtypes.Rot3((
-        geomtypes.Quat([0.953020613871, 0.214186495298, 0.0, 0.214186495298]),
-        geomtypes.Quat([0.953020613871, -0.214186495298, -0.0, -0.214186495298]),
+        geomtypes.Quat([0.9530206139, 0.2141864953, 0, 0.2141864953]),
+        geomtypes.Quat([0.9530206139, -0.2141864953, 0, -0.2141864953]),
     ))
 )
