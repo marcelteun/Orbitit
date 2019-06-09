@@ -2,7 +2,7 @@ import geomtypes
 import Geom3D
 import isometry
 shape = Geom3D.SimpleShape(
-    Vs = [
+    Vs=[
         geomtypes.Vec3([1.0, 1.0, 1.0]),
         geomtypes.Vec3([-1.0, 1.0, 1.0]),
         geomtypes.Vec3([-1.0, -1.0, 1.0]),
@@ -14,7 +14,7 @@ shape = Geom3D.SimpleShape(
         geomtypes.Vec3([1.0, 1.0, -2.0]),
         geomtypes.Vec3([0.5, 1.0, 1.0])
     ],
-    Fs = [
+    Fs=[
         [0, 4, 8],
         [0, 9, 1, 2, 3],
         [0, 3, 7, 4],
@@ -23,7 +23,7 @@ shape = Geom3D.SimpleShape(
         [3, 2, 6, 7],
         [7, 6, 5, 4]
     ],
-    Es = [],
-    colors = ([[0.99609400000000003, 0.0, 0.0]], [0, 0, 0, 0, 0, 0, 0]),
-    name = "SimpleShape"
+    Es=[0, 4, 4, 8, 0, 8, 0, 9, 1, 9, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 1, 4, 5, 1, 5, 5, 6, 2, 6, 6, 7],
+    colors=([[0.945312, 0.945312, 0.945312]], [0, 0, 0, 0, 0, 0, 0]),
+    name="SimpleShape"
 )
