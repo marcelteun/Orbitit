@@ -78,7 +78,6 @@ def get_octahedron():
                               colors=([yellow], []))
 
 
-
 def get_path(filename):
     """Return path to test file to compare with"""
     return path.join(DIR, filename)
@@ -123,7 +122,8 @@ class TestSimpleShape(unittest.TestCase):
         self.ensure_shape()
         tst_str = self.shape.toPsPiecesStr(scaling=self.scale,
                                            precision=self.ps_precision,
-                                           margin=math.pow(10, -self.ps_margin),
+                                           margin=math.pow(10,
+                                                           -self.ps_margin),
                                            suppressWarn=True)
         org = get_path(self.name + ".ps")
         self.chk_with_org(org, tst_str)
