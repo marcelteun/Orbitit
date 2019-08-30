@@ -1589,7 +1589,8 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         return s
 
     def glDraw(this):
-        if this.updateShape: this.setV()
+        if this.updateShape:
+            this.setV()
         Geom3D.CompoundShape.glDraw(this)
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
@@ -1669,7 +1670,6 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 	    this.heptagon.rotate(-geomtypes.UZ, this.posAngle)
 
     def setV(this):
-        #print this.name, "setV"
 	this.posHeptagon()
 
 class FldHeptagonCtrlWin(wx.Frame):
@@ -1751,11 +1751,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.trisPosGui = wx.Choice(this.panel,
                 style = wx.RA_VERTICAL,
                 choices = [
-                        'Position %d' % i for i in range(
-                            this.nr_of_positions
-                        )
-                ]
-        )
+                    'Position {}'.format(i + 1)
+                    for i in range(this.nr_of_positions)])
         this.Guis.append(this.trisPosGui)
         this.trisPosGui.Bind(wx.EVT_CHOICE, this.onTrisPosition)
         this.setEnableTrisFillItems()
@@ -2073,12 +2070,12 @@ class FldHeptagonCtrlWin(wx.Frame):
         res = re.search("-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.py", filename)
         if res:
             tris_pos = res.groups()[0]
-            return tris_pos
+            return int(tris_pos)
         else:
             # try old syntax:
             res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
             if res:
-                return '0'
+                return 0
             else:
                 this.printFileStrMapWarning(filename, 'fileStrMapTrisPos')
                 assert(False)
@@ -2509,9 +2506,18 @@ class FldHeptagonCtrlWin(wx.Frame):
     @property
     def tris_position(this):
         # Note these are called "Position <int>"
-	return int(this.trisPosGui.GetStringSelection().split()[1])
+        selected = this.trisPosGui.GetSelection()
+        # If nothing selected (after changing from having reflections)
+        if selected < 0:
+            selected = 0
+        return selected
 
-    def onTrisPosition(this, event = None):
+    @tris_position.setter
+    def tris_position(this, value):
+        this.trisPosGui.SetSelection(value)
+        this.onTrisPosition()
+
+    def onTrisPosition(this, event=None):
         this.setTriangleFillPosition(this.tris_position)
         this.setEnableTrisFillItems()
         this.updateShape()
@@ -2657,9 +2663,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.trisFillGui.SetStringSelection(
 	    this.fileStrMapTrisStr(this.prePosFileName))
 	this.onTriangleFill()
-        this.trisPosGui.SetStringSelection(
-            'Position %s' % this.fileStrMapTrisPos(this.prePosFileName))
-        this.onTrisPosition()
+        this.tris_position = this.fileStrMapTrisPos(this.prePosFileName)
 	# it's essential that prePosGui is set to dynamic be4 stdPrePos is read
 	# otherwise something else than dynamic might be read...
 	openFileStr = this.stringify[open_file]
@@ -2735,7 +2739,6 @@ class FldHeptagonCtrlWin(wx.Frame):
     fld1None = 0.0
     fld2None = 0.0
     def onPrePos(this, event = None):
-	#print "onPrePos"
         aVal = this.aNone
         tVal = this.tNone
 	c = this.shape
@@ -2789,14 +2792,17 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.foldMethodGui.SetStringSelection(FoldName[sps['7fold']])
 	    this.trisFillGui.SetStringSelection(this.trisAlt.stringify[sps['tris']])
             try:
-                tris_pos = sps['tris-pos']
+                this.tris_position = sps['tris-pos']
             except KeyError:
-                tris_pos = 0
-            this.trisPosGui.SetStringSelection('Position %d' % tris_pos)
+                this.tris_position = 0
+            try:
+                rotateFold = sps['fold-rot']
+            except KeyError:
+                rotateFold = 0
+            this.setRotateFld(rotateFold)
 
 	    this.onFoldMethod()
 	    this.onTriangleFill()
-            this.onTrisPosition()
 
 	    for gui in [
 		this.dihedralAngleGui, this.posAngleGui,

@@ -952,6 +952,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 		'7fold': Heptagons.foldMethod.w,
 		'tris': trisAlt.shell_strip_II,
                 'tris-pos': 1
+	    },{
+            #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+            'set': [2.2398383815253, 1.538134037316, -1.753834771439, 2.220230723671, 0.6077158322698, -1.7538347714391, -0.1073726559505],
+            '7fold': Heptagons.foldMethod.w,
+            'tris': trisAlt.strip_II_shell,
+            'tris-pos': 1,
+            'fold-rot': 1
 	    }
 	],
 	T60_P12: [
