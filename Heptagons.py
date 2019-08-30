@@ -2300,7 +2300,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	this.addTrisGui.Enable()
 	this.trisFillGui.Enable()
 
-    def onRefl(this, event = None):
+    def onRefl(this, event=None):
         this.shape.inclReflections = this.reflGui.IsChecked()
 	this.shape.updateShape = True
 	this.setEnablePrePosItems()
@@ -2308,7 +2308,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 	    this.setDefaultSize(this.refl_min_size)
 	else:
 	    this.setDefaultSize(this.rot_min_size)
-	if event != None:
+	if event is not None:
 	    if this.isPrePos():
 		this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
 		if not this.shape.inclReflections:
@@ -2336,7 +2336,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def isPrePos(this):
 	# TODO: move to offspring
-        return this.prePosGui.GetStringSelection() != this.prePosStrLst[-1]
+        # FIXME TODO the string 'Enable Sliders' should be a constant and be
+        # imported and used in the Scenes.. (or move to offspring..)
+        return this.prePosGui.GetStringSelection() != 'Enable Sliders'
 
     def saveTrisFillItem(this):
 	currentChoice = this.trisAlt.key[this.trisFillGui.GetStringSelection()]
