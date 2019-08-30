@@ -2365,10 +2365,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def setEnableTrisFillItems(this, itemList = None):
 	# first time fails
-	if this.trisFillGui.GetStringSelection() == '':
-	    currentChoice = this.trisAlt.strip_I
-	else:
+	try:
 	    currentChoice = this.trisAlt.key[this.trisFillGui.GetStringSelection()]
+        except KeyError:
+	    currentChoice = this.trisAlt.strip_I
 	if itemList == None:
 	    itemList = this.trisAlt.choiceList
 	    if this.shape.inclReflections:
