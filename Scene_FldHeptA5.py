@@ -955,12 +955,33 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 'tris': trisAlt.shell_strip_II,
                 'tris-pos': 1
             },{
-            #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
-            'set': [2.2398383815253, 1.538134037316, -1.753834771439, 2.220230723671, 0.6077158322698, -1.7538347714391, -0.1073726559505],
-            '7fold': Heptagons.foldMethod.w,
-            'tris': trisAlt.strip_II_shell,
-            'tris-pos': 1,
-            'fold-rot': 1
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                'set': [2.2398383815253, 1.538134037316, -1.753834771439, 2.220230723671, 0.6077158322698, -1.7538347714391, -0.1073726559505],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 1
+            },{
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                'set': [2.5964060652451, 0.6303582297009, -1.7538347714387, 2.8348162453136, 0.3892552426313, -1.7538347714394, 1.4996710788234],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 1
+            },{
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                'set': [1.5146302263609, -2.3128908096943, -1.753834771439, -1.8766503426196, -0.4739245692867, -1.753834771439, 1.9319622451753],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 1
+            },{
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                'set': [1.5146302263604, -2.3128908096942, 1.7538347714387, 1.1330038160007, -0.4739245692867, 1.7538347714397, -1.3415689033837],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 1
             }
         ],
         T60_P12: [
