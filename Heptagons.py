@@ -2385,10 +2385,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                     if this.trisAlt.isBaseKey(c_key) or isinstance(c_key, int):
                         return False
                     else:
-                        if this.symBase == isometry.A4:
-                            return c_key[0] >= c_key[1]
-                        else:
-                            return True
+                        return True
                 if not isValid(this.trisAlt.stringify[currentChoice]):
                     try:
                         currentChoice = this.trisAlt.key[this.savTrisNoRefl]
