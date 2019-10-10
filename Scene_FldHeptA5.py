@@ -346,6 +346,8 @@ class Shape(Heptagons.FldHeptagonShape):
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.addXtraFs:
+            assert this.edgeAlternative in this.o5triFs, \
+                "this triangle fill isn't implemented for A5"
             Fs = this.o5triFs[this.edgeAlternative][:]
             Es = this.o5triEs[this.edgeAlternative][:]
             this.trisO5Shape.setBaseVertexProperties(Vs = Vs)
