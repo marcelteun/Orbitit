@@ -2080,6 +2080,14 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.printFileStrMapWarning(filename, 'fileStrMapTrisPos')
                 assert(False)
 
+    def fileStrMapFoldPos(this, filename):
+        res = re.search("-fld_[^.]*\.([0-7])-.*\.py", filename)
+        if res:
+            tris_pos = res.groups()[0]
+            return int(tris_pos)
+        else:
+            return 0
+
     def setEnablePrePosItems(this):
         currentPrePos = this.prePos
         this.prePosGui.Clear()

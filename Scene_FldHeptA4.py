@@ -773,7 +773,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    data = {
 		    'set': in_data['set'],
 		    '7fold': Heptagons.foldMethod.get(fold_method_str),
-		    'tris': tris_str
+		    'tris': tris_str,
+                    'fold-rot': this.fileStrMapFoldPos(in_data['file'])
 	    }
 	    print 'see file %s/%s' % (this.rDir, in_data['file'])
 	    return data
