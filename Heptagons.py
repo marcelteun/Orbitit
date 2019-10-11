@@ -2550,6 +2550,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             for k, v in this.stringify.iteritems():
                 this.__prePosStr2Key[v] = k
             return this.__prePosStr2Key[s]
+        except KeyError:
+            # Happens when switching from Open File to Only Hepts e.g.
+            return -1
 
     @property
     def prePos(this):
