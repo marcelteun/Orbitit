@@ -658,6 +658,10 @@ class Transform3(tuple):
         raise UnsupportedTransform(
             'oops, unknown matrix; transform {}\n'.format(str(self)))
 
+    def __neg__(self):
+        """Return a new object with the inverse of this transform"""
+        return self.inverse()
+
     def is_direct(self):
         """Return whether this is an opposite transform (i.e. not direct)"""
         return self.is_rot()
