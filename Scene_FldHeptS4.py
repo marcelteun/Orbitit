@@ -119,7 +119,7 @@ hV2 = V2/2
 o4_fld_0 = geomtypes.Vec3([1, 0, 0])
 o4_fld_1 = geomtypes.Vec3([0, 1, 1])
 isomS4 = isometry.S4(setup = {'o4axis0': o4_fld_0, 'o4axis1': o4_fld_1})
-o4fld = Rot(axis = o4_fld_1, angle = geomtypes.qTurn)
+o4fld = Rot(axis = o4_fld_1, angle = geomtypes.QUARTER_TURN)
 isomO4 = isometry.C4(setup = {'axis': o4_fld_1})
 
 o3axis = geomtypes.Vec3([1/V3, 0, V2/V3])

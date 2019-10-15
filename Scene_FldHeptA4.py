@@ -262,7 +262,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 this.edgeAlternative = this.edgeAlternative & ~alt2_bit
 
     def setTriangleFillPosition(this, i):
-        print "TODO implement setTriangleFillPosition"
+        print "TODO implement setTriangleFillPosition for", i
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
         Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
