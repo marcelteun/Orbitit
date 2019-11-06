@@ -691,7 +691,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    data = {
 		    'set': in_data['set'],
 		    '7fold': Heptagons.foldMethod.get(fold_method_str),
-		    'tris': tris_alt
+		    'tris': tris_alt,
+            'fold-rot': this.fileStrMapFoldPos(in_data['file'])
 	    }
 	    print 'see file %s/%s' % (this.rDir, in_data['file'])
 	    return data
@@ -914,6 +915,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 	    },{
 		'file': 'frh-roots-1_0_1_0_0_1_0-fld_shell.0-alt_strip_II-opp_alt_strip_II.py',
 		'set': [-0.866025403784, -2.222676713307, -2.064570332814, -1.619344079087, 0.555984796217, -2.064570332814, 2.696366399863],
+	    },{
+		'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.1-alt_strip_I-opp_alt_strip_II-pos-0.py',
+		'set': [1.2275167604097, 2.3455801863989, -1.7538347714396, 0.6905325364774, 0.4614593061065, -1.753834771439, -0.041379464264],
 	    }
         ],
 	S_T8_S6: [
