@@ -22,7 +22,10 @@
 # -----------------------------------------------------------------
 from __future__ import print_function
 
+import Geom3D
+import geomtypes
 import isometry
+import rgb
 
 
 class Orbit(list):
@@ -84,8 +87,7 @@ class Orbit(list):
         v.indexCovered = {}
         for subGroup in v.final.subgroups:
             assert subGroup.order != 0, "{} ({})".format(
-                (str(subGroup),
-                 subGroup.__class__.__name__))
+                str(subGroup), subGroup.__class__.__name__)
             if v.stabiliser.__class__ in subGroup.subgroups:
                 # Check if the stabiliser can really be a subgroup for this
                 # orientation.
@@ -248,3 +250,237 @@ class Orbit(list):
             )
             props[n]['filtered'] = 0
         return v.loStabs[n]
+
+
+class Shape(Geom3D.SymmetricShape):
+    # standard colours
+    cols_blue = [
+         rgb.royalBlue,
+         rgb.lightSkyBlue,
+         rgb.midnightBlue,
+         rgb.steelBlue,
+         rgb.azure]
+
+    cols_green = [
+         rgb.yellowGreen,
+         rgb.lightSeaGreen,
+         rgb.darkGreen,
+         rgb.limeGreen,
+         rgb.darkOliveGreen]
+
+    cols_purple = [
+         rgb.slateBlue,
+         rgb.plum,
+         rgb.blueViolet,
+         rgb.seashell,
+         rgb.lavender]
+
+    cols_yellow = [
+         rgb.gold,
+         rgb.yellow,
+         rgb.lemonChiffon,
+         rgb.khaki,
+         rgb.lightGoldenrod]
+
+    cols_red = [
+         rgb.firebrick,
+         rgb.indianRed,
+         rgb.red,
+         rgb.peachPuff,
+         rgb.lightCoral]
+
+    cols_brown_orange = [
+         rgb.tan,
+         rgb.saddleBrown,
+         rgb.peru,
+         rgb.orange,
+         rgb.darkGoldenrod]
+
+    cols = [  # alternate from above colours
+         rgb.royalBlue,
+         rgb.yellowGreen,
+         rgb.slateBlue,
+         rgb.gold,
+         rgb.firebrick,
+         rgb.tan,
+
+         rgb.lightSkyBlue,
+         rgb.lightSeaGreen,
+         rgb.plum,
+         rgb.yellow,
+         rgb.indianRed,
+         rgb.saddleBrown,
+
+         rgb.midnightBlue,
+         rgb.darkGreen,
+         rgb.blueViolet,
+         rgb.lemonChiffon,
+         rgb.red,
+         rgb.peru,
+
+         rgb.steelBlue,
+         rgb.limeGreen,
+         rgb.seashell,
+         rgb.khaki,
+         rgb.peachPuff,
+         rgb.orange,
+
+         rgb.azure,
+         rgb.darkOliveGreen,
+         rgb.lavender,
+         rgb.lightGoldenrod,
+         rgb.lightCoral,
+         rgb.darkGoldenrod]
+
+    def __init__(self,
+                 base,
+                 final_sym, stab_sym,
+                 name,
+                 no_of_cols, col_alt=0, cols=None, col_sym=''):
+        """
+        base: the descriptive. A dictionary with 'Vs' and 'Fs'
+        final_sym: isometry object describing the final symmetry
+        stab_sym: isometry object descibing the stabiliser symmetry as subgroup
+                  of the final symmetry
+        name: string identifier.
+        no_of_cols: number of different colours to divide evenly, using the
+                    symmetry: all parts with the same colours will have the
+                    same symmetry.
+        col_alt: there might be more than one unique way of dividing the number
+                 of colours. Here you can specify an index.
+        cols: in class.cols colours are pre-defined. Here you can overwrite
+              these. Thse are supposed to consist of floating RGB values
+              between 0 and 1.
+        col_sym: it is possible that 'no_of_cols' is obtained based on
+                 different classes (the elements with the same colour have
+                 different symmetries) if that is the case then you can specify
+                 the symmetry (name) that the elements with the same colour
+                 should have, e.g. 'C4'.
+        """
+        Geom3D.SymmetricShape.__init__(self,
+                                       base['Vs'],
+                                       base['Fs'],
+                                       finalSym=final_sym,
+                                       stabSym=stab_sym,
+                                       name=name,
+                                       quiet=True)
+
+        if cols:
+            self.cols = cols
+
+        assert no_of_cols < len(self.cols), 'Not enough colours defined'
+        # Generate cols:
+        self.no_of_cols = no_of_cols
+        self.col_alt = col_alt
+        self.orbit = Orbit((final_sym, stab_sym))
+        col_choices = self.orbit.higherOrderStabiliserProps
+        alt_start_index = len(col_choices)
+        col_choices.extend(self.orbit.lowerOrderStabiliserProps)
+        # note: all isometries are stored in 'direct'
+        fs_orbit = self.getIsometries()['direct']
+        # find index in col_choices to use
+        for idx, col_choice in enumerate(col_choices):
+            if col_choice['index'] == no_of_cols:
+                if col_sym == '' or col_sym == col_choice['class'].__name__:
+                    break
+        assert col_choice['index'] == no_of_cols,\
+            'Cannot divide {} colours'.format(no_of_cols)
+        # Usefull data:
+        # Elements with the same colour are mapped onto eachother by:
+        self.same_col_isom = col_choice['class'].__name__
+        # find col symmetry properties
+        if idx < alt_start_index:
+            col_final_sym = self.orbit.final
+            col_syms = self.orbit.higherOrderStabiliser(idx)
+        else:
+            col_final_sym = self.orbit.altFinal
+            col_syms = self.orbit.lowerOrderStabiliser(idx - alt_start_index)
+            # now the fs_orbit might contain isometries that are not part of
+            # the colouring isometries. Recreate the shape with isometries that
+            # only have these:
+            final_sym = self.orbit.altFinal
+            stab_sym = self.orbit.altStab
+            verts = self.getBaseVertexProperties()['Vs']
+            faces = self.getBaseFaceProperties()['Fs']
+            Geom3D.SymmetricShape.__init__(verts, faces,
+                                           finalSym=final_sym,
+                                           stabSym=stab_sym,
+                                           name=self.name,
+                                           quiet=True)
+            # note: all isometries are stored in 'direct'
+            fs_orbit = self.getIsometries()['direct']
+
+        # generate colour array for this colour alternative
+        self.total_no_of_col_alt = len(col_syms)
+        assert col_alt < self.total_no_of_col_alt,\
+            "colour alternative {} doesn't exist (max {})".format(
+                col_alt, self.total_no_of_col_alt - 1)
+        col_quotient_set = col_final_sym / col_syms[col_alt]
+        self.col_per_isom = []
+        for isom in fs_orbit:
+            for i, sub_set in enumerate(col_quotient_set):
+                if isom in sub_set:
+                    self.col_per_isom.append(self.cols[i])
+                    break
+        # update with correct format
+        self.setFaceColors([([col], []) for col in self.col_per_isom])
+
+        # Compound index n means compound of n elements
+        self.index = len(fs_orbit)
+        self.axis = None
+
+    def transform_base(self, trans):
+        """Rotate the position of the descriptive
+
+        trans: a geomtypes.quat object (or matrix) for left multiplying all
+               vertices.
+        """
+        self.setVs([trans * v for v in self.baseShape.Vs])
+
+    def set_rot_axis(self, axis):
+        """Set the rotation axis for rotating the descriptive.
+
+        axis: a geomtypes.Vec3 object around which the descriptive will be
+              rotated.
+        """
+        self.axis = axis
+
+    def rot_base(self, rad):
+        """Rotation the descriptive 'rad' radians around the current axis.
+
+        Before calling this set_rot_axis should have been called.
+        rad: an angle in radians
+        """
+        self.transform_base(geomtypes.Rot3(axis=self.axis, angle=rad))
+
+    def to_off(self):
+        s = self.simple_shape.toOffStr(color_floats=True)
+        s += "# Color alternative based on {}\n".format(self.same_col_isom)
+        s += "# Used colour alternative {} (max {})".format(
+                self.col_alt, self.total_no_of_col_alt - 1)
+        return s
+
+    def to_js(self):
+        js = 'var {} = new Object();\n'.format(self.name)
+        js += '{}.descr = new Object();\n'.format(self.name)
+        js += '{}.descr.Vs = [\n'.format(self.name)
+        for v in self.baseShape.Vs:
+            js += '  {},\n'.format(v)
+        js += '];'
+        js += '{}.descr.Fs = {};'.format(self.name, self.baseShape.Fs)
+        eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        js += '{}.descr.transform = {};\n'.format(self.name, eye)
+        js += '{}.isoms = [\n'.format(self.name)
+        # note: all isometries are stored in 'direct'
+        for q in self.getIsometries()['direct']:
+            js += str(q.matrix(homogeneous=True))
+            js += ','
+        js += '];\n'
+        for i, col in enumerate(self.col_per_isom):
+            js += '{}.isoms[{}].col = [{}, {}, {}];\n'.format(
+                self.name, i, col[0], col[1], col[2])
+
+        if self.axis is not None:
+            js += '{}.rot_axis = {};\n'.format(self.name, self.axis)
+
+        return js

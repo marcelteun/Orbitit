@@ -282,6 +282,8 @@ class CtrlWin(wx.Frame):
         self.panel.Bind(wx.EVT_CHOICE,
                         self.on_no_of_col_select,
                         id=self.col_guis[-1].GetId())
+        # col_alt[0]: index for no of colors
+        # col_atl[1]: index for alternative number with that amount of colors
         self.col_alt = self.col_select[
             self.show_gui[self._final_sym_gui_idx].get_selected_idx()
         ][
@@ -322,6 +324,8 @@ class CtrlWin(wx.Frame):
         self.show_gui[self._stab_sym_gui_idx].set_lst(stab_syms)
         no_of_stabs = self.show_gui[self._stab_sym_gui_idx].length
         if self.col_select[i] is None:
+            # col_select[i][0]: index for no of colors
+            # col_select[i][1]: index for alternative number with that amount of colors
             self.col_select[i] = [[0, 0] for _ in range(no_of_stabs)]
             self.stab_sym_setup[i] = [None for _ in range(no_of_stabs)]
         final_sym_idx = final_sym_gui.get_selected_idx()

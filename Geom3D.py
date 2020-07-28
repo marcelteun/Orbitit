@@ -2499,7 +2499,7 @@ class SimpleShape:
         shape.recreateEdges()
         return shape
 
-class CompoundShape():
+class CompoundShape(object):
     dbgPrn = False
     dbgTrace = False
     """
@@ -3163,7 +3163,6 @@ class IsometricShape(CompoundShape):
     def setVs(this, Vs):
         if this.dbgTrace:
             print 'TODO %s.setVs(%s,..):' % (this.__class__, this.name)
-        print 'TEST RM or use parent %s.setVs(%s,..):' % (this.__class__, this.name)
         assert len(Vs) == len(this.baseShape.Vs)
         this.baseShape.setVertexProperties(Vs = Vs)
         this.mergeNeeded = True
@@ -3365,7 +3364,8 @@ class SymmetricShape(IsometricShape):
         finalSym = isometry.E, stabSym = isometry.E,
         colors = [],
         name = "SymmetricShape",
-        recreateEdges = True
+        recreateEdges = True,
+        quiet=False
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -3403,7 +3403,8 @@ class SymmetricShape(IsometricShape):
                 print '  - len(%d)' % len(coset)
                 for isom in coset: print '   ', isom
         FsOrbit = [coset.get_one() for coset in fsQuotientSet]
-        print 'Applying an orbit of order %d' % len(FsOrbit)
+        if not quiet:
+            print 'Applying an orbit of order %d' % len(FsOrbit)
         if this.dbgTrace:
             for isom in FsOrbit: print isom
         IsometricShape.__init__(this,
