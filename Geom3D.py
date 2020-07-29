@@ -3162,7 +3162,7 @@ class IsometricShape(CompoundShape):
 
     def setVs(this, Vs):
         if this.dbgTrace:
-            print 'TODO %s.setVs(%s,..):' % (this.__class__, this.name)
+            print '%s.setVs(%s,..):' % (this.__class__, this.name)
         assert len(Vs) == len(this.baseShape.Vs)
         this.baseShape.setVertexProperties(Vs = Vs)
         this.mergeNeeded = True
@@ -3185,7 +3185,6 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
-        #print 'TODO %s.setBaseVertexProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3219,7 +3218,6 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.getBaseVertexProperties(%s,..):' % (this.__class__, this.name)
-        print 'TODO %s.getBaseVertexProperties(%s,..):' % (this.__class__, this.name)
         return this.baseShape.getVertexProperties()
 
     def setBaseEdgeProperties(this, dictPar = None, **kwargs):
@@ -3235,7 +3233,6 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
-        #print 'TODO %s.setBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3270,7 +3267,6 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.getBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
-        print 'TODO %s.getBaseEdgeProperties(%s,..):' % (this.__class__, this.name)
         return this.baseShape.getEdgeProperties()
 
     def setBaseFaceProperties(this, dictPar = None, **kwargs):
@@ -3285,7 +3281,6 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
-        #print 'TODO %s.setBaseFaceProperties(%s,..):' % (this.__class__, this.name)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -3309,7 +3304,6 @@ class IsometricShape(CompoundShape):
         """
         if this.dbgTrace:
             print '%s.getBaseFaceProperties(%s,..):' % (this.__class__, this.name)
-        print 'TODO %s.getBaseFaceProperties(%s,..):' % (this.__class__, this.name)
         return this.baseShape.getFaceProperties()
 
     def glDraw(this):
