@@ -138,6 +138,23 @@ def _get_alternative_subgroups(sg, pars, chk, realise):
     return result
 
 
+def get_axes(transforms, n=0):
+    """From an list of transforms get all n-fold axes.
+
+    isoms: list/tuple of transforms
+    n: integer expressing amount of rotation in full turn, if nothing
+       specified, then any n-fold axis is ok
+    """
+    res = []
+    for t in transforms:
+        if t.is_rot():
+            if n == 0 or geomtypes.eq(t.angle(), 2 * math.pi / n):
+                axis = t.axis()
+                if axis not in res and -axis not in res:
+                    res.append(axis)
+    return res
+
+
 class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
 
@@ -375,7 +392,8 @@ class Set(set):
             if not found:
                 print("Warning: unknown setup parameter {} "
                       "for class {}".format(k, self.__class__.__name__))
-                assert False, 'Got setup = {}'.format(str(setup))
+                assert False, 'Got setup = {} for {}'.format(
+                    str(setup), self.__class__.__name__)
         self.generator = setup
 
     @property
@@ -491,8 +509,33 @@ class Cn(Set):
         if setup is None:
             setup = {}
         if isometries is not None:
-            # TODO: add some asserts
             Set.__init__(self, isometries)
+            min_angle = math.pi * 2
+            axis = None
+            for t in isometries:
+                assert t.is_rot, 'Cn cannot contain any {}'.format(str(t))
+                a = t.angle()
+                if geomtypes.eq(a, 0):
+                    continue
+                min_angle = min(a, min_angle)
+                if axis is None:
+                    axis = t.axis()
+                else:
+                    ax = t.axis()
+                    assert axis == ax or axis == -ax or geomtypes.eq(
+                        t.angle(), 0),\
+                        'Cn can only have one unique axis ({} != {})'.format(
+                            axis, ax)
+                    axis = ax
+            if axis is None:
+                # Should be C1
+                assert len(isometries) == 1, 'Expected C1, got {}'.format(
+                    isometries)
+                axis = isometries[0].axis()
+            n = int(round(2 * math.pi / min_angle))
+            if self.n != 0:
+                assert "C{} shouldn't be {}-fold (alpha = {} rad)".format(
+                    self.n, n, min_angle)
         else:
             self.chk_setup(setup)
             keys = setup.keys()
@@ -525,10 +568,10 @@ class Cn(Set):
             for _ in range(n-1):
                 isometries.append(r * isometries[-1])
             Set.__init__(self, isometries)
-            self.order = n
-            self.rot_axes = {'n': axis}
-            self.subgroups = _cn_get_subgroups(n)
-            self.subgroups.insert(0, C(n))
+        self.order = n
+        self.rot_axes = {'n': axis}
+        self.subgroups = _cn_get_subgroups(n)
+        self.subgroups.insert(0, C(n))
 
     def realise_subgroups(self, sg):
         """
@@ -640,8 +683,11 @@ class C2nCn(Set):
             assert self.n == 0 or s['n'] == self.n
             # TODO use direct parent here... (no dep on n)
             cn = Cn(setup=s)
-            self.direct_parent_setup = copy(s)
             self.n = cn.n
+            if self.n != 1:
+                self.direct_parent_setup = copy(s)
+            else:
+                self.direct_parent_setup = None
             s['n'] = 2 * s['n']
             c2n = Cn(setup=s)
             Set.__init__(self, cn | ((c2n-cn) * geomtypes.I))
@@ -1441,6 +1487,9 @@ class A4(Set):
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3)}
         else:
             self.chk_setup(setup)
             axes = setup.keys()
@@ -1524,6 +1573,9 @@ class S4A4(Set):
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3)}
         else:
             self.chk_setup(setup)
             axes = setup.keys()
@@ -1645,6 +1697,9 @@ class A4xI(Set):
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3)}
         else:
             self.chk_setup(setup)
             a4 = A4(setup=setup)
@@ -1732,6 +1787,10 @@ class S4(Set):
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3),
+                4: get_axes(isometries, 4)}
         else:
             self.chk_setup(setup)
             axes = setup.keys()
@@ -1880,6 +1939,10 @@ class S4xI(Set):
             assert len(isometries) == self.order, "{} != {}".format(
                 self.order, len(isometries))
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3),
+                4: get_axes(isometries, 4)}
         else:
             self.chk_setup(setup)
             s4 = S4(setup=setup)
@@ -2078,6 +2141,10 @@ class A5(Set):
                 self.order, len(isometries))
             # TODO: more asserts?
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3),
+                5: get_axes(isometries, 5)}
         else:
             self.chk_setup(setup)
             axes = setup.keys()
@@ -2221,6 +2288,10 @@ class A5xI(Set):
                 self.order, len(isometries))
             # TODO: more asserts?
             Set.__init__(self, isometries)
+            self.rot_axes = {
+                2: get_axes(isometries, 2),
+                3: get_axes(isometries, 3),
+                5: get_axes(isometries, 5)}
         else:
             self.chk_setup(setup)
             a5 = A5(setup=setup)

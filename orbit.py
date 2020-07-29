@@ -269,8 +269,8 @@ class Shape(Geom3D.SymmetricShape):
          rgb.darkOliveGreen]
 
     cols_purple = [
-         rgb.slateBlue,
          rgb.plum,
+         rgb.slateBlue,
          rgb.blueViolet,
          rgb.seashell,
          rgb.lavender]
@@ -299,14 +299,14 @@ class Shape(Geom3D.SymmetricShape):
     cols = [  # alternate from above colours
          rgb.royalBlue,
          rgb.yellowGreen,
-         rgb.slateBlue,
+         rgb.plum,
          rgb.gold,
          rgb.firebrick,
          rgb.tan,
 
          rgb.lightSkyBlue,
          rgb.lightSeaGreen,
-         rgb.plum,
+         rgb.slateBlue,
          rgb.yellow,
          rgb.indianRed,
          rgb.saddleBrown,
@@ -402,7 +402,7 @@ class Shape(Geom3D.SymmetricShape):
             stab_sym = self.orbit.altStab
             verts = self.getBaseVertexProperties()['Vs']
             faces = self.getBaseFaceProperties()['Fs']
-            Geom3D.SymmetricShape.__init__(verts, faces,
+            Geom3D.SymmetricShape.__init__(self, verts, faces,
                                            finalSym=final_sym,
                                            stabSym=stab_sym,
                                            name=self.name,
