@@ -116,6 +116,60 @@ def create_s4(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
 
+def create_s4xi(base, js_fd=None):
+    # example rotation
+    base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([2, 1, 0]),
+                              angle=math.pi/2)
+    polyh = S4A4.S4xI_E(base, 6, col_sym='C4xI')
+    polyh.transform_base(base_rot)
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4xI_C4C2(base, 3)
+    polyh.rot_base(math.pi/3)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4xI_C3(base, 4, col_sym='D3xI')
+    polyh.rot_base(2*math.pi/9)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4xI_C2(base, 4, col_alt=1)
+    polyh.rot_base(math.pi/9)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4xI_C2C1(base, 6, col_sym='D4C4')
+    polyh.rot_base(2*math.pi/9)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4xI_D1C1(base, 6, col_sym='D4C4')
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    # Rigid compounds
+    polyh = S4A4.S4xI_S4A4(base, 2)
+    save_off(polyh)
+
+    polyh = S4A4.S4xI_D4D2(base, 3)
+    save_off(polyh)
+
+    polyh = S4A4.S4xI_D3C3(base, 2)
+    save_off(polyh)
+
+    polyh = S4A4.S4xI_D2C2(base, 3)
+    save_off(polyh)
+
+
 if __name__ == "__main__":
 
     # TODO: from argument
@@ -139,3 +193,4 @@ if __name__ == "__main__":
         create_a4xi(base, fd)
         create_s4a4(base, fd)
         create_s4(base, fd)
+        create_s4xi(base, fd)

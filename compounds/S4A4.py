@@ -261,6 +261,206 @@ class S4_C2(orbit.Shape):
         self.transform_base(base_rot)
 
 
+###############################################################################
+#
+# S4 x I
+#
+###############################################################################
+class S4xI_E(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """General compound with S4xI symmetry with central freedom."""
+        super(S4xI_E, self).__init__(base,
+                                     isometry.S4xI(),
+                                     isometry.E(),
+                                     name='S4xI_E',
+                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                     col_sym=col_sym)
+
+
+class S4xI_C4C2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 12 elements with final symmetry S4xI (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the 4-fold axis in the final
+        symmetry
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        super(S4xI_C4C2, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.C4C2(setup={'axis': axis}),
+                                        name='S4xI_C4C2',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+class S4xI_C3(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 16 elements with final symmetry S4xI (rotation freedom)
+
+        The descriptive shares a 3-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([1, 1, 1])
+        super(S4xI_C3, self).__init__(base,
+                                      isometry.S4xI(),
+                                      isometry.C3(setup={'axis': axis}),
+                                      name='S4xI_C3',
+                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                      col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+class S4xI_C2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 24 elements with final symmetry S4xI (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the final symmetry (a pure
+        2-fold axis, i.e. not a 4-fold axis)
+        """
+        axis = geomtypes.Vec3([1, 1, 0])
+        super(S4xI_C2, self).__init__(base,
+                                      isometry.S4xI(),
+                                      isometry.C2(setup={'axis': axis}),
+                                      name='S4xI_C2',
+                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                      col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+        # the standard position isn't the right position
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
+                                  angle=math.pi/4)
+        self.transform_base(base_rot)
+
+
+class S4xI_C2C1(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 24 elements with final symmetry S4xI (rotation freedom)
+
+        The descriptive shares a reflection plane with one from the final
+        symmetry in such a way that the normal of the reflection plane goes
+        through a pure 2-fold axis of the final symmetry.
+        """
+        axis = geomtypes.Vec3([1, 1, 0])
+        super(S4xI_C2C1, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.C2C1(setup={'axis': axis}),
+                                        name='S4xI_C2C1',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+class S4xI_D1C1(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 24 elements with final symmetry S4xI (rotation freedom)
+
+        The descriptive shares a reflection plane with one from the final
+        symmetry in such a way that the normal of the reflection plane goes
+        through a 4-fold axis of the final symmetry.
+        """
+        axis = geomtypes.Vec3([1, 0, 0])
+        super(S4xI_D1C1, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.D1C1(setup={'axis': axis}),
+                                        name='S4xI_D1C1',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+        # the standard position isn't the right position
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
+                                  angle=math.pi/4)
+        self.transform_base(base_rot)
+
+
+# Rigid Compounds
+class S4xI_S4A4(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Rigid ompound of 2 elements with final symmetry S4xI
+
+        With the orginisation as the classical Stella Octangula.
+        """
+        super(S4xI_S4A4, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.S4A4(),
+                                        name='S4xI_S4A4',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+
+
+class S4xI_D4D2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Rigid ompound of 6 elements with final symmetry S4xI
+
+        With the orginisation as the classical compound of 3 cubes, but by
+        replacing each cube by a Stella Octangula.
+        """
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 1, 0])
+        super(S4xI_D4D2, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.D4D2(setup={
+                                            'axis_n': axis_n,
+                                            'axis_2': axis_2}),
+                                        name='S4xI_D4D2',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+
+        # the standard position isn't the right position
+        base_rot = geomtypes.Rot3(axis=axis_n, angle=math.pi/4)
+        self.transform_base(base_rot)
+
+
+class S4xI_D3C3(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Rigid ompound of 8 elements with final symmetry S4xI
+
+        Special case of S4 X I / C3 where mu = 60 degrees. In this case two
+        elements that share a 3-fold axis are mapped onto eachother
+        """
+        axis_n = geomtypes.Vec3([1, 1, 1])
+        normal_r = geomtypes.Vec3([-1, 1, 0])
+        super(S4xI_D3C3, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.D3C3(setup={
+                                            'axis_n': axis_n,
+                                            'normal_r': normal_r}),
+                                        name='S4xI_D3C3',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+
+        # the standard position isn't the right position
+        base_rot = geomtypes.Rot3(axis=axis_n, angle=math.pi/3)
+        self.transform_base(base_rot)
+
+
+class S4xI_D2C2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Rigid ompound of 8 elements with final symmetry S4xI
+
+        The descriptive shares a 2 reflection planes through its 2-fold axis
+        with 2 mirror planes through 1 2-fold axis of the final symmetry.
+        """
+        axis_n = geomtypes.Vec3([0, 1, 1])
+        normal_r = geomtypes.Vec3([1, 0, 0])
+        super(S4xI_D2C2, self).__init__(base,
+                                        isometry.S4xI(),
+                                        isometry.D2C2(setup={
+                                            'axis_n': axis_n,
+                                            'normal_r': normal_r}),
+                                        name='S4xI_D2C2',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+
+        # the standard position isn't the right position
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
+                                  angle=math.pi/4)
+        self.transform_base(base_rot)
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]),
+                                  angle=math.pi/4)
+        self.transform_base(base_rot)
+
+
 if __name__ == "__main__":
     a4_c3 = A4_C3(tetrahedron, 4, col_alt=0)
     a4_c3.rot_base(math.pi/6)
