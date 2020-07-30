@@ -93,6 +93,29 @@ def create_s4a4(base, js_fd=None):
     save_off(polyh)
 
 
+def create_s4(base, js_fd=None):
+    # example rotation
+    base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 1]),
+                              angle=2*math.pi/9)
+    polyh = S4A4.S4_E(base, 6, col_alt=2, col_sym='C4')
+    polyh.transform_base(base_rot)
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4_C3(base, 2)
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4_C2(base, 3)
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+
 if __name__ == "__main__":
 
     # TODO: from argument
@@ -115,3 +138,4 @@ if __name__ == "__main__":
         create_a4(base, fd)
         create_a4xi(base, fd)
         create_s4a4(base, fd)
+        create_s4(base, fd)
