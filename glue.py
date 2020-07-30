@@ -323,8 +323,8 @@ def filterIsUsed(isUsed, flatArray):
     for i in range(len(flatArray)):
         flatArray[i] = flatArray[i] - isUsed[flatArray[i]][1]
 
-def f2s(f, precision):
-    s = (('%%0.%df' % precision) % f).rstrip('0').rstrip('.')
+def f2s(f, precision=14):
+    s = '{{:0.{}f}}'.format(precision).format(f).rstrip('0').rstrip('.')
     if s != '-0':
         return s
     else:

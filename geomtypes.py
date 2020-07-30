@@ -28,6 +28,8 @@ Module with geometrical types.
 
 from __future__ import print_function
 import math
+
+import glue
 import indent
 
 
@@ -118,10 +120,10 @@ def _get_mat_rot(w, x, y, z, sign=1):
     dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
     dxw, dyw, dzw = 2*x*w, 2*y*w, 2*z*w
     dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
-    return [
+    return Mat([
         Vec([sign*(1-dy2-dz2), sign*(dxy-dzw), sign*(dxz+dyw)]),
         Vec([sign*(dxy+dzw), sign*(1-dx2-dz2), sign*(dyz-dxw)]),
-        Vec([sign*(dxz-dyw), sign*(dyz+dxw), sign*(1-dx2-dy2)])]
+        Vec([sign*(dxz-dyw), sign*(dyz+dxw), sign*(1-dx2-dy2)])])
 
 
 class NoRotation(Exception):
@@ -160,10 +162,10 @@ class Vec(tuple):
 
     def __str__(self):
         try:
-            s = '[%s' % self[0]
+            s = '[{}'.format(glue.f2s(self[0]))
             for i in range(1, len(self)):
-                s = '%s, %s' % (s, self[i])
-            return '%s]' % s
+                s += ', {}'.format((glue.f2s(self[i])))
+            return s + ']'
         except IndexError:
             return '[]'
 
@@ -895,11 +897,11 @@ class Transform3(tuple):
             _, x, y, z = self[0]
             dxy, dxz, dyz = 2*x*y, 2*x*z, 2*y*z
             dx2, dy2, dz2 = 2*x*x, 2*y*y, 2*z*z
-            self._cache['matrix_refl'] = [
+            self._cache['matrix_refl'] = Mat([
                 Vec([1-dx2, -dxy, -dxz]),
                 Vec([-dxy, 1-dy2, -dyz]),
                 Vec([-dxz, -dyz, 1-dz2]),
-            ]
+            ])
         return self._cache['matrix_refl']
 
     def __inverse_refl(self):
@@ -1420,9 +1422,12 @@ class Mat(list):
 
     def __str__(self):
         """Human readable string representation"""
-        s = ''
+        s = '['
+        c = '\n'
         for row in self:
-            s = '%s\n%s' % (s, str(row))
+            s += '{}  {}'.format(c, row)
+            c = ',\n'
+        s += '\n]'
         return s
 
     def row(self, i):
