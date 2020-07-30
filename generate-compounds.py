@@ -56,6 +56,43 @@ def create_a4xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
 
+def create_s4a4(base, js_fd=None):
+    # example rotation
+    base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]),
+                              angle=math.pi/4)
+    polyh = S4A4.S4A4_E(base, 4, col_alt=0)
+    polyh.transform_base(base_rot)
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    # Rotation freedom (around 1 axis)
+    polyh = S4A4.S4A4_C4C2(base, 3)
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4A4_C3(base, 4)
+    polyh.rot_base(math.pi/5)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    polyh = S4A4.S4A4_C2C1(base, 4)
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
+
+    # Rigid compounds
+    polyh = S4A4.S4A4_S4A4(base, 1)
+    save_off(polyh)
+
+    polyh = S4A4.S4A4_D3C3(base, 4)
+    save_off(polyh)
+
+
 if __name__ == "__main__":
 
     # TODO: from argument
@@ -77,3 +114,4 @@ if __name__ == "__main__":
 
         create_a4(base, fd)
         create_a4xi(base, fd)
+        create_s4a4(base, fd)
