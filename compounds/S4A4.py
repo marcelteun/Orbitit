@@ -461,6 +461,69 @@ class S4xI_D2C2(orbit.Shape):
         self.transform_base(base_rot)
 
 
+###############################################################################
+#
+# A5
+#
+###############################################################################
+class A5_E(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """General compound with A5 symmetry with central freedom."""
+        super(A5_E, self).__init__(base,
+                                   isometry.A5(),
+                                   isometry.E(),
+                                   name='A5_E',
+                                   no_of_cols=no_of_cols, col_alt=col_alt,
+                                   col_sym=col_sym)
+
+
+class A5_C3(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 20 elements with final symmetry A5 (rotation freedom)
+
+        The descriptive shares a 3-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([1, 1, 1])
+        super(A5_C3, self).__init__(base,
+                                    isometry.A5(),
+                                    isometry.C3(setup={'axis': axis}),
+                                    name='A5_C3',
+                                    no_of_cols=no_of_cols, col_alt=col_alt,
+                                    col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+class A5_C2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 30 elements with final symmetry A5 (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        super(A5_C2, self).__init__(base,
+                                    isometry.A5(),
+                                    isometry.C2(setup={'axis': axis}),
+                                    name='A5_C2',
+                                    no_of_cols=no_of_cols, col_alt=col_alt,
+                                    col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+# Rigid Compounds
+class A5_A4(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Rigid ompound of 5 elements with final symmetry A5
+
+        With the orginisation as in the classical compound of 5 tetrahedra
+        """
+        super(A5_A4, self).__init__(base,
+                                    isometry.A5(),
+                                    isometry.A4(),
+                                    name='A5_A4',
+                                    no_of_cols=no_of_cols, col_alt=col_alt,
+                                    col_sym=col_sym)
+
+
 if __name__ == "__main__":
     a4_c3 = A4_C3(tetrahedron, 4, col_alt=0)
     a4_c3.rot_base(math.pi/6)
