@@ -235,6 +235,13 @@ class Vec(tuple):
             "Right-hand operand of type {} isn't supported with Vec".format(
                 type(w)))
 
+    def insert(self, x, i=0):
+        """Return new copy with x inserted on position with index i"""
+        res = [self[n] for n in range(i)]
+        res.append(x)
+        res.extend([self[n] for n in range(i, len(self))])
+        return Vec(res)
+
     def squared_norm(self):
         """Return the squared norm of this vector"""
         r = 0
@@ -629,25 +636,26 @@ class Transform3(tuple):
                     Vec([m[2][0], m[2][1], m[2][2], 0]),
                     Vec([0, 0, 0, 1])])
 
-    def matrix(self):
-        """Return the matrix representation of this transform"""
-        if self.is_rot():
-            return self.__matrix_rot()
-        if self.is_refl():
-            return self.__matrix_refl()
-        if self.is_rot_inv():
-            return self.__matrix_rot_inv()
-        raise UnsupportedTransform(
-            'oops, unknown matrix; transform {}\n'.format(str(self)))
+    def matrix(self, homogeneous=False):
+        """Return the matrix representation of this transform.
 
-#    def matrix4(self):
-#        m = self.matrix()
-#        return Mat([
-#                Vec([m[0][0], m[0][1], m[0][2], 0]),
-#                Vec([m[1][0], m[1][1], m[1][2], 0]),
-#                Vec([m[2][0], m[2][1], m[2][2], 0]),
-#                Vec([0,       0,       0,       1]),
-#            ])
+        homogeneous: set to True to get a 4x4 representation.
+        """
+        if self.is_rot():
+            result = self.__matrix_rot()
+        elif self.is_refl():
+            result = self.__matrix_refl()
+        elif self.is_rot_inv():
+            result = self.__matrix_rot_inv()
+        else:
+            raise UnsupportedTransform(
+                'oops, unknown matrix; transform {}\n'.format(str(self)))
+        if not homogeneous:
+            return result
+        else:
+            result.insert_col([0, 0, 0], 3)
+            result.insert_row(Vec([0, 0, 0, 1]), 3)
+            return result
 
     def inverse(self):
         """Return a new object with the inverse of this transform"""
@@ -1443,6 +1451,15 @@ class Mat(list):
         return Mat([self.col(i) for i in range(self.cols)])
 
     T = transpose
+
+    def insert_row(self, row, i=0):
+        """Insert a row so it will have position with index i"""
+        self.insert(i, row)
+
+    def insert_col(self, col, i=0):
+        """Insert a column so it will have position with index i"""
+        for row_no, (row, x) in enumerate(zip(self, col)):
+            self[row_no] = row.insert(x, i)
 
     def rm_row(self, i):
         """Delete row i"""
