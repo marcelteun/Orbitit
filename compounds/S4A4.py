@@ -425,13 +425,13 @@ class S4xI_D3C3(Compound):
 
 class S4xI_D2C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
-        """Rigid ompound of 8 elements with final symmetry S4xI
+        """Rigid ompound of 12 elements with final symmetry S4xI
 
-        The descriptive shares a 2 reflection planes through its 2-fold axis
-        with 2 mirror planes through 1 2-fold axis of the final symmetry.
+        The descriptive shares 2 reflection planes through its 2-fold axis
+        with 2 mirror planes through a 2-fold axis of the final symmetry.
         """
-        axis_n = geomtypes.Vec3([0, 1, 1])
-        normal_r = geomtypes.Vec3([1, 0, 0])
+        axis_n = geomtypes.Vec3([1, 1, 0])
+        normal_r = geomtypes.Vec3([0, 0, 1])
         super(S4xI_D2C2, self).__init__(base,
                                         isometry.S4xI(),
                                         isometry.D2C2(setup={
@@ -442,7 +442,7 @@ class S4xI_D2C2(Compound):
                                         col_sym=col_sym)
 
         self.transform_base(self.alt_base_pos)
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]),
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 1, 0]),
                                   angle=math.pi/4)
         self.transform_base(base_rot)
 

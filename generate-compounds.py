@@ -151,7 +151,7 @@ def create_s4xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4xI_D1C1(base, 6, col_sym='D4C4')
-    polyh.rot_base(math.pi/6)  # example angle
+    polyh.rot_base(16 * math.pi / 180)  # example angle
     save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
