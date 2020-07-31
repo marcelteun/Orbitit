@@ -524,6 +524,146 @@ class A5_A4(orbit.Shape):
                                     col_sym=col_sym)
 
 
+###############################################################################
+#
+# A5 x I
+#
+###############################################################################
+class A5xI_E(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """General compound with A5xI symmetry with central freedom."""
+        super(A5xI_E, self).__init__(base,
+                                     isometry.A5xI(),
+                                     isometry.E(),
+                                     name='A5xI_E',
+                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                     col_sym=col_sym)
+
+
+class A5xI_C3(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 40 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 3-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([1, 1, 1])
+        super(A5xI_C3, self).__init__(base,
+                                      isometry.A5xI(),
+                                      isometry.C3(setup={'axis': axis}),
+                                      name='A5xI_C3',
+                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                      col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+class A5xI_C2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 60 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        super(A5xI_C2, self).__init__(base,
+                                      isometry.A5xI(),
+                                      isometry.C2(setup={'axis': axis}),
+                                      name='A5xI_C2',
+                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                      col_sym=col_sym)
+        self.set_rot_axis(axis)
+
+
+class A5xI_C2C1(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 60 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a reflection plane with the final symmetry
+        """
+        axis = geomtypes.Vec3([1, 0, 0])
+        super(A5xI_C2C1, self).__init__(base,
+                                        isometry.A5xI(),
+                                        isometry.C2C1(setup={'axis': axis}),
+                                        name='A5xI_C2C1',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+
+        # the standard position isn't the right position
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
+                                  angle=math.pi/4)
+        self.transform_base(base_rot)
+        self.set_rot_axis(axis)
+
+
+# Rigid Compounds
+class A5xI_A4(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Rigid ompound of 10 elements with final symmetry A5xI
+
+        With the orginisation as in the classical compound of 10 tetrahedra
+        """
+        super(A5xI_A4, self).__init__(base,
+                                      isometry.A5xI(),
+                                      isometry.A4(),
+                                      name='A5xI_A4',
+                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                      col_sym=col_sym)
+
+
+class A5xI_D3C3(orbit.Shape):
+    def __init__(self, version, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 20 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 3-fold axis with the final symmetry and
+        reflection planes fall together. The 'A' and 'B' versions occur in the
+        same was as cube compound 10A and 10B occur.
+
+        version: either 'A' or 'B'
+        """
+        axis = geomtypes.Vec3([1, 1, 1])
+        V5 = math.sqrt(5)
+        V2 = math.sqrt(2)
+        phi = (1 + V5) / 2
+        normal = geomtypes.Vec3([-1, -phi, phi + 1])
+        super(A5xI_D3C3, self).__init__(base,
+                                        isometry.A5xI(),
+                                        isometry.D3C3(setup={
+                                            'axis_n': axis,
+                                            'normal_r': normal}),
+                                        name='{}_A5xI_D3C3'.format(version),
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+        if version == 'A':
+            mu = math.acos(V2 * V5 / 4)
+        else:
+            mu = -math.acos(V2 * (3 + V5) / 8)
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 1, 1]),
+                                  angle=mu)
+        self.transform_base(base_rot)
+
+
+class A5xI_D2C2(orbit.Shape):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+        """Compound of 30 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the final symmetry and
+        reflection planes fall together.
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        normal = geomtypes.Vec3([1, 0, 0])
+        super(A5xI_D2C2, self).__init__(base,
+                                        isometry.A5xI(),
+                                        isometry.D2C2(setup={
+                                            'axis_n': axis,
+                                            'normal_r': normal}),
+                                        name='A5xI_D2C2',
+                                        no_of_cols=no_of_cols, col_alt=col_alt,
+                                        col_sym=col_sym)
+
+        # Apply the same transform as for A5xI / C2
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
+                                  angle=math.pi/4)
+        self.transform_base(base_rot)
+
+
 if __name__ == "__main__":
     a4_c3 = A4_C3(tetrahedron, 4, col_alt=0)
     a4_c3.rot_base(math.pi/6)
