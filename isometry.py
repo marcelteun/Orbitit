@@ -108,6 +108,62 @@ __DnxI_metas = {}
 __D2nDn_metas = {}
 
 
+def a5_sub_a4_setup(rot_axes):
+    setup = []
+    look_for_no = 0
+    for n, axis1 in enumerate(rot_axes[2]):
+        for axis2 in rot_axes[2][n + 1:]:
+            if geomtypes.eq(axis1 * axis2, 0):
+                setup.append({'o2axis0': axis1, 'o2axis1': axis2})
+                look_for_no += 1
+                break
+        if look_for_no >= 5:  # there are 5 A4 in A5
+            break
+    return setup
+
+
+def a5_sub_d5_setup(rot_axes):
+    setup = []
+    for n, axis1 in enumerate(rot_axes[5]):
+        for axis2 in rot_axes[2]:
+            if geomtypes.eq(axis1 * axis2, 0):
+                setup.append({'axis_n': axis1, 'axis_2': axis2})
+                break
+    return setup
+
+
+def a5_sub_d3_setup(rot_axes):
+    setup = []
+    for n, axis1 in enumerate(rot_axes[3]):
+        for axis2 in rot_axes[2]:
+            if geomtypes.eq(axis1 * axis2, 0):
+                setup.append({'axis_n': axis1, 'axis_2': axis2})
+                break
+    return setup
+
+
+def a5_get_std_subgroup_setups(rot_axes):
+    """Define the subgroup setup parameter for the standard A5 position."""
+    _sub_a4_setup = [{'o2axis0': rot_axes[2][i],
+                      'o2axis1': rot_axes[2][((i+3) % 5) + 5]}
+                     for i in range(5)]
+    _sub_d5_setup = [{'axis_n': rot_axes[5][i],
+                      'axis_2': rot_axes[2][(i+2) % 5]}
+                     for i in range(5)]
+    _sub_d5_setup.append({'axis_n': rot_axes[5][5],
+                          'axis_2': rot_axes[2][10]})
+    _sub_d3_setup = [{'axis_n': rot_axes[3][i],
+                      'axis_2': rot_axes[2][((i+3) % 5) + 5]}
+                     for i in range(5)]
+    _sub_d3_setup.extend([{'axis_n': rot_axes[3][i + 5],
+                           'axis_2': rot_axes[2][(i+3) % 5]}
+                          for i in range(5)])
+    # D2 is Similar to A4 (D2 is subgroup of A4), no need to set here.
+    # D3C3 is Similar to D3, no need to set here.
+    # D2C2 is Similar to D2, no need to set here.
+    return _sub_a4_setup, _sub_d5_setup, _sub_d3_setup
+
+
 def _sort_and_del_dups(g):
     """Sort list of isometry classes and remove duplicates"""
     # remove duplicates first (unsorts the list):
@@ -2069,6 +2125,7 @@ def _gen_d2(o2axis0, o2axis1):
         o2axis0 = o2axis0.axis()
     if isinstance(o2axis1, geomtypes.Transform3):
         o2axis1 = o2axis1.axis()
+
     assert geomtypes.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1),
                         0), "Error: axes not orthogonal"
     h0 = geomtypes.HalfTurn3(axis=o2axis0)
@@ -2203,6 +2260,35 @@ class A5(Set):
             transforms.extend([geomtypes.HalfTurn3(axis=a) for a in o2axes])
             Set.__init__(self, transforms)
             self.rot_axes = {2: o2axes, 3: o3axes, 5: o5axes}
+            self._sub_a4_setup, self._sub_d5_setup, self._sub_d3_setup = \
+                a5_get_std_subgroup_setups(self.rot_axes)
+
+    @property
+    def sub_a4_setup(self):
+        if not hasattr(self, 'sub_a4_setup'):
+            self._sub_a4_setup = a5_sub_a4_setup(self.rot_axes)
+        return self._sub_a4_setup
+
+    @property
+    def sub_d5_setup(self):
+        if not hasattr(self, 'sub_d5_setup'):
+            self._sub_d5_setup = a5_sub_d5_setup(self.rot_axes)
+        return self._sub_d5_setup
+
+    @property
+    def sub_d3_setup(self):
+        if not hasattr(self, 'sub_d3_setup'):
+            self._sub_d3_setup = a5_sub_d3_setup(self.rot_axes)
+        return self._sub_d3_setup
+
+    @property
+    def sub_d2_setup(self):
+        # Similar to A4 (D2 is subgroup of A4)
+        if not hasattr(self, 'sub_d2_setup'):
+            self._sub_d2_setup = [
+                {'axis_n': s['o2axis0'], 'axis_2': s['o2axis1']}
+                for s in self.sub_a4_setup]
+        return self._sub_d2_setup
 
     def realise_subgroups(self, sg):
         """
@@ -2212,34 +2298,13 @@ class A5(Set):
         if sg == A5:
             return [self]
         if sg == A4:
-            return [
-                # Essentially these lead to 3 different colourings, of which 2
-                # pairs are mirrors images.
-                sg(setup={'o2axis0': self.rot_axes[2][i],
-                          'o2axis1': self.rot_axes[2][((i+3) % 5) + 5]})
-                for i in range(5)
-            ]
+            return [sg(setup=setup) for setup in self.sub_a4_setup]
         if sg == D5:
-            isoms = [sg(setup={'axis_n': self.rot_axes[5][i],
-                               'axis_2': self.rot_axes[2][(i+2) % 5]})
-                     for i in range(5)]
-            isoms.append(
-                sg(setup={'axis_n': self.rot_axes[5][5],
-                          'axis_2': self.rot_axes[2][10]})
-            )
-            return isoms
+            return [sg(setup=setup) for setup in self.sub_d5_setup]
         if sg == D3:
-            isoms = [sg(setup={'axis_n': self.rot_axes[3][i],
-                               'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
-                     for i in range(5)]
-            isoms.extend([sg(setup={'axis_n': self.rot_axes[3][i + 5],
-                                    'axis_2': self.rot_axes[2][(i+3) % 5]})
-                          for i in range(5)])
-            return isoms
+            return [sg(setup=setup) for setup in self.sub_d3_setup]
         if sg == D2:
-            return [sg(setup={'axis_n': self.rot_axes[2][i],
-                              'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
-                    for i in range(5)]
+            return [sg(setup=setup) for setup in self.sub_d2_setup]
         if sg == C5:
             return [sg(setup={'axis': a}) for a in self.rot_axes[5]]
         if sg == C3:
@@ -2248,9 +2313,8 @@ class A5(Set):
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         if sg == E:
             return [sg()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError('{} not subgroup of {}'.format(
+            sg.__class__.__name__, self.__class__.__name__))
 
 
 class A5xI(Set):
@@ -2298,6 +2362,63 @@ class A5xI(Set):
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a5 * ExI())
             self.rot_axes = a5.rot_axes
+            self._sub_a4_setup, self._sub_d5_setup, self._sub_d3_setup = \
+                a5_get_std_subgroup_setups(self.rot_axes)
+
+    @property
+    def sub_a4_setup(self):
+        if not hasattr(self, 'sub_a4_setup'):
+            self._sub_a4_setup = a5_sub_a4_setup(self.rot_axes)
+        return self._sub_a4_setup
+
+    @property
+    def sub_d5_setup(self):
+        if not hasattr(self, 'sub_d5_setup'):
+            self._sub_d5_setup = a5_sub_d5_setup(self.rot_axes)
+        return self._sub_d5_setup
+
+    @property
+    def sub_d3_setup(self):
+        if not hasattr(self, 'sub_d3_setup'):
+            self._sub_d3_setup = a5_sub_d3_setup(self.rot_axes)
+        return self._sub_d3_setup
+
+    @property
+    def sub_d2_setup(self):
+        # Similar to A4 (D2 is subgroup of A4)
+        if not hasattr(self, 'sub_d2_setup'):
+            self._sub_d2_setup = [
+                {'axis_n': s['o2axis0'], 'axis_2': s['o2axis1']}
+                for s in self.sub_a4_setup]
+        return self._sub_d2_setup
+
+    # This one isn't copied from A5:
+    @property
+    def sub_d5c5_setup(self):
+        # Similar to D5 (but different setup names)
+        if not hasattr(self, 'sub_d5c5_setup'):
+            self._sub_d5c5_setup = [
+                {'axis_n': s['axis_n'], 'normal_r': s['axis_2']}
+                for s in self.sub_d5_setup]
+        return self._sub_d5c5_setup
+
+    @property
+    def sub_d3c3_setup(self):
+        # Similar to D3 (but different setup names)
+        if not hasattr(self, 'sub_d3c3_setup'):
+            self._sub_d3c3_setup = [
+                {'axis_n': s['axis_n'], 'normal_r': s['axis_2']}
+                for s in self.sub_d3_setup]
+        return self._sub_d3c3_setup
+
+    @property
+    def sub_d2c2_setup(self):
+        # Similar to D2 (but different setup names)
+        if not hasattr(self, 'sub_d2c2_setup'):
+            self._sub_d2c2_setup = [
+                {'axis_n': s['axis_n'], 'normal_r': s['axis_2']}
+                for s in self.sub_d2_setup]
+        return self._sub_d2c2_setup
 
     def realise_subgroups(self, sg):
         """
@@ -2311,61 +2432,26 @@ class A5xI(Set):
             return [sg(setup={'o3axis': self.rot_axes[3][0],
                               'o5axis': self.rot_axes[5][0]})]
         if sg == A4xI or sg == A4:
-            return [
-                # Essentially these lead to 3 different colourings, of which 2
-                # pairs are mirrors images. For A4xI the mirrors should lead to
-                # to equal solutions.
-                sg(setup={'o2axis0': self.rot_axes[2][i],
-                          'o2axis1': self.rot_axes[2][((i+3) % 5) + 5]})
-                for i in range(5)
-            ]
+            return [sg(setup=setup) for setup in self.sub_a4_setup]
         if sg == D5xI or sg == D5:
-            isoms = [sg(setup={'axis_n': self.rot_axes[5][i],
-                               'axis_2': self.rot_axes[2][(i+2) % 5]})
-                     for i in range(5)]
-            isoms.append(sg(setup={'axis_n': self.rot_axes[5][5],
-                                   'axis_2': self.rot_axes[2][10]}))
-            return isoms
+            return [sg(setup=setup) for setup in self.sub_d5_setup]
         if sg == D5C5:
-            isoms = [sg(setup={'axis_n': self.rot_axes[5][i],
-                               'normal_r': self.rot_axes[2][(i+2) % 5]})
-                     for i in range(5)]
-            isoms.append(sg(setup={'axis_n': self.rot_axes[5][5],
-                                   'normal_r': self.rot_axes[2][10]}))
-            return isoms
+            return [sg(setup=setup) for setup in self.sub_d5c5_setup]
         if sg == D3xI or sg == D3:
-            isoms = [sg(setup={'axis_n': self.rot_axes[3][i],
-                               'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
-                     for i in range(5)]
-            isoms.extend([sg(setup={'axis_n': self.rot_axes[3][i + 5],
-                                    'axis_2': self.rot_axes[2][(i+3) % 5]})
-                          for i in range(5)])
-            return isoms
+            return [sg(setup=setup) for setup in self.sub_d3_setup]
         if sg == D3C3:
-            isoms = [sg(setup={'axis_n': self.rot_axes[3][i],
-                               'normal_r': self.rot_axes[2][((i+3) % 5) + 5]})
-                     for i in range(5)]
-            isoms.extend([sg(setup={'axis_n': self.rot_axes[3][i + 5],
-                                    'normal_r': self.rot_axes[2][(i+3) % 5]})
-                          for i in range(5)])
-            return isoms
+            return [sg(setup=setup) for setup in self.sub_d3c3_setup]
         if sg == D2xI or sg == D2:
-            return [sg(setup={'axis_n': self.rot_axes[2][i],
-                              'axis_2': self.rot_axes[2][((i+3) % 5) + 5]})
-                    for i in range(5)]
+            return [sg(setup=setup) for setup in self.sub_d2_setup]
         if sg == D2C2:
-            return [sg(setup={'axis_n': self.rot_axes[2][i],
-                              'normal_r': self.rot_axes[2][((i+3) % 5) + 5]})
-                    for i in range(5)]
+            return [sg(setup=setup) for setup in self.sub_d2c2_setup]
         if sg == C5xI or sg == C5:
             return [sg(setup={'axis': a}) for a in self.rot_axes[5]]
         if sg == C3xI or sg == C3:
             return [sg(setup={'axis': a}) for a in self.rot_axes[3]]
         if sg == C2xI or sg == C2 or sg == C2C1 or sg == D1xI or sg == D1:
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
-        if sg == ExI:
-            return [sg()]
-        if sg == E:
+        if sg == E or sg == ExI:
             return [sg()]
         raise ImproperSubgroupError('{} not subgroup of {}'.format(
             sg.__class__.__name__, self.__class__.__name__))
