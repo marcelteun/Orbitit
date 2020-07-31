@@ -25,12 +25,17 @@ tetrahedron = {
 }
 
 
+class Compound(orbit.Shape):
+    alt_base_pos = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
+                                  angle=math.pi/4)
+
+
 ###############################################################################
 #
 # A4
 #
 ###############################################################################
-class A4_E(orbit.Shape):
+class A4_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with A4 symmetry with central freedom."""
         super(A4_E, self).__init__(base,
@@ -41,7 +46,7 @@ class A4_E(orbit.Shape):
                                    col_sym=col_sym)
 
 
-class A4_C3(orbit.Shape):
+class A4_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 4 elements with final symmetry A4 (rotation freedom)
 
@@ -62,7 +67,7 @@ class A4_C3(orbit.Shape):
 # A4 x I
 #
 ###############################################################################
-class A4xI_E(orbit.Shape):
+class A4xI_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with A4xI symmetry with central freedom."""
         super(A4xI_E, self).__init__(base,
@@ -73,7 +78,7 @@ class A4xI_E(orbit.Shape):
                                      col_sym=col_sym)
 
 
-class A4xI_C3(orbit.Shape):
+class A4xI_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 8 elements with final symmetry A4xI (rotation freedom)
 
@@ -89,7 +94,7 @@ class A4xI_C3(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class A4xI_C2C1(orbit.Shape):
+class A4xI_C2C1(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 12 elements with final symmetry A4xI (rotation freedom)
 
@@ -102,10 +107,7 @@ class A4xI_C2C1(orbit.Shape):
                                         name='A4xI_C2C1',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         col_sym=col_sym)
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
         self.set_rot_axis(axis)
 
 
@@ -114,7 +116,7 @@ class A4xI_C2C1(orbit.Shape):
 # S4A4
 #
 ###############################################################################
-class S4A4_E(orbit.Shape):
+class S4A4_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with S4A4 symmetry with central freedom."""
         super(S4A4_E, self).__init__(base,
@@ -125,7 +127,7 @@ class S4A4_E(orbit.Shape):
                                      col_sym=col_sym)
 
 
-class S4A4_C4C2(orbit.Shape):
+class S4A4_C4C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 6 elements with final symmetry S4A4 (rotation freedom)
 
@@ -141,7 +143,7 @@ class S4A4_C4C2(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class S4A4_C3(orbit.Shape):
+class S4A4_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 8 elements with final symmetry S4A4 (rotation freedom)
 
@@ -157,7 +159,7 @@ class S4A4_C3(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class S4A4_C2C1(orbit.Shape):
+class S4A4_C2C1(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 12 elements with final symmetry S4A4 (rotation freedom)
 
@@ -174,7 +176,7 @@ class S4A4_C2C1(orbit.Shape):
 
 
 # Rigid Compounds
-class S4A4_S4A4(orbit.Shape):
+class S4A4_S4A4(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Trivial "compound" of 1 element with final symmetry S4A4
 
@@ -188,7 +190,7 @@ class S4A4_S4A4(orbit.Shape):
                                         col_sym=col_sym)
 
 
-class S4A4_D3C3(orbit.Shape):
+class S4A4_D3C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid compound of 4 elements with S4A4 symmetry"""
         # Same as S4A4_C3 with special mu = 60 degrees
@@ -212,7 +214,7 @@ class S4A4_D3C3(orbit.Shape):
 # S4
 #
 ###############################################################################
-class S4_E(orbit.Shape):
+class S4_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with S4 symmetry with central freedom."""
         super(S4_E, self).__init__(base,
@@ -223,7 +225,7 @@ class S4_E(orbit.Shape):
                                    col_sym=col_sym)
 
 
-class S4_C3(orbit.Shape):
+class S4_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 8 elements with final symmetry S4 (rotation freedom)
 
@@ -239,7 +241,7 @@ class S4_C3(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class S4_C2(orbit.Shape):
+class S4_C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 12 elements with final symmetry S4 (rotation freedom)
 
@@ -255,10 +257,7 @@ class S4_C2(orbit.Shape):
                                     col_sym=col_sym)
         self.set_rot_axis(axis)
 
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
 
 
 ###############################################################################
@@ -266,7 +265,7 @@ class S4_C2(orbit.Shape):
 # S4 x I
 #
 ###############################################################################
-class S4xI_E(orbit.Shape):
+class S4xI_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with S4xI symmetry with central freedom."""
         super(S4xI_E, self).__init__(base,
@@ -277,7 +276,7 @@ class S4xI_E(orbit.Shape):
                                      col_sym=col_sym)
 
 
-class S4xI_C4C2(orbit.Shape):
+class S4xI_C4C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 12 elements with final symmetry S4xI (rotation freedom)
 
@@ -294,7 +293,7 @@ class S4xI_C4C2(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class S4xI_C3(orbit.Shape):
+class S4xI_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 16 elements with final symmetry S4xI (rotation freedom)
 
@@ -310,7 +309,7 @@ class S4xI_C3(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class S4xI_C2(orbit.Shape):
+class S4xI_C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
@@ -325,14 +324,10 @@ class S4xI_C2(orbit.Shape):
                                       no_of_cols=no_of_cols, col_alt=col_alt,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
-
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
 
 
-class S4xI_C2C1(orbit.Shape):
+class S4xI_C2C1(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
@@ -350,7 +345,7 @@ class S4xI_C2C1(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class S4xI_D1C1(orbit.Shape):
+class S4xI_D1C1(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
@@ -367,14 +362,11 @@ class S4xI_D1C1(orbit.Shape):
                                         col_sym=col_sym)
         self.set_rot_axis(axis)
 
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
 
 
 # Rigid Compounds
-class S4xI_S4A4(orbit.Shape):
+class S4xI_S4A4(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid ompound of 2 elements with final symmetry S4xI
 
@@ -388,7 +380,7 @@ class S4xI_S4A4(orbit.Shape):
                                         col_sym=col_sym)
 
 
-class S4xI_D4D2(orbit.Shape):
+class S4xI_D4D2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid ompound of 6 elements with final symmetry S4xI
 
@@ -405,13 +397,10 @@ class S4xI_D4D2(orbit.Shape):
                                         name='S4xI_D4D2',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         col_sym=col_sym)
-
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=axis_n, angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
 
 
-class S4xI_D3C3(orbit.Shape):
+class S4xI_D3C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid ompound of 8 elements with final symmetry S4xI
 
@@ -434,7 +423,7 @@ class S4xI_D3C3(orbit.Shape):
         self.transform_base(base_rot)
 
 
-class S4xI_D2C2(orbit.Shape):
+class S4xI_D2C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid ompound of 8 elements with final symmetry S4xI
 
@@ -452,10 +441,7 @@ class S4xI_D2C2(orbit.Shape):
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         col_sym=col_sym)
 
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]),
                                   angle=math.pi/4)
         self.transform_base(base_rot)
@@ -466,7 +452,7 @@ class S4xI_D2C2(orbit.Shape):
 # A5
 #
 ###############################################################################
-class A5_E(orbit.Shape):
+class A5_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with A5 symmetry with central freedom."""
         super(A5_E, self).__init__(base,
@@ -477,7 +463,7 @@ class A5_E(orbit.Shape):
                                    col_sym=col_sym)
 
 
-class A5_C3(orbit.Shape):
+class A5_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 20 elements with final symmetry A5 (rotation freedom)
 
@@ -493,7 +479,7 @@ class A5_C3(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class A5_C2(orbit.Shape):
+class A5_C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 30 elements with final symmetry A5 (rotation freedom)
 
@@ -510,7 +496,7 @@ class A5_C2(orbit.Shape):
 
 
 # Rigid Compounds
-class A5_A4(orbit.Shape):
+class A5_A4(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid ompound of 5 elements with final symmetry A5
 
@@ -529,7 +515,7 @@ class A5_A4(orbit.Shape):
 # A5 x I
 #
 ###############################################################################
-class A5xI_E(orbit.Shape):
+class A5xI_E(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """General compound with A5xI symmetry with central freedom."""
         super(A5xI_E, self).__init__(base,
@@ -540,7 +526,7 @@ class A5xI_E(orbit.Shape):
                                      col_sym=col_sym)
 
 
-class A5xI_C3(orbit.Shape):
+class A5xI_C3(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 40 elements with final symmetry A5xI (rotation freedom)
 
@@ -556,7 +542,7 @@ class A5xI_C3(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class A5xI_C2(orbit.Shape):
+class A5xI_C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
@@ -572,7 +558,7 @@ class A5xI_C2(orbit.Shape):
         self.set_rot_axis(axis)
 
 
-class A5xI_C2C1(orbit.Shape):
+class A5xI_C2C1(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
@@ -586,15 +572,12 @@ class A5xI_C2C1(orbit.Shape):
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         col_sym=col_sym)
 
-        # the standard position isn't the right position
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
         self.set_rot_axis(axis)
 
 
 # Rigid Compounds
-class A5xI_A4(orbit.Shape):
+class A5xI_A4(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Rigid ompound of 10 elements with final symmetry A5xI
 
@@ -608,7 +591,7 @@ class A5xI_A4(orbit.Shape):
                                       col_sym=col_sym)
 
 
-class A5xI_D3C3(orbit.Shape):
+class A5xI_D3C3(Compound):
     def __init__(self, version, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 20 elements with final symmetry A5xI (rotation freedom)
 
@@ -640,7 +623,7 @@ class A5xI_D3C3(orbit.Shape):
         self.transform_base(base_rot)
 
 
-class A5xI_D2C2(orbit.Shape):
+class A5xI_D2C2(Compound):
     def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
         """Compound of 30 elements with final symmetry A5xI (rotation freedom)
 
@@ -658,10 +641,7 @@ class A5xI_D2C2(orbit.Shape):
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         col_sym=col_sym)
 
-        # Apply the same transform as for A5xI / C2
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]),
-                                  angle=math.pi/4)
-        self.transform_base(base_rot)
+        self.transform_base(self.alt_base_pos)
 
 
 if __name__ == "__main__":
