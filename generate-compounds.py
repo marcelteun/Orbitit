@@ -110,7 +110,7 @@ def create_s4(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4_C2(base, 3)
-    polyh.rot_base(math.pi/6)  # example angle
+    polyh.rot_base(22.7 * math.pi / 180)  # example angle
     save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
