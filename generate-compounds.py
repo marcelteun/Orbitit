@@ -24,10 +24,10 @@ def create_a4(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
     # Rotation freedom (around 1 axis)
-    a4_c3 = S4A4.A4_C3(base, 4)
+    polyh = S4A4.A4_C3(base, 4)
     # example angle for which the compound is 5 | A5 / A4 with 1 removed
-    a4_c3.rot_base(math.acos((-1 + 3 * math.sqrt(5))/8))
-    save_off(a4_c3)
+    polyh.rot_base(math.acos((-1 + 3 * math.sqrt(5))/8))
+    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
 
