@@ -427,6 +427,7 @@ class Shape(Geom3D.SymmetricShape):
 
         # Compound index n means compound of n elements
         self.index = len(fs_orbit)
+        self.isoms = fs_orbit
         self.axis = None
 
     def transform_base(self, trans):
@@ -472,8 +473,8 @@ class Shape(Geom3D.SymmetricShape):
         js += '{}.descr.transform = {};\n'.format(self.name, eye)
         js += '{}.isoms = [\n'.format(self.name)
         # note: all isometries are stored in 'direct'
-        for q in self.getIsometries()['direct']:
-            js += str(q.matrix(homogeneous=True))
+        for q in self.isoms:
+            js += str(q.glMatrix())
             js += ','
         js += '];\n'
         for i, col in enumerate(self.col_per_isom):
