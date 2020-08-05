@@ -622,19 +622,7 @@ class Transform3(tuple):
 
     def glMatrix(self):
         """Return the glMatrix representation of this transform"""
-        if self.is_rot():
-            m = self.__glMatrix_rot()
-        elif self.is_refl():
-            m = self.__matrix_refl()
-        elif self.is_rot_inv():
-            m = self.__glMatrix_rot_inv()
-        else:
-            raise UnsupportedTransform(
-                'oops, unknown matrix; transform {}\n'.format(str(self)))
-        return Mat([Vec([m[0][0], m[0][1], m[0][2], 0]),
-                    Vec([m[1][0], m[1][1], m[1][2], 0]),
-                    Vec([m[2][0], m[2][1], m[2][2], 0]),
-                    Vec([0, 0, 0, 1])])
+        return self.matrix(homogeneous=True).transpose()
 
     def matrix(self, homogeneous=False):
         """Return the matrix representation of this transform.
@@ -653,8 +641,8 @@ class Transform3(tuple):
         if not homogeneous:
             return result
         else:
-            result.insert_col([0, 0, 0], 3)
-            result.insert_row(Vec([0, 0, 0, 1]), 3)
+            result = result.insert_col([0, 0, 0], 3)
+            result = result.insert_row(Vec([0, 0, 0, 1]), 3)
             return result
 
     def inverse(self):
@@ -1453,16 +1441,19 @@ class Mat(list):
     T = transpose
 
     def insert_row(self, row, i=0):
-        """Insert a row so it will have position with index i"""
-        self.insert(i, row)
+        """Return copy with inserted row at position with index i"""
+        result = self[:]
+        result.insert(i, Vec(row))
+        return self.__class__(result)
 
     def insert_col(self, col, i=0):
-        """Insert a column so it will have position with index i"""
-        for row_no, (row, x) in enumerate(zip(self, col)):
-            self[row_no] = row.insert(x, i)
+        """Return copy with a column inserted at position with index i"""
+        return self.__class__([
+            Vec(tuple(row[0:i]) + tuple([x]) + tuple(row[i:]))
+            for row, x in zip(self, col)])
 
     def rm_row(self, i):
-        """Delete row i"""
+        """Return copy with deleted row i"""
         # don't use self.pop(i), it changes self, while the result should be
         # returned instead.
         if i < 0:
@@ -1473,7 +1464,7 @@ class Mat(list):
         return Mat(n)
 
     def rm_col(self, i):
-        """Delete column i"""
+        """Return copy with deleted column i"""
         if i < 0:
             i += self.cols
         assert i >= 0
