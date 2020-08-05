@@ -429,6 +429,7 @@ class Shape(Geom3D.SymmetricShape):
         self.index = len(fs_orbit)
         self.isoms = fs_orbit
         self.axis = None
+        self.angle_domain = None
 
     def transform_base(self, trans):
         """Rotate the position of the descriptive
@@ -438,16 +439,17 @@ class Shape(Geom3D.SymmetricShape):
         """
         self.setVs([trans * v for v in self.baseShape.Vs])
 
-    def set_rot_axis(self, axis):
+    def set_rot_axis(self, axis, domain=None):
         """Set the rotation axis for rotating the descriptive.
 
         axis: a geomtypes.Vec3 object around which the descriptive will be
               rotated.
         """
         self.axis = axis
+        self.angle_domain = domain
 
     def rot_base(self, rad):
-        """Rotation the descriptive 'rad' radians around the current axis.
+        """Rotate the descriptive 'rad' radians around the current axis.
 
         Before calling this set_rot_axis should have been called.
         rad: an angle in radians
@@ -483,5 +485,11 @@ class Shape(Geom3D.SymmetricShape):
 
         if self.axis is not None:
             js += '{}.rot_axis = {};\n'.format(self.name, self.axis)
+
+        # The angle domain is used for the slide-bar, therefore the precision
+        # isn't very important
+        if self.angle_domain:
+            js += '{}.angle_domain = [{:.3f}, {:.3f}];\n'.format(
+                self.name, self.angle_domain[0], self.angle_domain[1])
 
         return js
