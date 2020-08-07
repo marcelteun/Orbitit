@@ -36,18 +36,19 @@ class Compound(orbit.Shape):
 #
 ###############################################################################
 class A4_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with A4 symmetry with central freedom."""
         super(A4_E, self).__init__(base,
                                    isometry.A4(),
                                    isometry.E(),
                                    name='A4_E',
                                    no_of_cols=no_of_cols, col_alt=col_alt,
+                                   cols=cols,
                                    col_sym=col_sym)
 
 
 class A4_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 4 elements with final symmetry A4 (rotation freedom)
 
         The descriptive shares a order 3 symmetry axis with the final symmetry
@@ -58,6 +59,7 @@ class A4_C3(Compound):
                                     isometry.C3(setup={'axis': axis}),
                                     name='A4_C3',
                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                    cols=cols,
                                     col_sym=col_sym)
         self.set_rot_axis(axis)
 
@@ -68,18 +70,19 @@ class A4_C3(Compound):
 #
 ###############################################################################
 class A4xI_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with A4xI symmetry with central freedom."""
         super(A4xI_E, self).__init__(base,
                                      isometry.A4xI(),
                                      isometry.E(),
                                      name='A4xI_E',
                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                     cols=cols,
                                      col_sym=col_sym)
 
 
 class A4xI_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 8 elements with final symmetry A4xI (rotation freedom)
 
         The descriptive shares a order 3 symmetry axis with the final symmetry
@@ -90,12 +93,13 @@ class A4xI_C3(Compound):
                                       isometry.C3(setup={'axis': axis}),
                                       name='A4xI_C3',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class A4xI_C2C1(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 12 elements with final symmetry A4xI (rotation freedom)
 
         The descriptive shares a reflection plane with the final symmetry
@@ -106,6 +110,7 @@ class A4xI_C2C1(Compound):
                                         isometry.C2C1(setup={'axis': axis}),
                                         name='A4xI_C2C1',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.transform_base(self.alt_base_pos)
         self.set_rot_axis(axis)
@@ -117,18 +122,19 @@ class A4xI_C2C1(Compound):
 #
 ###############################################################################
 class S4A4_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with S4A4 symmetry with central freedom."""
         super(S4A4_E, self).__init__(base,
                                      isometry.S4A4(),
                                      isometry.E(),
                                      name='S4A4_E',
                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                     cols=cols,
                                      col_sym=col_sym)
 
 
 class S4A4_C4C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 6 elements with final symmetry S4A4 (rotation freedom)
 
         The descriptive shares a order 2 symmetry axis with the final symmetry
@@ -139,12 +145,13 @@ class S4A4_C4C2(Compound):
                                         isometry.C4C2(setup={'axis': axis}),
                                         name='S4A4_C4C2',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class S4A4_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 8 elements with final symmetry S4A4 (rotation freedom)
 
         The descriptive shares a order 3 symmetry axis with the final symmetry
@@ -155,12 +162,13 @@ class S4A4_C3(Compound):
                                       isometry.C3(setup={'axis': axis}),
                                       name='S4A4_C3',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class S4A4_C2C1(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 12 elements with final symmetry S4A4 (rotation freedom)
 
         The descriptive shares a reflection plane with the final symmetry
@@ -171,13 +179,14 @@ class S4A4_C2C1(Compound):
                                         isometry.C2C1(setup={'axis': axis}),
                                         name='S4A4_C2C1',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 # Rigid Compounds
 class S4A4_S4A4(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Trivial "compound" of 1 element with final symmetry S4A4
 
         The descriptive shares all symmetries with the final one.
@@ -187,11 +196,12 @@ class S4A4_S4A4(Compound):
                                         isometry.S4A4(),
                                         name='S4A4_S4A4',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
 
 
 class S4A4_D3C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid compound of 4 elements with S4A4 symmetry"""
         # Same as S4A4_C3 with special mu = 60 degrees
         axis = geomtypes.Vec3([1, 1, 1])
@@ -203,6 +213,7 @@ class S4A4_D3C3(Compound):
                                             'normal_r': normal}),
                                         name='S4A4_D3C3',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         # Move to rigid angle
         base_rot = geomtypes.Rot3(axis=axis, angle=math.pi/3)
@@ -215,18 +226,19 @@ class S4A4_D3C3(Compound):
 #
 ###############################################################################
 class S4_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with S4 symmetry with central freedom."""
         super(S4_E, self).__init__(base,
                                    isometry.S4(),
                                    isometry.E(),
                                    name='S4_E',
                                    no_of_cols=no_of_cols, col_alt=col_alt,
+                                   cols=cols,
                                    col_sym=col_sym)
 
 
 class S4_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 8 elements with final symmetry S4 (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
@@ -237,12 +249,13 @@ class S4_C3(Compound):
                                     isometry.C3(setup={'axis': axis}),
                                     name='S4_C3',
                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                    cols=cols,
                                     col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class S4_C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 12 elements with final symmetry S4 (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry (a pure
@@ -254,6 +267,7 @@ class S4_C2(Compound):
                                     isometry.C2(setup={'axis': axis}),
                                     name='S4_C2',
                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                    cols=cols,
                                     col_sym=col_sym)
         self.set_rot_axis(axis)
 
@@ -266,18 +280,19 @@ class S4_C2(Compound):
 #
 ###############################################################################
 class S4xI_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with S4xI symmetry with central freedom."""
         super(S4xI_E, self).__init__(base,
                                      isometry.S4xI(),
                                      isometry.E(),
                                      name='S4xI_E',
                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                     cols=cols,
                                      col_sym=col_sym)
 
 
 class S4xI_C4C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 12 elements with final symmetry S4xI (rotation freedom)
 
         The descriptive shares a 2-fold axis with the 4-fold axis in the final
@@ -289,12 +304,13 @@ class S4xI_C4C2(Compound):
                                         isometry.C4C2(setup={'axis': axis}),
                                         name='S4xI_C4C2',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class S4xI_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 16 elements with final symmetry S4xI (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
@@ -305,12 +321,13 @@ class S4xI_C3(Compound):
                                       isometry.C3(setup={'axis': axis}),
                                       name='S4xI_C3',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class S4xI_C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry (a pure
@@ -322,13 +339,14 @@ class S4xI_C2(Compound):
                                       isometry.C2(setup={'axis': axis}),
                                       name='S4xI_C2',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
         self.transform_base(self.alt_base_pos)
 
 
 class S4xI_C2C1(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
         The descriptive shares a reflection plane with one from the final
@@ -341,12 +359,13 @@ class S4xI_C2C1(Compound):
                                         isometry.C2C1(setup={'axis': axis}),
                                         name='S4xI_C2C1',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class S4xI_D1C1(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
         The descriptive shares a reflection plane with one from the final
@@ -359,6 +378,7 @@ class S4xI_D1C1(Compound):
                                         isometry.D1C1(setup={'axis': axis}),
                                         name='S4xI_D1C1',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.set_rot_axis(axis)
 
@@ -367,7 +387,7 @@ class S4xI_D1C1(Compound):
 
 # Rigid Compounds
 class S4xI_S4A4(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid ompound of 2 elements with final symmetry S4xI
 
         With the orginisation as the classical Stella Octangula.
@@ -377,11 +397,12 @@ class S4xI_S4A4(Compound):
                                         isometry.S4A4(),
                                         name='S4xI_S4A4',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
 
 
 class S4xI_D4D2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid ompound of 6 elements with final symmetry S4xI
 
         With the orginisation as the classical compound of 3 cubes, but by
@@ -396,12 +417,13 @@ class S4xI_D4D2(Compound):
                                             'axis_2': axis_2}),
                                         name='S4xI_D4D2',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         self.transform_base(self.alt_base_pos)
 
 
 class S4xI_D3C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid ompound of 8 elements with final symmetry S4xI
 
         Special case of S4 X I / C3 where mu = 60 degrees. In this case two
@@ -416,6 +438,7 @@ class S4xI_D3C3(Compound):
                                             'normal_r': normal_r}),
                                         name='S4xI_D3C3',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
 
         # the standard position isn't the right position
@@ -424,7 +447,7 @@ class S4xI_D3C3(Compound):
 
 
 class S4xI_D2C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid ompound of 12 elements with final symmetry S4xI
 
         The descriptive shares 2 reflection planes through its 2-fold axis
@@ -439,6 +462,7 @@ class S4xI_D2C2(Compound):
                                             'normal_r': normal_r}),
                                         name='S4xI_D2C2',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
 
         self.transform_base(self.alt_base_pos)
@@ -453,18 +477,19 @@ class S4xI_D2C2(Compound):
 #
 ###############################################################################
 class A5_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with A5 symmetry with central freedom."""
         super(A5_E, self).__init__(base,
                                    isometry.A5(),
                                    isometry.E(),
                                    name='A5_E',
                                    no_of_cols=no_of_cols, col_alt=col_alt,
+                                   cols=cols,
                                    col_sym=col_sym)
 
 
 class A5_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 20 elements with final symmetry A5 (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
@@ -475,12 +500,13 @@ class A5_C3(Compound):
                                     isometry.C3(setup={'axis': axis}),
                                     name='A5_C3',
                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                    cols=cols,
                                     col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class A5_C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 30 elements with final symmetry A5 (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry
@@ -491,13 +517,14 @@ class A5_C2(Compound):
                                     isometry.C2(setup={'axis': axis}),
                                     name='A5_C2',
                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                    cols=cols,
                                     col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 # Rigid Compounds
 class A5_A4(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid ompound of 5 elements with final symmetry A5
 
         With the orginisation as in the classical compound of 5 tetrahedra
@@ -507,6 +534,7 @@ class A5_A4(Compound):
                                     isometry.A4(),
                                     name='A5_A4',
                                     no_of_cols=no_of_cols, col_alt=col_alt,
+                                    cols=cols,
                                     col_sym=col_sym)
 
 
@@ -516,18 +544,19 @@ class A5_A4(Compound):
 #
 ###############################################################################
 class A5xI_E(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """General compound with A5xI symmetry with central freedom."""
         super(A5xI_E, self).__init__(base,
                                      isometry.A5xI(),
                                      isometry.E(),
                                      name='A5xI_E',
                                      no_of_cols=no_of_cols, col_alt=col_alt,
+                                     cols=cols,
                                      col_sym=col_sym)
 
 
 class A5xI_C3(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 40 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
@@ -538,12 +567,13 @@ class A5xI_C3(Compound):
                                       isometry.C3(setup={'axis': axis}),
                                       name='A5xI_C3',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class A5xI_C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry
@@ -554,12 +584,13 @@ class A5xI_C2(Compound):
                                       isometry.C2(setup={'axis': axis}),
                                       name='A5xI_C2',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
         self.set_rot_axis(axis)
 
 
 class A5xI_C2C1(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a reflection plane with the final symmetry
@@ -570,6 +601,7 @@ class A5xI_C2C1(Compound):
                                         isometry.C2C1(setup={'axis': axis}),
                                         name='A5xI_C2C1',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
 
         self.transform_base(self.alt_base_pos)
@@ -578,7 +610,7 @@ class A5xI_C2C1(Compound):
 
 # Rigid Compounds
 class A5xI_A4(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Rigid ompound of 10 elements with final symmetry A5xI
 
         With the orginisation as in the classical compound of 10 tetrahedra
@@ -588,11 +620,13 @@ class A5xI_A4(Compound):
                                       isometry.A4(),
                                       name='A5xI_A4',
                                       no_of_cols=no_of_cols, col_alt=col_alt,
+                                      cols=cols,
                                       col_sym=col_sym)
 
 
 class A5xI_D3C3(Compound):
-    def __init__(self, version, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, version, base, no_of_cols, col_alt=0, col_sym='',
+                 cols=None):
         """Compound of 20 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry and
@@ -613,6 +647,7 @@ class A5xI_D3C3(Compound):
                                             'normal_r': normal}),
                                         name='{}_A5xI_D3C3'.format(version),
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
         if version == 'A':
             mu = math.acos(V2 * V5 / 4)
@@ -624,7 +659,7 @@ class A5xI_D3C3(Compound):
 
 
 class A5xI_D2C2(Compound):
-    def __init__(self, base, no_of_cols, col_alt=0, col_sym=''):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym='', cols=None):
         """Compound of 30 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry and
@@ -639,6 +674,7 @@ class A5xI_D2C2(Compound):
                                             'normal_r': normal}),
                                         name='A5xI_D2C2',
                                         no_of_cols=no_of_cols, col_alt=col_alt,
+                                        cols=cols,
                                         col_sym=col_sym)
 
         self.transform_base(self.alt_base_pos)
