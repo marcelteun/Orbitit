@@ -368,7 +368,7 @@ class Shape(Geom3D.SymmetricShape):
         if cols:
             self.cols = cols
 
-        assert no_of_cols < len(self.cols), 'Not enough colours defined'
+        assert no_of_cols <= len(self.cols), 'Not enough colours defined'
         # Generate cols:
         self.no_of_cols = no_of_cols
         self.col_alt = col_alt
