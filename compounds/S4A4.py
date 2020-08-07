@@ -61,7 +61,7 @@ class A4_C3(Compound):
                                     no_of_cols=no_of_cols, col_alt=col_alt,
                                     cols=cols,
                                     col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, 2*math.pi/3])
 
 
 ###############################################################################
@@ -95,7 +95,7 @@ class A4xI_C3(Compound):
                                       no_of_cols=no_of_cols, col_alt=col_alt,
                                       cols=cols,
                                       col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/3])
 
 
 class A4xI_C2C1(Compound):
@@ -113,7 +113,7 @@ class A4xI_C2C1(Compound):
                                         cols=cols,
                                         col_sym=col_sym)
         self.transform_base(self.alt_base_pos)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/4])
 
 
 ###############################################################################
