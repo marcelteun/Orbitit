@@ -11,6 +11,7 @@ V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 ASIN__1_V3 = math.asin(1 / V3)
+ACOS__1_V3 = math.acos(1 / V3)
 
 
 def save_off(comp, tail=''):
@@ -97,12 +98,20 @@ def create_s4a4(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/5)  # example angle
     save_off(polyh)
+    # special mu"
+    polyh = S4A4.S4A4_C3(base, 4)
+    polyh.rot_base(math.pi/6)
+    save_off(polyh, '_mu2')
 
-    polyh = S4A4.S4A4_C2C1(base, 4)
+    polyh = S4A4.S4A4_C2C1(base, 3)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/6)  # example angle
     save_off(polyh)
+    # special mu"
+    polyh = S4A4.S4A4_C2C1(base, 3)
+    polyh.rot_base(ACOS__1_V3)
+    save_off(polyh, '_mu3')
 
     # Rigid compounds
     polyh = S4A4.S4A4_S4A4(base, 1)

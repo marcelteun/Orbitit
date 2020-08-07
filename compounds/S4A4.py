@@ -147,7 +147,7 @@ class S4A4_C4C2(Compound):
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         cols=cols,
                                         col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/4])
 
 
 class S4A4_C3(Compound):
@@ -164,7 +164,7 @@ class S4A4_C3(Compound):
                                       no_of_cols=no_of_cols, col_alt=col_alt,
                                       cols=cols,
                                       col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/3])
 
 
 class S4A4_C2C1(Compound):
@@ -181,7 +181,7 @@ class S4A4_C2C1(Compound):
                                         no_of_cols=no_of_cols, col_alt=col_alt,
                                         cols=cols,
                                         col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/2])
 
 
 # Rigid Compounds
