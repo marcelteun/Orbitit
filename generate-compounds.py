@@ -87,22 +87,22 @@ def create_s4a4(base, js_fd=None):
 
     # Rotation freedom (around 1 axis)
     polyh = S4A4.S4A4_C4C2(base, 3)
-    polyh.rot_base(math.pi/6)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
 
     polyh = S4A4.S4A4_C3(base, 4)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/5)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4A4_C2C1(base, 4)
-    polyh.rot_base(math.pi/6)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
 
     # Rigid compounds
     polyh = S4A4.S4A4_S4A4(base, 1)
@@ -122,17 +122,18 @@ def create_s4(base, js_fd=None):
     if js_fd is not None:
         js_fd.write(polyh.to_js())
 
+    # Rotation freedom (around 1 axis)
     polyh = S4A4.S4_C3(base, 2)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/6)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4_C2(base, 3)
-    polyh.rot_base(22.7 * math.pi / 180)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(22.7 * math.pi / 180)  # example angle
+    save_off(polyh)
 
 
 def create_s4xi(base, js_fd=None):
@@ -145,35 +146,36 @@ def create_s4xi(base, js_fd=None):
     if js_fd is not None:
         js_fd.write(polyh.to_js())
 
+    # Rotation freedom (around 1 axis)
     polyh = S4A4.S4xI_C4C2(base, 3)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/3)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4xI_C3(base, 4, col_sym='D3xI')
-    polyh.rot_base(2*math.pi/9)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(2*math.pi/9)  # example angle
+    save_off(polyh)
 
     polyh = S4A4.S4xI_C2(base, 4, col_alt=1)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/9)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym='D4C4')
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(2*math.pi/9)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.S4xI_D1C1(base, 6, col_sym='D4C4')
-    polyh.rot_base(16 * math.pi / 180)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(16 * math.pi / 180)  # example angle
+    save_off(polyh)
 
     # Rigid compounds
     polyh = S4A4.S4xI_S4A4(base, 2)
@@ -199,17 +201,18 @@ def create_a5(base, js_fd=None):
     if js_fd is not None:
         js_fd.write(polyh.to_js())
 
+    # Rotation freedom (around 1 axis)
     polyh = S4A4.A5_C3(base, 5)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/13)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.A5_C2(base, 5)
-    polyh.rot_base(math.pi/11)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(math.pi/11)  # example angle
+    save_off(polyh)
 
     # Rigid compound
     polyh = S4A4.A5_A4(base, 5)
@@ -226,23 +229,24 @@ def create_a5xi(base, js_fd=None):
     if js_fd is not None:
         js_fd.write(polyh.to_js())
 
+    # Rotation freedom (around 1 axis)
     polyh = S4A4.A5xI_C3(base, 5)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/13)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.A5xI_C2(base, 5)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/11)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
     polyh = S4A4.A5xI_C2C1(base, 6)
-    polyh.rot_base(math.pi/9)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(math.pi/9)  # example angle
+    save_off(polyh)
 
     # Rigid compound
     polyh = S4A4.A5xI_A4(base, 5)
