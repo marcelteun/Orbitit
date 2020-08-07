@@ -430,6 +430,8 @@ class Shape(Geom3D.SymmetricShape):
         self.isoms = fs_orbit
         self.axis = None
         self.angle_domain = None
+        # Save original
+        self.baseShape.org_Vs = self.baseShape.Vs
 
     def transform_base(self, trans):
         """Rotate the position of the descriptive
@@ -455,6 +457,9 @@ class Shape(Geom3D.SymmetricShape):
         rad: an angle in radians
         """
         self.transform_base(geomtypes.Rot3(axis=self.axis, angle=rad))
+
+    def reset_rotation(self):
+        self.setVs(self.baseShape.org_Vs)
 
     def to_off(self):
         s = self.simple_shape.toOffStr(color_floats=True)
