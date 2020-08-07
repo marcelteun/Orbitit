@@ -7,9 +7,17 @@ import os
 from compounds import S4A4
 import geomtypes
 
+V3 = math.sqrt(3)
+V5 = math.sqrt(5)
+ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
+ASIN__1_V3 = math.asin(1 / V3)
 
-def save_off(comp):
-    with open('{}_{}.off'.format(comp.index, comp.name), 'w') as fd:
+
+def save_off(comp, tail=''):
+    # If this starts with a version then we need 2A_, 2B etc (not 2_A_)
+    sep = '_' if comp.name[1] != '_' else ''
+    with open('{}{}{}{}.off'.format(comp.index,
+                                    sep, comp.name, tail), 'w') as fd:
         fd.write(comp.to_off())
 
 
@@ -25,11 +33,11 @@ def create_a4(base, js_fd=None):
 
     # Rotation freedom (around 1 axis)
     polyh = S4A4.A4_C3(base, 4)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     # example angle for which the compound is 5 | A5 / A4 with 1 removed
     polyh.rot_base(math.acos((-1 + 3 * math.sqrt(5))/8))
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
 
 
 def create_a4xi(base, js_fd=None):
@@ -44,16 +52,27 @@ def create_a4xi(base, js_fd=None):
 
     # Rotation freedom (around 1 axis)
     polyh = S4A4.A4xI_C3(base, 4)
+    if js_fd is not None:
+        js_fd.write(polyh.to_js())
     polyh.rot_base(5*math.pi/18)  # example angle
     save_off(polyh)
-    if js_fd is not None:
-        js_fd.write(polyh.to_js())
+    # special mu"
+    polyh = S4A4.A4xI_C3(base, 4, cols=[S4A4.A4xI_C3.cols[0],
+                                        S4A4.A4xI_C3.cols[1],
+                                        S4A4.A4xI_C3.cols[1],
+                                        S4A4.A4xI_C3.cols[0]])
+    polyh.rot_base(ACOS__1_3V5_8)
+    save_off(polyh, '_mu2')
 
     polyh = S4A4.A4xI_C2C1(base, 3)
-    polyh.rot_base(math.pi/6)  # example angle
-    save_off(polyh)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
+    polyh.rot_base(math.pi/6)  # example angle
+    save_off(polyh)
+    # special mu"
+    polyh = S4A4.A4xI_C2C1(base, 3)
+    polyh.rot_base(ASIN__1_V3)
+    save_off(polyh, '_mu2')
 
 
 def create_s4a4(base, js_fd=None):
