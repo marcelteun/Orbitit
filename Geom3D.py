@@ -3166,6 +3166,7 @@ class IsometricShape(CompoundShape):
         assert len(Vs) == len(this.baseShape.Vs)
         this.baseShape.setVertexProperties(Vs = Vs)
         this.mergeNeeded = True
+        this.applySymmetryNeeded = True
 
     def setBaseOrientation(this, orientation):
         this.baseShape.orientation = orientation
