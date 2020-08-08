@@ -7,11 +7,13 @@ import os
 from compounds import S4A4
 import geomtypes
 
+V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
-ASIN__1_V3 = math.asin(1 / V3)
-ACOS__1_V3 = math.acos(1 / V3)
+ASIN_1_V3 = math.asin(1 / V3)
+ACOS_1_V3 = math.acos(1 / V3)
+ATAN_4V2_7 = math.atan(4 * V2 / 7)
 
 
 def save_off(comp, tail=''):
@@ -57,7 +59,7 @@ def create_a4xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(5*math.pi/18)  # example angle
     save_off(polyh)
-    # special mu"
+    # special mu
     polyh = S4A4.A4xI_C3(base, 4, cols=[S4A4.A4xI_C3.cols[0],
                                         S4A4.A4xI_C3.cols[1],
                                         S4A4.A4xI_C3.cols[1],
@@ -70,9 +72,9 @@ def create_a4xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/6)  # example angle
     save_off(polyh)
-    # special mu"
+    # special mu
     polyh = S4A4.A4xI_C2C1(base, 3)
-    polyh.rot_base(ASIN__1_V3)
+    polyh.rot_base(ASIN_1_V3)
     save_off(polyh, '_mu2')
 
 
@@ -98,7 +100,7 @@ def create_s4a4(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/5)  # example angle
     save_off(polyh)
-    # special mu"
+    # special mu
     polyh = S4A4.S4A4_C3(base, 4)
     polyh.rot_base(math.pi/6)
     save_off(polyh, '_mu2')
@@ -108,9 +110,9 @@ def create_s4a4(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/6)  # example angle
     save_off(polyh)
-    # special mu"
+    # special mu
     polyh = S4A4.S4A4_C2C1(base, 3)
-    polyh.rot_base(ACOS__1_V3)
+    polyh.rot_base(ACOS_1_V3)
     save_off(polyh, '_mu3')
 
     # Rigid compounds
@@ -137,7 +139,7 @@ def create_s4(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(44.48 * math.pi / 180)  # example angle
     save_off(polyh)
-    # special mu"
+    # special mu
     polyh = S4A4.S4_C3(base, 4)
     polyh.rot_base(math.pi/6)
     save_off(polyh, '_mu2')
@@ -147,7 +149,7 @@ def create_s4(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(22.7 * math.pi / 180)  # example angle
     save_off(polyh)
-    # special mu"
+    # special mu
     polyh = S4A4.S4_C2(base, 4, col_alt=1)
     polyh.rot_base(9.74 * math.pi / 180)  # TODO calculate algebraicly
     save_off(polyh, '_mu2')
@@ -164,23 +166,57 @@ def create_s4xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
     # Rotation freedom (around 1 axis)
-    polyh = S4A4.S4xI_C4C2(base, 3)
+    polyh = S4A4.S4xI_C4C2(base, 6, col_sym='C4xI')
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/3)  # example angle
     save_off(polyh)
+    # special mu
+    polyh = S4A4.S4xI_C4C2(base, 3)
+    polyh.rot_base(math.pi / 8)
+    save_off(polyh, '_mu2')
 
     polyh = S4A4.S4xI_C3(base, 4, col_sym='D3xI')
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     polyh.rot_base(2*math.pi/9)  # example angle
     save_off(polyh)
+    # special mu
+    polyh = S4A4.S4xI_C3(base, 4, col_sym='D3xI')
+    polyh.rot_base(math.pi / 6)
+    save_off(polyh, '_mu2')
 
-    polyh = S4A4.S4xI_C2(base, 4, col_alt=1)
+    polyh = S4A4.S4xI_C2(base, 6, col_sym='D2xI')
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/9)  # example angle
     save_off(polyh)
+    # special mu
+    polyh = S4A4.S4xI_C2(base, 4, col_alt=1)
+    polyh.rot_base(ACOS_1_V3 - math.pi / 4)
+    save_off(polyh, '_mu2')
+    polyh = S4A4.S4xI_C2(base, 4, col_alt=0)
+    polyh.rot_base(ASIN_1_V3)
+    save_off(polyh, '_mu3')
+    polyh = S4A4.S4xI_C2(base, 6, col_sym='D2xI')
+    polyh.rot_base(math.pi / 8)
+    save_off(polyh, '_mu4')
+    polyh = S4A4.S4xI_C2(base, 12, col_sym='C2xI',
+                         cols=[S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[0],
+                               ])
+    polyh.rot_base(ATAN_4V2_7 / 2)
+    save_off(polyh, '_mu5')
 
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym='D4C4')
     if js_fd is not None:
