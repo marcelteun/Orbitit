@@ -132,17 +132,25 @@ def create_s4(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
     # Rotation freedom (around 1 axis)
-    polyh = S4A4.S4_C3(base, 2)
+    polyh = S4A4.S4_C3(base, 4)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
-    polyh.rot_base(math.pi/6)  # example angle
+    polyh.rot_base(44.48 * math.pi / 180)  # example angle
     save_off(polyh)
+    # special mu"
+    polyh = S4A4.S4_C3(base, 4)
+    polyh.rot_base(math.pi/6)
+    save_off(polyh, '_mu2')
 
-    polyh = S4A4.S4_C2(base, 3)
+    polyh = S4A4.S4_C2(base, 6)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     polyh.rot_base(22.7 * math.pi / 180)  # example angle
     save_off(polyh)
+    # special mu"
+    polyh = S4A4.S4_C2(base, 4, col_alt=1)
+    polyh.rot_base(9.74 * math.pi / 180)  # TODO calculate algebraicly
+    save_off(polyh, '_mu2')
 
 
 def create_s4xi(base, js_fd=None):

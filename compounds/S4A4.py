@@ -61,7 +61,8 @@ class A4_C3(Compound):
                                     no_of_cols=no_of_cols, col_alt=col_alt,
                                     cols=cols,
                                     col_sym=col_sym)
-        self.set_rot_axis(axis, [0, 2*math.pi/3])
+        # Note double domain to show laevo and dextro
+        self.set_rot_axis(axis, [-math.pi/3, math.pi/3])
 
 
 ###############################################################################
@@ -251,7 +252,8 @@ class S4_C3(Compound):
                                     no_of_cols=no_of_cols, col_alt=col_alt,
                                     cols=cols,
                                     col_sym=col_sym)
-        self.set_rot_axis(axis)
+        # Note double domain to show laevo and dextro
+        self.set_rot_axis(axis, [-math.pi/3, math.pi/3])
 
 
 class S4_C2(Compound):
@@ -269,7 +271,8 @@ class S4_C2(Compound):
                                     no_of_cols=no_of_cols, col_alt=col_alt,
                                     cols=cols,
                                     col_sym=col_sym)
-        self.set_rot_axis(axis)
+        # Note double domain to show laevo and dextro
+        self.set_rot_axis(axis, [-math.pi/4, math.pi/4])
 
         self.transform_base(self.alt_base_pos)
 
