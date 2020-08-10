@@ -217,6 +217,33 @@ def create_s4xi(base, js_fd=None):
                                ])
     polyh.rot_base(ATAN_4V2_7 / 2)
     save_off(polyh, '_mu5')
+    polyh = S4A4.S4xI_C2(base, 24, col_sym='C2xI',
+                         cols=[S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[3]])
+    polyh.rot_base(14.36 * math.pi / 180)  # TODO: calc angle algebraicly
+    save_off(polyh, '_mu6')
 
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym='D4C4')
     if js_fd is not None:
