@@ -140,19 +140,36 @@ class CtrlWin(wx.Frame):
         def c(rgb_col):
             """Map rgb colour on wxWidgets colour"""
             return [c*255 for c in rgb_col]
-        self.cols = [
-            c(rgb.gold),
-            c(rgb.forestGreen),
-            c(rgb.red4),
-            c(rgb.deepSkyBlue),
-            c(rgb.khaki4),
-            c(rgb.midnightBlue),
-            c(rgb.chocolate1),
-            c(rgb.burlywood1),
-            c(rgb.chocolate4),
-            c(rgb.yellow),
-            c(rgb.aquamarine),
-            c(rgb.indianRed1)]
+        self.cols = [c(rgb.royalBlue),
+                     c(rgb.yellowGreen),
+                     c(rgb.plum),
+                     c(rgb.gold),
+                     c(rgb.firebrick),
+                     c(rgb.tan),
+                     c(rgb.lightSkyBlue),
+                     c(rgb.lightSeaGreen),
+                     c(rgb.slateBlue),
+                     c(rgb.yellow),
+                     c(rgb.indianRed),
+                     c(rgb.saddleBrown),
+                     c(rgb.midnightBlue),
+                     c(rgb.darkGreen),
+                     c(rgb.blueViolet),
+                     c(rgb.lemonChiffon),
+                     c(rgb.red),
+                     c(rgb.peru),
+                     c(rgb.steelBlue),
+                     c(rgb.limeGreen),
+                     c(rgb.seashell),
+                     c(rgb.khaki),
+                     c(rgb.peachPuff),
+                     c(rgb.orange),
+                     c(rgb.azure),
+                     c(rgb.darkOliveGreen),
+                     c(rgb.lavender),
+                     c(rgb.lightGoldenrod),
+                     c(rgb.lightCoral),
+                     c(rgb.darkGoldenrod)]
 
     def create_ctrl_sizer(self):
         """Create and return a wxWidget sizer with all the controls"""

@@ -297,18 +297,18 @@ class Shape(Geom3D.SymmetricShape):
          rgb.darkGoldenrod]
 
     cols = [  # alternate from above colours
-         rgb.royalBlue,
+         rgb.royalBlue,      # 0
          rgb.yellowGreen,
-         rgb.plum,
+         rgb.plum,           # 2
          rgb.gold,
          rgb.firebrick,
-         rgb.tan,
+         rgb.tan,            # 5
 
          rgb.lightSkyBlue,
-         rgb.lightSeaGreen,
+         rgb.lightSeaGreen,  # 7
          rgb.slateBlue,
          rgb.yellow,
-         rgb.indianRed,
+         rgb.indianRed,      # 10
          rgb.saddleBrown,
 
          rgb.midnightBlue,
