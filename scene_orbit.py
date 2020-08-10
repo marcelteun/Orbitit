@@ -513,6 +513,7 @@ class CtrlWin(wx.Frame):
         init_col = (255, 255, 255)
         max_col_per_row = 20
         # Add buttons for choosing individual colours:
+        self.select_col_guis = []
         for i in range(no_of_cols):
             try:
                 col = self.cols[i]
