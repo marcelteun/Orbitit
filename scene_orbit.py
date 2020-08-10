@@ -523,7 +523,8 @@ class CtrlWin(wx.Frame):
                 sel_col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
                 self.select_col_sizer.Add(sel_col_sizer_row, 0, wx.EXPAND)
             self.select_col_guis.append(
-                wxLibCS.ColourSelect(self.panel, wx.ID_ANY, colour=col)
+                wxLibCS.ColourSelect(self.panel, wx.ID_ANY, colour=col,
+                                     size=(40, 30))
             )
             self.panel.Bind(wxLibCS.EVT_COLOURSELECT, self.on_col_select)
             sel_col_sizer_row.Add(self.select_col_guis[-1], 0, wx.EXPAND)

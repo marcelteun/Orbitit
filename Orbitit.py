@@ -1230,8 +1230,8 @@ class ViewSettingsSizer(wx.BoxSizer):
         this.Guis.append(colTxt)
         col = this.canvas.getBgCol()
         this.bgColorGui = wx.lib.colourselect.ColourSelect(this.parentPanel,
-            wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255)
-        )
+            wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255),
+            size=wx.Size(40, 30))
         this.Guis.append(this.bgColorGui)
         this.parentPanel.Bind(wx.lib.colourselect.EVT_COLOURSELECT,
             this.onBgCol)
