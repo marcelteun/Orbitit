@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import math
 import os
+from scipy.optimize import fsolve
 
 from compounds import S4A4
 import geomtypes
@@ -13,7 +14,12 @@ V5 = math.sqrt(5)
 ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 ASIN_1_V3 = math.asin(1 / V3)
 ACOS_1_V3 = math.acos(1 / V3)
+
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
+
+MU6 = fsolve(lambda a: (V2 - 1) * math.cos(a) + (V2 + 1) * math.sin(a) - 1, 0)
+MU7 = fsolve(lambda a: (1 - V2) * math.cos(a) + (1 + V2) * math.sin(a) - 1,
+             0.5)
 
 
 def save_off(comp, tail=''):
@@ -242,8 +248,35 @@ def create_s4xi(base, js_fd=None):
                                S4A4.A4xI_C3.cols[0],
                                S4A4.A4xI_C3.cols[1],
                                S4A4.A4xI_C3.cols[3]])
-    polyh.rot_base(14.36 * math.pi / 180)  # TODO: calc angle algebraicly
+    polyh.rot_base(MU6)
     save_off(polyh, '_mu6')
+    polyh = S4A4.S4xI_C2(base, 24, col_sym='C2xI',
+                         cols=[S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[0],
+                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[3],
+                               S4A4.A4xI_C3.cols[1]])
+    polyh.rot_base(MU7)
+    save_off(polyh, '_mu7')
 
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym='D4C4')
     if js_fd is not None:
