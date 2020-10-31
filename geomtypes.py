@@ -399,7 +399,6 @@ class Quat(Vec):
         return super().__new__(cls, [float(v[i]) for i in range(4)])
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self._cache = {}
 
     def conjugate(self):
@@ -478,7 +477,6 @@ class Transform3(tuple):
         return super().__new__(cls, quatPair)
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self._cache = {}
 
     def __repr__(self):
