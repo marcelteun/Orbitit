@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """Test geomtypes."""
 #
 # Copyright (C) 2019 Marcel Tunnissen

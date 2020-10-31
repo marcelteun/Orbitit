@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 The main scene: create 3D objects by using symmetry orbits
 

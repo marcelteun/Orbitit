@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/env python
 """Module that contains classes for symmetry groups using group algebra."""
 #
 # Copyright (C) 2010-2019 Marcel Tunnissen
@@ -358,11 +358,11 @@ class Set(set):
                 '{} not subgroup of {} (with this orientation)'.format(
                     o.__class__.__name__, self.__class__.__name__))
 
-    def __div__(self, o):
+    def __truediv__(self, o):
         # this * subgroup: right quotient set
         # make sure o is a subgroup:
         if len(o) > len(self):
-            return o.__div__(self)
+            return o.__truediv__(self)
         o = self.subgroup(o)
         assert len(o) <= len(self)
         # use a list of sets, since sets are unhashable
@@ -376,7 +376,7 @@ class Set(set):
                 found_so_far = found_so_far.union(q)
         return quotient_set
 
-    quotient_set = __div__
+    quotient_set = __truediv__
 
     def __rdiv__(self, o):
         #  subgroup * self: left quotient set

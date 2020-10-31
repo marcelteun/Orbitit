@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Module with geometrical types.
 """
@@ -228,7 +228,7 @@ class Vec(tuple):
             "Right-hand operand of type {} isn't supported with Vec".format(
                 type(w)))
 
-    def __div__(self, w):
+    def __truediv__(self, w):
         if isinstance(w, (int, float)):
             return self.__class__([a/w for a in self])
         raise UnsupportedOperand(
@@ -396,10 +396,10 @@ class Quat(Vec):
         # if 3D vector, use it to set vector part only and use 0 for scalar
         if len(v) == 3:
             v = [0, v[0], v[1], v[2]]
-        return super(Quat, cls).__new__(cls, [float(v[i]) for i in range(4)])
+        return super().__new__(cls, [float(v[i]) for i in range(4)])
 
     def __init__(self, *args, **kwargs):
-        super(Quat, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._cache = {}
 
     def conjugate(self):
@@ -475,10 +475,10 @@ class Transform3(tuple):
         assert len(quatPair) == 2, assert_str + str(quatPair)
         assert isinstance(quatPair[0], Quat), assert_str + str(quatPair)
         assert isinstance(quatPair[1], Quat), assert_str + str(quatPair)
-        return super(Transform3, cls).__new__(cls, quatPair)
+        return super().__new__(cls, quatPair)
 
     def __init__(self, *args, **kwargs):
-        super(Transform3, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._cache = {}
 
     def __repr__(self):
