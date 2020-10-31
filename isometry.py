@@ -535,7 +535,7 @@ def _cn_get_subgroups(n):
     The own class (by calling C(n) cannot be added, since it leads to
     recursion.
     """
-    return [C(i) for i in range(n/2, 0, -1) if n % i == 0]
+    return [C(i) for i in range(n//2, 0, -1) if n % i == 0]
 
 
 class MetaCn(type):
@@ -674,7 +674,7 @@ def _c2ncn_get_subgroups(n):
     recursion.
     """
     # divisors (incl 1)
-    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    divs = [i for i in range(n//2, 0, -1) if n % i == 0]
     if n % 2 != 0:
         # n odd: group has a reflection
         # CnxI: all divisors are also odd, i.e. they miss reflection
@@ -795,7 +795,7 @@ def _cnxi_get_subgroups(n):
     recursion.
     """
     # divisors of n
-    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    divs = [i for i in range(n//2, 0, -1) if n % i == 0]
     # Note:
     # - OK if n odd (only odd divisors): always mapping on rotated version
     # - OK if n even:
@@ -809,7 +809,7 @@ def _cnxi_get_subgroups(n):
     # C2nCn:
     if n % 2 == 0:
         # n even: group contains a reflection
-        m = n / 2
+        m = n // 2
         # - if odd divisor: trivial, also have reflection
         # - if even divisor i: can only be added if (n / i) % 2 == 0
         g_c2ici = [C2nC(i) for i in range(1, m + 1)
@@ -918,7 +918,7 @@ def _dncn_get_subgroups(n):
     recursion.
     """
     # divisors (incl 1)
-    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    divs = [i for i in range(n//2, 0, -1) if n % i == 0]
     g = [DnC(i) for i in divs]
     divs.insert(0, n)
     g.extend([C(i) for i in divs])
@@ -1046,7 +1046,7 @@ def _dn_get_subgroups(n):
     recursion.
     """
     # divisors (incl 1)
-    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    divs = [i for i in range(n//2, 0, -1) if n % i == 0]
     g = [D(i) for i in divs]
     divs.insert(0, n)
     g.extend([C(i) for i in divs])
@@ -1188,7 +1188,7 @@ def _dnxi_get_subgroups(n):
     recursion.
     """
     # divisors (incl 1)
-    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    divs = [i for i in range(n//2, 0, -1) if n % i == 0]
     # DxI if n odd and divisor odd, or n even and divisor even
     g = [DxI(i) for i in divs if n % 2 == i % 2]
     divs.insert(0, n)
@@ -1345,7 +1345,7 @@ def _d2ndn_get_subgroups(n):
     recursion.
     """
     # divisors (incl 1)
-    divs = [i for i in range(n/2, 0, -1) if n % i == 0]
+    divs = [i for i in range(n//2, 0, -1) if n % i == 0]
     # D2nxDn if n odd and divisor odd, or n even and divisor even
     if n % 2 == 0:
         g = [D2nD(i) for i in divs if i % 2 == 0 and (n / i) % 2 == 1]
