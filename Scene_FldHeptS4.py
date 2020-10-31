@@ -154,7 +154,7 @@ useRgbCols = [
 ]
 heptColPerIsom = []
 for isom in isomS4:
-    for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
+    for subSet, i in zip(colQuotientSet, list(range(len(colQuotientSet)))):
         if isom in subSet:
             heptColPerIsom.append(([useRgbCols[i]], []))
             break;
@@ -256,7 +256,7 @@ class Shape(Heptagons.FldHeptagonShape):
         return s
 
     def setTriangleFillPosition(this, i):
-        print "TODO implement setTriangleFillPosition"
+        print("TODO implement setTriangleFillPosition")
 
     def setV(this):
         #
@@ -659,8 +659,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     rPre = 'frh-roots'
 
     def printFileStrMapWarning(this, filename, funcname):
-        print '%s:' % funcname
-        print '  WARNING: unable to interprete filename', filename
+        print('%s:' % funcname)
+        print('  WARNING: unable to interprete filename', filename)
 
     @property
     def specPosSetup(this):
@@ -685,7 +685,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 'tris': tris_alt,
                 'fold-rot': this.fileStrMapFoldPos(in_data['file'])
             }
-            print 'see file %s/%s' % (this.rDir, in_data['file'])
+            print('see file %s/%s' % (this.rDir, in_data['file']))
             return data
 
     predefReflSpecPos = {

@@ -378,15 +378,15 @@ class TestSubGroups(unittest.TestCase):
         ]
         self._chk_groups(h, expect)
 
-print 'testing creation of set',
+print('testing creation of set', end=' ')
 g = isometry.Set([geomtypes.HX, geomtypes.HY])
-print '....ok'
+print('....ok')
 #print 'Initialised set g:', g
-print "testing 'in' relation",
+print("testing 'in' relation", end=' ')
 assert geomtypes.Rot3(axis = [1, 0, 0], angle = geomtypes.HALF_TURN) in g
 assert geomtypes.Rot3(axis = [-1, 0, 0], angle = -geomtypes.HALF_TURN) in g
-print '......ok'
-print "testing 'close' function",
+print('......ok')
+print("testing 'close' function", end=' ')
 cg = g.close()
 #print 'isometry.Set g after closing:'
 #print cg
@@ -395,16 +395,16 @@ assert geomtypes.HX in cg
 assert geomtypes.HY in cg
 assert geomtypes.HZ in cg
 assert geomtypes.E in cg
-print '...ok'
+print('...ok')
 
-print 'testing creation of set',
+print('testing creation of set', end=' ')
 g = isometry.Set([geomtypes.Rot3(axis = geomtypes.UX, angle = geomtypes.QUARTER_TURN)])
-print '....ok'
-print "testing 'in' relation",
+print('....ok')
+print("testing 'in' relation", end=' ')
 geomtypes.Rot3(axis =  geomtypes.UX, angle = geomtypes.QUARTER_TURN)  in g
 geomtypes.Rot3(axis = -geomtypes.UX, angle = -geomtypes.QUARTER_TURN) in g
-print '......ok'
-print "testing 'close' function",
+print('......ok')
+print("testing 'close' function", end=' ')
 cg = g.close()
 #print 'isometry.Set g after closing:'
 #print cg
@@ -413,13 +413,13 @@ geomtypes.Rot3(axis =  geomtypes.Vec3([1, 0, 0]), angle = geomtypes.QUARTER_TURN
 geomtypes.Rot3(axis = -geomtypes.Vec3([1, 0, 0]), angle = -geomtypes.QUARTER_TURN) in cg
 assert geomtypes.HX in cg
 assert geomtypes.E in cg
-print '...ok'
+print('...ok')
 
-print 'testing creation of isometry.A4',
+print('testing creation of isometry.A4', end=' ')
 a4 = isometry.A4(setup = isometry.init_dict(o2axis0=geomtypes.UX,
                                             o2axis1=geomtypes.UY))
-print '.....ok'
-print 'checking result',
+print('.....ok')
+print('checking result', end=' ')
 assert len(a4) == 12
 assert geomtypes.E in a4
 assert geomtypes.HX in a4
@@ -441,9 +441,9 @@ t6 = geomtypes.Rot3(axis = [1,  1, -1], angle =   geomtypes.THIRD_TURN)
 assert t6 in a4
 t7 = geomtypes.Rot3(axis = [1,  1, -1], angle = 2*geomtypes.THIRD_TURN)
 assert t7 in a4
-print '............ok'
+print('............ok')
 
-print 'testing creation of isometry.A4',
+print('testing creation of isometry.A4', end=' ')
 a4 = isometry.A4(
         setup = isometry.init_dict(
             # try list argument
@@ -452,12 +452,12 @@ a4 = isometry.A4(
             o2axis1=geomtypes.HalfTurn3(axis=[1, -1, 0]))
     )
 #print 'isometry.A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
-print '.....ok'
+print('.....ok')
 # this a4 is the above a4 repositioned as follows:
 r0 = geomtypes.Rot3(axis = geomtypes.UZ, angle = geomtypes.QUARTER_TURN / 2)
 r1 = geomtypes.Rot3(axis = [1, -1, 0], angle = math.atan(1/math.sqrt(2)))
 r = r1 * r0
-print 'checking result',
+print('checking result', end=' ')
 assert len(a4) == 12
 assert geomtypes.E in a4
 assert geomtypes.HalfTurn3(axis=r*geomtypes.UX) in a4
@@ -471,13 +471,13 @@ assert geomtypes.Rot3(axis = r * t4.axis(), angle =   geomtypes.THIRD_TURN) in a
 assert geomtypes.Rot3(axis = r * t5.axis(), angle = 2*geomtypes.THIRD_TURN) in a4
 assert geomtypes.Rot3(axis = r * t6.axis(), angle =   geomtypes.THIRD_TURN) in a4
 assert geomtypes.Rot3(axis = r * t7.axis(), angle = 2*geomtypes.THIRD_TURN) in a4
-print '............ok'
+print('............ok')
 #print a4
-print 'test grouping this',
+print('test grouping this', end=' ')
 ca4 = copy(a4)
 a4.group(2)
 assert a4 == ca4
-print '.........ok'
+print('.........ok')
 
 ########################################################################
 # Quotient isometry.Set:
@@ -491,7 +491,7 @@ d2.group()
 assert len(d2) == 4
 # print 'has a subgroup D2:'
 # print d2
-print 'test quotient set: isometry.A4/D2',
+print('test quotient set: isometry.A4/D2', end=' ')
 q = a4 / d2
 # print 'which defines a right quotient set s = ['
 for s in q:
@@ -508,19 +508,19 @@ for i in range(len(q)-1):
     for transform in s:
         for j in range(i+1, len(q)):
             assert not transform in q[j]
-print '...ok'
+print('...ok')
 
 ########################################################################
 # Quotient isometry.Set:
-print 'test is_subgroup: isometry.A4, isometry.S4',
+print('test is_subgroup: isometry.A4, isometry.S4', end=' ')
 s4 = isometry.S4()
 a4 = isometry.A4()
 assert a4.is_subgroup(s4)
 assert not s4.is_subgroup(a4)
 a4.add(geomtypes.I)
 assert not a4.is_subgroup(s4)
-print '....ok'
+print('....ok')
 
 if __name__ == '__main__':
     unittest.main()
-    print 'success!'
+    print('success!')

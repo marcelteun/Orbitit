@@ -19,7 +19,7 @@ try:
     os.mkdir(dstDir)
 except OSError:
     if not os.path.isdir(dstDir):
-        print 'error: target directory exists as file'
+        print('error: target directory exists as file')
         exit(-1)
 
 fl = glob.glob("%s/frh-roots-*.py" % srcDir)
@@ -29,7 +29,7 @@ nrEmptyFiles = 0
 for fn in fl:
     fd = open(fn, 'r')
     ed = {'__name__': 'readPyFile'}
-    exec fd in ed
+    exec(fd, ed)
     fd.close()
     if len(ed['results']) > 0:
         nrSols += len(ed['results'])
@@ -47,5 +47,5 @@ for fn in fl:
         # TODO: make optional: to do something here..., e.g. rm
         nrEmptyFiles += 1
 
-print '%d solutions found in %d files' % (nrSols, nrFiles - nrEmptyFiles)
-print '  (excl. %d files without any solutions)' % nrEmptyFiles
+print('%d solutions found in %d files' % (nrSols, nrFiles - nrEmptyFiles))
+print('  (excl. %d files without any solutions)' % nrEmptyFiles)

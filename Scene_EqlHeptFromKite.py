@@ -78,7 +78,7 @@ class Shape(Geom3D.SimpleShape):
         this.kiteEs = [
                 0, 1, 1, 2, 2, 3, 3, 0
             ]
-        this.kiteVsIndices = range(4)
+        this.kiteVsIndices = list(range(4))
         this.heptaFs = [
                 [0, 6, 1],
                 [1, 6, 5],
@@ -90,7 +90,7 @@ class Shape(Geom3D.SimpleShape):
         this.heptaEs  = [
                 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0
             ]
-        this.heptaVsIndices = range(3, 10)
+        this.heptaVsIndices = list(range(3, 10))
         this.allNs = [
                 [0, 0, 1],
                 [0, 0, 1],
@@ -152,13 +152,13 @@ class Shape(Geom3D.SimpleShape):
         # the failure occurs at init since showKite and showHepta don't exist
         try:
             Vs = []
-            print 'this.showKite', this.showKite, 'this.showHepta', this.showHepta
+            print('this.showKite', this.showKite, 'this.showHepta', this.showHepta)
             if this.showKite:
                 Vs.extend(this.kiteVs)
             if this.showHepta:
                 Vs.extend(this.heptaVs)
-            for v in Vs: print v
-            print '==============='
+            for v in Vs: print(v)
+            print('===============')
             this.setVertexProperties(Vs = Vs)
         except AttributeError: pass
 
@@ -408,7 +408,7 @@ class CtrlWin(wx.Frame):
             tail = top * (2 * Heptagons.Rho - 1)
             side = 1 + Heptagons.Sigma
         else:
-            print 'onPrePos: oops, default case'
+            print('onPrePos: oops, default case')
             top  = 0.1
             tail = 0.1
             side = 0.1

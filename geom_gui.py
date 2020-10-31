@@ -32,7 +32,7 @@ Like vertices, faecs, symmetries, etc.
 # pylint: disable=too-many-branches,too-many-nested-blocks
 # pylint: disable=protected-access
 
-from __future__ import print_function
+
 
 import wx
 import wx.lib.scrolledpanel as wxXtra
@@ -1237,7 +1237,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         is_updated = self.is_sym_class_updated()
         cur_setup = []
         sym = self.get_sym_class(apply_order=False)
-        for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
+        for i, gui in zip(list(range(len(self.orient_guis))), self.orient_guis):
             input_type = sym.init_pars[i]['type']
             if input_type == 'vec3':
                 v = gui.get_vertex()
@@ -1282,7 +1282,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             "Wrong no. of initialisers for self symmetry"\
             "(got {}, expected {})".format(len(vec), len(self.orient_guis))
         sym = self.get_sym_class(apply_order=False)
-        for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
+        for i, gui in zip(list(range(len(self.orient_guis))), self.orient_guis):
             input_type = sym.init_pars[i]['type']
             if input_type == 'vec3':
                 _ = gui.set_vertex(vec[i])
@@ -1293,7 +1293,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         """return a symmetry instance"""
         sym = self.get_sym_class(apply_order=False)
         setup = {}
-        for i, gui in zip(range(len(self.orient_guis)), self.orient_guis):
+        for i, gui in zip(list(range(len(self.orient_guis))), self.orient_guis):
             input_type = sym.init_pars[i]['type']
             if input_type == 'vec3':
                 v = gui.get_vertex()

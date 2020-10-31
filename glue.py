@@ -105,7 +105,7 @@ def cylinderEdgeToX3d(
     dv = v1 - v0
     l = dv.norm()
     if l == 0:
-        print 'warning, edge length 0'
+        print('warning, edge length 0')
         return
     angle = math.acos((dv*vz)/l)
     axis = vz.cross(dv)
@@ -290,9 +290,9 @@ def mergeVs(Vs, Fs, precision = 12):
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
     geomtypes.set_eq_float_margin(math.pow(10, -precision))
-    print 'Find multiple occurences of vertices\n',
+    print('Find multiple occurences of vertices\n', end=' ')
     for i in range(len(Vs) - 1, -1, -1):
-        print '\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)),
+        print('\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)), end=' ')
         v = Vs[i]
         for j in range(i):
             if v == Vs[j]:
@@ -302,7 +302,7 @@ def mergeVs(Vs, Fs, precision = 12):
     geomtypes.reset_eq_float_margin()
     # Apply the changes now. Don't delete the vertices, since that means
     # re-indexing
-    print '\nClean up Fs'
+    print('\nClean up Fs')
     for f_i in range(len(Fs) - 1, -1, -1):
         f = Fs[f_i]
         face_vertices = []  # array holding unique face vertices

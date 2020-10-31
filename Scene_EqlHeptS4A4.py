@@ -163,7 +163,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         else:
           this.errorStr = ''
         Vs.extend(heptN[0]) # V12 - V18
-        Ns = range(33)
+        Ns = list(range(33))
         for i in range(4):
             Ns[i] = heptN[1]
         for i in range(12, 19):

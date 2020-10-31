@@ -533,14 +533,14 @@ Es_0 = [
     ]
 offsetIndexWith = lambda i: lambda x: x+i
 Es = []
-Es.extend(map(offsetIndexWith(0), Es_0))
-Es.extend(map(offsetIndexWith(12), Es_0))
-Es.extend(map(offsetIndexWith(24), Es_0))
-Es.extend(map(offsetIndexWith(36), Es_0))
-Es.extend(map(offsetIndexWith(48), Es_0))
-Es.extend(map(offsetIndexWith(60), Es_0))
-Es.extend(map(offsetIndexWith(72), Es_0))
-Es.extend(map(offsetIndexWith(84), Es_0))
+Es.extend(list(map(offsetIndexWith(0), Es_0)))
+Es.extend(list(map(offsetIndexWith(12), Es_0)))
+Es.extend(list(map(offsetIndexWith(24), Es_0)))
+Es.extend(list(map(offsetIndexWith(36), Es_0)))
+Es.extend(list(map(offsetIndexWith(48), Es_0)))
+Es.extend(list(map(offsetIndexWith(60), Es_0)))
+Es.extend(list(map(offsetIndexWith(72), Es_0)))
+Es.extend(list(map(offsetIndexWith(84), Es_0)))
 Es.extend(
     [
         # triangle edges from shell of cubes inside outer shell:
@@ -659,7 +659,7 @@ class CtrlWin(wx.Frame):
 
         str = 'cell %d'
         lenR = 2*len(str) + 1
-        r2 = range(2)
+        r2 = list(range(2))
         lenL = [0 for j in r2]
         nrOfCellsInColumn = len(Cells)/2
         for i in range(nrOfCellsInColumn):
@@ -708,7 +708,7 @@ class CtrlWin(wx.Frame):
         for i in range(0, len(this.showGui), 2):
             if this.showGui[i].GetId() == event.GetId():
                 this.shape.setShowGroup(i/2, this.showGui[i].IsChecked())
-        print 'Ctrl Window size:', (this.GetClientSize()[0], this.GetClientSize()[1])
+        print('Ctrl Window size:', (this.GetClientSize()[0], this.GetClientSize()[1]))
         this.canvas.paint()
 
     def onShowCells(this, event):

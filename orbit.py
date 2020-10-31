@@ -20,7 +20,7 @@
 # or write to the Free Software Foundation,
 #
 # -----------------------------------------------------------------
-from __future__ import print_function
+
 
 import Geom3D
 import geomtypes

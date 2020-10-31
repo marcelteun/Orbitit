@@ -4,7 +4,7 @@
 All base elements should be positioned with the synnetries as the standard
 tetrahedron below.
 """
-from __future__ import print_function
+
 import math
 
 import geomtypes

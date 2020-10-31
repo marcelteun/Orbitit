@@ -118,7 +118,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
     def __init__(this, parent, size = None):
         # Ensure double buffered to prevent flashing on systems where double buffering is not default.
         if this.dbgTrace:
-            print 'Interactive3DCanvas.__init__(this,..):'
+            print('Interactive3DCanvas.__init__(this,..):')
         this.parent = parent
         glcanvas.GLCanvas.__init__(this, parent, -1,
                 size = size,
@@ -173,13 +173,13 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
                   is somewhere along the z-axis
         """
         if this.dbgTrace:
-            print 'Interactive3DCanvas.setCameraDistance(this,..):'
+            print('Interactive3DCanvas.setCameraDistance(this,..):')
         this.cameraDistance = distance
 
     def initGl(this):
         #if this.dbgTrace:
         if True:
-            print 'Interactive3DCanvas.initGl(this,..):'
+            print('Interactive3DCanvas.initGl(this,..):')
         glMatrixMode(GL_PROJECTION)
         gluPerspective(45., 1.0, 1., 300.)
 
@@ -191,12 +191,12 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
 
     def setArcBallRadius(this, R = 0.8):
         if this.dbgTrace:
-            print 'Interactive3DCanvas.setArcBallRadius(this,..):'
+            print('Interactive3DCanvas.setArcBallRadius(this,..):')
         this.rScale = R
 
     def onSize(this, event):
         if this.dbgTrace:
-            print 'Interactive3DCanvas.onSize(this,..):'
+            print('Interactive3DCanvas.onSize(this,..):')
         size = this.GetClientSize()
         wOrH = min(size.width, size.height)
         size.height = size.width = wOrH
@@ -212,7 +212,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
 
     def OnPaint(this, event):
         if this.dbgTrace:
-            print 'Interactive3DCanvas.OnPaint(this,..):'
+            print('Interactive3DCanvas.OnPaint(this,..):')
         def xy2SphereV(x, y, w, h, R2):
             x, y = x - width/2, height/2 - y
             l2 = x * x + y * y
@@ -270,7 +270,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
 
     def resetOrientation(this):
         if this.dbgTrace:
-            print 'Interactive3DCanvas.resetOrientation(this,..):'
+            print('Interactive3DCanvas.resetOrientation(this,..):')
         try: # this.Moriginal might not exist at an early stage (e.g. on Windows)...
             glLoadMatrixd(this.Moriginal)
         except AttributeError:
@@ -282,7 +282,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
 
     def paint(this):
         if this.dbgTrace:
-            print 'Interactive3DCanvas.paint(this,..):'
+            print('Interactive3DCanvas.paint(this,..):')
         this.Refresh(False)
 
     def onRotateStart(this, event):
@@ -295,7 +295,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         # this window can cause window A to be closed and the release button
         # event is captured here, while the was no capture here.
         if this.dbgTrace:
-            print 'Interactive3DCanvas.onRotateStop(this,..):'
+            print('Interactive3DCanvas.onRotateStop(this,..):')
         if this.mouseLeftIn:
             this.mouseLeftIn = False
             this.ReleaseMouse()
@@ -304,7 +304,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
 
     def onZoomStart(this, event):
         if this.dbgTrace:
-            print 'Interactive3DCanvas.onZoomStart(this,..):'
+            print('Interactive3DCanvas.onZoomStart(this,..):')
         this.CaptureMouse()
         this.mouseRightIn = True
         this.z = this.zBac = event.GetPosition()[1]
@@ -314,7 +314,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         # this window can cause window A to be closed and the release button
         # event is captured here, while the was no capture here.
         if this.dbgTrace:
-            print 'Interactive3DCanvas.onZoomStop(this,..):'
+            print('Interactive3DCanvas.onZoomStop(this,..):')
         if this.mouseRightIn:
             this.mouseRightIn = False
             this.ReleaseMouse()
@@ -378,10 +378,10 @@ class Scene:
 
     def onSize(this, event):
         this.canvas.onSize(event)
-        print 'Canvas window size:', this.canvasFrame.GetClientSize()
+        print('Canvas window size:', this.canvasFrame.GetClientSize())
 
     def onCloseCanvas(this, event):
-        print 'onCloseCanvas'
+        print('onCloseCanvas')
         this.close()
         this.ctrlFrame.sceneClosed()
 

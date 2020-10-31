@@ -152,14 +152,14 @@ class doc:
                consist of several connected line segments.
         """
         if this.debug:
-            print "%s.addLineSegments" % this.name
+            print("%s.addLineSegments" % this.name)
             #print 'Vs:'
             #for v in Vs: print '  ', v
             #print 'Lines:'
             #print 'Lines:'
             #for l in Lines: print '  ', l
-            print 'len(Vs):', len(Vs)
-            print 'Lines[0]:', Lines[0]
+            print('len(Vs):', len(Vs))
+            print('Lines[0]:', Lines[0])
         vStr = '/vertices [\n'
         # use copies, for the cleanup
         Vs = [[c for c in v] for v in Vs]
@@ -176,8 +176,8 @@ class doc:
             )
         vStr = '%s] def' % vStr
         fStr_ = ''
-        maxX = maxY = -sys.maxint-1 # 2-complement
-        minX = minY =  sys.maxint
+        maxX = maxY = -sys.maxsize-1 # 2-complement
+        minX = minY =  sys.maxsize
         for partOfFace in Lines:
             oneFaceStr = ''
             for vNr in partOfFace:
@@ -277,18 +277,18 @@ grestore
         dY += this.bboxSpaceY
         # if it fits on this row (on this page):
         if this.debug:
-            print "%s.addToPage" % this.name
-            print "Page Size:", this.pageSize
-            print "  size respecting margin: (%f, %f) -> (%f, %f)" % (
+            print("%s.addToPage" % this.name)
+            print("Page Size:", this.pageSize)
+            print("  size respecting margin: (%f, %f) -> (%f, %f)" % (
                 this.leftMargin, this.bottomMargin,
                 this.pageSize[0] - this.rightMargin,
                 this.pageSize[1] - this.topMargin
-            )
+            ))
 
-            print "Current point: %f, %f" % (this.cx, this.cy)
-            print "fits on current row?:"
-            print " X:", this.cx + dX, '?<=', this.pageSize[0] - this.rightMargin
-            print " Y:", this.cy + dY, '?<=', this.pageSize[1] - this.topMargin
+            print("Current point: %f, %f" % (this.cx, this.cy))
+            print("fits on current row?:")
+            print(" X:", this.cx + dX, '?<=', this.pageSize[0] - this.rightMargin)
+            print(" Y:", this.cy + dY, '?<=', this.pageSize[1] - this.topMargin)
         if (
             this.cx + dX <= this.pageSize[0] - this.rightMargin
         ) and (
@@ -296,7 +296,7 @@ grestore
         ):
             # if no pages created yet.
             if this.debug:
-                print "  ....Yes"
+                print("  ....Yes")
             if (this.pagesStr == []):
                 this.addNewPageStr(drawStr)
             else:
@@ -308,7 +308,7 @@ grestore
         # else if it doesn't fit on the row:
         elif (this.cx + dX > this.pageSize[0] - this.rightMargin):
             if this.debug:
-                print "  ....No"
+                print("  ....No")
             # goto next row
             this.appendPageStr(
                 "%f %f translate\n" % (-this.shiftRight, this.shiftUp)
@@ -318,13 +318,13 @@ grestore
             this.shiftRight = 0
             this.shiftUp    = 0
             if this.debug:
-                print "Current point: %f, %f" % (this.cx, this.cy)
-                print "fits on current page?:"
-                print " Y:", this.cy + dY, '?<=', this.pageSize[1] - this.topMargin
+                print("Current point: %f, %f" % (this.cx, this.cy))
+                print("fits on current page?:")
+                print(" Y:", this.cy + dY, '?<=', this.pageSize[1] - this.topMargin)
             # if it still fits on this page:
             if (this.cy + dY <= this.pageSize[1] - this.topMargin):
                 if this.debug:
-                    print "  ....Yes"
+                    print("  ....Yes")
                 this.appendPageStr(drawStr)
                 this.appendPageStr("%f 0 translate\n" % (dX))
                 this.cx += dX
@@ -332,13 +332,13 @@ grestore
                 this.shiftUp = dY
             else:
                 if this.debug:
-                    print "  ....No"
+                    print("  ....No")
                 newPage = True
         else:
             newPage = True
         if newPage:
             if this.debug:
-                print "New page"
+                print("New page")
             this.addNewPageStr(drawStr)
             this.appendPageStr("%f 0 translate\n" % (dX))
             this.shiftRight += dX
@@ -365,4 +365,4 @@ if __name__ == '__main__':
 """)
     psDoc.addNewPageStr('10 10 square')
     psDoc.addNewPageStr('10 100 square')
-    print psDoc.toStr()
+    print(psDoc.toStr())

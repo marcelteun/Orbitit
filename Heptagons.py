@@ -203,12 +203,12 @@ class TrisAlt_base(object):
     def __init__(this):
         # TODO? Note that only s that aren't primitives (isinstance(x, int))
         # should be added here.
-        this.choiceList = [s for s in this.stringify.itervalues()]
+        this.choiceList = [s for s in this.stringify.values()]
         this.mapKeyOnFileStr = {}
         this.mapStrOnFileStr = {}
         this.mapFileStrOnStr = {}
         this.mapFileStrOnKey = {}
-        for (tStr, tId) in this.key.iteritems():
+        for (tStr, tId) in this.key.items():
             fileStr = this.toFileStr(tStr = tStr)
             this.mapKeyOnFileStr[tId]     = fileStr
             this.mapStrOnFileStr[tStr]    = fileStr
@@ -259,7 +259,7 @@ def Def_TrisAlt(name, tris_keys):
         'baseKey':   {}
     }
     # Always add all primitives:
-    for (k, s) in TrisAlt_base.stringify.iteritems():
+    for (k, s) in TrisAlt_base.stringify.items():
         class_dict['stringify'][k] = s
         class_dict['key'][s] = k
         class_dict[toTrisAltKeyStr(k)] = k
@@ -376,11 +376,11 @@ class FoldMethod:
     star      = 4
 
     def get(this, s):
-        for k,v in FoldName.iteritems():
+        for k,v in FoldName.items():
             if v == s:
                 return k
         s = str.capitalize(s)
-        for k,v in FoldName.iteritems():
+        for k,v in FoldName.items():
             if v == s:
                 return k
         return None
@@ -442,7 +442,7 @@ class RegularHeptagon:
         elif fold == FoldMethod.star:
             this.fold_star(a0, b0, a1, b1, keepV0, rotate)
         else:
-            raise TypeError, 'Unknown fold'
+            raise TypeError('Unknown fold')
 
     def foldParallel(this, a, b, keepV0 = True, rotate = 0):
         if rotate == 0:
@@ -1479,10 +1479,10 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     #print 'f', f, 'g', g
 
     if f == 0:
-        print 'Kite2Hept: warning f == 0'
+        print('Kite2Hept: warning f == 0')
         return
     if w == 0:
-        print 'Kite2Hept: warning w == 0'
+        print('Kite2Hept: warning w == 0')
         return
     #if f > g:
     #    f, g = g, f
@@ -1500,14 +1500,14 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
 
     #assert(root>=0)
     if root < 0:
-        print 'kite2Hept: negative sqrt requested'
+        print('kite2Hept: negative sqrt requested')
         return
 
     nom   = (f + g)
     denom = qkpr + V(root)
 
     if denom == 0:
-        print 'kite2Hept: error denom == 0'
+        print('kite2Hept: error denom == 0')
         return
 
     w1    =  nom / denom
@@ -1617,7 +1617,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.updateShape = True
 
     def setTriangleFillPosition(this, position):
-        print "WARNING: implement in derived class"
+        print("WARNING: implement in derived class")
 
     def setFold1(this, angle = None, oppositeAngle = None):
         if angle != None:
@@ -2029,7 +2029,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             psp = this.predefReflSpecPos
         else:
             psp = this.predefRotSpecPos
-        return psp.has_key(prePosId)
+        return prePosId in psp
 
     def fileStrMapFoldMethodStr(this, filename):
         res = re.search("-fld_([^.]*)\.", filename)
@@ -2186,7 +2186,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         inputStr = 'ar = %s' % this.setOrientGui.GetValue()
         ed = {'__name__': 'inputStr'}
         try:
-                exec inputStr in ed
+                exec(inputStr, ed)
         except SyntaxError:
                 this.statusBar.SetStatusText('Syntax error in input string');
                 raise
@@ -2460,7 +2460,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.prevTrisFill != this.trisAlt.twist_strip_I and
                 this.prevOppTrisFill != this.trisAlt.twist_strip_I
             ):
-                print '---------nvidia-seg-fault-work-around-----------'
+                print('---------nvidia-seg-fault-work-around-----------')
                 this.nvidea_workaround_0()
                 this.restoreShape = this.canvas.shape
             this.shape.setV() # make sure the shape is updated
@@ -2555,7 +2555,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             return this.__prePosStr2Key[s]
         except AttributeError:
             this.__prePosStr2Key = {}
-            for k, v in this.stringify.iteritems():
+            for k, v in this.stringify.items():
                 this.__prePosStr2Key[v] = k
             return this.__prePosStr2Key[s]
         except KeyError:
@@ -2572,19 +2572,19 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def openPrePosFile(this, filename):
         try:
-            print 'DBG open', filename
+            print('DBG open', filename)
             fd = open(filename, 'r')
         except IOError:
-            print 'DBG file not found:\n %s' % filename
+            print('DBG file not found:\n %s' % filename)
             return []
         ed = {'__name__': 'readPyFile'}
-        exec fd in ed
+        exec(fd, ed)
         fd.close()
         return ed['results']
 
     def noPrePosFound(this):
         s = 'Note: no valid positions found'
-        print s
+        print(s)
         this.statusBar.SetStatusText(s)
 
     @property
@@ -2711,9 +2711,9 @@ class FldHeptagonCtrlWin(wx.Frame):
                 oppFld2 = fld2
                 vStr = '%s] =' % vStr
                 dbgStr = '%s]' % dbgStr
-            print vStr
-            print dbgStr
-            print '----------------------------------------------------'
+            print(vStr)
+            print(dbgStr)
+            print('----------------------------------------------------')
             # Ensure this.specPosIndex in range:
         nrPos = len(setting)
         maxI = nrPos - 1

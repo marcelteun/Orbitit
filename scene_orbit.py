@@ -38,7 +38,7 @@ symmetry)
 # Old sins:
 # pylint: disable=exec-used,too-many-instance-attributes,too-few-public-methods
 # pylint: disable=too-many-statements,too-many-locals,too-many-branches
-from __future__ import print_function
+
 
 import os
 import wx
@@ -561,7 +561,7 @@ class CtrlWin(wx.Frame):
         """
         col = e.GetValue().Get()
         gui_idx = e.GetId()
-        for i, gui in zip(range(len(self.select_col_guis)),
+        for i, gui in zip(list(range(len(self.select_col_guis))),
                           self.select_col_guis):
             if gui.GetId() == gui_idx:
                 self.cols[i] = col
@@ -575,7 +575,7 @@ class CtrlWin(wx.Frame):
         col_per_isom = []
         for isom in self.fs_orbit:
             for sub_set, i in zip(col_quotient_set,
-                                  range(len(col_quotient_set))):
+                                  list(range(len(col_quotient_set)))):
                 if isom in sub_set:
                     col_per_isom.append(self.cols[i])
                     break

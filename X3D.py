@@ -65,7 +65,7 @@ class Index:
         return this.toX3DStr()
 
     def toX3DStr(this):
-        if dbgPrn: print 'Index.toX3DStr:', this.indexLst
+        if dbgPrn: print('Index.toX3DStr:', this.indexLst)
         indexStr = ''
         if this.indexLst != None:
             for i in this.indexLst:
@@ -151,12 +151,12 @@ class Node:
             return '%s' % val.toVrmlStr()
         elif _isNodeInstance_(val):
             if val.name == 'IS':
-                assert val.attrs.has_key('children')
+                assert 'children' in val.attrs
                 for node in val.attrs['children']:
                     assert _isNodeInstance_(node)
                     assert node.name == 'connect'
-                    assert node.attrs.has_key('nodeField')
-                    assert node.attrs.has_key('protoField')
+                    assert 'nodeField' in node.attrs
+                    assert 'protoField' in node.attrs
                     nodeField  = node.attrs['nodeField']
                     protoField = node.attrs['protoField']
                     assert type(nodeField)  == _STR_TYPE_
@@ -167,7 +167,7 @@ class Node:
 
     def attrToVrmlStr(this, attrs):
         attrStr = ''
-        for attrName, attrValue in attrs.iteritems():
+        for attrName, attrValue in attrs.items():
             # string attr values need to be quoted
             if attrName != 'USE' and attrName != 'DEF':
                 if attrName == 'IS':
@@ -185,56 +185,56 @@ class Node:
             else:
                 arrStr = '%s\n' % arrStr
             arrStr = '%s%s' % (arrStr, this.valueToVrmlStr(arrValue))
-            if dbgPrn: print 'Node.arrToVrmlStr:', arrStr
+            if dbgPrn: print('Node.arrToVrmlStr:', arrStr)
         return arrStr
 
     def toVrmlStr(this):
-        if this.attrs.has_key('USE'):
+        if 'USE' in this.attrs:
             return '\nUSE %s' % this.attrs['USE']
         else:
             nodeStr = ''
-            if this.attrs.has_key('DEF'):
+            if 'DEF' in this.attrs:
                 nodeStr = 'DEF %s ' % this.attrs['DEF']
             if this.name == 'ROUTE':
                 nodeStr = '%s%s' % (nodeStr, this.routeToVrmlStr())
             elif this.name == 'ProtoDeclare':
-                assert this.attrs.has_key('name')
+                assert 'name' in this.attrs
                 nodeStr = '%sPROTO %s ' % (nodeStr, this.attrs['name'])
                 #nodeStr = '%sPROTO %s {%s\n}' % (nodeStr, this.attrs['name'], reindent(this.attrToVrmlStr(this.attrs)))
-                assert this.attrs.has_key('children')
+                assert 'children' in this.attrs
                 for node in this.attrs['children']:
                     assert _isNodeInstance_(node)
                     nodeStr = '%s%s' % (nodeStr, node.toVrmlStr())
             elif this.name == 'ProtoInterface':
                 nodeStr = '%s[' % nodeStr
-                assert this.attrs.has_key('children')
+                assert 'children' in this.attrs
                 for node in this.attrs['children']:
                     assert _isNodeInstance_(node)
                     assert node.name in ['field', 'exposedField', 'eventIn', 'eventOut']
-                    assert node.attrs.has_key('type')
+                    assert 'type' in node.attrs
                     nodeStr = '%s\n  %s %s' % (nodeStr, node.name, node.attrs['type'])
-                    assert node.attrs.has_key('name')
+                    assert 'name' in node.attrs
                     nodeStr = '%s %s' % (nodeStr, node.attrs['name'])
-                    assert node.attrs.has_key('value')
+                    assert 'value' in node.attrs
                     nodeStr = '%s %s' % (nodeStr, this.valueToVrmlStr(node.attrs['value']))
                 nodeStr = '%s\n]' % nodeStr
             elif this.name == 'ProtoBody':
                 nodeStr = '%s\n{' % nodeStr
-                assert this.attrs.has_key('children')
+                assert 'children' in this.attrs
                 for node in this.attrs['children']:
                     assert _isNodeInstance_(node)
                     nodeStr = '%s\n  %s' % (nodeStr, reindent(node.toVrmlStr()))
                 nodeStr = '%s\n}' % nodeStr
             elif this.name == 'ProtoInstance':
-                assert this.attrs.has_key('name')
+                assert 'name' in this.attrs
                 nodeStr = '%s%s {' % (nodeStr, this.attrs['name'])
-                assert this.attrs.has_key('children')
+                assert 'children' in this.attrs
                 for node in this.attrs['children']:
                     assert _isNodeInstance_(node)
                     assert node.name == 'fieldValue'
-                    assert node.attrs.has_key('name')
+                    assert 'name' in node.attrs
                     nodeStr = '%s\n  %s' % (nodeStr, node.attrs['name'])
-                    assert node.attrs.has_key('value')
+                    assert 'value' in node.attrs
                     nodeStr = '%s %s' % (nodeStr, this.valueToVrmlStr(node.attrs['value']))
                 nodeStr = '%s\n}' % nodeStr
             else:
@@ -270,7 +270,7 @@ class Node:
     def toX3DStr(this):
         attrStr = ''
         childNodes = []
-        for attrName, attrValue in this.attrs.iteritems():
+        for attrName, attrValue in this.attrs.items():
             if not _isNodeInstance_(attrValue) and not (
                 type(attrValue) == _ARR_TYPE_ and attrValue != [] and _isNodeInstance_(attrValue[0])
             ):
@@ -327,7 +327,7 @@ class Node:
     def nodeToX3DStr(this, name):
         nodeStr = ''
         childNodes = []
-        for attrName, attrValue in this.attrs.iteritems():
+        for attrName, attrValue in this.attrs.items():
             if attrName == name:
                 if type(attrValue) == _STR_TYPE_:
                     nodeStr = '%s="%s"' % (attrName, attrValue)
@@ -375,7 +375,7 @@ class Doc:
         if this.meta == []:
             this.meta = meta
         else:
-            for name, content in meta.iteritems():
+            for name, content in meta.items():
                 this.meta[name] = content
 
     def addStdMeta(this, title, bgColor = FloatVec([0.2, 0.5, 1], 1)):
@@ -412,7 +412,7 @@ class Doc:
         docStr = '<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">'
         head = Node('head')
         if this.meta != []:
-            for name, content in this.meta.iteritems():
+            for name, content in this.meta.items():
                 head.addNode(Node('meta', name = name, content = content))
         sceneStr = '\n<Scene>'
         for node in this.contents:

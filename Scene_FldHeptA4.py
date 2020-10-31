@@ -175,7 +175,7 @@ else:
 
 heptColPerIsom = []
 for isom in useIsom:
-    for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
+    for subSet, i in zip(colQuotientSet, list(range(len(colQuotientSet)))):
         if isom in subSet:
             heptColPerIsom.append(([useRgbCols[i]], []))
             break;
@@ -262,7 +262,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 this.edgeAlternative = this.edgeAlternative & ~alt2_bit
 
     def setTriangleFillPosition(this, i):
-        print "TODO implement setTriangleFillPosition for", i
+        print("TODO implement setTriangleFillPosition for", i)
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
         Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
@@ -390,7 +390,7 @@ class Shape(Heptagons.FldHeptagonShape):
             return 0
 
     def initArrs(this):
-        print this.name, "initArrs"
+        print(this.name, "initArrs")
 
         #            5" = 18                 12 = 2"
         #    6" = 16                                 10 = 1"
@@ -679,16 +679,16 @@ class Shape(Heptagons.FldHeptagonShape):
                 this.baseShape.Vs[tris[i][1]],
                 this.baseShape.Vs[tris[i][2]],
             ).normal(True)
-            print 'norm0 %d: ', norm0
+            print('norm0 %d: ', norm0)
             norm1 = Geom3D.Triangle(
                 this.baseShape.Vs[tris[i+d][0]],
                 this.baseShape.Vs[tris[i+d][1]],
                 this.baseShape.Vs[tris[i+d][2]],
             ).normal(True)
-            print 'norm1 %d: ', norm1
+            print('norm1 %d: ', norm1)
             inprod = norm0 * norm1
-            print 'Tris angle %d: %.6f degrees' % (i, math.acos(inprod) * Geom3D.Rad2Deg)
-        print '------------' # TODO move out
+            print('Tris angle %d: %.6f degrees' % (i, math.acos(inprod) * Geom3D.Rad2Deg))
+        print('------------') # TODO move out
 
 class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
@@ -750,8 +750,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     rPre = 'frh-roots'
 
     def printFileStrMapWarning(this, filename, funcname):
-        print '%s:' % funcname
-        print '  WARNING: unable to interprete filename', filename
+        print('%s:' % funcname)
+        print('  WARNING: unable to interprete filename', filename)
 
     @property
     def specPosSetup(this):
@@ -776,7 +776,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                     'tris': tris_str,
                     'fold-rot': this.fileStrMapFoldPos(in_data['file'])
             }
-            print 'see file %s/%s' % (this.rDir, in_data['file'])
+            print('see file %s/%s' % (this.rDir, in_data['file']))
             return data
 
     predefReflSpecPos = {

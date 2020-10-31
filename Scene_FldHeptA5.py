@@ -143,7 +143,7 @@ useRgbCols = [
 ]
 heptColPerIsom = []
 for isom in isomA5:
-    for subSet, i in zip(colQuotientSet, range(len(colQuotientSet))):
+    for subSet, i in zip(colQuotientSet, list(range(len(colQuotientSet)))):
         if isom in subSet:
             heptColPerIsom.append(([useRgbCols[i]], []))
             break;
@@ -857,8 +857,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
     rPre = 'frh-roots'
 
     def printFileStrMapWarning(this, filename, funcname):
-        print '%s:' % funcname
-        print '  WARNING: unable to interprete filename', filename
+        print('%s:' % funcname)
+        print('  WARNING: unable to interprete filename', filename)
 
     @property
     def specPosSetup(this):
@@ -872,8 +872,8 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
             if this.specPosIndex >= len(psp[this.prePos]):
                 this.specPosIndex = -1
             data = psp[this.prePos][this.specPosIndex]
-            if data.has_key('file'):
-                print 'see file %s/%s' % (this.rDir, data['file'])
+            if 'file' in data:
+                print('see file %s/%s' % (this.rDir, data['file']))
             return data
 
     predefReflSpecPos = {

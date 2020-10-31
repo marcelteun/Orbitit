@@ -26,7 +26,7 @@ Module with geometrical types.
 # Old sins:
 # pylint: disable=too-many-lines,too-many-branches
 
-from __future__ import print_function
+
 import math
 
 import glue
@@ -1482,7 +1482,7 @@ class Mat(list):
             i += self.cols
         assert i >= 0
         n = []
-        for k, row in zip(range(self.rows), self):
+        for k, row in zip(list(range(self.rows)), self):
             r = list(row[0:i])
             r.append(v[k])
             r.extend(list(row[i+1:]))

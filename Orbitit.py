@@ -420,7 +420,7 @@ class MainWindow(wx.Frame):
 
     def readShapeFile(this, filename):
         isOffModel = filename[-3:] == 'off'
-        print "opening file:", filename
+        print("opening file:", filename)
         fd = open(filename, 'r')
         if isOffModel:
             shape = Geom3D.readOffFile(fd, recreateEdges = True)
@@ -466,7 +466,7 @@ class MainWindow(wx.Frame):
             filename = dlg.GetFilename()
             isOffModel = filename[-3:] == 'off'
             this.importDirName  = dlg.GetDirectory()
-            print "adding file:", filename
+            print("adding file:", filename)
             fd = open(os.path.join(this.importDirName, filename), 'r')
             if isOffModel:
                 shape = Geom3D.readOffFile(fd, recreateEdges = True)
@@ -479,7 +479,7 @@ class MainWindow(wx.Frame):
             try:
                 this.panel.getShape().addShape(shape)
             except AttributeError:
-                print "warning: cannot 'add' a shape to this scene, use 'File->Open' instead"
+                print("warning: cannot 'add' a shape to this scene, use 'File->Open' instead")
             this.setStatusStr("OFF file added")
             fd.close()
             # TODO: set better title
@@ -504,7 +504,7 @@ class MainWindow(wx.Frame):
                 else:
                     filename = '%spy' % filename
             fd = open(filepath, 'w')
-            print "writing to file %s" % filepath
+            print("writing to file %s" % filepath)
             # TODO precision through setting:
             shape = this.panel.getShape()
             shape.name = filename
@@ -539,7 +539,7 @@ class MainWindow(wx.Frame):
                         else:
                             filename = '%soff' % filename
                     fd = open(filepath, 'w')
-                    print "writing to file %s" % filepath
+                    print("writing to file %s" % filepath)
                     shape = this.panel.getShape()
                     try:
                         shape = shape.simple_shape
@@ -548,7 +548,7 @@ class MainWindow(wx.Frame):
                     if cleanUp:
                         shape = shape.cleanShape(margin)
                     fd.write(shape.toOffStr(precision, extraInfo))
-                    print "OFF file written"
+                    print("OFF file written")
                     this.setStatusStr("OFF file written")
                     fd.close()
                 else:
@@ -587,7 +587,7 @@ class MainWindow(wx.Frame):
                             filename = '%sps' % filename
                     # Note: if file exists is part of file dlg...
                     fd = open(filepath, 'w')
-                    print "writing to file %s" % filepath
+                    print("writing to file %s" % filepath)
                     shape = this.panel.getShape()
                     try:
                         shape = shape.simple_shape
@@ -634,7 +634,7 @@ class MainWindow(wx.Frame):
                 else:
                     filename = '%swrl' % filename
             fd = open(filepath, 'w')
-            print "writing to file %s" % filepath
+            print("writing to file %s" % filepath)
             # TODO precision through setting:
             r = this.panel.getShape().getEdgeProperties()['radius']
             x3dObj = this.panel.getShape().toX3dDoc(edgeRadius = r)
@@ -691,14 +691,14 @@ class MainWindow(wx.Frame):
                 this.sceneDirName, '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
-            print 'filepath', filepath
+            print('filepath', filepath)
             this.sceneDirName = filepath.rsplit('/', 1)[0]
-            print 'sceneDirName', this.sceneDirName
+            print('sceneDirName', this.sceneDirName)
             shape = this.readSceneFile(filepath)
         dlg.Destroy()
 
     def readSceneFile(this, filename):
-        print "Starting scene", filename
+        print("Starting scene", filename)
         fd = open(filename, 'r')
         ed = {}
         exec(fd.read(), ed)
@@ -710,7 +710,7 @@ class MainWindow(wx.Frame):
 
     def setScene(this, scene):
         this.closeCurrentScene()
-        print 'Switch to scene "%s"' % scene['lab']
+        print('Switch to scene "%s"' % scene['lab'])
         canvas = this.panel.getCanvas()
         this.scene = scene['class'](this, canvas)
         this.panel.setShape(this.scene.shape)
@@ -759,7 +759,7 @@ class MainWindow(wx.Frame):
         this.transformSettingsWindow = None
 
     def onClose(this, event):
-        print 'main onclose'
+        print('main onclose')
         if this.viewSettingsWindow != None:
             this.viewSettingsWindow.Close()
         if this.colourSettingsWindow != None:
@@ -804,7 +804,7 @@ class MainPanel(wx.Panel):
         Bind this function, and read and set the correct size in the scene.
         """
         s = this.GetClientSize()
-        print 'Window size:', (s[0]+2, s[1]+54)
+        print('Window size:', (s[0]+2, s[1]+54))
         this.Layout()
 
     def setShape(this, shape):
@@ -1451,7 +1451,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         try:
             this.parentWindow.setStatusStr('V-Radius: %0.5f; E-Radius: %0.5f' % (this.vR, this.eR))
         except AttributeError:
-            print "parentWindow.setStatusStr function undefined"
+            print("parentWindow.setStatusStr function undefined")
 
     def onVOption(this, e):
         #print 'onVOption'
@@ -1518,7 +1518,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         dlg.Destroy()
 
     def onFOption(this, e):
-        print 'View Settings Window size:', this.parentWindow.GetSize()
+        print('View Settings Window size:', this.parentWindow.GetSize())
         sel = this.fOptionsGui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
@@ -1893,7 +1893,7 @@ def readShapeFile(filename):
             fd = open(filename, 'r')
             return Geom3D.readOffFile(fd, recreateEdges = True)
         else:
-            print 'unrecognised file extension'
+            print('unrecognised file extension')
             return None
 
 def convertToPs(shape, o_fd, scale, precision, margin):
@@ -1926,7 +1926,7 @@ def convertToOff(shape, o_fd, precision, margin = 0):
     o_fd.write(shape.toOffStr(precision))
 
 def usage(exit_nr):
-    print """
+    print("""
 usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
 
 Without any specified options ut starts the program in the default scene.
@@ -1955,7 +1955,7 @@ Options:
         -s <file>
         --scene=<file> Start the program with the scene as specified by the
                        file parameter.
-    """
+    """)
     sys.exit(exit_nr)
 
 class Oper:
@@ -1969,8 +1969,8 @@ import getopt
 try:
     opts, args = getopt.getopt(sys.argv[1:],
         'fm:P:ps:y', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
-except getopt.GetoptError, err:
-    print str(err)
+except getopt.GetoptError as err:
+    print(str(err))
     usage(2)
 
 # defaults:
@@ -1991,19 +1991,19 @@ for opt, opt_arg in opts:
     elif opt in ('-s', '--scene'):
         oper = Oper.openScene
         scene_file = opt_arg
-        print 'DBG scene_file', scene_file
+        print('DBG scene_file', scene_file)
     elif opt in ('-y', '--py'):
         oper = Oper.toPy
     else:
-        print "Error: unknown option"
+        print("Error: unknown option")
         usage(2)
 
 o_fd = None
 a_ind = 0
-print 'DBG args', args
+print('DBG args', args)
 if oper != None:
     if len(args) <= a_ind:
-        print "reading python format from std input"
+        print("reading python format from std input")
         i_filename = None
     else:
         i_filename = args[a_ind]

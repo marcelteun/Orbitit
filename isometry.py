@@ -24,7 +24,7 @@
 # Old sins:
 # pylint: disable=too-many-lines,too-many-return-statements,too-many-branches
 # pylint: disable=too-many-locals,too-many-statements
-from __future__ import print_function
+
 
 from copy import copy, deepcopy
 import math
@@ -438,8 +438,8 @@ class Set(set):
         """Check whether all keys in setup are legitimate"""
         if setup != {} and self.init_pars == []:
             print("Warning: class {} doesn't handle any setup pars {}".format(
-                self.__class__.__name__, setup.keys()))
-        for k in setup.keys():
+                self.__class__.__name__, list(setup.keys())))
+        for k in list(setup.keys()):
             found = False
             for p in self.init_pars:
                 found |= p['par'] == k
@@ -544,9 +544,8 @@ class MetaCn(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class Cn(Set):
+class Cn(Set, metaclass=MetaCn):
     """Class for the C2 symmetry group"""
-    __metaclass__ = MetaCn
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
     order = 0
@@ -594,7 +593,7 @@ class Cn(Set):
                     self.n, n, min_angle)
         else:
             self.chk_setup(setup)
-            keys = setup.keys()
+            keys = list(setup.keys())
             if 'axis' in keys:
                 axis = setup['axis']
             else:
@@ -701,9 +700,8 @@ class MetaC2nCn(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class C2nCn(Set):
+class C2nCn(Set, metaclass=MetaC2nCn):
     """Class for the C2nCn symmetry group"""
-    __metaclass__ = MetaC2nCn
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
     order = 0
@@ -828,9 +826,8 @@ class MetaCnxI(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class CnxI(Set):
+class CnxI(Set, metaclass=MetaCnxI):
     """Class for the CnxI symmetry group"""
-    __metaclass__ = MetaCnxI
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
     order = 0
@@ -934,9 +931,8 @@ class MetaDnCn(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class DnCn(Set):
+class DnCn(Set, metaclass=MetaDnCn):
     """Class for the DnCn symmetry group"""
-    __metaclass__ = MetaDnCn
     init_pars = _init_pars('DnCn', 'n')
     std_setup = _std_setup('DnCn', 2)
     order = 0
@@ -1063,9 +1059,8 @@ class MetaDn(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class Dn(Set):
+class Dn(Set, metaclass=MetaDn):
     """Class for the Dn symmetry group"""
-    __metaclass__ = MetaDn
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
     order = 0
@@ -1089,7 +1084,7 @@ class Dn(Set):
             Set.__init__(self, isometries)
         else:
             self.chk_setup(setup)
-            keys = setup.keys()
+            keys = list(setup.keys())
             if 'axis_n' in keys:
                 axis_n = setup['axis_n']
             else:
@@ -1217,9 +1212,8 @@ class MetaDnxI(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class DnxI(Set):
+class DnxI(Set, metaclass=MetaDnxI):
     """Class for the DnxI symmetry group"""
-    __metaclass__ = MetaDnxI
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
     mixed = True
@@ -1378,9 +1372,8 @@ class MetaD2nDn(type):
         type.__init__(cls, classname, bases, classdict)
 
 
-class D2nDn(Set):
+class D2nDn(Set, metaclass=MetaD2nDn):
     """Class for the D2nDn symmetry group"""
-    __metaclass__ = MetaD2nDn
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
     order = 0
@@ -1548,7 +1541,7 @@ class A4(Set):
                 3: get_axes(isometries, 3)}
         else:
             self.chk_setup(setup)
-            axes = setup.keys()
+            axes = list(setup.keys())
             if 'o2axis0' in axes:
                 o2axis0 = setup['o2axis0']
             else:
@@ -1634,7 +1627,7 @@ class S4A4(Set):
                 3: get_axes(isometries, 3)}
         else:
             self.chk_setup(setup)
-            axes = setup.keys()
+            axes = list(setup.keys())
             if 'o2axis0' in axes:
                 o2axis0 = setup['o2axis0']
             else:
@@ -1849,7 +1842,7 @@ class S4(Set):
                 4: get_axes(isometries, 4)}
         else:
             self.chk_setup(setup)
-            axes = setup.keys()
+            axes = list(setup.keys())
             if 'o4axis0' in axes:
                 o4axis0 = setup['o4axis0']
             else:
@@ -2204,7 +2197,7 @@ class A5(Set):
                 5: get_axes(isometries, 5)}
         else:
             self.chk_setup(setup)
-            axes = setup.keys()
+            axes = list(setup.keys())
             if 'o3axis' in axes:
                 o3axis = setup['o3axis']
             else:

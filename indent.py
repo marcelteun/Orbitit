@@ -120,4 +120,4 @@ if __name__ == '__main__':
     s = s.add_line('} done')
     assert(c == s), 'test failed:\n>%s< != >%s<' % (c, s)
 
-    print 'test passed'
+    print('test passed')

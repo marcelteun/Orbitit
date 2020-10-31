@@ -239,8 +239,8 @@ Es_0 = [
     ]
 offsetIndexWith = lambda i: lambda x: x+i
 Es = []
-Es.extend(map(offsetIndexWith(0), Es_0))
-Es.extend(map(offsetIndexWith(6), Es_0))
+Es.extend(list(map(offsetIndexWith(0), Es_0)))
+Es.extend(list(map(offsetIndexWith(6), Es_0)))
 Es.extend(
     [
         6, 12, 6, 16, 8, 12, 8, 13, 10, 13, 10, 16, 12, 16, 16, 13, 13, 12,

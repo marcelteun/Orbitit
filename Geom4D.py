@@ -57,7 +57,7 @@ class SimpleShape:
         Cs: and array of cells, consisting of an array of Fs.
         """
         if this.dbgTrace:
-            print '%s.SimpleShape.__init__(%s,..):' % (this.__class__name)
+            print('%s.SimpleShape.__init__(%s,..):' % (this.__class__name))
         this.dimension = 4
         this.generateNormals = False
         this.v = Geom3D.Fields()
@@ -97,13 +97,13 @@ class SimpleShape:
         this.rot4 = None
         this.projectedTo3D = False
         if this.dbgPrn:
-            print '%s.__init__(%s,..)' % (this.__class__, this.name)
-            print 'this.colorData:'
+            print('%s.__init__(%s,..)' % (this.__class__, this.name))
+            print('this.colorData:')
             for i in range(len(this.colorData[0])):
-                print ('%d.' % i), this.colorData[0][i]
+                print(('%d.' % i), this.colorData[0][i])
             if len(this.colorData[0]) > 1:
                 assert this.colorData[0][1] != [0]
-            print this.colorData[1]
+            print(this.colorData[1])
 
     def setVertexProperties(this, dictPar = None, **kwargs):
         """
@@ -123,7 +123,7 @@ class SimpleShape:
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
         if this.dbgTrace:
-            print '%s.setVertexProperties(%s,..):' % (this.__class__, this.name)
+            print('%s.setVertexProperties(%s,..):' % (this.__class__, this.name))
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -154,7 +154,7 @@ class SimpleShape:
             value is not set. If the value is set it is used by glDraw
         """
         if this.dbgTrace:
-            print '%s.getVertexProperties(%s,..):' % (this.__class__, this.name)
+            print('%s.getVertexProperties(%s,..):' % (this.__class__, this.name))
         return {
             'Vs': this.Vs,
             'radius': this.v.radius,
@@ -181,7 +181,7 @@ class SimpleShape:
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
         if this.dbgTrace:
-            print '%s.setEdgeProperties(%s,..):' % (this.__class__, this.name)
+            print('%s.setEdgeProperties(%s,..):' % (this.__class__, this.name))
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -251,7 +251,7 @@ class SimpleShape:
                    all.
         """
         if this.dbgTrace:
-            print '%s.getEdgeProperties(%s,..):' % (this.__class__, this.name)
+            print('%s.getEdgeProperties(%s,..):' % (this.__class__, this.name))
         return {'Es': this.Es,
                 'radius': this.e.radius,
                 'color': this.e.col,
@@ -286,14 +286,14 @@ class SimpleShape:
         """
         loc = '%s.setFaceProperties(%s,..): warning' % (this.__class__, this.name)
         if this.dbgTrace:
-            print loc
+            print(loc)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
             else:
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
-                print '%s: FS not supported, use Cs instead' % (loc)
+                print('%s: FS not supported, use Cs instead' % (loc))
             if 'colors' in dict and dict['colors'] != None:
                 this.f.col = (dict['colors'])
             if 'drawFaces' in dict and dict['drawFaces'] != None:
@@ -324,7 +324,7 @@ class SimpleShape:
         setCellProperties (or getCellProperties).
         """
         if this.dbgTrace:
-            print '%s.getFaceColors(%s,..):' % (this.__class__, this.name)
+            print('%s.getFaceColors(%s,..):' % (this.__class__, this.name))
         return {
                 'colors': this.f.col,
                 'drawFaces': this.f.draw
@@ -351,7 +351,7 @@ class SimpleShape:
     className = "SimpleShape"y the dictPar will be used.
         """
         if this.dbgTrace:
-            print '%s.setCellProperties(%s,..):' % (this.__class__, this.name)
+            print('%s.setCellProperties(%s,..):' % (this.__class__, this.name))
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -403,7 +403,7 @@ class SimpleShape:
                gravitational centre. This factor is typically <= 1.
         """
         if this.dbgTrace:
-            print '%s.getCellProperties(%s,..):' % (this.__class__, this.name)
+            print('%s.getCellProperties(%s,..):' % (this.__class__, this.name))
         return {
                 'Cs': this.Cs,
                 'colors': this.c.col,
@@ -517,7 +517,7 @@ class SimpleShape:
         is called.
         """
         if this.dbgTrace:
-            print '%s.glInit(%s,..):' % (this.__class__, this.name)
+            print('%s.glInit(%s,..):' % (this.__class__, this.name))
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY)
 
@@ -585,7 +585,7 @@ class SimpleShape:
                 shapeVs = Vs3D
                 shapeEs = this.Es
             # Add a shape with faces for each cell
-            for i in xrange(len(this.Cs)):
+            for i in range(len(this.Cs)):
                 # use a copy, since we will filter (v indices will change):
                 cellFs = [ f[:] for f in this.Cs[i]]
                 if this.c.draw:
@@ -686,7 +686,7 @@ class SimpleShape:
                 cell.glInitialised = True
                 this.cells.append(cell)
             # Add a shape with faces for each cell
-            for i in xrange(len(this.Cs)):
+            for i in range(len(this.Cs)):
                 if this.c.draw:
                     colors = (this.c.col[0][this.c.col[1][i]], [])
                 else:
@@ -726,14 +726,14 @@ if __name__ == '__main__':
     cwd = os.getcwd()
 
     if not os.path.isdir(wDir):
-        os.mkdir(wDir, 0775)
+        os.mkdir(wDir, 0o775)
     os.chdir(wDir)
 
     NrOfErrorsOcurred = 0
     def printError(str):
         global NrOfErrorsOcurred
-        print '***** ERROR while testing *****'
-        print ' ', str
+        print('***** ERROR while testing *****')
+        print(' ', str)
         NrOfErrorsOcurred += 1
 
     v = vec(1, 1, 0, 0)
@@ -751,7 +751,7 @@ if __name__ == '__main__':
         Geom3D.eq(t.w, 0)
     ):
         printError('in function make_orthogonal_to')
-        print '  Expected (-3, 3, 8, 0), got', t
+        print('  Expected (-3, 3, 8, 0), got', t)
 
     n = w.normalise()
 
@@ -775,9 +775,9 @@ if __name__ == '__main__':
             printError('in function _setOrthoMatrix: e1.e3 = ', R.e1*R.e3, '!= 0')
         if not Geom3D.eq(R.e2 * R.e3, 0.0, margin):
             printError('in function _setOrthoMatrix: e2.e3 = ', R.e2*R.e3, '!= 0')
-        print '-----resulting matrix-----'
-        print R.getMatrix()
-        print '--------------------------'
+        print('-----resulting matrix-----')
+        print(R.getMatrix())
+        print('--------------------------')
 
     r = Rotation(v, w, math.pi/4)
     r._setOrthoMatrix()
@@ -806,6 +806,6 @@ if __name__ == '__main__':
 
     # EOT
     if NrOfErrorsOcurred == 0:
-        print 'test OK'
+        print('test OK')
     else:
-        print 'test failed with %d error(s)' % NrOfErrorsOcurred
+        print('test failed with %d error(s)' % NrOfErrorsOcurred)
