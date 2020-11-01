@@ -120,6 +120,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         if this.dbgTrace:
             print('Interactive3DCanvas.__init__(this,..):')
         this.parent = parent
+        size = (-1, -1) if size is None else size
         glcanvas.GLCanvas.__init__(this, parent, -1,
                 size = size,
                 attribList = [
