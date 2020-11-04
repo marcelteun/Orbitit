@@ -20,13 +20,17 @@
 # or write to the Free Software Foundation,
 #-------------------------------------------------------------------
 
-import wx
 import math
+
+#from OpenGL.GLU import *
+#from OpenGL.GL import *
+from OpenGL import GLU, GL
+from pyopengltk import OpenGLFrame
+import wx
+from wx import glcanvas
+
 import Geom3D
 import geomtypes
-from wx import glcanvas
-from OpenGL.GLU import *
-from OpenGL.GL import *
 
 def getAxis2AxisRotation(a0, a1):
     """Given 2 vectors return the rotation that is needed to transfer 1 into the other.
@@ -112,6 +116,33 @@ class VSphere:
         glTranslatef(v[0], v[1], v[2]);
         gluSphere(this.quad, this.radius, this.slices, this.stacks)
         glPopMatrix();
+
+class OglFrame(OpenGLFrame):
+    def __init__(self, *args, **kwargs):
+        self.cam_position = 5.0
+        self.bgCol = [0.097656, 0.097656, 0.437500]  # midnightBlue
+        super().__init__(*args, **kwargs)
+
+    def initgl(self):
+        GL.glViewport(0, 0, self.width, self.height)
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GLU.gluPerspective(45., 1.0, 1., 300.)
+
+        GL.glTranslatef(0.0, 0.0, -self.cam_position)
+        GL.glMatrixMode(GL.GL_MODELVIEW)
+
+    def redraw(self):
+        print("in redraw called")
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
+    def set_cam_position(self, distance):
+        """
+        Set the camera distance
+
+        distance: camera distance, usually a positive nr. Note that the camera
+                  is somewhere along the z-axis
+        """
+        self.cam_position = distance
 
 class Interactive3DCanvas(glcanvas.GLCanvas):
     dbgTrace = False

@@ -35,8 +35,9 @@ import geom_gui
 import pprint
 import tkinter as tk
 
-from OpenGL.GLU import *
-from OpenGL.GL import *
+from OpenGL import GL, GLU
+#from OpenGL.GLU import *
+#from OpenGL.GL import *
 from tkinter import messagebox
 
 DEG2RAD = Geom3D.Deg2Rad
@@ -50,69 +51,71 @@ def onSwitchFrontBack(canvas):
         glFrontFace(GL_CCW)
     canvas.paint()
 
-class Canvas3DScene(Scenes3D.Interactive3DCanvas):
-    def __init__(this, shape, *args, **kwargs):
-        this.shape = shape
-        Scenes3D.Interactive3DCanvas.__init__(this, *args, **kwargs)
+class Canvas3DScene(Scenes3D.OglFrame):
+    def __init__(self, shape, *args, **kwargs):
+        self.root = root
+        self.shape = shape
+        super().__init__(*args, **kwargs)
 
-    def initGl(this):
-        this.setCameraPosition(15.0)
-        Scenes3D.Interactive3DCanvas.initGl(this)
+    def initgl(self):
+        print("----------->")
+        super().initgl()
+        self.set_cam_position(15.0)
 
         #glShadeModel(GL_SMOOTH)
 
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
         matAmbient    = [0.2, 0.2, 0.2, 0.0]
         matDiffuse    = [0.1, 0.6, 0.0, 0.0]
         #matSpecular   = [0.2, 0.2, 0.2, 1.]
         matShininess  = 0.0
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient)
-        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse)
-        #glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, matAmbient)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, matDiffuse)
+        #GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, matShininess)
 
         lightPosition = [10.0, -30.0, -20.0, 0.0]
         lightAmbient  = [0.3, 0.3, 0.3, 1.0]
         lightDiffuse  = [0.5, 0.5, 0.5, 1.0]
         # disable specular part:
         lightSpecular = [0., 0., 0., 1.]
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPosition)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient)
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse)
-        glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular)
-        glEnable(GL_LIGHT0)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, lightPosition)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, lightAmbient)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, lightDiffuse)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, lightSpecular)
+        GL.glEnable(GL.GL_LIGHT0)
 
         lightPosition = [-30.0, 0.0, -20.0, 0.0]
         lightAmbient  = [0.0, 0.0, 0.0, 1.]
         lightDiffuse  = [0.08, 0.08, 0.08, 1.]
         lightSpecular = [0.0, 0.0, 0.0, 1.]
-        glLightfv(GL_LIGHT1, GL_POSITION, lightPosition)
-        glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbient)
-        glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuse)
-        glLightfv(GL_LIGHT1, GL_SPECULAR, lightSpecular)
-        glEnable(GL_LIGHT1)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular)
+        GL.glEnable(GL.GL_LIGHT1)
 
-        glEnable(GL_COLOR_MATERIAL)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_DEPTH_TEST)
-        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
-        glClearColor(this.bgCol[0], this.bgCol[1], this.bgCol[2], 0)
+        GL.glEnable(GL.GL_COLOR_MATERIAL)
+        GL.glEnable(GL.GL_LIGHTING)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE)
+        GL.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
+        GL.glClearColor(self.bgCol[0], self.bgCol[1], self.bgCol[2], 0)
 
     def setBgCol(this, bgCol):
         """rgb in value between 0 and 1"""
         this.bgCol = bgCol
-        glClearColor(bgCol[0], bgCol[1], bgCol[2], 0)
+        GL.glClearColor(bgCol[0], bgCol[1], bgCol[2], 0)
 
     def getBgCol(this):
         """rgb in value between 0 and 1"""
         return this.bgCol
 
-    def onPaint(this):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        this.shape.glDraw()
+    def redraw(self):
+        super().redraw()
+        self.shape.glDraw()
 
 
 class MainWindow(tk.Frame):
@@ -122,6 +125,8 @@ class MainWindow(tk.Frame):
         super().__init__(root)
         self.root = root
         self.add_menu_bar()
+        self.add_scene_canvas(scene, shape)
+        self.add_status_bar()
         root.protocol('WM_DELETE_WINDOW', self.on_quit)
         #self.statusBar = self.CreateStatusBar()
         #self.scene = None
@@ -133,6 +138,7 @@ class MainWindow(tk.Frame):
         #self.transformSettingsWindow = None
         #self.scene = None
         #self.panel = MainPanel(self, scene, shape, wx.ID_ANY)
+
         #if len(p_args) > 0 and (
         #    p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
         #):
@@ -147,7 +153,7 @@ class MainWindow(tk.Frame):
         #self.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
     def add_menu_bar(self):
-        self.menu_bar = tk.Frame(self, bd=1, relief=tk.RAISED)
+        self.menu_bar = tk.Frame(self.root, bd=1, relief=tk.RAISED)
         file_menu = self.create_file_menu("File", 0)
         file_menu.grid(row=0, column=0)
         self.root.bind('<Alt_L><f>',
@@ -182,10 +188,10 @@ class MainWindow(tk.Frame):
 
         self.root.bind("<F5>", lambda e: self.on_reset_view(e))
 
-        self.menu_bar.grid(row=0, column=0)
+        self.menu_bar.grid(row=0, column=0, sticky=tk.W + tk.E)
 
     def create_file_menu(self, text, underline):
-        menu_button = tk.Menubutton(self.root,
+        menu_button = tk.Menubutton(self.menu_bar,
                                     text=text,
                                     underline=underline)
         menu_file = tk.Menu(menu_button, tearoff=False)
@@ -231,7 +237,7 @@ class MainWindow(tk.Frame):
         return menu_button
 
     def create_edit_menu(self, text, underline):
-        menu_button = tk.Menubutton(self.root,
+        menu_button = tk.Menubutton(self.menu_bar,
                                     text=text,
                                     underline=underline)
         menu_edit = tk.Menu(menu_button, tearoff=False)
@@ -253,7 +259,7 @@ class MainWindow(tk.Frame):
         return menu_button
 
     def create_view_menu(self, text, underline):
-        menu_button = tk.Menubutton(self.root,
+        menu_button = tk.Menubutton(self.menu_bar,
                                     text=text,
                                     underline=underline)
         menu_view = tk.Menu(menu_button, tearoff=False)
@@ -270,7 +276,7 @@ class MainWindow(tk.Frame):
         return menu_button
 
     def create_tools_menu(self, text, underline):
-        menu_button = tk.Menubutton(self.root,
+        menu_button = tk.Menubutton(self.menu_bar,
                                     text=text,
                                     underline=underline)
         menu_tools = tk.Menu(menu_button, tearoff=False)
@@ -286,6 +292,17 @@ class MainWindow(tk.Frame):
 
         menu_button.config(menu=menu_tools)
         return menu_button
+
+    def add_scene_canvas(self, scene, shape):
+        self.gl_scene = scene(shape, self.root)
+        self.gl_scene.grid(row=1, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+        self.root.grid_rowconfigure(1, weight=1, minsize=300)
+        self.root.grid_columnconfigure(0, weight=1, minsize=300)
+        self.gl_scene.after(100, lambda: self.gl_scene.printContext(extns=False))
+
+    def add_status_bar(self):
+        self.status_bar = tk.Label(root, bd=1, relief=tk.SUNKEN)
+        self.status_bar.grid(row=2, column=0, sticky=tk.W + tk.E)
 
     def on_reload(self, e=None):
         print('TODO: on_reload')
@@ -722,9 +739,9 @@ class MainWindow(tk.Frame):
 #        # if the shape generates the normals itself:
 #        # TODO: handle that this.Ns is set correctly, i.e. normalised
 #        if shape.generateNormals:
-#            glDisable(GL_NORMALIZE)
+#            GL.glDisable(GL.GL_NORMALIZE)
 #        else:
-#            glEnable(GL_NORMALIZE)
+#            GL.glEnable(GL.GL_NORMALIZE)
 #        this.canvas.paint()
 #        this.parent.setStatusStr("Shape Updated")
 #        del oldShape
@@ -1927,6 +1944,7 @@ else:
         Canvas3DScene,
         Geom3D.SimpleShape([], []),
         args)
+    frame.grid(row=0, column=0)
     #if (len(args) == 0):
     #    frame.readSceneFile(scene_file)
     root.mainloop()
