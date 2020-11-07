@@ -120,18 +120,18 @@ class TestSimpleShape(unittest.TestCase):
     def test_export_to_ps(self):
         """Test export to PostScript function"""
         self.ensure_shape()
-        tst_str = self.shape.toPsPiecesStr(scaling=self.scale,
-                                           precision=self.ps_precision,
-                                           margin=math.pow(10,
-                                                           -self.ps_margin),
-                                           suppressWarn=True)
+        tst_str = self.shape.to_ps_pieces_str(scaling=self.scale,
+                                              precision=self.ps_precision,
+                                              margin=math.pow(10,
+                                                              -self.ps_margin),
+                                              suppressWarn=True)
         org = get_path(self.name + ".ps")
         self.chk_with_org(org, tst_str)
 
     def test_export_to_off(self):
         """Test export to off-format function"""
         self.ensure_shape()
-        tst_str = self.shape.toOffStr()
+        tst_str = self.shape.to_off_str()
         org = get_path(self.name + ".off")
         self.chk_with_org(org, tst_str)
 

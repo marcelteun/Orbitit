@@ -249,7 +249,7 @@ class Shape(Heptagons.EqlHeptagonShape):
         this.setBaseEdgeProperties(Es = Es)
         this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
 
-    def toPsPiecesStr(this,
+    def to_ps_pieces_str(this,
             faceIndices = [],
             scaling = 1,
             precision = 7,
@@ -267,7 +267,7 @@ class Shape(Heptagons.EqlHeptagonShape):
                 faceIndices.append(offset)
                 faceIndices.append(offset+3)
         #print faceIndices
-        return Heptagons.EqlHeptagonShape.toPsPiecesStr(this,
+        return Heptagons.EqlHeptagonShape.to_ps_pieces_str(this,
             faceIndices, scaling, precision, margin
         )
 

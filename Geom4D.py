@@ -706,17 +706,18 @@ class SimpleShape:
                 this.cells.append(cell)
             this.projectedTo3D = True
 
-    def toPsPiecesStr(this,
-            faceIndices = [],
-            scaling = 1,
-            precision = 7,
-            margin = 1.0e5*Geom3D.defaultFloatMargin,
-            pageSize = PS.PageSizeA4
-        ):
+    def to_ps_pieces_str(this,
+                         faceIndices=[],
+                         scaling=1,
+                         precision=7,
+                         margin=1.0e5*Geom3D.defaultFloatMargin,
+                         pageSize=PS.PageSizeA4):
         if this.mapToSingeShape:
-            return this.cell.toPsPiecesStr(faceIndices, scaling, precision, margin, pageSize)
+            return this.cell.to_ps_pieces_str(
+                faceIndices, scaling, precision, margin, pageSize)
         else:
-            assert False, 'toPsPiecesStr not supported for mapping to split draw'
+            assert False,\
+                'to_ps_pieces_str not supported for mapping to split draw'
 
 # Tests:
 if __name__ == '__main__':

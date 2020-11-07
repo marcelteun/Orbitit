@@ -2492,7 +2492,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.updateShape = True
             this.canvas.shape = shape
         elif restoreMyShape:
-            this.parent.panel.setShape(this.shape)
+            this.parent.panel.set_shape(this.shape)
 
     def updateShape(this):
         this.nvidea_workaround()
@@ -2577,7 +2577,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         except IOError:
             print('DBG file not found:\n %s' % filename)
             return []
-        ed = {'__name__': 'readPyFile'}
+        ed = {'__name__': 'read_py_file'}
         exec(fd, ed)
         fd.close()
         return ed['results']

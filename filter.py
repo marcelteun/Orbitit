@@ -28,7 +28,7 @@ nrSols = 0
 nrEmptyFiles = 0
 for fn in fl:
     fd = open(fn, 'r')
-    ed = {'__name__': 'readPyFile'}
+    ed = {'__name__': 'read_py_file'}
     exec(fd, ed)
     fd.close()
     if len(ed['results']) > 0:

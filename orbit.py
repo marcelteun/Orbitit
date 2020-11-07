@@ -462,7 +462,7 @@ class Shape(Geom3D.SymmetricShape):
         self.setVs(self.baseShape.org_Vs)
 
     def to_off(self):
-        s = self.simple_shape.toOffStr(color_floats=True)
+        s = self.simple_shape.to_off_str(color_floats=True)
         s += "# Color alternative based on {}\n".format(self.same_col_isom)
         s += "# Used colour alternative {} (max {})".format(
                 self.col_alt, self.total_no_of_col_alt - 1)

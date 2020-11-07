@@ -54,15 +54,15 @@ from functools import reduce
 # - Add possible scene objects, containing shapes.
 # - add transforms
 # - add print pieces (cp from p3D)
-# - function toPsPiecesStr finds intersection: this should be part of a separate
-#   functons mapping the SimpleShape on a shape consisting of none intersecting
-#   pieces. This could be a child of SimpleShape.
+# - function to_ps_pieces_str finds intersection: this should be part of a
+#   separate functons mapping the SimpleShape on a shape consisting of none
+#   intersecting pieces. This could be a child of SimpleShape.
 # - add function to filter out vertices that ly within a certain area: these
 #   should be projected on the avg of all of them: use a counter for this.
 # - clean up a bit: some functions return objects, other return the strings.
-#   Compare e.g. toOffStr, toX3dDoc. This is mainly since there are no Off
-#   objects. But if you compare toPsPiecesStr, it returns a str, but there are
-#   PS objects.
+#   Compare e.g. to_off_str, toX3dDoc. This is mainly since there are no Off
+#   objects. But if you compare to_ps_pieces_str, it returns a str, but there
+#   are PS objects.
 
 # Done
 # - edges after reading off file
@@ -144,13 +144,13 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
         result = result and eq(Va[i], Vb[i], margin)
     return result
 
-def readPyFile(fd, recreateEdges = True):
+def read_py_file(fd, recreateEdges = True):
     """Reads an the python file a 3D shape and returns an instance of that class
 
     fd: the file descriptor of a file that is opened with read permissions.
     return: an object of the SimpleShape class.
     """
-    ed = {'__name__': 'readPyFile'}
+    ed = {'__name__': 'read_py_file'}
     exec(fd, ed)
     shape = ed['shape']
     if recreateEdges and len(shape.Es) == 0:
@@ -164,7 +164,7 @@ def isInt(str):
     except ValueError:
         return False
 
-def readOffFile(fd, recreateEdges = True, name = ''):
+def read_off_file(fd, recreateEdges = True, name = ''):
     """Reads an the std 'off' format of a 3D object and returns an object of the
     SimpleShape class.
 
@@ -279,7 +279,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
             statesRev[state], i
         )
     shape = SimpleShape(Vs, Fs, Es, colors = (cols, fColors))
-    # Note that Orbitit's panel.setShape will ignore these anyway...
+    # Note that Orbitit's panel.set_shape will ignore these anyway...
     if vRadius != 0:
         shape.setVertexProperties(radius = vRadius)
     if eRadius != 0:
@@ -779,7 +779,7 @@ class Plane:
             return None
         V = N0.cross(N1)
         #V = V.normalise()
-        # for toPsPiecesStr this.N == [0, 0, 1]; hanlde more efficiently.
+        # for to_ps_pieces_str this.N == [0, 0, 1]; hanlde more efficiently.
         if N0 == geomtypes.Vec([0, 0, 1]):
             # simplified situation from below:
             z = -this.D
@@ -1549,7 +1549,9 @@ class SimpleShape:
         """
         if this.dbgTrace:
             print('%s.glDraw(%s,..):' % (this.__class__, this.name))
-        if this.Vs == []: return
+        if this.Vs == []:
+            print("Nothing to draw: no vertices found for this shape")
+            return
         if this.dbgPrn:
             #print this.name, "this.Vs:"
             for v in this.Vs: print(v)
@@ -1806,8 +1808,7 @@ class SimpleShape:
         return doc
 
 
-    def toOffStr(this, precision = 15, info = False,
-                 color_floats=False):
+    def to_off_str(this, precision = 15, info = False, color_floats=False):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
@@ -1818,7 +1819,7 @@ class SimpleShape:
                       between 0 and 1. If False an integer 0 to 255 is used.
         """
         if this.dbgTrace:
-            print('%s.toOffStr(%s,..):' % (this.__class__, this.name))
+            print('%s.to_off_str(%s,..):' % (this.__class__, this.name))
         #print len(this.colorData[1]), len(this.Fs)
         #for face in this.Fs:
         #    print face
@@ -1906,7 +1907,7 @@ class SimpleShape:
         s = w('# END')
         return s
 
-    def toPsPiecesStr(this,
+    def to_ps_pieces_str(this,
             faceIndices=[],
             scaling=1,
             precision=7,
@@ -1932,14 +1933,14 @@ class SimpleShape:
                 that 2 vertices have "the same" coordinates.
         """
         if this.dbgTrace:
-            print('%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name))
+            print('%s.to_ps_pieces_str(%s,..):' % (this.__class__, this.name))
         if faceIndices == []:
             faceIndices = list(range(len(this.Fs)))
         PsDoc = PS.doc(title = this.name, pageSize = pageSize)
         offset = 0
         debug = False
         if debug:
-            print('********toPsPiecesStr********')
+            print('********to_ps_pieces_str********')
             for i in range(len(this.Vs)):
                 print('V[', i, '] =', this.Vs[i])
         geomtypes.set_eq_float_margin(margin)
@@ -2539,6 +2540,16 @@ class CompoundShape(object):
                 s = s.insert('%s.' % __name__)
             return s
 
+    def glInit(self):
+        """
+        Initialise OpenGL for specific shapes
+
+        Enables a derivative to use some specific OpenGL settings needed for
+        this shape. This function is called in glDraw for the first time glDraw
+        is called.
+        """
+        SimpleShape.glInit(self)
+
     def saveFile(this, fd):
         """
         Save a shape in a file descriptor
@@ -2848,14 +2859,14 @@ class CompoundShape(object):
             print('%s.generateNormals(%s,..):' % (this.__class__, this.name))
         return this.shapeElements[0].generateNormals
 
-    def toOffStr(this, precision = 15, info = False):
+    def to_off_str(this, precision = 15, info = False):
         if this.dbgTrace:
-            print('%s.toOffStr(%s,..):' % (this.__class__, this.name))
+            print('%s.to_off_str(%s,..):' % (this.__class__, this.name))
         if this.mergeNeeded:
             this.mergeShapes()
-        return this.mergedShape.toOffStr(precision, info)
+        return this.mergedShape.to_off_str(precision, info)
 
-    def toPsPiecesStr(this,
+    def to_ps_pieces_str(this,
             faceIndices = [],
             scaling = 1,
             precision = 7,
@@ -2864,10 +2875,10 @@ class CompoundShape(object):
             suppressWarn = False
     ):
         if this.dbgTrace:
-            print('%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name))
+            print('%s.to_ps_pieces_str(%s,..):' % (this.__class__, this.name))
         if this.mergeNeeded:
             this.mergeShapes()
-        return this.mergedShape.toPsPiecesStr(
+        return this.mergedShape.to_ps_pieces_str(
             faceIndices, scaling, precision, margin, pageSize, suppressWarn)
 
     def toX3dDoc(this, id = 'SISH', precision = 5, edgeRadius = 0):
@@ -3323,7 +3334,7 @@ class IsometricShape(CompoundShape):
             else:
                 CompoundShape.glDraw(this)
 
-    def toPsPiecesStr(this,
+    def to_ps_pieces_str(this,
             faceIndices = [],
             scaling = 1,
             precision = 7,
@@ -3332,13 +3343,13 @@ class IsometricShape(CompoundShape):
             suppressWarn = False
         ):
         if this.dbgTrace:
-            print('%s.toPsPiecesStr(%s,..):' % (this.__class__, this.name))
+            print('%s.to_ps_pieces_str(%s,..):' % (this.__class__, this.name))
         if this.mergeNeeded:
             this.mergeShapes()
         if faceIndices == []:
             # no need to print all faces in orbited, because of symmetry
             faceIndices = list(range(len(this.baseShape.Fs)))
-        return this.simple_shape.toPsPiecesStr(
+        return this.simple_shape.to_ps_pieces_str(
             faceIndices, scaling, precision, margin, pageSize, suppressWarn)
 
 class SymmetricShape(IsometricShape):

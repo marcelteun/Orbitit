@@ -18,27 +18,21 @@
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
-#-------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 import math
 
-#from OpenGL.GLU import *
-#from OpenGL.GL import *
 from OpenGL import GLU, GL
 from pyopengltk import OpenGLFrame
-import wx
-from wx import glcanvas
 
 import Geom3D
 import geomtypes
 
-def getAxis2AxisRotation(a0, a1):
-    """Given 2 vectors return the rotation that is needed to transfer 1 into the other.
-    """
-    # TODO: how to know which angle is taken (if you switch the axes, will you
-    # still have to correct angle and axis?)
-    vec3Type = type(geomtypes.Vec3([0, 0, 0]))
-    assert (type(a0) == vec3Type) and (type(a1) == vec3Type)
+
+def axis_to_axis_rotation(a0, a1):
+    """Get the rotation that is needed to rotate 1 axis into the another."""
+    vec3_type = geomtypes.Vec3
+    assert isinstance(a0, vec3_type) and isinstance(a1, vec3_type)
     if a0 == a1:
         # if both axis are in fact the same no roation is needed
         axis = geomtypes.UZ
@@ -61,34 +55,37 @@ def getAxis2AxisRotation(a0, a1):
         axis = a_0.cross(a_1)
     return axis, angle
 
-class Triangle:
-    def __init__(this, v0, v1, v2):
-        this.v = [geomtypes.Vec3(v0), geomtypes.Vec3(v1), geomtypes.Vec3(v2)]
-        this.N = None
 
-    def normal(this):
-        if this.N == None:
-            n = (this.v[1] - this.v[0]).cross(this.v[2] - this.v[0])
-            this.N = [n[0], n[1], n[2]]
-            return this.N
+class Triangle:
+    def __init__(self, v0, v1, v2):
+        self.v = [geomtypes.Vec3(v0), geomtypes.Vec3(v1), geomtypes.Vec3(v2)]
+        self.N = None
+
+    def normal(self):
+        if self.N == None:
+            n = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
+            self.N = [n[0], n[1], n[2]]
+            return self.N
         else:
-            return this.N
+            return self.N
+
 
 class P2PCylinder:
-    def __init__(this, radius = 0.15, slices = 12, stacks = 1):
-        this.quad = gluNewQuadric()
-        this.radius = radius
-        this.slices = slices
-        this.stacks = stacks
-        gluQuadricNormals(this.quad, GLU_SMOOTH)
-        #gluQuadricTexture(this.quad, GL_TRUE)
+    def __init__(self, radius=0.15, slices=12, stacks=1):
+        self.quad = GLU.gluNewQuadric()
+        self.radius = radius
+        self.slices = slices
+        self.stacks = stacks
+        GLU.gluQuadricNormals(self.quad, GLU.GLU_SMOOTH)
+        # GLU.gluQuadricTexture(self.quad, GL.GL_TRUE)
 
-    def draw(this, v0 = [0, 0, 0], v1 = [0, 0, 1]):
+    def draw(self, v0=[0, 0, 0], v1=[0, 0, 1]):
         e = [v1[0]-v0[0], v1[1]-v0[1], v1[2]-v0[2]]
         eLen = math.sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2])
-        if eLen == 0: return
+        if eLen == 0:
+            return
 
-        #if this.slices < 3: this.slices = 10
+        # if self.slices < 3: self.slices = 10
 
         # Rotate such that the edge v0-v1 points in the positive z-direction,
         # Then translate the scene such that v0 ends up in the origin.
@@ -96,44 +93,161 @@ class P2PCylinder:
         #       = acos( e[2]/eLen)
         # axis = (0,0,1) x e , with x the cross product
         #      = [-e[1], e[0], 0]
-        glPushMatrix();
-        glTranslatef(v0[0], v0[1], v0[2]);
-        glRotatef(math.acos(e[2]/eLen) * Geom3D.Rad2Deg, -e[1], e[0], 0.);
-        gluCylinder(this.quad, this.radius, this.radius, eLen, this.slices, this.stacks)
-        glPopMatrix();
+        GL.glPushMatrix()
+        GL.glTranslatef(v0[0], v0[1], v0[2])
+        GL.glRotatef(math.acos(e[2]/eLen) * Geom3D.Rad2Deg, -e[1], e[0], 0.)
+        GLU.gluCylinder(self.quad, self.radius, self.radius,
+                        eLen, self.slices, self.stacks)
+        GL.glPopMatrix()
+
 
 class VSphere:
-    def __init__(this, radius = 0.2, slices = 12, stacks = 12):
-        this.quad = gluNewQuadric()
-        this.radius = radius
-        this.slices = slices
-        this.stacks = stacks
-        gluQuadricNormals(this.quad, GLU_SMOOTH)
-        #gluQuadricTexture(this.quad, GL_TRUE)
+    def __init__(self, radius=0.2, slices=12, stacks=12):
+        self.quad = GLU.gluNewQuadric()
+        self.radius = radius
+        self.slices = slices
+        self.stacks = stacks
+        GLU.gluQuadricNormals(self.quad, GLU.GLU_SMOOTH)
+        # GLU.gluQuadricTexture(self.quad, GL.GL_TRUE)
 
-    def draw(this, v = [0, 0, 0]):
-        glPushMatrix();
-        glTranslatef(v[0], v[1], v[2]);
-        gluSphere(this.quad, this.radius, this.slices, this.stacks)
-        glPopMatrix();
+    def draw(self, v=[0, 0, 0]):
+        GL.glPushMatrix()
+        GL.glTranslatef(v[0], v[1], v[2])
+        GLU.gluSphere(self.quad, self.radius, self.slices, self.stacks)
+        GL.glPopMatrix()
+
 
 class OglFrame(OpenGLFrame):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, shape, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.shape = shape
         self.cam_position = 5.0
         self.bgCol = [0.097656, 0.097656, 0.437500]  # midnightBlue
-        super().__init__(*args, **kwargs)
+        self.cyl = P2PCylinder(radius=0.05)
+        self.sphere = VSphere(radius=0.1)
+        self.init = False
+        self.first_frame = True
+        # initial mouse position
+        self.x_org = self.x = 0
+        self.y_org = self.y = 0
+        self.z_bac = self.z = 0
+        self.mouse_left_pressed = False
+        self.mouse_right_pressed = False
+        self.z_scale = 1.0/100
+        self.current_scale = 1.0
+        self.r_scale = 0.8
+
+        # these orientations are used internally and are related to the
+        # rotation caused by the mouse
+        # - model_orientation is used when calculating a new orientation. It
+        #   expresses the rotation caused by the mouse, before calculating the
+        #   new one.
+        # - moving_orientation is the newly calculated rotation after a mouse
+        #   indicated rotation is finished.
+        self.model_orientation = geomtypes.E
+        self.moving_orientation = geomtypes.E
+
+        self.bind("<ButtonPress-1>", lambda e: self.on_rotate_start(e))
+        self.bind("<ButtonRelease-1>", lambda e: self.on_rotate_stop(e))
+        self.bind("<ButtonPress-3>", lambda e: self.on_zoom_start(e))
+        self.bind("<ButtonRelease-3>", lambda e: self.on_zoom_stop(e))
+        self.bind("<B3-Motion>", lambda e: self.on_mouse_move(e))
+        self.bind("<B1-Motion>", lambda e: self.on_mouse_move(e))
+        self.bind("<Configure>", lambda e: self.on_size(e))
 
     def initgl(self):
-        GL.glViewport(0, 0, self.width, self.height)
+        width, height = self.winfo_width(), self.winfo_height()
+        size = min(width, height)
+
+        GL.glViewport(0, 0, size, size)
         GL.glMatrixMode(GL.GL_PROJECTION)
         GLU.gluPerspective(45., 1.0, 1., 300.)
 
         GL.glTranslatef(0.0, 0.0, -self.cam_position)
         GL.glMatrixMode(GL.GL_MODELVIEW)
 
+        self.model_mat_org = GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX)
+        self.init = True
+        self.shape.glInit()
+
     def redraw(self):
-        print("in redraw called")
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
+        def xy_to_sphere_pos(x, y, w, h, r2):
+            x, y = x - w/2, h/2 - y
+            l2 = x * x + y * y
+            if l2 < r2:
+                sphere_pos = geomtypes.Vec3([x, y, math.sqrt(r2 - l2)])
+            elif l2 > r2:
+                scale = math.sqrt(r2/l2)
+                sphere_pos = geomtypes.Vec3([scale*x, scale*y, 0])
+            else:  # probably never happens (floats)
+                sphere_pos = geomtypes.Vec3([x, y, 0])
+            return sphere_pos
+
+        if not self.init:
+            self.initgl()
+            self.init = True
+        GL.glPushMatrix()
+        self.shape.glDraw()
+        GL.glPopMatrix()
+
+        if self.x_org != 0 or self.y_org != 0:
+            width, height = self.winfo_width(), self.winfo_height()
+            edge_size = min(width, height)
+            if height > width:
+                x0 = self.x
+                y0 = self.y - (height - edge_size)
+                x1 = self.x_org
+                y1 = self.y_org - (height - edge_size)
+            else:
+                x0 = self.x - (width - edge_size)
+                y0 = self.y
+                x1 = self.x_org - (width - edge_size)
+                y1 = self.y_org
+            r2 = float(edge_size * edge_size) / 4
+            r2 = self.r_scale * self.r_scale * r2
+            sphere_pos_1 = xy_to_sphere_pos(x0, y0, edge_size, edge_size, r2)
+            sphere_pos_0 = xy_to_sphere_pos(x1, y1, edge_size, edge_size, r2)
+            axis, angle = axis_to_axis_rotation(sphere_pos_0, sphere_pos_1)
+            self.moving_orientation = geomtypes.Rot3(
+                axis=axis, angle=angle) * self.model_orientation
+            GL.glLoadMatrixd(self.model_mat_org)
+            GL.glScalef(self.current_scale,
+                        self.current_scale,
+                        self.current_scale)
+            geomtypes.set_eq_float_margin(1.0e-14)
+            angle = Geom3D.Rad2Deg*self.moving_orientation.angle()
+            axis = self.moving_orientation.axis()
+            geomtypes.reset_eq_float_margin()
+            GL.glRotatef(angle, axis[0], axis[1], axis[2])
+
+        if self.z != self.z_bac:
+            dZ = self.z - self.z_bac
+            # map [min, max] onto [0, 2]
+            # dZ' = (2/(max-min)) dZ + 1
+            dZ = dZ*self.z_scale + 1.0
+            self.current_scale = dZ * self.current_scale
+            GL.glScalef(dZ, dZ, dZ)
+
+        GL.glFlush()
+        if not self.first_frame:
+            self.tkSwapBuffers()
+            return
+        self.first_frame = False
+
+    def reset_orientation(self):
+        try:  # self.model_mat_org might not exist at an early stage
+            GL.glLoadMatrixd(self.model_mat_org)
+        except AttributeError:
+            pass
+        self.model_orientation = geomtypes.E
+        self.moving_orientation = geomtypes.E
+        self.current_scale = 1.0
+        self.paint()
+
+    def paint(self):
+        self.redraw()
 
     def set_cam_position(self, distance):
         """
@@ -144,224 +258,54 @@ class OglFrame(OpenGLFrame):
         """
         self.cam_position = distance
 
-class Interactive3DCanvas(glcanvas.GLCanvas):
-    dbgTrace = False
-    def __init__(this, parent, size = None):
-        # Ensure double buffered to prevent flashing on systems where double buffering is not default.
-        if this.dbgTrace:
-            print('Interactive3DCanvas.__init__(this,..):')
-        this.parent = parent
-        size = (-1, -1) if size is None else size
-        glcanvas.GLCanvas.__init__(this, parent, -1,
-                size = size,
-                attribList = [
-                    wx.glcanvas.WX_GL_RGBA,
-                    wx.glcanvas.WX_GL_DOUBLEBUFFER,
-                    wx.glcanvas.WX_GL_STENCIL_SIZE, 8
-                ]
-            )
-        this.context = glcanvas.GLContext(this)
-        this.cyl = P2PCylinder(radius = 0.05)
-        this.sphere = VSphere(radius = 0.1)
-        this.init = False
-        # initial mouse position
-        this.xOrg = this.x = 0
-        this.yOrg = this.y = 0
-        this.zBac = this.z = 0
-        this.mouseLeftIn   = False
-        this.mouseRightIn  = False
-        this.zScaleFactor  = 1.0/100
-        this.currentScale  = 1.0
-        this.rScale = 0.8
-        # these repos are used internally and are related to the rotation
-        # caused by the mouse
-        # - modelRepos is used when calculating a new orientation. It expresses
-        #   the rotation caused by the mouse, before calculating the new one.
-        # - movingRepos is the newly calculated rotation after a mouse indicated
-        #   rotation is finished.
-        this.modelRepos = geomtypes.E
-        this.movingRepos = geomtypes.E
-        this.xAxis = geomtypes.UX
-        this.yAxis = geomtypes.UY
-        this.angleAroundYaxis = 0
-        this.angleAroundXaxis = 0
-        this.bgCol = [0.097656, 0.097656, 0.437500] # midnightBlue
-        this.size = size
-        this.Bind(wx.EVT_ERASE_BACKGROUND, this.onEraseBackground)
-        this.Bind(wx.EVT_SIZE, this.onSize)
-        this.Bind(wx.EVT_PAINT, this.OnPaint)
-        this.Bind(wx.EVT_LEFT_DOWN, this.onRotateStart)
-        this.Bind(wx.EVT_LEFT_UP, this.onRotateStop)
-        this.Bind(wx.EVT_RIGHT_DOWN, this.onZoomStart)
-        this.Bind(wx.EVT_RIGHT_UP, this.onZoomStop)
-        this.Bind(wx.EVT_MOTION, this.onMouseMotion)
-        this.cameraDistance = 5.0
+    def on_zoom_start(self, event):
+        self.mouse_right_pressed = True
+        self.z = self.z_bac = event.y
+        return "break"
 
-    def setCameraPosition(this, distance):
-        """
-        Set the camera distance
-
-        distance: camera distance, usually a positive nr. Note that the camera
-                  is somewhere along the z-axis
-        """
-        if this.dbgTrace:
-            print('Interactive3DCanvas.setCameraDistance(this,..):')
-        this.cameraDistance = distance
-
-    def initGl(this):
-        #if this.dbgTrace:
-        if True:
-            print('Interactive3DCanvas.initGl(this,..):')
-        glMatrixMode(GL_PROJECTION)
-        gluPerspective(45., 1.0, 1., 300.)
-
-        glTranslatef(0.0, 0.0, -this.cameraDistance)
-        glMatrixMode(GL_MODELVIEW)
-
-    def onEraseBackground(this, event):
-        pass # Do nothing, to avoid flashing on MSW.
-
-    def setArcBallRadius(this, R = 0.8):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.setArcBallRadius(this,..):')
-        this.rScale = R
-
-    def onSize(this, event):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onSize(this,..):')
-        size = this.GetClientSize()
-        wOrH = min(size.width, size.height)
-        size.height = size.width = wOrH
-        this.SetClientSize(size)
-        this.size = size
-        try:
-            this.SetCurrent(this.context)
-        except wx._core.PyAssertionError:
-            pass
-        glViewport(0, 0, this.size.width, this.size.height)
-        #glViewport(0, 0, wOrH, wOrH)
-        event.Skip()
-
-    def OnPaint(this, event):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.OnPaint(this,..):')
-        def xy2SphereV(x, y, w, h, R2):
-            x, y = x - width/2, height/2 - y
-            l2 = x * x + y * y
-            if l2 < R2:
-                spherePos = geomtypes.Vec3([x, y, math.sqrt(R2 - l2)])
-            elif l2 > R2:
-                scale = math.sqrt(R2/l2)
-                spherePos = geomtypes.Vec3([scale*x, scale*y, 0])
-            else: # probably never happens (floats)
-                spherePos = geomtypes.Vec3([x, y, 0])
-            return spherePos
-        dc = wx.PaintDC(this)
-        this.SetCurrent(this.context)
-        if not this.init:
-            this.initGl()
-            this.init = True
-            this.Moriginal = glGetDoublev(GL_MODELVIEW_MATRIX)
-        glPushMatrix()
-        this.onPaint()
-        glPopMatrix()
-
-        if this.xOrg != 0 or this.yOrg != 0:
-            viewPort = glGetIntegerv(GL_VIEWPORT)
-            height = viewPort[3] - viewPort[1]
-            width  = viewPort[2] - viewPort[0]
-            D = min(width, height)
-            R2 = float(D*D)/4
-            R2 = this.rScale*this.rScale*R2
-            newSpherePos = xy2SphereV(this.x, this.y,    width, height, R2)
-            orgSphere = xy2SphereV(this.xOrg, this.yOrg, width, height, R2)
-            ax, an = getAxis2AxisRotation(orgSphere, newSpherePos)
-            this.movingRepos = geomtypes.Rot3(axis = ax, angle = an
-                ) * this.modelRepos
-            glLoadMatrixd(this.Moriginal)
-            glScalef(this.currentScale, this.currentScale, this.currentScale)
-            geomtypes.set_eq_float_margin(1.0e-14)
-            angle = Geom3D.Rad2Deg*this.movingRepos.angle()
-            axis  = this.movingRepos.axis()
-            geomtypes.reset_eq_float_margin()
-            #print 'rotate', angle, axis
-            glRotatef(angle, axis[0], axis[1], axis[2])
-
-        if this.z != this.zBac:
-            dZ = this.z - this.zBac
-            # map [min, max] onto [0, 2]
-            # dZ' = (2/(max-min)) dZ + 1
-            #pStr = '%f ->' % dZ
-            dZ = dZ*this.zScaleFactor + 1.0
-            this.currentScale = dZ * this.currentScale
-            #print '%s %f' % (pStr, dZ)
-            glScalef(dZ, dZ, dZ)
-
-        glFlush()
-        this.SwapBuffers()
-
-    def resetOrientation(this):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.resetOrientation(this,..):')
-        try: # this.Moriginal might not exist at an early stage (e.g. on Windows)...
-            glLoadMatrixd(this.Moriginal)
-        except AttributeError:
-            pass
-        this.modelRepos = geomtypes.E
-        this.movingRepos = geomtypes.E
-        this.currentScale = 1.0
-        this.paint()
-
-    def paint(this):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.paint(this,..):')
-        this.Refresh(False)
-
-    def onRotateStart(this, event):
-        this.CaptureMouse()
-        this.mouseLeftIn = True
-        this.xOrg, this.yOrg = this.x, this.y = event.GetPosition()
-
-    def onRotateStop(this, event):
-        # we need to check this, because a mouse click in a window A on top of
-        # this window can cause window A to be closed and the release button
+    def on_zoom_stop(self, event):
+        # we need to check self, because a mouse click in a window A on top of
+        # self window can cause window A to be closed and the release button
         # event is captured here, while the was no capture here.
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onRotateStop(this,..):')
-        if this.mouseLeftIn:
-            this.mouseLeftIn = False
-            this.ReleaseMouse()
-            this.modelRepos = this.movingRepos
-        this.xOrg, this.yOrg = this.x, this.y = (0, 0)
+        if self.mouse_right_pressed:
+            self.mouse_right_pressed = False
+        self.z_bac = self.z = 0.0
+        return "break"
 
-    def onZoomStart(this, event):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onZoomStart(this,..):')
-        this.CaptureMouse()
-        this.mouseRightIn = True
-        this.z = this.zBac = event.GetPosition()[1]
+    def on_rotate_start(self, event):
+        self.mouse_left_pressed = True
+        self.x_org, self.y_org = self.x, self.y = event.x, event.y
+        return "break"
 
-    def onZoomStop(this, event):
-        # we need to check this, because a mouse click in a window A on top of
-        # this window can cause window A to be closed and the release button
+    def on_rotate_stop(self, event):
+        # we need to check self, because a mouse click in a window A on top of
+        # self window can cause window A to be closed and the release button
         # event is captured here, while the was no capture here.
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onZoomStop(this,..):')
-        if this.mouseRightIn:
-            this.mouseRightIn = False
-            this.ReleaseMouse()
-        this.zBac = this.z = 0.0
+        if self.mouse_left_pressed:
+            self.mouse_left_pressed = False
+            self.model_orientation = self.moving_orientation
+        self.x_org, self.y_org = self.x, self.y = (0, 0)
+        return "break"
 
-    def onMouseMotion(this, event):
-        #if this.dbgTrace:
-        #    print 'Interactive3DCanvas.onMouseMotion(this,..):'
-        if event.Dragging():
-            if event.LeftIsDown():
-                this.x, this.y = event.GetPosition()
-            if event.RightIsDown():
-                this.zBac = this.z
-                this.z = event.GetPosition()[1]
-            this.Refresh(False)
+    def on_mouse_move(self, event):
+        if self.mouse_left_pressed:
+            self.x, self.y = event.x, event.y
+            self.paint()
+        if self.mouse_right_pressed:
+            self.z_bac = self.z
+            self.z = event.y
+            self.paint()
+        return "break"
+
+    def on_size(self, event):
+        width, height = event.width, event.height
+        size = min(width, height)
+        GL.glViewport(0, 0, size, size)
+        self.paint()
+
+    def set_arc_ball_radius(self, r=0.8):
+        self.r_scale = r
+
 
 class Scene:
     """
@@ -382,8 +326,8 @@ class Scene:
         rmControlsSizer. The close function calls the function
         this.rmControlsSizer().
     Optionally a scene can implement
-      - a function setArcBallRadius to set the relative radius of the sphere of
-        the arc ball navigation. It shall except one radius parameter.
+      - a function set_arc_ball_radius to set the relative radius of the sphere
+        of the arc ball navigation. It shall except one radius parameter.
     During init the Scene creates a canvas frame which is supposed to hold the
     3D object. The window frame is created here in the Scene class, but the
     contents is supposed to be created in the class with the name SceneCanvas,
@@ -405,8 +349,8 @@ class Scene:
         this.canvasFrame.Show(True)
         this.createControlsSizer(this.ctrlPanel)
 
-    def setArcBallRadius(this, R = 0.8):
-        this.canvas.setArcBallRadius(R = R)
+    def set_arc_ball_radius(this, R=0.8):
+        this.canvas.set_arc_ball_radius(R=R)
 
     def onSize(this, event):
         this.canvas.onSize(event)

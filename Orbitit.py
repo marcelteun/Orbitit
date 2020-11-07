@@ -44,21 +44,18 @@ DEG2RAD = Geom3D.Deg2Rad
 
 DefaultScene = './scene_orbit.py'
 
-def onSwitchFrontBack(canvas):
+def onSwitchFrontBack(gl_scane):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
         glFrontFace(GL_CW)
     else:
         glFrontFace(GL_CCW)
-    canvas.paint()
+    gl_scane.paint()
 
-class Canvas3DScene(Scenes3D.OglFrame):
-    def __init__(self, shape, *args, **kwargs):
-        self.root = root
-        self.shape = shape
-        super().__init__(*args, **kwargs)
+class OglFrame(Scenes3D.OglFrame):
+    def __init__(self, shape):
+        super().__init__(shape)
 
     def initgl(self):
-        print("----------->")
         super().initgl()
         self.set_cam_position(15.0)
 
@@ -121,28 +118,24 @@ class Canvas3DScene(Scenes3D.OglFrame):
 class MainWindow(tk.Frame):
     wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
 
-    def __init__(self, root, scene, shape, p_args, *args, **kwargs):
+    def __init__(self, root, ogl_frame, shape, p_args):
         super().__init__(root)
         self.root = root
+        self.context_created = False
         self.add_menu_bar()
-        self.add_scene_canvas(scene, shape)
+        self.add_scene_canvas(ogl_frame, shape)
         self.add_status_bar()
         root.protocol('WM_DELETE_WINDOW', self.on_quit)
-        #self.statusBar = self.CreateStatusBar()
-        #self.scene = None
-        #self.exportDirName = '.'
-        #self.importDirName = '.'
-        #self.sceneDirName = '.'
+        self.export_dir = '.'
+        self.import_dir = '.'
+        self.scene_dir = '.'
         #self.viewSettingsWindow = None
         #self.colourSettingsWindow = None
         #self.transformSettingsWindow = None
-        #self.scene = None
-        #self.panel = MainPanel(self, scene, shape, wx.ID_ANY)
 
-        #if len(p_args) > 0 and (
-        #    p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
-        #):
-        #    self.openFile(p_args[0])
+        if len(p_args) > 0 and (p_args[0][-4:] == '.off' or
+                                p_args[0][-3:] == '.py'):
+            self.open_file(p_args[0])
         #self.Show(True)
         #self.Bind(wx.EVT_CLOSE, self.onClose)
         #self.keySwitchFronBack = wx.NewId()
@@ -151,6 +144,10 @@ class MainWindow(tk.Frame):
         #]
         #self.Bind(wx.EVT_MENU, self.onKeyDown, id=self.keySwitchFronBack)
         #self.SetAcceleratorTable(wx.AcceleratorTable(ac))
+
+    def tkCreateContext(self):
+        super().tkCreateContext()
+        self.context_created = True
 
     def add_menu_bar(self):
         self.menu_bar = tk.Frame(self.root, bd=1, relief=tk.RAISED)
@@ -293,73 +290,75 @@ class MainWindow(tk.Frame):
         menu_button.config(menu=menu_tools)
         return menu_button
 
-    def add_scene_canvas(self, scene, shape):
-        self.gl_scene = scene(shape, self.root)
-        self.gl_scene.grid(row=1, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
+    def add_scene_canvas(self, ogl_frame, shape):
+        self.ogl_frame = ogl_frame(shape)
+        self.ogl_frame.grid(row=1, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
         self.root.grid_rowconfigure(1, weight=1, minsize=300)
         self.root.grid_columnconfigure(0, weight=1, minsize=300)
-        self.gl_scene.after(100, lambda: self.gl_scene.printContext(extns=False))
+        self.ogl_frame.after(100, lambda: self.ogl_frame.printContext(extns=False))
 
     def add_status_bar(self):
-        self.status_bar = tk.Label(root, bd=1, relief=tk.SUNKEN)
+        self.status_str = tk.StringVar()
+        self.status_bar = tk.Label(root, textvariable=self.status_str,
+                                   bd=1, relief=tk.SUNKEN)
         self.status_bar.grid(row=2, column=0, sticky=tk.W + tk.E)
 
     def on_reload(self, e=None):
         print('TODO: on_reload')
         if self.currentFile != None:
-            self.openFile(self.currentFile)
+            self.open_file(self.currentFile)
         elif self.currentScene != None:
-            self.setScene(self.currentScene)
+            self.set_scene(self.currentScene)
 
     def on_open(self, e=None):
         print("TODO: on_open.")
         dlg = wx.FileDialog(self, 'New: Choose a file',
-                self.importDirName, '', self.wildcard, wx.OPEN)
+                self.import_dir, '', self.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             dirname = dlg.GetDirectory()
             if dirname != None:
                 filename = os.path.join(dirname, filename)
-            self.openFile(filename)
+            self.open_file(filename)
         dlg.Destroy()
 
-    def readShapeFile(self, filename):
+    def read_shape_file(self, filename):
         isOffModel = filename[-3:] == 'off'
         print("opening file:", filename)
         fd = open(filename, 'r')
         if isOffModel:
-            shape = Geom3D.readOffFile(fd, recreateEdges = True)
+            shape = Geom3D.read_off_file(fd, recreateEdges=True)
         else:
             assert filename[-2:] == 'py'
-            shape = Geom3D.readPyFile(fd)
-        self.setStatusStr("file opened")
+            shape = Geom3D.read_py_file(fd)
+        self.update_status_bar("file opened")
         fd.close()
         return shape
 
-    def openFile(self, filename):
-        self.closeCurrentScene()
+    def open_file(self, filename):
+        self.close_current_scene()
         dirname = os.path.dirname(filename)
         if dirname != "":
-            self.importDirName = dirname
+            self.import_dir = dirname
         try:
-            shape = self.readShapeFile(filename)
+            shape = self.read_shape_file(filename)
         except AssertionError:
-            self.setStatusStr("ERROR reading file")
+            self.update_status_bar("ERROR reading file")
             raise
         if isinstance(shape, Geom3D.CompoundShape):
             # convert to SimpleShape first, since adding to IsometricShape
             # will not work.
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
-        shape = Geom3D.CompoundShape([shape], name = filename)
-        self.panel.setShape(shape)
+        shape = Geom3D.CompoundShape([shape], name=filename)
+        self.set_shape(shape)
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
         if len(shape.getFaceProperties()['Fs']) == 0 and (
-            self.panel.getShape().getVertexProperties()['radius'] <= 0
+            self.get_shape().getVertexProperties()['radius'] <= 0
         ):
-            self.panel.getShape().setVertexProperties(radius = 0.05)
-        self.SetTitle('%s' % os.path.basename(filename))
+            self.get_shape().setVertexProperties(radius=0.05)
+        self.root.title('%s' % os.path.basename(filename))
         # Save for reload:
         self.currentFile = filename
         self.currentScene = None
@@ -367,41 +366,41 @@ class MainWindow(tk.Frame):
     def on_add(self, e=None):
         print("TODO on_add")
         dlg = wx.FileDialog(self, 'Add: Choose a file',
-                self.importDirName, '', self.wildcard, wx.OPEN)
+                self.import_dir, '', self.wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             isOffModel = filename[-3:] == 'off'
-            self.importDirName  = dlg.GetDirectory()
+            self.import_dir  = dlg.GetDirectory()
             print("adding file:", filename)
-            fd = open(os.path.join(self.importDirName, filename), 'r')
+            fd = open(os.path.join(self.import_dir, filename), 'r')
             if isOffModel:
-                shape = Geom3D.readOffFile(fd, recreateEdges = True)
+                shape = Geom3D.read_off_file(fd, recreateEdges = True)
             else:
-                shape = Geom3D.readPyFile(fd)
+                shape = Geom3D.read_py_file(fd)
             if isinstance(shape, Geom3D.CompoundShape):
                 # convert to SimpleShape first, since adding a IsometricShape
                 # will not work.
                 shape = shape.simple_shape
             try:
-                self.panel.getShape().addShape(shape)
+                self.get_shape().addShape(shape)
             except AttributeError:
                 print("warning: cannot 'add' a shape to self scene, use 'File->Open' instead")
-            self.setStatusStr("OFF file added")
+            self.update_status_bar("OFF file added")
             fd.close()
             # TODO: set better title
-            self.SetTitle('Added: %s' % os.path.basename(filename))
+            self.root.title('Added: %s' % os.path.basename(filename))
         dlg.Destroy()
 
     def on_save_as_py(self, e=None):
         print("TODO: on_save_as_py")
         dlg = wx.FileDialog(self, 'Save as .py file',
-            self.exportDirName, '', '*.py',
+            self.export_dir, '', '*.py',
             style = wx.SAVE | wx.OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
             filename = dlg.GetFilename()
-            self.exportDirName  = filepath.rsplit('/', 1)[0]
+            self.export_dir  = filepath.rsplit('/', 1)[0]
             NameExt = filename.split('.')
             if len(NameExt) == 1:
                 filename = '%s.py' % filename
@@ -413,10 +412,10 @@ class MainWindow(tk.Frame):
             fd = open(filepath, 'w')
             print("writing to file %s" % filepath)
             # TODO precision through setting:
-            shape = self.panel.getShape()
+            shape = self.get_shape()
             shape.name = filename
             shape.saveFile(fd)
-            self.setStatusStr("Python file written")
+            self.update_status_bar("Python file written")
         dlg.Destroy()
 
     def on_save_as_off(self, e=None):
@@ -430,14 +429,14 @@ class MainWindow(tk.Frame):
                 precision = dlg.getPrecision()
                 margin = dlg.getFloatMargin()
                 fileDlg = wx.FileDialog(self, 'Save as .off file',
-                    self.exportDirName, '', '*.off',
+                    self.export_dir, '', '*.off',
                     wx.SAVE | wx.OVERWRITE_PROMPT
                 )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
                     filepath = fileDlg.GetPath()
                     filename = fileDlg.GetFilename()
-                    self.exportDirName  = filepath.rsplit('/', 1)[0]
+                    self.export_dir  = filepath.rsplit('/', 1)[0]
                     NameExt = filename.split('.')
                     if len(NameExt) == 1:
                         filename = '%s.off' % filename
@@ -448,16 +447,16 @@ class MainWindow(tk.Frame):
                             filename = '%soff' % filename
                     fd = open(filepath, 'w')
                     print("writing to file %s" % filepath)
-                    shape = self.panel.getShape()
+                    shape = self.get_shape()
                     try:
                         shape = shape.simple_shape
                     except AttributeError:
                         pass
                     if cleanUp:
                         shape = shape.cleanShape(margin)
-                    fd.write(shape.toOffStr(precision, extraInfo))
+                    fd.write(shape.to_off_str(precision, extraInfo))
                     print("OFF file written")
-                    self.setStatusStr("OFF file written")
+                    self.update_status_bar("OFF file written")
                     fd.close()
                 else:
                     dlg.Show()
@@ -478,14 +477,14 @@ class MainWindow(tk.Frame):
                 margin = dlg.getFloatMargin()
                 assert (scalingFactor >= 0 and scalingFactor != None)
                 fileDlg = wx.FileDialog(self, 'Save as .ps file',
-                    self.exportDirName, '', '*.ps',
+                    self.export_dir, '', '*.ps',
                     style = wx.SAVE | wx.OVERWRITE_PROMPT
                 )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
                     filepath = fileDlg.GetPath()
                     filename = fileDlg.GetFilename()
-                    self.exportDirName  = filepath.rsplit('/', 1)[0]
+                    self.export_dir  = filepath.rsplit('/', 1)[0]
                     NameExt = filename.split('.')
                     if len(NameExt) == 1:
                         filename = '%s.ps' % filename
@@ -497,23 +496,20 @@ class MainWindow(tk.Frame):
                     # Note: if file exists is part of file dlg...
                     fd = open(filepath, 'w')
                     print("writing to file %s" % filepath)
-                    shape = self.panel.getShape()
+                    shape = self.get_shape()
                     try:
                         shape = shape.simple_shape
                     except AttributeError:
                         pass
                     shape = shape.cleanShape(margin)
                     try:
-                        fd.write(
-                            shape.toPsPiecesStr(
-                                scaling = scalingFactor,
-                                precision = precision,
-                                margin = math.pow(10, -margin)
-                            )
-                        )
-                        self.setStatusStr("PS file written")
+                        fd.write(shape.to_ps_pieces_str(
+                            scaling=scalingFactor,
+                            precision=precision,
+                            margin=math.pow(10, -margin)))
+                        self.update_status_bar("PS file written")
                     except Geom3D.PrecisionError:
-                        self.setStatusStr(
+                        self.update_status_bar(
                             "Precision error, try to decrease float margin")
 
                     fd.close()
@@ -528,13 +524,13 @@ class MainWindow(tk.Frame):
     def on_save_as_wrl(self, e=None):
         print("TODO: on_save_as_wrl")
         dlg = wx.FileDialog(self,
-            'Save as .vrml file', self.exportDirName, '', '*.wrl',
+            'Save as .vrml file', self.export_dir, '', '*.wrl',
             style = wx.SAVE | wx.OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = fileDlg.GetPath()
             filename = dlg.GetFilename()
-            self.exportDirName  = filepath.rsplit('/', 1)[0]
+            self.export_dir  = filepath.rsplit('/', 1)[0]
             NameExt = filename.split('.')
             if len(NameExt) == 1:
                 filename = '%s.wrl' % filename
@@ -546,18 +542,18 @@ class MainWindow(tk.Frame):
             fd = open(filepath, 'w')
             print("writing to file %s" % filepath)
             # TODO precision through setting:
-            r = self.panel.getShape().getEdgeProperties()['radius']
-            x3dObj = self.panel.getShape().toX3dDoc(edgeRadius = r)
+            r = self.get_shape().getEdgeProperties()['radius']
+            x3dObj = self.get_shape().toX3dDoc(edgeRadius = r)
             x3dObj.setFormat(X3D.VRML_FMT)
             fd.write(x3dObj.toStr())
-            self.setStatusStr("VRML file written")
+            self.update_status_bar("VRML file written")
             fd.close()
         dlg.Destroy()
 
     def on_view_settings(self, e=None):
         print("TODO: on_view_settings")
         if self.viewSettingsWindow == None:
-            self.viewSettingsWindow = ViewSettingsWindow(self.panel.getCanvas(),
+            self.viewSettingsWindow = ViewSettingsWindow(self.ogl_frame,
                 None, wx.ID_ANY,
                 title = 'View Settings',
                 size = (394, 300)
@@ -572,7 +568,7 @@ class MainWindow(tk.Frame):
             # Don't reuse, the colours might be wrong after loading a new model
             self.colourSettingsWindow.Destroy()
         self.colourSettingsWindow = ColourSettingsWindow(
-            self.panel.getCanvas(), 5, None, wx.ID_ANY,
+            self.ogl_frame, 5, None, wx.ID_ANY,
             title = 'Colour Settings',
         )
         self.colourSettingsWindow.Bind(wx.EVT_CLOSE, self.onColourSettingsClose)
@@ -580,7 +576,7 @@ class MainWindow(tk.Frame):
     def on_transform(self, e=None):
         if self.transformSettingsWindow == None:
             self.transformSettingsWindow = TransformSettingsWindow(
-                self.panel.getCanvas(), None, wx.ID_ANY,
+                self.ogl_frame(), None, wx.ID_ANY,
                 title = 'Transform Settings',
             )
             self.transformSettingsWindow.Bind(wx.EVT_CLOSE, self.onTransformSettingsClose)
@@ -590,63 +586,60 @@ class MainWindow(tk.Frame):
 
     def on_dome(self, level, e=None):
         print("TODO: on_dome level", level)
-        shape = self.panel.getShape().getDome(level)
+        shape = self.get_shape().getDome(level)
         if shape is not None:
-            self.panel.setShape(shape)
-            self.SetTitle("Dome %s" % self.GetTitle())
+            self.set_shape(shape)
+            self.root.title("Dome %s" % self.GetTitle())
 
     def on_open_scene(self, e=None):
         wildcard = "Scene plugin (Scene_*.py)|?cene_*.py"
         dlg = wx.FileDialog(self, 'New: Choose a Scene',
-                self.sceneDirName, '', wildcard, wx.OPEN)
+                self.scene_dir, '', wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
             print('filepath', filepath)
-            self.sceneDirName = filepath.rsplit('/', 1)[0]
-            print('sceneDirName', self.sceneDirName)
-            shape = self.readSceneFile(filepath)
+            self.scene_dir = filepath.rsplit('/', 1)[0]
+            print('scene_dir', self.scene_dir)
+            shape = self.read_scene_file(filepath)
         dlg.Destroy()
 
-#    def readSceneFile(self, filename):
-#        print("Starting scene", filename)
-#        fd = open(filename, 'r')
-#        ed = {}
-#        exec(fd.read(), ed)
-#        scene = {
-#            'lab': ed['TITLE'],
-#            'class': ed['Scene']
-#        }
-#        self.setScene(scene)
-#
-#    def setScene(self, scene):
-#        self.closeCurrentScene()
-#        print('Switch to scene "%s"' % scene['lab'])
-#        canvas = self.panel.getCanvas()
-#        self.scene = scene['class'](self, canvas)
-#        self.panel.setShape(self.scene.shape)
-#        self.SetTitle(scene['lab'])
-#        canvas.resetOrientation()
-#        try:
-#            self.viewSettingsWindow.reBuild()
-#        except AttributeError:
-#            pass
-#        # save for reload:
-#        self.currentScene = scene
-#        self.currentFile = None
-#
-    def on_reset_view(self, e=None):
-        print("TODO: on_reset_view")
-        self.panel.getCanvas().resetOrientation()
+    def read_scene_file(self, filename):
+        print("Starting scene", filename)
+        fd = open(filename, 'r')
+        ed = {}
+        exec(fd.read(), ed)
+        scene = { 'label': ed['TITLE'],
+                 'class': ed['Scene']}
+        self.set_scene(scene)
 
-#    def closeCurrentScene(this):
-#        if this.scene != None:
-#            this.scene.close()
-#            del this.scene
-#            this.scene = None
-#
-#    def setStatusStr(this, str):
-#        this.statusBar.SetStatusText(str)
-#
+    def set_scene(self, scene):
+        self.close_current_scene()
+        print('Switch to scene "%s"' % scene['label'])
+        self.ogl_frame = scene['class']()
+        self.root.title(scene['label'])
+        self.ogl_frame.reset_orientation()
+        try:
+            self.viewSettingsWindow.reBuild()
+        except AttributeError:
+            pass
+        # save for reload:
+        self.currentScene = scene
+        self.currentFile = None
+
+    def on_reset_view(self, e=None):
+        self.ogl_frame().reset_orientation()
+
+    def close_current_scene(self):
+        print("print: TODO: only for destroying scenes control window")
+        return
+        if self.ogl_frame is not None:
+            #self.ogl_frame.close()
+            del self.ogl_frame
+            self.ogl_frame = None
+
+    def update_status_bar(self, str):
+        self.status_str.set(str)
+
     def on_quit(self, e=None):
         if messagebox.askokcancel('Quit?', 'Are you sure you want to quit?'):
             self.master.destroy()
@@ -679,78 +672,46 @@ class MainWindow(tk.Frame):
 #        id = e.GetId()
 #        if id == this.keySwitchFronBack:
 #            onSwitchFrontBack(this.panel.getCanvas())
-#
-#class MainPanel(wx.Panel):
-#    def __init__(this, parent, TstScene, shape, *args, **kwargs):
-#        wx.Panel.__init__(this, parent, *args, **kwargs)
-#        this.parent = parent
-#        # Note that uncommenting this will override the default size
-#        # handler, which resizes the sizers that are part of the Frame.
-#        this.Bind(wx.EVT_SIZE, this.onSize)
-#
-#        this.canvas = TstScene(shape, this)
-#        this.canvas.panel = this
-#        this.canvas.SetMinSize((300, 300))
-#        this.canvasSizer = wx.BoxSizer(wx.HORIZONTAL)
-#        this.canvasSizer.Add(this.canvas)
-#
-#        # Ctrl Panel:
-#        mainSizer = wx.BoxSizer(wx.VERTICAL)
-#        mainSizer.Add(this.canvas, 3, wx.EXPAND)
-#        this.SetSizer(mainSizer)
-#        this.SetAutoLayout(True)
-#        this.Layout()
-#
-#    def getCanvas(this):
-#        return this.canvas
-#
-#    def onSize(this, event):
-#        """Print the size plus an offset for y that includes the title bar.
-#
-#        This function is used to set the ctrl window size in the interactively.
-#        Bind this function, and read and set the correct size in the scene.
-#        """
-#        s = this.GetClientSize()
-#        print('Window size:', (s[0]+2, s[1]+54))
-#        this.Layout()
-#
-#    def setShape(this, shape):
-#        """Set a new shape to be shown with the current viewing settings
-#
-#        shape: the new shape. This will refresh the canvas.
-#        """
-#        oldShape = this.canvas.shape
-#        this.canvas.shape = shape
-#        # Use all the vertex settings except for Vs, i.e. keep the view
-#        # vertex settings the same.
-#        oldVSettings = oldShape.getVertexProperties()
-#        del oldVSettings['Vs']
-#        del oldVSettings['Ns']
-#        this.canvas.shape.setVertexProperties(oldVSettings)
-#        # Use all the edge settings except for Es
-#        oldESettings = oldShape.getEdgeProperties()
-#        del oldESettings['Es']
-#        this.canvas.shape.setEdgeProperties(oldESettings)
-#        # Use only the 'drawFaces' setting:
-#        oldFSettings = {
-#                'drawFaces': oldShape.getFaceProperties()['drawFaces']
-#            }
-#        this.canvas.shape.setFaceProperties(oldFSettings)
-#        # if the shape generates the normals itself:
-#        # TODO: handle that this.Ns is set correctly, i.e. normalised
-#        if shape.generateNormals:
-#            GL.glDisable(GL.GL_NORMALIZE)
-#        else:
-#            GL.glEnable(GL.GL_NORMALIZE)
-#        this.canvas.paint()
-#        this.parent.setStatusStr("Shape Updated")
-#        del oldShape
-#
-#    def getShape(this):
-#        """Return the current shape object
-#        """
-#        return this.canvas.shape
-#
+
+    def set_shape(self, shape):
+        """Set a new shape to be shown with the current viewing settings
+
+        shape: the new shape. This will refresh the canvas.
+        """
+        org_shape = self.get_shape()
+        self.ogl_frame.shape = shape
+        if org_shape:
+            # Use all the vertex settings except for Vs, i.e. keep the view
+            # vertex settings the same.
+            org_vs_settings = org_shape.getVertexProperties()
+            del org_vs_settings['Vs']
+            del org_vs_settings['Ns']
+            self.ogl_frame.shape.setVertexProperties(org_vs_settings)
+            # Use all the edge settings except for Es
+            org_es_settings = org_shape.getEdgeProperties()
+            del org_es_settings['Es']
+            self.ogl_frame.shape.setEdgeProperties(org_es_settings)
+            # Use only the 'drawFaces' setting:
+            org_fs_settings = {
+                    'drawFaces': org_shape.getFaceProperties()['drawFaces']
+                }
+            self.ogl_frame.shape.setFaceProperties(org_fs_settings)
+            del org_shape
+        # if the shape generates the normals itself:
+        # TODO: handle that self.Ns is set correctly, i.e. normalised
+        if shape.generateNormals:
+            GL.glDisable(GL.GL_NORMALIZE)
+        else:
+            GL.glEnable(GL.GL_NORMALIZE)
+        if self.context_created:
+            self.ogl_frame.redraw()
+        self.update_status_bar("Shape Updated")
+
+    def get_shape(self):
+        """Return the current shape object"""
+        return None if self.ogl_frame is not None else self.ogl_frame.shape
+
+
 #class ColourSettingsWindow(wx.Frame):
 #    def __init__(this, canvas, width, *args, **kwargs):
 #        wx.Frame.__init__(this, *args, **kwargs)
@@ -980,7 +941,7 @@ class MainWindow(tk.Frame):
 #        this.ctrlSizer.close()
 #        this.addContents()
 #
-#    def setStatusStr(this, str):
+#    def update_status_bar(this, str):
 #        this.statusBar.SetStatusText(str)
 #
 #class ViewSettingsSizer(wx.BoxSizer):
@@ -994,7 +955,7 @@ class MainWindow(tk.Frame):
 #
 #        parentWindow: the parentWindow object. This is used to update de
 #                      status string in the status bar. The parent window is
-#                      supposed to contain a function setStatusStr for this
+#                      supposed to contain a function update_status_bar for this
 #                      to work.
 #        parentPanel: The panel to add all control widgets to.
 #        canvas: An interactive 3D canvas object. This object is supposed to
@@ -1342,7 +1303,7 @@ class MainWindow(tk.Frame):
 #            this.Add(camDistSizer, 3, wx.EXPAND)
 #            this.Add(rotationSizer, 12, wx.EXPAND)
 #
-#        this.setStatusStr()
+#        this.update_status_bar()
 #
 #    def close(this):
 #        # The 'try' is necessary, since the boxes are destroyed in some OS,
@@ -1354,11 +1315,11 @@ class MainWindow(tk.Frame):
 #        for Gui in this.Guis:
 #            Gui.Destroy()
 #
-#    def setStatusStr(this):
+#    def update_status_bar(this):
 #        try:
-#            this.parentWindow.setStatusStr('V-Radius: %0.5f; E-Radius: %0.5f' % (this.vR, this.eR))
+#            this.parentWindow.update_status_bar('V-Radius: %0.5f; E-Radius: %0.5f' % (this.vR, this.eR))
 #        except AttributeError:
-#            print("parentWindow.setStatusStr function undefined")
+#            print("parentWindow.update_status_bar function undefined")
 #
 #    def onVOption(this, e):
 #        #print 'onVOption'
@@ -1376,7 +1337,7 @@ class MainWindow(tk.Frame):
 #        this.vR = (float(this.vRadiusGui.GetValue()) / this.vRadiusScale)
 #        this.canvas.shape.setVertexProperties(radius = this.vR)
 #        this.canvas.paint()
-#        this.setStatusStr()
+#        this.update_status_bar()
 #
 #    def onVColor(this, e):
 #        dlg = wx.ColourDialog(this.parentWindow)
@@ -1410,7 +1371,7 @@ class MainWindow(tk.Frame):
 #        this.eR = (float(this.eRadiusGui.GetValue()) / this.eRadiusScale)
 #        this.canvas.shape.setEdgeProperties(radius = this.eR)
 #        this.canvas.paint()
-#        this.setStatusStr()
+#        this.update_status_bar()
 #
 #    def onEColor(this, e):
 #        dlg = wx.ColourDialog(this.parentWindow)
@@ -1789,31 +1750,30 @@ class MainWindow(tk.Frame):
 #    def getFloatMargin(this):
 #        return this.floatMarginGui.GetValue()
 
-def readShapeFile(filename):
-    if filename == None:
+
+def read_shape_file(filename):
+    if filename is None:
         fd = sys.stdin
     else:
         if filename[-3:] == '.py':
             fd = open(filename, 'r')
-            return Geom3D.readPyFile(fd)
+            return Geom3D.read_py_file(fd)
         elif filename[-4:] == '.off':
             fd = open(filename, 'r')
-            return Geom3D.readOffFile(fd, recreateEdges = True)
+            return Geom3D.read_off_file(fd, recreateEdges=True)
         else:
             print('unrecognised file extension')
             return None
 
-def convertToPs(shape, o_fd, scale, precision, margin):
-    o_fd.write(
-        shape.toPsPiecesStr(
-            scaling = scale,
-            precision = precision,
-            margin = math.pow(10, -margin),
-            suppressWarn = True
-        )
-    )
 
-def convertToOff(shape, o_fd, precision, margin = 0):
+def convert_to_ps(shape, o_fd, scale, precision, margin):
+    o_fd.write(shape.to_ps_pieces_str(scaling=scale,
+                                      precision=precision,
+                                      margin=math.pow(10, -margin),
+                                      suppressWarn=True))
+
+
+def convert_to_off(shape, o_fd, precision, margin=0):
     """
     Save the shape to the o_fd file descriptor in .off format
 
@@ -1830,7 +1790,8 @@ def convertToOff(shape, o_fd, precision, margin = 0):
     if margin != 0:
         shape = shape.cleanShape(margin)
     # TODO: support for saving extraInfo?
-    o_fd.write(shape.toOffStr(precision))
+    o_fd.write(shape.to_off_str(precision))
+
 
 def usage(exit_nr):
     print("""
@@ -1908,7 +1869,7 @@ for opt, opt_arg in opts:
 o_fd = None
 a_ind = 0
 print('DBG args', args)
-if oper != None:
+if oper is not None:
     if len(args) <= a_ind:
         print("reading python format from std input")
         i_filename = None
@@ -1922,16 +1883,16 @@ if oper != None:
         a_ind += 1
 
 if oper == Oper.toPs:
-    shape = readShapeFile(i_filename)
-    if shape != None:
-        convertToPs(shape, o_fd, scale, precision, margin)
+    shape = read_shape_file(i_filename)
+    if shape is not None:
+        convert_to_ps(shape, o_fd, scale, precision, margin)
 elif oper == Oper.toOff:
-    shape = readShapeFile(i_filename)
-    if shape != None:
-        convertToOff(shape, o_fd, precision, margin)
+    shape = read_shape_file(i_filename)
+    if shape is not None:
+        convert_to_off(shape, o_fd, precision, margin)
 elif oper == Oper.toPy:
-    shape = readShapeFile(i_filename)
-    if shape != None:
+    shape = read_shape_file(i_filename)
+    if shape is not None:
         shape.saveFile(o_fd)
 else:
     if oper != Oper.openScene:
@@ -1941,12 +1902,12 @@ else:
     root.geometry("430x482")
     frame = MainWindow(
         root,
-        Canvas3DScene,
+        OglFrame,
         Geom3D.SimpleShape([], []),
         args)
     frame.grid(row=0, column=0)
-    #if (len(args) == 0):
-    #    frame.readSceneFile(scene_file)
+    if (len(args) == 0):
+        frame.read_scene_file(scene_file)
     root.mainloop()
 
 sys.stderr.write("Done\n")
