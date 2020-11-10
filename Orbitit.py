@@ -34,6 +34,7 @@ import geomtypes
 import geom_gui
 import pprint
 import tkinter as tk
+from tkinter import filedialog
 
 from OpenGL import GL, GLU
 #from OpenGL.GLU import *
@@ -116,7 +117,12 @@ class OglFrame(Scenes3D.OglFrame):
 
 
 class MainWindow(tk.Frame):
-    wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
+    shape_files = (("Off shape", "*.off"),
+                   ("Off shape", "*.OFF"),
+                   ("Python shape", "*.py"),
+                   ("Python shape", "*.PY"))
+    current_scene = None
+    current_file = None
 
     def __init__(self, root, ogl_frame, shape, p_args):
         super().__init__(root)
@@ -295,7 +301,6 @@ class MainWindow(tk.Frame):
         self.ogl_frame.grid(row=1, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
         self.root.grid_rowconfigure(1, weight=1, minsize=300)
         self.root.grid_columnconfigure(0, weight=1, minsize=300)
-        self.ogl_frame.after(100, lambda: self.ogl_frame.printContext(extns=False))
 
     def add_status_bar(self):
         self.status_str = tk.StringVar()
@@ -305,22 +310,19 @@ class MainWindow(tk.Frame):
 
     def on_reload(self, e=None):
         print('TODO: on_reload')
-        if self.currentFile != None:
-            self.open_file(self.currentFile)
-        elif self.currentScene != None:
-            self.set_scene(self.currentScene)
+        if self.current_file != None:
+            self.open_file(self.current_file)
+        elif self.current_scene != None:
+            self.set_scene(self.current_scene)
 
     def on_open(self, e=None):
-        print("TODO: on_open.")
-        dlg = wx.FileDialog(self, 'New: Choose a file',
-                self.import_dir, '', self.wildcard, wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetFilename()
-            dirname = dlg.GetDirectory()
-            if dirname != None:
-                filename = os.path.join(dirname, filename)
+        filename = filedialog.askopenfilename(
+            initialdir=self.import_dir,
+            title="Choose a File",
+            filetypes=self.shape_files)
+        if filename:
             self.open_file(filename)
-        dlg.Destroy()
+            self.import_dir = os.path.split(filename)[0]
 
     def read_shape_file(self, filename):
         isOffModel = filename[-3:] == 'off'
@@ -360,21 +362,21 @@ class MainWindow(tk.Frame):
             self.get_shape().setVertexProperties(radius=0.05)
         self.root.title('%s' % os.path.basename(filename))
         # Save for reload:
-        self.currentFile = filename
-        self.currentScene = None
+        self.current_file = filename
+        self.current_scene = None
 
     def on_add(self, e=None):
-        print("TODO on_add")
-        dlg = wx.FileDialog(self, 'Add: Choose a file',
-                self.import_dir, '', self.wildcard, wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetFilename()
-            isOffModel = filename[-3:] == 'off'
-            self.import_dir  = dlg.GetDirectory()
+        filename = filedialog.askopenfilename(
+            initialdir=self.import_dir,
+            title="Choose a File",
+            filetypes=self.shape_files)
+        if filename:
+            self.import_dir = os.path.split(filename)[0]
+            is_off_model = filename[-3:] == 'off'
             print("adding file:", filename)
             fd = open(os.path.join(self.import_dir, filename), 'r')
-            if isOffModel:
-                shape = Geom3D.read_off_file(fd, recreateEdges = True)
+            if is_off_model:
+                shape = Geom3D.read_off_file(fd, recreateEdges=True)
             else:
                 shape = Geom3D.read_py_file(fd)
             if isinstance(shape, Geom3D.CompoundShape):
@@ -384,12 +386,12 @@ class MainWindow(tk.Frame):
             try:
                 self.get_shape().addShape(shape)
             except AttributeError:
-                print("warning: cannot 'add' a shape to self scene, use 'File->Open' instead")
+                print("warning: cannot 'add' a shape to self scene, "
+                      "use 'File->Open' instead")
             self.update_status_bar("OFF file added")
             fd.close()
             # TODO: set better title
             self.root.title('Added: %s' % os.path.basename(filename))
-        dlg.Destroy()
 
     def on_save_as_py(self, e=None):
         print("TODO: on_save_as_py")
@@ -608,11 +610,13 @@ class MainWindow(tk.Frame):
         fd = open(filename, 'r')
         ed = {}
         exec(fd.read(), ed)
-        scene = { 'label': ed['TITLE'],
+        scene = {'label': ed['TITLE'],
                  'class': ed['Scene']}
         self.set_scene(scene)
 
     def set_scene(self, scene):
+        print("TODO: set scene: class replaced by OglCanvas? Where Ctrl Frame")
+        return
         self.close_current_scene()
         print('Switch to scene "%s"' % scene['label'])
         self.ogl_frame = scene['class']()
@@ -623,8 +627,8 @@ class MainWindow(tk.Frame):
         except AttributeError:
             pass
         # save for reload:
-        self.currentScene = scene
-        self.currentFile = None
+        self.current_scene = scene
+        self.current_file = None
 
     def on_reset_view(self, e=None):
         self.ogl_frame().reset_orientation()
@@ -703,13 +707,12 @@ class MainWindow(tk.Frame):
             GL.glDisable(GL.GL_NORMALIZE)
         else:
             GL.glEnable(GL.GL_NORMALIZE)
-        if self.context_created:
-            self.ogl_frame.redraw()
         self.update_status_bar("Shape Updated")
+        self.update()
 
     def get_shape(self):
         """Return the current shape object"""
-        return None if self.ogl_frame is not None else self.ogl_frame.shape
+        return None if self.ogl_frame is None else self.ogl_frame.shape
 
 
 #class ColourSettingsWindow(wx.Frame):

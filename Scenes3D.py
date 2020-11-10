@@ -27,6 +27,7 @@ from pyopengltk import OpenGLFrame
 
 import Geom3D
 import geomtypes
+import time
 
 
 def axis_to_axis_rotation(a0, a1):
@@ -126,7 +127,6 @@ class OglFrame(OpenGLFrame):
         self.cyl = P2PCylinder(radius=0.05)
         self.sphere = VSphere(radius=0.1)
         self.init = False
-        self.first_frame = True
         # initial mouse position
         self.x_org = self.x = 0
         self.y_org = self.y = 0
@@ -136,6 +136,9 @@ class OglFrame(OpenGLFrame):
         self.z_scale = 1.0/100
         self.current_scale = 1.0
         self.r_scale = 0.8
+
+        # First on_size event fails because no context was created yet
+        self._first_on_size_ignored = False
 
         # these orientations are used internally and are related to the
         # rotation caused by the mouse
@@ -153,6 +156,7 @@ class OglFrame(OpenGLFrame):
         self.bind("<ButtonRelease-3>", lambda e: self.on_zoom_stop(e))
         self.bind("<B3-Motion>", lambda e: self.on_mouse_move(e))
         self.bind("<B1-Motion>", lambda e: self.on_mouse_move(e))
+
         self.bind("<Configure>", lambda e: self.on_size(e))
 
     def initgl(self):
@@ -171,6 +175,9 @@ class OglFrame(OpenGLFrame):
         self.shape.glInit()
 
     def redraw(self):
+        self.paint(swap_buffers=False)
+
+    def paint(self, swap_buffers=True):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         def xy_to_sphere_pos(x, y, w, h, r2):
@@ -231,10 +238,11 @@ class OglFrame(OpenGLFrame):
             GL.glScalef(dZ, dZ, dZ)
 
         GL.glFlush()
-        if not self.first_frame:
+        if swap_buffers:
+            # Note on Linux I noticed a problem if I moved out this swap to the
+            # calling function. Sometimes double frames were drawn. This is why
+            # I added the parameter to this method
             self.tkSwapBuffers()
-            return
-        self.first_frame = False
 
     def reset_orientation(self):
         try:  # self.model_mat_org might not exist at an early stage
@@ -245,9 +253,6 @@ class OglFrame(OpenGLFrame):
         self.moving_orientation = geomtypes.E
         self.current_scale = 1.0
         self.paint()
-
-    def paint(self):
-        self.redraw()
 
     def set_cam_position(self, distance):
         """
@@ -298,6 +303,9 @@ class OglFrame(OpenGLFrame):
         return "break"
 
     def on_size(self, event):
+        if not self._first_on_size_ignored:
+            self._first_on_size_ignored = True
+            return
         width, height = event.width, event.height
         size = min(width, height)
         GL.glViewport(0, 0, size, size)
