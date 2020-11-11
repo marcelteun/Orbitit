@@ -277,7 +277,8 @@ def cleanUpVsFs(Vs, Fs):
             f[faceIndex] = f[faceIndex] - vRemoved[f[faceIndex]]
     return vUsage
 
-def mergeVs(Vs, Fs, precision = 12):
+
+def merge_vs(Vs, Fs, precision=12):
     """
     Merges vertices that are equal into one vertex.
 
@@ -292,7 +293,8 @@ def mergeVs(Vs, Fs, precision = 12):
     geomtypes.set_eq_float_margin(math.pow(10, -precision))
     print('Find multiple occurences of vertices\n', end=' ')
     for i in range(len(Vs) - 1, -1, -1):
-        print('\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)), end=' ')
+        print('\rchecking vertex {} (of {})'.format(len(Vs) - i, len(Vs)),
+              end=' ')
         v = Vs[i]
         for j in range(i):
             if v == Vs[j]:

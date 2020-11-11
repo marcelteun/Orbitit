@@ -303,12 +303,14 @@ def saveFile(fd, shape):
     fd.write("import isometry\n")
     fd.write("shape = %s" % repr(shape))
 
-class Fields:
+
+class Fields(object):
     """
     This class is an empty class to be able to set some fields, like structures
     in C.
     """
     pass
+
 
 class PrecisionError(ValueError):
     "Possible error caused bby floats not being equals exactly"
@@ -959,25 +961,26 @@ class SimpleShape:
         """
         return self
 
-    def cleanShape(this, precision):
-        """Return a new shape for which vertices are merged and degenerated faces are deleted.
+    def clean_shape(this, precision):
+        """Return a new shape for which vertices are merged
 
+        All degenerated faces are deleted.
         The shape will not have any edges.
         """
-        vProps = this.getVertexProperties()
-        fProps = this.getFaceProperties()
-        cpVs = copy.deepcopy(vProps['Vs'])
-        cpFs = copy.deepcopy(fProps['Fs'])
-        glue.mergeVs(cpVs, cpFs, precision)
+        vs_props = this.getVertexProperties()
+        fs_props = this.getFaceProperties()
+        copy_vs = copy.deepcopy(vs_props['Vs'])
+        copy_fs = copy.deepcopy(fs_props['Fs'])
+        glue.merge_vs(copy_vs, copy_fs, precision)
         # this may result on less faces, which breaks the colours!
         # TODO either update the colors immediately or return an array with
         # deleted face indices.
-        glue.cleanUpVsFs(cpVs, cpFs)
-        vProps['Vs'] = cpVs
-        fProps['Fs'] = cpFs
+        glue.cleanUpVsFs(copy_vs, copy_fs)
+        vs_props['Vs'] = copy_vs
+        fs_props['Fs'] = copy_fs
         shape = SimpleShape([], [], [])
-        shape.setVertexProperties(vProps)
-        shape.setFaceProperties(fProps)
+        shape.setVertexProperties(vs_props)
+        shape.setFaceProperties(fs_props)
         return shape
 
     def setVs(this, Vs):
@@ -1853,7 +1856,7 @@ class SimpleShape:
                     s = w('#         E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
         s = w('# Vertices Faces Edges')
         nrOfFaces = len(this.Fs)
-        nrOfEdges = len(this.Es)/2
+        nrOfEdges = len(this.Es)//2
         s = w('%d %d %d' % (len(this.Vs), nrOfFaces, nrOfEdges))
         s = w('# Vertices')
         for V in this.Vs:
@@ -2636,12 +2639,12 @@ class CompoundShape(object):
             this.mergeShapes()
         return this.mergedShape
 
-    def cleanShape(this, precision):
+    def clean_shape(this, precision):
         """Return a new shape for which vertices are merged and degenerated faces are deleted.
 
         The shape will not have any edges.
         """
-        this.simple_shape.cleanShape(precision)
+        this.simple_shape.clean_shape(precision)
 
     def glDraw(this):
         """Draws the compound shape as compound shape

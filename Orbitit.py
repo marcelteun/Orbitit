@@ -116,7 +116,19 @@ class OglFrame(Scenes3D.OglFrame):
         self.shape.glDraw()
 
 
+class OffFields(object):
+    extra_info = False
+    merge_vs = False
+    def __init__(self, precision=12, float_margin=10):
+        self.precision = precision
+        self.float_margin = float_margin
+
+
 class MainWindow(tk.Frame):
+    off_files = (("Off shape", "*.off"),
+                 ("Off shape", "*.OFF"))
+    python_files = (("Python shape", "*.py"),
+                    ("Python shape", "*.PY"))
     shape_files = (("Off shape", "*.off"),
                    ("Off shape", "*.OFF"),
                    ("Python shape", "*.py"),
@@ -135,6 +147,7 @@ class MainWindow(tk.Frame):
         self.export_dir = '.'
         self.import_dir = '.'
         self.scene_dir = '.'
+        self.off_vals = OffFields()
         #self.viewSettingsWindow = None
         #self.colourSettingsWindow = None
         #self.transformSettingsWindow = None
@@ -308,6 +321,9 @@ class MainWindow(tk.Frame):
                                    bd=1, relief=tk.SUNKEN)
         self.status_bar.grid(row=2, column=0, sticky=tk.W + tk.E)
 
+    def update_status_bar(self, str):
+        self.status_str.set(str)
+
     def on_reload(self, e=None):
         print('TODO: on_reload')
         if self.current_file != None:
@@ -393,86 +409,60 @@ class MainWindow(tk.Frame):
             # TODO: set better title
             self.root.title('Added: %s' % os.path.basename(filename))
 
+    def _fix_file_ext(self, filename, ext):
+        name_ext = filename.split('.')
+        # The case below is the only case the file dialog will cover when
+        # checking whether an existing file is being overwritten.
+        if len(name_ext) == 1:
+            filename = '{}.{}'.format(filename, ext.lower())
+        return filename
+
     def on_save_as_py(self, e=None):
-        print("TODO: on_save_as_py")
-        dlg = wx.FileDialog(self, 'Save as .py file',
-            self.export_dir, '', '*.py',
-            style = wx.SAVE | wx.OVERWRITE_PROMPT
-        )
-        if dlg.ShowModal() == wx.ID_OK:
-            filepath = dlg.GetPath()
-            filename = dlg.GetFilename()
-            self.export_dir  = filepath.rsplit('/', 1)[0]
-            NameExt = filename.split('.')
-            if len(NameExt) == 1:
-                filename = '%s.py' % filename
-            elif NameExt[-1].lower() != 'py':
-                if NameExt[-1] != '':
-                    filename = '%s.py' % filename
-                else:
-                    filename = '%spy' % filename
-            fd = open(filepath, 'w')
-            print("writing to file %s" % filepath)
+        filename = filedialog.asksaveasfilename(
+            initialdir=self.export_dir,
+            title="Save as Python File",
+            filetypes=self.python_files)
+        if filename:
+            self.export_dir = os.path.split(filename)[0]
+            filename = self._fix_file_ext(filename, 'py')
             # TODO precision through setting:
             shape = self.get_shape()
             shape.name = filename
-            shape.saveFile(fd)
-            self.update_status_bar("Python file written")
-        dlg.Destroy()
+            with open(filename, 'w') as fd:
+                print("writing to file %s" % filename)
+                shape.saveFile(fd)
+            self.update_status_bar("{} file written".format(filename))
 
     def on_save_as_off(self, e=None):
-        print('TODO: on_save_as_off')
-        dlg = ExportOffDialog(self, wx.ID_ANY, 'OFF settings')
-        fileChoosen = False
-        while not fileChoosen:
-            if dlg.ShowModal() == wx.ID_OK:
-                extraInfo = dlg.getExtraInfo()
-                cleanUp = dlg.getCleanUp()
-                precision = dlg.getPrecision()
-                margin = dlg.getFloatMargin()
-                fileDlg = wx.FileDialog(self, 'Save as .off file',
-                    self.export_dir, '', '*.off',
-                    wx.SAVE | wx.OVERWRITE_PROMPT
-                )
-                fileChoosen = fileDlg.ShowModal() == wx.ID_OK
-                if fileChoosen:
-                    filepath = fileDlg.GetPath()
-                    filename = fileDlg.GetFilename()
-                    self.export_dir  = filepath.rsplit('/', 1)[0]
-                    NameExt = filename.split('.')
-                    if len(NameExt) == 1:
-                        filename = '%s.off' % filename
-                    elif NameExt[-1].lower() != 'off':
-                        if NameExt[-1] != '':
-                            filename = '%s.off' % filename
-                        else:
-                            filename = '%soff' % filename
-                    fd = open(filepath, 'w')
-                    print("writing to file %s" % filepath)
-                    shape = self.get_shape()
-                    try:
-                        shape = shape.simple_shape
-                    except AttributeError:
-                        pass
-                    if cleanUp:
-                        shape = shape.cleanShape(margin)
-                    fd.write(shape.to_off_str(precision, extraInfo))
-                    print("OFF file written")
-                    self.update_status_bar("OFF file written")
-                    fd.close()
-                else:
-                    dlg.Show()
-                fileDlg.Destroy()
-            else:
-                break
-        # done while: file choosen
-        dlg.Destroy()
+        if ExportOffDialog(self,
+                           'OFF settings', self.off_vals).show() is not None:
+            filename = filedialog.asksaveasfilename(
+                initialdir=self.export_dir,
+                title="Save as OFF File",
+                filetypes=self.off_files)
+            if filename != '':
+                self.export_dir = os.path.split(filename)[0]
+                filename = self._fix_file_ext(filename, 'off')
+                shape = self.get_shape()
+                try:
+                    shape = shape.simple_shape
+                except AttributeError:
+                    pass
+                if self.off_vals.merge_vs:
+                    shape = shape.clean_shape(self.off_vals.float_margin)
+                with open(filename, 'w') as fd:
+                    print("writing to file %s" % filename)
+                    fd.write(shape.to_off_str(self.off_vals.precision,
+                                              self.off_vals.extra_info))
+                status_txt = "{} written".format(filename)
+                print(status_txt)
+                self.update_status_bar(status_txt)
 
     def on_save_as_ps(self, e=None):
         print("TODO: on_save_as_ps")
         dlg = ExportPsDialog(self, wx.ID_ANY, 'PS settings')
-        fileChoosen = False
-        while not fileChoosen:
+        file_chosen = False
+        while not file_chosen:
             if dlg.ShowModal() == wx.ID_OK:
                 scalingFactor = dlg.getScaling()
                 precision = dlg.getPrecision()
@@ -482,16 +472,16 @@ class MainWindow(tk.Frame):
                     self.export_dir, '', '*.ps',
                     style = wx.SAVE | wx.OVERWRITE_PROMPT
                 )
-                fileChoosen = fileDlg.ShowModal() == wx.ID_OK
-                if fileChoosen:
+                file_chosen = fileDlg.ShowModal() == wx.ID_OK
+                if file_chosen:
                     filepath = fileDlg.GetPath()
                     filename = fileDlg.GetFilename()
                     self.export_dir  = filepath.rsplit('/', 1)[0]
-                    NameExt = filename.split('.')
-                    if len(NameExt) == 1:
+                    name_ext = filename.split('.')
+                    if len(name_ext) == 1:
                         filename = '%s.ps' % filename
-                    elif NameExt[-1].lower() != 'ps':
-                        if NameExt[-1] != '':
+                    elif name_ext[-1].lower() != 'ps':
+                        if name_ext[-1] != '':
                             filename = '%s.ps' % filename
                         else:
                             filename = '%sps' % filename
@@ -503,7 +493,7 @@ class MainWindow(tk.Frame):
                         shape = shape.simple_shape
                     except AttributeError:
                         pass
-                    shape = shape.cleanShape(margin)
+                    shape = shape.clean_shape(margin)
                     try:
                         fd.write(shape.to_ps_pieces_str(
                             scaling=scalingFactor,
@@ -533,11 +523,11 @@ class MainWindow(tk.Frame):
             filepath = fileDlg.GetPath()
             filename = dlg.GetFilename()
             self.export_dir  = filepath.rsplit('/', 1)[0]
-            NameExt = filename.split('.')
-            if len(NameExt) == 1:
+            name_ext = filename.split('.')
+            if len(name_ext) == 1:
                 filename = '%s.wrl' % filename
-            elif NameExt[-1].lower() != 'wrl':
-                if NameExt[-1] != '':
+            elif name_ext[-1].lower() != 'wrl':
+                if name_ext[-1] != '':
                     filename = '%s.wrl' % filename
                 else:
                     filename = '%swrl' % filename
@@ -640,9 +630,6 @@ class MainWindow(tk.Frame):
             #self.ogl_frame.close()
             del self.ogl_frame
             self.ogl_frame = None
-
-    def update_status_bar(self, str):
-        self.status_str.set(str)
 
     def on_quit(self, e=None):
         if messagebox.askokcancel('Quit?', 'Are you sure you want to quit?'):
@@ -1537,122 +1524,145 @@ class MainWindow(tk.Frame):
 #        #    else:
 #        #        this.parentWindow.statusBar.SetStatusText("Error: The specified vectors are (too) parallel")
 #        #    pass
-#
-#class ExportOffDialog(wx.Dialog):
-#    precision = 12
-#    floatMargin = 10
-#    cleanUp = False
-#    extraInfo = False
-#    """
-#    Dialog for exporting a polyhedron to a PS file.
-#
-#    Settings like: scaling size and precision. Changing these settings will
-#    reflect in the next dialog that is created.
-#    Based on wxPython example dialog
-#    """
-#    def __init__(this,
-#            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
-#            style=wx.DEFAULT_DIALOG_STYLE
-#        ):
-#
-#        # Instead of calling wx.Dialog.__init__ we precreate the dialog
-#        # so we can set an extra style that must be set before
-#        # creation, and then we create the GUI dialog using the Create
-#        # method.
-#        pre = wx.PreDialog()
-#        pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-#        pre.Create(parent, ID, title, pos, size, style)
-#
-#        # This next step is the most important, it turns this Python
-#        # object into the real wrapper of the dialog (instead of pre)
-#        # as far as the wxPython extension is concerned.
-#        this.PostCreate(pre)
-#
-#        # Now continue with the normal construction of the dialog
-#        # contents
-#        sizer = wx.BoxSizer(wx.VERTICAL)
-#
-#        hbox = wx.BoxSizer(wx.HORIZONTAL)
-#        label = wx.StaticText(this, -1, "vertex precision (decimals):")
-#        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        this.precisionGui = wx.lib.intctrl.IntCtrl(this,
-#                value = this.precision,
-#                min   = 1,
-#                max   = 16
-#            )
-#        this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
-#        hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        this.extraInfoGui = wx.CheckBox(this,
-#                label = 'Print extra info')
-#        this.extraInfoGui.SetValue(this.extraInfo)
-#        this.extraInfoGui.Bind(wx.EVT_CHECKBOX, this.onExtraInfo)
-#        sizer.Add(this.extraInfoGui,
-#            0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        this.cleanUpGui = wx.CheckBox(this,
-#                label = 'Merge equal vertices (can take a while)')
-#        this.cleanUpGui.SetValue(this.cleanUp)
-#        this.cleanUpGui.Bind(wx.EVT_CHECKBOX, this.onCleanUp)
-#        sizer.Add(this.cleanUpGui,
-#            0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        hbox = wx.BoxSizer(wx.HORIZONTAL)
-#        label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
-#        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        this.floatMarginGui = wx.lib.intctrl.IntCtrl(this,
-#                value = this.floatMargin,
-#                min   = 1,
-#                max   = 16
-#            )
-#        this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
-#        if not this.cleanUp:
-#            this.floatMarginGui.Disable()
-#        hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        buttonSizer = wx.StdDialogButtonSizer()
-#
-#        button = wx.Button(this, wx.ID_OK)
-#        button.SetDefault()
-#        buttonSizer.AddButton(button)
-#        button = wx.Button(this, wx.ID_CANCEL)
-#        buttonSizer.AddButton(button)
-#        buttonSizer.Realize()
-#
-#        sizer.Add(buttonSizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        this.SetSizer(sizer)
-#        sizer.Fit(this)
-#
-#    def onExtraInfo(this, e):
-#        ExportOffDialog.extraInfo = this.extraInfoGui.GetValue()
-#
-#    def getExtraInfo(this):
-#        return this.extraInfoGui.GetValue()
-#
-#    def onCleanUp(this, e):
-#        ExportOffDialog.cleanUp = this.cleanUpGui.GetValue()
-#        if ExportOffDialog.cleanUp:
-#            this.floatMarginGui.Enable()
-#        else:
-#            this.floatMarginGui.Disable()
-#
-#    def getCleanUp(this):
-#        return this.cleanUpGui.GetValue()
-#
-#    def onPrecision(this, e):
-#        ExportOffDialog.precision = this.precisionGui.GetValue()
-#
-#    def getPrecision(this):
-#        return this.precisionGui.GetValue()
-#
-#    def onFloatMargin(this, e):
-#        ExportOffDialog.floatMargin = this.floatMarginGui.GetValue()
-#
-#    def getFloatMargin(this):
-#        return this.floatMarginGui.GetValue()
+
+
+class ExportOffDialog(tk.Toplevel):
+    min_precision = 1
+    max_precision = 16
+    """
+    Floating dialog for exporting a polyhedron to an OFF file.
+
+    The settings are:
+        precision: how many deimals to use for floating point number.
+        extra_info: whether to add extra info in comments
+        merge_vs: whether to merge vertices that are "equal" to one vertex.
+        float_margin: the amount of decimals to use when deciding whether
+                      vertices are equals
+    """
+    def __init__(self, parent, title, fields):
+        """Initialise object
+
+        parent: parent widget
+        title: title to use for new dialog
+        fields: an OffFields object with the following initial fields:
+                precision, extra_info, merge_vs and float_margin
+                This object is updated with the new values.
+                This is the object that will be updated with the new values
+        """
+        tk.Toplevel.__init__(self, parent)
+        self.attributes('-type', 'dialog')
+        self.title(title)
+        self.fields = fields
+        self.canceled = False
+
+        int_vcmd = (self.register(self.validate_if_int),
+                    # the parameters in elf.validate_if_int:
+                    '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+
+        row = 0
+        self.precision = tk.StringVar()
+        self.precision.set(fields.precision)
+        self.precision_txt = tk.Label(
+            self, text="vertex precision (decimals [{}, {}])".format(
+                self.min_precision, self.max_precision))
+        self.precision_txt.grid(row=row, column=0, sticky=tk.W)
+        self.precision_in = tk.Entry(self,
+                                     textvariable=self.precision,
+                                     validate='key',
+                                     validatecommand=int_vcmd)
+        self.precision_in.grid(row=row, column=1)
+
+        row += 1
+        self.extra_info = tk.BooleanVar()
+        self.extra_info.set(fields.extra_info)
+        self.extra_info_chk = tk.Checkbutton(self,
+                                             text="Add extra info",
+                                             variable=self.extra_info,
+                                             onvalue=True,
+                                             offvalue=False)
+        self.extra_info_chk.grid(row=row, column=0, sticky=tk.W)
+
+        row += 1
+        self.merge_vs = tk.BooleanVar()
+        self.merge_vs.set(fields.merge_vs)
+        self.merge_vs_chk = tk.Checkbutton(
+            self,
+            text="Merge equal vertices (can take time)",
+            variable=self.merge_vs,
+            onvalue=True,
+            offvalue=False,
+            command=self.on_chk_merge)
+        self.merge_vs_chk.grid(row=row, column=0, sticky=tk.W)
+
+        row += 1
+        self.float_margin = tk.StringVar()
+        self.float_margin.set(fields.float_margin)
+        self.float_margin_txt = tk.Label(
+            self, text="vertex precision (decimals [{}, {}])".format(
+                self.min_precision, self.max_precision))
+        self.float_margin_txt.grid(row=row, column=0, sticky=tk.W)
+        self.float_margin_in = tk.Entry(self,
+                                        textvariable=self.float_margin,
+                                        validate='key',
+                                        validatecommand=int_vcmd)
+        self.float_margin_in.grid(row=row, column=1)
+        if not self.fields.merge_vs:
+            self.float_margin_txt.configure(state='disabled')
+            self.float_margin_in.configure(state='disabled')
+
+        row += 1
+        self.cancel = tk.Button(self, text="Cancel", command=self.on_quit)
+        self.cancel.grid(row=row, column=0, sticky=tk.W)
+        self.ok = tk.Button(self, text="OK", command=self.on_ok)
+        self.ok.grid(row=row, column=1, sticky=tk.E)
+
+        self.bind("<Escape>", lambda e: self.on_quit(e))
+
+    def validate_if_int(self, action, index, value_if_allowed, prior_value,
+                        text, validation_type, trigger_type, widget_name):
+        allow = True
+        if value_if_allowed:
+            try:
+                i = int(value_if_allowed)
+                allow = i >= self.min_precision and i <= self.max_precision
+            except ValueError:
+                allow = False
+        return allow
+
+    def on_chk_merge(self):
+        if self.merge_vs.get():
+            self.float_margin_txt.configure(state='normal')
+            self.float_margin_in.configure(state='normal')
+        else:
+            self.float_margin_txt.configure(state='disabled')
+            self.float_margin_in.configure(state='disabled')
+
+    def on_quit(self, event=None):
+        self.canceled = True
+        self.destroy()
+
+    def on_ok(self, event=None):
+        self.destroy()
+
+    def show(self):
+        """
+        Show the dialog en return the values when it is close
+
+        return: None if the dialog is canceled (e.g. by pressing ESC) otherwise
+                it will return the updated obeject "fields" from __init__
+        """
+        self.wm_deiconify()
+        self.precision_in.focus_force()
+        self.wait_window()
+        if self.canceled:
+            return None
+        else:
+            self.fields.precision = int(self.precision.get())
+            self.fields.extra_info = self.extra_info.get()
+            self.fields.merge_vs = self.merge_vs.get()
+            self.fields.float_margin = int(self.float_margin.get())
+            return self.fields
+
 #
 #class ExportPsDialog(wx.Dialog):
 #    scaling = 50
@@ -1791,7 +1801,7 @@ def convert_to_off(shape, o_fd, precision, margin=0):
     except AttributeError:
         pass
     if margin != 0:
-        shape = shape.cleanShape(margin)
+        shape = shape.clean_shape(margin)
     # TODO: support for saving extraInfo?
     o_fd.write(shape.to_off_str(precision))
 
