@@ -116,17 +116,11 @@ class OglFrame(Scenes3D.OglFrame):
         self.shape.glDraw()
 
 
-class OffFields(object):
-    extra_info = False
-    merge_vs = False
-    def __init__(self, precision=12, float_margin=10):
-        self.precision = precision
-        self.float_margin = float_margin
-
-
 class MainWindow(tk.Frame):
     off_files = (("Off shape", "*.off"),
                  ("Off shape", "*.OFF"))
+    ps_files = (("Postscript", "*.ps"),
+                 ("Postscipt", "*.PS"))
     python_files = (("Python shape", "*.py"),
                     ("Python shape", "*.PY"))
     shape_files = (("Off shape", "*.off"),
@@ -148,6 +142,7 @@ class MainWindow(tk.Frame):
         self.import_dir = '.'
         self.scene_dir = '.'
         self.off_vals = OffFields()
+        self.ps_vals = PsFields()
         #self.viewSettingsWindow = None
         #self.colourSettingsWindow = None
         #self.transformSettingsWindow = None
@@ -459,59 +454,34 @@ class MainWindow(tk.Frame):
                 self.update_status_bar(status_txt)
 
     def on_save_as_ps(self, e=None):
-        print("TODO: on_save_as_ps")
-        dlg = ExportPsDialog(self, wx.ID_ANY, 'PS settings')
-        file_chosen = False
-        while not file_chosen:
-            if dlg.ShowModal() == wx.ID_OK:
-                scalingFactor = dlg.getScaling()
-                precision = dlg.getPrecision()
-                margin = dlg.getFloatMargin()
-                assert (scalingFactor >= 0 and scalingFactor != None)
-                fileDlg = wx.FileDialog(self, 'Save as .ps file',
-                    self.export_dir, '', '*.ps',
-                    style = wx.SAVE | wx.OVERWRITE_PROMPT
-                )
-                file_chosen = fileDlg.ShowModal() == wx.ID_OK
-                if file_chosen:
-                    filepath = fileDlg.GetPath()
-                    filename = fileDlg.GetFilename()
-                    self.export_dir  = filepath.rsplit('/', 1)[0]
-                    name_ext = filename.split('.')
-                    if len(name_ext) == 1:
-                        filename = '%s.ps' % filename
-                    elif name_ext[-1].lower() != 'ps':
-                        if name_ext[-1] != '':
-                            filename = '%s.ps' % filename
-                        else:
-                            filename = '%sps' % filename
-                    # Note: if file exists is part of file dlg...
-                    fd = open(filepath, 'w')
-                    print("writing to file %s" % filepath)
-                    shape = self.get_shape()
-                    try:
-                        shape = shape.simple_shape
-                    except AttributeError:
-                        pass
-                    shape = shape.clean_shape(margin)
+        if ExportPsDialog(self,
+                          'PS settings', self.ps_vals).show() is not None:
+            filename = filedialog.asksaveasfilename(
+                initialdir=self.export_dir,
+                title="Save as Postscript File",
+                filetypes=self.ps_files)
+            if filename != '':
+                self.export_dir = os.path.split(filename)[0]
+                filename = self._fix_file_ext(filename, 'ps')
+                shape = self.get_shape()
+                shape = shape.clean_shape(self.ps_vals.float_margin)
+                try:
+                    shape = shape.simple_shape
+                except AttributeError:
+                    pass
+                with open(filename, 'w') as fd:
+                    print("writing to file {}".format(filename))
                     try:
                         fd.write(shape.to_ps_pieces_str(
-                            scaling=scalingFactor,
-                            precision=precision,
-                            margin=math.pow(10, -margin)))
-                        self.update_status_bar("PS file written")
-                    except Geom3D.PrecisionError:
-                        self.update_status_bar(
-                            "Precision error, try to decrease float margin")
-
-                    fd.close()
-                else:
-                    dlg.Show()
-                fileDlg.Destroy()
-            else:
-                break
-        # done while: file choosen
-        dlg.Destroy()
+                            scaling=self.ps_vals.scaling,
+                            precision=self.ps_vals.precision,
+                            margin=math.pow(10,
+                                            -self.ps_vals.float_margin)))
+                        self.update_status_bar("{} written".format(
+                            filename))
+                    except Geom3D.PrecisionError as e:
+                        self.update_status_bar("Margin error, " + str(e))
+                        raise
 
     def on_save_as_wrl(self, e=None):
         print("TODO: on_save_as_wrl")
@@ -1526,7 +1496,59 @@ class MainWindow(tk.Frame):
 #        #    pass
 
 
-class ExportOffDialog(tk.Toplevel):
+class FieldsDialog(tk.Toplevel):
+    """Base class for making floating dialog windows with some fields"""
+    def __init__(self, parent, title, fields):
+        """Initialise object
+
+        parent: parent widget
+        title: title to use for new dialog
+        fields: an object with the following initial fields:
+        """
+        super().__init__(parent)
+        self.attributes('-type', 'dialog')
+        self.title(title)
+        self.fields = fields
+        self.canceled = False
+        self.protocol('WM_DELETE_WINDOW', self.on_quit)
+
+    def on_quit(self, event=None):
+        self.canceled = True
+        self.destroy()
+
+    def on_ok(self, event=None):
+        self.destroy()
+
+    def show(self, focus, select=True):
+        """
+        Show the dialog en return the values when it is close
+
+        focus: the widget to focus on
+        select: select content on 'focus'
+        return: None if the dialog is canceled (e.g. by pressing ESC) otherwise
+                it will return the object "fields" from __init__ (not updated)
+                It is up to the inheritant to update.
+        """
+        self.wm_deiconify()
+        focus.focus_force()
+        focus.selection_range(0, tk.END)
+        self.wait_window()
+        if self.canceled:
+            return None
+        else:
+            return self.fields
+
+
+class OffFields(object):
+    extra_info = False
+    merge_vs = False
+
+    def __init__(self, precision=12, float_margin=10):
+        self.precision = precision
+        self.float_margin = float_margin
+
+
+class ExportOffDialog(FieldsDialog):
     min_precision = 1
     max_precision = 16
     """
@@ -1549,11 +1571,7 @@ class ExportOffDialog(tk.Toplevel):
                 This object is updated with the new values.
                 This is the object that will be updated with the new values
         """
-        tk.Toplevel.__init__(self, parent)
-        self.attributes('-type', 'dialog')
-        self.title(title)
-        self.fields = fields
-        self.canceled = False
+        super().__init__(parent, title, fields)
 
         int_vcmd = (self.register(self.validate_if_int),
                     # the parameters in elf.validate_if_int:
@@ -1637,13 +1655,6 @@ class ExportOffDialog(tk.Toplevel):
             self.float_margin_txt.configure(state='disabled')
             self.float_margin_in.configure(state='disabled')
 
-    def on_quit(self, event=None):
-        self.canceled = True
-        self.destroy()
-
-    def on_ok(self, event=None):
-        self.destroy()
-
     def show(self):
         """
         Show the dialog en return the values when it is close
@@ -1651,10 +1662,7 @@ class ExportOffDialog(tk.Toplevel):
         return: None if the dialog is canceled (e.g. by pressing ESC) otherwise
                 it will return the updated obeject "fields" from __init__
         """
-        self.wm_deiconify()
-        self.precision_in.focus_force()
-        self.wait_window()
-        if self.canceled:
+        if super().show(self.precision_in) is None:
             return None
         else:
             self.fields.precision = int(self.precision.get())
@@ -1663,105 +1671,125 @@ class ExportOffDialog(tk.Toplevel):
             self.fields.float_margin = int(self.float_margin.get())
             return self.fields
 
-#
-#class ExportPsDialog(wx.Dialog):
-#    scaling = 50
-#    precision = 12
-#    floatMargin = 10
-#    """
-#    Dialog for exporting a polyhedron to a PS file.
-#
-#    Settings like: scaling size and precision. Changing these settings will
-#    reflect in the next dialog that is created.
-#    Based on wxPython example dialog
-#    """
-#    def __init__(this,
-#            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
-#            style=wx.DEFAULT_DIALOG_STYLE
-#        ):
-#
-#        # Instead of calling wx.Dialog.__init__ we precreate the dialog
-#        # so we can set an extra style that must be set before
-#        # creation, and then we create the GUI dialog using the Create
-#        # method.
-#        pre = wx.PreDialog()
-#        pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-#        pre.Create(parent, ID, title, pos, size, style)
-#
-#        # This next step is the most important, it turns this Python
-#        # object into the real wrapper of the dialog (instead of pre)
-#        # as far as the wxPython extension is concerned.
-#        this.PostCreate(pre)
-#
-#        # Now continue with the normal construction of the dialog
-#        # contents
-#        sizer = wx.BoxSizer(wx.VERTICAL)
-#
-#        hbox = wx.BoxSizer(wx.HORIZONTAL)
-#        label = wx.StaticText(this, -1, "Scaling Factor:")
-#        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        this.scalingFactorGui = wx.lib.intctrl.IntCtrl(this,
-#                value = ExportPsDialog.scaling,
-#                min   = 1,
-#                max   = 10000
-#            )
-#        this.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, this.onScaling)
-#        hbox.Add(this.scalingFactorGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#        hbox = wx.BoxSizer(wx.HORIZONTAL)
-#        label = wx.StaticText(this, -1, "vertex precision (decimals):")
-#        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        this.precisionGui = wx.lib.intctrl.IntCtrl(this,
-#                value = ExportPsDialog.precision,
-#                min   = 1,
-#                max   = 16
-#            )
-#        this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
-#        hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#        hbox = wx.BoxSizer(wx.HORIZONTAL)
-#        label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
-#        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        this.floatMarginGui = wx.lib.intctrl.IntCtrl(this,
-#                value = ExportPsDialog.floatMargin,
-#                min   = 1,
-#                max   = 16
-#            )
-#        this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
-#        hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-#        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        buttonSizer = wx.StdDialogButtonSizer()
-#
-#        button = wx.Button(this, wx.ID_OK)
-#        button.SetDefault()
-#        buttonSizer.AddButton(button)
-#        button = wx.Button(this, wx.ID_CANCEL)
-#        buttonSizer.AddButton(button)
-#        buttonSizer.Realize()
-#
-#        sizer.Add(buttonSizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-#
-#        this.SetSizer(sizer)
-#        sizer.Fit(this)
-#
-#    def onScaling(this, e):
-#        ExportPsDialog.scaling = this.scalingFactorGui.GetValue()
-#
-#    def getScaling(this):
-#        return this.scalingFactorGui.GetValue()
-#
-#    def onPrecision(this, e):
-#        ExportPsDialog.precision = this.precisionGui.GetValue()
-#
-#    def getPrecision(this):
-#        return this.precisionGui.GetValue()
-#
-#    def onFloatMargin(this, e):
-#        ExportPsDialog.floatMargin = this.floatMarginGui.GetValue()
-#
-#    def getFloatMargin(this):
-#        return this.floatMarginGui.GetValue()
+
+class PsFields(object):
+    def __init__(self, scaling=50, precision=12, float_margin=10):
+        self.scaling = scaling
+        self.precision = precision
+        self.float_margin = float_margin
+
+
+class ExportPsDialog(FieldsDialog):
+    min_precision = 1
+    max_precision = 16
+    """
+    Dialog for exporting a polyhedron to a PS file.
+
+    Settings like: scaling size and precision. Changing these settings will
+    reflect in the next dialog that is created.
+    Based on wxPython example dialog
+    """
+    def __init__(self, parent, title, fields):
+        """Initialise object
+
+        parent: parent widget
+        title: title to use for new dialog
+        fields: an object with the following initial fields:
+                scaling, precision and float_margin
+                This object is updated with the new values.
+                This is the object that will be updated with the new values
+        """
+        super().__init__(parent, title, fields)
+
+        float_vcmd = (self.register(self.validate_if_float),
+                      # the parameters in elf.validate_if_int:
+                      '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+
+        int_vcmd = (self.register(self.validate_if_int),
+                    # the parameters in elf.validate_if_int:
+                    '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+
+        row = 0
+        self.scaling = tk.StringVar()
+        self.scaling.set(self.fields.scaling)
+        self.scaling_txt = tk.Label(self, text="Scaling factor")
+        self.scaling_txt.grid(row=row, column=0, sticky=tk.W)
+        self.scaling_in = tk.Entry(self,
+                                   textvariable=self.scaling,
+                                   validate='key',
+                                   validatecommand=float_vcmd)
+        self.scaling_in.grid(row=row, column=1)
+
+        row += 1
+        self.precision = tk.StringVar()
+        self.precision.set(self.fields.precision)
+        self.precision_txt = tk.Label(
+            self, text="vertex precision (decimals [{}, {}])".format(
+                self.min_precision, self.max_precision))
+        self.precision_txt.grid(row=row, column=0, sticky=tk.W)
+        self.precision_in = tk.Entry(self,
+                                     textvariable=self.precision,
+                                     validate='key',
+                                     validatecommand=int_vcmd)
+        self.precision_in.grid(row=row, column=1)
+
+        row += 1
+        self.float_margin = tk.StringVar()
+        self.float_margin.set(self.fields.float_margin)
+        self.float_margin_txt = tk.Label(
+            self,
+            text="float margin for being equal (decimals [{}, {}])".format(
+                self.min_precision, self.max_precision))
+        self.float_margin_txt.grid(row=row, column=0, sticky=tk.W)
+        self.float_margin_in = tk.Entry(self,
+                                        textvariable=self.float_margin,
+                                        validate='key',
+                                        validatecommand=int_vcmd)
+        self.float_margin_in.grid(row=row, column=1)
+
+        row += 1
+        self.cancel = tk.Button(self, text="Cancel", command=self.on_quit)
+        self.cancel.grid(row=row, column=0, sticky=tk.W)
+        self.ok = tk.Button(self, text="OK", command=self.on_ok)
+        self.ok.grid(row=row, column=1, sticky=tk.E)
+
+        self.bind("<Escape>", lambda e: self.on_quit(e))
+
+    def validate_if_float(self, action, index, value_if_allowed, prior_value,
+                          text, validation_type, trigger_type, widget_name):
+        allow = True
+        if value_if_allowed:
+            try:
+                float(value_if_allowed)
+            except ValueError:
+                allow = False
+        return allow
+
+    def validate_if_int(self, action, index, value_if_allowed, prior_value,
+                        text, validation_type, trigger_type, widget_name):
+        allow = True
+        if value_if_allowed:
+            try:
+                i = int(value_if_allowed)
+                allow = i >= self.min_precision and i <= self.max_precision
+            except ValueError:
+                allow = False
+        return allow
+
+    def show(self):
+        """
+        Show the dialog en return the values when it is close
+
+        return: None if the dialog is canceled (e.g. by pressing ESC) otherwise
+                it will return the updated obeject "fields" from __init__
+        """
+        if super().show(self.scaling_in) is None:
+            return None
+        else:
+            self.fields.scaling = int(self.scaling.get())
+            self.fields.precision = int(self.precision.get())
+            self.fields.float_margin = int(self.float_margin.get())
+            return self.fields
 
 
 def read_shape_file(filename):

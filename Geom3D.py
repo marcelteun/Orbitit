@@ -313,7 +313,13 @@ class Fields(object):
 
 
 class PrecisionError(ValueError):
-    "Possible error caused bby floats not being equals exactly"
+    def __init__(self, diff, message):
+        self.diff = diff
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        return f"{self.message}: off by {self.diff}"
 
 class Line:
     def __init__(this, p0, p1 = None, v = None, d = 3, isSegment = False):
@@ -395,16 +401,17 @@ class Line:
             c = this.getPoint(t)
             for i in range(1, this.dimension):
                 if not eq(c[i], p[i], margin = margin):
-                    print('The point is not on the line; yDiff =', (c[i]-p[i]))
-                    raise PrecisionError('The point is not one the line;')
+                    raise PrecisionError(
+                        c[i]-p[i], "Point not on line")
         if this.isSegment:
             if not (
                 (t >= 0 or eq(t, 0, margin = margin))
                 and
                 (t <= 1 or eq(t, 1, margin = margin))
             ):
-                print('The point is not one the line segment; t =', t)
-                raise PrecisionError('The point is not one the line segment;')
+                delta = t if t < 0 else t - 1
+                raise PrecisionError(
+                    'Point not on line segment', delta)
         return t
 
 class Line2D(Line):
@@ -491,11 +498,8 @@ class Line2D(Line):
                     if this.debug:
                         print('edge intersects plane z =', z0,\
                             'in a point (t = %f)' % (t))
-                    try:
-                        s = this.getFactor(edgePV3D.getPoint(t),
-                                                                margin = margin)
-                    except PrecisionError:
-                        s = None
+                    s = this.getFactor(edgePV3D.getPoint(t),
+                                       margin=margin)
                 else:
                     if this.debug:
                         print('edge intersects plane z =', z0, 'but only if exteded (t =', t, ')')
@@ -521,7 +525,7 @@ class Line2D(Line):
                         if this.vOnLine(v0, margin):
                             tEq0 = True
                             tEq1 = False
-                            s = this.getFactor(v0, margin = margin)
+                            s = this.getFactor(v0, margin=margin)
                             if this.debug:
                                 print('edge is on the line')
                         else:
@@ -649,7 +653,8 @@ class Line2D(Line):
 #                    del pOnLineAtEdges[pInLoiIndex]
         if this.debug: print('pOnLineAtEdges', pOnLineAtEdges, 'after clean up')
         assert len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections, "The nr of intersections should be even, are all edges unique and do they form one closed face?"
-        if this.debug: print('=======intersectWithFacet========')
+        if this.debug:
+            print('=======intersectWithFacet========')
         return pOnLineAtEdges
 
 class Line3D(Line):
@@ -2052,10 +2057,16 @@ class SimpleShape:
                         if debug:
                             if debug: print('intersectingPlane', intersectingPlane)
                             if debug: print('Loi3D', Loi3D)
-                        assert eq(Loi3D.v[2], 0, 100 * margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
-                        assert eq(Loi3D.p[2], zBaseFace, 100 * margin), "all intersection lines should ly on z==%f, but z differs %f" % (
-                                        zBaseFace, zBaseFace-Loi3D.p[2]
-                                    )
+                        m_factor = 100
+                        if not eq(Loi3D.v[2], 0, m_factor * margin):
+                            raise PrecisionError(
+                                "Intersection line not paralell to z = 0",
+                                Loi3D.v[2] / m_factor)
+                        if not eq(Loi3D.p[2], zBaseFace, m_factor * margin):
+                            raise PrecisionError(
+                                "Intersection line not in z==%f".format(
+                                    zBaseFace),
+                                zBaseFace - Loi3D.p[2])
                         # loi2D = lineofintersection
                         loi2D = Line2D(
                                 [Loi3D.p[0], Loi3D.p[1]],
@@ -2066,9 +2077,9 @@ class SimpleShape:
                         # intersecting a 3D facet. It should be a mode dedicated
                         # call. The line is in the plane of the facet and we want to
                         # know where it shares edges.
-                        pInLoiFacet = loi2D.intersectWithFacet(Vs,
-                                intersectingFacet, Loi3D.p[2],
-                                margin, suppressWarn)
+                        pInLoiFacet = loi2D.intersectWithFacet(
+                            Vs, intersectingFacet, Loi3D.p[2],
+                            margin, suppressWarn)
                         if debug: print('pInLoiFacet', pInLoiFacet)
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
@@ -2080,8 +2091,9 @@ class SimpleShape:
                     if debug: print('phase 2: check iFacet nr:', loiData[-1])
                     # Now Intersect loi with the baseFacets.
                     for baseFacet in baseFacets:
-                        pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet,
-                                loiData[2], margin, suppressWarn)
+                        pInLoiBase = loi2D.intersectWithFacet(
+                            Vs, baseFacet, loiData[2],
+                            margin, suppressWarn)
                         if debug: print('pInLoiBase', pInLoiBase)
                         # Now combine the results of pInLoiFacet and pInLoiBase:
                         # Only keep intersections that fall within 2 segments for
@@ -2137,7 +2149,7 @@ class SimpleShape:
                             if nextFacetSeg:
                                 facetSegmentNr += 1
                 PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
-        except AssertionError as PrecisionError:
+        except PrecisionError:
             # catching assertion errors, to be able to set back margin
             geomtypes.set_eq_float_margin(margin)
             raise
@@ -2640,11 +2652,12 @@ class CompoundShape(object):
         return this.mergedShape
 
     def clean_shape(this, precision):
-        """Return a new shape for which vertices are merged and degenerated faces are deleted.
+        """Return a new shape for which vertices are merged.
 
+        All degenerated faces are deleted.
         The shape will not have any edges.
         """
-        this.simple_shape.clean_shape(precision)
+        return this.simple_shape.clean_shape(precision)
 
     def glDraw(this):
         """Draws the compound shape as compound shape
