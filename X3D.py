@@ -39,25 +39,14 @@ _INSTANCE_TYPE_ = type(_EMPTY_CLASS_())
 
 def defAttrs(**dict): return dict
 
-def reindent(str):
-    return string.join(string.split(str, '\n'), '\n  ')
 
-def _isDocInstance_(elem):
-    return type(elem) == _INSTANCE_TYPE_ and elem.__class__.__name__ == 'Doc'
-
-def _isNodeInstance_(elem):
-    return type(elem) == _INSTANCE_TYPE_ and (elem.__class__.__name__ == 'Node' or elem.__class__.__name__ == 'Route')
-
-def _isFloatVecInstance_(elem):
-    return type(elem) == _INSTANCE_TYPE_ and elem.__class__.__name__ == 'FloatVec'
-
-def _isIndexInstance_(elem):
-    return type(elem) == _INSTANCE_TYPE_ and elem.__class__.__name__ == 'Index'
+def reindent(s):
+    return '\n  '.join(str.split(s, '\n'))
 
 dbgPrn = True
 dbgPrn = False
 
-class Index:
+class Index(object):
     def __init__(this, indexLst = None):
         this.indexLst = indexLst
 
@@ -79,7 +68,7 @@ class Index:
     def __getitem__(this, i):
         return this.indexLst[i]
 
-class FloatVec:
+class FloatVec(object):
     def __init__(this, vec = None, precision = 6):
         this.vec = vec
         this.precision = precision
@@ -104,7 +93,7 @@ class FloatVec:
 
 NO_OP = FloatVec([1, 0, 0, 0], 1)
 
-class Node:
+class Node(object):
     # attrs is a dict
     def __init__(this, thisName, **attrs):
         this.name = thisName
@@ -145,15 +134,15 @@ class Node:
                 return 'FALSE'
         elif type(val) == _ARR_TYPE_:
             return '[%s\n]' % reindent(this.arrToVrmlStr(val))
-        elif _isIndexInstance_(val):
+        elif isinstance(val, Index):
             return '%s' % val.toVrmlStr()
-        elif _isFloatVecInstance_(val):
+        elif isinstance(val, FloatVec):
             return '%s' % val.toVrmlStr()
-        elif _isNodeInstance_(val):
+        elif isinstance(val, Node):
             if val.name == 'IS':
                 assert 'children' in val.attrs
                 for node in val.attrs['children']:
-                    assert _isNodeInstance_(node)
+                    assert isinstance(node, Node)
                     assert node.name == 'connect'
                     assert 'nodeField' in node.attrs
                     assert 'protoField' in node.attrs
@@ -180,7 +169,7 @@ class Node:
         arrStr = ''
         for i in range(len(arr)):
             arrValue = arr[i]
-            if _isFloatVecInstance_(arrValue) and i != 0:
+            if isinstance(arrValue, FloatVec) and i != 0:
                 arrStr = '%s,\n' % arrStr
             else:
                 arrStr = '%s\n' % arrStr
@@ -203,13 +192,13 @@ class Node:
                 #nodeStr = '%sPROTO %s {%s\n}' % (nodeStr, this.attrs['name'], reindent(this.attrToVrmlStr(this.attrs)))
                 assert 'children' in this.attrs
                 for node in this.attrs['children']:
-                    assert _isNodeInstance_(node)
+                    assert isinstance(node, Node)
                     nodeStr = '%s%s' % (nodeStr, node.toVrmlStr())
             elif this.name == 'ProtoInterface':
                 nodeStr = '%s[' % nodeStr
                 assert 'children' in this.attrs
                 for node in this.attrs['children']:
-                    assert _isNodeInstance_(node)
+                    assert isinstance(node, Node)
                     assert node.name in ['field', 'exposedField', 'eventIn', 'eventOut']
                     assert 'type' in node.attrs
                     nodeStr = '%s\n  %s %s' % (nodeStr, node.name, node.attrs['type'])
@@ -222,7 +211,7 @@ class Node:
                 nodeStr = '%s\n{' % nodeStr
                 assert 'children' in this.attrs
                 for node in this.attrs['children']:
-                    assert _isNodeInstance_(node)
+                    assert isinstance(node, Node)
                     nodeStr = '%s\n  %s' % (nodeStr, reindent(node.toVrmlStr()))
                 nodeStr = '%s\n}' % nodeStr
             elif this.name == 'ProtoInstance':
@@ -230,7 +219,7 @@ class Node:
                 nodeStr = '%s%s {' % (nodeStr, this.attrs['name'])
                 assert 'children' in this.attrs
                 for node in this.attrs['children']:
-                    assert _isNodeInstance_(node)
+                    assert isinstance(node, Node)
                     assert node.name == 'fieldValue'
                     assert 'name' in node.attrs
                     nodeStr = '%s\n  %s' % (nodeStr, node.attrs['name'])
@@ -245,7 +234,7 @@ class Node:
         arrStr = ''
         for arrValue in arr:
             if arrStr != '':
-                if _isFloatVecInstance_(arrValue):
+                if isinstance(arrValue, FloatVec):
                     arrStr = '%s, ' % arrStr
                 else:
                     arrStr = '%s ' % arrStr
@@ -261,9 +250,9 @@ class Node:
                     arrStr = '%strue' % arrStr
                 else:
                     arrStr = '%sfalse' % arrStr
-            elif _isIndexInstance_(arrValue):
+            elif isinstance(arrValue, Index):
                 arrStr = '%s%s' % (arrStr, arrValue.toX3DStr())
-            elif _isFloatVecInstance_(arrValue):
+            elif isinstance(arrValue, FloatVec):
                 arrStr = '%s%s' % (arrStr, arrValue.toX3DStr())
         return arrStr
 
@@ -271,8 +260,8 @@ class Node:
         attrStr = ''
         childNodes = []
         for attrName, attrValue in this.attrs.items():
-            if not _isNodeInstance_(attrValue) and not (
-                type(attrValue) == _ARR_TYPE_ and attrValue != [] and _isNodeInstance_(attrValue[0])
+            if not isinstance(attrValue, Node) and not (
+                type(attrValue) == _ARR_TYPE_ and attrValue != [] and isinstance(attrValue, Node[0])
             ):
                 if attrStr == '':
                     attrStr = ' '
@@ -291,16 +280,16 @@ class Node:
                     attrStr = "%s%s='false'" % (attrStr, attrName)
             elif type(attrValue) == _ARR_TYPE_:
                 if attrValue != []:
-                    if _isNodeInstance_(attrValue[0]):
+                    if isinstance(attrValue, Node[0]):
                         for node in attrValue:
                             childNodes.append(node)
                     else:
                         attrStr = "%s%s='%s'" % (attrStr, attrName, this.arrToX3DStr(attrValue))
-            elif _isIndexInstance_(attrValue):
+            elif isinstance(attrValue, Index):
                 attrStr = "%s%s='%s'" % (attrStr, attrName, attrValue.toX3DStr())
-            elif _isFloatVecInstance_(attrValue):
+            elif isinstance(attrValue, FloatVec):
                 attrStr = "%s%s='%s'" % (attrStr, attrName, attrValue.toX3DStr())
-            elif _isNodeInstance_(attrValue):
+            elif isinstance(attrValue, Node):
                 childNodes.append(attrValue)
         if attrStr != '':
             nodeStr = '\n<%s%s' % (this.name, attrStr)
@@ -343,24 +332,24 @@ class Node:
                 elif type(attrValue) == _ARR_TYPE_:
                     nodeStr = "%s='%s'" % (attrName, this.arrToX3DStr(attrValue))
                     # TODO: here the childnodes should be added as well.
-                elif _isIndexInstance_(attrValue):
+                elif isinstance(attrValue, Index):
                     nodeStr = "%s='%s'" % (attrName, attrValue.toX3DStr())
-                elif _isFloatVecInstance_(attrValue):
+                elif isinstance(attrValue, FloatVec):
                     nodeStr = "%s='%s'" % (attrName, attrValue.toX3DStr())
             elif type(attrValue) == _ARR_TYPE_:
                 if attrValue != []:
-                    if _isNodeInstance_(attrValue[0]):
+                    if isinstance(attrValue, Node[0]):
                         for node in attrValue:
                             nodeStr = node.nodeToX3DStr(name)
                             if nodeStr != '':
                                 break
-            elif _isNodeInstance_(attrValue):
+            elif isinstance(attrValue, Node):
                 nodeStr = attrValue.nodeToX3DStr(name)
             if nodeStr != '':
                 break
         return nodeStr
 
-class Doc:
+class Doc(object):
     def __init__(this, profile = 'IMMERSIVE'):
         this.contents = []
         this.profile = profile
@@ -404,7 +393,7 @@ class Doc:
         docStr = '#VRML V2.0 utf8'
         for node in this.contents:
             #print node, node.__class__.__name__
-            assert _isNodeInstance_(node)
+            assert isinstance(node, Node)
             docStr = '%s\n%s' % (docStr, node.toVrmlStr())
         return docStr
 
@@ -416,7 +405,7 @@ class Doc:
                 head.addNode(Node('meta', name = name, content = content))
         sceneStr = '\n<Scene>'
         for node in this.contents:
-            assert _isNodeInstance_(node)
+            assert isinstance(node, Node)
             sceneStr = '%s%s' % (sceneStr, reindent(node.toX3DStr()))
         sceneStr = '%s\n</Scene>' % sceneStr
         docStr = '%s\n<X3D profile="%s"\n     xmlns:xsd=\'http://www.w3.org/2001/XMLSchema-instance\'\n     xsd:noNamespaceSchemaLocation=\'http://www.web3d.org/specifications/x3d-3.0.xsd\'>%s%s\n</X3D>' % (

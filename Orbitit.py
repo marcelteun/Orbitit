@@ -120,9 +120,11 @@ class MainWindow(tk.Frame):
     off_files = (("Off shape", "*.off"),
                  ("Off shape", "*.OFF"))
     ps_files = (("Postscript", "*.ps"),
-                 ("Postscipt", "*.PS"))
+                ("Postscipt", "*.PS"))
     python_files = (("Python shape", "*.py"),
                     ("Python shape", "*.PY"))
+    vrml_files = (("VRML shape", "*.wrl"),
+                  ("VRML shape", "*.WRL"))
     shape_files = (("Off shape", "*.off"),
                    ("Off shape", "*.OFF"),
                    ("Python shape", "*.py"),
@@ -484,33 +486,21 @@ class MainWindow(tk.Frame):
                         raise
 
     def on_save_as_wrl(self, e=None):
-        print("TODO: on_save_as_wrl")
-        dlg = wx.FileDialog(self,
-            'Save as .vrml file', self.export_dir, '', '*.wrl',
-            style = wx.SAVE | wx.OVERWRITE_PROMPT
-        )
-        if dlg.ShowModal() == wx.ID_OK:
-            filepath = fileDlg.GetPath()
-            filename = dlg.GetFilename()
-            self.export_dir  = filepath.rsplit('/', 1)[0]
-            name_ext = filename.split('.')
-            if len(name_ext) == 1:
-                filename = '%s.wrl' % filename
-            elif name_ext[-1].lower() != 'wrl':
-                if name_ext[-1] != '':
-                    filename = '%s.wrl' % filename
-                else:
-                    filename = '%swrl' % filename
-            fd = open(filepath, 'w')
-            print("writing to file %s" % filepath)
+        filename = filedialog.asksaveasfilename(
+            initialdir=self.export_dir,
+            title="Save as .wrl file",
+            filetypes=self.vrml_files)
+        if filename != '':
+            self.export_dir = os.path.split(filename)[0]
+            filename = self._fix_file_ext(filename, 'wrl')
             # TODO precision through setting:
             r = self.get_shape().getEdgeProperties()['radius']
-            x3dObj = self.get_shape().toX3dDoc(edgeRadius = r)
+            x3dObj = self.get_shape().toX3dDoc(edgeRadius=r)
             x3dObj.setFormat(X3D.VRML_FMT)
-            fd.write(x3dObj.toStr())
-            self.update_status_bar("VRML file written")
-            fd.close()
-        dlg.Destroy()
+            with open(filename, 'w') as fd:
+                print(f"writing {filename}")
+                fd.write(x3dObj.toStr())
+            self.update_status_bar("{} written".format(filename))
 
     def on_view_settings(self, e=None):
         print("TODO: on_view_settings")
