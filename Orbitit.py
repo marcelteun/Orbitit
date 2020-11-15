@@ -21,6 +21,7 @@
 #
 #------------------------------------------------------------------
 
+from copy import deepcopy
 import glue
 import math
 import os
@@ -34,6 +35,7 @@ import geomtypes
 import geom_gui
 import pprint
 import tkinter as tk
+from tkinter import colorchooser
 from tkinter import filedialog
 
 from OpenGL import GL, GLU
@@ -44,6 +46,12 @@ from tkinter import messagebox
 DEG2RAD = Geom3D.Deg2Rad
 
 DefaultScene = './scene_orbit.py'
+
+
+def col_shape_to_tk(col):
+    return "#{:02X}{:02X}{:02X}".format(int(0xff * col[0]),
+                                        int(0xff * col[1]),
+                                        int(0xff * col[2]))
 
 def onSwitchFrontBack(gl_scane):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
@@ -145,7 +153,7 @@ class MainWindow(tk.Frame):
         self.off_vals = OffFields()
         self.ps_vals = PsFields()
         #self.viewSettingsWindow = None
-        #self.colourSettingsWindow = None
+        self.col_settings_window = None
         #self.transformSettingsWindow = None
         root.protocol('WM_DELETE_WINDOW', self.on_quit)
 
@@ -516,14 +524,14 @@ class MainWindow(tk.Frame):
             self.viewSettingsWindow.Raise()
 
     def on_colour_settings(self, e=None):
-        if not self.colourSettingsWindow is None:
+        if not self.col_settings_window is None:
             # Don't reuse, the colours might be wrong after loading a new model
-            self.colourSettingsWindow.Destroy()
-        self.colourSettingsWindow = ColourSettingsWindow(
-            self.ogl_frame, 5, None, wx.ID_ANY,
-            title = 'Colour Settings',
-        )
-        self.colourSettingsWindow.Bind(wx.EVT_CLOSE, self.onColourSettingsClose)
+            self.col_settings_window.destroy()
+        self.col_settings_window = ColourSettingsWindow(self,
+                                                        'Colour Settings',
+                                                        self.ogl_frame,
+                                                        6)
+        #self.col_settings_window.Bind(wx.EVT_CLOSE, self.onColourSettingsClose)
 
     def on_transform(self, e=None):
         if self.transformSettingsWindow == None:
@@ -662,122 +670,120 @@ class MainWindow(tk.Frame):
         return None if self.ogl_frame is None else self.ogl_frame.shape
 
 
-#class ColourSettingsWindow(wx.Frame):
-#    def __init__(this, canvas, width, *args, **kwargs):
-#        wx.Frame.__init__(this, *args, **kwargs)
-#        this.canvas    = canvas
-#        this.col_width = width
-#        this.statusBar = this.CreateStatusBar()
-#        this.panel     = wx.Panel(this, wx.ID_ANY)
-#        this.cols = this.canvas.shape.getFaceProperties()['colors']
-#        # take a copy for reset
-#        this.org_cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.cols]
-#        this.addContents()
-#
-#    def addContents(this):
-#        this.colSizer = wx.BoxSizer(wx.VERTICAL)
-#
-#        this.selColGuis = []
-#        i = 0
-#        shape_idx = 0
-#        # assume compound shape
-#        for shape_cols in this.cols:
-#            # use one colour select per colour for each sub-shape
-#            added_cols = []
-#            col_idx = 0
-#            for col in shape_cols[0]:
-#                wxcol = wx.Colour(256*col[0], 256*col[1], 256*col[2])
-#                if not wxcol in added_cols:
-#                    if i % this.col_width == 0:
-#                        selColSizerRow = wx.BoxSizer(wx.HORIZONTAL)
-#                        this.colSizer.Add(selColSizerRow, 0, wx.EXPAND)
-#                    this.selColGuis.append(
-#                        wx.ColourPickerCtrl(
-#                            this.panel, wx.ID_ANY, wxcol))
-#                    this.panel.Bind(wx.EVT_COLOURPICKER_CHANGED, this.onColSel)
-#                    selColSizerRow.Add(this.selColGuis[-1], 0, wx.EXPAND)
-#                    i += 1
-#                    # connect GUI to shape_idx and col_idx
-#                    this.selColGuis[-1].my_shape_idx = shape_idx
-#                    this.selColGuis[-1].my_cols = [col_idx]
-#                    # connect wxcolour to GUI
-#                    wxcol.my_gui = this.selColGuis[-1]
-#                    added_cols.append(wxcol)
-#                else:
-#                    gui = added_cols[added_cols.index(wxcol)].my_gui
-#                    # must be same shape_id
-#                    gui.my_cols.append(col_idx)
-#                col_idx += 1
-#            shape_idx += 1
-#
-#        this.noOfCols = i
-#        this.Guis = []
-#
-#        this.subSizer = wx.BoxSizer(wx.HORIZONTAL)
-#        this.colSizer.Add(this.subSizer)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Cancel'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onCancel)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Reset'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onReset)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Done'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onDone)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.panel.SetSizer(this.colSizer)
-#        this.panel.SetAutoLayout(True)
-#        this.panel.Layout()
-#        this.Show(True)
-#
-#    def onReset(this, e):
-#        for colgui in this.selColGuis:
-#             shape_idx = colgui.my_shape_idx
-#             col_idx = colgui.my_cols[0]
-#             c = this.org_cols[shape_idx][0][col_idx]
-#             wxcol = wx.Colour(256*c[0], 256*c[1], 256*c[2])
-#             colgui.SetColour(wxcol)
-#        this.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.org_cols]
-#        this.updatShapeColours()
-#
-#    def onCancel(this, e):
-#        this.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.org_cols]
-#        this.updatShapeColours()
-#        this.Close()
-#
-#    def onDone(this, e):
-#        this.Close()
-#
-#    def onColSel(this, e):
-#        wxcol = e.GetColour().Get()
-#        col = (float(wxcol[0])/256, float(wxcol[1])/256, float(wxcol[2])/256)
-#        gui_id = e.GetId()
-#        for gui in this.selColGuis:
-#            if gui.GetId() == gui_id:
-#                shape_cols = this.cols[gui.my_shape_idx][0]
-#                for col_idx in gui.my_cols:
-#                    shape_cols[col_idx] = col
-#                this.updatShapeColours()
-#
-#    def updatShapeColours(this):
-#        this.canvas.shape.setFaceProperties(colors=this.cols)
-#        this.canvas.paint()
-#
-#    def close(this):
-#        for Gui in this.Guis:
-#            Gui.Destroy()
-#
+class ColourSettingsWindow(tk.Toplevel):
+    """Base class for making floating dialog windows with some fields"""
+    def __init__(self, parent, title, ogl_frame, no_of_cols_per_row):
+        """Initialise object
+
+        parent: parent widget
+        title: title to use for new dialog
+        fields: an object with the following initial fields:
+        """
+        super().__init__(parent)
+        self.attributes('-type', 'dialog')
+        self.title(title)
+        self.ogl_frame = ogl_frame
+        self.cols = self.ogl_frame.shape.getFaceProperties()['colors']
+        # take a copy for reset
+        self.org_cols = deepcopy(self.cols)
+        self.protocol('WM_DELETE_WINDOW', self.on_cancel)
+
+        self.columnconfigure(0, weight=1)
+
+        colours = tk.Frame(self)
+        colours.grid(row=0, column=0, sticky=tk.W + tk.E)
+        for i in range(no_of_cols_per_row):
+            colours.columnconfigure(i, weight=1)
+
+        row = 0
+        column = 0
+        self.col_buttons = []
+        col_to_button = {}
+        for shape_idx, shape_cols in enumerate(self.cols):
+            for col_idx, col in enumerate(shape_cols[0]):
+                bg_col = col_shape_to_tk(col)
+                # TODO: also use Fg col?
+                if bg_col not in col_to_button:
+                    button = tk.Button(colours, bg=bg_col)
+                    button.configure(command=lambda b=button: self.on_col(b))
+                    button.bind("<Enter>", self.on_button_over)
+                    button['activebackground'] = button["background"]
+                    self.col_buttons.append(button)
+                    if column >= no_of_cols_per_row:
+                        column = 0
+                        row += 1
+                    button.grid(row=row, column=column, sticky=tk.W + tk.E)
+                    button.my_col_idx = {shape_idx: [col_idx]}
+                    col_to_button[bg_col] = button
+                    column += 1
+                else:
+                    col_button = col_to_button[bg_col]
+                    if shape_idx in col_button.my_col_idx:
+                        col_button.my_col_idx[shape_idx].append(col_idx)
+                    else:
+                        col_button.my_col_idx[shape_idx] = [col_idx]
+
+        buttons = tk.Frame(self)
+        buttons.grid(row=1, column=0, sticky=tk.W + tk.E)
+        # To split at reset button if window has bigger width
+        buttons.columnconfigure(1, weight=1)
+        self.cancel = tk.Button(buttons, text="Cancel", command=self.on_cancel)
+        self.cancel.grid(row=row, column=0, sticky=tk.W)
+        self.ok = tk.Button(buttons, text="Reset", command=self.on_reset)
+        self.ok.grid(row=row, column=1, sticky=tk.W)
+        self.ok = tk.Button(buttons, text="OK", command=self.on_ok)
+        self.ok.grid(row=row, column=2, sticky=tk.E)
+
+        self.bind("<Escape>", lambda e: self.on_cancel(e))
+
+    def on_button_over(self, event):
+        col_button = event.widget
+        col_button.focus_force()
+
+    def on_col(self, button):
+        old_col = button["background"]
+        rgb_col, tk_col = colorchooser.askcolor(color=old_col)
+        if rgb_col is not None:
+            new_col = [channel / 0xff for channel in rgb_col]
+            button['background'] = tk_col
+            button['activebackground'] = button["background"]
+            for shape_idx, cols in button.my_col_idx.items():
+                for col_idx in cols:
+                    self.cols[shape_idx][0][col_idx] = new_col
+        self.update_shape_cols()
+
+    def on_cancel(self, event=None):
+        self.on_reset()
+        self.destroy()
+
+    def on_reset(self, event=None):
+        # update button colours:
+        for col_button in self.col_buttons:
+            shape_idx = list(col_button.my_col_idx.keys())[0]  # 0 just take 1
+            col_idx = col_button.my_col_idx[shape_idx][0]  # 0 just take 1
+            org_col = self.org_cols[shape_idx][0][col_idx]
+            bg_col = col_shape_to_tk(org_col)
+            col_button.configure(bg=bg_col)
+        # update shape colours:
+        self.cols = deepcopy(self.org_cols)
+        self.update_shape_cols()
+
+    def update_shape_cols(self):
+        self.ogl_frame.shape.setFaceProperties(colors=self.cols)
+        self.ogl_frame.paint()
+
+    def on_ok(self, event=None):
+        self.destroy()
+
+
 #class TransformSettingsWindow(wx.Frame):
-#    def __init__(this, canvas, *args, **kwargs):
+#    def __init__(this, ogl_frame, *args, **kwargs):
 #        wx.Frame.__init__(this, *args, **kwargs)
-#        this.canvas    = canvas
+#        this.ogl_frame    = ogl_frame
 #        this.statusBar = this.CreateStatusBar()
 #        this.panel     = wx.Panel(this, wx.ID_ANY)
 #        this.addContents()
-#        this.orgVs = this.canvas.shape.getVertexProperties()['Vs']
+#        this.orgVs = this.ogl_frame.shape.getVertexProperties()['Vs']
 #        this.org_orgVs = this.orgVs # for cancel
 #        this.set_status("")
 #
@@ -830,19 +836,19 @@ class MainWindow(tk.Frame):
 #        # Assume compound shape
 #        newVs = [
 #            [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
-#        this.canvas.shape.setVertexProperties(Vs=newVs)
-#        this.canvas.paint()
+#        this.ogl_frame.shape.setVertexProperties(Vs=newVs)
+#        this.ogl_frame.paint()
 #        this.set_status("Use 'Apply' to define a subsequent transform")
 #
 #    def onApply(this, e=None):
-#        this.orgVs = this.canvas.shape.getVertexProperties()['Vs']
+#        this.orgVs = this.ogl_frame.shape.getVertexProperties()['Vs']
 #        # reset the angle
 #        this.rotateSizer.set_angle(0)
 #        this.set_status("applied, now you can define another axis")
 #
 #    def onReset(this, e=None):
-#        this.canvas.shape.setVertexProperties(Vs=this.org_orgVs)
-#        this.canvas.paint()
+#        this.ogl_frame.shape.setVertexProperties(Vs=this.org_orgVs)
+#        this.ogl_frame.paint()
 #        this.orgVs = this.org_orgVs
 #
 #    def onCancel(this, e=None):
@@ -860,16 +866,16 @@ class MainWindow(tk.Frame):
 #        this.statusBar.SetStatusText(str)
 #
 #class ViewSettingsWindow(wx.Frame):
-#    def __init__(this, canvas, *args, **kwargs):
+#    def __init__(this, ogl_frame, *args, **kwargs):
 #        wx.Frame.__init__(this, *args, **kwargs)
-#        this.canvas    = canvas
+#        this.ogl_frame    = ogl_frame
 #        this.statusBar = this.CreateStatusBar()
 #        this.panel     = wx.Panel(this, wx.ID_ANY)
 #        this.addContents()
 #
 #    def addContents(this):
-#        this.ctrlSizer = ViewSettingsSizer(this, this.panel, this.canvas)
-#        if this.canvas.shape.dimension == 4:
+#        this.ctrlSizer = ViewSettingsSizer(this, this.panel, this.ogl_frame)
+#        if this.ogl_frame.shape.dimension == 4:
 #            this.setDefaultSize((413, 791))
 #        else:
 #            this.setDefaultSize((380, 414))
@@ -899,7 +905,7 @@ class MainWindow(tk.Frame):
 #    cull_show_both  = 'Show Front and Back Faces'
 #    cull_show_front = 'Show Only Front Face'
 #    cull_show_back  = 'Show Only Back Face'
-#    def __init__(this, parentWindow, parentPanel, canvas, *args, **kwargs):
+#    def __init__(this, parentWindow, parentPanel, ogl_frame, *args, **kwargs):
 #        """
 #        Create a sizer with view settings.
 #
@@ -908,7 +914,7 @@ class MainWindow(tk.Frame):
 #                      supposed to contain a function update_status_bar for this
 #                      to work.
 #        parentPanel: The panel to add all control widgets to.
-#        canvas: An interactive 3D canvas object. This object is supposed to
+#        ogl_frame: An interactive 3D ogl_frame object. This object is supposed to
 #                have a shape field that points to the shape object that is
 #                being viewed.
 #        """
@@ -916,11 +922,11 @@ class MainWindow(tk.Frame):
 #        this.Guis = []
 #        this.Boxes = []
 #        wx.BoxSizer.__init__(this, wx.VERTICAL, *args, **kwargs)
-#        this.canvas       = canvas
+#        this.ogl_frame       = ogl_frame
 #        this.parentWindow = parentWindow
 #        this.parentPanel  = parentPanel
 #        # Show / Hide vertices
-#        vProps            = canvas.shape.getVertexProperties()
+#        vProps            = ogl_frame.shape.getVertexProperties()
 #        this.vR           = vProps['radius']
 #        this.vOptionsLst  = ['hide', 'show']
 #        if this.vR > 0:
@@ -960,7 +966,7 @@ class MainWindow(tk.Frame):
 #        this.Guis.append(this.vColorGui)
 #        this.parentPanel.Bind(wx.EVT_BUTTON, this.onVColor, id = this.vColorGui.GetId())
 #        # Show / hide edges
-#        eProps           = canvas.shape.getEdgeProperties()
+#        eProps           = ogl_frame.shape.getEdgeProperties()
 #        this.eR          = eProps['radius']
 #        this.eOptionsLst = ['hide', 'as cylinders', 'as lines']
 #        if eProps['drawEdges']:
@@ -1046,7 +1052,7 @@ class MainWindow(tk.Frame):
 #        # background Colour
 #        colTxt = wx.StaticText(this.parentPanel, -1, "Background Colour: ")
 #        this.Guis.append(colTxt)
-#        col = this.canvas.getBgCol()
+#        col = this.ogl_frame.getBgCol()
 #        this.bgColorGui = wx.lib.colourselect.ColourSelect(this.parentPanel,
 #            wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255),
 #            size=wx.Size(40, 30))
@@ -1078,7 +1084,7 @@ class MainWindow(tk.Frame):
 #        this.Add(oglSizer, 0, wx.EXPAND)
 #
 #        # 4D stuff
-#        if this.canvas.shape.dimension == 4:
+#        if this.ogl_frame.shape.dimension == 4:
 #            default = 0
 #            this.useTransparencyGui = wx.RadioBox(this.parentPanel,
 #                label = 'Use Transparency',
@@ -1133,7 +1139,7 @@ class MainWindow(tk.Frame):
 #                    value = this.Value2Slider(
 #                            this.prjVolFactor,
 #                            this.prjVolOffset,
-#                            this.canvas.shape.wProjVolume
+#                            this.ogl_frame.shape.wProjVolume
 #                        ),
 #                    minValue = 0,
 #                    maxValue = steps,
@@ -1155,7 +1161,7 @@ class MainWindow(tk.Frame):
 #                    value = this.Value2Slider(
 #                            this.camDistFactor,
 #                            this.camDistOffset,
-#                            this.canvas.shape.wCameraDistance
+#                            this.ogl_frame.shape.wCameraDistance
 #                        ),
 #                    minValue = 0,
 #                    maxValue = steps,
@@ -1277,16 +1283,16 @@ class MainWindow(tk.Frame):
 #        selStr = this.vOptionsLst[sel]
 #        if selStr == 'show':
 #            this.vRadiusGui.Enable()
-#            this.canvas.shape.setVertexProperties(radius = this.vR)
+#            this.ogl_frame.shape.setVertexProperties(radius = this.vR)
 #        elif selStr == 'hide':
 #            this.vRadiusGui.Disable()
-#            this.canvas.shape.setVertexProperties(radius = -1.0)
-#        this.canvas.paint()
+#            this.ogl_frame.shape.setVertexProperties(radius = -1.0)
+#        this.ogl_frame.paint()
 #
 #    def onVRadius(this, e):
 #        this.vR = (float(this.vRadiusGui.GetValue()) / this.vRadiusScale)
-#        this.canvas.shape.setVertexProperties(radius = this.vR)
-#        this.canvas.paint()
+#        this.ogl_frame.shape.setVertexProperties(radius = this.vR)
+#        this.ogl_frame.paint()
 #        this.update_status_bar()
 #
 #    def onVColor(this, e):
@@ -1295,10 +1301,10 @@ class MainWindow(tk.Frame):
 #            data = dlg.GetColourData()
 #            rgba = data.GetColour()
 #            rgb  = rgba.Get()
-#            this.canvas.shape.setVertexProperties(
+#            this.ogl_frame.shape.setVertexProperties(
 #                color = [float(i)/256 for i in rgb]
 #            )
-#            this.canvas.paint()
+#            this.ogl_frame.paint()
 #        dlg.Destroy()
 #
 #    def onEOption(this, e):
@@ -1306,21 +1312,21 @@ class MainWindow(tk.Frame):
 #        selStr = this.eOptionsLst[sel]
 #        if selStr == 'hide':
 #            this.eRadiusGui.Disable()
-#            this.canvas.shape.setEdgeProperties(drawEdges = False)
+#            this.ogl_frame.shape.setEdgeProperties(drawEdges = False)
 #        elif selStr == 'as cylinders':
 #            this.eRadiusGui.Enable()
-#            this.canvas.shape.setEdgeProperties(drawEdges = True)
-#            this.canvas.shape.setEdgeProperties(radius = this.eR)
+#            this.ogl_frame.shape.setEdgeProperties(drawEdges = True)
+#            this.ogl_frame.shape.setEdgeProperties(radius = this.eR)
 #        elif selStr == 'as lines':
 #            this.eRadiusGui.Disable()
-#            this.canvas.shape.setEdgeProperties(drawEdges = True)
-#            this.canvas.shape.setEdgeProperties(radius = 0)
-#        this.canvas.paint()
+#            this.ogl_frame.shape.setEdgeProperties(drawEdges = True)
+#            this.ogl_frame.shape.setEdgeProperties(radius = 0)
+#        this.ogl_frame.paint()
 #
 #    def onERadius(this, e):
 #        this.eR = (float(this.eRadiusGui.GetValue()) / this.eRadiusScale)
-#        this.canvas.shape.setEdgeProperties(radius = this.eR)
-#        this.canvas.paint()
+#        this.ogl_frame.shape.setEdgeProperties(radius = this.eR)
+#        this.ogl_frame.paint()
 #        this.update_status_bar()
 #
 #    def onEColor(this, e):
@@ -1329,10 +1335,10 @@ class MainWindow(tk.Frame):
 #            data = dlg.GetColourData()
 #            rgba = data.GetColour()
 #            rgb  = rgba.Get()
-#            this.canvas.shape.setEdgeProperties(
+#            this.ogl_frame.shape.setEdgeProperties(
 #                color = [float(i)/256 for i in rgb]
 #            )
-#            this.canvas.paint()
+#            this.ogl_frame.paint()
 #        dlg.Destroy()
 #
 #    def onFOption(this, e):
@@ -1340,13 +1346,13 @@ class MainWindow(tk.Frame):
 #        sel = this.fOptionsGui.GetStringSelection()
 #        # Looks like I switch front and back here, but this makes sense from
 #        # the GUI.
-#        this.canvas.shape.setFaceProperties(drawFaces = True)
+#        this.ogl_frame.shape.setFaceProperties(drawFaces = True)
 #        if sel == this.cull_show_both:
 #            glDisable(GL_CULL_FACE)
 #        elif sel == this.cull_show_none:
 #            # don't use culling here: doesn't work with edge radius and vertext
 #            # radius > 0
-#            this.canvas.shape.setFaceProperties(drawFaces = False)
+#            this.ogl_frame.shape.setFaceProperties(drawFaces = False)
 #            glDisable(GL_CULL_FACE)
 #        elif sel == this.cull_show_front:
 #            glCullFace(GL_FRONT)
@@ -1354,29 +1360,29 @@ class MainWindow(tk.Frame):
 #        elif this.cull_show_back:
 #            glCullFace(GL_BACK)
 #            glEnable(GL_CULL_FACE)
-#        this.canvas.paint()
+#        this.ogl_frame.paint()
 #
 #    def onOgl(this, e):
 #        id = e.GetId()
 #        if id == this.oglFrontFaceGui.GetId():
-#            onSwitchFrontBack(this.canvas)
+#            onSwitchFrontBack(this.ogl_frame)
 #
 #    def onBgCol(this, e):
 #        col = e.GetValue().Get()
-#        this.canvas.setBgCol(
+#        this.ogl_frame.setBgCol(
 #            [float(col[0])/255, float(col[1])/255, float(col[2])/255]
 #        )
-#        this.canvas.paint()
+#        this.ogl_frame.paint()
 #
 #    def onUseTransparency(this, event):
-#        this.canvas.shape.useTransparency((this.useTransparencyGui.GetSelection() == 0))
-#        this.canvas.paint()
+#        this.ogl_frame.shape.useTransparency((this.useTransparencyGui.GetSelection() == 0))
+#        this.ogl_frame.paint()
 #
 #    def onShowUnscaledEdges(this, event):
-#        this.canvas.shape.setEdgeProperties(
+#        this.ogl_frame.shape.setEdgeProperties(
 #            showUnscaled = (this.showUnscaledEdgesGui.GetSelection() == 0)
 #        )
-#        this.canvas.paint()
+#        this.ogl_frame.paint()
 #
 #    def Value2Slider(this, factor, offset, y):
 #        return (y - offset) / factor
@@ -1390,8 +1396,8 @@ class MainWindow(tk.Frame):
 #                this.cellScaleOffset,
 #                this.scaleGui.GetValue()
 #            )
-#        this.canvas.shape.setCellProperties(scale = scale)
-#        this.canvas.paint()
+#        this.ogl_frame.shape.setCellProperties(scale = scale)
+#        this.ogl_frame.paint()
 #
 #    def onPrjVolAdjust(this, event):
 #        #print 'size =', this.dynDlg.GetClientSize()
@@ -1420,8 +1426,8 @@ class MainWindow(tk.Frame):
 #                this.parentWindow.statusBar.SetStatusText(
 #                    'Error: Projection volume:  w should be > 0!'
 #                )
-#        this.canvas.shape.setProjectionProperties(cameraDistance, wProjVolume, dbg = True)
-#        this.canvas.paint()
+#        this.ogl_frame.shape.setProjectionProperties(cameraDistance, wProjVolume, dbg = True)
+#        this.ogl_frame.paint()
 #        event.Skip()
 #
 #    def onAngle(this, event):
@@ -1467,8 +1473,8 @@ class MainWindow(tk.Frame):
 #                            angle = (scale*angle, angle)
 #                        )
 #            #print r.getMatrix()
-#            this.canvas.shape.rotate(r)
-#            this.canvas.paint()
+#            this.ogl_frame.shape.rotate(r)
+#            this.ogl_frame.paint()
 #            aDeg = Geom3D.Rad2Deg * angle
 #            this.parentWindow.statusBar.SetStatusText(
 #                "Rotation angle: %f degrees (and scaling %0.2f)" % (aDeg, scale)
