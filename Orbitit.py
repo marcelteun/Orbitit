@@ -139,7 +139,6 @@ class MainWindow(tk.Frame):
         self.add_menu_bar()
         self.add_scene_canvas(ogl_frame, shape)
         self.add_status_bar()
-        root.protocol('WM_DELETE_WINDOW', self.on_quit)
         self.export_dir = '.'
         self.import_dir = '.'
         self.scene_dir = '.'
@@ -148,6 +147,7 @@ class MainWindow(tk.Frame):
         #self.viewSettingsWindow = None
         #self.colourSettingsWindow = None
         #self.transformSettingsWindow = None
+        root.protocol('WM_DELETE_WINDOW', self.on_quit)
 
         if len(p_args) > 0 and (p_args[0][-4:] == '.off' or
                                 p_args[0][-3:] == '.py'):
@@ -309,8 +309,8 @@ class MainWindow(tk.Frame):
     def add_scene_canvas(self, ogl_frame, shape):
         self.ogl_frame = ogl_frame(shape)
         self.ogl_frame.grid(row=1, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
-        self.root.grid_rowconfigure(1, weight=1, minsize=300)
-        self.root.grid_columnconfigure(0, weight=1, minsize=300)
+        self.root.rowconfigure(1, weight=1, minsize=300)
+        self.root.columnconfigure(0, weight=1, minsize=300)
 
     def add_status_bar(self):
         self.status_str = tk.StringVar()
@@ -627,7 +627,7 @@ class MainWindow(tk.Frame):
     def set_shape(self, shape):
         """Set a new shape to be shown with the current viewing settings
 
-        shape: the new shape. This will refresh the canvas.
+        shape: the new shape. This will refresh the ogl_frame.
         """
         org_shape = self.get_shape()
         self.ogl_frame.shape = shape

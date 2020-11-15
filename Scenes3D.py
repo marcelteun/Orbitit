@@ -175,9 +175,11 @@ class OglFrame(OpenGLFrame):
         self.shape.glInit()
 
     def redraw(self):
+        """called automatically from within OpenGLFrame."""
         self.paint(swap_buffers=False)
 
     def paint(self, swap_buffers=True):
+        """Call this one self after updates are made."""
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         def xy_to_sphere_pos(x, y, w, h, r2):
