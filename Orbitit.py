@@ -153,6 +153,8 @@ class MainWindow(tk.Frame):
         self.off_vals = OffFields()
         self.ps_vals = PsFields()
         #self.viewSettingsWindow = None
+        self.export_off_win = None
+        self.export_ps_win = None
         self.col_settings_window = None
         #self.transformSettingsWindow = None
         root.protocol('WM_DELETE_WINDOW', self.on_quit)
@@ -422,6 +424,9 @@ class MainWindow(tk.Frame):
             filename = '{}.{}'.format(filename, ext.lower())
         return filename
 
+    def to_top(self, window):
+        window.focus_force()
+
     def on_save_as_py(self, e=None):
         filename = filedialog.asksaveasfilename(
             initialdir=self.export_dir,
@@ -439,8 +444,13 @@ class MainWindow(tk.Frame):
             self.update_status_bar("{} file written".format(filename))
 
     def on_save_as_off(self, e=None):
-        if ExportOffDialog(self,
-                           'OFF settings', self.off_vals).show() is not None:
+        if self.export_off_win is not None:
+            self.to_top(self.export_off_win)
+            return
+        self.export_off_win = ExportOffDialog(self,
+                                              'OFF settings',
+                                              self.off_vals)
+        if self.export_off_win.show() is not None:
             filename = filedialog.asksaveasfilename(
                 initialdir=self.export_dir,
                 title="Save as OFF File",
@@ -462,10 +472,16 @@ class MainWindow(tk.Frame):
                 status_txt = "{} written".format(filename)
                 print(status_txt)
                 self.update_status_bar(status_txt)
+        self.export_off_win = None
 
     def on_save_as_ps(self, e=None):
-        if ExportPsDialog(self,
-                          'PS settings', self.ps_vals).show() is not None:
+        if self.export_ps_win is not None:
+            self.to_top(self.export_ps_win)
+            return
+        self.export_ps_win = ExportPsDialog(self,
+                                            'PS settings',
+                                            self.ps_vals)
+        if self.export_ps_win.show() is not None:
             filename = filedialog.asksaveasfilename(
                 initialdir=self.export_dir,
                 title="Save as Postscript File",
@@ -492,6 +508,7 @@ class MainWindow(tk.Frame):
                     except Geom3D.PrecisionError as e:
                         self.update_status_bar("Margin error, " + str(e))
                         raise
+        self.export_ps_win = None
 
     def on_save_as_wrl(self, e=None):
         filename = filedialog.asksaveasfilename(
