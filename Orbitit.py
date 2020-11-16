@@ -48,10 +48,17 @@ DEG2RAD = Geom3D.Deg2Rad
 DefaultScene = './scene_orbit.py'
 
 
-def col_shape_to_tk(col):
+def shape_col_to_tk(col):
     return "#{:02X}{:02X}{:02X}".format(int(0xff * col[0]),
                                         int(0xff * col[1]),
                                         int(0xff * col[2]))
+
+
+def tk_to_shape_col(col):
+    return (int(col[1:3], 16) / 0xff,
+            int(col[3:5], 16) / 0xff,
+            int(col[5:7], 16) / 0xff)
+
 
 def onSwitchFrontBack(gl_scane):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
@@ -540,15 +547,68 @@ class MainWindow(tk.Frame):
             self.viewSettingsWindow.SetFocus()
             self.viewSettingsWindow.Raise()
 
+    def make_col_map(self, all_shapes_cols):
+        """From shape colours create a list of tkinter colours and create map.
+
+        A map is create as self.idx_to_shape_cols which is a list of
+        dictionaries. For the dictionaries the key is a shape index and the
+        values are the face indices to which a colour should be applied. The
+        colour that should be applied is in the returned flat list with the
+        same index as the dictionary.
+
+        all_shapes_cols: see face colour properties of Geom3D.SimpleShape
+        return: flast list with unique colours as "#{:02X}{:02X}{:02X}"
+        """
+        flat_list_of_cols = []
+        idx_to_shape_cols = []
+        for shape_idx, shape_cols in enumerate(all_shapes_cols):
+            for col_idx, col in enumerate(shape_cols[0]):
+                tk_col = shape_col_to_tk(col)
+                if tk_col not in flat_list_of_cols:
+                    flat_list_of_cols.append(tk_col)
+                    idx_to_shape_cols.append({shape_idx: [col_idx]})
+                else:
+                    common_idx = flat_list_of_cols.index(tk_col)
+                    col_dict = idx_to_shape_cols[common_idx]
+                    if shape_idx in col_dict:
+                        col_dict[shape_idx].append(col_idx)
+                    else:
+                        col_dict[shape_idx] = [col_idx]
+        self.idx_to_shape_cols = idx_to_shape_cols
+        return flat_list_of_cols
+
     def on_colour_settings(self, e=None):
-        if not self.col_settings_window is None:
+        if self.col_settings_window is not None:
             # Don't reuse, the colours might be wrong after loading a new model
             self.col_settings_window.destroy()
-        self.col_settings_window = ColourSettingsWindow(self,
-                                                        'Colour Settings',
-                                                        self.ogl_frame,
-                                                        6)
-        #self.col_settings_window.Bind(wx.EVT_CLOSE, self.onColourSettingsClose)
+        cols = self.make_col_map(
+            self.ogl_frame.shape.getFaceProperties()['colors'])
+        self.col_settings_window = ColourSettingsWindow(
+            self, 'Colour Settings',
+            cols, 6,
+            lambda c, i=None: self.on_update_shape_cols(c, i))
+        self.col_settings_window.show()
+        self.col_settings_window = None
+
+    def on_update_shape_cols(self, tk_cols, col_idx=None):
+        shape_cols = self.ogl_frame.shape.getFaceProperties()['colors']
+
+        def update_col_dict(col_dict, tk_col):
+            shape_col = tk_to_shape_col(tk_col)
+            for shape_idx, col_indices in col_dict.items():
+                for col_idx in col_indices:
+                    shape_cols[shape_idx][0][col_idx] = shape_col
+
+        if col_idx is not None:
+            col_dict = self.idx_to_shape_cols[col_idx]
+            update_col_dict(col_dict, tk_cols[col_idx])
+        else:
+            for col_idx, tk_col in enumerate(tk_cols):
+                col_dict = self.idx_to_shape_cols[col_idx]
+                update_col_dict(col_dict, tk_col)
+
+        self.ogl_frame.shape.setFaceProperties(colors=shape_cols)
+        self.ogl_frame.paint()
 
     def on_transform(self, e=None):
         if self.transformSettingsWindow == None:
@@ -687,20 +747,25 @@ class MainWindow(tk.Frame):
         return None if self.ogl_frame is None else self.ogl_frame.shape
 
 
+# TODO: move to library, since this is a generic floating window now
 class ColourSettingsWindow(tk.Toplevel):
-    """Base class for making floating dialog windows with some fields"""
-    def __init__(self, parent, title, ogl_frame, no_of_cols_per_row):
+    """Dialog window for updating the shape colours."""
+    def __init__(self, parent, title, cols, no_of_cols_per_row, command):
         """Initialise object
 
         parent: parent widget
         title: title to use for new dialog
-        fields: an object with the following initial fields:
+        cols: the OpenGL canvas holding the shape object
+        no_of_cold_per_row: the number of colour buttons per dialog row.
+        command: a function accepting one parameter in the same format as the
+                 cols parameter. It also has an keyword parameter idx, that is
+                 used when only one index is updated.
         """
         super().__init__(parent)
         self.attributes('-type', 'dialog')
         self.title(title)
-        self.ogl_frame = ogl_frame
-        self.cols = self.ogl_frame.shape.getFaceProperties()['colors']
+        self.cols = cols
+        self.update_cols = command
         # take a copy for reset
         self.org_cols = deepcopy(self.cols)
         self.protocol('WM_DELETE_WINDOW', self.on_cancel)
@@ -715,30 +780,17 @@ class ColourSettingsWindow(tk.Toplevel):
         row = 0
         column = 0
         self.col_buttons = []
-        col_to_button = {}
-        for shape_idx, shape_cols in enumerate(self.cols):
-            for col_idx, col in enumerate(shape_cols[0]):
-                bg_col = col_shape_to_tk(col)
-                # TODO: also use Fg col?
-                if bg_col not in col_to_button:
-                    button = tk.Button(colours, bg=bg_col)
-                    button.configure(command=lambda b=button: self.on_col(b))
-                    button.bind("<Enter>", self.on_button_over)
-                    button['activebackground'] = button["background"]
-                    self.col_buttons.append(button)
-                    if column >= no_of_cols_per_row:
-                        column = 0
-                        row += 1
-                    button.grid(row=row, column=column, sticky=tk.W + tk.E)
-                    button.my_col_idx = {shape_idx: [col_idx]}
-                    col_to_button[bg_col] = button
-                    column += 1
-                else:
-                    col_button = col_to_button[bg_col]
-                    if shape_idx in col_button.my_col_idx:
-                        col_button.my_col_idx[shape_idx].append(col_idx)
-                    else:
-                        col_button.my_col_idx[shape_idx] = [col_idx]
+        for col in cols:
+            button = tk.Button(colours, bg=col)
+            button.configure(command=lambda b=button: self.on_col(b))
+            button.bind("<Enter>", self.on_button_over)
+            button['activebackground'] = button["background"]
+            self.col_buttons.append(button)
+            if column >= no_of_cols_per_row:
+                column = 0
+                row += 1
+            button.grid(row=row, column=column, sticky=tk.W + tk.E)
+            column += 1
 
         buttons = tk.Frame(self)
         buttons.grid(row=1, column=0, sticky=tk.W + tk.E)
@@ -761,13 +813,11 @@ class ColourSettingsWindow(tk.Toplevel):
         old_col = button["background"]
         rgb_col, tk_col = colorchooser.askcolor(color=old_col)
         if rgb_col is not None:
-            new_col = [channel / 0xff for channel in rgb_col]
+            col_idx = self.col_buttons.index(button)
             button['background'] = tk_col
             button['activebackground'] = button["background"]
-            for shape_idx, cols in button.my_col_idx.items():
-                for col_idx in cols:
-                    self.cols[shape_idx][0][col_idx] = new_col
-        self.update_shape_cols()
+            self.cols[col_idx] = tk_col
+            self.update_cols(self.cols, col_idx)
 
     def on_cancel(self, event=None):
         self.on_reset()
@@ -775,22 +825,19 @@ class ColourSettingsWindow(tk.Toplevel):
 
     def on_reset(self, event=None):
         # update button colours:
-        for col_button in self.col_buttons:
-            shape_idx = list(col_button.my_col_idx.keys())[0]  # 0 just take 1
-            col_idx = col_button.my_col_idx[shape_idx][0]  # 0 just take 1
-            org_col = self.org_cols[shape_idx][0][col_idx]
-            bg_col = col_shape_to_tk(org_col)
-            col_button.configure(bg=bg_col)
-        # update shape colours:
+        for org_col, col_button in zip(self.org_cols, self.col_buttons):
+            col_button.configure(bg=org_col)
+            col_button['activebackground'] = col_button["background"]
         self.cols = deepcopy(self.org_cols)
-        self.update_shape_cols()
-
-    def update_shape_cols(self):
-        self.ogl_frame.shape.setFaceProperties(colors=self.cols)
-        self.ogl_frame.paint()
+        self.update_cols(self.cols)
 
     def on_ok(self, event=None):
         self.destroy()
+
+    def show(self):
+        """Show the dialog en return when it is closed."""
+        self.wm_deiconify()
+        self.wait_window()
 
 
 #class TransformSettingsWindow(wx.Frame):
