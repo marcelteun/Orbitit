@@ -163,7 +163,7 @@ class MainWindow(tk.Frame):
         self.export_off_win = None
         self.export_ps_win = None
         self.col_settings_window = None
-        #self.transformSettingsWindow = None
+        self.transform_settings_window = None
         root.protocol('WM_DELETE_WINDOW', self.on_quit)
 
         if len(p_args) > 0 and (p_args[0][-4:] == '.off' or
@@ -611,15 +611,15 @@ class MainWindow(tk.Frame):
         self.ogl_frame.paint()
 
     def on_transform(self, e=None):
-        if self.transformSettingsWindow == None:
-            self.transformSettingsWindow = TransformSettingsWindow(
-                self.ogl_frame(), None, wx.ID_ANY,
-                title = 'Transform Settings',
-            )
-            self.transformSettingsWindow.Bind(wx.EVT_CLOSE, self.onTransformSettingsClose)
-        else:
-            self.transformSettingsWindow.SetFocus()
-            self.transformSettingsWindow.Raise()
+        if self.transform_settings_window is not None:
+            self.to_top(self.transform_settings_window)
+            return
+        self.rotation = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]))
+        self.transform_settings_window = ContiniousRotationUpdateWindow(
+            self, 'Transform Settings',
+            rotation=self.rotation)
+        self.transform_settings_window.show()
+        self.transform_settings_window = None
 
     def on_dome(self, level, e=None):
         print("TODO: on_dome level", level)
@@ -666,7 +666,7 @@ class MainWindow(tk.Frame):
         self.current_file = None
 
     def on_reset_view(self, e=None):
-        self.ogl_frame().reset_orientation()
+        self.ogl_frame.reset_orientation()
 
     def close_current_scene(self):
         print("print: TODO: only for destroying scenes control window")
@@ -690,9 +690,6 @@ class MainWindow(tk.Frame):
 #        this.colourSettingsWindow.Destroy()
 #        this.colourSettingsWindow = None
 #
-#    def onTransformSettingsClose(this, event):
-#        this.transformSettingsWindow.Destroy()
-#        this.transformSettingsWindow = None
 #
 #    def onClose(this, event):
 #        print('main onclose')
@@ -700,8 +697,8 @@ class MainWindow(tk.Frame):
 #            this.viewSettingsWindow.Close()
 #        if this.colourSettingsWindow != None:
 #            this.colourSettingsWindow.Close()
-#        if this.transformSettingsWindow != None:
-#            this.transformSettingsWindow.Close()
+#        if this.transform_settings_window != None:
+#            this.transform_settings_window.Close()
 #        this.Destroy()
 #
 #    def onKeyDown(this, e):
@@ -840,95 +837,264 @@ class ColourSettingsWindow(tk.Toplevel):
         self.wait_window()
 
 
-#class TransformSettingsWindow(wx.Frame):
-#    def __init__(this, ogl_frame, *args, **kwargs):
-#        wx.Frame.__init__(this, *args, **kwargs)
-#        this.ogl_frame    = ogl_frame
-#        this.statusBar = this.CreateStatusBar()
-#        this.panel     = wx.Panel(this, wx.ID_ANY)
-#        this.addContents()
-#        this.orgVs = this.ogl_frame.shape.getVertexProperties()['Vs']
-#        this.org_orgVs = this.orgVs # for cancel
-#        this.set_status("")
-#
-#    def addContents(this):
-#        this.mainSizer = wx.BoxSizer(wx.VERTICAL)
-#
-#        this.rotateSizer = geom_gui.AxisRotateSizer(
-#            this.panel,
-#            this.on_rot,
-#            min_angle=-180,
-#            max_angle=180,
-#            initial_angle=0
-#        )
-#        this.mainSizer.Add(this.rotateSizer)
-#
-#        # TODO: Add scale to transform
-#        # TODO: Add reflection
-#
-#        this.Guis = []
-#
-#        this.subSizer = wx.BoxSizer(wx.HORIZONTAL)
-#        this.mainSizer.Add(this.subSizer)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Apply'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onApply)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Cancel'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onCancel)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Reset'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onReset)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.Guis.append(wx.Button(this.panel, label='Done'))
-#        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onDone)
-#        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
-#
-#        this.panel.SetSizer(this.mainSizer)
-#        this.panel.SetAutoLayout(True)
-#        this.panel.Layout()
-#        this.Show(True)
-#
-#    def on_rot(self, angle, axis):
-#        if Geom3D.eq(axis.norm(), 0):
-#            this.set_status("Please define a proper axis")
-#            return
-#        transform = geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis)
-#        # Assume compound shape
-#        newVs = [
-#            [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
-#        this.ogl_frame.shape.setVertexProperties(Vs=newVs)
-#        this.ogl_frame.paint()
-#        this.set_status("Use 'Apply' to define a subsequent transform")
-#
-#    def onApply(this, e=None):
-#        this.orgVs = this.ogl_frame.shape.getVertexProperties()['Vs']
-#        # reset the angle
-#        this.rotateSizer.set_angle(0)
-#        this.set_status("applied, now you can define another axis")
-#
-#    def onReset(this, e=None):
-#        this.ogl_frame.shape.setVertexProperties(Vs=this.org_orgVs)
-#        this.ogl_frame.paint()
-#        this.orgVs = this.org_orgVs
-#
-#    def onCancel(this, e=None):
-#        this.onReset()
-#        this.Close()
-#
-#    def onDone(this, e):
-#        this.Close()
-#
-#    def close(this):
-#        for Gui in this.Guis:
-#            Gui.Destroy()
-#
-#    def set_status(this, str):
-#        this.statusBar.SetStatusText(str)
-#
+class FloatEntry(tk.Entry):
+    """Entry for only floating point numbers."""
+    def __init__(self, parent, *args,
+                 extra_validate=None,
+                 **kwargs):
+        """Initialise entry that only allows floating point numbers.
+
+        extra_validate: an extra validation step. This is a function that takes
+                        one parameters: the requested new value. Return True is
+                        valid, False otherwise.
+        """
+        self.extra_validate = extra_validate
+
+        float_vcmd = (parent.register(self.validate_if_float), '%P')
+
+        super().__init__(parent,
+                         *args,
+                         validate='key',
+                         validatecommand=float_vcmd,
+                         **kwargs)
+
+    def validate_if_float(self, new_value):
+        allow = True
+        try:
+            value = float(new_value)
+            if self.extra_validate is not None:
+                allow = self.extra_validate(value)
+        except ValueError:
+            allow = False
+        return allow
+
+
+class ContiniousRotationWidget(tk.Frame):
+    """A widget for continious updates of an angle."""
+    def __init__(self, parent,
+                 title,
+                 rotation, command,
+                 *args,
+                 angle_domain=[-180, 180],
+                 angle_digits=5,
+                 angle_init_step=0.1,
+                 float_width=10,
+                 **kwargs):
+        """Initialise object
+
+        parent: parent widget
+        rotation: a geomtypes.Rot3 object with the initial rotation
+        command: the command to call every time the roation object is updated.
+                 the command isn't called with any parameters. Just keep a
+                 reference to the rotation object (input parameter)
+        angle_domain: minimum and maximum angle (in degrees)
+        angle_digits: total amount of digits to show on angle slidebar (for
+                      min/max value.
+        angle_init_step: initial step (in degrees) for + and - buttons
+        float_width: width of all float entries that are used.
+        """
+        super().__init__(parent, *args, **kwargs)
+        self.rotation = rotation
+        self.command = command
+
+        def on_rotate(*args):
+            self.on_rotate()
+            return True
+
+        axis = rotation.axis()
+        angle = rotation.angle() / DEG2RAD
+
+        row = 0
+        # Row with axis and angle entries
+        tk.Label(self, text=title).grid(row=row, column=0, sticky=tk.W)
+        rot_ctrl = tk.Frame(self)
+        row += 1
+        rot_ctrl.grid(row=row, column=0, sticky=tk.W)
+        sub_row = 0
+        column = 0
+        tk.Button(rot_ctrl,
+                  text="Axis:",
+                  command=on_rotate).grid(row=sub_row, column=column)
+        self.axis_var = []
+        for i in range(3):
+            column += 1
+            # It doesn't seem that variables are required, but I got problems
+            # with updating the entries (e.g. with the reset)
+            self.axis_var.append(tk.DoubleVar())
+            self.axis_var[-1].set(axis[i])
+            axis_entry = FloatEntry(
+                rot_ctrl,
+                textvariable=self.axis_var[-1],
+                extra_validate=lambda v, n=i: self.check_zero_axis(v, n),
+                width=float_width)
+            axis_entry.grid(row=sub_row, column=column)
+            axis_entry.bind("<Tab>", on_rotate)
+        axis_entry.bind("<Return>", on_rotate)
+        column += 1
+        tk.Button(rot_ctrl,
+                  text="Angle:",
+                  command=on_rotate).grid(row=sub_row,
+                                          column=column, sticky=tk.W)
+        column += 1
+        self.var_angle = tk.DoubleVar()
+        self.var_angle.set(angle)
+        entry_angle = FloatEntry(rot_ctrl,
+                                 textvariable=self.var_angle,
+                                 width=float_width)
+        entry_angle.grid(row=sub_row, column=column, sticky=tk.E)
+        entry_angle.bind("<Return>", on_rotate)
+        entry_angle.bind("<Tab>", on_rotate)
+
+        sub_row += 1
+        # Row + / - angle entry
+        column = 0
+        step_down = tk.Button(rot_ctrl, text="-",
+                              command=lambda: self.on_step(False))
+        step_down.grid(row=sub_row, column=column, sticky=tk.W)
+        column += 2
+        tk.Label(rot_ctrl, text="step").grid(row=sub_row, column=column,
+                                             sticky=tk.E)
+        column += 1
+        self.angle_step = FloatEntry(rot_ctrl, width=float_width)
+        self.angle_step.insert(0, angle_init_step)
+        self.angle_step.grid(row=sub_row, column=column, sticky=tk.W)
+        column += 2
+        step_up = tk.Button(rot_ctrl, text="+",
+                            command=lambda: self.on_step(True))
+        step_up.grid(row=sub_row, column=column, sticky=tk.E)
+
+        # Row with slidebar
+        row += 1
+        # min / max from parameter
+        slidebar = tk.Scale(self, from_=angle_domain[0], to=angle_domain[1],
+                            variable=self.var_angle,
+                            resolution=-1,  # no rounding
+                            digits=angle_digits,
+                            command=on_rotate,
+                            orient=tk.HORIZONTAL)
+        slidebar.grid(row=row, sticky=tk.W + tk.E)
+
+    def check_zero_axis(self, val, index):
+        allow = not geomtypes.eq(val, 0)
+        if not allow:
+            for i, axis_entry in enumerate(self.axis_var):
+                if i != index:
+                    allow = allow or not geomtypes.eq(axis_entry.get(), 0)
+
+        # TODO: add status bar with string var if not allowed (needs reset)
+        return allow
+
+    def on_rotate(self):
+        self.command(geomtypes.Rot3(
+            axis=geomtypes.Vec3([axis.get() for axis in self.axis_var]),
+            angle=DEG2RAD * self.var_angle.get()))
+
+    def reset(self):
+        angle = self.rotation.angle()
+        self.var_angle.set(angle)
+        for axis_entry, ord_val in zip(self.axis_var, self.rotation.axis()):
+            axis_entry.set(ord_val)
+
+    def on_step(self, up):
+        step = float(self.angle_step.get())
+        if not up:
+            step = -step
+        self.var_angle.set(float(self.var_angle.get()) + step)
+        self.on_rotate()
+
+    def set_angle(self, angle):
+        self.var_angle.set(angle)
+
+
+class ContiniousRotationUpdateWindow(tk.Toplevel):
+    """Dialog window for updating rotation continiously.
+
+    Then dialog will buttons to confirm or reset the rotation
+    """
+    def __init__(self, parent, title, rotation, *args, **kwargs):
+        """Initialise object
+
+        parent: parent widget. This parent is supposed to have a status bar and
+                an OglFrame with a CompoundShape
+        title: title to use for new dialog
+        rotation: a geomtypes.Rot3 object with the initial rotation
+        """
+        super().__init__(parent, *args, **kwargs)
+        self.attributes('-type', 'dialog')
+        self.parent = parent
+        self.title(title)
+        self.rotation = rotation
+
+        self.org_vs = parent.ogl_frame.shape.getVertexProperties()['Vs']
+        row = -1
+
+        row += 1
+        self.rotation_gui = ContiniousRotationWidget(
+            self, "Rotate shape:", rotation,
+            lambda rot: self.on_rotation(rot))
+        self.rotation_gui.grid(row=row, column=0)
+
+        # Add Apply, Cancel, Reset, OK
+        row += 1
+        final = tk.Frame(self)
+        final.columnconfigure(2, weight=1)
+        final.grid(row=row, column=0, sticky=tk.W + tk.E)
+        column = 0
+        self.cancel = tk.Button(final, text="Cancel", command=self.on_quit)
+        self.cancel.grid(row=0, column=column, sticky=tk.W)
+        column += 1
+        self.reset = tk.Button(final, text="Reset", command=self.on_reset)
+        self.reset.grid(row=0, column=column, sticky=tk.W)
+        column += 1
+        self.next_text = "Apply and Next"
+        self.apply_it = tk.Button(final, text=self.next_text,
+                                  command=self.on_apply)
+        self.apply_it.grid(row=0, column=column, sticky=tk.E)
+        column += 1
+        self.ok = tk.Button(final, text="OK", command=self.on_ok)
+        self.ok.grid(row=0, column=column, sticky=tk.E)
+
+        self.bind("<Escape>", lambda e: self.on_quit())
+        self.bind("+", lambda e: self.rotation_gui.on_step(True))
+        self.bind("-", lambda e: self.rotation_gui.on_step(False))
+        self.bind("<KP_Add>", lambda e: self.rotation_gui.on_step(True))
+        self.bind("<KP_Subtract>", lambda e: self.rotation_gui.on_step(False))
+
+    def on_rotation(self, rotation):
+        # Assume compound shape
+        newVs = [
+            [rotation * geomtypes.Vec3(v) for v in shapeVs]
+            for shapeVs in self.org_vs]
+        self.parent.ogl_frame.shape.setVertexProperties(Vs=newVs)
+        self.parent.ogl_frame.paint()
+        self.parent.update_status_bar(
+            f"Use '{self.next_text}' to define a subsequent transform")
+
+    def on_apply(self):
+        self.org_vs = self.parent.ogl_frame.shape.getVertexProperties()['Vs']
+        self.rotation_gui.set_angle(0)
+        self.parent.update_status_bar("Appyling next rotation")
+        pass
+
+    def on_quit(self):
+        self.on_reset()
+        self.destroy()
+
+    def on_reset(self):
+        self.rotation_gui.reset()
+        self.on_rotation(self.rotation)
+        self.parent.update_status_bar("Latest rotation reset")
+
+    def on_ok(self):
+        self.parent.update_status_bar("Rotation applied")
+        self.destroy()
+
+    def show(self):
+        """Show the dialog en return when it is closed."""
+        self.wm_deiconify()
+        self.wait_window()
+
+
 #class ViewSettingsWindow(wx.Frame):
 #    def __init__(this, ogl_frame, *args, **kwargs):
 #        wx.Frame.__init__(this, *args, **kwargs)
@@ -1633,6 +1799,7 @@ class ExportOffDialog(FieldsDialog):
         """
         super().__init__(parent, title, fields)
 
+        # TODO remove extra parameters
         int_vcmd = (self.register(self.validate_if_int),
                     # the parameters in elf.validate_if_int:
                     '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
@@ -1761,12 +1928,14 @@ class ExportPsDialog(FieldsDialog):
         """
         super().__init__(parent, title, fields)
 
+        # TODO use the FloatEntry
         float_vcmd = (self.register(self.validate_if_float),
-                      # the parameters in elf.validate_if_int:
+                      # the parameters in self.validate_if_float:
                       '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
 
+        # TODO: remove extra parameters
         int_vcmd = (self.register(self.validate_if_int),
-                    # the parameters in elf.validate_if_int:
+                    # the parameters in self.validate_if_int:
                     '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
 
         row = 0
@@ -1927,90 +2096,96 @@ Options:
     """)
     sys.exit(exit_nr)
 
+
 class Oper:
     toPs = 1
     toOff = 2
     toPy = 3
     openScene = 4
 
-import getopt
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:],
-        'fm:P:ps:y', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
-except getopt.GetoptError as err:
-    print(str(err))
-    usage(2)
+if __name__ == "__main__":
+    import getopt
 
-# defaults:
-scale = 50
-margin = 10
-precision = 15
-
-oper = None
-for opt, opt_arg in opts:
-    if opt in ('-f', '--off'):
-        oper = Oper.toOff
-    elif opt in ('-m', '--margin'):
-        margin = int(opt_arg)
-    elif opt in ('-P', '--precision'):
-        precision = int(opt_arg)
-    elif opt in ('-p', '--ps'):
-        oper = Oper.toPs
-    elif opt in ('-s', '--scene'):
-        oper = Oper.openScene
-        scene_file = opt_arg
-        print('DBG scene_file', scene_file)
-    elif opt in ('-y', '--py'):
-        oper = Oper.toPy
-    else:
-        print("Error: unknown option")
+    try:
+        opts, args = getopt.getopt(
+            sys.argv[1:],
+            'fm:P:ps:y',
+            ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
+    except getopt.GetoptError as err:
+        print(str(err))
         usage(2)
 
-o_fd = None
-a_ind = 0
-print('DBG args', args)
-if oper is not None:
-    if len(args) <= a_ind:
-        print("reading python format from std input")
-        i_filename = None
+    # defaults:
+    scale = 50
+    margin = 10
+    precision = 15
+
+    oper = None
+    for opt, opt_arg in opts:
+        if opt in ('-f', '--off'):
+            oper = Oper.toOff
+        elif opt in ('-m', '--margin'):
+            margin = int(opt_arg)
+        elif opt in ('-P', '--precision'):
+            precision = int(opt_arg)
+        elif opt in ('-p', '--ps'):
+            oper = Oper.toPs
+        elif opt in ('-s', '--scene'):
+            oper = Oper.openScene
+            scene_file = opt_arg
+            print('DBG scene_file', scene_file)
+        elif opt in ('-y', '--py'):
+            oper = Oper.toPy
+        else:
+            print("Error: unknown option")
+            usage(2)
+
+    o_fd = None
+    a_ind = 0
+    print('DBG args', args)
+    if oper is not None:
+        if len(args) <= a_ind:
+            print("reading python format from std input")
+            i_filename = None
+        else:
+            i_filename = args[a_ind]
+            a_ind += 1
+        if len(args) <= a_ind:
+            o_fd = sys.stdout
+        else:
+            o_fd = open(args[a_ind], 'w')
+            a_ind += 1
+
+    if oper == Oper.toPs:
+        shape = read_shape_file(i_filename)
+        if shape is not None:
+            convert_to_ps(shape, o_fd, scale, precision, margin)
+    elif oper == Oper.toOff:
+        shape = read_shape_file(i_filename)
+        if shape is not None:
+            convert_to_off(shape, o_fd, precision, margin)
+    elif oper == Oper.toPy:
+        shape = read_shape_file(i_filename)
+        if shape is not None:
+            shape.saveFile(o_fd)
     else:
-        i_filename = args[a_ind]
-        a_ind += 1
-    if len(args) <= a_ind:
-        o_fd = sys.stdout
-    else:
-        o_fd = open(args[a_ind], 'w')
-        a_ind += 1
+        if oper != Oper.openScene:
+            scene_file = DefaultScene
+        root = tk.Tk()
+        root.title("Orbitit")
+        root.geometry("430x482")
+        frame = MainWindow(
+            root,
+            OglFrame,
+            Geom3D.SimpleShape([], []),
+            args)
+        frame.grid(row=0, column=0)
+        if (len(args) == 0):
+            frame.read_scene_file(scene_file)
+        root.mainloop()
 
-if oper == Oper.toPs:
-    shape = read_shape_file(i_filename)
-    if shape is not None:
-        convert_to_ps(shape, o_fd, scale, precision, margin)
-elif oper == Oper.toOff:
-    shape = read_shape_file(i_filename)
-    if shape is not None:
-        convert_to_off(shape, o_fd, precision, margin)
-elif oper == Oper.toPy:
-    shape = read_shape_file(i_filename)
-    if shape is not None:
-        shape.saveFile(o_fd)
-else:
-    if oper != Oper.openScene:
-        scene_file = DefaultScene
-    root = tk.Tk()
-    root.title("Orbitit")
-    root.geometry("430x482")
-    frame = MainWindow(
-        root,
-        OglFrame,
-        Geom3D.SimpleShape([], []),
-        args)
-    frame.grid(row=0, column=0)
-    if (len(args) == 0):
-        frame.read_scene_file(scene_file)
-    root.mainloop()
+    sys.stderr.write("Done\n")
 
-sys.stderr.write("Done\n")
-
-if o_fd != None: o_fd.close()
+    if o_fd is not None:
+        o_fd.close()
