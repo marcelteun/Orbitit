@@ -522,7 +522,7 @@ class MainWindow(tk.Frame):
             initialdir=self.export_dir,
             title="Save as .wrl file",
             filetypes=self.vrml_files)
-        if filename != '':
+        if filename:
             self.export_dir = os.path.split(filename)[0]
             filename = self._fix_file_ext(filename, 'wrl')
             # TODO precision through setting:
