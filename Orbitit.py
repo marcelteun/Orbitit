@@ -159,7 +159,7 @@ class MainWindow(tk.Frame):
         self.scene_dir = '.'
         self.off_vals = OffFields()
         self.ps_vals = PsFields()
-        #self.viewSettingsWindow = None
+        self.view_settings_win = None
         self.export_off_win = None
         self.export_ps_win = None
         self.col_settings_window = None
@@ -535,17 +535,13 @@ class MainWindow(tk.Frame):
             self.update_status_bar("{} written".format(filename))
 
     def on_view_settings(self, e=None):
-        print("TODO: on_view_settings")
-        if self.viewSettingsWindow == None:
-            self.viewSettingsWindow = ViewSettingsWindow(self.ogl_frame,
-                None, wx.ID_ANY,
-                title = 'View Settings',
-                size = (394, 300)
-            )
-            self.viewSettingsWindow.Bind(wx.EVT_CLOSE, self.onViewSettingsClose)
+        if self.view_settings_win is None:
+            self.view_settings_win = ViewSettingsWindow(
+                self,
+                title='View Settings').show()
+            self.view_settings_win = None
         else:
-            self.viewSettingsWindow.SetFocus()
-            self.viewSettingsWindow.Raise()
+            self.view_settings_win.show()
 
     def make_col_map(self, all_shapes_cols):
         """From shape colours create a list of tkinter colours and create map.
@@ -557,7 +553,7 @@ class MainWindow(tk.Frame):
         same index as the dictionary.
 
         all_shapes_cols: see face colour properties of Geom3D.SimpleShape
-        return: flast list with unique colours as "#{:02X}{:02X}{:02X}"
+        return: flat list with unique colours as "#{:02X}{:02X}{:02X}"
         """
         flat_list_of_cols = []
         idx_to_shape_cols = []
@@ -744,6 +740,38 @@ class MainWindow(tk.Frame):
         return None if self.ogl_frame is None else self.ogl_frame.shape
 
 
+# TODO: use this in ColourSettingsWindow
+class ColourButton(tk.Button):
+    """Button for setting a colour."""
+    def __init__(self, parent, rgb_col, command, *args, **kwargs):
+        """Initialise object
+
+        parent: parent widget
+        rgb_col: initial colour, it is an RGN tuple with values from 0 to 255
+        command: a function accepting one parameter in the same format as the
+                 cols parameter.
+        """
+        tk_col = "#{:02X}{:02X}{:02X}".format(rgb_col[0],
+                                              rgb_col[1],
+                                              rgb_col[2])
+        super().__init__(parent, *args, bg=tk_col, **kwargs)
+        self.configure(command=self.on_col)
+        self.bind("<Enter>", self.on_button_over)
+        self['activebackground'] = self["background"]
+        self.update_col = command
+
+    def on_button_over(self, event):
+        self.focus_force()
+
+    def on_col(self):
+        old_col = self["background"]
+        rgb_col, tk_col = colorchooser.askcolor(color=old_col)
+        if rgb_col is not None:
+            self['background'] = tk_col
+            self['activebackground'] = self["background"]
+            self.update_col(rgb_col)
+
+
 # TODO: move to library, since this is a generic floating window now
 class ColourSettingsWindow(tk.Toplevel):
     """Dialog window for updating the shape colours."""
@@ -793,7 +821,9 @@ class ColourSettingsWindow(tk.Toplevel):
         buttons.grid(row=1, column=0, sticky=tk.W + tk.E)
         # To split at reset button if window has bigger width
         buttons.columnconfigure(1, weight=1)
-        self.cancel = tk.Button(buttons, text="Cancel", command=self.on_cancel)
+        self.cancel = tk.Button(buttons,
+                                 text="Cancel",
+                                 command=self.on_cancel)
         self.cancel.grid(row=row, column=0, sticky=tk.W)
         self.ok = tk.Button(buttons, text="Reset", command=self.on_reset)
         self.ok.grid(row=row, column=1, sticky=tk.W)
@@ -1094,6 +1124,177 @@ class ContiniousRotationUpdateWindow(tk.Toplevel):
         self.wm_deiconify()
         self.wait_window()
 
+
+class ViewSettingsWindow(tk.Toplevel):
+    """Dialog window for updating view settings.
+
+    View settings are e.g. background colour, whether to show faces, edges and
+    / or vertices.
+    """
+    def __init__(self,
+                 parent,
+                 title,
+                 *args,
+                 radius_min=0.001,
+                 radius_max=0.1,
+                 **kwargs):
+        """Initialise object
+
+        parent: parent widget. This parent is supposed to have a status bar and
+                an OglFrame with a CompoundShape
+        title: title to use for new dialog
+        radius_min: min radius that can be set for width of edges and vertices
+        radius_max: max radius that can be set for width of edges and vertices
+        """
+        super().__init__(parent, *args, **kwargs)
+        self.attributes('-type', 'dialog')
+        self.parent = parent
+        self.ogl_frame = parent.ogl_frame
+        self.title(title)
+
+        slide_no_of_steps = 50
+        slide_resolution = (radius_max - radius_min) / slide_no_of_steps
+        slide_length = 200
+
+        row = -1
+
+        # VERTEX options
+        row += 1
+        vertex_options = tk.LabelFrame(self, text="Vertex Options")
+        vertex_options.grid(row=row, sticky=tk.E+tk.W)
+        self.show_vertices = tk.BooleanVar()
+        v_properties = parent.ogl_frame.shape.getVertexProperties()
+        self.show_vertices.set(v_properties['radius'] > 0)
+        tk.Checkbutton(vertex_options,
+                       text="Show",
+                       variable=self.show_vertices,
+                       command=self.on_vertex).grid(row=0, sticky=tk.W)
+        # Vertex Radius
+        self.v_radius_label = tk.Label(vertex_options,
+                                       text='With radius:',
+                                       anchor=tk.W)
+        self.v_radius_label.grid(row=1, sticky=tk.W)
+        self.vertex_radius = tk.DoubleVar()
+        self.vertex_radius.set(radius_min)
+        self.v_radius = tk.Scale(vertex_options,
+                                 from_=radius_min,
+                                 to=radius_max,
+                                 variable=self.vertex_radius,
+                                 resolution=slide_resolution,
+                                 length=slide_length,
+                                 showvalue=0,
+                                 command=self.on_vertex,
+                                 orient=tk.HORIZONTAL)
+        self.v_radius.grid(row=2)
+        col = [int(round(255 * c)) for c in v_properties['color']]
+        self.v_col = ColourButton(vertex_options, col, self.on_vertex_col)
+        self.v_col.grid(row=3, sticky=tk.W)
+        if not self.show_vertices.get():
+            self.v_radius_label.grid_forget()
+            self.v_radius.grid_forget()
+            self.v_col.grid_forget()
+
+        # FIXME:
+        # data/UniformPolyhedra/MW21.off doesn't regenerate edges correctly
+
+        # EDGE options
+        row += 1
+        edge_options = tk.LabelFrame(self, text="Edge Options")
+        edge_options.grid(row=row, column=0, sticky=tk.W+tk.E)
+        self.show_edges = tk.BooleanVar()
+        edge_properties = parent.ogl_frame.shape.getEdgeProperties()
+        self.show_edges.set(edge_properties['radius'] > 0)
+        tk.Checkbutton(edge_options,
+                       text="Show",
+                       variable=self.show_edges,
+                       command=self.on_edge).grid(row=0, sticky=tk.W)
+        # Edge Radius
+        self.edge_radius_label = tk.Label(edge_options,
+                                          text='With radius:',
+                                          anchor=tk.W)
+        self.edge_radius_label.grid(row=1, sticky=tk.W)
+        self.edge_radius = tk.DoubleVar()
+        self.edge_radius.set(radius_min)
+        self.edge_radius_slide = tk.Scale(edge_options,
+                                          from_=radius_min,
+                                          to=radius_max,
+                                          variable=self.edge_radius,
+                                          resolution=slide_resolution,
+                                          length=slide_length,
+                                          showvalue=0,
+                                          command=self.on_edge,
+                                          orient=tk.HORIZONTAL)
+        self.edge_radius_slide.grid(row=2)
+        col = [int(round(255 * c)) for c in edge_properties['color']]
+        self.edge_col = ColourButton(edge_options, col, self.on_edge_col)
+        self.edge_col.grid(row=3, sticky=tk.W)
+        if not self.show_edges.get():
+            self.edge_radius_label.grid_forget()
+            self.edge_radius_slide.grid_forget()
+            self.edge_col.grid_forget()
+
+        row += 1
+        face_options = tk.LabelFrame(self, text="Face Options")
+        face_options.grid(row=row, column=0, sticky=tk.W+tk.E)
+        tk.Label(face_options, text="TODO").grid()
+
+        row += 1
+        final = tk.Frame(self)
+        final.grid(row=row, column=0, sticky=tk.W + tk.E)
+        column = 0
+        self.ok = tk.Button(final, text="Done", command=self.on_ok)
+        self.ok.grid(row=0, column=column, sticky=tk.E)
+
+        self.bind("<Escape>", lambda e: self.on_ok(e))
+
+    def on_vertex(self, _=None):
+        if self.show_vertices.get():
+            self.v_radius_label.grid(sticky=tk.W)
+            self.v_radius.grid(sticky=tk.W)
+            self.ogl_frame.shape.setVertexProperties(
+                sticky=tk.W,
+                radius=self.vertex_radius.get())
+            self.v_col.grid(sticky=tk.W)
+        else:
+            self.v_radius_label.grid_forget()
+            self.v_radius.grid_forget()
+            self.ogl_frame.shape.setVertexProperties(radius=-1.0)
+            self.v_col.grid_forget()
+        self.ogl_frame.paint()
+
+    def on_vertex_col(self, tk_col):
+        self.ogl_frame.shape.setVertexProperties(
+            color=[float(i)/256 for i in tk_col])
+
+    def on_edge(self, _=None):
+        if self.show_edges.get():
+            self.edge_radius_label.grid(sticky=tk.W)
+            self.edge_radius_slide.grid(sticky=tk.W)
+            self.ogl_frame.shape.setEdgeProperties(drawEdge=True)
+            self.ogl_frame.shape.setEdgeProperties(
+                sticky=tk.W,
+                radius=self.edge_radius.get())
+            self.edge_col.grid(sticky=tk.W)
+        else:
+            self.edge_radius_label.grid_forget()
+            self.edge_radius_slide.grid_forget()
+            self.ogl_frame.shape.setEdgeProperties(drawEdge=False)
+            self.ogl_frame.shape.setEdgeProperties(radius=-1.0)
+            self.edge_col.grid_forget()
+        self.ogl_frame.paint()
+
+    def on_edge_col(self, tk_col):
+        self.ogl_frame.shape.setEdgeProperties(
+            color=[float(i)/256 for i in tk_col])
+
+    def on_ok(self):
+        self.parent.update_status_bar("View settings closed")
+        self.destroy()
+
+    def show(self):
+        """Show the dialog en return when it is closed."""
+        self.wm_deiconify()
+        self.wait_window()
 
 #class ViewSettingsWindow(wx.Frame):
 #    def __init__(this, ogl_frame, *args, **kwargs):
