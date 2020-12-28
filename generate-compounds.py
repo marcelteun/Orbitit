@@ -15,6 +15,7 @@ ASIN_1_V3 = math.asin(1 / V3)
 ACOS_1_V3 = math.acos(1 / V3)
 
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
+D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
 
 MU6 = fsolve(lambda a: (V2 - 1) * math.cos(a) + (V2 + 1) * math.sin(a) - 1, 0)
 MU7 = fsolve(lambda a: (1 - V2) * math.cos(a) + (1 + V2) * math.sin(a) - 1,
@@ -142,12 +143,24 @@ def create_s4(base, js_fd=None):
     polyh = S4A4.S4_C3(base, 4)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
-    polyh.rot_base(44.48 * math.pi / 180)  # example angle
+    polyh.rot_base(D_ATAN_V3_2_V5)  # use special angle as example angle
     save_off(polyh)
     # special mu
     polyh = S4A4.S4_C3(base, 4)
     polyh.rot_base(math.pi/6)
     save_off(polyh, '_mu2')
+    polyh = S4A4.S4_C3(base, 4)
+    polyh = S4A4.S4_C3(base, 8,
+                       cols=[S4A4.S4_C3.cols[0],
+                             S4A4.S4_C3.cols[3],
+                             S4A4.S4_C3.cols[2],
+                             S4A4.S4_C3.cols[1],
+                             S4A4.S4_C3.cols[1],
+                             S4A4.S4_C3.cols[2],
+                             S4A4.S4_C3.cols[3],
+                             S4A4.S4_C3.cols[0]])
+    polyh.rot_base(D_ATAN_V3_2_V5)
+    save_off(polyh, '_mu3')
 
     polyh = S4A4.S4_C2(base, 6)
     if js_fd is not None:
