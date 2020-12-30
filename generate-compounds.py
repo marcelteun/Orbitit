@@ -166,12 +166,15 @@ def create_s4(base, js_fd=None):
     polyh = S4A4.S4_C2(base, 6)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
-    polyh.rot_base(22.7 * math.pi / 180)  # example angle
+    polyh.rot_base(27.968 * math.pi / 180)  # example angle
     save_off(polyh)
     # special mu
     polyh = S4A4.S4_C2(base, 4, col_alt=1)
     polyh.rot_base(9.74 * math.pi / 180)  # TODO calculate algebraicly
     save_off(polyh, '_mu2')
+    polyh = S4A4.S4_C2(base, 4)
+    polyh.rot_base(ASIN_1_V3)
+    save_off(polyh, '_mu3')
 
 
 def create_s4xi(base, js_fd=None):
