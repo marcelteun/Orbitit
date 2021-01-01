@@ -17,6 +17,7 @@ ACOS_1_V3 = math.acos(1 / V3)
 
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
 D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
+ATAN_3_2V2 = math.atan(3 - 2 * V2)
 
 MU6 = fsolve(lambda a: (V2 - 1) * math.cos(a) + (V2 + 1) * math.sin(a) - 1, 0)
 MU7 = fsolve(lambda a: (1 - V2) * math.cos(a) + (1 + V2) * math.sin(a) - 1,
@@ -170,7 +171,7 @@ def create_s4(base, js_fd=None):
     save_off(polyh)
     # special mu
     polyh = S4A4.S4_C2(base, 4, col_alt=1)
-    polyh.rot_base(9.74 * math.pi / 180)  # TODO calculate algebraicly
+    polyh.rot_base(ATAN_3_2V2)
     save_off(polyh, '_mu2')
     polyh = S4A4.S4_C2(base, 4)
     polyh.rot_base(ASIN_1_V3)
