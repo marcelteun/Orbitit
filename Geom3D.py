@@ -231,7 +231,7 @@ def readOffFile(fd, recreateEdges = True, name = ''):
                         vRadius = 0.05
             elif state == states['readFs']:
                 # the function assumes: no comments in beween "q i0 .. iq-1 r g b"
-                assert words[0].isdigit()
+                assert words[0].isdigit(), "error interpreting line as face {}".format(words)
                 lenF = int(words[0])
                 if lenF > 0:
                     assert (len(words) >= lenF + 4 or len(words) == lenF + 1)
