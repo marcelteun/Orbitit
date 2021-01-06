@@ -18,11 +18,7 @@ ATAN_4V2_7 = math.atan(4 * V2 / 7)
 D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
 ATAN_3_2V2 = math.atan(3 - 2 * V2)
 ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
-
-MU6 = fsolve(lambda a: (V2 - 1) * math.cos(a) + (V2 + 1) * math.sin(a) - 1, 0)
-MU7 = fsolve(lambda a: (1 - V2) * math.cos(a) + (1 + V2) * math.sin(a) - 1,
-             0.5)
-
+ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
 
 def save_off(comp, tail=''):
     # If this starts with a version then we need 2A_, 2B etc (not 2_A_)
@@ -271,7 +267,7 @@ def create_s4xi(base, js_fd=None):
                                S4A4.A4xI_C3.cols[0],
                                S4A4.A4xI_C3.cols[1],
                                S4A4.A4xI_C3.cols[3]])
-    polyh.rot_base(MU6)
+    polyh.rot_base(ATAN_H_V2_1_V5__1)
     save_off(polyh, '_mu6')
     polyh = S4A4.S4xI_C2(base, 24, col_sym='C2xI',
                          cols=[S4A4.A4xI_C3.cols[0],
@@ -298,34 +294,7 @@ def create_s4xi(base, js_fd=None):
                                S4A4.A4xI_C3.cols[1],
                                S4A4.A4xI_C3.cols[3],
                                S4A4.A4xI_C3.cols[1]])
-    polyh.rot_base(MU7)
-    save_off(polyh, '_mu7')
-    polyh = S4A4.S4xI_C2(base, 24, col_sym='C2xI',
-                         cols=[S4A4.A4xI_C3.cols[0],
-                               S4A4.A4xI_C3.cols[1],
-                               S4A4.A4xI_C3.cols[2],
-                               S4A4.A4xI_C3.cols[0],
-                               S4A4.A4xI_C3.cols[2],
-                               S4A4.A4xI_C3.cols[1],
-                               S4A4.A4xI_C3.cols[2],
-                               S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[2],
-                               S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[1],
-                               S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[2],
-                               S4A4.A4xI_C3.cols[2],
-                               S4A4.A4xI_C3.cols[0],
-                               S4A4.A4xI_C3.cols[0],
-                               S4A4.A4xI_C3.cols[1],
-                               S4A4.A4xI_C3.cols[0],
-                               S4A4.A4xI_C3.cols[0],
-                               S4A4.A4xI_C3.cols[1],
-                               S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[1]])
-    polyh.rot_base(MU7)
+    polyh.rot_base(ATAN_H_V2_1_V5_1)
     save_off(polyh, '_mu7')
 
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym='D4C4')
