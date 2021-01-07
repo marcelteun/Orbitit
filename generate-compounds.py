@@ -43,7 +43,7 @@ def create_a4(base, js_fd=None):
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     # example angle for which the compound is 5 | A5 / A4 with 1 removed
-    polyh.rot_base(math.acos((-1 + 3 * math.sqrt(5))/8))
+    polyh.rot_base(D_ATAN_V3_2_V5)
     save_off(polyh)
 
 
@@ -68,7 +68,7 @@ def create_a4xi(base, js_fd=None):
                                         S4A4.A4xI_C3.cols[1],
                                         S4A4.A4xI_C3.cols[1],
                                         S4A4.A4xI_C3.cols[0]])
-    polyh.rot_base(ACOS__1_3V5_8)
+    polyh.rot_base(D_ATAN_V3_2_V5)
     save_off(polyh, '_mu2')
 
     polyh = S4A4.A4xI_C2C1(base, 3)
