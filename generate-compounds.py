@@ -176,9 +176,12 @@ def create_s4(base, js_fd=None):
     polyh = S4A4.S4_C2(base, 4, col_alt=1)
     polyh.rot_base(2*ATAN_3_2V2)
     save_off(polyh, '_mu4')
+    polyh = S4A4.S4_C2(base, 4, col_alt=0)
+    polyh.rot_base(ATAN_H_V2_1_V5__1)
+    save_off(polyh, '_mu5')
     polyh = S4A4.S4_C2(base, 4, col_alt=1)
     polyh.rot_base(ATAN_H_V2_1_V5_1)
-    save_off(polyh, '_mu5')
+    save_off(polyh, '_mu6')
 
 
 def create_s4xi(base, js_fd=None):
