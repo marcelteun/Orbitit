@@ -2,7 +2,6 @@
 
 import math
 import os
-from scipy.optimize import fsolve
 
 from compounds import S4A4
 import geomtypes
@@ -19,6 +18,7 @@ D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
 ATAN_3_2V2 = math.atan(3 - 2 * V2)
 ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
 ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
+
 
 def save_off(comp, tail=''):
     # If this starts with a version then we need 2A_, 2B etc (not 2_A_)
@@ -347,7 +347,7 @@ def create_a5(base, js_fd=None):
         js_fd.write(polyh.to_js())
 
     # Rotation freedom (around 1 axis)
-    polyh = S4A4.A5_C3(base, 5)
+    polyh = S4A4.A5_C3(base, 5, col_alt=1)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/13)  # example angle
