@@ -11,6 +11,9 @@ import geomtypes
 import isometry
 import orbit
 
+V2 = math.sqrt(2)
+V5 = math.sqrt(5)
+
 tetrahedron = {
         'Vs': [
             geomtypes.Vec3([1, 1, 1]),
@@ -505,7 +508,7 @@ class A5_C3(Compound):
                                     no_of_cols=no_of_cols, col_alt=col_alt,
                                     cols=cols,
                                     col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.acos(V2 * V5 / 4)])
 
 
 class A5_C2(Compound):
@@ -572,7 +575,7 @@ class A5xI_C3(Compound):
                                       no_of_cols=no_of_cols, col_alt=col_alt,
                                       cols=cols,
                                       col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.acos(V2 * V5 / 4)])
 
 
 class A5xI_C2(Compound):
@@ -639,8 +642,6 @@ class A5xI_D3C3(Compound):
         version: either 'A' or 'B'
         """
         axis = geomtypes.Vec3([1, 1, 1])
-        V5 = math.sqrt(5)
-        V2 = math.sqrt(2)
         phi = (1 + V5) / 2
         normal = geomtypes.Vec3([-1, -phi, phi + 1])
         super(A5xI_D3C3, self).__init__(base,
