@@ -525,7 +525,7 @@ class A5_C2(Compound):
                                     no_of_cols=no_of_cols, col_alt=col_alt,
                                     cols=cols,
                                     col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/4])
 
 
 # Rigid Compounds
@@ -592,7 +592,7 @@ class A5xI_C2(Compound):
                                       no_of_cols=no_of_cols, col_alt=col_alt,
                                       cols=cols,
                                       col_sym=col_sym)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, math.pi/4])
 
 
 class A5xI_C2C1(Compound):
@@ -611,7 +611,7 @@ class A5xI_C2C1(Compound):
                                         col_sym=col_sym)
 
         self.transform_base(self.alt_base_pos)
-        self.set_rot_axis(axis)
+        self.set_rot_axis(axis, [0, 75.64 * math.pi / 180])  # TODO calc
 
 
 # Rigid Compounds
