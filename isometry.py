@@ -2258,26 +2258,26 @@ class A5(Set):
 
     @property
     def sub_a4_setup(self):
-        if not hasattr(self, 'sub_a4_setup'):
+        if not hasattr(self, '_sub_a4_setup'):
             self._sub_a4_setup = a5_sub_a4_setup(self.rot_axes)
         return self._sub_a4_setup
 
     @property
     def sub_d5_setup(self):
-        if not hasattr(self, 'sub_d5_setup'):
+        if not hasattr(self, '_sub_d5_setup'):
             self._sub_d5_setup = a5_sub_d5_setup(self.rot_axes)
         return self._sub_d5_setup
 
     @property
     def sub_d3_setup(self):
-        if not hasattr(self, 'sub_d3_setup'):
+        if not hasattr(self, '_sub_d3_setup'):
             self._sub_d3_setup = a5_sub_d3_setup(self.rot_axes)
         return self._sub_d3_setup
 
     @property
     def sub_d2_setup(self):
         # Similar to A4 (D2 is subgroup of A4)
-        if not hasattr(self, 'sub_d2_setup'):
+        if not hasattr(self, '_sub_d2_setup'):
             self._sub_d2_setup = [
                 {'axis_n': s['o2axis0'], 'axis_2': s['o2axis1']}
                 for s in self.sub_a4_setup]
@@ -2360,26 +2360,26 @@ class A5xI(Set):
 
     @property
     def sub_a4_setup(self):
-        if not hasattr(self, 'sub_a4_setup'):
+        if not hasattr(self, '_sub_a4_setup'):
             self._sub_a4_setup = a5_sub_a4_setup(self.rot_axes)
         return self._sub_a4_setup
 
     @property
     def sub_d5_setup(self):
-        if not hasattr(self, 'sub_d5_setup'):
+        if not hasattr(self, '_sub_d5_setup'):
             self._sub_d5_setup = a5_sub_d5_setup(self.rot_axes)
         return self._sub_d5_setup
 
     @property
     def sub_d3_setup(self):
-        if not hasattr(self, 'sub_d3_setup'):
+        if not hasattr(self, '_sub_d3_setup'):
             self._sub_d3_setup = a5_sub_d3_setup(self.rot_axes)
         return self._sub_d3_setup
 
     @property
     def sub_d2_setup(self):
         # Similar to A4 (D2 is subgroup of A4)
-        if not hasattr(self, 'sub_d2_setup'):
+        if not hasattr(self, '_sub_d2_setup'):
             self._sub_d2_setup = [
                 {'axis_n': s['o2axis0'], 'axis_2': s['o2axis1']}
                 for s in self.sub_a4_setup]
@@ -2389,7 +2389,7 @@ class A5xI(Set):
     @property
     def sub_d5c5_setup(self):
         # Similar to D5 (but different setup names)
-        if not hasattr(self, 'sub_d5c5_setup'):
+        if not hasattr(self, '_sub_d5c5_setup'):
             self._sub_d5c5_setup = [
                 {'axis_n': s['axis_n'], 'normal_r': s['axis_2']}
                 for s in self.sub_d5_setup]
@@ -2398,7 +2398,7 @@ class A5xI(Set):
     @property
     def sub_d3c3_setup(self):
         # Similar to D3 (but different setup names)
-        if not hasattr(self, 'sub_d3c3_setup'):
+        if not hasattr(self, '_sub_d3c3_setup'):
             self._sub_d3c3_setup = [
                 {'axis_n': s['axis_n'], 'normal_r': s['axis_2']}
                 for s in self.sub_d3_setup]
@@ -2407,7 +2407,7 @@ class A5xI(Set):
     @property
     def sub_d2c2_setup(self):
         # Similar to D2 (but different setup names)
-        if not hasattr(self, 'sub_d2c2_setup'):
+        if not hasattr(self, '_sub_d2c2_setup'):
             self._sub_d2c2_setup = [
                 {'axis_n': s['axis_n'], 'normal_r': s['axis_2']}
                 for s in self.sub_d2_setup]
