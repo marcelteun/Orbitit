@@ -19,28 +19,21 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 from copy import deepcopy
-import glue
 import math
 import os
-import rgb
-import re
 import sys
 import X3D
 import Scenes3D
 import Geom3D
 import geomtypes
-import geom_gui
-import pprint
 import tkinter as tk
 from tkinter import colorchooser
 from tkinter import filedialog
 
-from OpenGL import GL, GLU
-#from OpenGL.GLU import *
-#from OpenGL.GL import *
+from OpenGL import GL
 from tkinter import messagebox
 
 DEG2RAD = Geom3D.Deg2Rad
@@ -60,13 +53,6 @@ def tk_to_shape_col(col):
             int(col[5:7], 16) / 0xff)
 
 
-def onSwitchFrontBack(gl_scane):
-    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
-        glFrontFace(GL_CW)
-    else:
-        glFrontFace(GL_CCW)
-    gl_scane.paint()
-
 class OglFrame(Scenes3D.OglFrame):
     def __init__(self, shape):
         super().__init__(shape)
@@ -75,23 +61,22 @@ class OglFrame(Scenes3D.OglFrame):
         super().initgl()
         self.set_cam_position(15.0)
 
-        #glShadeModel(GL_SMOOTH)
+        # GL.glShadeModel(GL.GL_SMOOTH)
 
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
+        GL.glDisable(GL.GL_CULL_FACE)
 
-        matAmbient    = [0.2, 0.2, 0.2, 0.0]
-        matDiffuse    = [0.1, 0.6, 0.0, 0.0]
-        #matSpecular   = [0.2, 0.2, 0.2, 1.]
-        matShininess  = 0.0
+        matAmbient = [0.2, 0.2, 0.2, 0.0]
+        matDiffuse = [0.1, 0.6, 0.0, 0.0]
+        matShininess = 0.0
         GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, matAmbient)
         GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, matDiffuse)
-        #GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
         GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, matShininess)
 
         lightPosition = [10.0, -30.0, -20.0, 0.0]
-        lightAmbient  = [0.3, 0.3, 0.3, 1.0]
-        lightDiffuse  = [0.5, 0.5, 0.5, 1.0]
+        lightAmbient = [0.3, 0.3, 0.3, 1.0]
+        lightDiffuse = [0.5, 0.5, 0.5, 1.0]
         # disable specular part:
         lightSpecular = [0., 0., 0., 1.]
         GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, lightPosition)
@@ -101,8 +86,8 @@ class OglFrame(Scenes3D.OglFrame):
         GL.glEnable(GL.GL_LIGHT0)
 
         lightPosition = [-30.0, 0.0, -20.0, 0.0]
-        lightAmbient  = [0.0, 0.0, 0.0, 1.]
-        lightDiffuse  = [0.08, 0.08, 0.08, 1.]
+        lightAmbient = [0.0, 0.0, 0.0, 1.]
+        lightDiffuse = [0.08, 0.08, 0.08, 1.]
         lightSpecular = [0.0, 0.0, 0.0, 1.]
         GL.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition)
         GL.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient)
@@ -115,16 +100,16 @@ class OglFrame(Scenes3D.OglFrame):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE)
         GL.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
-        GL.glClearColor(self.bgCol[0], self.bgCol[1], self.bgCol[2], 0)
+        GL.glClearColor(self.bg_col[0], self.bg_col[1], self.bg_col[2], 0)
 
-    def setBgCol(this, bgCol):
+    def set_bg_col(this, col):
         """rgb in value between 0 and 1"""
-        this.bgCol = bgCol
-        GL.glClearColor(bgCol[0], bgCol[1], bgCol[2], 0)
+        this.bg_col = col
+        GL.glClearColor(col[0], col[1], col[2], 0)
 
-    def getBgCol(this):
+    def get_bg_col(this):
         """rgb in value between 0 and 1"""
-        return this.bgCol
+        return this.bg_col
 
     def redraw(self):
         super().redraw()
@@ -169,14 +154,6 @@ class MainWindow(tk.Frame):
         if len(p_args) > 0 and (p_args[0][-4:] == '.off' or
                                 p_args[0][-3:] == '.py'):
             self.open_file(p_args[0])
-        #self.Show(True)
-        #self.Bind(wx.EVT_CLOSE, self.onClose)
-        #self.keySwitchFronBack = wx.NewId()
-        #ac = [
-        #    (wx.ACCEL_NORMAL, wx.WXK_F3, self.keySwitchFronBack)
-        #]
-        #self.Bind(wx.EVT_MENU, self.onKeyDown, id=self.keySwitchFronBack)
-        #self.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
     def tkCreateContext(self):
         super().tkCreateContext()
@@ -217,6 +194,8 @@ class MainWindow(tk.Frame):
         self.root.bind("<Control-y>", lambda e: self.on_save_as_py(e))
 
         self.root.bind("<F5>", lambda e: self.on_reset_view(e))
+
+        self.root.bind("f", lambda e: self.ogl_frame.switch_front_back_side())
 
         self.menu_bar.grid(row=0, column=0, sticky=tk.W + tk.E)
 
@@ -340,9 +319,9 @@ class MainWindow(tk.Frame):
 
     def on_reload(self, e=None):
         print('TODO: on_reload')
-        if self.current_file != None:
+        if self.current_file is not None:
             self.open_file(self.current_file)
-        elif self.current_scene != None:
+        elif self.current_scene is not None:
             self.set_scene(self.current_scene)
 
     def on_open(self, e=None):
@@ -512,8 +491,8 @@ class MainWindow(tk.Frame):
                                             -self.ps_vals.float_margin)))
                         self.update_status_bar("{} written".format(
                             filename))
-                    except Geom3D.PrecisionError as e:
-                        self.update_status_bar("Margin error, " + str(e))
+                    except Geom3D.PrecisionError as err:
+                        self.update_status_bar("Margin error, " + str(err))
                         raise
         self.export_ps_win = None
 
@@ -625,16 +604,18 @@ class MainWindow(tk.Frame):
             self.root.title("Dome %s" % self.GetTitle())
 
     def on_open_scene(self, e=None):
-        wildcard = "Scene plugin (Scene_*.py)|?cene_*.py"
-        dlg = wx.FileDialog(self, 'New: Choose a Scene',
-                self.scene_dir, '', wildcard, wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            filepath = dlg.GetPath()
-            print('filepath', filepath)
-            self.scene_dir = filepath.rsplit('/', 1)[0]
-            print('scene_dir', self.scene_dir)
-            shape = self.read_scene_file(filepath)
-        dlg.Destroy()
+        # TODO
+        pass
+        # wildcard = "Scene plugin (Scene_*.py)|?cene_*.py"
+        # dlg = wx.FileDialog(self, 'New: Choose a Scene',
+        #                     self.scene_dir, '', wildcard, wx.OPEN)
+        # if dlg.ShowModal() == wx.ID_OK:
+        #     filepath = dlg.GetPath()
+        #     print('filepath', filepath)
+        #     self.scene_dir = filepath.rsplit('/', 1)[0]
+        #     print('scene_dir', self.scene_dir)
+        #     shape = self.read_scene_file(filepath)
+        # dlg.Destroy()
 
     def read_scene_file(self, filename):
         print("Starting scene", filename)
@@ -668,7 +649,7 @@ class MainWindow(tk.Frame):
         print("print: TODO: only for destroying scenes control window")
         return
         if self.ogl_frame is not None:
-            #self.ogl_frame.close()
+            self.ogl_frame.close()
             del self.ogl_frame
             self.ogl_frame = None
 
@@ -677,26 +658,6 @@ class MainWindow(tk.Frame):
             self.master.destroy()
             sys.exit()
 
-#
-#    def onViewSettingsClose(this, event):
-#        this.viewSettingsWindow.Destroy()
-#        this.viewSettingsWindow = None
-#
-#    def onColourSettingsClose(this, event):
-#        this.colourSettingsWindow.Destroy()
-#        this.colourSettingsWindow = None
-#
-#
-#    def onClose(this, event):
-#        print('main onclose')
-#        if this.viewSettingsWindow != None:
-#            this.viewSettingsWindow.Close()
-#        if this.colourSettingsWindow != None:
-#            this.colourSettingsWindow.Close()
-#        if this.transform_settings_window != None:
-#            this.transform_settings_window.Close()
-#        this.Destroy()
-#
 #    def onKeyDown(this, e):
 #        id = e.GetId()
 #        if id == this.keySwitchFronBack:
@@ -822,8 +783,8 @@ class ColourSettingsWindow(tk.Toplevel):
         # To split at reset button if window has bigger width
         buttons.columnconfigure(1, weight=1)
         self.cancel = tk.Button(buttons,
-                                 text="Cancel",
-                                 command=self.on_cancel)
+                                text="Cancel",
+                                command=self.on_cancel)
         self.cancel.grid(row=row, column=0, sticky=tk.W)
         self.ok = tk.Button(buttons, text="Reset", command=self.on_reset)
         self.ok.grid(row=row, column=1, sticky=tk.W)
@@ -1163,7 +1124,7 @@ class ViewSettingsWindow(tk.Toplevel):
         vertex_options = tk.LabelFrame(self, text="Vertex Options")
         vertex_options.grid(row=row, sticky=tk.E+tk.W)
         self.show_vertices = tk.BooleanVar()
-        v_properties = parent.ogl_frame.shape.getVertexProperties()
+        v_properties = self.ogl_frame.shape.getVertexProperties()
         self.show_vertices.set(v_properties['radius'] > 0)
         tk.Checkbutton(vertex_options,
                        text="Show",
@@ -1194,15 +1155,12 @@ class ViewSettingsWindow(tk.Toplevel):
             self.v_radius.grid_forget()
             self.v_col.grid_forget()
 
-        # FIXME:
-        # data/UniformPolyhedra/MW21.off doesn't regenerate edges correctly
-
         # EDGE options
         row += 1
         edge_options = tk.LabelFrame(self, text="Edge Options")
         edge_options.grid(row=row, column=0, sticky=tk.W+tk.E)
         self.show_edges = tk.BooleanVar()
-        edge_properties = parent.ogl_frame.shape.getEdgeProperties()
+        edge_properties = self.ogl_frame.shape.getEdgeProperties()
         self.show_edges.set(edge_properties['radius'] > 0)
         tk.Checkbutton(edge_options,
                        text="Show",
@@ -1233,10 +1191,49 @@ class ViewSettingsWindow(tk.Toplevel):
             self.edge_radius_slide.grid_forget()
             self.edge_col.grid_forget()
 
+        # FACE options
         row += 1
         face_options = tk.LabelFrame(self, text="Face Options")
         face_options.grid(row=row, column=0, sticky=tk.W+tk.E)
-        tk.Label(face_options, text="TODO").grid()
+        face_properties = self.ogl_frame.shape.getFaceProperties()
+        self.draw_faces = tk.BooleanVar()
+        self.draw_faces.set(face_properties['drawFaces'])
+        tk.Checkbutton(face_options,
+                       text="Show",
+                       variable=self.draw_faces,
+                       command=self.on_draw_face).grid(sticky=tk.W)
+
+        # OpenGL options
+        row += 1
+        ogl_options = tk.LabelFrame(self, text="OpenGL Options")
+        ogl_options.grid(row=row, column=0, sticky=tk.W+tk.E)
+        col_row = tk.Frame(ogl_options)
+        col = [int(round(255 * c)) for c in self.ogl_frame.get_bg_col()]
+        self.bg_col = ColourButton(col_row, col, self.on_bg_col)
+        self.bg_col.grid(row=1, column=1, sticky=tk.W)
+        tk.Label(col_row, text='Background colour').grid(row=1, column=2)
+        col_row.grid(sticky=tk.W)
+        tk.Label(ogl_options, text="OpenGL faces").grid(sticky=tk.W)
+        self.face_switch_side = tk.BooleanVar()
+        self.face_switch_side.set(False)
+        tk.Checkbutton(ogl_options,
+                       text="Switch Front and Back",
+                       variable=self.face_switch_side,
+                       command=self.on_set_front_face).grid()
+        face_gl_draw_options = {
+            'both': 'Show front and back',
+            'front': 'Show front',
+            'back': 'Show back',
+            'none': 'Hide',
+        }
+        self.gl_draw_face_side = tk.StringVar()
+        self.gl_draw_face_side.set(self.ogl_frame.get_draw_sides())
+        for val, text in face_gl_draw_options.items():
+            tk.Radiobutton(ogl_options,
+                           text=text,
+                           variable=self.gl_draw_face_side,
+                           command=self.on_gl_draw_face,
+                           value=val).grid(sticky=tk.W)
 
         row += 1
         final = tk.Frame(self)
@@ -1264,7 +1261,7 @@ class ViewSettingsWindow(tk.Toplevel):
 
     def on_vertex_col(self, tk_col):
         self.ogl_frame.shape.setVertexProperties(
-            color=[float(i)/256 for i in tk_col])
+            color=[float(i)/255 for i in tk_col])
 
     def on_edge(self, _=None):
         if self.show_edges.get():
@@ -1285,7 +1282,22 @@ class ViewSettingsWindow(tk.Toplevel):
 
     def on_edge_col(self, tk_col):
         self.ogl_frame.shape.setEdgeProperties(
-            color=[float(i)/256 for i in tk_col])
+            color=[float(i)/255 for i in tk_col])
+
+    def on_draw_face(self, _=None):
+        self.ogl_frame.shape.setFaceProperties(
+            drawFaces=self.draw_faces.get())
+        self.ogl_frame.paint()
+
+    def on_set_front_face(self, _=None):
+        self.ogl_frame.switch_front_back_side(
+            do_it=self.face_switch_side.get())
+
+    def on_gl_draw_face(self, _=None):
+        self.ogl_frame.set_draw_sides(self.gl_draw_face_side.get())
+
+    def on_bg_col(self, tk_col):
+        self.ogl_frame.set_bg_col([float(i)/255 for i in tk_col])
 
     def on_ok(self):
         self.parent.update_status_bar("View settings closed")
@@ -1295,632 +1307,6 @@ class ViewSettingsWindow(tk.Toplevel):
         """Show the dialog en return when it is closed."""
         self.wm_deiconify()
         self.wait_window()
-
-#class ViewSettingsWindow(wx.Frame):
-#    def __init__(this, ogl_frame, *args, **kwargs):
-#        wx.Frame.__init__(this, *args, **kwargs)
-#        this.ogl_frame    = ogl_frame
-#        this.statusBar = this.CreateStatusBar()
-#        this.panel     = wx.Panel(this, wx.ID_ANY)
-#        this.addContents()
-#
-#    def addContents(this):
-#        this.ctrlSizer = ViewSettingsSizer(this, this.panel, this.ogl_frame)
-#        if this.ogl_frame.shape.dimension == 4:
-#            this.setDefaultSize((413, 791))
-#        else:
-#            this.setDefaultSize((380, 414))
-#        this.panel.SetSizer(this.ctrlSizer)
-#        this.panel.SetAutoLayout(True)
-#        this.panel.Layout()
-#        this.Show(True)
-#
-#    # move to general class
-#    def setDefaultSize(this, size):
-#        this.SetMinSize(size)
-#        # Needed for Dapper, not for Feisty:
-#        # (I believe it is needed for Windows as well)
-#        this.SetSize(size)
-#
-#    def reBuild(this):
-#        # Doesn't work out of the box (Guis are not destroyed...):
-#        #this.ctrlSizer.Destroy()
-#        this.ctrlSizer.close()
-#        this.addContents()
-#
-#    def update_status_bar(this, str):
-#        this.statusBar.SetStatusText(str)
-#
-#class ViewSettingsSizer(wx.BoxSizer):
-#    cull_show_none  = 'Hide'
-#    cull_show_both  = 'Show Front and Back Faces'
-#    cull_show_front = 'Show Only Front Face'
-#    cull_show_back  = 'Show Only Back Face'
-#    def __init__(this, parentWindow, parentPanel, ogl_frame, *args, **kwargs):
-#        """
-#        Create a sizer with view settings.
-#
-#        parentWindow: the parentWindow object. This is used to update de
-#                      status string in the status bar. The parent window is
-#                      supposed to contain a function update_status_bar for this
-#                      to work.
-#        parentPanel: The panel to add all control widgets to.
-#        ogl_frame: An interactive 3D ogl_frame object. This object is supposed to
-#                have a shape field that points to the shape object that is
-#                being viewed.
-#        """
-#
-#        this.Guis = []
-#        this.Boxes = []
-#        wx.BoxSizer.__init__(this, wx.VERTICAL, *args, **kwargs)
-#        this.ogl_frame       = ogl_frame
-#        this.parentWindow = parentWindow
-#        this.parentPanel  = parentPanel
-#        # Show / Hide vertices
-#        vProps            = ogl_frame.shape.getVertexProperties()
-#        this.vR           = vProps['radius']
-#        this.vOptionsLst  = ['hide', 'show']
-#        if this.vR > 0:
-#            default = 1 # key(1) = 'show'
-#        else:
-#            default = 0 # key(0) = 'hide'
-#        this.vOptionsGui  = wx.RadioBox(this.parentPanel,
-#            label = 'Vertex Options',
-#            style = wx.RA_VERTICAL,
-#            choices = this.vOptionsLst
-#        )
-#        this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onVOption, id = this.vOptionsGui.GetId())
-#        this.vOptionsGui.SetSelection(default)
-#        # Vertex Radius
-#        nrOfSliderSteps   = 40
-#        this.vRadiusMin   = 0.01
-#        this.vRadiusMax   = 0.100
-#        this.vRadiusScale = 1.0 / this.vRadiusMin
-#        s = (this.vRadiusMax - this.vRadiusMin) * this.vRadiusScale
-#        if int(s) < nrOfSliderSteps:
-#            this.vRadiusScale = (this.vRadiusScale * nrOfSliderSteps) / s
-#        this.vRadiusGui = wx.Slider(this.parentPanel,
-#            value = this.vRadiusScale * this.vR,
-#            minValue = this.vRadiusScale * this.vRadiusMin,
-#            maxValue = this.vRadiusScale * this.vRadiusMax,
-#            style = wx.SL_HORIZONTAL
-#        )
-#        this.Guis.append(this.vRadiusGui)
-#        this.parentPanel.Bind(wx.EVT_SLIDER, this.onVRadius, id = this.vRadiusGui.GetId())
-#        this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Vertex radius'))
-#        vRadiusSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-#        # disable if vertices are hidden anyway:
-#        if default != 1:
-#            this.vRadiusGui.Disable()
-#        # Vertex Colour
-#        this.vColorGui = wx.Button(this.parentPanel, wx.ID_ANY, "Colour")
-#        this.Guis.append(this.vColorGui)
-#        this.parentPanel.Bind(wx.EVT_BUTTON, this.onVColor, id = this.vColorGui.GetId())
-#        # Show / hide edges
-#        eProps           = ogl_frame.shape.getEdgeProperties()
-#        this.eR          = eProps['radius']
-#        this.eOptionsLst = ['hide', 'as cylinders', 'as lines']
-#        if eProps['drawEdges']:
-#            if this.vR > 0:
-#                default = 1 # key(1) = 'as cylinders'
-#            else:
-#                default = 2 # key(2) = 'as lines'
-#        else:
-#            default     = 0 # key(0) = 'hide'
-#        this.eOptionsGui = wx.RadioBox(this.parentPanel,
-#            label = 'Edge Options',
-#            style = wx.RA_VERTICAL,
-#            choices = this.eOptionsLst
-#        )
-#        this.Guis.append(this.eOptionsGui)
-#        this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onEOption, id = this.eOptionsGui.GetId())
-#        this.eOptionsGui.SetSelection(default)
-#        # Edge Radius
-#        nrOfSliderSteps   = 40
-#        this.eRadiusMin   = 0.008
-#        this.eRadiusMax   = 0.08
-#        this.eRadiusScale = 1.0 / this.eRadiusMin
-#        s = (this.eRadiusMax - this.eRadiusMin) * this.eRadiusScale
-#        if int(s) < nrOfSliderSteps:
-#            this.eRadiusScale = (this.eRadiusScale * nrOfSliderSteps) / s
-#        this.eRadiusGui = wx.Slider(this.parentPanel,
-#            value = this.eRadiusScale * this.eR,
-#            minValue = this.eRadiusScale * this.eRadiusMin,
-#            maxValue = this.eRadiusScale * this.eRadiusMax,
-#            style = wx.SL_HORIZONTAL
-#        )
-#        this.Guis.append(this.eRadiusGui)
-#        this.parentPanel.Bind(wx.EVT_SLIDER, this.onERadius, id = this.eRadiusGui.GetId())
-#        this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Edge radius'))
-#        eRadiusSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-#        # disable if edges are not drawn as scalable items anyway:
-#        if default != 1:
-#            this.eRadiusGui.Disable()
-#        # Edge Colour
-#        this.eColorGui = wx.Button(this.parentPanel, wx.ID_ANY, "Colour")
-#        this.Guis.append(this.eColorGui)
-#        this.parentPanel.Bind(wx.EVT_BUTTON, this.onEColor, id = this.eColorGui.GetId())
-#        # Show / hide face
-#        this.fOptionsLst = [
-#            this.cull_show_both,
-#            this.cull_show_front,
-#            this.cull_show_back,
-#            this.cull_show_none,
-#        ]
-#        this.fOptionsGui = wx.RadioBox(this.parentPanel,
-#            label = 'Face Options',
-#            style = wx.RA_VERTICAL,
-#            choices = this.fOptionsLst
-#        )
-#        this.Guis.append(this.fOptionsGui)
-#        this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onFOption, id = this.fOptionsGui.GetId())
-#        faceSizer = wx.BoxSizer(wx.HORIZONTAL)
-#        faceSizer.Add(this.fOptionsGui, 1, wx.EXPAND)
-#        if not glIsEnabled(GL_CULL_FACE):
-#            this.fOptionsGui.SetStringSelection(this.cull_show_both)
-#        else:
-#            # Looks like I switch front and back here, but this makes sense from
-#            # the GUI.
-#            if glGetInteger(GL_CULL_FACE_MODE) == GL_FRONT:
-#                this.fOptionsGui.SetStringSelection(this.cull_show_front)
-#            if glGetInteger(GL_CULL_FACE_MODE) == GL_BACK:
-#                this.fOptionsGui.SetStringSelection(this.cull_show_back)
-#            else: # ie GL_FRONT_AND_BACK
-#                this.fOptionsGui.SetStringSelection(this.cull_show_none)
-#
-#        # Open GL
-#        this.Boxes.append(wx.StaticBox(this.parentPanel,
-#                                                label = 'OpenGL Settings'))
-#        oglSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-#        this.Guis.append(
-#            wx.CheckBox(this.parentPanel,
-#                                label = 'Switch Front and Back Face (F3)')
-#        )
-#        this.oglFrontFaceGui = this.Guis[-1]
-#        this.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
-#        this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onOgl,
-#                                        id = this.oglFrontFaceGui.GetId())
-#        # background Colour
-#        colTxt = wx.StaticText(this.parentPanel, -1, "Background Colour: ")
-#        this.Guis.append(colTxt)
-#        col = this.ogl_frame.getBgCol()
-#        this.bgColorGui = wx.lib.colourselect.ColourSelect(this.parentPanel,
-#            wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255),
-#            size=wx.Size(40, 30))
-#        this.Guis.append(this.bgColorGui)
-#        this.parentPanel.Bind(wx.lib.colourselect.EVT_COLOURSELECT,
-#            this.onBgCol)
-#
-#        # Sizers
-#        vRadiusSizer.Add(this.vRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
-#        vRadiusSizer.Add(this.vColorGui,  1,             wx.BOTTOM | wx.LEFT)
-#        eRadiusSizer.Add(this.eRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
-#        eRadiusSizer.Add(this.eColorGui,  1,             wx.BOTTOM | wx.LEFT)
-#        #sizer = wx.BoxSizer(wx.VERTICAL)
-#        vSizer = wx.BoxSizer(wx.HORIZONTAL)
-#        vSizer.Add(this.vOptionsGui, 2, wx.EXPAND)
-#        vSizer.Add(vRadiusSizer, 5, wx.EXPAND)
-#        eSizer = wx.BoxSizer(wx.HORIZONTAL)
-#        eSizer.Add(this.eOptionsGui, 2, wx.EXPAND)
-#        eSizer.Add(eRadiusSizer, 5, wx.EXPAND)
-#        bgSizerSub = wx.BoxSizer(wx.HORIZONTAL)
-#        bgSizerSub.Add(colTxt, 0, wx.EXPAND)
-#        bgSizerSub.Add(this.bgColorGui, 0, wx.EXPAND)
-#        bgSizerSub.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
-#        oglSizer.Add(this.oglFrontFaceGui, 0, wx.EXPAND)
-#        oglSizer.Add(bgSizerSub, 0, wx.EXPAND)
-#        this.Add(vSizer, 5, wx.EXPAND)
-#        this.Add(eSizer, 5, wx.EXPAND)
-#        this.Add(faceSizer, 6, wx.EXPAND)
-#        this.Add(oglSizer, 0, wx.EXPAND)
-#
-#        # 4D stuff
-#        if this.ogl_frame.shape.dimension == 4:
-#            default = 0
-#            this.useTransparencyGui = wx.RadioBox(this.parentPanel,
-#                label = 'Use Transparency',
-#                style = wx.RA_VERTICAL,
-#                choices = ['Yes', 'No']
-#            )
-#            this.Guis.append(this.useTransparencyGui)
-#            this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onUseTransparency, id = this.useTransparencyGui.GetId())
-#            this.useTransparencyGui.SetSelection(default)
-#            faceSizer.Add(this.useTransparencyGui, 1, wx.EXPAND)
-#
-#            default = 0
-#            this.showUnscaledEdgesGui = wx.RadioBox(this.parentPanel,
-#                label = 'Unscaled Edges',
-#                style = wx.RA_VERTICAL,
-#                choices = ['Show', 'Hide']
-#            )
-#            this.Guis.append(this.showUnscaledEdgesGui)
-#            this.parentPanel.Bind(wx.EVT_RADIOBOX, this.onShowUnscaledEdges, id =
-#            this.showUnscaledEdgesGui.GetId())
-#            this.showUnscaledEdgesGui.SetSelection(default)
-#            faceSizer.Add(this.showUnscaledEdgesGui, 1, wx.EXPAND)
-#
-#            min   = 0.01
-#            max   = 1.0
-#            steps = 100
-#            this.cellScaleFactor = float(max - min) / steps
-#            this.cellScaleOffset = min
-#            this.scaleGui = wx.Slider(
-#                    this.parentPanel,
-#                    value = 100,
-#                    minValue = 0,
-#                    maxValue = steps,
-#                    style = wx.SL_HORIZONTAL
-#                )
-#            this.Guis.append(this.scaleGui)
-#            this.parentPanel.Bind(
-#                wx.EVT_SLIDER, this.onScale, id = this.scaleGui.GetId()
-#            )
-#            this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Scale Cells'))
-#            scaleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-#            scaleSizer.Add(this.scaleGui, 1, wx.EXPAND)
-#
-#            # 4D -> 3D projection properties: camera and prj volume distance
-#            steps = 100
-#            min   = 0.1
-#            max   = 5
-#            this.prjVolFactor = float(max - min) / steps
-#            this.prjVolOffset = min
-#            this.prjVolGui = wx.Slider(
-#                    this.parentPanel,
-#                    value = this.Value2Slider(
-#                            this.prjVolFactor,
-#                            this.prjVolOffset,
-#                            this.ogl_frame.shape.wProjVolume
-#                        ),
-#                    minValue = 0,
-#                    maxValue = steps,
-#                    style = wx.SL_HORIZONTAL
-#                )
-#            this.Guis.append(this.prjVolGui)
-#            this.parentPanel.Bind(
-#                wx.EVT_SLIDER, this.onPrjVolAdjust, id = this.prjVolGui.GetId()
-#            )
-#            this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Projection Volume W-Coordinate'))
-#            prjVolSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-#            prjVolSizer.Add(this.prjVolGui, 1, wx.EXPAND)
-#            min   = 0.5
-#            max   = 5
-#            this.camDistFactor = float(max - min) / steps
-#            this.camDistOffset = min
-#            this.camDistGui = wx.Slider(
-#                    this.parentPanel,
-#                    value = this.Value2Slider(
-#                            this.camDistFactor,
-#                            this.camDistOffset,
-#                            this.ogl_frame.shape.wCameraDistance
-#                        ),
-#                    minValue = 0,
-#                    maxValue = steps,
-#                    style = wx.SL_HORIZONTAL
-#                )
-#            this.Guis.append(this.camDistGui)
-#            this.parentPanel.Bind(
-#                wx.EVT_SLIDER, this.onPrjVolAdjust, id = this.camDistGui.GetId()
-#            )
-#            this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Camera Distance (from projection volume)'))
-#            camDistSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-#            camDistSizer.Add(this.camDistGui, 1, wx.EXPAND)
-#
-#            # Create a ctrl for specifying a 4D rotation
-#            this.Boxes.append(wx.StaticBox(parentPanel, label = 'Rotate 4D Object'))
-#            rotationSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-#            this.Boxes.append(wx.StaticBox(parentPanel, label = 'In a Plane Spanned by'))
-#            planeSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-#            this.v0Gui = geom_gui.Vector4DInput(
-#                    this.parentPanel,
-#                    #label = 'Vector 1',
-#                    relativeFloatSize = 4,
-#                    elem_labels = ['x0', 'y0', 'z0', 'w0']
-#                )
-#            this.parentPanel.Bind(
-#                geom_gui.EVT_VECTOR_UPDATED, this.onV, id = this.v0Gui.GetId()
-#            )
-#            this.v1Gui = geom_gui.Vector4DInput(
-#                    this.parentPanel,
-#                    #label = 'Vector 1',
-#                    relativeFloatSize = 4,
-#                    elem_labels = ['x1', 'y1', 'z1', 'w1']
-#                )
-#            this.parentPanel.Bind(
-#                geom_gui.EVT_VECTOR_UPDATED, this.onV, id = this.v1Gui.GetId()
-#            )
-#            # Exchange planes
-#            this.exchangeGui = wx.CheckBox(this.parentPanel, label = "Use Orthogonal Plane instead")
-#            this.exchangeGui.SetValue(False)
-#            this.parentPanel.Bind(wx.EVT_CHECKBOX, this.onExchangePlanes, id = this.exchangeGui.GetId())
-#            #this.Boxes.append?
-#            this.Guis.append(this.v0Gui)
-#            this.Guis.append(this.v1Gui)
-#            this.Guis.append(this.exchangeGui)
-#            planeSizer.Add(this.v0Gui, 12, wx.EXPAND)
-#            planeSizer.Add(this.v1Gui, 12, wx.EXPAND)
-#            planeSizer.Add(this.exchangeGui, 10, wx.EXPAND)
-#
-#            min   = 0.00
-#            max   = math.pi
-#            steps = 360 # step by degree (if you change this, make at least 30 and 45 degrees possible)
-#            this.angleFactor = float(max - min) / steps
-#            this.angleOffset = min
-#            this.angleGui = wx.Slider(
-#                    this.parentPanel,
-#                    value = 0,
-#                    minValue = 0,
-#                    maxValue = steps,
-#                    style = wx.SL_HORIZONTAL
-#                )
-#            this.Guis.append(this.angleGui)
-#            this.parentPanel.Bind(
-#                wx.EVT_SLIDER, this.onAngle, id = this.angleGui.GetId()
-#            )
-#            this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Using Angle'))
-#            angleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-#            angleSizer.Add(this.angleGui, 1, wx.EXPAND)
-#
-#            min   = 0.00
-#            max   = 1.0
-#            steps = 100
-#            this.angleScaleFactor = float(max - min) / steps
-#            this.angleScaleOffset = min
-#            this.angleScaleGui = wx.Slider(
-#                    this.parentPanel,
-#                    value = 0,
-#                    minValue = 0,
-#                    maxValue = steps,
-#                    style = wx.SL_HORIZONTAL
-#                )
-#            this.Guis.append(this.angleScaleGui)
-#            this.parentPanel.Bind(
-#                wx.EVT_SLIDER, this.onAngleScale, id = this.angleScaleGui.GetId()
-#            )
-#            this.Boxes.append(wx.StaticBox(this.parentPanel, label = 'Set Angle (by Scale) of Rotation in the Orthogonal Plane'))
-#            angleScaleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-#            angleScaleSizer.Add(this.angleScaleGui, 1, wx.EXPAND)
-#
-#            rotationSizer.Add(planeSizer, 12, wx.EXPAND)
-#            rotationSizer.Add(angleSizer, 5, wx.EXPAND)
-#            rotationSizer.Add(angleScaleSizer, 5, wx.EXPAND)
-#
-#            this.Add(scaleSizer, 3, wx.EXPAND)
-#            this.Add(prjVolSizer, 3, wx.EXPAND)
-#            this.Add(camDistSizer, 3, wx.EXPAND)
-#            this.Add(rotationSizer, 12, wx.EXPAND)
-#
-#        this.update_status_bar()
-#
-#    def close(this):
-#        # The 'try' is necessary, since the boxes are destroyed in some OS,
-#        # while this is necessary for e.g. Ubuntu Hardy Heron.
-#        for Box in this.Boxes:
-#            try:
-#                Box.Destroy()
-#            except wx._core.PyDeadObjectError: pass
-#        for Gui in this.Guis:
-#            Gui.Destroy()
-#
-#    def update_status_bar(this):
-#        try:
-#            this.parentWindow.update_status_bar('V-Radius: %0.5f; E-Radius: %0.5f' % (this.vR, this.eR))
-#        except AttributeError:
-#            print("parentWindow.update_status_bar function undefined")
-#
-#    def onVOption(this, e):
-#        #print 'onVOption'
-#        sel = this.vOptionsGui.GetSelection()
-#        selStr = this.vOptionsLst[sel]
-#        if selStr == 'show':
-#            this.vRadiusGui.Enable()
-#            this.ogl_frame.shape.setVertexProperties(radius = this.vR)
-#        elif selStr == 'hide':
-#            this.vRadiusGui.Disable()
-#            this.ogl_frame.shape.setVertexProperties(radius = -1.0)
-#        this.ogl_frame.paint()
-#
-#    def onVRadius(this, e):
-#        this.vR = (float(this.vRadiusGui.GetValue()) / this.vRadiusScale)
-#        this.ogl_frame.shape.setVertexProperties(radius = this.vR)
-#        this.ogl_frame.paint()
-#        this.update_status_bar()
-#
-#    def onVColor(this, e):
-#        dlg = wx.ColourDialog(this.parentWindow)
-#        if dlg.ShowModal() == wx.ID_OK:
-#            data = dlg.GetColourData()
-#            rgba = data.GetColour()
-#            rgb  = rgba.Get()
-#            this.ogl_frame.shape.setVertexProperties(
-#                color = [float(i)/256 for i in rgb]
-#            )
-#            this.ogl_frame.paint()
-#        dlg.Destroy()
-#
-#    def onEOption(this, e):
-#        sel = this.eOptionsGui.GetSelection()
-#        selStr = this.eOptionsLst[sel]
-#        if selStr == 'hide':
-#            this.eRadiusGui.Disable()
-#            this.ogl_frame.shape.setEdgeProperties(drawEdges = False)
-#        elif selStr == 'as cylinders':
-#            this.eRadiusGui.Enable()
-#            this.ogl_frame.shape.setEdgeProperties(drawEdges = True)
-#            this.ogl_frame.shape.setEdgeProperties(radius = this.eR)
-#        elif selStr == 'as lines':
-#            this.eRadiusGui.Disable()
-#            this.ogl_frame.shape.setEdgeProperties(drawEdges = True)
-#            this.ogl_frame.shape.setEdgeProperties(radius = 0)
-#        this.ogl_frame.paint()
-#
-#    def onERadius(this, e):
-#        this.eR = (float(this.eRadiusGui.GetValue()) / this.eRadiusScale)
-#        this.ogl_frame.shape.setEdgeProperties(radius = this.eR)
-#        this.ogl_frame.paint()
-#        this.update_status_bar()
-#
-#    def onEColor(this, e):
-#        dlg = wx.ColourDialog(this.parentWindow)
-#        if dlg.ShowModal() == wx.ID_OK:
-#            data = dlg.GetColourData()
-#            rgba = data.GetColour()
-#            rgb  = rgba.Get()
-#            this.ogl_frame.shape.setEdgeProperties(
-#                color = [float(i)/256 for i in rgb]
-#            )
-#            this.ogl_frame.paint()
-#        dlg.Destroy()
-#
-#    def onFOption(this, e):
-#        print('View Settings Window size:', this.parentWindow.GetSize())
-#        sel = this.fOptionsGui.GetStringSelection()
-#        # Looks like I switch front and back here, but this makes sense from
-#        # the GUI.
-#        this.ogl_frame.shape.setFaceProperties(drawFaces = True)
-#        if sel == this.cull_show_both:
-#            glDisable(GL_CULL_FACE)
-#        elif sel == this.cull_show_none:
-#            # don't use culling here: doesn't work with edge radius and vertext
-#            # radius > 0
-#            this.ogl_frame.shape.setFaceProperties(drawFaces = False)
-#            glDisable(GL_CULL_FACE)
-#        elif sel == this.cull_show_front:
-#            glCullFace(GL_FRONT)
-#            glEnable(GL_CULL_FACE)
-#        elif this.cull_show_back:
-#            glCullFace(GL_BACK)
-#            glEnable(GL_CULL_FACE)
-#        this.ogl_frame.paint()
-#
-#    def onOgl(this, e):
-#        id = e.GetId()
-#        if id == this.oglFrontFaceGui.GetId():
-#            onSwitchFrontBack(this.ogl_frame)
-#
-#    def onBgCol(this, e):
-#        col = e.GetValue().Get()
-#        this.ogl_frame.setBgCol(
-#            [float(col[0])/255, float(col[1])/255, float(col[2])/255]
-#        )
-#        this.ogl_frame.paint()
-#
-#    def onUseTransparency(this, event):
-#        this.ogl_frame.shape.useTransparency((this.useTransparencyGui.GetSelection() == 0))
-#        this.ogl_frame.paint()
-#
-#    def onShowUnscaledEdges(this, event):
-#        this.ogl_frame.shape.setEdgeProperties(
-#            showUnscaled = (this.showUnscaledEdgesGui.GetSelection() == 0)
-#        )
-#        this.ogl_frame.paint()
-#
-#    def Value2Slider(this, factor, offset, y):
-#        return (y - offset) / factor
-#
-#    def Slider2Value(this, factor, offset, x):
-#        return factor * float(x) + offset
-#
-#    def onScale(this, event):
-#        scale = this.Slider2Value(
-#                this.cellScaleFactor,
-#                this.cellScaleOffset,
-#                this.scaleGui.GetValue()
-#            )
-#        this.ogl_frame.shape.setCellProperties(scale = scale)
-#        this.ogl_frame.paint()
-#
-#    def onPrjVolAdjust(this, event):
-#        #print 'size =', this.dynDlg.GetClientSize()
-#        cameraDistance = this.Slider2Value(
-#                this.camDistFactor,
-#                this.camDistOffset,
-#                this.camDistGui.GetValue()
-#            )
-#        wProjVolume = this.Slider2Value(
-#                this.prjVolFactor,
-#                this.prjVolOffset,
-#                this.prjVolGui.GetValue()
-#            )
-#        if (cameraDistance > 0) and (wProjVolume > 0):
-#            this.parentWindow.statusBar.SetStatusText(
-#                "projection volume w = %0.2f; camera distance: %0.3f" % (
-#                    wProjVolume, cameraDistance
-#                )
-#            )
-#        else:
-#            if cameraDistance > 0:
-#                this.parentWindow.statusBar.SetStatusText(
-#                    'Error: Camera distance should be > 0!'
-#                )
-#            else:
-#                this.parentWindow.statusBar.SetStatusText(
-#                    'Error: Projection volume:  w should be > 0!'
-#                )
-#        this.ogl_frame.shape.setProjectionProperties(cameraDistance, wProjVolume, dbg = True)
-#        this.ogl_frame.paint()
-#        event.Skip()
-#
-#    def onAngle(this, event):
-#        this.rotate()
-#
-#    def onAngleScale(this, event):
-#        this.rotate()
-#
-#    def onExchangePlanes(this, event):
-#        this.rotate()
-#
-#    def onV(this, event):
-#        this.rotate()
-#
-#    def rotate(this):
-#        v0 = this.v0Gui.GetValue()
-#        v1 = this.v1Gui.GetValue()
-#        angle = this.Slider2Value(
-#                this.angleFactor,
-#                this.angleOffset,
-#                this.angleGui.GetValue()
-#            )
-#        scale = this.Slider2Value(
-#                this.angleScaleFactor,
-#                this.angleScaleOffset,
-#                this.angleScaleGui.GetValue()
-#            )
-#        if geomtypes.eq(angle, 0): return
-#        try:
-#            v1 = v1.make_orthogonal_to(v0)
-#            # if vectors are exchange, you actually specify the axial plane
-#            if this.exchangeGui.IsChecked():
-#                if geomtypes.eq(scale, 0):
-#                    r = geomtypes.Rot4(axialPlane = (v1, v0), angle = angle)
-#                else:
-#                    r = geomtypes.DoubleRot4(
-#                            axialPlane = (v1, v0),
-#                            angle = (angle, scale*angle)
-#                        )
-#            else:
-#                    r = geomtypes.DoubleRot4(
-#                            axialPlane = (v1, v0),
-#                            angle = (scale*angle, angle)
-#                        )
-#            #print r.getMatrix()
-#            this.ogl_frame.shape.rotate(r)
-#            this.ogl_frame.paint()
-#            aDeg = Geom3D.Rad2Deg * angle
-#            this.parentWindow.statusBar.SetStatusText(
-#                "Rotation angle: %f degrees (and scaling %0.2f)" % (aDeg, scale)
-#            )
-#        except ZeroDivisionError:
-#            # zero division means 1 of the vectors is (0, 0, 0, 0)
-#            this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
-#            pass
-#        #except AssertionError:
-#        #    zV = geomtypes.Vec4([0, 0, 0, 0])
-#        #    if v0 == zV or v1 == zV:
-#        #        this.parentWindow.statusBar.SetStatusText("Error: Don't use a zero vector")
-#        #    else:
-#        #        this.parentWindow.statusBar.SetStatusText("Error: The specified vectors are (too) parallel")
-#        #    pass
 
 
 class FieldsDialog(tk.Toplevel):

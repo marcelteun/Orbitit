@@ -123,7 +123,7 @@ class OglFrame(OpenGLFrame):
         super().__init__(*args, **kwargs)
         self.shape = shape
         self.cam_position = 5.0
-        self.bgCol = [0.097656, 0.097656, 0.437500]  # midnightBlue
+        self.bg_col = [0.097656, 0.097656, 0.437500]  # midnightBlue
         self.cyl = P2PCylinder(radius=0.05)
         self.sphere = VSphere(radius=0.1)
         self.init = False
@@ -136,6 +136,7 @@ class OglFrame(OpenGLFrame):
         self.z_scale = 1.0/100
         self.current_scale = 1.0
         self.r_scale = 0.8
+        self.face_draw_ccw = True
 
         # First on_size event fails because no context was created yet
         self._first_on_size_ignored = False
@@ -254,6 +255,61 @@ class OglFrame(OpenGLFrame):
         self.model_orientation = geomtypes.E
         self.moving_orientation = geomtypes.E
         self.current_scale = 1.0
+        self.paint()
+
+    def get_draw_sides(self):
+        """Get the current setting which defines what face side to draw.
+
+        return: the string 'front', 'back', 'both', 'none'
+        """
+        result = ''
+        if not GL.glIsEnabled(GL.GL_CULL_FACE):
+            result = 'both'
+        else:
+            if GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_FRONT:
+                result = 'back'
+            elif GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_BACK:
+                result = 'front'
+            else:
+                result = 'none'
+        return result
+
+    def set_draw_sides(self, val):
+        """Specify which sides of a face to draw.
+
+        This trigeers a paint.
+        val: one of 'front', 'back', 'both', 'none' is allowed
+        """
+        if val == 'both':
+            GL.glDisable(GL.GL_CULL_FACE)
+        else:
+            GL.glEnable(GL.GL_CULL_FACE)
+            if val == 'front':
+                GL.glCullFace(GL.GL_BACK)
+            elif val == 'back':
+                GL.glCullFace(GL.GL_FRONT)
+            else:
+                GL.glCullFace(GL.GL_FRONT_AND_BACK)
+        self.paint()
+
+    def switch_front_back_side(self, do_it=None):
+        """Whether to switch the fron and back side of a face.
+
+        This method assumes that on default CCW defines the front side.
+        This trigeers a paint.
+        do_it: optonal, boolean value whether to do this or not. If not
+               specified it will just switch the current value.
+        """
+        self.face_draw_ccw = True
+        if do_it is None:
+            # switch current value
+            new_value = {
+                GL.GL_CW: GL.GL_CCW,
+                GL.GL_CCW: GL.GL_CW}[GL.glGetIntegerv(GL.GL_FRONT_FACE)]
+        else:
+            new_value = {True: GL.GL_CW,
+                         False: GL.GL_CCW}[do_it]
+        GL.glFrontFace(new_value)
         self.paint()
 
     def set_cam_position(self, distance):

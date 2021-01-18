@@ -40,6 +40,7 @@ ROOTS:
 	should increase depending on the precision.
 
 PRIO
+2021-01-18: # data/UniformPolyhedra/MW21.off doesn't regenerate edges correctly
 2012-09-19 - Heptagons Scene: there is a shell fill that is the opposite of the
              current one. I.e. the origin is opposite. Note that for a W-fold
 	     and a trapezium fold this doesn't make much sense...
