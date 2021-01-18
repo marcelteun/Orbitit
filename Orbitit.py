@@ -112,6 +112,7 @@ class OglFrame(Scenes3D.OglFrame):
         return this.bg_col
 
     def redraw(self):
+        print('Orbitit: redraw')
         super().redraw()
         self.shape.glDraw()
 
@@ -492,8 +493,9 @@ class MainWindow(tk.Frame):
                         self.update_status_bar("{} written".format(
                             filename))
                     except Geom3D.PrecisionError as err:
-                        self.update_status_bar("Margin error, " + str(err))
-                        raise
+                        err_str = "Margin error, " + str(err)
+                        self.update_status_bar(err_str)
+                        print(err_str)
         self.export_ps_win = None
 
     def on_save_as_wrl(self, e=None):
