@@ -319,7 +319,6 @@ class MainWindow(tk.Frame):
         self.status_str.set(str)
 
     def on_reload(self, e=None):
-        print('TODO: on_reload')
         if self.current_file is not None:
             self.open_file(self.current_file)
         elif self.current_scene is not None:
@@ -374,6 +373,7 @@ class MainWindow(tk.Frame):
         # Save for reload:
         self.current_file = filename
         self.current_scene = None
+        self.ogl_frame.paint()
 
     def on_add(self, e=None):
         filename = filedialog.askopenfilename(
@@ -402,6 +402,7 @@ class MainWindow(tk.Frame):
             fd.close()
             # TODO: set better title
             self.root.title('Added: %s' % os.path.basename(filename))
+            self.ogl_frame.paint()
 
     def _fix_file_ext(self, filename, ext):
         name_ext = filename.split('.')
