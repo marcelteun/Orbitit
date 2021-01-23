@@ -21,20 +21,21 @@
 #
 # ------------------------------------------------------------------
 
-from copy import deepcopy
 import math
 import os
 import sys
-import X3D
-import Scenes3D
-import Geom3D
-import geomtypes
+
 import tkinter as tk
-from tkinter import colorchooser
 from tkinter import filedialog
 
 from OpenGL import GL
 from tkinter import messagebox
+
+import X3D
+import Scenes3D
+import geom_gui
+import Geom3D
+import geomtypes
 
 DEG2RAD = Geom3D.Deg2Rad
 
@@ -561,7 +562,7 @@ class MainWindow(tk.Frame):
             self.col_settings_window.destroy()
         cols = self.make_col_map(
             self.ogl_frame.shape.getFaceProperties()['colors'])
-        self.col_settings_window = ColourSettingsWindow(
+        self.col_settings_window = geom_gui.ColourSettingsWindow(
             self, 'Colour Settings',
             cols, 6,
             lambda c, i=None: self.on_update_shape_cols(c, i))
@@ -702,133 +703,6 @@ class MainWindow(tk.Frame):
     def get_shape(self):
         """Return the current shape object"""
         return None if self.ogl_frame is None else self.ogl_frame.shape
-
-
-# TODO: use this in ColourSettingsWindow
-class ColourButton(tk.Button):
-    """Button for setting a colour."""
-    def __init__(self, parent, rgb_col, command, *args, **kwargs):
-        """Initialise object
-
-        parent: parent widget
-        rgb_col: initial colour, it is an RGN tuple with values from 0 to 255
-        command: a function accepting one parameter in the same format as the
-                 cols parameter.
-        """
-        tk_col = "#{:02X}{:02X}{:02X}".format(rgb_col[0],
-                                              rgb_col[1],
-                                              rgb_col[2])
-        super().__init__(parent, *args, bg=tk_col, **kwargs)
-        self.configure(command=self.on_col)
-        self.bind("<Enter>", self.on_button_over)
-        self['activebackground'] = self["background"]
-        self.update_col = command
-
-    def on_button_over(self, event):
-        self.focus_force()
-
-    def on_col(self):
-        old_col = self["background"]
-        rgb_col, tk_col = colorchooser.askcolor(color=old_col)
-        if rgb_col is not None:
-            self['background'] = tk_col
-            self['activebackground'] = self["background"]
-            self.update_col(rgb_col)
-
-
-# TODO: move to library, since this is a generic floating window now
-class ColourSettingsWindow(tk.Toplevel):
-    """Dialog window for updating the shape colours."""
-    def __init__(self, parent, title, cols, no_of_cols_per_row, command):
-        """Initialise object
-
-        parent: parent widget
-        title: title to use for new dialog
-        cols: the OpenGL canvas holding the shape object
-        no_of_cold_per_row: the number of colour buttons per dialog row.
-        command: a function accepting one parameter in the same format as the
-                 cols parameter. It also has an keyword parameter idx, that is
-                 used when only one index is updated.
-        """
-        super().__init__(parent)
-        self.attributes('-type', 'dialog')
-        self.title(title)
-        self.cols = cols
-        self.update_cols = command
-        # take a copy for reset
-        self.org_cols = deepcopy(self.cols)
-        self.protocol('WM_DELETE_WINDOW', self.on_cancel)
-
-        self.columnconfigure(0, weight=1)
-
-        colours = tk.Frame(self)
-        colours.grid(row=0, column=0, sticky=tk.W + tk.E)
-        for i in range(no_of_cols_per_row):
-            colours.columnconfigure(i, weight=1)
-
-        row = 0
-        column = 0
-        self.col_buttons = []
-        for col in cols:
-            button = tk.Button(colours, bg=col)
-            button.configure(command=lambda b=button: self.on_col(b))
-            button.bind("<Enter>", self.on_button_over)
-            button['activebackground'] = button["background"]
-            self.col_buttons.append(button)
-            if column >= no_of_cols_per_row:
-                column = 0
-                row += 1
-            button.grid(row=row, column=column, sticky=tk.W + tk.E)
-            column += 1
-
-        buttons = tk.Frame(self)
-        buttons.grid(row=1, column=0, sticky=tk.W + tk.E)
-        # To split at reset button if window has bigger width
-        buttons.columnconfigure(1, weight=1)
-        self.cancel = tk.Button(buttons,
-                                text="Cancel",
-                                command=self.on_cancel)
-        self.cancel.grid(row=row, column=0, sticky=tk.W)
-        self.ok = tk.Button(buttons, text="Reset", command=self.on_reset)
-        self.ok.grid(row=row, column=1, sticky=tk.W)
-        self.ok = tk.Button(buttons, text="OK", command=self.on_ok)
-        self.ok.grid(row=row, column=2, sticky=tk.E)
-
-        self.bind("<Escape>", lambda e: self.on_cancel(e))
-
-    def on_button_over(self, event):
-        col_button = event.widget
-        col_button.focus_force()
-
-    def on_col(self, button):
-        old_col = button["background"]
-        rgb_col, tk_col = colorchooser.askcolor(color=old_col)
-        if rgb_col is not None:
-            col_idx = self.col_buttons.index(button)
-            button['background'] = tk_col
-            button['activebackground'] = button["background"]
-            self.cols[col_idx] = tk_col
-            self.update_cols(self.cols, col_idx)
-
-    def on_cancel(self, event=None):
-        self.on_reset()
-        self.destroy()
-
-    def on_reset(self, event=None):
-        # update button colours:
-        for org_col, col_button in zip(self.org_cols, self.col_buttons):
-            col_button.configure(bg=org_col)
-            col_button['activebackground'] = col_button["background"]
-        self.cols = deepcopy(self.org_cols)
-        self.update_cols(self.cols)
-
-    def on_ok(self, event=None):
-        self.destroy()
-
-    def show(self):
-        """Show the dialog en return when it is closed."""
-        self.wm_deiconify()
-        self.wait_window()
 
 
 class FloatEntry(tk.Entry):
@@ -1150,8 +1024,10 @@ class ViewSettingsWindow(tk.Toplevel):
                                  command=self.on_vertex,
                                  orient=tk.HORIZONTAL)
         self.v_radius.grid(row=2)
-        col = [int(round(255 * c)) for c in v_properties['color']]
-        self.v_col = ColourButton(vertex_options, col, self.on_vertex_col)
+        col = shape_col_to_tk(v_properties['color'])
+        self.v_col = geom_gui.ColourButton(vertex_options,
+                                           col,
+                                           self.on_vertex_col)
         self.v_col.grid(row=3, sticky=tk.W)
         if not self.show_vertices.get():
             self.v_radius_label.grid_forget()
@@ -1186,8 +1062,10 @@ class ViewSettingsWindow(tk.Toplevel):
                                           command=self.on_edge,
                                           orient=tk.HORIZONTAL)
         self.edge_radius_slide.grid(row=2)
-        col = [int(round(255 * c)) for c in edge_properties['color']]
-        self.edge_col = ColourButton(edge_options, col, self.on_edge_col)
+        col = shape_col_to_tk(edge_properties['color'])
+        self.edge_col = geom_gui.ColourButton(edge_options,
+                                              col,
+                                              self.on_edge_col)
         self.edge_col.grid(row=3, sticky=tk.W)
         if not self.show_edges.get():
             self.edge_radius_label.grid_forget()
@@ -1211,8 +1089,8 @@ class ViewSettingsWindow(tk.Toplevel):
         ogl_options = tk.LabelFrame(self, text="OpenGL Options")
         ogl_options.grid(row=row, column=0, sticky=tk.W+tk.E)
         col_row = tk.Frame(ogl_options)
-        col = [int(round(255 * c)) for c in self.ogl_frame.get_bg_col()]
-        self.bg_col = ColourButton(col_row, col, self.on_bg_col)
+        col = shape_col_to_tk(self.ogl_frame.get_bg_col())
+        self.bg_col = geom_gui.ColourButton(col_row, col, self.on_bg_col)
         self.bg_col.grid(row=1, column=1, sticky=tk.W)
         tk.Label(col_row, text='Background colour').grid(row=1, column=2)
         col_row.grid(sticky=tk.W)
@@ -1264,7 +1142,7 @@ class ViewSettingsWindow(tk.Toplevel):
 
     def on_vertex_col(self, tk_col):
         self.ogl_frame.shape.setVertexProperties(
-            color=[float(i)/255 for i in tk_col])
+            color=tk_to_shape_col(tk_col))
 
     def on_edge(self, _=None):
         if self.show_edges.get():
@@ -1285,7 +1163,7 @@ class ViewSettingsWindow(tk.Toplevel):
 
     def on_edge_col(self, tk_col):
         self.ogl_frame.shape.setEdgeProperties(
-            color=[float(i)/255 for i in tk_col])
+            color=tk_to_shape_col(tk_col))
 
     def on_draw_face(self, _=None):
         self.ogl_frame.shape.setFaceProperties(
@@ -1300,7 +1178,7 @@ class ViewSettingsWindow(tk.Toplevel):
         self.ogl_frame.set_draw_sides(self.gl_draw_face_side.get())
 
     def on_bg_col(self, tk_col):
-        self.ogl_frame.set_bg_col([float(i)/255 for i in tk_col])
+        self.ogl_frame.set_bg_col(tk_to_shape_col(tk_col))
 
     def on_ok(self):
         self.parent.update_status_bar("View settings closed")
@@ -1312,49 +1190,6 @@ class ViewSettingsWindow(tk.Toplevel):
         self.wait_window()
 
 
-class FieldsDialog(tk.Toplevel):
-    """Base class for making floating dialog windows with some fields"""
-    def __init__(self, parent, title, fields):
-        """Initialise object
-
-        parent: parent widget
-        title: title to use for new dialog
-        fields: an object with the following initial fields:
-        """
-        super().__init__(parent)
-        self.attributes('-type', 'dialog')
-        self.title(title)
-        self.fields = fields
-        self.canceled = False
-        self.protocol('WM_DELETE_WINDOW', self.on_quit)
-
-    def on_quit(self, event=None):
-        self.canceled = True
-        self.destroy()
-
-    def on_ok(self, event=None):
-        self.destroy()
-
-    def show(self, focus, select=True):
-        """
-        Show the dialog en return the values when it is close
-
-        focus: the widget to focus on
-        select: select content on 'focus'
-        return: None if the dialog is canceled (e.g. by pressing ESC) otherwise
-                it will return the object "fields" from __init__ (not updated)
-                It is up to the inheritant to update.
-        """
-        self.wm_deiconify()
-        focus.focus_force()
-        focus.selection_range(0, tk.END)
-        self.wait_window()
-        if self.canceled:
-            return None
-        else:
-            return self.fields
-
-
 class OffFields(object):
     extra_info = False
     merge_vs = False
@@ -1364,7 +1199,7 @@ class OffFields(object):
         self.float_margin = float_margin
 
 
-class ExportOffDialog(FieldsDialog):
+class ExportOffDialog(geom_gui.FieldsDialog):
     min_precision = 1
     max_precision = 16
     """
@@ -1496,7 +1331,7 @@ class PsFields(object):
         self.float_margin = float_margin
 
 
-class ExportPsDialog(FieldsDialog):
+class ExportPsDialog(geom_gui.FieldsDialog):
     min_precision = 1
     max_precision = 16
     """

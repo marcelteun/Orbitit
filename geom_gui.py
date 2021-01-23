@@ -33,7 +33,9 @@ Like vertices, faecs, symmetries, etc.
 # pylint: disable=protected-access
 
 
-
+from copy import deepcopy
+import tkinter as tk
+from tkinter import colorchooser
 import wx
 import wx.lib.scrolledpanel as wxXtra
 
@@ -49,6 +51,165 @@ def opposite_orientation(orientation):
     if orientation == wx.HORIZONTAL:
         return wx.VERTICAL
     return wx.HORIZONTAL
+
+
+class ColourButton(tk.Button):
+    """Button for setting a colour."""
+    def __init__(self, parent, tk_col, command=None, *args, **kwargs):
+        """Initialise object
+
+        parent: parent widget
+        tk_col: initial colour, it is an hexidecimal RGB value '#ABCDEF'
+        command: a function accepting one parameter in the same format as the
+                 tk_col parameter.
+        """
+        super().__init__(parent, *args, bg=tk_col, **kwargs)
+        self.configure(command=command)
+        self.bind("<Enter>", self.on_button_over)
+        self.configure(activebackground=self["background"])
+
+    def configure(self, command=None, *args, **kwargs):
+        if command:
+            self.update_col = command
+            super().configure(*args, command=self.on_col, **kwargs)
+        else:
+            super().configure(*args, **kwargs)
+
+    def on_button_over(self, event):
+        self.focus_force()
+
+    def on_col(self):
+        old_col = self["background"]
+        rgb_col, tk_col = colorchooser.askcolor(color=old_col)
+        if rgb_col is not None:
+            self.configure(background=tk_col, activebackground=tk_col)
+            self.update_col(tk_col)
+
+
+class ColourSettingsWindow(tk.Toplevel):
+    """Dialog window for updating the shape colours."""
+    def __init__(self, parent, title, tk_cols, no_of_cols_per_row, command):
+        """Initialise object
+
+        parent: parent widget
+        title: title to use for new dialog
+        tk_cols: a list of tk_cols using the hexidecimal format '#ABCDEF'
+        no_of_cold_per_row: the number of colour buttons per dialog row.
+        command: a function accepting one parameter in the same format as the
+                 tk_cols parameter. It also has an keyword parameter idx, that
+                 is used when only one index is updated.
+        """
+        super().__init__(parent)
+        self.attributes('-type', 'dialog')
+        self.title(title)
+        self.tk_cols = tk_cols
+        self.update_cols = command
+        # take a copy for reset
+        self.org_cols = deepcopy(self.tk_cols)
+        self.protocol('WM_DELETE_WINDOW', self.on_cancel)
+
+        self.columnconfigure(0, weight=1)
+
+        colours = tk.Frame(self)
+        colours.grid(row=0, column=0, sticky=tk.W + tk.E)
+        for i in range(no_of_cols_per_row):
+            colours.columnconfigure(i, weight=1)
+
+        row = 0
+        column = 0
+        self.col_buttons = []
+        for idx, tk_col in enumerate(tk_cols):
+            button = ColourButton(colours, tk_col)
+            button.configure(
+                command=lambda tk_col, idx=idx: self.on_col(tk_col, idx))
+            self.col_buttons.append(button)
+            if column >= no_of_cols_per_row:
+                column = 0
+                row += 1
+            button.grid(row=row, column=column, sticky=tk.W + tk.E)
+            column += 1
+
+        buttons = tk.Frame(self)
+        buttons.grid(row=1, column=0, sticky=tk.W + tk.E)
+        # To split at reset button if window has bigger width
+        buttons.columnconfigure(1, weight=1)
+        self.cancel = tk.Button(buttons,
+                                text="Cancel",
+                                command=self.on_cancel)
+        self.cancel.grid(row=row, column=0, sticky=tk.W)
+        self.ok = tk.Button(buttons, text="Reset", command=self.on_reset)
+        self.ok.grid(row=row, column=1, sticky=tk.W)
+        self.ok = tk.Button(buttons, text="Done", command=self.on_ok)
+        self.ok.grid(row=row, column=2, sticky=tk.E)
+
+        self.bind("<Escape>", lambda e: self.on_cancel(e))
+
+    def on_col(self, tk_col, idx):
+        self.tk_cols[idx] = tk_col
+        self.update_cols(self.tk_cols, idx)
+
+    def on_cancel(self, event=None):
+        self.on_reset()
+        self.destroy()
+
+    def on_reset(self, event=None):
+        # update button colours:
+        for org_col, col_button in zip(self.org_cols, self.col_buttons):
+            col_button.configure(bg=org_col)
+            col_button['activebackground'] = col_button["background"]
+        self.tk_cols = deepcopy(self.org_cols)
+        self.update_cols(self.tk_cols)
+
+    def on_ok(self, event=None):
+        self.destroy()
+
+    def show(self):
+        """Show the dialog en return when it is closed."""
+        self.wm_deiconify()
+        self.wait_window()
+
+
+class FieldsDialog(tk.Toplevel):
+    """Base class for making floating dialog windows with some fields"""
+    def __init__(self, parent, title, fields):
+        """Initialise object
+
+        parent: parent widget
+        title: title to use for new dialog
+        fields: an object with the following initial fields:
+        """
+        super().__init__(parent)
+        self.attributes('-type', 'dialog')
+        self.title(title)
+        self.fields = fields
+        self.canceled = False
+        self.protocol('WM_DELETE_WINDOW', self.on_quit)
+
+    def on_quit(self, event=None):
+        self.canceled = True
+        self.destroy()
+
+    def on_ok(self, event=None):
+        self.destroy()
+
+    def show(self, focus, select=True):
+        """
+        Show the dialog en return the values when it is close
+
+        focus: the widget to focus on
+        select: select content on 'focus'
+        return: None if the dialog is canceled (e.g. by pressing ESC) otherwise
+                it will return the object "fields" from __init__ (not updated)
+                It is up to the inheritant to update.
+        """
+        self.wm_deiconify()
+        focus.focus_force()
+        focus.selection_range(0, tk.END)
+        self.wait_window()
+        if self.canceled:
+            return None
+        else:
+            return self.fields
 
 
 class DisabledDropTarget(wx.TextDropTarget):
