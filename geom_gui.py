@@ -39,8 +39,11 @@ from tkinter import colorchooser
 import wx
 import wx.lib.scrolledpanel as wxXtra
 
+import Geom3D
 import geomtypes
 import isometry
+
+DEG2RAD = Geom3D.Deg2Rad
 
 # TODO:
 # - filter faces for FacesInput.GetFace (negative nrs, length 2, etc)
@@ -210,6 +213,177 @@ class FieldsDialog(tk.Toplevel):
             return None
         else:
             return self.fields
+
+
+class FloatEntry(tk.Entry):
+    """Entry for only floating point numbers."""
+    def __init__(self, parent, *args,
+                 extra_validate=None,
+                 **kwargs):
+        """Initialise entry that only allows floating point numbers.
+
+        extra_validate: an extra validation step. This is a function that takes
+                        one parameters: the requested new value. Return True is
+                        valid, False otherwise.
+        """
+        self.extra_validate = extra_validate
+
+        float_vcmd = (parent.register(self.validate_if_float), '%P')
+
+        super().__init__(parent,
+                         *args,
+                         validate='key',
+                         validatecommand=float_vcmd,
+                         **kwargs)
+
+    def validate_if_float(self, new_value):
+        allow = True
+        try:
+            value = float(new_value)
+            if self.extra_validate is not None:
+                allow = self.extra_validate(value)
+        except ValueError:
+            allow = False
+        return allow
+
+
+class ContiniousRotationWidget(tk.Frame):
+    """A widget for continious updates of an angle."""
+    def __init__(self, parent,
+                 title,
+                 rotation, command,
+                 *args,
+                 angle_domain=[-180, 180],
+                 angle_digits=5,
+                 angle_init_step=0.1,
+                 float_width=10,
+                 **kwargs):
+        """Initialise object
+
+        parent: parent widget
+        rotation: a geomtypes.Rot3 object with the initial rotation
+        command: the command to call every time the roation object is updated.
+                 the command isn't called with any parameters. Just keep a
+                 reference to the rotation object (input parameter)
+        angle_domain: minimum and maximum angle (in degrees)
+        angle_digits: total amount of digits to show on angle slidebar (for
+                      min/max value.
+        angle_init_step: initial step (in degrees) for + and - buttons
+        float_width: width of all float entries that are used.
+        """
+        super().__init__(parent, *args, **kwargs)
+        self.rotation = rotation
+        self.command = command
+
+        def on_rotate(*args):
+            self.on_rotate()
+            return True
+
+        axis = rotation.axis()
+        angle = rotation.angle() / DEG2RAD
+
+        row = 0
+        # Row with axis and angle entries
+        tk.Label(self, text=title).grid(row=row, column=0, sticky=tk.W)
+        rot_ctrl = tk.Frame(self)
+        row += 1
+        rot_ctrl.grid(row=row, column=0, sticky=tk.W)
+        sub_row = 0
+        column = 0
+        tk.Button(rot_ctrl,
+                  text="Axis:",
+                  command=on_rotate).grid(row=sub_row, column=column)
+        self.axis_var = []
+        for i in range(3):
+            column += 1
+            # It doesn't seem that variables are required, but I got problems
+            # with updating the entries (e.g. with the reset)
+            self.axis_var.append(tk.DoubleVar())
+            self.axis_var[-1].set(axis[i])
+            axis_entry = FloatEntry(
+                rot_ctrl,
+                textvariable=self.axis_var[-1],
+                extra_validate=lambda v, n=i: self.check_zero_axis(v, n),
+                width=float_width)
+            axis_entry.grid(row=sub_row, column=column)
+            axis_entry.bind("<Tab>", on_rotate)
+        axis_entry.bind("<Return>", on_rotate)
+        column += 1
+        tk.Button(rot_ctrl,
+                  text="Angle:",
+                  command=on_rotate).grid(row=sub_row,
+                                          column=column, sticky=tk.W)
+        column += 1
+        self.var_angle = tk.DoubleVar()
+        self.var_angle.set(angle)
+        entry_angle = FloatEntry(rot_ctrl,
+                                 textvariable=self.var_angle,
+                                 width=float_width)
+        entry_angle.grid(row=sub_row, column=column, sticky=tk.E)
+        entry_angle.bind("<Return>", on_rotate)
+        entry_angle.bind("<Tab>", on_rotate)
+
+        sub_row += 1
+        # Row + / - angle entry
+        column = 0
+        step_down = tk.Button(rot_ctrl, text="-",
+                              command=lambda: self.on_step(False))
+        step_down.grid(row=sub_row, column=column, sticky=tk.W)
+        column += 2
+        tk.Label(rot_ctrl, text="step").grid(row=sub_row, column=column,
+                                             sticky=tk.E)
+        column += 1
+        self.angle_step = FloatEntry(rot_ctrl, width=float_width)
+        self.angle_step.insert(0, angle_init_step)
+        self.angle_step.grid(row=sub_row, column=column, sticky=tk.W)
+        column += 2
+        step_up = tk.Button(rot_ctrl, text="+",
+                            command=lambda: self.on_step(True))
+        step_up.grid(row=sub_row, column=column, sticky=tk.E)
+
+        # Row with slidebar
+        row += 1
+        # min / max from parameter
+        slidebar = tk.Scale(self, from_=angle_domain[0], to=angle_domain[1],
+                            variable=self.var_angle,
+                            resolution=-1,  # no rounding
+                            digits=angle_digits,
+                            command=on_rotate,
+                            orient=tk.HORIZONTAL)
+        slidebar.grid(row=row, sticky=tk.W + tk.E)
+
+    def check_zero_axis(self, val, index):
+        allow = not geomtypes.eq(val, 0)
+        if not allow:
+            for i, axis_entry in enumerate(self.axis_var):
+                if i != index:
+                    allow = allow or not geomtypes.eq(axis_entry.get(), 0)
+
+        # TODO: add status bar with string var if not allowed (needs reset)
+        return allow
+
+    def on_rotate(self):
+        self.command(geomtypes.Rot3(
+            axis=geomtypes.Vec3([axis.get() for axis in self.axis_var]),
+            angle=DEG2RAD * self.var_angle.get()))
+
+    def reset(self):
+        angle = self.rotation.angle()
+        self.var_angle.set(angle)
+        for axis_entry, ord_val in zip(self.axis_var, self.rotation.axis()):
+            axis_entry.set(ord_val)
+
+    def on_step(self, up):
+        step = float(self.angle_step.get())
+        if not up:
+            step = -step
+        self.var_angle.set(float(self.var_angle.get()) + step)
+        self.on_rotate()
+
+    def set_angle(self, angle):
+        self.var_angle.set(angle)
+
+# -----------------------------
 
 
 class DisabledDropTarget(wx.TextDropTarget):
