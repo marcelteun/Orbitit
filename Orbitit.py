@@ -592,7 +592,7 @@ class MainWindow(tk.Frame):
             self.to_top(self.transform_settings_window)
             return
         self.rotation = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]))
-        self.transform_settings_window = ContiniousRotationUpdateWindow(
+        self.transform_settings_window = TransformSettingsWindow(
             self, 'Transform Settings',
             rotation=self.rotation)
         self.transform_settings_window.show()
@@ -703,7 +703,7 @@ class MainWindow(tk.Frame):
         return None if self.ogl_frame is None else self.ogl_frame.shape
 
 
-class ContiniousRotationUpdateWindow(tk.Toplevel):
+class TransformSettingsWindow(tk.Toplevel):
     """Dialog window for updating rotation continiously.
 
     Then dialog will buttons to confirm or reset the rotation
@@ -731,6 +731,12 @@ class ContiniousRotationUpdateWindow(tk.Toplevel):
             lambda rot: self.on_rotation(rot))
         self.rotation_gui.grid(row=row, column=0)
 
+        row += 1
+        tk.Button(self,
+                  text="Invert",
+                  command=self.on_invert).grid(row=row, sticky=tk.W)
+        row += 1
+
         # Add Apply, Cancel, Reset, OK
         row += 1
         final = tk.Frame(self)
@@ -743,7 +749,7 @@ class ContiniousRotationUpdateWindow(tk.Toplevel):
         self.reset = tk.Button(final, text="Reset", command=self.on_reset)
         self.reset.grid(row=0, column=column, sticky=tk.W)
         column += 1
-        self.next_text = "Apply and Next"
+        self.next_text = "Apply and Next Transform"
         self.apply_it = tk.Button(final, text=self.next_text,
                                   command=self.on_apply)
         self.apply_it.grid(row=0, column=column, sticky=tk.E)
@@ -759,10 +765,19 @@ class ContiniousRotationUpdateWindow(tk.Toplevel):
 
     def on_rotation(self, rotation):
         # Assume compound shape
-        newVs = [
-            [rotation * geomtypes.Vec3(v) for v in shapeVs]
-            for shapeVs in self.org_vs]
-        self.parent.ogl_frame.shape.setVertexProperties(Vs=newVs)
+        new_vs = [
+            [rotation * geomtypes.Vec3(v) for v in shape_vs]
+            for shape_vs in self.org_vs]
+        self.parent.ogl_frame.shape.setVertexProperties(Vs=new_vs)
+        self.parent.ogl_frame.paint()
+        self.parent.update_status_bar(
+            f"Use '{self.next_text}' to define a subsequent transform")
+
+    def on_invert(self):
+        new_vs = [
+            [-geomtypes.Vec3(v) for v in shape_vs]
+            for shape_vs in self.org_vs]
+        self.parent.ogl_frame.shape.setVertexProperties(Vs=new_vs)
         self.parent.ogl_frame.paint()
         self.parent.update_status_bar(
             f"Use '{self.next_text}' to define a subsequent transform")
@@ -770,7 +785,7 @@ class ContiniousRotationUpdateWindow(tk.Toplevel):
     def on_apply(self):
         self.org_vs = self.parent.ogl_frame.shape.getVertexProperties()['Vs']
         self.rotation_gui.set_angle(0)
-        self.parent.update_status_bar("Appyling next rotation")
+        self.parent.update_status_bar("Appyling next transform")
         pass
 
     def on_quit(self):
