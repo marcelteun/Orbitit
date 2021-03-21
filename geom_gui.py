@@ -820,8 +820,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         j = len(self._faces_labels)
         self._faces_labels.append(wx.StaticText(self, wx.ID_ANY,
                                                 '{} '.format(j)))
-        self.face_idx_sizer.Add(self._faces_labels[-1],
-                                1, wx.EXPAND | wx.ALIGN_CENTRE_VERTICAL)
+        self.face_idx_sizer.Add(self._faces_labels[-1], 1, wx.EXPAND)
 
         face_sizer = wx.BoxSizer(self.orientation)
         self._faces.append([face_sizer])

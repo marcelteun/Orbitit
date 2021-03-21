@@ -112,7 +112,7 @@ class Orbit(list):
                         # choose this sub orbit anyway (hence the break above).
                         # But to save time later, remove it already.
                         del hoStabs[i]
-                index = v.final.order/subGroup.order
+                index = v.final.order // subGroup.order
                 if hoStabs:
                     higherOrderStabiliserProps.append({'class': subGroup,
                                                        'index': index,
@@ -212,7 +212,7 @@ class Orbit(list):
                             break
                         else:
                             del loStabs[i]
-                    index = v.altFinal.order/subGroup.order
+                    index = v.altFinal.order // subGroup.order
                     try:
                         if v.indexCovered[index]:
                             pass
@@ -415,7 +415,7 @@ class Shape(Geom3D.SymmetricShape):
         assert col_alt < self.total_no_of_col_alt,\
             "colour alternative {} doesn't exist (max {})".format(
                 col_alt, self.total_no_of_col_alt - 1)
-        col_quotient_set = col_final_sym / col_syms[col_alt]
+        col_quotient_set = col_final_sym  //  col_syms[col_alt]
         self.col_per_isom = []
         for isom in fs_orbit:
             for i, sub_set in enumerate(col_quotient_set):

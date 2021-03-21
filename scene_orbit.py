@@ -630,7 +630,7 @@ class CtrlWin(wx.Frame):
         wildcard = "OFF shape (*.off)|*.off|Python shape (*.py)|*.py"
         dlg = wx.FileDialog(self,
                             'New: Choose a file', self.import_dir_name,
-                            '', wildcard, wx.OPEN)
+                            '', wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()

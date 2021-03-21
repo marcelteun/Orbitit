@@ -409,7 +409,7 @@ class MainWindow(wx.Frame):
 
     def onOpen(this, e):
         dlg = wx.FileDialog(this, 'New: Choose a file',
-                this.importDirName, '', this.wildcard, wx.OPEN)
+                this.importDirName, '', this.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             dirname = dlg.GetDirectory()
@@ -461,7 +461,7 @@ class MainWindow(wx.Frame):
 
     def onAdd(this, e):
         dlg = wx.FileDialog(this, 'Add: Choose a file',
-                this.importDirName, '', this.wildcard, wx.OPEN)
+                this.importDirName, '', this.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             isOffModel = filename[-3:] == 'off'
@@ -489,7 +489,7 @@ class MainWindow(wx.Frame):
     def onSaveAsPy(this, e):
         dlg = wx.FileDialog(this, 'Save as .py file',
             this.exportDirName, '', '*.py',
-            style = wx.SAVE | wx.OVERWRITE_PROMPT
+            style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
@@ -523,7 +523,7 @@ class MainWindow(wx.Frame):
                 margin = dlg.getFloatMargin()
                 fileDlg = wx.FileDialog(this, 'Save as .off file',
                     this.exportDirName, '', '*.off',
-                    wx.SAVE | wx.OVERWRITE_PROMPT
+                    wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                 )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
@@ -570,7 +570,7 @@ class MainWindow(wx.Frame):
                 assert (scalingFactor >= 0 and scalingFactor != None)
                 fileDlg = wx.FileDialog(this, 'Save as .ps file',
                     this.exportDirName, '', '*.ps',
-                    style = wx.SAVE | wx.OVERWRITE_PROMPT
+                    style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                 )
                 fileChoosen = fileDlg.ShowModal() == wx.ID_OK
                 if fileChoosen:
@@ -619,7 +619,7 @@ class MainWindow(wx.Frame):
     def onSaveAsWrl(this, e):
         dlg = wx.FileDialog(this,
             'Save as .vrml file', this.exportDirName, '', '*.wrl',
-            style = wx.SAVE | wx.OVERWRITE_PROMPT
+            style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = fileDlg.GetPath()
@@ -688,7 +688,7 @@ class MainWindow(wx.Frame):
     def onOpenScene(this, e):
         wildcard = "Scene plugin (Scene_*.py)|?cene_*.py"
         dlg = wx.FileDialog(this, 'New: Choose a Scene',
-                this.sceneDirName, '', wildcard, wx.OPEN)
+                this.sceneDirName, '', wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
             print('filepath', filepath)
@@ -785,11 +785,11 @@ class MainPanel(wx.Panel):
         this.canvas.panel = this
         this.canvas.SetMinSize((300, 300))
         this.canvasSizer = wx.BoxSizer(wx.HORIZONTAL)
-        this.canvasSizer.Add(this.canvas)
+        this.canvasSizer.Add(this.canvas, 1, wx.SHAPED)
 
         # Ctrl Panel:
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        mainSizer.Add(this.canvas, 3, wx.EXPAND)
+        mainSizer.Add(this.canvasSizer, 1, wx.SHAPED)
         this.SetSizer(mainSizer)
         this.SetAutoLayout(True)
         this.Layout()

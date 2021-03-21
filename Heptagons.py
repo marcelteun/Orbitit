@@ -2648,7 +2648,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def chooseOpenFile(this):
         filename = None
         dlg = wx.FileDialog(this, 'New: Choose a file',
-                this.rDir, '', '*.py', wx.OPEN)
+                this.rDir, '', '*.py', wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
                 filename = dlg.GetPath()
         dlg.Destroy()
