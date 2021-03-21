@@ -868,7 +868,7 @@ class ColourSettingsWindow(wx.Frame):
             added_cols = []
             col_idx = 0
             for col in shape_cols[0]:
-                wxcol = wx.Colour(256*col[0], 256*col[1], 256*col[2])
+                wxcol = wx.Colour(255*col[0], 255*col[1], 255*col[2])
                 if not wxcol in added_cols:
                     if i % this.col_width == 0:
                         selColSizerRow = wx.BoxSizer(wx.HORIZONTAL)
@@ -920,7 +920,7 @@ class ColourSettingsWindow(wx.Frame):
              shape_idx = colgui.my_shape_idx
              col_idx = colgui.my_cols[0]
              c = this.org_cols[shape_idx][0][col_idx]
-             wxcol = wx.Colour(256*c[0], 256*c[1], 256*c[2])
+             wxcol = wx.Colour(255*c[0], 255*c[1], 255*c[2])
              colgui.SetColour(wxcol)
         this.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in this.org_cols]
         this.updatShapeColours()
@@ -935,7 +935,7 @@ class ColourSettingsWindow(wx.Frame):
 
     def onColSel(this, e):
         wxcol = e.GetColour().Get()
-        col = (float(wxcol[0])/256, float(wxcol[1])/256, float(wxcol[2])/256)
+        col = (float(wxcol[0])/255, float(wxcol[1])/255, float(wxcol[2])/255)
         gui_id = e.GetId()
         for gui in this.selColGuis:
             if gui.GetId() == gui_id:
@@ -1478,7 +1478,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             rgba = data.GetColour()
             rgb  = rgba.Get()
             this.canvas.shape.setVertexProperties(
-                color = [float(i)/256 for i in rgb]
+                color = [float(i)/255 for i in rgb]
             )
             this.canvas.paint()
         dlg.Destroy()
@@ -1512,7 +1512,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             rgba = data.GetColour()
             rgb  = rgba.Get()
             this.canvas.shape.setEdgeProperties(
-                color = [float(i)/256 for i in rgb]
+                color = [float(i)/255 for i in rgb]
             )
             this.canvas.paint()
         dlg.Destroy()
