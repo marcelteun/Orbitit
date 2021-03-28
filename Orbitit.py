@@ -975,10 +975,17 @@ class TransformSettingsWindow(wx.Frame):
         )
         this.mainSizer.Add(this.rotateSizer)
 
+        this.Guis = []
+
         # TODO: Add scale to transform
         # TODO: Add reflection
 
-        this.Guis = []
+        # Invert
+        invert_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        this.mainSizer.Add(invert_sizer)
+        this.Guis.append(wx.Button(this.panel, label='Invert'))
+        this.Guis[-1].Bind(wx.EVT_BUTTON, this.on_invert)
+        invert_sizer.Add(this.Guis[-1], 0, wx.EXPAND)
 
         this.subSizer = wx.BoxSizer(wx.HORIZONTAL)
         this.mainSizer.Add(this.subSizer)
@@ -1012,6 +1019,14 @@ class TransformSettingsWindow(wx.Frame):
         # Assume compound shape
         newVs = [
             [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
+        this.canvas.shape.setVertexProperties(Vs=newVs)
+        this.canvas.paint()
+        this.set_status("Use 'Apply' to define a subsequent transform")
+
+    def on_invert(this, e=None):
+        # Assume compound shape
+        newVs = [
+            [-geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
         this.canvas.shape.setVertexProperties(Vs=newVs)
         this.canvas.paint()
         this.set_status("Use 'Apply' to define a subsequent transform")
