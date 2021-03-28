@@ -1679,7 +1679,7 @@ class ExportOffDialog(wx.Dialog):
     reflect in the next dialog that is created.
     Based on wxPython example dialog
     """
-    def __init__(this,
+    def __init__(self,
             parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
             style=wx.DEFAULT_DIALOG_STYLE
         ):
@@ -1688,72 +1688,67 @@ class ExportOffDialog(wx.Dialog):
         # so we can set an extra style that must be set before
         # creation, and then we create the GUI dialog using the Create
         # method.
-        pre = wx.PreDialog()
-        pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        pre.Create(parent, ID, title, pos, size, style)
-
-        # This next step is the most important, it turns this Python
-        # object into the real wrapper of the dialog (instead of pre)
-        # as far as the wxPython extension is concerned.
-        this.PostCreate(pre)
+        wx.Dialog.__init__(self)
+        self.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
+        self.Create(parent, ID, title, pos, size, style)
 
         # Now continue with the normal construction of the dialog
         # contents
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        label = wx.StaticText(this, -1, "vertex precision (decimals):")
+        label = wx.StaticText(self, -1, "vertex precision (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-        this.precisionGui = wx.lib.intctrl.IntCtrl(this,
-                value = this.precision,
+        self.precisionGui = wx.lib.intctrl.IntCtrl(self,
+                value = self.precision,
                 min   = 1,
                 max   = 16
             )
-        this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
-        hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.precisionGui.Bind(wx.lib.intctrl.EVT_INT, self.onPrecision)
+        hbox.Add(self.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
 
-        this.extraInfoGui = wx.CheckBox(this,
+        self.extraInfoGui = wx.CheckBox(self,
                 label = 'Print extra info')
-        this.extraInfoGui.SetValue(this.extraInfo)
-        this.extraInfoGui.Bind(wx.EVT_CHECKBOX, this.onExtraInfo)
-        sizer.Add(this.extraInfoGui,
-            0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.extraInfoGui.SetValue(self.extraInfo)
+        self.extraInfoGui.Bind(wx.EVT_CHECKBOX, self.onExtraInfo)
+        sizer.Add(self.extraInfoGui,
+            0, wx.GROW|wx.ALL, 5)
 
-        this.cleanUpGui = wx.CheckBox(this,
+        self.cleanUpGui = wx.CheckBox(self,
                 label = 'Merge equal vertices (can take a while)')
-        this.cleanUpGui.SetValue(this.cleanUp)
-        this.cleanUpGui.Bind(wx.EVT_CHECKBOX, this.onCleanUp)
-        sizer.Add(this.cleanUpGui,
-            0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.cleanUpGui.SetValue(self.cleanUp)
+        self.cleanUpGui.Bind(wx.EVT_CHECKBOX, self.onCleanUp)
+        sizer.Add(self.cleanUpGui,
+            0, wx.GROW|wx.ALL, 5)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
+        label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-        this.floatMarginGui = wx.lib.intctrl.IntCtrl(this,
-                value = this.floatMargin,
+        self.floatMarginGui = wx.lib.intctrl.IntCtrl(self,
+                value = self.floatMargin,
                 min   = 1,
                 max   = 16
             )
-        this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
-        if not this.cleanUp:
-            this.floatMarginGui.Disable()
-        hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, self.onFloatMargin)
+        if not self.cleanUp:
+            self.floatMarginGui.Disable()
+        hbox.Add(self.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
 
         buttonSizer = wx.StdDialogButtonSizer()
 
-        button = wx.Button(this, wx.ID_OK)
+        button = wx.Button(self, wx.ID_OK)
         button.SetDefault()
         buttonSizer.AddButton(button)
-        button = wx.Button(this, wx.ID_CANCEL)
+        button = wx.Button(self, wx.ID_CANCEL)
         buttonSizer.AddButton(button)
         buttonSizer.Realize()
 
-        sizer.Add(buttonSizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        sizer.Add(buttonSizer, 0, wx.ALL, 5)
 
-        this.SetSizer(sizer)
-        sizer.Fit(this)
+        self.SetSizer(sizer)
+        sizer.Fit(self)
 
     def onExtraInfo(this, e):
         ExportOffDialog.extraInfo = this.extraInfoGui.GetValue()
@@ -1794,7 +1789,7 @@ class ExportPsDialog(wx.Dialog):
     reflect in the next dialog that is created.
     Based on wxPython example dialog
     """
-    def __init__(this,
+    def __init__(self,
             parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
             style=wx.DEFAULT_DIALOG_STYLE
         ):
@@ -1803,66 +1798,61 @@ class ExportPsDialog(wx.Dialog):
         # so we can set an extra style that must be set before
         # creation, and then we create the GUI dialog using the Create
         # method.
-        pre = wx.PreDialog()
-        pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        pre.Create(parent, ID, title, pos, size, style)
-
-        # This next step is the most important, it turns this Python
-        # object into the real wrapper of the dialog (instead of pre)
-        # as far as the wxPython extension is concerned.
-        this.PostCreate(pre)
+        wx.Dialog.__init__(self)
+        self.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
+        self.Create(parent, ID, title, pos, size, style)
 
         # Now continue with the normal construction of the dialog
         # contents
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        label = wx.StaticText(this, -1, "Scaling Factor:")
+        label = wx.StaticText(self, -1, "Scaling Factor:")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-        this.scalingFactorGui = wx.lib.intctrl.IntCtrl(this,
+        self.scalingFactorGui = wx.lib.intctrl.IntCtrl(self,
                 value = ExportPsDialog.scaling,
                 min   = 1,
                 max   = 10000
             )
-        this.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, this.onScaling)
-        hbox.Add(this.scalingFactorGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, self.onScaling)
+        hbox.Add(self.scalingFactorGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        label = wx.StaticText(this, -1, "vertex precision (decimals):")
+        label = wx.StaticText(self, -1, "vertex precision (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-        this.precisionGui = wx.lib.intctrl.IntCtrl(this,
+        self.precisionGui = wx.lib.intctrl.IntCtrl(self,
                 value = ExportPsDialog.precision,
                 min   = 1,
                 max   = 16
             )
-        this.precisionGui.Bind(wx.lib.intctrl.EVT_INT, this.onPrecision)
-        hbox.Add(this.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.precisionGui.Bind(wx.lib.intctrl.EVT_INT, self.onPrecision)
+        hbox.Add(self.precisionGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        label = wx.StaticText(this, -1, "float margin for being equal (decimals):")
+        label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-        this.floatMarginGui = wx.lib.intctrl.IntCtrl(this,
+        self.floatMarginGui = wx.lib.intctrl.IntCtrl(self,
                 value = ExportPsDialog.floatMargin,
                 min   = 1,
                 max   = 16
             )
-        this.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, this.onFloatMargin)
-        hbox.Add(this.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.floatMarginGui.Bind(wx.lib.intctrl.EVT_INT, self.onFloatMargin)
+        hbox.Add(self.floatMarginGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
 
         buttonSizer = wx.StdDialogButtonSizer()
 
-        button = wx.Button(this, wx.ID_OK)
+        button = wx.Button(self, wx.ID_OK)
         button.SetDefault()
         buttonSizer.AddButton(button)
-        button = wx.Button(this, wx.ID_CANCEL)
+        button = wx.Button(self, wx.ID_CANCEL)
         buttonSizer.AddButton(button)
         buttonSizer.Realize()
 
-        sizer.Add(buttonSizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        sizer.Add(buttonSizer, 0, wx.ALL, 5)
 
-        this.SetSizer(sizer)
-        sizer.Fit(this)
+        self.SetSizer(sizer)
+        sizer.Fit(self)
 
     def onScaling(this, e):
         ExportPsDialog.scaling = this.scalingFactorGui.GetValue()
