@@ -275,6 +275,7 @@ class CtrlWin(wx.Frame):
         """
         try:
             self.col_sizer.Clear(True)
+            self.select_col_sizer = None
         except AttributeError:
             self.col_gui_box = wx.StaticBox(self.panel, label='Colour Setup')
             self.col_sizer = wx.StaticBoxSizer(self.col_gui_box, wx.VERTICAL)
