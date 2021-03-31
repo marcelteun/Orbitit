@@ -248,7 +248,7 @@ class MainWindow(wx.Frame):
             this.openFile(p_args[0])
         this.Show(True)
         this.Bind(wx.EVT_CLOSE, this.onClose)
-        this.keySwitchFronBack = wx.NewId()
+        this.keySwitchFronBack = wx.NewIdRef().GetId()
         ac = [
             (wx.ACCEL_NORMAL, wx.WXK_F3, this.keySwitchFronBack)
         ]
@@ -272,7 +272,7 @@ class MainWindow(wx.Frame):
                 text = "&Open\tCtrl+O"
             )
         this.Bind(wx.EVT_MENU, this.onOpen, id = openGui.GetId())
-        menu.AppendItem(openGui)
+        menu.Append(openGui)
 
         openGui = wx.MenuItem(
                 menu,
@@ -280,7 +280,7 @@ class MainWindow(wx.Frame):
                 text = "&Reload\tCtrl+R"
             )
         this.Bind(wx.EVT_MENU, this.onReload, id = openGui.GetId())
-        menu.AppendItem(openGui)
+        menu.Append(openGui)
 
         add = wx.MenuItem(
                 menu,
@@ -288,7 +288,7 @@ class MainWindow(wx.Frame):
                 text = "&Add\tCtrl+A"
             )
         this.Bind(wx.EVT_MENU, this.onAdd, id = add.GetId())
-        menu.AppendItem(add)
+        menu.Append(add)
         export = wx.Menu()
 
         saveAsPy = wx.MenuItem(
@@ -297,7 +297,7 @@ class MainWindow(wx.Frame):
                 text = "&Python\tCtrl+Y"
             )
         this.Bind(wx.EVT_MENU, this.onSaveAsPy, id = saveAsPy.GetId())
-        export.AppendItem(saveAsPy)
+        export.Append(saveAsPy)
 
         saveAsOff = wx.MenuItem(
                 export,
@@ -305,7 +305,7 @@ class MainWindow(wx.Frame):
                 text = "&Off\tCtrl+E"
             )
         this.Bind(wx.EVT_MENU, this.onSaveAsOff, id = saveAsOff.GetId())
-        export.AppendItem(saveAsOff)
+        export.Append(saveAsOff)
 
         saveAsPs = wx.MenuItem(
                 export,
@@ -313,7 +313,7 @@ class MainWindow(wx.Frame):
                 text = "&PS\tCtrl+P"
             )
         this.Bind(wx.EVT_MENU, this.onSaveAsPs, id = saveAsPs.GetId())
-        export.AppendItem(saveAsPs)
+        export.Append(saveAsPs)
 
         saveAsWrl = wx.MenuItem(
                 export,
@@ -321,9 +321,9 @@ class MainWindow(wx.Frame):
                 text = "&VRML\tCtrl+V"
             )
         this.Bind(wx.EVT_MENU, this.onSaveAsWrl, id = saveAsWrl.GetId())
-        export.AppendItem(saveAsWrl)
+        export.Append(saveAsWrl)
 
-        menu.AppendMenu(wx.ID_ANY, "&Export", export)
+        menu.AppendSubMenu(export, "&Export")
         menu.AppendSeparator()
         exit = wx.MenuItem(
                 menu,
@@ -331,7 +331,7 @@ class MainWindow(wx.Frame):
                 text = "E&xit\tCtrl+Q"
             )
         this.Bind(wx.EVT_MENU, this.onExit, id = exit.GetId())
-        menu.AppendItem(exit)
+        menu.Append(exit)
         return menu
 
     def createEditMenu(this):
@@ -343,7 +343,7 @@ class MainWindow(wx.Frame):
                 text = "&View Settings\tCtrl+W"
             )
         this.Bind(wx.EVT_MENU, this.onViewSettings, id = viewSettings.GetId())
-        menu.AppendItem(viewSettings)
+        menu.Append(viewSettings)
 
         colourSettings = wx.MenuItem(
                 menu,
@@ -351,7 +351,7 @@ class MainWindow(wx.Frame):
                 text = "&Colours\tCtrl+C"
             )
         this.Bind(wx.EVT_MENU, this.onColourSettings, id = colourSettings.GetId())
-        menu.AppendItem(colourSettings)
+        menu.Append(colourSettings)
 
         transformSettings = wx.MenuItem(
                 menu,
@@ -359,7 +359,7 @@ class MainWindow(wx.Frame):
                 text = "&Transform\tCtrl+T"
             )
         this.Bind(wx.EVT_MENU, this.onTransform, id = transformSettings.GetId())
-        menu.AppendItem(transformSettings)
+        menu.Append(transformSettings)
 
         return menu
 
@@ -371,7 +371,7 @@ class MainWindow(wx.Frame):
                 text = "&Dome Level 1\td"
             )
         this.Bind(wx.EVT_MENU, this.onDome, id = tool.GetId())
-        menu.AppendItem(tool)
+        menu.Append(tool)
         this.dome1 = tool
         tool = wx.MenuItem(
                 menu,
@@ -379,7 +379,7 @@ class MainWindow(wx.Frame):
                 text = "&Dome Level 2\tShift+D"
             )
         this.Bind(wx.EVT_MENU, this.onDome, id = tool.GetId())
-        menu.AppendItem(tool)
+        menu.Append(tool)
         this.dome2 = tool
         return menu
 
@@ -391,14 +391,14 @@ class MainWindow(wx.Frame):
                 text = "&Reset\tF5"
             )
         this.Bind(wx.EVT_MENU, this.onResetView, id = reset.GetId())
-        menu.AppendItem(reset)
+        menu.Append(reset)
         scene = wx.MenuItem(
                 menu,
                 wx.ID_ANY,
                 text = "&Scene..."
             )
         this.Bind(wx.EVT_MENU, this.onOpenScene, id = scene.GetId())
-        menu.AppendItem(scene)
+        menu.Append(scene)
         return menu
 
     def onReload(this, e):
