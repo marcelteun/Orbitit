@@ -230,6 +230,8 @@ class Vec(tuple):
 
     def __truediv__(self, w):
         if isinstance(w, (int, float)):
+            if w == 0:
+                w = 1
             return self.__class__([a/w for a in self])
         raise UnsupportedOperand(
             "Right-hand operand of type {} isn't supported with Vec".format(
