@@ -38,21 +38,18 @@ class Orbit(list):
         return list.__new__(this, v)
 
     def __repr__(v):
-        s = '%s([\n'
-        s = '%s  %s\n' % repr(v[0])
-        s = '%s  %s\n' % repr(v[1])
-        s = '%s])\n'
+        s = '[{}, {}]'.format(repr(v.final), repr(v.stabiliser))
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s += '{}({})'.format(__name__, s)
         return s
 
     def __str__(v):
-        s = '%s([\n'
-        s = '%s  final = %s\n' % str(v[0])
-        s = '%s  stabiliser = %s\n' % str(v[1])
-        s = '%s])\n'
+        s = '{\n'
+        s += '  final = {}\n'.format(str(v.final))
+        s += '  stabiliser = {}\n'.format(str(v.stabiliser))
+        s += '}\n'
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s = '{}.{}'.format(__name__, s)
         return s
 
     @property

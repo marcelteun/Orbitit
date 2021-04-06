@@ -702,6 +702,7 @@ class MetaC2nCn(type):
 
 class C2nCn(Set, metaclass=MetaC2nCn):
     """Class for the C2nCn symmetry group"""
+    mixed = True
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
     order = 0
@@ -828,6 +829,7 @@ class MetaCnxI(type):
 
 class CnxI(Set, metaclass=MetaCnxI):
     """Class for the CnxI symmetry group"""
+    mixed = True
     init_pars = _init_pars('Cn', 'n')
     std_setup = _std_setup('Cn', 2)
     order = 0
@@ -860,6 +862,7 @@ class CnxI(Set, metaclass=MetaCnxI):
             # then if you specify n it should be the correct value
             assert self.n == 0 or s['n'] == self.n
             cn = Cn(setup=s)
+            self.direct_parent = C(self.n)
             self.direct_parent_setup = copy(s)
             self.n = cn.n
             Set.__init__(self, cn * ExI())
@@ -933,6 +936,7 @@ class MetaDnCn(type):
 
 class DnCn(Set, metaclass=MetaDnCn):
     """Class for the DnCn symmetry group"""
+    mixed = True
     init_pars = _init_pars('DnCn', 'n')
     std_setup = _std_setup('DnCn', 2)
     order = 0
@@ -973,6 +977,7 @@ class DnCn(Set, metaclass=MetaDnCn):
             else:
                 s['axis'] = copy(self.std_setup['axis_n'])
             cn = Cn(setup=s)
+            self.direct_parent = C(self.n)
             self.direct_parent_setup = copy(s)
             if 'normal_r' in setup:
                 s['axis_2'] = setup['normal_r']
@@ -1214,10 +1219,9 @@ class MetaDnxI(type):
 
 class DnxI(Set, metaclass=MetaDnxI):
     """Class for the DnxI symmetry group"""
+    mixed = True
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
-    mixed = True
-    direct_parent = D
     order = 0
     n = 0
 
@@ -1374,6 +1378,7 @@ class MetaD2nDn(type):
 
 class D2nDn(Set, metaclass=MetaD2nDn):
     """Class for the D2nDn symmetry group"""
+    mixed = True
     init_pars = _init_pars('Dn', 'n')
     std_setup = _std_setup('Dn', 2)
     order = 0
@@ -1411,6 +1416,7 @@ class D2nDn(Set, metaclass=MetaD2nDn):
             assert self.n == 0 or s['n'] == self.n
             dn = Dn(setup=s)
             self.n = dn.n
+            self.direct_parent = D(self.n)
             self.direct_parent_setup = copy(s)
             s['n'] = 2 * s['n']
             d2n = Dn(setup=s)
