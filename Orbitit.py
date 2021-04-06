@@ -953,108 +953,127 @@ class ColourSettingsWindow(wx.Frame):
             Gui.Destroy()
 
 class TransformSettingsWindow(wx.Frame):
-    def __init__(this, canvas, *args, **kwargs):
-        wx.Frame.__init__(this, *args, **kwargs)
-        this.canvas    = canvas
-        this.statusBar = this.CreateStatusBar()
-        this.panel     = wx.Panel(this, wx.ID_ANY)
-        this.addContents()
-        this.orgVs = this.canvas.shape.getVertexProperties()['Vs']
-        this.org_orgVs = this.orgVs # for cancel
-        this.set_status("")
+    def __init__(self, canvas, *args, **kwargs):
+        wx.Frame.__init__(self, *args, **kwargs)
+        self.canvas    = canvas
+        self.statusBar = self.CreateStatusBar()
+        self.panel     = wx.Panel(self, wx.ID_ANY)
+        self.addContents()
+        self.orgVs = self.canvas.shape.getVertexProperties()['Vs']
+        self.org_orgVs = self.orgVs # for cancel
+        self.set_status("")
 
-    def addContents(this):
-        this.mainSizer = wx.BoxSizer(wx.VERTICAL)
+    def addContents(self):
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        this.rotateSizer = geom_gui.AxisRotateSizer(
-            this.panel,
-            this.on_rot,
+        self.rotateSizer = geom_gui.AxisRotateSizer(
+            self.panel,
+            self.on_rot,
             min_angle=-180,
             max_angle=180,
             initial_angle=0
         )
-        this.mainSizer.Add(this.rotateSizer)
+        self.mainSizer.Add(self.rotateSizer)
 
-        this.Guis = []
+        self.guis = []
 
         # TODO: Add scale to transform
         # TODO: Add reflection
 
+        # Transform
+        translate_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainSizer.Add(translate_sizer)
+        self.guis.append(geom_gui.Vector3DInput(self.panel, "Translation vector:"))
+        self.translation = self.guis[-1]
+        translate_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Translate'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_translate)
+        translate_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+
         # Invert
         invert_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        this.mainSizer.Add(invert_sizer)
-        this.Guis.append(wx.Button(this.panel, label='Invert'))
-        this.Guis[-1].Bind(wx.EVT_BUTTON, this.on_invert)
-        invert_sizer.Add(this.Guis[-1], 0, wx.EXPAND)
+        self.mainSizer.Add(invert_sizer)
+        self.guis.append(wx.Button(self.panel, label='Invert'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_invert)
+        invert_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        this.subSizer = wx.BoxSizer(wx.HORIZONTAL)
-        this.mainSizer.Add(this.subSizer)
+        self.subSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainSizer.Add(self.subSizer)
 
-        this.Guis.append(wx.Button(this.panel, label='Apply'))
-        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onApply)
-        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Apply'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.onApply)
+        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        this.Guis.append(wx.Button(this.panel, label='Cancel'))
-        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onCancel)
-        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Cancel'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.onCancel)
+        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        this.Guis.append(wx.Button(this.panel, label='Reset'))
-        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onReset)
-        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Reset'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.onReset)
+        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        this.Guis.append(wx.Button(this.panel, label='Done'))
-        this.Guis[-1].Bind(wx.EVT_BUTTON, this.onDone)
-        this.subSizer.Add(this.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Done'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.onDone)
+        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        this.panel.SetSizer(this.mainSizer)
-        this.panel.SetAutoLayout(True)
-        this.panel.Layout()
-        this.Show(True)
+        self.panel.SetSizer(self.mainSizer)
+        self.panel.SetAutoLayout(True)
+        self.panel.Layout()
+        self.Show(True)
 
-    def on_rot(this, angle, axis):
+    def on_rot(self, angle, axis):
         if Geom3D.eq(axis.norm(), 0):
-            this.set_status("Please define a proper axis")
+            self.set_status("Please define a proper axis")
             return
         transform = geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis)
         # Assume compound shape
         newVs = [
-            [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
-        this.canvas.shape.setVertexProperties(Vs=newVs)
-        this.canvas.paint()
-        this.set_status("Use 'Apply' to define a subsequent transform")
+            [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in self.orgVs]
+        self.canvas.shape.setVertexProperties(Vs=newVs)
+        self.canvas.paint()
+        self.set_status("Use 'Apply' to define a subsequent transform")
 
-    def on_invert(this, e=None):
+    def on_invert(self, e=None):
         # Assume compound shape
         newVs = [
-            [-geomtypes.Vec3(v) for v in shapeVs] for shapeVs in this.orgVs]
-        this.canvas.shape.setVertexProperties(Vs=newVs)
-        this.canvas.paint()
-        this.set_status("Use 'Apply' to define a subsequent transform")
+            [-geomtypes.Vec3(v) for v in shapeVs] for shapeVs in self.orgVs]
+        self.canvas.shape.setVertexProperties(Vs=newVs)
+        self.canvas.paint()
+        self.set_status("Use 'Apply' to define a subsequent transform")
 
-    def onApply(this, e=None):
-        this.orgVs = this.canvas.shape.getVertexProperties()['Vs']
+    def on_translate(self, e=None):
+        # Assume compound shape
+        newVs = [
+            [geomtypes.Vec3(v) + self.translation.get_vertex()
+             for v in shapeVs] for shapeVs in self.orgVs]
+        self.canvas.shape.setVertexProperties(Vs=newVs)
+        self.canvas.paint()
+        self.set_status("Use 'Apply' to define a subsequent transform")
+
+    def onApply(self, e=None):
+        self.orgVs = self.canvas.shape.getVertexProperties()['Vs']
         # reset the angle
-        this.rotateSizer.set_angle(0)
-        this.set_status("applied, now you can define another axis")
+        self.rotateSizer.set_angle(0)
+        self.set_status("applied, now you can define another axis")
 
-    def onReset(this, e=None):
-        this.canvas.shape.setVertexProperties(Vs=this.org_orgVs)
-        this.canvas.paint()
-        this.orgVs = this.org_orgVs
+    def onReset(self, e=None):
+        self.canvas.shape.setVertexProperties(Vs=self.org_orgVs)
+        self.canvas.paint()
+        self.orgVs = self.org_orgVs
 
-    def onCancel(this, e=None):
-        this.onReset()
-        this.Close()
+    def onCancel(self, e=None):
+        self.onReset()
+        self.Close()
 
-    def onDone(this, e):
-        this.Close()
+    def onDone(self, e):
+        self.Close()
 
-    def close(this):
-        for Gui in this.Guis:
+    def close(self):
+        for Gui in self.guis:
             Gui.Destroy()
 
-    def set_status(this, str):
-        this.statusBar.SetStatusText(str)
+    def set_status(self, str):
+        self.statusBar.SetStatusText(str)
 
 class ViewSettingsWindow(wx.Frame):
     def __init__(this, canvas, *args, **kwargs):
