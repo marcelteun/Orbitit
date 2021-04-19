@@ -105,8 +105,11 @@ class doc:
     def addPageStr(this, str):
         this.addNewPageStr(str)
 
-    def appendPageStr(this, str):
-        this.pagesStr[-1] = "%s%s" % (this.pagesStr[-1], str)
+    def appendPageStr(self, s):
+        if (self.pagesStr == []):
+            self.addNewPageStr(s)
+        else:
+            self.pagesStr[-1] = f"{self.pagesStr[-1]}{s}"
 
     def resetPageValues(this):
         # current point:
@@ -297,10 +300,7 @@ grestore
             # if no pages created yet.
             if this.debug:
                 print("  ....Yes")
-            if (this.pagesStr == []):
-                this.addNewPageStr(drawStr)
-            else:
-                this.appendPageStr(drawStr)
+            this.appendPageStr(drawStr)
             this.appendPageStr("%f 0 translate\n" % (dX))
             this.shiftRight += dX
             this.cx += dX
