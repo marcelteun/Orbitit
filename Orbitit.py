@@ -37,6 +37,11 @@ import pprint
 import wx.lib.intctrl
 import wx.lib.colourselect
 
+# work-around for PyOpenGL bug (see commit message)
+if not os.environ.get("PYOPENGL_PLATFORM", ""):
+    if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
+            "wayland" in os.getenv("XDG_SESSION_TYPE", "").lower():
+        os.environ['PYOPENGL_PLATFORM'] = 'egl'
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
