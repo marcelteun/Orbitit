@@ -964,6 +964,44 @@ class SimpleShape:
         """
         return self
 
+    def filter_faces(self, keep_one=True):
+        """Remove faces using the same vertices (independent of their colour)
+
+        keep_one: of the faces with duplicates keep at least one.
+        """
+        v_props = self.getVertexProperties()
+        f_props = self.getFaceProperties()
+        fs = f_props['Fs']
+        org_cols = f_props['colors']
+        d = dict()
+        for i, face in enumerate(fs):
+            face_cp = face[:]
+            face_cp.sort()
+            try:
+                d[tuple(face_cp)].append(i)
+            except KeyError:
+                d[tuple(face_cp)] = [i]
+
+        new_fs = []
+        col_idx = []
+        if keep_one:
+            for f in d:
+                new_fs.append(fs[i[0]])
+                col_idx.append(org_cols[1][i[0]])
+        else:
+            for f, i in d.items():
+                if len(i) == 1:
+                    new_fs.append(fs[i[0]])
+                    col_idx.append(org_cols[1][i[0]])
+        new_cols = (copy.deepcopy(org_cols[0]), col_idx)
+        shape = SimpleShape([], [], [])
+        shape.setVertexProperties(v_props)
+        f_props['Fs'] = new_fs
+        f_props['colors'] = new_cols
+        shape.setFaceProperties(f_props)
+        return shape
+
+
     def cleanShape(this, precision):
         """Return a new shape for which vertices are merged and degenerated faces are deleted.
 

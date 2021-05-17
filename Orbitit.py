@@ -1993,85 +1993,86 @@ class Oper:
     toPy = 3
     openScene = 4
 
-import getopt
+if __name__ == "__main__":
+    import getopt
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:],
-        'fm:P:ps:y', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
-except getopt.GetoptError as err:
-    print(str(err))
-    usage(2)
-
-# defaults:
-scale = 50
-margin = 10
-precision = 15
-
-oper = None
-for opt, opt_arg in opts:
-    if opt in ('-f', '--off'):
-        oper = Oper.toOff
-    elif opt in ('-m', '--margin'):
-        margin = int(opt_arg)
-    elif opt in ('-P', '--precision'):
-        precision = int(opt_arg)
-    elif opt in ('-p', '--ps'):
-        oper = Oper.toPs
-    elif opt in ('-s', '--scene'):
-        oper = Oper.openScene
-        scene_file = opt_arg
-        print('DBG scene_file', scene_file)
-    elif opt in ('-y', '--py'):
-        oper = Oper.toPy
-    else:
-        print("Error: unknown option")
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],
+            'fm:P:ps:y', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
+    except getopt.GetoptError as err:
+        print(str(err))
         usage(2)
 
-o_fd = None
-a_ind = 0
-print('DBG args', args)
-if oper != None:
-    if len(args) <= a_ind:
-        print("reading python format from std input")
-        i_filename = None
+    # defaults:
+    scale = 50
+    margin = 10
+    precision = 15
+
+    oper = None
+    for opt, opt_arg in opts:
+        if opt in ('-f', '--off'):
+            oper = Oper.toOff
+        elif opt in ('-m', '--margin'):
+            margin = int(opt_arg)
+        elif opt in ('-P', '--precision'):
+            precision = int(opt_arg)
+        elif opt in ('-p', '--ps'):
+            oper = Oper.toPs
+        elif opt in ('-s', '--scene'):
+            oper = Oper.openScene
+            scene_file = opt_arg
+            print('DBG scene_file', scene_file)
+        elif opt in ('-y', '--py'):
+            oper = Oper.toPy
+        else:
+            print("Error: unknown option")
+            usage(2)
+
+    o_fd = None
+    a_ind = 0
+    print('DBG args', args)
+    if oper != None:
+        if len(args) <= a_ind:
+            print("reading python format from std input")
+            i_filename = None
+        else:
+            i_filename = args[a_ind]
+            a_ind += 1
+        if len(args) <= a_ind:
+            o_fd = sys.stdout
+        else:
+            o_fd = open(args[a_ind], 'w')
+            a_ind += 1
+
+    if oper == Oper.toPs:
+        shape = readShapeFile(i_filename)
+        if shape != None:
+            convertToPs(shape, o_fd, scale, precision, margin)
+    elif oper == Oper.toOff:
+        shape = readShapeFile(i_filename)
+        if shape != None:
+            convertToOff(shape, o_fd, precision, margin)
+    elif oper == Oper.toPy:
+        shape = readShapeFile(i_filename)
+        if shape != None:
+            shape.saveFile(o_fd)
     else:
-        i_filename = args[a_ind]
-        a_ind += 1
-    if len(args) <= a_ind:
-        o_fd = sys.stdout
-    else:
-        o_fd = open(args[a_ind], 'w')
-        a_ind += 1
+        if oper != Oper.openScene:
+            scene_file = DefaultScene
+        app = wx.App(False)
+        frame = MainWindow(
+                Canvas3DScene,
+                Geom3D.SimpleShape([], []),
+                args,
+                None,
+                wx.ID_ANY, "test",
+                size = (430, 482),
+                pos = wx.Point(980, 0)
+            )
+        if (len(args) == 0):
+            frame.readSceneFile(scene_file)
+        app.MainLoop()
 
-if oper == Oper.toPs:
-    shape = readShapeFile(i_filename)
-    if shape != None:
-        convertToPs(shape, o_fd, scale, precision, margin)
-elif oper == Oper.toOff:
-    shape = readShapeFile(i_filename)
-    if shape != None:
-        convertToOff(shape, o_fd, precision, margin)
-elif oper == Oper.toPy:
-    shape = readShapeFile(i_filename)
-    if shape != None:
-        shape.saveFile(o_fd)
-else:
-    if oper != Oper.openScene:
-        scene_file = DefaultScene
-    app = wx.App(False)
-    frame = MainWindow(
-            Canvas3DScene,
-            Geom3D.SimpleShape([], []),
-            args,
-            None,
-            wx.ID_ANY, "test",
-            size = (430, 482),
-            pos = wx.Point(980, 0)
-        )
-    if (len(args) == 0):
-        frame.readSceneFile(scene_file)
-    app.MainLoop()
+    sys.stderr.write("Done\n")
 
-sys.stderr.write("Done\n")
-
-if o_fd != None: o_fd.close()
+    if o_fd != None: o_fd.close()
