@@ -68,7 +68,7 @@ class IntInput(wx.TextCtrl):
     """An input field for typing integer numbers"""
     def __init__(self, parent, ident, value, *args, **kwargs):
         """Create an input field for typing integer numbers"""
-        wx.TextCtrl.__init__(self, parent, ident, str(value), *args, **kwargs)
+        super().__init__(parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         # self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
         self.val_updated = False
@@ -76,95 +76,109 @@ class IntInput(wx.TextCtrl):
         self.SetDropTarget(DisabledDropTarget(
             reason='may break string format for signed integer'))
         self.Bind(wx.EVT_CHAR, self.on_char)
+        self.Bind(wx.EVT_TEXT, self.on_text)
+
+    def _sign_only_handled(self, string):
+        """If string being set equals "+" or "-" handle it."""
+        if string == "-" or string == "+":
+            self.ChangeValue(string + '0')
+            wx.CallLater(1, self.SetSelection, 1, 2)
+            self.val_updated = True
+            return True
+        else:
+            return False
+
+    def _handle_empty(self):
+        """Handle empty string being set."""
+        self.ChangeValue('0')
+        wx.CallLater(1, self.SetSelection, 0, 1)
+        self.val_updated = True
+
+    def _handle_char(self, char):
+        """Handle when char is being added to the current input."""
+        string = super().GetValue()
+        selected = self.GetSelection()
+        head = string[:selected[0]]
+        if self.GetStringSelection():
+            tail_start = selected[1] + 1
+        else:
+            tail_start = selected[1]
+        if tail_start < len(string):
+            tail = string[selected[1]:]
+        else:
+            tail = ""
+        new_string = head + char + tail
+        if not self._sign_only_handled(new_string):
+            # Raise exception if not integer value
+            try:
+                _ = int(new_string)
+                self.ChangeValue(new_string)
+                self.SetInsertionPoint(selected[0]+1)
+                self.val_updated = True
+            except ValueError:
+                print(self.__class__, f"ignores key {char} (here)")
+
+    def handle_special(self, event):
+        """Handle events with special characters, like DELETE."""
+        current_value = super().GetValue()
+        cursor_pos = self.GetInsertionPoint()
+        handled = True
+        key = event.GetKeyCode()
+        if key in [wx.WXK_BACK, wx.WXK_DELETE]:
+            pos = {
+                wx.WXK_BACK: 0,
+                wx.WXK_DELETE: 1,
+            }
+            if len(current_value) <= 1 and cursor_pos == pos[key]:
+                event.Skip(False)  # prevent annoying bell
+            else:
+                event.Skip()
+                self.val_updated = True
+        elif key == wx.WXK_CLEAR:
+            event.Skip()
+        elif (key in [wx.WXK_HOME, wx.WXK_LEFT] and cursor_pos == 0) or \
+                (key in [wx.WXK_END, wx.WXK_RIGHT] and cursor_pos == len(current_value)):
+            self.SetInsertionPoint(cursor_pos)
+            event.Skip(False)  # prevent annoying bell
+        elif key in [wx.WXK_RETURN, wx.WXK_TAB,
+                     wx.WXK_LEFT, wx.WXK_RIGHT,
+                     wx.WXK_INSERT,
+                     wx.WXK_HOME, wx.WXK_END]:
+            event.Skip()
+        else:
+            handled = False
+        return handled
 
     def on_char(self, e):
         """Handle character input in the float input field"""
-        k = e.GetKeyCode()  # ASCII is returned for ASCII values
-        updated = True  # except for some cases below
-        try:
-            c = chr(k)
-        except ValueError:
-            c = 0
-        if c >= '0' and c <= '9':
-            e.Skip()
-        elif c in ['+', '-']:
-            # Handle selected text by replacing it by a '0', otherwise it may
-            # prevent from overwriting a sign:
-            ss = self.GetStringSelection()
-            if not ss == '':
-                sel = self.GetSelection()
-                if sel[0] == 0:
-                    self.Replace(sel[0], sel[1], '0')
-                    end_select = sel[0]+1
-                else:
-                    self.Replace(sel[0], sel[1], '')
-                    end_select = sel[0]
-                self.SetSelection(sel[0], end_select)
-                # self.SetInsertionPoint(sel[0])
-            s = wx.TextCtrl.GetValue(self)
-            # only allow one +, -
-            if c not in s:
-                # only allow + and - in the beginning
-                print(' not c in s:', self.GetInsertionPoint())
-                if self.GetInsertionPoint() == 0:
-                    # don't allow - if there's already a + and the other way
-                    # around:
-                    if c == '+':
-                        if '-' not in s:
-                            e.Skip()
-                    else:
-                        if '+' not in s:
-                            e.Skip()
-                else:
-                    # allow selected whole string start with -
-                    if self.GetSelection()[0] == 0 and c == '-':
-                        self.Replace(0, 1, '-0')
-                        self.SetSelection(1, 2)
-        elif k in [wx.WXK_BACK, wx.WXK_DELETE]:
-            ss = self.GetStringSelection()
-            # Handle selected text by replacing it by a '0' the field might
-            # become completely empty if all is selected
-            if not ss == '':
-                sel = self.GetSelection()
-                self.Replace(sel[0], sel[1], '0')
-                self.SetSelection(sel[0], sel[0]+1)
-            if len(wx.TextCtrl.GetValue(self)) <= 1:
-                # do not allow an empt field, set to 0 instead:
-                self.SetValue(0)
-                self.SetSelection(0, 1)
-            else:
-                e.Skip()
-        elif k == wx.WXK_CLEAR:
-            self.SetValue(0)
-        elif k in [wx.WXK_RETURN, wx.WXK_TAB,
-                   wx.WXK_LEFT, wx.WXK_RIGHT,
-                   wx.WXK_INSERT,
-                   wx.WXK_HOME, wx.WXK_END]:
-            updated = False
-            e.Skip()
-        else:
-            updated = False
-            print(self.__class__, 'ignores key event with code:', k)
+        if not self.handle_special(e):
+            key = e.GetKeyCode()  # ASCII is returned for ASCII values
+            self._handle_char(chr(key))
+            e.Skip(False)
         # elif k >= 256:
         #     e.Skip()
-        self.val_updated = updated
+
+    def on_text(self, e):
+        """Handle after string after character update is done."""
+        string = super().GetValue()
+        # print("on_text: ", string)
+        if not self._sign_only_handled(string) and string == "":
+            self._handle_empty()
 
     # doc-string for
     # wx.TextCtrl.GetValue(*args, **kwargs)
     #     GetValue(self) -> String
+    # Change to get_value? TODO: check if anyone using old name
     def GetValue(self):  # pylint: disable=arguments-differ
-        v = wx.TextCtrl.GetValue(self)
+        v = super().GetValue()
         self.val_updated = False
         if v == '':
             v = '0'
         return int(v)
 
-    # doc-string for
-    # wx.TextCtrl.SetValue(*args, **kwargs)
-    #     SetValue(self, String value)
-    def SetValue(self, i):  # pylint: disable=arguments-differ
+    def set_value(self, i):
         self.val_updated = True
-        wx.TextCtrl.SetValue(self, str(i))
+        super().SetValue(self, str(i))
 
 
 class FloatInput(wx.TextCtrl):
@@ -332,7 +346,7 @@ class LabeledIntInput(wx.BoxSizer):
 
     def SetValue(self, i):
         """Set the integer value of the input"""
-        return self.boxes[-1].SetValue(i)
+        return self.boxes[-1].set_value(i)
 
     def Destroy(self, *args, **kwargs):
         for box in self.boxes:
