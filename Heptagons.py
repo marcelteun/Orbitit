@@ -23,17 +23,15 @@
 # $Log$
 #
 import wx
-import isometry
 import math
 import re
 import rgb
-import string
 import Geom3D
-from OpenGL.GL import *
+from OpenGL.GL import glColor, glEnable, glDisable, glBlendFunc
+from OpenGL.GL import GL_CULL_FACE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
 import geomtypes
 from geomtypes import Rot3      as Rot
-from geomtypes import HalfTurn3 as HalfTurn
 from geomtypes import Vec3      as Vec
 
 V3 = math.sqrt(3)
@@ -181,17 +179,17 @@ class TrisAlt_base(object):
             return False
 
     def toFileStr(this, tId = None, tStr = None):
-        assert(tId != None or tStr != None)
-        if (tId == None):
+        assert(tId is not None or tStr is not None)
+        if (tId is None):
             tId = this.key[tStr]
         if not isinstance(tId, int):
             tStr0 = this.stringify[tId[0]]
             tStr1 = this.stringify[tId[1]]
             tStr = "%s-opp_%s" % (tStr0, tStr1)
-        elif tStr == None:
+        elif tStr is None:
             tStr = this.stringify[tId]
 
-        t = string.join(tStr.split(), '_').lower().replace('ernative', '')
+        t = '_'.join(tStr.split()).lower().replace('ernative', '')
         t = t.replace('_ii', '_II')
         t = t.replace('_i', '_I')
         t = t.replace('alt.', 'alt')
@@ -216,8 +214,8 @@ class TrisAlt_base(object):
             this.mapFileStrOnKey[fileStr] = tId
 
 def toTrisAltKeyStr(tId = None, tStr = None):
-    assert(tId != None or tStr != None)
-    if (tId == None):
+    assert(tId is not None or tStr is not None)
+    if (tId is None):
         tId = TrisAlt_base.key[tStr]
     if not isinstance(tId, int):
         if tId[0] & loose_bit and tId[1] & loose_bit:
@@ -237,7 +235,7 @@ def toTrisAltKeyStr(tId = None, tStr = None):
             tStr = '%s_%s' % (
                         TrisAlt_base.stringify[tId[0]],
                         TrisAlt_base.stringify[tId[1]])
-    elif tStr == None:
+    elif tStr is None:
         tStr = TrisAlt_base.stringify[tId]
     t = "_".join(tStr.split())
     t = t.replace('_ii', '_II')
@@ -1594,9 +1592,9 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         Geom3D.CompoundShape.glDraw(this)
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
-        if alt != None:
+        if alt is not None:
             this.edgeAlternative = alt
-        if oppositeAlt != None:
+        if oppositeAlt is not None:
             this.oppEdgeAlternative = oppositeAlt
         this.updateShape = True
 
@@ -1620,16 +1618,16 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         print("WARNING: implement in derived class")
 
     def setFold1(this, angle = None, oppositeAngle = None):
-        if angle != None:
+        if angle is not None:
             this.fold1 = angle
-        if oppositeAngle != None:
+        if oppositeAngle is not None:
             this.oppFold1 = oppositeAngle
         this.updateShape = True
 
     def setFold2(this, angle = None, oppositeAngle = None):
-        if angle != None:
+        if angle is not None:
             this.fold2 = angle
-        if oppositeAngle != None:
+        if oppositeAngle is not None:
             this.oppFold2 = oppositeAngle
         this.updateShape = True
 
@@ -1742,7 +1740,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         # static adjustments
         this.trisFillGui = wx.Choice(this.panel,
                 style = wx.RA_VERTICAL,
-                choices = ''
+                choices = []
             )
         this.Guis.append(this.trisFillGui)
         this.trisFillGui.Bind(wx.EVT_CHOICE, this.onTriangleFill)
@@ -2057,7 +2055,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def fileStrMapTrisStr(this, filename):
         # New format: incl -pos:
         res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.py", filename)
-        if res == None:
+        if res is None:
             # try old method:
             res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
         if res:
@@ -2377,7 +2375,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             currentChoice = this.trisAlt.key[this.trisFillGui.GetStringSelection()]
         except KeyError:
             currentChoice = this.trisAlt.strip_I
-        if itemList == None:
+        if itemList is None:
             itemList = this.trisAlt.choiceList
             if this.shape.inclReflections:
                 isValid = lambda c: this.trisAlt.isBaseKey(this.trisAlt.key[c])
@@ -2501,7 +2499,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def onTriangleFill(this, event = None):
         this.nvidea_workaround_0()
         this.shape.setEdgeAlternative(this.trisFill, this.oppTrisFill)
-        if event != None:
+        if event is not None:
             if this.isPrePos():
                 this.onPrePos(event)
             else:
@@ -2535,7 +2533,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             ]
         this.shape.setFoldMethod(this.foldMethod)
         this.allignFoldSlideBarsWithFoldMethod()
-        if event != None:
+        if event is not None:
             if this.isPrePos():
                 this.onPrePos(event)
             else:
@@ -2566,10 +2564,6 @@ class FldHeptagonCtrlWin(wx.Frame):
     def prePos(this):
         return this.mapPrePosStr(this.prePosGui.GetStringSelection())
 
-    @property
-    def stdPrePos(this):
-        assert False, "TODO: implement at offspring"
-
     def openPrePosFile(this, filename):
         try:
             print('DBG open', filename)
@@ -2596,7 +2590,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             assert prePosId != dyn_pos
             if prePosId == open_file:
                 filename = this.prePosFileName
-                if filename == None:
+                if filename is None:
                     return []
                 this.sav_stdPrePos = this.openPrePosFile(filename)
                 return this.sav_stdPrePos
@@ -2612,7 +2606,6 @@ class FldHeptagonCtrlWin(wx.Frame):
                 return this.sav_stdPrePos
 
     def onPrev(this, event = None):
-        prePosId = this.prePos
         if this.stdPrePos != []:
             if this.specPosIndex > 0:
                 this.specPosIndex -= 1
@@ -2624,7 +2617,6 @@ class FldHeptagonCtrlWin(wx.Frame):
             this.noPrePosFound()
 
     def onNext(this, event = None):
-        prePosId = this.prePos
         if this.stdPrePos != []:
             try:
                 maxI = len(this.stdPrePos) - 1
@@ -2656,7 +2648,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onOpenFile(this, e):
         filename = this.chooseOpenFile()
-        if filename == None:
+        if filename is None:
             return
         this.prePosFileName = filename
         this.foldMethodGui.SetStringSelection(
@@ -2749,12 +2741,10 @@ class FldHeptagonCtrlWin(wx.Frame):
     fld1None = 0.0
     fld2None = 0.0
     def onPrePos(this, event = None):
-        aVal = this.aNone
-        tVal = this.tNone
         c = this.shape
         # remove the "From File" from the pull down list as soon as it is
         # deselected
-        if event != None and this.prePos != open_file:
+        if event is not None and this.prePos != open_file:
             openFileStr = this.stringify[open_file]
             n = this.prePosGui.FindString(openFileStr)
             if n >= 0:
@@ -2763,7 +2753,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.prePosGui.Delete(this.prePosGui.FindString(openFileStr))
                 this.prePosGui.SetSelection(selStr)
         if this.prePos == dyn_pos:
-            if event != None:
+            if event is not None:
                 this.prePosFileName = None
             if (this.restoreTris):
                 this.restoreTris = False
@@ -2776,10 +2766,6 @@ class FldHeptagonCtrlWin(wx.Frame):
             this.nrTxt.SetLabel('---')
         elif this.prePos != open_file:
             # this block is run for predefined spec pos only:
-            oppFld1 = fld1 = this.fld1None
-            oppFld2 = fld2 = this.fld2None
-            posVal = this.aNone
-            nrPos = 0
             if (this.showOnlyHepts()):
                 this.shape.addXtraFs = False
                 this.restoreTris = True
@@ -2827,7 +2813,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             else:
                 this.disableGuisNoRefl()
         if this.prePos != dyn_pos:
-            if event != None:
+            if event is not None:
                 this.resetStdPrePos()
             setting = this.stdPrePos
             if setting == []:
@@ -2922,43 +2908,43 @@ class EqlHeptagonShape(Geom3D.IsometricShape):
             vertexR       = None,
             opaqueness    = None
         ):
-        if addFaces != None:
+        if addFaces is not None:
             this.setFaceProperties(drawFaces = addFaces)
-        if showKite != None:
+        if showKite is not None:
             this.showKite = showKite
-        if showHepta != None:
+        if showHepta is not None:
             this.showHepta = showHepta
-        if showXtra != None:
+        if showXtra is not None:
             this.showXtra = showXtra
-        if heptPosAlt != None:
+        if heptPosAlt is not None:
             this.heptPosAlt = heptPosAlt
-        if triangleAlt != None:
+        if triangleAlt is not None:
             this.triangleAlt = triangleAlt
             this.updateV = True
-        if addXtraEdge != None:
+        if addXtraEdge is not None:
             this.addXtraEdge = addXtraEdge
-        if cullingOn != None:
+        if cullingOn is not None:
             if cullingOn:
                 glEnable(GL_CULL_FACE)
             else:
                 glDisable(GL_CULL_FACE)
-        if edgeR != None:
+        if edgeR is not None:
             this.setEdgeProperties(radius = edgeR, drawEdges = True)
-        if vertexR != None:
+        if vertexR is not None:
             this.setVertexProperties(radius = vertexR)
-        if opaqueness != None:
+        if opaqueness is not None:
             # TODO...
             this.opaqueness = opaqueness
         if (
-            showKite != None  # not so efficient perhaps, but works..
+            showKite is not None  # not so efficient perhaps, but works..
             or
-            showHepta != None  # not so efficient perhaps, but works..
+            showHepta is not None  # not so efficient perhaps, but works..
             or
-            showXtra != None  # not so efficient perhaps, but works..
+            showXtra is not None  # not so efficient perhaps, but works..
             or
-            heptPosAlt != None
+            heptPosAlt is not None
             or
-            addXtraEdge != None
+            addXtraEdge is not None
         ):
             this.setV()
 

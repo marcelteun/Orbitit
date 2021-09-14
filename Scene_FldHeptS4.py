@@ -20,16 +20,11 @@
 # or write to the Free Software Foundation,
 #
 
-import wx
 import math
 import rgb
 import Heptagons
 import isometry
 import Geom3D
-import Scenes3D
-
-from glob import glob
-from OpenGL.GL import *
 
 import geomtypes
 from geomtypes import Rot3 as Rot
@@ -40,9 +35,8 @@ TITLE = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 trisAlt = Heptagons.TrisAlt()
 trisAlt.baseKey = {
     trisAlt.refl_1: True,
-    trisAlt.refl_2: True
+    trisAlt.refl_2: True,
 }
-#trisAlt.baseKey[trisAlt.twist_strip_I] = True
 
 counter = Heptagons.Tris_counter()
 
@@ -645,13 +639,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     def showOnlyHepts(this):
         return this.prePos == only_hepts and not (
-            this.trisFill == None) and not (
+            this.trisFill is None) and not (
             this.trisFill == trisAlt.refl_1 or
             this.trisFill == trisAlt.refl_2)
 
     def showOnlyO3Tris(this):
         return this.prePos == Heptagons.only_xtra_o3s and not (
-            this.trisFill == None) and not (
+            this.trisFill is None) and not (
             this.trisFill == trisAlt.refl_1 or
             this.trisFill == trisAlt.refl_2)
 
@@ -675,9 +669,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 this.specPosIndex = -1
             in_data = psp[this.prePos][this.specPosIndex]
             fold_method_str = this.fileStrMapFoldMethodStr(in_data['file'])
-            assert fold_method_str != None
+            assert fold_method_str is not None
             tris_str = this.fileStrMapTrisStr(in_data['file'])
-            assert tris_str != None
+            assert tris_str is not None
             tris_alt = trisAlt.key[tris_str]
             data = {
                 'set': in_data['set'],

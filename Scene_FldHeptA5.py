@@ -20,17 +20,11 @@
 # or write to the Free Software Foundation,
 #
 
-import wx
 import math
-import re
 import rgb
 import Heptagons
 import isometry
 import Geom3D
-import Scenes3D
-
-from glob import glob
-from OpenGL.GL import *
 
 import geomtypes
 from geomtypes import Rot3 as Rot
@@ -837,7 +831,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     def showOnlyHepts(this):
         return this.prePos == only_hepts and not (
-                this.trisFill == None
+                this.trisFill is None
             ) and not (
                 this.trisFill == trisAlt.refl_1 or
                 this.trisFill == trisAlt.refl_2 or
@@ -846,7 +840,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     def showOnlyO3Tris(this):
         return this.prePos == Heptagons.only_xtra_o3s and not (
-                this.trisFill == None
+                this.trisFill is None
             ) and not (
                 this.trisFill == trisAlt.refl_1 or
                 this.trisFill == trisAlt.refl_2 or

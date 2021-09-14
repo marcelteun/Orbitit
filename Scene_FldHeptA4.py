@@ -20,17 +20,11 @@
 # or write to the Free Software Foundation,
 #
 
-import wx
 import math
-import re
 import rgb
 import Heptagons
 import isometry
 import Geom3D
-import Scenes3D
-
-from glob import glob
-from OpenGL.GL import *
 
 import geomtypes
 from geomtypes import Rot3 as Rot
@@ -245,29 +239,12 @@ class Shape(Heptagons.FldHeptagonShape):
                 )
         return s
 
-    def correctEdgeAlternative(this):
-        # TODO
-        if (this.edgeAlternative == trisAlt.star or
-                this.edgeAlternative == trisAlt.star_1_loose):
-            this.altMFoldFace = False
-            this.altNFoldFace = False
-        else:
-            if this.altNFoldFace:
-                this.edgeAlternative = this.edgeAlternative | alt1_bit
-            else:
-                this.edgeAlternative = this.edgeAlternative & ~alt1_bit
-            if this.altMFoldFace:
-                this.edgeAlternative = this.edgeAlternative | alt2_bit
-            else:
-                this.edgeAlternative = this.edgeAlternative & ~alt2_bit
-
     def setTriangleFillPosition(this, i):
         print("TODO implement setTriangleFillPosition for", i)
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
         Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
-        # TODO
-        #this.correctEdgeAlternative()
+        # TODO correct edge alternative?
 
     def setV(this):
         this.posHeptagon()
@@ -736,13 +713,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
 
     def showOnlyHepts(this):
         return this.prePos == S_only_hepts and not (
-                this.trisFill == None
+                this.trisFill is None
             ) and not (
                 this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
     def showOnlyO3Tris(this):
         return this.prePos == Heptagons.only_xtra_o3s and not (
-                this.trisFill == None
+                this.trisFill is None
             ) and not (
                 this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
 
@@ -766,9 +743,9 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 this.specPosIndex = -1
             in_data = psp[this.prePos][this.specPosIndex]
             fold_method_str = this.fileStrMapFoldMethodStr(in_data['file'])
-            assert fold_method_str != None
+            assert fold_method_str is not None
             tris_str = this.fileStrMapTrisStr(in_data['file'])
-            assert tris_str != None
+            assert tris_str is not None
             tris_str = trisAlt.key[tris_str]
             data = {
                     'set': in_data['set'],
