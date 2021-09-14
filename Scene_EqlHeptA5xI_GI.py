@@ -223,7 +223,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es = Es)
         this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
-        this.Vs = Vs
+        this.setVs(Vs)
 
     def toPsPiecesStr(this,
             faceIndices = [],
@@ -269,12 +269,13 @@ class Shape(Heptagons.EqlHeptagonShape):
             if this.updateV:
                 this.setV()
             # reference vector, a side of the heptagon:
-            r0 = this.Vs[4]
-            r1 = this.Vs[5]
+            vs = this.Vs[0]
+            r0 = vs[4]
+            r1 = vs[5]
             r = r0 - r1
             # the extra edge
-            v0 = this.Vs[this.xtraEs[0]]
-            v1 = this.Vs[this.xtraEs[1]]
+            v0 = vs[this.xtraEs[0]]
+            v1 = vs[this.xtraEs[1]]
             v = v0 - v1
             #print r.norm(), v.norm()
             return '%s, extra edge length: %02.2f' % (stdStr, v.norm()/r.norm())

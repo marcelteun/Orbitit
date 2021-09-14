@@ -239,7 +239,7 @@ def toTrisAltKeyStr(tId = None, tStr = None):
                         TrisAlt_base.stringify[tId[1]])
     elif tStr == None:
         tStr = TrisAlt_base.stringify[tId]
-    t = string.join(tStr.split(), '_')
+    t = "_".join(tStr.split())
     t = t.replace('_ii', '_II')
     t = t.replace('_i', '_I')
     t = t.replace('alt._rot.', 'arot')
@@ -2902,7 +2902,7 @@ class EqlHeptagonShape(Geom3D.IsometricShape):
         pass
 
     def setH(this, h):
-        this.h     = h
+        this.h = h
         this.setV()
 
     def setAngle(this, a):
@@ -2978,7 +2978,7 @@ class EqlHeptagonShape(Geom3D.IsometricShape):
 
 class EqlHeptagonCtrlWin(wx.Frame):
     def __init__(this, shape, canvas, size, *args, **kwargs):
-        assert (type(shape) == type(EqlHeptagonShape()))
+        assert isinstance(shape, EqlHeptagonShape)
         this.shape = shape
         this.canvas = canvas
         wx.Frame.__init__(this, *args, **kwargs)

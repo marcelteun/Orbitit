@@ -152,13 +152,12 @@ class Shape(Geom3D.SimpleShape):
         # the failure occurs at init since showKite and showHepta don't exist
         try:
             Vs = []
-            print('this.showKite', this.showKite, 'this.showHepta', this.showHepta)
             if this.showKite:
                 Vs.extend(this.kiteVs)
             if this.showHepta:
                 Vs.extend(this.heptaVs)
-            for v in Vs: print(v)
-            print('===============')
+            #for v in Vs: print(v)
+            #print('===============')
             this.setVertexProperties(Vs = Vs)
         except AttributeError: pass
 
