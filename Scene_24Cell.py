@@ -21,12 +21,10 @@
 #
 
 import wx
-import math
 import rgb
 import Geom3D
 import Geom4D
-import Scenes3D
-from OpenGL.GL import *
+from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
 
 TITLE = '24-Cell'
 
@@ -410,7 +408,7 @@ class CtrlWin(wx.Frame):
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
         this.panel.Layout()
-        s = this.GetClientSize()
+        #s = this.GetClientSize()
         #print 'Ctrl Window size:', (s[0]+2, s[1])
 
     def createControlsSizer(this):

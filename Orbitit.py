@@ -1398,7 +1398,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             this.v0Gui = geom_gui.Vector4DInput(
                     this.parentPanel,
                     #label = 'Vector 1',
-                    relativeFloatSize = 4,
+                    rel_float_size = 4,
                     elem_labels = ['x0', 'y0', 'z0', 'w0']
                 )
             this.parentPanel.Bind(
@@ -1407,7 +1407,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             this.v1Gui = geom_gui.Vector4DInput(
                     this.parentPanel,
                     #label = 'Vector 1',
-                    relativeFloatSize = 4,
+                    rel_float_size = 4,
                     elem_labels = ['x1', 'y1', 'z1', 'w1']
                 )
             this.parentPanel.Bind(

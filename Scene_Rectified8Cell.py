@@ -21,12 +21,10 @@
 #-------------------------------------------------------------------
 
 import wx
-import math
 import rgb
 import Geom3D
 import Geom4D
-import Scenes3D
-from OpenGL.GL import *
+from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
 
 TITLE = 'Rectified Tesseract'
 
@@ -336,7 +334,7 @@ class CtrlWin(wx.Frame):
     def onShowGroup(this, event):
         for i in range(0, len(this.showGui), 2):
             if this.showGui[i].GetId() == event.GetId():
-                this.shape.setShowGroup(i/2, this.showGui[i].IsChecked())
+                this.shape.setShowGroup(i//2, this.showGui[i].IsChecked())
         #print 'Ctrl Window size:', (this.GetClientSize()[0], this.GetClientSize()[1])
         this.canvas.paint()
 
@@ -344,7 +342,7 @@ class CtrlWin(wx.Frame):
         for i in range(1, len(this.showGui), 2):
             if this.showGui[i].GetId() == event.GetId():
                 this.showGui[i].SetSelection(event.GetSelection())
-                groupId = i/2 # actually it should be (i-1)/2 but rounding fixes this
+                groupId = i//2 # actually it should be (i-1)/2 but rounding fixes this
                 list = [ this.showGui[i].IsChecked(j) for j in range(len(Cells[groupId])) ]
                 this.shape.setShowCellsOfGroup(groupId, list)
         this.canvas.paint()

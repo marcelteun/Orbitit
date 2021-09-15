@@ -25,8 +25,7 @@ import math
 import rgb
 import Geom3D
 import Geom4D
-import Scenes3D
-from OpenGL.GL import *
+from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
 
 TITLE = 'Rectified 24-Cell'
 
@@ -35,7 +34,6 @@ V2  = math.sqrt(2)
 dV2 = 2*V2
 
 Vs = [
-
         [  0,  V2,  V2,  dV2],  #  0
         [ V2,   0,  V2,  dV2],  #  1
         [  0, -V2,  V2,  dV2],  #  2
@@ -139,7 +137,6 @@ Vs = [
         [-dV2,  V2,   0, -V2],  # 93
         [-dV2,   0, -V2, -V2],  # 94
         [-dV2, -V2,   0, -V2],  # 95
-
     ]
 
 # 24 cubes
@@ -661,7 +658,7 @@ class CtrlWin(wx.Frame):
         lenR = 2*len(str) + 1
         r2 = list(range(2))
         lenL = [0 for j in r2]
-        nrOfCellsInColumn = len(Cells)/2
+        nrOfCellsInColumn = len(Cells) // 2
         for i in range(nrOfCellsInColumn):
             for j in r2:
                 lenL[j] = max(lenL[j], 2*len(CellGroups[nrOfCellsInColumn * j + i]))
@@ -707,7 +704,7 @@ class CtrlWin(wx.Frame):
     def onShowGroup(this, event):
         for i in range(0, len(this.showGui), 2):
             if this.showGui[i].GetId() == event.GetId():
-                this.shape.setShowGroup(i/2, this.showGui[i].IsChecked())
+                this.shape.setShowGroup(i//2, this.showGui[i].IsChecked())
         print('Ctrl Window size:', (this.GetClientSize()[0], this.GetClientSize()[1]))
         this.canvas.paint()
 
@@ -715,7 +712,7 @@ class CtrlWin(wx.Frame):
         for i in range(1, len(this.showGui), 2):
             if this.showGui[i].GetId() == event.GetId():
                 this.showGui[i].SetSelection(event.GetSelection())
-                groupId = i/2 # actually it should be (i-1)/2 but rounding fixes this
+                groupId = i//2 # actually it should be (i-1)/2 but rounding fixes this
                 list = [ this.showGui[i].IsChecked(j) for j in range(len(Cells[groupId])) ]
                 this.shape.setShowCellsOfGroup(groupId, list)
         this.canvas.paint()
