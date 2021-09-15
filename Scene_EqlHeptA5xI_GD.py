@@ -23,10 +23,8 @@
 
 import wx
 import math
-import rgb
 import Heptagons
 import Geom3D
-import Scenes3D
 import geomtypes
 
 from geomtypes import HalfTurn3 as HalfTurn

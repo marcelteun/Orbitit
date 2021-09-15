@@ -22,11 +22,9 @@
 
 import wx
 import math
-import rgb
 import Heptagons
 import geomtypes
 import Geom3D
-import Scenes3D
 
 TITLE = 'Equilateral Heptagons Tetrahedron'
 
