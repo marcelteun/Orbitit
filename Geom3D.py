@@ -156,7 +156,7 @@ def readPyFile(fd, recreateEdges = True):
     return: an object of the SimpleShape class.
     """
     ed = {'__name__': 'readPyFile'}
-    exec(fd, ed)
+    exec(fd.read(), ed)
     shape = ed['shape']
     if recreateEdges and len(shape.Es) == 0:
         shape.recreateEdges()

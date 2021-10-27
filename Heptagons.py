@@ -2572,7 +2572,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             print('DBG file not found:\n %s' % filename)
             return []
         ed = {'__name__': 'readPyFile'}
-        exec(fd, ed)
+        exec(fd.read(), ed)
         fd.close()
         return ed['results']
 
