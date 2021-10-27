@@ -1511,7 +1511,7 @@ class SimpleShape:
         """
         if this.dbgTrace:
             print('%s.divideColor(%s,..):' % (this.__class__, this.name))
-        div = this.FsLen / this.nrOfColors
+        div = this.FsLen // this.nrOfColors
         mod = this.FsLen % this.nrOfColors
         fColors = []
         colorIRange = list(range(this.nrOfColors))
