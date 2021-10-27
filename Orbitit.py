@@ -1969,11 +1969,11 @@ Options:
                      specified by -y or an off file, specified by -f. If no
                      argument is specified, the the result is piped to stdout.
         -y <file>
-        --py=<file>  export to a python fyle defing a shape that can be
+        --py=<file>  export to a python file defing a shape that can be
                      interpreted by Orbitit
 
         -f <file>
-        --off=<file> export to a python fyle defing a shape that can be read by
+        --off=<file> export to a python file defing a shape that can be read by
                      other programs, like Antiprism and Stella.
 
         -m <int>
