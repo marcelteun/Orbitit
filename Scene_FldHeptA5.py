@@ -76,6 +76,7 @@ open_file     =  Heptagons.open_file
 only_hepts    =  Heptagons.only_hepts
 all_eq_tris   =  counter.pp()
 no_o3_tris    =  counter.pp()
+T20_P12       =  counter.pp()
 T60_P12       =  counter.pp()
 T140_P12      =  counter.pp()
 T200          =  counter.pp()
@@ -85,6 +86,7 @@ Stringify = {
     only_hepts:   'Just Heptagons',
     all_eq_tris:  'All 80 Triangles Equilateral',
     no_o3_tris:   '48 Triangles',
+    T20_P12:      '20 Triangles and 12 Pentagons',
     T60_P12:      '60 Triangles and 12 Pentagons',
     T140_P12:     '140 Triangles and 12 Pentagons',
     T200:         '200 Triangles',
@@ -819,6 +821,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
             [ # prePosLst
                 Stringify[only_hepts],
                 Stringify[dyn_pos],
+                Stringify[T20_P12],
                 Stringify[T60_P12],
                 Stringify[T140_P12],
                 Stringify[T200],
@@ -985,6 +988,37 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 1
+            }
+        ],
+        T20_P12: [
+            {
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                'set': [3.9285156166, 0.4481183997, -1.1824397375, -0.6742498494, 0.7406212166, 1.0271943946, -2.9154857351],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 0
+            }, {
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                'set': [3.7946099505, 0.4342295954, -1.3000303091, -0.6713165943, 0.6792547664, 1.1292221703, -3.1339879423],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 0
+            }, {
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                'set': [3.2135654837, -0.4036768949, 1.6871643575, 0.8066757021, -2.7177042329, -1.8939034612, -2.3546442874],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 0
+            }, {
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                'set': [2.7907235251, -0.3606585776, 1.2610787379, 0.2334086784, -3.0920488367, -1.8938496708, 2.5205702708],
+                '7fold': Heptagons.foldMethod.w,
+                'tris': trisAlt.strip_II_shell,
+                'tris-pos': 1,
+                'fold-rot': 0
             }
         ],
         T60_P12: [
