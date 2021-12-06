@@ -22,14 +22,8 @@
 #------------------------------------------------------------------
 
 import math
-import rgb
-import glue
-import X3D
-import PS
-import Scenes3D
-import geomtypes
-import Geom3D
-import wx
+
+from orbitit import Geom3D, geomtypes, glue, PS, rgb
 
 from OpenGL.GLU import *
 from OpenGL.GL import *

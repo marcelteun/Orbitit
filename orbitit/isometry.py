@@ -29,7 +29,7 @@
 from copy import copy, deepcopy
 import math
 
-import geomtypes
+from orbitit import geomtypes
 
 X = geomtypes.UX
 Y = geomtypes.UY

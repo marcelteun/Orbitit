@@ -22,12 +22,10 @@
 
 import wx
 import math
-import Heptagons
-import Geom3D
-import geomtypes
 
-from geomtypes import HalfTurn3 as HalfTurn
-from geomtypes import Rot3      as Rot
+from orbitit import Geom3D, geomtypes, Heptagons
+from orbitit.geomtypes import HalfTurn3 as HalfTurn
+from orbitit.geomtypes import Rot3 as Rot
 
 vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 

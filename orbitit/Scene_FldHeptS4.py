@@ -21,14 +21,10 @@
 #
 
 import math
-import rgb
-import Heptagons
-import isometry
-import Geom3D
 
-import geomtypes
-from geomtypes import Rot3 as Rot
-from geomtypes import Vec3 as Vec
+from orbitit import Geom3D, geomtypes, isometry, Heptagons, rgb
+from orbitit.geomtypes import Rot3 as Rot
+from orbitit.geomtypes import Vec3 as Vec
 
 TITLE = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 

@@ -29,8 +29,7 @@ Module with geometrical types.
 
 import math
 
-import glue
-import indent
+from orbitit import glue, indent
 
 
 def turn(r):

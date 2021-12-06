@@ -23,9 +23,10 @@
 import wx
 import math
 import os
-import Geom3D
-import geomtypes
 from wx import glcanvas
+
+from orbitit import Geom3D, geomtypes
+
 # work-around for PyOpenGL bug (see commit message)
 if not os.environ.get("PYOPENGL_PLATFORM", ""):
     if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\

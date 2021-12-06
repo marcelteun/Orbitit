@@ -23,37 +23,33 @@
 
 import wx
 import math
-import Heptagons
-import Geom3D
-import geomtypes
 
-from geomtypes import HalfTurn3 as HalfTurn
-from geomtypes import Rot3      as Rot
+from orbitit import Geom3D, geomtypes, Heptagons
+from orbitit.geomtypes import HalfTurn3 as HalfTurn
+from orbitit.geomtypes import Rot3 as Rot
 
 vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
-TITLE = 'Equilateral Heptagons from Great Icosahedron - Great Stellated Dodecahedron'
+TITLE = 'Equilateral Heptagons from Great Dodecahedron - Small Stellated Dodecahedron'
 
-V3   = math.sqrt(3)
 V5   = math.sqrt(5)
 tau  = (1.0 + V5)/2
 tau2 = tau + 1.0
-Dtau2= (3 + V5)
-dtau = 1.0/tau
-w    = 1
-Ca   = 1.0/V3
-H0   = 2.0*Ca/tau2
-Rl   = vec(1.0, -Ca, H0)
+w    = 0.5
+Cq   = (2.5 - V5)
+H0   = math.sqrt(50 - 10*V5)/10
+Ch   = math.sqrt(25 + 10*V5)/10
+Rl   = vec(-w, Ch, H0)
 
-halfTurn = HalfTurn(axis=geomtypes.UX)
+atanH0d2 = Geom3D.Rad2Deg * math.atan(tau2/2)
 
 class Shape(Heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
-        t1 = Rot(angle = geomtypes.turn(0.2), axis = vec(0, -Dtau2, 1))
-        t2 = Rot(angle = geomtypes.turn(0.4), axis = vec(0, -Dtau2, 1))
-        t3 = Rot(angle = geomtypes.turn(0.6), axis = vec(0, -Dtau2, 1))
-        t4 = Rot(angle = geomtypes.turn(0.8), axis = vec(0, -Dtau2, 1))
-        h0 = HalfTurn(axis=vec(0, -1, tau2))
+        t1 = Rot(axis = vec(0, 0, 1), angle = geomtypes.turn(0.2))
+        t2 = Rot(axis = vec(0, 0, 1), angle = geomtypes.turn(0.4))
+        t3 = Rot(axis = vec(0, 0, 1), angle = geomtypes.turn(0.6))
+        t4 = Rot(axis = vec(0, 0, 1), angle = geomtypes.turn(0.8))
+        h0 = HalfTurn(axis=vec(0, 1, tau))
         Heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     geomtypes.E, t1, t2, t3, t4,
@@ -67,32 +63,32 @@ class Shape(Heptagons.EqlHeptagonShape):
             # isometry really) But for historical reasons I used a half turn
             # here to prevent edges to be drawn twice.
             #oppositeIsometry = geomtypes.I,
-            oppositeIsometry = halfTurn,
-            name = 'EglHeptA5xI_GI'
+            oppositeIsometry = geomtypes.HX,
+            name = 'EglHeptA5xI_GD'
         )
         this.initArrs()
         this.setH(H0)
+        this.setViewSettings(edgeR = 0.01, vertexR = 0.02)
 
     def setH(this, h):
-        this.angle = Geom3D.Rad2Deg * math.atan((h - H0)/Ca)
+        this.angle = Geom3D.Rad2Deg * math.atan((h - H0)/Ch) #+ atanH0d2
         Heptagons.EqlHeptagonShape.setH(this, h)
 
     def setAngle(this, a):
-        this.h     = Ca * math.tan(a*Geom3D.Deg2Rad) + H0
+        this.h     = Ch * math.tan(a*Geom3D.Deg2Rad) + H0
         Heptagons.EqlHeptagonShape.setAngle(this, a)
 
     def setV(this):
         # input this.h
-        St = this.h / (Dtau2*V3*this.h - 3)
-        #print 's', St
+        St = this.h / (2*math.sqrt(2*Cq)*this.h - Cq)
         #
-        #                  0
+        #                  2
         #           __..--'-_
-        #      3 -''    .    _"- 1
+        #      1 -''    .    _"- 3
         #         \       _-'
         #          \   _-'
         #           \-'
-        #           2
+        #           0
         #
         #    z    y
         #     ^ 7\
@@ -105,16 +101,16 @@ class Shape(Heptagons.EqlHeptagonShape):
         # and 0 a face centre.
         #
         Vs = [
-                vec(0.0,      0.0,      this.h),   # 0
+                vec(0.0,      0.0,    this.h),   # 0
                 Rl,
-                vec(0.0,     -Dtau2*St, St),
-                vec(-Rl[0],   Rl[1],    Rl[2])     # 3
+                vec(0.0,      St,     St/2),
+                vec(-Rl[0],   Rl[1],  Rl[2])     # 3
             ]
 
         # add heptagons
         H = HalfTurn(axis=Vs[3])
         this.errorStr = ''
-        if not this.heptPosAlt:
+        if this.heptPosAlt:
             Ns = Vs
             heptN = Heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None:
@@ -137,6 +133,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             else:
                 vt = heptN[0][5]
                 xtraEdgeIndex = 14
+            #print v
             # A part that will form the regular pentagrams (with overlaps).
             RegularTrianglePartV = [
                         heptN[0][3],
@@ -162,7 +159,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             else:
                 vt = heptN[0][2]
                 xtraEdgeIndex = 15
-            # One third of regular triangle.
+            # One third of regular pentagon.
             RegularTrianglePartV = [
                         heptN[0][3],
                         heptN[0][4],
@@ -181,15 +178,13 @@ class Shape(Heptagons.EqlHeptagonShape):
             return
         else:
             this.errorStr = ''
-        vt = H * vt
         # rotate vt by a half turn, IsoscelesTriangleV NOT auto updated.
+        vt = H * vt
         IsoscelesTriangleV[2] = vt
-        Vs.extend(heptN[0]) # V4 - V10, the heptagon
+        Vs.extend(heptN[0]) # V4 - V10
         Vs.extend(RegularTrianglePartV) # V11 - V13
         Vs.extend(IsoscelesTriangleV) # V14 - V16
         #for V in Vs: print V
-        #h = heptN[1]
-        #Ns = [[-h[0], -h[1], -h[2]] for i in range(11)]
         Ns = [heptN[1] for i in range(11)]
         Ns.extend([RegularTrianglePartN for i in range(3)])
         IsoscelesTriangleN = Geom3D.Triangle(
@@ -270,12 +265,14 @@ class Shape(Heptagons.EqlHeptagonShape):
             vs = this.Vs[0]
             r0 = vs[4]
             r1 = vs[5]
+            #r2 = vs[6]
             r = r0 - r1
             # the extra edge
             v0 = vs[this.xtraEs[0]]
             v1 = vs[this.xtraEs[1]]
+            #print this.xtraEs[0], this.xtraEs[1]
             v = v0 - v1
-            #print r.norm(), v.norm()
+            #print r.norm(), (r1-r2).norm(), v.norm()
             return '%s, extra edge length: %02.2f' % (stdStr, v.norm()/r.norm())
         # TODO: if not addXtraEdge: print diff in norms (or both edge lengths)
         else:
@@ -288,42 +285,40 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
         # s: string text in GUI
         # t: triangle alternative value
         # e: add extra edge
-        # h: alternative heptagon position
         # if a field is not specified: don't care.
         this.specialSolidAngles = [
             {'a':   0.0,               's': 'None'},
-            {'a':   0.0,               's': 'Great Icosahedron', 'h': False},
-            {'a':  79.187683036428297, 's': 'Great Stellated Dodecahedron', 'h': True},
-            {'a':  20.905157447889302, 's': 'A Stellation of the Rhombic Triacontahedron (IJ)'},
-            {'a':  41.810314895778596, 's': 'A Stellation of the Icosahedron (C)'}
+            {'a':   0.0,               's': 'Great Dodecahedron'},
+            # TODO: calc the exact angles.
+            {'a':  63.43             , 's': 'Small Stellated Dodecahedron'},
+            {'a':  30.0              , 's': '1st Stellation of the Rhombic Triacontahedron'}
         ]
         this.prefHeptSpecAngles = [
             {'a':   0.0,                's': 'None'},
-            {'a':  -7.362284243348462, 's': 'Minimum Angle', 't': True, 'e': True},
-            {'a':  53.175309408014598, 's': 'Maximum Angle', 't': False, 'e': True},
-            {'a':  14.444715180025225, 's': 'Equilateral Triangles', 't': True, 'e': True},
-            {'a':  17.084786013831049, 's': 'Equilateral Triangles', 't': False, 'e': True},
-            # no rhombi
+            {'a': -14.610137341149157, 's': 'Minimum Angle', 't': False, 'e': False},
+            {'a':  71.460948844711950, 's': 'Maximum Angle', 't': True, 'e': False},
+            {'a':  38.693009512922956, 's': 'Equilateral Triangles', 't': True, 'e': True},
+            {'a':  10.539390252849577, 's': 'Equilateral Triangles', 't': False, 'e': True},
+            {'a':  54.710109080964479, 's': 'Rhombi', 't': True, 'e': False},
         ]
 
         this.altHeptSpecAngles = [
             {'a':   0.0,               's': 'None'},
-            {'a':   6.837020288942317, 's': 'Minimum Angle', 't': False, 'e': True},
-            {'a':  82.321770249837471, 's': 'Maximum Angle', 't': True, 'e': True},
-            {'a':  35.179849014382299, 's': 'Equilateral Triangles', 't': False, 'e': True},
-            {'a':  61.551581272227054, 's': 'Equilateral Triangles', 't': True, 'e': True},
+            {'a': -26.133750479584418, 's': 'Minimum Angle', 't': True, 'e': True},
+            {'a':  -9.780732451367566, 's': 'Maximum Angle', 't': True, 'e': False},
+            {'a': -24.863664853476752, 's': 'Equilateral Triangles', 't': False, 'e': True},
+            # outside valid range
+            #{'a':  -1.862217818210073, 's': 'Equilateral Triangles', 't': False, 'e': True},
         ]
         this.setKiteAngleExtremes(
-                this.prefHeptSpecAngles[1]['a'],
-                this.altHeptSpecAngles[2]['a']
+                this.altHeptSpecAngles[1]['a'],
+                this.prefHeptSpecAngles[2]['a']
             )
         kwargs['title'] = TITLE
         Heptagons.EqlHeptagonCtrlWin.__init__(this,
-            shape, canvas, (332, 638),
+            shape, canvas, (332, 642),
             *args, **kwargs
         )
-        this.shape.setViewSettings(heptPosAlt=True)
-        this.altHeptPosChk.SetValue(True)
 
     def addSpecialPositions(this, parentFrame, parentSizer):
         labelLst = []
@@ -381,8 +376,8 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
         specPosSizer.Add(this.altHeptSpecPosGui,  1, wx.EXPAND)
 
         #parentSizer.Add(this.transparencySizer,  .1, wx.EXPAND)
-        parentSizer.Add(this.specialSolidPosGui, 12, wx.EXPAND)
-        parentSizer.Add(specPosSizer,      12, wx.EXPAND)
+        parentSizer.Add(this.specialSolidPosGui, 10, wx.EXPAND)
+        parentSizer.Add(specPosSizer,      14, wx.EXPAND)
 
     def onSpecialSolidPos(this, event = None):
         index = this.specialSolidPosGui.GetSelection()
@@ -399,13 +394,9 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
         this.shape.setAngle(angle)
 
         this.showKiteChk.SetValue(True)
+        this.showHeptaChk.SetValue(True)
         this.showXtraChk.SetValue(False)
-        if 'h' in angleData:
-            this.altHeptPosChk.SetValue(angleData['h'])
-            this.showHeptaChk.SetValue(True)
-        else:
-            this.showHeptaChk.SetValue(False)
-            this.altHeptPosChk.SetValue(False)
+        this.altHeptPosChk.SetValue(False)
         this.onViewSettingsChk(this)
         if index != 0:
             if this.prefHeptSpecPosGui.GetSelection() != 0:
@@ -483,5 +474,3 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):
         Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
-
-

@@ -22,10 +22,7 @@
 # -----------------------------------------------------------------
 
 
-import Geom3D
-import geomtypes
-import isometry
-import rgb
+from orbitit import Geom3D, geomtypes, isometry, rgb
 
 
 class Orbit(list):

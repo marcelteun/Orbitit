@@ -22,10 +22,9 @@
 
 import wx
 import math
-import rgb
-import Geom3D
-import Geom4D
 from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
+
+from orbitit import Geom3D, Geom4D, rgb
 
 TITLE = '5-Cell'
 

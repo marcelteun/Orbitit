@@ -25,9 +25,8 @@
 # B. Should they be in A or in B?
 
 import math
-import X3D
-import PS
-import geomtypes
+
+from orbitit import geomtypes, X3D
 
 X3D_DEFAULT_V_NAME     = 'coords'
 X3D_DEFAULT_PROTO_NAME = 'proto'

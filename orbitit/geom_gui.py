@@ -37,8 +37,7 @@ Like vertices, faecs, symmetries, etc.
 import wx
 import wx.lib.scrolledpanel as wxXtra
 
-import geomtypes
-import isometry
+from orbitit import geomtypes, isometry
 
 # TODO:
 # - filter faces for FacesInput.GetFace (negative nrs, length 2, etc)

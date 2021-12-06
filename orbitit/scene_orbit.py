@@ -44,12 +44,7 @@ import os
 import wx
 import wx.lib.colourselect as wxLibCS
 
-import rgb
-import Geom3D
-import geom_gui
-import geomtypes
-import isometry
-import orbit
+from orbitit import Geom3D, geom_gui, geomtypes, isometry, orbit, rgb
 
 TITLE = 'Create Polyhedron by Orbiting'
 

@@ -22,9 +22,8 @@
 
 import wx
 import math
-import Heptagons
-import geomtypes
-import Geom3D
+
+from orbitit import Geom3D, geomtypes, Heptagons
 
 TITLE = 'Equilateral Heptagons Tetrahedron'
 

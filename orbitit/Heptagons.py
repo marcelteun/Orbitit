@@ -25,14 +25,12 @@
 import wx
 import math
 import re
-import rgb
-import Geom3D
 from OpenGL.GL import glColor, glEnable, glDisable, glBlendFunc
 from OpenGL.GL import GL_CULL_FACE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
-import geomtypes
-from geomtypes import Rot3      as Rot
-from geomtypes import Vec3      as Vec
+from orbitit import Geom3D, geomtypes, rgb
+from orbitit.geomtypes import Rot3 as Rot
+from orbitit.geomtypes import Vec3 as Vec
 
 V3 = math.sqrt(3)
 

@@ -21,14 +21,10 @@
 #--------------------------------------------------------------------
 
 import wx
-import math
-import rgb
-import Heptagons
-import Geom3D
-import geomtypes
-import Scenes3D
 from OpenGL.GLU import *
 from OpenGL.GL import *
+
+from orbitit import Geom3D, geomtypes, Heptagons, rgb
 
 TITLE = 'Equilateral Heptagons from Kite'
 

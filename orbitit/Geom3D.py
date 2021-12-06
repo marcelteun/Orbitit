@@ -24,17 +24,11 @@
 
 import copy
 import math
-import rgb
-import glue
-import indent
-import X3D
-import PS
-import Scenes3D
 import wx
 import sys
 import os
-import geomtypes
-import isometry
+
+from orbitit import geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, X3D
 
 # work-around for PyOpenGL bug (see commit message)
 if not os.environ.get("PYOPENGL_PLATFORM", ""):

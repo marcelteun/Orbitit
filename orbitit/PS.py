@@ -22,7 +22,8 @@
 #------------------------------------------------------------------
 
 import sys
-import glue
+
+from orbitit import glue
 
 # TODO: Add standard page sizes here (and check if A4 is correct)
 PageSizeA4 = (559, 774)

@@ -5,23 +5,9 @@ Ubuntu, as a consequence some problems might exist with windows.
 Copyright (C) 2010 Marcel Tunnissen
 http://www.tunnissen.eu
 
-License: GNU Public License version 2
+License: GPLv2, see LICENCSE.txt
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program (gpl-2.0.txt); if not,
-check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-or write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+If you downloaded this from github directly:
 
 Requirements:
 -------------
@@ -37,10 +23,18 @@ sudo apt-get install python3 python3-pip
 Then use pip to install other packages, e.g:
     pip3 install pyopengl wxpython
 
+Note installing wxpython can take quite while
+
 Run:
 ----
-cd to directory
-./Orbitit.py
+Make sure the PYTHONPATH points out this directory, e.g.
+export PYTHONPATH=$PWD
+then
+python orbitit/Orbitit.py
+
+If you have installed this through "pip install orbitit"
+Run:
+python -m orbitit
 
 Segmentation Faults:
 --------------------

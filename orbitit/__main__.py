@@ -21,21 +21,14 @@
 #
 #------------------------------------------------------------------
 
-import glue
 import math
 import os
-import rgb
-import re
 import sys
-import X3D
-import Scenes3D
-import Geom3D
-import geomtypes
-import geom_gui
 import wx
-import pprint
 import wx.lib.intctrl
 import wx.lib.colourselect
+
+from orbitit import Geom3D, geom_gui, geomtypes, Scenes3D, X3D
 
 # work-around for PyOpenGL bug (see commit message)
 if not os.environ.get("PYOPENGL_PLATFORM", ""):
@@ -159,7 +152,7 @@ DEG2RAD = Geom3D.Deg2Rad
 #             intersections should be even, are all edges unique and do they
 #             form one closed face?"
 
-DefaultScene = './scene_orbit.py'
+DefaultScene = 'orbitit/scene_orbit.py'
 
 def onSwitchFrontBack(canvas):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
