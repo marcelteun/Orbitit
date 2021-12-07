@@ -297,9 +297,7 @@ def saveFile(fd, shape):
 
     The caller still need to close the filde descriptor afterwards
     """
-    fd.write("import geomtypes\n")
-    fd.write("import Geom3D\n")
-    fd.write("import isometry\n")
+    fd.write("import orbitit\n")
     fd.write("shape = %s" % repr(shape))
 
 class Fields:

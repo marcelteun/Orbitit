@@ -30,7 +30,7 @@ Run:
 Make sure the PYTHONPATH points out this directory, e.g.
 export PYTHONPATH=$PWD
 then
-python orbitit/Orbitit.py
+python orbitit
 
 If you have installed this through "pip install orbitit"
 Run:
