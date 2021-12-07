@@ -29,6 +29,42 @@ import wx.lib.intctrl
 import wx.lib.colourselect
 
 from orbitit import Geom3D, geom_gui, geomtypes, Scenes3D, X3D
+from orbitit import (
+    Scene_24Cell,
+    Scene_5Cell,
+    Scene_8Cell,
+    Scene_EqlHeptA5xI,
+    Scene_EqlHeptA5xI_GD,
+    Scene_EqlHeptA5xI_GI,
+    Scene_EqlHeptFromKite,
+    Scene_EqlHeptS4A4,
+    Scene_EqlHeptS4xI,
+    Scene_FldHeptA4,
+    Scene_FldHeptA5,
+    Scene_FldHeptS4,
+    Scene_Rectified24Cell,
+    Scene_Rectified8Cell,
+    scene_orbit,
+)
+DEFAULT_SCENE = 'scene_orbit'
+
+SCENES = {
+    'Scene_24Cell': Scene_24Cell,
+    'Scene_5Cell': Scene_5Cell,
+    'Scene_8Cell': Scene_8Cell,
+    'Scene_EqlHeptA5xI': Scene_EqlHeptA5xI,
+    'Scene_EqlHeptA5xI_GD': Scene_EqlHeptA5xI_GD,
+    'Scene_EqlHeptA5xI_GI': Scene_EqlHeptA5xI_GI,
+    'Scene_EqlHeptFromKite': Scene_EqlHeptFromKite,
+    'Scene_EqlHeptS4A4': Scene_EqlHeptS4A4,
+    'Scene_EqlHeptS4xI': Scene_EqlHeptS4xI,
+    'Scene_FldHeptA4': Scene_FldHeptA4,
+    'Scene_FldHeptA5': Scene_FldHeptA5,
+    'Scene_FldHeptS4': Scene_FldHeptS4,
+    'Scene_Rectified24Cell': Scene_Rectified24Cell,
+    'Scene_Rectified8Cell': Scene_Rectified8Cell,
+    'scene_orbit': scene_orbit,
+}
 
 # work-around for PyOpenGL bug (see commit message)
 if not os.environ.get("PYOPENGL_PLATFORM", ""):
@@ -152,8 +188,6 @@ DEG2RAD = Geom3D.Deg2Rad
 #             intersections should be even, are all edges unique and do they
 #             form one closed face?"
 
-DefaultScene = 'orbitit/scene_orbit.py'
-
 def onSwitchFrontBack(canvas):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
         glFrontFace(GL_CW)
@@ -229,6 +263,7 @@ class MainWindow(wx.Frame):
     wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
     def __init__(this, TstScene, shape, p_args, *args, **kwargs):
         wx.Frame.__init__(this, *args, **kwargs)
+        this.scenes_list = list(SCENES.keys())
         this.addMenuBar()
         this.statusBar = this.CreateStatusBar()
         this.scene = None
@@ -684,25 +719,17 @@ class MainWindow(wx.Frame):
             this.SetTitle("Dome %s" % this.GetTitle())
 
     def onOpenScene(this, e):
-        wildcard = "Scene plugin (Scene_*.py)|?cene_*.py"
-        dlg = wx.FileDialog(this, 'New: Choose a Scene',
-                this.sceneDirName, '', wildcard, wx.FD_OPEN)
+        dlg = wx.SingleChoiceDialog(this,'Choose a Scene', '', this.scenes_list)
         if dlg.ShowModal() == wx.ID_OK:
-            filepath = dlg.GetPath()
-            print('filepath', filepath)
-            this.sceneDirName = filepath.rsplit('/', 1)[0]
-            print('sceneDirName', this.sceneDirName)
-            shape = this.readSceneFile(filepath)
+            scene_index = dlg.GetSelection()
+            frame.load_scene(SCENES[this.scenes_list[scene_index]])
         dlg.Destroy()
 
-    def readSceneFile(this, filename):
-        print("Starting scene", filename)
-        fd = open(filename, 'r')
-        ed = {}
-        exec(fd.read(), ed)
+    def load_scene(this, scene):
+        print("Starting scene", scene)
         scene = {
-            'lab': ed['TITLE'],
-            'class': ed['Scene']
+            'lab': scene.TITLE,
+            'class': scene.Scene,
         }
         this.setScene(scene)
 
@@ -2051,7 +2078,7 @@ if __name__ == "__main__":
             shape.saveFile(o_fd)
     else:
         if oper != Oper.openScene:
-            scene_file = DefaultScene
+            scene_name = DEFAULT_SCENE
         app = wx.App(False)
         frame = MainWindow(
                 Canvas3DScene,
@@ -2063,7 +2090,7 @@ if __name__ == "__main__":
                 pos = wx.Point(980, 0)
             )
         if (len(args) == 0):
-            frame.readSceneFile(scene_file)
+            frame.load_scene(SCENES[scene_name])
         app.MainLoop()
 
     sys.stderr.write("Done\n")
