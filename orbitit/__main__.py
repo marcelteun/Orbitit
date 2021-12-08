@@ -97,34 +97,34 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
         GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
-        matAmbient    = [0.2, 0.2, 0.2, 0.0]
-        matDiffuse    = [0.1, 0.6, 0.0, 0.0]
-        #matSpecular   = [0.2, 0.2, 0.2, 1.]
-        matShininess  = 0.0
-        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, matAmbient)
-        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, matDiffuse)
-        #GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, matSpecular)
-        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, matShininess)
+        mat_ambient = [0.2, 0.2, 0.2, 0.0]
+        mat_diffuse = [0.1, 0.6, 0.0, 0.0]
+        #mat_specular = [0.2, 0.2, 0.2, 1.]
+        mat_shininess = 0.0
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, mat_ambient)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, mat_diffuse)
+        #GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, mat_specular)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, mat_shininess)
 
-        lightPosition = [10.0, -30.0, -20.0, 0.0]
-        lightAmbient  = [0.3, 0.3, 0.3, 1.0]
-        lightDiffuse  = [0.5, 0.5, 0.5, 1.0]
+        light_pos = [10.0, -30.0, -20.0, 0.0]
+        light_ambient = [0.3, 0.3, 0.3, 1.0]
+        light_diffuse = [0.5, 0.5, 0.5, 1.0]
         # disable specular part:
-        lightSpecular = [0., 0., 0., 1.]
-        GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, lightPosition)
-        GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, lightAmbient)
-        GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, lightDiffuse)
-        GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, lightSpecular)
+        light_specular = [0., 0., 0., 1.]
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, light_pos)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, light_ambient)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, light_diffuse)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, light_specular)
         GL.glEnable(GL.GL_LIGHT0)
 
-        lightPosition = [-30.0, 0.0, -20.0, 0.0]
-        lightAmbient  = [0.0, 0.0, 0.0, 1.]
-        lightDiffuse  = [0.08, 0.08, 0.08, 1.]
-        lightSpecular = [0.0, 0.0, 0.0, 1.]
-        GL.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition)
-        GL.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient)
-        GL.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse)
-        GL.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular)
+        light_pos = [-30.0, 0.0, -20.0, 0.0]
+        light_ambient = [0.0, 0.0, 0.0, 1.]
+        light_diffuse = [0.08, 0.08, 0.08, 1.]
+        light_specular = [0.0, 0.0, 0.0, 1.]
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, light_pos)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, light_ambient)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, light_diffuse)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, light_specular)
         GL.glEnable(GL.GL_LIGHT1)
 
         GL.glEnable(GL.GL_COLOR_MATERIAL)
@@ -178,12 +178,12 @@ class MainWindow(wx.Frame):
         self.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
     def add_menu_bar(self):
-        menuBar = wx.MenuBar()
-        menuBar.Append(self.create_file_menu(), '&File')
-        menuBar.Append(self.create_edit_menu(), '&Edit')
-        menuBar.Append(self.create_view_menu(), '&View')
-        menuBar.Append(self.create_tools_menu(), '&Tools')
-        self.SetMenuBar(menuBar)
+        menu_bar = wx.MenuBar()
+        menu_bar.Append(self.create_file_menu(), '&File')
+        menu_bar.Append(self.create_edit_menu(), '&Edit')
+        menu_bar.Append(self.create_view_menu(), '&View')
+        menu_bar.Append(self.create_tools_menu(), '&Tools')
+        self.SetMenuBar(menu_bar)
 
     def create_file_menu(self):
         menu = wx.Menu()
@@ -383,17 +383,17 @@ class MainWindow(wx.Frame):
         while not file_chosen:
             if dlg.ShowModal() == wx.ID_OK:
                 extra_data = dlg.get_extra_data()
-                cleanUp = dlg.get_clean_up()
+                clean_up = dlg.get_clean_up()
                 precision = dlg.get_precision()
                 margin = dlg.get_float_margin()
-                fileDlg = wx.FileDialog(self, 'Save as .off file',
+                file_dlg = wx.FileDialog(self, 'Save as .off file',
                     self.export_dir_name, '', '*.off',
                     wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                 )
-                file_chosen = fileDlg.ShowModal() == wx.ID_OK
+                file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
-                    filepath = fileDlg.GetPath()
-                    filename = fileDlg.GetFilename()
+                    filepath = file_dlg.GetPath()
+                    filename = file_dlg.GetFilename()
                     self.export_dir_name  = filepath.rsplit('/', 1)[0]
                     NameExt = filename.split('.')
                     if len(NameExt) == 1:
@@ -410,7 +410,7 @@ class MainWindow(wx.Frame):
                         shape = shape.simple_shape
                     except AttributeError:
                         pass
-                    if cleanUp:
+                    if clean_up:
                         shape = shape.cleanShape(margin)
                     fd.write(shape.toOffStr(precision, extra_data))
                     print("OFF file written")
@@ -418,7 +418,7 @@ class MainWindow(wx.Frame):
                     fd.close()
                 else:
                     dlg.Show()
-                fileDlg.Destroy()
+                file_dlg.Destroy()
             else:
                 break
         # done while: file choosen
@@ -429,18 +429,18 @@ class MainWindow(wx.Frame):
         file_chosen = False
         while not file_chosen:
             if dlg.ShowModal() == wx.ID_OK:
-                scalingFactor = dlg.getScaling()
+                scale_factor = dlg.get_scaling()
                 precision = dlg.get_precision()
                 margin = dlg.get_float_margin()
-                assert (scalingFactor >= 0 and scalingFactor != None)
-                fileDlg = wx.FileDialog(self, 'Save as .ps file',
+                assert (scale_factor >= 0 and scale_factor != None)
+                file_dlg = wx.FileDialog(self, 'Save as .ps file',
                     self.export_dir_name, '', '*.ps',
                     style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                 )
-                file_chosen = fileDlg.ShowModal() == wx.ID_OK
+                file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
-                    filepath = fileDlg.GetPath()
-                    filename = fileDlg.GetFilename()
+                    filepath = file_dlg.GetPath()
+                    filename = file_dlg.GetFilename()
                     self.export_dir_name  = filepath.rsplit('/', 1)[0]
                     NameExt = filename.split('.')
                     if len(NameExt) == 1:
@@ -462,7 +462,7 @@ class MainWindow(wx.Frame):
                     try:
                         fd.write(
                             shape.toPsPiecesStr(
-                                scaling = scalingFactor,
+                                scaling = scale_factor,
                                 precision = precision,
                                 margin = math.pow(10, -margin)
                             )
@@ -475,7 +475,7 @@ class MainWindow(wx.Frame):
                     fd.close()
                 else:
                     dlg.Show()
-                fileDlg.Destroy()
+                file_dlg.Destroy()
             else:
                 break
         # done while: file choosen
@@ -669,23 +669,23 @@ class MainPanel(wx.Panel):
 
         shape: the new shape. This will refresh the canvas.
         """
-        oldShape = self.canvas.shape
+        old_shape = self.canvas.shape
         self.canvas.shape = shape
         # Use all the vertex settings except for Vs, i.e. keep the view
         # vertex settings the same.
-        oldVSettings = oldShape.getVertexProperties()
-        del oldVSettings['Vs']
-        del oldVSettings['Ns']
-        self.canvas.shape.setVertexProperties(oldVSettings)
+        old_v_settings = old_shape.getVertexProperties()
+        del old_v_settings['Vs']
+        del old_v_settings['Ns']
+        self.canvas.shape.setVertexProperties(old_v_settings)
         # Use all the edge settings except for Es
-        oldESettings = oldShape.getEdgeProperties()
-        del oldESettings['Es']
-        self.canvas.shape.setEdgeProperties(oldESettings)
+        old_e_settings = old_shape.getEdgeProperties()
+        del old_e_settings['Es']
+        self.canvas.shape.setEdgeProperties(old_e_settings)
         # Use only the 'drawFaces' setting:
-        oldFSettings = {
-                'drawFaces': oldShape.getFaceProperties()['drawFaces']
+        old_f_settings = {
+                'drawFaces': old_shape.getFaceProperties()['drawFaces']
             }
-        self.canvas.shape.setFaceProperties(oldFSettings)
+        self.canvas.shape.setFaceProperties(old_f_settings)
         # if the shape generates the normals itself:
         # TODO: handle that this.Ns is set correctly, i.e. normalised
         if shape.generateNormals:
@@ -694,7 +694,7 @@ class MainPanel(wx.Panel):
             GL.glEnable(GL.GL_NORMALIZE)
         self.canvas.paint()
         self.parent.set_status_text("Shape Updated")
-        del oldShape
+        del old_shape
 
     def get_shape(self):
         """Return the current shape object
@@ -714,9 +714,9 @@ class ColourSettingsWindow(wx.Frame):
         self.add_content()
 
     def add_content(self):
-        self.colSizer = wx.BoxSizer(wx.VERTICAL)
+        self.col_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.selColGuis = []
+        self.select_col_guis = []
         i = 0
         shape_idx = 0
         # assume compound shape
@@ -725,60 +725,59 @@ class ColourSettingsWindow(wx.Frame):
             added_cols = []
             col_idx = 0
             for col in shape_cols[0]:
-                wxcol = wx.Colour(255*col[0], 255*col[1], 255*col[2])
-                if not wxcol in added_cols:
+                wx_col = wx.Colour(255*col[0], 255*col[1], 255*col[2])
+                if not wx_col in added_cols:
                     if i % self.col_width == 0:
-                        selColSizerRow = wx.BoxSizer(wx.HORIZONTAL)
-                        self.colSizer.Add(selColSizerRow, 0, wx.EXPAND)
-                    self.selColGuis.append(
+                        col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
+                        self.col_sizer.Add(col_sizer_row, 0, wx.EXPAND)
+                    self.select_col_guis.append(
                         wx.ColourPickerCtrl(
-                            self.panel, wx.ID_ANY, wxcol))
+                            self.panel, wx.ID_ANY, wx_col))
                     self.panel.Bind(wx.EVT_COLOURPICKER_CHANGED, self.on_col_select)
-                    selColSizerRow.Add(self.selColGuis[-1], 0, wx.EXPAND)
+                    col_sizer_row.Add(self.select_col_guis[-1], 0, wx.EXPAND)
                     i += 1
                     # connect GUI to shape_idx and col_idx
-                    self.selColGuis[-1].my_shape_idx = shape_idx
-                    self.selColGuis[-1].my_cols = [col_idx]
-                    # connect wxcolour to GUI
-                    wxcol.my_gui = self.selColGuis[-1]
-                    added_cols.append(wxcol)
+                    self.select_col_guis[-1].my_shape_idx = shape_idx
+                    self.select_col_guis[-1].my_cols = [col_idx]
+                    # connect wx_col to GUI
+                    wx_col.my_gui = self.select_col_guis[-1]
+                    added_cols.append(wx_col)
                 else:
-                    gui = added_cols[added_cols.index(wxcol)].my_gui
+                    gui = added_cols[added_cols.index(wx_col)].my_gui
                     # must be same shape_id
                     gui.my_cols.append(col_idx)
                 col_idx += 1
             shape_idx += 1
 
-        self.noOfCols = i
-        self.Guis = []
+        self.guis = []
 
-        self.subSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.colSizer.Add(self.subSizer)
+        self.sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.col_sizer.Add(self.sub_sizer)
 
-        self.Guis.append(wx.Button(self.panel, label='Cancel'))
-        self.Guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
-        self.subSizer.Add(self.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Cancel'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.Guis.append(wx.Button(self.panel, label='Reset'))
-        self.Guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
-        self.subSizer.Add(self.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Reset'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.Guis.append(wx.Button(self.panel, label='Done'))
-        self.Guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
-        self.subSizer.Add(self.Guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Done'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.panel.SetSizer(self.colSizer)
+        self.panel.SetSizer(self.col_sizer)
         self.panel.SetAutoLayout(True)
         self.panel.Layout()
         self.Show(True)
 
     def on_reset(self, e):
-        for colgui in self.selColGuis:
-             shape_idx = colgui.my_shape_idx
-             col_idx = colgui.my_cols[0]
+        for col_gui in self.select_col_guis:
+             shape_idx = col_gui.my_shape_idx
+             col_idx = col_gui.my_cols[0]
              c = self.org_cols[shape_idx][0][col_idx]
-             wxcol = wx.Colour(255*c[0], 255*c[1], 255*c[2])
-             colgui.SetColour(wxcol)
+             wx_col = wx.Colour(255*c[0], 255*c[1], 255*c[2])
+             col_gui.SetColour(wx_col)
         self.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.org_cols]
         self.update_shape_cols()
 
@@ -791,10 +790,10 @@ class ColourSettingsWindow(wx.Frame):
         self.Close()
 
     def on_col_select(self, e):
-        wxcol = e.GetColour().Get()
-        col = (float(wxcol[0])/255, float(wxcol[1])/255, float(wxcol[2])/255)
+        wx_col = e.GetColour().Get()
+        col = (float(wx_col[0])/255, float(wx_col[1])/255, float(wx_col[2])/255)
         gui_id = e.GetId()
-        for gui in self.selColGuis:
+        for gui in self.select_col_guis:
             if gui.GetId() == gui_id:
                 shape_cols = self.cols[gui.my_shape_idx][0]
                 for col_idx in gui.my_cols:
@@ -806,7 +805,7 @@ class ColourSettingsWindow(wx.Frame):
         self.canvas.paint()
 
     def close(self):
-        for Gui in self.Guis:
+        for Gui in self.guis:
             Gui.Destroy()
 
 class TransformSettingsWindow(wx.Frame):
@@ -816,21 +815,21 @@ class TransformSettingsWindow(wx.Frame):
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
-        self.orgVs = self.canvas.shape.getVertexProperties()['Vs']
-        self.org_orgVs = self.orgVs # for cancel
+        self.org_vs = self.canvas.shape.getVertexProperties()['Vs']
+        self.org_org_vs = self.org_vs # for cancel
         self.set_status_text("")
 
     def add_content(self):
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.rotateSizer = geom_gui.AxisRotateSizer(
+        self.rot_sizer = geom_gui.AxisRotateSizer(
             self.panel,
             self.on_rot,
             min_angle=-180,
             max_angle=180,
             initial_angle=0
         )
-        self.main_sizer.Add(self.rotateSizer)
+        self.main_sizer.Add(self.rot_sizer)
 
         self.guis = []
 
@@ -854,24 +853,24 @@ class TransformSettingsWindow(wx.Frame):
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_invert)
         invert_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.subSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.main_sizer.Add(self.subSizer)
+        self.sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.main_sizer.Add(self.sub_sizer)
 
         self.guis.append(wx.Button(self.panel, label='Apply'))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_apply)
-        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         self.guis.append(wx.Button(self.panel, label='Cancel'))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
-        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         self.guis.append(wx.Button(self.panel, label='Reset'))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
-        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         self.guis.append(wx.Button(self.panel, label='Done'))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
-        self.subSizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         self.panel.SetSizer(self.main_sizer)
         self.panel.SetAutoLayout(True)
@@ -884,39 +883,39 @@ class TransformSettingsWindow(wx.Frame):
             return
         transform = geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis)
         # Assume compound shape
-        newVs = [
-            [transform * geomtypes.Vec3(v) for v in shapeVs] for shapeVs in self.orgVs]
-        self.canvas.shape.setVertexProperties(Vs=newVs)
+        new_vs = [
+            [transform * geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
+        self.canvas.shape.setVertexProperties(Vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_invert(self, e=None):
         # Assume compound shape
-        newVs = [
-            [-geomtypes.Vec3(v) for v in shapeVs] for shapeVs in self.orgVs]
-        self.canvas.shape.setVertexProperties(Vs=newVs)
+        new_vs = [
+            [-geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
+        self.canvas.shape.setVertexProperties(Vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_translate(self, e=None):
         # Assume compound shape
-        newVs = [
+        new_vs = [
             [geomtypes.Vec3(v) + self.translation.get_vertex()
-             for v in shapeVs] for shapeVs in self.orgVs]
-        self.canvas.shape.setVertexProperties(Vs=newVs)
+             for v in shape_vs] for shape_vs in self.org_vs]
+        self.canvas.shape.setVertexProperties(Vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_apply(self, e=None):
-        self.orgVs = self.canvas.shape.getVertexProperties()['Vs']
+        self.org_vs = self.canvas.shape.getVertexProperties()['Vs']
         # reset the angle
-        self.rotateSizer.set_angle(0)
+        self.rot_sizer.set_angle(0)
         self.set_status_text("applied, now you can define another axis")
 
     def on_reset(self, e=None):
-        self.canvas.shape.setVertexProperties(Vs=self.org_orgVs)
+        self.canvas.shape.setVertexProperties(Vs=self.org_org_vs)
         self.canvas.paint()
-        self.orgVs = self.org_orgVs
+        self.org_vs = self.org_org_vs
 
     def on_cancel(self, e=None):
         self.on_reset()
@@ -941,12 +940,12 @@ class ViewSettingsWindow(wx.Frame):
         self.add_contents()
 
     def add_contents(self):
-        self.ctrlSizer = ViewSettingsSizer(self, self.panel, self.canvas)
+        self.ctrl_sizer = ViewSettingsSizer(self, self.panel, self.canvas)
         if self.canvas.shape.dimension == 4:
             self.set_default_size((413, 791))
         else:
             self.set_default_size((380, 414))
-        self.panel.SetSizer(self.ctrlSizer)
+        self.panel.SetSizer(self.ctrl_sizer)
         self.panel.SetAutoLayout(True)
         self.panel.Layout()
         self.Show(True)
@@ -960,8 +959,8 @@ class ViewSettingsWindow(wx.Frame):
 
     def rebuild(self):
         # Doesn't work out of the box (Guis are not destroyed...):
-        #self.ctrlSizer.Destroy()
-        self.ctrlSizer.close()
+        #self.ctrl_sizer.Destroy()
+        self.ctrl_sizer.close()
         self.add_contents()
 
     def set_status_text(self, str):
@@ -991,132 +990,132 @@ class ViewSettingsSizer(wx.BoxSizer):
         self.parent_win = parent_win
         self.parent_panel = parent_panel
         # Show / Hide vertices
-        vProps = canvas.shape.getVertexProperties()
-        self.vR = vProps['radius']
-        self.vOptionsLst = ['hide', 'show']
-        if self.vR > 0:
+        v_props = canvas.shape.getVertexProperties()
+        self.v_r = v_props['radius']
+        self.v_opts_lst = ['hide', 'show']
+        if self.v_r > 0:
             default = 1 # key(1) = 'show'
         else:
             default = 0 # key(0) = 'hide'
-        self.vOptionsGui  = wx.RadioBox(self.parent_panel,
+        self.v_opts_gui  = wx.RadioBox(self.parent_panel,
             label = 'Vertex Options',
             style = wx.RA_VERTICAL,
-            choices = self.vOptionsLst
+            choices = self.v_opts_lst
         )
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_v_option, id = self.vOptionsGui.GetId())
-        self.vOptionsGui.SetSelection(default)
+        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_v_option, id = self.v_opts_gui.GetId())
+        self.v_opts_gui.SetSelection(default)
         # Vertex Radius
-        nrOfSliderSteps   = 40
-        self.vRadiusMin   = 0.01
-        self.vRadiusMax   = 0.100
-        self.vRadiusScale = 1.0 / self.vRadiusMin
-        s = (self.vRadiusMax - self.vRadiusMin) * self.vRadiusScale
-        if int(s) < nrOfSliderSteps:
-            self.vRadiusScale = (self.vRadiusScale * nrOfSliderSteps) / s
-        self.vRadiusGui = wx.Slider(self.parent_panel,
-            value = self.vRadiusScale * self.vR,
-            minValue = self.vRadiusScale * self.vRadiusMin,
-            maxValue = self.vRadiusScale * self.vRadiusMax,
+        no_of_slider_steps = 40
+        self.v_r_min = 0.01
+        self.v_r_max = 0.100
+        self.v_r_scale = 1.0 / self.v_r_min
+        s = (self.v_r_max - self.v_r_min) * self.v_r_scale
+        if int(s) < no_of_slider_steps:
+            self.v_r_scale = (self.v_r_scale * no_of_slider_steps) / s
+        self.v_r_gui = wx.Slider(self.parent_panel,
+            value = self.v_r_scale * self.v_r,
+            minValue = self.v_r_scale * self.v_r_min,
+            maxValue = self.v_r_scale * self.v_r_max,
             style = wx.SL_HORIZONTAL
         )
-        self.Guis.append(self.vRadiusGui)
-        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_v_radius, id = self.vRadiusGui.GetId())
+        self.Guis.append(self.v_r_gui)
+        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_v_radius, id = self.v_r_gui.GetId())
         self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Vertex radius'))
-        vRadiusSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        v_r_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         # disable if vertices are hidden anyway:
         if default != 1:
-            self.vRadiusGui.Disable()
+            self.v_r_gui.Disable()
         # Vertex Colour
-        self.vColorGui = wx.Button(self.parent_panel, wx.ID_ANY, "Colour")
-        self.Guis.append(self.vColorGui)
-        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_v_col, id = self.vColorGui.GetId())
+        self.v_col_gui = wx.Button(self.parent_panel, wx.ID_ANY, "Colour")
+        self.Guis.append(self.v_col_gui)
+        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_v_col, id = self.v_col_gui.GetId())
         # Show / hide edges
-        eProps           = canvas.shape.getEdgeProperties()
-        self.eR          = eProps['radius']
-        self.eOptionsLst = ['hide', 'as cylinders', 'as lines']
-        if eProps['drawEdges']:
-            if self.vR > 0:
+        e_props = canvas.shape.getEdgeProperties()
+        self.e_r = e_props['radius']
+        self.e_opts_lst = ['hide', 'as cylinders', 'as lines']
+        if e_props['drawEdges']:
+            if self.v_r > 0:
                 default = 1 # key(1) = 'as cylinders'
             else:
                 default = 2 # key(2) = 'as lines'
         else:
             default     = 0 # key(0) = 'hide'
-        self.eOptionsGui = wx.RadioBox(self.parent_panel,
+        self.e_opts_gui = wx.RadioBox(self.parent_panel,
             label = 'Edge Options',
             style = wx.RA_VERTICAL,
-            choices = self.eOptionsLst
+            choices = self.e_opts_lst
         )
-        self.Guis.append(self.eOptionsGui)
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_e_option, id = self.eOptionsGui.GetId())
-        self.eOptionsGui.SetSelection(default)
+        self.Guis.append(self.e_opts_gui)
+        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_e_option, id = self.e_opts_gui.GetId())
+        self.e_opts_gui.SetSelection(default)
         # Edge Radius
-        nrOfSliderSteps   = 40
-        self.eRadiusMin   = 0.008
-        self.eRadiusMax   = 0.08
-        self.eRadiusScale = 1.0 / self.eRadiusMin
-        s = (self.eRadiusMax - self.eRadiusMin) * self.eRadiusScale
-        if int(s) < nrOfSliderSteps:
-            self.eRadiusScale = (self.eRadiusScale * nrOfSliderSteps) / s
-        self.eRadiusGui = wx.Slider(self.parent_panel,
-            value = self.eRadiusScale * self.eR,
-            minValue = self.eRadiusScale * self.eRadiusMin,
-            maxValue = self.eRadiusScale * self.eRadiusMax,
+        no_of_slider_steps = 40
+        self.e_r_min = 0.008
+        self.e_r_max = 0.08
+        self.e_r_scale = 1.0 / self.e_r_min
+        s = (self.e_r_max - self.e_r_min) * self.e_r_scale
+        if int(s) < no_of_slider_steps:
+            self.e_r_scale = (self.e_r_scale * no_of_slider_steps) / s
+        self.e_r_gui = wx.Slider(self.parent_panel,
+            value = self.e_r_scale * self.e_r,
+            minValue = self.e_r_scale * self.e_r_min,
+            maxValue = self.e_r_scale * self.e_r_max,
             style = wx.SL_HORIZONTAL
         )
-        self.Guis.append(self.eRadiusGui)
-        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_e_radius, id = self.eRadiusGui.GetId())
+        self.Guis.append(self.e_r_gui)
+        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_e_radius, id = self.e_r_gui.GetId())
         self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Edge radius'))
-        eRadiusSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        e_r_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         # disable if edges are not drawn as scalable items anyway:
         if default != 1:
-            self.eRadiusGui.Disable()
+            self.e_r_gui.Disable()
         # Edge Colour
-        self.eColorGui = wx.Button(self.parent_panel, wx.ID_ANY, "Colour")
-        self.Guis.append(self.eColorGui)
-        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_e_col, id = self.eColorGui.GetId())
+        self.e_col_gui = wx.Button(self.parent_panel, wx.ID_ANY, "Colour")
+        self.Guis.append(self.e_col_gui)
+        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_e_col, id = self.e_col_gui.GetId())
         # Show / hide face
-        self.fOptionsLst = [
+        self.f_opts_lst = [
             self.cull_show_both,
             self.cull_show_front,
             self.cull_show_back,
             self.cull_show_none,
         ]
-        self.fOptionsGui = wx.RadioBox(self.parent_panel,
+        self.f_opts_gui = wx.RadioBox(self.parent_panel,
             label = 'Face Options',
             style = wx.RA_VERTICAL,
-            choices = self.fOptionsLst
+            choices = self.f_opts_lst
         )
-        self.Guis.append(self.fOptionsGui)
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_f_option, id = self.fOptionsGui.GetId())
-        faceSizer = wx.BoxSizer(wx.HORIZONTAL)
-        faceSizer.Add(self.fOptionsGui, 1, wx.EXPAND)
+        self.Guis.append(self.f_opts_gui)
+        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_f_option, id = self.f_opts_gui.GetId())
+        f_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        f_sizer.Add(self.f_opts_gui, 1, wx.EXPAND)
         if not GL.glIsEnabled(GL.GL_CULL_FACE):
-            self.fOptionsGui.SetStringSelection(self.cull_show_both)
+            self.f_opts_gui.SetStringSelection(self.cull_show_both)
         else:
             # Looks like I switch front and back here, but this makes sense from
             # the GUI.
             if GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_FRONT:
-                self.fOptionsGui.SetStringSelection(self.cull_show_front)
+                self.f_opts_gui.SetStringSelection(self.cull_show_front)
             if GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_BACK:
-                self.fOptionsGui.SetStringSelection(self.cull_show_back)
+                self.f_opts_gui.SetStringSelection(self.cull_show_back)
             else: # ie GL.GL_FRONT_AND_BACK
-                self.fOptionsGui.SetStringSelection(self.cull_show_none)
+                self.f_opts_gui.SetStringSelection(self.cull_show_none)
 
         # Open GL
         self.Boxes.append(wx.StaticBox(self.parent_panel,
                                                 label = 'OpenGL Settings'))
-        oglSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        back_front_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         self.Guis.append(
             wx.CheckBox(self.parent_panel,
                                 label = 'Switch Front and Back Face (F3)')
         )
-        self.oglFrontFaceGui = self.Guis[-1]
-        self.oglFrontFaceGui.SetValue(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
+        self.front_back_gui = self.Guis[-1]
+        self.front_back_gui.SetValue(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
         self.parent_panel.Bind(wx.EVT_CHECKBOX, self.on_front_back,
-                                        id = self.oglFrontFaceGui.GetId())
+                                        id = self.front_back_gui.GetId())
         # background Colour
-        colTxt = wx.StaticText(self.parent_panel, -1, "Background Colour: ")
-        self.Guis.append(colTxt)
+        col_txt = wx.StaticText(self.parent_panel, -1, "Background Colour: ")
+        self.Guis.append(col_txt)
         col = self.canvas.bg_col
         self.bg_col_gui = wx.lib.colourselect.ColourSelect(self.parent_panel,
             wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255),
@@ -1126,154 +1125,170 @@ class ViewSettingsSizer(wx.BoxSizer):
             self.on_bg_col)
 
         # Sizers
-        vRadiusSizer.Add(self.vRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
-        vRadiusSizer.Add(self.vColorGui,  1,             wx.BOTTOM | wx.LEFT)
-        eRadiusSizer.Add(self.eRadiusGui, 1, wx.EXPAND | wx.TOP    | wx.LEFT)
-        eRadiusSizer.Add(self.eColorGui,  1,             wx.BOTTOM | wx.LEFT)
+        v_r_sizer.Add(self.v_r_gui, 1, wx.EXPAND | wx.TOP | wx.LEFT)
+        v_r_sizer.Add(self.v_col_gui, 1, wx.BOTTOM | wx.LEFT)
+        e_r_sizer.Add(self.e_r_gui, 1, wx.EXPAND | wx.TOP | wx.LEFT)
+        e_r_sizer.Add(self.e_col_gui, 1, wx.BOTTOM | wx.LEFT)
         #sizer = wx.BoxSizer(wx.VERTICAL)
-        vSizer = wx.BoxSizer(wx.HORIZONTAL)
-        vSizer.Add(self.vOptionsGui, 2, wx.EXPAND)
-        vSizer.Add(vRadiusSizer, 5, wx.EXPAND)
-        eSizer = wx.BoxSizer(wx.HORIZONTAL)
-        eSizer.Add(self.eOptionsGui, 2, wx.EXPAND)
-        eSizer.Add(eRadiusSizer, 5, wx.EXPAND)
-        bgSizerSub = wx.BoxSizer(wx.HORIZONTAL)
-        bgSizerSub.Add(colTxt, 0, wx.EXPAND)
-        bgSizerSub.Add(self.bg_col_gui, 0, wx.EXPAND)
-        bgSizerSub.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
-        oglSizer.Add(self.oglFrontFaceGui, 0, wx.EXPAND)
-        oglSizer.Add(bgSizerSub, 0, wx.EXPAND)
-        self.Add(vSizer, 5, wx.EXPAND)
-        self.Add(eSizer, 5, wx.EXPAND)
-        self.Add(faceSizer, 6, wx.EXPAND)
-        self.Add(oglSizer, 0, wx.EXPAND)
+        v_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        v_sizer.Add(self.v_opts_gui, 2, wx.EXPAND)
+        v_sizer.Add(v_r_sizer, 5, wx.EXPAND)
+        e_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        e_sizer.Add(self.e_opts_gui, 2, wx.EXPAND)
+        e_sizer.Add(e_r_sizer, 5, wx.EXPAND)
+        bg_sizer_sub = wx.BoxSizer(wx.HORIZONTAL)
+        bg_sizer_sub.Add(col_txt, 0, wx.EXPAND)
+        bg_sizer_sub.Add(self.bg_col_gui, 0, wx.EXPAND)
+        bg_sizer_sub.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
+        back_front_sizer.Add(self.front_back_gui, 0, wx.EXPAND)
+        back_front_sizer.Add(bg_sizer_sub, 0, wx.EXPAND)
+        self.Add(v_sizer, 5, wx.EXPAND)
+        self.Add(e_sizer, 5, wx.EXPAND)
+        self.Add(f_sizer, 6, wx.EXPAND)
+        self.Add(back_front_sizer, 0, wx.EXPAND)
 
         # 4D stuff
         if self.canvas.shape.dimension == 4:
             default = 0
-            self.useTransparencyGui = wx.RadioBox(self.parent_panel,
+            self.use_transparency_gui = wx.RadioBox(
+                self.parent_panel,
                 label = 'Use Transparency',
                 style = wx.RA_VERTICAL,
                 choices = ['Yes', 'No']
             )
-            self.Guis.append(self.useTransparencyGui)
-            self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_use_transparent, id = self.useTransparencyGui.GetId())
-            self.useTransparencyGui.SetSelection(default)
-            faceSizer.Add(self.useTransparencyGui, 1, wx.EXPAND)
+            self.Guis.append(self.use_transparency_gui)
+            self.parent_panel.Bind(
+                wx.EVT_RADIOBOX,
+                self.on_use_transparent,
+                id = self.use_transparency_gui.GetId(),
+            )
+            self.use_transparency_gui.SetSelection(default)
+            f_sizer.Add(self.use_transparency_gui, 1, wx.EXPAND)
 
             default = 0
-            self.showUnscaledEdgesGui = wx.RadioBox(self.parent_panel,
+            self.show_es_unscaled_gui = wx.RadioBox(self.parent_panel,
                 label = 'Unscaled Edges',
                 style = wx.RA_VERTICAL,
                 choices = ['Show', 'Hide']
             )
-            self.Guis.append(self.showUnscaledEdgesGui)
+            self.Guis.append(self.show_es_unscaled_gui)
             self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_show_unscaled_es, id =
-            self.showUnscaledEdgesGui.GetId())
-            self.showUnscaledEdgesGui.SetSelection(default)
-            faceSizer.Add(self.showUnscaledEdgesGui, 1, wx.EXPAND)
+            self.show_es_unscaled_gui.GetId())
+            self.show_es_unscaled_gui.SetSelection(default)
+            f_sizer.Add(self.show_es_unscaled_gui, 1, wx.EXPAND)
 
             min   = 0.01
             max   = 1.0
             steps = 100
-            self.cellScaleFactor = float(max - min) / steps
-            self.cellScaleOffset = min
-            self.scaleGui = wx.Slider(
-                    self.parent_panel,
-                    value = 100,
-                    minValue = 0,
-                    maxValue = steps,
-                    style = wx.SL_HORIZONTAL
-                )
-            self.Guis.append(self.scaleGui)
+            self.cell_scale_factor = float(max - min) / steps
+            self.cell_scale_offset = min
+            self.scale_gui = wx.Slider(
+                self.parent_panel,
+                value = 100,
+                minValue = 0,
+                maxValue = steps,
+                style = wx.SL_HORIZONTAL,
+            )
+            self.Guis.append(self.scale_gui)
             self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.on_scale, id = self.scaleGui.GetId()
+                wx.EVT_SLIDER, self.on_scale, id = self.scale_gui.GetId()
             )
             self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Scale Cells'))
             scale_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
-            scale_sizer.Add(self.scaleGui, 1, wx.EXPAND)
+            scale_sizer.Add(self.scale_gui, 1, wx.EXPAND)
 
             # 4D -> 3D projection properties: camera and prj volume distance
             steps = 100
             min   = 0.1
             max   = 5
-            self.prjVolFactor = float(max - min) / steps
-            self.prjVolOffset = min
-            self.prjVolGui = wx.Slider(
+            self.prj_vol_factor = float(max - min) / steps
+            self.prj_vol_offset = min
+            self.prj_vol_gui = wx.Slider(
                     self.parent_panel,
                     value = self.val_2_slider(
-                            self.prjVolFactor,
-                            self.prjVolOffset,
+                            self.prj_vol_factor,
+                            self.prj_vol_offset,
                             self.canvas.shape.w_prj_vol
                         ),
                     minValue = 0,
                     maxValue = steps,
                     style = wx.SL_HORIZONTAL
                 )
-            self.Guis.append(self.prjVolGui)
+            self.Guis.append(self.prj_vol_gui)
             self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.on_prj_vol_adjust, id = self.prjVolGui.GetId()
+                wx.EVT_SLIDER, self.on_prj_vol_adjust, id = self.prj_vol_gui.GetId()
             )
-            self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Projection Volume W-Coordinate'))
+            self.Boxes.append(
+                wx.StaticBox(self.parent_panel, label = 'Projection Volume W-Coordinate')
+            )
             prj_vol_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
-            prj_vol_sizer.Add(self.prjVolGui, 1, wx.EXPAND)
+            prj_vol_sizer.Add(self.prj_vol_gui, 1, wx.EXPAND)
             min   = 0.5
             max   = 5
-            self.camDistFactor = float(max - min) / steps
-            self.camDistOffset = min
-            self.camDistGui = wx.Slider(
-                    self.parent_panel,
-                    value = self.val_2_slider(
-                            self.camDistFactor,
-                            self.camDistOffset,
-                            self.canvas.shape.wCameraDistance
-                        ),
-                    minValue = 0,
-                    maxValue = steps,
-                    style = wx.SL_HORIZONTAL
-                )
-            self.Guis.append(self.camDistGui)
-            self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.on_prj_vol_adjust, id = self.camDistGui.GetId()
+            self.cam_dist_factor = float(max - min) / steps
+            self.cam_dist_offset = min
+            self.cam_dist_gui = wx.Slider(
+                self.parent_panel,
+                value = self.val_2_slider(
+                    self.cam_dist_factor,
+                    self.cam_dist_offset,
+                    self.canvas.shape.wCameraDistance,
+                ),
+                minValue = 0,
+                maxValue = steps,
+                style = wx.SL_HORIZONTAL,
             )
-            self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Camera Distance (from projection volume)'))
+            self.Guis.append(self.cam_dist_gui)
+            self.parent_panel.Bind(
+                wx.EVT_SLIDER, self.on_prj_vol_adjust, id = self.cam_dist_gui.GetId()
+            )
+            self.Boxes.append(
+                wx.StaticBox(self.parent_panel, label = 'Camera Distance (from projection volume)')
+            )
             cam_dist_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
-            cam_dist_sizer.Add(self.camDistGui, 1, wx.EXPAND)
+            cam_dist_sizer.Add(self.cam_dist_gui, 1, wx.EXPAND)
 
             # Create a ctrl for specifying a 4D rotation
             self.Boxes.append(wx.StaticBox(parent_panel, label = 'Rotate 4D Object'))
             rotation_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
             self.Boxes.append(wx.StaticBox(parent_panel, label = 'In a Plane Spanned by'))
-            planeSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-            self.v0Gui = geom_gui.Vector4DInput(
+            plane_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+            self.v0_gui = geom_gui.Vector4DInput(
                     self.parent_panel,
                     #label = 'Vector 1',
                     rel_float_size = 4,
                     elem_labels = ['x0', 'y0', 'z0', 'w0']
                 )
             self.parent_panel.Bind(
-                geom_gui.EVT_VECTOR_UPDATED, self.on_rot_axes, id = self.v0Gui.GetId()
+                geom_gui.EVT_VECTOR_UPDATED, self.on_rot_axes, id = self.v0_gui.GetId()
             )
-            self.v1Gui = geom_gui.Vector4DInput(
+            self.v1_gui = geom_gui.Vector4DInput(
                     self.parent_panel,
                     #label = 'Vector 1',
                     rel_float_size = 4,
                     elem_labels = ['x1', 'y1', 'z1', 'w1']
                 )
             self.parent_panel.Bind(
-                geom_gui.EVT_VECTOR_UPDATED, self.on_rot_axes, id = self.v1Gui.GetId()
+                geom_gui.EVT_VECTOR_UPDATED, self.on_rot_axes, id = self.v1_gui.GetId()
             )
             # Exchange planes
-            self.switch_planes_gui = wx.CheckBox(self.parent_panel, label = "Use Orthogonal Plane instead")
+            self.switch_planes_gui = wx.CheckBox(
+                self.parent_panel,
+                label = "Use Orthogonal Plane instead",
+            )
             self.switch_planes_gui.SetValue(False)
-            self.parent_panel.Bind(wx.EVT_CHECKBOX, self.on_switch_planes, id = self.switch_planes_gui.GetId())
+            self.parent_panel.Bind(
+                wx.EVT_CHECKBOX,
+                self.on_switch_planes,
+                id = self.switch_planes_gui.GetId(),
+            )
             #self.Boxes.append?
-            self.Guis.append(self.v0Gui)
-            self.Guis.append(self.v1Gui)
+            self.Guis.append(self.v0_gui)
+            self.Guis.append(self.v1_gui)
             self.Guis.append(self.switch_planes_gui)
-            planeSizer.Add(self.v0Gui, 12, wx.EXPAND)
-            planeSizer.Add(self.v1Gui, 12, wx.EXPAND)
-            planeSizer.Add(self.switch_planes_gui, 10, wx.EXPAND)
+            plane_sizer.Add(self.v0_gui, 12, wx.EXPAND)
+            plane_sizer.Add(self.v1_gui, 12, wx.EXPAND)
+            plane_sizer.Add(self.switch_planes_gui, 10, wx.EXPAND)
 
             min   = 0.00
             max   = math.pi
@@ -1292,8 +1307,8 @@ class ViewSettingsSizer(wx.BoxSizer):
                 wx.EVT_SLIDER, self.on_angle, id = self.angle_gui.GetId()
             )
             self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Using Angle'))
-            angleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
-            angleSizer.Add(self.angle_gui, 1, wx.EXPAND)
+            angle_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
+            angle_sizer.Add(self.angle_gui, 1, wx.EXPAND)
 
             min   = 0.00
             max   = 1.0
@@ -1315,8 +1330,8 @@ class ViewSettingsSizer(wx.BoxSizer):
             angle_scale_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
             angle_scale_sizer.Add(self.angle_scale_gui, 1, wx.EXPAND)
 
-            rotation_sizer.Add(planeSizer, 12, wx.EXPAND)
-            rotation_sizer.Add(angleSizer, 5, wx.EXPAND)
+            rotation_sizer.Add(plane_sizer, 12, wx.EXPAND)
+            rotation_sizer.Add(angle_sizer, 5, wx.EXPAND)
             rotation_sizer.Add(angle_scale_sizer, 5, wx.EXPAND)
 
             self.Add(scale_sizer, 3, wx.EXPAND)
@@ -1340,24 +1355,24 @@ class ViewSettingsSizer(wx.BoxSizer):
 
     def set_status_text(self):
         try:
-            self.parent_win.set_status_text('V-Radius: %0.5f; E-Radius: %0.5f' % (self.vR, self.eR))
+            self.parent_win.set_status_text('V-Radius: %0.5f; E-Radius: %0.5f' % (self.v_r, self.e_r))
         except AttributeError:
             print("parent_win.set_status_text function undefined")
 
     def on_v_option(self, e):
-        sel = self.vOptionsGui.GetSelection()
-        selStr = self.vOptionsLst[sel]
-        if selStr == 'show':
-            self.vRadiusGui.Enable()
-            self.canvas.shape.setVertexProperties(radius = self.vR)
-        elif selStr == 'hide':
-            self.vRadiusGui.Disable()
+        sel = self.v_opts_gui.GetSelection()
+        sel_str = self.v_opts_lst[sel]
+        if sel_str == 'show':
+            self.v_r_gui.Enable()
+            self.canvas.shape.setVertexProperties(radius = self.v_r)
+        elif sel_str == 'hide':
+            self.v_r_gui.Disable()
             self.canvas.shape.setVertexProperties(radius = -1.0)
         self.canvas.paint()
 
     def on_v_radius(self, e):
-        self.vR = (float(self.vRadiusGui.GetValue()) / self.vRadiusScale)
-        self.canvas.shape.setVertexProperties(radius = self.vR)
+        self.v_r = (float(self.v_r_gui.GetValue()) / self.v_r_scale)
+        self.canvas.shape.setVertexProperties(radius = self.v_r)
         self.canvas.paint()
         self.set_status_text()
 
@@ -1374,24 +1389,24 @@ class ViewSettingsSizer(wx.BoxSizer):
         dlg.Destroy()
 
     def on_e_option(self, e):
-        sel = self.eOptionsGui.GetSelection()
-        selStr = self.eOptionsLst[sel]
-        if selStr == 'hide':
-            self.eRadiusGui.Disable()
+        sel = self.e_opts_gui.GetSelection()
+        sel_str = self.e_opts_lst[sel]
+        if sel_str == 'hide':
+            self.e_r_gui.Disable()
             self.canvas.shape.setEdgeProperties(drawEdges = False)
-        elif selStr == 'as cylinders':
-            self.eRadiusGui.Enable()
+        elif sel_str == 'as cylinders':
+            self.e_r_gui.Enable()
             self.canvas.shape.setEdgeProperties(drawEdges = True)
-            self.canvas.shape.setEdgeProperties(radius = self.eR)
-        elif selStr == 'as lines':
-            self.eRadiusGui.Disable()
+            self.canvas.shape.setEdgeProperties(radius = self.e_r)
+        elif sel_str == 'as lines':
+            self.e_r_gui.Disable()
             self.canvas.shape.setEdgeProperties(drawEdges = True)
             self.canvas.shape.setEdgeProperties(radius = 0)
         self.canvas.paint()
 
     def on_e_radius(self, e):
-        self.eR = (float(self.eRadiusGui.GetValue()) / self.eRadiusScale)
-        self.canvas.shape.setEdgeProperties(radius = self.eR)
+        self.e_r = (float(self.e_r_gui.GetValue()) / self.e_r_scale)
+        self.canvas.shape.setEdgeProperties(radius = self.e_r)
         self.canvas.paint()
         self.set_status_text()
 
@@ -1409,7 +1424,7 @@ class ViewSettingsSizer(wx.BoxSizer):
 
     def on_f_option(self, e):
         print('View Settings Window size:', self.parent_win.GetSize())
-        sel = self.fOptionsGui.GetStringSelection()
+        sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
         self.canvas.shape.setFaceProperties(drawFaces = True)
@@ -1430,7 +1445,7 @@ class ViewSettingsSizer(wx.BoxSizer):
 
     def on_front_back(self, e):
         id = e.GetId()
-        if id == self.oglFrontFaceGui.GetId():
+        if id == self.front_back_gui.GetId():
             on_switch_front_and_back(self.canvas)
 
     def on_bg_col(self, e):
@@ -1439,12 +1454,12 @@ class ViewSettingsSizer(wx.BoxSizer):
         self.canvas.paint()
 
     def on_use_transparent(self, event):
-        self.canvas.shape.useTransparency((self.useTransparencyGui.GetSelection() == 0))
+        self.canvas.shape.useTransparency((self.use_transparency_gui.GetSelection() == 0))
         self.canvas.paint()
 
     def on_show_unscaled_es(self, event):
         self.canvas.shape.setEdgeProperties(
-            showUnscaled = (self.showUnscaledEdgesGui.GetSelection() == 0)
+            showUnscaled = (self.show_es_unscaled_gui.GetSelection() == 0)
         )
         self.canvas.paint()
 
@@ -1456,24 +1471,23 @@ class ViewSettingsSizer(wx.BoxSizer):
 
     def on_scale(self, event):
         scale = self.slider_to_val(
-                self.cellScaleFactor,
-                self.cellScaleOffset,
-                self.scaleGui.GetValue()
+                self.cell_scale_factor,
+                self.cell_scale_offset,
+                self.scale_gui.GetValue()
             )
         self.canvas.shape.setCellProperties(scale = scale)
         self.canvas.paint()
 
     def on_prj_vol_adjust(self, event):
-        #print 'size =', self.dynDlg.GetClientSize()
         cam_dist = self.slider_to_val(
-                self.camDistFactor,
-                self.camDistOffset,
-                self.camDistGui.GetValue()
+                self.cam_dist_factor,
+                self.cam_dist_offset,
+                self.cam_dist_gui.GetValue()
             )
         w_prj_vol = self.slider_to_val(
-                self.prjVolFactor,
-                self.prjVolOffset,
-                self.prjVolGui.GetValue()
+                self.prj_vol_factor,
+                self.prj_vol_offset,
+                self.prj_vol_gui.GetValue()
             )
         if (cam_dist > 0) and (w_prj_vol > 0):
             self.parent_win.set_status_text(
@@ -1507,8 +1521,8 @@ class ViewSettingsSizer(wx.BoxSizer):
         self.rotate()
 
     def rotate(self):
-        v0 = self.v0Gui.GetValue()
-        v1 = self.v1Gui.GetValue()
+        v0 = self.v0_gui.GetValue()
+        v1 = self.v1_gui.GetValue()
         angle = self.slider_to_val(
                 self.angle_factor,
                 self.angle_offset,
@@ -1539,17 +1553,17 @@ class ViewSettingsSizer(wx.BoxSizer):
             #print r.getMatrix()
             self.canvas.shape.rotate(r)
             self.canvas.paint()
-            aDeg = Geom3D.Rad2Deg * angle
+            deg = Geom3D.Rad2Deg * angle
             self.parent_win.set_status_text(
-                "Rotation angle: %f degrees (and scaling %0.2f)" % (aDeg, scale)
+                "Rotation angle: %f degrees (and scaling %0.2f)" % (deg, scale)
             )
         except ZeroDivisionError:
             # zero division means 1 of the vectors is (0, 0, 0, 0)
             self.parent_win.set_status_text("Error: Don't use a zero vector")
             pass
         #except AssertionError:
-        #    zV = geomtypes.Vec4([0, 0, 0, 0])
-        #    if v0 == zV or v1 == zV:
+        #    z_v = geomtypes.Vec4([0, 0, 0, 0])
+        #    if v0 == z_v or v1 == z_v:
         #        self.parent_win.set_status_text("Error: Don't use a zero vector")
         #    else:
         #        self.parent_win.set_status_text("Error: The specified vectors are (too) parallel")
@@ -1557,8 +1571,8 @@ class ViewSettingsSizer(wx.BoxSizer):
 
 class ExportOffDialog(wx.Dialog):
     precision = 12
-    floatMargin = 10
-    cleanUp = False
+    float_margin = 10
+    clean_up = False
     extra_data = False
     """
     Dialog for exporting a polyhedron to a PS file.
@@ -1605,7 +1619,7 @@ class ExportOffDialog(wx.Dialog):
 
         self.clean_up_gui = wx.CheckBox(self,
                 label = 'Merge equal vertices (can take a while)')
-        self.clean_up_gui.SetValue(self.cleanUp)
+        self.clean_up_gui.SetValue(self.clean_up)
         self.clean_up_gui.Bind(wx.EVT_CHECKBOX, self.on_clean_up)
         sizer.Add(self.clean_up_gui,
             0, wx.GROW|wx.ALL, 5)
@@ -1614,12 +1628,12 @@ class ExportOffDialog(wx.Dialog):
         label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         self.float_margin_gui = wx.lib.intctrl.IntCtrl(self,
-                value = self.floatMargin,
+                value = self.float_margin,
                 min   = 1,
                 max   = 16
             )
         self.float_margin_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_float_margin)
-        if not self.cleanUp:
+        if not self.clean_up:
             self.float_margin_gui.Disable()
         hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
@@ -1645,8 +1659,8 @@ class ExportOffDialog(wx.Dialog):
         return self.extra_data_gui.GetValue()
 
     def on_clean_up(self, e):
-        ExportOffDialog.cleanUp = self.clean_up_gui.GetValue()
-        if ExportOffDialog.cleanUp:
+        ExportOffDialog.clean_up = self.clean_up_gui.GetValue()
+        if ExportOffDialog.clean_up:
             self.float_margin_gui.Enable()
         else:
             self.float_margin_gui.Disable()
@@ -1661,7 +1675,7 @@ class ExportOffDialog(wx.Dialog):
         return self.precision_gui.GetValue()
 
     def on_float_margin(self, e):
-        ExportOffDialog.floatMargin = self.float_margin_gui.GetValue()
+        ExportOffDialog.float_margin = self.float_margin_gui.GetValue()
 
     def get_float_margin(self):
         return self.float_margin_gui.GetValue()
@@ -1669,7 +1683,7 @@ class ExportOffDialog(wx.Dialog):
 class ExportPsDialog(wx.Dialog):
     scaling = 50
     precision = 12
-    floatMargin = 10
+    float_margin = 10
     """
     Dialog for exporting a polyhedron to a PS file.
 
@@ -1697,13 +1711,13 @@ class ExportPsDialog(wx.Dialog):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "Scaling Factor:")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-        self.scalingFactorGui = wx.lib.intctrl.IntCtrl(self,
+        self.scale_factor_gui = wx.lib.intctrl.IntCtrl(self,
                 value = ExportPsDialog.scaling,
                 min   = 1,
                 max   = 10000
             )
-        self.scalingFactorGui.Bind(wx.lib.intctrl.EVT_INT, self.onScaling)
-        hbox.Add(self.scalingFactorGui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        self.scale_factor_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_scaling)
+        hbox.Add(self.scale_factor_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "vertex precision (decimals):")
@@ -1720,7 +1734,7 @@ class ExportPsDialog(wx.Dialog):
         label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         self.float_margin_gui = wx.lib.intctrl.IntCtrl(self,
-                value = ExportPsDialog.floatMargin,
+                value = ExportPsDialog.float_margin,
                 min   = 1,
                 max   = 16
             )
@@ -1742,11 +1756,11 @@ class ExportPsDialog(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def onScaling(self, e):
-        ExportPsDialog.scaling = self.scalingFactorGui.GetValue()
+    def on_scaling(self, e):
+        ExportPsDialog.scaling = self.scale_factor_gui.GetValue()
 
-    def getScaling(self):
-        return self.scalingFactorGui.GetValue()
+    def get_scaling(self):
+        return self.scale_factor_gui.GetValue()
 
     def on_precision(self, e):
         ExportPsDialog.precision = self.precision_gui.GetValue()
@@ -1755,7 +1769,7 @@ class ExportPsDialog(wx.Dialog):
         return self.precision_gui.GetValue()
 
     def on_float_margin(self, e):
-        ExportPsDialog.floatMargin = self.float_margin_gui.GetValue()
+        ExportPsDialog.float_margin = self.float_margin_gui.GetValue()
 
     def get_float_margin(self):
         return self.float_margin_gui.GetValue()
@@ -1774,7 +1788,7 @@ def read_shape_file(filename):
             print('unrecognised file extension')
             return None
 
-def convertToPs(shape, o_fd, scale, precision, margin):
+def convert_to_ps(shape, o_fd, scale, precision, margin):
     o_fd.write(
         shape.toPsPiecesStr(
             scaling = scale,
@@ -1784,7 +1798,7 @@ def convertToPs(shape, o_fd, scale, precision, margin):
         )
     )
 
-def convertToOff(shape, o_fd, precision, margin = 0):
+def convert_to_off(shape, o_fd, precision, margin = 0):
     """
     Save the shape to the o_fd file descriptor in .off format
 
@@ -1803,6 +1817,7 @@ def convertToOff(shape, o_fd, precision, margin = 0):
     # TODO: support for saving extra_data?
     o_fd.write(shape.toOffStr(precision))
 
+# TODO: use argparse
 def usage(exit_nr):
     print("""
 usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
@@ -1837,10 +1852,10 @@ Options:
     sys.exit(exit_nr)
 
 class Oper:
-    toPs = 1
-    toOff = 2
-    toPy = 3
-    openScene = 4
+    to_ps = 1
+    to_off = 2
+    to_py = 3
+    open_scene = 4
 
 if __name__ == "__main__":
     import getopt
@@ -1860,19 +1875,19 @@ if __name__ == "__main__":
     oper = None
     for opt, opt_arg in opts:
         if opt in ('-f', '--off'):
-            oper = Oper.toOff
+            oper = Oper.to_off
         elif opt in ('-m', '--margin'):
             margin = int(opt_arg)
         elif opt in ('-P', '--precision'):
             precision = int(opt_arg)
         elif opt in ('-p', '--ps'):
-            oper = Oper.toPs
+            oper = Oper.to_ps
         elif opt in ('-s', '--scene'):
-            oper = Oper.openScene
+            oper = Oper.open_scene
             scene_file = opt_arg
             print('DBG scene_file', scene_file)
         elif opt in ('-y', '--py'):
-            oper = Oper.toPy
+            oper = Oper.to_py
         else:
             print("Error: unknown option")
             usage(2)
@@ -1893,20 +1908,20 @@ if __name__ == "__main__":
             o_fd = open(args[a_ind], 'w')
             a_ind += 1
 
-    if oper == Oper.toPs:
+    if oper == Oper.to_ps:
         shape = read_shape_file(i_filename)
         if shape != None:
-            convertToPs(shape, o_fd, scale, precision, margin)
-    elif oper == Oper.toOff:
+            convert_to_ps(shape, o_fd, scale, precision, margin)
+    elif oper == Oper.to_off:
         shape = read_shape_file(i_filename)
         if shape != None:
-            convertToOff(shape, o_fd, precision, margin)
-    elif oper == Oper.toPy:
+            convert_to_off(shape, o_fd, precision, margin)
+    elif oper == Oper.to_py:
         shape = read_shape_file(i_filename)
         if shape != None:
             shape.saveFile(o_fd)
     else:
-        if oper != Oper.openScene:
+        if oper != Oper.open_scene:
             scene_name = DEFAULT_SCENE
         app = wx.App(False)
         frame = MainWindow(
