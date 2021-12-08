@@ -64,15 +64,15 @@ LOG_STDOUT_LVL = LOG_INFO  # or WARN?
 LOG_BAR_LVL = LOG_INFO
 
 
-class Shape(Geom3D.SimpleShape):
+class Shape(Geom3D.CompoundShape):
     """Simple wrapper for the Shape being used."""
     def __init__(self):
-        Geom3D.SimpleShape.__init__(self, [], [])
+        super(Shape, self).__init__([Geom3D.SimpleShape([], [])])
 
-    def glInit(self):
-        Geom3D.SimpleShape.glInit(self)
-        # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        # glEnable(GL_BLEND)
+    #def glInit(self):
+    #    super(Shape, self).glInit()
+    #    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    #    glEnable(GL_BLEND)
 
 
 class CtrlWin(wx.Frame):
