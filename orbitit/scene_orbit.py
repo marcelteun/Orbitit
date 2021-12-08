@@ -410,7 +410,7 @@ class CtrlWin(wx.Frame):
         self.shape.recreateEdges()
         self.update_orientation(
             self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
-        self.canvas.panel.setShape(self.shape)
+        self.canvas.panel.set_shape(self.shape)
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.
@@ -459,7 +459,7 @@ class CtrlWin(wx.Frame):
     def on_rot(self, angle, axis):
         """Handle when the descriptive is rotated"""
         self.update_orientation(angle, axis)
-        self.canvas.panel.setShape(self.shape)
+        self.canvas.panel.set_shape(self.shape)
 
     def on_no_of_col_select(self, e):
         """Handle when the colour symmetry is chosen"""
@@ -520,7 +520,7 @@ class CtrlWin(wx.Frame):
                                                    name=self.name)
                 self.fs_orbit = self.shape.getIsometries()['direct']
                 self.shape.recreateEdges()
-                self.canvas.panel.setShape(self.shape)
+                self.canvas.panel.set_shape(self.shape)
                 self.fs_orbit_org = False  # and do this only once
         assert self.col_syms
         init_col = (255, 255, 255)

@@ -121,11 +121,8 @@ class VSphere:
         glPopMatrix();
 
 class Interactive3DCanvas(glcanvas.GLCanvas):
-    dbgTrace = False
     def __init__(this, parent, size = None):
         # Ensure double buffered to prevent flashing on systems where double buffering is not default.
-        if this.dbgTrace:
-            print('Interactive3DCanvas.__init__(this,..):')
         this.parent = parent
         size = (-1, -1) if size is None else size
         glcanvas.GLCanvas.__init__(this, parent, -1,
@@ -161,7 +158,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.yAxis = geomtypes.UY
         this.angleAroundYaxis = 0
         this.angleAroundXaxis = 0
-        this.bgCol = [0.097656, 0.097656, 0.437500] # midnightBlue
+        this.bg_col = [0.097656, 0.097656, 0.437500] # midnightBlue
         this.size = size
         this.Bind(wx.EVT_ERASE_BACKGROUND, this.onEraseBackground)
         this.Bind(wx.EVT_SIZE, this.onSize)
@@ -173,21 +170,17 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.Bind(wx.EVT_MOTION, this.onMouseMotion)
         this.cameraDistance = 5.0
 
-    def setCameraPosition(this, distance):
+    def set_cam_pos(this, distance):
         """
         Set the camera distance
 
         distance: camera distance, usually a positive nr. Note that the camera
                   is somewhere along the z-axis
         """
-        if this.dbgTrace:
-            print('Interactive3DCanvas.setCameraDistance(this,..):')
         this.cameraDistance = distance
 
-    def initGl(this):
-        #if this.dbgTrace:
-        if True:
-            print('Interactive3DCanvas.initGl(this,..):')
+    def init_gl(this):
+        print('Interactive3DCanvas.init_gl(this,..):')
         glMatrixMode(GL_PROJECTION)
         gluPerspective(45., 1.0, 1., 300.)
 
@@ -198,13 +191,9 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         pass # Do nothing, to avoid flashing on MSW.
 
     def setArcBallRadius(this, R = 0.8):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.setArcBallRadius(this,..):')
         this.rScale = R
 
     def onSize(this, event):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onSize(this,..):')
         size = this.GetClientSize()
         wOrH = min(size.width, size.height)
         size.height = size.width = wOrH
@@ -219,8 +208,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         event.Skip()
 
     def OnPaint(this, event):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.OnPaint(this,..):')
         def xy2SphereV(x, y, w, h, R2):
             x, y = x - width/2, height/2 - y
             l2 = x * x + y * y
@@ -235,11 +222,11 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         dc = wx.PaintDC(this)
         this.SetCurrent(this.context)
         if not this.init:
-            this.initGl()
+            this.init_gl()
             this.init = True
             this.Moriginal = glGetDoublev(GL_MODELVIEW_MATRIX)
         glPushMatrix()
-        this.onPaint()
+        this.on_paint()
         glPopMatrix()
 
         if this.xOrg != 0 or this.yOrg != 0:
@@ -277,8 +264,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.SwapBuffers()
 
     def resetOrientation(this):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.resetOrientation(this,..):')
         try: # this.Moriginal might not exist at an early stage (e.g. on Windows)...
             glLoadMatrixd(this.Moriginal)
         except AttributeError:
@@ -289,8 +274,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.paint()
 
     def paint(this):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.paint(this,..):')
         this.Refresh(False)
 
     def onRotateStart(this, event):
@@ -302,8 +285,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         # we need to check this, because a mouse click in a window A on top of
         # this window can cause window A to be closed and the release button
         # event is captured here, while the was no capture here.
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onRotateStop(this,..):')
         if this.mouseLeftIn:
             this.mouseLeftIn = False
             this.ReleaseMouse()
@@ -311,8 +292,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.xOrg, this.yOrg = this.x, this.y = (0, 0)
 
     def onZoomStart(this, event):
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onZoomStart(this,..):')
         this.CaptureMouse()
         this.mouseRightIn = True
         this.z = this.zBac = event.GetPosition()[1]
@@ -321,16 +300,12 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         # we need to check this, because a mouse click in a window A on top of
         # this window can cause window A to be closed and the release button
         # event is captured here, while the was no capture here.
-        if this.dbgTrace:
-            print('Interactive3DCanvas.onZoomStop(this,..):')
         if this.mouseRightIn:
             this.mouseRightIn = False
             this.ReleaseMouse()
         this.zBac = this.z = 0.0
 
     def onMouseMotion(this, event):
-        #if this.dbgTrace:
-        #    print 'Interactive3DCanvas.onMouseMotion(this,..):'
         if event.Dragging():
             if event.LeftIsDown():
                 this.x, this.y = event.GetPosition()
@@ -349,7 +324,7 @@ class Scene:
     This allows the scene to add controls to the control window / panel.
     The ctrlFrame class is a Frame that implements a function
       - sceneClosed, which deletes the references to this scene
-      - setDefaultSize, that sets the size of the control frame
+      - set_default_size, that sets the size of the control frame
     A scene is supposed to
       - create a sizer this.ctrlSizer during object creation. This is done by
         calling the function this.createControlsSizer(), which takes one

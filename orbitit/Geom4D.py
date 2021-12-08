@@ -405,13 +405,13 @@ class SimpleShape:
                 'scale': this.c.scale
             }
 
-    def setProjectionProperties(this, wCameraDistance, wProjVolume, dbg = False):
+    def setProjectionProperties(this, wCameraDistance, w_prj_vol, dbg = False):
         """
         wCameraDistance: should be > 0. distance in w coordinate between the
                          camera (for which x, y, z, are 0) and the projection
                          volume>
-        wProjVolume: should be >= 0. w coordinate of the near volume. This is
-                     the voume in which the object is projected.
+        w_prj_vol: should be >= 0. w coordinate of the near volume. This is
+                   the voume in which the object is projected.
         """
         #
         #                 |
@@ -423,12 +423,12 @@ class SimpleShape:
         #                 |
         #                 |
         #
-        assert (wProjVolume > 0)
+        assert (w_prj_vol > 0)
         assert (wCameraDistance > 0)
-        this.wProjVolume     = wProjVolume
-        this.wCamera         = wProjVolume + wCameraDistance
+        this.w_prj_vol = w_prj_vol
+        this.wCamera = w_prj_vol + wCameraDistance
         this.wCameraDistance = wCameraDistance
-        this.projectedTo3D   = False
+        this.projectedTo3D = False
 
     def rotate(this, rotation, successive = False):
         """

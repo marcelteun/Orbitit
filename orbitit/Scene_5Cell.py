@@ -120,7 +120,7 @@ class Shape(Geom4D.SimpleShape):
         # On default, don't draw the outer cell:
         this.showWhichCells[-1][0] = False
         this.showFs()
-        this.setProjectionProperties(wCameraDistance = 3.76, wProjVolume = 0.25)
+        this.setProjectionProperties(wCameraDistance = 3.76, w_prj_vol = 0.25)
 
     def setShowGroup(this, groupId, show = True):
         this.showGroup[groupId] = show
@@ -163,7 +163,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((237, 590))
+        this.set_default_size((237, 590))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -226,7 +226,7 @@ class CtrlWin(wx.Frame):
         this.canvas.paint()
 
     # move to general class
-    def setDefaultSize(this, size):
+    def set_default_size(this, size):
         this.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)

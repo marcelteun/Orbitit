@@ -840,7 +840,6 @@ TRI_IN = 4 # the normal pointing towards from the origin is the normal
 class SimpleShape:
     dbgPrn = False
     dbgTrace = False
-    bgCol     = rgb.midnightBlue[:]
     normal_direction = TRI_OUT
     """
     This class decribes a simple 3D object consisting of faces and edges.

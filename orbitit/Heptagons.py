@@ -1722,7 +1722,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize(this.refl_min_size)
+        this.set_default_size(this.refl_min_size)
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -2113,7 +2113,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         for Gui in this.Guis:
             Gui.Destroy()
 
-    def setDefaultSize(this, size):
+    def set_default_size(this, size):
         this.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
@@ -2309,9 +2309,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.shape.updateShape = True
         this.setEnablePrePosItems()
         if this.shape.inclReflections:
-            this.setDefaultSize(this.refl_min_size)
+            this.set_default_size(this.refl_min_size)
         else:
-            this.setDefaultSize(this.rot_min_size)
+            this.set_default_size(this.rot_min_size)
         if event is not None:
             if this.isPrePos():
                 this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
@@ -2488,7 +2488,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.updateShape = True
             this.canvas.shape = shape
         elif restoreMyShape:
-            this.parent.panel.setShape(this.shape)
+            this.parent.panel.set_shape(this.shape)
 
     def updateShape(this):
         this.nvidea_workaround()
@@ -2973,7 +2973,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize(size)
+        this.set_default_size(size)
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -3099,7 +3099,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         except AttributeError: pass
 
     # move to general class
-    def setDefaultSize(this, size):
+    def set_default_size(this, size):
         this.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)

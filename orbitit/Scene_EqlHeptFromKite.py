@@ -245,7 +245,7 @@ class CtrlWin(wx.Frame):
                 this.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.setDefaultSize((438, 312))
+        this.set_default_size((438, 312))
         this.panel.SetAutoLayout(True)
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
@@ -426,7 +426,7 @@ class CtrlWin(wx.Frame):
         this.canvas.paint()
 
     # move to general class
-    def setDefaultSize(this, size):
+    def set_default_size(this, size):
         this.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
