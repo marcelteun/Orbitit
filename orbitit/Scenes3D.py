@@ -369,11 +369,13 @@ class Scene:
         this.ctrlFrame.sceneClosed()
 
     def close(this):
-        #try:
+        try:
             this.rmControlsSizer()
             this.canvas.Destroy()
             this.canvasFrame.Destroy()
-        #except wx._core.PyDeadObjectError: pass
+        except RuntimeError:
+            # The user probably closed the window already
+            pass
 
 def AllMem(aClass):
     try: mro = list(aClass.__mro__)

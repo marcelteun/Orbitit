@@ -1332,7 +1332,9 @@ class ViewSettingsSizer(wx.BoxSizer):
         for Box in self.Boxes:
             try:
                 Box.Destroy()
-            except wx._core.PyDeadObjectError: pass
+            except RuntimeError:
+                # The user probably closed the window already
+                pass
         for Gui in self.Guis:
             Gui.Destroy()
 

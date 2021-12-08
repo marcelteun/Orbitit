@@ -3594,6 +3594,6 @@ class Scene():
     def close(this):
         try:
             this.ctrlWin.Close(True)
-        except wx._core.PyDeadObjectError:
-            # The user closed the window already
+        except RuntimeError:
+            # The user probably closed the window already
             pass

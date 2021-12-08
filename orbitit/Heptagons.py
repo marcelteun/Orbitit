@@ -2109,7 +2109,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         for Box in this.Boxes:
             try:
                 Box.Destroy()
-            except wx._core.PyDeadObjectError: pass
+            except RuntimeError:
+                # The user probably closed the window already
+                pass
         for Gui in this.Guis:
             Gui.Destroy()
 

@@ -351,7 +351,8 @@ class LabeledIntInput(wx.BoxSizer):
         for box in self.boxes:
             try:
                 box.Destroy()
-            except wx._core.PyDeadObjectError:
+            except RuntimeError:
+                # The user probably closed the window already
                 pass
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         # wx.StaticBoxSizer.Destroy(self)
@@ -415,7 +416,8 @@ class Vector3DInput(wx.BoxSizer):
         for box in self.boxes:
             try:
                 box.Destroy()
-            except wx._core.PyDeadObjectError:
+            except RuntimeError:
+                # The user probably closed the window already
                 pass
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         # wx.StaticBoxSizer.Destroy(self)
@@ -550,7 +552,8 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         for box in self.boxes:
             try:
                 box.Destroy()
-            except wx._core.PyDeadObjectError:
+            except RuntimeError:
+                # The user probably closed the window already
                 pass
 
     # TODO Insert?
@@ -762,7 +765,8 @@ class Vector4DInput(wx.StaticBoxSizer):
         for box in self.boxes:
             try:
                 box.Destroy()
-            except wx._core.PyDeadObjectError:
+            except RuntimeError:
+                # The user probably closed the window already
                 pass
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         # wx.StaticBoxSizer.Destroy(self)
@@ -995,7 +999,8 @@ class FaceSetDynamicPanel(wx.Panel):
         for box in self.boxes:
             try:
                 box.Destroy()
-            except wx._core.PyDeadObjectError:
+            except RuntimeError:
+                # The user probably closed the window already
                 pass
 
 
@@ -1322,7 +1327,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
         for box in self.boxes + self.orient_guis:
             try:
                 box.Destroy()
-            except wx._core.PyDeadObjectError:
+            except RuntimeError:
+                # The user probably closed the window already
                 pass
         # Segmentation fault in Hardy Heron (with python 2.5.2):
         # wx.StaticBoxSizer.Destroy(self)
