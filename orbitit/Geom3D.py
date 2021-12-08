@@ -1886,8 +1886,8 @@ class SimpleShape:
                     s = w('#         E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
         s = w('# Vertices Faces Edges')
         nrOfFaces = len(this.Fs)
-        nrOfEdges = len(this.Es)/2
-        s = w('%d %d %d' % (len(this.Vs), nrOfFaces, nrOfEdges))
+        no_of_edges = len(this.Es) // 2
+        s = w('%d %d %d' % (len(this.Vs), nrOfFaces, no_of_edges))
         s = w('# Vertices')
         for V in this.Vs:
             s = w('%s %s %s' % (
@@ -1935,7 +1935,7 @@ class SimpleShape:
                 if info:
                     s = w('# face normal: %s' % fnStr)
         if info:
-            for i in range(nrOfEdges):
+            for i in range(no_of_edges):
                 s = w('# edge: %d %d' % (this.Es[2*i], this.Es[2*i + 1]))
         s = w('# END')
         return s
