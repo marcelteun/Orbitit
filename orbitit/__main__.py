@@ -66,6 +66,7 @@ SCENES = {
     'scene_orbit': scene_orbit,
 }
 
+# 2021-05-05:
 # work-around for PyOpenGL bug (see commit message)
 if not os.environ.get("PYOPENGL_PLATFORM", ""):
     if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
@@ -76,7 +77,7 @@ from OpenGL.GL import *
 
 DEG2RAD = Geom3D.Deg2Rad
 
-def onSwitchFrontBack(canvas):
+def on_switch_front_and_back(canvas):
     if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
         glFrontFace(GL_CW)
     else:
@@ -684,7 +685,7 @@ class MainWindow(wx.Frame):
     def onKeyDown(self, e):
         id = e.GetId()
         if id == self.keySwitchFronBack:
-            onSwitchFrontBack(self.panel.getCanvas())
+            on_switch_front_and_back(self.panel.getCanvas())
 
 class MainPanel(wx.Panel):
     def __init__(self, parent, TstScene, shape, *args, **kwargs):
@@ -1488,7 +1489,7 @@ class ViewSettingsSizer(wx.BoxSizer):
     def onOgl(self, e):
         id = e.GetId()
         if id == self.oglFrontFaceGui.GetId():
-            onSwitchFrontBack(self.canvas)
+            on_switch_front_and_back(self.canvas)
 
     def onBgCol(self, e):
         col = e.GetValue().Get()
