@@ -72,16 +72,15 @@ if not os.environ.get("PYOPENGL_PLATFORM", ""):
     if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
             "wayland" in os.getenv("XDG_SESSION_TYPE", "").lower():
         os.environ['PYOPENGL_PLATFORM'] = 'egl'
-from OpenGL.GLU import *
-from OpenGL.GL import *
+from OpenGL import GL
 
 DEG2RAD = Geom3D.Deg2Rad
 
 def on_switch_front_and_back(canvas):
-    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
-        glFrontFace(GL_CW)
+    if GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CCW:
+        GL.glFrontFace(GL.GL_CW)
     else:
-        glFrontFace(GL_CCW)
+        GL.glFrontFace(GL.GL_CCW)
     canvas.paint()
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
@@ -93,59 +92,59 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         self.setCameraPosition(15.0)
         Scenes3D.Interactive3DCanvas.initGl(self)
 
-        #glShadeModel(GL_SMOOTH)
+        #GL.glShadeModel(GL.GL_SMOOTH)
 
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
         matAmbient    = [0.2, 0.2, 0.2, 0.0]
         matDiffuse    = [0.1, 0.6, 0.0, 0.0]
         #matSpecular   = [0.2, 0.2, 0.2, 1.]
         matShininess  = 0.0
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient)
-        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse)
-        #glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular)
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, matAmbient)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, matDiffuse)
+        #GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, matSpecular)
+        GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, matShininess)
 
         lightPosition = [10.0, -30.0, -20.0, 0.0]
         lightAmbient  = [0.3, 0.3, 0.3, 1.0]
         lightDiffuse  = [0.5, 0.5, 0.5, 1.0]
         # disable specular part:
         lightSpecular = [0., 0., 0., 1.]
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPosition)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient)
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse)
-        glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular)
-        glEnable(GL_LIGHT0)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, lightPosition)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, lightAmbient)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, lightDiffuse)
+        GL.glLightfv(GL.GL_LIGHT0, GL.GL_SPECULAR, lightSpecular)
+        GL.glEnable(GL.GL_LIGHT0)
 
         lightPosition = [-30.0, 0.0, -20.0, 0.0]
         lightAmbient  = [0.0, 0.0, 0.0, 1.]
         lightDiffuse  = [0.08, 0.08, 0.08, 1.]
         lightSpecular = [0.0, 0.0, 0.0, 1.]
-        glLightfv(GL_LIGHT1, GL_POSITION, lightPosition)
-        glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbient)
-        glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuse)
-        glLightfv(GL_LIGHT1, GL_SPECULAR, lightSpecular)
-        glEnable(GL_LIGHT1)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse)
+        GL.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular)
+        GL.glEnable(GL.GL_LIGHT1)
 
-        glEnable(GL_COLOR_MATERIAL)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_DEPTH_TEST)
-        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
-        glClearColor(self.bgCol[0], self.bgCol[1], self.bgCol[2], 0)
+        GL.glEnable(GL.GL_COLOR_MATERIAL)
+        GL.glEnable(GL.GL_LIGHTING)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE)
+        GL.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
+        GL.glClearColor(self.bgCol[0], self.bgCol[1], self.bgCol[2], 0)
 
     def setBgCol(self, bgCol):
         """rgb in value between 0 and 1"""
         self.bgCol = bgCol
-        glClearColor(bgCol[0], bgCol[1], bgCol[2], 0)
+        GL.glClearColor(bgCol[0], bgCol[1], bgCol[2], 0)
 
     def getBgCol(self):
         """rgb in value between 0 and 1"""
         return self.bgCol
 
     def onPaint(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         self.shape.glDraw()
 
 class MainWindow(wx.Frame):
@@ -544,7 +543,7 @@ class MainWindow(wx.Frame):
             style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
-            filepath = fileDlg.GetPath()
+            filepath = dlg.GetPath()
             filename = dlg.GetFilename()
             self.exportDirName  = filepath.rsplit('/', 1)[0]
             NameExt = filename.split('.')
@@ -746,9 +745,9 @@ class MainPanel(wx.Panel):
         # if the shape generates the normals itself:
         # TODO: handle that this.Ns is set correctly, i.e. normalised
         if shape.generateNormals:
-            glDisable(GL_NORMALIZE)
+            GL.glDisable(GL.GL_NORMALIZE)
         else:
-            glEnable(GL_NORMALIZE)
+            GL.glEnable(GL.GL_NORMALIZE)
         self.canvas.paint()
         self.parent.setStatusStr("Shape Updated")
         del oldShape
@@ -1149,16 +1148,16 @@ class ViewSettingsSizer(wx.BoxSizer):
         self.parentPanel.Bind(wx.EVT_RADIOBOX, self.onFOption, id = self.fOptionsGui.GetId())
         faceSizer = wx.BoxSizer(wx.HORIZONTAL)
         faceSizer.Add(self.fOptionsGui, 1, wx.EXPAND)
-        if not glIsEnabled(GL_CULL_FACE):
+        if not GL.glIsEnabled(GL.GL_CULL_FACE):
             self.fOptionsGui.SetStringSelection(self.cull_show_both)
         else:
-            # Looks like I switch front and back here, but self makes sense from
+            # Looks like I switch front and back here, but this makes sense from
             # the GUI.
-            if glGetInteger(GL_CULL_FACE_MODE) == GL_FRONT:
+            if GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_FRONT:
                 self.fOptionsGui.SetStringSelection(self.cull_show_front)
-            if glGetInteger(GL_CULL_FACE_MODE) == GL_BACK:
+            if GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_BACK:
                 self.fOptionsGui.SetStringSelection(self.cull_show_back)
-            else: # ie GL_FRONT_AND_BACK
+            else: # ie GL.GL_FRONT_AND_BACK
                 self.fOptionsGui.SetStringSelection(self.cull_show_none)
 
         # Open GL
@@ -1170,7 +1169,7 @@ class ViewSettingsSizer(wx.BoxSizer):
                                 label = 'Switch Front and Back Face (F3)')
         )
         self.oglFrontFaceGui = self.Guis[-1]
-        self.oglFrontFaceGui.SetValue(glGetIntegerv(GL_FRONT_FACE) == GL_CW)
+        self.oglFrontFaceGui.SetValue(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
         self.parentPanel.Bind(wx.EVT_CHECKBOX, self.onOgl,
                                         id = self.oglFrontFaceGui.GetId())
         # background Colour
@@ -1472,18 +1471,18 @@ class ViewSettingsSizer(wx.BoxSizer):
         # the GUI.
         self.canvas.shape.setFaceProperties(drawFaces = True)
         if sel == self.cull_show_both:
-            glDisable(GL_CULL_FACE)
+            GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_none:
             # don't use culling here: doesn't work with edge radius and vertext
             # radius > 0
             self.canvas.shape.setFaceProperties(drawFaces = False)
-            glDisable(GL_CULL_FACE)
+            GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_front:
-            glCullFace(GL_FRONT)
-            glEnable(GL_CULL_FACE)
+            GL.glCullFace(GL.GL_FRONT)
+            GL.glEnable(GL.GL_CULL_FACE)
         elif self.cull_show_back:
-            glCullFace(GL_BACK)
-            glEnable(GL_CULL_FACE)
+            GL.glCullFace(GL.GL_BACK)
+            GL.glEnable(GL.GL_CULL_FACE)
         self.canvas.paint()
 
     def onOgl(self, e):
