@@ -155,7 +155,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
 
 class MainWindow(wx.Frame):
     wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
-    def __init__(self, TstScene, shape, p_args, *args, **kwargs):
+    def __init__(self, TstScene, shape, filename, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.scenes_list = list(SCENES.keys())
         self.add_menu_bar()
@@ -168,10 +168,10 @@ class MainWindow(wx.Frame):
         self.transform_settings_win = None
         self.scene = None
         self.panel = MainPanel(self, TstScene, shape, wx.ID_ANY)
-        if len(p_args) > 0 and (
-            p_args[0][-4:] == '.off' or p_args[0][-3:] == '.py'
+        if len(filename) > 0 and (
+            filename[-4:] == '.off' or filename[-3:] == '.py'
         ):
-            self.open_file(p_args[0])
+            self.open_file(filename)
         self.Show(True)
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.key_switch_front_back = wx.NewIdRef().GetId()
@@ -1821,126 +1821,94 @@ def convert_to_off(shape, o_fd, precision, margin = 0):
     # TODO: support for saving extra_data?
     o_fd.write(shape.toOffStr(precision))
 
-# TODO: use argparse
-def usage(exit_nr):
-    print("""
-usage Orbitit.py [-p | --ps] [<in_file>] [<out_file>]
-
-Without any specified options it starts the program in the default scene.
-Options:
-
-        --precision <int>
-        -P <int>          Write the number with <int> number of decimals.
-
-        -p
-        --ps         export to PS. The input file is either a python scrypt,
-                     specified by -y or an off file, specified by -f. If no
-                     argument is specified, the the result is piped to stdout.
-        -y <file>
-        --py=<file>  export to a python file defing a shape that can be
-                     interpreted by Orbitit
-
-        -f <file>
-        --off=<file> export to a off-file defing a shape that can be read by
-                     other programs, like Antiprism and Stella.
-
-        -m <int>
-        --margin=<int> set the margin for floating point numbers to be
-                       considered equal. All numbers with a difference that is
-                       smaller than 1.0e-<int> will be considered equal.
-
-        -s <file>
-        --scene=<file> Start the program with the scene as specified by the
-                       file parameter.
-    """)
-    sys.exit(exit_nr)
-
-class Oper:
-    to_ps = 1
-    to_off = 2
-    to_py = 3
-    open_scene = 4
-
 if __name__ == "__main__":
-    import getopt
+    import argparse
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:],
-            'fm:P:ps:y', ['off', '--margin=', 'precision=', 'ps', 'scene=', 'py'])
-    except getopt.GetoptError as err:
-        print(str(err))
-        usage(2)
+    DESCR = """Utility for handling polyhedra."""
 
-    # defaults:
-    scale = 50
-    margin = 10
-    precision = 15
+    parser = argparse.ArgumentParser(description=DESCR)
+    parser.add_argument(
+        "-i", "--input-file",
+        metavar='filename',
+        default="",
+        help="Input files can either be a python file in a certain format or an off file.",
+    )
+    parser.add_argument(
+        "-P", "--precision",
+        metavar='i',
+        default=15,
+        help="Write floating point numbers with <i> number of decimals.",
+    )
+    parser.add_argument(
+        "-o", "--off",
+        metavar='filename',
+        help="Export an input file to an off-file",
+    )
+    parser.add_argument(
+        "-p", "--ps",
+        metavar='filename',
+        help="Export an input file to post-script",
+    )
+    parser.add_argument(
+        "-y", "--py",
+        metavar='filename',
+        help="Export an input file to python",
+    )
+    parser.add_argument(
+        "-m", "--margin",
+        metavar='i',
+        default=10,
+        help="Set the margin for floating point numbers to be considered equal. All numbers with a"
+            "difference that is smaller than 1.0e-<i> will be considered equal.",
+    )
+    parser.add_argument(
+        "-s", "--scene",
+        metavar='scene-name',
+        default=DEFAULT_SCENE,
+        help="Start the user interface with the specified scene name. This parameter is ignored if "
+            f"the '-i' option is used. Valid scene names are: {list(SCENES.keys())}",
+    )
+    parser.add_argument(
+        "-x", "--scale",
+        metavar='n',
+        default=50,
+        help="When saving to PostScript, then use the specified scale factor",
+    )
 
-    oper = None
-    for opt, opt_arg in opts:
-        if opt in ('-f', '--off'):
-            oper = Oper.to_off
-        elif opt in ('-m', '--margin'):
-            margin = int(opt_arg)
-        elif opt in ('-P', '--precision'):
-            precision = int(opt_arg)
-        elif opt in ('-p', '--ps'):
-            oper = Oper.to_ps
-        elif opt in ('-s', '--scene'):
-            oper = Oper.open_scene
-            scene_file = opt_arg
-            print('DBG scene_file', scene_file)
-        elif opt in ('-y', '--py'):
-            oper = Oper.to_py
-        else:
-            print("Error: unknown option")
-            usage(2)
+    args = parser.parse_args()
 
     o_fd = None
-    a_ind = 0
-    print('DBG args', args)
-    if oper != None:
-        if len(args) <= a_ind:
-            print("reading python format from std input")
-            i_filename = None
-        else:
-            i_filename = args[a_ind]
-            a_ind += 1
-        if len(args) <= a_ind:
-            o_fd = sys.stdout
-        else:
-            o_fd = open(args[a_ind], 'w')
-            a_ind += 1
-
-    if oper == Oper.to_ps:
-        shape = read_shape_file(i_filename)
-        if shape != None:
-            convert_to_ps(shape, o_fd, scale, precision, margin)
-    elif oper == Oper.to_off:
-        shape = read_shape_file(i_filename)
-        if shape != None:
-            convert_to_off(shape, o_fd, precision, margin)
-    elif oper == Oper.to_py:
-        shape = read_shape_file(i_filename)
-        if shape != None:
+    outfile = None
+    if args.input_file:
+        shape = read_shape_file(args.input_file)
+        if not shape:
+            print(f"Couldn't read shape file {args.input_file}")
+            sys.exit(-1)
+        if args.off:
+            o_fd = open(args.off, 'w')
+            convert_to_off(shape, o_fd, args.precision, args.margin)
+        elif args.py:
+            o_fd = open(args.py, 'w')
             shape.saveFile(o_fd)
+        elif args.ps:
+            o_fd = open(args.ps, 'w')
+            convert_to_ps(shape, o_fd, args.scale, args.precision, args.margin)
+
+    if o_fd:
+        o_fd.close()
     else:
-        if oper != Oper.open_scene:
-            scene_name = DEFAULT_SCENE
         app = wx.App(False)
         frame = MainWindow(
                 Canvas3DScene,
                 Geom3D.SimpleShape([], []),
-                args,
+                args.input_file,
                 None,
                 wx.ID_ANY, "test",
                 size = (430, 482),
                 pos = wx.Point(980, 0)
             )
-        if (len(args) == 0):
-            frame.load_scene(SCENES[scene_name])
+        if not args.input_file:
+            frame.load_scene(SCENES[args.scene])
         app.MainLoop()
 
     sys.stderr.write("Done\n")
-
-    if o_fd != None: o_fd.close()
