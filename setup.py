@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = 'orbitit',
     packages = ['orbitit'],
-    version = '0.4',
+    version = '0.5',
     license='GNU Public License version 2',
     description = 'Program for modelling polyhedra',
     author = 'Marcel "Teun" Tunnissen',
