@@ -1,11 +1,16 @@
 from distutils.core import setup
+import setuptools
+
+with open("README", "r", encoding="utf-8") as fd:
+    long_description = fd.read()
+
 setup(
     name = 'orbitit',
-    packages = ['orbitit'],
-    version = '0.5',
+    version = '0.5.1',
     license='GNU Public License version 2',
-    description = 'Program for modelling polyhedra',
-    author = 'Marcel "Teun" Tunnissen',
+    description = 'Utility for modelling polyhedra',
+    long_description=long_description,
+    author = 'marcelteun',
     author_email = 'marcelteun@gmail.com',
     url = 'https://github.com/marcelteun/Orbitit',
     download_url = 'https://github.com/marcelteun/Orbitit/archive/refs/tags/0.4.0.zip',
@@ -16,7 +21,10 @@ setup(
         'pyopengl',
     ],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: GPLv2',
         'Programming Language :: Python :: 3',
     ],
+    package_dir={"": "orbitit"},
+    python_requires=">=3.6",
 )
