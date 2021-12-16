@@ -28,10 +28,6 @@ from wx import glcanvas
 from orbitit import Geom3D, geomtypes
 
 # work-around for PyOpenGL bug (see commit message)
-if not os.environ.get("PYOPENGL_PLATFORM", ""):
-    if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
-            "wayland" in os.getenv("XDG_SESSION_TYPE", "").lower():
-        os.environ['PYOPENGL_PLATFORM'] = 'egl'
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
@@ -125,7 +121,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         # Ensure double buffered to prevent flashing on systems where double buffering is not default.
         this.parent = parent
         size = (-1, -1) if size is None else size
-        glcanvas.GLCanvas.__init__(this, parent, -1,
+        super().__init__(parent, -1,
                 size = size,
                 attribList = [
                     wx.glcanvas.WX_GL_RGBA,
