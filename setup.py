@@ -5,7 +5,7 @@ with open("README", "r", encoding="utf-8") as fd:
 
 setup(
     name = 'orbitit',
-    version = '0.5.2',
+    version = '0.5.3',
     license='GNU Public License version 2',
     description = 'Utility for modelling polyhedra',
     long_description=long_description,
