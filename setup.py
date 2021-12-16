@@ -1,12 +1,11 @@
 from distutils.core import setup
-import setuptools
 
 with open("README", "r", encoding="utf-8") as fd:
     long_description = fd.read()
 
 setup(
     name = 'orbitit',
-    version = '0.5.1',
+    version = '0.5.2',
     license='GNU Public License version 2',
     description = 'Utility for modelling polyhedra',
     long_description=long_description,
@@ -22,7 +21,7 @@ setup(
     ],
     classifiers=[
         'Operating System :: OS Independent',
-        'License :: OSI Approved :: GPLv2',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Programming Language :: Python :: 3',
     ],
     package_dir={"": "orbitit"},
