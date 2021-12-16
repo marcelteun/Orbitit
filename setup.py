@@ -11,7 +11,8 @@ setup(
     download_url = 'https://github.com/marcelteun/Orbitit/archive/refs/tags/0.4.0.zip',
     keywords = ['orbitit', 'polyhedra', 'heptagons'],
     install_requires=[
-        'wxpython',
+        'python-config',
+        'wxPython>=4.0.0',
         'pyopengl',
     ],
     classifiers=[

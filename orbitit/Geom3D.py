@@ -28,15 +28,10 @@ import wx
 import sys
 import os
 
-from orbitit import geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, X3D
-
-# work-around for PyOpenGL bug (see commit message)
-if not os.environ.get("PYOPENGL_PLATFORM", ""):
-    if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
-            "wayland" in os.getenv("XDG_SESSION_TYPE", "").lower():
-        os.environ['PYOPENGL_PLATFORM'] = 'egl'
 from OpenGL import GL
 from functools import reduce
+
+from orbitit import geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, X3D
 
 # TODO:
 # - Test the gl stuf of SimpleShape: create an Interactive3DCanvas

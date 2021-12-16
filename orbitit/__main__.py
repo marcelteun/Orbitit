@@ -31,9 +31,13 @@ import wx.lib.colourselect
 # 2021-05-05:
 # work-around for PyOpenGL bug (see commit message)
 if not os.environ.get("PYOPENGL_PLATFORM", ""):
+    print("Note: environment variable PYOPENGL_PLATFORM undefined")
     if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
             "wayland" in os.getenv("XDG_SESSION_TYPE", "").lower():
         os.environ['PYOPENGL_PLATFORM'] = 'egl'
+        print("Note: PYOPENGL_PLATFORM set to egl")
+    else:
+        print("If not working (e.g. invalid context) define PYOPENGL_PLATFORM")
 from OpenGL import GL
 
 from orbitit import Geom3D, geom_gui, geomtypes, Scenes3D, X3D
