@@ -28,7 +28,7 @@ import math
 import random
 import unittest
 
-import geomtypes
+from orbitit import geomtypes
 
 
 class TestVec(unittest.TestCase):
@@ -90,17 +90,17 @@ class TestVec(unittest.TestCase):
         """Test angle between vectors"""
         v = geomtypes.Vec([0, 0, 0])
         w = geomtypes.Vec([10, 0, 0])
-        with self.assertRaises(ZeroDivisionError):
+        with self.assertRaises(ValueError):
             r = v.angle(w)
 
         v = geomtypes.Vec([10, 0, 0])
         w = geomtypes.Vec([0, 0, 0])
-        with self.assertRaises(ZeroDivisionError):
+        with self.assertRaises(ValueError):
             r = v.angle(w)
 
         v = geomtypes.Vec([0, 0, 0])
         w = geomtypes.Vec([0, 0, 0])
-        with self.assertRaises(ZeroDivisionError):
+        with self.assertRaises(ValueError):
             r = v.angle(w)
 
         v = geomtypes.Vec([4, 0, 0])

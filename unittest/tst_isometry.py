@@ -24,8 +24,7 @@ from copy import copy
 import math
 import unittest
 
-import geomtypes
-import isometry
+from orbitit import geomtypes, isometry
 
 class TestSubGroups(unittest.TestCase):
     """Unit test subgroups"""

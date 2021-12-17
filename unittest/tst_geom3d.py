@@ -28,8 +28,7 @@ import math
 from os import path
 import unittest
 
-import Geom3D
-import geomtypes
+from orbitit import Geom3D, geomtypes
 
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)

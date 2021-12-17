@@ -1,13 +1,13 @@
-Geom3D.IsometricShape(
+orbitit.Geom3D.IsometricShape(
     Vs=[
-        geomtypes.Vec3([1, 1, 1]),
-        geomtypes.Vec3([-1, 1, 1]),
-        geomtypes.Vec3([-1, -1, 1]),
-        geomtypes.Vec3([1, -1, 1]),
-        geomtypes.Vec3([1, 1, -1]),
-        geomtypes.Vec3([-1, 1, -1]),
-        geomtypes.Vec3([-1, -1, -1]),
-        geomtypes.Vec3([1, -1, -1])
+        orbitit.geomtypes.Vec3([1, 1, 1]),
+        orbitit.geomtypes.Vec3([-1, 1, 1]),
+        orbitit.geomtypes.Vec3([-1, -1, 1]),
+        orbitit.geomtypes.Vec3([1, -1, 1]),
+        orbitit.geomtypes.Vec3([1, 1, -1]),
+        orbitit.geomtypes.Vec3([-1, 1, -1]),
+        orbitit.geomtypes.Vec3([-1, -1, -1]),
+        orbitit.geomtypes.Vec3([1, -1, -1])
     ],
     Fs=[
         [0, 1, 2, 3],
@@ -33,59 +33,59 @@ Geom3D.IsometricShape(
         ([[0.996094, 0.839844, 0.0]], [])
     ],
     directIsometries=[
-        geomtypes.Rot3((
-            geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
-            geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
+            orbitit.geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([-0.7071067812, 0, -0.7071067812, 0]),
-            geomtypes.Quat([-0.7071067812, 0, 0.7071067812, 0]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([-0.7071067812, 0, -0.7071067812, 0]),
+            orbitit.geomtypes.Quat([-0.7071067812, 0, 0.7071067812, 0]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0, 0, -0.7071067812, -0.7071067812]),
-            geomtypes.Quat([0, 0, 0.7071067812, 0.7071067812]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0, 0, -0.7071067812, -0.7071067812]),
+            orbitit.geomtypes.Quat([0, 0, 0.7071067812, 0.7071067812]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0.7071067812, -0.7071067812, 0, 0]),
-            geomtypes.Quat([0.7071067812, 0.7071067812, 0, 0]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0.7071067812, -0.7071067812, 0, 0]),
+            orbitit.geomtypes.Quat([0.7071067812, 0.7071067812, 0, 0]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0, -0.7071067812, 0.7071067812, 0]),
-            geomtypes.Quat([0, 0.7071067812, -0.7071067812, 0]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0, -0.7071067812, 0.7071067812, 0]),
+            orbitit.geomtypes.Quat([0, 0.7071067812, -0.7071067812, 0]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
-            geomtypes.Quat([0.5, 0.5, 0.5, 0.5]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
+            orbitit.geomtypes.Quat([0.5, 0.5, 0.5, 0.5]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([-0.5, -0.5, 0.5, -0.5]),
-            geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([-0.5, -0.5, 0.5, -0.5]),
+            orbitit.geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0, 0.7071067812, 0, -0.7071067812]),
-            geomtypes.Quat([0, -0.7071067812, 0, 0.7071067812]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0, 0.7071067812, 0, -0.7071067812]),
+            orbitit.geomtypes.Quat([0, -0.7071067812, 0, 0.7071067812]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([-0.7071067812, -0.7071067812, 0, 0]),
-            geomtypes.Quat([-0.7071067812, 0.7071067812, 0, 0]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([-0.7071067812, -0.7071067812, 0, 0]),
+            orbitit.geomtypes.Quat([-0.7071067812, 0.7071067812, 0, 0]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0, 0.7071067812, 0, 0.7071067812]),
-            geomtypes.Quat([0, -0.7071067812, 0, -0.7071067812]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0, 0.7071067812, 0, 0.7071067812]),
+            orbitit.geomtypes.Quat([0, -0.7071067812, 0, -0.7071067812]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0, 0, -0.7071067812, 0.7071067812]),
-            geomtypes.Quat([0, 0, 0.7071067812, -0.7071067812]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0, 0, -0.7071067812, 0.7071067812]),
+            orbitit.geomtypes.Quat([0, 0, 0.7071067812, -0.7071067812]),
         )),
-        geomtypes.Rot3((
-            geomtypes.Quat([0.7071067812, 0, -0.7071067812, 0]),
-            geomtypes.Quat([0.7071067812, 0, 0.7071067812, 0]),
+        orbitit.geomtypes.Rot3((
+            orbitit.geomtypes.Quat([0.7071067812, 0, -0.7071067812, 0]),
+            orbitit.geomtypes.Quat([0.7071067812, 0, 0.7071067812, 0]),
         ))
     ],
     unfoldOrbit=False,
     name='12cubes',
-    orientation=geomtypes.Rot3((
-        geomtypes.Quat([0.9530206139, 0.2141864953, 0, 0.2141864953]),
-        geomtypes.Quat([0.9530206139, -0.2141864953, 0, -0.2141864953]),
+    orientation=orbitit.geomtypes.Rot3((
+        orbitit.geomtypes.Quat([0.9530206139, 0.2141864953, 0, 0.2141864953]),
+        orbitit.geomtypes.Quat([0.9530206139, -0.2141864953, 0, -0.2141864953]),
     ))
 )

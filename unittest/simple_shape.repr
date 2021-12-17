@@ -1,15 +1,15 @@
-Geom3D.SimpleShape(
+orbitit.Geom3D.SimpleShape(
     Vs=[
-        geomtypes.Vec3([1, 1, 1]),
-        geomtypes.Vec3([-1, 1, 1]),
-        geomtypes.Vec3([-1, -1, 1]),
-        geomtypes.Vec3([1, -1, 1]),
-        geomtypes.Vec3([1, 1, -1]),
-        geomtypes.Vec3([-1, 1, -1]),
-        geomtypes.Vec3([-1, -1, -1]),
-        geomtypes.Vec3([1, -1, -1]),
-        geomtypes.Vec3([1, 1, -2]),
-        geomtypes.Vec3([0.5, 1, 1])
+        orbitit.geomtypes.Vec3([1, 1, 1]),
+        orbitit.geomtypes.Vec3([-1, 1, 1]),
+        orbitit.geomtypes.Vec3([-1, -1, 1]),
+        orbitit.geomtypes.Vec3([1, -1, 1]),
+        orbitit.geomtypes.Vec3([1, 1, -1]),
+        orbitit.geomtypes.Vec3([-1, 1, -1]),
+        orbitit.geomtypes.Vec3([-1, -1, -1]),
+        orbitit.geomtypes.Vec3([1, -1, -1]),
+        orbitit.geomtypes.Vec3([1, 1, -2]),
+        orbitit.geomtypes.Vec3([0.5, 1, 1])
     ],
     Fs=[
         [0, 1, 2, 3],

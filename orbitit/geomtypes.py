@@ -262,7 +262,11 @@ class Vec(tuple):
 
     def angle(self, w):
         """Return the angle between two (2D) vectors"""
-        return math.acos(self.normalise()*w.normalise())
+        s_norm = self.norm()
+        w_norm = w.norm()
+        if s_norm == 0 or w_norm == 0:
+            raise ValueError("Cannot take angle with nul vector")
+        return math.acos((self / s_norm) * (w / w_norm))
 
     # TODO cross product from GA?
 
