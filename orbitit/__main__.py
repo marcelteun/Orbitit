@@ -168,7 +168,7 @@ class MainWindow(wx.Frame):
         self.transform_settings_win = None
         self.scene = None
         self.panel = MainPanel(self, TstScene, shape, wx.ID_ANY)
-        if len(filename) > 0 and (
+        if filename and (
             filename[-4:] == '.off' or filename[-3:] == '.py'
         ):
             self.open_file(filename)
@@ -1828,9 +1828,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description=DESCR)
     parser.add_argument(
-        "-i", "--input-file",
+        "inputfile",
         metavar='filename',
-        default="",
+        nargs="?",
         help="Input files can either be a python file in a certain format or an off file.",
     )
     parser.add_argument(
@@ -1879,10 +1879,10 @@ if __name__ == "__main__":
 
     o_fd = None
     outfile = None
-    if args.input_file:
-        shape = read_shape_file(args.input_file)
+    if args.inputfile:
+        shape = read_shape_file(args.inputfile)
         if not shape:
-            print(f"Couldn't read shape file {args.input_file}")
+            print(f"Couldn't read shape file {args.inputfile}")
             sys.exit(-1)
         if args.off:
             o_fd = open(args.off, 'w')
@@ -1901,13 +1901,13 @@ if __name__ == "__main__":
         frame = MainWindow(
                 Canvas3DScene,
                 Geom3D.SimpleShape([], []),
-                args.input_file,
+                args.inputfile,
                 None,
                 wx.ID_ANY, "test",
                 size = (430, 482),
                 pos = wx.Point(980, 0)
             )
-        if not args.input_file:
+        if not args.inputfile:
             frame.load_scene(SCENES[args.scene])
         app.MainLoop()
 
