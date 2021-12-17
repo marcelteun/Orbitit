@@ -1,6 +1,4 @@
-import Geom3D
-import geomtypes
-import math
+from orbitit import Geom3D, geomtypes
 
 Vs = [
 	geomtypes.Vec3([ 1,  1,  1]),

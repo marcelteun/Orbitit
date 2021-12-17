@@ -31,26 +31,28 @@ echo -n "$ccgray"
 
 # indent test
 tst="indent.py"
-python indent.py > /dev/null && pass "$tst" || fail "$tst"
+python -m orbitit.indent > /dev/null && pass "$tst" || fail "$tst"
+
+run="python3 -m orbitit"
 
 # test: output to Python
 if [ -z $SKIP_PY_TST ]; then {
 	# test simple shape
 	obj="cube.degenerate.face"
 	tst="export $obj to Python"
-	./Orbitit.py -y tst/$obj.py tst/tst.py
+	$run -y tst/tst.py tst/$obj.py
 	diff_test "tst/tst.py" "tst/$obj.out.py"
 
 	# test isometric shape with default orientation of base shape
 	obj="5cubes"
 	tst="export $obj to Python"
-	./Orbitit.py -y tst/$obj.py tst/tst.py
+	$run -y tst/tst.py tst/$obj.py
 	diff_test "tst/tst.py" "tst/$obj.out.py"
 
 	# test isometric shape with a non-default orientation of base shape
 	obj="12cubes"
 	tst="export $obj to Python"
-	./Orbitit.py -y tst/$obj.py tst/tst.py
+	$run -y tst/tst.py tst/$obj.py
 	diff_test "tst/tst.py" "tst/$obj.out.py"
 
 	rm tst/tst.py
@@ -61,13 +63,13 @@ if [ -z $SKIP_PS_TST ]; then {
 	# a simple example, .off input: classic compound of five cubes
 	obj="5cubes"
 	tst="export $obj to PS"
-	./Orbitit.py -P 12 -p tst/$obj.off tst/tst.ps
+	$run -P 12 -p tst/tst.ps tst/$obj.off
 	diff_test "tst/tst.ps" "tst/$obj.ps"
 
 	# python: isometric shape with non-default orientation of base shape
 	obj="12cubes"
 	tst="export $obj to PS"
-	./Orbitit.py -P 11 -p tst/$obj.py tst/tst.ps
+	$run -P 11 -p tst/tst.ps tst/$obj.py
 	diff_test "tst/tst.ps" "tst/$obj.ps"
 
 	# a cube with a degenerate face
@@ -75,23 +77,23 @@ if [ -z $SKIP_PS_TST ]; then {
 	# the face normal
 	obj="cube.degenerate.face"
 	tst="export $obj to PS"
-	./Orbitit.py -P 12 -p tst/$obj.py tst/tst.ps
+	$run -P 12 -p tst/tst.ps tst/$obj.py
 	diff_test "tst/tst.ps" "tst/$obj.ps"
 
 	# some complex uniform star polyhedra examples
 	obj="MW115"
 	tst="export $obj to PS"
-	./Orbitit.py -m 9 -P 12 -p tst/$obj.off tst/tst.ps
+	$run -m 9 -P 12 -p tst/tst.ps tst/$obj.off
 	diff_test "tst/tst.ps" "tst/$obj.ps"
 
 	obj="MW117"
 	tst="export $obj to PS"
-	./Orbitit.py -m 9 -P 12 -p tst/$obj.off tst/tst.ps
+	$run -m 9 -P 12 -p tst/tst.ps tst/$obj.off
 	diff_test "tst/tst.ps" "tst/$obj.ps"
 
 	obj="MW119"
 	tst="export $obj to PS"
-	./Orbitit.py -m 9 -P 11 -p tst/$obj.off tst/tst.ps
+	$run -m 9 -P 11 -p tst/tst.ps tst/$obj.off
 	diff_test "tst/tst.ps" "tst/$obj.ps"
 
 	# clean up

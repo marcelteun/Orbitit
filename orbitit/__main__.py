@@ -1835,6 +1835,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-P", "--precision",
+        type=int,
         metavar='i',
         default=15,
         help="Write floating point numbers with <i> number of decimals.",
@@ -1856,6 +1857,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-m", "--margin",
+        type=int,
         metavar='i',
         default=10,
         help="Set the margin for floating point numbers to be considered equal. All numbers with a"

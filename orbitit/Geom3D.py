@@ -755,6 +755,9 @@ class Plane:
         """
         v1 = geomtypes.Vec3(P0) - geomtypes.Vec3(P1)
         v2 = geomtypes.Vec3(P0) - geomtypes.Vec3(P2)
+        cross = v1.cross(v2)
+        if eq(cross.norm(), 0):
+            raise ValueError("Points are on one line")
         return v1.cross(v2).normalize()
 
     def intersectWithPlane(this, plane):
@@ -817,7 +820,7 @@ def facePlane(Vs, face):
                     Vs[face[fi_1]]
                 )
             planeFound = True
-        except ZeroDivisionError or AssertionError:
+        except ValueError or AssertionError:
             fi_1 += 1
             if fi_1 >= len(face):
                 fi_0 += 1
@@ -2121,8 +2124,8 @@ class SimpleShape:
                             pointsIn2D.append(loi2D.getPoint(t1))
                             Es.append([nrOfVs, nrOfVs+1])
                             return nrOfVs + 2
-                        while (baseSegmentNr < len(pInLoiBase)/2) and \
-                            (facetSegmentNr < len(pInLoiFacet)/2):
+                        while (baseSegmentNr < len(pInLoiBase) // 2) and \
+                            (facetSegmentNr < len(pInLoiFacet) // 2):
                             if nextBaseSeg:
                                 b0 = pInLoiBase[2*baseSegmentNr]
                                 b1 = pInLoiBase[2*baseSegmentNr + 1]

@@ -1549,5 +1549,7 @@ class Mat(list):
         """Solve matrix usinguse Cramer's method"""
         assert len(v) == self.rows
         det = self.det()
+        if det == 0:
+            raise ValueError(f"No solution for {self}")
         return Vec(
             [self.replace_col(i, v).det() / det for i in range(self.cols)])

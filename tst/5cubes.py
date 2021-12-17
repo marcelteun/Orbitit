@@ -1,6 +1,4 @@
-import geomtypes
-import Geom3D
-import isometry
+from orbitit import Geom3D, geomtypes
 shape = Geom3D.IsometricShape(
   Vs = [
     geomtypes.Vec3([1.0, 1.0, 1.0]),

@@ -1,18 +1,16 @@
-import geomtypes
-import Geom3D
-import isometry
-shape = Geom3D.SimpleShape(
+import orbitit
+shape = orbitit.Geom3D.SimpleShape(
     Vs=[
-        geomtypes.Vec3([1.0, 1.0, 1.0]),
-        geomtypes.Vec3([-1.0, 1.0, 1.0]),
-        geomtypes.Vec3([-1.0, -1.0, 1.0]),
-        geomtypes.Vec3([1.0, -1.0, 1.0]),
-        geomtypes.Vec3([1.0, 1.0, -1.0]),
-        geomtypes.Vec3([-1.0, 1.0, -1.0]),
-        geomtypes.Vec3([-1.0, -1.0, -1.0]),
-        geomtypes.Vec3([1.0, -1.0, -1.0]),
-        geomtypes.Vec3([1.0, 1.0, -2.0]),
-        geomtypes.Vec3([0.5, 1.0, 1.0])
+        orbitit.geomtypes.Vec3([1, 1, 1]),
+        orbitit.geomtypes.Vec3([-1, 1, 1]),
+        orbitit.geomtypes.Vec3([-1, -1, 1]),
+        orbitit.geomtypes.Vec3([1, -1, 1]),
+        orbitit.geomtypes.Vec3([1, 1, -1]),
+        orbitit.geomtypes.Vec3([-1, 1, -1]),
+        orbitit.geomtypes.Vec3([-1, -1, -1]),
+        orbitit.geomtypes.Vec3([1, -1, -1]),
+        orbitit.geomtypes.Vec3([1, 1, -2]),
+        orbitit.geomtypes.Vec3([0.5, 1, 1])
     ],
     Fs=[
         [0, 4, 8],
