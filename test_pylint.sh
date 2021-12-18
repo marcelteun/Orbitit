@@ -1,3 +1,8 @@
 #!/bin/sh -e
-chk_files="isometry.py geomtypes.py scene_orbit.py geom_gui.py"
-pylint $chk_files
+chk_files="
+	orbitit/isometry.py
+	orbitit/geomtypes.py
+	orbitit/scene_orbit.py
+	orbitit/geom_gui.py
+"
+pylint --extension-pkg-allow-list=wx $chk_files
