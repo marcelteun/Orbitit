@@ -34,4 +34,9 @@ good-names=I,glMatrix,__glMatrix_rot,__glMatrix_rot_inv,
 #   Constant name <> doesn't conform to UPPER_CASE naming style
 #   Since all module level variables are supposed to be capitalized
 # W0511 Don't warn about TODO, FIXME etc
-disable=W0511
+# W1514 UTF-8 standard encoding is okay
+disable=W0511,W1514
+
+[DESIGN]
+# Since inheriting from wx.Frame leads to 8 already
+max-parents=8

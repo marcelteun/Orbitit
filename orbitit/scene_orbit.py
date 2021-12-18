@@ -67,7 +67,7 @@ LOG_BAR_LVL = LOG_INFO
 class Shape(Geom3D.CompoundShape):
     """Simple wrapper for the Shape being used."""
     def __init__(self):
-        super(Shape, self).__init__([Geom3D.SimpleShape([], [])])
+        super().__init__([Geom3D.SimpleShape([], [])])
 
     #def glInit(self):
     #    super(Shape, self).glInit()
@@ -280,11 +280,11 @@ class CtrlWin(wx.Frame):
             self.show_gui[self._stab_sym_gui_idx].get_selected()
         ))
         no_of_cols_choice_lst = [
-            '%d (based on %s)' % (p['index'], p['class'].__name__)
+            f"{p['index']} (based on {p['class'].__name__})"
             for p in self.orbit.higherOrderStabiliserProps
         ]
         no_of_cols_choice_lst.extend([
-            '%d (based on %s)' % (p['index'], p['class'].__name__)
+            f"{p['index']} (based on {p['class'].__name__})"
             for p in self.orbit.lowerOrderStabiliserProps
         ])
         self.col_guis = []
@@ -347,9 +347,9 @@ class CtrlWin(wx.Frame):
             self.hide_stab_list()
 
     def hide_stab_list(self):
+        """Hide gui with stabilisers, not to confuse the user"""
         self.show_gui[self._stab_sym_gui_idx].ShowItems(False)
-        self.show_gui[self._gen_stab_sym_gui_idx].SetLabel(
-            "Show Stabilisers")
+        self.show_gui[self._gen_stab_sym_gui_idx].SetLabel("Show Stabilisers")
         self.panel.Layout()
 
     def on_generate_stab_list(self, _):
@@ -420,8 +420,9 @@ class CtrlWin(wx.Frame):
             self.on_no_of_col_select(self.col_guis[self._no_of_cols_gui_idx])
         self.panel.Layout()
         self.status_text(
-            '{} symmetries applied: choose colours!'.format(self.shape.order),
-            LOG_INFO)
+            f"{self.shape.order} symmetries applied: choose colours!",
+            LOG_INFO,
+        )
         if not self.cols:
             self.cols = [(255, 100, 0)]
         if e is not None:
@@ -429,7 +430,7 @@ class CtrlWin(wx.Frame):
 
     def status_text(self, txt, lvl=LOG_INFO):
         """Set the status bar log to specified text"""
-        txt = '%s: %s' % (LOG_TXT[lvl], txt)
+        txt = f"{LOG_TXT[lvl]}: {txt}"
         if lvl >= LOG_STDOUT_LVL:
             print(txt)
         if lvl >= LOG_BAR_LVL:
@@ -580,8 +581,7 @@ class CtrlWin(wx.Frame):
             for col in col_per_isom]
         self.shape.setFaceColors(cols)
         self.status_text(
-            'Colour alternative {} of {} applied'.format(self.col_alt[1] + 1,
-                                                         len(self.col_syms)),
+            f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
             LOG_INFO)
         self.canvas.paint()
 
@@ -631,18 +631,17 @@ class CtrlWin(wx.Frame):
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()
             print("opening file:", filename)
-            fd = open(os.path.join(self.import_dir_name, filename), 'r')
-            if filename[-3:] == '.py':
-                shape = Geom3D.readPyFile(fd)
-                # For Compound derived shapes (isinstance) use merge:
-                try:
-                    shape = shape.SimpleShape
-                except AttributeError:
-                    # probably a SimpleShape
-                    pass
-            else:
-                shape = Geom3D.readOffFile(fd, recreateEdges=False)
-            fd.close()
+            with  open(os.path.join(self.import_dir_name, filename)) as fd:
+                if filename[-3:] == '.py':
+                    shape = Geom3D.readPyFile(fd)
+                    # For Compound derived shapes (isinstance) use merge:
+                    try:
+                        shape = shape.SimpleShape
+                    except AttributeError:
+                        # probably a SimpleShape
+                        pass
+                else:
+                    shape = Geom3D.readOffFile(fd, recreateEdges=False)
             if isinstance(shape, Geom3D.IsometricShape):
                 verts = shape.baseShape.Vs
                 faces = shape.baseShape.Fs
@@ -662,9 +661,9 @@ class CtrlWin(wx.Frame):
             # rotAngle = 30
             #   where the angle is in degrees (floating point)
             if filename[-3:] == '.py':
-                fd = open(os.path.join(self.import_dir_name, filename), 'r')
                 ed = {}
-                exec(fd.read(), ed)
+                with open(os.path.join(self.import_dir_name, filename)) as fd:
+                    exec(fd.read(), ed)
                 more_settings = 0
                 key_err_str = 'Note: KeyError while looking for'
                 key = 'final_sym'
@@ -742,7 +741,6 @@ class CtrlWin(wx.Frame):
                     self.rot_sizer.set_angle(angle)
                     self.update_orientation(
                         self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
-                fd.close()
             self.name = filename
         dlg.Destroy()
 
