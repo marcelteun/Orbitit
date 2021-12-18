@@ -26,7 +26,7 @@
 # pylint: disable=too-many-lines,too-many-statements,too-many-locals
 import unittest
 
-import Geom3D
+from orbitit import Geom3D
 from tst_geom3d import get_path, TestSimpleShape
 
 red = (.8, .1, .1)
