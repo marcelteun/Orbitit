@@ -29,20 +29,14 @@ import wx
 import wx.lib.intctrl
 import wx.lib.colourselect
 
-# 2021-05-05:
-# work-around for PyOpenGL bug (see commit message)
-if not os.environ.get("PYOPENGL_PLATFORM", ""):
-    print("Note: environment variable PYOPENGL_PLATFORM undefined")
-    if os.environ.get("DESKTOP_SESSION", "").lower() == "i3" or\
-            "wayland" in os.getenv("XDG_SESSION_TYPE", "").lower():
-        os.environ['PYOPENGL_PLATFORM'] = 'egl'
-        print("Note: PYOPENGL_PLATFORM set to egl")
-    else:
-        print("If not working (e.g. invalid context) define PYOPENGL_PLATFORM")
+# pre-load a fix that can set environment variable PYOPENGL_PLATFORM
+from orbitit import pre_pyopengl  # pylint: disable=wrong-import-order
 from OpenGL import GL
 
-from orbitit import Geom3D, geom_gui, geomtypes, Scenes3D, X3D
-from orbitit import (
+from orbitit import (  # pylint: disable=ungrouped-imports
+    Geom3D,
+    geom_gui,
+    geomtypes,
     Scene_24Cell,
     Scene_5Cell,
     Scene_8Cell,
@@ -58,6 +52,8 @@ from orbitit import (
     Scene_Rectified24Cell,
     Scene_Rectified8Cell,
     scene_orbit,
+    Scenes3D,
+    X3D,
 )
 DEFAULT_SCENE = 'scene_orbit'
 
@@ -80,6 +76,9 @@ SCENES = {
 }
 
 DEG2RAD = Geom3D.Deg2Rad
+
+# prevent warning for not being used:
+del pre_pyopengl
 
 def on_switch_front_and_back(canvas):
     if GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CCW:
