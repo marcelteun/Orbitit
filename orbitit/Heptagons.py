@@ -2490,7 +2490,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.updateShape = True
             this.canvas.shape = shape
         elif restoreMyShape:
-            this.parent.panel.set_shape(this.shape)
+            this.parent.panel.shape = this.shape
 
     def updateShape(this):
         this.nvidea_workaround()
