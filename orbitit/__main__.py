@@ -1541,6 +1541,9 @@ class ViewSettingsSizer(wx.BoxSizer):
     def rotate(self):
         v0 = self.v0_gui.GetValue()
         v1 = self.v1_gui.GetValue()
+        if v0 == geomtypes.Vec([0, 0, 0, 0]) or v1 == geomtypes.Vec([0, 0, 0, 0]) or v0 == v1:
+            self.parent_win.set_status_text(f"Please define two vectors spanning a plane")
+            return
         angle = self.slider_to_val(
                 self.angle_factor,
                 self.angle_offset,
