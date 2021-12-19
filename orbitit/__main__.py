@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Utility for handling polyhedra"""
 #
 # Copyright (C) 2010-2019 Marcel Tunnissen
 #
@@ -98,7 +99,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
 
         #GL.glShadeModel(GL.GL_SMOOTH)
 
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
         mat_ambient = [0.2, 0.2, 0.2, 0.0]
@@ -270,13 +271,13 @@ class MainWindow(wx.Frame):
         menu.Append(menu_item)
         return menu
 
-    def on_reload(self, e):
+    def on_reload(self, _):
         if self.current_file != None:
             self.open_file(self.current_file)
         elif self.current_scene != None:
             self.set_scene(self.current_scene)
 
-    def on_open(self, e):
+    def on_open(self, _):
         dlg = wx.FileDialog(self, 'New: Choose a file',
                 self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
@@ -328,7 +329,7 @@ class MainWindow(wx.Frame):
         self.current_file = filename
         self.current_scene = None
 
-    def on_add(self, e):
+    def on_add(self, _):
         dlg = wx.FileDialog(self, 'Add: Choose a file',
                 self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
@@ -355,7 +356,7 @@ class MainWindow(wx.Frame):
             self.SetTitle('Added: %s' % os.path.basename(filename))
         dlg.Destroy()
 
-    def on_save_py(self, e):
+    def on_save_py(self, _):
         dlg = wx.FileDialog(self, 'Save as .py file',
             self.export_dir_name, '', '*.py',
             style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
@@ -381,7 +382,7 @@ class MainWindow(wx.Frame):
             self.set_status_text("Python file written")
         dlg.Destroy()
 
-    def on_save_off(self, e):
+    def on_save_off(self, _):
         dlg = ExportOffDialog(self, wx.ID_ANY, 'OFF settings')
         file_chosen = False
         while not file_chosen:
@@ -428,7 +429,7 @@ class MainWindow(wx.Frame):
         # done while: file choosen
         dlg.Destroy()
 
-    def on_save_ps(self, e):
+    def on_save_ps(self, _):
         dlg = ExportPsDialog(self, wx.ID_ANY, 'PS settings')
         file_chosen = False
         while not file_chosen:
@@ -485,7 +486,7 @@ class MainWindow(wx.Frame):
         # done while: file choosen
         dlg.Destroy()
 
-    def on_save_wrl(self, e):
+    def on_save_wrl(self, _):
         dlg = wx.FileDialog(self,
             'Save as .vrml file', self.export_dir_name, '', '*.wrl',
             style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
@@ -513,7 +514,7 @@ class MainWindow(wx.Frame):
             fd.close()
         dlg.Destroy()
 
-    def on_view_settings(self, e):
+    def on_view_settings(self, _):
         if self.view_settings_win == None:
             self.view_settings_win = ViewSettingsWindow(self.panel.get_canvas(),
                 None, wx.ID_ANY,
@@ -525,7 +526,7 @@ class MainWindow(wx.Frame):
             self.view_settings_win.SetFocus()
             self.view_settings_win.Raise()
 
-    def on_col_settings(self, e):
+    def on_col_settings(self, _):
         if not self.col_settings_win is None:
             # Don't reuse, the colours might be wrong after loading a new model
             self.col_settings_win.Destroy()
@@ -535,7 +536,7 @@ class MainWindow(wx.Frame):
         )
         self.col_settings_win.Bind(wx.EVT_CLOSE, self.on_col_win_closed)
 
-    def on_transform(self, e):
+    def on_transform(self, _):
         if self.transform_settings_win == None:
             self.transform_settings_win = TransformSettingsWindow(
                 self.panel.get_canvas(), None, wx.ID_ANY,
@@ -554,7 +555,7 @@ class MainWindow(wx.Frame):
             self.panel.set_shape(shape)
             self.SetTitle("Dome %s" % self.GetTitle())
 
-    def on_view_scene(self, e):
+    def on_view_scene(self, _):
         dlg = wx.SingleChoiceDialog(self,'Choose a Scene', '', self.scenes_list)
         if dlg.ShowModal() == wx.ID_OK:
             scene_index = dlg.GetSelection()
@@ -585,7 +586,7 @@ class MainWindow(wx.Frame):
         self.current_scene = scene
         self.current_file = None
 
-    def on_view_reset(self, e):
+    def on_view_reset(self, _):
         self.panel.get_canvas().resetOrientation()
 
     def close_current_scene(self):
@@ -597,7 +598,7 @@ class MainWindow(wx.Frame):
     def set_status_text(self, str):
         self.status_bar.SetStatusText(str)
 
-    def on_exit(self, e):
+    def on_exit(self, _):
         dlg = wx.MessageDialog(None,
                                'Are you sure you want to quit?', 'Question',
                                wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
@@ -607,19 +608,19 @@ class MainWindow(wx.Frame):
         else:
             dlg.Destroy()
 
-    def on_view_win_closed(self, event):
+    def on_view_win_closed(self, _):
         self.view_settings_win.Destroy()
         self.view_settings_win = None
 
-    def on_col_win_closed(self, event):
+    def on_col_win_closed(self, _):
         self.col_settings_win.Destroy()
         self.col_settings_win = None
 
-    def on_transform_win_closed(self, event):
+    def on_transform_win_closed(self, _):
         self.transform_settings_win.Destroy()
         self.transform_settings_win = None
 
-    def on_close(self, event):
+    def on_close(self, _):
         print('main onclose')
         if self.view_settings_win != None:
             self.view_settings_win.Close()
@@ -658,7 +659,7 @@ class MainPanel(wx.Panel):
     def get_canvas(self):
         return self.canvas
 
-    def on_size(self, event):
+    def on_size(self, _):
         """Print the size plus an offset for y that includes the title bar.
 
         This function is used to set the ctrl window size in the interactively.
@@ -714,7 +715,9 @@ class ColourSettingsWindow(wx.Frame):
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.cols = self.canvas.shape.getFaceProperties()['colors']
         # take a copy for reset
-        self.org_cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.cols]
+        self.org_cols = [
+            [[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.cols
+        ]
         self.add_content()
 
     def add_content(self):
@@ -775,22 +778,26 @@ class ColourSettingsWindow(wx.Frame):
         self.panel.Layout()
         self.Show(True)
 
-    def on_reset(self, e):
+    def on_reset(self, _):
         for col_gui in self.select_col_guis:
-             shape_idx = col_gui.my_shape_idx
-             col_idx = col_gui.my_cols[0]
-             c = self.org_cols[shape_idx][0][col_idx]
-             wx_col = wx.Colour(255*c[0], 255*c[1], 255*c[2])
-             col_gui.SetColour(wx_col)
-        self.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.org_cols]
+            shape_idx = col_gui.my_shape_idx
+            col_idx = col_gui.my_cols[0]
+            c = self.org_cols[shape_idx][0][col_idx]
+            wx_col = wx.Colour(255*c[0], 255*c[1], 255*c[2])
+            col_gui.SetColour(wx_col)
+        self.cols = [
+            [[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.org_cols
+        ]
         self.update_shape_cols()
 
-    def on_cancel(self, e):
-        self.cols = [[[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.org_cols]
+    def on_cancel(self, _):
+        self.cols = [
+            [[c for c in col_idx] for col_idx in shape_cols] for shape_cols in self.org_cols
+        ]
         self.update_shape_cols()
         self.Close()
 
-    def on_done(self, e):
+    def on_done(self, _):
         self.Close()
 
     def on_col_select(self, e):
@@ -893,7 +900,7 @@ class TransformSettingsWindow(wx.Frame):
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
-    def on_invert(self, e=None):
+    def on_invert(self, _=None):
         # Assume compound shape
         new_vs = [
             [-geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
@@ -901,7 +908,7 @@ class TransformSettingsWindow(wx.Frame):
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
-    def on_translate(self, e=None):
+    def on_translate(self, _=None):
         # Assume compound shape
         new_vs = [
             [geomtypes.Vec3(v) + self.translation.get_vertex()
@@ -910,22 +917,22 @@ class TransformSettingsWindow(wx.Frame):
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
-    def on_apply(self, e=None):
+    def on_apply(self, _=None):
         self.org_vs = self.canvas.shape.getVertexProperties()['Vs']
         # reset the angle
         self.rot_sizer.set_angle(0)
         self.set_status_text("applied, now you can define another axis")
 
-    def on_reset(self, e=None):
+    def on_reset(self, _=None):
         self.canvas.shape.setVertexProperties(Vs=self.org_org_vs)
         self.canvas.paint()
         self.org_vs = self.org_org_vs
 
-    def on_cancel(self, e=None):
+    def on_cancel(self, _=None):
         self.on_reset()
         self.Close()
 
-    def on_done(self, e):
+    def on_done(self, _):
         self.Close()
 
     def close(self):
@@ -1296,7 +1303,8 @@ class ViewSettingsSizer(wx.BoxSizer):
 
             min   = 0.00
             max   = math.pi
-            steps = 360 # step by degree (if you change this, make at least 30 and 45 degrees possible)
+            # step by degree (if you change this, make at least 30 and 45 degrees possible)
+            steps = 360
             self.angle_factor = float(max - min) / steps
             self.angle_offset = min
             self.angle_gui = wx.Slider(
@@ -1330,7 +1338,12 @@ class ViewSettingsSizer(wx.BoxSizer):
             self.parent_panel.Bind(
                 wx.EVT_SLIDER, self.on_angle_scale, id = self.angle_scale_gui.GetId()
             )
-            self.Boxes.append(wx.StaticBox(self.parent_panel, label = 'Set Angle (by Scale) of Rotation in the Orthogonal Plane'))
+            self.Boxes.append(
+                wx.StaticBox(
+                    self.parent_panel,
+                    label = 'Set Angle (by Scale) of Rotation in the Orthogonal Plane',
+                )
+            )
             angle_scale_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
             angle_scale_sizer.Add(self.angle_scale_gui, 1, wx.EXPAND)
 
@@ -1359,11 +1372,13 @@ class ViewSettingsSizer(wx.BoxSizer):
 
     def set_status_text(self):
         try:
-            self.parent_win.set_status_text('V-Radius: %0.5f; E-Radius: %0.5f' % (self.v_r, self.e_r))
+            self.parent_win.set_status_text(
+                "V-Radius: %0.5f; E-Radius: %0.5f" % (self.v_r, self.e_r)
+            )
         except AttributeError:
             print("parent_win.set_status_text function undefined")
 
-    def on_v_option(self, e):
+    def on_v_option(self, _):
         sel = self.v_opts_gui.GetSelection()
         sel_str = self.v_opts_lst[sel]
         if sel_str == 'show':
@@ -1374,13 +1389,13 @@ class ViewSettingsSizer(wx.BoxSizer):
             self.canvas.shape.setVertexProperties(radius = -1.0)
         self.canvas.paint()
 
-    def on_v_radius(self, e):
+    def on_v_radius(self, _):
         self.v_r = (float(self.v_r_gui.GetValue()) / self.v_r_scale)
         self.canvas.shape.setVertexProperties(radius = self.v_r)
         self.canvas.paint()
         self.set_status_text()
 
-    def on_v_col(self, e):
+    def on_v_col(self, _):
         dlg = wx.ColourDialog(self.parent_win)
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetColourData()
@@ -1392,7 +1407,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             self.canvas.paint()
         dlg.Destroy()
 
-    def on_e_option(self, e):
+    def on_e_option(self, _):
         sel = self.e_opts_gui.GetSelection()
         sel_str = self.e_opts_lst[sel]
         if sel_str == 'hide':
@@ -1408,13 +1423,13 @@ class ViewSettingsSizer(wx.BoxSizer):
             self.canvas.shape.setEdgeProperties(radius = 0)
         self.canvas.paint()
 
-    def on_e_radius(self, e):
+    def on_e_radius(self, _):
         self.e_r = (float(self.e_r_gui.GetValue()) / self.e_r_scale)
         self.canvas.shape.setEdgeProperties(radius = self.e_r)
         self.canvas.paint()
         self.set_status_text()
 
-    def on_e_col(self, e):
+    def on_e_col(self, _):
         dlg = wx.ColourDialog(self.parent_win)
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetColourData()
@@ -1426,7 +1441,7 @@ class ViewSettingsSizer(wx.BoxSizer):
             self.canvas.paint()
         dlg.Destroy()
 
-    def on_f_option(self, e):
+    def on_f_option(self, _):
         print('View Settings Window size:', self.parent_win.GetSize())
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
@@ -1457,11 +1472,11 @@ class ViewSettingsSizer(wx.BoxSizer):
         self.canvas.bg_col = [float(col[0])/255, float(col[1])/255, float(col[2])/255]
         self.canvas.paint()
 
-    def on_use_transparent(self, event):
+    def on_use_transparent(self, _):
         self.canvas.shape.useTransparency((self.use_transparency_gui.GetSelection() == 0))
         self.canvas.paint()
 
-    def on_show_unscaled_es(self, event):
+    def on_show_unscaled_es(self, _):
         self.canvas.shape.setEdgeProperties(
             showUnscaled = (self.show_es_unscaled_gui.GetSelection() == 0)
         )
@@ -1473,7 +1488,7 @@ class ViewSettingsSizer(wx.BoxSizer):
     def slider_to_val(self, factor, offset, x):
         return factor * float(x) + offset
 
-    def on_scale(self, event):
+    def on_scale(self, _):
         scale = self.slider_to_val(
                 self.cell_scale_factor,
                 self.cell_scale_offset,
@@ -1512,16 +1527,16 @@ class ViewSettingsSizer(wx.BoxSizer):
         self.canvas.paint()
         event.Skip()
 
-    def on_angle(self, event):
+    def on_angle(self, _):
         self.rotate()
 
-    def on_angle_scale(self, event):
+    def on_angle_scale(self, _):
         self.rotate()
 
-    def on_switch_planes(self, event):
+    def on_switch_planes(self, _):
         self.rotate()
 
-    def on_rot_axes(self, event):
+    def on_rot_axes(self, _):
         self.rotate()
 
     def rotate(self):
@@ -1550,10 +1565,10 @@ class ViewSettingsSizer(wx.BoxSizer):
                             angle = (angle, scale*angle)
                         )
             else:
-                    r = geomtypes.DoubleRot4(
-                            axialPlane = (v1, v0),
-                            angle = (scale*angle, angle)
-                        )
+                r = geomtypes.DoubleRot4(
+                    axialPlane = (v1, v0),
+                    angle = (scale*angle, angle),
+                )
             #print r.getMatrix()
             self.canvas.shape.rotate(r)
             self.canvas.paint()
@@ -1564,7 +1579,7 @@ class ViewSettingsSizer(wx.BoxSizer):
         except ZeroDivisionError:
             # zero division means 1 of the vectors is (0, 0, 0, 0)
             self.parent_win.set_status_text("Error: Don't use a zero vector")
-            pass
+
         #except AssertionError:
         #    z_v = geomtypes.Vec4([0, 0, 0, 0])
         #    if v0 == z_v or v1 == z_v:
@@ -1574,10 +1589,6 @@ class ViewSettingsSizer(wx.BoxSizer):
         #    pass
 
 class ExportOffDialog(wx.Dialog):
-    precision = 12
-    float_margin = 10
-    clean_up = False
-    extra_data = False
     """
     Dialog for exporting a polyhedron to a PS file.
 
@@ -1585,18 +1596,20 @@ class ExportOffDialog(wx.Dialog):
     reflect in the next dialog that is created.
     Based on wxPython example dialog
     """
-    def __init__(self,
-            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
-            style=wx.DEFAULT_DIALOG_STYLE
-        ):
 
+    precision = 12
+    float_margin = 10
+    clean_up = False
+    extra_data = False
+
+    def __init__(self, parent, ID, title):
         # Instead of calling wx.Dialog.__init__ we precreate the dialog
         # so we can set an extra style that must be set before
         # creation, and then we create the GUI dialog using the Create
         # method.
         wx.Dialog.__init__(self)
         self.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.Create(parent, ID, title, pos, size, style)
+        self.Create(parent, ID, title)
 
         # Now continue with the normal construction of the dialog
         # contents
@@ -1610,14 +1623,12 @@ class ExportOffDialog(wx.Dialog):
                 min   = 1,
                 max   = 16
             )
-        self.precision_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_precision)
         hbox.Add(self.precision_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
 
         self.extra_data_gui = wx.CheckBox(self,
                 label = 'Print extra info')
         self.extra_data_gui.SetValue(self.extra_data)
-        self.extra_data_gui.Bind(wx.EVT_CHECKBOX, self.on_extra_data)
         sizer.Add(self.extra_data_gui,
             0, wx.GROW|wx.ALL, 5)
 
@@ -1636,7 +1647,6 @@ class ExportOffDialog(wx.Dialog):
                 min   = 1,
                 max   = 16
             )
-        self.float_margin_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_float_margin)
         if not self.clean_up:
             self.float_margin_gui.Disable()
         hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
@@ -1656,38 +1666,37 @@ class ExportOffDialog(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def on_extra_data(self, e):
-        ExportOffDialog.extra_data = self.extra_data_gui.GetValue()
-
     def get_extra_data(self):
-        return self.extra_data_gui.GetValue()
+        """Retrieve check-box value stating whether to save extra data"""
+        value = self.extra_data_gui.GetValue()
+        self.__class__.extra_data = value
+        return value
 
-    def on_clean_up(self, e):
-        ExportOffDialog.clean_up = self.clean_up_gui.GetValue()
+    def on_clean_up(self, _):
+        """Adjust GUI after (un)checking clean-up check box"""
+        self.__class__.clean_up = self.clean_up_gui.GetValue()
         if ExportOffDialog.clean_up:
             self.float_margin_gui.Enable()
         else:
             self.float_margin_gui.Disable()
 
     def get_clean_up(self):
+        """Retrieve check-box value whether to clean-up shape"""
         return self.clean_up_gui.GetValue()
 
-    def on_precision(self, e):
-        ExportOffDialog.precision = self.precision_gui.GetValue()
-
     def get_precision(self):
-        return self.precision_gui.GetValue()
-
-    def on_float_margin(self, e):
-        ExportOffDialog.float_margin = self.float_margin_gui.GetValue()
+        """Retrieve value of the field holding the precision"""
+        value = self.precision_gui.GetValue()
+        self.__class__.precision = value
+        return value
 
     def get_float_margin(self):
-        return self.float_margin_gui.GetValue()
+        """Retrieve value of the field holding the float margin"""
+        value = self.float_margin_gui.GetValue()
+        self.__class__.float_margin = value
+        return value
 
 class ExportPsDialog(wx.Dialog):
-    scaling = 50
-    precision = 12
-    float_margin = 10
     """
     Dialog for exporting a polyhedron to a PS file.
 
@@ -1695,10 +1704,12 @@ class ExportPsDialog(wx.Dialog):
     reflect in the next dialog that is created.
     Based on wxPython example dialog
     """
-    def __init__(self,
-            parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition,
-            style=wx.DEFAULT_DIALOG_STYLE
-        ):
+
+    scaling = 50
+    precision = 12
+    float_margin = 10
+
+    def __init__(self, parent, ID, title):
 
         # Instead of calling wx.Dialog.__init__ we precreate the dialog
         # so we can set an extra style that must be set before
@@ -1706,7 +1717,7 @@ class ExportPsDialog(wx.Dialog):
         # method.
         wx.Dialog.__init__(self)
         self.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.Create(parent, ID, title, pos, size, style)
+        self.Create(parent, ID, title)
 
         # Now continue with the normal construction of the dialog
         # contents
@@ -1716,33 +1727,30 @@ class ExportPsDialog(wx.Dialog):
         label = wx.StaticText(self, -1, "Scaling Factor:")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         self.scale_factor_gui = wx.lib.intctrl.IntCtrl(self,
-                value = ExportPsDialog.scaling,
+                value = self.__class__.scaling,
                 min   = 1,
                 max   = 10000
             )
-        self.scale_factor_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_scaling)
         hbox.Add(self.scale_factor_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "vertex precision (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         self.precision_gui = wx.lib.intctrl.IntCtrl(self,
-                value = ExportPsDialog.precision,
+                value = self.__class__.precision,
                 min   = 1,
                 max   = 16
             )
-        self.precision_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_precision)
         hbox.Add(self.precision_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
         hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         self.float_margin_gui = wx.lib.intctrl.IntCtrl(self,
-                value = ExportPsDialog.float_margin,
+                value = self.__class__.float_margin,
                 min   = 1,
                 max   = 16
             )
-        self.float_margin_gui.Bind(wx.lib.intctrl.EVT_INT, self.on_float_margin)
         hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
 
@@ -1760,40 +1768,41 @@ class ExportPsDialog(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    def on_scaling(self, e):
-        ExportPsDialog.scaling = self.scale_factor_gui.GetValue()
-
     def get_scaling(self):
-        return self.scale_factor_gui.GetValue()
-
-    def on_precision(self, e):
-        ExportPsDialog.precision = self.precision_gui.GetValue()
+        """Retrieve value of the field holding the scaling"""
+        value = self.scale_factor_gui.GetValue()
+        self.__class__.scaling = value
+        return value
 
     def get_precision(self):
-        return self.precision_gui.GetValue()
-
-    def on_float_margin(self, e):
-        ExportPsDialog.float_margin = self.float_margin_gui.GetValue()
+        """Retrieve value of the field holding the precision"""
+        value = self.precision_gui.GetValue()
+        self.__class__.precision = value
+        return value
 
     def get_float_margin(self):
-        return self.float_margin_gui.GetValue()
+        """Retrieve value of the field holding the float margin"""
+        value = self.float_margin_gui.GetValue()
+        self.__class__.float_margin = value
+        return value
 
 def read_shape_file(filename):
-    if filename == None:
-        fd = sys.stdin
-    else:
+    """Load off-file or python file and return shape"""
+    shape = None
+    if filename is not None:
         if filename[-3:] == '.py':
-            fd = open(filename, 'r')
-            return Geom3D.readPyFile(fd)
+            with open(filename, 'r') as fd:
+                shape = Geom3D.readPyFile(fd)
         elif filename[-4:] == '.off':
-            fd = open(filename, 'r')
-            return Geom3D.readOffFile(fd, recreateEdges = True)
+            with open(filename, 'r') as fd:
+                shape = Geom3D.readOffFile(fd, recreateEdges = True)
         else:
             print('unrecognised file extension')
-            return None
+    return shape
 
-def convert_to_ps(shape, o_fd, scale, precision, margin):
-    o_fd.write(
+def convert_to_ps(shape, fd, scale, precision, margin):
+    """Convert shape to PostScript and save to file descriptor fd"""
+    fd.write(
         shape.toPsPiecesStr(
             scaling = scale,
             precision = precision,
@@ -1802,9 +1811,9 @@ def convert_to_ps(shape, o_fd, scale, precision, margin):
         )
     )
 
-def convert_to_off(shape, o_fd, precision, margin = 0):
+def convert_to_off(shape, fd, precision, margin = 0):
     """
-    Save the shape to the o_fd file descriptor in .off format
+    Save the shape to the fd file descriptor in .off format
 
     precision: how many decimals to write.
     margin: what margin to use to require that 2 floating numbers are equal.
@@ -1819,7 +1828,7 @@ def convert_to_off(shape, o_fd, precision, margin = 0):
     if margin != 0:
         shape = shape.cleanShape(margin)
     # TODO: support for saving extra_data?
-    o_fd.write(shape.toOffStr(precision))
+    fd.write(shape.toOffStr(precision))
 
 if __name__ == "__main__":
     import argparse
@@ -1879,26 +1888,26 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    o_fd = None
-    outfile = None
+    START_GUI = True
     if args.inputfile:
-        shape = read_shape_file(args.inputfile)
-        if not shape:
+        in_shape = read_shape_file(args.inputfile)
+        if not in_shape:
             print(f"Couldn't read shape file {args.inputfile}")
             sys.exit(-1)
         if args.off:
-            o_fd = open(args.off, 'w')
-            convert_to_off(shape, o_fd, args.precision, args.margin)
+            START_GUI = False
+            with open(args.off, 'w') as o_fd:
+                convert_to_off(in_shape, o_fd, args.precision, args.margin)
         elif args.py:
-            o_fd = open(args.py, 'w')
-            shape.saveFile(o_fd)
+            START_GUI = False
+            with open(args.py, 'w') as o_fd:
+                in_shape.saveFile(o_fd)
         elif args.ps:
-            o_fd = open(args.ps, 'w')
-            convert_to_ps(shape, o_fd, args.scale, args.precision, args.margin)
+            START_GUI = False
+            with open(args.ps, 'w') as o_fd:
+                convert_to_ps(in_shape, o_fd, args.scale, args.precision, args.margin)
 
-    if o_fd:
-        o_fd.close()
-    else:
+    if START_GUI:
         app = wx.App(False)
         frame = MainWindow(
                 Canvas3DScene,
