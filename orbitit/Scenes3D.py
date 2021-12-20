@@ -31,6 +31,14 @@ from orbitit import Geom3D, geomtypes
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
+def on_switch_front_and_back(canvas):
+    """In OpenGL switch definition of what is front and back of a face"""
+    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
+        glFrontFace(GL_CW)
+    else:
+        glFrontFace(GL_CCW)
+    canvas.paint()
+
 def getAxis2AxisRotation(a0, a1):
     """Given 2 vectors return the rotation that is needed to transfer 1 into the other.
     """
