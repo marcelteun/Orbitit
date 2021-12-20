@@ -341,7 +341,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.panel.shape.getVertexProperties()['radius'] <= 0
         ):
             self.panel.shape.setVertexProperties(radius = 0.05)
-        self.SetTitle('%s' % os.path.basename(filename))
+        self.SetTitle(os.path.basename(filename))
         # Save for reload:
         self.current_file = filename
         self.current_scene = None
@@ -371,7 +371,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.set_status_text("OFF file added")
             fd.close()
             # TODO: set better title
-            self.SetTitle('Added: %s' % os.path.basename(filename))
+            self.SetTitle(f'Added: {os.path.basename(filename)}')
         dlg.Destroy()
 
     def on_save_py(self, _):
@@ -386,14 +386,14 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.export_dir_name  = filepath.rsplit('/', 1)[0]
             name_ext = filename.split('.')
             if len(name_ext) == 1:
-                filename = '%s.py' % filename
+                filename = f'{filename}.py'
             elif name_ext[-1].lower() != 'py':
                 if name_ext[-1] != '':
-                    filename = '%s.py' % filename
+                    filename = f'{filename}.py'
                 else:
-                    filename = '%spy' % filename
+                    filename = f'{filename}py'
             fd = open(filepath, 'w')
-            print("writing to file %s" % filepath)
+            print(f"writing to file {filepath}")
             # TODO precision through setting:
             shape = self.panel.shape
             shape.name = filename
@@ -422,14 +422,14 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     self.export_dir_name  = filepath.rsplit('/', 1)[0]
                     name_ext = filename.split('.')
                     if len(name_ext) == 1:
-                        filename = '%s.off' % filename
+                        filename = f'{filename}.off'
                     elif name_ext[-1].lower() != 'off':
                         if name_ext[-1] != '':
-                            filename = '%s.off' % filename
+                            filename = f'{filename}.off'
                         else:
-                            filename = '%soff' % filename
+                            filename = f'{filename}off'
                     fd = open(filepath, 'w')
-                    print("writing to file %s" % filepath)
+                    print(f"writing to file {filepath}")
                     shape = self.panel.shape
                     try:
                         shape = shape.simple_shape
@@ -438,7 +438,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     if clean_up:
                         shape = shape.cleanShape(margin)
                     fd.write(shape.toOffStr(precision, extra_data))
-                    print("OFF file written")
                     self.set_status_text("OFF file written")
                     fd.close()
                 else:
@@ -470,15 +469,15 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     self.export_dir_name  = filepath.rsplit('/', 1)[0]
                     name_ext = filename.split('.')
                     if len(name_ext) == 1:
-                        filename = '%s.ps' % filename
+                        filename = f'{filename}.ps'
                     elif name_ext[-1].lower() != 'ps':
                         if name_ext[-1] != '':
-                            filename = '%s.ps' % filename
+                            filename = f'{filename}.ps'
                         else:
-                            filename = '%sps' % filename
+                            filename = f'{filename}ps'
                     # Note: if file exists is part of file dlg...
                     fd = open(filepath, 'w')
-                    print("writing to file %s" % filepath)
+                    print(f"writing to file {filepath}")
                     shape = self.panel.shape
                     try:
                         shape = shape.simple_shape
@@ -519,14 +518,14 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.export_dir_name  = filepath.rsplit('/', 1)[0]
             name_ext = filename.split('.')
             if len(name_ext) == 1:
-                filename = '%s.wrl' % filename
+                filename = f'{filename}.wrl'
             elif name_ext[-1].lower() != 'wrl':
                 if name_ext[-1] != '':
-                    filename = '%s.wrl' % filename
+                    filename = f'{filename}.wrl'
                 else:
-                    filename = '%swrl' % filename
+                    filename = f'{filename}wrl'
             fd = open(filepath, 'w')
-            print("writing to file %s" % filepath)
+            print(f"writing to file {filepath}")
             # TODO precision through setting:
             r = self.panel.shape.getEdgeProperties()['radius']
             x3d_obj = self.panel.shape.toX3dDoc(edgeRadius = r)
@@ -581,7 +580,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         shape = self.panel.shape.getDome(level)
         if shape is not None:
             self.panel.shape = shape
-            self.SetTitle("Dome %s" % self.GetTitle())
+            self.SetTitle(f"Dome({self.GetTitle()})")
 
     def on_view_scene(self, _):
         """Handle event '_' change the current scene"""
@@ -593,7 +592,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def load_scene(self, scene):
         """ Set the current scene to the scene with the specified name"""
-        print("Starting scene", scene)
         scene = {
             'lab': scene.TITLE,
             'class': scene.Scene,
@@ -608,7 +606,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             'class' is the python class.
         """
         self.close_current_scene()
-        print('Switch to scene "%s"' % scene['lab'])
+        print(f"Switch to scene: \"{scene['lab']}\".")
         canvas = self.panel.canvas
         self.scene = scene['class'](self, canvas)
         self.panel.shape = self.scene.shape
