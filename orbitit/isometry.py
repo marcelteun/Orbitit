@@ -235,28 +235,27 @@ class Set(set):
         self.short_string = True
 
     def __repr__(self):
-        s = '%s([\n' % (self.__class__.__name__)
+        s = f'{self.__class__.__name__}([\n'
         for e in self:
-            s = '%s  %s,\n' % (s, repr(e))
-        s = '%s])' % s
+            s = f'{s} {repr(e)},\n'
+        s = f'{s}])'
         if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+            s = f'{__name__}.{s}'
         return s
 
     def __str__(self):
         def to_s():
             """Convert to string"""
-            s = '%s([\n' % (self.__class__.__name__)
+            s = f'{self.__class__.__name__}([\n'
             for e in self:
-                s = '%s  %s,\n' % (s, str(e))
-            s = '%s])' % s
+                s = f'{s} {e},\n'
+            s = f'{s}])'
             if __name__ != '__main__':
-                s = '%s.%s' % (__name__, s)
+                s = f'{__name__}.{s}'
             return s
         if self.generator != {}:
             if self.short_string:
-                s = '{}(setup={})'.format(self.__class__.__name__,
-                                          self.generator)
+                s = f'{self.__class__.__name__}(setup={self.generator})'
             else:
                 s = to_s()
         else:
@@ -341,22 +340,23 @@ class Set(set):
             else:
                 # o is already a set
                 for e in o:
-                    assert e in self, '{} not in {}'.format(
-                        e, self.__class__.__name__)
+                    assert e in self, f'{e} not in {self.__class__.__name__}'
                 subgroup = copy(o)
                 # for optimisation: don't call group (slow) for self == o:
                 if len(subgroup) < len(self):
                     subgroup.group()
                 elif len(subgroup) > len(self):
                     raise ImproperSubgroupError(
-                        '{} not subgroup of {} (with this orientation)'.format(
-                            o.__class__.__name__, self.__class__.__name__))
+                        f'{o.__class__.__name__} not subgroup of {self.__class__.__name__}'
+                        ' (with this orientation)'
+                    )
                 return subgroup
         # except ImproperSubgroupError:
         except AssertionError:
             raise ImproperSubgroupError(
-                '{} not subgroup of {} (with this orientation)'.format(
-                    o.__class__.__name__, self.__class__.__name__))
+                f'{o.__class__.__name__} not subgroup of {self.__class__.__name__}'
+                ' (with this orientation)'
+            )
 
     def __truediv__(self, o):
         # this * subgroup: right quotient set
@@ -431,14 +431,16 @@ class Set(set):
             if l_new == l_prev:
                 break
         assert l_new == l_prev, \
-            "Couldn't close group after {} iterations".format(max_iter)
+            f"Couldn't close group after {max_iter} iterations"
         return result
 
     def chk_setup(self, setup):
         """Check whether all keys in setup are legitimate"""
         if setup != {} and self.init_pars == []:
-            print("Warning: class {} doesn't handle any setup pars {}".format(
-                self.__class__.__name__, list(setup.keys())))
+            print(
+                f"Warning: class {self.__class__.__name__} doesn't handle "
+                f"any setup pars {list(setup.keys())}"
+            )
         for k in list(setup.keys()):
             found = False
             for p in self.init_pars:
@@ -446,10 +448,10 @@ class Set(set):
                 if found:
                     break
             if not found:
-                print("Warning: unknown setup parameter {} "
-                      "for class {}".format(k, self.__class__.__name__))
-                assert False, 'Got setup = {} for {}'.format(
-                    str(setup), self.__class__.__name__)
+                print(
+                    f"Warning: unknown setup parameter {k} for class {self.__class__.__name__}"
+                )
+                assert False, f'Got setup = {str(setup)} for {self.__class__.__name__}'
         self.generator = setup
 
     @property
@@ -488,8 +490,9 @@ class E(Set):
         assert isinstance(sg, type)
         if sg == E:
             return [E()]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 E.subgroups = [E]
@@ -522,8 +525,9 @@ class ExI(Set):
             return [self]
         if sg == E:
             return [E()]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 ExI.subgroups = [ExI, E]
@@ -568,7 +572,7 @@ class Cn(Set, metaclass=MetaCn):
             min_angle = math.pi * 2
             axis = None
             for t in isometries:
-                assert t.is_rot, 'Cn cannot contain any {}'.format(str(t))
+                assert t.is_rot, f'Cn cannot contain any {t}'
                 a = t.angle()
                 if geomtypes.eq(a, 0):
                     continue
@@ -579,18 +583,15 @@ class Cn(Set, metaclass=MetaCn):
                     ax = t.axis()
                     assert axis == ax or axis == -ax or geomtypes.eq(
                         t.angle(), 0),\
-                        'Cn can only have one unique axis ({} != {})'.format(
-                            axis, ax)
+                        f'Cn can only have one unique axis ({axis} != {ax})'
                     axis = ax
             if axis is None:
                 # Should be C1
-                assert len(isometries) == 1, 'Expected C1, got {}'.format(
-                    isometries)
+                assert len(isometries) == 1, f'Expected C1, got {isometries}'
                 axis = isometries[0].axis()
             n = int(round(2 * math.pi / min_angle))
             if self.n != 0:
-                assert "C{} shouldn't be {}-fold (alpha = {} rad)".format(
-                    self.n, n, min_angle)
+                assert f"C{self.n} shouldn't be {n}-fold (alpha = {min_angle} rad)"
         else:
             self.chk_setup(setup)
             keys = list(setup.keys())
@@ -641,8 +642,9 @@ class Cn(Set, metaclass=MetaCn):
             if sg.n == self.n:
                 return [self]
             return[sg(setup={'axis': self.rot_axes['n']})]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create Cn classes:
@@ -654,7 +656,7 @@ def C(n):
         if n == 1:
             __Cn_metas[n] = E
         else:
-            c_n = MetaCn('C{}'.format(n),
+            c_n = MetaCn(f'C{n}',
                          (Cn,),
                          {'n': n,
                           'order': n,
@@ -764,9 +766,9 @@ class C2nCn(Set, metaclass=MetaC2nCn):
             return [sg(setup={'axis': self.rot_axes['n']})]
         elif sg == E:
             return [E()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create C2nCn classes:
@@ -775,7 +777,7 @@ def C2nC(n):
     try:
         return __C2nCn_metas[n]
     except KeyError:
-        c_2n_c_n = MetaC2nCn('C{}C{}'.format(2*n, n),
+        c_2n_c_n = MetaC2nCn(f'C{2*n}C{n}',
                              (C2nCn,),
                              {'n': n,
                               'order': 2 * n,
@@ -886,9 +888,9 @@ class CnxI(Set, metaclass=MetaCnxI):
             return [ExI()]
         elif sg == E:
             return [E()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create CnxI classes:
@@ -900,7 +902,7 @@ def CxI(n):
         if n == 1:
             __CnxI_metas[n] = ExI
         else:
-            c_nxi = MetaCnxI('C{}xI'.format(n),
+            c_nxi = MetaCnxI(f'C{n}xI',
                              (CnxI,),
                              {'n': n,
                               'order': 2 * n,
@@ -1011,14 +1013,15 @@ class DnCn(Set, metaclass=MetaDnCn):
                                         'normal_r': p}))
         if isinstance(sg, MetaC2nCn):
             assert sg.n == 1, \
-                'Only C2C1 can be subgroup of DnCn (n={})'.format(sg.n)
+                f'Only C2C1 can be subgroup of DnCn (n={sg.n})'
             # C2C1 ~= E, plus reflection, with normal == rotation axis (0)
             # provide the normal of the one reflection:
             return [sg(setup={'axis': self.refl_normals[0]})]
         if isinstance(sg, MetaCn):
             return [sg(setup={'axis': self.rot_axes['n']})]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create DnCn classes:
@@ -1030,7 +1033,7 @@ def DnC(n):
         if n == 1:
             __DnCn_metas[n] = C2C1
         else:
-            d_n_c_n = MetaDnCn('D{}C{}'.format(n, n),
+            d_n_c_n = MetaDnCn(f'D{n}C{n}',
                                (DnCn,),
                                {'n': n,
                                 'order': 2 * n,
@@ -1102,8 +1105,7 @@ class Dn(Set, metaclass=MetaDn):
                 # If self.n is hard-code (e.g. for D3)
                 # then if you specify n it should be the correct value
                 assert 'n' not in setup or setup['n'] == self.n, \
-                    'Ooops: n not defined right for {}'.format(
-                        self.__class__.__name__)
+                    f'Ooops: n not defined right for {self.__class__.__name__}'
                 n = self.n
             else:
                 if 'n' in keys:
@@ -1160,8 +1162,9 @@ class Dn(Set, metaclass=MetaDn):
                 lambda r, p: p in r.rot_axes[2],
                 lambda sg, p: sg(setup={'axis_n': self.rot_axes['n'],
                                         'axis_2': p}))
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create Dn classes:
@@ -1173,7 +1176,7 @@ def D(n):
         if n == 1:
             __Dn_metas[n] = C2
         else:
-            d_n = MetaDn('D{}'.format(n),
+            d_n = MetaDn(f'D{n}',
                          (Dn,),
                          {'n': n,
                           'order': 2 * n,
@@ -1314,8 +1317,9 @@ class DnxI(Set, metaclass=MetaDnxI):
                 real_spc.insert(0, real_std)
                 return real_spc
             return [real_std]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create DnxI classes:
@@ -1328,7 +1332,7 @@ def DxI(n):
         if n == 1:
             __DnxI_metas[n] = C2xI
         else:
-            dnxi = MetaDnxI('D{}xI'.format(n),
+            dnxi = MetaDnxI(f'D{n}xI',
                             (DnxI,),
                             {'n': n,
                              'order': 4 * n,
@@ -1480,9 +1484,9 @@ class D2nDn(Set, metaclass=MetaD2nDn):
                 return sg_base
             return [sg(setup={'axis': self.rot_axes['n']})]
         # Note: no DnxI, CnxI subgroups exist, see _d2ndn_get_subgroups
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 # dynamically create D2nDn classes:
@@ -1496,7 +1500,7 @@ def D2nD(n):
             # D2D1 ~= D2C2
             __D2nDn_metas[n] = D2C2
         else:
-            d_2n_d_n = MetaD2nDn('D{}D{}'.format(2*n, n),
+            d_2n_d_n = MetaD2nDn(f'D{2*n}D{n}',
                                  (D2nDn,),
                                  {'n': n,
                                   'order': 4 * n,
@@ -1539,8 +1543,7 @@ class A4(Set):
         # A4 consists of:
         # 1. A subgroup D2: E, and half turns h0, h1, h2
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             Set.__init__(self, isometries)
             self.rot_axes = {
                 2: get_axes(isometries, 2),
@@ -1587,9 +1590,9 @@ class A4(Set):
             return [C3(setup={'axis': a}) for a in o3a]
         elif sg == E:
             return [E()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 class S4A4(Set):
@@ -1625,8 +1628,7 @@ class S4A4(Set):
         if isometries is None and setup is None:
             setup = {}
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             Set.__init__(self, isometries)
             self.rot_axes = {
                 2: get_axes(isometries, 2),
@@ -1703,7 +1705,7 @@ class S4A4(Set):
                     if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
-            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
         elif sg == C4C2:
             return [C4C2(setup={'axis': a}) for a in self.rot_axes[2]]
@@ -1715,9 +1717,9 @@ class S4A4(Set):
             return [sg(setup={'axis': normal}) for normal in self.refl_normals]
         elif sg == E:
             return [E()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 class A4xI(Set):
@@ -1749,8 +1751,7 @@ class A4xI(Set):
         if isometries is None and setup is None:
             setup = {}
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             Set.__init__(self, isometries)
             self.rot_axes = {
                 2: get_axes(isometries, 2),
@@ -1789,7 +1790,7 @@ class A4xI(Set):
                     if geomtypes.eq(rn*o2, 0):
                         isoms.append(sg(setup={'axis_n': o2, 'normal_r': rn}))
                         break
-            assert len(isoms) == 3, 'len(isoms) == %d != 3' % len(isoms)
+            assert len(isoms) == 3, f'len(isoms) == {len(isoms)} != 3'
             return isoms
         if sg == C2xI:
             o2a = self.rot_axes[2]
@@ -1807,9 +1808,9 @@ class A4xI(Set):
             return [sg()]
         elif sg == E:
             return [sg()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 class S4(Set):
@@ -1839,8 +1840,7 @@ class S4(Set):
         if isometries is None and setup is None:
             setup = {}
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             Set.__init__(self, isometries)
             self.rot_axes = {
                 2: get_axes(isometries, 2),
@@ -1923,7 +1923,7 @@ class S4(Set):
                     if geomtypes.eq(o2*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'axis_2': o2}))
                         break
-            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
         elif sg == D2:
             isoms = []
@@ -1937,7 +1937,7 @@ class S4(Set):
                     if geomtypes.eq(o2*o4, 0):
                         isoms.append(sg(setup={'axis_n': o4, 'axis_2': o2}))
                         break
-            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
         elif sg == C4:
             o4a = self.rot_axes[4]
@@ -1953,9 +1953,9 @@ class S4(Set):
             return isoms
         elif sg == E:
             return [E()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 class S4xI(Set):
@@ -1991,8 +1991,7 @@ class S4xI(Set):
         if isometries is None and setup is None:
             setup = {}
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             Set.__init__(self, isometries)
             self.rot_axes = {
                 2: get_axes(isometries, 2),
@@ -2032,7 +2031,7 @@ class S4xI(Set):
                     if geomtypes.eq(o2*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'axis_2': o2}))
                         break
-            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
         elif sg == D4C4:
             isoms = []
@@ -2064,7 +2063,7 @@ class S4xI(Set):
                     if geomtypes.eq(a2*a4, 0):
                         isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
-            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
         elif sg == D3C3:
             isoms = []
@@ -2073,7 +2072,7 @@ class S4xI(Set):
                     if geomtypes.eq(rn*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
-            assert len(isoms) == 4, 'len(isoms) == %d != 4' % len(isoms)
+            assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
         elif sg == C3xI or sg == C3:
             o3a = self.rot_axes[3]
@@ -2095,7 +2094,7 @@ class S4xI(Set):
                     if geomtypes.eq(rn*o2, 0):
                         isoms.append(sg(setup={'axis_n': o2, 'normal_r': rn}))
                         break
-            assert len(isoms) == 12, 'len(isoms) == %d != 12' % len(isoms)
+            assert len(isoms) == 12, f'len(isoms) == {len(isoms)} != 12'
             return isoms
         elif sg == C4xI or sg == C4 or sg == C4C2:
             o4a = self.rot_axes[4]
@@ -2112,9 +2111,9 @@ class S4xI(Set):
             return [sg()]
         elif sg == E:
             return [sg()]
-        else:
-            raise ImproperSubgroupError('{} not subgroup of {}'.format(
-                sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 def _gen_d2(o2axis0, o2axis1):
@@ -2193,8 +2192,7 @@ class A5(Set):
         if isometries is None and setup is None:
             setup = {}
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             # TODO: more asserts?
             Set.__init__(self, isometries)
             self.rot_axes = {
@@ -2312,8 +2310,9 @@ class A5(Set):
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         if sg == E:
             return [sg()]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 class A5xI(Set):
@@ -2347,8 +2346,7 @@ class A5xI(Set):
         if isometries is None and setup is None:
             setup = {}
         if isometries is not None:
-            assert len(isometries) == self.order, "{} != {}".format(
-                self.order, len(isometries))
+            assert len(isometries) == self.order, f"{self.order} != {len(isometries)}"
             # TODO: more asserts?
             Set.__init__(self, isometries)
             self.rot_axes = {
@@ -2452,8 +2450,9 @@ class A5xI(Set):
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
         if sg == E or sg == ExI:
             return [sg()]
-        raise ImproperSubgroupError('{} not subgroup of {}'.format(
-            sg.__class__.__name__, self.__class__.__name__))
+        raise ImproperSubgroupError(
+            f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
+        )
 
 
 C1 = E
