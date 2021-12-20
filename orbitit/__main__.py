@@ -307,14 +307,13 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Return shape defined in file with 'filename'"""
         is_off_model = filename[-3:] == 'off'
         print("opening file:", filename)
-        fd = open(filename, 'r')
-        if is_off_model:
-            shape = Geom3D.readOffFile(fd, recreateEdges = True)
-        else:
-            assert filename[-2:] == 'py'
-            shape = Geom3D.readPyFile(fd)
+        with open(filename, 'r') as fd:
+            if is_off_model:
+                shape = Geom3D.readOffFile(fd, recreateEdges = True)
+            else:
+                assert filename[-2:] == 'py'
+                shape = Geom3D.readPyFile(fd)
         self.set_status_text("file opened")
-        fd.close()
         return shape
 
     def open_file(self, filename):
@@ -355,11 +354,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             is_off_model = filename[-3:] == 'off'
             self.import_dir_name  = dlg.GetDirectory()
             print("adding file:", filename)
-            fd = open(os.path.join(self.import_dir_name, filename), 'r')
-            if is_off_model:
-                shape = Geom3D.readOffFile(fd, recreateEdges = True)
-            else:
-                shape = Geom3D.readPyFile(fd)
+            with open(os.path.join(self.import_dir_name, filename), 'r') as fd:
+                if is_off_model:
+                    shape = Geom3D.readOffFile(fd, recreateEdges = True)
+                else:
+                    shape = Geom3D.readPyFile(fd)
             if isinstance(shape, Geom3D.CompoundShape):
                 # convert to SimpleShape first, since adding a IsometricShape
                 # will not work.
@@ -369,7 +368,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             except AttributeError:
                 print("warning: cannot 'add' a shape to this scene, use 'File->Open' instead")
             self.set_status_text("OFF file added")
-            fd.close()
             # TODO: set better title
             self.SetTitle(f'Added: {os.path.basename(filename)}')
         dlg.Destroy()
@@ -392,12 +390,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     filename = f'{filename}.py'
                 else:
                     filename = f'{filename}py'
-            fd = open(filepath, 'w')
             print(f"writing to file {filepath}")
             # TODO precision through setting:
             shape = self.panel.shape
             shape.name = filename
-            shape.saveFile(fd)
+            with open(filepath, 'w') as fd:
+                shape.saveFile(fd)
             self.set_status_text("Python file written")
         dlg.Destroy()
 
@@ -428,7 +426,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                             filename = f'{filename}.off'
                         else:
                             filename = f'{filename}off'
-                    fd = open(filepath, 'w')
                     print(f"writing to file {filepath}")
                     shape = self.panel.shape
                     try:
@@ -437,9 +434,9 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                         pass
                     if clean_up:
                         shape = shape.cleanShape(margin)
-                    fd.write(shape.toOffStr(precision, extra_data))
+                    with open(filepath, 'w') as fd:
+                        fd.write(shape.toOffStr(precision, extra_data))
                     self.set_status_text("OFF file written")
-                    fd.close()
                 else:
                     dlg.Show()
                 file_dlg.Destroy()
@@ -476,7 +473,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                         else:
                             filename = f'{filename}ps'
                     # Note: if file exists is part of file dlg...
-                    fd = open(filepath, 'w')
                     print(f"writing to file {filepath}")
                     shape = self.panel.shape
                     try:
@@ -484,20 +480,19 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     except AttributeError:
                         pass
                     shape = shape.cleanShape(margin)
-                    try:
-                        fd.write(
-                            shape.toPsPiecesStr(
-                                scaling = scale_factor,
-                                precision = precision,
-                                margin = math.pow(10, -margin)
+                    with open(filepath, 'w') as fd:
+                        try:
+                            fd.write(
+                                shape.toPsPiecesStr(
+                                    scaling = scale_factor,
+                                    precision = precision,
+                                    margin = math.pow(10, -margin)
+                                )
                             )
-                        )
-                        self.set_status_text("PS file written")
-                    except Geom3D.PrecisionError:
-                        self.set_status_text(
-                            "Precision error, try to decrease float margin")
-
-                    fd.close()
+                            self.set_status_text("PS file written")
+                        except Geom3D.PrecisionError:
+                            self.set_status_text(
+                                "Precision error, try to decrease float margin")
                 else:
                     dlg.Show()
                 file_dlg.Destroy()
@@ -524,15 +519,14 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     filename = f'{filename}.wrl'
                 else:
                     filename = f'{filename}wrl'
-            fd = open(filepath, 'w')
             print(f"writing to file {filepath}")
             # TODO precision through setting:
             r = self.panel.shape.getEdgeProperties()['radius']
             x3d_obj = self.panel.shape.toX3dDoc(edgeRadius = r)
             x3d_obj.setFormat(X3D.VRML_FMT)
-            fd.write(x3d_obj.toStr())
+            with open(filepath, 'w') as fd:
+                fd.write(x3d_obj.toStr())
             self.set_status_text("VRML file written")
-            fd.close()
         dlg.Destroy()
 
     def on_view_settings(self, _):
