@@ -1,3 +1,3 @@
 #!/bin/sh -e
 $PWD/unit_test.sh
-$PWD/pylint.sh
+$PWD/test_pylint.sh

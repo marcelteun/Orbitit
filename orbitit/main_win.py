@@ -714,13 +714,17 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         """Close down view settings window"""
         # The 'try' is necessary, since the boxes are destroyed in some OS,
         # while this is necessary for e.g. Ubuntu Hardy Heron.
-        for box in self.boxes:
+        # for pylint; prevent duplicate-code
+        my_boxes = self.boxes
+        for box in my_boxes:
             try:
                 box.Destroy()
             except RuntimeError:
                 # The user probably closed the window already
                 pass
-        for gui in self.guis:
+        # for pylint; prevent duplicate-code
+        my_guis = self.guis
+        for gui in my_guis:
             gui.Destroy()
 
     def set_status_text(self):
