@@ -157,7 +157,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         self.shape.glDraw()
 
-class MainWindow(wx.Frame):
+class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Main window holding the shape for the orbitit program"""
     wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
     def __init__(self, TstScene, shape, filename, *args, **kwargs):
@@ -749,7 +749,7 @@ class MainPanel(wx.Panel):
         self.parent.set_status_text("Shape Updated")
         del old_shape
 
-class ColourWindow(wx.Frame):
+class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape"""
     def __init__(self, canvas, width, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
@@ -864,7 +864,7 @@ class ColourWindow(wx.Frame):
         for gui in self.guis:
             gui.Destroy()
 
-class TransformWindow(wx.Frame):
+class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window with controls for transforming current shape
 
     The transform is applied dynamically (i.e. while window is still open), but can be canceled.
@@ -1041,7 +1041,7 @@ class ViewSettingsWindow(wx.Frame):
         """Set text of the status bar for this window"""
         self.status_bar.SetStatusText(s)
 
-class ViewSettingsSizer(wx.BoxSizer):
+class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attributes
     """A sizer with all view settings for the view settings window"""
 
     cull_show_none  = 'Hide'
@@ -1049,6 +1049,7 @@ class ViewSettingsSizer(wx.BoxSizer):
     cull_show_front = 'Show Only Front Face'
     cull_show_back  = 'Show Only Back Face'
 
+    # pylint: disable=too-many-branches, too-many-statements, too-many-locals
     def __init__(self, parent_win, parent_panel, canvas, *args, **kwargs):
         """
         Create a sizer with view settings.
