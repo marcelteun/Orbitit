@@ -127,17 +127,14 @@ def _get_mat_rot(w, x, y, z, sign=1):
 
 class NoRotation(Exception):
     """The transform doesn't represent a rotation"""
-    pass
 
 
 class UnsupportedTransform(Exception):
     """This isn't a transform or it isn't supported."""
-    pass
 
 
 class UnsupportedOperand(Exception):
     """One of the operand aren't supported for this operation"""
-    pass
 
 
 # Use tuples instead of lists to enable building sets used for isometries
