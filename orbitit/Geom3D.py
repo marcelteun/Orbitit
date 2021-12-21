@@ -916,7 +916,7 @@ class SimpleShape:
         s.incr()
         try:
             s = s.glue_line(',\n'.join(
-                repr(v).reindent(s.indent) for v in this.Vs)
+                indent.Str(repr(v)).reindent(s.indent) for v in this.Vs)
             )
         except AttributeError:
             print('ERROR: Are you sure the vertices are all of type geomtypes.Vec3?')
@@ -2990,8 +2990,6 @@ class IsometricShape(CompoundShape):
         if unfoldOrbit: this.mergeShapes()
 
     def __repr__(this):
-        if this.dbgTrace:
-            print('%s.__repr__(%s,..):' % (this.__class__, name))
         # comment out class name, see comment at __fix_repr__ below:
         #s = indent.Str('%s(\n' % findModuleClassName(this.__class__, __name__))
         s = indent.Str('IsometricShape(\n')
@@ -2999,7 +2997,7 @@ class IsometricShape(CompoundShape):
         s.incr()
         try:
             s = s.glue_line(',\n'.join(
-                repr(v).reindent(s.indent) for v in this.baseShape.Vs)
+                indent.Str(repr(v)).reindent(s.indent) for v in this.baseShape.Vs)
             )
         except AttributeError:
             print('ERROR: Are you sure the vertices are all of type geomtypes.Vec3?')
@@ -3035,7 +3033,7 @@ class IsometricShape(CompoundShape):
             s = s.add_line('directIsometries=[')
             s.incr()
             s = s.glue_line(',\n'.join(
-                repr(i).reindent(s.indent) for i in
+                indent.Str(repr(i)).reindent(s.indent) for i in
                     this.isometryOperations['direct']
             ))
             s = s.add_decr_line('],')
@@ -3043,7 +3041,7 @@ class IsometricShape(CompoundShape):
             s = s.add_line('oppositeIsometry=[')
             s.incr()
             s = s.glue_line(',\n'.join(
-                repr(i).reindent(s.indent) for i in
+                indent.Str(repr(i)).reindent(s.indent) for i in
                     this.isometryOperations['opposite']
             ))
             s = s.add_decr_line('],')
