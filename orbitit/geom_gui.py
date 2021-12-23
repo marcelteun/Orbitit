@@ -326,8 +326,7 @@ class LabeledIntInput(wx.BoxSizer):
                           style=wx.ALIGN_RIGHT))
         self.Add(self.boxes[-1], 1, wx.EXPAND)
         if not isinstance(init, int):
-            print('{} warning: initialiser not an int ({})'.format(
-                self.__class__, str(init)))
+            print(f"{self.__class__} warning: initialiser not an int ({init})")
             init = 0
         self.boxes.append(IntInput(
             panel, wx.ID_ANY, init, size=(width, -1)))
@@ -403,8 +402,7 @@ class Vector3DInput(wx.BoxSizer):
         """Set the vertex in the GUI to be the one specified"""
         for i in v:
             if not isinstance(i, (float, int)):
-                print('{} warning: v[{}] not a number ({})'.format(
-                    self.__class__, v.index(i), str(i)))
+                print(f"{self.__class__} warning: v[{v.index(i)}] not a number ({i})")
                 return
         self._vec[0].SetValue(v[0])
         self._vec[1].SetValue(v[1])
@@ -489,7 +487,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             j = len(self._vec)
             self._vec_labels.append(
                 wx.StaticText(self, wx.ID_ANY,
-                              '{} '.format(j),
+                              f"{j} ",
                               style=wx.TE_CENTRE))
             self.column_sizers[0].Add(self._vec_labels[-1], 1)
             self._vec.append([])
@@ -519,8 +517,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
                 g.Destroy()
             self.Layout()
         else:
-            print('{} warning: nothing to delete.'.format(
-                self.__class__.__name__))
+            print(f"{self.__class__.__name__} warning: nothing to delete")
 
     def get_vector(self, i):
         """Get the vertex with index 'i' from the list of vertices"""
@@ -835,8 +832,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         if face is not None:
             face_len = len(face)
         j = len(self._faces_labels)
-        self._faces_labels.append(wx.StaticText(self, wx.ID_ANY,
-                                                '{} '.format(j)))
+        self._faces_labels.append(wx.StaticText(self, wx.ID_ANY, f"{j} "))
         self.face_idx_sizer.Add(self._faces_labels[-1], 1, wx.EXPAND)
 
         face_sizer = wx.BoxSizer(self.orientation)
@@ -1162,7 +1158,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                                     isometry.A5xI]:
                 pass
             else:
-                assert False, 'unknown class {}'.format(selected_class)
+                assert False, f'unknown class {selected_class}'
         return selected_class
 
     def add_setup_gui(self):
@@ -1295,9 +1291,10 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def setup_sym(self, vec):
         """Fill in the symmetry setup fields in the GUI"""
-        assert len(vec) == len(self.orient_guis),\
-            "Wrong no. of initialisers for self symmetry"\
-            "(got {}, expected {})".format(len(vec), len(self.orient_guis))
+        assert len(vec) == len(self.orient_guis), (
+            "Wrong no. of initialisers for self symmetry"
+            f"(got {len(vec)}, expected {len(self.orient_guis)})"
+        )
         sym = self.get_sym_class(apply_order=False)
         for i, gui in zip(list(range(len(self.orient_guis))), self.orient_guis):
             input_type = sym.init_pars[i]['type']
