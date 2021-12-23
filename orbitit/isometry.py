@@ -337,20 +337,21 @@ class Set(set):
                 subgroup = Set([o])
                 subgroup.group()
                 return subgroup
-            else:
-                # o is already a set
-                for e in o:
-                    assert e in self, f'{e} not in {self.__class__.__name__}'
-                subgroup = copy(o)
-                # for optimisation: don't call group (slow) for self == o:
-                if len(subgroup) < len(self):
-                    subgroup.group()
-                elif len(subgroup) > len(self):
-                    raise ImproperSubgroupError(
-                        f'{o.__class__.__name__} not subgroup of {self.__class__.__name__}'
-                        ' (with this orientation)'
-                    )
-                return subgroup
+
+            # o is already a set
+            for e in o:
+                assert e in self, f'{e} not in {self.__class__.__name__}'
+            subgroup = copy(o)
+            # for optimisation: don't call group (slow) for self == o:
+            if len(subgroup) < len(self):
+                subgroup.group()
+            elif len(subgroup) > len(self):
+                raise ImproperSubgroupError(
+                    f'{o.__class__.__name__} not subgroup of {self.__class__.__name__}'
+                    ' (with this orientation)'
+                )
+            return subgroup
+
         # except ImproperSubgroupError:
         except AssertionError:
             raise ImproperSubgroupError(
@@ -762,9 +763,9 @@ class C2nCn(Set, metaclass=MetaC2nCn):
             if sg.n == self.n:
                 return [self]
             return [sg(setup={'axis': self.rot_axes['n']})]
-        elif isinstance(sg, MetaCn):
+        if isinstance(sg, MetaCn):
             return [sg(setup={'axis': self.rot_axes['n']})]
-        elif sg == E:
+        if sg == E:
             return [E()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -882,11 +883,11 @@ class CnxI(Set, metaclass=MetaCnxI):
             if sg.n == self.n:
                 return [self]
             return [sg(setup={'axis': self.rot_axes['n']})]
-        elif isinstance(sg, (MetaC2nCn, MetaCn)):
+        if isinstance(sg, (MetaC2nCn, MetaCn)):
             return [sg(setup={'axis': self.rot_axes['n']})]
-        elif sg == ExI:
+        if sg == ExI:
             return [ExI()]
-        elif sg == E:
+        if sg == E:
             return [E()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -1579,16 +1580,16 @@ class A4(Set):
         assert isinstance(sg, type)
         if sg == A4:
             return [self]
-        elif sg == D2:
+        if sg == D2:
             o2a = self.rot_axes[2]
             return [D2(setup={'axis_n': o2a[0], 'axis_2': o2a[1]})]
-        elif sg == C2:
+        if sg == C2:
             o2a = self.rot_axes[2]
             return [C2(setup={'axis': a}) for a in o2a]
-        elif sg == C3:
+        if sg == C3:
             o3a = self.rot_axes[3]
             return [C3(setup={'axis': a}) for a in o3a]
-        elif sg == E:
+        if sg == E:
             return [E()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -1690,15 +1691,15 @@ class S4A4(Set):
         # C3, C2, E
         if sg == S4A4:
             return [self]
-        elif sg == A4:
+        if sg == A4:
             o2a = self.rot_axes[2]
             return [sg(setup={'o2axis0': o2a[0], 'o2axis1': o2a[1]})]
-        elif sg == D4D2:
+        if sg == D4D2:
             o2a = self.rot_axes[2]
             l_o2a = len(o2a)
             return [sg(setup={'axis_n': o2a[i], 'axis_2': o2a[(i+1) % l_o2a]})
                     for i in range(l_o2a)]
-        elif sg == D3C3:
+        if sg == D3C3:
             isoms = []
             for o3 in self.rot_axes[3]:
                 for rn in self.refl_normals:
@@ -1707,15 +1708,15 @@ class S4A4(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg == C4C2:
+        if sg == C4C2:
             return [C4C2(setup={'axis': a}) for a in self.rot_axes[2]]
-        elif sg == C3:
+        if sg == C3:
             return [sg(setup={'axis': a}) for a in self.rot_axes[3]]
-        elif sg == C2:
+        if sg == C2:
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
-        elif sg == C2C1:
+        if sg == C2C1:
             return [sg(setup={'axis': normal}) for normal in self.refl_normals]
-        elif sg == E:
+        if sg == E:
             return [E()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -1770,20 +1771,20 @@ class A4xI(Set):
         assert isinstance(sg, type)
         if sg == A4xI:
             return [self]
-        elif sg == A4:
+        if sg == A4:
             # other ways of orienting A4 into A4xI don't give anything new
             return [A4(setup={'o2axis0': self.rot_axes[2][0],
                               'o2axis1': self.rot_axes[2][1]})]
-        elif sg == D2xI:
+        if sg == D2xI:
             o2a = self.rot_axes[2]
             return [sg(setup={'axis_n': o2a[0], 'axis_2': o2a[1]})]
-        elif sg == C3xI:
+        if sg == C3xI:
             o3a = self.rot_axes[3]
             return [sg(setup={'axis': a}) for a in o3a]
-        elif sg == D2:
+        if sg == D2:
             o2a = self.rot_axes[2]
             return [sg(setup={'axis_n': o2a[0], 'axis_2': o2a[1]})]
-        elif sg == D2C2:
+        if sg == D2C2:
             isoms = []
             for o2 in self.rot_axes[2]:
                 for rn in self.rot_axes[2]:
@@ -1795,18 +1796,18 @@ class A4xI(Set):
         if sg == C2xI:
             o2a = self.rot_axes[2]
             return [sg(setup={'axis': a}) for a in o2a]
-        elif sg == C3:
+        if sg == C3:
             o3a = self.rot_axes[3]
             return [sg(setup={'axis': a}) for a in o3a]
-        elif sg == C2:
+        if sg == C2:
             o2a = self.rot_axes[2]
             return [sg(setup={'axis': a}) for a in o2a]
-        elif sg == C2C1:
+        if sg == C2C1:
             o2a = self.rot_axes[2]
             return [sg(setup={'axis': a}) for a in o2a]
-        elif sg == ExI:
+        if sg == ExI:
             return [sg()]
-        elif sg == E:
+        if sg == E:
             return [sg()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -1907,16 +1908,16 @@ class S4(Set):
         assert isinstance(sg, type)
         if sg == S4:
             return [self]
-        elif sg == A4:
+        if sg == A4:
             # other ways of orienting A4 into S4 don't give anything new
             return [A4(setup={'o2axis0': self.rot_axes[4][0],
                               'o2axis1': self.rot_axes[4][1]})]
-        elif sg == D4:
+        if sg == D4:
             o4a = self.rot_axes[4]
             l_o4a = len(o4a)
             return [sg(setup={'axis_n': o4a[i], 'axis_2': o4a[(i+1) % l_o4a]})
                     for i in range(l_o4a)]
-        elif sg == D3:
+        if sg == D3:
             isoms = []
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
@@ -1925,7 +1926,7 @@ class S4(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg == D2:
+        if sg == D2:
             isoms = []
             # There are 2 kinds of D2:
             # 1. one consisting of the three 4-fold axes
@@ -1939,19 +1940,19 @@ class S4(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg == C4:
+        if sg == C4:
             o4a = self.rot_axes[4]
             return [sg(setup={'axis': a}) for a in o4a]
-        elif sg == C3:
+        if sg == C3:
             o3a = self.rot_axes[3]
             return [sg(setup={'axis': a}) for a in o3a]
-        elif sg == C2:
+        if sg == C2:
             o4a = self.rot_axes[4]
             isoms = [sg(setup={'axis': a}) for a in o4a]
             o2a = self.rot_axes[2]
             isoms.extend([sg(setup={'axis': a}) for a in o2a])
             return isoms
-        elif sg == E:
+        if sg == E:
             return [E()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -2011,20 +2012,20 @@ class S4xI(Set):
         assert isinstance(sg, type)
         if sg == S4xI:
             return [self]
-        elif sg == S4:
+        if sg == S4:
             # other ways of orienting S4 into S4xI don't give anything new
             return [sg(setup={'o4axis0': self.rot_axes[4][0],
                               'o4axis1': self.rot_axes[4][1]})]
-        elif sg in (A4xI, A4, S4A4):
+        if sg in (A4xI, A4, S4A4):
             return [sg(setup={'o2axis0': self.rot_axes[4][0],
                               'o2axis1': self.rot_axes[4][1]})]
-        elif sg in (D4xI, D8D4, D4):
+        if sg in (D4xI, D8D4, D4):
             o4a = self.rot_axes[4]
             l_o4a = len(o4a)
             return [sg(setup={'axis_n': o4a[i],
                               'axis_2': o4a[(i + 1) % l_o4a]})
                     for i in range(l_o4a)]
-        elif sg in (D3xI, D3):
+        if sg in (D3xI, D3):
             isoms = []
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
@@ -2033,7 +2034,7 @@ class S4xI(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg == D4C4:
+        if sg == D4C4:
             isoms = []
             for a4 in self.rot_axes[4]:
                 for rn in self.rot_axes[2]:
@@ -2041,7 +2042,7 @@ class S4xI(Set):
                         isoms.append(sg(setup={'axis_n': a4, 'normal_r': rn}))
                         break
             return isoms
-        elif sg == D4D2:
+        if sg == D4D2:
             o4a = self.rot_axes[4]
             l_o4a = len(o4a)
             isoms = [sg(setup={'axis_n': o4a[i],
@@ -2054,7 +2055,7 @@ class S4xI(Set):
                         isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
             return isoms
-        elif sg in (D2xI, D2):
+        if sg in (D2xI, D2):
             o4a = self.rot_axes[4]
             isoms = [sg(setup={'axis_n': o4a[0], 'axis_2': o4a[1]})]
             o2a = self.rot_axes[2]
@@ -2065,7 +2066,7 @@ class S4xI(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg == D3C3:
+        if sg == D3C3:
             isoms = []
             for o3 in self.rot_axes[3]:
                 for rn in self.rot_axes[2]:
@@ -2074,10 +2075,10 @@ class S4xI(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg in (C3xI, C3):
+        if sg in (C3xI, C3):
             o3a = self.rot_axes[3]
             return [sg(setup={'axis': a}) for a in o3a]
-        elif sg == D2C2:
+        if sg == D2C2:
             o4a = self.rot_axes[4]
             l_o4a = len(o4a)
             isoms = [sg(setup={'axis_n': o4a[i],
@@ -2096,18 +2097,18 @@ class S4xI(Set):
                         break
             assert len(isoms) == 12, f'len(isoms) == {len(isoms)} != 12'
             return isoms
-        elif sg in (C4xI, C4, C4C2):
+        if sg in (C4xI, C4, C4C2):
             o4a = self.rot_axes[4]
             return [sg(setup={'axis': a}) for a in o4a]
-        elif sg in (C2xI, D1xI, C2, D1):
+        if sg in (C2xI, D1xI, C2, D1):
             o2a = self.rot_axes[4]
             o2a.extend(self.rot_axes[2])
             return [sg(setup={'axis': a}) for a in o2a]
-        elif sg == C2C1:
+        if sg == C2C1:
             isoms = [sg(setup={'axis': a}) for a in self.rot_axes[2]]
             isoms.extend([sg(setup={'axis': a}) for a in self.rot_axes[4]])
             return isoms
-        elif sg in (E, ExI):
+        if sg in (E, ExI):
             return [sg()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
