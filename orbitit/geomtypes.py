@@ -370,7 +370,7 @@ class Quat(Vec):
             v = [0, v[0], v[1], v[2]]
         return super().__new__(cls, [float(v[i]) for i in range(4)])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called,unused-argument
         self._cache = {}
 
     def conjugate(self):
@@ -446,7 +446,7 @@ class Transform3(tuple):
         assert isinstance(quatPair[1], Quat), assert_str + str(quatPair)
         return super().__new__(cls, quatPair)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called,unused-argument
         self._cache = {}
 
     def __repr__(self):
@@ -767,12 +767,6 @@ class Transform3(tuple):
             self._cache['matrix_rot'] = _get_mat_rot(w, x, y, z)
         return self._cache['matrix_rot']
 
-    def __glMatrix_rot(self):
-        if 'gl_matrix_rot' not in self._cache:
-            w, x, y, z = self[0]
-            self._cache['gl_matrix_rot'] = _get_mat_rot(-w, x, y, z)
-        return self._cache['gl_matrix_rot']
-
     def __inverse_rot(self):
         if 'inverse_rot' not in self._cache:
             self._cache['inverse_rot'] = Rot3(axis=self.axis(),
@@ -932,16 +926,6 @@ class Transform3(tuple):
             w, x, y, z = self[0]
             self._cache['matrix_rot_inv'] = _get_mat_rot(w, x, y, z, -1)
         return self._cache['matrix_rot_inv']
-
-    def __glMatrix_rot_inv(self):
-        """If this is a rotary inversion, return the glMatrix.
-
-        Should only be called when this is a rotary inversion
-        """
-        if 'gl_matrix_rot_inv' not in self._cache:
-            w, x, y, z = self[0]
-            self._cache['gl_matrix_rot_inv'] = _get_mat_rot(-w, x, y, z, -1)
-        return self._cache['gl_matrix_rot_inv']
 
     def __inverse_rot_inv(self):
         """If this is a rotary inversion, return the reverse.
