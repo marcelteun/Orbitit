@@ -602,12 +602,13 @@ class Transform3(tuple):
             result = self.__matrix_rot_inv()
         else:
             raise UnsupportedTransform(f"oops, unknown matrix; transform {self}\n")
+
         if not homogeneous:
             return result
-        else:
-            result = result.insert_col([0, 0, 0], 3)
-            result = result.insert_row(Vec([0, 0, 0, 1]), 3)
-            return result
+
+        result = result.insert_col([0, 0, 0], 3)
+        result = result.insert_row(Vec([0, 0, 0, 1]), 3)
+        return result
 
     def inverse(self):
         """Return a new object with the inverse of this transform"""
@@ -980,7 +981,8 @@ class Rot3(Transform3):
             if not trans.is_rot():
                 raise NoRotation(f"{quat} doesn't represent a rotation")
             return trans
-        elif isinstance(quat, Quat):
+
+        if isinstance(quat, Quat):
             try:
                 quat = quat.normalise()
             except ZeroDivisionError:
@@ -989,17 +991,17 @@ class Rot3(Transform3):
             if not trans.is_rot():
                 raise NoRotation(f"{quat} doesn't represent a rotation")
             return trans
-        else:
-            # quat = cos(angle) + y sin(angle)
-            alpha = angle / 2
-            # if axis is specified as e.g. a list:
-            if not isinstance(axis, Vec):
-                axis = Vec3(axis)
-            if axis != Vec3([0, 0, 0]):
-                axis = axis.normalise()
-            quat = math.sin(alpha) * axis
-            quat = Quat([math.cos(alpha), quat[0], quat[1], quat[2]])
-            return Transform3.__new__(cls, [quat, quat.conjugate()])
+
+        # quat = cos(angle) + y sin(angle)
+        alpha = angle / 2
+        # if axis is specified as e.g. a list:
+        if not isinstance(axis, Vec):
+            axis = Vec3(axis)
+        if axis != Vec3([0, 0, 0]):
+            axis = axis.normalise()
+        quat = math.sin(alpha) * axis
+        quat = Quat([math.cos(alpha), quat[0], quat[1], quat[2]])
+        return Transform3.__new__(cls, [quat, quat.conjugate()])
 
 
 class HalfTurn3(Rot3):
@@ -1495,17 +1497,18 @@ class Mat(list):
         """Return inverse matrix"""
         if self.orthogonal():
             return self.T()
-        else:
-            # the hard way:
-            det = self.det()
-            sign = 1
-            n = []
-            for i in range(self.rows):
-                r = []
-                for j in range(self.cols):
-                    r.append(sign * self.minor(i, j) / det)
-                    sign = -sign
-                n.append(Vec(r))
+
+        # the hard way:
+        det = self.det()
+        sign = 1
+        n = []
+        for i in range(self.rows):
+            r = []
+            for j in range(self.cols):
+                r.append(sign * self.minor(i, j) / det)
+                sign = -sign
+            n.append(Vec(r))
+
         return Mat(n).T()
 
     def solve(self, v):
