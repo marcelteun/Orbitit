@@ -610,7 +610,7 @@ class Cn(Set, metaclass=MetaCn):
                     n = 1
                 # If self.n is hard-code (e.g. for C3)
                 # then if you specify n it should be the correct value
-                assert self.n == 0 or n == self.n
+                assert self.n in (0, n)
                 self.n = n
 
             angle = 2 * math.pi / n
@@ -737,7 +737,7 @@ class C2nCn(Set, metaclass=MetaC2nCn):
                 s['n'] = self.n
             # If self.n is hard-code (e.g. for C6C3)
             # then if you specify n it should be the correct value
-            assert self.n == 0 or s['n'] == self.n
+            assert self.n in (0, s['n'])
             # TODO use direct parent here... (no dep on n)
             cn = Cn(setup=s)
             self.n = cn.n
@@ -862,7 +862,7 @@ class CnxI(Set, metaclass=MetaCnxI):
                 s['n'] = self.n
             # If self.n is hard-code (e.g. for C3xI)
             # then if you specify n it should be the correct value
-            assert self.n == 0 or s['n'] == self.n
+            assert self.n in (0, s['n'])
             cn = Cn(setup=s)
             self.direct_parent = C(self.n)
             self.direct_parent_setup = copy(s)
@@ -973,7 +973,7 @@ class DnCn(Set, metaclass=MetaDnCn):
                 s['n'] = setup['n']
                 # If self.n is hard-code (e.g. for D3C3)
                 # then if you specify n it should be the correct value
-                assert self.n == 0 or s['n'] == self.n
+                assert self.n in (0, s['n'])
             if 'axis_n' in setup:
                 s['axis'] = setup['axis_n']
             else:
@@ -1256,7 +1256,7 @@ class DnxI(Set, metaclass=MetaDnxI):
                 s['n'] = self.n
             # If self.n is hard-code (e.g. for D3xI)
             # then if you specify n it should be the correct value
-            assert self.n == 0 or s['n'] == self.n
+            assert self.n in (0, s['n'])
             dn = Dn(setup=s)
             self.direct_parent = D(self.n)
             self.direct_parent_setup = copy(s)
@@ -1417,7 +1417,7 @@ class D2nDn(Set, metaclass=MetaD2nDn):
                 s['n'] = self.n
             # If self.n is hard-code (e.g. for D6D3)
             # then if you specify n it should be the correct value
-            assert self.n == 0 or s['n'] == self.n
+            assert self.n in (0, s['n'])
             dn = Dn(setup=s)
             self.n = dn.n
             self.direct_parent = D(self.n)
@@ -2015,16 +2015,16 @@ class S4xI(Set):
             # other ways of orienting S4 into S4xI don't give anything new
             return [sg(setup={'o4axis0': self.rot_axes[4][0],
                               'o4axis1': self.rot_axes[4][1]})]
-        elif sg == A4xI or sg == A4 or sg == S4A4:
+        elif sg in (A4xI, A4, S4A4):
             return [sg(setup={'o2axis0': self.rot_axes[4][0],
                               'o2axis1': self.rot_axes[4][1]})]
-        elif sg == D4xI or sg == D8D4 or sg == D4:
+        elif sg in (D4xI, D8D4, D4):
             o4a = self.rot_axes[4]
             l_o4a = len(o4a)
             return [sg(setup={'axis_n': o4a[i],
                               'axis_2': o4a[(i + 1) % l_o4a]})
                     for i in range(l_o4a)]
-        elif sg == D3xI or sg == D3:
+        elif sg in (D3xI, D3):
             isoms = []
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
@@ -2054,7 +2054,7 @@ class S4xI(Set):
                         isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
             return isoms
-        elif sg == D2xI or sg == D2:
+        elif sg in (D2xI, D2):
             o4a = self.rot_axes[4]
             isoms = [sg(setup={'axis_n': o4a[0], 'axis_2': o4a[1]})]
             o2a = self.rot_axes[2]
@@ -2074,7 +2074,7 @@ class S4xI(Set):
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
             return isoms
-        elif sg == C3xI or sg == C3:
+        elif sg in (C3xI, C3):
             o3a = self.rot_axes[3]
             return [sg(setup={'axis': a}) for a in o3a]
         elif sg == D2C2:
@@ -2096,10 +2096,10 @@ class S4xI(Set):
                         break
             assert len(isoms) == 12, f'len(isoms) == {len(isoms)} != 12'
             return isoms
-        elif sg == C4xI or sg == C4 or sg == C4C2:
+        elif sg in (C4xI, C4, C4C2):
             o4a = self.rot_axes[4]
             return [sg(setup={'axis': a}) for a in o4a]
-        elif sg == C2xI or sg == D1xI or sg == C2 or sg == D1:
+        elif sg in (C2xI, D1xI, C2, D1):
             o2a = self.rot_axes[4]
             o2a.extend(self.rot_axes[2])
             return [sg(setup={'axis': a}) for a in o2a]
@@ -2107,9 +2107,7 @@ class S4xI(Set):
             isoms = [sg(setup={'axis': a}) for a in self.rot_axes[2]]
             isoms.extend([sg(setup={'axis': a}) for a in self.rot_axes[4]])
             return isoms
-        elif sg == ExI:
-            return [sg()]
-        elif sg == E:
+        elif sg in (E, ExI):
             return [sg()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
@@ -2439,27 +2437,27 @@ class A5xI(Set):
             # other ways of orienting A5 into A5xI don't give anything new
             return [sg(setup={'o3axis': self.rot_axes[3][0],
                               'o5axis': self.rot_axes[5][0]})]
-        if sg == A4xI or sg == A4:
+        if sg in (A4xI, A4):
             return [sg(setup=setup) for setup in self.sub_a4_setup]
-        if sg == D5xI or sg == D5:
+        if sg in (D5xI, D5):
             return [sg(setup=setup) for setup in self.sub_d5_setup]
         if sg == D5C5:
             return [sg(setup=setup) for setup in self.sub_d5c5_setup]
-        if sg == D3xI or sg == D3:
+        if sg in (D3xI, D3):
             return [sg(setup=setup) for setup in self.sub_d3_setup]
         if sg == D3C3:
             return [sg(setup=setup) for setup in self.sub_d3c3_setup]
-        if sg == D2xI or sg == D2:
+        if sg in (D2xI, D2):
             return [sg(setup=setup) for setup in self.sub_d2_setup]
         if sg == D2C2:
             return [sg(setup=setup) for setup in self.sub_d2c2_setup]
-        if sg == C5xI or sg == C5:
+        if sg in (C5xI, C5):
             return [sg(setup={'axis': a}) for a in self.rot_axes[5]]
-        if sg == C3xI or sg == C3:
+        if sg in (C3xI, C3):
             return [sg(setup={'axis': a}) for a in self.rot_axes[3]]
-        if sg == C2xI or sg == C2 or sg == C2C1 or sg == D1xI or sg == D1:
+        if sg in (C2xI, C2, C2C1, D1xI, D1):
             return [sg(setup={'axis': a}) for a in self.rot_axes[2]]
-        if sg == E or sg == ExI:
+        if sg in (E, ExI):
             return [sg()]
         raise ImproperSubgroupError(
             f'{sg.__class__.__name__} not subgroup of {self.__class__.__name__}'
