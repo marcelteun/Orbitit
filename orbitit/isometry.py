@@ -126,7 +126,7 @@ def a5_sub_a4_setup(rot_axes):
 def a5_sub_d5_setup(rot_axes):
     """Return all orientation set-ups for subgroup D5 for certain A5 rot_axes"""
     setup = []
-    for n, axis1 in enumerate(rot_axes[5]):
+    for _, axis1 in enumerate(rot_axes[5]):
         for axis2 in rot_axes[2]:
             if geomtypes.eq(axis1 * axis2, 0):
                 setup.append({'axis_n': axis1, 'axis_2': axis2})
@@ -137,7 +137,7 @@ def a5_sub_d5_setup(rot_axes):
 def a5_sub_d3_setup(rot_axes):
     """Return all orientation set-ups for subgroup D3 for certain A5 rot_axes"""
     setup = []
-    for n, axis1 in enumerate(rot_axes[3]):
+    for _, axis1 in enumerate(rot_axes[3]):
         for axis2 in rot_axes[2]:
             if geomtypes.eq(axis1 * axis2, 0):
                 setup.append({'axis_n': axis1, 'axis_2': axis2})
@@ -356,11 +356,11 @@ class Set(set):
             return subgroup
 
         # except ImproperSubgroupError:
-        except AssertionError:
+        except AssertionError as e:
             raise ImproperSubgroupError(
                 f'{o.__class__.__name__} not subgroup of {self.__class__.__name__}'
                 ' (with this orientation)'
-            )
+            ) from e
 
     def __truediv__(self, o):
         # this * subgroup: right quotient set
@@ -440,7 +440,7 @@ class Set(set):
 
     def chk_setup(self, setup):
         """Check whether all keys in setup are legitimate"""
-        if setup != {} and self.init_pars == []:
+        if setup != {} and not self.init_pars:
             print(
                 f"Warning: class {self.__class__.__name__} doesn't handle "
                 f"any setup pars {list(setup.keys())}"
@@ -1121,7 +1121,7 @@ class Dn(Set, metaclass=MetaDn):
 
             h = geomtypes.HalfTurn3(axis=axis_2)
             cn = Cn(setup={'axis': axis_n, 'n': n})
-            isometries = [isom for isom in cn]
+            isometries = list(cn)
             hs = [isom * h for isom in cn]
             isometries.extend(hs)
             self.rot_axes = {'n': axis_n, 2: [h.axis() for h in hs]}
@@ -2325,7 +2325,7 @@ class A5(Set):
         )
 
 
-class A5xI(Set):
+class A5xI(Set):  # pylint: disable=too-many-instance-attributes
     """Class for the A5xI symmetry group
 
     This is the complete symmetry group of the icosaheron or dodecahedron
