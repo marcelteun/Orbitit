@@ -109,6 +109,7 @@ __D2nDn_metas = {}
 
 
 def a5_sub_a4_setup(rot_axes):
+    """Return all orientation set-ups for subgroup A4 for certain A5 rot_axes"""
     setup = []
     look_for_no = 0
     for n, axis1 in enumerate(rot_axes[2]):
@@ -123,6 +124,7 @@ def a5_sub_a4_setup(rot_axes):
 
 
 def a5_sub_d5_setup(rot_axes):
+    """Return all orientation set-ups for subgroup D5 for certain A5 rot_axes"""
     setup = []
     for n, axis1 in enumerate(rot_axes[5]):
         for axis2 in rot_axes[2]:
@@ -133,6 +135,7 @@ def a5_sub_d5_setup(rot_axes):
 
 
 def a5_sub_d3_setup(rot_axes):
+    """Return all orientation set-ups for subgroup D3 for certain A5 rot_axes"""
     setup = []
     for n, axis1 in enumerate(rot_axes[3]):
         for axis2 in rot_axes[2]:
@@ -2265,24 +2268,28 @@ class A5(Set):
 
     @property
     def sub_a4_setup(self):
+        """Set up orientations for subgroup A4"""
         if self._sub_a4_setup is None:
             self._sub_a4_setup = a5_sub_a4_setup(self.rot_axes)
         return self._sub_a4_setup
 
     @property
     def sub_d5_setup(self):
+        """Set up orientations for subgroup D5"""
         if self._sub_d5_setup is None:
             self._sub_d5_setup = a5_sub_d5_setup(self.rot_axes)
         return self._sub_d5_setup
 
     @property
     def sub_d3_setup(self):
+        """Set up orientations for subgroup D3"""
         if self._sub_d3_setup is None:
             self._sub_d3_setup = a5_sub_d3_setup(self.rot_axes)
         return self._sub_d3_setup
 
     @property
     def sub_d2_setup(self):
+        """Set up orientations for subgroup D2"""
         # Similar to A4 (D2 is subgroup of A4)
         if self._sub_d2_setup is None:
             self._sub_d2_setup = [
@@ -2374,24 +2381,28 @@ class A5xI(Set):
 
     @property
     def sub_a4_setup(self):
+        """Set up orientations for subgroup A4"""
         if self._sub_a4_setup is None:
             self._sub_a4_setup = a5_sub_a4_setup(self.rot_axes)
         return self._sub_a4_setup
 
     @property
     def sub_d5_setup(self):
+        """Set up orientations for subgroup D5"""
         if self._sub_d5_setup is None:
             self._sub_d5_setup = a5_sub_d5_setup(self.rot_axes)
         return self._sub_d5_setup
 
     @property
     def sub_d3_setup(self):
+        """Set up orientations for subgroup D3"""
         if self._sub_d3_setup is None:
             self._sub_d3_setup = a5_sub_d3_setup(self.rot_axes)
         return self._sub_d3_setup
 
     @property
     def sub_d2_setup(self):
+        """Set up orientations for subgroup D2"""
         # Similar to A4 (D2 is subgroup of A4)
         if self._sub_d2_setup is None:
             self._sub_d2_setup = [
@@ -2402,6 +2413,7 @@ class A5xI(Set):
     # This one isn't copied from A5:
     @property
     def sub_d5c5_setup(self):
+        """Set up orientations for subgroup D5C5"""
         # Similar to D5 (but different setup names)
         if self._sub_d5c5_setup is None:
             self._sub_d5c5_setup = [
@@ -2411,6 +2423,7 @@ class A5xI(Set):
 
     @property
     def sub_d3c3_setup(self):
+        """Set up orientations for subgroup D3C3"""
         # Similar to D3 (but different setup names)
         if self._sub_d3c3_setup is None:
             self._sub_d3c3_setup = [
@@ -2420,6 +2433,7 @@ class A5xI(Set):
 
     @property
     def sub_d2c2_setup(self):
+        """Set up orientations for subgroup D2C2"""
         # Similar to D2 (but different setup names)
         if self._sub_d2c2_setup is None:
             self._sub_d2c2_setup = [
