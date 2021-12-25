@@ -50,14 +50,14 @@ def opposite_orientation(orientation):
     return wx.HORIZONTAL
 
 
-class DisabledDropTarget(wx.TextDropTarget):
+class DisabledDropTarget(wx.TextDropTarget):  # pylint: disable=too-few-public-methods
     """A drop target that doesn't allow dropping anything"""
     def __init__(self, reason='for some reason', enable_reason=True):
         self.reason = reason
         self.enable_reason = enable_reason
         wx.TextDropTarget.__init__(self)
 
-    def OnDragOver(self, *_, **__):
+    def OnDragOver(self, *_, **__):  # pylint: disable=invalid-name
         """Make sure to disable drag-and-drop do prevent serious format problem."""
         if self.enable_reason:
             print(self.__class__, 'drag from text disabled 0:', self.reason)
@@ -80,13 +80,13 @@ class IntInput(wx.TextCtrl):
 
     def _sign_only_handled(self, string):
         """If string being set equals "+" or "-" handle it."""
-        if string == "-" or string == "+":
+        if string in ("-", "+"):
             self.ChangeValue(string + '0')
             wx.CallLater(1, self.SetSelection, 1, 2)
             self.val_updated = True
             return True
-        else:
-            return False
+
+        return False
 
     def _handle_empty(self):
         """Handle empty string being set."""
@@ -213,7 +213,7 @@ class FloatInput(wx.TextCtrl):
         except ValueError:
             c = 0
         rkc = e.GetRawKeyCode()
-        if c >= '0' and c <= '9':
+        if '0' <= c <= '9':
             e.Skip()
         elif c in ['+', '-', '.']:
             # Handle selected text by replacing it by a '0', otherwise it may
@@ -433,7 +433,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
 
     The panel doesn't contain any widgets to grow or shrink this list
     """
-    __hlabels = ['index', 'x', 'y', 'z']
+    __head_lables = ['index', 'x', 'y', 'z']
 
     def __init__(self, parent, length, orientation=wx.HORIZONTAL):
         """
@@ -454,9 +454,9 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.column_sizers = []  # align vector columns
         # header:
         scale = 0
-        for i in range(len(self.__hlabels)):
+        for i, header in enumerate(self.__head_lables):
             self.boxes.append(
-                wx.StaticText(self, wx.ID_ANY, self.__hlabels[i])
+                wx.StaticText(self, wx.ID_ANY, header)
             )
             self.column_sizers.append(wx.BoxSizer(opp_orient))
             self.column_sizers[i].Add(self.boxes[-1], 0,
@@ -498,7 +498,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
                               style=wx.TE_CENTRE))
             self.column_sizers[0].Add(self._vec_labels[-1], 1)
             self._vec.append([])
-            for i in range(1, len(self.__hlabels)):
+            for i in range(1, len(self.__head_lables)):
                 if vs is None:
                     f = 0
                 else:
@@ -1285,7 +1285,6 @@ class SymmetrySelect(wx.StaticBoxSizer):
     def set_selected_class(self, cl):
         """Set the selected symmetry in the drop down menu by class"""
         found = False
-        # to shut-up pylint: undefined-loop-variable:
         i = 0
         for i, cl_i in enumerate(self.groups_lst):
             if cl == cl_i:
