@@ -57,7 +57,7 @@ class DisabledDropTarget(wx.TextDropTarget):
         self.enable_reason = enable_reason
         wx.TextDropTarget.__init__(self)
 
-    def OnDragOver(self, *args, **kwargs):
+    def OnDragOver(self, *_, **__):
         if self.enable_reason:
             print(self.__class__, 'drag from text disabled 0:', self.reason)
         return ''
@@ -157,7 +157,7 @@ class IntInput(wx.TextCtrl):
         # elif k >= 256:
         #     e.Skip()
 
-    def on_text(self, e):
+    def on_text(self, _):
         """Handle after string after character update is done."""
         string = super().GetValue()
         # print("on_text: ", string)
@@ -346,7 +346,7 @@ class LabeledIntInput(wx.BoxSizer):
         """Set the integer value of the input"""
         return self.boxes[-1].set_value(i)
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for box in self.boxes:
             try:
                 box.Destroy()
@@ -408,7 +408,7 @@ class Vector3DInput(wx.BoxSizer):
         self._vec[1].SetValue(v[1])
         self._vec[2].SetValue(v[2])
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for ctrl in self._vec:
             ctrl.Destroy()
         for box in self.boxes:
@@ -541,7 +541,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.clear()
         self.extend(verts)
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for ctrl in self._vec:
             ctrl.Destroy()
         for ctrl in self._vec_labels:
@@ -754,7 +754,7 @@ class Vector4DInput(wx.StaticBoxSizer):
                                self._vec[2].GetValue(),
                                self._vec[3].GetValue()])
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for ctrl in self._vec_label:
             ctrl.Destroy()
         for ctrl in self._vec:
@@ -901,7 +901,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self.clear()
         self.extend(faces)
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for ctrl in self._faces_labels:
             ctrl.Destroy()
         for ctrl in self._faces:
@@ -991,7 +991,7 @@ class FaceSetDynamicPanel(wx.Panel):
         self.boxes[self._face_lst_idx].set(faces)
         self.Layout()
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for box in self.boxes:
             try:
                 box.Destroy()
@@ -1320,7 +1320,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
         return sym
 
-    def Destroy(self, *args, **kwargs):
+    def Destroy(self, *_, **__):
         for box in self.boxes + self.orient_guis:
             try:
                 box.Destroy()
