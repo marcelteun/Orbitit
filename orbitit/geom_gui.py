@@ -58,6 +58,7 @@ class DisabledDropTarget(wx.TextDropTarget):
         wx.TextDropTarget.__init__(self)
 
     def OnDragOver(self, *_, **__):
+        """Make sure to disable drag-and-drop do prevent serious format problem."""
         if self.enable_reason:
             print(self.__class__, 'drag from text disabled 0:', self.reason)
         return ''
@@ -169,6 +170,7 @@ class IntInput(wx.TextCtrl):
     #     GetValue(self) -> String
     # Change to get_value? TODO: check if anyone using old name
     def GetValue(self):  # pylint: disable=arguments-differ
+        """Get the value of int input"""
         v = super().GetValue()
         self.val_updated = False
         if v == '':
@@ -176,6 +178,7 @@ class IntInput(wx.TextCtrl):
         return int(v)
 
     def set_value(self, i):
+        """Set value of int input to the specified value"""
         self.val_updated = True
         super().SetValue(self, str(i))
 
@@ -286,6 +289,7 @@ class FloatInput(wx.TextCtrl):
     # wx.TextCtrl.GetValue(*args, **kwargs)
     #     GetValue(self) -> String
     def GetValue(self):  # pylint: disable=arguments-differ
+        """Get the value of float input"""
         v = wx.TextCtrl.GetValue(self)
         if v == '':
             v = '0'
@@ -296,6 +300,7 @@ class FloatInput(wx.TextCtrl):
     # wx.TextCtrl.SetValue(*args, **kwargs)
     #     SetValue(self, String value)
     def SetValue(self, f):  # pylint: disable=arguments-differ
+        """Set value of float input to the specified value"""
         wx.TextCtrl.SetValue(self, str(f))
 
 
@@ -347,6 +352,7 @@ class LabeledIntInput(wx.BoxSizer):
         return self.boxes[-1].set_value(i)
 
     def Destroy(self, *_, **__):
+        """Destroy labeled int input and release memory."""
         for box in self.boxes:
             try:
                 box.Destroy()
@@ -409,6 +415,7 @@ class Vector3DInput(wx.BoxSizer):
         self._vec[2].SetValue(v[2])
 
     def Destroy(self, *_, **__):
+        """Destroy Vector3 input and release memory."""
         for ctrl in self._vec:
             ctrl.Destroy()
         for box in self.boxes:
@@ -542,6 +549,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         self.extend(verts)
 
     def Destroy(self, *_, **__):
+        """Destroy Vector3 panel and release memory."""
         for ctrl in self._vec:
             ctrl.Destroy()
         for ctrl in self._vec_labels:
@@ -755,6 +763,7 @@ class Vector4DInput(wx.StaticBoxSizer):
                                self._vec[3].GetValue()])
 
     def Destroy(self, *_, **__):
+        """Destroy Vector4 input and release memory."""
         for ctrl in self._vec_label:
             ctrl.Destroy()
         for ctrl in self._vec:
@@ -902,6 +911,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         self.extend(faces)
 
     def Destroy(self, *_, **__):
+        """Destroy face set panel and release memory."""
         for ctrl in self._faces_labels:
             ctrl.Destroy()
         for ctrl in self._faces:
@@ -992,6 +1002,7 @@ class FaceSetDynamicPanel(wx.Panel):
         self.Layout()
 
     def Destroy(self, *_, **__):
+        """Destroy face set gui and release memory."""
         for box in self.boxes:
             try:
                 box.Destroy()
@@ -1321,6 +1332,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         return sym
 
     def Destroy(self, *_, **__):
+        """Destroy symmetry select gui and release memory."""
         for box in self.boxes + self.orient_guis:
             try:
                 box.Destroy()
