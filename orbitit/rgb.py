@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Python translation of Linux standard rgb.txt"""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
