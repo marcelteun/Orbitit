@@ -18,6 +18,9 @@ good-names=I,glMatrix,
   __Dn_metas,__DnxI_metas,__D2nDn_metas,
   GetValue, SetValue, GetId, Destroy
 
+[MASTER]
+extension-pkg-whitelist=wx
+
 [MESSAGES CONTROL]
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifiers separated by comma (,) or put this
