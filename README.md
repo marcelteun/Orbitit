@@ -26,7 +26,7 @@ install wxPython through pip.
 
 ## If You Install through PyPI (pip install)
 
-Alse here it is important to have the correct packages for building wxPython
+Also here it is important to have the correct packages for building wxPython
 installed. See section [wxPython](wxPython)" above.
 
 ### Install
