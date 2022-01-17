@@ -3,8 +3,8 @@
 import math
 import os
 
-from compounds import S4A4
-import geomtypes
+from orbitit.compounds import S4A4
+from orbitit import geomtypes
 
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)

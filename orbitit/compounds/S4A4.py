@@ -7,9 +7,7 @@ tetrahedron below.
 
 import math
 
-import geomtypes
-import isometry
-import orbit
+from orbitit import geomtypes, isometry, orbit
 
 V2 = math.sqrt(2)
 V5 = math.sqrt(5)
