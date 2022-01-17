@@ -35,18 +35,18 @@ class Orbit(list):
         return list.__new__(self, v)
 
     def __repr__(self):
-        s = '[{}, {}]'.format(repr(self.final), repr(self.stabiliser))
-        if __name__ != '__main__':
-            s += '{}({})'.format(__name__, s)
+        s = f"[{repr(self.final)}, {repr(self.stabiliser)}]"
+        if __name__ != "__main__":
+            s += f"{__name__}({s})"
         return s
 
     def __str__(self):
-        s = '{\n'
-        s += '  final = {}\n'.format(str(self.final))
-        s += '  stabiliser = {}\n'.format(str(self.stabiliser))
-        s += '}\n'
-        if __name__ != '__main__':
-            s = '{}.{}'.format(__name__, s)
+        s = "{\n"
+        s += f"  final = {self.final}\n"
+        s += f"  stabiliser = {self.stabiliser}\n"
+        s += "}\n"
+        if __name__ != "__main__":
+            s = f"{__name__}.{s}"
         return s
 
     @property
@@ -80,8 +80,7 @@ class Orbit(list):
         self.hoStabs = []
         self.indexCovered = {}
         for subGroup in self.final.subgroups:
-            assert subGroup.order != 0, "{} ({})".format(
-                str(subGroup), subGroup.__class__.__name__)
+            assert subGroup.order != 0, f"{subGroup} ({subGroup.__class__.__name__})"
             if self.stabiliser.__class__ in subGroup.subgroups:
                 # Check if the stabiliser can really be a subgroup for this
                 # orientation.
@@ -131,7 +130,7 @@ class Orbit(list):
         # filter rest if needed:
         if not props:
             return []
-        if (props[n]['filtered'] > 0):
+        if props[n]['filtered'] > 0:
             # Now filter out the stabilisers that are not a subgroup for this
             # orientation.
             # (part of this is done in __hosp)
@@ -235,7 +234,7 @@ class Orbit(list):
         props = self.lowerOrderStabiliserProps
 
         # filter rest if needed:
-        if (props[n]['filtered'] > 0):
+        if props[n]['filtered'] > 0:
             for i in range(props[n]['filtered']-1, -1, -1):
                 if not self.altStab.is_subgroup(self.loStabs[n][i]):
                     del self.loStabs[n][i]
@@ -377,8 +376,7 @@ class Shape(Geom3D.SymmetricShape):
             if col_choice['index'] == no_of_cols:
                 if col_sym == '' or col_sym == col_choice['class'].__name__:
                     break
-        assert col_choice['index'] == no_of_cols,\
-            'Cannot divide {} colours'.format(no_of_cols)
+        assert col_choice['index'] == no_of_cols, f"Cannot divide {no_of_cols} colours"
         # Usefull data:
         # Elements with the same colour are mapped onto eachother by:
         self.same_col_isom = col_choice['class'].__name__
@@ -407,9 +405,8 @@ class Shape(Geom3D.SymmetricShape):
         # generate colour array for this colour alternative
         self.total_no_of_col_alt = len(col_syms)
         assert col_alt < self.total_no_of_col_alt,\
-            "colour alternative {} doesn't exist (max {})".format(
-                col_alt, self.total_no_of_col_alt - 1)
-        col_quotient_set = col_final_sym  //  col_syms[col_alt]
+            f"colour alternative {col_alt} doesn't exist (max {self.total_no_of_col_alt - 1})"
+        col_quotient_set = col_final_sym / col_syms[col_alt]
         self.col_per_isom = []
         for isom in fs_orbit:
             for i, sub_set in enumerate(col_quotient_set):
@@ -457,38 +454,38 @@ class Shape(Geom3D.SymmetricShape):
 
     def to_off(self):
         s = self.simple_shape.toOffStr(color_floats=True)
-        s += "# Color alternative based on {}\n".format(self.same_col_isom)
-        s += "# Used colour alternative {} (max {})".format(
-                self.col_alt, self.total_no_of_col_alt - 1)
+        s += f"# Color alternative based on {self.same_col_isom}\n".format(self.same_col_isom)
+        s += f"# Used colour alternative {self.col_alt} (max {self.total_no_of_col_alt - 1})"
         return s
 
     def to_js(self):
-        js = 'var {} = new Object();\n'.format(self.name)
-        js += '{}.descr = new Object();\n'.format(self.name)
-        js += '{}.descr.Vs = [\n'.format(self.name)
+        js = f"var {self.name} = new Object();\n"
+        js += f"{self.name}.descr = new Object();\n"
+        js += f"{self.name}.descr.Vs = [\n"
         for v in self.baseShape.Vs:
-            js += '  {},\n'.format(v)
+            js += f"  {v},\n"
         js += '];'
-        js += '{}.descr.Fs = {};'.format(self.name, self.baseShape.Fs)
+        js += f"{self.name}.descr.Fs = {self.baseShape.Fs};"
         eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-        js += '{}.descr.transform = {};\n'.format(self.name, eye)
-        js += '{}.isoms = [\n'.format(self.name)
+        js += f"{self.name}.descr.transform = {eye};\n"
+        js += f"{self.name}.isoms = [\n"
         # note: all isometries are stored in 'direct'
         for q in self.isoms:
             js += str(q.glMatrix())
             js += ','
         js += '];\n'
         for i, col in enumerate(self.col_per_isom):
-            js += '{}.isoms[{}].col = [{}, {}, {}];\n'.format(
-                self.name, i, col[0], col[1], col[2])
+            js += f"{self.name}.isoms[{i}].col = [{col[0]}, {col[1]}, {col[2]}];\n"
 
         if self.axis is not None:
-            js += '{}.rot_axis = {};\n'.format(self.name, self.axis)
+            js += f"{self.name}.rot_axis = {self.axis};\n"
 
         # The angle domain is used for the slide-bar, therefore the precision
         # isn't very important
         if self.angle_domain:
-            js += '{}.angle_domain = [{:.3f}, {:.3f}];\n'.format(
-                self.name, self.angle_domain[0], self.angle_domain[1])
+            js += (
+                f"{self.name}.angle_domain = "
+                f"[{self.angle_domain[0]:.3f}, {self.angle_domain[1]:.3f}];\n"
+            )
 
         return js
