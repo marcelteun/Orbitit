@@ -916,31 +916,31 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             # rot b0
-            V1V3 = (Vs[1] + Vs[3])/2
+            V1V3 = (Vs[1] + Vs[3]) / 2
             V1V3axis = Vec(Vs[1] - Vs[3])
             # negative angle since left side rotates
             rot_b0 = Rot(axis=V1V3axis, angle=-b0)
             V2 = V1V3 + rot_b0 * (Vs[2] - V1V3)
             # rot a0
-            V1V4 = (Vs[1] + Vs[4])/2
+            V1V4 = (Vs[1] + Vs[4]) / 2
             V1V4axis = Vec(Vs[1] - Vs[4])
             rot_a0 = Rot(axis=V1V4axis, angle=a0)
             # middle of V0-V5 which is // to V1V4 axis
-            V0V5  = (Vs[0] + Vs[5])/2
+            V0V5  = (Vs[0] + Vs[5]) / 2
             V0V5_ = V1V4 + rot_a0 * (V0V5 - V1V4)
             V0_ = V0V5_ + (Vs[0] - V0V5)
             V5  = V0V5_ + (Vs[5] - V0V5)
             V6_ = V1V4 + rot_a0 * (Vs[6] - V1V4)
             # rot a1
-            V1V5 = (Vs[1] + V5)/2
+            V1V5 = (Vs[1] + V5) / 2
             V1V5axis = Vec(Vs[1] - V5)
             rot_a1 = Rot(axis=V1V5axis, angle=a1)
-            V0V6  = (V0_ + V6_)/2
+            V0V6  = (V0_ + V6_) / 2
             V0V6_ = V1V5 + rot_a1 * (V0V6 - V1V5)
             V0_ = V0V6_ + (V0_ - V0V6)
             V6  = V0V6_ + (V6_ - V0V6)
             # rot b1
-            V1V6 = (Vs[1] + V6)/2
+            V1V6 = (Vs[1] + V6) / 2
             V1V6axis = Vec(Vs[1] - V6)
             rot_b1 = Rot(axis=V1V6axis, angle=b1)
             V0 = V1V6 + rot_b1 * (V0_ - V1V6)
@@ -973,7 +973,7 @@ class RegularHeptagon:
         self.fold_star_2_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_star_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_star_1, see that one for more info
+        """Helper function for fold_star_2, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -982,33 +982,33 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             # rot b0
-            V2V4 = (Vs[2] + Vs[4])/2
+            V2V4 = (Vs[2] + Vs[4]) / 2
             V2V4axis = Vec(Vs[2] - Vs[4])
             rot_b0 = Rot(axis=V2V4axis, angle=b0)
             # middle of V1-V5 which is // to V2V4 axis
-            V1V5  = (Vs[1] + Vs[5])/2
+            V1V5  = (Vs[1] + Vs[5]) / 2
             V1V5_ = V2V4 + rot_b0 * (V1V5 - V2V4)
             V1_ = V1V5_ + (Vs[1] - V1V5)
             V5 = V1V5_ + (Vs[5] - V1V5)
             # middle of V0-V6 which is // to V2V4 axis
-            V0V6  = (Vs[0] + Vs[6])/2
+            V0V6  = (Vs[0] + Vs[6]) / 2
             V0V6_ = V2V4 + rot_b0 * (V0V6 - V2V4)
             V0_ = V0V6_ + (Vs[0] - V0V6)
             V6_ = V0V6_ + (Vs[6] - V0V6)
 
             # rot a0
-            V2V5 = (Vs[2] + V5)/2
+            V2V5 = (Vs[2] + V5) / 2
             V2V5axis = Vec(Vs[2] - V5)
             rot_a0 = Rot(axis=V2V5axis, angle=a0)
             # middle of V1-V6 which is // to V2V5 axis
-            V1V6  = (V1_ + V6_)/2
+            V1V6  = (V1_ + V6_) / 2
             V1V6_ = V2V5 + rot_a0 * (V1V6 - V2V5)
             V1_ = V1V6_ + (V1_ - V1V6)
             V6 = V1V6_ + (V6_ - V1V6)
             V0_ = V2V5 + rot_a0 * (V0_ - V2V5)
 
             # rot a1
-            V2V6 = (Vs[2] + V6)/2
+            V2V6 = (Vs[2] + V6) / 2
             V2V6axis = Vec(Vs[2] - V6)
             rot_a1 = Rot(axis=V2V6axis, angle=a1)
             # middle of V0-V1 which is // to V2V6 axis
@@ -1018,14 +1018,91 @@ class RegularHeptagon:
             V1_ = V0V1_ + (V1_ - V0V1)
 
             # rot b1
-            V2V0 = (Vs[2] + V0)/2
+            V2V0 = (Vs[2] + V0) / 2
             V2V0axis = Vec(Vs[2] - V0)
             rot_b1 = Rot(axis=V2V0axis, angle=b1)
             V1 = V2V0 + rot_b1 * (V1_ - V2V0)
+
             self.Vs = [V0, V1, Vs[2], Vs[3], Vs[4], V5, V6]
 
     def fold_star_3(self, a0, b0, a1, b1, keepV0=True):
-        pass
+        """
+        Fold around 4 diagonals in the shape of the character 'shell'.
+
+        the fold angle a0 refers to the axes V3-V6,
+        The fold angle b0 refers to the axes V3-V5,
+        the fold angle a1 refers to the axes V3-V0,
+        The fold angle b1 refers to the axes V3-V1 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
+        #
+        #                3
+        #               .^.
+        #         2   _/| |\_   4
+        #           _/ /   \ \_
+        # axis b1 _/  |     |  \_ axis b0
+        #        /    |     |    \
+        #       1    /       \    5
+        #   axis a1 |         | axis a0
+        #           "         "
+        #           0         6
+        #
+        self.fold_star_es_fs(3)
+        self.fold_star_3_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_star_3_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_star_3, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            V3V5 = (Vs[3] + Vs[5]) / 2
+            V3V5axis = Vec(Vs[3] - Vs[5])
+            rot_b0 = Rot(axis=V3V5axis, angle=b0)
+            # middle of V2-V6 which is // to V3V5 axis
+            V2V6  = (Vs[2] + Vs[6]) / 2
+            V2V6_ = V3V5 + rot_b0 * (V2V6 - V3V5)
+            V2_ = V2V6_ + (Vs[2] - V2V6)
+            V6 = V2V6_ + (Vs[6] - V2V6)
+            # middle of V1-V0 which is // to V3V5 axis
+            V1V0  = (Vs[1] + Vs[0]) / 2
+            V1V0_ = V3V5 + rot_b0 * (V1V0 - V3V5)
+            V1_ = V1V0_ + (Vs[1] - V1V0)
+            V0_ = V1V0_ + (Vs[0] - V1V0)
+
+            # rot a0
+            V3V6 = (Vs[3] + V6) / 2
+            V3V6axis = Vec(Vs[3] - V6)
+            rot_a0 = Rot(axis=V3V6axis, angle=a0)
+            # middle of V2-V0 which is // to V3V6 axis
+            V2V0  = (V2_ + V0_) / 2
+            V2V0_ = V3V6 + rot_a0 * (V2V0 - V3V6)
+            V2_ = V2V0_ + (V2_ - V2V0)
+            V0 = V2V0_ + (V0_ - V2V0)
+            V1_ = V3V6 + rot_a0 * (V1_ - V3V6)
+
+            # rot a1
+            V3V0 = (Vs[3] + V0) / 2
+            V3V0axis = Vec(Vs[3] - V0)
+            rot_a1 = Rot(axis=V3V0axis, angle=a1)
+            # middle of V1-V2 which is // to V3V0 axis
+            V1V2  = (V1_ + V2_) / 2
+            V1V2_ = V3V0 + rot_a1 * (V1V2 - V3V0)
+            V1 = V1V2_ + (V1_ - V1V2)
+            V2_ = V1V2_ + (V2_ - V1V2)
+
+            # rot b1
+            V3V1 = (Vs[3] + V1) / 2
+            V3V1axis = Vec(Vs[3] - V1)
+            rot_b1 = Rot(axis=V3V1axis, angle=b1)
+            V2 = V3V1 + rot_b1 * (V2_ - V3V1)
+
+            self.Vs = [V0, V1, V2, Vs[3], Vs[4], Vs[5], V6]
 
     def fold_star_4(self, a0, b0, a1, b1, keepV0=True):
         pass
