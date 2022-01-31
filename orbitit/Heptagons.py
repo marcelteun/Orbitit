@@ -918,7 +918,8 @@ class RegularHeptagon:
             # rot b0
             V1V3 = (Vs[1] + Vs[3])/2
             V1V3axis = Vec(Vs[1] - Vs[3])
-            rot_b0 = Rot(axis=V1V3axis, angle=b0)
+            # negative angle since left side rotates
+            rot_b0 = Rot(axis=V1V3axis, angle=-b0)
             V2 = V1V3 + rot_b0 * (Vs[2] - V1V3)
             # rot a0
             V1V4 = (Vs[1] + Vs[4])/2
