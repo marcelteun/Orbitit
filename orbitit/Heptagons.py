@@ -781,7 +781,7 @@ class RegularHeptagon:
                     V6,
                 ]
 
-    def fold_star(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
+    def fold_star(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         """
         Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
 
@@ -804,17 +804,17 @@ class RegularHeptagon:
         #
 
         prj = {
-            0: this.fold_star_0,
-            1: this.fold_star_1,
-            2: this.fold_star_2,
-            3: this.fold_star_3,
-            4: this.fold_star_4,
-            5: this.fold_star_5,
-            6: this.fold_star_6
+            0: self.fold_star_0,
+            1: self.fold_star_1,
+            2: self.fold_star_2,
+            3: self.fold_star_3,
+            4: self.fold_star_4,
+            5: self.fold_star_5,
+            6: self.fold_star_6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
-    def fold_star_0(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_0(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
 
@@ -838,11 +838,11 @@ class RegularHeptagon:
         if (keepV0):
             assert False, "TODO"
         else:
-            Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
-            V0 = this.VsOrg[0]
-            V1_ = Rot0_3 * this.VsOrg[1]
-            V2 = Rot0_3 * this.VsOrg[2]
-            Rot0_2 = Rot(axis = V2 - V0, angle = b0)
+            Rot0_3 = Rot(axis=self.VsOrg[3] - self.VsOrg[0], angle=a0)
+            V0 = self.VsOrg[0]
+            V1_ = Rot0_3 * self.VsOrg[1]
+            V2 = Rot0_3 * self.VsOrg[2]
+            Rot0_2 = Rot(axis=V2 - V0, angle=b0)
             V1 = Rot0_2 * V1_
             if (Geom3D.eq(a0, a1)):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
@@ -850,21 +850,37 @@ class RegularHeptagon:
                     V6 = Vec([-V1[0], V1[1], V1[2]])
                 else:
                     V6 = Vec([-V1_[0], V1_[1], V1_[2]])
-                    Rot5_0 = Rot(axis = V0 - V5, angle = b1)
+                    Rot5_0 = Rot(axis=V0 - V5, angle=b1)
                     V6 = Rot5_0 * (V6 - V0) + V0
             else:
-                Rot4_0 = Rot(axis = V0 - this.VsOrg[4], angle = a1)
-                V6 = Rot4_0 * this.VsOrg[6]
-                V5 = Rot4_0 * this.VsOrg[5]
-                Rot5_0 = Rot(axis = V0 - V5, angle = b1)
+                Rot4_0 = Rot(axis=V0 - self.VsOrg[4], angle=a1)
+                V6 = Rot4_0 * self.VsOrg[6]
+                V5 = Rot4_0 * self.VsOrg[5]
+                Rot5_0 = Rot(axis=V0 - V5, angle=b1)
                 V6 = Rot5_0 * (V6 - V0) + V0
-            this.Vs = [V0, V1, V2, this.VsOrg[3], this.VsOrg[4], V5, V6]
-            this.Fs = [[0, 2, 1], [0, 3, 2], [0, 4, 3], [0, 5, 4], [0, 6, 5]]
-            this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                    0, 2, 0, 3, 0, 4, 0, 5
-                ]
+            self.Vs = [V0, V1, V2, self.VsOrg[3], self.VsOrg[4], V5, V6]
+            self.fold_star_es_fs(0)
 
-    def fold_star_1(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_es_fs(self, no):
+        """
+        Set self.Es and self.FS for shell fold and specified position.
+
+        no: number to shift up
+        """
+        i = [(i + no) % 7 for i in range(7)]
+        self.Fs = [
+            [i[0], i[2], i[1]],
+            [i[0], i[3], i[2]],
+            [i[0], i[4], i[3]],
+            [i[0], i[5], i[4]],
+            [i[0], i[6], i[5]],
+        ]
+        self.Es = [
+            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
+            i[0], i[2], i[0], i[3], i[0], i[4], i[0], i[5]
+        ]
+
+    def fold_star_1(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -887,13 +903,10 @@ class RegularHeptagon:
         #           "         "
         #           5         4
         #
-        this.Fs = [[1, 3, 2], [1, 4, 3], [1, 5, 4], [1, 6, 5], [1, 0, 6]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                1, 3, 1, 4, 1, 5, 1, 6
-            ]
-        this.Vs = this.fold_star_1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+        self.fold_star_es_fs(1)
+        self.fold_star_1_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_1_help(this, a0, b0, a1, b1, keepV0, Vs):
+    def fold_star_1_vs(self, a0, b0, a1, b1, keepV0, Vs):
         """Helper function for fold_star_1, see that one for more info
 
         Vs: the array with vertex numbers.
@@ -905,12 +918,12 @@ class RegularHeptagon:
             # rot b0
             V1V3 = (Vs[1] + Vs[3])/2
             V1V3axis = Vec(Vs[1] - Vs[3])
-            rot_b0 = Rot(axis = V1V3axis, angle = b0)
+            rot_b0 = Rot(axis=V1V3axis, angle=b0)
             V2 = V1V3 + rot_b0 * (Vs[2] - V1V3)
             # rot a0
             V1V4 = (Vs[1] + Vs[4])/2
             V1V4axis = Vec(Vs[1] - Vs[4])
-            rot_a0 = Rot(axis = V1V4axis, angle = a0)
+            rot_a0 = Rot(axis=V1V4axis, angle=a0)
             # middle of V0-V5 which is // to V1V4 axis
             V0V5  = (Vs[0] + Vs[5])/2
             V0V5_ = V1V4 + rot_a0 * (V0V5 - V1V4)
@@ -920,7 +933,7 @@ class RegularHeptagon:
             # rot a1
             V1V5 = (Vs[1] + V5)/2
             V1V5axis = Vec(Vs[1] - V5)
-            rot_a1 = Rot(axis = V1V5axis, angle = a1)
+            rot_a1 = Rot(axis=V1V5axis, angle=a1)
             V0V6  = (V0_ + V6_)/2
             V0V6_ = V1V5 + rot_a1 * (V0V6 - V1V5)
             V0_ = V0V6_ + (V0_ - V0V6)
@@ -928,19 +941,11 @@ class RegularHeptagon:
             # rot b1
             V1V6 = (Vs[1] + V6)/2
             V1V6axis = Vec(Vs[1] - V6)
-            rot_b1 = Rot(axis = V1V6axis, angle = b1)
+            rot_b1 = Rot(axis=V1V6axis, angle=b1)
             V0 = V1V6 + rot_b1 * (V0_ - V1V6)
-            return [
-                    V0,
-                    Vs[1],
-                    V2,
-                    Vs[3],
-                    Vs[4],
-                    V5,
-                    V6,
-                ]
+            self.Vs = [V0, Vs[1], V2, Vs[3], Vs[4], V5, V6]
 
-    def fold_star_2(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_2(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -963,14 +968,10 @@ class RegularHeptagon:
         #           "         "
         #           6         5
         #
-        # TODO: +1 modulo 7 from previous
-        this.Fs = [[2, 4, 3], [2, 5, 4], [2, 6, 5], [2, 0, 6], [2, 1, 0]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                2, 4, 2, 5, 2, 6, 2, 0
-            ]
-        this.Vs = this.fold_star_2_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+        self.fold_star_es_fs(2)
+        self.fold_star_2_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_2_help(this, a0, b0, a1, b1, keepV0, Vs):
+    def fold_star_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
         """Helper function for fold_star_1, see that one for more info
 
         Vs: the array with vertex numbers.
@@ -982,7 +983,7 @@ class RegularHeptagon:
             # rot b0
             V2V4 = (Vs[2] + Vs[4])/2
             V2V4axis = Vec(Vs[2] - Vs[4])
-            rot_b0 = Rot(axis = V2V4axis, angle = b0)
+            rot_b0 = Rot(axis=V2V4axis, angle=b0)
             # middle of V1-V5 which is // to V2V4 axis
             V1V5  = (Vs[1] + Vs[5])/2
             V1V5_ = V2V4 + rot_b0 * (V1V5 - V2V4)
@@ -997,7 +998,7 @@ class RegularHeptagon:
             # rot a0
             V2V5 = (Vs[2] + V5)/2
             V2V5axis = Vec(Vs[2] - V5)
-            rot_a0 = Rot(axis = V2V5axis, angle = a0)
+            rot_a0 = Rot(axis=V2V5axis, angle=a0)
             # middle of V1-V6 which is // to V2V5 axis
             V1V6  = (V1_ + V6_)/2
             V1V6_ = V2V5 + rot_a0 * (V1V6 - V2V5)
@@ -1008,7 +1009,7 @@ class RegularHeptagon:
             # rot a1
             V2V6 = (Vs[2] + V6)/2
             V2V6axis = Vec(Vs[2] - V6)
-            rot_a1 = Rot(axis = V2V6axis, angle = a1)
+            rot_a1 = Rot(axis=V2V6axis, angle=a1)
             # middle of V0-V1 which is // to V2V6 axis
             V0V1  = (V0_ + V1_)/2
             V0V1_ = V2V6 + rot_a1 * (V0V1 - V2V6)
@@ -1018,28 +1019,20 @@ class RegularHeptagon:
             # rot b1
             V2V0 = (Vs[2] + V0)/2
             V2V0axis = Vec(Vs[2] - V0)
-            rot_b1 = Rot(axis = V2V0axis, angle = b1)
+            rot_b1 = Rot(axis=V2V0axis, angle=b1)
             V1 = V2V0 + rot_b1 * (V1_ - V2V0)
-            return [
-                    V0,
-                    V1,
-                    Vs[2],
-                    Vs[3],
-                    Vs[4],
-                    V5,
-                    V6,
-                ]
+            self.Vs = [V0, V1, Vs[2], Vs[3], Vs[4], V5, V6]
 
-    def fold_star_3(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_3(self, a0, b0, a1, b1, keepV0=True):
         pass
 
-    def fold_star_4(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_4(self, a0, b0, a1, b1, keepV0=True):
         pass
 
-    def fold_star_5(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_5(self, a0, b0, a1, b1, keepV0=True):
         pass
 
-    def fold_star_6(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_star_6(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -1062,23 +1055,23 @@ class RegularHeptagon:
         #           "         "
         #           3         2
         #
-        this.Fs = [[6, 1, 0], [6, 2, 1], [6, 3, 2], [6, 4, 3], [6, 5, 4]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[6, 1, 0], [6, 2, 1], [6, 3, 2], [6, 4, 3], [6, 5, 4]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 6, 1, 6, 2, 6, 3, 6, 4
             ]
         # opposite angle, because of opposite isometry
-        Vs = this.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
             [
-                this.VsOrg[0],
-                this.VsOrg[6],
-                this.VsOrg[5],
-                this.VsOrg[4],
-                this.VsOrg[3],
-                this.VsOrg[2],
-                this.VsOrg[1]
+                self.VsOrg[0],
+                self.VsOrg[6],
+                self.VsOrg[5],
+                self.VsOrg[4],
+                self.VsOrg[3],
+                self.VsOrg[2],
+                self.VsOrg[1]
             ]
         )
-        this.Vs = [
+        self.Vs = [
             Vs[0],
             Vs[6],
             Vs[5],
