@@ -22,23 +22,23 @@
 
 import math
 
-from orbitit import Geom3D, geomtypes, isometry, Heptagons, rgb
+from orbitit import Geom3D, geomtypes, isometry, heptagons, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
 TITLE = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 
-trisAlt = Heptagons.TrisAlt()
+trisAlt = heptagons.TrisAlt()
 trisAlt.baseKey = {
     trisAlt.refl_1: True,
     trisAlt.refl_2: True,
 }
 
-counter = Heptagons.Tris_counter()
+counter = heptagons.Tris_counter()
 
-dyn_pos     = Heptagons.dyn_pos
-open_file   = Heptagons.open_file
-only_hepts  = Heptagons.only_hepts
+dyn_pos     = heptagons.dyn_pos
+open_file   = heptagons.open_file
+only_hepts  = heptagons.only_hepts
 O6              = counter.pp()
 T32             = counter.pp()
 T24_S6          = counter.pp()
@@ -149,7 +149,7 @@ for isom in isomS4:
             heptColPerIsom.append(([useRgbCols[i]], []))
             break;
 
-class Shape(Heptagons.FldHeptagonShape):
+class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = Geom3D.IsometricShape(
             Vs = [], Fs = [], directIsometries = isomS4,
@@ -175,7 +175,7 @@ class Shape(Heptagons.FldHeptagonShape):
                 name = 'o4SquareS4',
             recreateEdges = False
             )
-        Heptagons.FldHeptagonShape.__init__(this,
+        heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape, trisO4Shape],
             4, 3,
                 name = 'FoldedRegHeptS4xI'
@@ -193,7 +193,7 @@ class Shape(Heptagons.FldHeptagonShape):
 
     def getStatusStr(this):
         #angle = Geom3D.Rad2Deg * this.dihedralAngle
-        s = Heptagons.FldHeptagonShape.getStatusStr(this)
+        s = heptagons.FldHeptagonShape.getStatusStr(this)
         if this.updateShape:
             #print 'getStatusStr: forced setV'
             this.setV()
@@ -329,7 +329,7 @@ class Shape(Heptagons.FldHeptagonShape):
             if (not this.onlyRegFs):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
-                if this.oppEdgeAlternative & Heptagons.rot_bit:
+                if this.oppEdgeAlternative & heptagons.rot_bit:
                     eAlt = this.oppEdgeAlternative
                 else:
                     eAlt = this.edgeAlternative
@@ -611,9 +611,9 @@ class Shape(Heptagons.FldHeptagonShape):
             trisAlt.refl_2:         refl,
         }
 
-class CtrlWin(Heptagons.FldHeptagonCtrlWin):
+class CtrlWin(heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
-        Heptagons.FldHeptagonCtrlWin.__init__(this,
+        heptagons.FldHeptagonCtrlWin.__init__(this,
             shape, canvas,
             8, # maxHeigth
             [ # prePosLst
@@ -640,7 +640,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
             this.trisFill == trisAlt.refl_2)
 
     def showOnlyO3Tris(this):
-        return this.prePos == Heptagons.only_xtra_o3s and not (
+        return this.prePos == heptagons.only_xtra_o3s and not (
             this.trisFill is None) and not (
             this.trisFill == trisAlt.refl_1 or
             this.trisFill == trisAlt.refl_2)
@@ -671,7 +671,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
             tris_alt = trisAlt.key[tris_str]
             data = {
                 'set': in_data['set'],
-                '7fold': Heptagons.foldMethod.get(fold_method_str),
+                '7fold': heptagons.foldMethod.get(fold_method_str),
                 'tris': tris_alt,
                 'fold-rot': this.fileStrMapFoldPos(in_data['file'])
             }

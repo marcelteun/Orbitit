@@ -22,7 +22,7 @@
 
 import math
 
-from orbitit import Geom3D, geomtypes, isometry, Heptagons, rgb
+from orbitit import Geom3D, geomtypes, isometry, heptagons, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
@@ -30,7 +30,7 @@ TITLE = 'Polyhedra with Folded Regular Heptagons and Tetrahedral Symmetry'
 
 V2 = math.sqrt(2)
 
-trisAlt = Heptagons.TrisAlt()
+trisAlt = heptagons.TrisAlt()
 trisAlt.baseKey = {
     trisAlt.strip_I:           True,
     trisAlt.strip_II:          True,
@@ -43,13 +43,13 @@ trisAlt.baseKey = {
     trisAlt.twist_strip_I:     True
 }
 
-counter = Heptagons.Tris_counter()
+counter = heptagons.Tris_counter()
 
-dyn_pos         = Heptagons.dyn_pos
-open_file       = Heptagons.open_file
+dyn_pos         = heptagons.dyn_pos
+open_file       = heptagons.open_file
 # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
-S_T8            = Heptagons.only_xtra_o3s
-S_only_hepts    = Heptagons.only_hepts
+S_T8            = heptagons.only_xtra_o3s
+S_only_hepts    = heptagons.only_hepts
 S_T16           = counter.pp()
 S_T24           = counter.pp()
 S_T32           = counter.pp()
@@ -171,7 +171,7 @@ for isom in useIsom:
             break;
 isomsO3 = isometry.D2()
 
-class Shape(Heptagons.FldHeptagonShape):
+class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = Geom3D.IsometricShape(
             Vs = [], Fs = [], directIsometries = isometry.A4(),
@@ -186,7 +186,7 @@ class Shape(Heptagons.FldHeptagonShape):
             colors = [([rgb.cyan[:]], [])],
             name = 'o3TrisA4'
         )
-        Heptagons.FldHeptagonShape.__init__(this,
+        heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape],
             3, 3,
             name = 'FoldedRegHeptA4'
@@ -239,7 +239,7 @@ class Shape(Heptagons.FldHeptagonShape):
         print("TODO implement setTriangleFillPosition for", i)
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
-        Heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
+        heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
         # TODO correct edge alternative?
 
     def setV(this):
@@ -307,7 +307,7 @@ class Shape(Heptagons.FldHeptagonShape):
             if (not this.onlyRegFs):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
-                if this.oppEdgeAlternative & Heptagons.rot_bit:
+                if this.oppEdgeAlternative & heptagons.rot_bit:
                     eAlt = this.oppEdgeAlternative
                 else:
                     eAlt = this.edgeAlternative
@@ -357,7 +357,7 @@ class Shape(Heptagons.FldHeptagonShape):
         # print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][1], Vs[6][0], Vs[6][2])
 
     def getReflPosAngle(this):
-        if this.edgeAlternative & Heptagons.twist_bit == Heptagons.twist_bit:
+        if this.edgeAlternative & heptagons.twist_bit == heptagons.twist_bit:
             return math.pi/4
         else:
             return 0
@@ -663,9 +663,9 @@ class Shape(Heptagons.FldHeptagonShape):
             print('Tris angle %d: %.6f degrees' % (i, math.acos(inprod) * Geom3D.Rad2Deg))
         print('------------') # TODO move out
 
-class CtrlWin(Heptagons.FldHeptagonCtrlWin):
+class CtrlWin(heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
-        Heptagons.FldHeptagonCtrlWin.__init__(this,
+        heptagons.FldHeptagonCtrlWin.__init__(this,
             shape, canvas,
             3, # maxHeigth
             [ # prePosLst
@@ -711,13 +711,13 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
         return this.prePos == S_only_hepts and not (
                 this.trisFill is None
             ) and not (
-                this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
+                this.trisFill & heptagons.twist_bit == heptagons.twist_bit)
 
     def showOnlyO3Tris(this):
-        return this.prePos == Heptagons.only_xtra_o3s and not (
+        return this.prePos == heptagons.only_xtra_o3s and not (
                 this.trisFill is None
             ) and not (
-                this.trisFill & Heptagons.twist_bit == Heptagons.twist_bit)
+                this.trisFill & heptagons.twist_bit == heptagons.twist_bit)
 
     rDir = 'data/Data_FldHeptA4'
     rPre = 'frh-roots'
@@ -745,7 +745,7 @@ class CtrlWin(Heptagons.FldHeptagonCtrlWin):
             tris_str = trisAlt.key[tris_str]
             data = {
                     'set': in_data['set'],
-                    '7fold': Heptagons.foldMethod.get(fold_method_str),
+                    '7fold': heptagons.foldMethod.get(fold_method_str),
                     'tris': tris_str,
                     'fold-rot': this.fileStrMapFoldPos(in_data['file'])
             }

@@ -24,7 +24,7 @@ import wx
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
-from orbitit import Geom3D, geomtypes, Heptagons, rgb
+from orbitit import Geom3D, geomtypes, heptagons, rgb
 
 TITLE = 'Equilateral Heptagons from Kite'
 
@@ -106,7 +106,7 @@ class Shape(Geom3D.SimpleShape):
         Vb = [0, -this.tail, 0]
         Vl = [-this.side, 0, 0]
         Vr = [ this.side, 0, 0]
-        tuple = Heptagons.Kite2Hept(Vl, Vt, Vr, Vb)
+        tuple = heptagons.Kite2Hept(Vl, Vt, Vr, Vb)
         if tuple == None: return
         h0, h1, h2, h3, h4, h5, h6 = tuple[0]
 
@@ -399,9 +399,9 @@ class CtrlWin(wx.Frame):
             tail = 0.6
             side = 1.6
         elif selStr == 'Regular':
-            top  = 2*Heptagons.RhoH
-            tail = top * (2 * Heptagons.Rho - 1)
-            side = 1 + Heptagons.Sigma
+            top  = 2*heptagons.RhoH
+            tail = top * (2 * heptagons.Rho - 1)
+            side = 1 + heptagons.Sigma
         else:
             print('onPrePos: oops, default case')
             top  = 0.1

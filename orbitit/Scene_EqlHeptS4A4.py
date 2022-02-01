@@ -23,7 +23,7 @@
 import wx
 import math
 
-from orbitit import Geom3D, geomtypes, Heptagons
+from orbitit import Geom3D, geomtypes, heptagons
 
 TITLE = 'Equilateral Heptagons Tetrahedron'
 
@@ -33,9 +33,9 @@ V2  = math.sqrt(2)
 hV2 = 1.0/V2
 tV3 = 1.0/math.sqrt(3)
 
-class Shape(Heptagons.EqlHeptagonShape):
+class Shape(heptagons.EqlHeptagonShape):
     def __init__(this):
-        Heptagons.EqlHeptagonShape.__init__(this,
+        heptagons.EqlHeptagonShape.__init__(this,
             directIsometries = [
                     geomtypes.E,
                     geomtypes.HX,
@@ -50,13 +50,13 @@ class Shape(Heptagons.EqlHeptagonShape):
 
     def setH(this, h):
         this.angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
-        Heptagons.EqlHeptagonShape.setH(this, h)
+        heptagons.EqlHeptagonShape.setH(this, h)
 
     def setAngle(this, a):
         tanA     = math.tan(a*Geom3D.Deg2Rad)
         this.h     = (V2 + tanA) / (V2 + 4*tanA)
         this.setH(this.h)
-        Heptagons.EqlHeptagonShape.setAngle(this, a)
+        heptagons.EqlHeptagonShape.setAngle(this, a)
 
     def setV(this):
         # input this.h
@@ -153,7 +153,7 @@ class Shape(Heptagons.EqlHeptagonShape):
             #this.Ns = this.NsPref
 
         # add heptagons
-        heptN = Heptagons.Kite2Hept(Vs[3], Vs[2], Vs[1], Vs[0])
+        heptN = heptagons.Kite2Hept(Vs[3], Vs[2], Vs[1], Vs[0])
         if heptN == None:
           this.errorStr = 'No valid equilateral heptagon for this position'
           return
@@ -165,13 +165,13 @@ class Shape(Heptagons.EqlHeptagonShape):
             Ns[i] = heptN[1]
         for i in range(12, 19):
             Ns[i] = heptN[1]
-        heptN = Heptagons.Kite2Hept(Vs[7], Vs[6], Vs[5], Vs[4])
+        heptN = heptagons.Kite2Hept(Vs[7], Vs[6], Vs[5], Vs[4])
         Vs.extend(heptN[0]) # V19 - V25
         for i in range(4, 8):
             Ns[i] = heptN[1]
         for i in range(19, 26):
             Ns[i] = heptN[1]
-        heptN = Heptagons.Kite2Hept(Vs[11], Vs[10], Vs[9], Vs[8])
+        heptN = heptagons.Kite2Hept(Vs[11], Vs[10], Vs[9], Vs[8])
         Vs.extend(heptN[0]) # V26 - V32
         for i in range(8, 12):
             Ns[i] = heptN[1]
@@ -264,7 +264,7 @@ class Shape(Heptagons.EqlHeptagonShape):
                 faceIndices.append(offset)
                 faceIndices.append(offset+3)
         #print faceIndices
-        return Heptagons.EqlHeptagonShape.toPsPiecesStr(this,
+        return heptagons.EqlHeptagonShape.toPsPiecesStr(this,
             faceIndices, scaling, precision, margin
         )
 
@@ -329,7 +329,7 @@ class Shape(Heptagons.EqlHeptagonShape):
 
     # GUI PART
 
-class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
+class CtrlWin(heptagons.EqlHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
         # a: angle
         # s: string text in GUI
@@ -348,7 +348,7 @@ class CtrlWin(Heptagons.EqlHeptagonCtrlWin):
         ]
         this.setKiteAngleExtremes(this.specialAngles[3]['a'], this.specialAngles[2]['a'], 168)
         kwargs['title'] = TITLE
-        Heptagons.EqlHeptagonCtrlWin.__init__(this,
+        heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (338, 570),
             *args, **kwargs
         )

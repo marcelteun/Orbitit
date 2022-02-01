@@ -20,29 +20,29 @@
 # or write to the Free Software Foundation,
 #
 
-import Heptagons
+import heptagons
 
-trisAlt = Heptagons.TrisAlt()
+trisAlt = heptagons.TrisAlt()
 
-dyn_pos		= Heptagons.dyn_pos
-only_hepts      = Heptagons.only_hepts
-only_xtra_o3s	= Heptagons.only_xtra_o3s
-all_eq_tris	= Heptagons.all_eq_tris
-no_o3_tris	= Heptagons.no_o3_tris
-edge_1_1_V2_1	= Heptagons.tris_fill_base + 1
-edge_1_V2_1_1	= Heptagons.tris_fill_base + 2
-edge_V2_1_1_1	= Heptagons.tris_fill_base + 3
-edge_V2_1_V2_1	= Heptagons.tris_fill_base + 4
-squares_24	= Heptagons.tris_fill_base + 5 # Copied out
-edge_0_1_1_1	= Heptagons.tris_fill_base + 6
-edge_0_1_V2_1	= Heptagons.tris_fill_base + 7
-tris_24		= Heptagons.tris_fill_base + 8
-edge_1_1_0_1	= Heptagons.tris_fill_base + 9
-edge_1_0_1_1	= Heptagons.tris_fill_base + 10
-edge_V2_1_0_1	= Heptagons.tris_fill_base + 11
-edge_V2_1_1_0	= Heptagons.tris_fill_base + 12
-square_12	= Heptagons.tris_fill_base + 13 # Copied out
-edge_0_V2_1_1   = Heptagons.tris_fill_base + 14
+dyn_pos		= heptagons.dyn_pos
+only_hepts      = heptagons.only_hepts
+only_xtra_o3s	= heptagons.only_xtra_o3s
+all_eq_tris	= heptagons.all_eq_tris
+no_o3_tris	= heptagons.no_o3_tris
+edge_1_1_V2_1	= heptagons.tris_fill_base + 1
+edge_1_V2_1_1	= heptagons.tris_fill_base + 2
+edge_V2_1_1_1	= heptagons.tris_fill_base + 3
+edge_V2_1_V2_1	= heptagons.tris_fill_base + 4
+squares_24	= heptagons.tris_fill_base + 5 # Copied out
+edge_0_1_1_1	= heptagons.tris_fill_base + 6
+edge_0_1_V2_1	= heptagons.tris_fill_base + 7
+tris_24		= heptagons.tris_fill_base + 8
+edge_1_1_0_1	= heptagons.tris_fill_base + 9
+edge_1_0_1_1	= heptagons.tris_fill_base + 10
+edge_V2_1_0_1	= heptagons.tris_fill_base + 11
+edge_V2_1_1_0	= heptagons.tris_fill_base + 12
+square_12	= heptagons.tris_fill_base + 13 # Copied out
+edge_0_V2_1_1   = heptagons.tris_fill_base + 14
 
 par_lst = [
     [1.31032278994319, 0.0, -1.96281693322690, -2.21106088677011],
@@ -65,9 +65,9 @@ star_lst = [
     [1.3845570493440107, 1.4469702342451671, -1.3161975058771898, -0.86544404605462155],
 ]
 OnlyHeptagons = {
-    Heptagons.foldMethod.parallel: par_lst,
-    Heptagons.foldMethod.star: star_lst,
-    Heptagons.foldMethod.w: w_lst,
+    heptagons.foldMethod.parallel: par_lst,
+    heptagons.foldMethod.star: star_lst,
+    heptagons.foldMethod.w: w_lst,
     # none found for the others,... :(
 }
 
@@ -138,7 +138,7 @@ w_star1loose_lst = [
 ]
 
 OnlyO3Triangles = {
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_I:           tria_strip_lst,
 	trisAlt.strip_II:          tria_strip_lst,
 	trisAlt.star:              tria_star_lst,
@@ -146,7 +146,7 @@ OnlyO3Triangles = {
 	trisAlt.alt_strip_I:       tria_strip_lst,
 	trisAlt.alt_strip_II:      tria_strip_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose:     star_strip_1loose_lst,
 	trisAlt.strip_I:           star_strip_lst,
 	trisAlt.strip_II:          star_strip_lst,
@@ -155,7 +155,7 @@ OnlyO3Triangles = {
 	trisAlt.alt_strip_II:      star_strip_lst,
 	trisAlt.alt_strip_1_loose: star_strip_1loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose:     w_strip_1loose_lst,
 	trisAlt.strip_I:           w_strip_lst,
 	trisAlt.strip_II:          w_strip_lst,
@@ -164,7 +164,7 @@ OnlyO3Triangles = {
 	trisAlt.alt_strip_II:      w_strip_lst,
 	trisAlt.alt_strip_1_loose: w_strip_1loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	# These are all the same, since there are no solutions for the 1 loose
 	# variants
 	trisAlt.strip_I:           trap_strip_lst,
@@ -211,15 +211,15 @@ w_alt_strip1loose_lst = [
 ]
 
 Squares12 = {
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose:     tria_xxx1loose_lst,
 	trisAlt.star_1_loose:      tria_xxx1loose_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose:     star_xxx1loose_lst,
 	trisAlt.star_1_loose:      star_xxx1loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose:     w_xxx1loose_lst,
 	trisAlt.star_1_loose:      w_xxx1loose_lst,
 	trisAlt.alt_strip_1_loose: w_alt_strip1loose_lst,
@@ -273,27 +273,27 @@ trap_alt_strip_list = [
 ]
 Tris24 = {
     # valid for all non-loose methods:
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_I:           par_star_strip_list,
 	trisAlt.strip_II:          par_star_strip_list,
 	trisAlt.star:              par_star_strip_list,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose:     tri_xxx1loose_list,
 	trisAlt.strip_I:           tri_star_strip_list,
 	trisAlt.strip_II:          tri_star_strip_list,
 	trisAlt.star:              tri_star_strip_list,
 	trisAlt.star_1_loose:      tri_xxx1loose_list,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose:     star_xxx1loose_list,
 	trisAlt.star_1_loose:      star_xxx1loose_list,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose:     w_xxx1loose_list,
 	trisAlt.star_1_loose:      w_xxx1loose_list,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.alt_strip_I:       trap_alt_strip_list,
 	trisAlt.alt_strip_II:      trap_alt_strip_list,
     },
@@ -396,7 +396,7 @@ w_strip_lst = [
 Pos32TrianglesI = {
     # TODO: fill in more...
     # no solutions found for trapezium and parallel fold (for any triangles).
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.strip_I: tri_strip_lst,
 	trisAlt.strip_II: tri_strip_lst,
@@ -406,7 +406,7 @@ Pos32TrianglesI = {
 	trisAlt.alt_strip_II: tri_strip_lst,
 	trisAlt.alt_strip_1_loose: tri_strip1loose_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: star_strip1loose_lst,
 	trisAlt.strip_I: star_strip_lst,
 	trisAlt.strip_II: star_strip_lst,
@@ -415,7 +415,7 @@ Pos32TrianglesI = {
 	trisAlt.alt_strip_II: star_strip_lst,
 	trisAlt.alt_strip_1_loose: star_strip1loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.strip_I: w_strip_lst,
 	trisAlt.strip_II: w_strip_lst,
@@ -475,27 +475,27 @@ trp_alt_strip1loose_lst = [
     [1.80523453225663, 0.26579440566459, 1.92412294881261, -2.49857890913702],
 ]
 Pos32TrianglesII = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_strip1x_lst,
 	trisAlt.strip_I: par_strip1x_lst,
 	trisAlt.star_1_loose: par_strip1x_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1x_lst,
 	trisAlt.strip_I: tri_strip1x_lst,
 	trisAlt.star_1_loose: tri_strip1x_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1x_lst,
 	trisAlt.strip_I: str_strip1x_lst,
 	trisAlt.star_1_loose: str_strip1x_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1x_lst,
 	trisAlt.strip_I: w_strip1x_lst,
 	trisAlt.star_1_loose: w_strip1x_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_1_loose: trp_strip1x_lst,
 	trisAlt.strip_I: trp_strip1x_lst,
 	trisAlt.star_1_loose: trp_strip1x_lst,
@@ -577,7 +577,7 @@ w_strip_lst = [
 
 FoldedSquareAndO3Triangle = {
     # nothing found for parallel and trapezium fold (strip triangle alt)
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip_1_loose_lst,
 	trisAlt.strip_I: tri_strip_lst,
 	trisAlt.strip_II: tri_strip_lst,
@@ -587,7 +587,7 @@ FoldedSquareAndO3Triangle = {
 	trisAlt.alt_strip_II: tri_strip_lst,
 	trisAlt.alt_strip_1_loose: tri_strip_1_loose_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: star_strip_1_loose_lst,
 	trisAlt.strip_I: star_strip_lst,
 	trisAlt.strip_II: star_strip_lst,
@@ -596,7 +596,7 @@ FoldedSquareAndO3Triangle = {
 	trisAlt.alt_strip_II: star_strip_lst,
 	trisAlt.alt_strip_1_loose: star_strip_1_loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip_1_loose_lst,
 	trisAlt.strip_I: w_strip_lst,
 	trisAlt.strip_II: w_strip_lst,
@@ -747,34 +747,34 @@ trp_altStrip1loose_lst = [
     [0.03101005645957, 1.87434041191451, 1.98271602067982, 1.55514021866117],
 ]
 FoldedSquareAnd1TriangleType = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_x1loose_tri_lst,
 	trisAlt.star_1_loose: par_x1loose_tri_lst,
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.star: par_stripI_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_x1loose_tri_lst,
 	trisAlt.star_1_loose: tri_x1loose_tri_lst,
 	trisAlt.strip_I: tri_stripI_lst,
 	trisAlt.star: tri_stripI_lst,
 	trisAlt.strip_II: tri_stripII_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_x1loose_tri_lst,
 	trisAlt.star_1_loose: str_x1loose_tri_lst,
 	trisAlt.star: str_stripI_lst,
 	trisAlt.strip_I: str_stripI_lst,
 	trisAlt.alt_strip_II: str_altStripII_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_x1loose_tri_lst,
 	trisAlt.star_1_loose: w_x1loose_tri_lst,
 	trisAlt.star: w_stripI_lst,
 	trisAlt.strip_I: w_stripI_lst,
 	trisAlt.alt_strip_II: w_altStripII_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_1_loose: trp_x1loose_tri_lst,
 	trisAlt.star_1_loose: trp_x1loose_tri_lst,
 	trisAlt.star: trp_stripI_lst,
@@ -906,31 +906,31 @@ trap_altStrip1loose_lst = [
     [1.36602540378444, 0.91561938203030, -1.49715598194876, -2.06457033281442],
 ]
 Pos48Triangles = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_1loose_lst,
 	trisAlt.strip_I: par_star_stripI_lst,
 	trisAlt.star: par_star_stripI_lst,
 	trisAlt.star_1_loose: par_1loose_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_1loose_lst,
 	trisAlt.strip_I: tri_star_stripI_lst,
 	trisAlt.strip_II: tri_stripII_lst,
 	trisAlt.star: tri_star_stripI_lst,
 	trisAlt.star_1_loose: tri_1loose_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: star_1loose_lst,
 	trisAlt.strip_I: star_star_stripI_lst,
 	trisAlt.star: star_star_stripI_lst,
 	trisAlt.star_1_loose: star_1loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_1loose_lst,
 	trisAlt.star_1_loose: w_1loose_lst,
 	trisAlt.alt_strip_II: w_altStripII_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_1_loose: trap_1loose_lst,
 	trisAlt.star_1_loose: trap_1loose_lst,
 	trisAlt.alt_strip_I: trap_altStripI_lst,
@@ -1028,26 +1028,26 @@ trap_alt_atripII_lst = [
 
 ]
 Pos24Squares = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.strip_II: par_stripII_lst,
 	trisAlt.star: par_stripI_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_I: tri_stripI_lst,
 	trisAlt.strip_II: tri_stripII_lst,
 	trisAlt.star: tri_stripI_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_I: star_stripI_lst,
 	trisAlt.strip_II: star_stripII_lst,
 	trisAlt.star: star_stripI_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.alt_strip_I: w_alt_atripI_lst,
 	trisAlt.alt_strip_II: w_alt_atripII_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.alt_strip_I: trap_alt_atripI_lst,
 	trisAlt.alt_strip_II: trap_alt_atripII_lst,
     },
@@ -1387,13 +1387,13 @@ trap_alt_stripI_lst = [
 ]
 
 E1_1_V2_1 = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.star: par_star_lst,
 	trisAlt.star_1_loose: par_star_1_loose_lst,
 	trisAlt.alt_strip_I: par_alt_stripI_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip_1_loose_lst,
 	trisAlt.strip_I: tri_strip_I_lst,
 	trisAlt.strip_II: tri_strip_II_lst,
@@ -1401,7 +1401,7 @@ E1_1_V2_1 = {
 	trisAlt.star: tri_star_lst,
 	trisAlt.alt_strip_II: tri_alt_stripII_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: star_strip_1_loose_lst,
 	trisAlt.strip_I: star_strip_I_lst,
 	trisAlt.strip_II: star_strip_II_lst,
@@ -1409,7 +1409,7 @@ E1_1_V2_1 = {
 	trisAlt.star: star_star_lst,
 	trisAlt.alt_strip_II: star_alt_stripII_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip_1_loose_lst,
 	trisAlt.strip_I: w_strip_I_lst,
 	trisAlt.star: w_star_lst,
@@ -1418,7 +1418,7 @@ E1_1_V2_1 = {
 	trisAlt.alt_strip_II: w_alt_stripII_lst,
 	trisAlt.alt_strip_1_loose: w_alt_strip_1_loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_I: trap_strip_I_lst,
 	trisAlt.star: trap_star_lst,
 	trisAlt.star_1_loose: trap_star_1_loose_lst,
@@ -1732,34 +1732,34 @@ trap_alt_stripII_lst = [
 ]
 E1_V2_1_1 = {
     # 1 loose triangle: nothing special
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.strip_II: par_stripII_lst,
 	trisAlt.star: par_star_lst,
 	trisAlt.alt_strip_I: par_alt_stripI_lst,
 	trisAlt.alt_strip_II: par_alt_stripII_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_I: tri_stripI_lst,
 	trisAlt.strip_II: tri_stripII_lst,
 	trisAlt.star: tri_star_lst,
 	trisAlt.alt_strip_I: tri_alt_stripI_lst,
 	trisAlt.alt_strip_II: tri_alt_stripII_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_I: star_stripI_lst,
 	trisAlt.strip_II: star_stripII_lst,
 	trisAlt.star: star_star_lst,
 	trisAlt.alt_strip_I: star_alt_stripI_lst,
 	trisAlt.alt_strip_II: star_alt_stripII_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_I: w_stripI_lst,
 	trisAlt.strip_II: w_stripII_lst,
 	trisAlt.alt_strip_I: w_alt_stripI_lst,
 	trisAlt.alt_strip_II: w_alt_stripII_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_I: trap_stripI_lst,
 	trisAlt.strip_II: trap_stripII_lst,
 	trisAlt.alt_strip_I: trap_alt_stripI_lst,
@@ -2167,7 +2167,7 @@ trp_alt_strip_1_loose_lst = [
     [1.17817115258922, 2.12163118667207, -1.39361963114971, -0.17551356714746],
 ]
 EV2_1_1_1 = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_strip1loose_lst,
 	trisAlt.strip_I: par_strip_I_lst,
 	trisAlt.star: par_star_lst,
@@ -2175,7 +2175,7 @@ EV2_1_1_1 = {
 	trisAlt.alt_strip_I: par_alt_strip_I_lst,
 	trisAlt.alt_strip_1_loose: par_alt_strip_1_loose_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.strip_I: tri_strip_I_lst,
 	trisAlt.strip_II: tri_strip_II_lst,
@@ -2183,7 +2183,7 @@ EV2_1_1_1 = {
 	trisAlt.star_1_loose: tri_star1loose_lst,
 	trisAlt.alt_strip_II: tri_alt_strip_II_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1loose_lst,
 	trisAlt.strip_I: str_strip_I_lst,
 	trisAlt.strip_II: str_strip_II_lst,
@@ -2191,7 +2191,7 @@ EV2_1_1_1 = {
 	trisAlt.star_1_loose: str_star1loose_lst,
 	trisAlt.alt_strip_II: str_alt_strip_II_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.strip_I: w_strip_I_lst,
 	trisAlt.star: w_star_lst,
@@ -2199,7 +2199,7 @@ EV2_1_1_1 = {
 	trisAlt.alt_strip_II: w_alt_strip_II_lst,
 	trisAlt.alt_strip_1_loose: w_alt_strip_1_loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_1_loose: trp_strip1loose_lst,
 	trisAlt.strip_I: trp_strip_I_lst,
 	trisAlt.star: trp_star_lst,
@@ -2525,13 +2525,13 @@ w_altStrip1loose_lst = [
 ]
 
 EV2_1_V2_1 = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.star: par_star_lst,
 	trisAlt.star_1_loose: par_star1loose_lst,
 	trisAlt.alt_strip_I: par_altStripI_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.strip_I: tri_stripI_lst,
 	trisAlt.strip_II: tri_stripII_lst,
@@ -2539,7 +2539,7 @@ EV2_1_V2_1 = {
 	trisAlt.star_1_loose: tri_star1loose_lst,
 	trisAlt.alt_strip_II: tri_altStripII_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1loose_lst,
 	trisAlt.strip_I: str_stripI_lst,
 	trisAlt.strip_II: str_stripII_lst,
@@ -2547,7 +2547,7 @@ EV2_1_V2_1 = {
 	trisAlt.star_1_loose: str_star1loose_lst,
 	trisAlt.alt_strip_II: str_altStripII_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.strip_I: w_stripI_lst,
 	trisAlt.star: w_star_lst,
@@ -2555,7 +2555,7 @@ EV2_1_V2_1 = {
 	trisAlt.alt_strip_II: w_altStripII_lst,
 	trisAlt.alt_strip_1_loose: w_altStrip1loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_I: trp_stripI_lst,
 	trisAlt.star: trp_star_lst,
 	trisAlt.star_1_loose: trp_star1loose_lst,
@@ -2744,7 +2744,7 @@ w_altStrip1loose_list = [
     [1.78539563651769, 0.04131468995198, 0.35629636014470, -3.04029683367018],
 ]
 E0_1_1_1 = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_I: par_strip_list,
 	trisAlt.strip_II: par_strip_list,
 	trisAlt.star: par_star_list,
@@ -2752,27 +2752,27 @@ E0_1_1_1 = {
 	trisAlt.alt_strip_I: par_altStrip_list,
 	trisAlt.alt_strip_II: par_altStrip_list,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.strip_I: tri_strip_list,
 	trisAlt.strip_II: tri_strip_list,
 	trisAlt.star: tri_star_list,
 	trisAlt.star_1_loose: tri_star1loose_list,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1loose_lst,
 	trisAlt.strip_I: str_strip_list,
 	trisAlt.strip_II: str_strip_list,
 	trisAlt.star_1_loose: str_star1loose_list,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.star_1_loose: w_star1loose_list,
 	trisAlt.alt_strip_I: str_strip_list,  # remarkable:
 	trisAlt.alt_strip_II: str_strip_list, # the same as a different fold!
 	trisAlt.alt_strip_1_loose: w_altStrip1loose_list,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.star_1_loose: trp_star1loose_list,
 	trisAlt.alt_strip_I: trp_altStrip_list,
 	trisAlt.alt_strip_II: trp_altStrip_list,
@@ -2990,7 +2990,7 @@ trp_altStrip1loose_lst = [
     [1.78761504059563, -0.14450886689923, 0.78651599021905, 2.81034048901031],
 ]
 E0_1_V2_1 = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_strip1loose_lst,
 	trisAlt.strip_I: par_strip_lst,
 	trisAlt.strip_II: par_strip_lst,
@@ -2999,21 +2999,21 @@ E0_1_V2_1 = {
 	trisAlt.alt_strip_I: par_altStrip_lst,
 	trisAlt.alt_strip_II: par_altStrip_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.strip_I: tri_strip_lst,
 	trisAlt.strip_II: tri_strip_lst,
 	trisAlt.star: tri_star_lst,
 	trisAlt.star_1_loose: tri_star1loose_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1loose_lst,
 	trisAlt.strip_I: str_strip_lst,
 	trisAlt.strip_II: str_strip_lst,
 	trisAlt.star: str_star_lst,
 	trisAlt.star_1_loose: str_star1loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.star_1_loose: w_star1loose_lst,
 	# interesting: why does star_star list work for w - strip?
@@ -3021,7 +3021,7 @@ E0_1_V2_1 = {
 	trisAlt.alt_strip_II: str_star_lst,
 	trisAlt.alt_strip_1_loose: w_altStrip1loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_1_loose: trp_strip1loose_lst,
 	trisAlt.star_1_loose: trp_star1loose_lst,
 	trisAlt.alt_strip_I: trp_altStrip_lst,
@@ -3171,24 +3171,24 @@ trp_star1loose_lst = [
     [3.09711507150192, 0.40984649760789, -0.20100503006556, -0.96997534601223],
 ]
 E0_V2_1_1 = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.star_1_loose: par_star1loose_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.star_1_loose: tri_star1loose_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1loose_lst,
 	trisAlt.star_1_loose: str_star1loose_lst,
 	trisAlt.alt_strip_1_loose: str_altStrip1loose_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.star_1_loose: w_star1loose_lst,
 	trisAlt.alt_strip_1_loose: w_altStrip1loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.star_1_loose: trp_star1loose_lst,
     },
 }
@@ -3613,7 +3613,7 @@ trp_altStrip1loose_lst = [
     [0.66723327917965, 2.45533813559815, -1.07090299151769, -0.01367907968087],
 ]
 AllEquilateralTris = {
-    Heptagons.foldMethod.parallel: {
+    heptagons.foldMethod.parallel: {
 	trisAlt.strip_1_loose: par_strip1loose_lst,
 	trisAlt.strip_I: par_stripI_lst,
 	trisAlt.star: par_star_lst,
@@ -3621,7 +3621,7 @@ AllEquilateralTris = {
 	trisAlt.alt_strip_I: par_altStripI_lst,
 	trisAlt.alt_strip_1_loose: par_altStrip1loose_lst,
     },
-    Heptagons.foldMethod.triangle: {
+    heptagons.foldMethod.triangle: {
 	trisAlt.strip_1_loose: tri_strip1loose_lst,
 	trisAlt.strip_I: tri_stripI_lst,
 	trisAlt.strip_II: tri_stripII_lst,
@@ -3629,7 +3629,7 @@ AllEquilateralTris = {
 	trisAlt.star_1_loose: tri_star1loose_lst,
 	trisAlt.alt_strip_II: tri_altStripII_lst,
     },
-    Heptagons.foldMethod.star: {
+    heptagons.foldMethod.star: {
 	trisAlt.strip_1_loose: str_strip1loose_lst,
 	trisAlt.strip_I: str_stripI_lst,
 	trisAlt.strip_II: str_stripII_lst,
@@ -3637,7 +3637,7 @@ AllEquilateralTris = {
 	trisAlt.star_1_loose: str_star1loose_lst,
 	trisAlt.alt_strip_II: str_altStripII_lst,
     },
-    Heptagons.foldMethod.w: {
+    heptagons.foldMethod.w: {
 	trisAlt.strip_1_loose: w_strip1loose_lst,
 	trisAlt.strip_I: w_stripI_lst,
 	trisAlt.star_1_loose: w_star1loose_lst,
@@ -3645,7 +3645,7 @@ AllEquilateralTris = {
 	trisAlt.alt_strip_II: w_altStripII_lst,
 	trisAlt.alt_strip_1_loose: w_altStrip1loose_lst,
     },
-    Heptagons.foldMethod.trapezium: {
+    heptagons.foldMethod.trapezium: {
 	trisAlt.strip_1_loose: trp_strip1loose_lst,
 	trisAlt.strip_I: trp_stripI_lst,
 	trisAlt.star_1_loose: trp_star1loose_lst,
@@ -3657,26 +3657,26 @@ AllEquilateralTris = {
 specPos = {
     only_hepts: {
 	# Note: all triangle variants are the same:
-	Heptagons.foldMethod.parallel: {
-	    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.parallel],
-	    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.parallel],
-	    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.parallel],
-	    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.parallel],
-	    trisAlt.star_1_loose:  OnlyHeptagons[Heptagons.foldMethod.parallel],
+	heptagons.foldMethod.parallel: {
+	    trisAlt.strip_1_loose: OnlyHeptagons[heptagons.foldMethod.parallel],
+	    trisAlt.strip_I:       OnlyHeptagons[heptagons.foldMethod.parallel],
+	    trisAlt.strip_II:      OnlyHeptagons[heptagons.foldMethod.parallel],
+	    trisAlt.star:          OnlyHeptagons[heptagons.foldMethod.parallel],
+	    trisAlt.star_1_loose:  OnlyHeptagons[heptagons.foldMethod.parallel],
 	},
-	Heptagons.foldMethod.w: {
-	    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.w],
-	    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.w],
-	    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.w],
-	    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.w],
-	    trisAlt.star_1_loose:  OnlyHeptagons[Heptagons.foldMethod.w],
+	heptagons.foldMethod.w: {
+	    trisAlt.strip_1_loose: OnlyHeptagons[heptagons.foldMethod.w],
+	    trisAlt.strip_I:       OnlyHeptagons[heptagons.foldMethod.w],
+	    trisAlt.strip_II:      OnlyHeptagons[heptagons.foldMethod.w],
+	    trisAlt.star:          OnlyHeptagons[heptagons.foldMethod.w],
+	    trisAlt.star_1_loose:  OnlyHeptagons[heptagons.foldMethod.w],
 	},
-	Heptagons.foldMethod.star: {
-	    trisAlt.strip_1_loose: OnlyHeptagons[Heptagons.foldMethod.star],
-	    trisAlt.strip_I:       OnlyHeptagons[Heptagons.foldMethod.star],
-	    trisAlt.strip_II:      OnlyHeptagons[Heptagons.foldMethod.star],
-	    trisAlt.star:          OnlyHeptagons[Heptagons.foldMethod.star],
-	    trisAlt.star_1_loose:  OnlyHeptagons[Heptagons.foldMethod.star],
+	heptagons.foldMethod.star: {
+	    trisAlt.strip_1_loose: OnlyHeptagons[heptagons.foldMethod.star],
+	    trisAlt.strip_I:       OnlyHeptagons[heptagons.foldMethod.star],
+	    trisAlt.strip_II:      OnlyHeptagons[heptagons.foldMethod.star],
+	    trisAlt.star:          OnlyHeptagons[heptagons.foldMethod.star],
+	    trisAlt.star_1_loose:  OnlyHeptagons[heptagons.foldMethod.star],
 	},
     },
     only_xtra_o3s:   OnlyO3Triangles,
