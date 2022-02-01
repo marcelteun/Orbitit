@@ -6,6 +6,7 @@ chk_files="
 	orbitit/isometry.py
 	orbitit/main_dlg.py
 	orbitit/main_win.py
+	orbitit/orbit.py
 	orbitit/rgb.py
 	orbitit/scene_orbit.py
 "
