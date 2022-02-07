@@ -367,31 +367,47 @@ TrisAlt = Def_TrisAlt('TrisAlt', [
     )
 
 class FoldMethod(Enum):
+    """
+    Enum class to distinguish the different heptagon folds
+
+    Note: The folds only use a capital in the beginning, since the string representation is used in
+    the GUI and this way there is no need to convert the strings back and forth.
+
+    Attributes:
+        PARALLEL: a fold with one reflection symmetry with two parallel diagonals
+        TRAPEZIUM: a fold with one reflection symmetry with 3 folds using three shortes diagonals
+        W: a fold with one reflection symmetry with in a W shape using 2 shortest and 2 longest
+           diagonals.
+        TRIANGLE: a fold with one reflection symmetry using two shortest and one longest diagonal
+            where the diagonals form a triangle
+        SHELL: a fold with one reflection symmetry using two shortest and two longest diagonals all
+            from one vertex.
+        G: a non-symmetric 4-fold with two short and two long diagonals. It is a triangle fold with
+            one fold over a short edge added.
+        MIXED: a non-symmetric 4-fold with two short and two long diagonals, which is a combination
+            of a W and a Shell fold. It can be obtained from either by switching a fold over a short
+            diagonal
+    """
+
     PARALLEL  = 0
     TRAPEZIUM = 1
     W         = 2
     TRIANGLE  = 3
     SHELL     = 4
+    G         = 5
+    MIXED     = 6
 
-    @staticmethod
-    def get(s):
+    @classmethod
+    def get(self, s):
         """Get the enum value for a fold name."""
-        for k,v in FoldName.items():
-            if v == s:
-                return k
-        s = str.capitalize(s)
-        for k, v in FoldName.items():
-            if v == s:
-                return k
+        for v in self:
+            if v.name == s:
+                return v
+        s = str.upper(s)
+        for v in self:
+            if v.name == s:
+                return v
         return None
-
-FoldName = {
-        FoldMethod.PARALLEL: 'Parallel',
-        FoldMethod.TRAPEZIUM: 'Trapezium',
-        FoldMethod.W: 'W',
-        FoldMethod.TRIANGLE: 'Triangle',
-        FoldMethod.SHELL: 'Shell',
-    }
 
 class RegularHeptagon:
     def __init__(this):
@@ -2099,11 +2115,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         # static adjustments
         l = this.foldMethodList = [
-            FoldName[FoldMethod.PARALLEL],
-            FoldName[FoldMethod.TRIANGLE],
-            FoldName[FoldMethod.SHELL],
-            FoldName[FoldMethod.W],
-            FoldName[FoldMethod.TRAPEZIUM],
+            FoldMethod.PARALLEL.name.capitalize(),
+            FoldMethod.TRIANGLE.name.capitalize(),
+            FoldMethod.SHELL.name.capitalize(),
+            FoldMethod.W.name.capitalize(),
+            FoldMethod.TRAPEZIUM.name.capitalize(),
         ]
         this.foldMethodListItems = [
             FoldMethod.get(l[i]) for i in range(len(l))
@@ -2114,7 +2130,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 choices = this.foldMethodList
             )
         for i in range(len(this.foldMethodList)):
-            if (this.foldMethodList[i] == FoldName[this.foldMethod]):
+            if (this.foldMethodList[i].upper() == this.foldMethod.name):
                 this.foldMethodGui.SetSelection(i)
         this.Guis.append(this.foldMethodGui)
         this.foldMethodGui.Bind(wx.EVT_RADIOBOX, this.onFoldMethod)
@@ -3108,7 +3124,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
             # get fold, tris alt
             sps = this.specPosSetup
-            this.foldMethodGui.SetStringSelection(FoldName[sps['7fold']])
+            this.foldMethodGui.SetStringSelection(sps['7fold'].name.capitalize())
             this.trisFillGui.SetStringSelection(this.trisAlt.stringify[sps['tris']])
             try:
                 this.tris_position = sps['tris-pos']
@@ -3429,5 +3445,3 @@ class EqlHeptagonCtrlWin(wx.Frame):
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
         this.SetSize(size)
-
-
