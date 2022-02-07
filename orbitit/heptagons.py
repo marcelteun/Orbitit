@@ -441,35 +441,38 @@ class RegularHeptagon:
         this.Fs = [[6, 5, 4, 3, 2, 1, 0]]
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
-    def fold(this, a0, b0, a1 = None, b1 = None, keepV0 = True,
-                                                fold = FoldMethod.PARALLEL,
-                                                rotate = 0
+    def fold(
+        self,
+        a0,
+        b0,
+        a1=None,
+        b1=None,
+        keepV0=True,
+        fold=FoldMethod.PARALLEL,
+        rotate=0,
     ):
-        if fold == FoldMethod.PARALLEL:
-            this.foldParallel(a0, b0, keepV0, rotate)
-        elif fold == FoldMethod.TRAPEZIUM:
-            this.foldTrapezium(a0, b0, b1, keepV0, rotate)
-        elif fold == FoldMethod.W:
-            this.fold_W(a0, b0, a1, b1, keepV0, rotate)
-        elif fold == FoldMethod.TRIANGLE:
-            this.foldTriangle(a0, b0, b1, keepV0, rotate)
-        elif fold == FoldMethod.SHELL:
-            this.fold_star(a0, b0, a1, b1, keepV0, rotate)
-        else:
-            raise TypeError('Unknown fold')
+        method = {
+            FoldMethod.PARALLEL: self.foldParallel,
+            FoldMethod.TRAPEZIUM:self.foldTrapezium,
+            FoldMethod.W: self.fold_W,
+            FoldMethod.TRIANGLE: self.foldTriangle,
+            FoldMethod.SHELL: self.fold_shell,
+            FoldMethod.MIXED: self.fold_mixed,
+        }
+        method[fold](a0, b0, a1, b1, keepV0, rotate)
 
-    def foldParallel(this, a, b, keepV0 = True, rotate = 0):
+    def foldParallel(self, a, b, _=None, __=None, keepV0=True, rotate=0):
         if rotate == 0:
-            this.foldParallel_0(a, b, keepV0)
+            self.foldParallel_0(a, b, keepV0)
         else:
-            this.foldParallel_1(a, b, keepV0)
+            self.foldParallel_1(a, b, keepV0)
 
-    def foldParallel_0(this, a, b, keepV0 = True):
+    def foldParallel_0(self, a, b, keepV0=True):
         """
         Fold around the 2 parallel diagonals V1-V6 and V2-V5.
 
-        The fold angle a refers the the axis V2-V5 and
-        the fold angle b refers the the axis V1-V6.
+        The fold angle a refers the axis V2-V5 and
+        the fold angle b refers the axis V1-V6.
         If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
         folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
         It assumes that the heptagon is in the original position.
@@ -487,8 +490,8 @@ class RegularHeptagon:
         #         4       3
         #
         #
-        this.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 1, 6, 2, 5,
             ]
         cosa = math.cos(a)
@@ -507,24 +510,24 @@ class RegularHeptagon:
             #                       _.-'
             #                   _.-'  a
             #   (0, 0) .-------.-------.------.
-            #   this. V[0]   V[1]    V[2]    V[3]
+            #   self. V[0]   V[1]    V[2]    V[3]
             dV2 = [
-                    this.VsOrg[2][1] - this.VsOrg[1][1],
-                    this.VsOrg[2][2] - this.VsOrg[1][2]
+                    self.VsOrg[2][1] - self.VsOrg[1][1],
+                    self.VsOrg[2][2] - self.VsOrg[1][2]
                 ]
             V2 = Vec([
-                    this.VsOrg[2][0],
-                    this.VsOrg[1][1] + cosa * dV2[0] - sina * dV2[1],
-                    this.VsOrg[1][2] + cosa * dV2[1] + sina * dV2[0]
+                    self.VsOrg[2][0],
+                    self.VsOrg[1][1] + cosa * dV2[0] - sina * dV2[1],
+                    self.VsOrg[1][2] + cosa * dV2[1] + sina * dV2[0]
                 ])
             # Similarly:
             dV3_ = [
-                    this.VsOrg[3][1] - this.VsOrg[1][1],
-                    this.VsOrg[3][2] - this.VsOrg[1][2]
+                    self.VsOrg[3][1] - self.VsOrg[1][1],
+                    self.VsOrg[3][2] - self.VsOrg[1][2]
                 ]
             V3_ = [
-                    this.VsOrg[1][1] + cosa * dV3_[0] - sina * dV3_[1],
-                    this.VsOrg[1][2] + cosa * dV3_[1] + sina * dV3_[0]
+                    self.VsOrg[1][1] + cosa * dV3_[0] - sina * dV3_[1],
+                    self.VsOrg[1][2] + cosa * dV3_[1] + sina * dV3_[0]
                 ]
             # now rotate beta:
             dV3 = [
@@ -532,39 +535,39 @@ class RegularHeptagon:
                     V3_[1] - V2[2]
                 ]
             V3 = Vec([
-                    this.VsOrg[3][0],
+                    self.VsOrg[3][0],
                     V2[1] + cosb * dV3[0] - sinb * dV3[1],
                     V2[2] + cosb * dV3[1] + sinb * dV3[0]
                 ])
-            this.Vs = [
-                    this.VsOrg[0],
-                    this.VsOrg[1],
+            self.Vs = [
+                    self.VsOrg[0],
+                    self.VsOrg[1],
                     V2,
                     V3,
                     Vec([-V3[0], V3[1], V3[2]]),
                     Vec([-V2[0], V2[1], V2[2]]),
-                    this.VsOrg[6]
+                    self.VsOrg[6]
                 ]
         else:
             # similar to before, except the roles of the vertices are switched
             # i.e. keep V[3] constant...
             dV1 = [
-                    this.VsOrg[1][1] - this.VsOrg[2][1],
-                    this.VsOrg[1][2] - this.VsOrg[2][2]
+                    self.VsOrg[1][1] - self.VsOrg[2][1],
+                    self.VsOrg[1][2] - self.VsOrg[2][2]
                 ]
             V1 = Vec([
-                    this.VsOrg[1][0],
-                    this.VsOrg[2][1] + cosa * dV1[0] - sina * dV1[1],
-                    this.VsOrg[2][2] + cosa * dV1[1] + sina * dV1[0]
+                    self.VsOrg[1][0],
+                    self.VsOrg[2][1] + cosa * dV1[0] - sina * dV1[1],
+                    self.VsOrg[2][2] + cosa * dV1[1] + sina * dV1[0]
                 ])
             # Similarly:
             dV0_ = [
-                    this.VsOrg[0][1] - this.VsOrg[2][1],
-                    this.VsOrg[0][2] - this.VsOrg[2][2]
+                    self.VsOrg[0][1] - self.VsOrg[2][1],
+                    self.VsOrg[0][2] - self.VsOrg[2][2]
                 ]
             V0_ = [
-                    this.VsOrg[2][1] + cosa * dV0_[0] - sina * dV0_[1],
-                    this.VsOrg[2][2] + cosa * dV0_[1] + sina * dV0_[0]
+                    self.VsOrg[2][1] + cosa * dV0_[0] - sina * dV0_[1],
+                    self.VsOrg[2][2] + cosa * dV0_[1] + sina * dV0_[0]
                 ]
             # now rotate beta:
             dV0 = [
@@ -572,27 +575,27 @@ class RegularHeptagon:
                     V0_[1] - V1[2]
                 ]
             V0 = Vec([
-                    this.VsOrg[0][0],
+                    self.VsOrg[0][0],
                     V1[1] + cosb * dV0[0] - sinb * dV0[1],
                     V1[2] + cosb * dV0[1] + sinb * dV0[0]
                 ])
-            this.Vs = [
+            self.Vs = [
                     V0,
                     V1,
-                    this.VsOrg[2],
-                    this.VsOrg[3],
-                    this.VsOrg[4],
-                    this.VsOrg[5],
+                    self.VsOrg[2],
+                    self.VsOrg[3],
+                    self.VsOrg[4],
+                    self.VsOrg[5],
                     Vec([-V1[0], V1[1], V1[2]])
                 ]
 
-    def foldParallel_1(this, a, b, keepV0 = True):
+    def foldParallel_1(self, a, b, keepV0=True):
         """
         Fold around the 2 parallel diagonals parallel to the edge opposite of
         vertex 1
 
-        The fold angle a refers the the axis V3-V6 and
-        the fold angle b refers the the axis V2-V0.
+        The fold angle a refers the axis V3-V6 and
+        the fold angle b refers the axis V2-V0.
         If keepV0 = True then the vertex V0, and V2 are kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -608,41 +611,41 @@ class RegularHeptagon:
         #
         #         5       4
         #
-        this.Fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 2, 0, 3, 6,
             ]
         if (keepV0):
             assert False, "TODO"
         else:
-            V3V6 = (this.VsOrg[3] + this.VsOrg[6])/2
-            V3V6axis = Vec(this.VsOrg[3] - this.VsOrg[6])
-            V0V2 = (this.VsOrg[0] + this.VsOrg[2])/2
+            V3V6 = (self.VsOrg[3] + self.VsOrg[6])/2
+            V3V6axis = Vec(self.VsOrg[3] - self.VsOrg[6])
+            V0V2 = (self.VsOrg[0] + self.VsOrg[2])/2
             rot_a = Rot(axis = V3V6axis, angle = a)
             V0V2_ = V3V6 + rot_a * (V0V2 - V3V6)
-            V0 = V0V2_ + (this.VsOrg[0] - V0V2)
-            V2 = V0V2_ + (this.VsOrg[2] - V0V2)
-            V1_ = V3V6 + rot_a * (this.VsOrg[1] - V3V6)
+            V0 = V0V2_ + (self.VsOrg[0] - V0V2)
+            V2 = V0V2_ + (self.VsOrg[2] - V0V2)
+            V1_ = V3V6 + rot_a * (self.VsOrg[1] - V3V6)
 
             V0V2axis = Vec(V2 - V0)
             rot_b = Rot(axis = V0V2axis, angle = b)
             V1 = V0V2 + rot_b * (V1_ - V0V2)
-            this.Vs = [
+            self.Vs = [
                     V0,
                     V1,
                     V2,
-                    this.VsOrg[3],
-                    this.VsOrg[4],
-                    this.VsOrg[5],
-                    this.VsOrg[6],
+                    self.VsOrg[3],
+                    self.VsOrg[4],
+                    self.VsOrg[5],
+                    self.VsOrg[6],
                 ]
 
-    def foldTrapezium(this, a, b0, b1 = None, keepV0 = True, rotate = 0):
+    def foldTrapezium(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
         """
         Fold around 4 diagonals in the shape of a trapezium (trapezoid)
 
-        The fold angle a refers the the axis V1-V6 and
-        The fold angle b refers the the axes V1-V3 and V6-V4 and
+        The fold angle a refers the axis V1-V6 and
+        The fold angle b refers the axes V1-V3 and V6-V4 and
         If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
         folding, otherwise the edge V3-V4 is kept invariant.
         It assumes that the heptagon is in the original position.
@@ -660,8 +663,8 @@ class RegularHeptagon:
         #          4       3
         #
         #
-        this.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 4, 6, 6, 1, 1, 3,
             ]
         cosa = math.cos(a)
@@ -669,82 +672,82 @@ class RegularHeptagon:
         if (keepV0):
             # see foldParallel
             dV2_ = [
-                    this.VsOrg[2][1] - this.VsOrg[1][1],
-                    this.VsOrg[2][2] - this.VsOrg[1][2]
+                    self.VsOrg[2][1] - self.VsOrg[1][1],
+                    self.VsOrg[2][2] - self.VsOrg[1][2]
                 ]
             V2_ = Vec([
-                    this.VsOrg[2][0],
-                    this.VsOrg[1][1] + cosa * dV2_[0] - sina * dV2_[1],
-                    this.VsOrg[1][2] + cosa * dV2_[1] + sina * dV2_[0]
+                    self.VsOrg[2][0],
+                    self.VsOrg[1][1] + cosa * dV2_[0] - sina * dV2_[1],
+                    self.VsOrg[1][2] + cosa * dV2_[1] + sina * dV2_[0]
                 ])
             dV3 = [
-                    this.VsOrg[3][1] - this.VsOrg[1][1],
-                    this.VsOrg[3][2] - this.VsOrg[1][2]
+                    self.VsOrg[3][1] - self.VsOrg[1][1],
+                    self.VsOrg[3][2] - self.VsOrg[1][2]
                 ]
             V3 = Vec([
-                    this.VsOrg[3][0],
-                    this.VsOrg[1][1] + cosa * dV3[0] - sina * dV3[1],
-                    this.VsOrg[1][2] + cosa * dV3[1] + sina * dV3[0]
+                    self.VsOrg[3][0],
+                    self.VsOrg[1][1] + cosa * dV3[0] - sina * dV3[1],
+                    self.VsOrg[1][2] + cosa * dV3[1] + sina * dV3[0]
                 ])
             V4 = Vec([-V3[0], V3[1], V3[2]])
-            V1V3 = (this.VsOrg[1] + V3)/2
-            V1V3axis = Vec(V3 - this.VsOrg[1])
+            V1V3 = (self.VsOrg[1] + V3)/2
+            V1V3axis = Vec(V3 - self.VsOrg[1])
             r = Rot(axis = V1V3axis, angle = b0)
             V2 = V1V3 + r * (V2_ - V1V3)
             if not Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
-                V4V6 = (V4 + this.VsOrg[6])/2
-                V4V6axis = Vec(this.VsOrg[6] - V4)
+                V4V6 = (V4 + self.VsOrg[6])/2
+                V4V6axis = Vec(self.VsOrg[6] - V4)
                 r = Rot(axis = V4V6axis, angle = b1)
                 V5_ = Vec([-V2_[0], V2_[1], V2_[2]])
                 V5 = V4V6 + r * (V5_ - V4V6)
-            this.Vs = [
-                    this.VsOrg[0],
-                    this.VsOrg[1],
+            self.Vs = [
+                    self.VsOrg[0],
+                    self.VsOrg[1],
                     V2,
                     V3,
                     V4,
                     V5,
-                    this.VsOrg[6]
+                    self.VsOrg[6]
                 ]
         else:
             dV0 = [
-                    this.VsOrg[0][1] - this.VsOrg[1][1],
-                    this.VsOrg[0][2] - this.VsOrg[1][2]
+                    self.VsOrg[0][1] - self.VsOrg[1][1],
+                    self.VsOrg[0][2] - self.VsOrg[1][2]
                 ]
             V0 = Vec([
-                    this.VsOrg[0][0],
-                    this.VsOrg[1][1] + cosa * dV0[0] - sina * dV0[1],
-                    this.VsOrg[1][2] + cosa * dV0[1] + sina * dV0[0]
+                    self.VsOrg[0][0],
+                    self.VsOrg[1][1] + cosa * dV0[0] - sina * dV0[1],
+                    self.VsOrg[1][2] + cosa * dV0[1] + sina * dV0[0]
                 ])
-            V1V3 = (this.VsOrg[1] + this.VsOrg[3])/2
-            V1V3axis = Vec(this.VsOrg[3] - this.VsOrg[1])
+            V1V3 = (self.VsOrg[1] + self.VsOrg[3])/2
+            V1V3axis = Vec(self.VsOrg[3] - self.VsOrg[1])
             r = Rot(axis = V1V3axis, angle = b0)
-            V2 = V1V3 + r * (this.VsOrg[2] - V1V3)
+            V2 = V1V3 + r * (self.VsOrg[2] - V1V3)
             if Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
-                V4V6 = (this.VsOrg[4] + this.VsOrg[6])/2
-                V4V6axis = Vec(this.VsOrg[6] - this.VsOrg[4])
+                V4V6 = (self.VsOrg[4] + self.VsOrg[6])/2
+                V4V6axis = Vec(self.VsOrg[6] - self.VsOrg[4])
                 r = Rot(axis = V4V6axis, angle = b1)
-                V5 = V4V6 + r * (this.VsOrg[5] - V4V6)
-            this.Vs = [
+                V5 = V4V6 + r * (self.VsOrg[5] - V4V6)
+            self.Vs = [
                     V0,
-                    this.VsOrg[1],
+                    self.VsOrg[1],
                     V2,
-                    this.VsOrg[3],
-                    this.VsOrg[4],
+                    self.VsOrg[3],
+                    self.VsOrg[4],
                     V5,
-                    this.VsOrg[6]
+                    self.VsOrg[6]
                 ]
 
-    def foldTriangle(this, a, b0, b1, keepV0 = True, rotate = 0):
+    def foldTriangle(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
         """
         Fold around 3 triangular diagonals from V0.
 
-        The fold angle a refers the the axes V0-V2 and V0-V5 and
-        the fold angle b refers the the axis V2-V5.
+        The fold angle a refers the axes V0-V2 and V0-V5 and
+        the fold angle b refers the axis V2-V5.
         If keepV0 = True then the triangle V0, V1, V6 is kept invariant during
         folding, otherwise the trapezium V2-V3-V4-V5 is kept invariant.
         """
@@ -760,51 +763,51 @@ class RegularHeptagon:
         #
         #            4       3
         #
-        this.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 0, 2, 2, 5, 5, 0
             ]
-        Rot0_2 = Rot(axis = this.VsOrg[2] - this.VsOrg[0], angle = b0)
-        V1 = Rot0_2 * this.VsOrg[1]
+        Rot0_2 = Rot(axis = self.VsOrg[2] - self.VsOrg[0], angle = b0)
+        V1 = Rot0_2 * self.VsOrg[1]
         if (Geom3D.eq(b0, b1)):
             V6 = Vec([-V1[0], V1[1], V1[2]])
         else:
-            Rot5_0 = Rot(axis = this.VsOrg[0] - this.VsOrg[5], angle = b1)
-            V6 = Rot5_0 * this.VsOrg[6]
-        V2 = this.VsOrg[2]
+            Rot5_0 = Rot(axis = self.VsOrg[0] - self.VsOrg[5], angle = b1)
+            V6 = Rot5_0 * self.VsOrg[6]
+        V2 = self.VsOrg[2]
         if keepV0:
-            Rot5_2 = Rot(axis = this.VsOrg[5] - this.VsOrg[2], angle = a)
-            V3 = Rot5_2 * (this.VsOrg[3] - V2) + V2
-            this.Vs = [
-                    this.VsOrg[0],
+            Rot5_2 = Rot(axis = self.VsOrg[5] - self.VsOrg[2], angle = a)
+            V3 = Rot5_2 * (self.VsOrg[3] - V2) + V2
+            self.Vs = [
+                    self.VsOrg[0],
                     V1,
-                    this.VsOrg[2],
+                    self.VsOrg[2],
                     V3,
                     Vec([-V3[0], V3[1], V3[2]]),
-                    this.VsOrg[5],
+                    self.VsOrg[5],
                     V6,
                 ]
         else:
-            Rot2_5 = Rot(axis = this.VsOrg[2] - this.VsOrg[5], angle = a)
-            V0 = Rot2_5 * (this.VsOrg[0] - V2) + V2
+            Rot2_5 = Rot(axis = self.VsOrg[2] - self.VsOrg[5], angle = a)
+            V0 = Rot2_5 * (self.VsOrg[0] - V2) + V2
             V1 = Rot2_5 * (V1 - V2) + V2
             V6 = Rot2_5 * (V6 - V2) + V2
-            this.Vs = [
+            self.Vs = [
                     V0,
                     V1,
-                    this.VsOrg[2],
-                    this.VsOrg[3],
-                    this.VsOrg[4],
-                    this.VsOrg[5],
+                    self.VsOrg[2],
+                    self.VsOrg[3],
+                    self.VsOrg[4],
+                    self.VsOrg[5],
                     V6,
                 ]
 
-    def fold_star(self, a0, b0, a1, b1, keepV0=True, rotate=0):
+    def fold_shell(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         """
         Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
 
-        The fold angle a refers the the axes V0-V2 and V0-V5 and
-        the fold angle b0 refers the the axes V0-V3 and V0-V4.
+        The fold angle a refers the axes V0-V2 and V0-V5 and
+        the fold angle b0 refers the axes V0-V3 and V0-V4.
         The keepV0 variable is ignored here (it is provided to be consistent
         with the other fold functions.)
         """
@@ -822,22 +825,22 @@ class RegularHeptagon:
         #
 
         prj = {
-            0: self.fold_star_0,
-            1: self.fold_star_1,
-            2: self.fold_star_2,
-            3: self.fold_star_3,
-            4: self.fold_star_4,
-            5: self.fold_star_5,
-            6: self.fold_star_6
+            0: self.fold_shell_0,
+            1: self.fold_shell_1,
+            2: self.fold_shell_2,
+            3: self.fold_shell_3,
+            4: self.fold_shell_4,
+            5: self.fold_shell_5,
+            6: self.fold_shell_6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
-    def fold_star_0(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_0(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
 
-        The fold angle a refers the the axes V0-V2 and V0-V5 and
-        the fold angle b0 refers the the axes V0-V3 and V0-V4.
+        The fold angle a refers the axes V0-V2 and V0-V5 and
+        the fold angle b0 refers the axes V0-V3 and V0-V4.
         The keepV0 variable is ignored here (it is provided to be consistent
         with the other fold functions.)
         """
@@ -877,9 +880,9 @@ class RegularHeptagon:
                 Rot5_0 = Rot(axis=V0 - V5, angle=b1)
                 V6 = Rot5_0 * (V6 - V0) + V0
             self.Vs = [V0, V1, V2, self.VsOrg[3], self.VsOrg[4], V5, V6]
-            self.fold_star_es_fs(0)
+            self.fold_shell_es_fs(0)
 
-    def fold_star_es_fs(self, no):
+    def fold_shell_es_fs(self, no):
         """
         Set self.Es and self.FS for shell fold and specified position.
 
@@ -898,7 +901,7 @@ class RegularHeptagon:
             i[0], i[2], i[0], i[3], i[0], i[4], i[0], i[5]
         ]
 
-    def fold_star_1(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_1(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -921,11 +924,11 @@ class RegularHeptagon:
         #           "         "
         #           5         4
         #
-        self.fold_star_es_fs(1)
-        self.fold_star_1_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.fold_shell_es_fs(1)
+        self.fold_shell_1_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_1_vs(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_star_1, see that one for more info
+    def fold_shell_1_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_1, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -970,7 +973,7 @@ class RegularHeptagon:
 
         self.Vs = v
 
-    def fold_star_2(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_2(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -993,11 +996,11 @@ class RegularHeptagon:
         #           "         "
         #           6         5
         #
-        self.fold_star_es_fs(2)
-        self.fold_star_2_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.fold_shell_es_fs(2)
+        self.fold_shell_2_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_star_2, see that one for more info
+    def fold_shell_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_2, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -1050,7 +1053,7 @@ class RegularHeptagon:
 
         self.Vs = v
 
-    def fold_star_3(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_3(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -1073,11 +1076,11 @@ class RegularHeptagon:
         #           "         "
         #           0         6
         #
-        self.fold_star_es_fs(3)
-        self.fold_star_3_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.fold_shell_es_fs(3)
+        self.fold_shell_3_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_3_vs(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_star_3, see that one for more info
+    def fold_shell_3_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_3, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -1130,7 +1133,7 @@ class RegularHeptagon:
 
         self.Vs = v
 
-    def fold_star_4(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_4(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -1153,11 +1156,11 @@ class RegularHeptagon:
         #           "         "
         #           1         0
         #
-        self.fold_star_es_fs(4)
-        self.fold_star_4_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.fold_shell_es_fs(4)
+        self.fold_shell_4_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_4_vs(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_star_3, see that one for more info
+    def fold_shell_4_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_3, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -1210,7 +1213,7 @@ class RegularHeptagon:
 
         self.Vs = v
 
-    def fold_star_5(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_5(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -1233,11 +1236,11 @@ class RegularHeptagon:
         #           "         "
         #           2         1
         #
-        self.fold_star_es_fs(5)
-        self.fold_star_5_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.fold_shell_es_fs(5)
+        self.fold_shell_5_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_star_5_vs(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_star_3, see that one for more info
+    def fold_shell_5_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_3, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -1290,7 +1293,7 @@ class RegularHeptagon:
 
         self.Vs = v
 
-    def fold_star_6(self, a0, b0, a1, b1, keepV0=True):
+    def fold_shell_6(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'shell'.
 
@@ -1339,26 +1342,26 @@ class RegularHeptagon:
             Vs[1]
         ]
 
-    def fold_W(this, a0, b0, a1, b1, keepV0 = True, rotate = 0):
+    def fold_W(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         prj = {
-            0: this.fold_W0,
-            1: this.fold_W1,
-            2: this.fold_W2,
-            3: this.fold_W3,
-            4: this.fold_W4,
-            5: this.fold_W5,
-            6: this.fold_W6
+            0: self.fold_W0,
+            1: self.fold_W1,
+            2: self.fold_W2,
+            3: self.fold_W3,
+            4: self.fold_W4,
+            5: self.fold_W5,
+            6: self.fold_W6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
-    def fold_W0(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W0(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V0-V3,
-        the fold angle a1 refers to the axes V0-V4,
-        The fold angle b0 refers to the axes V1-V3,
-        The fold angle b1 refers to the axes V6-V4 and
+        the fold angle a0 refers to the axis V0-V3,
+        the fold angle a1 refers to the axis V0-V4,
+        The fold angle b0 refers to the axis V1-V3,
+        The fold angle b1 refers to the axis V6-V4 and
         The vertex V0 is kept invariant during folding
         The keepV0 variable is ignored here (it is provided to be consistent
         with the other fold functions.)
@@ -1375,10 +1378,10 @@ class RegularHeptagon:
         #          "         "
         #          4         3
         #
-        Rot0_3 = Rot(axis = this.VsOrg[3] - this.VsOrg[0], angle = a0)
-        V1 = Rot0_3 * this.VsOrg[1]
-        V2_ = Rot0_3 * this.VsOrg[2]
-        Rot1_3 = Rot(axis = this.VsOrg[3] - V1, angle = b0)
+        Rot0_3 = Rot(axis = self.VsOrg[3] - self.VsOrg[0], angle = a0)
+        V1 = Rot0_3 * self.VsOrg[1]
+        V2_ = Rot0_3 * self.VsOrg[2]
+        Rot1_3 = Rot(axis = self.VsOrg[3] - V1, angle = b0)
         V2 = Rot1_3 * (V2_ - V1) + V1
         if (Geom3D.eq(a0, a1)):
             V6 = Vec([-V1[0], V1[1], V1[2]])
@@ -1386,29 +1389,29 @@ class RegularHeptagon:
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
                 V5 = Vec([-V2_[0], V2_[1], V2_[2]])
-                Rot4_6 = Rot(axis = V6 - this.VsOrg[4], angle = b1)
+                Rot4_6 = Rot(axis = V6 - self.VsOrg[4], angle = b1)
                 V5 = Rot4_6 * (V5 - V6) + V6
         else:
-            Rot4_0 = Rot(axis = this.VsOrg[0] - this.VsOrg[4], angle = a1)
-            V6 = Rot4_0 * this.VsOrg[6]
-            V5 = Rot4_0 * this.VsOrg[5]
-            Rot4_6 = Rot(axis = V6 - this.VsOrg[4], angle = b1)
+            Rot4_0 = Rot(axis = self.VsOrg[0] - self.VsOrg[4], angle = a1)
+            V6 = Rot4_0 * self.VsOrg[6]
+            V5 = Rot4_0 * self.VsOrg[5]
+            Rot4_6 = Rot(axis = V6 - self.VsOrg[4], angle = b1)
             V5 = Rot4_6 * (V5 - V6) + V6
-        this.Vs = [
-                this.VsOrg[0],
+        self.Vs = [
+                self.VsOrg[0],
                 V1,
                 V2,
-                this.VsOrg[3],
-                this.VsOrg[4],
+                self.VsOrg[3],
+                self.VsOrg[4],
                 V5,
                 V6,
             ]
-        this.Fs = [[1, 3, 2], [1, 0, 3], [0, 4, 3], [0, 6, 4], [6, 5, 4]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[1, 3, 2], [1, 0, 3], [0, 4, 3], [0, 6, 4], [6, 5, 4]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 1, 3, 3, 0, 0, 4, 4, 6
             ]
 
-    def fold_W1_help(this, a0, b0, a1, b1, keepV0, Vs):
+    def fold_W1_help(self, a0, b0, a1, b1, keepV0, Vs):
         """Helper function for fold_W1, see that one for more info
 
         Vs: the array with vertex numbers.
@@ -1461,7 +1464,7 @@ class RegularHeptagon:
                     V6,
                 ]
 
-    def fold_W3_help(this, a0, b0, a1, b1, keepV0, Vs):
+    def fold_W3_help(self, a0, b0, a1, b1, keepV0, Vs):
         """Helper function for fold_W3, see that one for more info
 
         Vs: the array with vertex numbers.
@@ -1519,14 +1522,14 @@ class RegularHeptagon:
                     Vs[6],
                 ]
 
-    def fold_W1(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W1(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V1-V4,
-        the fold angle a1 refers to the axes V1-V5,
-        The fold angle b0 refers to the axes V2-V4,
-        The fold angle b1 refers to the axes V0-V5 and
+        the fold angle a0 refers to the axis V1-V4,
+        the fold angle a1 refers to the axis V1-V5,
+        The fold angle b0 refers to the axis V2-V4,
+        The fold angle b1 refers to the axis V0-V5 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -1542,20 +1545,20 @@ class RegularHeptagon:
         #          "         "
         #          5         4
         #
-        this.Fs = [[2, 4, 3], [2, 1, 4], [1, 5, 4], [1, 0, 5], [0, 6, 5]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[2, 4, 3], [2, 1, 4], [1, 5, 4], [1, 0, 5], [0, 6, 5]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 2, 4, 4, 1, 1, 5, 5, 0
             ]
-        this.Vs = this.fold_W1_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+        self.Vs = self.fold_W1_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_W2(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W2(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V2-V5,
-        the fold angle a1 refers to the axes V2-V6,
-        The fold angle b0 refers to the axes V3-V5,
-        The fold angle b1 refers to the axes V1-V6 and
+        the fold angle a0 refers to the axis V2-V5,
+        the fold angle a1 refers to the axis V2-V6,
+        The fold angle b0 refers to the axis V3-V5,
+        The fold angle b1 refers to the axis V1-V6 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -1571,22 +1574,22 @@ class RegularHeptagon:
         #          "         "
         #          6         5
         #
-        this.Fs = [[3, 5, 4], [3, 2, 5], [2, 6, 5], [2, 1, 6], [1, 0, 6]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[3, 5, 4], [3, 2, 5], [2, 6, 5], [2, 1, 6], [1, 0, 6]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 3, 5, 5, 2, 2, 6, 6, 1
             ]
-        Vs = this.fold_W1_help(a0, b0, a1, b1, keepV0,
+        Vs = self.fold_W1_help(a0, b0, a1, b1, keepV0,
             [
-                this.VsOrg[1],
-                this.VsOrg[2],
-                this.VsOrg[3],
-                this.VsOrg[4],
-                this.VsOrg[5],
-                this.VsOrg[6],
-                this.VsOrg[0]
+                self.VsOrg[1],
+                self.VsOrg[2],
+                self.VsOrg[3],
+                self.VsOrg[4],
+                self.VsOrg[5],
+                self.VsOrg[6],
+                self.VsOrg[0]
             ]
         )
-        this.Vs = [
+        self.Vs = [
             Vs[6],
             Vs[0],
             Vs[1],
@@ -1596,14 +1599,14 @@ class RegularHeptagon:
             Vs[5]
         ]
 
-    def fold_W3(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W3(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V3-V6,
-        the fold angle a1 refers to the axes V3-V0,
-        The fold angle b0 refers to the axes V4-V6,
-        The fold angle b1 refers to the axes V2-V0 and
+        the fold angle a0 refers to the axis V3-V6,
+        the fold angle a1 refers to the axis V3-V0,
+        The fold angle b0 refers to the axis V4-V6,
+        The fold angle b1 refers to the axis V2-V0 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -1619,20 +1622,20 @@ class RegularHeptagon:
         #          "         "
         #          0         6
         #
-        this.Fs = [[4, 6, 5], [4, 3, 6], [3, 0, 6], [3, 2, 0], [2, 1, 0]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[4, 6, 5], [4, 3, 6], [3, 0, 6], [3, 2, 0], [2, 1, 0]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 4, 6, 6, 3, 3, 0, 0, 2
             ]
-        this.Vs = this.fold_W3_help(a0, b0, a1, b1, keepV0, this.VsOrg)
+        self.Vs = self.fold_W3_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_W4(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W4(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V3-V6,
-        the fold angle a1 refers to the axes V3-V0,
-        The fold angle b0 refers to the axes V4-V6,
-        The fold angle b1 refers to the axes V2-V0 and
+        the fold angle a0 refers to the axis V3-V6,
+        the fold angle a1 refers to the axis V3-V0,
+        The fold angle b0 refers to the axis V4-V6,
+        The fold angle b1 refers to the axis V2-V0 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -1648,22 +1651,22 @@ class RegularHeptagon:
         #          "         "
         #          1         0
         #
-        this.Fs = [[5, 0, 6], [5, 4, 0], [4, 1, 0], [4, 3, 1], [3, 2, 1]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[5, 0, 6], [5, 4, 0], [4, 1, 0], [4, 3, 1], [3, 2, 1]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 5, 0, 0, 4, 4, 1, 1, 3
             ]
-        Vs = this.fold_W3_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_W3_help(-a1, -b1, -a0, -b0, keepV0,
             [
-                this.VsOrg[0],
-                this.VsOrg[6],
-                this.VsOrg[5],
-                this.VsOrg[4],
-                this.VsOrg[3],
-                this.VsOrg[2],
-                this.VsOrg[1]
+                self.VsOrg[0],
+                self.VsOrg[6],
+                self.VsOrg[5],
+                self.VsOrg[4],
+                self.VsOrg[3],
+                self.VsOrg[2],
+                self.VsOrg[1]
             ]
         )
-        this.Vs = [
+        self.Vs = [
             Vs[0],
             Vs[6],
             Vs[5],
@@ -1673,14 +1676,14 @@ class RegularHeptagon:
             Vs[1]
         ]
 
-    def fold_W5(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W5(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V1-V4,
-        the fold angle a1 refers to the axes V1-V5,
-        The fold angle b0 refers to the axes V2-V4,
-        The fold angle b1 refers to the axes V0-V5 and
+        the fold angle a0 refers to the axis V1-V4,
+        the fold angle a1 refers to the axis V1-V5,
+        The fold angle b0 refers to the axis V2-V4,
+        The fold angle b1 refers to the axis V0-V5 and
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -1696,22 +1699,22 @@ class RegularHeptagon:
         #          "         "
         #          2         1
         #
-        this.Fs = [[0, 6, 1], [6, 5, 1], [5, 2, 1], [5, 4, 2], [4, 3, 2]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[0, 6, 1], [6, 5, 1], [5, 2, 1], [5, 4, 2], [4, 3, 2]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 6, 1, 1, 5, 5, 2, 2, 4
             ]
-        Vs = this.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
             [
-                this.VsOrg[6],
-                this.VsOrg[5],
-                this.VsOrg[4],
-                this.VsOrg[3],
-                this.VsOrg[2],
-                this.VsOrg[1],
-                this.VsOrg[0]
+                self.VsOrg[6],
+                self.VsOrg[5],
+                self.VsOrg[4],
+                self.VsOrg[3],
+                self.VsOrg[2],
+                self.VsOrg[1],
+                self.VsOrg[0]
             ]
         )
-        this.Vs = [
+        self.Vs = [
             Vs[6],
             Vs[5],
             Vs[4],
@@ -1721,14 +1724,14 @@ class RegularHeptagon:
             Vs[0]
         ]
 
-    def fold_W6(this, a0, b0, a1, b1, keepV0 = True):
+    def fold_W6(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
-        the fold angle a0 refers to the axes V6-V2,
-        the fold angle a1 refers to the axes V6-V3,
-        The fold angle b0 refers to the axes V2-V0 and
-        The fold angle b1 refers to the axes V3-V5,
+        the fold angle a0 refers to the axis V6-V2,
+        the fold angle a1 refers to the axis V6-V3,
+        The fold angle b0 refers to the axis V2-V0 and
+        The fold angle b1 refers to the axis V3-V5,
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
@@ -1744,23 +1747,23 @@ class RegularHeptagon:
         #          "         "
         #          3         2
         #
-        this.Fs = [[1, 0, 2], [2, 0, 6], [2, 6, 3], [3, 6, 5], [3, 5, 4]]
-        this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
+        self.Fs = [[1, 0, 2], [2, 0, 6], [2, 6, 3], [3, 6, 5], [3, 5, 4]]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 0, 2, 2, 6, 6, 3, 3, 5
             ]
         # opposite angle, because of opposite isometry
-        Vs = this.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
             [
-                this.VsOrg[0],
-                this.VsOrg[6],
-                this.VsOrg[5],
-                this.VsOrg[4],
-                this.VsOrg[3],
-                this.VsOrg[2],
-                this.VsOrg[1]
+                self.VsOrg[0],
+                self.VsOrg[6],
+                self.VsOrg[5],
+                self.VsOrg[4],
+                self.VsOrg[3],
+                self.VsOrg[2],
+                self.VsOrg[1]
             ]
         )
-        this.Vs = [
+        self.Vs = [
             Vs[0],
             Vs[6],
             Vs[5],
@@ -1770,16 +1773,325 @@ class RegularHeptagon:
             Vs[1]
         ]
 
-    def translate(this, T):
-        for i in range(len(this.Vs)):
-            this.Vs[i] = T + this.Vs[i]
+    def fold_mixed(self, a0, b0, a1, b1, keepV0=True, rotate=0):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
 
-    def rotate(this, axis, angle):
-        this.transform(Rot(axis = axis, angle = angle))
+        The fold angle a0 refers the axis V0-V2
+        the fold angle b0 refers the axes V0-V3 and V0-V4.
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #               Vi
+        #               .^.
+        #       i+6     | |\_   i+1
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #     i+5 |  / i     \    i+2
+        #          \|  s      | axis a0
+        #           "         "
+        #         i+4  a1     i+3
+        #
 
-    def transform(this, T):
-        for i in range(len(this.Vs)):
-            this.Vs[i] = T * this.Vs[i]
+        prj = {
+            0: self.fold_mixed_0,
+            1: self.fold_mixed_1,
+            2: self.fold_mixed_2,
+            3: self.fold_mixed_3,
+            4: self.fold_mixed_4,
+            5: self.fold_mixed_5,
+            6: self.fold_mixed_6
+        }
+        prj[rotate](a0, b0, a1, b1, keepV0)
+
+    def fold_mixed_es_fs(self, no):
+        """
+        Set self.Es and self.FS for shell fold and specified position.
+
+        no: number to shift up
+        """
+        i = [(i + no) % 7 for i in range(7)]
+        self.Fs = [
+            [i[0], i[2], i[1]],
+            [i[0], i[3], i[2]],
+            [i[0], i[4], i[3]],
+            [i[0], i[6], i[4]],
+            [i[6], i[5], i[4]],
+        ]
+        self.Es = [
+            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
+            i[0], i[2], i[0], i[3], i[0], i[4], i[6], i[4]
+        ]
+
+    def fold_mixed_0(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V0-V3
+        the fold angle b0 refers the axis V0-V2
+        the fold angle a1 refers the axis V0-V4
+        the fold angle b1 refers the axis V6-V4
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                0
+        #               .^.
+        #        6      | |\_   1
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       5 |  / i     \    2
+        #          \|  s      | axis a0
+        #           "         "
+        #           4  a1     3
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(0)
+            self.fold_mixed_0_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_0_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_1, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot a0
+            V0V3 = (v[0] + v[3]) / 2
+            V0V3axis = Vec(v[0] - v[3])
+            # Note: negative angle
+            rot_a0 = Rot(axis=V0V3axis, angle=-a0)
+            # middle of V1-V2 which is // to V0V3 axis
+            V1V2  = (v[1] + v[2]) / 2
+            V1V2_ = V0V3 + rot_a0 * (V1V2 - V0V3)
+            v[1] = V1V2_ + (v[1] - V1V2)
+            v[2]  = V1V2_ + (v[2] - V1V2)
+
+            # rot b0
+            V0V2 = (v[0] + v[2]) / 2
+            V0V2axis = Vec(v[0] - v[2])
+            # Note: negative angle
+            rot_b0 = Rot(axis=V0V2axis, angle=-b0)
+            v[1] = V0V2 + rot_b0 * (v[1] - V0V2)
+
+            # rot a1
+            V0V4 = (v[0] + v[4]) / 2
+            V0V4axis = Vec(v[0] - v[4])
+            rot_a1 = Rot(axis=V0V4axis, angle=a1)
+            # middle of V6-V5 which is // to V0V4 axis
+            V6V5  = (v[6] + v[5]) / 2
+            V6V5_ = V0V4 + rot_a1 * (V6V5 - V0V4)
+            v[6] = V6V5_ + (v[6] - V6V5)
+            v[5]  = V6V5_ + (v[5] - V6V5)
+
+            # rot b1
+            V6V4 = (v[6] + v[4]) / 2
+            V6V4axis = Vec(v[6] - v[4])
+            rot_b1 = Rot(axis=V6V4axis, angle=b1)
+            v[5] = V6V4 + rot_b1 * (v[5] - V6V4)
+
+        self.Vs = v
+
+    def fold_mixed_1(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V1-V4
+        the fold angle b0 refers the axis V1-V3
+        the fold angle a1 refers the axis V1-V5
+        the fold angle b1 refers the axis V0-V5
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                1
+        #               .^.
+        #        0      | |\_   2
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       6 |  / i     \    3
+        #          \|  s      | axis a0
+        #           "         "
+        #           5  a1     4
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(1)
+            assert False, "TODO"
+            self.fold_mixed_1_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_2(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V2-V5
+        the fold angle b0 refers the axis V2-V4
+        the fold angle a1 refers the axis V2-V6
+        the fold angle b1 refers the axis V1-V6
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                2
+        #               .^.
+        #        1      | |\_   3
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       0 |  / i     \    4
+        #          \|  s      | axis a0
+        #           "         "
+        #           6  a1     5
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(1)
+            assert False, "TODO"
+            self.fold_mixed_2_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_3(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V3-V6
+        the fold angle b0 refers the axis V3-V5
+        the fold angle a1 refers the axis V3-V0
+        the fold angle b1 refers the axis V2-V0
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                3
+        #               .^.
+        #        2      | |\_   4
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       1 |  / i     \    5
+        #          \|  s      | axis a0
+        #           "         "
+        #           0  a1     6
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(1)
+            assert False, "TODO"
+            self.fold_mixed_3_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_4(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V4-V0
+        the fold angle b0 refers the axis V4-V6
+        the fold angle a1 refers the axis V4-V1
+        the fold angle b1 refers the axis V3-V1
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                4
+        #               .^.
+        #        3      | |\_   5
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       2 |  / i     \    6
+        #          \|  s      | axis a0
+        #           "         "
+        #           1  a1     0
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(1)
+            assert False, "TODO"
+            self.fold_mixed_4_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_5(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V5-V1
+        the fold angle b0 refers the axis V5-V0
+        the fold angle a1 refers the axis V5-V2
+        the fold angle b1 refers the axis V4-V2
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                5
+        #               .^.
+        #        4      | |\_   6
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       3 |  / i     \    0
+        #          \|  s      | axis a0
+        #           "         "
+        #           2  a1     1
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(1)
+            assert False, "TODO"
+            self.fold_mixed_5_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_6(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V6-V2
+        the fold angle b0 refers the axis V6-V1
+        the fold angle a1 refers the axis V6-V3
+        the fold angle b1 refers the axis V5-V3
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #
+        #                6
+        #               .^.
+        #        5      | |\_   0
+        #        |     /   \ \_
+        # axis b1 \   |a    |  \_ axis b0
+        #         |   |x    |    \
+        #       4 |  / i     \    1
+        #          \|  s      | axis a0
+        #           "         "
+        #           3  a1     2
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_mixed_es_fs(1)
+            assert False, "TODO"
+            self.fold_mixed_6_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def translate(self, T):
+        for i in range(len(self.Vs)):
+            self.Vs[i] = T + self.Vs[i]
+
+    def rotate(self, axis, angle):
+        self.transform(Rot(axis = axis, angle = angle))
+
+    def transform(self, T):
+        for i in range(len(self.Vs)):
+            self.Vs[i] = T * self.Vs[i]
 
 def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     """Return the a tuple with vertices and the normal of an equilateral
@@ -1993,16 +2305,23 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         else:
             return this.posAngleMax
 
-    def posHeptagon(this):
-        this.heptagon.fold(this.fold1, this.fold2, this.oppFold1, this.oppFold2,
-            keepV0 = False, fold = this.foldHeptagon, rotate = this.rotateFold)
-        this.heptagon.translate(H * geomtypes.UY)
+    def posHeptagon(self):
+        self.heptagon.fold(
+            self.fold1,
+            self.fold2,
+            self.oppFold1,
+            self.oppFold2,
+            keepV0=False,
+            fold=self.foldHeptagon,
+            rotate=self.rotateFold,
+        )
+        self.heptagon.translate(H * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
-        this.heptagon.rotate(
-            -geomtypes.UX, geomtypes.QUARTER_TURN - this.dihedralAngle)
-        this.heptagon.translate(this.height*geomtypes.UZ)
-        if this.posAngle != 0:
-            this.heptagon.rotate(-geomtypes.UZ, this.posAngle)
+        self.heptagon.rotate(
+            -geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedralAngle)
+        self.heptagon.translate(self.height*geomtypes.UZ)
+        if self.posAngle != 0:
+            self.heptagon.rotate(-geomtypes.UZ, self.posAngle)
 
     def setV(this):
         this.posHeptagon()
@@ -2069,212 +2388,229 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.prevTrisFill    = -1
         this.prevOppTrisFill = -1
 
-    def createControlsSizer(this):
-        this.heightF = 40 # slider step factor, or: 1 / slider step
+    def createControlsSizer(self):
+        self.heightF = 40 # slider step factor, or: 1 / slider step
 
-        this.Guis = []
+        self.Guis = []
 
         # static adjustments
-        this.trisFillGui = wx.Choice(this.panel,
+        self.trisFillGui = wx.Choice(self.panel,
                 style = wx.RA_VERTICAL,
                 choices = []
             )
-        this.Guis.append(this.trisFillGui)
-        this.trisFillGui.Bind(wx.EVT_CHOICE, this.onTriangleFill)
-        this.setEnableTrisFillItems()
+        self.Guis.append(self.trisFillGui)
+        self.trisFillGui.Bind(wx.EVT_CHOICE, self.onTriangleFill)
+        self.setEnableTrisFillItems()
 
-        this.trisPosGui = wx.Choice(this.panel,
+        self.trisPosGui = wx.Choice(self.panel,
                 style = wx.RA_VERTICAL,
                 choices = [
                     'Position {}'.format(i + 1)
-                    for i in range(this.nr_of_positions)])
-        this.Guis.append(this.trisPosGui)
-        this.trisPosGui.Bind(wx.EVT_CHOICE, this.onTrisPosition)
-        this.setEnableTrisFillItems()
+                    for i in range(self.nr_of_positions)])
+        self.Guis.append(self.trisPosGui)
+        self.trisPosGui.Bind(wx.EVT_CHOICE, self.onTrisPosition)
+        self.setEnableTrisFillItems()
 
-        this.reflGui = wx.CheckBox(this.panel, label = 'Reflections Required')
-        this.Guis.append(this.reflGui)
-        this.reflGui.SetValue(this.shape.inclReflections)
-        this.reflGui.Bind(wx.EVT_CHECKBOX, this.onRefl)
+        self.reflGui = wx.CheckBox(self.panel, label = 'Reflections Required')
+        self.Guis.append(self.reflGui)
+        self.reflGui.SetValue(self.shape.inclReflections)
+        self.reflGui.Bind(wx.EVT_CHECKBOX, self.onRefl)
 
-        this.rotateFldGui = wx.Button(this.panel, label = 'Rotate Fold 1/7')
-        this.rotateFld = 0
-        this.Guis.append(this.rotateFldGui)
-        this.rotateFldGui.Bind(wx.EVT_BUTTON, this.onRotateFld)
+        self.rotateFldGui = wx.Button(self.panel, label = 'Rotate Fold 1/7')
+        self.rotateFld = 0
+        self.Guis.append(self.rotateFldGui)
+        self.rotateFldGui.Bind(wx.EVT_BUTTON, self.onRotateFld)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        this.applySymGui = wx.CheckBox(this.panel, label = 'Apply Symmetry')
-        this.Guis.append(this.applySymGui)
-        this.applySymGui.SetValue(this.shape.applySymmetry)
-        this.applySymGui.Bind(wx.EVT_CHECKBOX, this.onApplySym)
-        this.addTrisGui = wx.CheckBox(this.panel, label = 'Show Triangles')
-        this.Guis.append(this.addTrisGui)
-        this.addTrisGui.SetValue(this.shape.addXtraFs)
-        this.addTrisGui.Bind(wx.EVT_CHECKBOX, this.onAddTriangles)
+        self.applySymGui = wx.CheckBox(self.panel, label = 'Apply Symmetry')
+        self.Guis.append(self.applySymGui)
+        self.applySymGui.SetValue(self.shape.applySymmetry)
+        self.applySymGui.Bind(wx.EVT_CHECKBOX, self.onApplySym)
+        self.addTrisGui = wx.CheckBox(self.panel, label = 'Show Triangles')
+        self.Guis.append(self.addTrisGui)
+        self.addTrisGui.SetValue(self.shape.addXtraFs)
+        self.addTrisGui.Bind(wx.EVT_CHECKBOX, self.onAddTriangles)
 
         # static adjustments
-        l = this.foldMethodList = [
+        self.foldMethodList = [
             FoldMethod.PARALLEL.name.capitalize(),
             FoldMethod.TRIANGLE.name.capitalize(),
             FoldMethod.SHELL.name.capitalize(),
             FoldMethod.W.name.capitalize(),
             FoldMethod.TRAPEZIUM.name.capitalize(),
+            FoldMethod.MIXED.name.capitalize(),
         ]
-        this.foldMethodListItems = [
-            FoldMethod.get(l[i]) for i in range(len(l))
+        self.foldMethodListItems = [
+            FoldMethod.get(self.foldMethodList[i]) for i in range(len(self.foldMethodList))
         ]
-        this.foldMethodGui = wx.RadioBox(this.panel,
+        self.valid_fold_incl_refl = {
+            True: [
+                FoldMethod.PARALLEL.name.capitalize(),
+                FoldMethod.TRIANGLE.name.capitalize(),
+                FoldMethod.SHELL.name.capitalize(),
+                FoldMethod.W.name.capitalize(),
+                FoldMethod.TRAPEZIUM.name.capitalize(),
+            ],
+            False: [
+                FoldMethod.SHELL.name.capitalize(),
+                FoldMethod.W.name.capitalize(),
+                FoldMethod.MIXED.name.capitalize(),
+            ]
+        }
+
+        self.foldMethodGui = wx.RadioBox(self.panel,
                 label = 'Heptagon Fold Method',
                 style = wx.RA_VERTICAL,
-                choices = this.foldMethodList
+                choices = self.foldMethodList
             )
-        for i in range(len(this.foldMethodList)):
-            if (this.foldMethodList[i].upper() == this.foldMethod.name):
-                this.foldMethodGui.SetSelection(i)
-        this.Guis.append(this.foldMethodGui)
-        this.foldMethodGui.Bind(wx.EVT_RADIOBOX, this.onFoldMethod)
+        for i in range(len(self.foldMethodList)):
+            if (self.foldMethodList[i].upper() == self.foldMethod.name):
+                self.foldMethodGui.SetSelection(i)
+        self.Guis.append(self.foldMethodGui)
+        self.foldMethodGui.Bind(wx.EVT_RADIOBOX, self.onFoldMethod)
+        self.show_right_folds()
 
         # predefined positions
-        this.prePosGui = wx.Choice(this.panel,
+        self.prePosGui = wx.Choice(self.panel,
                 #label = 'Only Regular Faces with:',
                 style = wx.RA_VERTICAL,
-                choices = this.prePosStrLst
+                choices = self.prePosStrLst
             )
         # Don't hardcode which index is dyn_pos, I might reorder the item list
         # one time, and will probably forget to update the default selection..
-        for i in range(len(this.prePosStrLst)):
-            if (this.prePosStrLst[i] == this.stringify[dyn_pos]):
-                this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
+        for i in range(len(self.prePosStrLst)):
+            if (self.prePosStrLst[i] == self.stringify[dyn_pos]):
+                self.prePosGui.SetStringSelection(self.stringify[dyn_pos])
                 break
-        this.setEnablePrePosItems()
-        this.Guis.append(this.prePosGui)
-        this.prePosGui.Bind(wx.EVT_CHOICE, this.onPrePos)
+        self.setEnablePrePosItems()
+        self.Guis.append(self.prePosGui)
+        self.prePosGui.Bind(wx.EVT_CHOICE, self.onPrePos)
 
-        this.openFileButton = wx.Button(this.panel, label = 'Open File')
-        this.firstButton    = wx.Button(this.panel, label = 'First')
-        this.nextButton     = wx.Button(this.panel, label = 'Next')
-        this.nrTxt          = wx.Button(this.panel, label = '---',  style=wx.NO_BORDER)
-        this.prevButton     = wx.Button(this.panel, label = 'Prev')
-        this.lastButton     = wx.Button(this.panel, label = 'Last')
-        this.Guis.append(this.openFileButton)
-        this.Guis.append(this.firstButton)
-        this.Guis.append(this.nextButton)
-        this.Guis.append(this.nrTxt)
-        this.Guis.append(this.prevButton)
-        this.Guis.append(this.lastButton)
-        this.openFileButton.Bind(wx.EVT_BUTTON, this.onOpenFile)
-        this.firstButton.Bind(wx.EVT_BUTTON, this.onFirst)
-        this.nextButton.Bind(wx.EVT_BUTTON, this.onNext)
-        this.prevButton.Bind(wx.EVT_BUTTON, this.onPrev)
-        this.lastButton.Bind(wx.EVT_BUTTON, this.onLast)
+        self.openFileButton = wx.Button(self.panel, label = 'Open File')
+        self.firstButton    = wx.Button(self.panel, label = 'First')
+        self.nextButton     = wx.Button(self.panel, label = 'Next')
+        self.nrTxt          = wx.Button(self.panel, label = '---',  style=wx.NO_BORDER)
+        self.prevButton     = wx.Button(self.panel, label = 'Prev')
+        self.lastButton     = wx.Button(self.panel, label = 'Last')
+        self.Guis.append(self.openFileButton)
+        self.Guis.append(self.firstButton)
+        self.Guis.append(self.nextButton)
+        self.Guis.append(self.nrTxt)
+        self.Guis.append(self.prevButton)
+        self.Guis.append(self.lastButton)
+        self.openFileButton.Bind(wx.EVT_BUTTON, self.onOpenFile)
+        self.firstButton.Bind(wx.EVT_BUTTON, self.onFirst)
+        self.nextButton.Bind(wx.EVT_BUTTON, self.onNext)
+        self.prevButton.Bind(wx.EVT_BUTTON, self.onPrev)
+        self.lastButton.Bind(wx.EVT_BUTTON, self.onLast)
 
         # dynamic adjustments
-        this.posAngleGui = wx.Slider(
-                this.panel,
-                value = Geom3D.Rad2Deg * this.shape.posAngle,
-                minValue = Geom3D.Rad2Deg * this.shape.posAngleMin,
-                maxValue = Geom3D.Rad2Deg * this.shape.posAngleMax,
+        self.posAngleGui = wx.Slider(
+                self.panel,
+                value = Geom3D.Rad2Deg * self.shape.posAngle,
+                minValue = Geom3D.Rad2Deg * self.shape.posAngleMin,
+                maxValue = Geom3D.Rad2Deg * self.shape.posAngleMax,
                 style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.posAngleGui)
-        this.posAngleGui.Bind(wx.EVT_SLIDER, this.onPosAngle)
-        this.minFoldAngle = -180
-        this.maxFoldAngle =  180
-        this.dihedralAngleGui = wx.Slider(
-                this.panel,
-                value = Geom3D.Rad2Deg * this.shape.dihedralAngle,
-                minValue = this.minFoldAngle,
-                maxValue = this.maxFoldAngle,
+        self.Guis.append(self.posAngleGui)
+        self.posAngleGui.Bind(wx.EVT_SLIDER, self.onPosAngle)
+        self.minFoldAngle = -180
+        self.maxFoldAngle =  180
+        self.dihedralAngleGui = wx.Slider(
+                self.panel,
+                value = Geom3D.Rad2Deg * self.shape.dihedralAngle,
+                minValue = self.minFoldAngle,
+                maxValue = self.maxFoldAngle,
                 style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.dihedralAngleGui)
-        this.dihedralAngleGui.Bind(wx.EVT_SLIDER, this.onDihedralAngle)
-        this.fold1Gui = wx.Slider(
-                this.panel,
-                value = Geom3D.Rad2Deg * this.shape.fold1,
-                minValue = this.minFoldAngle,
-                maxValue = this.maxFoldAngle,
+        self.Guis.append(self.dihedralAngleGui)
+        self.dihedralAngleGui.Bind(wx.EVT_SLIDER, self.onDihedralAngle)
+        self.fold1Gui = wx.Slider(
+                self.panel,
+                value = Geom3D.Rad2Deg * self.shape.fold1,
+                minValue = self.minFoldAngle,
+                maxValue = self.maxFoldAngle,
                 style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.fold1Gui)
-        this.fold1Gui.Bind(wx.EVT_SLIDER, this.onFold1)
-        this.fold2Gui = wx.Slider(
-                this.panel,
-                value = Geom3D.Rad2Deg * this.shape.fold2,
-                minValue = this.minFoldAngle,
-                maxValue = this.maxFoldAngle,
+        self.Guis.append(self.fold1Gui)
+        self.fold1Gui.Bind(wx.EVT_SLIDER, self.onFold1)
+        self.fold2Gui = wx.Slider(
+                self.panel,
+                value = Geom3D.Rad2Deg * self.shape.fold2,
+                minValue = self.minFoldAngle,
+                maxValue = self.maxFoldAngle,
                 style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.fold2Gui)
-        this.fold2Gui.Bind(wx.EVT_SLIDER, this.onFold2)
-        this.fold1OppGui = wx.Slider(
-                this.panel,
-                value = Geom3D.Rad2Deg * this.shape.oppFold1,
-                minValue = this.minFoldAngle,
-                maxValue = this.maxFoldAngle,
+        self.Guis.append(self.fold2Gui)
+        self.fold2Gui.Bind(wx.EVT_SLIDER, self.onFold2)
+        self.fold1OppGui = wx.Slider(
+                self.panel,
+                value = Geom3D.Rad2Deg * self.shape.oppFold1,
+                minValue = self.minFoldAngle,
+                maxValue = self.maxFoldAngle,
                 style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.fold1OppGui)
-        this.fold1OppGui.Bind(wx.EVT_SLIDER, this.onFold1Opp)
-        this.fold2OppGui = wx.Slider(
-                this.panel,
-                value = Geom3D.Rad2Deg * this.shape.oppFold2,
-                minValue = this.minFoldAngle,
-                maxValue = this.maxFoldAngle,
+        self.Guis.append(self.fold1OppGui)
+        self.fold1OppGui.Bind(wx.EVT_SLIDER, self.onFold1Opp)
+        self.fold2OppGui = wx.Slider(
+                self.panel,
+                value = Geom3D.Rad2Deg * self.shape.oppFold2,
+                minValue = self.minFoldAngle,
+                maxValue = self.maxFoldAngle,
                 style = wx.SL_HORIZONTAL | wx.SL_LABELS
             )
-        this.Guis.append(this.fold2OppGui)
-        this.fold2OppGui.Bind(wx.EVT_SLIDER, this.onFold2Opp)
-        this.heightGui = wx.Slider(
-                this.panel,
-                value = this.maxHeight - this.shape.height*this.heightF,
-                minValue = -this.maxHeight * this.heightF,
-                maxValue = this.maxHeight * this.heightF,
+        self.Guis.append(self.fold2OppGui)
+        self.fold2OppGui.Bind(wx.EVT_SLIDER, self.onFold2Opp)
+        self.heightGui = wx.Slider(
+                self.panel,
+                value = self.maxHeight - self.shape.height*self.heightF,
+                minValue = -self.maxHeight * self.heightF,
+                maxValue = self.maxHeight * self.heightF,
                 style = wx.SL_VERTICAL
             )
-        this.Guis.append(this.heightGui)
-        this.heightGui.Bind(wx.EVT_SLIDER, this.onHeight)
-        this.__guisNoReflEnabled = True
-        if this.shape.inclReflections:
-            this.disableGuisNoRefl()
+        self.Guis.append(self.heightGui)
+        self.heightGui.Bind(wx.EVT_SLIDER, self.onHeight)
+        self.__guisNoReflEnabled = True
+        if self.shape.inclReflections:
+            self.disableGuisNoRefl()
 
-        this.setOrientGui = wx.TextCtrl(
-                this.panel
+        self.setOrientGui = wx.TextCtrl(
+                self.panel
             )
-        this.Guis.append(this.setOrientGui)
-        this.setOrientButton  = wx.Button(this.panel, label = 'Apply')
-        this.Guis.append(this.setOrientButton)
-        this.setOrientButton.Bind(wx.EVT_BUTTON, this.onSetOrient)
-        this.cleanOrientButton  = wx.Button(this.panel, label = 'Clean')
-        this.Guis.append(this.cleanOrientButton)
-        this.cleanOrientButton.Bind(wx.EVT_BUTTON, this.onCleanOrient)
+        self.Guis.append(self.setOrientGui)
+        self.setOrientButton  = wx.Button(self.panel, label = 'Apply')
+        self.Guis.append(self.setOrientButton)
+        self.setOrientButton.Bind(wx.EVT_BUTTON, self.onSetOrient)
+        self.cleanOrientButton  = wx.Button(self.panel, label = 'Clean')
+        self.Guis.append(self.cleanOrientButton)
+        self.cleanOrientButton.Bind(wx.EVT_BUTTON, self.onCleanOrient)
 
         # Sizers
-        this.Boxes = []
+        self.Boxes = []
 
         # sizer with view settings
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'View Settings'))
-        settingsSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        settingsSizer.Add(this.applySymGui, 0, wx.EXPAND)
-        settingsSizer.Add(this.addTrisGui, 0, wx.EXPAND)
-        settingsSizer.Add(this.reflGui, 0, wx.EXPAND)
-        settingsSizer.Add(this.rotateFldGui, 0, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'View Settings'))
+        settingsSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        settingsSizer.Add(self.applySymGui, 0, wx.EXPAND)
+        settingsSizer.Add(self.addTrisGui, 0, wx.EXPAND)
+        settingsSizer.Add(self.reflGui, 0, wx.EXPAND)
+        settingsSizer.Add(self.rotateFldGui, 0, wx.EXPAND)
         settingsSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         # The sizers holding the special positions
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'Special Positions'))
-        posSizerSubV = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Special Positions'))
+        posSizerSubV = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
-        posSizerSubH.Add(this.openFileButton, 0, wx.EXPAND)
-        posSizerSubH.Add(this.prePosGui, 0, wx.EXPAND)
+        posSizerSubH.Add(self.openFileButton, 0, wx.EXPAND)
+        posSizerSubH.Add(self.prePosGui, 0, wx.EXPAND)
         posSizerSubV.Add(posSizerSubH, 0, wx.EXPAND)
         posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
-        posSizerSubH.Add(this.firstButton, 1, wx.EXPAND)
-        posSizerSubH.Add(this.prevButton, 1, wx.EXPAND)
-        posSizerSubH.Add(this.nrTxt, 1, wx.EXPAND)
-        posSizerSubH.Add(this.nextButton, 1, wx.EXPAND)
-        posSizerSubH.Add(this.lastButton, 1, wx.EXPAND)
+        posSizerSubH.Add(self.firstButton, 1, wx.EXPAND)
+        posSizerSubH.Add(self.prevButton, 1, wx.EXPAND)
+        posSizerSubH.Add(self.nrTxt, 1, wx.EXPAND)
+        posSizerSubH.Add(self.nextButton, 1, wx.EXPAND)
+        posSizerSubH.Add(self.lastButton, 1, wx.EXPAND)
         posSizerSubV.Add(posSizerSubH, 0, wx.EXPAND)
         posSizerSubV.Add(wx.BoxSizer(), 1, wx.EXPAND)
         prePosSizerH = wx.BoxSizer(wx.HORIZONTAL)
@@ -2282,14 +2618,14 @@ class FldHeptagonCtrlWin(wx.Frame):
         prePosSizerH.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         # Alternatives of filling with triangles
-        this.Boxes.append(wx.StaticBox(this.panel,
+        self.Boxes.append(wx.StaticBox(self.panel,
                                         label = 'Triangle Fill Alternative'))
-        fillSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        fillSizer.Add(this.trisFillGui, 0, wx.EXPAND)
-        fillSizer.Add(this.trisPosGui, 0, wx.EXPAND)
+        fillSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        fillSizer.Add(self.trisFillGui, 0, wx.EXPAND)
+        fillSizer.Add(self.trisPosGui, 0, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
-        statSizer.Add(this.foldMethodGui, 0, wx.EXPAND)
+        statSizer.Add(self.foldMethodGui, 0, wx.EXPAND)
         statSizer.Add(fillSizer, 0, wx.EXPAND)
         statSizer.Add(settingsSizer, 0, wx.EXPAND)
         statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
@@ -2297,34 +2633,28 @@ class FldHeptagonCtrlWin(wx.Frame):
         posSizerH = wx.BoxSizer(wx.HORIZONTAL)
         # sizer holding the dynamic adjustments
         specPosDynamic = wx.BoxSizer(wx.VERTICAL)
-        this.Boxes.append(wx.StaticBox(this.panel,
-                                            label = 'Dihedral Angle (Degrees)'))
-        angleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        angleSizer.Add(this.dihedralAngleGui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel,
-                                            label = 'Fold 1 Angle (Degrees)'))
-        fold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        fold1Sizer.Add(this.fold1Gui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel,
-                                            label = 'Fold 2 Angle (Degrees)'))
-        fold2Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        fold2Sizer.Add(this.fold2Gui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel,
-                                        label = 'Positional Angle (Degrees)'))
-        posAngleSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        posAngleSizer.Add(this.posAngleGui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel,
-                                    label = 'Opposite Fold 1 Angle (Degrees)'))
-        oppFold1Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        oppFold1Sizer.Add(this.fold1OppGui, 1, wx.EXPAND)
-        this.Boxes.append(wx.StaticBox(this.panel,
-                                    label = 'Opposite Fold 2 Angle (Degrees)'))
-        oppFold2Sizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        oppFold2Sizer.Add(this.fold2OppGui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Dihedral Angle (Degrees)'))
+        angleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
+        angleSizer.Add(self.dihedralAngleGui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Fold 1 Angle (Degrees)'))
+        fold1Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        fold1Sizer.Add(self.fold1Gui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Fold 2 Angle (Degrees)'))
+        fold2Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        fold2Sizer.Add(self.fold2Gui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Positional Angle (Degrees)'))
+        posAngleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
+        posAngleSizer.Add(self.posAngleGui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Opposite Fold 1 Angle (Degrees)'))
+        oppFold1Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        oppFold1Sizer.Add(self.fold1OppGui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Opposite Fold 2 Angle (Degrees)'))
+        oppFold2Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        oppFold2Sizer.Add(self.fold2OppGui, 1, wx.EXPAND)
 
-        this.Boxes.append(wx.StaticBox(this.panel, label = 'Offset T'))
-        heightSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.VERTICAL)
-        heightSizer.Add(this.heightGui, 1, wx.EXPAND)
+        self.Boxes.append(wx.StaticBox(self.panel, label = 'Offset T'))
+        heightSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        heightSizer.Add(self.heightGui, 1, wx.EXPAND)
         specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
         specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
@@ -2335,12 +2665,12 @@ class FldHeptagonCtrlWin(wx.Frame):
         posSizerH.Add(specPosDynamic, 3, wx.EXPAND)
         posSizerH.Add(heightSizer, 1, wx.EXPAND)
 
-        this.Boxes.append(wx.StaticBox(this.panel,
+        self.Boxes.append(wx.StaticBox(self.panel,
             label = 'Set Orientation Directly (specify array)'))
-        setOrientSizer = wx.StaticBoxSizer(this.Boxes[-1], wx.HORIZONTAL)
-        setOrientSizer.Add(this.setOrientGui, 1, wx.EXPAND)
-        setOrientSizer.Add(this.setOrientButton, 0, wx.EXPAND)
-        setOrientSizer.Add(this.cleanOrientButton, 0, wx.EXPAND)
+        setOrientSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
+        setOrientSizer.Add(self.setOrientGui, 1, wx.EXPAND)
+        setOrientSizer.Add(self.setOrientButton, 0, wx.EXPAND)
+        setOrientSizer.Add(self.cleanOrientButton, 0, wx.EXPAND)
 
         # MAIN sizer
         mainVSizer = wx.BoxSizer(wx.VERTICAL)
@@ -2353,7 +2683,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
         mainSizer.Add(mainVSizer, 6, wx.EXPAND)
 
-        this.errorStr = {
+        self.errorStr = {
                 'PosEdgeCfg': "ERROR: Impossible combination of position and edge configuration!"
             }
 
@@ -2575,8 +2905,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             if this.foldMethod == FoldMethod.PARALLEL:
                 this.fold1OppGui.Disable()
                 this.fold2OppGui.Disable()
-            elif (this.foldMethod == FoldMethod.W or
-                this.foldMethod == FoldMethod.SHELL
+            elif (
+                this.foldMethod == FoldMethod.W
+                or this.foldMethod == FoldMethod.SHELL
+                or this.foldMethod == FoldMethod.MIXED
             ):
                 this.fold1OppGui.Enable()
                 this.fold2OppGui.Enable()
@@ -2645,30 +2977,31 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.addTrisGui.Enable()
         this.trisFillGui.Enable()
 
-    def onRefl(this, event=None):
-        this.shape.inclReflections = this.reflGui.IsChecked()
-        this.shape.updateShape = True
-        this.setEnablePrePosItems()
-        if this.shape.inclReflections:
-            this.set_default_size(this.refl_min_size)
+    def onRefl(self, event=None):
+        self.shape.inclReflections = self.reflGui.IsChecked()
+        self.shape.updateShape = True
+        self.show_right_folds()
+        self.setEnablePrePosItems()
+        if self.shape.inclReflections:
+            self.set_default_size(self.refl_min_size)
         else:
-            this.set_default_size(this.rot_min_size)
+            self.set_default_size(self.rot_min_size)
         if event is not None:
-            if this.isPrePos():
-                this.prePosGui.SetStringSelection(this.stringify[dyn_pos])
-                if not this.shape.inclReflections:
-                    this.__sav_oppFld1 = this.shape.fold1
-                    this.__sav_oppFld2 = this.shape.fold2
-                this.onPrePos(event)
+            if self.isPrePos():
+                self.prePosGui.SetStringSelection(self.stringify[dyn_pos])
+                if not self.shape.inclReflections:
+                    self.__sav_oppFld1 = self.shape.fold1
+                    self.__sav_oppFld2 = self.shape.fold2
+                self.onPrePos(event)
             else:
-                if this.shape.inclReflections:
-                    this.savTrisNoRefl = this.trisFillGui.GetStringSelection()
-                    this.disableGuisNoRefl()
+                if self.shape.inclReflections:
+                    self.savTrisNoRefl = self.trisFillGui.GetStringSelection()
+                    self.disableGuisNoRefl()
                 else:
-                    this.savTrisRefl = this.trisFillGui.GetStringSelection()
-                    this.enableGuisNoRefl()
-                this.statusBar.SetStatusText(this.shape.getStatusStr())
-                this.updateShape()
+                    self.savTrisRefl = self.trisFillGui.GetStringSelection()
+                    self.enableGuisNoRefl()
+                self.statusBar.SetStatusText(self.shape.getStatusStr())
+                self.updateShape()
 
     def setRotateFld(this, rotateFld):
         this.rotateFld = int(rotateFld) % 7
@@ -2865,6 +3198,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         this.setTriangleFillPosition(this.tris_position)
         this.setEnableTrisFillItems()
         this.updateShape()
+
+    def show_right_folds(self):
+        valid_names = self.valid_fold_incl_refl[self.shape.inclReflections]
+        is_valid = [False for _ in self.foldMethodList]
+        for name in valid_names:
+            i = self.foldMethodList.index(name)
+            is_valid[i] = True
+        for i, show in enumerate(is_valid):
+            self.foldMethodGui.ShowItem(i, show)
 
     def onFoldMethod(this, event = None):
         this.foldMethod = this.foldMethodListItems[
