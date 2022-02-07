@@ -745,7 +745,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             tris_str = trisAlt.key[tris_str]
             data = {
                     'set': in_data['set'],
-                    '7fold': heptagons.foldMethod.get(fold_method_str),
+                    '7fold': heptagons.FoldMethod.get(fold_method_str),
                     'tris': tris_str,
                     'fold-rot': this.fileStrMapFoldPos(in_data['file'])
             }

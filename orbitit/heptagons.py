@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 #
 # Copyright (C) 2008 Marcel Tunnissen
 #
@@ -25,6 +25,8 @@
 import wx
 import math
 import re
+from enum import Enum
+
 from OpenGL.GL import glColor, glEnable, glDisable, glBlendFunc
 from OpenGL.GL import GL_CULL_FACE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
@@ -364,19 +366,21 @@ TrisAlt = Def_TrisAlt('TrisAlt', [
         ]
     )
 
-class FoldMethod:
+class FoldMethod(Enum):
     parallel  = 0
     trapezium = 1
     w         = 2
     triangle  = 3
     star      = 4
 
-    def get(this, s):
+    @staticmethod
+    def get(s):
+        """Get the enum value for a fold name."""
         for k,v in FoldName.items():
             if v == s:
                 return k
         s = str.capitalize(s)
-        for k,v in FoldName.items():
+        for k, v in FoldName.items():
             if v == s:
                 return k
         return None
@@ -388,8 +392,6 @@ FoldName = {
         FoldMethod.triangle: 'Triangle',
         FoldMethod.star: 'Shell',
     }
-
-foldMethod = FoldMethod()
 
 class RegularHeptagon:
     def __init__(this):
@@ -1882,7 +1884,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.fold2 = 0.0
         this.oppFold1 = 0.0
         this.oppFold2 = 0.0
-        this.foldHeptagon = foldMethod.parallel
+        this.foldHeptagon = FoldMethod.parallel
         this.height = 2.3
         this.applySymmetry = True
         this.addXtraFs = True
@@ -2032,7 +2034,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.stringify[open_file] = "From File"
         this.panel = wx.Panel(this, -1)
         this.statusBar = this.CreateStatusBar()
-        this.foldMethod = foldMethod.triangle
+        this.foldMethod = FoldMethod.triangle
         this.restoreTris = False
         this.restoreO3s = False
         this.shape.foldHeptagon = this.foldMethod
@@ -2097,14 +2099,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         # static adjustments
         l = this.foldMethodList = [
-            FoldName[foldMethod.parallel],
-            FoldName[foldMethod.triangle],
-            FoldName[foldMethod.star],
-            FoldName[foldMethod.w],
-            FoldName[foldMethod.trapezium],
+            FoldName[FoldMethod.parallel],
+            FoldName[FoldMethod.triangle],
+            FoldName[FoldMethod.star],
+            FoldName[FoldMethod.w],
+            FoldName[FoldMethod.trapezium],
         ]
         this.foldMethodListItems = [
-            foldMethod.get(l[i]) for i in range(len(l))
+            FoldMethod.get(l[i]) for i in range(len(l))
         ]
         this.foldMethodGui = wx.RadioBox(this.panel,
                 label = 'Heptagon Fold Method',
