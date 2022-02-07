@@ -367,11 +367,11 @@ TrisAlt = Def_TrisAlt('TrisAlt', [
     )
 
 class FoldMethod(Enum):
-    parallel  = 0
-    trapezium = 1
-    w         = 2
-    triangle  = 3
-    star      = 4
+    PARALLEL  = 0
+    TRAPEZIUM = 1
+    W         = 2
+    TRIANGLE  = 3
+    SHELL     = 4
 
     @staticmethod
     def get(s):
@@ -386,11 +386,11 @@ class FoldMethod(Enum):
         return None
 
 FoldName = {
-        FoldMethod.parallel: 'Parallel',
-        FoldMethod.trapezium: 'Trapezium',
-        FoldMethod.w: 'W',
-        FoldMethod.triangle: 'Triangle',
-        FoldMethod.star: 'Shell',
+        FoldMethod.PARALLEL: 'Parallel',
+        FoldMethod.TRAPEZIUM: 'Trapezium',
+        FoldMethod.W: 'W',
+        FoldMethod.TRIANGLE: 'Triangle',
+        FoldMethod.SHELL: 'Shell',
     }
 
 class RegularHeptagon:
@@ -426,18 +426,18 @@ class RegularHeptagon:
         this.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
     def fold(this, a0, b0, a1 = None, b1 = None, keepV0 = True,
-                                                fold = FoldMethod.parallel,
+                                                fold = FoldMethod.PARALLEL,
                                                 rotate = 0
     ):
-        if fold == FoldMethod.parallel:
+        if fold == FoldMethod.PARALLEL:
             this.foldParallel(a0, b0, keepV0, rotate)
-        elif fold == FoldMethod.trapezium:
+        elif fold == FoldMethod.TRAPEZIUM:
             this.foldTrapezium(a0, b0, b1, keepV0, rotate)
-        elif fold == FoldMethod.w:
+        elif fold == FoldMethod.W:
             this.fold_W(a0, b0, a1, b1, keepV0, rotate)
-        elif fold == FoldMethod.triangle:
+        elif fold == FoldMethod.TRIANGLE:
             this.foldTriangle(a0, b0, b1, keepV0, rotate)
-        elif fold == FoldMethod.star:
+        elif fold == FoldMethod.SHELL:
             this.fold_star(a0, b0, a1, b1, keepV0, rotate)
         else:
             raise TypeError('Unknown fold')
@@ -1884,7 +1884,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         this.fold2 = 0.0
         this.oppFold1 = 0.0
         this.oppFold2 = 0.0
-        this.foldHeptagon = FoldMethod.parallel
+        this.foldHeptagon = FoldMethod.PARALLEL
         this.height = 2.3
         this.applySymmetry = True
         this.addXtraFs = True
@@ -2034,7 +2034,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 this.stringify[open_file] = "From File"
         this.panel = wx.Panel(this, -1)
         this.statusBar = this.CreateStatusBar()
-        this.foldMethod = FoldMethod.triangle
+        this.foldMethod = FoldMethod.TRIANGLE
         this.restoreTris = False
         this.restoreO3s = False
         this.shape.foldHeptagon = this.foldMethod
@@ -2099,11 +2099,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         # static adjustments
         l = this.foldMethodList = [
-            FoldName[FoldMethod.parallel],
-            FoldName[FoldMethod.triangle],
-            FoldName[FoldMethod.star],
-            FoldName[FoldMethod.w],
-            FoldName[FoldMethod.trapezium],
+            FoldName[FoldMethod.PARALLEL],
+            FoldName[FoldMethod.TRIANGLE],
+            FoldName[FoldMethod.SHELL],
+            FoldName[FoldMethod.W],
+            FoldName[FoldMethod.TRAPEZIUM],
         ]
         this.foldMethodListItems = [
             FoldMethod.get(l[i]) for i in range(len(l))
@@ -2556,16 +2556,16 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def allignFoldSlideBarsWithFoldMethod(this):
         if not this.shape.inclReflections:
-            if this.foldMethod == FoldMethod.parallel:
+            if this.foldMethod == FoldMethod.PARALLEL:
                 this.fold1OppGui.Disable()
                 this.fold2OppGui.Disable()
-            elif (this.foldMethod == FoldMethod.w or
-                this.foldMethod == FoldMethod.star
+            elif (this.foldMethod == FoldMethod.W or
+                this.foldMethod == FoldMethod.SHELL
             ):
                 this.fold1OppGui.Enable()
                 this.fold2OppGui.Enable()
-            elif (this.foldMethod == FoldMethod.trapezium or
-                this.foldMethod == FoldMethod.triangle
+            elif (this.foldMethod == FoldMethod.TRAPEZIUM or
+                this.foldMethod == FoldMethod.TRIANGLE
             ):
                 this.fold1OppGui.Disable()
                 this.fold2OppGui.Enable()
