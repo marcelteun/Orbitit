@@ -2093,7 +2093,7 @@ class RegularHeptagon:
             v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
             v[2] = v2v6_ + (v[2] - v2v6)
             v[6]  = v2v6_ + (v[6] - v2v6)
-            # middle of V0-V6 which is // to v3v5 axis
+            # middle of V1-V0 which is // to v3v5 axis
             v1v0  = (v[1] + v[0]) / 2
             v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
             v[1] = v1v0_ + (v[1] - v1v0)
@@ -2228,8 +2228,60 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(5)
-            assert False, "TODO"
             self.fold_mixed_5_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_5_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b1
+            v4v2 = (v[4] + v[2]) / 2
+            v4v2_axis = Vec(v[4] - v[2])
+            # Note: negative angle
+            rot_b1 = Rot(axis=v4v2_axis, angle=-b1)
+            # middle of V5-V1 which is // to v4v2 axis
+            v5v1 = (v[5] + v[1]) / 2
+            v5v1_ = v4v2 + rot_b1 * (v5v1 - v4v2)
+            v[5] = v5v1_ + (v[5] - v5v1)
+            v[1] = v5v1_ + (v[1] - v5v1)
+            # middle of V6-V0 which is // to v4v2 axis
+            v6v0 = (v[6] + v[0]) / 2
+            v6v0_ = v4v2 + rot_b1 * (v6v0 - v4v2)
+            v[6] = v6v0_ + (v[6] - v6v0)
+            v[0] = v6v0_ + (v[0] - v6v0)
+
+            # rot a1
+            v5v2 = (v[5] + v[2]) / 2
+            v5v2_axis = Vec(v[5] - v[2])
+            # Note: negative angle
+            rot_a1 = Rot(axis=v5v2_axis, angle=-a1)
+            # middle of V6-V1 which is // to v5v2 axis
+            v6v1  = (v[6] + v[1]) / 2
+            v6v1_ = v5v2 + rot_a1 * (v6v1 - v5v2)
+            v[6] = v6v1_ + (v[6] - v6v1)
+            v[1]  = v6v1_ + (v[1] - v6v1)
+            v[0] = v5v2 + rot_a1 * (v[0] - v5v2)
+
+            # rot a0
+            v5v1 = (v[5] + v[1]) / 2
+            v5v1_axis = Vec(v[5] - v[1])
+            # Note: negative angle
+            rot_a0 = Rot(axis=v5v1_axis, angle=-a0)
+            # middle of V6-V0 which is // to v5v1 axis
+            v6v0  = (v[6] + v[0]) / 2
+            v6v0_ = v5v1 + rot_a0 * (v6v0 - v5v1)
+            v[6] = v6v0_ + (v[6] - v6v0)
+            v[0]  = v6v0_ + (v[0] - v6v0)
+
+            # rot b0
+            v5v0 = (v[5] + v[0]) / 2
+            v5v0_axis = Vec(v[5] - v[0])
+            # Note: negative angle
+            rot_b0 = Rot(axis=v5v0_axis, angle=-b0)
+            v[6] = v5v0 + rot_b0 * (v[6] - v5v0)
+
+        self.Vs = v
 
     def fold_mixed_6(self, a0, b0, a1, b1, keepV0=True):
         """
