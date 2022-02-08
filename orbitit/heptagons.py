@@ -2310,8 +2310,60 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(6)
-            assert False, "TODO"
             self.fold_mixed_6_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_6_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b1
+            v5v3 = (v[5] + v[3]) / 2
+            v5v3_axis = Vec(v[5] - v[3])
+            # Note: negative angle
+            rot_b1 = Rot(axis=v5v3_axis, angle=-b1)
+            # middle of V6-V2 which is // to v5v3 axis
+            v6v2 = (v[6] + v[2]) / 2
+            v6v2_ = v5v3 + rot_b1 * (v6v2 - v5v3)
+            v[6] = v6v2_ + (v[6] - v6v2)
+            v[2] = v6v2_ + (v[2] - v6v2)
+            # middle of V0-V1 which is // to v5v3 axis
+            v0v1 = (v[0] + v[1]) / 2
+            v0v1_ = v5v3 + rot_b1 * (v0v1 - v5v3)
+            v[0] = v0v1_ + (v[0] - v0v1)
+            v[1] = v0v1_ + (v[1] - v0v1)
+
+            # rot a1
+            v6v3 = (v[6] + v[3]) / 2
+            v6v3_axis = Vec(v[6] - v[3])
+            # Note: negative angle
+            rot_a1 = Rot(axis=v6v3_axis, angle=-a1)
+            # middle of V0-V2 which is // to v6v3 axis
+            v0v2  = (v[0] + v[2]) / 2
+            v0v2_ = v6v3 + rot_a1 * (v0v2 - v6v3)
+            v[0] = v0v2_ + (v[0] - v0v2)
+            v[2]  = v0v2_ + (v[2] - v0v2)
+            v[1] = v6v3 + rot_a1 * (v[1] - v6v3)
+
+            # rot a0
+            v6v2 = (v[6] + v[2]) / 2
+            v6v2_axis = Vec(v[6] - v[2])
+            # Note: negative angle
+            rot_a0 = Rot(axis=v6v2_axis, angle=-a0)
+            # middle of V0-V1 which is // to v6v2 axis
+            v0v1  = (v[0] + v[1]) / 2
+            v0v1_ = v6v2 + rot_a0 * (v0v1 - v6v2)
+            v[0] = v0v1_ + (v[0] - v0v1)
+            v[1]  = v0v1_ + (v[1] - v0v1)
+
+            # rot b0
+            v6v1 = (v[6] + v[1]) / 2
+            v6v1_axis = Vec(v[6] - v[1])
+            # Note: negative angle
+            rot_b0 = Rot(axis=v6v1_axis, angle=-b0)
+            v[0] = v6v1 + rot_b0 * (v[0] - v6v1)
+
+        self.Vs = v
 
     def translate(self, T):
         for i in range(len(self.Vs)):
