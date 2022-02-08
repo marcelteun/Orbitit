@@ -622,9 +622,9 @@ class RegularHeptagon:
             v3v6_axis = Vec(self.VsOrg[3] - self.VsOrg[6])
             v0v2 = (self.VsOrg[0] + self.VsOrg[2])/2
             rot_a = Rot(axis = v3v6_axis, angle = a)
-            V0V2_ = v3v6 + rot_a * (v0v2 - v3v6)
-            V0 = V0V2_ + (self.VsOrg[0] - v0v2)
-            V2 = V0V2_ + (self.VsOrg[2] - v0v2)
+            v0v2_ = v3v6 + rot_a * (v0v2 - v3v6)
+            V0 = v0v2_ + (self.VsOrg[0] - v0v2)
+            V2 = v0v2_ + (self.VsOrg[2] - v0v2)
             V1_ = v3v6 + rot_a * (self.VsOrg[1] - v3v6)
 
             v0v2_axis = Vec(V2 - V0)
@@ -950,9 +950,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v1v4_axis, angle=a0)
             # middle of V0-V5 which is // to v1v4 axis
             v0v5  = (v[0] + v[5]) / 2
-            V0V5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
-            v[0] = V0V5_ + (v[0] - v0v5)
-            v[5]  = V0V5_ + (v[5] - v0v5)
+            v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
+            v[0] = v0v5_ + (v[0] - v0v5)
+            v[5]  = v0v5_ + (v[5] - v0v5)
             v[6] = v1v4 + rot_a0 * (v[6] - v1v4)
 
             # rot a1
@@ -961,9 +961,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v1v5_axis, angle=a1)
             # middle of V0-V6 which is // to v1v4 axis
             v0v6  = (v[0] + v[6]) / 2
-            V0V6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
-            v[0] = V0V6_ + (v[0] - v0v6)
-            v[6]  = V0V6_ + (v[6] - v0v6)
+            v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
+            v[0] = v0v6_ + (v[0] - v0v6)
+            v[6]  = v0v6_ + (v[6] - v0v6)
 
             # rot b1
             v1v6 = (v[1] + v[6]) / 2
@@ -1015,14 +1015,14 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v2v4_axis, angle=b0)
             # middle of V1-V5 which is // to v2v4 axis
             v1v5  = (v[1] + v[5]) / 2
-            V1V5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
-            v[1] = V1V5_ + (v[1] - v1v5)
-            v[5] = V1V5_ + (v[5] - v1v5)
+            v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
+            v[1] = v1v5_ + (v[1] - v1v5)
+            v[5] = v1v5_ + (v[5] - v1v5)
             # middle of V0-V6 which is // to v2v4 axis
             v0v6  = (v[0] + v[6]) / 2
-            V0V6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
-            v[0] = V0V6_ + (v[0] - v0v6)
-            v[6] = V0V6_ + (v[6] - v0v6)
+            v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
+            v[0] = v0v6_ + (v[0] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot a0
             v2v5 = (v[2] + v[5]) / 2
@@ -1030,9 +1030,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v2v5_axis, angle=a0)
             # middle of V1-V6 which is // to v2v5 axis
             v1v6  = (v[1] + v[6]) / 2
-            V1V6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
-            v[1] = V1V6_ + (v[1] - v1v6)
-            v[6] = V1V6_ + (v[6] - v1v6)
+            v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
+            v[1] = v1v6_ + (v[1] - v1v6)
+            v[6] = v1v6_ + (v[6] - v1v6)
             v[0] = v2v5 + rot_a0 * (v[0] - v2v5)
 
             # rot a1
@@ -1041,9 +1041,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v2v6_axis, angle=a1)
             # middle of V0-V1 which is // to v2v6 axis
             v0v1  = (v[0] + v[1])/2
-            V0V1_ = v2v6 + rot_a1 * (v0v1 - v2v6)
-            v[0] = V0V1_ + (v[0] - v0v1)
-            v[1] = V0V1_ + (v[1] - v0v1)
+            v0v1_ = v2v6 + rot_a1 * (v0v1 - v2v6)
+            v[0] = v0v1_ + (v[0] - v0v1)
+            v[1] = v0v1_ + (v[1] - v0v1)
 
             # rot b1
             v2v0 = (v[2] + v[0]) / 2
@@ -1095,14 +1095,14 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v3v5_axis, angle=b0)
             # middle of V2-V6 which is // to v3v5 axis
             v2v6  = (v[2] + v[6]) / 2
-            V2V6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
-            v[2] = V2V6_ + (v[2] - v2v6)
-            v[6] = V2V6_ + (v[6] - v2v6)
+            v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
+            v[2] = v2v6_ + (v[2] - v2v6)
+            v[6] = v2v6_ + (v[6] - v2v6)
             # middle of V1-V0 which is // to v3v5 axis
             v1v0  = (v[1] + v[0]) / 2
-            V1V0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
-            v[1] = V1V0_ + (v[1] - v1v0)
-            v[0] = V1V0_ + (v[0] - v1v0)
+            v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
+            v[1] = v1v0_ + (v[1] - v1v0)
+            v[0] = v1v0_ + (v[0] - v1v0)
 
             # rot a0
             v3v6 = (v[3] + v[6]) / 2
@@ -1110,9 +1110,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v3v6_axis, angle=a0)
             # middle of V2-V0 which is // to v3v6 axis
             v2v0  = (v[2] + v[0]) / 2
-            V2V0_ = v3v6 + rot_a0 * (v2v0 - v3v6)
-            v[2] = V2V0_ + (v[2] - v2v0)
-            v[0] = V2V0_ + (v[0] - v2v0)
+            v2v0_ = v3v6 + rot_a0 * (v2v0 - v3v6)
+            v[2] = v2v0_ + (v[2] - v2v0)
+            v[0] = v2v0_ + (v[0] - v2v0)
             v[1] = v3v6 + rot_a0 * (v[1] - v3v6)
 
             # rot a1
@@ -1121,9 +1121,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v3v0_axis, angle=a1)
             # middle of V1-V2 which is // to v3v0 axis
             v1v2  = (v[1] + v[2]) / 2
-            V1V2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
-            v[1] = V1V2_ + (v[1] - v1v2)
-            v[2] = V1V2_ + (v[2] - v1v2)
+            v1v2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
+            v[1] = v1v2_ + (v[1] - v1v2)
+            v[2] = v1v2_ + (v[2] - v1v2)
 
             # rot b1
             v3v1 = (v[3] + v[1]) / 2
@@ -1175,14 +1175,14 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v4v2_axis, angle=-b1)
             # middle of V5-V1 which is // to v4v2 axis
             v5v1  = (v[5] + v[1]) / 2
-            V5V1_ = v4v2 + rot_b1 * (v5v1 - v4v2)
-            v[5] = V5V1_ + (v[5] - v5v1)
-            v[1] = V5V1_ + (v[1] - v5v1)
+            v5v1_ = v4v2 + rot_b1 * (v5v1 - v4v2)
+            v[5] = v5v1_ + (v[5] - v5v1)
+            v[1] = v5v1_ + (v[1] - v5v1)
             # middle of V6-V0 which is // to v4v2 axis
             v6v0  = (v[6] + v[0]) / 2
-            V6V0_ = v4v2 + rot_b1 * (v6v0 - v4v2)
-            v[6] = V6V0_ + (v[6] - v6v0)
-            v[0] = V6V0_ + (v[0] - v6v0)
+            v6v0_ = v4v2 + rot_b1 * (v6v0 - v4v2)
+            v[6] = v6v0_ + (v[6] - v6v0)
+            v[0] = v6v0_ + (v[0] - v6v0)
 
             # rot a1
             v4v1 = (v[4] + v[1]) / 2
@@ -1190,9 +1190,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v4v1_axis, angle=-a1)
             # middle of V5-V0 which is // to v4v1 axis
             v5v0  = (v[5] + v[0]) / 2
-            V5V0_ = v4v1 + rot_a1 * (v5v0 - v4v1)
-            v[5] = V5V0_ + (v[5] - v5v0)
-            v[0] = V5V0_ + (v[0] - v5v0)
+            v5v0_ = v4v1 + rot_a1 * (v5v0 - v4v1)
+            v[5] = v5v0_ + (v[5] - v5v0)
+            v[0] = v5v0_ + (v[0] - v5v0)
             v[6] = v4v1 + rot_a1 * (v[6] - v4v1)
 
             # rot a0
@@ -1201,9 +1201,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v4v0_axis, angle=-a0)
             # middle of V5-V6 which is // to v4v0 axis
             v5v6  = (v[5] + v[6]) / 2
-            V5V6_ = v4v0 + rot_a0 * (v5v6 - v4v0)
-            v[5] = V5V6_ + (v[5] - v5v6)
-            v[6] = V5V6_ + (v[6] - v5v6)
+            v5v6_ = v4v0 + rot_a0 * (v5v6 - v4v0)
+            v[5] = v5v6_ + (v[5] - v5v6)
+            v[6] = v5v6_ + (v[6] - v5v6)
 
             # rot b0
             v4v6 = (v[4] + v[6]) / 2
@@ -1255,14 +1255,14 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v5v3_axis, angle=-b1)
             # middle of V6-V2 which is // to v5v3 axis
             v6v2  = (v[6] + v[2]) / 2
-            V6V2_ = v5v3 + rot_b1 * (v6v2 - v5v3)
-            v[6] = V6V2_ + (v[6] - v6v2)
-            v[2] = V6V2_ + (v[2] - v6v2)
+            v6v2_ = v5v3 + rot_b1 * (v6v2 - v5v3)
+            v[6] = v6v2_ + (v[6] - v6v2)
+            v[2] = v6v2_ + (v[2] - v6v2)
             # middle of V0-V1 which is // to v5v3 axis
             v0v1  = (v[0] + v[1]) / 2
-            V0V1_ = v5v3 + rot_b1 * (v0v1 - v5v3)
-            v[0] = V0V1_ + (v[0] - v0v1)
-            v[1] = V0V1_ + (v[1] - v0v1)
+            v0v1_ = v5v3 + rot_b1 * (v0v1 - v5v3)
+            v[0] = v0v1_ + (v[0] - v0v1)
+            v[1] = v0v1_ + (v[1] - v0v1)
 
             # rot a1
             v5v2 = (v[5] + v[2]) / 2
@@ -1270,9 +1270,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v5v2_axis, angle=-a1)
             # middle of V6-V1 which is // to v5v2 axis
             v6v1  = (v[6] + v[1]) / 2
-            V6V1_ = v5v2 + rot_a1 * (v6v1 - v5v2)
-            v[6] = V6V1_ + (v[6] - v6v1)
-            v[1] = V6V1_ + (v[1] - v6v1)
+            v6v1_ = v5v2 + rot_a1 * (v6v1 - v5v2)
+            v[6] = v6v1_ + (v[6] - v6v1)
+            v[1] = v6v1_ + (v[1] - v6v1)
             v[0] = v5v2 + rot_a1 * (v[0] - v5v2)
 
             # rot a0
@@ -1281,9 +1281,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v5v1_axis, angle=-a0)
             # middle of V6-V0 which is // to v5v1 axis
             v6v0  = (v[6] + v[0]) / 2
-            V6V0_ = v5v1 + rot_a0 * (v6v0 - v5v1)
-            v[6] = V6V0_ + (v[6] - v6v0)
-            v[0] = V6V0_ + (v[0] - v6v0)
+            v6v0_ = v5v1 + rot_a0 * (v6v0 - v5v1)
+            v[6] = v6v0_ + (v[6] - v6v0)
+            v[0] = v6v0_ + (v[0] - v6v0)
 
             # rot b0
             v5v0 = (v[5] + v[0]) / 2
@@ -1425,30 +1425,30 @@ class RegularHeptagon:
             v2v4_axis = Vec(Vs[2] - Vs[4])
             rot_b0 = Rot(axis = v2v4_axis, angle = b0)
             v1v5  = (Vs[1] + Vs[5])/2
-            V1V5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
-            V1  = V1V5_ + (Vs[1] - v1v5)
-            V5_ = V1V5_ + (Vs[5] - v1v5)
+            v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
+            V1  = v1v5_ + (Vs[1] - v1v5)
+            V5_ = v1v5_ + (Vs[5] - v1v5)
             v0v6 = (Vs[0] + Vs[6])/2
-            V0V6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
-            V0_ = V0V6_ + (Vs[0] - v0v6)
-            V6_ = V0V6_ + (Vs[6] - v0v6)
+            v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
+            V0_ = v0v6_ + (Vs[0] - v0v6)
+            V6_ = v0v6_ + (Vs[6] - v0v6)
             # rot a0
             v1v4 = (V1 + Vs[4])/2
             v1v4_axis = Vec(V1 - Vs[4])
             rot_a0 = Rot(axis = v1v4_axis, angle = a0)
             v0v5  = (V0_ + V5_)/2
-            V0V5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
-            V0_ = V0V5_ + (V0_ - v0v5)
-            V5  = V0V5_ + (V5_ - v0v5)
+            v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
+            V0_ = v0v5_ + (V0_ - v0v5)
+            V5  = v0v5_ + (V5_ - v0v5)
             V6_ = v1v4 + rot_a0 * (V6_ - v1v4)
             # rot a1
             v1v5 = (V1 + V5)/2
             v1v5_axis = Vec(V1 - V5)
             rot_a1 = Rot(axis = v1v5_axis, angle = a1)
             v0v6  = (V0_ + V6_)/2
-            V0V6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
-            V0  = V0V6_ + (V0_ - v0v6)
-            V6_ = V0V6_ + (V6_ - v0v6)
+            v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
+            V0  = v0v6_ + (V0_ - v0v6)
+            V6_ = v0v6_ + (V6_ - v0v6)
             # rot b1
             v0v5 = (V0 + V5)/2
             v0v5_axis = Vec(V0 - V5)
@@ -1490,18 +1490,18 @@ class RegularHeptagon:
             v3v6_axis = Vec(Vs[3] - Vs[6])
             rot_a0 = Rot(axis = v3v6_axis, angle = a0)
             v0v2  = (Vs[0] + Vs[2])/2
-            V0V2_ = v3v6 + rot_a0 * (v0v2 - v3v6)
-            V0  = V0V2_ + (Vs[0] - v0v2)
-            V2_ = V0V2_ + (Vs[2] - v0v2)
+            v0v2_ = v3v6 + rot_a0 * (v0v2 - v3v6)
+            V0  = v0v2_ + (Vs[0] - v0v2)
+            V2_ = v0v2_ + (Vs[2] - v0v2)
             V1_ = v3v6 + rot_a0 * (Vs[1] - v3v6)
             # rot a1
             v3v0 = (Vs[3] + V0)/2
             v3v0_axis = Vec(Vs[3] - V0)
             rot_a1 = Rot(axis = v3v0_axis, angle = a1)
             v1v2  = (V1_ + V2_)/2
-            V1V2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
-            V1_ = V1V2_ + (V1_ - v1v2)
-            V2  = V1V2_ + (V2_ - v1v2)
+            v1v2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
+            V1_ = v1v2_ + (V1_ - v1v2)
+            V2  = v1v2_ + (V2_ - v1v2)
             # rot b1
             v2v0 = (V2 + V0)/2
             v2v0_axis = Vec(V2 - V0)
@@ -1871,9 +1871,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v0v3_axis, angle=-a0)
             # middle of V1-V2 which is // to v0v3 axis
             v1v2  = (v[1] + v[2]) / 2
-            V1V2_ = v0v3 + rot_a0 * (v1v2 - v0v3)
-            v[1] = V1V2_ + (v[1] - v1v2)
-            v[2]  = V1V2_ + (v[2] - v1v2)
+            v1v2_ = v0v3 + rot_a0 * (v1v2 - v0v3)
+            v[1] = v1v2_ + (v[1] - v1v2)
+            v[2]  = v1v2_ + (v[2] - v1v2)
 
             # rot b0
             v0v2 = (v[0] + v[2]) / 2
@@ -1888,9 +1888,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v0v4_axis, angle=a1)
             # middle of V6-V5 which is // to v0v4 axis
             v6v5  = (v[6] + v[5]) / 2
-            V6V5_ = v0v4 + rot_a1 * (v6v5 - v0v4)
-            v[6] = V6V5_ + (v[6] - v6v5)
-            v[5]  = V6V5_ + (v[5] - v6v5)
+            v6v5_ = v0v4 + rot_a1 * (v6v5 - v0v4)
+            v[6] = v6v5_ + (v[6] - v6v5)
+            v[5]  = v6v5_ + (v[5] - v6v5)
 
             # rot b1
             v6v4 = (v[6] + v[4]) / 2
@@ -1940,9 +1940,9 @@ class RegularHeptagon:
             rot_a0 = Rot(axis=v1v4_axis, angle=a0)
             # middle of V0-V5 which is // to v1v4 axis
             v0v5  = (v[0] + v[5]) / 2
-            V0V5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
-            v[0] = V0V5_ + (v[0] - v0v5)
-            v[5]  = V0V5_ + (v[5] - v0v5)
+            v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
+            v[0] = v0v5_ + (v[0] - v0v5)
+            v[5]  = v0v5_ + (v[5] - v0v5)
             v[6] = v1v4 + rot_a0 * (v[6] - v1v4)
 
             # rot b0
@@ -1958,9 +1958,9 @@ class RegularHeptagon:
             rot_a1 = Rot(axis=v1v5_axis, angle=a1)
             # middle of V0-V6 which is // to v1v5 axis
             v0v6  = (v[0] + v[6]) / 2
-            V0V6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
-            v[0] = V0V6_ + (v[0] - v0v6)
-            v[6]  = V0V6_ + (v[6] - v0v6)
+            v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
+            v[0] = v0v6_ + (v[0] - v0v6)
+            v[6]  = v0v6_ + (v[6] - v0v6)
 
             # rot b1
             v0v5 = (v[0] + v[5]) / 2
@@ -1998,9 +1998,58 @@ class RegularHeptagon:
         if (keepV0):
             assert False, "TODO"
         else:
-            self.fold_mixed_es_fs(1)
-            assert False, "TODO"
+            self.fold_mixed_es_fs(2)
             self.fold_mixed_2_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_mixed_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            v2v4 = (v[2] + v[4]) / 2
+            v2v4_axis = Vec(v[2] - v[4])
+            rot_b0 = Rot(axis=v2v4_axis, angle=b0)
+            v[2] = v2v4 + rot_b0 * (v[2] - v2v4)
+            # middle of V1-V5 which is // to v2v4 axis
+            v1v5  = (v[1] + v[5]) / 2
+            v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
+            v[1] = v1v5_ + (v[1] - v1v5)
+            v[5]  = v1v5_ + (v[5] - v1v5)
+            # middle of V0-V6 which is // to v2v4 axis
+            v0v6  = (v[0] + v[6]) / 2
+            v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
+            v[0] = v0v6_ + (v[0] - v0v6)
+            v[6]  = v0v6_ + (v[6] - v0v6)
+
+            # rot a0
+            v2v5 = (v[2] + v[5]) / 2
+            v2v5_axis = Vec(v[2] - v[5])
+            rot_a0 = Rot(axis=v2v5_axis, angle=a0)
+            # middle of V1-V6 which is // to v2v5 axis
+            v1v6  = (v[1] + v[6]) / 2
+            v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
+            v[1] = v1v6_ + (v[1] - v1v6)
+            v[6]  = v1v6_ + (v[6] - v1v6)
+            v[0] = v2v5 + rot_a0 * (v[0] - v2v5)
+
+            # rot a1
+            v2v6 = (v[2] + v[6]) / 2
+            v2v6_axis = Vec(v[2] - v[6])
+            rot_a1 = Rot(axis=v2v6_axis, angle=a1)
+            # middle of V1-V0 which is // to v2v6 axis
+            v1v0  = (v[1] + v[0]) / 2
+            v1v0_ = v2v6 + rot_a1 * (v1v0 - v2v6)
+            v[1] = v1v0_ + (v[1] - v1v0)
+            v[0]  = v1v0_ + (v[0] - v1v0)
+
+            # rot b1
+            v1v6 = (v[1] + v[6]) / 2
+            v1v6_axis = Vec(v[1] - v[6])
+            rot_b1 = Rot(axis=v1v6_axis, angle=b1)
+            v[0] = v1v6 + rot_b1 * (v[0] - v1v6)
+
+        self.Vs = v
 
     def fold_mixed_3(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -2028,7 +2077,7 @@ class RegularHeptagon:
         if (keepV0):
             assert False, "TODO"
         else:
-            self.fold_mixed_es_fs(1)
+            self.fold_mixed_es_fs(3)
             assert False, "TODO"
             self.fold_mixed_3_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
@@ -2058,7 +2107,7 @@ class RegularHeptagon:
         if (keepV0):
             assert False, "TODO"
         else:
-            self.fold_mixed_es_fs(1)
+            self.fold_mixed_es_fs(4)
             assert False, "TODO"
             self.fold_mixed_4_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
@@ -2088,7 +2137,7 @@ class RegularHeptagon:
         if (keepV0):
             assert False, "TODO"
         else:
-            self.fold_mixed_es_fs(1)
+            self.fold_mixed_es_fs(5)
             assert False, "TODO"
             self.fold_mixed_5_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
@@ -2118,7 +2167,7 @@ class RegularHeptagon:
         if (keepV0):
             assert False, "TODO"
         else:
-            self.fold_mixed_es_fs(1)
+            self.fold_mixed_es_fs(6)
             assert False, "TODO"
             self.fold_mixed_6_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
 
