@@ -452,22 +452,22 @@ class RegularHeptagon:
         rotate=0,
     ):
         method = {
-            FoldMethod.PARALLEL: self.foldParallel,
-            FoldMethod.TRAPEZIUM:self.foldTrapezium,
-            FoldMethod.W: self.fold_W,
-            FoldMethod.TRIANGLE: self.foldTriangle,
+            FoldMethod.PARALLEL: self.fold_parallel,
+            FoldMethod.TRAPEZIUM:self.fold_trapezium,
+            FoldMethod.W: self.fold_w,
+            FoldMethod.TRIANGLE: self.fold_triangle,
             FoldMethod.SHELL: self.fold_shell,
             FoldMethod.MIXED: self.fold_mixed,
         }
         method[fold](a0, b0, a1, b1, keepV0, rotate)
 
-    def foldParallel(self, a, b, _=None, __=None, keepV0=True, rotate=0):
+    def fold_parallel(self, a, b, _=None, __=None, keepV0=True, rotate=0):
         if rotate == 0:
-            self.foldParallel_0(a, b, keepV0)
+            self.fold_parallel_0(a, b, keepV0)
         else:
-            self.foldParallel_1(a, b, keepV0)
+            self.fold_parallel_1(a, b, keepV0)
 
-    def foldParallel_0(self, a, b, keepV0=True):
+    def fold_parallel_0(self, a, b, keepV0=True):
         """
         Fold around the 2 parallel diagonals V1-V6 and V2-V5.
 
@@ -589,7 +589,7 @@ class RegularHeptagon:
                     Vec([-V1[0], V1[1], V1[2]])
                 ]
 
-    def foldParallel_1(self, a, b, keepV0=True):
+    def fold_parallel_1(self, a, b, keepV0=True):
         """
         Fold around the 2 parallel diagonals parallel to the edge opposite of
         vertex 1
@@ -640,7 +640,7 @@ class RegularHeptagon:
                     self.VsOrg[6],
                 ]
 
-    def foldTrapezium(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
+    def fold_trapezium(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
         """
         Fold around 4 diagonals in the shape of a trapezium (trapezoid)
 
@@ -670,7 +670,7 @@ class RegularHeptagon:
         cosa = math.cos(a)
         sina = math.sin(a)
         if (keepV0):
-            # see foldParallel
+            # see fold_parallel
             dV2_ = [
                     self.VsOrg[2][1] - self.VsOrg[1][1],
                     self.VsOrg[2][2] - self.VsOrg[1][2]
@@ -742,7 +742,7 @@ class RegularHeptagon:
                     self.VsOrg[6]
                 ]
 
-    def foldTriangle(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
+    def fold_triangle(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
         """
         Fold around 3 triangular diagonals from V0.
 
@@ -1321,7 +1321,7 @@ class RegularHeptagon:
                 6, 1, 6, 2, 6, 3, 6, 4
             ]
         # opposite angle, because of opposite isometry
-        Vs = self.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_w1_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 self.VsOrg[0],
                 self.VsOrg[6],
@@ -1342,19 +1342,19 @@ class RegularHeptagon:
             Vs[1]
         ]
 
-    def fold_W(self, a0, b0, a1, b1, keepV0=True, rotate=0):
+    def fold_w(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         prj = {
-            0: self.fold_W0,
-            1: self.fold_W1,
-            2: self.fold_W2,
-            3: self.fold_W3,
-            4: self.fold_W4,
-            5: self.fold_W5,
-            6: self.fold_W6
+            0: self.fold_w0,
+            1: self.fold_w1,
+            2: self.fold_w2,
+            3: self.fold_w3,
+            4: self.fold_w4,
+            5: self.fold_w5,
+            6: self.fold_w6
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
-    def fold_W0(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w0(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1411,8 +1411,8 @@ class RegularHeptagon:
                 1, 3, 3, 0, 0, 4, 4, 6
             ]
 
-    def fold_W1_help(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_W1, see that one for more info
+    def fold_w1_help(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_w1, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -1464,8 +1464,8 @@ class RegularHeptagon:
                     V6,
                 ]
 
-    def fold_W3_help(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_W3, see that one for more info
+    def fold_w3_help(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_w3, see that one for more info
 
         Vs: the array with vertex numbers.
         returns a new array.
@@ -1522,7 +1522,7 @@ class RegularHeptagon:
                     Vs[6],
                 ]
 
-    def fold_W1(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w1(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1549,9 +1549,9 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 2, 4, 4, 1, 1, 5, 5, 0
             ]
-        self.Vs = self.fold_W1_help(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.Vs = self.fold_w1_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_W2(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w2(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1578,7 +1578,7 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 3, 5, 5, 2, 2, 6, 6, 1
             ]
-        Vs = self.fold_W1_help(a0, b0, a1, b1, keepV0,
+        Vs = self.fold_w1_help(a0, b0, a1, b1, keepV0,
             [
                 self.VsOrg[1],
                 self.VsOrg[2],
@@ -1599,7 +1599,7 @@ class RegularHeptagon:
             Vs[5]
         ]
 
-    def fold_W3(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w3(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1626,9 +1626,9 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 4, 6, 6, 3, 3, 0, 0, 2
             ]
-        self.Vs = self.fold_W3_help(a0, b0, a1, b1, keepV0, self.VsOrg)
+        self.Vs = self.fold_w3_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
-    def fold_W4(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w4(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1655,7 +1655,7 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 5, 0, 0, 4, 4, 1, 1, 3
             ]
-        Vs = self.fold_W3_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_w3_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 self.VsOrg[0],
                 self.VsOrg[6],
@@ -1676,7 +1676,7 @@ class RegularHeptagon:
             Vs[1]
         ]
 
-    def fold_W5(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w5(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1703,7 +1703,7 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 6, 1, 1, 5, 5, 2, 2, 4
             ]
-        Vs = self.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_w1_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 self.VsOrg[6],
                 self.VsOrg[5],
@@ -1724,7 +1724,7 @@ class RegularHeptagon:
             Vs[0]
         ]
 
-    def fold_W6(self, a0, b0, a1, b1, keepV0=True):
+    def fold_w6(self, a0, b0, a1, b1, keepV0=True):
         """
         Fold around 4 diagonals in the shape of the character 'W'.
 
@@ -1752,7 +1752,7 @@ class RegularHeptagon:
                 0, 2, 2, 6, 6, 3, 3, 5
             ]
         # opposite angle, because of opposite isometry
-        Vs = self.fold_W1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_w1_help(-a1, -b1, -a0, -b0, keepV0,
             [
                 self.VsOrg[0],
                 self.VsOrg[6],
