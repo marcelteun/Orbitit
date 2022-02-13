@@ -139,10 +139,9 @@ egShape = Geom3D.IsometricShape(
     directIsometries = useIsom,
     unfoldOrbit = True
 )
-#colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
-#colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
 useSimpleColours = False
 colStabiliser = isometry.C2(setup = {'axis': [1.0, 0.0, 0.0]})
+#colStabiliser = isometry.C3(setup = {'axis': [1.0, 1.0, 1.0]})
 colQuotientSet = useIsom / colStabiliser
 if useSimpleColours:
     useRgbCols = [
