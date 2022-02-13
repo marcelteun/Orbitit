@@ -155,10 +155,10 @@ if useSimpleColours:
 else:
     useRgbCols = [
         rgb.indianRed,
-        rgb.mediumBlue,
-        rgb.limeGreen,
         rgb.cornflowerBlue,
+        rgb.limeGreen,
         rgb.mistyRose1,
+        rgb.mediumBlue,
         rgb.gray20,
     ]
 
