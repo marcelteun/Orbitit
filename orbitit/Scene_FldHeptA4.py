@@ -141,7 +141,10 @@ egShape = Geom3D.IsometricShape(
 )
 useSimpleColours = False
 colStabiliser = isometry.C2(setup = {'axis': [1.0, 0.0, 0.0]})
+colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
+colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
 #colStabiliser = isometry.C3(setup = {'axis': [1.0, 1.0, 1.0]})
+#colStabiliser = isometry.C3(setup = {'axis': [1.0, -1.0, 1.0]})
 colQuotientSet = useIsom / colStabiliser
 if useSimpleColours:
     useRgbCols = [
@@ -1068,6 +1071,15 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             },{
                 'file': 'frh-roots-0_1_0_1_1_0_1-fld_shell.1-alt_strip_II-opp_alt_strip_II-pos-0.py',
                 'set': [1.728727324, 0.590129541, 0.7371091452, 2.5131975524, -0.116839474, 0.0628633939, 0.1549096005],
+            },{
+                'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.1-strip_I-opp_strip_I-pos-0.py',
+                'set': [1.621041509300, 1.609345876500, 0.604784142600, -0.695028787700, -0.080524980800, -1.029260922700, 1.337815569200],
+            },{
+                'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.1-strip_I-opp_strip_I-pos-0.py',
+                'set': [1.551230551100, 1.702711045100, -1.197490012000, -0.813025509500, -0.095839633800, 1.277914181300, -1.866148811200],
+            },{
+                'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.2-shell-opp_strip_I-pos-0.py',
+                'set': [0.762030869100, 2.474787916100, -1.753834771600, 0.561331842500, 0.078085062900, -1.753834771300, 0.561331841900],
             },
         ]
     }

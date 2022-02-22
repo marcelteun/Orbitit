@@ -621,14 +621,14 @@ class RegularHeptagon:
             v3v6 = (self.VsOrg[3] + self.VsOrg[6])/2
             v3v6_axis = Vec(self.VsOrg[3] - self.VsOrg[6])
             v0v2 = (self.VsOrg[0] + self.VsOrg[2])/2
-            rot_a = Rot(axis = v3v6_axis, angle = a)
+            rot_a = Rot(axis=v3v6_axis, angle=a)
             v0v2_ = v3v6 + rot_a * (v0v2 - v3v6)
             V0 = v0v2_ + (self.VsOrg[0] - v0v2)
             V2 = v0v2_ + (self.VsOrg[2] - v0v2)
             V1_ = v3v6 + rot_a * (self.VsOrg[1] - v3v6)
 
             v0v2_axis = Vec(V2 - V0)
-            rot_b = Rot(axis = v0v2_axis, angle = b)
+            rot_b = Rot(axis=v0v2_axis, angle=b)
             V1 = v0v2 + rot_b * (V1_ - v0v2)
             self.Vs = [
                     V0,
@@ -692,14 +692,14 @@ class RegularHeptagon:
             V4 = Vec([-V3[0], V3[1], V3[2]])
             v1v3 = (self.VsOrg[1] + V3)/2
             v1v3_axis = Vec(V3 - self.VsOrg[1])
-            r = Rot(axis = v1v3_axis, angle = b0)
+            r = Rot(axis=v1v3_axis, angle=b0)
             V2 = v1v3 + r * (V2_ - v1v3)
             if not Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
                 v4v6 = (V4 + self.VsOrg[6])/2
                 v4v6_axis = Vec(self.VsOrg[6] - V4)
-                r = Rot(axis = v4v6_axis, angle = b1)
+                r = Rot(axis=v4v6_axis, angle=b1)
                 V5_ = Vec([-V2_[0], V2_[1], V2_[2]])
                 V5 = v4v6 + r * (V5_ - v4v6)
             self.Vs = [
@@ -723,14 +723,14 @@ class RegularHeptagon:
                 ])
             v1v3 = (self.VsOrg[1] + self.VsOrg[3])/2
             v1v3_axis = Vec(self.VsOrg[3] - self.VsOrg[1])
-            r = Rot(axis = v1v3_axis, angle = b0)
+            r = Rot(axis=v1v3_axis, angle=b0)
             V2 = v1v3 + r * (self.VsOrg[2] - v1v3)
             if Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
                 v4v6 = (self.VsOrg[4] + self.VsOrg[6])/2
                 v4v6_axis = Vec(self.VsOrg[6] - self.VsOrg[4])
-                r = Rot(axis = v4v6_axis, angle = b1)
+                r = Rot(axis=v4v6_axis, angle=b1)
                 V5 = v4v6 + r * (self.VsOrg[5] - v4v6)
             self.Vs = [
                     V0,
@@ -767,16 +767,16 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 0, 2, 2, 5, 5, 0
             ]
-        Rot0_2 = Rot(axis = self.VsOrg[2] - self.VsOrg[0], angle = b0)
+        Rot0_2 = Rot(axis=self.VsOrg[2] - self.VsOrg[0], angle=b0)
         V1 = Rot0_2 * self.VsOrg[1]
         if (Geom3D.eq(b0, b1)):
             V6 = Vec([-V1[0], V1[1], V1[2]])
         else:
-            Rot5_0 = Rot(axis = self.VsOrg[0] - self.VsOrg[5], angle = b1)
+            Rot5_0 = Rot(axis=self.VsOrg[0] - self.VsOrg[5], angle=b1)
             V6 = Rot5_0 * self.VsOrg[6]
         V2 = self.VsOrg[2]
         if keepV0:
-            Rot5_2 = Rot(axis = self.VsOrg[5] - self.VsOrg[2], angle = a)
+            Rot5_2 = Rot(axis=self.VsOrg[5] - self.VsOrg[2], angle=a)
             V3 = Rot5_2 * (self.VsOrg[3] - V2) + V2
             self.Vs = [
                     self.VsOrg[0],
@@ -788,7 +788,7 @@ class RegularHeptagon:
                     V6,
                 ]
         else:
-            Rot2_5 = Rot(axis = self.VsOrg[2] - self.VsOrg[5], angle = a)
+            Rot2_5 = Rot(axis=self.VsOrg[2] - self.VsOrg[5], angle=a)
             V0 = Rot2_5 * (self.VsOrg[0] - V2) + V2
             V1 = Rot2_5 * (V1 - V2) + V2
             V6 = Rot2_5 * (V6 - V2) + V2
@@ -1321,7 +1321,7 @@ class RegularHeptagon:
                 6, 1, 6, 2, 6, 3, 6, 4
             ]
         # opposite angle, because of opposite isometry
-        Vs = self.fold_w1_help(-a1, -b1, -a0, -b0, keepV0,
+        Vs = self.fold_shell_1_vs(-a1, -b1, -a0, -b0, keepV0,
             [
                 self.VsOrg[0],
                 self.VsOrg[6],
@@ -1332,15 +1332,7 @@ class RegularHeptagon:
                 self.VsOrg[1]
             ]
         )
-        self.Vs = [
-            Vs[0],
-            Vs[6],
-            Vs[5],
-            Vs[4],
-            Vs[3],
-            Vs[2],
-            Vs[1]
-        ]
+        self.Vs = [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]]
 
     def fold_w(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         prj = {
@@ -1378,10 +1370,10 @@ class RegularHeptagon:
         #          "         "
         #          4         3
         #
-        Rot0_3 = Rot(axis = self.VsOrg[3] - self.VsOrg[0], angle = a0)
+        Rot0_3 = Rot(axis=self.VsOrg[3] - self.VsOrg[0], angle=a0)
         V1 = Rot0_3 * self.VsOrg[1]
         V2_ = Rot0_3 * self.VsOrg[2]
-        Rot1_3 = Rot(axis = self.VsOrg[3] - V1, angle = b0)
+        Rot1_3 = Rot(axis=self.VsOrg[3] - V1, angle=b0)
         V2 = Rot1_3 * (V2_ - V1) + V1
         if (Geom3D.eq(a0, a1)):
             V6 = Vec([-V1[0], V1[1], V1[2]])
@@ -1389,13 +1381,13 @@ class RegularHeptagon:
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
                 V5 = Vec([-V2_[0], V2_[1], V2_[2]])
-                Rot4_6 = Rot(axis = V6 - self.VsOrg[4], angle = b1)
+                Rot4_6 = Rot(axis=V6 - self.VsOrg[4], angle=b1)
                 V5 = Rot4_6 * (V5 - V6) + V6
         else:
-            Rot4_0 = Rot(axis = self.VsOrg[0] - self.VsOrg[4], angle = a1)
+            Rot4_0 = Rot(axis=self.VsOrg[0] - self.VsOrg[4], angle=a1)
             V6 = Rot4_0 * self.VsOrg[6]
             V5 = Rot4_0 * self.VsOrg[5]
-            Rot4_6 = Rot(axis = V6 - self.VsOrg[4], angle = b1)
+            Rot4_6 = Rot(axis=V6 - self.VsOrg[4], angle=b1)
             V5 = Rot4_6 * (V5 - V6) + V6
         self.Vs = [
                 self.VsOrg[0],
@@ -1417,122 +1409,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        if (keepV0):
-            assert False, "TODO"
-        else:
-            # rot b0
-            v2v4 = (Vs[2] + Vs[4])/2
-            v2v4_axis = Vec(Vs[2] - Vs[4])
-            rot_b0 = Rot(axis = v2v4_axis, angle = b0)
-            v1v5  = (Vs[1] + Vs[5])/2
-            v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
-            V1  = v1v5_ + (Vs[1] - v1v5)
-            V5_ = v1v5_ + (Vs[5] - v1v5)
-            v0v6 = (Vs[0] + Vs[6])/2
-            v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
-            V0_ = v0v6_ + (Vs[0] - v0v6)
-            V6_ = v0v6_ + (Vs[6] - v0v6)
-            # rot a0
-            v1v4 = (V1 + Vs[4])/2
-            v1v4_axis = Vec(V1 - Vs[4])
-            rot_a0 = Rot(axis = v1v4_axis, angle = a0)
-            v0v5  = (V0_ + V5_)/2
-            v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
-            V0_ = v0v5_ + (V0_ - v0v5)
-            V5  = v0v5_ + (V5_ - v0v5)
-            V6_ = v1v4 + rot_a0 * (V6_ - v1v4)
-            # rot a1
-            v1v5 = (V1 + V5)/2
-            v1v5_axis = Vec(V1 - V5)
-            rot_a1 = Rot(axis = v1v5_axis, angle = a1)
-            v0v6  = (V0_ + V6_)/2
-            v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
-            V0  = v0v6_ + (V0_ - v0v6)
-            V6_ = v0v6_ + (V6_ - v0v6)
-            # rot b1
-            v0v5 = (V0 + V5)/2
-            v0v5_axis = Vec(V0 - V5)
-            rot_b1 = Rot(axis = v0v5_axis, angle = b1)
-            V6 = v0v5 + rot_b1 * (V6_ - v0v5)
-            return [
-                    V0,
-                    V1,
-                    Vs[2],
-                    Vs[3],
-                    Vs[4],
-                    V5,
-                    V6,
-                ]
-
-    def fold_w3_help(self, a0, b0, a1, b1, keepV0, Vs):
-        """Helper function for fold_w3, see that one for more info
-
-        Vs: the array with vertex numbers.
-        returns a new array.
-        """
-        if (keepV0):
-            assert False, "TODO"
-        else:
-            #
-            #               3
-            #               ^
-            #        2     | |     4
-            #        .    /   \    .
-            # axis b1 \  |     |  / axis b0
-            #          " |     | "
-            #      1   |/       \|   5
-            #          V axes  a V
-            #          "         "
-            #          0         6
-            #
-            # rot a0
-            v3v6 = (Vs[3] + Vs[6])/2
-            v3v6_axis = Vec(Vs[3] - Vs[6])
-            rot_a0 = Rot(axis = v3v6_axis, angle = a0)
-            v0v2  = (Vs[0] + Vs[2])/2
-            v0v2_ = v3v6 + rot_a0 * (v0v2 - v3v6)
-            V0  = v0v2_ + (Vs[0] - v0v2)
-            V2_ = v0v2_ + (Vs[2] - v0v2)
-            V1_ = v3v6 + rot_a0 * (Vs[1] - v3v6)
-            # rot a1
-            v3v0 = (Vs[3] + V0)/2
-            v3v0_axis = Vec(Vs[3] - V0)
-            rot_a1 = Rot(axis = v3v0_axis, angle = a1)
-            v1v2  = (V1_ + V2_)/2
-            v1v2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
-            V1_ = v1v2_ + (V1_ - v1v2)
-            V2  = v1v2_ + (V2_ - v1v2)
-            # rot b1
-            v2v0 = (V2 + V0)/2
-            v2v0_axis = Vec(V2 - V0)
-            rot_b1 = Rot(axis = v2v0_axis, angle = b1)
-            V1 = v2v0 + rot_b1 * (V1_ - v2v0)
-            # rot b0
-            v6v4 = (Vs[6] + Vs[4])/2
-            v6v4_axis = Vec(Vs[6] - Vs[4])
-            rot_b0 = Rot(axis = v6v4_axis, angle = b0)
-            V5 = v6v4 + rot_b0 * (Vs[5] - v6v4)
-            return [
-                    V0,
-                    V1,
-                    V2,
-                    Vs[3],
-                    Vs[4],
-                    V5,
-                    Vs[6],
-                ]
-
-    def fold_w1(self, a0, b0, a1, b1, keepV0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'W'.
-
-        the fold angle a0 refers to the axis V1-V4,
-        the fold angle a1 refers to the axis V1-V5,
-        The fold angle b0 refers to the axis V2-V4,
-        The fold angle b1 refers to the axis V0-V5 and
-        If keepV0 = True then the vertex V0 is kept invariant
-        during folding, otherwise the edge V3 - V4 is kept invariant
-        """
+        v = [v for v in Vs]
         #
         #               1
         #               ^
@@ -1545,6 +1422,269 @@ class RegularHeptagon:
         #          "         "
         #          5         4
         #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            v2v4 = (v[2] + v[4])/2
+            v2v4_axis = Vec(v[2] - v[4])
+            rot_b0 = Rot(axis=v2v4_axis, angle=b0)
+            v1v5  = (v[1] + v[5])/2
+            v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
+            v[1]  = v1v5_ + (v[1] - v1v5)
+            v5_ = v1v5_ + (v[5] - v1v5)
+            v0v6 = (v[0] + v[6])/2
+            v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
+            v0_ = v0v6_ + (v[0] - v0v6)
+            v6_ = v0v6_ + (v[6] - v0v6)
+
+            # rot a0
+            v1v4 = (v[1] + v[4])/2
+            v1v4_axis = Vec(v[1] - v[4])
+            rot_a0 = Rot(axis=v1v4_axis, angle=a0)
+            v0v5  = (v0_ + v5_)/2
+            v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
+            v0_ = v0v5_ + (v0_ - v0v5)
+            v[5]  = v0v5_ + (v5_ - v0v5)
+            v6_ = v1v4 + rot_a0 * (v6_ - v1v4)
+
+            # rot a1
+            v1v5 = (v[1] + v[5])/2
+            v1v5_axis = Vec(v[1] - v[5])
+            rot_a1 = Rot(axis=v1v5_axis, angle=a1)
+            v0v6  = (v0_ + v6_)/2
+            v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
+            v[0]  = v0v6_ + (v0_ - v0v6)
+            v6_ = v0v6_ + (v6_ - v0v6)
+
+            # rot b1
+            v0v5 = (v[0] + v[5])/2
+            v0v5_axis = Vec(v[0] - v[5])
+            rot_b1 = Rot(axis=v0v5_axis, angle=b1)
+            v[6] = v0v5 + rot_b1 * (v6_ - v0v5)
+
+            return v
+
+    def fold_w2_help(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_w1, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        #
+        #               2
+        #               ^
+        #        1     | |     3
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      0   |/       \|   4
+        #          V axes  a V
+        #          "         "
+        #          6         5
+        #
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            v3v5 = (v[3] + v[5])/2
+            v3v5_axis = Vec(v[3] - v[5])
+            rot_b0 = Rot(axis=v3v5_axis, angle=b0)
+            v2v6  = (v[2] + v[6])/2
+            v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
+            v[2]  = v2v6_ + (v[2] - v2v6)
+            v6_ = v2v6_ + (v[6] - v2v6)
+            v1v0 = (v[1] + v[0])/2
+            v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
+            v1_ = v1v0_ + (v[1] - v1v0)
+            v0_ = v1v0_ + (v[0] - v1v0)
+
+            # rot a0
+            v2v5 = (v[2] + v[5])/2
+            v2v5_axis = Vec(v[2] - v[5])
+            rot_a0 = Rot(axis=v2v5_axis, angle=a0)
+            v1v6  = (v1_ + v6_)/2
+            v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
+            v1_ = v1v6_ + (v1_ - v1v6)
+            v[6]  = v1v6_ + (v6_ - v1v6)
+            v0_ = v2v5 + rot_a0 * (v0_ - v2v5)
+
+            # rot a1
+            v2v6 = (v[2] + v[6])/2
+            v2v6_axis = Vec(v[2] - v[6])
+            rot_a1 = Rot(axis=v2v6_axis, angle=a1)
+            v1v0  = (v1_ + v0_)/2
+            v1v0_ = v2v6 + rot_a1 * (v1v0 - v2v6)
+            v[1]  = v1v0_ + (v1_ - v1v0)
+            v0_ = v1v0_ + (v0_ - v1v0)
+
+            # rot b1
+            v1v6 = (v[1] + v[6])/2
+            v1v6_axis = Vec(v[1] - v[6])
+            rot_b1 = Rot(axis=v1v6_axis, angle=b1)
+            v[0] = v1v6 + rot_b1 * (v0_ - v1v6)
+
+        return v
+
+    def fold_w3_help(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_w3, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        #
+        #               3
+        #               ^
+        #        2     | |     4
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      1   |/       \|   5
+        #          V axes  a V
+        #          "         "
+        #          0         6
+        #
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot a0
+            v3v6 = (v[3] + v[6]) / 2
+            v3v6_axis = Vec(v[3] - v[6])
+            rot_a0 = Rot(axis=v3v6_axis, angle=a0)
+            v0v2  = (v[0] + v[2]) / 2
+            v0v2_ = v3v6 + rot_a0 * (v0v2 - v3v6)
+            v[0]  = v0v2_ + (v[0] - v0v2)
+            v2_ = v0v2_ + (v[2] - v0v2)
+            v1_ = v3v6 + rot_a0 * (v[1] - v3v6)
+
+            # rot a1
+            v3v0 = (v[3] + v[0]) / 2
+            v3v0_axis = Vec(v[3] - v[0])
+            rot_a1 = Rot(axis=v3v0_axis, angle=a1)
+            v1v2  = (v1_ + v2_) / 2
+            v1v2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
+            v1_ = v1v2_ + (v1_ - v1v2)
+            v[2]  = v1v2_ + (v2_ - v1v2)
+
+            # rot b1
+            v2v0 = (v[2] + v[0]) / 2
+            v2v0_axis = Vec(v[2] - v[0])
+            rot_b1 = Rot(axis=v2v0_axis, angle=b1)
+            v[1] = v2v0 + rot_b1 * (v1_ - v2v0)
+
+            # rot b0
+            v6v4 = (v[6] + v[4]) / 2
+            v6v4_axis = Vec(v[6] - v[4])
+            rot_b0 = Rot(axis=v6v4_axis, angle=b0)
+            v[5] = v6v4 + rot_b0 * (v[5] - v6v4)
+            return v
+
+    def fold_w4_help(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_w3, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        #
+        #               4
+        #               ^
+        #        3     | |     5
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      2   |/       \|   6
+        #          V axes  a V
+        #          "         "
+        #          1         0
+        #
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot a1
+            v4v1 = (v[4] + v[1]) / 2
+            v4v1_axis = Vec(v[4] - v[1])
+            rot_a1 = Rot(axis=v4v1_axis, angle=-a1)
+            # 0 2 -> 4 ,6 or 6, 4?
+            v0v5  = (v[0] + v[5]) / 2
+            v0v5_ = v4v1 + rot_a1 * (v0v5 - v4v1)
+            v[0]  = v0v5_ + (v[0] - v0v5)
+            v5_ = v0v5_ + (v[5] - v0v5)
+            v6_ = v4v1 + rot_a1 * (v[6] - v4v1)
+
+            # rot a0
+            v4v0 = (v[4] + v[0]) / 2
+            v4v0_axis = Vec(v[4] - v[0])
+            rot_a0 = Rot(axis=v4v0_axis, angle=-a0)
+            v6v5  = (v6_ + v5_) / 2
+            v6v5_ = v4v0 + rot_a0 * (v6v5 - v4v0)
+            v6_ = v6v5_ + (v6_ - v6v5)
+            v[5]  = v6v5_ + (v5_ - v6v5)
+
+            # rot b0
+            v5v0 = (v[5] + v[0]) / 2
+            v5v0_axis = Vec(v[5] - v[0])
+            rot_b0 = Rot(axis=v5v0_axis, angle=-b0)
+            v[6] = v5v0 + rot_b0 * (v6_ - v5v0)
+
+            # rot b1
+            v1v3 = (v[1] + v[3]) / 2
+            v1v3_axis = Vec(v[1] - v[3])
+            rot_b1 = Rot(axis=v1v3_axis, angle=-b1)
+            v[2] = v1v3 + rot_b1 * (v[2] - v1v3)
+            return v
+
+    def fold_w5_help(self, a0, b0, a1, b1, keepV0, Vs):
+        #
+        #               5
+        #               ^
+        #        4     | |     6
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      3   |/       \|   0
+        #          V axes  a V
+        #          "         "
+        #          2         1
+        #
+        v = self.fold_w2_help(
+            -a1, -b1, -a0, -b0, keepV0,
+            [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]],
+        )
+        return [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
+
+    def fold_w6_help(self, a0, b0, a1, b1, keepV0, Vs):
+        #
+        #               6
+        #               ^
+        #        5     | |     0
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      4   |/       \|   1
+        #          V axes  a V
+        #          "         "
+        #          3         2
+        #
+        v = self.fold_w1_help(
+            -a1, -b1, -a0, -b0, keepV0,
+            [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]],
+        )
+        return [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
+
+    def fold_w1(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around 4 diagonals in the shape of the character 'W'.
+
+        the fold angle a0 refers to the axis V1-V4,
+        the fold angle a1 refers to the axis V1-V5,
+        The fold angle b0 refers to the axis V2-V4,
+        The fold angle b1 refers to the axis V0-V5 and
+        If keepV0 = True then the vertex V0 is kept invariant
+        during folding, otherwise the edge V3 - V4 is kept invariant
+        """
         self.Fs = [[2, 4, 3], [2, 1, 4], [1, 5, 4], [1, 0, 5], [0, 6, 5]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 2, 4, 4, 1, 1, 5, 5, 0
@@ -1562,42 +1702,11 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        #
-        #               2
-        #               ^
-        #        1     | |     3
-        #        .    /   \    .
-        # axis b1 \  |     |  / axis b0
-        #          " |     | "
-        #      0   |/       \|   4
-        #          V axes  a V
-        #          "         "
-        #          6         5
-        #
         self.Fs = [[3, 5, 4], [3, 2, 5], [2, 6, 5], [2, 1, 6], [1, 0, 6]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 3, 5, 5, 2, 2, 6, 6, 1
             ]
-        Vs = self.fold_w1_help(a0, b0, a1, b1, keepV0,
-            [
-                self.VsOrg[1],
-                self.VsOrg[2],
-                self.VsOrg[3],
-                self.VsOrg[4],
-                self.VsOrg[5],
-                self.VsOrg[6],
-                self.VsOrg[0]
-            ]
-        )
-        self.Vs = [
-            Vs[6],
-            Vs[0],
-            Vs[1],
-            Vs[2],
-            Vs[3],
-            Vs[4],
-            Vs[5]
-        ]
+        self.Vs = self.fold_w2_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w3(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -1610,18 +1719,6 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        #
-        #               3
-        #               ^
-        #        2     | |     4
-        #        .    /   \    .
-        # axis b1 \  |     |  / axis b0
-        #          " |     | "
-        #      1   |/       \|   5
-        #          V axes  a V
-        #          "         "
-        #          0         6
-        #
         self.Fs = [[4, 6, 5], [4, 3, 6], [3, 0, 6], [3, 2, 0], [2, 1, 0]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 4, 6, 6, 3, 3, 0, 0, 2
@@ -1639,42 +1736,11 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        #
-        #               4
-        #               ^
-        #        3     | |     5
-        #        .    /   \    .
-        # axis b1 \  |     |  / axis b0
-        #          " |     | "
-        #      2   |/       \|   6
-        #          V axes  a V
-        #          "         "
-        #          1         0
-        #
         self.Fs = [[5, 0, 6], [5, 4, 0], [4, 1, 0], [4, 3, 1], [3, 2, 1]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 5, 0, 0, 4, 4, 1, 1, 3
             ]
-        Vs = self.fold_w3_help(-a1, -b1, -a0, -b0, keepV0,
-            [
-                self.VsOrg[0],
-                self.VsOrg[6],
-                self.VsOrg[5],
-                self.VsOrg[4],
-                self.VsOrg[3],
-                self.VsOrg[2],
-                self.VsOrg[1]
-            ]
-        )
-        self.Vs = [
-            Vs[0],
-            Vs[6],
-            Vs[5],
-            Vs[4],
-            Vs[3],
-            Vs[2],
-            Vs[1]
-        ]
+        self.Vs = self.fold_w4_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w5(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -1687,42 +1753,11 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        #
-        #               5
-        #               ^
-        #        4     | |     6
-        #        .    /   \    .
-        # axis b1 \  |     |  / axis b0
-        #          " |     | "
-        #      3   |/       \|   0
-        #          V axes  a V
-        #          "         "
-        #          2         1
-        #
         self.Fs = [[0, 6, 1], [6, 5, 1], [5, 2, 1], [5, 4, 2], [4, 3, 2]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 6, 1, 1, 5, 5, 2, 2, 4
             ]
-        Vs = self.fold_w1_help(-a1, -b1, -a0, -b0, keepV0,
-            [
-                self.VsOrg[6],
-                self.VsOrg[5],
-                self.VsOrg[4],
-                self.VsOrg[3],
-                self.VsOrg[2],
-                self.VsOrg[1],
-                self.VsOrg[0]
-            ]
-        )
-        self.Vs = [
-            Vs[6],
-            Vs[5],
-            Vs[4],
-            Vs[3],
-            Vs[2],
-            Vs[1],
-            Vs[0]
-        ]
+        self.Vs = self.fold_w5_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w6(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -1735,43 +1770,12 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        #
-        #               6
-        #               ^
-        #        5     | |     0
-        #        .    /   \    .
-        # axis b1 \  |     |  / axis b0
-        #          " |     | "
-        #      4   |/       \|   1
-        #          V axes  a V
-        #          "         "
-        #          3         2
-        #
         self.Fs = [[1, 0, 2], [2, 0, 6], [2, 6, 3], [3, 6, 5], [3, 5, 4]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
                 0, 2, 2, 6, 6, 3, 3, 5
             ]
         # opposite angle, because of opposite isometry
-        Vs = self.fold_w1_help(-a1, -b1, -a0, -b0, keepV0,
-            [
-                self.VsOrg[0],
-                self.VsOrg[6],
-                self.VsOrg[5],
-                self.VsOrg[4],
-                self.VsOrg[3],
-                self.VsOrg[2],
-                self.VsOrg[1]
-            ]
-        )
-        self.Vs = [
-            Vs[0],
-            Vs[6],
-            Vs[5],
-            Vs[4],
-            Vs[3],
-            Vs[2],
-            Vs[1]
-        ]
+        self.Vs = self.fold_w6_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_mixed(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         """
@@ -2370,7 +2374,7 @@ class RegularHeptagon:
             self.Vs[i] = T + self.Vs[i]
 
     def rotate(self, axis, angle):
-        self.transform(Rot(axis = axis, angle = angle))
+        self.transform(Rot(axis=axis, angle=angle))
 
     def transform(self, T):
         for i in range(len(self.Vs)):
@@ -2549,14 +2553,14 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def setTriangleFillPosition(self, position):
         print("WARNING: implement in derived class")
 
-    def setFold1(self, angle = None, oppositeAngle = None):
+    def setFold1(self, angle=None, oppositeAngle = None):
         if angle is not None:
             self.fold1 = angle
         if oppositeAngle is not None:
             self.oppFold1 = oppositeAngle
         self.updateShape = True
 
-    def setFold2(self, angle = None, oppositeAngle = None):
+    def setFold2(self, angle=None, oppositeAngle = None):
         if angle is not None:
             self.fold2 = angle
         if oppositeAngle is not None:
