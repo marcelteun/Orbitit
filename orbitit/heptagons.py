@@ -824,16 +824,35 @@ class RegularHeptagon:
         #         i+4         i+3
         #
 
-        prj = {
-            0: self.fold_shell_0,
-            1: self.fold_shell_1,
-            2: self.fold_shell_2,
-            3: self.fold_shell_3,
-            4: self.fold_shell_4,
-            5: self.fold_shell_5,
-            6: self.fold_shell_6
-        }
+        prj = [
+            self.fold_shell_0,
+            self.fold_shell_1,
+            self.fold_shell_2,
+            self.fold_shell_3,
+            self.fold_shell_4,
+            self.fold_shell_5,
+            self.fold_shell_6,
+        ]
         prj[rotate](a0, b0, a1, b1, keepV0)
+
+    def fold_shell_es_fs(self, no):
+        """
+        Set self.Es and self.FS for shell fold and specified position.
+
+        no: number to shift up
+        """
+        i = [(i + no) % 7 for i in range(7)]
+        self.Fs = [
+            [i[0], i[2], i[1]],
+            [i[0], i[3], i[2]],
+            [i[0], i[4], i[3]],
+            [i[0], i[5], i[4]],
+            [i[0], i[6], i[5]],
+        ]
+        self.Es = [
+            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
+            i[0], i[2], i[0], i[3], i[0], i[4], i[0], i[5]
+        ]
 
     def fold_shell_0(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -902,25 +921,6 @@ class RegularHeptagon:
             v[6] = v0v5 + rot_b1 * (v[6] - v0v5)
 
         self.Vs = v
-
-    def fold_shell_es_fs(self, no):
-        """
-        Set self.Es and self.FS for shell fold and specified position.
-
-        no: number to shift up
-        """
-        i = [(i + no) % 7 for i in range(7)]
-        self.Fs = [
-            [i[0], i[2], i[1]],
-            [i[0], i[3], i[2]],
-            [i[0], i[4], i[3]],
-            [i[0], i[5], i[4]],
-            [i[0], i[6], i[5]],
-        ]
-        self.Es = [
-            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
-            i[0], i[2], i[0], i[3], i[0], i[4], i[0], i[5]
-        ]
 
     def fold_shell_1(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -1337,12 +1337,9 @@ class RegularHeptagon:
         #           "         "
         #           3         2
         #
-        self.Fs = [[6, 1, 0], [6, 2, 1], [6, 3, 2], [6, 4, 3], [6, 5, 4]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                6, 1, 6, 2, 6, 3, 6, 4
-            ]
+        self.fold_shell_es_fs(6)
         # opposite angle, because of opposite isometry
-        Vs = self.fold_shell_1_vs(-a1, -b1, -a0, -b0, keepV0,
+        self.fold_shell_1_vs(-a1, -b1, -a0, -b0, keepV0,
             [
                 self.VsOrg[0],
                 self.VsOrg[6],
@@ -1353,19 +1350,50 @@ class RegularHeptagon:
                 self.VsOrg[1]
             ]
         )
-        self.Vs = [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]]
+        self.Vs = [
+            self.Vs[0], self.Vs[6], self.Vs[5], self.Vs[4], self.Vs[3], self.Vs[2], self.Vs[1]
+        ]
 
     def fold_w(self, a0, b0, a1, b1, keepV0=True, rotate=0):
-        prj = {
-            0: self.fold_w0,
-            1: self.fold_w1,
-            2: self.fold_w2,
-            3: self.fold_w3,
-            4: self.fold_w4,
-            5: self.fold_w5,
-            6: self.fold_w6
-        }
+        prj = [
+            self.fold_w0,
+            self.fold_w1,
+            self.fold_w2,
+            self.fold_w3,
+            self.fold_w4,
+            self.fold_w5,
+            self.fold_w6,
+        ]
         prj[rotate](a0, b0, a1, b1, keepV0)
+
+    def fold_w_es_fs(self, no):
+        """
+        Set self.Es and self.FS for shell fold and specified position.
+
+        no: number to shift up
+        """
+        #               0
+        #               ^
+        #        6     | |     1
+        #        .    /   \    .
+        # axis b1 \  |     |  / axis b0
+        #          " |     | "
+        #      5   |/       \|   2
+        #          V axes  a V
+        #          "         "
+        #          4         3
+        i = [(i + no) % 7 for i in range(7)]
+        self.Fs = [
+            [i[1], i[3], i[2]],
+            [i[1], i[0], i[3]],
+            [i[0], i[4], i[3]],
+            [i[0], i[6], i[4]],
+            [i[6], i[5], i[4]],
+        ]
+        self.Es = [
+            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
+            i[6], i[4], i[4], i[0], i[0], i[3], i[3], i[1]
+        ]
 
     def fold_w0(self, a0, b0, a1, b1, keepV0=True):
         """
@@ -1419,10 +1447,7 @@ class RegularHeptagon:
                 V5,
                 V6,
             ]
-        self.Fs = [[1, 3, 2], [1, 0, 3], [0, 4, 3], [0, 6, 4], [6, 5, 4]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                1, 3, 3, 0, 0, 4, 4, 6
-            ]
+        self.fold_w_es_fs(0)
 
     def fold_w1_help(self, a0, b0, a1, b1, keepV0, Vs):
         """Helper function for fold_w1, see that one for more info
@@ -1706,10 +1731,7 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        self.Fs = [[2, 4, 3], [2, 1, 4], [1, 5, 4], [1, 0, 5], [0, 6, 5]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                2, 4, 4, 1, 1, 5, 5, 0
-            ]
+        self.fold_w_es_fs(1)
         self.Vs = self.fold_w1_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w2(self, a0, b0, a1, b1, keepV0=True):
@@ -1723,10 +1745,7 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        self.Fs = [[3, 5, 4], [3, 2, 5], [2, 6, 5], [2, 1, 6], [1, 0, 6]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                3, 5, 5, 2, 2, 6, 6, 1
-            ]
+        self.fold_w_es_fs(2)
         self.Vs = self.fold_w2_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w3(self, a0, b0, a1, b1, keepV0=True):
@@ -1740,10 +1759,7 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        self.Fs = [[4, 6, 5], [4, 3, 6], [3, 0, 6], [3, 2, 0], [2, 1, 0]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                4, 6, 6, 3, 3, 0, 0, 2
-            ]
+        self.fold_w_es_fs(3)
         self.Vs = self.fold_w3_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w4(self, a0, b0, a1, b1, keepV0=True):
@@ -1757,10 +1773,7 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        self.Fs = [[5, 0, 6], [5, 4, 0], [4, 1, 0], [4, 3, 1], [3, 2, 1]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                5, 0, 0, 4, 4, 1, 1, 3
-            ]
+        self.fold_w_es_fs(4)
         self.Vs = self.fold_w4_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w5(self, a0, b0, a1, b1, keepV0=True):
@@ -1774,10 +1787,7 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        self.Fs = [[0, 6, 1], [6, 5, 1], [5, 2, 1], [5, 4, 2], [4, 3, 2]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                6, 1, 1, 5, 5, 2, 2, 4
-            ]
+        self.fold_w_es_fs(5)
         self.Vs = self.fold_w5_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_w6(self, a0, b0, a1, b1, keepV0=True):
@@ -1791,11 +1801,7 @@ class RegularHeptagon:
         If keepV0 = True then the vertex V0 is kept invariant
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
-        self.Fs = [[1, 0, 2], [2, 0, 6], [2, 6, 3], [3, 6, 5], [3, 5, 4]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                0, 2, 2, 6, 6, 3, 3, 5
-            ]
-        # opposite angle, because of opposite isometry
+        self.fold_w_es_fs(6)
         self.Vs = self.fold_w6_help(a0, b0, a1, b1, keepV0, self.VsOrg)
 
     def fold_mixed(self, a0, b0, a1, b1, keepV0=True, rotate=0):
