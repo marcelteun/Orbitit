@@ -856,31 +856,52 @@ class RegularHeptagon:
         #           "         "
         #           4         3
         #
+        self.fold_shell_es_fs(0)
+        self.fold_shell_0_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_shell_0_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_0, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        v = [v for v in Vs]
         if (keepV0):
             assert False, "TODO"
         else:
-            Rot0_3 = Rot(axis=self.VsOrg[3] - self.VsOrg[0], angle=a0)
-            V0 = self.VsOrg[0]
-            V1_ = Rot0_3 * self.VsOrg[1]
-            V2 = Rot0_3 * self.VsOrg[2]
-            Rot0_2 = Rot(axis=V2 - V0, angle=b0)
-            V1 = Rot0_2 * V1_
-            if (Geom3D.eq(a0, a1)):
-                V5 = Vec([-V2[0], V2[1], V2[2]])
-                if (Geom3D.eq(b0, b1)):
-                    V6 = Vec([-V1[0], V1[1], V1[2]])
-                else:
-                    V6 = Vec([-V1_[0], V1_[1], V1_[2]])
-                    Rot5_0 = Rot(axis=V0 - V5, angle=b1)
-                    V6 = Rot5_0 * (V6 - V0) + V0
-            else:
-                Rot4_0 = Rot(axis=V0 - self.VsOrg[4], angle=a1)
-                V6 = Rot4_0 * self.VsOrg[6]
-                V5 = Rot4_0 * self.VsOrg[5]
-                Rot5_0 = Rot(axis=V0 - V5, angle=b1)
-                V6 = Rot5_0 * (V6 - V0) + V0
-            self.Vs = [V0, V1, V2, self.VsOrg[3], self.VsOrg[4], V5, V6]
-            self.fold_shell_es_fs(0)
+            # rot a0
+            v0v3 = (v[0] + v[3]) / 2
+            v0v3_axis = Vec(v[0] - v[3])
+            rot_a0 = Rot(axis=v0v3_axis, angle=-a0)
+            # middle of V1-V2 which is // to v0v3 axis
+            v1v2  = (v[1] + v[2]) / 2
+            v1v2_ = v0v3 + rot_a0 * (v1v2 - v0v3)
+            v[1] = v1v2_ + (v[1] - v1v2)
+            v[2]  = v1v2_ + (v[2] - v1v2)
+
+            # rot b0
+            v0v2 = (v[0] + v[2]) / 2
+            v0v2_axis = Vec(v[0] - v[2])
+            rot_b0 = Rot(axis=v0v2_axis, angle=-b0)
+            v[1] = v0v2 + rot_b0 * (v[1] - v0v2)
+
+            # rot a1
+            v0v4 = (v[0] + v[4]) / 2
+            v0v4_axis = Vec(v[0] - v[4])
+            rot_a1 = Rot(axis=v0v4_axis, angle=a1)
+            # middle of V6-V5 which is // to v1v4 axis
+            v6v5  = (v[6] + v[5]) / 2
+            v6v5_ = v0v4 + rot_a1 * (v6v5 - v0v4)
+            v[6] = v6v5_ + (v[6] - v6v5)
+            v[5]  = v6v5_ + (v[5] - v6v5)
+
+            # rot b1
+            v0v5 = (v[0] + v[5]) / 2
+            v0v5_axis = Vec(v[0] - v[5])
+            rot_b1 = Rot(axis=v0v5_axis, angle=b1)
+            v[6] = v0v5 + rot_b1 * (v[6] - v0v5)
+
+        self.Vs = v
 
     def fold_shell_es_fs(self, no):
         """
