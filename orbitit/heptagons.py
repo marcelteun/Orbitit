@@ -458,6 +458,7 @@ class RegularHeptagon:
             FoldMethod.TRIANGLE: self.fold_triangle,
             FoldMethod.SHELL: self.fold_shell,
             FoldMethod.MIXED: self.fold_mixed,
+            FoldMethod.G: self.fold_g,
         }
         method[fold](a0, b0, a1, b1, keepV0, rotate)
 
@@ -1808,8 +1809,11 @@ class RegularHeptagon:
         """
         Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
 
-        The fold angle a0 refers the axis V0-V2
-        the fold angle b0 refers the axes V0-V3 and V0-V4.
+        For rotate == 0:
+        The fold angle a0 refers the axis V0-V3
+        the fold angle b0 refers the axes V0-V2
+        The fold angle a1 refers the axis V0-V4
+        the fold angle b1 refers the axes V6-V4
         The keepV0 variable is ignored here (it is provided to be consistent
         with the other fold functions.)
         """
@@ -2396,6 +2400,150 @@ class RegularHeptagon:
 
         self.Vs = v
 
+    def fold_g(self, a0, b0, a1, b1, keepV0=True, rotate=0):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        For rotate == 0:
+        The fold angle a0 refers the axis V0-V2
+        the fold angle b0 refers the axes V0-V3 and V0-V4.
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #             Vi
+        #            /\
+        #   Vi+6    /  '.    Vi+1
+        #         .'     '.
+        # axis a1/         \ axis b1
+        #       /  axis a0  \
+        # Vi+5 -------------.- Vi+2
+        #      axis b0__--''
+        #          _-'
+        #       Vi+4     Vi+3
+        #
+
+        prj = {
+            0: self.fold_g_0,
+            1: self.fold_g_1,
+            2: self.fold_g_2,
+            3: self.fold_g_3,
+            4: self.fold_g_4,
+            5: self.fold_g_5,
+            6: self.fold_g_6
+        }
+        prj[rotate](a0, b0, a1, b1, keepV0)
+
+    def fold_g_es_fs(self, no):
+        """
+        Set self.Es and self.FS for shell fold and specified position.
+
+        no: number to shift up
+        """
+        i = [(i + no) % 7 for i in range(7)]
+        self.Fs = [
+            [i[0], i[2], i[1]],
+            [i[0], i[5], i[2]],
+            [i[0], i[6], i[5]],
+            [i[2], i[5], i[4]],
+            [i[2], i[4], i[3]],
+        ]
+        self.Es = [
+            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
+            i[4], i[2], i[2], i[0], i[0], i[5], i[5], i[2]
+        ]
+
+    def fold_g_0(self, a0, b0, a1, b1, keepV0=True):
+        """
+        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+
+        The fold angle a0 refers the axis V0-V3
+        the fold angle b0 refers the axis V0-V2
+        the fold angle a1 refers the axis V0-V4
+        the fold angle b1 refers the axis V6-V4
+        The keepV0 variable is ignored here (it is provided to be consistent
+        with the other fold functions.)
+        """
+        #             V0
+        #            /\
+        #     V6    /  '.    V1
+        #         .'     '.
+        # axis a1/         \ axis b1
+        #       /  axis a0  \
+        #   V5 =------------.- V2
+        #      axis b0__--''
+        #          _-'
+        #        V4       V3
+        #
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_g_es_fs(0)
+            self.fold_g_0_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_g_0_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        """Helper function for fold_shell_1, see that one for more info
+
+        Vs: the array with vertex numbers.
+        returns a new array.
+        """
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            v2v4 = (v[2] + v[4]) / 2
+            v2v4_axis = Vec(v[2] - v[4])
+            rot_b0 = Rot(axis=v2v4_axis, angle=b0)
+            # middle of V1-V5 which is // to v2v4 axis
+            v1v5  = (v[1] + v[5]) / 2
+            v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
+            v[1] = v1v5_ + (v[1] - v1v5)
+            v[5]  = v1v5_ + (v[5] - v1v5)
+            # middle of V1-V5 which is // to v2v4 axis
+            v0v6  = (v[0] + v[6]) / 2
+            v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
+            v[0] = v0v6_ + (v[0] - v0v6)
+            v[6]  = v0v6_ + (v[6] - v0v6)
+
+            # rot a0
+            v2v5 = (v[2] + v[5]) / 2
+            v2v5_axis = Vec(v[2] - v[5])
+            rot_a0 = Rot(axis=v2v5_axis, angle=a0)
+            # middle of V1-V6 which is // to v2v5 axis
+            v1v6  = (v[1] + v[6]) / 2
+            v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
+            v[1] = v1v6_ + (v[1] - v1v6)
+            v[6] = v1v6_ + (v[6] - v1v6)
+            v[0] = v2v5 + rot_a0 * (v[0] - v2v5)
+
+            # rot a1
+            v0v5 = (v[0] + v[5]) / 2
+            v0v5_axis = Vec(v[0] - v[5])
+            rot_a1 = Rot(axis=v0v5_axis, angle=a1)
+            v[6] = v0v5 + rot_a1 * (v[6] - v0v5)
+
+            # rot b1
+            v0v2 = (v[0] + v[2]) / 2
+            v0v2_axis = Vec(v[0] - v[2])
+            rot_b1 = Rot(axis=v0v2_axis, angle=-b1)
+            v[1] = v0v2 + rot_b1 * (v[1] - v0v2)
+
+        self.Vs = v
+
+    def fold_g_1(self, a0, b0, a1, b1, keepV0=True):
+        pass
+    def fold_g_2(self, a0, b0, a1, b1, keepV0=True):
+        pass
+    def fold_g_3(self, a0, b0, a1, b1, keepV0=True):
+        pass
+    def fold_g_4(self, a0, b0, a1, b1, keepV0=True):
+        pass
+    def fold_g_5(self, a0, b0, a1, b1, keepV0=True):
+        pass
+    def fold_g_6(self, a0, b0, a1, b1, keepV0=True):
+        pass
+
     def translate(self, T):
         for i in range(len(self.Vs)):
             self.Vs[i] = T + self.Vs[i]
@@ -2754,6 +2902,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             FoldMethod.W.name.capitalize(),
             FoldMethod.TRAPEZIUM.name.capitalize(),
             FoldMethod.MIXED.name.capitalize(),
+            FoldMethod.G.name.capitalize(),
         ]
         self.foldMethodListItems = [
             FoldMethod.get(self.foldMethodList[i]) for i in range(len(self.foldMethodList))
@@ -2770,6 +2919,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 FoldMethod.SHELL.name.capitalize(),
                 FoldMethod.W.name.capitalize(),
                 FoldMethod.MIXED.name.capitalize(),
+                FoldMethod.G.name.capitalize(),
             ]
         }
 
@@ -3223,6 +3373,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.foldMethod == FoldMethod.W
                 or self.foldMethod == FoldMethod.SHELL
                 or self.foldMethod == FoldMethod.MIXED
+                or self.foldMethod == FoldMethod.G
             ):
                 self.fold1OppGui.Enable()
                 self.fold2OppGui.Enable()
