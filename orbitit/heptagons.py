@@ -2474,7 +2474,6 @@ class RegularHeptagon:
         #          _-'
         #        V4       V3
         #
-        #
         if (keepV0):
             assert False, "TODO"
         else:
@@ -2500,7 +2499,7 @@ class RegularHeptagon:
             v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
             v[1] = v1v5_ + (v[1] - v1v5)
             v[5]  = v1v5_ + (v[5] - v1v5)
-            # middle of V1-V5 which is // to v2v4 axis
+            # middle of V0-V6 which is // to v2v4 axis
             v0v6  = (v[0] + v[6]) / 2
             v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
             v[0] = v0v6_ + (v[0] - v0v6)
@@ -2532,7 +2531,69 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_1(self, a0, b0, a1, b1, keepV0=True):
-        pass
+        #            V1
+        #            /\
+        #     V0    /  '.    V2
+        #         .'     '.
+        # axis a1/         \ axis b1
+        #       /  axis a0  \
+        #   V6 =------------.- V3
+        #      axis b0__--''
+        #          _-'
+        #        V5       V4
+        #
+        #
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            self.fold_g_es_fs(1)
+            self.fold_g_1_vs(a0, b0, a1, b1, keepV0, self.VsOrg)
+
+    def fold_g_1_vs(self, a0, b0, a1, b1, keepV0, Vs):
+        v = [v for v in Vs]
+        if (keepV0):
+            assert False, "TODO"
+        else:
+            # rot b0
+            v3v5 = (v[3] + v[5]) / 2
+            v3v5_axis = Vec(v[3] - v[5])
+            rot_b0 = Rot(axis=v3v5_axis, angle=b0)
+            # middle of V2-V6 which is // to v3v5 axis
+            v2v6  = (v[2] + v[6]) / 2
+            v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
+            v[2] = v2v6_ + (v[2] - v2v6)
+            v[6]  = v2v6_ + (v[6] - v2v6)
+            # middle of V1-V0 which is // to v3v5 axis
+            v1v0  = (v[1] + v[0]) / 2
+            v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
+            v[1] = v1v0_ + (v[1] - v1v0)
+            v[0]  = v1v0_ + (v[0] - v1v0)
+
+            # rot a0
+            v3v6 = (v[3] + v[6]) / 2
+            v3v6_axis = Vec(v[3] - v[6])
+            rot_a0 = Rot(axis=v3v6_axis, angle=a0)
+            # middle of V2-V6 which is // to v3v6 axis
+            v2v0  = (v[2] + v[0]) / 2
+            v2v0_ = v3v6 + rot_a0 * (v2v0 - v3v6)
+            v[2] = v2v0_ + (v[2] - v2v0)
+            v[0] = v2v0_ + (v[0] - v2v0)
+            v[1] = v3v6 + rot_a0 * (v[1] - v3v6)
+
+            # rot a1
+            v1v6 = (v[1] + v[6]) / 2
+            v1v6_axis = Vec(v[1] - v[6])
+            rot_a1 = Rot(axis=v1v6_axis, angle=a1)
+            v[0] = v1v6 + rot_a1 * (v[0] - v1v6)
+
+            # rot b1
+            v1v3 = (v[1] + v[3]) / 2
+            v1v3_axis = Vec(v[1] - v[3])
+            rot_b1 = Rot(axis=v1v3_axis, angle=-b1)
+            v[2] = v1v3 + rot_b1 * (v[2] - v1v3)
+
+        self.Vs = v
+
     def fold_g_2(self, a0, b0, a1, b1, keepV0=True):
         pass
     def fold_g_3(self, a0, b0, a1, b1, keepV0=True):
