@@ -32,6 +32,7 @@ from orbitit import Geom3D, geomtypes
 
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)
+blue = (.3, .3, .8)
 DIR = "unittest"
 
 
@@ -54,7 +55,7 @@ def get_cube():
           [3, 2, 6, 7],
           [7, 6, 5, 4]]
     return Geom3D.SimpleShape(Vs=Vs, Fs=Fs,
-                              colors=([red], []))
+                              colors=([red, yellow, blue], [0, 1, 2, 1, 2, 0]))
 
 
 def get_octahedron():
