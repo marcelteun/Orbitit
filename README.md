@@ -61,8 +61,8 @@ Make sure the `PYTHONPATH` points out this directory, e.g. in Linux
 Also make sure to have set the `PYOPENGL_PLATFORM` environment variable.
 On my system I do
 ```
-source init_env
-python orbitit
+source ./init_env
+python -m orbitit
 ```
 
 ## Errors
