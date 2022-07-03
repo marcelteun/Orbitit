@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import math
 import os
 
@@ -409,14 +410,23 @@ def create_a5xi(base, js_fd=None):
 
 if __name__ == "__main__":
 
-    # TODO: from argument
-    out_dir = 'data/compounds/s4a4'
+    parser = argparse.ArgumentParser(
+            description="Generate off-files for compound polyhedra of polyhedra with "
+            "tetrahedral symmetry"
+    )
+    parser.add_argument(
+        "-o", "--output-dir",
+        default="data/compounds/s4a4",
+        help="Output directory to store off-models in. The whole path will be created if "
+        "it doesn't exist."
+    )
+    args = parser.parse_args()
     js_file = 'rotational_freedom.js'
 
     # Create all models in one dir
-    if not os.path.isdir(out_dir):
-        os.makedirs(out_dir)
-    os.chdir(out_dir)
+    if not os.path.isdir(args.output_dir):
+        os.makedirs(args.output_dir)
+    os.chdir(args.output_dir)
 
     # TODO: from argument
     base = S4A4.tetrahedron
