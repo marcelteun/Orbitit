@@ -5,7 +5,7 @@ import math
 import os
 
 from orbitit.compounds import S4A4
-from orbitit import geomtypes
+from orbitit import geomtypes, rgb
 
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
@@ -151,13 +151,13 @@ def create_s4(base, js_fd=None):
     polyh = S4A4.S4_C3(base, 4)
     polyh = S4A4.S4_C3(base, 8,
                        cols=[S4A4.S4_C3.cols[0],
-                             S4A4.S4_C3.cols[3],
-                             S4A4.S4_C3.cols[2],
+                             S4A4.S4_C3.cols[0],
                              S4A4.S4_C3.cols[1],
                              S4A4.S4_C3.cols[1],
                              S4A4.S4_C3.cols[2],
+                             S4A4.S4_C3.cols[2],
                              S4A4.S4_C3.cols[3],
-                             S4A4.S4_C3.cols[0]])
+                             S4A4.S4_C3.cols[3]])
     polyh.rot_base(D_ATAN_V3_2_V5)
     save_off(polyh, '_mu3')
 
@@ -173,13 +173,55 @@ def create_s4(base, js_fd=None):
     polyh = S4A4.S4_C2(base, 4)
     polyh.rot_base(ASIN_1_V3)
     save_off(polyh, '_mu3')
-    polyh = S4A4.S4_C2(base, 4, col_alt=1)
+    polyh = S4A4.S4_C2(base, 12,
+                       cols=[S4A4.S4_C2.cols[0],
+                             S4A4.S4_C2.cols[1],
+                             rgb.gray,
+                             rgb.gray,
+                             rgb.gray,
+                             S4A4.S4_C2.cols[1],
+                             S4A4.S4_C2.cols[3],
+                             S4A4.S4_C2.cols[2],
+                             S4A4.S4_C2.cols[3],
+                             S4A4.S4_C2.cols[0],
+                             rgb.gray,
+                             S4A4.S4_C2.cols[2],
+                            ],
+                       )
     polyh.rot_base(2*ATAN_3_2V2)
     save_off(polyh, '_mu4')
-    polyh = S4A4.S4_C2(base, 4, col_alt=0)
+    polyh = S4A4.S4_C2(base, 12,
+                       cols=[S4A4.S4_C2.cols[0],
+                             S4A4.S4_C2.cols[0],
+                             rgb.gray,
+                             rgb.gray,
+                             rgb.gray,
+                             S4A4.S4_C2.cols[3],
+                             S4A4.S4_C2.cols[2],
+                             S4A4.S4_C2.cols[1],
+                             S4A4.S4_C2.cols[3],
+                             S4A4.S4_C2.cols[1],
+                             rgb.gray,
+                             S4A4.S4_C2.cols[2],
+                            ],
+                       )
     polyh.rot_base(ATAN_H_V2_1_V5__1)
     save_off(polyh, '_mu5')
-    polyh = S4A4.S4_C2(base, 4, col_alt=1)
+    polyh = S4A4.S4_C2(base, 12,
+                       cols=[rgb.gray,
+                             S4A4.S4_C2.cols[1],
+                             S4A4.S4_C2.cols[2],
+                             S4A4.S4_C2.cols[1],
+                             S4A4.S4_C2.cols[3],
+                             rgb.gray,
+                             rgb.gray,
+                             rgb.gray,
+                             S4A4.S4_C2.cols[3],
+                             S4A4.S4_C2.cols[0],
+                             S4A4.S4_C2.cols[0],
+                             S4A4.S4_C2.cols[2],
+                            ],
+                       )
     polyh.rot_base(ATAN_H_V2_1_V5_1)
     save_off(polyh, '_mu6')
 
@@ -214,6 +256,12 @@ def create_s4xi(base, js_fd=None):
     polyh = S4A4.S4xI_C3(base, 4, col_sym='D3xI')
     polyh.rot_base(math.pi / 6)
     save_off(polyh, '_mu2')
+    polyh = S4A4.S4xI_C3(base, 2, col_sym='S4')
+    polyh.rot_base(D_ATAN_V3_2_V5)
+    save_off(polyh, '_mu3')
+    polyh = S4A4.S4xI_C3(base, 2, col_sym='A4xI')
+    polyh.rot_base(D_ATAN_V3_2_V5)
+    save_off(polyh, '_mu3_1')
 
     polyh = S4A4.S4xI_C2(base, 6, col_sym='D2xI')
     if js_fd is not None:
@@ -231,21 +279,22 @@ def create_s4xi(base, js_fd=None):
     polyh.rot_base(math.pi / 8)
     save_off(polyh, '_mu4')
     polyh = S4A4.S4xI_C2(base, 12, col_sym='C2xI',
-                         cols=[S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[0],
+                         cols=[S4A4.A4xI_C3.cols[0],
                                S4A4.A4xI_C3.cols[2],
                                S4A4.A4xI_C3.cols[3],
-                               S4A4.A4xI_C3.cols[2],
+                               S4A4.A4xI_C3.cols[1],
                                S4A4.A4xI_C3.cols[0],
                                S4A4.A4xI_C3.cols[2],
                                S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[3],
                                S4A4.A4xI_C3.cols[1],
-                               S4A4.A4xI_C3.cols[1],
+                               S4A4.A4xI_C3.cols[2],
                                S4A4.A4xI_C3.cols[3],
                                S4A4.A4xI_C3.cols[0],
                                ])
     polyh.rot_base(ATAN_4V2_7 / 2)
     save_off(polyh, '_mu5')
+    # FIXME: generated in a different order after upgrading Python
     polyh = S4A4.S4xI_C2(base, 24, col_sym='C2xI',
                          cols=[S4A4.A4xI_C3.cols[0],
                                S4A4.A4xI_C3.cols[1],
@@ -273,6 +322,7 @@ def create_s4xi(base, js_fd=None):
                                S4A4.A4xI_C3.cols[3]])
     polyh.rot_base(ATAN_H_V2_1_V5__1)
     save_off(polyh, '_mu6')
+    # FIXME: generated in a different order after upgrading Python
     polyh = S4A4.S4xI_C2(base, 24, col_sym='C2xI',
                          cols=[S4A4.A4xI_C3.cols[0],
                                S4A4.A4xI_C3.cols[1],
