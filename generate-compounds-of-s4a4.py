@@ -7,6 +7,7 @@ import os
 from orbitit.compounds import S4A4
 from orbitit import geomtypes, rgb
 
+# TODO: check if col_alt with Python3 still gives the same alternatives
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
@@ -19,7 +20,7 @@ D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
 ATAN_3_2V2 = math.atan(3 - 2 * V2)
 ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
 ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
-
+ATAN_V2_4 = math.atan(V2 / 4)
 
 def save_off(comp, tail=''):
     # If this starts with a version then we need 2A_, 2B etc (not 2_A_)
@@ -372,6 +373,20 @@ def create_s4xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(16 * math.pi / 180)  # example angle
     save_off(polyh)
+    # special mu
+    #            , , , math.pi/8, ACOS_1_V3]
+    polyh = S4A4.S4xI_D1C1(base, 12, col_sym='D2C2', col_alt=2)
+    polyh.rot_base(ATAN_V2_4/2)
+    save_off(polyh, '_mu2')
+    polyh = S4A4.S4xI_D1C1(base, 3, col_alt=1)
+    polyh.rot_base(ATAN_V2_4)
+    save_off(polyh, '_mu3')
+    polyh = S4A4.S4xI_D1C1(base, 3)
+    polyh.rot_base(math.pi/8)
+    save_off(polyh, '_mu4')
+    polyh = S4A4.S4xI_D1C1(base, 3, col_alt=1)
+    polyh.rot_base(ASIN_1_V3)
+    save_off(polyh, '_mu5')
 
     # Rigid compounds
     polyh = S4A4.S4xI_S4A4(base, 2)
