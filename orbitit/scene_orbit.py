@@ -70,7 +70,7 @@ class Shape(Geom3D.CompoundShape):
         super().__init__([Geom3D.SimpleShape([], [])])
 
     #def glInit(self):
-    #    super(Shape, self).glInit()
+    #    super().glInit()
     #    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     #    glEnable(GL_BLEND)
 

@@ -180,7 +180,7 @@ class IntInput(wx.TextCtrl):
     def set_value(self, i):
         """Set value of int input to the specified value"""
         self.val_updated = True
-        super().SetValue(self, str(i))
+        super().SetValue(str(i))
 
 
 class FloatInput(wx.TextCtrl):
