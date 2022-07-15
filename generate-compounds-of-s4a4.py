@@ -425,10 +425,10 @@ def create_a5(base, js_fd=None):
     # special mu
     polyh = S4A4.A5_C3(base, 10)
     polyh.rot_base(H_ACOS_1_3V5_8)
-    save_off(polyh, '_mu2')
+    save_off(polyh, '_mu3')
     polyh = S4A4.A5_C3(base, 5, col_alt=1)
     polyh.rot_base(ACOS_1_3V5_8)
-    save_off(polyh, '_mu3')
+    save_off(polyh, '_mu4')
     polyh = S4A4.A5_C3(
         base,
         20,
@@ -456,7 +456,7 @@ def create_a5(base, js_fd=None):
         ]
     )
     polyh.rot_base(ACOS_7_3V5_3_2_2V5_8)
-    save_off(polyh, '_mu4')
+    save_off(polyh, '_mu5')
 
     polyh = S4A4.A5_C2(base, 5)
     if js_fd is not None:
