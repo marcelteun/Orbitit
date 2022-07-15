@@ -507,7 +507,7 @@ class A5_C3(Compound):
                          cols=cols,
                          col_sym=col_sym)
         self.set_rot_axis(axis)
-        self.set_rot_axis(axis, [0, math.acos(V2 * V5 / 4)])
+        self.set_rot_axis(axis, [-math.acos((V2 * (3 + V5) / 8)), math.acos(V2 * V5 / 4)])
 
 
 class A5_C2(Compound):
