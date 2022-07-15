@@ -143,12 +143,12 @@ for isom in isomA5:
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = Geom3D.IsometricShape(
-            Vs = [], Fs = [], directIsometries = isomA5,
+            Vs = [], Fs = [], isometries = isomA5,
             name = 'FoldedHeptagonsA5',
             recreateEdges = False
         )
         xtraTrisShape = Geom3D.IsometricShape(
-            Vs = [], Fs = [], directIsometries = isomA5,
+            Vs = [], Fs = [], isometries = isomA5,
             name = 'xtraTrisA5',
             recreateEdges = False
         )
@@ -377,8 +377,8 @@ class Shape(heptagons.FldHeptagonShape):
                     )
                 )
                 theShapes.append(this.xtraTrisShape)
-        for shape in theShapes:
-            shape.showBaseOnly = not this.applySymmetry
+        for isom_shape in theShapes:
+            isom_shape.show_base_only = not this.apply_symmetries
         this.setShapes(theShapes)
         #rad = this.getRadii()
         #print 'min radius:', rad[0], 'max radius:', rad[1]

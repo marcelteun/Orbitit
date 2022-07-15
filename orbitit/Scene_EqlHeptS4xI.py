@@ -40,19 +40,16 @@ halfTurn = HalfTurn(axis=geomtypes.UX)
 class Shape(heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
         this.atanHV2 = Geom3D.Rad2Deg * math.atan(1/V2)
-        heptagons.EqlHeptagonShape.__init__(this,
-            directIsometries = [
+        super().__init__(
+            base_isometries=[
                     geomtypes.E,
-                    Rot(angle = geomtypes.turn(0.25), axis = geomtypes.UZ),
-                    Rot(angle = geomtypes.turn(0.50), axis = geomtypes.UZ),
-                    Rot(angle = geomtypes.turn(0.75), axis = geomtypes.UZ)
+                    Rot(angle=geomtypes.turn(0.25), axis=geomtypes.UZ),
+                    Rot(angle=geomtypes.turn(0.50), axis=geomtypes.UZ),
+                    Rot(angle=geomtypes.turn(0.75), axis=geomtypes.UZ)
                 ],
-            # abuse the opposite isometry (even though this is not an opposite
-            # isometry really) But for historical reasons I used a half turn
-            # here to prevent edges to be drawn twice.
-            #oppositeIsometry = geomtypes.I,
-            oppositeIsometry = halfTurn,
-            name = 'EglHeptS4xI'
+            # Use a half turn here to prevent edges to be drawn twice.
+            extra_isometry=halfTurn,
+            name='EglHeptS4xI'
         )
         this.initArrs()
         this.setH(1.0)
@@ -63,15 +60,15 @@ class Shape(heptagons.EqlHeptagonShape):
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
         this.angle = Geom3D.Rad2Deg * math.atan(V2 * (h - 1.0)) + this.atanHV2
-        heptagons.EqlHeptagonShape.setH(this, h)
+        super().setH(h)
 
     def setAngle(this, a):
         # TODO: use consistent angles, Dodecahedron uses without const atanHV2
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
-        alpha      = a - this.atanHV2
-        this.h     = hV2 * math.tan(alpha*Geom3D.Deg2Rad) + 1.0
-        heptagons.EqlHeptagonShape.setAngle(this, alpha)
+        alpha = a - this.atanHV2
+        this.h = hV2 * math.tan(alpha*Geom3D.Deg2Rad) + 1.0
+        super().setAngle(alpha)
 
     def setV(this):
         # input this.h
@@ -276,7 +273,6 @@ class Shape(heptagons.EqlHeptagonShape):
                 else:
                     xtraEs = [43, 44, 46, 47, 49, 50]
 
-        #this.showBaseOnly = True
         this.setBaseVertexProperties(Vs = Vs, Ns = Ns)
         Fs = []
         Es = []
@@ -319,9 +315,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 else:
                     faceIndices.append(offset+3)
         #print 'faceIndices', faceIndices
-        return heptagons.EqlHeptagonShape.toPsPiecesStr(this,
-            faceIndices, scaling, precision, margin
-        )
+        return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
 
     def initArrs(this):
         this.kiteFs = [

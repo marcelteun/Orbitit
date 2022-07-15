@@ -27,9 +27,10 @@ Module with geometrical types.
 # pylint: disable=too-many-lines,too-many-branches
 
 
+import json
 import math
 
-from orbitit import glue, indent
+from orbitit import base, glue, indent
 
 
 def turn(r):
@@ -53,7 +54,8 @@ QUARTER_TURN = turn(0.25)
 THIRD_TURN = turn(1.0/3)
 
 DEFAULT_EQ_FLOAT_MARGIN = 1.0e-10
-DEFAULT_ROUND_FLOAT_MARGIN = 10
+
+float_precision = 10
 
 # Disable pylint warning: Constant name "_eq_float_margin" doesn't conform to
 # UPPER_CASE naming style (invalid-name)
@@ -96,6 +98,14 @@ def eq(a, b, margin=None):
     return abs(a - b) < margin
 
 
+# Work around to save the floats in JSON as I want, see
+# https://stackoverflow.com/questions/54370322
+class RoundingFloat(float):
+    __repr__ = staticmethod(lambda x: glue.f2s(x, float_precision))
+
+json.encoder.c_make_encoder = None
+json.encoder.float = RoundingFloat
+
 def _get_mat_rot(w, x, y, z, sign=1):
     """Return matrix for a quarternion that is supposed to represent a rotation
 
@@ -123,7 +133,7 @@ class UnsupportedOperand(Exception):
 
 
 # Use tuples instead of lists to enable building sets used for isometries
-class Vec(tuple):
+class Vec(tuple, base.Orbitit):
     """Define a Euclidean vector"""
     def __new__(cls, v):
         return tuple.__new__(cls, [float(a) for a in v])
@@ -134,10 +144,19 @@ class Vec(tuple):
             s = f"{__name__}.{s}"
         return s
 
+    @property
+    def repr_dict(self):
+        """Return a short representation of the object."""
+        return {
+            'class': base.class_to_json[self.__class__],
+            'data': list(self),
+        }
+
     def __str__(self):
         try:
-            s = ", ".join([glue.f2s(i, DEFAULT_ROUND_FLOAT_MARGIN) for i in self])
-            return f"[{s}]"
+            return "[{}]".format(
+                ", ".join([glue.f2s(i, float_precision) for i in self])
+            )
         except IndexError:
             return '[]'
 
@@ -434,7 +453,7 @@ def _is_quat_pair(q):
     )
 
 
-class Transform3(tuple):
+class Transform3(tuple, base.Orbitit):
     """Define a 3D tranformation using quarternions"""
     debug = False
     eq_float_margin = _eq_float_margin
@@ -458,6 +477,14 @@ class Transform3(tuple):
             s = f"{__name__}." + s
         return s
 
+    @property
+    def repr_dict(self):
+        """Return a short representation of the object."""
+        return {
+            'class': base.class_to_json[self.__class__],
+            'data': [self[0].repr_dict, self[1].repr_dict],
+        }
+
     def __hash__(self):
         if 'hash_nr' not in self._cache:
             if self.is_rot():
@@ -480,7 +507,10 @@ class Transform3(tuple):
         # non-proper transform: show the quaternion pair.
         return f"{self[0]} * .. * {self[1]}"
 
-    def to_orbit_str(self, prec=DEFAULT_ROUND_FLOAT_MARGIN):
+    def to_json(self):
+        pass
+
+    def to_orbit_str(self, prec=float_precision):
         """Return the orbit file format representation for this transform.
 
         If this is not a proper transform, then UnsupportedTransform is raised
@@ -664,22 +694,22 @@ class Transform3(tuple):
     def __hash_rot(self):
         axis = self.__axis_rot()
         return hash((self.Rot,
-                     round(self.__angle_rot(), DEFAULT_ROUND_FLOAT_MARGIN),
-                     round(axis[0], DEFAULT_ROUND_FLOAT_MARGIN),
-                     round(axis[1], DEFAULT_ROUND_FLOAT_MARGIN),
-                     round(axis[2], DEFAULT_ROUND_FLOAT_MARGIN)))
+                     round(self.__angle_rot(), float_precision),
+                     round(axis[0], float_precision),
+                     round(axis[1], float_precision),
+                     round(axis[2], float_precision)))
 
     def __str_rot(self):
         axis = self.__axis_rot()
         return (
-            f"Rotation of {glue.f2s(to_degrees(self.__angle_rot()), DEFAULT_ROUND_FLOAT_MARGIN)} "
+            f"Rotation of {glue.f2s(to_degrees(self.__angle_rot()), float_precision)} "
             "degrees around ["
-            f"{glue.f2s(axis[0], DEFAULT_ROUND_FLOAT_MARGIN)}, "
-            f"{glue.f2s(axis[1], DEFAULT_ROUND_FLOAT_MARGIN)}, "
-            f"{glue.f2s(axis[2], DEFAULT_ROUND_FLOAT_MARGIN)}]"
+            f"{glue.f2s(axis[0], float_precision)}, "
+            f"{glue.f2s(axis[1], float_precision)}, "
+            f"{glue.f2s(axis[2], float_precision)}]"
         )
 
-    def __rot2orbit(self, prec=DEFAULT_ROUND_FLOAT_MARGIN):
+    def __rot2orbit(self, prec=float_precision):
         axis = self.__axis_rot()
         return (
             f"R {glue.f2s(self.__angle_rot(), prec)} "
@@ -796,9 +826,9 @@ class Transform3(tuple):
             (
                 self.Refl,
                 self.Refl,  # to use a tuple of 5 elements for all types
-                round(normal[0], DEFAULT_ROUND_FLOAT_MARGIN),
-                round(normal[1], DEFAULT_ROUND_FLOAT_MARGIN),
-                round(normal[2], DEFAULT_ROUND_FLOAT_MARGIN)
+                round(normal[0], float_precision),
+                round(normal[1], float_precision),
+                round(normal[2], float_precision)
             )
         )
 
@@ -806,12 +836,12 @@ class Transform3(tuple):
         norm = self.plane_normal()
         return (
             "Reflection in plane with normal ["
-            f"{glue.f2s(norm[0], DEFAULT_ROUND_FLOAT_MARGIN)}, "
-            f"{glue.f2s(norm[1], DEFAULT_ROUND_FLOAT_MARGIN)}, "
-            f"{glue.f2s(norm[2], DEFAULT_ROUND_FLOAT_MARGIN)}]"
+            f"{glue.f2s(norm[0], float_precision)}, "
+            f"{glue.f2s(norm[1], float_precision)}, "
+            f"{glue.f2s(norm[2], float_precision)}]"
         )
 
-    def __refl2orbit(self, prec=DEFAULT_ROUND_FLOAT_MARGIN):
+    def __refl2orbit(self, prec=float_precision):
         norm = self.plane_normal()
         return f"S {glue.f2s(norm[0], prec)} {glue.f2s(norm[1], prec)} {glue.f2s(norm[2], prec)}"
 
@@ -879,23 +909,23 @@ class Transform3(tuple):
     def __hash_rot_inv(self):
         axis = self.__axis_rot_inv()
         return hash((self.Rot,
-                     round(self.__angle_rot_inv(), DEFAULT_ROUND_FLOAT_MARGIN),
-                     round(axis[0], DEFAULT_ROUND_FLOAT_MARGIN),
-                     round(axis[1], DEFAULT_ROUND_FLOAT_MARGIN),
-                     round(axis[2], DEFAULT_ROUND_FLOAT_MARGIN)))
+                     round(self.__angle_rot_inv(), float_precision),
+                     round(axis[0], float_precision),
+                     round(axis[1], float_precision),
+                     round(axis[2], float_precision)))
 
     def __str_rot_inv(self):
         r = self.I()
         axis = r.axis()
         return (
-            f"Rotary inversion of {glue.f2s(to_degrees(r.angle()), DEFAULT_ROUND_FLOAT_MARGIN)} "
+            f"Rotary inversion of {glue.f2s(to_degrees(r.angle()), float_precision)} "
             "degrees around ["
-            f"{glue.f2s(axis[0], DEFAULT_ROUND_FLOAT_MARGIN)}, "
-            f"{glue.f2s(axis[1], DEFAULT_ROUND_FLOAT_MARGIN)}, "
-            f"{glue.f2s(axis[2], DEFAULT_ROUND_FLOAT_MARGIN)}]"
+            f"{glue.f2s(axis[0], float_precision)}, "
+            f"{glue.f2s(axis[1], float_precision)}, "
+            f"{glue.f2s(axis[2], float_precision)}]"
         )
 
-    def __rotinv2orbit(self, prec=DEFAULT_ROUND_FLOAT_MARGIN):
+    def __rotinv2orbit(self, prec=float_precision):
         """If this is a rotary inversion, return orbit file format string repr.
 
         Should only be called when this is a rotary inversion
@@ -1503,3 +1533,21 @@ class Mat(list):
             raise ValueError(f"No solution for {self}")
         return Vec(
             [self.replace_col(i, v).det() / det for i in range(self.cols)])
+
+
+# Classes that support conversion from and to JSON:
+base.class_to_json[Vec] = "vector"
+base.class_to_json[Vec3] = "vector_3"
+base.class_to_json[Vec4] = "vector_4"
+base.class_to_json[Quat] = "quaternion"
+# All Transform3 derivatives are saved as Transform3, since they only have a different __new__ and
+# not all support quat_pair.
+base.class_to_json[Transform3] = "transform_3d"
+base.class_to_json[Rot3] = "transform_3d"
+base.class_to_json[Refl3] = "transform_3d"
+base.class_to_json[RotInv3] = "transform_3d"
+base.class_to_json[HalfTurn3] = "transform_3d"
+base.class_to_json[Rotx] = "transform_3d"
+base.class_to_json[Roty] = "transform_3d"
+base.class_to_json[Rotz] = "transform_3d"
+base.json_to_class["transform_3d"] = Transform3

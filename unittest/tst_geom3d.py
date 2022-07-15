@@ -28,7 +28,7 @@ import math
 from os import path
 import unittest
 
-from orbitit import Geom3D, geomtypes
+from orbitit import Geom3D, geomtypes, isometry
 
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)
@@ -109,8 +109,8 @@ class TestSimpleShape(unittest.TestCase):
             chk_file = org + '.chk'
             with open(chk_file, 'w') as fd:
                 fd.write(chk_str)
-            self.assertTrue(False, 'Unexpected content {} != {}'.format(
-                org, chk_file))
+            self.assertTrue(False, 'Unexpected content {} != {} (expected)'.format(
+                chk_file, org))
 
     def ensure_shape(self):
         """Make sure the shape is defined"""
@@ -135,6 +135,12 @@ class TestSimpleShape(unittest.TestCase):
         org = get_path(self.name + ".off")
         self.chk_with_org(org, tst_str)
 
+    def test_export_to_json(self):
+        self.ensure_shape()
+        tst_str = self.shape.to_json()
+        org = get_path(self.name + ".json")
+        self.chk_with_org(org, tst_str)
+
     def test_repr(self):
         """Test repr-format function"""
         self.ensure_shape()
@@ -145,14 +151,14 @@ class TestSimpleShape(unittest.TestCase):
 
 class TestCompoundShape(TestSimpleShape):
     """Unit tests for Geom3D.CompoundShape"""
-    shape = Geom3D.CompoundShape([get_cube(), get_octahedron()])
+    shape = Geom3D.CompoundShape([get_cube(), get_octahedron()], "abc")
     name = "compound_shape"
 
 
 class TestIsometricShape(TestSimpleShape):
     """Unit test for Geom3D.IsometricShape"""
     shape = None
-    name = "isometric_shape"
+    name = "isom_12cubes"
     scale = 50
 
     def def_shape(self):
@@ -190,7 +196,7 @@ class TestIsometricShape(TestSimpleShape):
                     ([[0.542969, 0.0, 0.0]], []),
                     ([[0.132812, 0.542969, 0.132812]], []),
                     ([[0.996094, 0.839844, 0.0]], [])],
-            directIsometries=[
+            isometries=[
                 geomtypes.Rot3((geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
                                 geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]))),
                 geomtypes.Rot3((geomtypes.Quat([-v2_div_2, 0, -v2_div_2, 0]),
@@ -216,7 +222,6 @@ class TestIsometricShape(TestSimpleShape):
                 geomtypes.Rot3((geomtypes.Quat([v2_div_2, 0, -v2_div_2, 0]),
                                 geomtypes.Quat([v2_div_2, 0, v2_div_2, 0]))),
             ],
-            unfoldOrbit=False,
             name="12cubes",
             orientation=geomtypes.Rot3((
                 geomtypes.Quat([0.953020613871,
@@ -233,7 +238,7 @@ class TestIsometricShape(TestSimpleShape):
 class TestIsometricShape1(TestSimpleShape):
     """More unit test for Geom3D.IsometricShape"""
     shape = None
-    name = "isometric_shape_1"
+    name = "isom_5cubes"
     scale = 50
 
     def def_shape(self):
@@ -265,7 +270,7 @@ class TestIsometricShape1(TestSimpleShape):
                     ([[0.542969, 0.0, 0.0]], []),
                     ([[0.0, 0.746094, 0.996094]], []),
                     ([[0.542969, 0.523438, 0.304688]], [])],
-            directIsometries=[
+            isometries=[
                 geomtypes.Rot3((geomtypes.Quat([-a, -0.5, b, 0]),
                                 geomtypes.Quat([-a, 0.5, -b, 0]))),
                 geomtypes.Rot3((geomtypes.Quat([a, -b, 0, -0.5]),
@@ -275,12 +280,93 @@ class TestIsometricShape1(TestSimpleShape):
                 geomtypes.Rot3((geomtypes.Quat([0.5, 0, -b, a]),
                                 geomtypes.Quat([0.5, 0, b, -a]))),
                 geomtypes.Rot3((geomtypes.Quat([0, -0.5, a, b]),
-                                geomtypes.Quat([0, 0.5, -a, -b])))],
-            unfoldOrbit=False,
+                                geomtypes.Quat([0, 0.5, -a, -b])))
+            ],
             name="5cubes",
             orientation=geomtypes.Rot3((geomtypes.Quat([1.0, 0.0, 0.0, 0.0]),
                                         geomtypes.Quat([1.0, 0.0, 0.0, 0.0])))
         )
+
+    def chk_with_org(self, org, chk_str):
+        """Get file contents from file with expected data"""
+        # Note the order of isometries might change, what you need to do is to create a SimpleShape
+        # and check the results:
+        # - the Vs should be the same (in any order)
+        # - the colours should be the same
+        # - etc
+        # This is a lot of work..
+        try:
+            with open(org, 'r') as fd:
+                expect_str = fd.read()
+        except IOError:
+            write_chk_file(org, chk_str)
+            self.assertTrue(False, 'Missing file, check {}'.format(org))
+        if chk_str != expect_str:
+            chk_file = org + '.chk'
+            with open(chk_file, 'w') as fd:
+                fd.write(chk_str)
+            self.assertTrue(False, 'Unexpected content {} != {} (expected)'.format(
+                chk_file, org))
+
+
+class TestSymmetricShape(TestSimpleShape):
+    """More unit test for Geom3D.SymmetricShape"""
+    shape = None
+    name = "5cubes"
+    scale = 50
+
+    def def_shape(self):
+        """Define an SymmetricShape describing a compound of 5 cubes
+
+        The descriptive uses the default orientation
+        """
+        self.shape = Geom3D.SymmetricShape(
+            Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+                geomtypes.Vec3([-1.0, 1.0, 1.0]),
+                geomtypes.Vec3([-1.0, -1.0, 1.0]),
+                geomtypes.Vec3([1.0, -1.0, 1.0]),
+                geomtypes.Vec3([1.0, 1.0, -1.0]),
+                geomtypes.Vec3([-1.0, 1.0, -1.0]),
+                geomtypes.Vec3([-1.0, -1.0, -1.0]),
+                geomtypes.Vec3([1.0, -1.0, -1.0])],
+            Fs=[[0, 1, 2, 3],
+                [0, 3, 7, 4],
+                [1, 0, 4, 5],
+                [2, 1, 5, 6],
+                [3, 2, 6, 7],
+                [7, 6, 5, 4]],
+            Es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6,
+                2, 6, 6, 7],
+            colors=[([[0.996094, 0.839844, 0.0]], []),
+                    ([[0.132812, 0.542969, 0.132812]], []),
+                    ([[0.542969, 0.0, 0.0]], []),
+                    ([[0.0, 0.746094, 0.996094]], []),
+                    ([[0.542969, 0.523438, 0.304688]], [])],
+            finalSym=isometry.A5(),
+            stabSym=isometry.A4(),
+            name="5cubes",
+        )
+
+    def chk_with_org(self, org, chk_str):
+        """Get file contents from file with expected data"""
+        # Note the order of isometries might change, what you need to do is to create a SimpleShape
+        # and check the results:
+        # - the Vs should be the same (in any order)
+        # - the colours should be the same
+        # - etc
+        # This is a lot of work..
+        try:
+            with open(org, 'r') as fd:
+                expect_str = fd.read()
+        except IOError:
+            write_chk_file(org, chk_str)
+            self.assertTrue(False, 'Missing file, check {}'.format(org))
+        if chk_str != expect_str:
+            chk_file = org + '.chk'
+            with open(chk_file, 'w') as fd:
+                fd.write(chk_str)
+            self.assertTrue(False, 'Unexpected content {} != {} (expected)'.format(
+                chk_file, org))
 
 
 if __name__ == '__main__':

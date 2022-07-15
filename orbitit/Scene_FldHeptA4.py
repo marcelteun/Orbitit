@@ -128,25 +128,15 @@ def Vlen(v0, v1):
 
 # get the col faces array by using a similar shape here, so it is calculated
 # only once
-useIsom = isometry.A4()
-egShape = Geom3D.IsometricShape(
-    Vs = [
-        geomtypes.Vec3([0, 0, 1]),
-        geomtypes.Vec3([0, 1, 1]),
-        geomtypes.Vec3([1, 1, 1])
-    ],
-    Fs = [[0, 1, 2]],
-    directIsometries = useIsom,
-    unfoldOrbit = True
-)
-useSimpleColours = False
-colStabiliser = isometry.C2(setup = {'axis': [1.0, 0.0, 0.0]})
-colStabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
-colStabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
-#colStabiliser = isometry.C3(setup = {'axis': [1.0, 1.0, 1.0]})
-#colStabiliser = isometry.C3(setup = {'axis': [1.0, -1.0, 1.0]})
-colQuotientSet = useIsom / colStabiliser
-if useSimpleColours:
+use_isom = isometry.A4()
+use_black_and_white = False
+col_stabiliser = isometry.C2(setup = {'axis': [1.0, 0.0, 0.0]})
+col_stabiliser = isometry.C2(setup = {'axis': [0.0, 0.0, 1.0]})
+col_stabiliser = isometry.C2(setup = {'axis': [0.0, 1.0, 0.0]})
+#col_stabiliser = isometry.C3(setup = {'axis': [1.0, 1.0, 1.0]})
+#col_stabiliser = isometry.C3(setup = {'axis': [1.0, -1.0, 1.0]})
+colQuotientSet = use_isom / col_stabiliser
+if use_black_and_white:
     useRgbCols = [
         rgb.gray95,
         rgb.gray80,
@@ -166,7 +156,7 @@ else:
     ]
 
 heptColPerIsom = []
-for isom in useIsom:
+for isom in use_isom:
     for subSet, i in zip(colQuotientSet, list(range(len(colQuotientSet)))):
         if isom in subSet:
             heptColPerIsom.append(([useRgbCols[i]], []))
@@ -176,15 +166,15 @@ isomsO3 = isometry.D2()
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = Geom3D.IsometricShape(
-            Vs = [], Fs = [], directIsometries = isometry.A4(),
+            Vs = [], Fs = [], isometries = isometry.A4(),
             name = 'FoldedHeptagonsA4'
         )
         xtraTrisShape = Geom3D.IsometricShape(
-            Vs = [], Fs = [], directIsometries = isometry.A4(),
+            Vs = [], Fs = [], isometries = isometry.A4(),
             name = 'xtraTrisA4'
         )
         trisO3Shape = Geom3D.IsometricShape(
-            Vs = [], Fs = [], directIsometries = isomsO3,
+            Vs = [], Fs = [], isometries = isomsO3,
             colors = [([rgb.cyan[:]], [])],
             name = 'o3TrisA4'
         )
@@ -346,8 +336,8 @@ class Shape(heptagons.FldHeptagonShape):
                     )
                 )
                 theShapes.append(this.xtraTrisShape)
-        for shape in theShapes:
-            shape.showBaseOnly = not this.applySymmetry
+        for isom_shape in theShapes:
+            isom_shape.show_base_only = not this.apply_symmetries
         this.setShapes(theShapes)
         this.updateShape = False
         # print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][1], Vs[0][0], Vs[0][2])
@@ -650,15 +640,15 @@ class Shape(heptagons.FldHeptagonShape):
         d = 1
         for i in range(2):
             norm0 = Geom3D.Triangle(
-                this.baseShape.Vs[tris[i][0]],
-                this.baseShape.Vs[tris[i][1]],
-                this.baseShape.Vs[tris[i][2]],
+                this.base_shape.Vs[tris[i][0]],
+                this.base_shape.Vs[tris[i][1]],
+                this.base_shape.Vs[tris[i][2]],
             ).normal(True)
             print('norm0 %d: ', norm0)
             norm1 = Geom3D.Triangle(
-                this.baseShape.Vs[tris[i+d][0]],
-                this.baseShape.Vs[tris[i+d][1]],
-                this.baseShape.Vs[tris[i+d][2]],
+                this.base_shape.Vs[tris[i+d][0]],
+                this.base_shape.Vs[tris[i+d][1]],
+                this.base_shape.Vs[tris[i+d][2]],
             ).normal(True)
             print('norm1 %d: ', norm1)
             inprod = norm0 * norm1

@@ -35,14 +35,14 @@ tV3 = 1.0/math.sqrt(3)
 
 class Shape(heptagons.EqlHeptagonShape):
     def __init__(this):
-        heptagons.EqlHeptagonShape.__init__(this,
-            directIsometries = [
+        super().__init__(
+            base_isometries=[
                     geomtypes.E,
                     geomtypes.HX,
                     geomtypes.HY,
                     geomtypes.HZ
                 ],
-            name = 'EglHeptS4A4'
+            name='EglHeptS4A4'
         )
         this.initArrs()
         this.setH(1.0)
@@ -50,13 +50,13 @@ class Shape(heptagons.EqlHeptagonShape):
 
     def setH(this, h):
         this.angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
-        heptagons.EqlHeptagonShape.setH(this, h)
+        super().setH(h)
 
     def setAngle(this, a):
         tanA     = math.tan(a*Geom3D.Deg2Rad)
         this.h     = (V2 + tanA) / (V2 + 4*tanA)
         this.setH(this.h)
-        heptagons.EqlHeptagonShape.setAngle(this, a)
+        super().setAngle(a)
 
     def setV(this):
         # input this.h
@@ -264,9 +264,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 faceIndices.append(offset)
                 faceIndices.append(offset+3)
         #print faceIndices
-        return heptagons.EqlHeptagonShape.toPsPiecesStr(this,
-            faceIndices, scaling, precision, margin
-        )
+        return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
 
     def initArrs(this):
         this.kiteFs = [

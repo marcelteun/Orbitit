@@ -49,5 +49,5 @@ orbitit.Geom3D.CompoundShape(
             name="SimpleShape"
         )
     ],
-    name="CompoundShape"
+    name="abc"
 )

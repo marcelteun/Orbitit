@@ -25,7 +25,7 @@ orbitit.Geom3D.IsometricShape(
         ([[0.0, 0.746094, 0.996094]], []),
         ([[0.542969, 0.523438, 0.304688]], [])
     ],
-    directIsometries=[
+    isometries=[
         orbitit.geomtypes.Rot3((
             orbitit.geomtypes.Quat([-0.8090169944, -0.5, 0.3090169944, 0]),
             orbitit.geomtypes.Quat([-0.8090169944, 0.5, -0.3090169944, 0]),
@@ -47,7 +47,6 @@ orbitit.Geom3D.IsometricShape(
             orbitit.geomtypes.Quat([0, 0.5, -0.8090169944, -0.3090169944]),
         ))
     ],
-    unfoldOrbit=False,
     name='5cubes',
     orientation=orbitit.geomtypes.Rot3((
         orbitit.geomtypes.Quat([1, 0, 0, 0]),

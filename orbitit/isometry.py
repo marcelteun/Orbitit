@@ -29,7 +29,7 @@
 from copy import copy, deepcopy
 import math
 
-from orbitit import geomtypes
+from orbitit import base, geomtypes
 
 X = geomtypes.UX
 Y = geomtypes.UY
@@ -218,7 +218,7 @@ class ImproperSubgroupError(ValueError):
     "Raised when subgroup is not really a subgroup"
 
 
-class Set(set):
+class Set(set, base.Orbitit):
     """
     Base class for the symmetry groups, which are sets of isometries.
     """
@@ -234,10 +234,11 @@ class Set(set):
             self.generator
         except AttributeError:
             self.generator = {}
-        set.__init__(self, *args)
+        super().__init__(*args)
         self.short_string = True
 
     def __repr__(self):
+        # TODO: fix indentaton
         s = f'{self.__class__.__name__}([\n'
         for e in self:
             s = f'{s} {repr(e)},\n'
@@ -245,6 +246,14 @@ class Set(set):
         if __name__ != '__main__':
             s = f'{__name__}.{s}'
         return s
+
+    @property
+    def repr_dict(self):
+        """Return a short representation of the object."""
+        return {
+            'class': base.class_to_json[self.__class__],
+            'data': [e.repr_dict for e in self],
+        }
 
     def __str__(self):
         def to_s():
@@ -560,7 +569,7 @@ def _cn_get_subgroups(n):
     return [C(i) for i in range(n//2, 0, -1) if n % i == 0]
 
 
-class MetaCn(type):
+class MetaCn(type(Set)):
     """Meta class for the algebraic group of class Cn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -715,7 +724,7 @@ def _c2ncn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 
-class MetaC2nCn(type):
+class MetaC2nCn(type(Set)):
     """Meta class for the algebraic group of class C2nCn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -843,7 +852,7 @@ def _cnxi_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 
-class MetaCnxI(type):
+class MetaCnxI(type(Set)):
     """Meta class for the algebraic group of class CnxI"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -951,7 +960,7 @@ def _dncn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 
-class MetaDnCn(type):
+class MetaDnCn(type(Set)):
     """Meta class for the algebraic group of class DnCn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -1083,7 +1092,7 @@ def _dn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 
-class MetaDn(type):
+class MetaDn(type(Set)):
     """Meta class for the algebraic group of class Dn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -1237,7 +1246,7 @@ def _dnxi_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 
-class MetaDnxI(type):
+class MetaDnxI(type(Set)):
     """Meta class for the algebraic group of class DnxI"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -1398,7 +1407,7 @@ def _d2ndn_get_subgroups(n):
     return _sort_and_del_dups(g)
 
 
-class MetaD2nDn(type):
+class MetaD2nDn(type(Set)):
     """Meta class for the algebraic group of class D2nDn"""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
@@ -2631,3 +2640,7 @@ DnCn.subgroups = [DnCn, Cn, E]
 Dn.subgroups = [Dn, Cn, C2, E]
 DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
 D2nDn.subgroups = [D2nDn, Dn, C2nCn, Cn, E]
+
+# Classes that support conversion from and to JSON:
+base.class_to_json[Set] = "isometry"
+base.json_to_class["isometry"] = Set

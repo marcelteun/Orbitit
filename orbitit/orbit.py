@@ -369,8 +369,7 @@ class Shape(Geom3D.SymmetricShape):
         col_choices = self.orbit.higherOrderStabiliserProps
         alt_start_index = len(col_choices)
         col_choices.extend(self.orbit.lowerOrderStabiliserProps)
-        # note: all isometries are stored in 'direct'
-        fs_orbit = self.getIsometries()['direct']
+        fs_orbit = self.isometries
         # find index in col_choices to use
         for idx, col_choice in enumerate(col_choices):
             if col_choice['index'] == no_of_cols:
@@ -400,7 +399,7 @@ class Shape(Geom3D.SymmetricShape):
                                            name=self.name,
                                            quiet=True)
             # note: all isometries are stored in 'direct'
-            fs_orbit = self.getIsometries()['direct']
+            fs_orbit = self.isometries
 
         # generate colour array for this colour alternative
         self.total_no_of_col_alt = len(col_syms)
@@ -422,7 +421,7 @@ class Shape(Geom3D.SymmetricShape):
         self.axis = None
         self.angle_domain = None
         # Save original
-        self.baseShape.org_Vs = self.baseShape.Vs
+        self.base_shape.org_Vs = self.base_shape.Vs
 
     def transform_base(self, trans):
         """Rotate the position of the descriptive
@@ -430,7 +429,7 @@ class Shape(Geom3D.SymmetricShape):
         trans: a geomtypes.quat object (or matrix) for left multiplying all
                vertices.
         """
-        self.setVs([trans * v for v in self.baseShape.Vs])
+        self.setVs([trans * v for v in self.base_shape.Vs])
 
     def set_rot_axis(self, axis, domain=None):
         """Set the rotation axis for rotating the descriptive.
@@ -450,7 +449,7 @@ class Shape(Geom3D.SymmetricShape):
         self.transform_base(geomtypes.Rot3(axis=self.axis, angle=rad))
 
     def reset_rotation(self):
-        self.setVs(self.baseShape.org_Vs)
+        self.setVs(self.base_shape.org_Vs)
 
     def to_off(self):
         s = self.simple_shape.toOffStr(color_floats=True)
@@ -462,10 +461,10 @@ class Shape(Geom3D.SymmetricShape):
         js = f"var {self.name} = new Object();\n"
         js += f"{self.name}.descr = new Object();\n"
         js += f"{self.name}.descr.Vs = [\n"
-        for v in self.baseShape.Vs:
+        for v in self.base_shape.Vs:
             js += f"  {v},\n"
         js += '];'
-        js += f"{self.name}.descr.Fs = {self.baseShape.Fs};"
+        js += f"{self.name}.descr.Fs = {self.base_shape.Fs};"
         eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         js += f"{self.name}.descr.transform = {eye};\n"
         js += f"{self.name}.isoms = [\n"

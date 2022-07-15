@@ -405,7 +405,7 @@ class CtrlWin(wx.Frame):
             if e is not None:
                 e.Skip()
             return
-        self.fs_orbit = self.shape.getIsometries()['direct']
+        self.fs_orbit = self.shape.isometries
         self.fs_orbit_org = True
         self.shape.recreateEdges()
         self.update_orientation(
@@ -519,7 +519,7 @@ class CtrlWin(wx.Frame):
                                                    finalSym=final_sym,
                                                    stabSym=stab_sym,
                                                    name=self.name)
-                self.fs_orbit = self.shape.getIsometries()['direct']
+                self.fs_orbit = self.shape.isometries
                 self.shape.recreateEdges()
                 self.canvas.panel.shape = self.shape
                 self.fs_orbit_org = False  # and do this only once
@@ -643,8 +643,8 @@ class CtrlWin(wx.Frame):
                 else:
                     shape = Geom3D.readOffFile(fd, recreateEdges=False)
             if isinstance(shape, Geom3D.IsometricShape):
-                verts = shape.baseShape.Vs
-                faces = shape.baseShape.Fs
+                verts = shape.base_shape.Vs
+                faces = shape.base_shape.Fs
             else:
                 verts = shape.Vs
                 faces = shape.Fs

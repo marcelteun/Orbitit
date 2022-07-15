@@ -33,7 +33,7 @@ shape = orbitit.Geom3D.IsometricShape(
     ([[0.13281200000000001, 0.54296900000000003, 0.13281200000000001]], []),
     ([[0.99609400000000003, 0.83984400000000003, 0.0]], []),
   ],
-  directIsometries = [
+  isometries = [
     orbitit.geomtypes.Rot3((orbitit.geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]), orbitit.geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]))),
     orbitit.geomtypes.Rot3((orbitit.geomtypes.Quat([-0.707106781187, 1.04526690545e-16, -0.707106781187, 4.32963728536e-17]), orbitit.geomtypes.Quat([-0.707106781187, -1.04526690545e-16, 0.707106781187, -4.32963728536e-17]))),
     orbitit.geomtypes.Rot3((orbitit.geomtypes.Quat([-1.22460635382e-16, 6.12303176911e-17, -0.707106781187, -0.707106781187]), orbitit.geomtypes.Quat([-1.22460635382e-16, -6.12303176911e-17, 0.707106781187, 0.707106781187]))),
@@ -47,7 +47,6 @@ shape = orbitit.Geom3D.IsometricShape(
     orbitit.geomtypes.Rot3((orbitit.geomtypes.Quat([3.33066907388e-16, 1.11022302463e-16, -0.707106781187, 0.707106781187]), orbitit.geomtypes.Quat([3.33066907388e-16, -1.11022302463e-16, 0.707106781187, -0.707106781187]))),
     orbitit.geomtypes.Rot3((orbitit.geomtypes.Quat([0.707106781187, 4.32963728536e-17, -0.707106781187, -1.04526690545e-16]), orbitit.geomtypes.Quat([0.707106781187, -4.32963728536e-17, 0.707106781187, 1.04526690545e-16]))),
   ],
-  unfoldOrbit = False,
   name = "12cubes.py",
   orientation = orbitit.geomtypes.Rot3((orbitit.geomtypes.Quat([0.953020613871, 0.214186495298, 0.0, 0.214186495298]), orbitit.geomtypes.Quat([0.953020613871, -0.214186495298, -0.0, -0.214186495298])))
 )

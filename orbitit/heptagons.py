@@ -3029,7 +3029,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.oppFold2 = 0.0
         self.foldHeptagon = FoldMethod.PARALLEL
         self.height = 2.3
-        self.applySymmetry = True
+        self.apply_symmetries = True
         self.addXtraFs = True
         self.onlyRegFs = False
         self.useCulling = False
@@ -3240,7 +3240,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         # I think it is clearer with CheckBox-es than with ToggleButton-s
         self.applySymGui = wx.CheckBox(self.panel, label = 'Apply Symmetry')
         self.Guis.append(self.applySymGui)
-        self.applySymGui.SetValue(self.shape.applySymmetry)
+        self.applySymGui.SetValue(self.shape.apply_symmetries)
         self.applySymGui.Bind(wx.EVT_CHECKBOX, self.onApplySym)
         self.addTrisGui = wx.CheckBox(self.panel, label = 'Show Triangles')
         self.Guis.append(self.addTrisGui)
@@ -3708,7 +3708,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         event.Skip()
 
     def onApplySym(self, event):
-        self.shape.applySymmetry = self.applySymGui.IsChecked()
+        self.shape.apply_symmetries = self.applySymGui.IsChecked()
         self.shape.updateShape = True
         self.updateShape()
 
@@ -3971,7 +3971,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.oppFold2 = self.shape.oppFold2
             shape.foldHeptagon = self.shape.foldHeptagon
             shape.height = self.shape.height
-            shape.applySymmetry = self.shape.applySymmetry
+            shape.apply_symmetries = self.shape.apply_symmetries
             shape.addXtraFs = self.shape.addXtraFs
             shape.onlyRegFs = self.shape.onlyRegFs
             shape.useCulling = self.shape.useCulling
@@ -4351,19 +4351,24 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 class EqlHeptagonShape(Geom3D.IsometricShape):
     def __init__(self,
-        directIsometries = [geomtypes.E],
-        oppositeIsometry = None,
+        base_isometries = [geomtypes.E],
+        extra_isometry = None,
         name = 'EqlHeptagonShape'
     ):
-        Geom3D.IsometricShape.__init__(self,
-            Vs = [],
-            Fs = [],
-            #Es = [],
-            #colors = [()]
-            directIsometries = directIsometries,
-            oppositeIsometry = oppositeIsometry,
-            unfoldOrbit = True,
-            name = name)
+        """
+        Define a shape with many equilateral heptagons.
+
+        base_isometries: the isometries to apply to the basic equilateral heptagon
+        extra_isometry: an extra isometry that is applied to all isometries.
+            This will double the amount of isometries.
+        name: the name to be used for this shape.
+        """
+        isometries = [i for i in base_isometries]
+        if extra_isometry != None:
+            for i in base_isometries:
+                isometries.append(extra_isometry * i)
+
+        super().__init__(Vs=[], Fs=[], isometries=isometries, name=name)
         self.showKite      = True
         self.showHepta     = False
         self.addFaces      = True
@@ -4447,9 +4452,8 @@ class EqlHeptagonShape(Geom3D.IsometricShape):
         ):
             self.setV()
 
-
     def glInit(self):
-        Geom3D.IsometricShape.glInit(self)
+        super().glInit()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def getStatusStr(self):
