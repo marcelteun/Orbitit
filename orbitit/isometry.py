@@ -452,11 +452,25 @@ class Set(set):
                 if found:
                     break
             if not found:
-                print(
-                    f"Warning: unknown setup parameter {k} for class {self.__class__.__name__}"
+                assert  k == 'n' and self.n, (
+                    f'Unknown parameter {k} in setup = {str(setup)} for {self.__class__.__name__}'
                 )
-                assert False, f'Got setup = {str(setup)} for {self.__class__.__name__}'
         self.generator = setup
+
+    @classmethod
+    def remove_init_par(cls, label):
+        """Remove an init_par with specified label.
+
+        This is used for isometry sets like C2 with unspecified axis, which is created from C(n)
+        where the 'n' would have been an init_par as well. With this method one can remove the
+        parameter 'n', since that one isn't required anymore.
+        """
+        del_n = -1
+        for i, par in enumerate(cls.init_pars):
+            if par['par'] == label:
+                del_n = i
+        if del_n >= 0:
+            del cls.init_pars[del_n]
 
     @property
     def setup(self):
@@ -669,6 +683,7 @@ def C(n):
                           'std_setup': _std_setup('Cn', n)})
             c_n.subgroups = _cn_get_subgroups(n)
             c_n.subgroups.insert(0, c_n)
+            c_n.remove_init_par('n')
             __Cn_metas[n] = c_n
         return __Cn_metas[n]
 
@@ -791,6 +806,7 @@ def C2nC(n):
                               'std_setup': _std_setup('Cn', n)})
         c_2n_c_n.subgroups = _c2ncn_get_subgroups(n)
         c_2n_c_n.subgroups.insert(0, c_2n_c_n)
+        c_2n_c_n.remove_init_par('n')
         __C2nCn_metas[n] = c_2n_c_n
         return __C2nCn_metas[n]
 
@@ -916,6 +932,7 @@ def CxI(n):
                               'std_setup': _std_setup('Cn', n)})
             c_nxi.subgroups = _cnxi_get_subgroups(n)
             c_nxi.subgroups.insert(0, c_nxi)
+            c_nxi.remove_init_par('n')
             __CnxI_metas[n] = c_nxi
         return __CnxI_metas[n]
 
@@ -1047,6 +1064,7 @@ def DnC(n):
                                 'std_setup': _std_setup('DnCn', n)})
             d_n_c_n.subgroups = _dncn_get_subgroups(n)
             d_n_c_n.subgroups.insert(0, d_n_c_n)
+            d_n_c_n.remove_init_par('n')
             __DnCn_metas[n] = d_n_c_n
         return __DnCn_metas[n]
 
@@ -1189,6 +1207,7 @@ def D(n):
                           'std_setup': _std_setup('Dn', n)})
             d_n.subgroups = _dn_get_subgroups(n)
             d_n.subgroups.insert(0, d_n)
+            d_n.remove_init_par('n')
             __Dn_metas[n] = d_n
         return __Dn_metas[n]
 
@@ -1346,6 +1365,7 @@ def DxI(n):
                              'std_setup': _std_setup('Dn', n)})
             dnxi.subgroups = _dnxi_get_subgroups(n)
             dnxi.subgroups.insert(0, dnxi)
+            dnxi.remove_init_par('n')
             __DnxI_metas[n] = dnxi
         return __DnxI_metas[n]
 
@@ -1514,6 +1534,7 @@ def D2nD(n):
                                   'std_setup': _std_setup('Dn', n)})
             d_2n_d_n.subgroups = _d2ndn_get_subgroups(n)
             d_2n_d_n.subgroups.insert(0, d_2n_d_n)
+            d_2n_d_n.remove_init_par('n')
             __D2nDn_metas[n] = d_2n_d_n
         return __D2nDn_metas[n]
 
