@@ -399,7 +399,7 @@ def create_s4xi(base, js_fd=None):
     polyh = S4A4.S4xI_D4D2(base, 3)
     save_off(polyh)
 
-    polyh = S4A4.S4xI_D3C3(base, 2)
+    polyh = S4A4.S4xI_D3C3(base, 4)
     save_off(polyh)
 
     polyh = S4A4.S4xI_D2C2(base, 3)
