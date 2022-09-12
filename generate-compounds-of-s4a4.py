@@ -13,6 +13,7 @@ V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 ACOS_7_3V5_3_2_2V5_8 = math.acos((-7 + 3*V5 + 3*math.sqrt(2 + 2*V5)) / 8)
+acos_7_3V5_16 = math.acos((7 + 3*V5) / 16)
 ASIN_1_V3 = math.asin(1 / V3)
 ACOS_1_V3 = math.acos(1 / V3)
 
@@ -457,6 +458,34 @@ def create_a5(base, js_fd=None):
     )
     polyh.rot_base(ACOS_7_3V5_3_2_2V5_8)
     save_off(polyh, '_mu5')
+    polyh = S4A4.A5_C3(
+        base,
+        20,
+        cols=[
+            S4A4.A4xI_C3.cols[0], #
+            S4A4.A4xI_C3.cols[1], #
+            S4A4.A4xI_C3.cols[6], #
+            S4A4.A4xI_C3.cols[3], #
+            S4A4.A4xI_C3.cols[10], #
+            S4A4.A4xI_C3.cols[8], #
+            S4A4.A4xI_C3.cols[7], #
+            S4A4.A4xI_C3.cols[2], #
+            S4A4.A4xI_C3.cols[1], #
+            S4A4.A4xI_C3.cols[3], #
+            S4A4.A4xI_C3.cols[8], #
+            S4A4.A4xI_C3.cols[4], #
+            S4A4.A4xI_C3.cols[9],
+            S4A4.A4xI_C3.cols[2], #
+            S4A4.A4xI_C3.cols[6], #
+            S4A4.A4xI_C3.cols[4], #
+            S4A4.A4xI_C3.cols[9],
+            S4A4.A4xI_C3.cols[0], #
+            S4A4.A4xI_C3.cols[7], #
+            S4A4.A4xI_C3.cols[10],
+        ]
+    )
+    polyh.rot_base(acos_7_3V5_16)
+    save_off(polyh, '_mu6')
 
     polyh = S4A4.A5_C2(base, 5)
     if js_fd is not None:
