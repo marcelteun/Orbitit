@@ -25,14 +25,18 @@
 # split the methods and the file other than to shut up pylint:
 # pylint: disable=too-many-lines,too-many-statements,too-many-locals
 import math
+import os
 import random
 import unittest
 
 from orbitit import geomtypes
 
 
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
 class TestVec(unittest.TestCase):
-    """Unit tests for geomtypes.Vec"""
+    """Unit tests for geomtypes.Vec and derivatives"""
 
     def test_basic(self):
         """Some basic tests: init, add, sub, mul, div"""
@@ -155,11 +159,7 @@ class TestVec(unittest.TestCase):
         self.assertEqual(r, geomtypes.Vec3([0, 0, 0]))
         self.assertTrue(isinstance(r, geomtypes.Vec3))
 
-
-class TestQuat(unittest.TestCase):
-    """Unit tests for geomtypes.Quat"""
-
-    def test_basic(self):
+    def test_quat_basic(self):
         """Test some basic functions"""
         q0 = geomtypes.Quat([1, 2, 3, 5])
         exp = geomtypes.Quat([2, 4, 6, 10])
@@ -226,6 +226,38 @@ class TestQuat(unittest.TestCase):
         r = q.conjugate()
         self.assertEqual(r, q)
         self.assertTrue(isinstance(r, geomtypes.Quat))
+
+    def test_json(self):
+        """Test saving to and loading from JSON."""
+        test_matrix = [
+            # test_vector, type
+            ([], geomtypes.Vec),
+            ([1], geomtypes.Vec),
+            ([1, 2], geomtypes.Vec),
+            ([1, 2, 3], geomtypes.Vec),
+            ([-1.1, 1.2, math.pi], geomtypes.Vec),
+            ([1, 2, 3], geomtypes.Vec3),
+            ([0, 0, 0], geomtypes.Vec3),
+            ([-1, 1, -2], geomtypes.Vec3),
+            ([-1.1, 1.2, math.pi], geomtypes.Vec3),
+            ([0, -1.1, 1.2, math.pi], geomtypes.Vec4),
+            ([0, 0, 0, 0], geomtypes.Quat),
+            ([1, 0, 0, 0], geomtypes.Quat),
+            ([0, 0, 0, 1], geomtypes.Quat),
+            ([1, 1, 1, 1], geomtypes.Quat),
+            ([4/7, -1/2, 1/3, -math.sqrt(3)], geomtypes.Quat),
+        ]
+        # NOTE that for floats assertEqual will use the Vec.__eq__,
+        # This will used geomtypes._eq_float_margin
+        # When saving floats in JSON, geomtypes.RoundingFloat is used,
+        # which uses geomtypes geomtypes.float_precision
+        # Both are using 10 decimals per default
+        for v, cls in test_matrix:
+            filename = os.path.join(DIR_PATH, "output", "test_vec.json")
+            cls(v).write_json_file(filename)
+            w = cls.from_json_file(filename)
+            self.assertEqual(v, w)
+            self.assertEqual(w, v)
 
 
 class TestRot3(unittest.TestCase):

@@ -152,6 +152,12 @@ class Vec(tuple, base.Orbitit):
             'data': list(self),
         }
 
+    @classmethod
+    def from_json(cls, json_str):
+        """Recreate object from JSON string."""
+        data = cls.get_data(json_str)
+        return cls(data)
+
     def __str__(self):
         try:
             return "[{}]".format(
@@ -1540,6 +1546,11 @@ base.class_to_json[Vec] = "vector"
 base.class_to_json[Vec3] = "vector_3"
 base.class_to_json[Vec4] = "vector_4"
 base.class_to_json[Quat] = "quaternion"
+base.json_to_class["vector"] = Vec
+base.json_to_class["vector_3"] = Vec3
+base.json_to_class["vector_4"] = Vec4
+base.json_to_class["quaternion"] = Quat
+
 # All Transform3 derivatives are saved as Transform3, since they only have a different __new__ and
 # not all support quat_pair.
 base.class_to_json[Transform3] = "transform_3d"
