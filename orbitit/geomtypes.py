@@ -153,9 +153,7 @@ class Vec(tuple, base.Orbitit):
         }
 
     @classmethod
-    def from_json(cls, json_str):
-        """Recreate object from JSON string."""
-        data = cls.get_data(json_str)
+    def from_dict_data(cls, data):
         return cls(data)
 
     def __str__(self):
@@ -398,6 +396,12 @@ class Quat(Vec):
     def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called,unused-argument
         self._cache = {}
 
+    @classmethod
+    def from_dict_data(cls, data):
+        result = super().from_dict_data(data)
+        assert len(result) == 4, f"Expected 4 input values, not {len(result)}"
+        return result
+
     def conjugate(self):
         """Return conjugate for this quarternion"""
         return self.__class__([self[0], -self[1], -self[2], -self[3]])
@@ -464,12 +468,16 @@ class Transform3(tuple, base.Orbitit):
     debug = False
     eq_float_margin = _eq_float_margin
 
-    def __new__(cls, quatPair):
+    def __new__(cls, quat_pair):
+        """Create a new Transform object.
+
+        quat_pair: a pair of quaternions representing the transform
+        """
         assert_str = "A 3D transform is represented by 2 quaternions: "
-        assert len(quatPair) == 2, assert_str + str(quatPair)
-        assert isinstance(quatPair[0], Quat), assert_str + str(quatPair)
-        assert isinstance(quatPair[1], Quat), assert_str + str(quatPair)
-        return super().__new__(cls, quatPair)
+        assert len(quat_pair) == 2, assert_str + str(quat_pair)
+        assert isinstance(quat_pair[0], Quat), assert_str + str(quat_pair)
+        assert isinstance(quat_pair[1], Quat), assert_str + str(quat_pair)
+        return super().__new__(cls, quat_pair)
 
     def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called,unused-argument
         self._cache = {}
@@ -490,6 +498,11 @@ class Transform3(tuple, base.Orbitit):
             'class': base.class_to_json[self.__class__],
             'data': [self[0].repr_dict, self[1].repr_dict],
         }
+
+    @classmethod
+    def from_dict_data(cls, data):
+        assert len(data) == 2, f"Expected a pair, not {len(data)} elements"
+        return cls([Quat.from_json_dict(q) for q in data])
 
     def __hash__(self):
         if 'hash_nr' not in self._cache:
@@ -558,7 +571,10 @@ class Transform3(tuple, base.Orbitit):
                 f"oops, fallback: unknown transform \n{self}\nor\n{u}"
             return is_eq
         if (is_eq and (self.__hash__() != u.__hash__())):
-            print(f"\n*** warning hashing will not work between\n {self} and\n{u}")
+            print(
+                "\n*** Note: transforms considered equal, but hashes aren't for"
+                f"\n{self} and\n{u}"
+            )
         return is_eq
 
     def __ne__(self, u):
@@ -992,7 +1008,9 @@ class Rot3(Transform3):
     """Define a rotation in 3D"""
     def __new__(cls, quat=None, axis=Vec3([1, 0, 0]), angle=0):
         """
-        Initialise a 3D rotation
+        Initialise a 3D rotation.
+
+        quat_pair: a pair of quaternions representing the transform
         axis: axis to rotate around: doesn't need to be normalised
         angle: angle in radians to rotate
         """
@@ -1027,12 +1045,12 @@ class Rot3(Transform3):
 class HalfTurn3(Rot3):
     """Define a half-turn (rotation)
 
-    qLeft: ignored argument added to be compatible with Rot3
+    quat_pair: ignored argument added to be compatible with Rot3
     axis: named argument holding the axis to rotate around
     angle: ignored argument added to be compatible with Rot3
     """
-    def __new__(cls, qLeft=None, axis=None, angle=0):
-        del qLeft, angle
+    def __new__(cls, quat_pair=None, axis=None, angle=0):
+        del quat_pair, angle
         assert axis is not None, "You must specify an axis"
         return Rot3.__new__(cls, axis=axis, angle=HALF_TURN)
 
@@ -1040,36 +1058,36 @@ class HalfTurn3(Rot3):
 class Rotx(Rot3):
     """Define a rotation around the x-axis
 
-    qLeft: ignored argument added to be compatible with Rot3
+    quat_pair: ignored argument added to be compatible with Rot3
     axis: ignored argument added to be compatible with Rot3
     angle: named argument holding the rotation angle in radians
     """
-    def __new__(cls, qLeft=None, axis=None, angle=0):
-        del qLeft, axis
+    def __new__(cls, quat_pair=None, axis=None, angle=0):
+        del quat_pair, axis
         return Rot3.__new__(cls, axis=UX, angle=angle)
 
 
 class Roty(Rot3):
     """Define a rotation around the y-axis
 
-    qLeft: ignored argument added to be compatible with Rot3
+    quat_pair: ignored argument added to be compatible with Rot3
     axis: ignored argument added to be compatible with Rot3
     angle: named argument holding the rotation angle in radians
     """
-    def __new__(cls, qLeft=None, axis=None, angle=0):
-        del qLeft, axis
+    def __new__(cls, quat_pair=None, axis=None, angle=0):
+        del quat_pair, axis
         return Rot3.__new__(cls, axis=UY, angle=angle)
 
 
 class Rotz(Rot3):
     """Define a rotation around the z-axis
 
-    qLeft: ignored argument added to be compatible with Rot3
+    quat_pair: ignored argument added to be compatible with Rot3
     axis: ignored argument added to be compatible with Rot3
     angle: named argument holding the rotation angle in radians
     """
-    def __new__(cls, qLeft=None, axis=None, angle=0):
-        del qLeft, axis
+    def __new__(cls, quat_pair=None, axis=None, angle=0):
+        del quat_pair, axis
         return Rot3.__new__(cls, axis=UZ, angle=angle)
 
 
@@ -1109,23 +1127,23 @@ class Refl3(Transform3):
 
 class RotInv3(Transform3):
     """Define a rotary inversion"""
-    def __new__(cls, qLeft=None, axis=None, angle=None):
+    def __new__(cls, quat_pair=None, axis=None, angle=None):
         """
         Initialise a 3D rotation
 
-        qLeft: ignored argument added to be compatible with Rot3
-        axis: ignored argument added to be compatible with Rot3
-        angle: named argument holding the rotation angle in radians
+        quat_pair: a pair of quaternions representing the transform
+        axis: axis to rotate around: doesn't need to be normalised
+        angle: angle in radians to rotate
         """
         # Do not inherit from Rot3 (and then apply inversion):
         # a rotary inversion is not a rotation.
         result = None
-        if _is_quat_pair(qLeft):
-            result = Transform3.__new__(cls, qLeft)
+        if _is_quat_pair(quat_pair):
+            result = Transform3.__new__(cls, quat_pair)
             result._cache = {}
-            assert result.is_rot_inv(), f"{qLeft} doesn't represent a rotary inversion"
+            assert result.is_rot_inv(), f"{quat_pair} doesn't represent a rotary inversion"
         else:
-            ri = Rot3(qLeft, axis, angle).I()
+            ri = Rot3(quat_pair, axis, angle).I()
             result = Transform3.__new__(cls, [ri[0], ri[1]])
         return result
 
@@ -1141,12 +1159,12 @@ E = Rot3(Quat([1, 0, 0, 0]))
 # TODO: make the 3D case a special case of 4D...
 class Transform4(tuple):
     """Define a tranform in 4D"""
-    def __new__(cls, quatPair):
+    def __new__(cls, quat_pair):
         assert_str = "A 4D transform is represented by 2 quaternions: "
-        assert len(quatPair) == 2, assert_str + str(quatPair)
-        assert isinstance(quatPair[0], Quat), assert_str + str(quatPair)
-        assert isinstance(quatPair[1], Quat), assert_str + str(quatPair)
-        return tuple.__new__(cls, quatPair)
+        assert len(quat_pair) == 2, assert_str + str(quat_pair)
+        assert isinstance(quat_pair[0], Quat), assert_str + str(quat_pair)
+        assert isinstance(quat_pair[1], Quat), assert_str + str(quat_pair)
+        return tuple.__new__(cls, quat_pair)
 
     def __mul__(self, u):
         """Multiply a transforms with something else
@@ -1198,7 +1216,7 @@ class Transform4(tuple):
 class Rot4(Transform4):
     """Define a rotation in 4D"""
     def __new__(cls,
-                quatPair=None,
+                quat_pair=None,
                 axialPlane=(Vec4([0, 0, 1, 0]), Vec4([0, 0, 0, 1])),
                 angle=0):
         """
@@ -1364,7 +1382,7 @@ def find_orthogonal_plane(plane):
 class DoubleRot4(Transform4):
     """Define the general (double) rotation in 4D"""
     def __new__(cls,
-                quatPair=None,
+                quat_pair=None,
                 axialPlane=(Vec4([0, 0, 1, 0]), Vec4([0, 0, 0, 1])),
                 angle=(0, 0)):
         ortho_plane = find_orthogonal_plane(axialPlane)

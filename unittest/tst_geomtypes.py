@@ -252,12 +252,18 @@ class TestVec(unittest.TestCase):
         # When saving floats in JSON, geomtypes.RoundingFloat is used,
         # which uses geomtypes geomtypes.float_precision
         # Both are using 10 decimals per default
+        filename = os.path.join(DIR_PATH, "output", "test_vec.json")
         for v, cls in test_matrix:
-            filename = os.path.join(DIR_PATH, "output", "test_vec.json")
             cls(v).write_json_file(filename)
             w = cls.from_json_file(filename)
             self.assertEqual(v, w)
             self.assertEqual(w, v)
+
+        # test assert raises
+        v = geomtypes.Vec3([0, 1, 2])
+        v.write_json_file(filename)
+        with self.assertRaises(AssertionError):
+            geomtypes.Quat.from_json_file(filename)
 
 
 class TestRot3(unittest.TestCase):
@@ -902,6 +908,49 @@ class TestRefl3(unittest.TestCase):
             self.assertEqual(s0, s1)
             r = s0 * s1
             self.assertEqual(r, geomtypes.E)
+
+
+class TestTransform(unittest.TestCase):
+    """Unit tests for geomtypes.Transform3"""
+
+    def test_json(self):
+        """Test saving to and loading from JSON."""
+        test_matrix = [
+            # E
+            geomtypes.E,
+            geomtypes.Rot3(axis=geomtypes.UZ, angle=0),
+            # Rotations
+            geomtypes.Rot3(axis=geomtypes.UZ, angle=1),
+            geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=0.5),
+            geomtypes.HalfTurn3(axis=geomtypes.Vec3([1, 1, 1])),
+            geomtypes.Rotx(math.pi / 3),
+            geomtypes.Roty(math.pi / 4),
+            geomtypes.Rotz(math.pi / 6),
+            geomtypes.HX,
+            geomtypes.HY,
+            geomtypes.HZ,
+            # Reflections
+            geomtypes.Refl3(normal=geomtypes.UZ),
+            geomtypes.Refl3(normal=geomtypes.Vec3([1, 2, 3])),
+            # Rotary inversions
+            geomtypes.RotInv3(axis=geomtypes.UZ, angle=1),
+            geomtypes.RotInv3(axis=geomtypes.Vec3([1, 2, 3]), angle=0.5),
+        ]
+        test_vec = [
+            geomtypes.Vec([0, 0, 0]),
+            geomtypes.Vec([0, 0, 1]),
+            geomtypes.Vec([0, 1, 1]),
+            geomtypes.Vec([1, 1, 1]),
+        ]
+        # Increase float_precision which is used to save floats
+        geomtypes.float_precision = 12
+        for trfm_org in test_matrix:
+            filename = os.path.join(DIR_PATH, "output", "test_transform.json")
+            trfm_org.write_json_file(filename)
+            trfm_new = geomtypes.Transform3.from_json_file(filename)
+            self.assertEqual(trfm_org, trfm_new)
+            for v in test_vec:
+                self.assertEqual(trfm_new * v, trfm_org * v)
 
 
 class TestRotInv3(unittest.TestCase):
