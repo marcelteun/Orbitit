@@ -2913,10 +2913,11 @@ class IsometricShape(CompoundShape):
         if self.isometries != None:
             s = s.add_line('isometries=[')
             s.incr()
-            s = s.glue_line(',\n'.join(
-                indent.Str(repr(i)).reindent(s.indent) for i in
-                    self.isometries
-            ))
+            s = s.glue_line(
+                ',\n'.join(
+                    indent.Str(repr(i)).reindent(s.indent) for i in self.isometries
+                )
+            )
             s = s.add_decr_line('],')
         s = s.add_line("name='%s'," % self.name)
         s = s.glue_line(
@@ -3250,22 +3251,58 @@ class SymmetricShape(IsometricShape):
         # This requires a more user friendly class interface for the user:
         # provide an array of colours and a symmetry (and index) on which the
         # colouring is based. For now fall back on the parental repr.
-        s = '%s(\n  ' % base.find_module_class_name(self.__class__, __name__)
-        s = '%sVs = [\n' % (s)
-        for v in self.base_shape.Vs:
-            s = '%s    %s,\n' % (s, repr(v))
-        s = '%s  ],\n  ' % s
-        s = '%sFs = [\n' % (s)
-        for f in self.base_shape.Fs:
-            s = '%s    %s,\n' % (s, repr(f))
-        s = '%s  ],\n  ' % s
+        s = indent.Str(f"{base.find_module_class_name(self.__class__, __name__)}(\n")
+        s = s.add_incr_line('Vs=[')
+        s.incr()
+        try:
+            s = s.glue_line(',\n'.join(
+                indent.Str(repr(v)).reindent(s.indent) for v in self.base_shape.Vs)
+            )
+        except AttributeError:
+            print('ERROR: Are you sure the vertices are all of type geomtypes.Vec3?')
+            raise
+        s = s.add_decr_line('],')
+        s = s.add_line('Fs=[')
+        s.incr()
+        s = s.glue_line(',\n'.join(
+            indent.Str(repr(f)).reindent(s.indent) for f in self.base_shape.Fs)
+        )
+        s = s.add_decr_line('],')
         if self.base_shape.Es != []:
-            s = '%sEs = %s,\n  ' % (s, repr(self.base_shape.Es))
+            s = s.add_line('Es=%s,' % repr(self.base_shape.Es))
         if self.base_shape.Ns != []:
-            s = '%sNs = [\n' % (s)
-            for v in self.base_shape.Ns:
-                s = '%s    %s,\n' % (s, repr(v))
-            s = '%s  ],\n  ' % s
+            s = s.add_incr_line('Ns=[')
+            s.incr()
+            try:
+                s = s.glue_line(',\n'.join(
+                    repr(n).reindent(s.indent) for n in self.base_shape.Ns)
+                )
+            except AttributeError:
+                print('ERROR: Are you sure the normals are all of type geomtypes.Vec3?')
+                raise
+            s = s.add_decr_line('],')
+        s = s.add_line('colors=[')
+        s.incr()
+        cols = self.getFaceColors()
+        s = s.glue_line(',\n'.join(
+            indent.Str(repr(c)).reindent(s.indent) for c in cols)
+        )
+        s = s.add_decr_line('],')
+        s = s.add_line('finalSym=')
+        s.incr()
+        s = s.glue_line((repr(self.finalSym) + ",").reindent(s.indent))
+        s.decr()
+        s = s.add_line('stabSym=')
+        s.incr()
+        s = s.glue_line((repr(self.stabSym) + ",").reindent(s.indent))
+        s.decr()
+        s = s.add_line("name='%s'," % self.name)
+        s = s.add_decr_line(')')
+        if __name__ != '__main__':
+            s = s.insert('%s.' % __name__)
+        return s
+
+        return s
         s = '%sfinalSym = %s,\n  stabSym = %s,\n  ' % (
                 s,
                 repr(self.finalSym),

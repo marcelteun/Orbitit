@@ -29,7 +29,7 @@
 from copy import copy, deepcopy
 import math
 
-from orbitit import base, geomtypes
+from orbitit import base, geomtypes, glue, indent
 
 X = geomtypes.UX
 Y = geomtypes.UY
@@ -238,13 +238,15 @@ class Set(set, base.Orbitit):
         self.short_string = True
 
     def __repr__(self):
-        # TODO: fix indentaton
-        s = f'{self.__class__.__name__}([\n'
-        for e in self:
-            s = f'{s} {repr(e)},\n'
-        s = f'{s}])'
+        s = indent.Str(f"{base.find_module_class_name(self.__class__, __name__)}(\n")
+        s = s.add_incr_line("[")
+        s.incr()
+        s = s.glue_line(',\n'.join(repr(e).reindent(s.indent) for e in self))
+        s = s.add_decr_line("]")
+        s.decr()
+        s += ")"
         if __name__ != '__main__':
-            s = f'{__name__}.{s}'
+            s = s.insert(__name__)
         return s
 
     @property

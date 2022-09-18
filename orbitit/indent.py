@@ -22,69 +22,60 @@
 #------------------------------------------------------------------
 
 class Str(str):
-    def __new__(this, s = '', indent_step = 4, indent = 0):
-        return str.__new__(this, s)
+    def __new__(self, s='', indent_step=4, indent=0):
+        return str.__new__(self, s)
 
-    def __init__(this, s = '', indent_step = 4, indent = 0):
-        this.indent_step = indent_step
-        this.indent = indent
-        if this.indent < 0:
-            this.indent = 0
+    def __init__(self, s='', indent_step=4, indent=0):
+        self.indent_step = indent_step
+        self.indent = indent
+        if self.indent < 0:
+            self.indent = 0
 
-    def _chk_indent(this):
-        if this.indent < 0:
-            this.indent = 0
+    def _chk_indent(self):
+        if self.indent < 0:
+            self.indent = 0
 
-    def cp_props(this, s):
-        s.indent = this.indent
-        s.indent_step = this.indent_step
+    def cp_props(self, s):
+        s.indent = self.indent
+        s.indent_step = self.indent_step
 
-    def glue_line(this, s):
+    def glue_line(self, s):
         """add a line that already has indentation, i.e. don't indent"""
-        return Str(
-            "%s%s\n" % (this, s),
-            this.indent_step,
-            this.indent
-        )
+        return Str(f"{self}{s}\n", self.indent_step, self.indent)
 
-    def add_line(this, s):
-        return Str(
-            "%s%s%s\n" % (this, ' ' * this.indent, s),
-            this.indent_step,
-            this.indent
-        )
+    def add_line(self, s):
+        return Str(f"{self}{' ' * self.indent}{s}\n", self.indent_step, self.indent)
 
-    def add_incr_line(this, s, i = 1):
-        this.incr(i)
-        return this.add_line(s)
+    def add_incr_line(self, s, i=1):
+        self.incr(i)
+        return self.add_line(s)
 
-    def add_decr_line(this, s, i = 1):
-        this.decr(i)
-        return this.add_line(s)
+    def add_decr_line(self, s, i=1):
+        self.decr(i)
+        return self.add_line(s)
 
-    def incr(this, i = 1):
-        this.indent = this.indent + i * this.indent_step
+    def incr(self, i=1):
+        self.indent = self.indent + i * self.indent_step
 
-    def decr(this, i = 1):
-        this.indent = this.indent - i * this.indent_step
-        if this.indent < 0:
-            this.indent = 0
+    def decr(self, i=1):
+        self.indent = self.indent - i * self.indent_step
+        if self.indent < 0:
+            self.indent = 0
 
-    def insert(this, s):
-        return Str(
-            "%s%s" % (s, this),
-            this.indent_step,
-            this.indent
-        )
+    def insert(self, s):
+        return Str(f"{s}{self}", self.indent_step, self.indent)
 
-    def reindent(this, i):
+    def __add__(self, s):
+        return Str(f"{self}{s}", self.indent_step, self.indent)
+
+    def reindent(self, i):
         """Indent the the whole block with i indent steps.
 
         Currently only i >= 0 is supported
         Note: newlines will not get an indentation.
         """
         return Str('\n'.join(
-                s if s == '' else (i * ' ') + s for s in this.splitlines()
+                s if s == '' else (i * ' ') + s for s in self.splitlines()
             )
         )
 

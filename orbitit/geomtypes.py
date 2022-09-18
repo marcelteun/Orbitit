@@ -488,7 +488,7 @@ class Transform3(tuple, base.Orbitit):
         s = s.add_line(f"{repr(Quat(self[1]))},")
         s = s.add_decr_line('))')
         if __name__ != '__main__':
-            s = f"{__name__}." + s
+            s = s.insert(f"{__name__}.")
         return s
 
     @property
