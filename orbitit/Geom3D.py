@@ -924,9 +924,7 @@ class SimpleShape(base.Orbitit):
         }
 
     @classmethod
-    def from_json(cls, json_str):
-        """Recreate object from JSON string."""
-        data = cls.get_data(json_str)
+    def from_dict_data(cls, data):
         return cls(data["vs"], data["fs"], colors=(data["cols"], data["face_cols"]), name=data["name"])
 
     def saveFile(self, fd):
@@ -2506,11 +2504,9 @@ class CompoundShape(base.Orbitit):
         }
 
     @classmethod
-    def from_json(cls, json_str):
-        """Recreate object from JSON string."""
-        data = cls.get_data(json_str)
+    def from_dict_data(cls, data):
         return cls(
-            shapes=[base.json_to_class[s["class"]].from_json(s) for s in data["shapes"]],
+            shapes=[base.json_to_class[s["class"]].from_json_dict(s) for s in data["shapes"]],
             name=data["name"],
         )
 
