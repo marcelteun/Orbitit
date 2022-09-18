@@ -13,14 +13,14 @@ class_to_json = {
 
 class Orbitit(ABC):
     @property
-    def json_repr(self):
+    def json_str(self):
         """Return a JSON representation of the object."""
         return json.dumps(self.repr_dict, sort_keys=True)
 
     def write_json_file(self, filename):
         """Write a JSON string representation to the specified path."""
         with open(filename, "w") as fd:
-            fd.write(self.json_repr)
+            fd.write(self.json_str)
 
     @abstractproperty
     def repr_dict(self):

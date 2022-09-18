@@ -33,7 +33,10 @@ from orbitit import Geom3D, geomtypes, isometry
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)
 blue = (.3, .3, .8)
-DIR = "unittest"
+
+DIR_PATH = path.dirname(path.realpath(__file__))
+OUT_DIR = "output"
+IN_DIR = "expected"
 
 
 def get_cube():
@@ -78,15 +81,27 @@ def get_octahedron():
                               colors=([yellow], []))
 
 
-def get_path(filename):
-    """Return path to test file to compare with"""
-    return path.join(DIR, filename)
+def get_path(filename, sub_dir):
+    """Return path to test-file to compare with"""
+    return path.join(DIR_PATH, sub_dir, filename)
 
 
-def write_chk_file(f, s):
-    """Write a check file for filename 'f' string 's'"""
-    with open(f + '.check', 'w') as fd:
-        fd.write(s)
+def chk_with_org(filename, chk_str):
+    """Get file contents from file with expected data"""
+    org_name = get_path(filename, IN_DIR)
+    chk_name = get_path(filename + '.chk', OUT_DIR)
+    try:
+        with open(org_name, 'r') as fd:
+            expect_str = fd.read()
+    except IOError:
+        with open(chk_name, 'w') as fd:
+            fd.write(chk_str)
+        return (False, 'Missing file, check {}'.format(org))
+    if chk_str != expect_str:
+        with open(chk_name, 'w') as fd:
+            fd.write(chk_str)
+        return (False, 'Unexpected content {} != {} (expected)'.format(chk_name, org_name))
+    return (True, "")
 
 
 class TestSimpleShape(unittest.TestCase):
@@ -96,21 +111,6 @@ class TestSimpleShape(unittest.TestCase):
     ps_margin = 10
     ps_precision = 7
     scale = 1
-
-    def chk_with_org(self, org, chk_str):
-        """Get file contents from file with expected data"""
-        try:
-            with open(org, 'r') as fd:
-                expect_str = fd.read()
-        except IOError:
-            write_chk_file(org, chk_str)
-            self.assertTrue(False, 'Missing file, check {}'.format(org))
-        if chk_str != expect_str:
-            chk_file = org + '.chk'
-            with open(chk_file, 'w') as fd:
-                fd.write(chk_str)
-            self.assertTrue(False, 'Unexpected content {} != {} (expected)'.format(
-                chk_file, org))
 
     def ensure_shape(self):
         """Make sure the shape is defined"""
@@ -125,28 +125,28 @@ class TestSimpleShape(unittest.TestCase):
                                            margin=math.pow(10,
                                                            -self.ps_margin),
                                            suppressWarn=True)
-        org = get_path(self.name + ".ps")
-        self.chk_with_org(org, tst_str)
+        result, msg = chk_with_org(self.name + ".ps", tst_str)
+        self.assertTrue(result, msg)
 
     def test_export_to_off(self):
         """Test export to off-format function"""
         self.ensure_shape()
         tst_str = self.shape.toOffStr()
-        org = get_path(self.name + ".off")
-        self.chk_with_org(org, tst_str)
+        result, msg = chk_with_org(self.name + ".off", tst_str)
+        self.assertTrue(result, msg)
 
     def test_export_to_json(self):
         self.ensure_shape()
-        tst_str = self.shape.to_json()
-        org = get_path(self.name + ".json")
-        self.chk_with_org(org, tst_str)
+        tst_str = self.shape.json_str
+        result, msg = chk_with_org(self.name + ".json", tst_str)
+        self.assertTrue(result, msg)
 
     def test_repr(self):
         """Test repr-format function"""
         self.ensure_shape()
         tst_str = repr(self.shape)
-        org = get_path(self.name + ".repr")
-        self.chk_with_org(org, tst_str)
+        result, msg = chk_with_org(self.name + ".repr", tst_str)
+        self.assertTrue(result, msg)
 
 
 class TestCompoundShape(TestSimpleShape):
@@ -287,27 +287,6 @@ class TestIsometricShape1(TestSimpleShape):
                                         geomtypes.Quat([1.0, 0.0, 0.0, 0.0])))
         )
 
-    def chk_with_org(self, org, chk_str):
-        """Get file contents from file with expected data"""
-        # Note the order of isometries might change, what you need to do is to create a SimpleShape
-        # and check the results:
-        # - the Vs should be the same (in any order)
-        # - the colours should be the same
-        # - etc
-        # This is a lot of work..
-        try:
-            with open(org, 'r') as fd:
-                expect_str = fd.read()
-        except IOError:
-            write_chk_file(org, chk_str)
-            self.assertTrue(False, 'Missing file, check {}'.format(org))
-        if chk_str != expect_str:
-            chk_file = org + '.chk'
-            with open(chk_file, 'w') as fd:
-                fd.write(chk_str)
-            self.assertTrue(False, 'Unexpected content {} != {} (expected)'.format(
-                chk_file, org))
-
 
 class TestSymmetricShape(TestSimpleShape):
     """More unit test for Geom3D.SymmetricShape"""
@@ -346,27 +325,6 @@ class TestSymmetricShape(TestSimpleShape):
             stabSym=isometry.A4(),
             name="5cubes",
         )
-
-    def chk_with_org(self, org, chk_str):
-        """Get file contents from file with expected data"""
-        # Note the order of isometries might change, what you need to do is to create a SimpleShape
-        # and check the results:
-        # - the Vs should be the same (in any order)
-        # - the colours should be the same
-        # - etc
-        # This is a lot of work..
-        try:
-            with open(org, 'r') as fd:
-                expect_str = fd.read()
-        except IOError:
-            write_chk_file(org, chk_str)
-            self.assertTrue(False, 'Missing file, check {}'.format(org))
-        if chk_str != expect_str:
-            chk_file = org + '.chk'
-            with open(chk_file, 'w') as fd:
-                fd.write(chk_str)
-            self.assertTrue(False, 'Unexpected content {} != {} (expected)'.format(
-                chk_file, org))
 
 
 if __name__ == '__main__':
