@@ -142,24 +142,24 @@ for isom in isomA5:
 
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-        heptagonsShape = Geom3D.IsometricShape(
+        heptagonsShape = Geom3D.SymmetricShape(
             Vs = [], Fs = [], isometries = isomA5,
             name = 'FoldedHeptagonsA5',
             recreateEdges = False
         )
-        xtraTrisShape = Geom3D.IsometricShape(
+        xtraTrisShape = Geom3D.SymmetricShape(
             Vs = [], Fs = [], isometries = isomA5,
             name = 'xtraTrisA5',
             recreateEdges = False
         )
-        trisO3Shape = Geom3D.SymmetricShape(
+        trisO3Shape = Geom3D.OrbitShape(
             Vs = [], Fs = [],
             finalSym = isomA5, stabSym = isomO3,
             colors = [([rgb.cyan[:]], [])],
             name = 'o3TrisA5',
             recreateEdges = False
         )
-        trisO5Shape = Geom3D.SymmetricShape(
+        trisO5Shape = Geom3D.OrbitShape(
             Vs = [], Fs = [],
             finalSym = isomA5, stabSym = isomO5,
             colors = [([rgb.cyan[:]], [])],

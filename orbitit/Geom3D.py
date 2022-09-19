@@ -2813,7 +2813,7 @@ class CompoundShape(base.Orbitit):
             self.merge_shapes()
         return self.merged_shape.getDome(level)
 
-class IsometricShape(CompoundShape):
+class SymmetricShape(CompoundShape):
     """
     The class describes simple shapes that have a base shape that is reused by
     some transformations. They can be expressed by a subset of all vertices,
@@ -2827,7 +2827,7 @@ class IsometricShape(CompoundShape):
         Ns=[],
         colors=[([], [])],
         isometries=[E],
-        name="IsometricShape",
+        name="SymmetricShape",
         recreateEdges=True,
         orientation=None,
     ):
@@ -2873,7 +2873,7 @@ class IsometricShape(CompoundShape):
     def __repr__(self):
         # comment out class name, see comment at __fix_repr__ below:
         #s = indent.Str('%s(\n' % base.find_module_class_name(self.__class__, __name__))
-        s = indent.Str('IsometricShape(\n')
+        s = indent.Str('SymmetricShape(\n')
         s = s.add_incr_line('Vs=[')
         s.incr()
         try:
@@ -3178,7 +3178,7 @@ class IsometricShape(CompoundShape):
         return self.simple_shape.toPsPiecesStr(
             faceIndices, scaling, precision, margin, pageSize, suppressWarn)
 
-class SymmetricShape(IsometricShape):
+class OrbitShape(SymmetricShape):
     """
     The class describes simple shapes that are symmetric. They can be expressed
     by a subset of all vertices, edges and faces. The symmetry of the shape is
@@ -3194,7 +3194,7 @@ class SymmetricShape(IsometricShape):
         Vs, Fs, Es = [], Ns = [],
         finalSym = isometry.E, stabSym = isometry.E,
         colors = [],
-        name = "SymmetricShape",
+        name = "OrbitShape",
         recreateEdges = True,
         quiet=False
     ):
@@ -3229,12 +3229,15 @@ class SymmetricShape(IsometricShape):
         FsOrbit = [coset.get_one() for coset in fsQuotientSet]
         if not quiet:
             print('Applying an orbit of order %d' % len(FsOrbit))
-        IsometricShape.__init__(self,
-                Vs, Fs, Es, Ns,
-                isometries=FsOrbit,
-                name=name,
-                recreateEdges=recreateEdges
-            )
+        super().__init__(
+            Vs,
+            Fs,
+            Es,
+            Ns,
+            isometries=FsOrbit,
+            name=name,
+            recreateEdges=recreateEdges
+        )
         self.finalSym = finalSym
         self.stabSym = stabSym
         if colors != []:
@@ -3432,9 +3435,9 @@ class Scene():
 # Classes that support conversion from and to JSON:
 base.class_to_json[SimpleShape] = "shape"
 base.class_to_json[CompoundShape] = "compound_shape"
-base.class_to_json[IsometricShape] = "isometric_shape"
-base.class_to_json[SymmetricShape] = "orbit_shape"
+base.class_to_json[SymmetricShape] = "isometric_shape"
+base.class_to_json[OrbitShape] = "orbit_shape"
 base.json_to_class["shape"] = CompoundShape
 base.json_to_class["compound_shape"] = CompoundShape
-base.json_to_class["isometric_shape"] = IsometricShape
-base.json_to_class["orbit_shape"] = SymmetricShape
+base.json_to_class["isometric_shape"] = SymmetricShape
+base.json_to_class["orbit_shape"] = OrbitShape

@@ -396,9 +396,13 @@ class CtrlWin(wx.Frame):
         self.final_sym_setup[final_sym_idx] = final_sym_obj.setup
         self.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup
         try:
-            self.shape = Geom3D.SymmetricShape(
-                verts, faces,
-                finalSym=final_sym_obj, stabSym=stab_sym, name=self.name)
+            self.shape = Geom3D.OrbitShape(
+                verts,
+                faces,
+                finalSym=final_sym_obj,
+                stabSym=stab_sym,
+                name=self.name
+            )
         except isometry.ImproperSubgroupError:
             self.status_text(
                 'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
@@ -515,10 +519,13 @@ class CtrlWin(wx.Frame):
                 stab_sym = self.orbit.altStab
                 verts = self.shape.getBaseVertexProperties()['Vs']
                 faces = self.shape.getBaseFaceProperties()['Fs']
-                self.shape = Geom3D.SymmetricShape(verts, faces,
-                                                   finalSym=final_sym,
-                                                   stabSym=stab_sym,
-                                                   name=self.name)
+                self.shape = Geom3D.OrbitShape(
+                    verts,
+                    faces,
+                    finalSym=final_sym,
+                    stabSym=stab_sym,
+                    name=self.name
+                )
                 self.fs_orbit = self.shape.isometries
                 self.shape.recreateEdges()
                 self.canvas.panel.shape = self.shape
@@ -642,7 +649,7 @@ class CtrlWin(wx.Frame):
                         pass
                 else:
                     shape = Geom3D.readOffFile(fd, recreateEdges=False)
-            if isinstance(shape, Geom3D.IsometricShape):
+            if isinstance(shape, Geom3D.SymmetricShape):
                 verts = shape.base_shape.Vs
                 faces = shape.base_shape.Fs
             else:

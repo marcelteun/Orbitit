@@ -318,7 +318,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.set_status_text("ERROR reading file")
             raise
         if isinstance(shape, Geom3D.CompoundShape):
-            # convert to SimpleShape first, since adding to IsometricShape
+            # convert to SimpleShape first, since adding to SymmetricShape
             # will not work.
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
@@ -350,7 +350,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 else:
                     shape = Geom3D.readPyFile(fd)
             if isinstance(shape, Geom3D.CompoundShape):
-                # convert to SimpleShape first, since adding a IsometricShape
+                # convert to SimpleShape first, since adding a SymmetricShape
                 # will not work.
                 shape = shape.simple_shape
             try:

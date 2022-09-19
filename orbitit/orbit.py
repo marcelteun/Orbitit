@@ -245,7 +245,7 @@ class Orbit(list):
         return self.loStabs[n]
 
 
-class Shape(Geom3D.SymmetricShape):
+class Shape(Geom3D.OrbitShape):
     # standard colours
     cols_blue = [
          rgb.royalBlue,
@@ -350,13 +350,15 @@ class Shape(Geom3D.SymmetricShape):
                  the symmetry (name) that the elements with the same colour
                  should have, e.g. 'C4'.
         """
-        Geom3D.SymmetricShape.__init__(self,
-                                       base['Vs'],
-                                       base['Fs'],
-                                       finalSym=final_sym,
-                                       stabSym=stab_sym,
-                                       name=name,
-                                       quiet=True)
+        Geom3D.OrbitShape.__init__(
+            self,
+            base['Vs'],
+            base['Fs'],
+            finalSym=final_sym,
+            stabSym=stab_sym,
+            name=name,
+            quiet=True,
+        )
 
         if cols:
             self.cols = cols
@@ -393,11 +395,14 @@ class Shape(Geom3D.SymmetricShape):
             stab_sym = self.orbit.altStab
             verts = self.getBaseVertexProperties()['Vs']
             faces = self.getBaseFaceProperties()['Fs']
-            Geom3D.SymmetricShape.__init__(self, verts, faces,
-                                           finalSym=final_sym,
-                                           stabSym=stab_sym,
-                                           name=self.name,
-                                           quiet=True)
+            super().__init__(
+                verts,
+                faces,
+                finalSym=final_sym,
+                stabSym=stab_sym,
+                name=self.name,
+                quiet=True,
+            )
             # note: all isometries are stored in 'direct'
             fs_orbit = self.isometries
 

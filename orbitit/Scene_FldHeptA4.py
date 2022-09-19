@@ -165,15 +165,15 @@ isomsO3 = isometry.D2()
 
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-        heptagonsShape = Geom3D.IsometricShape(
+        heptagonsShape = Geom3D.SymmetricShape(
             Vs = [], Fs = [], isometries = isometry.A4(),
             name = 'FoldedHeptagonsA4'
         )
-        xtraTrisShape = Geom3D.IsometricShape(
+        xtraTrisShape = Geom3D.SymmetricShape(
             Vs = [], Fs = [], isometries = isometry.A4(),
             name = 'xtraTrisA4'
         )
-        trisO3Shape = Geom3D.IsometricShape(
+        trisO3Shape = Geom3D.SymmetricShape(
             Vs = [], Fs = [], isometries = isomsO3,
             colors = [([rgb.cyan[:]], [])],
             name = 'o3TrisA4'

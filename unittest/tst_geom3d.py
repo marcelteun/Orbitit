@@ -155,19 +155,19 @@ class TestCompoundShape(TestSimpleShape):
     name = "compound_shape"
 
 
-class TestIsometricShape(TestSimpleShape):
-    """Unit test for Geom3D.IsometricShape"""
+class TestSymmetricShape(TestSimpleShape):
+    """Unit test for Geom3D.SymmetricShape"""
     shape = None
     name = "isom_12cubes"
     scale = 50
 
     def def_shape(self):
-        """Define an IsometricShape describing a compound of 12 cubes
+        """Define an SymmetricShape describing a compound of 12 cubes
 
         The descriptive doesn't use the default orientation
         """
         v2_div_2 = math.sqrt(2) / 2
-        self.shape = Geom3D.IsometricShape(
+        self.shape = Geom3D.SymmetricShape(
             Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
@@ -235,20 +235,20 @@ class TestIsometricShape(TestSimpleShape):
             )
 
 
-class TestIsometricShape1(TestSimpleShape):
-    """More unit test for Geom3D.IsometricShape"""
+class TestSymmetricShape1(TestSimpleShape):
+    """More unit test for Geom3D.SymmetricShape"""
     shape = None
     name = "isom_5cubes"
     scale = 50
 
     def def_shape(self):
-        """Define an IsometricShape describing a compound of 5 cubes
+        """Define an SymmetricShape describing a compound of 5 cubes
 
         The descriptive uses the default orientation
         """
         a = 0.809016994375
         b = 0.309016994375
-        self.shape = Geom3D.IsometricShape(
+        self.shape = Geom3D.SymmetricShape(
             Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
@@ -288,18 +288,18 @@ class TestIsometricShape1(TestSimpleShape):
         )
 
 
-class TestSymmetricShape(TestSimpleShape):
-    """More unit test for Geom3D.SymmetricShape"""
+class TestOrbitShape(TestSimpleShape):
+    """More unit test for Geom3D.OrbitShape"""
     shape = None
     name = "5cubes"
     scale = 50
 
     def def_shape(self):
-        """Define an SymmetricShape describing a compound of 5 cubes
+        """Define an OrbitShape describing a compound of 5 cubes
 
         The descriptive uses the default orientation
         """
-        self.shape = Geom3D.SymmetricShape(
+        self.shape = Geom3D.OrbitShape(
             Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
