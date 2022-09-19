@@ -2825,6 +2825,7 @@ class SymmetricShape(CompoundShape):
         Fs,
         Es=[],
         Ns=[],
+        # TODO: remove double array: the opposite symmetries are gone. Also update the docstrin.
         colors=[([], [])],
         isometries=[E],
         name="SymmetricShape",
@@ -2940,8 +2941,7 @@ class SymmetricShape(CompoundShape):
                 'name': self.name,
                 'vs': self.base_shape.Vs,
                 'fs': self.base_shape.Fs,
-                'cols': self.base_shape.colorData[0],
-                'face_cols': self.base_shape.colorData[1],
+                'cols': self.shape_colors,
                 'orientation': self.base_shape.orientation.repr_dict,
                 'isometries': [i.repr_dict for i in self.isometries],
             },
@@ -2966,13 +2966,13 @@ class SymmetricShape(CompoundShape):
         assert len(colors) > 0, 'colors should have at least one element'
         assert len(colors[0]) == 2, \
             'a colors element should be a tuple of 2 elements: (colors, fColors)'
-        self.shapeColors = colors
+        self.shape_colors = colors
         self.nrOfShapeColorDefs = len(colors)
         self.merge_needed = True
         self.needs_apply_isoms = True
 
     def getFaceColors(self):
-        return self.shapeColors
+        return self.shape_colors
 
     def applyColors(self):
         """
@@ -2981,19 +2981,19 @@ class SymmetricShape(CompoundShape):
         if (self.nrOfShapeColorDefs != self.order):
             if self.nrOfShapeColorDefs == 1:
                 colorDataPerShape = [
-                        self.shapeColors[0] for i in range(self.order)
+                        self.shape_colors[0] for i in range(self.order)
                     ]
             elif self.nrOfShapeColorDefs < self.order:
                 div = self.order / self.nrOfShapeColorDefs
                 mod = self.order % self.nrOfShapeColorDefs
                 colorDataPerShape = []
                 for i in range(div):
-                    colorDataPerShape.extend(self.shapeColors)
-                colorDataPerShape.extend(self.shapeColors[:mod])
+                    colorDataPerShape.extend(self.shape_colors)
+                colorDataPerShape.extend(self.shape_colors[:mod])
             else:
-                colorDataPerShape = self.shapeColors[:self.order],
-            self.shapeColors = colorDataPerShape
-        self.nrOfShapeColorDefs = len(self.shapeColors)
+                colorDataPerShape = self.shape_colors[:self.order],
+            self.shape_colors = colorDataPerShape
+        self.nrOfShapeColorDefs = len(self.shape_colors)
         assert (self.nrOfShapeColorDefs == self.order), '%d != %d' % (
             self.nrOfShapeColorDefs, self.order)
 
@@ -3005,7 +3005,7 @@ class SymmetricShape(CompoundShape):
         This will create all the individual shapes.
         """
 
-        if len(self.shapeColors) != self.order:
+        if len(self.shape_colors) != self.order:
             self.applyColors()
         shapes = [
             SimpleShape(
@@ -3013,7 +3013,7 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.Fs,
                 self.base_shape.Es,
                 Ns = self.base_shape.Ns,
-                colors = self.shapeColors[i],
+                colors = self.shape_colors[i],
                 orientation = isom * self.base_shape.orientation
             )
             for i, isom in enumerate(self.isometries)
@@ -3246,7 +3246,17 @@ class OrbitShape(SymmetricShape):
     @property
     def repr_dict(self):
         """Return a short representation of the object."""
-        raise NotImplementedError
+        return {
+            'class': base.class_to_json[self.__class__],
+            'data': {
+                'name': self.name,
+                'vs': self.Vs,
+                'fs': self.Fs,
+                'cols': self.shape_colors,
+                'final_sym': self.finalSym.repr_dict,
+                'stab_sym': self.stabSym.repr_dict,
+            },
+        }
 
     def __repr__(self):
         # This repr should be fixed, since you cannot be sure in which order the
@@ -3435,9 +3445,9 @@ class Scene():
 # Classes that support conversion from and to JSON:
 base.class_to_json[SimpleShape] = "shape"
 base.class_to_json[CompoundShape] = "compound_shape"
-base.class_to_json[SymmetricShape] = "isometric_shape"
+base.class_to_json[SymmetricShape] = "symmetric_shape"
 base.class_to_json[OrbitShape] = "orbit_shape"
 base.json_to_class["shape"] = CompoundShape
 base.json_to_class["compound_shape"] = CompoundShape
-base.json_to_class["isometric_shape"] = SymmetricShape
+base.json_to_class["symmetric_shape"] = SymmetricShape
 base.json_to_class["orbit_shape"] = OrbitShape

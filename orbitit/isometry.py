@@ -252,10 +252,15 @@ class Set(set, base.Orbitit):
     @property
     def repr_dict(self):
         """Return a short representation of the object."""
-        return {
-            'class': base.class_to_json[self.__class__],
-            'data': [e.repr_dict for e in self],
+        result = {
+            "class": base.class_to_json[self.__class__],
+            "data": {},
         }
+        if self.generator:
+            result["data"]["generator"] = self.generator
+        else:
+            result["data"]["isometries"] = [e.repr_dict for e in self]
+        return result
 
     def __str__(self):
         def to_s():
