@@ -231,9 +231,9 @@ class Set(set, base.Orbitit):
 
     def __init__(self, *args):
         try:
-            self.generator
+            self._generator
         except AttributeError:
-            self.generator = {}
+            self._generator = {}
         super().__init__(*args)
         self.short_string = True
 
@@ -256,8 +256,8 @@ class Set(set, base.Orbitit):
             "class": base.class_to_json[self.__class__],
             "data": {},
         }
-        if self.generator:
-            result["data"]["generator"] = self.generator
+        if self._generator:
+            result["data"]["generator"] = self._generator
         else:
             result["data"]["isometries"] = [e.repr_dict for e in self]
         return result
@@ -272,9 +272,9 @@ class Set(set, base.Orbitit):
             if __name__ != '__main__':
                 s = f'{__name__}.{s}'
             return s
-        if self.generator != {}:
+        if self._generator != {}:
             if self.short_string:
-                s = f'{self.__class__.__name__}(setup={self.generator})'
+                s = f'{self.__class__.__name__}(setup={self._generator})'
             else:
                 s = to_s()
         else:
@@ -471,7 +471,7 @@ class Set(set, base.Orbitit):
                 assert  k == 'n' and self.n, (
                     f'Unknown parameter {k} in setup = {str(setup)} for {self.__class__.__name__}'
                 )
-        self.generator = setup
+        self._generator = setup
 
     @classmethod
     def remove_init_par(cls, label):
@@ -491,7 +491,7 @@ class Set(set, base.Orbitit):
     @property
     def setup(self):
         """Fetch the original setup"""
-        return self.generator
+        return self._generator
 
 
 def init_dict(**kwargs):
@@ -2253,6 +2253,11 @@ class A5(Set):
                 o5axis = setup['o5axis']
             else:
                 o5axis = copy(self.std_setup['o5axis'])
+            if not setup:
+                self._generator = {
+                    'o3axis': o3axis,
+                    'o5axis': o5axis,
+                }
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
@@ -2651,3 +2656,7 @@ D2nDn.subgroups = [D2nDn, Dn, C2nCn, Cn, E]
 # Classes that support conversion from and to JSON:
 base.class_to_json[Set] = "isometry"
 base.json_to_class["isometry"] = Set
+base.class_to_json[A4] = "A4"
+base.class_to_json[A5] = "A5"
+base.json_to_class["A4"] = A4
+base.json_to_class["A5"] = A5

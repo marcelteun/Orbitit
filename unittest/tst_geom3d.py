@@ -96,7 +96,7 @@ def chk_with_org(filename, chk_str):
     except IOError:
         with open(chk_name, 'w') as fd:
             fd.write(chk_str)
-        return (False, 'Missing file, check {}'.format(org))
+        return (False, 'Missing file, check {}'.format(org_name))
     if chk_str != expect_str:
         with open(chk_name, 'w') as fd:
             fd.write(chk_str)
@@ -325,6 +325,7 @@ class TestOrbitShape(TestSimpleShape):
             stabSym=isometry.A4(),
             name="5cubes",
         )
+        #self.shape.json_indent = 2
 
 
 if __name__ == '__main__':

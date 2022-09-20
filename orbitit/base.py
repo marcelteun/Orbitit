@@ -12,10 +12,13 @@ class_to_json = {
 }
 
 class Orbitit(ABC):
+    """Shared base class for orbitit library."""
+    json_indent = None
+
     @property
     def json_str(self):
         """Return a JSON representation of the object."""
-        return json.dumps(self.repr_dict, sort_keys=True)
+        return json.dumps(self.repr_dict, sort_keys=True, indent=self.json_indent)
 
     def write_json_file(self, filename):
         """Write a JSON string representation to the specified path."""
