@@ -823,9 +823,12 @@ class SimpleShape(base.Orbitit):
     This class decribes a simple 3D object consisting of faces and edges.
     """
     def __init__(self,
-        Vs, Fs, Es = [], Ns = [],
-        colors = ([], []), name = "SimpleShape",
-        orientation = None
+        Vs, Fs,
+        Es=[],
+        Ns=[],
+        colors=None,
+        name="SimpleShape",
+        orientation=None
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -861,16 +864,14 @@ class SimpleShape(base.Orbitit):
         self.gl.sphere = None
         self.gl.cyl = None
         self.gl.alwaysSetVertices = False # set to true if a scene contains more than 1 shape
-        if colors[0] == []:
+        if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
         self.scalingFactor = 1.0
-        self.setVertexProperties(Vs = Vs, Ns = Ns, radius = -1., color = [1. , 1. , .8 ])
+        self.setVertexProperties(Vs=Vs, Ns=Ns, radius=-1., color=[1. , 1. , .8 ])
         self.setEdgeProperties(
-            Es = Es, radius = -1., color = [0.1, 0.1, 0.1], drawEdges = True
+            Es=Es, radius=-1., color=[0.1, 0.1, 0.1], drawEdges=True
         )
-        self.setFaceProperties(
-            Fs = Fs, colors = colors, drawFaces = True
-        )
+        self.setFaceProperties(Fs=Fs, colors=colors, drawFaces=True)
         self.defaultColor = rgb.yellow
         if orientation:
             self.orientation = orientation
@@ -1252,11 +1253,11 @@ class SimpleShape(base.Orbitit):
 
         colors: see getFaceProperties.
         """
-        if colors[0] != None:
+        if colors[0] is not None:
             colorDefs  = colors[0]
         else:
             colorDefs  = self.colorData[0]
-        if colors[1] != None:
+        if colors[1] is not None:
             fColors = colors[1]
         else:
             fColors = self.colorData[1]
@@ -2825,8 +2826,7 @@ class SymmetricShape(CompoundShape):
         Fs,
         Es=[],
         Ns=[],
-        # TODO: remove double array: the opposite symmetries are gone. Also update the docstrin.
-        colors=[([], [])],
+        colors=[],
         isometries=[E],
         name="SymmetricShape",
         recreateEdges=True,
@@ -2842,13 +2842,8 @@ class SymmetricShape(CompoundShape):
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
             is used by glDraw
-        colors: optional array parameter describing the colours. Each element
-                consists of a tuple similar to the the 'colors' parameter from
-                SimpleShape; see the __init__ function of that class. The tuples
-                will be used to divide the colours over the different elements
-                of the orbit, first for all the direct isometries, then the
-                opposite. The array should at least contain one tuple to specify
-                the base element.
+        colors: optional array parameter describing the colours. Each element consists of RGB
+            channel values (between 0 and 1). There should be an RGB value for each isometry..
         isometries: a list of all isometries that are needed to reproduce all
             parts of the shape can can be transformed from the specified base
             element through an isometry.
@@ -2859,12 +2854,12 @@ class SymmetricShape(CompoundShape):
         self.base_shape = SimpleShape(
             Vs, Fs, Es,
             Ns=Ns,
-            colors=colors[0],
+            colors=([colors[0]], []) if colors else ([], []),
             orientation=orientation,
         )
         if recreateEdges:
             self.base_shape.recreateEdges()
-        CompoundShape.__init__(self, [self.base_shape], name = name)
+        super().__init__([self.base_shape], name = name)
         self.setFaceColors(colors)
         self.isometries = isometries
         self.order = len(isometries)
@@ -2961,11 +2956,10 @@ class SymmetricShape(CompoundShape):
         """
         Check and set the face colours and and save their properties.
         """
-        if colors == [([], [])]:
-            colors = [([rgb.gray95[:]], [])]
+        breakpoint()
+        if not colors:
+            colors = [rgb.gray95[:]]
         assert len(colors) > 0, 'colors should have at least one element'
-        assert len(colors[0]) == 2, \
-            'a colors element should be a tuple of 2 elements: (colors, fColors)'
         self.shape_colors = colors
         self.nrOfShapeColorDefs = len(colors)
         self.merge_needed = True
@@ -3004,7 +2998,7 @@ class SymmetricShape(CompoundShape):
 
         This will create all the individual shapes.
         """
-
+        breakpoint()
         if len(self.shape_colors) != self.order:
             self.applyColors()
         shapes = [
@@ -3013,7 +3007,7 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.Fs,
                 self.base_shape.Es,
                 Ns = self.base_shape.Ns,
-                colors = self.shape_colors[i],
+                colors = ([self.shape_colors[i]], []),
                 orientation = isom * self.base_shape.orientation
             )
             for i, isom in enumerate(self.isometries)
@@ -3140,9 +3134,11 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.setFaceProperties(Fs = dict['Fs'])
                 self.needs_apply_isoms = True
             if 'colors' in dict and dict['colors'] != None:
+                self.base_shape.setFaceColors(
                 self.setFaceColors([dict['colors']])
+                self.shape_colors = None
                 # taken care of by the function above:
-                # self.merge_needed = True
+                self.merge_needed = True
             if 'drawFaces' in dict and dict['drawFaces'] != None:
                 self.setEnableDrawFaces(dict['drawFaces'])
 

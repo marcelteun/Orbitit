@@ -289,8 +289,8 @@ class Shape(heptagons.EqlHeptagonShape):
             Fs.extend(xtraFs)
             Es.extend(xtraEs)
             colIds.extend(this.xtraColIds)
-        this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.setBaseEdgeProperties(Es=Es)
+        this.setBaseFaceProperties(Fs=Fs, colors=(this.theColors, colIds))
 
     def toPsPiecesStr(this,
             faceIndices = [],

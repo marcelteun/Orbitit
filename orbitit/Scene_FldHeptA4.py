@@ -159,7 +159,7 @@ heptColPerIsom = []
 for isom in use_isom:
     for subSet, i in zip(colQuotientSet, list(range(len(colQuotientSet)))):
         if isom in subSet:
-            heptColPerIsom.append(([useRgbCols[i]], []))
+            heptColPerIsom.append(useRgbCols[i])
             break;
 isomsO3 = isometry.D2()
 
@@ -175,7 +175,7 @@ class Shape(heptagons.FldHeptagonShape):
         )
         trisO3Shape = Geom3D.SymmetricShape(
             Vs = [], Fs = [], isometries = isomsO3,
-            colors = [([rgb.cyan[:]], [])],
+            colors = [rgb.cyan[:]],
             name = 'o3TrisA4'
         )
         heptagons.FldHeptagonShape.__init__(this,

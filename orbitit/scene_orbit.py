@@ -584,8 +584,9 @@ class CtrlWin(wx.Frame):
                     col_per_isom.append(self.cols[i])
                     break
         cols = [
-            ([[float(colCh)/255 for colCh in col]], [])
-            for col in col_per_isom]
+            [float(colCh)/255 for colCh in col]
+            for col in col_per_isom
+        ]
         self.shape.setFaceColors(cols)
         self.status_text(
             f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",

@@ -418,7 +418,7 @@ class Shape(Geom3D.OrbitShape):
                     self.col_per_isom.append(self.cols[i])
                     break
         # update with correct format
-        self.setFaceColors([([col], []) for col in self.col_per_isom])
+        self.setFaceColors([col for col in self.col_per_isom])
 
         # Compound index n means compound of n elements
         self.index = len(fs_orbit)

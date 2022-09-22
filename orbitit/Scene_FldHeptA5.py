@@ -137,7 +137,7 @@ heptColPerIsom = []
 for isom in isomA5:
     for subSet, i in zip(colQuotientSet, list(range(len(colQuotientSet)))):
         if isom in subSet:
-            heptColPerIsom.append(([useRgbCols[i]], []))
+            heptColPerIsom.append(useRgbCols[i])
             break;
 
 class Shape(heptagons.FldHeptagonShape):
@@ -155,14 +155,14 @@ class Shape(heptagons.FldHeptagonShape):
         trisO3Shape = Geom3D.OrbitShape(
             Vs = [], Fs = [],
             finalSym = isomA5, stabSym = isomO3,
-            colors = [([rgb.cyan[:]], [])],
+            colors = [rgb.cyan[:]],
             name = 'o3TrisA5',
             recreateEdges = False
         )
         trisO5Shape = Geom3D.OrbitShape(
             Vs = [], Fs = [],
             finalSym = isomA5, stabSym = isomO5,
-            colors = [([rgb.cyan[:]], [])],
+            colors = [rgb.cyan[:]],
             name = 'o5PentasA5',
             recreateEdges = False
         )
