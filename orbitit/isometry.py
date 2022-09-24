@@ -1600,6 +1600,11 @@ class A4(Set):
                 o2axis1 = setup['o2axis1']
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
+            if not setup:
+                self._generator = {
+                    'o2axis0': o2axis0,
+                    'o2axis1': o2axis1,
+                }
             d2 = _gen_d2(o2axis0, o2axis1)
             h0, h1, h2 = d2
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)

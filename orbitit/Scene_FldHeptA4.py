@@ -166,22 +166,22 @@ isomsO3 = isometry.D2()
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = Geom3D.SymmetricShape(
-            Vs = [], Fs = [], isometries = isometry.A4(),
-            name = 'FoldedHeptagonsA4'
+            Vs=[], Fs=[], isometries=isometry.A4(),
+            name='FoldedHeptagonsA4'
         )
-        xtraTrisShape = Geom3D.SymmetricShape(
-            Vs = [], Fs = [], isometries = isometry.A4(),
-            name = 'xtraTrisA4'
+        xtraTrisShape = Geom3D.SymmetricShapeSplitCols(
+            Vs=[], Fs=[], isometries=isometry.A4(),
+            name='xtraTrisA4'
         )
         trisO3Shape = Geom3D.SymmetricShape(
-            Vs = [], Fs = [], isometries = isomsO3,
-            colors = [rgb.cyan[:]],
-            name = 'o3TrisA4'
+            Vs=[], Fs=[], isometries=isomsO3,
+            colors=[rgb.cyan[:]],
+            name='o3TrisA4'
         )
         heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape],
             3, 3,
-            name = 'FoldedRegHeptA4'
+            name='FoldedRegHeptA4'
         )
         this.heptagonsShape = heptagonsShape
         this.xtraTrisShape = xtraTrisShape
@@ -327,8 +327,8 @@ class Shape(heptagons.FldHeptagonShape):
                     Fs.extend(this.oppTriFs[this.oppEdgeAlternative])
                     Es.extend(this.oppTriEs[this.oppEdgeAlternative])
                     colIds = this.triColIds[eAlt]
-                this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
-                this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
+                this.xtraTrisShape.setBaseVertexProperties(Vs=Vs)
+                this.xtraTrisShape.setBaseEdgeProperties(Es=Es)
                 this.xtraTrisShape.setBaseFaceProperties(
                     Fs = Fs,
                     colors = ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]],

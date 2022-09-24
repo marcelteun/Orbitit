@@ -4349,7 +4349,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.setEnableTrisFillItems()
         self.updateShape()
 
-class EqlHeptagonShape(Geom3D.SymmetricShape):
+class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
     def __init__(self,
         base_isometries = [geomtypes.E],
         extra_isometry = None,

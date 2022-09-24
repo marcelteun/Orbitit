@@ -197,7 +197,7 @@ class TestSymmetricShape(TestSimpleShape):
                 [0.542969, 0.0, 0.0],
                 [0.132812, 0.542969, 0.132812],
                 [0.996094, 0.839844, 0.0],
-            ]
+            ],
             isometries=[
                 geomtypes.Rot3((geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
                                 geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]))),
@@ -224,7 +224,7 @@ class TestSymmetricShape(TestSimpleShape):
                 geomtypes.Rot3((geomtypes.Quat([v2_div_2, 0, -v2_div_2, 0]),
                                 geomtypes.Quat([v2_div_2, 0, v2_div_2, 0]))),
             ],
-            name="12cubes",
+            name=self.name,
             orientation=geomtypes.Rot3((
                 geomtypes.Quat([0.953020613871,
                                 0.214186495298,
@@ -234,7 +234,9 @@ class TestSymmetricShape(TestSimpleShape):
                                 -0.214186495298,
                                 0.0,
                                 -0.214186495298])))
-            )
+        )
+        # for debugging:
+        #self.shape.json_indent = 2
 
 
 class TestSymmetricShape1(TestSimpleShape):
@@ -273,7 +275,7 @@ class TestSymmetricShape1(TestSimpleShape):
                 [0.542969, 0.0, 0.0],
                 [0.0, 0.746094, 0.996094],
                 [0.542969, 0.523438, 0.304688],
-            ]
+            ],
             isometries=[
                 geomtypes.Rot3((geomtypes.Quat([-a, -0.5, b, 0]),
                                 geomtypes.Quat([-a, 0.5, -b, 0]))),
@@ -286,16 +288,18 @@ class TestSymmetricShape1(TestSimpleShape):
                 geomtypes.Rot3((geomtypes.Quat([0, -0.5, a, b]),
                                 geomtypes.Quat([0, 0.5, -a, -b])))
             ],
-            name="5cubes",
+            name=self.name,
             orientation=geomtypes.Rot3((geomtypes.Quat([1.0, 0.0, 0.0, 0.0]),
                                         geomtypes.Quat([1.0, 0.0, 0.0, 0.0])))
         )
+        # for debugging:
+        #self.shape.json_indent = 2
 
 
 class TestOrbitShape(TestSimpleShape):
     """More unit test for Geom3D.OrbitShape"""
     shape = None
-    name = "5cubes"
+    name = "orbit_5cubes"
     scale = 50
 
     def def_shape(self):
@@ -326,12 +330,13 @@ class TestOrbitShape(TestSimpleShape):
                 [0.542969, 0.0, 0.0],
                 [0.0, 0.746094, 0.996094],
                 [0.542969, 0.523438, 0.304688],
-            ]
+            ],
             finalSym=isometry.A5(),
             stabSym=isometry.A4(),
-            name="5cubes",
+            name=self.name,
         )
-        self.shape.json_indent = 2
+        # for debugging:
+        #self.shape.json_indent = 2
 
 
 if __name__ == '__main__':

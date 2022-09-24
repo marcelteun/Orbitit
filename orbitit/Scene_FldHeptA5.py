@@ -147,7 +147,7 @@ class Shape(heptagons.FldHeptagonShape):
             name = 'FoldedHeptagonsA5',
             recreateEdges = False
         )
-        xtraTrisShape = Geom3D.SymmetricShape(
+        xtraTrisShape = Geom3D.SymmetricShapeSplitCols(
             Vs = [], Fs = [], isometries = isomA5,
             name = 'xtraTrisA5',
             recreateEdges = False

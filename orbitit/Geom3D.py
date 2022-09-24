@@ -2820,13 +2820,15 @@ class SymmetricShape(CompoundShape):
     some transformations. They can be expressed by a subset of all vertices,
     edges and faces. The isometries of the shape are then used to reproduce the
     complete shape.
+
+    Colours can be specified for whole transformations of the base shape.
     """
     def __init__(self,
         Vs,
         Fs,
         Es=[],
         Ns=[],
-        colors=[],
+        colors=None,
         isometries=[E],
         name="SymmetricShape",
         recreateEdges=True,
@@ -2854,12 +2856,12 @@ class SymmetricShape(CompoundShape):
         self.base_shape = SimpleShape(
             Vs, Fs, Es,
             Ns=Ns,
-            colors=([colors[0]], []) if colors else ([], []),
+            colors=([colors[0]], []) if colors else None,
             orientation=orientation,
         )
         if recreateEdges:
             self.base_shape.recreateEdges()
-        super().__init__([self.base_shape], name = name)
+        super().__init__([self.base_shape], name=name)
         self.setFaceColors(colors)
         self.isometries = isometries
         self.order = len(isometries)
@@ -2952,14 +2954,23 @@ class SymmetricShape(CompoundShape):
 
         CompoundShape.merge_shapes(self)
 
+    def _chk_face_colors_par(self, colors):
+        """Check whether the colors parameters is valid.
+
+        If not raise an assert.
+
+        return the default colours (useful if default colors are used)
+        """
+        if not colors:
+            colors = [rgb.gray95[:]]
+        assert len(colors) > 0, 'colors should have at least one element'
+        return colors
+
     def setFaceColors(self, colors):
         """
         Check and set the face colours and and save their properties.
         """
-        breakpoint()
-        if not colors:
-            colors = [rgb.gray95[:]]
-        assert len(colors) > 0, 'colors should have at least one element'
+        colors = self._chk_face_colors_par(colors)
         self.shape_colors = colors
         self.nrOfShapeColorDefs = len(colors)
         self.merge_needed = True
@@ -2978,7 +2989,7 @@ class SymmetricShape(CompoundShape):
                         self.shape_colors[0] for i in range(self.order)
                     ]
             elif self.nrOfShapeColorDefs < self.order:
-                div = self.order / self.nrOfShapeColorDefs
+                div = self.order // self.nrOfShapeColorDefs
                 mod = self.order % self.nrOfShapeColorDefs
                 colorDataPerShape = []
                 for i in range(div):
@@ -2998,7 +3009,6 @@ class SymmetricShape(CompoundShape):
 
         This will create all the individual shapes.
         """
-        breakpoint()
         if len(self.shape_colors) != self.order:
             self.applyColors()
         shapes = [
@@ -3134,9 +3144,7 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.setFaceProperties(Fs = dict['Fs'])
                 self.needs_apply_isoms = True
             if 'colors' in dict and dict['colors'] != None:
-                self.base_shape.setFaceColors(
                 self.setFaceColors([dict['colors']])
-                self.shape_colors = None
                 # taken care of by the function above:
                 self.merge_needed = True
             if 'drawFaces' in dict and dict['drawFaces'] != None:
@@ -3173,6 +3181,82 @@ class SymmetricShape(CompoundShape):
             faceIndices = list(range(len(self.base_shape.Fs)))
         return self.simple_shape.toPsPiecesStr(
             faceIndices, scaling, precision, margin, pageSize, suppressWarn)
+
+class SymmetricShapeSplitCols(SymmetricShape):
+    """
+    Same as a symmetric shape except that on can define a colour for each individual face.
+    """
+    def __init__(self,
+        Vs,
+        Fs,
+        Es=[],
+        Ns=[],
+        colors=None,
+        isometries=[E],
+        name="SymmetricShape",
+        recreateEdges=True,
+        orientation=None,
+    ):
+        """
+        Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
+            are the coordinates of the vertices.
+        Fs: an array of faces. Each face is an array of vertex indices, in the
+            order in which the vertices appear in the face.
+        Es: optional parameter edges. An array of edges. Each edges is 2
+            dimensional array that contain the vertex indices of the edge.
+        Ns: optional array of normals (per vertex) This value might be [] in
+            which case the normalised vertices are used. If the value is set it
+            is used by glDraw
+        colors: optional array parameter describing the colours. Each element
+                consists of a tuple similar to the the 'colors' parameter from
+                SimpleShape; see the __init__ function of that class. The tuples
+                will be used to divide the colours over the different elements
+                of all the isometries.
+        isometries: a list of all isometries that are needed to reproduce all
+            parts of the shape can can be transformed from the specified base
+            element through an isometry.
+        name: a string identifier representing the model.
+        orientation: orientation of the base shape. This is an isometry operation.
+        """
+        # this is before creating the base shape, since it check "colors"
+        super().__init__(
+            Vs, Fs, Es, Ns, colors, isometries, name, recreateEdges, orientation)
+
+    def _chk_face_colors_par(self, colors):
+        """Check whether the colors parameters is valid.
+
+        If not raise an assert.
+        """
+        if not colors:
+            colors = [([rgb.gray95[:]], [])]
+        assert len(colors) > 0, 'colors should have at least one element'
+        for c in colors:
+            assert len(c) == 2, \
+                f'a colors element should be a 2-tuple (colors, face_i), got {c}'
+        return colors
+
+    def apply_isoms(self):
+        """
+        Apply the isometry operations for the current properties, like Vs and
+        colour settings.
+
+        This will create all the individual shapes.
+        """
+        if len(self.shape_colors) != self.order:
+            self.applyColors()
+        shapes = [
+            SimpleShape(
+                self.base_shape.Vs,
+                self.base_shape.Fs,
+                self.base_shape.Es,
+                Ns = self.base_shape.Ns,
+                colors = self.shape_colors[i],
+                orientation = isom * self.base_shape.orientation
+            )
+            for i, isom in enumerate(self.isometries)
+        ]
+        self.setShapes(shapes)
+        self.needs_apply_isoms = False
 
 class OrbitShape(SymmetricShape):
     """
