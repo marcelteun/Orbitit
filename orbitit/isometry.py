@@ -286,7 +286,10 @@ class Set(set, base.Orbitit):
             return cls(setup=data["generator"])
         elif "isometries" in data:
             isoms=[base.json_to_class[i["class"]].from_json_dict(i) for i in data["isometries"]]
-            return cls(isometries=isoms)
+            if cls == Set:
+                return cls(isoms)
+            else:
+                return cls(isometries=isoms)
         else:
             raise IndexError(f'missing "generator" or "isometries" in {data}')
 

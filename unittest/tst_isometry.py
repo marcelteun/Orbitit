@@ -28,6 +28,7 @@ import unittest
 from orbitit import geomtypes, isometry
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+IN_DIR = "expected"
 OUT_DIR = "output"
 
 class TestSubGroups(unittest.TestCase):
@@ -537,6 +538,14 @@ class TestSubGroups(unittest.TestCase):
             isom.write_json_file(filename)
             isom_cp = isometry.Set.from_json_file(filename)
             self.assertEqual(isom, isom_cp)
+            cmp_filename = os.path.join(DIR_PATH, IN_DIR, f"check_isom_{name}.json")
+            # Set to True to generate the expected files. This requires a manual check then
+            regenerate_in_files = False
+            if regenerate_in_files:
+                rm_generator = isometry.Set([i for i in isom])
+                rm_generator.write_json_file(cmp_filename)
+            isom_cmp = isometry.Set.from_json_file(cmp_filename)
+            self.assertEqual(isom, isom_cmp)
 
 
 if __name__ == '__main__':

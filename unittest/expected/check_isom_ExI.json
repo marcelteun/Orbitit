@@ -1,0 +1,1 @@
+{"class": "isometry", "data": {"isometries": [{"class": "transform_3d", "data": [{"class": "quaternion", "data": [1, 0, 0, 0]}, {"class": "quaternion", "data": [1, 0, 0, 0]}]}, {"class": "transform_3d", "data": [{"class": "quaternion", "data": [-1, 0, 0, 0]}, {"class": "quaternion", "data": [1, 0, 0, 0]}]}]}}
