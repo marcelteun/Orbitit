@@ -228,6 +228,7 @@ class Set(set, base.Orbitit):
     # it consists of direct isometries only if it is a group:
     mixed = False
     std_setup = None
+    to_class = {}
 
     def __init__(self, *args):
         try:
@@ -261,6 +262,15 @@ class Set(set, base.Orbitit):
         else:
             result["data"]["isometries"] = [e.repr_dict for e in self]
         return result
+
+    @classmethod
+    def from_json_dict(cls, repr_dict):
+        """Recreate object from complete dict representation."""
+        try:
+            sub_class = cls.to_class[repr_dict["class"]]
+        except KeyError as e:
+            raise Exception(f'{repr_dict["class"]} not in {self.to_class} (expected)') from e
+        return sub_class.from_dict_data(repr_dict["data"])
 
     def __str__(self):
         def to_s():
@@ -2659,9 +2669,23 @@ DnxI.subgroups = [DnxI, Dn, CnxI, Cn, C2xI, C2, ExI, E]
 D2nDn.subgroups = [D2nDn, Dn, C2nCn, Cn, E]
 
 # Classes that support conversion from and to JSON:
+Set.to_class["isometry"] = Set
+Set.to_class["E"] = E
+Set.to_class["ExI"] = ExI
+Set.to_class["A4"] = A4
+Set.to_class["A5"] = A5
+Set.to_class["S4"] = S4
+Set.to_class["S4A4"] = S4A4
+Set.to_class["A4xI"] = A4xI
+Set.to_class["A5xI"] = A5xI
+Set.to_class["S4xI"] = S4xI
 base.class_to_json[Set] = "isometry"
-base.json_to_class["isometry"] = Set
+base.class_to_json[E] = "E"
+base.class_to_json[ExI] = "ExI"
 base.class_to_json[A4] = "A4"
 base.class_to_json[A5] = "A5"
-base.json_to_class["A4"] = A4
-base.json_to_class["A5"] = A5
+base.class_to_json[S4] = "S4"
+base.class_to_json[S4A4] = "S4A4"
+base.class_to_json[A4xI] = "A4xI"
+base.class_to_json[A5xI] = "A5xI"
+base.class_to_json[S4xI] = "S4xI"

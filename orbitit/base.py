@@ -51,6 +51,7 @@ class Orbitit(ABC):
     @abstractclassmethod
     def from_dict_data(cls, data):
         """Recreate object from the data field of the dict representation."""
+        raise NotImplementedError
 
 
 def find_module_class_name(c, m):

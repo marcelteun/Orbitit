@@ -22,9 +22,13 @@
 
 from copy import copy
 import math
+import os
 import unittest
 
 from orbitit import geomtypes, isometry
+
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+OUT_DIR = "output"
 
 class TestSubGroups(unittest.TestCase):
     """Unit test subgroups"""
@@ -377,148 +381,128 @@ class TestSubGroups(unittest.TestCase):
         ]
         self._chk_groups(h, expect)
 
-print('testing creation of set', end=' ')
-g = isometry.Set([geomtypes.HX, geomtypes.HY])
-print('....ok')
-#print 'Initialised set g:', g
-print("testing 'in' relation", end=' ')
-assert geomtypes.Rot3(axis = [1, 0, 0], angle = geomtypes.HALF_TURN) in g
-assert geomtypes.Rot3(axis = [-1, 0, 0], angle = -geomtypes.HALF_TURN) in g
-print('......ok')
-print("testing 'close' function", end=' ')
-cg = g.close()
-#print 'isometry.Set g after closing:'
-#print cg
-assert len(cg) == 4
-assert geomtypes.HX in cg
-assert geomtypes.HY in cg
-assert geomtypes.HZ in cg
-assert geomtypes.E in cg
-print('...ok')
+    def test_close(self):
+        g = isometry.Set([geomtypes.HX, geomtypes.HY])
+        self.assertTrue(geomtypes.Rot3(axis=[1, 0, 0], angle=geomtypes.HALF_TURN) in g)
+        self.assertTrue(geomtypes.Rot3(axis=[-1, 0, 0], angle=-geomtypes.HALF_TURN) in g)
+        self.assertFalse(geomtypes.HZ in g)
+        self.assertFalse(geomtypes.E in g)
+        cg = g.close()
+        self.assertEqual(len(cg), 4)
+        self.assertTrue(geomtypes.HX in cg)
+        self.assertTrue(geomtypes.HY in cg)
+        self.assertTrue(geomtypes.HZ in cg)
+        self.assertTrue(geomtypes.E in cg)
 
-print('testing creation of set', end=' ')
-g = isometry.Set([geomtypes.Rot3(axis = geomtypes.UX, angle = geomtypes.QUARTER_TURN)])
-print('....ok')
-print("testing 'in' relation", end=' ')
-geomtypes.Rot3(axis =  geomtypes.UX, angle = geomtypes.QUARTER_TURN)  in g
-geomtypes.Rot3(axis = -geomtypes.UX, angle = -geomtypes.QUARTER_TURN) in g
-print('......ok')
-print("testing 'close' function", end=' ')
-cg = g.close()
-#print 'isometry.Set g after closing:'
-#print cg
-assert len(cg) == 4
-geomtypes.Rot3(axis =  geomtypes.Vec3([1, 0, 0]), angle = geomtypes.QUARTER_TURN)  in cg
-geomtypes.Rot3(axis = -geomtypes.Vec3([1, 0, 0]), angle = -geomtypes.QUARTER_TURN) in cg
-assert geomtypes.HX in cg
-assert geomtypes.E in cg
-print('...ok')
+        g = isometry.Set([geomtypes.Rot3(axis=geomtypes.UX, angle=geomtypes.QUARTER_TURN)])
+        self.assertTrue(geomtypes.Rot3(axis=geomtypes.UX, angle=geomtypes.QUARTER_TURN)  in g)
+        self.assertTrue(geomtypes.Rot3(axis=-geomtypes.UX, angle=-geomtypes.QUARTER_TURN) in g)
+        cg = g.close()
+        self.assertEqual(len(cg), 4)
+        self.assertTrue(
+            geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=geomtypes.QUARTER_TURN) in cg
+        )
+        self.assertTrue(
+            geomtypes.Rot3(axis=-geomtypes.Vec3([1, 0, 0]), angle=-geomtypes.QUARTER_TURN) in cg
+        )
+        self.assertTrue(geomtypes.HX in cg)
+        self.assertTrue(geomtypes.E in cg)
 
-print('testing creation of isometry.A4', end=' ')
-a4 = isometry.A4(setup = isometry.init_dict(o2axis0=geomtypes.UX,
-                                            o2axis1=geomtypes.UY))
-print('.....ok')
-print('checking result', end=' ')
-assert len(a4) == 12
-assert geomtypes.E in a4
-assert geomtypes.HX in a4
-assert geomtypes.HY in a4
-assert geomtypes.HZ in a4
-t0 = geomtypes.Rot3(axis = [1,  1,  1], angle =   geomtypes.THIRD_TURN)
-assert t0 in a4
-t1 = geomtypes.Rot3(axis = [1,  1,  1], angle = 2*geomtypes.THIRD_TURN)
-assert t1 in a4
-t2 = geomtypes.Rot3(axis = [1, -1,  1], angle =   geomtypes.THIRD_TURN)
-assert t2 in a4
-t3 = geomtypes.Rot3(axis = [1, -1,  1], angle = 2*geomtypes.THIRD_TURN)
-assert t3 in a4
-t4 = geomtypes.Rot3(axis = [1, -1, -1], angle =   geomtypes.THIRD_TURN)
-assert t4 in a4
-t5 = geomtypes.Rot3(axis = [1, -1, -1], angle = 2*geomtypes.THIRD_TURN)
-assert t5 in a4
-t6 = geomtypes.Rot3(axis = [1,  1, -1], angle =   geomtypes.THIRD_TURN)
-assert t6 in a4
-t7 = geomtypes.Rot3(axis = [1,  1, -1], angle = 2*geomtypes.THIRD_TURN)
-assert t7 in a4
-print('............ok')
+    def test_A4(self):
+        a4 = isometry.A4(
+            setup=isometry.init_dict(o2axis0=geomtypes.UX, o2axis1=geomtypes.UY)
+        )
+        self.assertEqual(len(a4), 12)
+        self.assertTrue(geomtypes.E in a4)
+        self.assertTrue(geomtypes.HX in a4)
+        self.assertTrue(geomtypes.HY in a4)
+        self.assertTrue(geomtypes.HZ in a4)
+        transforms = [
+            geomtypes.Rot3(axis=[1,  1,  1], angle=geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1,  1,  1], angle=2*geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1, -1,  1], angle=geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1, -1,  1], angle=2*geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1, -1, -1], angle=geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1, -1, -1], angle=2*geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1,  1, -1], angle=geomtypes.THIRD_TURN),
+            geomtypes.Rot3(axis=[1,  1, -1], angle=2*geomtypes.THIRD_TURN),
+        ]
+        for t in transforms:
+            self.assertTrue(t in a4)
 
-print('testing creation of isometry.A4', end=' ')
-a4 = isometry.A4(
-        setup = isometry.init_dict(
-            # try list argument
-            o2axis0=[1, 1, 1],
-            # try Rot3 argument
-            o2axis1=geomtypes.HalfTurn3(axis=[1, -1, 0]))
-    )
-#print 'isometry.A4(o2axis0 = [1, 1, 1], o2axis1 = [1, -1, 0])'
-print('.....ok')
-# this a4 is the above a4 repositioned as follows:
-r0 = geomtypes.Rot3(axis = geomtypes.UZ, angle = geomtypes.QUARTER_TURN / 2)
-r1 = geomtypes.Rot3(axis = [1, -1, 0], angle = math.atan(1/math.sqrt(2)))
-r = r1 * r0
-print('checking result', end=' ')
-assert len(a4) == 12
-assert geomtypes.E in a4
-assert geomtypes.HalfTurn3(axis=r*geomtypes.UX) in a4
-assert geomtypes.HalfTurn3(axis=r*geomtypes.UY) in a4
-assert geomtypes.HalfTurn3(axis=r*geomtypes.UZ) in a4
-assert geomtypes.Rot3(axis = r * t0.axis(), angle =   geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t1.axis(), angle = 2*geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t2.axis(), angle =   geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t3.axis(), angle = 2*geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t4.axis(), angle =   geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t5.axis(), angle = 2*geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t6.axis(), angle =   geomtypes.THIRD_TURN) in a4
-assert geomtypes.Rot3(axis = r * t7.axis(), angle = 2*geomtypes.THIRD_TURN) in a4
-print('............ok')
-#print a4
-print('test grouping this', end=' ')
-ca4 = copy(a4)
-a4.group(2)
-assert a4 == ca4
-print('.........ok')
+        a4_alt = isometry.A4(
+            setup = isometry.init_dict(
+                # try list argument
+                o2axis0=[1, 1, 1],
+                # try Rot3 argument
+                o2axis1=geomtypes.HalfTurn3(axis=[1, -1, 0]))
+        )
+        # this a4_alt is the same as the above a4 repositioned as follows:
+        r0 = geomtypes.Rot3(axis = geomtypes.UZ, angle = geomtypes.QUARTER_TURN / 2)
+        r1 = geomtypes.Rot3(axis = [1, -1, 0], angle = math.atan(1/math.sqrt(2)))
+        r = r1 * r0
+        self.assertEqual(len(a4_alt), 12)
+        self.assertTrue(geomtypes.E in a4_alt)
+        self.assertTrue(geomtypes.HalfTurn3(axis=r*geomtypes.UX) in a4_alt)
+        self.assertTrue(geomtypes.HalfTurn3(axis=r*geomtypes.UY) in a4_alt)
+        self.assertTrue(geomtypes.HalfTurn3(axis=r*geomtypes.UZ) in a4_alt)
+        for t in transforms:
+            self.assertTrue(
+                geomtypes.Rot3(axis=r * t.axis(), angle=geomtypes.THIRD_TURN) in a4_alt
+            )
 
-########################################################################
-# Quotient isometry.Set:
-a4 = isometry.A4(setup = isometry.init_dict(o2axis0=geomtypes.UX,
-                                            o2axis1=geomtypes.UY))
-assert len(a4) == 12
-# print 'group a4:'
-# print a4
-d2 = isometry.Set([geomtypes.HX, geomtypes.HY])
-d2.group()
-assert len(d2) == 4
-# print 'has a subgroup D2:'
-# print d2
-print('test quotient set: isometry.A4/D2', end=' ')
-q = a4 / d2
-# print 'which defines a right quotient set s = ['
-for s in q:
-#     print '  set('
-#     for e in s:
-#         print '    ', e
-#     print '  )'
-    assert len(s) == 4
-# print ']'
-assert len(q) == 3
-# check if isometry.A4 / D2 is a partition of isometry.A4:
-for i in range(len(q)-1):
-    s = q[i]
-    for transform in s:
-        for j in range(i+1, len(q)):
-            assert not transform in q[j]
-print('...ok')
+        ca4 = copy(a4)
+        a4.group(2)
+        self.assertEqual(a4, ca4)
 
-########################################################################
-# Quotient isometry.Set:
-print('test is_subgroup: isometry.A4, isometry.S4', end=' ')
-s4 = isometry.S4()
-a4 = isometry.A4()
-assert a4.is_subgroup(s4)
-assert not s4.is_subgroup(a4)
-a4.add(geomtypes.I)
-assert not a4.is_subgroup(s4)
-print('....ok')
+    def test_quotient_set(self):
+        a4 = isometry.A4(
+            setup=isometry.init_dict(o2axis0=geomtypes.UX, o2axis1=geomtypes.UY)
+        )
+        self.assertTrue(len(a4) == 12)
+        d2 = isometry.Set([geomtypes.HX, geomtypes.HY])
+        d2.group()
+        self.assertTrue(len(d2) == 4)
+        q = a4 / d2
+        for s in q:
+            self.assertTrue(len(s) == 4)
+        self.assertTrue(len(q) == 3)
+        # check if isometry.A4 / D2 is a partition of isometry.A4:
+        for i in range(len(q)-1):
+            s = q[i]
+            for transform in s:
+                for j in range(i+1, len(q)):
+                    self.assertTrue(not transform in q[j])
+
+    def test_quotient_set(self):
+        s4 = isometry.S4()
+        a4 = isometry.A4()
+        self.assertTrue(a4.is_subgroup(s4))
+        self.assertFalse(s4.is_subgroup(a4))
+        a4.add(geomtypes.I)
+        self.assertFalse(a4.is_subgroup(s4))
+
+    def test_json_import_export(self):
+        # sub_test_name, isometry
+        isoms = [
+            [ "E", isometry.E()],
+            [ "A4", isometry.A4()],
+            [ "A5", isometry.A5()],
+            [ "S4", isometry.S4()],
+            [ "ExI", isometry.ExI()],
+            [ "S4A4", isometry.S4A4()],
+            [ "A4xI", isometry.A4xI()],
+            [ "A5xI", isometry.A5xI()],
+            [ "S4xI", isometry.S4xI()],
+            # TODO: std cyclic and dihedral groups
+            # TODO: newly created cyclic and dihedral groups
+        ]
+        for name, isom in isoms:
+            filename = os.path.join(DIR_PATH, OUT_DIR, f"check_isom_{name}.json")
+            isom.write_json_file(filename)
+            isom_cp = isometry.Set.from_json_file(filename)
+            self.assertEqual(isom, isom_cp)
+
 
 if __name__ == '__main__':
     unittest.main()
