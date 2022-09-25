@@ -34,6 +34,7 @@ from orbitit import pre_pyopengl  # pylint: disable=wrong-import-order
 from OpenGL import GL
 
 from orbitit import (  # pylint: disable=ungrouped-imports
+    base,
     Geom3D,
     Scene_24Cell,
     Scene_5Cell,
@@ -77,6 +78,25 @@ SCENES = {
 
 # prevent warning for not being used:
 del pre_pyopengl
+
+def is_off_model(filename):
+    return filename[-4:] == '.off'
+
+def is_json_model(filename):
+    return filename[-5:] == '.json'
+
+def read_shape_file(filename):
+    """Load off-file or python file and return shape"""
+    shape = None
+    if filename is not None:
+        if is_off_model(filename):
+            with open(filename, 'r') as fd:
+                shape = Geom3D.read_off_file(fd)
+        elif is_json_model(filename):
+            shape = base.Orbitit.from_json_file(filename)
+        else:
+            print('unrecognised file extension')
+    return shape
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     """OpenGL canvas where the 3D shape is painted"""
@@ -149,7 +169,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
 
 class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Main window holding the shape for the orbitit program"""
-    wildcard = "OFF shape (*.off)|*.off| Python shape (*.py)|*.py"
+    wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
     def __init__(self, TstScene, shape, filename, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.scenes_list = list(SCENES.keys())
@@ -167,9 +187,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.transform_settings_win = None
         self.scene = None
         self.panel = MainPanel(self, TstScene, shape, wx.ID_ANY)
-        if filename and (
-            filename[-4:] == '.off' or filename[-3:] == '.py'
-        ):
+        if filename and (is_off_model(filename) or is_json_model(filename)):
             self.open_file(filename)
         self.Show(True)
         self.Bind(wx.EVT_CLOSE, self.on_close)
@@ -206,8 +224,8 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         menu.Append(menu_item)
         export = wx.Menu()
 
-        menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&Python\tCtrl+Y")
-        self.Bind(wx.EVT_MENU, self.on_save_py, id = menu_item.GetId())
+        menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&JSON\tCtrl+J")
+        self.Bind(wx.EVT_MENU, self.on_save_json, id = menu_item.GetId())
         export.Append(menu_item)
 
         menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&Off\tCtrl+E")
@@ -293,36 +311,26 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.open_file(filename)
         dlg.Destroy()
 
-    def read_shape_file(self, filename):
-        """Return shape defined in file with 'filename'"""
-        is_off_model = filename[-3:] == 'off'
-        print("opening file:", filename)
-        with open(filename, 'r') as fd:
-            if is_off_model:
-                shape = Geom3D.readOffFile(fd, recreateEdges = True)
-            else:
-                assert filename[-2:] == 'py'
-                shape = Geom3D.readPyFile(fd)
-        self.set_status_text("file opened")
-        return shape
-
     def open_file(self, filename):
         """Open the shape file with 'filename' and update shape"""
         self.close_current_scene()
         dirname = os.path.dirname(filename)
         if dirname != "":
             self.import_dir_name = dirname
-        try:
-            shape = self.read_shape_file(filename)
-        except AssertionError:
+        print(f"opening {filename}")
+        shape = read_shape_file(filename)
+        if shape:
+            self.set_status_text("file opened")
+        else:
             self.set_status_text("ERROR reading file")
-            raise
+            raise ValueError(f"Invalid input file {filename}")
+
         if isinstance(shape, Geom3D.CompoundShape):
             # convert to SimpleShape first, since adding to SymmetricShape
             # will not work.
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
-        shape = Geom3D.CompoundShape([shape], name = filename)
+        shape = Geom3D.CompoundShape([shape], name=filename)
         self.panel.shape = shape
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
@@ -341,20 +349,20 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
-            is_off_model = filename[-3:] == 'off'
             self.import_dir_name  = dlg.GetDirectory()
             print("adding file:", filename)
-            with open(os.path.join(self.import_dir_name, filename), 'r') as fd:
-                if is_off_model:
-                    shape = Geom3D.readOffFile(fd, recreateEdges = True)
-                else:
-                    shape = Geom3D.readPyFile(fd)
+            path = os.path.join(self.import_dir_name, filename)
+            if is_off_model(filename):
+                with open(path, 'r') as fd:
+                    shape = Geom3D.read_off_file(fd)
+            else:
+                shape = base.Orbitit.from_json_file(path)
             if isinstance(shape, Geom3D.CompoundShape):
                 # convert to SimpleShape first, since adding a SymmetricShape
                 # will not work.
                 shape = shape.simple_shape
             try:
-                self.panel.shape.addShape(shape)
+                self.panel.shape.add_shape(shape)
             except AttributeError:
                 print("warning: cannot 'add' a shape to this scene, use 'File->Open' instead")
             self.set_status_text("OFF file added")
@@ -362,10 +370,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.SetTitle(f'Added: {os.path.basename(filename)}')
         dlg.Destroy()
 
-    def on_save_py(self, _):
-        """Handle event '_' to export the current shape to python file"""
-        dlg = wx.FileDialog(self, 'Save as .py file',
-            self.export_dir_name, '', '*.py',
+    # TODO: turn into saving a JSON file
+    def on_save_json(self, _):
+        """Handle event '_' to export the current shape to a JSON file"""
+        dlg = wx.FileDialog(self, 'Save as .json file',
+            self.export_dir_name, '', '*.json',
             style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
@@ -374,19 +383,18 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.export_dir_name  = filepath.rsplit('/', 1)[0]
             name_ext = filename.split('.')
             if len(name_ext) == 1:
-                filename = f'{filename}.py'
-            elif name_ext[-1].lower() != 'py':
+                filename = f'{filename}.json'
+            elif name_ext[-1].lower() != 'json':
                 if name_ext[-1] != '':
-                    filename = f'{filename}.py'
+                    filename = f'{filename}.json'
                 else:
-                    filename = f'{filename}py'
+                    filename = f'{filename}json'
             print(f"writing to file {filepath}")
-            # TODO precision through setting:
+            # TODO add precision through setting:
             shape = self.panel.shape
             shape.name = filename
-            with open(filepath, 'w') as fd:
-                shape.saveFile(fd)
-            self.set_status_text("Python file written")
+            shape.write_json_file(filepath)
+            self.set_status_text("JSON file written")
         dlg.Destroy()
 
     def on_save_off(self, _):
@@ -731,20 +739,6 @@ class MainPanel(wx.Panel):
         self.parent.set_status_text("Shape Updated")
         del old_shape
 
-def read_shape_file(filename):
-    """Load off-file or python file and return shape"""
-    shape = None
-    if filename is not None:
-        if filename[-3:] == '.py':
-            with open(filename, 'r') as fd:
-                shape = Geom3D.readPyFile(fd)
-        elif filename[-4:] == '.off':
-            with open(filename, 'r') as fd:
-                shape = Geom3D.readOffFile(fd, recreateEdges = True)
-        else:
-            print('unrecognised file extension')
-    return shape
-
 def convert_to_ps(shape, fd, scale, precision, margin):
     """Convert shape to PostScript and save to file descriptor fd"""
     fd.write(
@@ -853,12 +847,14 @@ if __name__ == "__main__":
                 convert_to_ps(
                     in_shape, o_fd, prog_args.scale, prog_args.precision, prog_args.margin
                 )
+    else:
+        in_shape = Geom3D.SimpleShape([], [])
 
     if START_GUI:
         app = wx.App(False)
         frame = MainWindow(
                 Canvas3DScene,
-                Geom3D.SimpleShape([], []),
+                in_shape,
                 prog_args.inputfile,
                 None,
                 wx.ID_ANY, "test",

@@ -2,7 +2,7 @@ import geomtypes
 import Geom3D
 import isometry
 shape = Geom3D.CompoundShape(
-    simpleShapes = [
+    shapes = [
         Geom3D.SimpleShape(
             Vs = [
                 geomtypes.Vec3([1.0, 1.0, 1.0]),

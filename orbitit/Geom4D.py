@@ -252,7 +252,7 @@ class SimpleShape:
                 'drawEdges': this.e.draw
             }
 
-    def recreateEdges(this):
+    def regen_edges(this):
         """
         Recreates the edges in the 3D object by using an adges for every side of
         a face, i.e. all faces will be surrounded by edges.
@@ -261,7 +261,7 @@ class SimpleShape:
         i.e. edges that have the same vertex index, only appear once.
         The creation of edges is not optimised and can take a long time.
         """
-        assert False, "Geom4D.SimpleShape.recreateEdges: TODO IMPLEMENT"
+        assert False, "Geom4D.SimpleShape.regen_edges: TODO IMPLEMENT"
 
     def setFaceProperties(this, dictPar = None, **kwargs):
         """
@@ -624,13 +624,13 @@ class SimpleShape:
             this.projectedTo3D = True
             this.updateTransparency = False
             if this.e.draw and isScaledDown:
-                this.cell.recreateEdges()
+                this.cell.regen_edges()
                 # Don't use, out of performance issues:
                 # cellEs = this.cell.getEdgeProperties()['Es']
                 # --------------------------
                 # Bad performance during scaling:
                 # cellEs = this.cell.getEdgeProperties()['Es']
-                # this.cell.recreateEdges()
+                # this.cell.regen_edges()
                 # cellEs.extend(this.cell.getEdgeProperties()['Es'])
                 # -------end bad perf---------
                 cellEs = this.cell.Es

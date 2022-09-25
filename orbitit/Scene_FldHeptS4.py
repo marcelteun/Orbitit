@@ -150,33 +150,41 @@ for isom in isomS4:
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = Geom3D.SymmetricShape(
-            Vs = [], Fs = [], isometries = isomS4,
-            name = 'FoldedHeptagonsS4',
-            recreateEdges = False
+            Vs=[],
+            Fs=[],
+            isometries=isomS4,
+            name='FoldedHeptagonsS4',
+            regen_edges=False
         )
         xtraTrisShape = Geom3D.SymmetricShapeSplitCols(
-            Vs = [], Fs = [], isometries = isomS4,
-            name = 'xtraTrisS4',
-            recreateEdges = False
+            Vs=[],
+            Fs=[],
+            isometries=isomS4,
+            name='xtraTrisS4',
+            regen_edges=False
         )
         trisO3Shape = Geom3D.OrbitShape(
-            Vs = [], Fs = [],
-            finalSym = isomS4, stabSym = isomO3,
-            colors = [rgb.cyan[:]],
-            name = 'o3TrisS4',
-            recreateEdges = False
+            Vs=[],
+            Fs=[],
+            finalSym=isomS4,
+            stabSym=isomO3,
+            colors=[rgb.cyan[:]],
+            name='o3TrisS4',
+            regen_edges=False
         )
         trisO4Shape = Geom3D.OrbitShape(
-            Vs = [], Fs = [],
-            finalSym = isomS4, stabSym = isomO4,
-            colors = [rgb.cyan[:]],
-            name = 'o4SquareS4',
-            recreateEdges = False
+            Vs=[],
+            Fs=[],
+            finalSym=isomS4,
+            stabSym=isomO4,
+            colors=[rgb.cyan[:]],
+            name='o4SquareS4',
+            regen_edges=False
         )
         heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape, trisO4Shape],
             4, 3,
-            name = 'FoldedRegHeptS4xI'
+            name='FoldedRegHeptS4xI'
         )
         this.heptagonsShape = heptagonsShape
         this.xtraTrisShape = xtraTrisShape

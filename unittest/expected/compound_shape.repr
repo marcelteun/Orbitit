@@ -1,5 +1,5 @@
 orbitit.Geom3D.CompoundShape(
-    simpleShapes=[
+    shapes=[
         orbitit.Geom3D.SimpleShape(
             Vs=[
                 orbitit.geomtypes.Vec3([1, 1, 1]),
@@ -21,7 +21,7 @@ orbitit.Geom3D.CompoundShape(
                 [3, 2, 6, 7],
                 [7, 6, 5, 4]
             ],
-            Es=[],
+            Es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2, 6, 6, 7],
             colors=([(0.8, 0.1, 0.1), (0.8, 0.8, 0.3), (0.3, 0.3, 0.8)], [0, 1, 2, 1, 2, 0]),
             name="SimpleShape"
         ),
@@ -44,10 +44,10 @@ orbitit.Geom3D.CompoundShape(
                 [5, 4, 3],
                 [5, 1, 4]
             ],
-            Es=[],
+            Es=[0, 1, 1, 2, 0, 2, 2, 3, 0, 3, 3, 4, 0, 4, 1, 4, 2, 5, 1, 5, 3, 5, 4, 5],
             colors=([(0.8, 0.8, 0.3)], [0, 0, 0, 0, 0, 0, 0, 0]),
             name="SimpleShape"
         )
     ],
-    name="abc"
+    name="CompoundShape"
 )

@@ -259,12 +259,6 @@ class TestVec(unittest.TestCase):
             self.assertEqual(v, w)
             self.assertEqual(w, v)
 
-        # test assert raises
-        v = geomtypes.Vec3([0, 1, 2])
-        v.write_json_file(filename)
-        with self.assertRaises(AssertionError):
-            geomtypes.Quat.from_json_file(filename)
-
 
 class TestRot3(unittest.TestCase):
     """Unit tests for geomtypes.Rot3"""

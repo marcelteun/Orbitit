@@ -44,9 +44,8 @@ class Orbitit(ABC):
     @classmethod
     def from_json_dict(cls, repr_dict):
         """Recreate object from complete dict representation."""
-        expected = class_to_json[cls]
-        assert repr_dict["class"] == expected, f'{repr_dict["class"]} != {expected} (expected)'
-        return cls.from_dict_data(repr_dict["data"])
+        cls_to_use = json_to_class[repr_dict["class"]]
+        return cls_to_use.from_dict_data(repr_dict["data"])
 
     @abstractclassmethod
     def from_dict_data(cls, data):

@@ -45,7 +45,7 @@ class TestUniformShape1(TestSimpleShape):
     def def_shape(self):
         name = get_path(self.name + ".off")
         with open(name, 'r') as fd:
-            self.shape = Geom3D.readOffFile(fd, recreateEdges=True)
+            self.shape = Geom3D.read_off_file(fd, regen_edges=True)
 
 
 class TestUniformShape2(TestUniformShape1):

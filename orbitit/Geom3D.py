@@ -118,7 +118,7 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
         result = result and eq(Va[i], Vb[i], margin)
     return result
 
-def readPyFile(fd, recreateEdges = True):
+def readPyFile(fd, regen_edges=True):
     """Reads an the python file a 3D shape and returns an instance of that class
 
     fd: the file descriptor of a file that is opened with read permissions.
@@ -127,8 +127,8 @@ def readPyFile(fd, recreateEdges = True):
     ed = {'__name__': 'readPyFile'}
     exec(fd.read(), ed)
     shape = ed['shape']
-    if recreateEdges and len(shape.Es) == 0:
-        shape.recreateEdges()
+    if regen_edges and len(shape.Es) == 0:
+        shape.regen_edges()
     return shape
 
 def isInt(str):
@@ -138,16 +138,15 @@ def isInt(str):
     except ValueError:
         return False
 
-def readOffFile(fd, recreateEdges = True, name = ''):
+def read_off_file(fd, regen_edges=True, name=''):
     """Reads an the std 'off' format of a 3D object and returns an object of the
     SimpleShape class.
 
     fd: the file descriptor of a file that is opened with read permissions.
-    recreateEdges: if set to True then the SimpleShape will recreate the edges
-                   for all faces, i.e. all faces will be surrounded by edges.
-                   Edges will be filtered so that shared edges between faces,
-                   i.e. edges that have the same vertex index, only appear once.
-                   The creation of edges is not optimised and can take a long time.
+    regen_edges: if set to True then the shape will recreate the edges for all faces, i.e. all faces
+        will be surrounded by edges. Edges will be filtered so that shared edges between faces, i.e.
+        edges that have the same vertex index, only appear once. The creation of edges is not
+        optimised and can take a long time.
     return: an object of the SimpleShape class.
     """
     states = {'checkOff': 0, 'readSizes': 1, 'readVs': 2, 'readFs': 3, 'readOk': 4}
@@ -262,8 +261,8 @@ def readOffFile(fd, recreateEdges = True, name = ''):
         shape.name = name
     # If the file defines edges (faces of length 2) then don't recreate any
     # edges, even if requested
-    if recreateEdges and len(Es) == 0:
-        shape.recreateEdges()
+    if regen_edges and len(Es) == 0:
+        shape.regen_edges()
     return shape
 
 def saveFile(fd, shape):
@@ -926,7 +925,12 @@ class SimpleShape(base.Orbitit):
 
     @classmethod
     def from_dict_data(cls, data):
-        return cls(data["vs"], data["fs"], colors=(data["cols"], data["face_cols"]), name=data["name"])
+        return cls(
+            [geomtypes.Vec3(v) for v in data["vs"]],
+            data["fs"],
+            colors=(data["cols"], data["face_cols"]),
+            name=data["name"]
+        )
 
     def saveFile(self, fd):
         """
@@ -1007,7 +1011,7 @@ class SimpleShape(base.Orbitit):
     def setVs(self, Vs):
         self.setVertexProperties(Vs = Vs)
 
-    def setVertexProperties(self, dictPar = None, **kwargs):
+    def setVertexProperties(self, dict_par=None, **kwargs):
         """
         Set the vertices and how/whether vertices are drawn in OpenGL.
 
@@ -1017,33 +1021,33 @@ class SimpleShape(base.Orbitit):
         - color.
         - Ns.
         Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
+        pairs in the dictionary dict_par.
         If they are not specified (or equal to None) they are not changed.
         See getVertexProperties for the explanation of the keywords.
-        The output of getVertexProperties can be used as the dictPar parameter.
+        The output of getVertexProperties can be used as the dict_par parameter.
         This can be used to copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
+        If dict_par is used and kwargs, then only the dict_par will be used.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
-                dict = dictPar
+        if dict_par != None or kwargs != {}:
+            if dict_par != None:
+                the_dict = dict_par
             else:
-                dict = kwargs
-            if 'Vs' in dict and dict['Vs'] != None:
-                self.Vs = dict['Vs']
-                self.VsRange = range(len(dict['Vs']))
+                the_dict = kwargs
+            if 'Vs' in the_dict and the_dict['Vs'] != None:
+                self.Vs = [geomtypes.Vec3(v) for v in the_dict["Vs"]]
+                self.VsRange = range(len(self.Vs))
                 self.gl.updateVs = True
                 self.fNsUp2date = False
-            if 'Ns' in dict and dict['Ns'] != None:
-                self.Ns = dict['Ns']
-            if 'radius' in dict and dict['radius'] != None:
-                self.gl.vRadius     = dict['radius']
-                self.gl.addSphereVs = dict['radius'] > 0.0
+            if 'Ns' in the_dict and the_dict['Ns'] != None:
+                self.Ns = the_dict['Ns']
+            if 'radius' in the_dict and the_dict['radius'] != None:
+                self.gl.vRadius     = the_dict['radius']
+                self.gl.addSphereVs = the_dict['radius'] > 0.0
                 if self.gl.addSphereVs:
                     if self.gl.sphere != None: del self.gl.sphere
-                    self.gl.sphere = Scenes3D.VSphere(radius = dict['radius'])
-            if 'color' in dict and dict['color'] != None:
-                self.gl.vCol = dict['color']
+                    self.gl.sphere = Scenes3D.VSphere(radius = the_dict['radius'])
+            if 'color' in the_dict and the_dict['color'] != None:
+                self.gl.vCol = the_dict['color']
 
     def getVertexProperties(self):
         """
@@ -1126,7 +1130,7 @@ class SimpleShape(base.Orbitit):
                 'drawEdges': self.gl.drawEdges
             }
 
-    def recreateEdges(self):
+    def regen_edges(self):
         """
         Recreates the edges in the 3D object by using an adges for every side of
         a face, i.e. all faces will be surrounded by edges.
@@ -2455,7 +2459,7 @@ class SimpleShape(base.Orbitit):
             Fs.extend(xFs)
             colIndices.extend([cols[1][i] for j in range(len(xFs))])
         shape = SimpleShape(Vs, Fs, [], colors = (cols[0], colIndices))
-        shape.recreateEdges()
+        shape.regen_edges()
         return shape
 
 class CompoundShape(base.Orbitit):
@@ -2464,13 +2468,19 @@ class CompoundShape(base.Orbitit):
     SimpleShapes. The resulting shape can be treated as one, e.g. it can be
     exported as one 'OFF' file.
     """
-    def __init__(self, simpleShapes, name = "CompoundShape"):
+    def __init__(
+        self,
+        shapes,
+        regen_edges=True,
+        name="CompoundShape",
+    ):
         """
-        simpleShapes: an array of SimpleShape objects of which the shape is a
-        compound.
+        shapes: a list of SimpleShape objects of which the shape is a compound.
         """
         self.name = name
-        self.setShapes(simpleShapes)
+        self.setShapes(shapes)
+        if regen_edges:
+            self.regen_edges()
 
     def __repr__(self):
         """
@@ -2481,7 +2491,7 @@ class CompoundShape(base.Orbitit):
         else:
             s = indent.Str(
                 '%s(\n' % base.find_module_class_name(self.__class__, __name__))
-            s = s.add_incr_line('simpleShapes=[')
+            s = s.add_incr_line('shapes=[')
             s.incr()
             s = s.glue_line(',\n'.join(
                 repr(shape).reindent(s.indent) for shape in self.shapeElements)
@@ -2519,7 +2529,7 @@ class CompoundShape(base.Orbitit):
         """
         saveFile(fd, self)
 
-    def addShape(self, shape):
+    def add_shape(self, shape):
         """
         Add shape 'shape' to the current compound.
         """
@@ -2538,14 +2548,14 @@ class CompoundShape(base.Orbitit):
         for shape in self.shapeElements:
             shape.gl_alwaysSetVertices(do)
 
-    def setShapes(self, simpleShapes):
+    def setShapes(self, shapes):
         """
         Set the shapes all at once.
 
         Note: you need to make sure yourself to have the generateNormals set
         consistently for all shapes.
         """
-        self.shapeElements = simpleShapes
+        self.shapeElements = shapes
         self.gl_alwaysSetVertices(True)
         self.merge_needed = True
 
@@ -2606,9 +2616,9 @@ class CompoundShape(base.Orbitit):
         for shape in self.shapeElements:
             shape.glDraw()
 
-    def recreateEdges(self):
+    def regen_edges(self):
         for shape in self.shapeElements:
-            shape.recreateEdges()
+            shape.regen_edges()
         self.merge_needed = True
 
     def setVertexProperties(self, dictPar = None, **kwargs):
@@ -2830,9 +2840,9 @@ class SymmetricShape(CompoundShape):
         Ns=[],
         colors=None,
         isometries=[E],
-        name="SymmetricShape",
-        recreateEdges=True,
+        regen_edges=True,
         orientation=None,
+        name="SymmetricShape",
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -2849,8 +2859,12 @@ class SymmetricShape(CompoundShape):
         isometries: a list of all isometries that are needed to reproduce all
             parts of the shape can can be transformed from the specified base
             element through an isometry.
-        name: a string identifier representing the model.
+        regen_edges: if set to True then the shape will recreate the edges for all faces, i.e. all
+            faces will be surrounded by edges. Edges will be filtered so that shared edges between
+            faces, i.e. edges that have the same vertex index, only appear once. The creation of
+            edges is not optimised and can take a long time.
         orientation: orientation of the base shape. This is an isometry operation.
+        name: a string identifier representing the model.
         """
         # this is before creating the base shape, since it check "colors"
         self.base_shape = SimpleShape(
@@ -2859,8 +2873,8 @@ class SymmetricShape(CompoundShape):
             colors=([colors[0]], []) if colors else None,
             orientation=orientation,
         )
-        if recreateEdges:
-            self.base_shape.recreateEdges()
+        if regen_edges:
+            self.base_shape.regen_edges()
         super().__init__([self.base_shape], name=name)
         self.setFaceColors(colors)
         self.isometries = isometries
@@ -2944,6 +2958,21 @@ class SymmetricShape(CompoundShape):
             },
         }
 
+    @classmethod
+    def from_dict_data(cls, data):
+        o = data["orientation"]
+        return cls(
+            data["vs"],
+            data["fs"],
+            isometries=[
+                base.json_to_class[s["class"]].from_json_dict(s)
+                for s in data["isometries"]
+            ],
+            colors=data["cols"],
+            orientation=base.json_to_class[o["class"]].from_json_dict(o),
+            name=data["name"],
+        )
+
     def merge_shapes(self):
         if self.show_base_only:
             # assuming that the base shape is a simple shape:
@@ -2952,7 +2981,7 @@ class SymmetricShape(CompoundShape):
         elif self.needs_apply_isoms:
             self.apply_isoms()
 
-        CompoundShape.merge_shapes(self)
+        super().merge_shapes()
 
     def _chk_face_colors_par(self, colors):
         """Check whether the colors parameters is valid.
@@ -3193,9 +3222,9 @@ class SymmetricShapeSplitCols(SymmetricShape):
         Ns=[],
         colors=None,
         isometries=[E],
-        name="SymmetricShape",
-        recreateEdges=True,
+        regen_edges=True,
         orientation=None,
+        name="SymmetricShape",
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -3215,12 +3244,16 @@ class SymmetricShapeSplitCols(SymmetricShape):
         isometries: a list of all isometries that are needed to reproduce all
             parts of the shape can can be transformed from the specified base
             element through an isometry.
-        name: a string identifier representing the model.
+        regen_edges: if set to True then the shape will recreate the edges for all faces, i.e. all
+            faces will be surrounded by edges. Edges will be filtered so that shared edges between
+            faces, i.e. edges that have the same vertex index, only appear once. The creation of
+            edges is not optimised and can take a long time.
         orientation: orientation of the base shape. This is an isometry operation.
+        name: a string identifier representing the model.
         """
         # this is before creating the base shape, since it check "colors"
         super().__init__(
-            Vs, Fs, Es, Ns, colors, isometries, name, recreateEdges, orientation)
+            Vs, Fs, Es, Ns, colors, isometries, name, regen_edges, orientation)
 
     def _chk_face_colors_par(self, colors):
         """Check whether the colors parameters is valid.
@@ -3271,11 +3304,15 @@ class OrbitShape(SymmetricShape):
     """
 
     def __init__(self,
-        Vs, Fs, Es = [], Ns = [],
-        finalSym = isometry.E, stabSym = isometry.E,
-        colors = [],
-        name = "OrbitShape",
-        recreateEdges = True,
+        Vs,
+        Fs,
+        Es=[],
+        Ns=[],
+        finalSym=isometry.E,
+        stabSym=isometry.E,
+        colors=[],
+        regen_edges=True,
+        name="OrbitShape",
         quiet=False
     ):
         """
@@ -3290,6 +3327,13 @@ class OrbitShape(SymmetricShape):
             is used by glDraw
         finalSym: the resulting symmetry of the shape.
         stabSym: the symmetry of the stabiliser, which is a subgroup of finalSym
+        colors: optional array parameter describing the colours. Each element consists of RGB
+            channel values (between 0 and 1). There should be an RGB value for each isometry..
+        regen_edges: if set to True then the shape will recreate the edges for all faces, i.e. all
+            faces will be surrounded by edges. Edges will be filtered so that shared edges between
+            faces, i.e. edges that have the same vertex index, only appear once. The creation of
+            edges is not optimised and can take a long time.
+        name: a string identifier representing the model.
 
         As an example: a square is used to define a cube. The square has a D4C4
         symmetry and the cube S4xI. The former is used as stabSym and the latter
@@ -3316,7 +3360,7 @@ class OrbitShape(SymmetricShape):
             Ns,
             isometries=FsOrbit,
             name=name,
-            recreateEdges=recreateEdges
+            regen_edges=regen_edges
         )
         self.finalSym = finalSym
         self.stabSym = stabSym
@@ -3330,13 +3374,24 @@ class OrbitShape(SymmetricShape):
             'class': base.class_to_json[self.__class__],
             'data': {
                 'name': self.name,
-                'vs': self.Vs,
-                'fs': self.Fs,
+                'vs': self.base_shape.Vs,
+                'fs': self.base_shape.Fs,
                 'cols': self.shape_colors,
                 'final_sym': self.finalSym.repr_dict,
                 'stab_sym': self.stabSym.repr_dict,
             },
         }
+
+    @classmethod
+    def from_dict_data(cls, data):
+        return cls(
+            data["vs"],
+            data["fs"],
+            finalSym = isometry.Set.from_json_dict(data["final_sym"]),
+            stabSym = isometry.Set.from_json_dict(data["stab_sym"]),
+            colors=data["cols"],
+            name=data["name"],
+        )
 
     def __repr__(self):
         # This repr should be fixed, since you cannot be sure in which order the
@@ -3527,7 +3582,7 @@ base.class_to_json[SimpleShape] = "shape"
 base.class_to_json[CompoundShape] = "compound_shape"
 base.class_to_json[SymmetricShape] = "symmetric_shape"
 base.class_to_json[OrbitShape] = "orbit_shape"
-base.json_to_class["shape"] = CompoundShape
+base.json_to_class["shape"] = SimpleShape
 base.json_to_class["compound_shape"] = CompoundShape
 base.json_to_class["symmetric_shape"] = SymmetricShape
 base.json_to_class["orbit_shape"] = OrbitShape

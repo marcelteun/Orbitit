@@ -411,7 +411,7 @@ class CtrlWin(wx.Frame):
             return
         self.fs_orbit = self.shape.isometries
         self.fs_orbit_org = True
-        self.shape.recreateEdges()
+        self.shape.regen_edges()
         self.update_orientation(
             self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
         self.canvas.panel.shape = self.shape
@@ -527,7 +527,7 @@ class CtrlWin(wx.Frame):
                     name=self.name
                 )
                 self.fs_orbit = self.shape.isometries
-                self.shape.recreateEdges()
+                self.shape.regen_edges()
                 self.canvas.panel.shape = self.shape
                 self.fs_orbit_org = False  # and do this only once
         assert self.col_syms
@@ -649,7 +649,7 @@ class CtrlWin(wx.Frame):
                         # probably a SimpleShape
                         pass
                 else:
-                    shape = Geom3D.readOffFile(fd, recreateEdges=False)
+                    shape = Geom3D.read_off_file(fd, regen_edges=False)
             if isinstance(shape, Geom3D.SymmetricShape):
                 verts = shape.base_shape.Vs
                 faces = shape.base_shape.Fs
