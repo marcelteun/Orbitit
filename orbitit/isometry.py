@@ -89,6 +89,14 @@ def _std_setup(sym, order=None):
         setup['n'] = order
     return setup
 
+def ensure_axis_type(axis):
+    if not isinstance(axis, geomtypes.Vec3):
+        if isinstance(axis, list):
+            axis = geomtypes.Vec3(axis)
+        else:
+            raise TypeError
+    return axis
+
 
 HALFTURN = geomtypes.HALF_TURN
 QUARTER_TURN = geomtypes.QUARTER_TURN
@@ -271,6 +279,16 @@ class Set(set, base.Orbitit):
         except KeyError as e:
             raise Exception(f'{repr_dict["class"]} not in {self.to_class} (expected)') from e
         return sub_class.from_dict_data(repr_dict["data"])
+
+    @classmethod
+    def from_dict_data(cls, data):
+        if "generator" in data:
+            return cls(setup=data["generator"])
+        elif "isometries" in data:
+            isoms=[base.json_to_class[i["class"]].from_json_dict(i) for i in data["isometries"]]
+            return cls(isometries=isoms)
+        else:
+            raise IndexError(f'missing "generator" or "isometries" in {data}')
 
     def __str__(self):
         def to_s():
@@ -522,10 +540,21 @@ class E(Set):
         self.chk_setup(setup)
         if isometries:
             assert len(isometries) == 1, \
-                'Class E should contain exactly one isometry'
+                f'Class E should contain exactly one isometry, got {len(isometries)}'
             assert isometries[0] == geomtypes.E, \
-                'Class E should only contain the isometry E'
+                f'Class E should only contain the isometry E, got {isometries[0]}'
         Set.__init__(self, [geomtypes.E])
+
+    @property
+    def repr_dict(self):
+        return {
+            "class": base.class_to_json[self.__class__],
+            "data": {},
+        }
+
+    @classmethod
+    def from_dict_data(cls, data):
+        return cls()
 
     def realise_subgroups(self, sg):
         """
@@ -559,6 +588,17 @@ class ExI(Set):
             assert geomtypes.E in isometries and geomtypes.I in isometries, \
                 'Class ExI should only contain the isometry E and I'
         Set.__init__(self, [geomtypes.E, geomtypes.I])
+
+    @property
+    def repr_dict(self):
+        return {
+            "class": base.class_to_json[self.__class__],
+            "data": {},
+        }
+
+    @classmethod
+    def from_dict_data(cls, data):
+        return cls()
 
     def realise_subgroups(self, sg):
         """
@@ -1610,11 +1650,10 @@ class A4(Set):
                 o2axis1 = setup['o2axis1']
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
-            if not setup:
-                self._generator = {
-                    'o2axis0': o2axis0,
-                    'o2axis1': o2axis1,
-                }
+            self._generator = {
+                'o2axis0': o2axis0,
+                'o2axis1': o2axis1,
+            }
             d2 = _gen_d2(o2axis0, o2axis1)
             h0, h1, h2 = d2
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)
@@ -1701,6 +1740,10 @@ class S4A4(Set):
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
             self.direct_parent_setup = copy(setup)
+            self._generator = {
+                'o2axis0': o2axis0,
+                'o2axis1': o2axis1,
+            }
             d2 = _gen_d2(o2axis0, o2axis1)
             h0, h1, h2 = d2
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)
@@ -1815,6 +1858,7 @@ class A4xI(Set):
         else:
             self.chk_setup(setup)
             a4 = A4(setup=setup)
+            self._generator = a4._generator
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a4 * ExI())
             self.rot_axes = a4.rot_axes
@@ -1913,6 +1957,10 @@ class S4(Set):
                 o4axis1 = setup['o4axis1']
             else:
                 o4axis1 = copy(self.std_setup['o4axis1'])
+            self._generator = {
+                'o4axis0': o4axis0,
+                'o4axis1': o4axis1,
+            }
             d2 = _gen_d2(o4axis0, o4axis1)
             r1_1, r1_2, r2_1, r2_2, r3_1, r3_2, r4_1, r4_2 = _gen_a4_o3(d2)
             q0_2, q1_2, q2_2 = d2
@@ -2056,6 +2104,7 @@ class S4xI(Set):
         else:
             self.chk_setup(setup)
             s4 = S4(setup=setup)
+            self._generator = s4._generator
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, s4 * ExI())
             self.rot_axes = s4.rot_axes
@@ -2268,16 +2317,17 @@ class A5(Set):
                 o5axis = setup['o5axis']
             else:
                 o5axis = copy(self.std_setup['o5axis'])
-            if not setup:
-                self._generator = {
-                    'o3axis': o3axis,
-                    'o5axis': o5axis,
-                }
+            self._generator = {
+                'o3axis': o3axis,
+                'o5axis': o5axis,
+            }
 
             turn5 = 2 * math.pi / 5
             turn3 = 2 * math.pi / 3
             r0_1_5 = geomtypes.Rot3(axis=o5axis, angle=turn5)
             r0_1_3 = geomtypes.Rot3(axis=o3axis, angle=turn3)
+            o3axis = ensure_axis_type(o3axis)
+            o5axis = ensure_axis_type(o5axis)
             o3axes = [o3axis]                           # o3[0]
             o5axes = [r0_1_3 * o5axis]                  # o5[0]
             for i in range(4):
@@ -2430,6 +2480,7 @@ class A5xI(Set):  # pylint: disable=too-many-instance-attributes
         else:
             self.chk_setup(setup)
             a5 = A5(setup=setup)
+            self._generator = a5._generator
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a5 * ExI())
             self.rot_axes = a5.rot_axes
