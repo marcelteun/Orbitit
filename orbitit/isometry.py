@@ -740,7 +740,8 @@ def C(n):
         if n == 1:
             __Cn_metas[n] = E
         else:
-            c_n = MetaCn(f'C{n}',
+            class_name = f'C{n}'
+            c_n = MetaCn(class_name,
                          (Cn,),
                          {'n': n,
                           'order': n,
@@ -751,6 +752,8 @@ def C(n):
             c_n.subgroups.insert(0, c_n)
             c_n.remove_init_par('n')
             __Cn_metas[n] = c_n
+            base.class_to_json[c_n] = class_name
+            Set.to_class[class_name] = c_n
         return __Cn_metas[n]
 
 
@@ -862,7 +865,8 @@ def C2nC(n):
     try:
         return __C2nCn_metas[n]
     except KeyError:
-        c_2n_c_n = MetaC2nCn(f'C{2*n}C{n}',
+        class_name = f'C{2*n}C{n}'
+        c_2n_c_n = MetaC2nCn(class_name,
                              (C2nCn,),
                              {'n': n,
                               'order': 2 * n,
@@ -874,6 +878,8 @@ def C2nC(n):
         c_2n_c_n.subgroups.insert(0, c_2n_c_n)
         c_2n_c_n.remove_init_par('n')
         __C2nCn_metas[n] = c_2n_c_n
+        base.class_to_json[c_2n_c_n] = class_name
+        Set.to_class[class_name] = c_2n_c_n
         return __C2nCn_metas[n]
 
 
@@ -988,7 +994,8 @@ def CxI(n):
         if n == 1:
             __CnxI_metas[n] = ExI
         else:
-            c_nxi = MetaCnxI(f'C{n}xI',
+            class_name = f'C{n}xI'
+            c_nxi = MetaCnxI(class_name,
                              (CnxI,),
                              {'n': n,
                               'order': 2 * n,
@@ -1000,6 +1007,8 @@ def CxI(n):
             c_nxi.subgroups.insert(0, c_nxi)
             c_nxi.remove_init_par('n')
             __CnxI_metas[n] = c_nxi
+            base.class_to_json[c_nxi] = class_name
+            Set.to_class[class_name] = c_nxi
         return __CnxI_metas[n]
 
 
@@ -1120,7 +1129,8 @@ def DnC(n):
         if n == 1:
             __DnCn_metas[n] = C2C1
         else:
-            d_n_c_n = MetaDnCn(f'D{n}C{n}',
+            class_name = f'D{n}C{n}'
+            d_n_c_n = MetaDnCn(class_name,
                                (DnCn,),
                                {'n': n,
                                 'order': 2 * n,
@@ -1132,6 +1142,8 @@ def DnC(n):
             d_n_c_n.subgroups.insert(0, d_n_c_n)
             d_n_c_n.remove_init_par('n')
             __DnCn_metas[n] = d_n_c_n
+            base.class_to_json[d_n_c_n] = class_name
+            Set.to_class[class_name] = d_n_c_n
         return __DnCn_metas[n]
 
 
@@ -1264,7 +1276,8 @@ def D(n):
         if n == 1:
             __Dn_metas[n] = C2
         else:
-            d_n = MetaDn(f'D{n}',
+            class_name = f'D{n}'
+            d_n = MetaDn(class_name,
                          (Dn,),
                          {'n': n,
                           'order': 2 * n,
@@ -1275,6 +1288,8 @@ def D(n):
             d_n.subgroups.insert(0, d_n)
             d_n.remove_init_par('n')
             __Dn_metas[n] = d_n
+            base.class_to_json[d_n] = class_name
+            Set.to_class[class_name] = d_n
         return __Dn_metas[n]
 
 
@@ -1421,7 +1436,8 @@ def DxI(n):
         if n == 1:
             __DnxI_metas[n] = C2xI
         else:
-            dnxi = MetaDnxI(f'D{n}xI',
+            class_name = f'D{n}xI'
+            dnxi = MetaDnxI(class_name,
                             (DnxI,),
                             {'n': n,
                              'order': 4 * n,
@@ -1433,6 +1449,8 @@ def DxI(n):
             dnxi.subgroups.insert(0, dnxi)
             dnxi.remove_init_par('n')
             __DnxI_metas[n] = dnxi
+            base.class_to_json[dnxi] = class_name
+            Set.to_class[class_name] = dnxi
         return __DnxI_metas[n]
 
 
@@ -1590,7 +1608,8 @@ def D2nD(n):
             # D2D1 ~= D2C2
             __D2nDn_metas[n] = D2C2
         else:
-            d_2n_d_n = MetaD2nDn(f'D{2*n}D{n}',
+            class_name = f'D{2*n}D{n}'
+            d_2n_d_n = MetaD2nDn(class_name,
                                  (D2nDn,),
                                  {'n': n,
                                   'order': 4 * n,
@@ -1602,6 +1621,8 @@ def D2nD(n):
             d_2n_d_n.subgroups.insert(0, d_2n_d_n)
             d_2n_d_n.remove_init_par('n')
             __D2nDn_metas[n] = d_2n_d_n
+            base.class_to_json[d_2n_d_n] = class_name
+            Set.to_class[class_name] = d_2n_d_n
         return __D2nDn_metas[n]
 
 
