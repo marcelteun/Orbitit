@@ -3253,7 +3253,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
         """
         # this is before creating the base shape, since it check "colors"
         super().__init__(
-            Vs, Fs, Es, Ns, colors, isometries, name, regen_edges, orientation)
+            Vs, Fs, Es, Ns, colors, isometries, regen_edges, orientation, name)
 
     def _chk_face_colors_par(self, colors):
         """Check whether the colors parameters is valid.
