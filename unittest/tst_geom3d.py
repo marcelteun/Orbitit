@@ -331,8 +331,8 @@ class TestOrbitShape(TestSimpleShape):
                 [0.0, 0.746094, 0.996094],
                 [0.542969, 0.523438, 0.304688],
             ],
-            finalSym=isometry.A5(),
-            stabSym=isometry.A4(),
+            final_sym=isometry.A5(),
+            stab_sym=isometry.A4(),
             name=self.name,
         )
         # for debugging:

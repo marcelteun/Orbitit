@@ -354,8 +354,8 @@ class Shape(Geom3D.OrbitShape):
             self,
             base['Vs'],
             base['Fs'],
-            finalSym=final_sym,
-            stabSym=stab_sym,
+            final_sym=final_sym,
+            stab_sym=stab_sym,
             name=name,
             quiet=True,
         )
@@ -398,8 +398,8 @@ class Shape(Geom3D.OrbitShape):
             super().__init__(
                 verts,
                 faces,
-                finalSym=final_sym,
-                stabSym=stab_sym,
+                final_sym=final_sym,
+                stab_sym=stab_sym,
                 name=self.name,
                 quiet=True,
             )

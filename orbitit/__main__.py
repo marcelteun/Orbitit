@@ -211,39 +211,39 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Create 'File' menu"""
         menu = wx.Menu()
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Open\tCtrl+O")
-        self.Bind(wx.EVT_MENU, self.on_open, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Open\tCtrl+O")
+        self.Bind(wx.EVT_MENU, self.on_open, id=menu_item.GetId())
         menu.Append(menu_item)
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Reload\tCtrl+R")
-        self.Bind(wx.EVT_MENU, self.on_reload, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Reload\tCtrl+R")
+        self.Bind(wx.EVT_MENU, self.on_reload, id=menu_item.GetId())
         menu.Append(menu_item)
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Add\tCtrl+A")
-        self.Bind(wx.EVT_MENU, self.on_add, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Add\tCtrl+A")
+        self.Bind(wx.EVT_MENU, self.on_add, id=menu_item.GetId())
         menu.Append(menu_item)
         export = wx.Menu()
 
-        menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&JSON\tCtrl+J")
-        self.Bind(wx.EVT_MENU, self.on_save_json, id = menu_item.GetId())
+        menu_item = wx.MenuItem(export, wx.ID_ANY, text="&JSON\tCtrl+J")
+        self.Bind(wx.EVT_MENU, self.on_save_json, id=menu_item.GetId())
         export.Append(menu_item)
 
-        menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&Off\tCtrl+E")
-        self.Bind(wx.EVT_MENU, self.on_save_off, id = menu_item.GetId())
+        menu_item = wx.MenuItem(export, wx.ID_ANY, text="&Off\tCtrl+E")
+        self.Bind(wx.EVT_MENU, self.on_save_off, id=menu_item.GetId())
         export.Append(menu_item)
 
-        menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&PS\tCtrl+P")
-        self.Bind(wx.EVT_MENU, self.on_save_ps, id = menu_item.GetId())
+        menu_item = wx.MenuItem(export, wx.ID_ANY, text="&PS\tCtrl+P")
+        self.Bind(wx.EVT_MENU, self.on_save_ps, id=menu_item.GetId())
         export.Append(menu_item)
 
-        menu_item = wx.MenuItem(export, wx.ID_ANY, text = "&VRML\tCtrl+V")
-        self.Bind(wx.EVT_MENU, self.on_save_wrl, id = menu_item.GetId())
+        menu_item = wx.MenuItem(export, wx.ID_ANY, text="&VRML\tCtrl+V")
+        self.Bind(wx.EVT_MENU, self.on_save_wrl, id=menu_item.GetId())
         export.Append(menu_item)
 
         menu.AppendSubMenu(export, "&Export")
         menu.AppendSeparator()
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "E&xit\tCtrl+Q")
-        self.Bind(wx.EVT_MENU, self.on_exit, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="E&xit\tCtrl+Q")
+        self.Bind(wx.EVT_MENU, self.on_exit, id=menu_item.GetId())
         menu.Append(menu_item)
         return menu
 
@@ -251,16 +251,16 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Create 'Edit' menu"""
         menu = wx.Menu()
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&View Settings\tCtrl+W")
-        self.Bind(wx.EVT_MENU, self.on_view_settings, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&View Settings\tCtrl+W")
+        self.Bind(wx.EVT_MENU, self.on_view_settings, id=menu_item.GetId())
         menu.Append(menu_item)
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Colours\tCtrl+C")
-        self.Bind(wx.EVT_MENU, self.on_col_settings, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Colours\tCtrl+C")
+        self.Bind(wx.EVT_MENU, self.on_col_settings, id=menu_item.GetId())
         menu.Append(menu_item)
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Transform\tCtrl+T")
-        self.Bind(wx.EVT_MENU, self.on_transform, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Transform\tCtrl+T")
+        self.Bind(wx.EVT_MENU, self.on_transform, id=menu_item.GetId())
         menu.Append(menu_item)
 
         return menu
@@ -268,13 +268,13 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def create_tools_menu(self):
         """Create 'Tools' menu"""
         menu = wx.Menu()
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Dome Level 1\td")
-        self.Bind(wx.EVT_MENU, self.on_dome, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Dome Level 1\td")
+        self.Bind(wx.EVT_MENU, self.on_dome, id=menu_item.GetId())
         menu.Append(menu_item)
         self.dome1 = menu_item
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Dome Level 2\tShift+D")
-        self.Bind(wx.EVT_MENU, self.on_dome, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Dome Level 2\tShift+D")
+        self.Bind(wx.EVT_MENU, self.on_dome, id=menu_item.GetId())
         menu.Append(menu_item)
         self.dome2 = menu_item
 
@@ -283,12 +283,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def create_view_menu(self):
         """Create 'View' menu"""
         menu = wx.Menu()
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Reset\tF5")
-        self.Bind(wx.EVT_MENU, self.on_view_reset, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Reset\tF5")
+        self.Bind(wx.EVT_MENU, self.on_view_reset, id=menu_item.GetId())
         menu.Append(menu_item)
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text = "&Scene...")
-        self.Bind(wx.EVT_MENU, self.on_view_scene, id = menu_item.GetId())
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Scene...")
+        self.Bind(wx.EVT_MENU, self.on_view_scene, id=menu_item.GetId())
         menu.Append(menu_item)
         return menu
 
@@ -301,8 +301,8 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_open(self, _):
         """Handle event '_' to open file"""
-        dlg = wx.FileDialog(self, 'New: Choose a file',
-                self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
+        dlg = wx.FileDialog(
+            self, 'New: Choose a file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             dirname = dlg.GetDirectory()
@@ -334,10 +334,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.panel.shape = shape
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
-        if len(shape.getFaceProperties()['Fs']) == 0 and (
-            self.panel.shape.getVertexProperties()['radius'] <= 0
+        if (
+                len(shape.getFaceProperties()['Fs']) == 0
+                and
+                self.panel.shape.getVertexProperties()['radius'] <= 0
         ):
-            self.panel.shape.setVertexProperties(radius = 0.05)
+            self.panel.shape.setVertexProperties(radius=0.05)
         self.SetTitle(os.path.basename(filename))
         # Save for reload:
         self.current_file = filename
@@ -345,11 +347,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_add(self, _):
         """Handle event '_' to add file to the current shape"""
-        dlg = wx.FileDialog(self, 'Add: Choose a file',
-                self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
+        dlg = wx.FileDialog(
+            self, 'Add: Choose a file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN
+        )
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
-            self.import_dir_name  = dlg.GetDirectory()
+            self.import_dir_name = dlg.GetDirectory()
             print("adding file:", filename)
             path = os.path.join(self.import_dir_name, filename)
             if is_off_model(filename):
@@ -373,14 +376,18 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     # TODO: turn into saving a JSON file
     def on_save_json(self, _):
         """Handle event '_' to export the current shape to a JSON file"""
-        dlg = wx.FileDialog(self, 'Save as .json file',
-            self.export_dir_name, '', '*.json',
-            style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+        dlg = wx.FileDialog(
+            self,
+            'Save as .json file',
+            self.export_dir_name,
+            '',
+            '*.json',
+            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
             filename = dlg.GetFilename()
-            self.export_dir_name  = filepath.rsplit('/', 1)[0]
+            self.export_dir_name = filepath.rsplit('/', 1)[0]
             name_ext = filename.split('.')
             if len(name_ext) == 1:
                 filename = f'{filename}.json'
@@ -407,15 +414,19 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 clean_up = dlg.get_clean_up()
                 precision = dlg.get_precision()
                 margin = dlg.get_float_margin()
-                file_dlg = wx.FileDialog(self, 'Save as .off file',
-                    self.export_dir_name, '', '*.off',
-                    wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+                file_dlg = wx.FileDialog(
+                    self,
+                    'Save as .off file',
+                    self.export_dir_name,
+                    '',
+                    '*.off',
+                    wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 )
                 file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
                     filepath = file_dlg.GetPath()
                     filename = file_dlg.GetFilename()
-                    self.export_dir_name  = filepath.rsplit('/', 1)[0]
+                    self.export_dir_name = filepath.rsplit('/', 1)[0]
                     name_ext = filename.split('.')
                     if len(name_ext) == 1:
                         filename = f'{filename}.off'
@@ -453,15 +464,19 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 precision = dlg.get_precision()
                 margin = dlg.get_float_margin()
                 assert (scale_factor >= 0 and scale_factor is not None)
-                file_dlg = wx.FileDialog(self, 'Save as .ps file',
-                    self.export_dir_name, '', '*.ps',
-                    style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+                file_dlg = wx.FileDialog(
+                    self,
+                    'Save as .ps file',
+                    self.export_dir_name,
+                    '',
+                    '*.ps',
+                    style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
                 )
                 file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
                     filepath = file_dlg.GetPath()
                     filename = file_dlg.GetFilename()
-                    self.export_dir_name  = filepath.rsplit('/', 1)[0]
+                    self.export_dir_name = filepath.rsplit('/', 1)[0]
                     name_ext = filename.split('.')
                     if len(name_ext) == 1:
                         filename = f'{filename}.ps'

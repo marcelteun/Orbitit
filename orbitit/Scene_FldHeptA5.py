@@ -159,8 +159,8 @@ class Shape(heptagons.FldHeptagonShape):
         trisO3Shape = Geom3D.OrbitShape(
             Vs=[],
             Fs=[],
-            finalSym=isomA5,
-            stabSym=isomO3,
+            final_sym=isomA5,
+            stab_sym=isomO3,
             colors=[rgb.cyan[:]],
             name='o3TrisA5',
             regen_edges=False
@@ -168,8 +168,8 @@ class Shape(heptagons.FldHeptagonShape):
         trisO5Shape = Geom3D.OrbitShape(
             Vs=[],
             Fs=[],
-            finalSym=isomA5,
-            stabSym=isomO5,
+            final_sym=isomA5,
+            stab_sym=isomO5,
             colors=[rgb.cyan[:]],
             name='o5PentasA5',
             regen_edges=False

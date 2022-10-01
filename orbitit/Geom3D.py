@@ -3308,8 +3308,8 @@ class OrbitShape(SymmetricShape):
         Fs,
         Es=[],
         Ns=[],
-        finalSym=isometry.E,
-        stabSym=isometry.E,
+        final_sym=isometry.E,
+        stab_sym=isometry.E,
         colors=[],
         regen_edges=True,
         name="OrbitShape",
@@ -3325,8 +3325,8 @@ class OrbitShape(SymmetricShape):
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
             is used by glDraw
-        finalSym: the resulting symmetry of the shape.
-        stabSym: the symmetry of the stabiliser, which is a subgroup of finalSym
+        final_sym: the resulting symmetry of the shape.
+        stab_sym: the symmetry of the stabiliser, which is a subgroup of final_sym
         colors: optional array parameter describing the colours. Each element consists of RGB
             channel values (between 0 and 1). There should be an RGB value for each isometry..
         regen_edges: if set to True then the shape will recreate the edges for all faces, i.e. all
@@ -3336,17 +3336,17 @@ class OrbitShape(SymmetricShape):
         name: a string identifier representing the model.
 
         As an example: a square is used to define a cube. The square has a D4C4
-        symmetry and the cube S4xI. The former is used as stabSym and the latter
-        as finalSym.
+        symmetry and the cube S4xI. The former is used as stab_sym and the latter
+        as final_sym.
         The following parameters can be used:
         with v = lambda x, y, z: geomtypes.Vec3([x, y, z])
         Vs = [v(1, 1, 1), v(1, -1, 1), v(1, -1, -1), v(1, 1, -1)] and
         Fs = [[0, 1, 2, 3]]
-        finalSym = S4xI(setup = {'o4axis0': v(0, 0, 1), 'o4axis1': v(0, 1, 0)})
-        stabSym = D4C4(setup = {'axis_n': v(1, 0, 0), 'normal_r': v(0, 1, 0)})
+        final_sym = S4xI(setup = {'o4axis0': v(0, 0, 1), 'o4axis1': v(0, 1, 0)})
+        stab_sym = D4C4(setup = {'axis_n': v(1, 0, 0), 'normal_r': v(0, 1, 0)})
         colors: the colours per isometry. (use [] for none)
         """
-        try: fsQuotientSet = finalSym  / stabSym
+        try: fsQuotientSet = final_sym  / stab_sym
         except isometry.ImproperSubgroupError:
             print("ERROR: Stabiliser not a subgroup of final symmetry")
             raise
@@ -3362,8 +3362,8 @@ class OrbitShape(SymmetricShape):
             name=name,
             regen_edges=regen_edges
         )
-        self.finalSym = finalSym
-        self.stabSym = stabSym
+        self.final_sym = final_sym
+        self.stab_sym = stab_sym
         if colors != []:
             self.setFaceColors(colors)
 
@@ -3377,8 +3377,8 @@ class OrbitShape(SymmetricShape):
                 'vs': self.base_shape.Vs,
                 'fs': self.base_shape.Fs,
                 'cols': self.shape_colors,
-                'final_sym': self.finalSym.repr_dict,
-                'stab_sym': self.stabSym.repr_dict,
+                'final_sym': self.final_sym.repr_dict,
+                'stab_sym': self.stab_sym.repr_dict,
             },
         }
 
@@ -3387,8 +3387,8 @@ class OrbitShape(SymmetricShape):
         return cls(
             data["vs"],
             data["fs"],
-            finalSym = isometry.Set.from_json_dict(data["final_sym"]),
-            stabSym = isometry.Set.from_json_dict(data["stab_sym"]),
+            final_sym = isometry.Set.from_json_dict(data["final_sym"]),
+            stab_sym = isometry.Set.from_json_dict(data["stab_sym"]),
             colors=data["cols"],
             name=data["name"],
         )
@@ -3436,13 +3436,13 @@ class OrbitShape(SymmetricShape):
             indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
         s = s.add_decr_line('],')
-        s = s.add_line('finalSym=')
+        s = s.add_line('final_sym=')
         s.incr()
-        s = s.glue_line((repr(self.finalSym) + ",").reindent(s.indent))
+        s = s.glue_line((repr(self.final_sym) + ",").reindent(s.indent))
         s.decr()
-        s = s.add_line('stabSym=')
+        s = s.add_line('stab_sym=')
         s.incr()
-        s = s.glue_line((repr(self.stabSym) + ",").reindent(s.indent))
+        s = s.glue_line((repr(self.stab_sym) + ",").reindent(s.indent))
         s.decr()
         s = s.add_line("name='%s'," % self.name)
         s = s.add_decr_line(')')
@@ -3451,10 +3451,10 @@ class OrbitShape(SymmetricShape):
         return s
 
         return s
-        s = '%sfinalSym = %s,\n  stabSym = %s,\n  ' % (
+        s = '%sfinal_sym = %s,\n  stab_sym = %s,\n  ' % (
                 s,
-                repr(self.finalSym),
-                repr(self.stabSym)
+                repr(self.final_sym),
+                repr(self.stab_sym)
             )
         cols = self.getFaceColors()
         s = '%scolors = [\n  ' % (s)
@@ -3467,79 +3467,22 @@ class OrbitShape(SymmetricShape):
             s = '%s.%s' % (__name__, s)
         return s
 
-    def setColours(self, colours, stabSym):
+    def setColours(self, colours, stab_sym):
         """
-        Use the colours as specied and divide them according stabSym
+        Use the colours as specied and divide them according stab_sym
 
         colours: an array with rgb colour defs.
-        stabSym: the colours will be divided in a symmetric way, ie. in such a
-                 way that the base parts with the same colour have the symmetry
-                 stabSym. For this to happen:
-                 1. the following is required:
-                    - stabSym is a subgroup of finalSym at object creation.
-                 2. the following is usually the case:
+        stab_sym: the colours will be divided in a symmetric way, ie. in such a way that the base
+            parts with the same colour have the symmetry stab_sym. For this to happen:
+                1. the following is required:
+                   - stab_sym is a subgroup of final_sym at object creation.
+                2. the following is usually the case:
 
-                 An example of the usual case. A square is used to define a
-                 cube as explained in __init__.
-                 former is used as stabSym at object creation and the latter as
-                 finalSym.
-                 CONTINUE here: testing cube example.., really need to read a
-                 Scene...
+            An example of the usual case. A square is used to define a cube as explained in
+            __init__. former is used as stab_sym at object creation and the latter as final_sym.
+            CONTINUE here: testing cube example.., really need to read a Scene...
         """
         pass
-
-    def export_as_orbit(self, angle_domain, axis, prec=15):
-        """
-        Export object in the orbit file format
-        angle_domain: sorted array of angles in radians
-        axis: and array specifying the rotation axis
-        """
-        no_of_transforms = 1
-        s = "#orbit1.n\n"
-        syms = self.isometries
-        no_of_syms = 0
-        dir_syms = syms['direct']
-        if dir_syms is not None:
-            no_of_syms += len(dir_syms)
-        opp_syms = syms['opposite']
-        if opp_syms is not None:
-            no_of_syms += len(opp_syms)
-        s += "3 {} {} {} {} {}\n".format(len(self.base_shape.Vs),
-                                         len(self.base_shape.Fs),
-                                         no_of_syms,
-                                         no_of_transforms,
-                                         no_of_transforms)
-
-        prec_str = '{{:.{}g}}'.format(prec)
-        for vertex in self.base_shape.Vs:
-            s += "{} {} {}\n".format(prec_str, prec_str, prec_str).format(
-                vertex[0], vertex[1], vertex[2])
-        for face in self.base_shape.Fs:
-            line = '{}'.format(len(face))
-            for i in face:
-                line += ' {}'.format(i)
-            line += '\n'
-            s += line
-        # only direct is used (includes 'opposite' as well)
-        cols = self.getFaceColors()
-        if self.isometries:
-            if len(cols) == 1:
-                col = cols[0]
-                cols = [col for isom in self.isometries]
-            for i, isom in enumerate(self.isometries):
-                s += "c {} {} {} ".format(
-                    glue.f2s(cols[i][0][0][0], prec),
-                    glue.f2s(cols[i][0][0][1], prec),
-                    glue.f2s(cols[i][0][0][2], prec),
-                )
-                s += isom.to_orbit_str(prec)
-                s += '\n'
-        s += "{}".format(no_of_transforms)
-        for angle in angle_domain:
-            s += ' {}'.format(glue.f2s(angle, prec))
-        s += f"\nR _0 {glue.f2s(axis[0], prec)} {glue.f2s(axis[1], prec)} {glue.f2s(axis[2], prec)}\n"
-
-        return s
 
 class Scene():
     """

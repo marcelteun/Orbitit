@@ -10,4 +10,4 @@ chk_files="
 	orbitit/rgb.py
 	orbitit/scene_orbit.py
 "
-pylint --extension-pkg-allow-list=wx $chk_files
+pylint --extension-pkg-whitelist=wx $chk_files

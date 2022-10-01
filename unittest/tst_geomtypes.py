@@ -250,7 +250,7 @@ class TestVec(unittest.TestCase):
         # NOTE that for floats assertEqual will use the Vec.__eq__,
         # This will used geomtypes._eq_float_margin
         # When saving floats in JSON, geomtypes.RoundingFloat is used,
-        # which uses geomtypes geomtypes.float_precision
+        # which uses geomtypes geomtypes.FLOAT_PRECISION
         # Both are using 10 decimals per default
         filename = os.path.join(DIR_PATH, "output", "test_vec.json")
         for v, cls in test_matrix:
@@ -937,7 +937,7 @@ class TestTransform(unittest.TestCase):
             geomtypes.Vec([1, 1, 1]),
         ]
         # Increase float_precision which is used to save floats
-        geomtypes.float_precision = 12
+        geomtypes.FLOAT_PRECISION = 12
         for trfm_org in test_matrix:
             filename = os.path.join(DIR_PATH, "output", "test_transform.json")
             trfm_org.write_json_file(filename)

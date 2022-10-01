@@ -27,7 +27,7 @@
 import unittest
 
 from orbitit import Geom3D
-from tst_geom3d import get_path, TestSimpleShape
+from tst_geom3d import get_path, IN_DIR, OUT_DIR, TestSimpleShape
 
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)
@@ -43,7 +43,7 @@ class TestUniformShape1(TestSimpleShape):
     ps_precision = 12
 
     def def_shape(self):
-        name = get_path(self.name + ".off")
+        name = get_path(self.name + ".off", IN_DIR)
         with open(name, 'r') as fd:
             self.shape = Geom3D.read_off_file(fd, regen_edges=True)
 

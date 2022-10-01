@@ -1299,19 +1299,23 @@ class SymmetrySelect(wx.StaticBoxSizer):
         """Set the selected symmetry in the drop down menu by index"""
         self.boxes[self._sym_gui_idx].SetSelection(i)
 
-    def setup_sym(self, vec):
-        """Fill in the symmetry setup fields in the GUI"""
-        assert len(vec) == len(self.orient_guis), (
+    def setup_sym(self, setup):
+        """Fill in the symmetry setup fields in the GUI
+
+        setup: a dictionary with the same structure as isometry.<class-object>.setup
+        """
+        assert len(setup) == len(self.orient_guis), (
             "Wrong no. of initialisers for self symmetry"
-            f"(got {len(vec)}, expected {len(self.orient_guis)})"
+            f"(got {len(setup)}, expected {len(self.orient_guis)})"
         )
         sym = self.get_sym_class(apply_order=False)
         for i, gui in zip(list(range(len(self.orient_guis))), self.orient_guis):
             input_type = sym.init_pars[i]['type']
+            key = sym.init_pars[i]['par']
             if input_type == 'vec3':
-                _ = gui.set_vertex(vec[i])
+                _ = gui.set_vertex(setup[key])
             elif input_type == 'int':
-                _ = gui.SetValue(vec[i])
+                _ = gui.SetValue(setup[key])
 
     def get_selected(self):
         """return a symmetry instance"""

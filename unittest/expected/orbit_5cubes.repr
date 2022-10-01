@@ -25,7 +25,7 @@ orbitit.Geom3D.OrbitShape(
         [0.0, 0.746094, 0.996094],
         [0.542969, 0.523438, 0.304688]
     ],
-    finalSym=
+    final_sym=
         orbitit.isometryA5(
             [
                 orbitit.geomtypes.Rot3((
@@ -270,7 +270,7 @@ orbitit.Geom3D.OrbitShape(
                 ))
             ]
         ),
-    stabSym=
+    stab_sym=
         orbitit.isometryA4(
             [
                 orbitit.geomtypes.Rot3((

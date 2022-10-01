@@ -44,7 +44,7 @@ import os
 import wx
 import wx.lib.colourselect as wxLibCS
 
-from orbitit import Geom3D, geom_gui, geomtypes, isometry, orbit, rgb
+from orbitit import base, Geom3D, geom_gui, geomtypes, isometry, orbit, rgb
 
 TITLE = 'Create Polyhedron by Orbiting'
 
@@ -399,8 +399,8 @@ class CtrlWin(wx.Frame):
             self.shape = Geom3D.OrbitShape(
                 verts,
                 faces,
-                finalSym=final_sym_obj,
-                stabSym=stab_sym,
+                final_sym=final_sym_obj,
+                stab_sym=stab_sym,
                 name=self.name
             )
         except isometry.ImproperSubgroupError:
@@ -522,8 +522,8 @@ class CtrlWin(wx.Frame):
                 self.shape = Geom3D.OrbitShape(
                     verts,
                     faces,
-                    finalSym=final_sym,
-                    stabSym=stab_sym,
+                    final_sym=final_sym,
+                    stab_sym=stab_sym,
                     name=self.name
                 )
                 self.fs_orbit = self.shape.isometries
@@ -625,13 +625,34 @@ class CtrlWin(wx.Frame):
             self.col_alt[1] += len(self.col_syms)
         self.update_shape_cols()
 
+    def import_json(self, filename):
+        shape = base.Orbitit.from_json_file(filename)
+        if not isinstance(shape, Geom3D.SimpleShape) and\
+               not isinstance(shape, Geom3D.CompoundShape):
+            self.status_text("The JSON file doesn't represent a shape", LOG_ERR)
+        # For Compound derived shapes (isinstance) use merge:
+        if isinstance(shape, Geom3D.OrbitShape):
+            final_sym = shape.final_sym
+            stab_sym = shape.stab_sym
+            self.show_gui[self._final_sym_gui_idx].set_selected_class(type(final_sym))
+            self.show_gui[self._final_sym_gui_idx].on_set_sym(None)
+            self.show_gui[self._final_sym_gui_idx].setup_sym(final_sym.setup)
+            self.show_gui[self._stab_sym_gui_idx].set_selected_class(type(stab_sym))
+            self.show_gui[self._stab_sym_gui_idx].on_set_sym(None)
+            self.show_gui[self._stab_sym_gui_idx].setup_sym(stab_sym.setup)
+            # TODO: set the colours
+            shape = shape.base_shape
+        if isinstance(shape, Geom3D.CompoundShape):
+            shape = shape.simple_shape
+        return shape
+
     def on_import(self, _):
         """Handle the import of a file
 
         The file can specify the descriptive and its orientation and the
         symmetries
         """
-        wildcard = "OFF shape (*.off)|*.off|Python shape (*.py)|*.py"
+        wildcard = "OFF shape (*.off)|*.off|Python shape (*.json)|*.json"
         dlg = wx.FileDialog(self,
                             'New: Choose a file', self.import_dir_name,
                             '', wildcard, wx.FD_OPEN)
@@ -639,116 +660,17 @@ class CtrlWin(wx.Frame):
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()
             print("opening file:", filename)
-            with  open(os.path.join(self.import_dir_name, filename)) as fd:
-                if filename[-3:] == '.py':
-                    shape = Geom3D.readPyFile(fd)
-                    # For Compound derived shapes (isinstance) use merge:
-                    try:
-                        shape = shape.SimpleShape
-                    except AttributeError:
-                        # probably a SimpleShape
-                        pass
-                else:
-                    shape = Geom3D.read_off_file(fd, regen_edges=False)
-            if isinstance(shape, Geom3D.SymmetricShape):
-                verts = shape.base_shape.Vs
-                faces = shape.base_shape.Fs
+            filepath = os.path.join(self.import_dir_name, filename)
+            if filename[-5:] == '.json':
+                shape = self.import_json(filepath)
             else:
-                verts = shape.Vs
-                faces = shape.Fs
+                with  open(filename) as fd:
+                    shape = Geom3D.read_off_file(fd, regen_edges=False)
+            verts = shape.Vs
+            faces = shape.Fs
             print('read ', len(verts), ' Vs and ', len(faces), ' Fs.')
             self.show_gui[self._vs_gui_idx].set(verts)
             self.show_gui[self._fs_gui_idx].set(faces)
-            # With a python file it is possible to set the other properties as
-            # well: e.g.
-            # final_sym = isometry.S4xI
-            # final_sym_setup = [ [1, 0, 0], [0, 0, 1] ]
-            # stab_sym = isometry.C3xI
-            # stab_sym_setup = [ [0, 0, 1] ]
-            # rotAxis = [1, 1, 1]
-            # rotAngle = 30
-            #   where the angle is in degrees (floating point)
-            if filename[-3:] == '.py':
-                ed = {}
-                with open(os.path.join(self.import_dir_name, filename)) as fd:
-                    exec(fd.read(), ed)
-                more_settings = 0
-                key_err_str = 'Note: KeyError while looking for'
-                key = 'final_sym'
-                # to prevent accepting keyErrors in other code than ed[key]:
-                key_defined = False
-                try:
-                    final_sym = ed[key]
-                    key_defined = True
-                except KeyError:
-                    print(key_err_str, key)
-                if key_defined:
-                    more_settings += 1
-                    self.show_gui[self._final_sym_gui_idx].set_selected_class(
-                        final_sym
-                    )
-                    self.show_gui[self._final_sym_gui_idx].on_set_sym(None)
-                    key = 'final_sym_setup'
-                    key_defined = False
-                    try:
-                        sym_setup = ed[key]
-                        key_defined = True
-                    except KeyError:
-                        print(key_err_str, key)
-                    if key_defined:
-                        more_settings += 1
-                        self.show_gui[self._final_sym_gui_idx].setup_sym(
-                            sym_setup
-                        )
-                key = 'stab_sym'
-                key_defined = False
-                try:
-                    stab_sym = ed[key]
-                    key_defined = True
-                except KeyError:
-                    print(key_err_str, key)
-                if key_defined:
-                    more_settings += 1
-                    self.show_gui[self._stab_sym_gui_idx].set_selected_class(
-                        stab_sym
-                    )
-                    self.show_gui[self._stab_sym_gui_idx].on_set_sym(None)
-                    key = 'stab_sym_setup'
-                    key_defined = False
-                    try:
-                        sym_setup = ed[key]
-                        key_defined = True
-                    except KeyError:
-                        print(key_err_str, key)
-                    if key_defined:
-                        more_settings += 1
-                        self.show_gui[self._stab_sym_gui_idx].setup_sym(
-                            sym_setup
-                        )
-                if more_settings > 0:
-                    self.on_apply_sym(None)
-                key = 'rotAxis'
-                key_defined = False
-                try:
-                    axis = ed[key]
-                    key_defined = True
-                except KeyError:
-                    print(key_err_str, key)
-                if key_defined:
-                    more_settings += 1
-                    self.rot_sizer.set_axis(axis)
-                key = 'rotAngle'
-                key_defined = False
-                try:
-                    angle = ed[key]
-                    key_defined = True
-                except KeyError:
-                    print(key_err_str, key)
-                if key_defined:
-                    more_settings += 1
-                    self.rot_sizer.set_angle(angle)
-                    self.update_orientation(
-                        self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
             self.name = filename
         dlg.Destroy()
 

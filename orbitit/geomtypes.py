@@ -55,7 +55,7 @@ THIRD_TURN = turn(1.0/3)
 
 DEFAULT_EQ_FLOAT_MARGIN = 1.0e-10
 
-float_precision = 10
+FLOAT_PRECISION = 10
 
 # Disable pylint warning: Constant name "_eq_float_margin" doesn't conform to
 # UPPER_CASE naming style (invalid-name)
@@ -98,10 +98,12 @@ def eq(a, b, margin=None):
     return abs(a - b) < margin
 
 
-# Work around to save the floats in JSON as I want, see
-# https://stackoverflow.com/questions/54370322
 class RoundingFloat(float):
-    __repr__ = staticmethod(lambda x: glue.f2s(x, float_precision))
+    """Work-around to save the floats in JSON as I want.
+
+    see https://stackoverflow.com/questions/54370322
+    """
+    __repr__ = staticmethod(lambda x: glue.f2s(x, FLOAT_PRECISION))
 
 json.encoder.c_make_encoder = None
 json.encoder.float = RoundingFloat
@@ -159,7 +161,7 @@ class Vec(tuple, base.Orbitit):
     def __str__(self):
         try:
             return "[{}]".format(
-                ", ".join([glue.f2s(i, float_precision) for i in self])
+                ", ".join([glue.f2s(i, FLOAT_PRECISION) for i in self])
             )
         except IndexError:
             return '[]'
@@ -529,7 +531,7 @@ class Transform3(tuple, base.Orbitit):
     def to_json(self):
         pass
 
-    def to_orbit_str(self, prec=float_precision):
+    def to_orbit_str(self, prec=FLOAT_PRECISION):
         """Return the orbit file format representation for this transform.
 
         If this is not a proper transform, then UnsupportedTransform is raised
@@ -716,22 +718,22 @@ class Transform3(tuple, base.Orbitit):
     def __hash_rot(self):
         axis = self.__axis_rot()
         return hash((self.Rot,
-                     round(self.__angle_rot(), float_precision),
-                     round(axis[0], float_precision),
-                     round(axis[1], float_precision),
-                     round(axis[2], float_precision)))
+                     round(self.__angle_rot(), FLOAT_PRECISION),
+                     round(axis[0], FLOAT_PRECISION),
+                     round(axis[1], FLOAT_PRECISION),
+                     round(axis[2], FLOAT_PRECISION)))
 
     def __str_rot(self):
         axis = self.__axis_rot()
         return (
-            f"Rotation of {glue.f2s(to_degrees(self.__angle_rot()), float_precision)} "
+            f"Rotation of {glue.f2s(to_degrees(self.__angle_rot()), FLOAT_PRECISION)} "
             "degrees around ["
-            f"{glue.f2s(axis[0], float_precision)}, "
-            f"{glue.f2s(axis[1], float_precision)}, "
-            f"{glue.f2s(axis[2], float_precision)}]"
+            f"{glue.f2s(axis[0], FLOAT_PRECISION)}, "
+            f"{glue.f2s(axis[1], FLOAT_PRECISION)}, "
+            f"{glue.f2s(axis[2], FLOAT_PRECISION)}]"
         )
 
-    def __rot2orbit(self, prec=float_precision):
+    def __rot2orbit(self, prec=FLOAT_PRECISION):
         axis = self.__axis_rot()
         return (
             f"R {glue.f2s(self.__angle_rot(), prec)} "
@@ -848,9 +850,9 @@ class Transform3(tuple, base.Orbitit):
             (
                 self.Refl,
                 self.Refl,  # to use a tuple of 5 elements for all types
-                round(normal[0], float_precision),
-                round(normal[1], float_precision),
-                round(normal[2], float_precision)
+                round(normal[0], FLOAT_PRECISION),
+                round(normal[1], FLOAT_PRECISION),
+                round(normal[2], FLOAT_PRECISION)
             )
         )
 
@@ -858,12 +860,12 @@ class Transform3(tuple, base.Orbitit):
         norm = self.plane_normal()
         return (
             "Reflection in plane with normal ["
-            f"{glue.f2s(norm[0], float_precision)}, "
-            f"{glue.f2s(norm[1], float_precision)}, "
-            f"{glue.f2s(norm[2], float_precision)}]"
+            f"{glue.f2s(norm[0], FLOAT_PRECISION)}, "
+            f"{glue.f2s(norm[1], FLOAT_PRECISION)}, "
+            f"{glue.f2s(norm[2], FLOAT_PRECISION)}]"
         )
 
-    def __refl2orbit(self, prec=float_precision):
+    def __refl2orbit(self, prec=FLOAT_PRECISION):
         norm = self.plane_normal()
         return f"S {glue.f2s(norm[0], prec)} {glue.f2s(norm[1], prec)} {glue.f2s(norm[2], prec)}"
 
@@ -931,23 +933,23 @@ class Transform3(tuple, base.Orbitit):
     def __hash_rot_inv(self):
         axis = self.__axis_rot_inv()
         return hash((self.Rot,
-                     round(self.__angle_rot_inv(), float_precision),
-                     round(axis[0], float_precision),
-                     round(axis[1], float_precision),
-                     round(axis[2], float_precision)))
+                     round(self.__angle_rot_inv(), FLOAT_PRECISION),
+                     round(axis[0], FLOAT_PRECISION),
+                     round(axis[1], FLOAT_PRECISION),
+                     round(axis[2], FLOAT_PRECISION)))
 
     def __str_rot_inv(self):
         r = self.I()
         axis = r.axis()
         return (
-            f"Rotary inversion of {glue.f2s(to_degrees(r.angle()), float_precision)} "
+            f"Rotary inversion of {glue.f2s(to_degrees(r.angle()), FLOAT_PRECISION)} "
             "degrees around ["
-            f"{glue.f2s(axis[0], float_precision)}, "
-            f"{glue.f2s(axis[1], float_precision)}, "
-            f"{glue.f2s(axis[2], float_precision)}]"
+            f"{glue.f2s(axis[0], FLOAT_PRECISION)}, "
+            f"{glue.f2s(axis[1], FLOAT_PRECISION)}, "
+            f"{glue.f2s(axis[2], FLOAT_PRECISION)}]"
         )
 
-    def __rotinv2orbit(self, prec=float_precision):
+    def __rotinv2orbit(self, prec=FLOAT_PRECISION):
         """If this is a rotary inversion, return orbit file format string repr.
 
         Should only be called when this is a rotary inversion
@@ -1104,7 +1106,7 @@ class Refl3(Transform3):
         """
         result = None
         if _is_quat_pair(quat):
-            result = Transform3.__new__(cls, quat)
+            result = super().__new__(quat)
             assert result.is_refl(), f"{quat} doesn't represent a reflection"
         elif isinstance(quat, Quat):
             try:
