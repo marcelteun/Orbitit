@@ -80,9 +80,11 @@ SCENES = {
 del pre_pyopengl
 
 def is_off_model(filename):
+    """Return True if the filename indicates this is an off-file."""
     return filename[-4:] == '.off'
 
 def is_json_model(filename):
+    """Return True if the filename indicates this is an JSON file."""
     return filename[-5:] == '.json'
 
 def read_shape_file(filename):
@@ -497,9 +499,9 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                         try:
                             fd.write(
                                 shape.toPsPiecesStr(
-                                    scaling = scale_factor,
-                                    precision = precision,
-                                    margin = math.pow(10, -margin)
+                                    scaling=scale_factor,
+                                    precision=precision,
+                                    margin=math.pow(10, -margin)
                                 )
                             )
                             self.set_status_text("PS file written")
@@ -516,14 +518,15 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_save_wrl(self, _):
         """Handle event '_' to export the current shape to VRML format"""
-        dlg = wx.FileDialog(self,
+        dlg = wx.FileDialog(
+            self,
             'Save as .vrml file', self.export_dir_name, '', '*.wrl',
-            style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
         )
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
             filename = dlg.GetFilename()
-            self.export_dir_name  = filepath.rsplit('/', 1)[0]
+            self.export_dir_name = filepath.rsplit('/', 1)[0]
             name_ext = filename.split('.')
             if len(name_ext) == 1:
                 filename = f'{filename}.wrl'
@@ -535,7 +538,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             print(f"writing to file {filepath}")
             # TODO precision through setting:
             r = self.panel.shape.getEdgeProperties()['radius']
-            x3d_obj = self.panel.shape.toX3dDoc(edgeRadius = r)
+            x3d_obj = self.panel.shape.toX3dDoc(edgeRadius=r)
             x3d_obj.setFormat(X3D.VRML_FMT)
             with open(filepath, 'w') as fd:
                 fd.write(x3d_obj.toStr())
@@ -545,10 +548,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def on_view_settings(self, _):
         """Handle event '_' to load the view settings"""
         if self.view_settings_win is None:
-            self.view_settings_win = main_win.ViewSettingsWindow(self.panel.canvas,
+            self.view_settings_win = main_win.ViewSettingsWindow(
+                self.panel.canvas,
                 None, wx.ID_ANY,
-                title = 'View Settings',
-                size = (394, 300)
+                title='View Settings',
+                size=(394, 300)
             )
             self.view_settings_win.Bind(wx.EVT_CLOSE, self.on_view_win_closed)
         else:
@@ -562,7 +566,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.col_settings_win.Destroy()
         self.col_settings_win = main_win.ColourWindow(
             self.panel.canvas, 5, None, wx.ID_ANY,
-            title = 'Colour Settings',
+            title='Colour Settings',
         )
         self.col_settings_win.Bind(wx.EVT_CLOSE, self.on_col_win_closed)
 
@@ -571,7 +575,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         if self.transform_settings_win is None:
             self.transform_settings_win = main_win.TransformWindow(
                 self.panel.canvas, None, wx.ID_ANY,
-                title = 'Transform Settings',
+                title='Transform Settings',
             )
             self.transform_settings_win.Bind(wx.EVT_CLOSE, self.on_transform_win_closed)
         else:
@@ -591,10 +595,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_view_scene(self, _):
         """Handle event '_' change the current scene"""
-        dlg = wx.SingleChoiceDialog(self,'Choose a Scene', '', self.scenes_list)
+        dlg = wx.SingleChoiceDialog(self, 'Choose a Scene', '', self.scenes_list)
         if dlg.ShowModal() == wx.ID_OK:
             scene_index = dlg.GetSelection()
-            frame.load_scene(SCENES[self.scenes_list[scene_index]])
+            self.load_scene(SCENES[self.scenes_list[scene_index]])
         dlg.Destroy()
 
     def load_scene(self, scene):
@@ -740,9 +744,7 @@ class MainPanel(wx.Panel):
         del old_e_settings['Es']
         self.canvas.shape.setEdgeProperties(old_e_settings)
         # Use only the 'drawFaces' setting:
-        old_f_settings = {
-                'drawFaces': old_shape.getFaceProperties()['drawFaces']
-            }
+        old_f_settings = {'drawFaces': old_shape.getFaceProperties()['drawFaces']}
         self.canvas.shape.setFaceProperties(old_f_settings)
         # if the shape generates the normals itself:
         # TODO: handle that this.Ns is set correctly, i.e. normalised
@@ -758,14 +760,14 @@ def convert_to_ps(shape, fd, scale, precision, margin):
     """Convert shape to PostScript and save to file descriptor fd"""
     fd.write(
         shape.toPsPiecesStr(
-            scaling = scale,
-            precision = precision,
-            margin = math.pow(10, -margin),
-            suppressWarn = True
+            scaling=scale,
+            precision=precision,
+            margin=math.pow(10, -margin),
+            suppressWarn=True
         )
     )
 
-def convert_to_off(shape, fd, precision, margin = 0):
+def convert_to_off(shape, fd, precision, margin=0):
     """
     Save the shape to the fd file descriptor in .off format
 
@@ -789,95 +791,95 @@ if __name__ == "__main__":
 
     DESCR = """Utility for handling polyhedra."""
 
-    parser = argparse.ArgumentParser(description=DESCR)
-    parser.add_argument(
+    PARSER = argparse.ArgumentParser(description=DESCR)
+    PARSER.add_argument(
         "inputfile",
         metavar='filename',
         nargs="?",
         help="Input files can either be a python file in a certain format or an off file.",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-P", "--precision",
         type=int,
         metavar='i',
         default=15,
         help="Write floating point numbers with <i> number of decimals.",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-o", "--off",
         metavar='filename',
         help="Export an input file to an off-file",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-p", "--ps",
         metavar='filename',
         help="Export an input file to post-script",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-y", "--py",
         metavar='filename',
         help="Export an input file to python",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-m", "--margin",
         type=int,
         metavar='i',
         default=10,
         help="Set the margin for floating point numbers to be considered equal. All numbers with a"
-            "difference that is smaller than 1.0e-<i> will be considered equal.",
+        "difference that is smaller than 1.0e-<i> will be considered equal.",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-s", "--scene",
         metavar='scene-name',
         default=DEFAULT_SCENE,
         help="Start the user interface with the specified scene name. This parameter is ignored if "
-            f"the '-i' option is used. Valid scene names are: {list(SCENES.keys())}",
+        f"the '-i' option is used. Valid scene names are: {list(SCENES.keys())}",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "-x", "--scale",
         metavar='n',
         default=50,
         help="When saving to PostScript, then use the specified scale factor",
     )
 
-    prog_args = parser.parse_args()
+    PROG_ARGS = PARSER.parse_args()
 
     START_GUI = True
-    if prog_args.inputfile:
-        in_shape = read_shape_file(prog_args.inputfile)
-        if not in_shape:
-            print(f"Couldn't read shape file {prog_args.inputfile}")
+    if PROG_ARGS.inputfile:
+        IN_SHAPE = read_shape_file(PROG_ARGS.inputfile)
+        if not IN_SHAPE:
+            print(f"Couldn't read shape file {PROG_ARGS.inputfile}")
             sys.exit(-1)
-        if prog_args.off:
+        if PROG_ARGS.off:
             START_GUI = False
-            with open(prog_args.off, 'w') as o_fd:
-                convert_to_off(in_shape, o_fd, prog_args.precision, prog_args.margin)
-        elif prog_args.py:
+            with open(PROG_ARGS.off, 'w') as o_fd:
+                convert_to_off(IN_SHAPE, o_fd, PROG_ARGS.precision, PROG_ARGS.margin)
+        elif PROG_ARGS.py:
             START_GUI = False
-            with open(prog_args.py, 'w') as o_fd:
-                in_shape.saveFile(o_fd)
-        elif prog_args.ps:
+            with open(PROG_ARGS.py, 'w') as o_fd:
+                IN_SHAPE.saveFile(o_fd)
+        elif PROG_ARGS.ps:
             START_GUI = False
-            with open(prog_args.ps, 'w') as o_fd:
+            with open(PROG_ARGS.ps, 'w') as o_fd:
                 convert_to_ps(
-                    in_shape, o_fd, prog_args.scale, prog_args.precision, prog_args.margin
+                    IN_SHAPE, o_fd, PROG_ARGS.scale, PROG_ARGS.precision, PROG_ARGS.margin
                 )
     else:
-        in_shape = Geom3D.SimpleShape([], [])
+        IN_SHAPE = Geom3D.SimpleShape([], [])
 
     if START_GUI:
-        app = wx.App(False)
-        frame = MainWindow(
-                Canvas3DScene,
-                in_shape,
-                prog_args.inputfile,
-                None,
-                wx.ID_ANY, "test",
-                size = (430, 482),
-                pos = wx.Point(980, 0)
-            )
-        if not prog_args.inputfile:
-            frame.load_scene(SCENES[prog_args.scene])
-        app.MainLoop()
+        APP = wx.App(False)
+        FRAME = MainWindow(
+            Canvas3DScene,
+            IN_SHAPE,
+            PROG_ARGS.inputfile,
+            None,
+            wx.ID_ANY, "test",
+            size=(430, 482),
+            pos=wx.Point(980, 0)
+        )
+        if not PROG_ARGS.inputfile:
+            FRAME.load_scene(SCENES[PROG_ARGS.scene])
+        APP.MainLoop()
 
     sys.stderr.write("Done\n")

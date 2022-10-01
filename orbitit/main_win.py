@@ -168,12 +168,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.rot_sizer = geom_gui.AxisRotateSizer(
-            self.panel,
-            self.on_rot,
-            min_angle=-180,
-            max_angle=180,
-            initial_angle=0
-        )
+            self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0)
         self.main_sizer.Add(self.rot_sizer)
 
         self.guis = []
