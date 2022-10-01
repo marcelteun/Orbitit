@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""A class for handling setting colours for orbit shapes."""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -25,14 +26,28 @@
 from orbitit import Geom3D, geomtypes, isometry, rgb
 
 
-class Orbit(list):
-    def __new__(self, v):
+class Orbit(list):  # pylint: disable=too-many-instance-attributes
+    """A class for handling algebraic orbits."""
+
+    def __new__(cls, v):
         assert len(v) == 2
         assert isinstance(v[0], isometry.Set)
         assert isinstance(v[1], isometry.Set)
+        return super().__new__(cls, v)
+
+    def __init__(self, v):
+        super().__init__(v)
         self.final = v[0]
         self.stabiliser = v[1]
-        return list.__new__(self, v)
+        self.final_sym_alt = None
+        self.stab_sym_alt = None
+        self.lower_order_stabs = None
+        self.__losp_called = False
+        self.__losp_cache = None
+        self.higher_order_stabs = None
+        self.__hosp_called = False
+        self.__hosp_cache = None
+        self.index_covered = None
 
     def __repr__(self):
         s = f"[{repr(self.final)}, {repr(self.stabiliser)}]"
@@ -50,7 +65,7 @@ class Orbit(list):
         return s
 
     @property
-    def higherOrderStabiliserProps(self):
+    def higher_order_stab_props(self):
         """Get possible sub orbit classes for higher order stabilisers
 
         A higher order stabiliser is a subgroup of G that has the stabiliser as
@@ -61,27 +76,26 @@ class Orbit(list):
         each other by the orbit that is derived from the higher order
         stabiliser. This orbit is a sub-orbit of the original orbit. The norm
         of this sub-orbit equals to the amount of colours used.
-        Returns: a list of dictionaries with properties of higher order
-        stabilisers. Each dictionary holds:
+
+        Return:
+        A list of dictionaries with properties of higher order stabilisers. Each dictionary holds:
             'class': higher order stabiliser classes is obtained.
             'index': the length of the subgroups in the final group, or the
                      norm of the coset.
         """
-        try:
-            assert self.__hospCalled, 'if this exists it should be true'
-        except AttributeError:
-            self.__hosProps = self.__hosp()
-            self.__hospCalled = True
-        return self.__hosProps
+        if not self.__hosp_called:
+            self.__hosp_cache = self.__hosp()
+            self.__hosp_called = True
+        return self.__hosp_cache
 
     def __hosp(self):
-        """See higherOrderStabiliserProps"""
-        higherOrderStabiliserProps = []
-        self.hoStabs = []
-        self.indexCovered = {}
-        for subGroup in self.final.subgroups:
-            assert subGroup.order != 0, f"{subGroup} ({subGroup.__class__.__name__})"
-            if self.stabiliser.__class__ in subGroup.subgroups:
+        """See higher_order_stab_props"""
+        higher_order_stab_props = []
+        self.higher_order_stabs = []
+        self.index_covered = {}
+        for sub_group in self.final.subgroups:
+            assert sub_group.order != 0, f"{sub_group} ({sub_group.__class__.__name__})"
+            if self.stabiliser.__class__ in sub_group.subgroups:
                 # Check if the stabiliser can really be a subgroup for this
                 # orientation.
                 # E.g.
@@ -93,39 +107,42 @@ class Orbit(list):
                 # However the D2C2 that is a subgroup of the A4xI subgroup of
                 # S4xI has a principle axis that is a 4-fold axis of S4xI.
 
-                hoStabs = self.final.realise_subgroups(subGroup)
+                higher_order_stabs = self.final.realise_subgroups(sub_group)
                 # from end to beginning, because elements will be filtered out:
-                for i in range(len(hoStabs)-1, -1, -1):
-                    if self.stabiliser.is_subgroup(hoStabs[i]):
+                for i in range(len(higher_order_stabs)-1, -1, -1):
+                    if self.stabiliser.is_subgroup(higher_order_stabs[i]):
                         break
-                    else:
-                        # remove this from the list, this is part of the work
-                        # of filtering the list. This is not done completely
-                        # here since it costs time, and the user might not
-                        # choose this sub orbit anyway (hence the break above).
-                        # But to save time later, remove it already.
-                        del hoStabs[i]
-                index = self.final.order // subGroup.order
-                if hoStabs:
-                    higherOrderStabiliserProps.append({'class': subGroup,
-                                                       'index': index,
-                                                       'filtered': i})
-                    self.hoStabs.append(hoStabs)
-                    self.indexCovered[index] = True
+                    # remove this from the list, this is part of the work
+                    # of filtering the list. This is not done completely
+                    # here since it costs time, and the user might not
+                    # choose this sub orbit anyway (hence the break above).
+                    # But to save time later, remove it already.
+                    del higher_order_stabs[i]
+                index = self.final.order // sub_group.order
+                if higher_order_stabs:
+                    higher_order_stab_props.append(
+                        {
+                            'class': sub_group,
+                            'index': index,
+                            'filtered': i,
+                        }
+                    )
+                    self.higher_order_stabs.append(higher_order_stabs)
+                    self.index_covered[index] = True
                 # else filter out, since no real subgroup
             # else: this subgroup of G doesn't have the stabiliser as subgroup
-        return higherOrderStabiliserProps
+        return higher_order_stab_props
 
-    def higherOrderStabiliser(self, n):
+    def higher_order_stab(self, n):
         """Get possible sub orbits for higher order stabilisers
 
         With this a list of higher order stabilisers of one class is obtained.
-        n: the list index in higherOrderStabiliserProps representing the class.
-        see also higherOrderStabiliserProps.
+        n: the list index in higher_order_stab_props representing the class.
+        see also higher_order_stab_props.
         """
 
         # Make sure the list is initialised.
-        props = self.higherOrderStabiliserProps
+        props = self.higher_order_stab_props
 
         # filter rest if needed:
         if not props:
@@ -143,16 +160,16 @@ class Orbit(list):
             # but not necessarily this orientation. In fact only one of the
             # three possible D4xI will have this D2C2 as subgroup.
             for i in range(props[n]['filtered']-1, -1, -1):
-                if not self.stabiliser.is_subgroup(self.hoStabs[n][i]):
-                    del self.hoStabs[n][i]
-            assert len(self.hoStabs[n]) != 0, (
+                if not self.stabiliser.is_subgroup(self.higher_order_stabs[n][i]):
+                    del self.higher_order_stabs[n][i]
+            assert len(self.higher_order_stabs[n]) != 0, (
                 "This case should have been checked in __hosp"
             )
             props[n]['filtered'] = 0
-        return self.hoStabs[n]
+        return self.higher_order_stabs[n]
 
     @property
-    def lowerOrderStabiliserProps(self):
+    def lower_order_stab_props(self):
         """Get possible sub orbit classes for lower order stabilisers
 
         Lower order stabiliser are very similar to higher order stabiliser.
@@ -161,175 +178,191 @@ class Orbit(list):
         isometries are considered. Then for this only-direct stabiliser and the
         only-direct final group the higher order stabilisers are generated.
 
-        The same list of dictionaries is returned as in
-        higherOrderStabiliserProps
+        The same list of dictionaries is returned as in higher_order_stab_props
         """
-        try:
-            assert self.__lospCalled, 'if this exists it should be true'
-        except AttributeError:
-            self.__losProps = self.__losp()
-            self.__lospCalled = True
-        return self.__losProps
+        if not self.__losp_called:
+            self.__losp_cache = self.__losp()
+            self.__losp_called = True
+        return self.__losp_cache
 
     def __losp(self):
-        """See lowerOrderStabiliserProps"""
+        """See lower_order_stab_props"""
 
-        lowerOrderStabiliserProps = []
-        self.loStabs = []
+        lower_order_stab_props = []
+        self.lower_order_stabs = []
         # if stabiliser has both direct and opposite isometries
         if self.stabiliser.mixed:
             # alternative way of colouring by using the direct parents; i.e.
             # the parent with only direct isometries
             assert self.final.mixed
             if self.final.generator:
-                self.altFinal = self.final.direct_parent(
-                        setup=self.final.direct_parent_setup)
+                self.final_sym_alt = self.final.direct_parent(setup=self.final.direct_parent_setup)
             else:
-                self.altFinal = self.final.direct_parent(
+                self.final_sym_alt = self.final.direct_parent(
                     isometries=[isom for isom in self.final if isom.is_direct()])
             if self.stabiliser.generator:
-                self.altStab = self.stabiliser.direct_parent(
+                self.stab_sym_alt = self.stabiliser.direct_parent(
                     setup=self.stabiliser.direct_parent_setup)
             else:
-                self.altStab = self.stabiliser.direct_parent(
+                self.stab_sym_alt = self.stabiliser.direct_parent(
                     isometries=[
                         isom for isom in self.stabiliser if isom.is_direct()])
 
             # TODO: fix; don't copy above code from hosp__
-            for subGroup in self.altFinal.subgroups:
-                assert subGroup.order != 0
-                if self.altStab.__class__ in subGroup.subgroups:
-                    loStabs = self.altFinal.realise_subgroups(subGroup)
-                    for i in range(len(loStabs)-1, -1, -1):
-                        if self.altStab.is_subgroup(loStabs[i]):
+            for sub_group in self.final_sym_alt.subgroups:
+                assert sub_group.order != 0
+                if self.stab_sym_alt.__class__ in sub_group.subgroups:
+                    lower_order_stabs = self.final_sym_alt.realise_subgroups(sub_group)
+                    for i in range(len(lower_order_stabs)-1, -1, -1):
+                        if self.stab_sym_alt.is_subgroup(lower_order_stabs[i]):
                             break
-                        else:
-                            del loStabs[i]
-                    index = self.altFinal.order // subGroup.order
+                        del lower_order_stabs[i]
+                    index = self.final_sym_alt.order // sub_group.order
                     try:
-                        if self.indexCovered[index]:
+                        if self.index_covered[index]:
                             pass
                     except KeyError:
-                        if loStabs != []:
-                            lowerOrderStabiliserProps.append({
-                                    'class': subGroup,
-                                    'index': index, 'filtered': i
+                        if lower_order_stabs != []:
+                            lower_order_stab_props.append(
+                                {
+                                    'class': sub_group,
+                                    'index': index,
+                                    'filtered': i,
                                 }
                             )
-                            self.loStabs.append(loStabs)
-                            # don't add to self.indexCovered, it means covered by
+                            self.lower_order_stabs.append(lower_order_stabs)
+                            # don't add to self.index_covered, it means covered by
                             # __hosp, really
 
-        return lowerOrderStabiliserProps
+        return lower_order_stab_props
 
-    def lowerOrderStabiliser(self, n):
+    def lower_order_stab(self, n):
         """Get possible sub orbits for higher order stabilisers
 
         With this a list of higher order stabilisers of one class is obtained.
-        n: the list index in lowerOrderStabiliserProps representing the class.
-        see also lowerOrderStabiliserProps.
+        n: the list index in lower_order_stab_props representing the class.
+        see also lower_order_stab_props.
         """
 
         # Make sure the list is initialised.
-        props = self.lowerOrderStabiliserProps
+        props = self.lower_order_stab_props
 
         # filter rest if needed:
         if props[n]['filtered'] > 0:
             for i in range(props[n]['filtered']-1, -1, -1):
-                if not self.altStab.is_subgroup(self.loStabs[n][i]):
-                    del self.loStabs[n][i]
-            assert len(self.loStabs[n]) != 0, (
+                if not self.stab_sym_alt.is_subgroup(self.lower_order_stabs[n][i]):
+                    del self.lower_order_stabs[n][i]
+            assert len(self.lower_order_stabs[n]) != 0, (
                 "This case should have been checked in __losp"
             )
             props[n]['filtered'] = 0
-        return self.loStabs[n]
+        return self.lower_order_stabs[n]
 
 
-class Shape(Geom3D.OrbitShape):
+class Shape(Geom3D.OrbitShape):  # pylint: disable=too-many-instance-attributes
+    """An extension of the Geom3D.OrbitShape.
+
+    The colours a standardised and the descriptive can be rotated.
+    """
+    # TODO: move to Geom3D.OrbitShape
     # standard colours
     cols_blue = [
-         rgb.royalBlue,
-         rgb.lightSkyBlue,
-         rgb.midnightBlue,
-         rgb.steelBlue,
-         rgb.azure]
+        rgb.royalBlue,
+        rgb.lightSkyBlue,
+        rgb.midnightBlue,
+        rgb.steelBlue,
+        rgb.azure,
+    ]
 
     cols_green = [
-         rgb.yellowGreen,
-         rgb.lightSeaGreen,
-         rgb.darkGreen,
-         rgb.limeGreen,
-         rgb.darkOliveGreen]
+        rgb.yellowGreen,
+        rgb.lightSeaGreen,
+        rgb.darkGreen,
+        rgb.limeGreen,
+        rgb.darkOliveGreen,
+    ]
 
     cols_purple = [
-         rgb.plum,
-         rgb.slateBlue,
-         rgb.blueViolet,
-         rgb.seashell,
-         rgb.lavender]
+        rgb.plum,
+        rgb.slateBlue,
+        rgb.blueViolet,
+        rgb.seashell,
+        rgb.lavender,
+    ]
 
     cols_yellow = [
-         rgb.gold,
-         rgb.yellow,
-         rgb.lemonChiffon,
-         rgb.khaki,
-         rgb.lightGoldenrod]
+        rgb.gold,
+        rgb.yellow,
+        rgb.lemonChiffon,
+        rgb.khaki,
+        rgb.lightGoldenrod,
+    ]
 
     cols_red = [
-         rgb.firebrick,
-         rgb.indianRed,
-         rgb.red,
-         rgb.peachPuff,
-         rgb.lightCoral]
+        rgb.firebrick,
+        rgb.indianRed,
+        rgb.red,
+        rgb.peachPuff,
+        rgb.lightCoral,
+    ]
 
     cols_brown_orange = [
-         rgb.tan,
-         rgb.saddleBrown,
-         rgb.peru,
-         rgb.orange,
-         rgb.darkGoldenrod]
+        rgb.tan,
+        rgb.saddleBrown,
+        rgb.peru,
+        rgb.orange,
+        rgb.darkGoldenrod,
+    ]
 
     cols = [  # alternate from above colours
-         rgb.royalBlue,      # 0
-         rgb.yellowGreen,
-         rgb.plum,           # 2
-         rgb.gold,
-         rgb.firebrick,
-         rgb.tan,            # 5
+        rgb.royalBlue,      # 0
+        rgb.yellowGreen,
+        rgb.plum,           # 2
+        rgb.gold,
+        rgb.firebrick,
+        rgb.tan,            # 5
 
-         rgb.lightSkyBlue,
-         rgb.lightSeaGreen,  # 7
-         rgb.slateBlue,
-         rgb.yellow,
-         rgb.indianRed,      # 10
-         rgb.saddleBrown,
+        rgb.lightSkyBlue,
+        rgb.lightSeaGreen,  # 7
+        rgb.slateBlue,
+        rgb.yellow,
+        rgb.indianRed,      # 10
+        rgb.saddleBrown,
 
-         rgb.midnightBlue,
-         rgb.darkGreen,
-         rgb.blueViolet,
-         rgb.lemonChiffon,
-         rgb.red,
-         rgb.peru,
+        rgb.midnightBlue,
+        rgb.darkGreen,
+        rgb.blueViolet,
+        rgb.lemonChiffon,
+        rgb.red,
+        rgb.peru,
 
-         rgb.steelBlue,
-         rgb.limeGreen,
-         rgb.seashell,
-         rgb.khaki,
-         rgb.peachPuff,
-         rgb.orange,
+        rgb.steelBlue,
+        rgb.limeGreen,
+        rgb.seashell,
+        rgb.khaki,
+        rgb.peachPuff,
+        rgb.orange,
 
-         rgb.azure,
-         rgb.darkOliveGreen,
-         rgb.lavender,
-         rgb.lightGoldenrod,
-         rgb.lightCoral,
-         rgb.darkGoldenrod]
+        rgb.azure,
+        rgb.darkOliveGreen,
+        rgb.lavender,
+        rgb.lightGoldenrod,
+        rgb.lightCoral,
+        rgb.darkGoldenrod,
+    ]
 
-    def __init__(self,
-                 base,
-                 final_sym, stab_sym,
-                 name,
-                 no_of_cols, col_alt=0, cols=None, col_sym=''):
+    # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(
+            self,
+            base,
+            final_sym,
+            stab_sym,
+            name,
+            no_of_cols,
+            col_alt=0,
+            cols=None,
+            col_sym='',
+        ):
         """
         base: the descriptive. A dictionary with 'Vs' and 'Fs'
         final_sym: isometry object describing the final symmetry
@@ -368,15 +401,18 @@ class Shape(Geom3D.OrbitShape):
         self.no_of_cols = no_of_cols
         self.col_alt = col_alt
         self.orbit = Orbit((final_sym, stab_sym))
-        col_choices = self.orbit.higherOrderStabiliserProps
+        col_choices = self.orbit.higher_order_stab_props
         alt_start_index = len(col_choices)
-        col_choices.extend(self.orbit.lowerOrderStabiliserProps)
+        col_choices.extend(self.orbit.lower_order_stab_props)
         fs_orbit = self.isometries
         # find index in col_choices to use
+        idx = 0
+        col_choice = None
         for idx, col_choice in enumerate(col_choices):
             if col_choice['index'] == no_of_cols:
-                if col_sym == '' or col_sym == col_choice['class'].__name__:
+                if col_sym in ["", col_choice['class'].__name__]:
                     break
+        assert col_choice is not None
         assert col_choice['index'] == no_of_cols, f"Cannot divide {no_of_cols} colours"
         # Usefull data:
         # Elements with the same colour are mapped onto eachother by:
@@ -384,15 +420,15 @@ class Shape(Geom3D.OrbitShape):
         # find col symmetry properties
         if idx < alt_start_index:
             col_final_sym = self.orbit.final
-            col_syms = self.orbit.higherOrderStabiliser(idx)
+            col_syms = self.orbit.higher_order_stab(idx)
         else:
-            col_final_sym = self.orbit.altFinal
-            col_syms = self.orbit.lowerOrderStabiliser(idx - alt_start_index)
+            col_final_sym = self.orbit.final_sym_alt
+            col_syms = self.orbit.lower_order_stab(idx - alt_start_index)
             # now the fs_orbit might contain isometries that are not part of
             # the colouring isometries. Recreate the shape with isometries that
             # only have these:
-            final_sym = self.orbit.altFinal
-            stab_sym = self.orbit.altStab
+            final_sym = self.orbit.final_sym_alt
+            stab_sym = self.orbit.stab_sym_alt
             verts = self.getBaseVertexProperties()['Vs']
             faces = self.getBaseFaceProperties()['Fs']
             super().__init__(
@@ -418,7 +454,7 @@ class Shape(Geom3D.OrbitShape):
                     self.col_per_isom.append(self.cols[i])
                     break
         # update with correct format
-        self.setFaceColors([col for col in self.col_per_isom])
+        self.setFaceColors(self.col_per_isom.copy())
 
         # Compound index n means compound of n elements
         self.index = len(fs_orbit)
@@ -454,15 +490,18 @@ class Shape(Geom3D.OrbitShape):
         self.transform_base(geomtypes.Rot3(axis=self.axis, angle=rad))
 
     def reset_rotation(self):
+        """Undo any rotation."""
         self.setVs(self.base_shape.org_Vs)
 
     def to_off(self):
+        """Return to off-format representation."""
         s = self.simple_shape.toOffStr(color_floats=True)
         s += f"# Color alternative based on {self.same_col_isom}\n".format(self.same_col_isom)
         s += f"# Used colour alternative {self.col_alt} (max {self.total_no_of_col_alt - 1})"
         return s
 
     def to_js(self):
+        """Return javascript representation so it can be shown with the showoff library."""
         js = f"var {self.name} = new Object();\n"
         js += f"{self.name}.descr = new Object();\n"
         js += f"{self.name}.descr.Vs = [\n"

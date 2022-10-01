@@ -281,11 +281,11 @@ class CtrlWin(wx.Frame):
         ))
         no_of_cols_choice_lst = [
             f"{p['index']} (based on {p['class'].__name__})"
-            for p in self.orbit.higherOrderStabiliserProps
+            for p in self.orbit.higher_order_stab_props
         ]
         no_of_cols_choice_lst.extend([
             f"{p['index']} (based on {p['class'].__name__})"
-            for p in self.orbit.lowerOrderStabiliserProps
+            for p in self.orbit.lower_order_stab_props
         ])
         self.col_guis = []
         self.col_guis.append(
@@ -499,24 +499,24 @@ class CtrlWin(wx.Frame):
 
         col_div_no = e.GetSelection()
         self.col_alt[0] = col_div_no
-        l0 = len(self.orbit.higherOrderStabiliserProps)
+        l0 = len(self.orbit.higher_order_stab_props)
         assert l0 != 0, 'no higher order stabilisers found'
         if col_div_no < l0:
             self.col_final_sym = self.orbit.final
-            self.col_syms = self.orbit.higherOrderStabiliser(col_div_no)
-            no_of_cols = self.orbit.higherOrderStabiliserProps[
+            self.col_syms = self.orbit.higher_order_stab(col_div_no)
+            no_of_cols = self.orbit.higher_order_stab_props[
                 col_div_no]['index']
         else:
-            self.col_final_sym = self.orbit.altFinal
-            self.col_syms = self.orbit.lowerOrderStabiliser(col_div_no - l0)
-            no_of_cols = self.orbit.lowerOrderStabiliserProps[
+            self.col_final_sym = self.orbit.final_sym_alt
+            self.col_syms = self.orbit.lower_order_stab(col_div_no - l0)
+            no_of_cols = self.orbit.lower_order_stab_props[
                 col_div_no - l0]['index']
             # now the fs_orbit might contain isometries that are not part of
             # the colouring isometries. Recreate the shape with isometries that
             # only have these:
             if self.fs_orbit_org:
-                final_sym = self.orbit.altFinal
-                stab_sym = self.orbit.altStab
+                final_sym = self.orbit.final_sym_alt
+                stab_sym = self.orbit.stab_sym_alt
                 verts = self.shape.getBaseVertexProperties()['Vs']
                 faces = self.shape.getBaseFaceProperties()['Fs']
                 self.shape = Geom3D.OrbitShape(
