@@ -22,10 +22,11 @@
 #-----------------------------------------------------------------
 # $Log$
 #
-import wx
+from enum import Enum
+import json
 import math
 import re
-from enum import Enum
+import wx
 
 from OpenGL.GL import glColor, glEnable, glDisable, glBlendFunc
 from OpenGL.GL import GL_CULL_FACE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
@@ -3316,7 +3317,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.Guis.append(self.nrTxt)
         self.Guis.append(self.prevButton)
         self.Guis.append(self.lastButton)
-        self.openFileButton.Bind(wx.EVT_BUTTON, self.onOpenFile)
+        self.openFileButton.Bind(wx.EVT_BUTTON, self.on_open_file)
         self.firstButton.Bind(wx.EVT_BUTTON, self.onFirst)
         self.nextButton.Bind(wx.EVT_BUTTON, self.onNext)
         self.prevButton.Bind(wx.EVT_BUTTON, self.onPrev)
@@ -3506,12 +3507,12 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         return mainSizer
 
-    def isPrePosValid(self, prePosId):
+    def isPrePosValid(self, pre_pos_id):
         if self.shape.inclReflections:
             psp = self.predefReflSpecPos
         else:
             psp = self.predefRotSpecPos
-        return prePosId in psp
+        return pre_pos_id in psp
 
     def fileStrMapFoldMethodStr(self, filename):
         res = re.search("-fld_([^.]*)\.", filename)
@@ -3538,10 +3539,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def fileStrMapTrisStr(self, filename):
         # New format: incl -pos:
-        res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.py", filename)
+        res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.json", filename)
         if res is None:
             # try old method:
-            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
+            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
         if res:
             tris_str = res.groups()[0]
             return self.trisAlt.mapFileStrOnStr[tris_str]
@@ -3549,13 +3550,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.printFileStrMapWarning(filename, 'fileStrMapTrisStr')
 
     def fileStrMapTrisPos(self, filename):
-        res = re.search("-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.py", filename)
+        res = re.search("-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.json", filename)
         if res:
             tris_pos = res.groups()[0]
             return int(tris_pos)
         else:
             # try old syntax:
-            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.py", filename)
+            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
             if res:
                 return 0
             else:
@@ -3563,7 +3564,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 assert(False)
 
     def fileStrMapFoldPos(self, filename):
-        res = re.search("-fld_[^.]*\.([0-7])-.*\.py", filename)
+        res = re.search("-fld_[^.]*\.([0-7])-.*\.json", filename)
         if res:
             tris_pos = res.groups()[0]
             return int(tris_pos)
@@ -3575,10 +3576,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.prePosGui.Clear()
         prePosStillValid = False
         for prePosStr in self.prePosStrLst:
-            prePosId = self.mapPrePosStr(prePosStr)
-            if self.isPrePosValid(prePosId):
+            pre_pos_id = self.mapPrePosStr(prePosStr)
+            if self.isPrePosValid(pre_pos_id):
                 self.prePosGui.Append(prePosStr)
-                if currentPrePos == prePosId:
+                if currentPrePos == pre_pos_id:
                     prePosStillValid = True
             else:
                 if prePosStr == self.stringify[dyn_pos]:
@@ -4063,17 +4064,15 @@ class FldHeptagonCtrlWin(wx.Frame):
     def prePos(self):
         return self.mapPrePosStr(self.prePosGui.GetStringSelection())
 
-    def openPrePosFile(self, filename):
-        try:
-            print('DBG open', filename)
-            fd = open(filename, 'r')
-        except IOError:
-            print('DBG file not found:\n %s' % filename)
-            return []
-        ed = {'__name__': 'readPyFile'}
-        exec(fd.read(), ed)
-        fd.close()
-        return ed['results']
+    def open_pre_pos_file(self, filename):
+        with open(filename, "r") as fd:
+            data = json.load(fd)
+        assert type(data) == list, f"Expected a JSON holding a list, got {type(data)}"
+        for l in data:
+            assert len(l) in (4, 5, 7), f"Expected elements with a length 4 or 7, got {len(l)}"
+            for i in l:
+                assert type(i) in (int, float), "Expected a number, got {type(i)}"
+        return data
 
     def noPrePosFound(self):
         s = 'Note: no valid positions found'
@@ -4081,17 +4080,17 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.statusBar.SetStatusText(s)
 
     @property
-    def stdPrePos(self):
+    def std_pre_pos(self):
         try:
             return self.sav_stdPrePos
         except AttributeError:
-            prePosId = self.prePos
-            assert prePosId != dyn_pos
-            if prePosId == open_file:
+            pre_pos_id = self.prePos
+            assert pre_pos_id != dyn_pos
+            if pre_pos_id == open_file:
                 filename = self.prePosFileName
                 if filename is None:
                     return []
-                self.sav_stdPrePos = self.openPrePosFile(filename)
+                self.sav_stdPrePos = self.open_pre_pos_file(filename)
                 return self.sav_stdPrePos
             else:
                 # use correct predefined special positions
@@ -4105,20 +4104,20 @@ class FldHeptagonCtrlWin(wx.Frame):
                 return self.sav_stdPrePos
 
     def onPrev(self, event = None):
-        if self.stdPrePos != []:
+        if self.std_pre_pos != []:
             if self.specPosIndex > 0:
                 self.specPosIndex -= 1
             elif self.specPosIndex == -1:
-                self.specPosIndex = len(self.stdPrePos) - 2
-            # else prePosId == 0 : first one selected don't scroll around
+                self.specPosIndex = len(self.std_pre_pos) - 2
+            # else pre_pos_id == 0 : first one selected don't scroll around
             self.onPrePos()
         else:
             self.noPrePosFound()
 
     def onNext(self, event = None):
-        if self.stdPrePos != []:
+        if self.std_pre_pos != []:
             try:
-                maxI = len(self.stdPrePos) - 1
+                maxI = len(self.std_pre_pos) - 1
                 if self.specPosIndex >= 0:
                     if self.specPosIndex < maxI - 1:
                         self.specPosIndex += 1
@@ -4136,17 +4135,17 @@ class FldHeptagonCtrlWin(wx.Frame):
     def showOnlyO3Tris(self):
         return self.prePos == only_xtra_o3s
 
-    def chooseOpenFile(self):
+    def choose_file(self):
         filename = None
         dlg = wx.FileDialog(self, 'New: Choose a file',
-                self.rDir, '', '*.py', wx.FD_OPEN)
+                self.rDir, '', '*.json', wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
                 filename = dlg.GetPath()
         dlg.Destroy()
         return filename
 
-    def onOpenFile(self, e):
-        filename = self.chooseOpenFile()
+    def on_open_file(self, e):
+        filename = self.choose_file()
         if filename is None:
             return
         self.prePosFileName = filename
@@ -4165,13 +4164,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.fileStrMapTrisStr(self.prePosFileName))
         self.onTriangleFill()
         self.tris_position = self.fileStrMapTrisPos(self.prePosFileName)
-        # it's essential that prePosGui is set to dynamic be4 stdPrePos is read
+        # it's essential that prePosGui is set to dynamic be4 std_pre_pos is read
         # otherwise something else than dynamic might be read...
-        openFileStr = self.stringify[open_file]
-        if not openFileStr in self.prePosGui.GetItems():
-                self.prePosGui.Append(openFileStr)
-        self.prePosGui.SetStringSelection(openFileStr)
-        self.resetStdPrePos()
+        open_file_str = self.stringify[open_file]
+        if not open_file_str in self.prePosGui.GetItems():
+                self.prePosGui.Append(open_file_str)
+        self.prePosGui.SetStringSelection(open_file_str)
+        self.reset_std_pre_pos()
         self.onPrePos()
 
     def updateShapeSettings(self, setting):
@@ -4229,7 +4228,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.statusBar.SetStatusText(self.shape.getStatusStr())
         #self.shape.printTrisAngles()
 
-    def resetStdPrePos(self):
+    def reset_std_pre_pos(self):
         try:
             del self.sav_stdPrePos
         except AttributeError:
@@ -4239,6 +4238,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     aNone = 0.0
     fld1None = 0.0
     fld2None = 0.0
+
     def onPrePos(self, event = None):
         c = self.shape
         # remove the "From File" from the pull down list as soon as it is
@@ -4313,8 +4313,8 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.disableGuisNoRefl()
         if self.prePos != dyn_pos:
             if event is not None:
-                self.resetStdPrePos()
-            setting = self.stdPrePos
+                self.reset_std_pre_pos()
+            setting = self.std_pre_pos
             if setting == []:
                 self.noPrePosFound()
                 return
