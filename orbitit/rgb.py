@@ -22,6 +22,9 @@
 #
 #------------------------------------------------------------------
 # This file is a conversion from the linux rgb.txt
+
+# This naming comes directly from rgb.txt, so:
+# pylint: disable=invalid-name
 snow = [0.996094, 0.976562, 0.976562]
 ghostWhite = [0.968750, 0.968750, 0.996094]
 whiteSmoke = [0.957031, 0.957031, 0.957031]
