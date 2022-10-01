@@ -75,7 +75,7 @@ class Shape(Geom3D.CompoundShape):
     #    glEnable(GL_BLEND)
 
 
-class CtrlWin(wx.Frame):
+class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
     """Window with all the controls for the symmetry orbit
 
     Here you can define (or import):
@@ -626,6 +626,15 @@ class CtrlWin(wx.Frame):
         self.update_shape_cols()
 
     def import_json(self, filename):
+        """Retrieve a shape through a JSON file.
+
+        If the shape is an orbit shape, the symmetry settings will be filled in. The vertices and
+        face definitions aren't filled in.
+
+        Return:
+        A SimpleShape is returned. If the shape in the JSON file is an orbit shape, then the base
+        shape is returned.
+        """
         shape = base.Orbitit.from_json_file(filename)
         if not isinstance(shape, Geom3D.SimpleShape) and\
                not isinstance(shape, Geom3D.CompoundShape):
