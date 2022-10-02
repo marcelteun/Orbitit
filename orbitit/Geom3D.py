@@ -118,9 +118,9 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
         result = result and eq(Va[i], Vb[i], margin)
     return result
 
-def isInt(str):
+def is_int(str):
     try:
-        num = int(str)
+        _ = int(str)
         return True
     except ValueError:
         return False
@@ -202,7 +202,7 @@ def read_off_file(fd, regen_edges=True, name=''):
                         if len(words) == lenF + 1:
                             cols.append([0.8, 0.8, 0.8])
                         else:
-                            if isInt(words[lenF+1]):
+                            if is_int(words[lenF+1]):
                                 cols.append(
                                     [float(words[j])/255 for j in range(lenF+1, lenF+4)]
                                 )
