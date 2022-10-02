@@ -668,7 +668,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             if filename[-5:] == '.json':
                 shape = self.import_json(filepath)
             else:
-                with  open(filename) as fd:
+                with  open(filepath) as fd:
                     shape = Geom3D.read_off_file(fd, regen_edges=False)
             verts = shape.Vs
             faces = shape.Fs
