@@ -37,7 +37,7 @@ Like vertices, faecs, symmetries, etc.
 import wx
 import wx.lib.scrolledpanel as wxXtra
 
-from orbitit import geomtypes, isometry
+from orbitit import geomtypes, glue, isometry
 
 # TODO:
 # - filter faces for FacesInput.GetFace (negative nrs, length 2, etc)
@@ -187,7 +187,7 @@ class FloatInput(wx.TextCtrl):
     """An input field for typing floating point numbers"""
     def __init__(self, parent, ident, value, *args, **kwargs):
         """Create an input field for typing floating point numbers"""
-        wx.TextCtrl.__init__(self, parent, ident, str(value), *args, **kwargs)
+        wx.TextCtrl.__init__(self, parent, ident, self.to_str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         # self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
         self.SetMaxLength(18)
@@ -195,6 +195,14 @@ class FloatInput(wx.TextCtrl):
             reason='may break string format for floating point'))
         self.Bind(wx.EVT_CHAR, self.on_char)
         self.on_set = None
+
+    @staticmethod
+    def to_str(value):
+        """Convert float value to a string representation.
+
+        Prevent scientific notation.
+        """
+        return glue.f2s(value)
 
     def bind_on_set(self, on_set):
         """
@@ -301,7 +309,7 @@ class FloatInput(wx.TextCtrl):
     #     SetValue(self, String value)
     def SetValue(self, f):  # pylint: disable=arguments-differ
         """Set value of float input to the specified value"""
-        wx.TextCtrl.SetValue(self, str(f))
+        wx.TextCtrl.SetValue(self, self.to_str(f))
 
 
 class LabeledIntInput(wx.BoxSizer):
@@ -493,9 +501,8 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
         for n in range(no):
             j = len(self._vec)
             self._vec_labels.append(
-                wx.StaticText(self, wx.ID_ANY,
-                              f"{j} ",
-                              style=wx.TE_CENTRE))
+                wx.StaticText(self, wx.ID_ANY, f"{j} ", style=wx.TE_CENTRE)
+            )
             self.column_sizers[0].Add(self._vec_labels[-1], 1)
             self._vec.append([])
             for i in range(1, len(self.__head_lables)):
