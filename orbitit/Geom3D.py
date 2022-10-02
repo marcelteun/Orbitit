@@ -3334,11 +3334,18 @@ class OrbitShape(SymmetricShape):
         stab_sym = D4C4(setup = {'axis_n': v(1, 0, 0), 'normal_r': v(0, 1, 0)})
         colors: the colours per isometry. (use [] for none)
         """
-        try: fsQuotientSet = final_sym  / stab_sym
+        try:
+            fs_quotient_set = final_sym  / stab_sym
         except isometry.ImproperSubgroupError:
             print("ERROR: Stabiliser not a subgroup of final symmetry")
             raise
-        FsOrbit = [coset.get_one() for coset in fsQuotientSet]
+        len_f = len(final_sym)
+        len_s = len(stab_sym)
+        len_q = len(fs_quotient_set)
+        assert len_f % len_s == 0, f"Expected divisable group length {len_f} / {len_s}"
+        assert len_q == len_f // len_s,\
+            f"Wrong length ({len_q} != {len_f // len_s}) of quotient set (increase precisio?)"
+        FsOrbit = [coset.get_one() for coset in fs_quotient_set]
         if not quiet:
             print('Applying an orbit of order %d' % len(FsOrbit))
         super().__init__(

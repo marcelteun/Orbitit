@@ -452,9 +452,15 @@ class Set(set, base.Orbitit):
             self.add(e)
 
     def get_one(self):
-        """Just get any element in the set"""
+        """Just get any element in the set.
+
+        Try to return a direct isometry if possible.
+        """
+        e = None
         for e in self:
-            return e
+            if e.is_direct():
+                return e
+        return e
 
     def group(self, max_iter=50):
         """
