@@ -2465,6 +2465,7 @@ class CompoundShape(base.Orbitit):
         shapes: a list of SimpleShape objects of which the shape is a compound.
         """
         self.name = name
+        self.merge_needed = False
         self.setShapes(shapes)
         if regen_edges:
             self.regen_edges()
@@ -2995,7 +2996,7 @@ class SymmetricShape(CompoundShape):
     def getFaceColors(self):
         return self.shape_colors
 
-    def applyColors(self):
+    def apply_colors(self):
         """
         Divide the shape colors over the isometries and re-assign class field.
         """
@@ -3026,7 +3027,7 @@ class SymmetricShape(CompoundShape):
         This will create all the individual shapes.
         """
         if len(self.shape_colors) != self.order:
-            self.applyColors()
+            self.apply_colors()
         shapes = [
             SimpleShape(
                 self.base_shape.Vs,
@@ -3263,7 +3264,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
         This will create all the individual shapes.
         """
         if len(self.shape_colors) != self.order:
-            self.applyColors()
+            self.apply_colors()
         shapes = [
             SimpleShape(
                 self.base_shape.Vs,
