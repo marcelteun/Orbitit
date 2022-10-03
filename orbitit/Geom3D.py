@@ -1764,8 +1764,9 @@ class SimpleShape(base.Orbitit):
         return doc
 
 
-    def toOffStr(self, precision = 15, info = False,
-                 color_floats=False):
+    def toOffStr(
+            self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
+        ):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
@@ -1775,46 +1776,48 @@ class SimpleShape(base.Orbitit):
         color_floats: whether to export the colours as floating point numbers
                       between 0 and 1. If False an integer 0 to 255 is used.
         """
-        w = lambda a: '%s%s\n' % (s, a)
-        s = ''
-        s = w('OFF')
-        s = w('#')
-        s = w('# %s' % self.name)
-        s = w('#')
-        s = w('# file generated with python script by Marcel Tunnissen')
+        w = lambda a: '{}{}\n'.format(s, a)
+        s = ""
+        s = w("OFF")
+        s = w("#")
+        s = w(f"# {self.name}")
+        s = w("#")
+        s = w("# file generated with python script by Marcel Tunnissen")
         if info:
             self.calculateSphereRadii()
-            s = w('# inscribed sphere(s)    : %s' % str(self.spheresRadii.inscribed))
-            s = w('# mid sphere(s)          : %s' % str(self.spheresRadii.mid))
-            s = w('# circumscribed sphere(s): %s' % str(self.spheresRadii.circumscribed))
+            s = w(f"# inscribed sphere(s)    : {self.spheresRadii.inscribed}")
+            s = w(f"# mid sphere(s)          : {self.spheresRadii.mid}")
+            s = w(f"# circumscribed sphere(s): {self.spheresRadii.circumscribed}")
             d = self.createDihedralAngles()
             for a, Es in d.items():
-                s = w('# Dihedral angle: %s rad (%s degrees) for %d edges' % (
-                    glue.f2s(a, precision),
-                    glue.f2s(a*Rad2Deg, precision),
-                    len(Es)
-                ))
+                s = w(
+                    "# Dihedral angle: {} rad ({} degrees) for {} edges".format(
+                        geomtypes.f2s(a, precision),
+                        geomtypes.f2s(a*Rad2Deg, precision),
+                        len(Es)
+                    )
+                )
                 if len(Es) > 2:
-                    s = w('#                 E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
+                    s = w(f"#                 E.g. {Es[0]}, {Es[1]}, {Es[2]} etc")
             l2e = self.createEdgeLengths()
             for l, Es in l2e.items():
-                s = w('# Length: %s for %d edges' % (
-                    glue.f2s(l, precision), len(Es)
-                ))
+                s = w(f"# Length: {geomtypes.f2s(l, precision)} for {len(Es)} edges")
                 if len(Es) > 2:
-                    s = w('#         E.g. %s, %s, %s, etc' % (Es[0], Es[1], Es[2]))
-        s = w('# Vertices Faces Edges')
-        nrOfFaces = len(self.Fs)
+                    s = w(f"#         E.g. {Es[0]}, {Es[1]}, {Es[2]}, etc")
+        s = w("# Vertices Faces Edges")
+        no_of_faces = len(self.Fs)
         no_of_edges = len(self.Es) // 2
-        s = w('%d %d %d' % (len(self.Vs), nrOfFaces, no_of_edges))
-        s = w('# Vertices')
+        s = w(f"{len(self.Vs)} {no_of_faces} {no_of_edges}")
+        s = w("# Vertices")
         for V in self.Vs:
-            s = w('%s %s %s' % (
-                glue.f2s(V[0], precision),
-                glue.f2s(V[1], precision),
-                glue.f2s(V[2], precision)
-            ))
-        s = w('# Sides and colours')
+            s = w(
+                "{} {} {}".format(
+                    geomtypes.f2s(V[0], precision),
+                    geomtypes.f2s(V[1], precision),
+                    geomtypes.f2s(V[2], precision),
+                )
+            )
+        s = w("# Sides and colours")
         # self.colorData[1] = [] : use self.colorData[0][0]
         # self.colorData[1] = [c0, c1, .. cn] where ci is an index i
         #                     self.colorData[0]
@@ -1825,38 +1828,43 @@ class SimpleShape(base.Orbitit):
         else:
             oneColor = False
             assert len(self.colorData[1]) == len(self.colorData[1])
-        def faceStr(face):
-            s = ('%d  ' % (len(face)))
+
+        def face_str(face):
+            """convert face to string in off-format."""
+            s = f"{len(face)} "
             for fi in face:
-                s = ('%s%d ' % (s, fi))
+                s += f" {fi}"
             if color_floats:
-                s = '{} {:g} {:g} {:g}'.format(s, color[0], color[1], color[2])
+                s += "  {:g} {:g} {:g}".format(color[0], color[1], color[2])
             else:
-                s = '%s %d %d %d' % (
-                        s, color[0] * 255, color[1]*255, color[2]*255)
+                s += "  {:d} {:d} {:d}".format(
+                    int(color[0]*255),
+                    int(color[1]*255),
+                    int(color[2]*255),
+                )
             return s
         if oneColor:
             for face in self.Fs:
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
-                s = '%s%s\n' % (s, faceStr(face))
+                s += f"{face_str(face)}\n"
         else:
             self.createFaceNormals(normalise = True)
-            for i in range(nrOfFaces):
+            for i in range(no_of_faces):
                 face = self.Fs[i]
                 color = self.colorData[0][self.colorData[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
-                s = '%s%s\n' % (s, faceStr(face))
+                s = '%s%s\n' % (s, face_str(face))
                 fnStr = '%s %s %s' % (
-                        glue.f2s(self.fNs[i][0], precision),
-                        glue.f2s(self.fNs[i][1], precision),
-                        glue.f2s(self.fNs[i][2], precision)
+                        geomtypes.f2s(self.fNs[i][0], precision),
+                        geomtypes.f2s(self.fNs[i][1], precision),
+                        geomtypes.f2s(self.fNs[i][2], precision)
                     )
                 if info:
-                    s = w('# face normal: %s' % fnStr)
+                    s = w(f"# face normal: {fnStr}")
         if info:
             for i in range(no_of_edges):
-                s = w('# edge: %d %d' % (self.Es[2*i], self.Es[2*i + 1]))
-        s = w('# END')
+                s = w("# edge: {:d} {:d}".format(self.Es[2*i], self.Es[2*i + 1]))
+        s = w("# END")
         return s
 
     def toPsPiecesStr(self,

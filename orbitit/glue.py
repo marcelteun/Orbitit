@@ -317,16 +317,3 @@ def mergeVs(Vs, Fs, precision = 12):
 #       if replace_by[Es[i]] > -1:
 #           Es[i] = replace_by[Es[i]]
     return replaced
-
-def filterIsUsed(isUsed, flatArray):
-    for i in range(len(flatArray)):
-        flatArray[i] = flatArray[i] - isUsed[flatArray[i]][1]
-
-def f2s(f, precision=14):
-    fmt = f"{{:0.{precision}f}}"
-    s = fmt.format(f)
-    s = s.rstrip('0').rstrip('.')
-    if s != '-0':
-        return s
-    else:
-        return '0'

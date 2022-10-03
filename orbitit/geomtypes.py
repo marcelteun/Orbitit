@@ -30,7 +30,7 @@ Module with geometrical types.
 import json
 import math
 
-from orbitit import base, glue, indent
+from orbitit import base, indent
 
 
 def turn(r):
@@ -100,12 +100,30 @@ def eq(a, b, margin=None):
     return abs(a - b) < margin
 
 
+def f2s(f, precision=FLOAT_OUT_PRECISION):
+    """Get string representation of a float or int with certain precision
+
+    The floating point notation is used with a certain precision. Scientific notication is prevented
+    so that the string can be used in geom_gui.FloatInput. The length of the string representation
+    for the floating point number is minimised, i.e. 0.00001 with precision 4 is written as "0".
+
+    precision: maximum amount of decimal places used for writing out the floating point number.
+    """
+    fmt = f"{{:0.{precision}f}}"
+    s = fmt.format(f)
+    s = s.rstrip('0').rstrip('.')
+    if s != '-0':
+        return s
+    else:
+        return '0'
+
+
 class RoundingFloat(float):
     """Work-around to save the floats in JSON as I want.
 
     see https://stackoverflow.com/questions/54370322
     """
-    __repr__ = staticmethod(lambda x: glue.f2s(x, FLOAT_OUT_PRECISION))
+    __repr__ = staticmethod(lambda x: f2s(x))
 
 json.encoder.c_make_encoder = None
 json.encoder.float = RoundingFloat
@@ -163,7 +181,7 @@ class Vec(tuple, base.Orbitit):
     def __str__(self):
         try:
             return "[{}]".format(
-                ", ".join([glue.f2s(i, FLOAT_OUT_PRECISION) for i in self])
+                ", ".join([f2s(i) for i in self])
             )
         except IndexError:
             return '[]'
@@ -533,19 +551,6 @@ class Transform3(tuple, base.Orbitit):
     def to_json(self):
         pass
 
-    def to_orbit_str(self, prec=FLOAT_OUT_PRECISION):
-        """Return the orbit file format representation for this transform.
-
-        If this is not a proper transform, then UnsupportedTransform is raised
-        """
-        if self.is_rot():
-            return self.__rot2orbit(prec)
-        if self.is_refl():
-            return self.__refl2orbit(prec)
-        if self.is_rot_inv():
-            return self.__rotinv2orbit(prec)
-        raise UnsupportedTransform("Not a (supported) transform")
-
     def __mul__(self, u):
         if isinstance(u, Transform3):
             # self * u =  wLeft * vLeft .. vRight * wRight
@@ -728,20 +733,11 @@ class Transform3(tuple, base.Orbitit):
     def __str_rot(self):
         axis = self.__axis_rot()
         return (
-            f"Rotation of {glue.f2s(to_degrees(self.__angle_rot()), FLOAT_OUT_PRECISION)} "
+            f"Rotation of {f2s(to_degrees(self.__angle_rot()))} "
             "degrees around ["
-            f"{glue.f2s(axis[0], FLOAT_OUT_PRECISION)}, "
-            f"{glue.f2s(axis[1], FLOAT_OUT_PRECISION)}, "
-            f"{glue.f2s(axis[2], FLOAT_OUT_PRECISION)}]"
-        )
-
-    def __rot2orbit(self, prec=FLOAT_OUT_PRECISION):
-        axis = self.__axis_rot()
-        return (
-            f"R {glue.f2s(self.__angle_rot(), prec)} "
-            f"{glue.f2s(axis[0], prec)} "
-            f"{glue.f2s(axis[1], prec)} "
-            f"{glue.f2s(axis[2], prec)}"
+            f"{f2s(axis[0])}, "
+            f"{f2s(axis[1])}, "
+            f"{f2s(axis[2])}]"
         )
 
     def __angle_rot(self):
@@ -862,14 +858,10 @@ class Transform3(tuple, base.Orbitit):
         norm = self.plane_normal()
         return (
             "Reflection in plane with normal ["
-            f"{glue.f2s(norm[0], FLOAT_OUT_PRECISION)}, "
-            f"{glue.f2s(norm[1], FLOAT_OUT_PRECISION)}, "
-            f"{glue.f2s(norm[2], FLOAT_OUT_PRECISION)}]"
+            f"{f2s(norm[0])}, "
+            f"{f2s(norm[1])}, "
+            f"{f2s(norm[2])}]"
         )
-
-    def __refl2orbit(self, prec=FLOAT_OUT_PRECISION):
-        norm = self.plane_normal()
-        return f"S {glue.f2s(norm[0], prec)} {glue.f2s(norm[1], prec)} {glue.f2s(norm[2], prec)}"
 
     def plane_normal(self):
         """If this is a reflection, return the plane normal.
@@ -944,20 +936,12 @@ class Transform3(tuple, base.Orbitit):
         r = self.I()
         axis = r.axis()
         return (
-            f"Rotary inversion of {glue.f2s(to_degrees(r.angle()), FLOAT_OUT_PRECISION)} "
+            f"Rotary inversion of {f2s(to_degrees(r.angle()))} "
             "degrees around ["
-            f"{glue.f2s(axis[0], FLOAT_OUT_PRECISION)}, "
-            f"{glue.f2s(axis[1], FLOAT_OUT_PRECISION)}, "
-            f"{glue.f2s(axis[2], FLOAT_OUT_PRECISION)}]"
+            f"{f2s(axis[0])}, "
+            f"{f2s(axis[1])}, "
+            f"{f2s(axis[2])}]"
         )
-
-    def __rotinv2orbit(self, prec=FLOAT_OUT_PRECISION):
-        """If this is a rotary inversion, return orbit file format string repr.
-
-        Should only be called when this is a rotary inversion
-        """
-        r = self.I()
-        return 'I' + r.to_orbit_str(prec)[1:]
 
     def __angle_rot_inv(self):
         """If this is a rotary inversion, return the angle.

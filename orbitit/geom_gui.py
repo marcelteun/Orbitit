@@ -37,7 +37,7 @@ Like vertices, faecs, symmetries, etc.
 import wx
 import wx.lib.scrolledpanel as wxXtra
 
-from orbitit import geomtypes, glue, isometry
+from orbitit import geomtypes, isometry
 
 # TODO:
 # - filter faces for FacesInput.GetFace (negative nrs, length 2, etc)
@@ -202,7 +202,7 @@ class FloatInput(wx.TextCtrl):
 
         Prevent scientific notation.
         """
-        return glue.f2s(value)
+        return geomtypes.f2s(value)
 
     def bind_on_set(self, on_set):
         """

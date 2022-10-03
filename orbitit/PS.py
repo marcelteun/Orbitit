@@ -23,7 +23,9 @@
 
 import sys
 
+from orbitit.geomtypes import f2s
 from orbitit import glue
+
 
 # TODO: Add standard page sizes here (and check if A4 is correct)
 PageSizeA4 = (559, 774)
@@ -174,8 +176,8 @@ class doc:
             v = Vs[i]
             vStr = '%s  [%s %s] %% %d\n' % (
                 vStr,
-                glue.f2s(v[0], precision),
-                glue.f2s(v[1], precision),
+                f2s(v[0], precision),
+                f2s(v[1], precision),
                 i
             )
         vStr = '%s] def' % vStr
@@ -193,10 +195,10 @@ class doc:
                 oneFaceStr = '%s %d' % (oneFaceStr, vNr)
             fStr_ = '%s[%s]' % (fStr_, oneFaceStr[1:])
         bboxStr = '/bbox [%s %s %s %s] def' % (
-            glue.f2s(minX, precision),
-            glue.f2s(minY, precision),
-            glue.f2s(maxX, precision),
-            glue.f2s(maxY, precision)
+            f2s(minX, precision),
+            f2s(minY, precision),
+            f2s(maxX, precision),
+            f2s(maxY, precision)
         )
         fStr = '/faces [\n'
         break_limit = 78
