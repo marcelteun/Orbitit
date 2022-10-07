@@ -63,6 +63,10 @@ On my system I do
 ```
 source ./init_env
 python -m orbitit
+
+Use "python -m orbitit -h" for more help on additional parameters. Note that you
+can define an environment variable ORBITIT_LIB to point to a library with
+models, e.g. the github repo orbitit-lib.
 ```
 
 ## Errors

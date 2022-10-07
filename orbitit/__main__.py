@@ -172,7 +172,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
 class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Main window holding the shape for the orbitit program"""
     wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
-    def __init__(self, TstScene, shape, filename, *args, **kwargs):
+    def __init__(self, TstScene, shape, filename, export_dir, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.scenes_list = list(SCENES.keys())
         self.current_scene = None
@@ -182,8 +182,8 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.add_menu_bar()
         self.status_bar = self.CreateStatusBar()
         self.scene = None
-        self.export_dir_name = '.'
-        self.import_dir_name = '.'
+        self.export_dir_name = export_dir if export_dir else os.getcwd()
+        self.import_dir_name = os.environ.get("ORBITIT_LIB", os.getcwd())
         self.view_settings_win = None
         self.col_settings_win = None
         self.transform_settings_win = None
@@ -304,7 +304,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def on_open(self, _):
         """Handle event '_' to open file"""
         dlg = wx.FileDialog(
-            self, 'New: Choose a file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
+            self, 'Open an file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             dirname = dlg.GetDirectory()
@@ -789,14 +789,39 @@ def convert_to_off(shape, fd, precision, margin=0):
 if __name__ == "__main__":
     import argparse
 
-    DESCR = """Utility for handling polyhedra."""
+    DESCR = """Utility for handling polyhedra.
+
+    The enviroment variable ORBITIT_LIB can be used to specifiy the default location for importing
+    files (unless you use the filename parameter).
+    """
 
     PARSER = argparse.ArgumentParser(description=DESCR)
     PARSER.add_argument(
         "inputfile",
         metavar='filename',
         nargs="?",
-        help="Input files can either be a python file in a certain format or an off file.",
+        help="Input files can either be a python file in a certain format or an off file. "
+        "If this is specified then the setting for ORBITIT_LIB is overwritten to the path "
+        "of this files.",
+    )
+    PARSER.add_argument(
+        "-e", "--export-dir",
+        metavar="path",
+        help="Export to this directory when exporting files. If nothing is specified, then "
+        "the current working dir is used.",
+    )
+    PARSER.add_argument(
+        "-m", "--margin",
+        type=int,
+        metavar='i',
+        default=10,
+        help="Set the margin for floating point numbers to be considered equal. All numbers with a"
+        "difference that is smaller than 1.0e-<i> will be considered equal.",
+    )
+    PARSER.add_argument(
+        "-o", "--off",
+        metavar='filename',
+        help="Export an input file to an off-file. Specify full path. Any --export-dir is ignored.",
     )
     PARSER.add_argument(
         "-P", "--precision",
@@ -806,27 +831,14 @@ if __name__ == "__main__":
         help="Write floating point numbers with <i> number of decimals.",
     )
     PARSER.add_argument(
-        "-o", "--off",
-        metavar='filename',
-        help="Export an input file to an off-file",
-    )
-    PARSER.add_argument(
         "-p", "--ps",
         metavar='filename',
-        help="Export an input file to post-script",
+        help="Export an input file to post-script. Specify full path. Any --export-dir is ignored.",
     )
     PARSER.add_argument(
         "-y", "--py",
         metavar='filename',
-        help="Export an input file to python",
-    )
-    PARSER.add_argument(
-        "-m", "--margin",
-        type=int,
-        metavar='i',
-        default=10,
-        help="Set the margin for floating point numbers to be considered equal. All numbers with a"
-        "difference that is smaller than 1.0e-<i> will be considered equal.",
+        help="Export an input file to python. Specify full path. Any --export-dir is ignored.",
     )
     PARSER.add_argument(
         "-s", "--scene",
@@ -873,6 +885,7 @@ if __name__ == "__main__":
             Canvas3DScene,
             IN_SHAPE,
             PROG_ARGS.inputfile,
+            PROG_ARGS.export_dir,
             None,
             wx.ID_ANY, "test",
             size=(430, 482),
