@@ -114,7 +114,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.panel.SetSizer(self.main_sizer)
         self.Show(True)
         self.panel.Layout()
-        self.import_dir_name = '.'
+        self.import_dir_name = os.environ.get("ORBITIT_LIB", os.getcwd())
         self.cols = []
         self.select_col_guis = []
         self.orbit = None
