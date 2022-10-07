@@ -656,10 +656,15 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         The file can specify the descriptive and its orientation and the
         symmetries
         """
-        wildcard = "OFF shape (*.off)|*.off|Python shape (*.json)|*.json"
-        dlg = wx.FileDialog(self,
-                            'New: Choose a file', self.import_dir_name,
-                            '', wildcard, wx.FD_OPEN)
+        wildcard = "Python shape (*.json)|*.json|OFF shape (*.off)|*.off"
+        dlg = wx.FileDialog(
+            self,
+            'New: Choose a file',
+            self.import_dir_name,
+            '',
+            wildcard,
+            wx.FD_OPEN,
+        )
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()
