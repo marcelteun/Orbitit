@@ -167,7 +167,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def on_paint(self):
         """Redraw the shape on the OpenGL canvas"""
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-        self.shape.glDraw()
+        self.shape.gl_draw()
 
 class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Main window holding the shape for the orbitit program"""

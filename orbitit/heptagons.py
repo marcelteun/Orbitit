@@ -3051,10 +3051,10 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             s = '%s.%s' % (__name__, s)
         return s
 
-    def glDraw(self):
+    def gl_draw(self):
         if self.updateShape:
             self.setV()
-        Geom3D.CompoundShape.glDraw(self)
+        Geom3D.CompoundShape.gl_draw(self)
 
     def setEdgeAlternative(self, alt = None, oppositeAlt = None):
         if alt is not None:

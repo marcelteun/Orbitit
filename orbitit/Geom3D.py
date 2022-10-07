@@ -825,7 +825,7 @@ class SimpleShape(base.Orbitit):
             dimensional array that contain the vertex indices of the edge.
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
-            is used by glDraw
+            is used by gl_draw
         colors: A tuple that defines the colour of the faces. The tuple consists
                 of the following two items:
                 0. colour definitions:
@@ -1047,7 +1047,7 @@ class SimpleShape(base.Orbitit):
                 to a value <= 0.0.
         color: optianl array with 3 rgb values between 0 and 1.
         Ns: an array of normals (per vertex) This value might be None if the
-            value is not set. If the value is set it is used by glDraw
+            value is not set. If the value is set it is used by gl_draw
         """
         return {
             'Vs': self.Vs,
@@ -1268,7 +1268,7 @@ class SimpleShape(base.Orbitit):
 
     def setEnableDrawFaces(self, draw = True):
         """
-        Set whether the faces need to be drawn in glDraw (or not).
+        Set whether the faces need to be drawn in gl_draw (or not).
 
         draw: optional argument that is True by default. Set to False to
               disable drawing of the faces.
@@ -1495,7 +1495,7 @@ class SimpleShape(base.Orbitit):
         Initialise OpenGL for specific shapes
 
         Enables a derivative to use some specific OpenGL settings needed for
-        this shape. This function is called in glDraw for the first time glDraw
+        this shape. This function is called in gl_draw for the first time gl_draw
         is called.
         """
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
@@ -1507,7 +1507,28 @@ class SimpleShape(base.Orbitit):
 
         self.glInitialised = True
 
-    def glDraw(self):
+    def gl_draw(self):
+        """wrap _gl_draw to be able to catch OpenGL errors"""
+        if self.Vs == []:
+            return
+        Es = self.Es
+        if not self.glInitialised:
+            self.glInit()
+
+        # Check if unity matrix?
+        GL.glPushMatrix()
+
+        try:
+            self._gl_draw()
+        except GL.OpenGL.error.Error:
+            print("OpenGL Error occurred. Did you define PYOPENGL_PLATFORM?")
+        except:
+            GL.glPopMatrix()
+            raise
+
+        GL.glPopMatrix()
+
+    def _gl_draw(self):
         """
         Draw the base element according to the definition of the Vs, Es, Fs and
         colour settings.
@@ -1516,15 +1537,6 @@ class SimpleShape(base.Orbitit):
         setFaceProperties to specify how and whether to draw the vertices, edges
         and faces respectively.
         """
-        if self.Vs == []: return
-        Es = self.Es
-        if not self.glInitialised:
-            self.glInit()
-        # have this one here and not in glDraw, so that a client can call this
-        # function as well (without having to think about this)
-
-        # Check if unity matrix?
-        GL.glPushMatrix()
         GL.glMultMatrixd(self.orientation.glMatrix())
         if self.gl.updateVs:
             # calculate the gravitational centre. Only calculate the vertices
@@ -1548,12 +1560,14 @@ class SimpleShape(base.Orbitit):
             # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
             if not self.generateNormals:
                 try:
-                    GL.glVertexPointerf(Vs)
+                    if not GL.glVertexPointerf(Vs):
+                        return
                     Ns = self.Ns
                 except TypeError:
                     Vs = [ [v[0], v[1], v[2]] for v in Vs ]
-                    print("glDraw: converting Vs(Ns); vec3 type not accepted")
-                    GL.glVertexPointerf(Vs)
+                    print("gl_draw: converting Vs(Ns); vec3 type not accepted")
+                    if not GL.glVertexPointerf(Vs):
+                        return
                     Ns = [ [v[0], v[1], v[2]] for v in self.Ns ]
                 if Ns != []:
                     assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
@@ -1564,19 +1578,22 @@ class SimpleShape(base.Orbitit):
                     self.NsSaved = Vs
             elif self.Ns != [] and len(self.Ns) == len(Vs):
                 try:
-                    GL.glVertexPointerf(Vs)
+                    if not GL.glVertexPointerf(Vs):
+                        return
                     Ns = self.Ns
                 except TypeError:
                     Vs = [ [v[0], v[1], v[2]] for v in Vs ]
-                    print("glDraw: converting Vs(Ns); vec3 type not accepted")
-                    GL.glVertexPointerf(Vs)
+                    print("gl_draw: converting Vs(Ns); vec3 type not accepted")
+                    if not GL.glVertexPointerf(Vs):
+                        return
                     Ns = [ [n[0], n[1], n[2]] for n in self.Ns ]
                 GL.glNormalPointerf(Ns)
                 self.NsSaved = Ns
             else:
                 self.createVertexNormals(True, Vs)
                 if self.nVs != []:
-                    GL.glVertexPointerf(self.nVs)
+                    if not GL.glVertexPointerf(self.nVs):
+                        return
                 GL.glNormalPointerf(self.vNs)
                 self.NsSaved = self.vNs
                 Vs = self.nVs
@@ -1584,7 +1601,8 @@ class SimpleShape(base.Orbitit):
             self.VsSaved = Vs
         else:
             if self.gl.alwaysSetVertices:
-                GL.glVertexPointerf(self.VsSaved)
+                if not GL.glVertexPointerf(self.VsSaved):
+                    return
                 GL.glNormalPointerf(self.NsSaved)
         # VERTICES
         if self.gl.addSphereVs:
@@ -1669,7 +1687,6 @@ class SimpleShape(base.Orbitit):
                             GL.glDepthMask(GL.GL_TRUE)
                         # ready, disable stencil
                         GL.glDisable(GL.GL_STENCIL_TEST)
-        GL.glPopMatrix()
 
     def toX3dNode(self, id = 'SISH', precision = 5, edgeRadius = 0):
         """
@@ -2604,13 +2621,13 @@ class CompoundShape(base.Orbitit):
         """
         self.simple_shape.cleanShape(precision)
 
-    def glDraw(self):
+    def gl_draw(self):
         """Draws the compound shape as compound shape
 
         If you want to draw it as one, draw the SimpleShape instead
         """
         for shape in self.shapeElements:
-            shape.glDraw()
+            shape.gl_draw()
 
     def regen_edges(self):
         for shape in self.shapeElements:
@@ -2849,7 +2866,7 @@ class SymmetricShape(CompoundShape):
             dimensional array that contain the vertex indices of the edge.
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
-            is used by glDraw
+            is used by gl_draw
         colors: optional array parameter describing the colours. Each element consists of RGB
             channel values (between 0 and 1). There should be an RGB value for each isometry..
         isometries: a list of all isometries that are needed to reproduce all
@@ -3183,13 +3200,13 @@ class SymmetricShape(CompoundShape):
         """
         return self.base_shape.getFaceProperties()
 
-    def glDraw(self):
+    def gl_draw(self):
         if self.show_base_only:
-            self.base_shape.glDraw()
+            self.base_shape.gl_draw()
         else:
             if self.needs_apply_isoms:
                 self.apply_isoms()
-            CompoundShape.glDraw(self)
+            CompoundShape.gl_draw(self)
 
     def toPsPiecesStr(self,
             faceIndices=[],
@@ -3231,7 +3248,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
             dimensional array that contain the vertex indices of the edge.
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
-            is used by glDraw
+            is used by gl_draw
         colors: optional array parameter describing the colours. Each element
                 consists of a tuple similar to the the 'colors' parameter from
                 SimpleShape; see the __init__ function of that class. The tuples
@@ -3320,7 +3337,7 @@ class OrbitShape(SymmetricShape):
             dimensional array that contain the vertex indices of the edge.
         Ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
-            is used by glDraw
+            is used by gl_draw
         final_sym: the resulting symmetry of the shape.
         stab_sym: the symmetry of the stabiliser, which is a subgroup of final_sym
         colors: optional array parameter describing the colours. Each element consists of RGB

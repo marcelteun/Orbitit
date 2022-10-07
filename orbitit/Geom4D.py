@@ -145,7 +145,7 @@ class SimpleShape:
                 to a value <= 0.0.
         color: optianl array with 3 rgb values between 0 and 1.
         Ns: an array of normals (per vertex) This value might be None if the
-            value is not set. If the value is set it is used by glDraw
+            value is not set. If the value is set it is used by gl_draw
         """
         if this.dbgTrace:
             print('%s.getVertexProperties(%s,..):' % (this.__class__, this.name))
@@ -507,7 +507,7 @@ class SimpleShape:
         Initialise OpenGL for specific shapes
 
         Enables a derivative to use some specific OpenGL settings needed for
-        this shape. This function is called in glDraw for the first time glDraw
+        this shape. This function is called in gl_draw for the first time gl_draw
         is called.
         """
         if this.dbgTrace:
@@ -521,18 +521,18 @@ class SimpleShape:
 
         this.glInitialised = True
 
-    def glDraw(this):
+    def gl_draw(this):
         if not this.glInitialised:
             this.glInit()
         if this.mapToSingeShape:
             this.glDrawSingleRemoveUnscaledEdges()
             this.cell.generateNormals = this.generateNormals
-            this.cell.glDraw()
+            this.cell.gl_draw()
         else:
             this.glDrawSplit()
             for cell in this.cells:
                 cell.generateNormals = this.generateNormals
-                cell.glDraw()
+                cell.gl_draw()
 
     def glDrawSingleRemoveUnscaledEdges(this):
         isScaledDown = not Geom3D.eq(this.c.scale, 1.0, margin = 0.001)
