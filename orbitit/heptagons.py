@@ -24,6 +24,7 @@
 #
 from enum import Enum
 import json
+import logging
 import math
 import re
 import wx
@@ -195,7 +196,6 @@ class TrisAlt_base(object):
         t = t.replace('_i', '_I')
         t = t.replace('alt.', 'alt')
         t = t.replace('rot.', 'rot')
-        #print 'DBP map(%s) ==> %s' % (self.stringify[trisFillId], t)
         return t
 
     baseKey = {}
@@ -2922,7 +2922,6 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
                 the preferred position is returned, otherwise the heptagon will
                 be 'upside down'.
     """
-    #print 'heptPosAlt', heptPosAlt
     if not heptPosAlt:
         Vl = Vec(Left)
         Vt = Vec(Top)
@@ -2939,13 +2938,12 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     w = Dr.norm()
     f = Du.norm()
     g = (Vo - Vb).norm()
-    #print 'f', f, 'g', g
 
     if f == 0:
-        print('Kite2Hept: warning f == 0')
+        logging.warning('Kite2Hept: f == 0')
         return
     if w == 0:
-        print('Kite2Hept: warning w == 0')
+        logging.warning('Kite2Hept: warning w == 0')
         return
     #if f > g:
     #    f, g = g, f
@@ -2963,20 +2961,19 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
 
     #assert(root>=0)
     if root < 0:
-        print('kite2Hept: negative sqrt requested')
+        logging.warning('kite2Hept: negative sqrt requested')
         return
 
     nom   = (f + g)
     denom = qkpr + V(root)
 
     if denom == 0:
-        print('kite2Hept: error denom == 0')
+        logging.warning('kite2Hept: denom == 0')
         return
 
     w1    =  nom / denom
 
     w1Rel = w1 / w
-    #print 'c', w1Rel
     w2Rel = k * w1Rel
     w3Rel = m * w1Rel
 
@@ -3080,7 +3077,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.updateShape = True
 
     def setTriangleFillPosition(self, position):
-        print("WARNING: implement in derived class")
+        logging.warning("implement in derived class")
 
     def setFold1(self, angle=None, oppositeAngle = None):
         if angle is not None:
@@ -3590,7 +3587,6 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.prePosGui.SetStringSelection(self.stringify[dyn_pos])
 
     def rmControlsSizer(self):
-        #print "rmControlsSizer"
         # The 'try' is necessary, since the boxes are destroyed in some OS,
         # while this is necessary for Ubuntu Hardy Heron.
         for Box in self.Boxes:
@@ -3615,7 +3611,6 @@ class FldHeptagonCtrlWin(wx.Frame):
         event.Skip()
 
     def onDihedralAngle(self, event):
-        #print self.GetSize()
         self.shape.setDihedralAngle(
             Geom3D.Deg2Rad * self.dihedralAngleGui.GetValue())
         self.statusBar.SetStatusText(self.shape.getStatusStr())
@@ -3949,7 +3944,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.prevTrisFill != self.trisAlt.twist_strip_I and
                 self.prevOppTrisFill != self.trisAlt.twist_strip_I
             ):
-                print('---------nvidia-seg-fault-work-around-----------')
+                logging.info('---------nvidia-seg-fault-work-around-----------')
                 self.nvidea_workaround_0()
                 self.restoreShape = self.canvas.shape
             self.shape.setV() # make sure the shape is updated
@@ -4075,8 +4070,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         return data
 
     def noPrePosFound(self):
-        s = 'Note: no valid positions found'
-        print(s)
+        logging.info("Note: no valid positions found")
         self.statusBar.SetStatusText(s)
 
     @property
@@ -4201,9 +4195,8 @@ class FldHeptagonCtrlWin(wx.Frame):
                 oppFld2 = fld2
                 vStr = '%s] =' % vStr
                 dbgStr = '%s]' % dbgStr
-            print(vStr)
-            print(dbgStr)
-            print('----------------------------------------------------')
+            logging.info(vStr)
+            logging.info(dbgStr)
             # Ensure self.specPosIndex in range:
         nrPos = len(setting)
         maxI = nrPos - 1
@@ -4277,10 +4270,6 @@ class FldHeptagonCtrlWin(wx.Frame):
             elif (self.restoreO3s):
                 self.restoreO3s = False
                 self.shape.onlyRegFs = False
-#           try:
-#           except AttributeError:
-#               print 'DBG key eror for trisFill: "%s"' % self.trisFillGui.GetStringSelection()
-#               pass
 
             # get fold, tris alt
             sps = self.specPosSetup
@@ -4572,7 +4561,6 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.prePosSelected = False
 
     def onKiteAngleAdjust(self, event):
-        #print 'size =', self.dynDlg.GetClientSize()
         self.setNoPrePos()
         self.shape.setAngle(self.Slider2Angle(self.kiteAngleGui.GetValue()))
         self.canvas.paint()

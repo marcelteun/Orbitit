@@ -247,10 +247,10 @@ class Shape(heptagons.EqlHeptagonShape):
         this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
 
     def toPsPiecesStr(this,
-            faceIndices = [],
-            scaling = 1,
-            precision = 7,
-            margin = 1.0e-10
+            faceIndices=[],
+            scaling=1,
+            precision=7,
+            margin=1.0e-10,
         ):
         if faceIndices == []:
             offset = 0
@@ -263,7 +263,6 @@ class Shape(heptagons.EqlHeptagonShape):
             if this.showXtra:
                 faceIndices.append(offset)
                 faceIndices.append(offset+3)
-        #print faceIndices
         return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
 
     def initArrs(this):
@@ -366,7 +365,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         parentSizer.Add(this.specialPosGui, 18, wx.EXPAND)
 
     def onSpecialPos(this, event = None):
-        #print 'onSpecialPos'
         index = this.specialPosGui.GetSelection()
         angleData = this.specialAngles[index]
         angle = angleData['a']

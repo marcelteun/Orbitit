@@ -293,15 +293,13 @@ class Shape(heptagons.EqlHeptagonShape):
         this.setBaseFaceProperties(Fs=Fs, colors=(this.theColors, colIds))
 
     def toPsPiecesStr(this,
-            faceIndices = [],
-            scaling = 1,
-            precision = 7,
-            margin = 1.0e-10
+            faceIndices=[],
+            scaling=1,
+            precision=7,
+            margin=1.0e-10,
         ):
         if faceIndices == []:
             offset = 0
-            #for f in range(len(this.Fs)):
-            #    print 'F[', f, '] =', this.Fs[f]
             if this.showKite:
                 faceIndices.append(offset)
                 offset += len(this.kiteFs)
@@ -314,7 +312,6 @@ class Shape(heptagons.EqlHeptagonShape):
                     faceIndices.append(offset+1)
                 else:
                     faceIndices.append(offset+3)
-        #print 'faceIndices', faceIndices
         return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
 
     def initArrs(this):
@@ -421,7 +418,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         parentSizer.Add(specPosSizer,      15, wx.EXPAND)
 
     def onMinMaxPos(this, event = None):
-        #print 'onMinMaxPos'
         index = this.minMaxPosGui.GetSelection()
         angleData = this.minMaxAngles[index]
         angle = angleData['a']
@@ -447,7 +443,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
                 this.altHeptSpecPosGui.SetSelection(0)
 
     def onPrefHeptSpecPos(this, event = None):
-        #print 'onPrefHeptSpecPos'
         index = this.prefHeptSpecPosGui.GetSelection()
         angleData = this.prefHeptSpecAngles[index]
         angle = angleData['a']
@@ -477,7 +472,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
                 this.altHeptSpecPosGui.SetSelection(0)
 
     def onAltHeptSpecPos(this, event = None):
-        #print 'onAltHeptSpecPos'
         index = this.altHeptSpecPosGui.GetSelection()
         angleData = this.altHeptSpecAngles[index]
         angle = angleData['a']

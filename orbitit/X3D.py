@@ -21,6 +21,7 @@
 #
 #------------------------------------------------------------------
 
+import logging
 import string
 import time
 
@@ -42,9 +43,6 @@ def defAttrs(**dict): return dict
 def reindent(s):
     return "\n  ".join(s.split("\n"))
 
-dbgPrn = True
-dbgPrn = False
-
 class Index:
     def __init__(this, indexLst = None):
         this.indexLst = indexLst
@@ -53,7 +51,7 @@ class Index:
         return this.toX3DStr()
 
     def toX3DStr(this):
-        if dbgPrn: print('Index.toX3DStr:', this.indexLst)
+        logging.debug(f"Index.toX3DStr: {this.indexLst}")
         indexStr = ''
         if this.indexLst != None:
             for i in this.indexLst:
@@ -173,7 +171,7 @@ class Node:
             else:
                 arrStr = '%s\n' % arrStr
             arrStr = '%s%s' % (arrStr, this.valueToVrmlStr(arrValue))
-            if dbgPrn: print('Node.arrToVrmlStr:', arrStr)
+            logging.debug(f"Node.arrToVrmlStr: {arrStr}")
         return arrStr
 
     def toVrmlStr(this):

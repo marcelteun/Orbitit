@@ -213,7 +213,6 @@ class CtrlWin(wx.Frame):
         for i in range(0, len(this.showGui), 2):
             if this.showGui[i].GetId() == event.GetId():
                 this.shape.setShowGroup(i//2, this.showGui[i].IsChecked())
-        #print 'Ctrl Window size:', (this.GetClientSize()[0], this.GetClientSize()[1])
         this.canvas.paint()
 
     def onShowCells(this, event):

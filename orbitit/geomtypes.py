@@ -28,6 +28,7 @@ Module with geometrical types.
 
 
 import json
+import logging
 import math
 
 from orbitit import base, indent
@@ -191,7 +192,6 @@ class Vec(tuple, base.Orbitit):
 
     def __radd__(self, w):
         # provide __radd__ for [..] + Vec([..])
-        # print 'v', self, 'w', w
         return self.__class__([a + b for a, b in zip(self, w)])
 
     def __sub__(self, w):
@@ -574,15 +574,16 @@ class Transform3(tuple, base.Orbitit):
         else:
             is_eq = self[0] == u[0] and self[1] == u[1]
             if is_eq:
-                print('fallback:',
-                      self[0], '==', u[0], 'and', self[1], '==', u[1])
+                logging.info(
+                    f"fallback: {self[0]} == {u[0]} and {self[1]} == {u[1]}"
+                )
             assert not is_eq, \
                 f"oops, fallback: unknown transform \n{self}\nor\n{u}"
             return is_eq
         if (is_eq and (self.__hash__() != u.__hash__())):
-            print(
-                "\n*** Note: transforms considered equal, but hashes aren't for"
-                f"\n{self} and\n{u}"
+            logging.INFO(
+                f"Note: transforms considered equal, but hashes will not be for\n"
+                "{self} and\n{u}"
             )
         return is_eq
 

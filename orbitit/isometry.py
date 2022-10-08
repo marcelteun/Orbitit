@@ -27,6 +27,7 @@
 
 
 from copy import copy, deepcopy
+import logging
 import math
 
 from orbitit import base, geomtypes, glue, indent
@@ -494,8 +495,8 @@ class Set(set, base.Orbitit):
     def chk_setup(self, setup):
         """Check whether all keys in setup are legitimate"""
         if setup != {} and not self.init_pars:
-            print(
-                f"Warning: class {self.__class__.__name__} doesn't handle "
+            logging.warning(
+                f"class {self.__class__.__name__} doesn't handle "
                 f"any setup pars {list(setup.keys())}"
             )
         for k in list(setup.keys()):

@@ -40,6 +40,7 @@ symmetry)
 # pylint: disable=too-many-statements,too-many-locals,too-many-branches
 
 
+import logging
 import os
 import wx
 import wx.lib.colourselect as wxLibCS
@@ -47,21 +48,6 @@ import wx.lib.colourselect as wxLibCS
 from orbitit import base, Geom3D, geom_gui, geomtypes, isometry, orbit, rgb
 
 TITLE = 'Create Polyhedron by Orbiting'
-
-LOG_DBG = 1
-LOG_INFO = 2
-LOG_WARN = 3
-LOG_ERR = 4
-
-LOG_TXT = {
-    LOG_DBG:  'DEBUG',
-    LOG_INFO: 'INFO',
-    LOG_WARN: 'WARNING',
-    LOG_ERR:  'ERROR',
-}
-
-LOG_STDOUT_LVL = LOG_INFO  # or WARN?
-LOG_BAR_LVL = LOG_INFO
 
 
 class Shape(Geom3D.CompoundShape):
@@ -306,8 +292,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         try:
             return self.final_sym_setup[sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_get_final_sym_setup: '
-                  '1st time = ok')
+            logging.info(
+                "Note: ignoring error at on_get_final_sym_setup: 1st time = ok"
+            )
             return None
 
     def on_get_stab_sym_setup(self, sym_idx):
@@ -317,8 +304,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         try:
             return self.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
-            print('Note: ignoring error at on_get_stab_sym_setup: '
-                  '1st time = ok')
+            logging.info(
+                "Note: ignoring error at on_get_stab_sym_setup: 1st time = ok"
+            )
             return None
 
     def on_final_sym_select(self, sym):
@@ -380,7 +368,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         verts = self.show_gui[self._vs_gui_idx].get()
         faces = self.show_gui[self._fs_gui_idx].get()
         if faces == []:
-            self.status_text('No faces defined!', LOG_ERR)
+            self.status_text('No faces defined!', logging.ERROR)
             return
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
         final_sym_obj = final_sym_gui.get_selected()
@@ -400,7 +388,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             )
         except isometry.ImproperSubgroupError:
             self.status_text(
-                'Stabiliser not a subgroup of final symmetry!', LOG_ERR)
+                'Stabiliser not a subgroup of final symmetry!', logging.ERROR)
             if e is not None:
                 e.Skip()
             return
@@ -420,19 +408,22 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.panel.Layout()
         self.status_text(
             f"{self.shape.order} symmetries applied: choose colours!",
-            LOG_INFO,
+            logging.INFO,
         )
         if not self.cols:
             self.cols = [(255, 100, 0)]
         if e is not None:
             e.Skip()
 
-    def status_text(self, txt, lvl=LOG_INFO):
-        """Set the status bar log to specified text"""
-        txt = f"{LOG_TXT[lvl]}: {txt}"
-        if lvl >= LOG_STDOUT_LVL:
-            print(txt)
-        if lvl >= LOG_BAR_LVL:
+    def status_text(self, txt, level=logging.INFO):
+        """Set the status bar log to specified text
+
+        txt: a message to log
+        level: the level from the logging module
+        """
+        logging.getLogger().log(level, txt)
+        if level >= logging.INFO:
+            txt = f"{logging.getLevelName(level)}: {txt}"
             self.stat_bar.SetStatusText(txt)
 
     def update_orientation(self, angle, axis):
@@ -441,7 +432,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             rot = geomtypes.E
             self.status_text(
                 'Rotation axis is the null-vector: applying identity',
-                LOG_INFO
+                logging.INFO
             )
         else:
             rot = geomtypes.Rot3(
@@ -453,7 +444,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         except AttributeError:
             self.status_text(
                 'Apply symmetry first, before pulling the slide-bar',
-                LOG_WARN
+                logging.WARNING
             )
 
     def on_rot(self, angle, axis):
@@ -585,7 +576,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.shape.setFaceColors(cols)
         self.status_text(
             f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
-            LOG_INFO)
+            logging.INFO)
         self.canvas.paint()
 
     # move to general class
@@ -633,7 +624,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         shape = base.Orbitit.from_json_file(filename)
         if not isinstance(shape, Geom3D.SimpleShape) and\
                not isinstance(shape, Geom3D.CompoundShape):
-            self.status_text("The JSON file doesn't represent a shape", LOG_ERR)
+            self.status_text("The JSON file doesn't represent a shape", logging.ERROR)
         # For Compound derived shapes (isinstance) use merge:
         if isinstance(shape, Geom3D.OrbitShape):
             final_sym = shape.final_sym
@@ -668,7 +659,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()
-            print("opening file:", filename)
+            logging.info(f"opening file: {filename}")
             filepath = os.path.join(self.import_dir_name, filename)
             if filename[-5:] == '.json':
                 shape = self.import_json(filepath)
@@ -677,7 +668,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                     shape = Geom3D.read_off_file(fd, regen_edges=False)
             verts = shape.Vs
             faces = shape.Fs
-            print('read ', len(verts), ' Vs and ', len(faces), ' Fs.')
+            logging.info(f"read {len(verts)} Vs and {len(faces)} Fs.")
             self.show_gui[self._vs_gui_idx].set(verts)
             self.show_gui[self._fs_gui_idx].set(faces)
             self.name = filename

@@ -120,11 +120,11 @@ class TestSimpleShape(unittest.TestCase):
     def test_export_to_ps(self):
         """Test export to PostScript function"""
         self.ensure_shape()
-        tst_str = self.shape.toPsPiecesStr(scaling=self.scale,
-                                           precision=self.ps_precision,
-                                           margin=math.pow(10,
-                                                           -self.ps_margin),
-                                           suppressWarn=True)
+        tst_str = self.shape.toPsPiecesStr(
+            scaling=self.scale,
+            precision=self.ps_precision,
+            margin=math.pow(10, -self.ps_margin),
+        )
         result, msg = chk_with_org(self.name + ".ps", tst_str)
         self.assertTrue(result, msg)
 

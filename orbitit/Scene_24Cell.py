@@ -314,7 +314,6 @@ class Shape(Geom4D.SimpleShape):
                 else:
                     Cs.append([])
                     colIds.append([])
-        #print 'nr of cols', len(colIds), 'nr of faces', len(Cs)
         if showTranspII:
             for i in range(8):
                 if this.showWichTranspII[i]:
@@ -338,14 +337,6 @@ class Shape(Geom4D.SimpleShape):
                 else:
                     Cs.append([])
                     colIds.append([])
-        #i = 0
-        #for cell in Cs:
-        #    print i, cell
-        #    i+=1
-        #i = 0
-        #for cellCol in colIds:
-        #    print i, cellCol
-        #    i+=1
         this.setCellProperties(Cs = Cs)
         this.setFaceProperties(colors = (Cols, colIds))
 
@@ -386,10 +377,6 @@ class Shape(Geom4D.SimpleShape):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glEnable(GL_BLEND)
 
-#    def onVs4DTransformed(this):
-#        # order...?
-#        print this.Vs4D[5]
-
 class CtrlWin(wx.Frame):
     def __init__(this, shape, canvas, *args, **kwargs):
         this.shape = shape
@@ -407,8 +394,6 @@ class CtrlWin(wx.Frame):
         this.panel.SetSizer(this.mainSizer)
         this.Show(True)
         this.panel.Layout()
-        #s = this.GetClientSize()
-        #print 'Ctrl Window size:', (s[0]+2, s[1])
 
     def createControlsSizer(this):
         ctrlSizer = wx.BoxSizer(wx.VERTICAL)
@@ -497,7 +482,6 @@ class CtrlWin(wx.Frame):
         this.showTranspIListGui.SetSelection(event.GetSelection())
         list = [ this.showTranspIListGui.IsChecked(i) for i in range(8) ]
         this.shape.setShowWhichTranspI(list)
-        #print 'Ctrl Window size:', (this.GetClientSize()[0]+2, this.GetClientSize()[1])
         this.canvas.paint()
 
     def onShowTranspIIList(this, event):

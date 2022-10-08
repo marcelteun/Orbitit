@@ -196,7 +196,6 @@ class Shape(heptagons.FldHeptagonShape):
         #angle = Geom3D.Rad2Deg * this.dihedralAngle
         s = heptagons.FldHeptagonShape.getStatusStr(this)
         if this.updateShape:
-            #print 'getStatusStr: forced setV'
             this.setV()
         Vs = this.baseVs
         if this.inclReflections:
@@ -283,15 +282,6 @@ class Shape(heptagons.FldHeptagonShape):
         #                      o2
         #
         #         2' = 8                7 = 5'
-
-        #print '  --> triangle fill alt', this.edgeAlternative, this.oppEdgeAlternative
-        #print '  --> triangle fill pos', this.triangleFillPosition
-        #print '  --> fold1', this.fold1, this.oppFold1
-        #print '  --> fold2', this.fold2, this.oppFold2
-        #print '  --> height', this.height
-        #print '  --> dihedralAngle', this.dihedralAngle
-        #print '  --> posAngle', this.posAngle
-        #print '------Shape.setV--------------------'
 
         this.posHeptagon()
         Vs = this.heptagon.Vs[:]
@@ -389,15 +379,7 @@ class Shape(heptagons.FldHeptagonShape):
             isom_shape.show_base_only = not this.apply_symmetries
         this.setShapes(theShapes)
         #rad = this.getRadii()
-        #print 'min radius:', rad[0], 'max radius:', rad[1]
         this.updateShape = False
-        #print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][0], Vs[0][1], Vs[0][2])
-        #print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][0], Vs[1][1], Vs[1][2])
-        #print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][0], Vs[2][1], Vs[2][2])
-        #print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][0], Vs[3][1], Vs[3][2])
-        #print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][0], Vs[4][1], Vs[4][2])
-        #print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][0], Vs[5][1], Vs[5][2])
-        #print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][0], Vs[6][1], Vs[6][2])
 
     def initArrs(this):
 
@@ -858,8 +840,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
     rPre = 'frh-roots'
 
     def printFileStrMapWarning(this, filename, funcname):
-        print('%s:' % funcname)
-        print('  WARNING: unable to interprete filename', filename)
+        logging.warning(f"unable to interprete filename {filename}")
 
     @property
     def specPosSetup(this):
@@ -874,7 +855,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
                 this.specPosIndex = -1
             data = psp[this.prePos][this.specPosIndex]
             if 'file' in data:
-                print('see file %s/%s' % (this.rDir, data['file']))
+                logging.info("see file {this.rDir}/{in_data['file']}")
             return data
 
     predefReflSpecPos = {

@@ -21,6 +21,7 @@
 #
 #------------------------------------------------------------------
 
+import logging
 import math
 
 from orbitit import Geom3D, geomtypes, glue, PS, rgb
@@ -43,15 +44,11 @@ class Plane:
     ZW = Axis.Z | Axis.W
 
 class SimpleShape:
-    dbgPrn = False
-    dbgTrace = False
     className = "Geom4D.SimpleShape"
     def __init__(this, Vs, Cs, Es = [], Ns = [], colors = ([], []), name = "4DSimpleShape"):
         """
         Cs: and array of cells, consisting of an array of Fs.
         """
-        if this.dbgTrace:
-            print('%s.SimpleShape.__init__(%s,..):' % (this.__class__name))
         this.dimension = 4
         this.generateNormals = False
         this.v = Geom3D.Fields()
@@ -59,7 +56,6 @@ class SimpleShape:
         this.f = Geom3D.Fields()
         this.c = Geom3D.Fields()
         # SETTINGS similar to Geom3D.SimpleShape:
-        #print 'SimpleShape.Fs', Fs
         this.name = name
         if colors[0] == []:
             colors = ([rgb.gray95[:]], [])
@@ -90,14 +86,6 @@ class SimpleShape:
         # expresses whether the 4D coordinates need to be updated:
         this.rot4 = None
         this.projectedTo3D = False
-        if this.dbgPrn:
-            print('%s.__init__(%s,..)' % (this.__class__, this.name))
-            print('this.colorData:')
-            for i in range(len(this.colorData[0])):
-                print(('%d.' % i), this.colorData[0][i])
-            if len(this.colorData[0]) > 1:
-                assert this.colorData[0][1] != [0]
-            print(this.colorData[1])
 
     def setVertexProperties(this, dictPar = None, **kwargs):
         """
@@ -116,8 +104,6 @@ class SimpleShape:
         This can be used to copy settings from one shape to another.
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        if this.dbgTrace:
-            print('%s.setVertexProperties(%s,..):' % (this.__class__, this.name))
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -147,8 +133,6 @@ class SimpleShape:
         Ns: an array of normals (per vertex) This value might be None if the
             value is not set. If the value is set it is used by gl_draw
         """
-        if this.dbgTrace:
-            print('%s.getVertexProperties(%s,..):' % (this.__class__, this.name))
         return {
             'Vs': this.Vs,
             'radius': this.v.radius,
@@ -174,8 +158,6 @@ class SimpleShape:
         This can be used drawFacesto copy settings from one shape to another.
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        if this.dbgTrace:
-            print('%s.setEdgeProperties(%s,..):' % (this.__class__, this.name))
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -244,8 +226,6 @@ class SimpleShape:
         drawEdges: settings that expresses whether the edges should be drawn at
                    all.
         """
-        if this.dbgTrace:
-            print('%s.getEdgeProperties(%s,..):' % (this.__class__, this.name))
         return {'Es': this.Es,
                 'radius': this.e.radius,
                 'color': this.e.col,
@@ -278,16 +258,13 @@ class SimpleShape:
         This can be used to copy settings from one shape to another.
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        loc = '%s.setFaceProperties(%s,..): warning' % (this.__class__, this.name)
-        if this.dbgTrace:
-            print(loc)
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
             else:
                 dict = kwargs
             if 'Fs' in dict and dict['Fs'] != None:
-                print('%s: FS not supported, use Cs instead' % (loc))
+                logging.info("FS not supported, use Cs instead")
             if 'colors' in dict and dict['colors'] != None:
                 this.f.col = (dict['colors'])
             if 'drawFaces' in dict and dict['drawFaces'] != None:
@@ -317,8 +294,6 @@ class SimpleShape:
         NOTE: these settings can be overwritten by setCellProperties, see
         setCellProperties (or getCellProperties).
         """
-        if this.dbgTrace:
-            print('%s.getFaceColors(%s,..):' % (this.__class__, this.name))
         return {
                 'colors': this.f.col,
                 'drawFaces': this.f.draw
@@ -340,12 +315,8 @@ class SimpleShape:
         See getCellProperties for the explanation of the keywords.
         The output of getCellProperties can be used as the dictPar parameter.
         This can be used to copy settings from one shape to another.
-        If dictPar is used and kwargs, then onl    dbgPrn = False
-    dbgTrace = False
-    className = "SimpleShape"y the dictPar will be used.
+        If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        if this.dbgTrace:
-            print('%s.setCellProperties(%s,..):' % (this.__class__, this.name))
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
@@ -359,10 +330,6 @@ class SimpleShape:
                 this.c.draw = dict['drawCells']
             if 'scale' in dict and dict['scale'] != None:
                 this.c.scale = dict['scale']
-            #print 'Cs:', this.Cs
-            #print 'this.c.col[1]:', this.c.col[1]
-            # TODO Is an assert valid here:
-            #assert len(this.Cs) == len(this.c.col[1]), 'len(Cs) = %d != %d = (c.col[1])' % (len(this.Cs), len(this.c.col[1]))
             this.projectedTo3D = False
 
     def getCellProperties(this, Cs = None, colors = None):
@@ -396,8 +363,6 @@ class SimpleShape:
         scale: scale the cell with the specified scaling factor around its
                gravitational centre. This factor is typically <= 1.
         """
-        if this.dbgTrace:
-            print('%s.getCellProperties(%s,..):' % (this.__class__, this.name))
         return {
                 'Cs': this.Cs,
                 'colors': this.c.col,
@@ -477,11 +442,9 @@ class SimpleShape:
         """
         returns an array of 3D vertices.
         """
-        #print "projectTo3D_getVs"
         Vs3D = []
         for v in Vs4D:
             wV = v[3]
-            #print "mapping v:", v
             if not Geom3D.eq(this.wCamera, wV):
                 scale = this.wCameraDistance / (this.wCamera - wV)
                 Vs3D.append([scale * v[0], scale * v[1], scale * v[2]])
@@ -510,8 +473,6 @@ class SimpleShape:
         this shape. This function is called in gl_draw for the first time gl_draw
         is called.
         """
-        if this.dbgTrace:
-            print('%s.glInit(%s,..):' % (this.__class__, this.name))
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY)
 
@@ -537,7 +498,6 @@ class SimpleShape:
     def glDrawSingleRemoveUnscaledEdges(this):
         isScaledDown = not Geom3D.eq(this.c.scale, 1.0, margin = 0.001)
         if not this.projectedTo3D:
-            # print 'reprojecting...'
             try:
                 del this.cell
             except AttributeError:
@@ -554,8 +514,6 @@ class SimpleShape:
             #for i in range(0, len(this.Es), 2):
             #    v0 = Vs4D[this.Es[i]]
             #    v1 = Vs4D[this.Es[i+1]]
-            #    print 'delta v:', v0 - v1
-            #    print 'Edge [%d, %d]; len:' % (this.Es[i], this.Es[i+1]), (v1-v0).length()
             #if this.Ns != []:
             #    Ns3D = this.projectVsTo3D(Ns4D)
             # Now project all to one 3D shape. 1 3D shape is chosen, instean of
@@ -605,7 +563,6 @@ class SimpleShape:
                         sum = sum + nrUsed[vIndex]
                     if sum != 0:
                         g = g / sum
-                    #print this.name, 'g:', g
                     cellVs = [this.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs]
 
 
@@ -685,7 +642,6 @@ class SimpleShape:
                     colors = (this.c.col[0][this.c.col[1][i]], [])
                 else:
                     colors = (this.f.col[0], this.f.col[1][i])
-                #print colors
                 cell = Geom3D.SimpleShape(
                         Vs3D, this.Cs[i], [], [], # Vs , Fs, Es, Ns
                         colors,
@@ -701,105 +657,13 @@ class SimpleShape:
             this.projectedTo3D = True
 
     def toPsPiecesStr(this,
-            faceIndices = [],
-            scaling = 1,
-            precision = 7,
-            margin = 1.0e5*Geom3D.defaultFloatMargin,
-            pageSize = PS.PageSizeA4
+            faceIndices=[],
+            scaling=1,
+            precision=7,
+            margin=1.0e5*Geom3D.defaultFloatMargin,
+            pageSize=PS.PageSizeA4,
         ):
         if this.mapToSingeShape:
             return this.cell.toPsPiecesStr(faceIndices, scaling, precision, margin, pageSize)
         else:
             assert False, 'toPsPiecesStr not supported for mapping to split draw'
-
-# Tests:
-if __name__ == '__main__':
-    import os
-
-    wDir = 'tstThis'
-    cwd = os.getcwd()
-
-    if not os.path.isdir(wDir):
-        os.mkdir(wDir, 0o775)
-    os.chdir(wDir)
-
-    NrOfErrorsOcurred = 0
-    def printError(str):
-        global NrOfErrorsOcurred
-        print('***** ERROR while testing *****')
-        print(' ', str)
-        NrOfErrorsOcurred += 1
-
-    v = vec(1, 1, 0, 0)
-    w = vec(0, 3, 4, 0)
-    z = 0.1 * w
-    p = z.is_parallel(w)
-    if not p:
-        printError('in function is_parallel')
-    t = w.make_orthogonal_to(v)
-    #print 'check if [-3, 3, 8, 0] ==', w
-    if not (
-        Geom3D.eq(t.x, -3) and
-        Geom3D.eq(t.y, 3) and
-        Geom3D.eq(t.z, 8) and
-        Geom3D.eq(t.w, 0)
-    ):
-        printError('in function make_orthogonal_to')
-        print('  Expected (-3, 3, 8, 0), got', t)
-
-    n = w.normalise()
-
-    # TODO Move some of these tests to geomtypes, after cgtypes rm, any relevant?
-
-    # check if n is still of type vec and not cgtypes.vec4 (which doesn't have
-    # a is_parallel)
-    if not n.is_parallel(w):
-        printError('in function is_parallel after norm')
-
-    def testOrthogonalVectors (R, margin = Geom3D.defaultFloatMargin):
-        if not Geom3D.eq(R.e0 * R.e1, 0.0, margin):
-            printError('in function _setOrthoMatrix: e0.e1 = ', R.e0*R.e1, '!= 0')
-        if not Geom3D.eq(R.e0 * R.e2, 0.0, margin):
-            printError('in function _setOrthoMatrix: e0.e2 = ', R.e0*R.e2, '!= 0')
-        if not Geom3D.eq(R.e0 * R.e3, 0.0, margin):
-            printError('in function _setOrthoMatrix: e0.e3 = ', R.e0*R.e3, '!= 0')
-        if not Geom3D.eq(R.e1 * R.e2, 0.0, margin):
-            printError('in function _setOrthoMatrix: e1.e2 = ', R.e1*R.e2, '!= 0')
-        if not Geom3D.eq(R.e1 * R.e3, 0.0, margin):
-            printError('in function _setOrthoMatrix: e1.e3 = ', R.e1*R.e3, '!= 0')
-        if not Geom3D.eq(R.e2 * R.e3, 0.0, margin):
-            printError('in function _setOrthoMatrix: e2.e3 = ', R.e2*R.e3, '!= 0')
-        print('-----resulting matrix-----')
-        print(R.getMatrix())
-        print('--------------------------')
-
-    r = Rotation(v, w, math.pi/4)
-    r._setOrthoMatrix()
-    testOrthogonalVectors(r, margin = 1.0e-16)
-
-    r = Rotation(vec(0, 0, 1, 0), vec(0, 1, 0, 0), math.pi/4)
-    r._setOrthoMatrix()
-    testOrthogonalVectors(r, margin = 1.0e-16)
-
-    # error in this one:
-    #r = Rotation(vec(0, 1, 0, 0), vec(0, 0, 1, 0), math.pi/4)
-    # ok:
-    #r = Rotation(vec(1, 0, 0, 0), vec(0, 0, 1, 0), math.pi/4)
-    # not ok:
-    r = Rotation(vec(0, 0, 1, 0), vec(1, 0, 0, 0), math.pi/4)
-    r._setOrthoMatrix()
-    testOrthogonalVectors(r, margin = 1.0e-16)
-
-    r = Rotation(vec(0, 0, 0, 1), vec(1, 0, 0, 0), math.pi/4)
-    r._setOrthoMatrix()
-    testOrthogonalVectors(r, margin = 1.0e-16)
-
-    r = Rotation(vec(0, 0, 0, 1), vec(1, 0, 0, 0), math.pi/4, math.atan(0.75))
-    r._setOrthoMatrix()
-    testOrthogonalVectors(r, margin = 1.0e-16)
-
-    # EOT
-    if NrOfErrorsOcurred == 0:
-        print('test OK')
-    else:
-        print('test failed with %d error(s)' % NrOfErrorsOcurred)

@@ -20,6 +20,7 @@
 # or write to the Free Software Foundation,
 #--------------------------------------------------------------------
 
+import logging
 import wx
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -152,8 +153,6 @@ class Shape(Geom3D.SimpleShape):
                 Vs.extend(this.kiteVs)
             if this.showHepta:
                 Vs.extend(this.heptaVs)
-            #for v in Vs: print(v)
-            #print('===============')
             this.setVertexProperties(Vs = Vs)
         except AttributeError: pass
 
@@ -344,7 +343,6 @@ class CtrlWin(wx.Frame):
         this.prePosSelected = False
 
     def onSideAdjust(this, event):
-        #print 'size =', this.dynDlg.GetClientSize()
         this.setNoPrePos()
         this.shape.setSide(float(this.kiteSideAdjust.GetValue()) / this.sideScale)
         this.canvas.paint()
@@ -372,14 +370,12 @@ class CtrlWin(wx.Frame):
         event.Skip()
 
     def onPrePos(this, event = None):
-        #print 'onPrePos'
         sel = this.prePosSelect.GetSelection()
         # if switching from 'None' to a predefined position:
         if not this.prePosSelected and (sel != 0):
             this.topSav = this.shape.top
             this.tailSav = this.shape.tail
             this.sideSav = this.shape.side
-            #print this.topSav, this.tailSav, this.sideSav
             this.prePosSelected = True
         # TODO: id user selects prepos and then starts sliding, then the
         # selection should become None again.
@@ -388,7 +384,6 @@ class CtrlWin(wx.Frame):
             top  = this.topSav
             tail = this.tailSav
             side = this.sideSav
-            #print this.topSav, this.tailSav, this.sideSav
             this.prePosSelected = False
         elif selStr == 'Concave I':
             top  =  0.25
@@ -403,7 +398,7 @@ class CtrlWin(wx.Frame):
             tail = top * (2 * heptagons.Rho - 1)
             side = 1 + heptagons.Sigma
         else:
-            print('onPrePos: oops, default case')
+            logging.info("onPrePos: oops, default case")
             top  = 0.1
             tail = 0.1
             side = 0.1

@@ -31,7 +31,6 @@ from orbitit import glue
 PageSizeA4 = (559, 774)
 
 class doc:
-    debug = False
     name  = "PS.doc"
     def __init__(this,
         originX = 0, originY = 0, width = 595, height = 842,
@@ -157,15 +156,6 @@ class doc:
         Lines: a list of lines, each face is a list of vertex nrs and it may
                consist of several connected line segments.
         """
-        if this.debug:
-            print("%s.addLineSegments" % this.name)
-            #print 'Vs:'
-            #for v in Vs: print '  ', v
-            #print 'Lines:'
-            #print 'Lines:'
-            #for l in Lines: print '  ', l
-            print('len(Vs):', len(Vs))
-            print('Lines[0]:', Lines[0])
         vStr = '/vertices [\n'
         # use copies, for the cleanup
         Vs = [[c for c in v] for v in Vs]
@@ -282,27 +272,12 @@ grestore
         dX += this.bboxSpaceX
         dY += this.bboxSpaceY
         # if it fits on this row (on this page):
-        if this.debug:
-            print("%s.addToPage" % this.name)
-            print("Page Size:", this.pageSize)
-            print("  size respecting margin: (%f, %f) -> (%f, %f)" % (
-                this.leftMargin, this.bottomMargin,
-                this.pageSize[0] - this.rightMargin,
-                this.pageSize[1] - this.topMargin
-            ))
-
-            print("Current point: %f, %f" % (this.cx, this.cy))
-            print("fits on current row?:")
-            print(" X:", this.cx + dX, '?<=', this.pageSize[0] - this.rightMargin)
-            print(" Y:", this.cy + dY, '?<=', this.pageSize[1] - this.topMargin)
         if (
             this.cx + dX <= this.pageSize[0] - this.rightMargin
         ) and (
             this.cy + dY <= this.pageSize[1] - this.topMargin
         ):
             # if no pages created yet.
-            if this.debug:
-                print("  ....Yes")
             this.appendPageStr(drawStr)
             this.appendPageStr("%f 0 translate\n" % (dX))
             this.shiftRight += dX
@@ -310,8 +285,6 @@ grestore
             if this.shiftUp < dY: this.shiftUp = dY
         # else if it doesn't fit on the row:
         elif (this.cx + dX > this.pageSize[0] - this.rightMargin):
-            if this.debug:
-                print("  ....No")
             # goto next row
             this.appendPageStr(
                 "%f %f translate\n" % (-this.shiftRight, this.shiftUp)
@@ -320,52 +293,20 @@ grestore
             this.cy += this.shiftUp
             this.shiftRight = 0
             this.shiftUp    = 0
-            if this.debug:
-                print("Current point: %f, %f" % (this.cx, this.cy))
-                print("fits on current page?:")
-                print(" Y:", this.cy + dY, '?<=', this.pageSize[1] - this.topMargin)
             # if it still fits on this page:
             if (this.cy + dY <= this.pageSize[1] - this.topMargin):
-                if this.debug:
-                    print("  ....Yes")
                 this.appendPageStr(drawStr)
                 this.appendPageStr("%f 0 translate\n" % (dX))
                 this.cx += dX
                 this.shiftRight += dX
                 this.shiftUp = dY
             else:
-                if this.debug:
-                    print("  ....No")
                 newPage = True
         else:
             newPage = True
         if newPage:
-            if this.debug:
-                print("New page")
             this.addNewPageStr(drawStr)
             this.appendPageStr("%f 0 translate\n" % (dX))
             this.shiftRight += dX
             this.cx += dX
             this.shiftUp = dY
-
-if __name__ == '__main__':
-
-    psDoc = doc(title = 'tstDoc')
-    psDoc.addSetupStr("""
-/square { % x y -> _
-    translate
-    0 0 moveto
-    100 0 lineto
-    100 100 lineto
-    0 100 lineto
-    closepath
-    gsave
-        .8 setgray
-        fill
-    grestore
-    stroke
-} bind def
-""")
-    psDoc.addNewPageStr('10 10 square')
-    psDoc.addNewPageStr('10 100 square')
-    print(psDoc.toStr())

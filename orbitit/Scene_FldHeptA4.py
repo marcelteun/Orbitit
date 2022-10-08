@@ -20,6 +20,7 @@
 # or write to the Free Software Foundation,
 #
 
+import logging
 import math
 
 from orbitit import Geom3D, geomtypes, isometry, heptagons, rgb
@@ -195,7 +196,6 @@ class Shape(heptagons.FldHeptagonShape):
 
     def getStatusStr(this):
         if this.updateShape:
-            #print 'getStatusStr: forced setV'
             this.setV()
         Vs = this.baseVs
         Es = this.triEs[this.edgeAlternative]
@@ -228,7 +228,7 @@ class Shape(heptagons.FldHeptagonShape):
         return s
 
     def setTriangleFillPosition(this, i):
-        print("TODO implement setTriangleFillPosition for", i)
+        logging.warning(f"TODO implement setTriangleFillPosition for {i}")
 
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
         heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
@@ -275,8 +275,6 @@ class Shape(heptagons.FldHeptagonShape):
         Vs.append(Rl * Vs[13])                                 # Vs[22] = V13'
         Vs.append(Rl * Vs[-1])                                 # Vs[23] = V13"
         this.baseVs = Vs
-        #for i in range(len(Vs)):
-        #    print 'Vs[%d]:' % i, Vs[i]
         Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
@@ -340,13 +338,6 @@ class Shape(heptagons.FldHeptagonShape):
             isom_shape.show_base_only = not this.apply_symmetries
         this.setShapes(theShapes)
         this.updateShape = False
-        # print 'V0 = (%.4f, %.4f, %.4f)' % (Vs[0][1], Vs[0][0], Vs[0][2])
-        # print 'V1 = (%.4f, %.4f, %.4f)' % (Vs[1][1], Vs[1][0], Vs[1][2])
-        # print 'V2 = (%.4f, %.4f, %.4f)' % (Vs[2][1], Vs[2][0], Vs[2][2])
-        # print 'V3 = (%.4f, %.4f, %.4f)' % (Vs[3][1], Vs[3][0], Vs[3][2])
-        # print 'V4 = (%.4f, %.4f, %.4f)' % (Vs[4][1], Vs[4][0], Vs[4][2])
-        # print 'V5 = (%.4f, %.4f, %.4f)' % (Vs[5][1], Vs[5][0], Vs[5][2])
-        # print 'V6 = (%.4f, %.4f, %.4f)' % (Vs[6][1], Vs[6][0], Vs[6][2])
 
     def getReflPosAngle(this):
         if this.edgeAlternative & heptagons.twist_bit == heptagons.twist_bit:
@@ -355,7 +346,7 @@ class Shape(heptagons.FldHeptagonShape):
             return 0
 
     def initArrs(this):
-        print(this.name, "initArrs")
+        logging.info(f"{this.name} initArrs")
 
         #            5" = 18                 12 = 2"
         #    6" = 16                                 10 = 1"
@@ -644,16 +635,18 @@ class Shape(heptagons.FldHeptagonShape):
                 this.base_shape.Vs[tris[i][1]],
                 this.base_shape.Vs[tris[i][2]],
             ).normal(True)
-            print('norm0 %d: ', norm0)
+            logging.info("norm0: {norm0}")
             norm1 = Geom3D.Triangle(
                 this.base_shape.Vs[tris[i+d][0]],
                 this.base_shape.Vs[tris[i+d][1]],
                 this.base_shape.Vs[tris[i+d][2]],
             ).normal(True)
-            print('norm1 %d: ', norm1)
+            logging.info("norm1: {norm1}")
             inprod = norm0 * norm1
-            print('Tris angle %d: %.6f degrees' % (i, math.acos(inprod) * Geom3D.Rad2Deg))
-        print('------------') # TODO move out
+            logging.info(
+                f"Tris angle {i}: {math.acos(inprod) * Geom3D.Rad2Deg:.6f} degrees"
+            )
+        logging.info("------------")
 
 class CtrlWin(heptagons.FldHeptagonCtrlWin):
     def __init__(this, shape, canvas, *args, **kwargs):
@@ -715,8 +708,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
     rPre = 'frh-roots'
 
     def printFileStrMapWarning(this, filename, funcname):
-        print('%s:' % funcname)
-        print('  WARNING: unable to interprete filename', filename)
+        logging.warning(f"unable to interprete filename {filename}")
 
     @property
     def specPosSetup(this):
@@ -741,7 +733,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
                     'tris': tris_str,
                     'fold-rot': this.fileStrMapFoldPos(in_data['file'])
             }
-            print('see file %s/%s' % (this.rDir, in_data['file']))
+            logging.info("see file {this.rDir}/{in_data['file']}")
             return data
 
     predefReflSpecPos = {

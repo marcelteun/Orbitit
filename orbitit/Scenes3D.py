@@ -20,9 +20,10 @@
 # or write to the Free Software Foundation,
 #-------------------------------------------------------------------
 
-import wx
+import logging
 import math
 import os
+import wx
 from wx import glcanvas
 
 from orbitit import Geom3D, geomtypes
@@ -137,7 +138,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
                     wx.glcanvas.WX_GL_STENCIL_SIZE, 8
                 ]
             )
-        this.context = glcanvas.GLContext(this)
+        this.context = wx.glcanvas.GLContext(this)
         this.cyl = P2PCylinder(radius = 0.05)
         this.sphere = VSphere(radius = 0.1)
         this.init = False
@@ -184,7 +185,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.cameraDistance = distance
 
     def init_gl(this):
-        print('Interactive3DCanvas.init_gl(this,..):')
+        logging.info("Interactive3DCanvas.init_gl(this,..)")
         glMatrixMode(GL_PROJECTION)
         gluPerspective(45., 1.0, 1., 300.)
 
@@ -251,7 +252,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             angle = Geom3D.Rad2Deg*this.movingRepos.angle()
             axis  = this.movingRepos.axis()
             geomtypes.reset_eq_float_margin()
-            #print 'rotate', angle, axis
             glRotatef(angle, axis[0], axis[1], axis[2])
 
         if this.z != this.zBac:
@@ -261,7 +261,6 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             #pStr = '%f ->' % dZ
             dZ = dZ*this.zScaleFactor + 1.0
             this.currentScale = dZ * this.currentScale
-            #print '%s %f' % (pStr, dZ)
             glScalef(dZ, dZ, dZ)
 
         glFlush()
@@ -365,10 +364,10 @@ class Scene:
 
     def onSize(this, event):
         this.canvas.onSize(event)
-        print('Canvas window size:', this.canvasFrame.GetClientSize())
+        logging.info(f"Canvas window size: {this.canvasFrame.GetClientSize()}")
 
     def onCloseCanvas(this, event):
-        print('onCloseCanvas')
+        logging.info("onCloseCanvas")
         this.close()
         this.ctrlFrame.sceneClosed()
 

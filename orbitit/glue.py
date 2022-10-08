@@ -24,6 +24,7 @@
 # I am not sure where to put these functions. These convert objects from A to
 # B. Should they be in A or in B?
 
+import logging
 import math
 
 from orbitit import geomtypes, X3D
@@ -37,7 +38,6 @@ def ConvertVec3ToX3d(vertices, precision):
     Vs = []
     for v in vertices:
         Vs.append(X3D.FloatVec(v, precision))
-        #print v, X3D.FloatVec(v).vec, X3D.FloatVec(v).toVrmlStr()
     return Vs
 
 def ConvertIndicesToX3d(indexVecs):
@@ -104,7 +104,7 @@ def cylinderEdgeToX3d(
     dv = v1 - v0
     l = dv.norm()
     if l == 0:
-        print('warning, edge length 0')
+        logging.warning("edge length 0")
         return
     angle = math.acos((dv*vz)/l)
     axis = vz.cross(dv)
@@ -257,7 +257,6 @@ def cleanUpVsFs(Vs, Fs):
     # After the unused vertices are deleted, vReoved will contain:
     # - how many vertices that come before this (vertex) index are deleted.
     #
-    #print 'cleanUpVsFs(Vs, Fs):'
     vUsage = getVUsageIn2D(Vs, Fs)
     vRemoved = [0 for x in vUsage]
     notUsed = 0 # counts the amount of vertices that are not used until vertex i
@@ -266,7 +265,6 @@ def cleanUpVsFs(Vs, Fs):
         if vUsage[i - notUsed] == 0:
             del Vs[i - notUsed]
             del vUsage[i - notUsed]
-            #print i, ', new Vs:', Vs
             notUsed += 1
         # change the value of vUsage to the amount of vertices that are (not
         # used and from now on) deleted until vertex i
@@ -289,9 +287,12 @@ def mergeVs(Vs, Fs, precision = 12):
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
     geomtypes.set_eq_float_margin(math.pow(10, -precision))
-    print('Find multiple occurences of vertices\n', end=' ')
+    logging.info("Find multiple occurences of vertices")
+    log_handler = logging.getLogger().handlers[0]
+    end_bac, log_handler.terminator = log_handler.terminator, '\r'
+
     for i in range(len(Vs) - 1, -1, -1):
-        print('\rchecking vertex %d (of %d)' % (len(Vs) - i, len(Vs)), end=' ')
+        logging.info(f"checking vertex {len(Vs) - i} (of {len(Vs)})")
         v = Vs[i]
         for j in range(i):
             if v == Vs[j]:
@@ -301,7 +302,9 @@ def mergeVs(Vs, Fs, precision = 12):
     geomtypes.reset_eq_float_margin()
     # Apply the changes now. Don't delete the vertices, since that means
     # re-indexing
-    print('\nClean up Fs')
+    log_handler.terminator = end_bac
+    logging.info("")
+    logging.info("Clean up Fs")
     for f_i in range(len(Fs) - 1, -1, -1):
         f = Fs[f_i]
         face_vertices = []  # array holding unique face vertices

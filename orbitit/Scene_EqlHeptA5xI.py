@@ -115,7 +115,6 @@ class Shape(heptagons.EqlHeptagonShape):
             else:
                 vt = heptN[0][5]
                 xtraEdgeIndex = 14
-            #print v
             # One third of regular triangle.
             RegularTrianglePartV = [
                         heptN[0][3],
@@ -162,7 +161,6 @@ class Shape(heptagons.EqlHeptagonShape):
         Vs.extend(heptN[0]) # V4 - V10
         Vs.extend(RegularTrianglePartV) # V11 - V13
         Vs.extend(IsoscelesTriangleV) # V14 - V16
-        #for V in Vs: print V
         Ns = [heptN[1] for i in range(11)]
         RegularTrianglePartN = RegularTrianglePartV[2]
         Ns.extend([RegularTrianglePartN for i in range(3)])
@@ -197,15 +195,13 @@ class Shape(heptagons.EqlHeptagonShape):
         this.setVs(Vs)
 
     def toPsPiecesStr(this,
-            faceIndices = [],
-            scaling = 1,
-            precision = 7,
-            margin = 1.0e-10
+            faceIndices=[],
+            scaling=1,
+            precision=7,
+            margin=1.0e-10,
         ):
         if faceIndices == []:
             offset = 0
-            #for f in range(len(this.Fs)):
-            #    print 'F[', f, '] =', this.Fs[f]
             if this.showKite:
                 faceIndices.append(offset)
                 offset += len(this.kiteFs)
@@ -215,7 +211,6 @@ class Shape(heptagons.EqlHeptagonShape):
             if this.showXtra:
                 faceIndices.append(offset)
                 faceIndices.append(offset+1)
-        #print 'faceIndices', faceIndices
         return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
 
     def initArrs(this):
@@ -246,9 +241,7 @@ class Shape(heptagons.EqlHeptagonShape):
             # the extra edge
             v0 = vs[this.xtraEs[0]]
             v1 = vs[this.xtraEs[1]]
-            #print this.xtraEs[0], this.xtraEs[1]
             v = v0 - v1
-            #print r.norm(), (r1-r2).norm(), v.norm()
             return '%s, extra edge length: %02.2f' % (stdStr, v.norm()/r.norm())
         # TODO: if not addXtraEdge: print diff in norms (or both edge lengths)
         else:
@@ -365,7 +358,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
                 this.altHeptSpecPosGui.SetSelection(0)
 
     def onPrefHeptSpecPos(this, event = None):
-        #print 'onPrefHeptSpecPos'
         index = this.prefHeptSpecPosGui.GetSelection()
         angleData = this.prefHeptSpecAngles[index]
         angle = angleData['a']
@@ -395,7 +387,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
                 this.altHeptSpecPosGui.SetSelection(0)
 
     def onAltHeptSpecPos(this, event = None):
-        #print 'onAltHeptSpecPos'
         index = this.altHeptSpecPosGui.GetSelection()
         angleData = this.altHeptSpecAngles[index]
         angle = angleData['a']

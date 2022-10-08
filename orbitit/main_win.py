@@ -22,6 +22,7 @@
 #
 #------------------------------------------------------------------
 
+import logging
 import math
 import wx
 import wx.lib.intctrl
@@ -729,7 +730,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 f"V-Radius: {self.v_r:0.5}; E-Radius: {self.e_r:0.5}"
             )
         except AttributeError:
-            print("parent_win.set_status_text function undefined")
+            logging.warning("parent_win.set_status_text function undefined")
 
     def on_v_option(self, _):
         """Handle event '_' to show or hide vertex"""
@@ -802,7 +803,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_f_option(self, _):
         """Handle event '_' to show or hide faces as according to view settings"""
-        print('View Settings Window size:', self.parent_win.GetSize())
+        logging.info("View Settings Window size: {self.parent_win.GetSize()}")
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
@@ -929,7 +930,6 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                     axialPlane = (v1, v0),
                     angle = (scale*angle, angle),
                 )
-            #print r.getMatrix()
             self.canvas.shape.rotate(r)
             self.canvas.paint()
             deg = Geom3D.Rad2Deg * angle

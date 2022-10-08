@@ -34,6 +34,7 @@ Like vertices, faecs, symmetries, etc.
 
 
 
+import logging
 import wx
 import wx.lib.scrolledpanel as wxXtra
 
@@ -60,7 +61,7 @@ class DisabledDropTarget(wx.TextDropTarget):  # pylint: disable=too-few-public-m
     def OnDragOver(self, *_, **__):  # pylint: disable=invalid-name
         """Make sure to disable drag-and-drop do prevent serious format problem."""
         if self.enable_reason:
-            print(self.__class__, 'drag from text disabled 0:', self.reason)
+            logging.info(f"{self.__class__} drag from text disabled 0: {self.reason}")
         return ''
 
 
@@ -116,7 +117,7 @@ class IntInput(wx.TextCtrl):
                 self.SetInsertionPoint(selected[0]+1)
                 self.val_updated = True
             except ValueError:
-                print(self.__class__, f"ignores key {char} (here)")
+                logging.info(f"{self.__class__} ignores key {char} (here)")
 
     def handle_special(self, event):
         """Handle events with special characters, like DELETE."""
@@ -161,7 +162,6 @@ class IntInput(wx.TextCtrl):
     def on_text(self, _):
         """Handle after string after character update is done."""
         string = super().GetValue()
-        # print("on_text: ", string)
         if not self._sign_only_handled(string) and string == "":
             self._handle_empty()
 
@@ -287,9 +287,9 @@ class FloatInput(wx.TextCtrl):
             elif rkc == ord('x'):
                 self.Cut()
             else:
-                print(self.__class__, 'ignores Ctrl-key event with code:', rkc)
+                logging.info(f"{self.__class__} ignores Ctrl-key event with code: {rkc}")
         else:
-            print(self.__class__, 'ignores key event with code:', k)
+            logging.info(f"{self.__class__} ignores key event with code: {k}")
         # elif k >= 256:
         #     e.Skip()
 
@@ -339,7 +339,7 @@ class LabeledIntInput(wx.BoxSizer):
                           style=wx.ALIGN_RIGHT))
         self.Add(self.boxes[-1], 1, wx.EXPAND)
         if not isinstance(init, int):
-            print(f"{self.__class__} warning: initialiser not an int ({init})")
+            logging.info(f"{self.__class__} warning: initialiser not an int ({init})")
             init = 0
         self.boxes.append(IntInput(
             panel, wx.ID_ANY, init, size=(width, -1)))
@@ -416,7 +416,7 @@ class Vector3DInput(wx.BoxSizer):
         """Set the vertex in the GUI to be the one specified"""
         for i in v:
             if not isinstance(i, (float, int)):
-                print(f"{self.__class__} warning: v[{v.index(i)}] not a number ({i})")
+                logging.info(f"{self.__class__} warning: v[{v.index(i)}] not a number ({i})")
                 return
         self._vec[0].SetValue(v[0])
         self._vec[1].SetValue(v[1])
@@ -531,7 +531,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
                 g.Destroy()
             self.Layout()
         else:
-            print(f"{self.__class__.__name__} warning: nothing to delete")
+            logging.info(f"{self.__class__.__name__} warning: nothing to delete")
 
     def get_vector(self, i):
         """Get the vertex with index 'i' from the list of vertices"""
@@ -1300,7 +1300,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         if found:
             self.set_selected(i)
         else:
-            print('Warning: set_selected_class: class not found')
+            logging.warning("set_selected_class: class not found")
 
     def set_selected(self, i):
         """Set the selected symmetry in the drop down menu by index"""
