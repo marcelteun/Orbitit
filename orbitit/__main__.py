@@ -98,7 +98,7 @@ def read_shape_file(filename):
         elif is_json_model(filename):
             shape = base.Orbitit.from_json_file(filename)
         else:
-            loggin.warning('unrecognised file extension, file not opened')
+            logging.warning('unrecognised file extension, file not opened')
     return shape
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
@@ -390,7 +390,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         dirname = os.path.dirname(filename)
         if dirname != "":
             self.import_dir_name = dirname
-        logging.info(f"opening {filename}")
+        logging.info("opening %s", filename)
         shape = read_shape_file(filename)
         if shape:
             self.set_status_text("file opened")
@@ -426,7 +426,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()
-            logging.info(f"adding file: {filename}")
+            logging.info("adding file: %s", filename)
             path = os.path.join(self.import_dir_name, filename)
             if is_off_model(filename):
                 with open(path, 'r') as fd:
@@ -469,7 +469,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     filename = f'{filename}.json'
                 else:
                     filename = f'{filename}json'
-            logging.info(f"writing to file {filepath}")
+            logging.info("writing to file %s", filepath)
             # TODO add precision through setting:
             shape = self.panel.shape
             shape.name = filename
@@ -508,7 +508,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                             filename = f'{filename}.off'
                         else:
                             filename = f'{filename}off'
-                    logging.info(f"writing to file {filepath}")
+                    logging.info("writing to file %s", filepath)
                     shape = self.panel.shape
                     try:
                         shape = shape.simple_shape
@@ -559,7 +559,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                         else:
                             filename = f'{filename}ps'
                     # Note: if file exists is part of file dlg...
-                    logging.info(f"writing to file {filepath}")
+                    logging.info("writing to file %s", filepath)
                     shape = self.panel.shape
                     try:
                         shape = shape.simple_shape
@@ -606,7 +606,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     filename = f'{filename}.wrl'
                 else:
                     filename = f'{filename}wrl'
-            logging.info(f"writing to file {filepath}")
+            logging.info("writing to file %s", filepath)
             # TODO precision through setting:
             r = self.panel.shape.getEdgeProperties()['radius']
             x3d_obj = self.panel.shape.toX3dDoc(edgeRadius=r)
@@ -684,7 +684,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             'class' is the python class.
         """
         self.close_current_scene()
-        logging.info(f"Switching to scene: \"{scene['lab']}\".")
+        logging.info('Switching to scene: "%s".', scene['lab'])
         canvas = self.panel.canvas
         self.scene = scene['class'](self, canvas)
         self.panel.shape = self.scene.shape
@@ -784,7 +784,7 @@ class MainPanel(wx.Panel):
         Bind this function, and read and set the correct size in the scene.
         """
         s = self.GetClientSize()
-        logging.info(f"Window size: [{s[0]+2}, {s[1]+54}]")
+        logging.info("Window size: [%d, %d]", s[0]+2, s[1]+54)
         self.Layout()
 
     @property
@@ -930,7 +930,7 @@ if __name__ == "__main__":
     if PROG_ARGS.inputfile:
         IN_SHAPE = read_shape_file(PROG_ARGS.inputfile)
         if not IN_SHAPE:
-            logging.error(f"Couldn't read shape file {PROG_ARGS.inputfile}")
+            logging.error("Couldn't read shape file %s", PROG_ARGS.inputfile)
             sys.exit(-1)
         if PROG_ARGS.off:
             START_GUI = False

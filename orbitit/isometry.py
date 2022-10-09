@@ -30,7 +30,7 @@ from copy import copy, deepcopy
 import logging
 import math
 
-from orbitit import base, geomtypes, glue, indent
+from orbitit import base, geomtypes, indent
 
 X = geomtypes.UX
 Y = geomtypes.UY
@@ -91,6 +91,7 @@ def _std_setup(sym, order=None):
     return setup
 
 def ensure_axis_type(axis):
+    """Return an 3D axis using the right type."""
     if not isinstance(axis, geomtypes.Vec3):
         if isinstance(axis, list):
             axis = geomtypes.Vec3(axis)
@@ -278,21 +279,20 @@ class Set(set, base.Orbitit):
         try:
             sub_class = cls.to_class[repr_dict["class"]]
         except KeyError as e:
-            raise Exception(f'{repr_dict["class"]} not in {self.to_class} (expected)') from e
+            raise Exception(f'{repr_dict["class"]} not in {cls.to_class} (expected)') from e
         return sub_class.from_dict_data(repr_dict["data"])
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from dictionary data."""
         if "generator" in data:
-            return cls(setup=data["generator"])
-        elif "isometries" in data:
-            isoms=[base.json_to_class[i["class"]].from_json_dict(i) for i in data["isometries"]]
+            return cls(setup=data["generator"])  # pylint: disable=unexpected-keyword-arg
+        if "isometries" in data:
+            isoms = [base.json_to_class[i["class"]].from_json_dict(i) for i in data["isometries"]]
             if cls == Set:
                 return cls(isoms)
-            else:
-                return cls(isometries=isoms)
-        else:
-            raise IndexError(f'missing "generator" or "isometries" in {data}')
+            return cls(isometries=isoms)  # pylint: disable=unexpected-keyword-arg
+        raise IndexError(f'missing "generator" or "isometries" in {data}')
 
     def __str__(self):
         def to_s():
@@ -496,8 +496,9 @@ class Set(set, base.Orbitit):
         """Check whether all keys in setup are legitimate"""
         if setup != {} and not self.init_pars:
             logging.warning(
-                f"class {self.__class__.__name__} doesn't handle "
-                f"any setup pars {list(setup.keys())}"
+                "class %s doesn't handle any setup pars %s",
+                self.__class__,
+                list(setup.keys()),
             )
         for k in list(setup.keys()):
             found = False
@@ -564,6 +565,7 @@ class E(Set):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from dictionary data."""
         return cls()
 
     def realise_subgroups(self, sg):
@@ -608,6 +610,7 @@ class ExI(Set):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from dictionary data."""
         return cls()
 
     def realise_subgroups(self, sg):

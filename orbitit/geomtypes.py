@@ -115,8 +115,7 @@ def f2s(f, precision=FLOAT_OUT_PRECISION):
     s = s.rstrip('0').rstrip('.')
     if s != '-0':
         return s
-    else:
-        return '0'
+    return '0'
 
 
 class RoundingFloat(float):
@@ -124,7 +123,7 @@ class RoundingFloat(float):
 
     see https://stackoverflow.com/questions/54370322
     """
-    __repr__ = staticmethod(lambda x: f2s(x))
+    __repr__ = staticmethod(lambda x: f2s(x))  # pylint: disable=unnecessary-lambda
 
 json.encoder.c_make_encoder = None
 json.encoder.float = RoundingFloat
@@ -177,6 +176,7 @@ class Vec(tuple, base.Orbitit):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from dictionary data."""
         return cls(data)
 
     def __str__(self):
@@ -286,7 +286,7 @@ class Vec(tuple, base.Orbitit):
 class Vec3(Vec):
     """Define a Euclidean vector in 3D"""
     def __new__(cls, v):
-        return Vec.__new__(cls, [float(v[i]) for i in range(3)])
+        return super().__new__(cls, [float(v[i]) for i in range(3)])
 
     def cross(self, w):
         "Return the cross product of this vector with 'w'"""
@@ -306,7 +306,8 @@ UZ = Vec3([0, 0, 1])
 class Vec4(Vec):
     """Define a Euclidean vector in 4D"""
     def __new__(cls, v):
-        return Vec.__new__(cls, [float(v[i]) for i in range(4)])
+        """Create a new object."""
+        return super().__new__(cls, [float(v[i]) for i in range(4)])
 
     def is_parallel(self, v):
         """Return whether 'v' is parallel to this vector"""
@@ -420,6 +421,7 @@ class Quat(Vec):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from dictionary data."""
         result = super().from_dict_data(data)
         assert len(result) == 4, f"Expected 4 input values, not {len(result)}"
         return result
@@ -523,6 +525,7 @@ class Transform3(tuple, base.Orbitit):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from dictionary data."""
         assert len(data) == 2, f"Expected a pair, not {len(data)} elements"
         return cls([Quat.from_json_dict(q) for q in data])
 
@@ -548,9 +551,6 @@ class Transform3(tuple, base.Orbitit):
         # non-proper transform: show the quaternion pair.
         return f"{self[0]} * .. * {self[1]}"
 
-    def to_json(self):
-        pass
-
     def __mul__(self, u):
         if isinstance(u, Transform3):
             # self * u =  wLeft * vLeft .. vRight * wRight
@@ -575,15 +575,20 @@ class Transform3(tuple, base.Orbitit):
             is_eq = self[0] == u[0] and self[1] == u[1]
             if is_eq:
                 logging.info(
-                    f"fallback: {self[0]} == {u[0]} and {self[1]} == {u[1]}"
+                    "fallback: %s == %s and %s == %s",
+                    self[0],
+                    u[0],
+                    self[1],
+                    u[1],
                 )
             assert not is_eq, \
                 f"oops, fallback: unknown transform \n{self}\nor\n{u}"
             return is_eq
         if (is_eq and (self.__hash__() != u.__hash__())):
-            logging.INFO(
-                f"Note: transforms considered equal, but hashes will not be for\n"
-                "{self} and\n{u}"
+            logging.info(
+                "Note: transforms considered equal, but hashes will not be for\n%s and\n%s",
+                self,
+                u,
             )
         return is_eq
 
@@ -1004,7 +1009,7 @@ class Rot3(Transform3):
         angle: angle in radians to rotate
         """
         if _is_quat_pair(quat):
-            trans = Transform3.__new__(cls, quat)
+            trans = super().__new__(cls, quat)
             if not trans.is_rot():
                 raise NoRotation(f"{quat} doesn't represent a rotation")
             return trans
@@ -1014,7 +1019,7 @@ class Rot3(Transform3):
                 quat = quat.normalise()
             except ZeroDivisionError:
                 pass  # raise exception below
-            trans = Transform3.__new__(cls, [quat, quat.conjugate()])
+            trans = super().__new__(cls, (quat, quat.conjugate()))
             if not trans.is_rot():
                 raise NoRotation(f"{quat} doesn't represent a rotation")
             return trans
@@ -1028,7 +1033,7 @@ class Rot3(Transform3):
             axis = axis.normalise()
         quat = math.sin(alpha) * axis
         quat = Quat([math.cos(alpha), quat[0], quat[1], quat[2]])
-        return Transform3.__new__(cls, [quat, quat.conjugate()])
+        return super().__new__(cls, (quat, quat.conjugate()))
 
 
 class HalfTurn3(Rot3):
@@ -1100,7 +1105,7 @@ class Refl3(Transform3):
                 quat = quat.normalise()
             except ZeroDivisionError:
                 pass  # will fail on assert below:
-            result = Transform3.__new__(cls, [quat, quat])
+            result = super().__new__(cls, (quat, quat))
             assert result.is_refl(), f"{quat} doesn't represent a reflection"
         else:
             try:
@@ -1108,7 +1113,7 @@ class Refl3(Transform3):
                 quat = Quat(normal)
             except ZeroDivisionError:
                 quat = Quat(normal)  # will fail on assert below:
-            result = Transform3.__new__(cls, [quat, quat])
+            result = super().__new__(cls, (quat, quat))
             assert result.is_refl(), \
                 f"normal {normal} doesn't define a valid 3D plane normal"
         return result
@@ -1128,12 +1133,12 @@ class RotInv3(Transform3):
         # a rotary inversion is not a rotation.
         result = None
         if _is_quat_pair(quat_pair):
-            result = Transform3.__new__(cls, quat_pair)
+            result = super().__new__(cls, quat_pair)
             result._cache = {}
             assert result.is_rot_inv(), f"{quat_pair} doesn't represent a rotary inversion"
         else:
             ri = Rot3(quat_pair, axis, angle).I()
-            result = Transform3.__new__(cls, [ri[0], ri[1]])
+            result = super().__new__(cls, (ri[0], ri[1]))
         return result
 
 
@@ -1237,9 +1242,13 @@ class Rot4(Transform4):
         cosa = math.cos(alpha)
         _q0 = sina * _q0.vector()
         _q1 = sina * _q1.vector()
-        return Transform4.__new__(cls,
-                                  [Quat([cosa, _q0[0], _q0[1], _q0[2]]),
-                                   Quat([cosa, _q1[0], _q1[1], _q1[2]])])
+        return super().__new__(
+            cls,
+            (
+                Quat([cosa, _q0[0], _q0[1], _q0[2]]),
+                Quat([cosa, _q1[0], _q1[1], _q1[2]]),
+            ),
+        )
 
 
 def find_orthogonal_plane(plane):
@@ -1377,7 +1386,7 @@ class DoubleRot4(Transform4):
         ortho_plane = find_orthogonal_plane(axialPlane)
         r0 = Rot4(axialPlane=axialPlane, angle=angle[0])
         r1 = Rot4(axialPlane=ortho_plane, angle=angle[1])
-        return Transform4.__new__(cls, [r1[0]*r0[0], r0[1]*r1[1]])
+        return super().__new__(cls, (r1[0]*r0[0], r0[1]*r1[1]))
 
 # TODO implement Geom3D.Line3D here (in this file)
 
