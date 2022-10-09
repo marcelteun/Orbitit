@@ -57,7 +57,6 @@ from orbitit import (  # pylint: disable=ungrouped-imports
     main_dlg,
     main_win,
 )
-DEFAULT_SCENE = 'scene_orbit'
 
 SCENES = {
     'Scene_24Cell': Scene_24Cell,
@@ -76,6 +75,7 @@ SCENES = {
     'Scene_Rectified8Cell': Scene_Rectified8Cell,
     'scene_orbit': scene_orbit,
 }
+DEFAULT_SCENE = 'scene_orbit'
 
 # prevent warning for not being used:
 del pre_pyopengl
@@ -175,11 +175,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
     def __init__(self, TstScene, shape, filename, export_dir, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
-        self.scenes_list = list(SCENES.keys())
         self.current_scene = None
         self.current_file = None
         self.dome1 = None
         self.dome2 = None
+        self.id_to_scene = {}
         self.add_menu_bar()
         self.status_bar = self.CreateStatusBar()
         self.scene = None
@@ -225,8 +225,8 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Add\tCtrl+A")
         self.Bind(wx.EVT_MENU, self.on_add, id=menu_item.GetId())
         menu.Append(menu_item)
-        export = wx.Menu()
 
+        export = wx.Menu()
         menu_item = wx.MenuItem(export, wx.ID_ANY, text="&JSON\tCtrl+J")
         self.Bind(wx.EVT_MENU, self.on_save_json, id=menu_item.GetId())
         export.Append(menu_item)
@@ -290,9 +290,79 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.Bind(wx.EVT_MENU, self.on_view_reset, id=menu_item.GetId())
         menu.Append(menu_item)
 
-        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Scene...")
-        self.Bind(wx.EVT_MENU, self.on_view_scene, id=menu_item.GetId())
+        menu.AppendSubMenu(self.create_scenes_main_menu(), "&Scene")
+        return menu
+
+    def create_scenes_main_menu(self):
+        """Return the main menu for loading new scenes."""
+        menu = wx.Menu()
+
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Orbit")
+        menu_id = menu_item.GetId()
+        self.id_to_scene[menu_id] = scene_orbit
+        self.Bind(wx.EVT_MENU, self.on_select_scene, id=menu_id)
         menu.Append(menu_item)
+
+        menu.AppendSubMenu(self.create_hept_scenes_menu(), "&Heptagons")
+        menu.AppendSubMenu(self.create_polychora_menu(), "&Polychora")
+
+        return menu
+
+    def create_hept_scenes_menu(self):
+        """Return the menu for loading heptagon scenes."""
+        menu = wx.Menu()
+
+        sub_menu = wx.Menu()
+        scene_items = [  # menu_title, scene
+            ("&Tetrahedral", Scene_FldHeptA4),
+            ("&Octahedral", Scene_FldHeptS4),
+            ("&Dodecahedral", Scene_FldHeptA5),
+        ]
+        for title, scene in scene_items:
+            sub_menu_item = wx.MenuItem(menu, wx.ID_ANY, text=title)
+            sub_menu_id = sub_menu_item.GetId()
+            self.id_to_scene[sub_menu_id] = scene
+            self.Bind(wx.EVT_MENU, self.on_select_scene, id=sub_menu_id)
+            sub_menu.Append(sub_menu_item)
+        menu.AppendSubMenu(sub_menu, "&Folded")
+
+        sub_menu = wx.Menu()
+        scene_items = [  # menu_title, scene
+            ("One &Kite", Scene_EqlHeptFromKite),
+            ("&Dodecadron", Scene_EqlHeptA5xI),
+            ("&Great Dodecahedron", Scene_EqlHeptA5xI_GD),
+            ("Great &Icosahedron", Scene_EqlHeptA5xI_GI),
+            ("&Tetrahedron", Scene_EqlHeptS4A4),
+            ("&Cube", Scene_EqlHeptS4xI),
+        ]
+        for title, scene in scene_items:
+            sub_menu_item = wx.MenuItem(menu, wx.ID_ANY, text=title)
+            sub_menu_id = sub_menu_item.GetId()
+            self.id_to_scene[sub_menu_id] = scene
+            self.Bind(wx.EVT_MENU, self.on_select_scene, id=sub_menu_id)
+            sub_menu.Append(sub_menu_item)
+        menu.AppendSubMenu(sub_menu, "&Equilateral based on")
+
+        return menu
+
+    def create_polychora_menu(self):
+        """Return the menu for loading 4D models."""
+        menu = wx.Menu()
+
+        scene_items = [  # menu_title, scene
+            ("5 Cell", Scene_5Cell),
+            ("Tesseract", Scene_8Cell),
+            ("Rectified Tesseract", Scene_Rectified8Cell),
+            ("24 Cell", Scene_24Cell),
+            ("Rectified 24 Cell", Scene_Rectified24Cell),
+        ]
+        for title, scene in scene_items:
+            menu_item = wx.MenuItem(menu, wx.ID_ANY, text=title)
+            menu_id = menu_item.GetId()
+            self.id_to_scene[menu_id] = scene
+            self.Bind(wx.EVT_MENU, self.on_select_scene, id=menu_id)
+            menu.Append(menu_item)
+
         return menu
 
     def on_reload(self, _):
@@ -594,13 +664,9 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.panel.shape = shape
             self.SetTitle(f"Dome({self.GetTitle()})")
 
-    def on_view_scene(self, _):
-        """Handle event '_' change the current scene"""
-        dlg = wx.SingleChoiceDialog(self, 'Choose a Scene', '', self.scenes_list)
-        if dlg.ShowModal() == wx.ID_OK:
-            scene_index = dlg.GetSelection()
-            self.load_scene(SCENES[self.scenes_list[scene_index]])
-        dlg.Destroy()
+    def on_select_scene(self, evt):
+        """Handle event '_' change to scene connected to some menu ID"""
+        self.load_scene(self.id_to_scene[evt.GetId()])
 
     def load_scene(self, scene):
         """ Set the current scene to the scene with the specified name"""
