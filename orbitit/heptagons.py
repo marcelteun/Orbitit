@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+"""Module with widgets and shapes to support defining polyhedra consisting of heptagons.
+
+E.g. equilateral heptagons derived from kites or folded regular heptagons.
+"""
 #
 # Copyright (C) 2008 Marcel Tunnissen
 #
@@ -19,9 +23,12 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#-----------------------------------------------------------------
-# $Log$
-#
+# -----------------------------------------------------------------
+# Old sins:
+# pylint: disable=too-many-lines,too-many-arguments,too-many-locals
+# pylint: disable=too-many-instance-attributes,too-many-branches
+# pylint: disable=too-many-statements,too-many-public-methods
+
 from enum import Enum
 import json
 import logging
@@ -38,140 +45,136 @@ from orbitit.geomtypes import Vec3 as Vec
 
 V3 = math.sqrt(3)
 
-h         = math.sin(  math.pi / 7)
-RhoH      = math.sin(2*math.pi / 7)
-SigmaH    = math.sin(3*math.pi / 7)
-Rho       = RhoH / h
-Sigma     = SigmaH / h
-R         = 0.5 / h
-H         = (1 + Sigma + Rho)*h
+h = math.sin(math.pi / 7)
+RhoH = math.sin(2 * math.pi / 7)
+SigmaH = math.sin(3 * math.pi / 7)
+Rho = RhoH / h
+Sigma = SigmaH / h
+R = 0.5 / h
+H = (1 + Sigma + Rho) * h
 
-only_hepts      = -1
-dyn_pos         = -2
-open_file       = -3
-only_xtra_o3s   = -4
-all_eq_tris     = -5
-no_o3_tris      = -6
+only_hepts = -1
+dyn_pos = -2
+open_file = -3
+only_xtra_o3s = -4
+all_eq_tris = -5
+no_o3_tris = -6
 
-tris_fill_base  = 0
+tris_fill_base = 0
 
 alt_bit = 8
 loose_bit = 16
-rot_bit   = 32
+rot_bit = 32
 twist_bit = 64
 tris_offset = 128
 
-class Tris_counter():
+
+class Tris_counter:
     def __init__(self):
         self.reset(tris_offset)
 
     def reset(self, v):
-        self.counter = v;
+        self.counter = v
 
     def pp(self):
         i = self.counter
         self.counter += 1
         return i
 
+
 class TrisAlt_base(object):
     # Note nrs should be different from below
-    refl_1             = 0
-    strip_I            = 1
-    strip_II           = 2
-    star               = 3
-    refl_2             = 4
-    crossed_2          = 5
-    strip_1_loose      = strip_I  | loose_bit
-    star_1_loose       = star     | loose_bit
-    alt_strip_I        = strip_I              | alt_bit
-    alt_strip_II       = strip_II             | alt_bit
-    alt_strip_1_loose  = strip_I  | loose_bit | alt_bit
-    rot_strip_1_loose  = strip_I  | loose_bit           | rot_bit
-    arot_strip_1_loose = strip_I  | loose_bit | alt_bit | rot_bit
-    rot_star_1_loose   = star     | loose_bit           | rot_bit
-    arot_star_1_loose  = star     | loose_bit | alt_bit | rot_bit
-    rot_strip_I        = strip_I  |                       rot_bit
-    rot_star           = star     |                       rot_bit
-    arot_strip_I       = strip_I              | alt_bit | rot_bit
-    arot_star          = star                 | alt_bit | rot_bit
+    refl_1 = 0
+    strip_I = 1
+    strip_II = 2
+    star = 3
+    refl_2 = 4
+    crossed_2 = 5
+    strip_1_loose = strip_I | loose_bit
+    star_1_loose = star | loose_bit
+    alt_strip_I = strip_I | alt_bit
+    alt_strip_II = strip_II | alt_bit
+    alt_strip_1_loose = strip_I | loose_bit | alt_bit
+    rot_strip_1_loose = strip_I | loose_bit | rot_bit
+    arot_strip_1_loose = strip_I | loose_bit | alt_bit | rot_bit
+    rot_star_1_loose = star | loose_bit | rot_bit
+    arot_star_1_loose = star | loose_bit | alt_bit | rot_bit
+    rot_strip_I = strip_I | rot_bit
+    rot_star = star | rot_bit
+    arot_strip_I = strip_I | alt_bit | rot_bit
+    arot_star = star | alt_bit | rot_bit
     # TODO: this is a new position really
     # TODO: rename to refl2 for S4A4
     # TODO: rename to some 1 - loose variant for A4
-    twist_strip_I      = strip_I                                  | twist_bit
+    twist_strip_I = strip_I | twist_bit
 
     stringify = {
-        refl_1:                 'refl 1',
-        refl_2:                 'refl 2',
-        crossed_2:              'crossed',
-        strip_1_loose:          'strip 1 Loose',
-        strip_I:                'strip I',
-        strip_II:               'strip II',
-        star:                   'shell',
-        star_1_loose:           'shell 1 loose',
-        alt_strip_I:            'alt. strip I',
-        alt_strip_II:           'alt. strip II',
-        alt_strip_1_loose:      'alt. strip 1 loose',
-
-        twist_strip_I:          'twisted',
-
-        rot_strip_1_loose:      'rot. strip 1 loose',
-        rot_star_1_loose:       'rot. shell 1 loose',
-        arot_strip_1_loose:     'alt. rot. strip 1 loose',
-        arot_star_1_loose:      'alt. rot. shell 1 loose',
-        rot_strip_I:            'rot. strip I',
-        rot_star:               'rot. shell',
-        arot_strip_I:           'alt. rot. strip I',
-        arot_star:              'alt. rot. shell',
+        refl_1: "refl 1",
+        refl_2: "refl 2",
+        crossed_2: "crossed",
+        strip_1_loose: "strip 1 Loose",
+        strip_I: "strip I",
+        strip_II: "strip II",
+        star: "shell",
+        star_1_loose: "shell 1 loose",
+        alt_strip_I: "alt. strip I",
+        alt_strip_II: "alt. strip II",
+        alt_strip_1_loose: "alt. strip 1 loose",
+        twist_strip_I: "twisted",
+        rot_strip_1_loose: "rot. strip 1 loose",
+        rot_star_1_loose: "rot. shell 1 loose",
+        arot_strip_1_loose: "alt. rot. strip 1 loose",
+        arot_star_1_loose: "alt. rot. shell 1 loose",
+        rot_strip_I: "rot. strip I",
+        rot_star: "rot. shell",
+        arot_strip_I: "alt. rot. strip I",
+        arot_star: "alt. rot. shell",
     }
 
     class_key = {
-        'refl_1':            refl_1,
-        'refl_2':            refl_2,
-        'crossed_2':         crossed_2,
-        'strip_I':           strip_I,
-        'strip_II':          strip_II,
-        'star':              star,
-        'strip_1_loose':     strip_1_loose,
-        'star_1_loose':      star_1_loose,
-        'alt_strip_I':       alt_strip_I,
-        'alt_strip_II':      alt_strip_II,
-        'alt_strip_1_loose': alt_strip_1_loose,
-
-        'twist_strip_I':     twist_strip_I,
-
-        'rot_strip_1_loose':  rot_strip_1_loose,
-        'rot_star_1_loose':   rot_star_1_loose,
-        'arot_strip_1_loose': arot_strip_1_loose,
-        'arot_star_1_loose':  arot_star_1_loose,
-        'rot_strip_I':        rot_strip_I,
-        'rot_star':           rot_star,
-        'arot_strip_I':       arot_strip_I,
-        'arot_star':          arot_star
+        "refl_1": refl_1,
+        "refl_2": refl_2,
+        "crossed_2": crossed_2,
+        "strip_I": strip_I,
+        "strip_II": strip_II,
+        "star": star,
+        "strip_1_loose": strip_1_loose,
+        "star_1_loose": star_1_loose,
+        "alt_strip_I": alt_strip_I,
+        "alt_strip_II": alt_strip_II,
+        "alt_strip_1_loose": alt_strip_1_loose,
+        "twist_strip_I": twist_strip_I,
+        "rot_strip_1_loose": rot_strip_1_loose,
+        "rot_star_1_loose": rot_star_1_loose,
+        "arot_strip_1_loose": arot_strip_1_loose,
+        "arot_star_1_loose": arot_star_1_loose,
+        "rot_strip_I": rot_strip_I,
+        "rot_star": rot_star,
+        "arot_strip_I": arot_strip_I,
+        "arot_star": arot_star,
     }
 
     key = {
-        stringify[refl_1]:            refl_1,
-        stringify[refl_2]:            refl_2,
-        stringify[crossed_2]:         crossed_2,
-        stringify[strip_I]:           strip_I,
-        stringify[strip_II]:          strip_II,
-        stringify[star]:              star,
-        stringify[strip_1_loose]:     strip_1_loose,
-        stringify[star_1_loose]:      star_1_loose,
-        stringify[alt_strip_I]:       alt_strip_I,
-        stringify[alt_strip_II]:      alt_strip_II,
+        stringify[refl_1]: refl_1,
+        stringify[refl_2]: refl_2,
+        stringify[crossed_2]: crossed_2,
+        stringify[strip_I]: strip_I,
+        stringify[strip_II]: strip_II,
+        stringify[star]: star,
+        stringify[strip_1_loose]: strip_1_loose,
+        stringify[star_1_loose]: star_1_loose,
+        stringify[alt_strip_I]: alt_strip_I,
+        stringify[alt_strip_II]: alt_strip_II,
         stringify[alt_strip_1_loose]: alt_strip_1_loose,
-
-        stringify[twist_strip_I]:     twist_strip_I,
-
-        stringify[rot_strip_1_loose]:  rot_strip_1_loose,
-        stringify[rot_star_1_loose]:   rot_star_1_loose,
+        stringify[twist_strip_I]: twist_strip_I,
+        stringify[rot_strip_1_loose]: rot_strip_1_loose,
+        stringify[rot_star_1_loose]: rot_star_1_loose,
         stringify[arot_strip_1_loose]: arot_strip_1_loose,
-        stringify[arot_star_1_loose]:  arot_star_1_loose,
-        stringify[rot_strip_I]:        rot_strip_I,
-        stringify[rot_star]:           rot_star,
-        stringify[arot_strip_I]:       arot_strip_I,
-        stringify[arot_star]:          arot_star,
+        stringify[arot_star_1_loose]: arot_star_1_loose,
+        stringify[rot_strip_I]: rot_strip_I,
+        stringify[rot_star]: rot_star,
+        stringify[arot_strip_I]: arot_strip_I,
+        stringify[arot_star]: arot_star,
     }
 
     def isBaseKey(self, k):
@@ -180,9 +183,9 @@ class TrisAlt_base(object):
         except KeyError:
             return False
 
-    def toFileStr(self, tId = None, tStr = None):
-        assert(tId is not None or tStr is not None)
-        if (tId is None):
+    def toFileStr(self, tId=None, tStr=None):
+        assert tId is not None or tStr is not None
+        if tId is None:
             tId = self.key[tStr]
         if not isinstance(tId, int):
             tStr0 = self.stringify[tId[0]]
@@ -191,14 +194,15 @@ class TrisAlt_base(object):
         elif tStr is None:
             tStr = self.stringify[tId]
 
-        t = '_'.join(tStr.split()).lower().replace('ernative', '')
-        t = t.replace('_ii', '_II')
-        t = t.replace('_i', '_I')
-        t = t.replace('alt.', 'alt')
-        t = t.replace('rot.', 'rot')
+        t = "_".join(tStr.split()).lower().replace("ernative", "")
+        t = t.replace("_ii", "_II")
+        t = t.replace("_i", "_I")
+        t = t.replace("alt.", "alt")
+        t = t.replace("rot.", "rot")
         return t
 
     baseKey = {}
+
     def __init__(self):
         # TODO? Note that only s that aren't primitives (isinstance(x, int))
         # should be added here.
@@ -208,164 +212,158 @@ class TrisAlt_base(object):
         self.mapFileStrOnStr = {}
         self.mapFileStrOnKey = {}
         for (tStr, tId) in self.key.items():
-            fileStr = self.toFileStr(tStr = tStr)
-            self.mapKeyOnFileStr[tId]     = fileStr
-            self.mapStrOnFileStr[tStr]    = fileStr
+            fileStr = self.toFileStr(tStr=tStr)
+            self.mapKeyOnFileStr[tId] = fileStr
+            self.mapStrOnFileStr[tStr] = fileStr
             self.mapFileStrOnStr[fileStr] = tStr
             self.mapFileStrOnKey[fileStr] = tId
 
-def toTrisAltKeyStr(tId = None, tStr = None):
-    assert(tId is not None or tStr is not None)
-    if (tId is None):
+
+def toTrisAltKeyStr(tId=None, tStr=None):
+    assert tId is not None or tStr is not None
+    if tId is None:
         tId = TrisAlt_base.key[tStr]
     if not isinstance(tId, int):
         if tId[0] & loose_bit and tId[1] & loose_bit:
-            tStr = '%s_1loose_%s' % (
-                        TrisAlt_base.stringify[tId[0] & ~loose_bit],
-                        TrisAlt_base.stringify[tId[1] & ~loose_bit])
+            tStr = "{}_1loose_{}".format(
+                TrisAlt_base.stringify[tId[0] & ~loose_bit],
+                TrisAlt_base.stringify[tId[1] & ~loose_bit],
+            )
         elif tId[0] & loose_bit:
-            tStr = '%s__%s' % (
-                        TrisAlt_base.stringify[tId[0]],
-                        TrisAlt_base.stringify[tId[1]])
+            tStr = "{}__{}".format(
+                TrisAlt_base.stringify[tId[0]],
+                TrisAlt_base.stringify[tId[1]],
+            )
         # TODO: remove share under new position
-        elif (tId[0] == TrisAlt_base.twist_strip_I and
-            tId[1] == TrisAlt_base.twist_strip_I
+        elif (
+                tId[0] == TrisAlt_base.twist_strip_I
+                and tId[1] == TrisAlt_base.twist_strip_I
         ):
-            tStr = 'twist_strip_I_strip_I'
+            tStr = "twist_strip_I_strip_I"
         else:
-            tStr = '%s_%s' % (
-                        TrisAlt_base.stringify[tId[0]],
-                        TrisAlt_base.stringify[tId[1]])
+            tStr = "%s_%s" % (
+                TrisAlt_base.stringify[tId[0]],
+                TrisAlt_base.stringify[tId[1]],
+            )
     elif tStr is None:
         tStr = TrisAlt_base.stringify[tId]
     t = "_".join(tStr.split())
-    t = t.replace('_ii', '_II')
-    t = t.replace('_i', '_I')
-    t = t.replace('alt._rot.', 'arot')
-    t = t.replace('rot.', 'rot')
-    t = t.replace('alt.', 'alt')
+    t = t.replace("_ii", "_II")
+    t = t.replace("_i", "_I")
+    t = t.replace("alt._rot.", "arot")
+    t = t.replace("rot.", "rot")
+    t = t.replace("alt.", "alt")
     return t
+
 
 class Meta_TrisAlt(type):
     def __init__(self, classname, bases, classdict):
         type.__init__(self, classname, bases, classdict)
 
+
 def Def_TrisAlt(name, tris_keys):
-    class_dict = {
-        'mixed':     False,
-        'stringify': {},
-        'key':       {},
-        'baseKey':   {}
-    }
+    class_dict = {"mixed": False, "stringify": {}, "key": {}, "baseKey": {}}
     # Always add all primitives:
     for (k, s) in TrisAlt_base.stringify.items():
-        class_dict['stringify'][k] = s
-        class_dict['key'][s] = k
+        class_dict["stringify"][k] = s
+        class_dict["key"][s] = k
         class_dict[toTrisAltKeyStr(k)] = k
     for k in tris_keys:
         if isinstance(k, int):
-            class_dict['baseKey'][k] = True
+            class_dict["baseKey"][k] = True
         else:
             # must be a tuple of 2
-            assert len(k) == 2, 'Exptected 2 tuple, got: %s.' % k
+            assert len(k) == 2, "Exptected 2 tuple, got: %s." % k
             if k[0] & loose_bit and k[1] & loose_bit:
-                s = '%s - 1 loose - %s' % (
-                            TrisAlt_base.stringify[k[0] & ~loose_bit],
-                            TrisAlt_base.stringify[k[1] & ~loose_bit])
-            elif (k[0] == TrisAlt_base.twist_strip_I and
-                k[1] == TrisAlt_base.twist_strip_I
+                s = "%s - 1 loose - %s" % (
+                    TrisAlt_base.stringify[k[0] & ~loose_bit],
+                    TrisAlt_base.stringify[k[1] & ~loose_bit],
+                )
+            elif (
+                    k[0] == TrisAlt_base.twist_strip_I
+                    and k[1] == TrisAlt_base.twist_strip_I
             ):
-                s = 'strip I - twisted - strip I'
+                s = "strip I - twisted - strip I"
             else:
-                s = '%s - %s' % (
-                            TrisAlt_base.stringify[k[0]],
-                            TrisAlt_base.stringify[k[1]])
-            class_dict['stringify'][k] = s
-            class_dict['key'][s] = k
+                s = "%s - %s" % (
+                    TrisAlt_base.stringify[k[0]],
+                    TrisAlt_base.stringify[k[1]],
+                )
+            class_dict["stringify"][k] = s
+            class_dict["key"][s] = k
             class_dict[toTrisAltKeyStr(k)] = k
     return Meta_TrisAlt(name, (TrisAlt_base,), class_dict)
 
-TrisAlt = Def_TrisAlt('TrisAlt', [
-            TrisAlt_base.refl_1,
-            TrisAlt_base.refl_2,
-            TrisAlt_base.crossed_2,
-            TrisAlt_base.strip_1_loose,
-            TrisAlt_base.strip_I,
-            TrisAlt_base.strip_II,
-            TrisAlt_base.star,
-            TrisAlt_base.star_1_loose,
-            TrisAlt_base.alt_strip_I,
-            TrisAlt_base.alt_strip_II,
-            TrisAlt_base.alt_strip_1_loose,
 
-            TrisAlt_base.twist_strip_I,
+TrisAlt = Def_TrisAlt(
+    "TrisAlt",
+    [
+        TrisAlt_base.refl_1,
+        TrisAlt_base.refl_2,
+        TrisAlt_base.crossed_2,
+        TrisAlt_base.strip_1_loose,
+        TrisAlt_base.strip_I,
+        TrisAlt_base.strip_II,
+        TrisAlt_base.star,
+        TrisAlt_base.star_1_loose,
+        TrisAlt_base.alt_strip_I,
+        TrisAlt_base.alt_strip_II,
+        TrisAlt_base.alt_strip_1_loose,
+        TrisAlt_base.twist_strip_I,
+        TrisAlt_base.rot_strip_1_loose,
+        TrisAlt_base.rot_star_1_loose,
+        TrisAlt_base.arot_strip_1_loose,
+        TrisAlt_base.arot_star_1_loose,
+        (TrisAlt_base.strip_I, TrisAlt_base.strip_I),
+        (TrisAlt_base.strip_I, TrisAlt_base.strip_II),
+        (TrisAlt_base.strip_I, TrisAlt_base.star),
+        (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_I),
+        (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_II),
+        (TrisAlt_base.strip_II, TrisAlt_base.strip_I),
+        (TrisAlt_base.strip_II, TrisAlt_base.strip_II),
+        (TrisAlt_base.strip_II, TrisAlt_base.star),
+        (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_I),
+        (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_II),
+        (TrisAlt_base.star, TrisAlt_base.strip_I),
+        (TrisAlt_base.star, TrisAlt_base.strip_II),
+        (TrisAlt_base.star, TrisAlt_base.star),
+        (TrisAlt_base.star, TrisAlt_base.alt_strip_I),
+        (TrisAlt_base.star, TrisAlt_base.alt_strip_II),
+        (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_I),
+        (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_II),
+        (TrisAlt_base.alt_strip_I, TrisAlt_base.star),
+        (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_I),
+        (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_II),
+        (TrisAlt_base.twist_strip_I, TrisAlt_base.twist_strip_I),
+        (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_I),
+        (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_II),
+        (TrisAlt_base.alt_strip_II, TrisAlt_base.star),
+        (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_I),
+        (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_II),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.strip_1_loose),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.star_1_loose),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.alt_strip_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.strip_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.star_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.alt_strip_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.strip_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.star_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.alt_strip_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.rot_strip_1_loose),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_strip_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_strip_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.arot_strip_1_loose),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_strip_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_strip_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.rot_star_1_loose),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_star_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_star_1_loose),
+        (TrisAlt_base.star_1_loose, TrisAlt_base.arot_star_1_loose),
+        (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_star_1_loose),
+        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_star_1_loose),
+    ],
+)
 
-            TrisAlt_base.rot_strip_1_loose,
-            TrisAlt_base.rot_star_1_loose,
-            TrisAlt_base.arot_strip_1_loose,
-            TrisAlt_base.arot_star_1_loose,
-
-            (TrisAlt_base.strip_I, TrisAlt_base.strip_I),
-            (TrisAlt_base.strip_I, TrisAlt_base.strip_II),
-            (TrisAlt_base.strip_I, TrisAlt_base.star),
-            (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_I),
-            (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_II),
-
-            (TrisAlt_base.strip_II, TrisAlt_base.strip_I),
-            (TrisAlt_base.strip_II, TrisAlt_base.strip_II),
-            (TrisAlt_base.strip_II, TrisAlt_base.star),
-            (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_I),
-            (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_II),
-
-            (TrisAlt_base.star, TrisAlt_base.strip_I),
-            (TrisAlt_base.star, TrisAlt_base.strip_II),
-            (TrisAlt_base.star, TrisAlt_base.star),
-            (TrisAlt_base.star, TrisAlt_base.alt_strip_I),
-            (TrisAlt_base.star, TrisAlt_base.alt_strip_II),
-
-            (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_I),
-            (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_II),
-            (TrisAlt_base.alt_strip_I, TrisAlt_base.star),
-            (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_I),
-            (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_II),
-
-            (TrisAlt_base.twist_strip_I, TrisAlt_base.twist_strip_I),
-
-            (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_I),
-            (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_II),
-            (TrisAlt_base.alt_strip_II, TrisAlt_base.star),
-            (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_I),
-            (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_II),
-
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.strip_1_loose),
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.star_1_loose),
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.alt_strip_1_loose),
-
-            (TrisAlt_base.star_1_loose, TrisAlt_base.strip_1_loose),
-            (TrisAlt_base.star_1_loose, TrisAlt_base.star_1_loose),
-            (TrisAlt_base.star_1_loose, TrisAlt_base.alt_strip_1_loose),
-
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.strip_1_loose),
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.star_1_loose),
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.alt_strip_1_loose),
-
-            (TrisAlt_base.star_1_loose, TrisAlt_base.rot_strip_1_loose),
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_strip_1_loose),
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_strip_1_loose),
-
-            (TrisAlt_base.star_1_loose, TrisAlt_base.arot_strip_1_loose),
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_strip_1_loose),
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_strip_1_loose),
-
-            (TrisAlt_base.star_1_loose, TrisAlt_base.rot_star_1_loose),
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_star_1_loose),
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_star_1_loose),
-
-            (TrisAlt_base.star_1_loose, TrisAlt_base.arot_star_1_loose),
-            (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_star_1_loose),
-            (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_star_1_loose),
-        ]
-    )
 
 class FoldMethod(Enum):
     """
@@ -390,13 +388,13 @@ class FoldMethod(Enum):
             diagonal
     """
 
-    PARALLEL  = 0
+    PARALLEL = 0
     TRAPEZIUM = 1
-    W         = 2
-    TRIANGLE  = 3
-    SHELL     = 4
-    G         = 5
-    MIXED     = 6
+    W = 2
+    TRIANGLE = 3
+    SHELL = 4
+    G = 5
+    MIXED = 6
 
     @classmethod
     def get(self, s):
@@ -409,6 +407,7 @@ class FoldMethod(Enum):
             if v.name == s:
                 return v
         return None
+
 
 class RegularHeptagon:
     def __init__(self):
@@ -430,31 +429,31 @@ class RegularHeptagon:
         #  - a mirror axis parallel to the Y-axis
         #  - V0 = (0, 0, 0)
         self.VsOrg = [
-                Vec([     0.0,            0.0, 0.0]),
-                Vec([   Rho/2,             -h, 0.0]),
-                Vec([ Sigma/2, -(1 + Sigma)*h, 0.0]),
-                Vec([     0.5,             -H, 0.0]),
-                Vec([    -0.5,             -H, 0.0]),
-                Vec([-Sigma/2, -(1 + Sigma)*h, 0.0]),
-                Vec([  -Rho/2,             -h, 0.0])
-            ]
-        self.Vs = self.VsOrg[:]     # the vertex aray to use.
+            Vec([0.0, 0.0, 0.0]),
+            Vec([Rho / 2, -h, 0.0]),
+            Vec([Sigma / 2, -(1 + Sigma) * h, 0.0]),
+            Vec([0.5, -H, 0.0]),
+            Vec([-0.5, -H, 0.0]),
+            Vec([-Sigma / 2, -(1 + Sigma) * h, 0.0]),
+            Vec([-Rho / 2, -h, 0.0]),
+        ]
+        self.Vs = self.VsOrg[:]  # the vertex aray to use.
         self.Fs = [[6, 5, 4, 3, 2, 1, 0]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
     def fold(
-        self,
-        a0,
-        b0,
-        a1=None,
-        b1=None,
-        keepV0=True,
-        fold=FoldMethod.PARALLEL,
-        rotate=0,
+            self,
+            a0,
+            b0,
+            a1=None,
+            b1=None,
+            keepV0=True,
+            fold=FoldMethod.PARALLEL,
+            rotate=0,
     ):
         method = {
             FoldMethod.PARALLEL: self.fold_parallel,
-            FoldMethod.TRAPEZIUM:self.fold_trapezium,
+            FoldMethod.TRAPEZIUM: self.fold_trapezium,
             FoldMethod.W: self.fold_w,
             FoldMethod.TRIANGLE: self.fold_triangle,
             FoldMethod.SHELL: self.fold_shell,
@@ -493,14 +492,12 @@ class RegularHeptagon:
         #
         #
         self.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                1, 6, 2, 5,
-            ]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 1, 6, 2, 5]
         cosa = math.cos(a)
         sina = math.sin(a)
         cosb = math.cos(b)
         sinb = math.sin(b)
-        if (keepV0):
+        if keepV0:
             # for x-coord set to 0:
             # V2 - V[1] = fold_a(V[2] - V[1]) = (cosa, sina)*(V[2] - V[1])
             # => V2 = V[1] + (cosa, sina)*(V[2] - V[1])
@@ -514,82 +511,84 @@ class RegularHeptagon:
             #   (0, 0) .-------.-------.------.
             #   self. V[0]   V[1]    V[2]    V[3]
             dV2 = [
-                    self.VsOrg[2][1] - self.VsOrg[1][1],
-                    self.VsOrg[2][2] - self.VsOrg[1][2]
-                ]
-            V2 = Vec([
+                self.VsOrg[2][1] - self.VsOrg[1][1],
+                self.VsOrg[2][2] - self.VsOrg[1][2],
+            ]
+            V2 = Vec(
+                [
                     self.VsOrg[2][0],
                     self.VsOrg[1][1] + cosa * dV2[0] - sina * dV2[1],
-                    self.VsOrg[1][2] + cosa * dV2[1] + sina * dV2[0]
-                ])
+                    self.VsOrg[1][2] + cosa * dV2[1] + sina * dV2[0],
+                ]
+            )
             # Similarly:
             dV3_ = [
-                    self.VsOrg[3][1] - self.VsOrg[1][1],
-                    self.VsOrg[3][2] - self.VsOrg[1][2]
-                ]
+                self.VsOrg[3][1] - self.VsOrg[1][1],
+                self.VsOrg[3][2] - self.VsOrg[1][2],
+            ]
             V3_ = [
-                    self.VsOrg[1][1] + cosa * dV3_[0] - sina * dV3_[1],
-                    self.VsOrg[1][2] + cosa * dV3_[1] + sina * dV3_[0]
-                ]
+                self.VsOrg[1][1] + cosa * dV3_[0] - sina * dV3_[1],
+                self.VsOrg[1][2] + cosa * dV3_[1] + sina * dV3_[0],
+            ]
             # now rotate beta:
-            dV3 = [
-                    V3_[0] - V2[1],
-                    V3_[1] - V2[2]
-                ]
-            V3 = Vec([
+            dV3 = [V3_[0] - V2[1], V3_[1] - V2[2]]
+            V3 = Vec(
+                [
                     self.VsOrg[3][0],
                     V2[1] + cosb * dV3[0] - sinb * dV3[1],
-                    V2[2] + cosb * dV3[1] + sinb * dV3[0]
-                ])
-            self.Vs = [
-                    self.VsOrg[0],
-                    self.VsOrg[1],
-                    V2,
-                    V3,
-                    Vec([-V3[0], V3[1], V3[2]]),
-                    Vec([-V2[0], V2[1], V2[2]]),
-                    self.VsOrg[6]
+                    V2[2] + cosb * dV3[1] + sinb * dV3[0],
                 ]
+            )
+            self.Vs = [
+                self.VsOrg[0],
+                self.VsOrg[1],
+                V2,
+                V3,
+                Vec([-V3[0], V3[1], V3[2]]),
+                Vec([-V2[0], V2[1], V2[2]]),
+                self.VsOrg[6],
+            ]
         else:
             # similar to before, except the roles of the vertices are switched
             # i.e. keep V[3] constant...
             dV1 = [
-                    self.VsOrg[1][1] - self.VsOrg[2][1],
-                    self.VsOrg[1][2] - self.VsOrg[2][2]
-                ]
-            V1 = Vec([
+                self.VsOrg[1][1] - self.VsOrg[2][1],
+                self.VsOrg[1][2] - self.VsOrg[2][2],
+            ]
+            V1 = Vec(
+                [
                     self.VsOrg[1][0],
                     self.VsOrg[2][1] + cosa * dV1[0] - sina * dV1[1],
-                    self.VsOrg[2][2] + cosa * dV1[1] + sina * dV1[0]
-                ])
+                    self.VsOrg[2][2] + cosa * dV1[1] + sina * dV1[0],
+                ]
+            )
             # Similarly:
             dV0_ = [
-                    self.VsOrg[0][1] - self.VsOrg[2][1],
-                    self.VsOrg[0][2] - self.VsOrg[2][2]
-                ]
+                self.VsOrg[0][1] - self.VsOrg[2][1],
+                self.VsOrg[0][2] - self.VsOrg[2][2],
+            ]
             V0_ = [
-                    self.VsOrg[2][1] + cosa * dV0_[0] - sina * dV0_[1],
-                    self.VsOrg[2][2] + cosa * dV0_[1] + sina * dV0_[0]
-                ]
+                self.VsOrg[2][1] + cosa * dV0_[0] - sina * dV0_[1],
+                self.VsOrg[2][2] + cosa * dV0_[1] + sina * dV0_[0],
+            ]
             # now rotate beta:
-            dV0 = [
-                    V0_[0] - V1[1],
-                    V0_[1] - V1[2]
-                ]
-            V0 = Vec([
+            dV0 = [V0_[0] - V1[1], V0_[1] - V1[2]]
+            V0 = Vec(
+                [
                     self.VsOrg[0][0],
                     V1[1] + cosb * dV0[0] - sinb * dV0[1],
-                    V1[2] + cosb * dV0[1] + sinb * dV0[0]
-                ])
-            self.Vs = [
-                    V0,
-                    V1,
-                    self.VsOrg[2],
-                    self.VsOrg[3],
-                    self.VsOrg[4],
-                    self.VsOrg[5],
-                    Vec([-V1[0], V1[1], V1[2]])
+                    V1[2] + cosb * dV0[1] + sinb * dV0[0],
                 ]
+            )
+            self.Vs = [
+                V0,
+                V1,
+                self.VsOrg[2],
+                self.VsOrg[3],
+                self.VsOrg[4],
+                self.VsOrg[5],
+                Vec([-V1[0], V1[1], V1[2]]),
+            ]
 
     def fold_parallel_1(self, a, b, keepV0=True):
         """
@@ -614,15 +613,13 @@ class RegularHeptagon:
         #         5       4
         #
         self.Fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                2, 0, 3, 6,
-            ]
-        if (keepV0):
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 2, 0, 3, 6]
+        if keepV0:
             assert False, "TODO"
         else:
-            v3v6 = (self.VsOrg[3] + self.VsOrg[6])/2
+            v3v6 = (self.VsOrg[3] + self.VsOrg[6]) / 2
             v3v6_axis = Vec(self.VsOrg[3] - self.VsOrg[6])
-            v0v2 = (self.VsOrg[0] + self.VsOrg[2])/2
+            v0v2 = (self.VsOrg[0] + self.VsOrg[2]) / 2
             rot_a = Rot(axis=v3v6_axis, angle=a)
             v0v2_ = v3v6 + rot_a * (v0v2 - v3v6)
             V0 = v0v2_ + (self.VsOrg[0] - v0v2)
@@ -633,14 +630,14 @@ class RegularHeptagon:
             rot_b = Rot(axis=v0v2_axis, angle=b)
             V1 = v0v2 + rot_b * (V1_ - v0v2)
             self.Vs = [
-                    V0,
-                    V1,
-                    V2,
-                    self.VsOrg[3],
-                    self.VsOrg[4],
-                    self.VsOrg[5],
-                    self.VsOrg[6],
-                ]
+                V0,
+                V1,
+                V2,
+                self.VsOrg[3],
+                self.VsOrg[4],
+                self.VsOrg[5],
+                self.VsOrg[6],
+            ]
 
     def fold_trapezium(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
         """
@@ -666,83 +663,79 @@ class RegularHeptagon:
         #
         #
         self.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                4, 6, 6, 1, 1, 3,
-            ]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 4, 6, 6, 1, 1, 3]
         cosa = math.cos(a)
         sina = math.sin(a)
-        if (keepV0):
+        if keepV0:
             # see fold_parallel
             dV2_ = [
-                    self.VsOrg[2][1] - self.VsOrg[1][1],
-                    self.VsOrg[2][2] - self.VsOrg[1][2]
-                ]
-            V2_ = Vec([
+                self.VsOrg[2][1] - self.VsOrg[1][1],
+                self.VsOrg[2][2] - self.VsOrg[1][2],
+            ]
+            V2_ = Vec(
+                [
                     self.VsOrg[2][0],
                     self.VsOrg[1][1] + cosa * dV2_[0] - sina * dV2_[1],
-                    self.VsOrg[1][2] + cosa * dV2_[1] + sina * dV2_[0]
-                ])
-            dV3 = [
-                    self.VsOrg[3][1] - self.VsOrg[1][1],
-                    self.VsOrg[3][2] - self.VsOrg[1][2]
+                    self.VsOrg[1][2] + cosa * dV2_[1] + sina * dV2_[0],
                 ]
-            V3 = Vec([
+            )
+            dV3 = [
+                self.VsOrg[3][1] - self.VsOrg[1][1],
+                self.VsOrg[3][2] - self.VsOrg[1][2],
+            ]
+            V3 = Vec(
+                [
                     self.VsOrg[3][0],
                     self.VsOrg[1][1] + cosa * dV3[0] - sina * dV3[1],
-                    self.VsOrg[1][2] + cosa * dV3[1] + sina * dV3[0]
-                ])
+                    self.VsOrg[1][2] + cosa * dV3[1] + sina * dV3[0],
+                ]
+            )
             V4 = Vec([-V3[0], V3[1], V3[2]])
-            v1v3 = (self.VsOrg[1] + V3)/2
+            v1v3 = (self.VsOrg[1] + V3) / 2
             v1v3_axis = Vec(V3 - self.VsOrg[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             V2 = v1v3 + r * (V2_ - v1v3)
             if not Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
-                v4v6 = (V4 + self.VsOrg[6])/2
+                v4v6 = (V4 + self.VsOrg[6]) / 2
                 v4v6_axis = Vec(self.VsOrg[6] - V4)
                 r = Rot(axis=v4v6_axis, angle=b1)
                 V5_ = Vec([-V2_[0], V2_[1], V2_[2]])
                 V5 = v4v6 + r * (V5_ - v4v6)
-            self.Vs = [
-                    self.VsOrg[0],
-                    self.VsOrg[1],
-                    V2,
-                    V3,
-                    V4,
-                    V5,
-                    self.VsOrg[6]
-                ]
+            self.Vs = [self.VsOrg[0], self.VsOrg[1], V2, V3, V4, V5, self.VsOrg[6]]
         else:
             dV0 = [
-                    self.VsOrg[0][1] - self.VsOrg[1][1],
-                    self.VsOrg[0][2] - self.VsOrg[1][2]
-                ]
-            V0 = Vec([
+                self.VsOrg[0][1] - self.VsOrg[1][1],
+                self.VsOrg[0][2] - self.VsOrg[1][2],
+            ]
+            V0 = Vec(
+                [
                     self.VsOrg[0][0],
                     self.VsOrg[1][1] + cosa * dV0[0] - sina * dV0[1],
-                    self.VsOrg[1][2] + cosa * dV0[1] + sina * dV0[0]
-                ])
-            v1v3 = (self.VsOrg[1] + self.VsOrg[3])/2
+                    self.VsOrg[1][2] + cosa * dV0[1] + sina * dV0[0],
+                ]
+            )
+            v1v3 = (self.VsOrg[1] + self.VsOrg[3]) / 2
             v1v3_axis = Vec(self.VsOrg[3] - self.VsOrg[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             V2 = v1v3 + r * (self.VsOrg[2] - v1v3)
             if Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
-                v4v6 = (self.VsOrg[4] + self.VsOrg[6])/2
+                v4v6 = (self.VsOrg[4] + self.VsOrg[6]) / 2
                 v4v6_axis = Vec(self.VsOrg[6] - self.VsOrg[4])
                 r = Rot(axis=v4v6_axis, angle=b1)
                 V5 = v4v6 + r * (self.VsOrg[5] - v4v6)
             self.Vs = [
-                    V0,
-                    self.VsOrg[1],
-                    V2,
-                    self.VsOrg[3],
-                    self.VsOrg[4],
-                    V5,
-                    self.VsOrg[6]
-                ]
+                V0,
+                self.VsOrg[1],
+                V2,
+                self.VsOrg[3],
+                self.VsOrg[4],
+                V5,
+                self.VsOrg[6],
+            ]
 
     def fold_triangle(self, a, b0, _=None, b1=None, keepV0=True, rotate=0):
         """
@@ -766,12 +759,10 @@ class RegularHeptagon:
         #            4       3
         #
         self.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0,
-                0, 2, 2, 5, 5, 0
-            ]
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
         Rot0_2 = Rot(axis=self.VsOrg[2] - self.VsOrg[0], angle=b0)
         V1 = Rot0_2 * self.VsOrg[1]
-        if (Geom3D.eq(b0, b1)):
+        if Geom3D.eq(b0, b1):
             V6 = Vec([-V1[0], V1[1], V1[2]])
         else:
             Rot5_0 = Rot(axis=self.VsOrg[0] - self.VsOrg[5], angle=b1)
@@ -781,28 +772,28 @@ class RegularHeptagon:
             Rot5_2 = Rot(axis=self.VsOrg[5] - self.VsOrg[2], angle=a)
             V3 = Rot5_2 * (self.VsOrg[3] - V2) + V2
             self.Vs = [
-                    self.VsOrg[0],
-                    V1,
-                    self.VsOrg[2],
-                    V3,
-                    Vec([-V3[0], V3[1], V3[2]]),
-                    self.VsOrg[5],
-                    V6,
-                ]
+                self.VsOrg[0],
+                V1,
+                self.VsOrg[2],
+                V3,
+                Vec([-V3[0], V3[1], V3[2]]),
+                self.VsOrg[5],
+                V6,
+            ]
         else:
             Rot2_5 = Rot(axis=self.VsOrg[2] - self.VsOrg[5], angle=a)
             V0 = Rot2_5 * (self.VsOrg[0] - V2) + V2
             V1 = Rot2_5 * (V1 - V2) + V2
             V6 = Rot2_5 * (V6 - V2) + V2
             self.Vs = [
-                    V0,
-                    V1,
-                    self.VsOrg[2],
-                    self.VsOrg[3],
-                    self.VsOrg[4],
-                    self.VsOrg[5],
-                    V6,
-                ]
+                V0,
+                V1,
+                self.VsOrg[2],
+                self.VsOrg[3],
+                self.VsOrg[4],
+                self.VsOrg[5],
+                V6,
+            ]
 
     def fold_shell(self, a0, b0, a1, b1, keepV0=True, rotate=0):
         """
@@ -852,8 +843,28 @@ class RegularHeptagon:
             [i[0], i[6], i[5]],
         ]
         self.Es = [
-            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
-            i[0], i[2], i[0], i[3], i[0], i[4], i[0], i[5]
+            i[0],
+            i[1],
+            i[1],
+            i[2],
+            i[2],
+            i[3],
+            i[3],
+            i[4],
+            i[4],
+            i[5],
+            i[5],
+            i[6],
+            i[6],
+            i[0],
+            i[0],
+            i[2],
+            i[0],
+            i[3],
+            i[0],
+            i[4],
+            i[0],
+            i[5],
         ]
 
     def fold_shell_0(self, a0, b0, a1, b1, keepV0=True):
@@ -887,7 +898,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a0
@@ -895,10 +906,10 @@ class RegularHeptagon:
             v0v3_axis = Vec(v[0] - v[3])
             rot_a0 = Rot(axis=v0v3_axis, angle=-a0)
             # middle of V1-V2 which is // to v0v3 axis
-            v1v2  = (v[1] + v[2]) / 2
+            v1v2 = (v[1] + v[2]) / 2
             v1v2_ = v0v3 + rot_a0 * (v1v2 - v0v3)
             v[1] = v1v2_ + (v[1] - v1v2)
-            v[2]  = v1v2_ + (v[2] - v1v2)
+            v[2] = v1v2_ + (v[2] - v1v2)
 
             # rot b0
             v0v2 = (v[0] + v[2]) / 2
@@ -911,10 +922,10 @@ class RegularHeptagon:
             v0v4_axis = Vec(v[0] - v[4])
             rot_a1 = Rot(axis=v0v4_axis, angle=a1)
             # middle of V6-V5 which is // to v1v4 axis
-            v6v5  = (v[6] + v[5]) / 2
+            v6v5 = (v[6] + v[5]) / 2
             v6v5_ = v0v4 + rot_a1 * (v6v5 - v0v4)
             v[6] = v6v5_ + (v[6] - v6v5)
-            v[5]  = v6v5_ + (v[5] - v6v5)
+            v[5] = v6v5_ + (v[5] - v6v5)
 
             # rot b1
             v0v5 = (v[0] + v[5]) / 2
@@ -957,7 +968,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -972,10 +983,10 @@ class RegularHeptagon:
             v1v4_axis = Vec(v[1] - v[4])
             rot_a0 = Rot(axis=v1v4_axis, angle=a0)
             # middle of V0-V5 which is // to v1v4 axis
-            v0v5  = (v[0] + v[5]) / 2
+            v0v5 = (v[0] + v[5]) / 2
             v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
             v[0] = v0v5_ + (v[0] - v0v5)
-            v[5]  = v0v5_ + (v[5] - v0v5)
+            v[5] = v0v5_ + (v[5] - v0v5)
             v[6] = v1v4 + rot_a0 * (v[6] - v1v4)
 
             # rot a1
@@ -983,10 +994,10 @@ class RegularHeptagon:
             v1v5_axis = Vec(v[1] - v[5])
             rot_a1 = Rot(axis=v1v5_axis, angle=a1)
             # middle of V0-V6 which is // to v1v4 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
             v[0] = v0v6_ + (v[0] - v0v6)
-            v[6]  = v0v6_ + (v[6] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot b1
             v1v6 = (v[1] + v[6]) / 2
@@ -1029,7 +1040,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -1037,12 +1048,12 @@ class RegularHeptagon:
             v2v4_axis = Vec(v[2] - v[4])
             rot_b0 = Rot(axis=v2v4_axis, angle=b0)
             # middle of V1-V5 which is // to v2v4 axis
-            v1v5  = (v[1] + v[5]) / 2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
             v[1] = v1v5_ + (v[1] - v1v5)
             v[5] = v1v5_ + (v[5] - v1v5)
             # middle of V0-V6 which is // to v2v4 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
             v[0] = v0v6_ + (v[0] - v0v6)
             v[6] = v0v6_ + (v[6] - v0v6)
@@ -1052,7 +1063,7 @@ class RegularHeptagon:
             v2v5_axis = Vec(v[2] - v[5])
             rot_a0 = Rot(axis=v2v5_axis, angle=a0)
             # middle of V1-V6 which is // to v2v5 axis
-            v1v6  = (v[1] + v[6]) / 2
+            v1v6 = (v[1] + v[6]) / 2
             v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
             v[1] = v1v6_ + (v[1] - v1v6)
             v[6] = v1v6_ + (v[6] - v1v6)
@@ -1063,7 +1074,7 @@ class RegularHeptagon:
             v2v6_axis = Vec(v[2] - v[6])
             rot_a1 = Rot(axis=v2v6_axis, angle=a1)
             # middle of V0-V1 which is // to v2v6 axis
-            v0v1  = (v[0] + v[1])/2
+            v0v1 = (v[0] + v[1]) / 2
             v0v1_ = v2v6 + rot_a1 * (v0v1 - v2v6)
             v[0] = v0v1_ + (v[0] - v0v1)
             v[1] = v0v1_ + (v[1] - v0v1)
@@ -1109,7 +1120,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -1117,12 +1128,12 @@ class RegularHeptagon:
             v3v5_axis = Vec(v[3] - v[5])
             rot_b0 = Rot(axis=v3v5_axis, angle=b0)
             # middle of V2-V6 which is // to v3v5 axis
-            v2v6  = (v[2] + v[6]) / 2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
             v[2] = v2v6_ + (v[2] - v2v6)
             v[6] = v2v6_ + (v[6] - v2v6)
             # middle of V1-V0 which is // to v3v5 axis
-            v1v0  = (v[1] + v[0]) / 2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
             v[1] = v1v0_ + (v[1] - v1v0)
             v[0] = v1v0_ + (v[0] - v1v0)
@@ -1132,7 +1143,7 @@ class RegularHeptagon:
             v3v6_axis = Vec(v[3] - v[6])
             rot_a0 = Rot(axis=v3v6_axis, angle=a0)
             # middle of V2-V0 which is // to v3v6 axis
-            v2v0  = (v[2] + v[0]) / 2
+            v2v0 = (v[2] + v[0]) / 2
             v2v0_ = v3v6 + rot_a0 * (v2v0 - v3v6)
             v[2] = v2v0_ + (v[2] - v2v0)
             v[0] = v2v0_ + (v[0] - v2v0)
@@ -1143,7 +1154,7 @@ class RegularHeptagon:
             v3v0_axis = Vec(v[3] - v[0])
             rot_a1 = Rot(axis=v3v0_axis, angle=a1)
             # middle of V1-V2 which is // to v3v0 axis
-            v1v2  = (v[1] + v[2]) / 2
+            v1v2 = (v[1] + v[2]) / 2
             v1v2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
             v[1] = v1v2_ + (v[1] - v1v2)
             v[2] = v1v2_ + (v[2] - v1v2)
@@ -1189,7 +1200,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b1
@@ -1197,12 +1208,12 @@ class RegularHeptagon:
             v4v2_axis = Vec(v[4] - v[2])
             rot_b1 = Rot(axis=v4v2_axis, angle=-b1)
             # middle of V5-V1 which is // to v4v2 axis
-            v5v1  = (v[5] + v[1]) / 2
+            v5v1 = (v[5] + v[1]) / 2
             v5v1_ = v4v2 + rot_b1 * (v5v1 - v4v2)
             v[5] = v5v1_ + (v[5] - v5v1)
             v[1] = v5v1_ + (v[1] - v5v1)
             # middle of V6-V0 which is // to v4v2 axis
-            v6v0  = (v[6] + v[0]) / 2
+            v6v0 = (v[6] + v[0]) / 2
             v6v0_ = v4v2 + rot_b1 * (v6v0 - v4v2)
             v[6] = v6v0_ + (v[6] - v6v0)
             v[0] = v6v0_ + (v[0] - v6v0)
@@ -1212,7 +1223,7 @@ class RegularHeptagon:
             v4v1_axis = Vec(v[4] - v[1])
             rot_a1 = Rot(axis=v4v1_axis, angle=-a1)
             # middle of V5-V0 which is // to v4v1 axis
-            v5v0  = (v[5] + v[0]) / 2
+            v5v0 = (v[5] + v[0]) / 2
             v5v0_ = v4v1 + rot_a1 * (v5v0 - v4v1)
             v[5] = v5v0_ + (v[5] - v5v0)
             v[0] = v5v0_ + (v[0] - v5v0)
@@ -1223,7 +1234,7 @@ class RegularHeptagon:
             v4v0_axis = Vec(v[4] - v[0])
             rot_a0 = Rot(axis=v4v0_axis, angle=-a0)
             # middle of V5-V6 which is // to v4v0 axis
-            v5v6  = (v[5] + v[6]) / 2
+            v5v6 = (v[5] + v[6]) / 2
             v5v6_ = v4v0 + rot_a0 * (v5v6 - v4v0)
             v[5] = v5v6_ + (v[5] - v5v6)
             v[6] = v5v6_ + (v[6] - v5v6)
@@ -1269,7 +1280,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b1
@@ -1277,12 +1288,12 @@ class RegularHeptagon:
             v5v3_axis = Vec(v[5] - v[3])
             rot_b1 = Rot(axis=v5v3_axis, angle=-b1)
             # middle of V6-V2 which is // to v5v3 axis
-            v6v2  = (v[6] + v[2]) / 2
+            v6v2 = (v[6] + v[2]) / 2
             v6v2_ = v5v3 + rot_b1 * (v6v2 - v5v3)
             v[6] = v6v2_ + (v[6] - v6v2)
             v[2] = v6v2_ + (v[2] - v6v2)
             # middle of V0-V1 which is // to v5v3 axis
-            v0v1  = (v[0] + v[1]) / 2
+            v0v1 = (v[0] + v[1]) / 2
             v0v1_ = v5v3 + rot_b1 * (v0v1 - v5v3)
             v[0] = v0v1_ + (v[0] - v0v1)
             v[1] = v0v1_ + (v[1] - v0v1)
@@ -1292,7 +1303,7 @@ class RegularHeptagon:
             v5v2_axis = Vec(v[5] - v[2])
             rot_a1 = Rot(axis=v5v2_axis, angle=-a1)
             # middle of V6-V1 which is // to v5v2 axis
-            v6v1  = (v[6] + v[1]) / 2
+            v6v1 = (v[6] + v[1]) / 2
             v6v1_ = v5v2 + rot_a1 * (v6v1 - v5v2)
             v[6] = v6v1_ + (v[6] - v6v1)
             v[1] = v6v1_ + (v[1] - v6v1)
@@ -1303,7 +1314,7 @@ class RegularHeptagon:
             v5v1_axis = Vec(v[5] - v[1])
             rot_a0 = Rot(axis=v5v1_axis, angle=-a0)
             # middle of V6-V0 which is // to v5v1 axis
-            v6v0  = (v[6] + v[0]) / 2
+            v6v0 = (v[6] + v[0]) / 2
             v6v0_ = v5v1 + rot_a0 * (v6v0 - v5v1)
             v[6] = v6v0_ + (v[6] - v6v0)
             v[0] = v6v0_ + (v[0] - v6v0)
@@ -1341,7 +1352,12 @@ class RegularHeptagon:
         #
         self.fold_shell_es_fs(6)
         # opposite angle, because of opposite isometry
-        self.fold_shell_1_vs(-a1, -b1, -a0, -b0, keepV0,
+        self.fold_shell_1_vs(
+            -a1,
+            -b1,
+            -a0,
+            -b0,
+            keepV0,
             [
                 self.VsOrg[0],
                 self.VsOrg[6],
@@ -1349,11 +1365,17 @@ class RegularHeptagon:
                 self.VsOrg[4],
                 self.VsOrg[3],
                 self.VsOrg[2],
-                self.VsOrg[1]
-            ]
+                self.VsOrg[1],
+            ],
         )
         self.Vs = [
-            self.Vs[0], self.Vs[6], self.Vs[5], self.Vs[4], self.Vs[3], self.Vs[2], self.Vs[1]
+            self.Vs[0],
+            self.Vs[6],
+            self.Vs[5],
+            self.Vs[4],
+            self.Vs[3],
+            self.Vs[2],
+            self.Vs[1],
         ]
 
     def fold_w(self, a0, b0, a1, b1, keepV0=True, rotate=0):
@@ -1393,8 +1415,28 @@ class RegularHeptagon:
             [i[6], i[5], i[4]],
         ]
         self.Es = [
-            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
-            i[6], i[4], i[4], i[0], i[0], i[3], i[3], i[1]
+            i[0],
+            i[1],
+            i[1],
+            i[2],
+            i[2],
+            i[3],
+            i[3],
+            i[4],
+            i[4],
+            i[5],
+            i[5],
+            i[6],
+            i[6],
+            i[0],
+            i[6],
+            i[4],
+            i[4],
+            i[0],
+            i[0],
+            i[3],
+            i[3],
+            i[1],
         ]
 
     def fold_w0(self, a0, b0, a1, b1, keepV0=True):
@@ -1426,9 +1468,9 @@ class RegularHeptagon:
         V2_ = Rot0_3 * self.VsOrg[2]
         Rot1_3 = Rot(axis=self.VsOrg[3] - V1, angle=b0)
         V2 = Rot1_3 * (V2_ - V1) + V1
-        if (Geom3D.eq(a0, a1)):
+        if Geom3D.eq(a0, a1):
             V6 = Vec([-V1[0], V1[1], V1[2]])
-            if (Geom3D.eq(b0, b1)):
+            if Geom3D.eq(b0, b1):
                 V5 = Vec([-V2[0], V2[1], V2[2]])
             else:
                 V5 = Vec([-V2_[0], V2_[1], V2_[2]])
@@ -1441,14 +1483,14 @@ class RegularHeptagon:
             Rot4_6 = Rot(axis=V6 - self.VsOrg[4], angle=b1)
             V5 = Rot4_6 * (V5 - V6) + V6
         self.Vs = [
-                self.VsOrg[0],
-                V1,
-                V2,
-                self.VsOrg[3],
-                self.VsOrg[4],
-                V5,
-                V6,
-            ]
+            self.VsOrg[0],
+            V1,
+            V2,
+            self.VsOrg[3],
+            self.VsOrg[4],
+            V5,
+            V6,
+        ]
         self.fold_w_es_fs(0)
 
     def fold_w1_help(self, a0, b0, a1, b1, keepV0, Vs):
@@ -1470,43 +1512,43 @@ class RegularHeptagon:
         #          "         "
         #          5         4
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
-            v2v4 = (v[2] + v[4])/2
+            v2v4 = (v[2] + v[4]) / 2
             v2v4_axis = Vec(v[2] - v[4])
             rot_b0 = Rot(axis=v2v4_axis, angle=b0)
-            v1v5  = (v[1] + v[5])/2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
-            v[1]  = v1v5_ + (v[1] - v1v5)
+            v[1] = v1v5_ + (v[1] - v1v5)
             v5_ = v1v5_ + (v[5] - v1v5)
-            v0v6 = (v[0] + v[6])/2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
             v0_ = v0v6_ + (v[0] - v0v6)
             v6_ = v0v6_ + (v[6] - v0v6)
 
             # rot a0
-            v1v4 = (v[1] + v[4])/2
+            v1v4 = (v[1] + v[4]) / 2
             v1v4_axis = Vec(v[1] - v[4])
             rot_a0 = Rot(axis=v1v4_axis, angle=a0)
-            v0v5  = (v0_ + v5_)/2
+            v0v5 = (v0_ + v5_) / 2
             v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
             v0_ = v0v5_ + (v0_ - v0v5)
-            v[5]  = v0v5_ + (v5_ - v0v5)
+            v[5] = v0v5_ + (v5_ - v0v5)
             v6_ = v1v4 + rot_a0 * (v6_ - v1v4)
 
             # rot a1
-            v1v5 = (v[1] + v[5])/2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_axis = Vec(v[1] - v[5])
             rot_a1 = Rot(axis=v1v5_axis, angle=a1)
-            v0v6  = (v0_ + v6_)/2
+            v0v6 = (v0_ + v6_) / 2
             v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
-            v[0]  = v0v6_ + (v0_ - v0v6)
+            v[0] = v0v6_ + (v0_ - v0v6)
             v6_ = v0v6_ + (v6_ - v0v6)
 
             # rot b1
-            v0v5 = (v[0] + v[5])/2
+            v0v5 = (v[0] + v[5]) / 2
             v0v5_axis = Vec(v[0] - v[5])
             rot_b1 = Rot(axis=v0v5_axis, angle=b1)
             v[6] = v0v5 + rot_b1 * (v6_ - v0v5)
@@ -1532,43 +1574,43 @@ class RegularHeptagon:
         #          6         5
         #
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
-            v3v5 = (v[3] + v[5])/2
+            v3v5 = (v[3] + v[5]) / 2
             v3v5_axis = Vec(v[3] - v[5])
             rot_b0 = Rot(axis=v3v5_axis, angle=b0)
-            v2v6  = (v[2] + v[6])/2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
-            v[2]  = v2v6_ + (v[2] - v2v6)
+            v[2] = v2v6_ + (v[2] - v2v6)
             v6_ = v2v6_ + (v[6] - v2v6)
-            v1v0 = (v[1] + v[0])/2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
             v1_ = v1v0_ + (v[1] - v1v0)
             v0_ = v1v0_ + (v[0] - v1v0)
 
             # rot a0
-            v2v5 = (v[2] + v[5])/2
+            v2v5 = (v[2] + v[5]) / 2
             v2v5_axis = Vec(v[2] - v[5])
             rot_a0 = Rot(axis=v2v5_axis, angle=a0)
-            v1v6  = (v1_ + v6_)/2
+            v1v6 = (v1_ + v6_) / 2
             v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
             v1_ = v1v6_ + (v1_ - v1v6)
-            v[6]  = v1v6_ + (v6_ - v1v6)
+            v[6] = v1v6_ + (v6_ - v1v6)
             v0_ = v2v5 + rot_a0 * (v0_ - v2v5)
 
             # rot a1
-            v2v6 = (v[2] + v[6])/2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_axis = Vec(v[2] - v[6])
             rot_a1 = Rot(axis=v2v6_axis, angle=a1)
-            v1v0  = (v1_ + v0_)/2
+            v1v0 = (v1_ + v0_) / 2
             v1v0_ = v2v6 + rot_a1 * (v1v0 - v2v6)
-            v[1]  = v1v0_ + (v1_ - v1v0)
+            v[1] = v1v0_ + (v1_ - v1v0)
             v0_ = v1v0_ + (v0_ - v1v0)
 
             # rot b1
-            v1v6 = (v[1] + v[6])/2
+            v1v6 = (v[1] + v[6]) / 2
             v1v6_axis = Vec(v[1] - v[6])
             rot_b1 = Rot(axis=v1v6_axis, angle=b1)
             v[0] = v1v6 + rot_b1 * (v0_ - v1v6)
@@ -1594,16 +1636,16 @@ class RegularHeptagon:
         #          0         6
         #
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a0
             v3v6 = (v[3] + v[6]) / 2
             v3v6_axis = Vec(v[3] - v[6])
             rot_a0 = Rot(axis=v3v6_axis, angle=a0)
-            v0v2  = (v[0] + v[2]) / 2
+            v0v2 = (v[0] + v[2]) / 2
             v0v2_ = v3v6 + rot_a0 * (v0v2 - v3v6)
-            v[0]  = v0v2_ + (v[0] - v0v2)
+            v[0] = v0v2_ + (v[0] - v0v2)
             v2_ = v0v2_ + (v[2] - v0v2)
             v1_ = v3v6 + rot_a0 * (v[1] - v3v6)
 
@@ -1611,10 +1653,10 @@ class RegularHeptagon:
             v3v0 = (v[3] + v[0]) / 2
             v3v0_axis = Vec(v[3] - v[0])
             rot_a1 = Rot(axis=v3v0_axis, angle=a1)
-            v1v2  = (v1_ + v2_) / 2
+            v1v2 = (v1_ + v2_) / 2
             v1v2_ = v3v0 + rot_a1 * (v1v2 - v3v0)
             v1_ = v1v2_ + (v1_ - v1v2)
-            v[2]  = v1v2_ + (v2_ - v1v2)
+            v[2] = v1v2_ + (v2_ - v1v2)
 
             # rot b1
             v2v0 = (v[2] + v[0]) / 2
@@ -1648,7 +1690,7 @@ class RegularHeptagon:
         #          1         0
         #
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a1
@@ -1656,9 +1698,9 @@ class RegularHeptagon:
             v4v1_axis = Vec(v[4] - v[1])
             rot_a1 = Rot(axis=v4v1_axis, angle=-a1)
             # 0 2 -> 4 ,6 or 6, 4?
-            v0v5  = (v[0] + v[5]) / 2
+            v0v5 = (v[0] + v[5]) / 2
             v0v5_ = v4v1 + rot_a1 * (v0v5 - v4v1)
-            v[0]  = v0v5_ + (v[0] - v0v5)
+            v[0] = v0v5_ + (v[0] - v0v5)
             v5_ = v0v5_ + (v[5] - v0v5)
             v6_ = v4v1 + rot_a1 * (v[6] - v4v1)
 
@@ -1666,10 +1708,10 @@ class RegularHeptagon:
             v4v0 = (v[4] + v[0]) / 2
             v4v0_axis = Vec(v[4] - v[0])
             rot_a0 = Rot(axis=v4v0_axis, angle=-a0)
-            v6v5  = (v6_ + v5_) / 2
+            v6v5 = (v6_ + v5_) / 2
             v6v5_ = v4v0 + rot_a0 * (v6v5 - v4v0)
             v6_ = v6v5_ + (v6_ - v6v5)
-            v[5]  = v6v5_ + (v5_ - v6v5)
+            v[5] = v6v5_ + (v5_ - v6v5)
 
             # rot b0
             v5v0 = (v[5] + v[0]) / 2
@@ -1698,7 +1740,11 @@ class RegularHeptagon:
         #          2         1
         #
         v = self.fold_w2_help(
-            -a1, -b1, -a0, -b0, keepV0,
+            -a1,
+            -b1,
+            -a0,
+            -b0,
+            keepV0,
             [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]],
         )
         return [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
@@ -1717,7 +1763,11 @@ class RegularHeptagon:
         #          3         2
         #
         v = self.fold_w1_help(
-            -a1, -b1, -a0, -b0, keepV0,
+            -a1,
+            -b1,
+            -a0,
+            -b0,
+            keepV0,
             [Vs[0], Vs[6], Vs[5], Vs[4], Vs[3], Vs[2], Vs[1]],
         )
         return [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
@@ -1838,7 +1888,7 @@ class RegularHeptagon:
             3: self.fold_mixed_3,
             4: self.fold_mixed_4,
             5: self.fold_mixed_5,
-            6: self.fold_mixed_6
+            6: self.fold_mixed_6,
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
@@ -1857,8 +1907,28 @@ class RegularHeptagon:
             [i[6], i[5], i[4]],
         ]
         self.Es = [
-            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
-            i[0], i[2], i[0], i[3], i[0], i[4], i[6], i[4]
+            i[0],
+            i[1],
+            i[1],
+            i[2],
+            i[2],
+            i[3],
+            i[3],
+            i[4],
+            i[4],
+            i[5],
+            i[5],
+            i[6],
+            i[6],
+            i[0],
+            i[0],
+            i[2],
+            i[0],
+            i[3],
+            i[0],
+            i[4],
+            i[6],
+            i[4],
         ]
 
     def fold_mixed_0(self, a0, b0, a1, b1, keepV0=True):
@@ -1884,7 +1954,7 @@ class RegularHeptagon:
         #           "         "
         #           4  a1     3
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(0)
@@ -1897,7 +1967,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a0
@@ -1906,10 +1976,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a0 = Rot(axis=v0v3_axis, angle=-a0)
             # middle of V1-V2 which is // to v0v3 axis
-            v1v2  = (v[1] + v[2]) / 2
+            v1v2 = (v[1] + v[2]) / 2
             v1v2_ = v0v3 + rot_a0 * (v1v2 - v0v3)
             v[1] = v1v2_ + (v[1] - v1v2)
-            v[2]  = v1v2_ + (v[2] - v1v2)
+            v[2] = v1v2_ + (v[2] - v1v2)
 
             # rot b0
             v0v2 = (v[0] + v[2]) / 2
@@ -1923,10 +1993,10 @@ class RegularHeptagon:
             v0v4_axis = Vec(v[0] - v[4])
             rot_a1 = Rot(axis=v0v4_axis, angle=a1)
             # middle of V6-V5 which is // to v0v4 axis
-            v6v5  = (v[6] + v[5]) / 2
+            v6v5 = (v[6] + v[5]) / 2
             v6v5_ = v0v4 + rot_a1 * (v6v5 - v0v4)
             v[6] = v6v5_ + (v[6] - v6v5)
-            v[5]  = v6v5_ + (v[5] - v6v5)
+            v[5] = v6v5_ + (v[5] - v6v5)
 
             # rot b1
             v6v4 = (v[6] + v[4]) / 2
@@ -1959,7 +2029,7 @@ class RegularHeptagon:
         #           "         "
         #           5  a1     4
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(1)
@@ -1967,7 +2037,7 @@ class RegularHeptagon:
 
     def fold_mixed_1_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a0
@@ -1975,10 +2045,10 @@ class RegularHeptagon:
             v1v4_axis = Vec(v[1] - v[4])
             rot_a0 = Rot(axis=v1v4_axis, angle=a0)
             # middle of V0-V5 which is // to v1v4 axis
-            v0v5  = (v[0] + v[5]) / 2
+            v0v5 = (v[0] + v[5]) / 2
             v0v5_ = v1v4 + rot_a0 * (v0v5 - v1v4)
             v[0] = v0v5_ + (v[0] - v0v5)
-            v[5]  = v0v5_ + (v[5] - v0v5)
+            v[5] = v0v5_ + (v[5] - v0v5)
             v[6] = v1v4 + rot_a0 * (v[6] - v1v4)
 
             # rot b0
@@ -1993,10 +2063,10 @@ class RegularHeptagon:
             v1v5_axis = Vec(v[1] - v[5])
             rot_a1 = Rot(axis=v1v5_axis, angle=a1)
             # middle of V0-V6 which is // to v1v5 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v1v5 + rot_a1 * (v0v6 - v1v5)
             v[0] = v0v6_ + (v[0] - v0v6)
-            v[6]  = v0v6_ + (v[6] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot b1
             v0v5 = (v[0] + v[5]) / 2
@@ -2031,7 +2101,7 @@ class RegularHeptagon:
         #           "         "
         #           6  a1     5
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(2)
@@ -2039,7 +2109,7 @@ class RegularHeptagon:
 
     def fold_mixed_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -2047,25 +2117,25 @@ class RegularHeptagon:
             v2v4_axis = Vec(v[2] - v[4])
             rot_b0 = Rot(axis=v2v4_axis, angle=b0)
             # middle of V1-V5 which is // to v2v4 axis
-            v1v5  = (v[1] + v[5]) / 2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
             v[1] = v1v5_ + (v[1] - v1v5)
-            v[5]  = v1v5_ + (v[5] - v1v5)
+            v[5] = v1v5_ + (v[5] - v1v5)
             # middle of V0-V6 which is // to v2v4 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
             v[0] = v0v6_ + (v[0] - v0v6)
-            v[6]  = v0v6_ + (v[6] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot a0
             v2v5 = (v[2] + v[5]) / 2
             v2v5_axis = Vec(v[2] - v[5])
             rot_a0 = Rot(axis=v2v5_axis, angle=a0)
             # middle of V1-V6 which is // to v2v5 axis
-            v1v6  = (v[1] + v[6]) / 2
+            v1v6 = (v[1] + v[6]) / 2
             v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
             v[1] = v1v6_ + (v[1] - v1v6)
-            v[6]  = v1v6_ + (v[6] - v1v6)
+            v[6] = v1v6_ + (v[6] - v1v6)
             v[0] = v2v5 + rot_a0 * (v[0] - v2v5)
 
             # rot a1
@@ -2073,10 +2143,10 @@ class RegularHeptagon:
             v2v6_axis = Vec(v[2] - v[6])
             rot_a1 = Rot(axis=v2v6_axis, angle=a1)
             # middle of V1-V0 which is // to v2v6 axis
-            v1v0  = (v[1] + v[0]) / 2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v2v6 + rot_a1 * (v1v0 - v2v6)
             v[1] = v1v0_ + (v[1] - v1v0)
-            v[0]  = v1v0_ + (v[0] - v1v0)
+            v[0] = v1v0_ + (v[0] - v1v0)
 
             # rot b1
             v1v6 = (v[1] + v[6]) / 2
@@ -2109,7 +2179,7 @@ class RegularHeptagon:
         #           "         "
         #           0  a1     6
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(3)
@@ -2117,7 +2187,7 @@ class RegularHeptagon:
 
     def fold_mixed_3_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -2125,25 +2195,25 @@ class RegularHeptagon:
             v3v5_axis = Vec(v[3] - v[5])
             rot_b0 = Rot(axis=v3v5_axis, angle=b0)
             # middle of V2-V6 which is // to v3v5 axis
-            v2v6  = (v[2] + v[6]) / 2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
             v[2] = v2v6_ + (v[2] - v2v6)
-            v[6]  = v2v6_ + (v[6] - v2v6)
+            v[6] = v2v6_ + (v[6] - v2v6)
             # middle of V1-V0 which is // to v3v5 axis
-            v1v0  = (v[1] + v[0]) / 2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
             v[1] = v1v0_ + (v[1] - v1v0)
-            v[0]  = v1v0_ + (v[0] - v1v0)
+            v[0] = v1v0_ + (v[0] - v1v0)
 
             # rot a0
             v3v6 = (v[3] + v[6]) / 2
             v3v6_axis = Vec(v[3] - v[6])
             rot_a0 = Rot(axis=v3v6_axis, angle=a0)
             # middle of V2-V0 which is // to v3v6 axis
-            v2v0  = (v[2] + v[0]) / 2
+            v2v0 = (v[2] + v[0]) / 2
             v2v0_ = v3v6 + rot_a0 * (v2v0 - v3v6)
             v[2] = v2v0_ + (v[2] - v2v0)
-            v[0]  = v2v0_ + (v[0] - v2v0)
+            v[0] = v2v0_ + (v[0] - v2v0)
             v[1] = v3v6 + rot_a0 * (v[1] - v3v6)
 
             # rot a1
@@ -2151,10 +2221,10 @@ class RegularHeptagon:
             v3v0_axis = Vec(v[3] - v[0])
             rot_a1 = Rot(axis=v3v0_axis, angle=a1)
             # middle of V2-V1 which is // to v3v0 axis
-            v2v1  = (v[2] + v[1]) / 2
+            v2v1 = (v[2] + v[1]) / 2
             v2v1_ = v3v0 + rot_a1 * (v2v1 - v3v0)
             v[2] = v2v1_ + (v[2] - v2v1)
-            v[1]  = v2v1_ + (v[1] - v2v1)
+            v[1] = v2v1_ + (v[1] - v2v1)
 
             # rot b1
             v2v0 = (v[2] + v[0]) / 2
@@ -2187,7 +2257,7 @@ class RegularHeptagon:
         #           "         "
         #           1  a1     0
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(4)
@@ -2195,7 +2265,7 @@ class RegularHeptagon:
 
     def fold_mixed_4_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a1
@@ -2204,10 +2274,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a1 = Rot(axis=v4v1_axis, angle=-a1)
             # middle of V5-V0 which is // to v4v1 axis
-            v5v0  = (v[5] + v[0]) / 2
+            v5v0 = (v[5] + v[0]) / 2
             v5v0_ = v4v1 + rot_a1 * (v5v0 - v4v1)
             v[5] = v5v0_ + (v[5] - v5v0)
-            v[0]  = v5v0_ + (v[0] - v5v0)
+            v[0] = v5v0_ + (v[0] - v5v0)
             v[6] = v4v1 + rot_a1 * (v[6] - v4v1)
 
             # rot a0
@@ -2216,10 +2286,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a0 = Rot(axis=v4v0_axis, angle=-a0)
             # middle of V5-V6 which is // to v4v0 axis
-            v5v6  = (v[5] + v[6]) / 2
+            v5v6 = (v[5] + v[6]) / 2
             v5v6_ = v4v0 + rot_a0 * (v5v6 - v4v0)
             v[5] = v5v6_ + (v[5] - v5v6)
-            v[6]  = v5v6_ + (v[6] - v5v6)
+            v[6] = v5v6_ + (v[6] - v5v6)
 
             # rot b0
             v4v6 = (v[4] + v[6]) / 2
@@ -2260,7 +2330,7 @@ class RegularHeptagon:
         #           "         "
         #           2  a1     1
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(5)
@@ -2268,7 +2338,7 @@ class RegularHeptagon:
 
     def fold_mixed_5_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b1
@@ -2293,10 +2363,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a1 = Rot(axis=v5v2_axis, angle=-a1)
             # middle of V6-V1 which is // to v5v2 axis
-            v6v1  = (v[6] + v[1]) / 2
+            v6v1 = (v[6] + v[1]) / 2
             v6v1_ = v5v2 + rot_a1 * (v6v1 - v5v2)
             v[6] = v6v1_ + (v[6] - v6v1)
-            v[1]  = v6v1_ + (v[1] - v6v1)
+            v[1] = v6v1_ + (v[1] - v6v1)
             v[0] = v5v2 + rot_a1 * (v[0] - v5v2)
 
             # rot a0
@@ -2305,10 +2375,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a0 = Rot(axis=v5v1_axis, angle=-a0)
             # middle of V6-V0 which is // to v5v1 axis
-            v6v0  = (v[6] + v[0]) / 2
+            v6v0 = (v[6] + v[0]) / 2
             v6v0_ = v5v1 + rot_a0 * (v6v0 - v5v1)
             v[6] = v6v0_ + (v[6] - v6v0)
-            v[0]  = v6v0_ + (v[0] - v6v0)
+            v[0] = v6v0_ + (v[0] - v6v0)
 
             # rot b0
             v5v0 = (v[5] + v[0]) / 2
@@ -2342,7 +2412,7 @@ class RegularHeptagon:
         #           "         "
         #           3  a1     2
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(6)
@@ -2350,7 +2420,7 @@ class RegularHeptagon:
 
     def fold_mixed_6_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b1
@@ -2375,10 +2445,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a1 = Rot(axis=v6v3_axis, angle=-a1)
             # middle of V0-V2 which is // to v6v3 axis
-            v0v2  = (v[0] + v[2]) / 2
+            v0v2 = (v[0] + v[2]) / 2
             v0v2_ = v6v3 + rot_a1 * (v0v2 - v6v3)
             v[0] = v0v2_ + (v[0] - v0v2)
-            v[2]  = v0v2_ + (v[2] - v0v2)
+            v[2] = v0v2_ + (v[2] - v0v2)
             v[1] = v6v3 + rot_a1 * (v[1] - v6v3)
 
             # rot a0
@@ -2387,10 +2457,10 @@ class RegularHeptagon:
             # Note: negative angle
             rot_a0 = Rot(axis=v6v2_axis, angle=-a0)
             # middle of V0-V1 which is // to v6v2 axis
-            v0v1  = (v[0] + v[1]) / 2
+            v0v1 = (v[0] + v[1]) / 2
             v0v1_ = v6v2 + rot_a0 * (v0v1 - v6v2)
             v[0] = v0v1_ + (v[0] - v0v1)
-            v[1]  = v0v1_ + (v[1] - v0v1)
+            v[1] = v0v1_ + (v[1] - v0v1)
 
             # rot b0
             v6v1 = (v[6] + v[1]) / 2
@@ -2430,7 +2500,7 @@ class RegularHeptagon:
             3: self.fold_g_3,
             4: self.fold_g_4,
             5: self.fold_g_5,
-            6: self.fold_g_6
+            6: self.fold_g_6,
         }
         prj[rotate](a0, b0, a1, b1, keepV0)
 
@@ -2449,8 +2519,28 @@ class RegularHeptagon:
             [i[2], i[4], i[3]],
         ]
         self.Es = [
-            i[0], i[1], i[1], i[2], i[2], i[3], i[3], i[4], i[4], i[5], i[5], i[6], i[6], i[0],
-            i[4], i[2], i[2], i[0], i[0], i[5], i[5], i[2]
+            i[0],
+            i[1],
+            i[1],
+            i[2],
+            i[2],
+            i[3],
+            i[3],
+            i[4],
+            i[4],
+            i[5],
+            i[5],
+            i[6],
+            i[6],
+            i[0],
+            i[4],
+            i[2],
+            i[2],
+            i[0],
+            i[0],
+            i[5],
+            i[5],
+            i[2],
         ]
 
     def fold_g_0(self, a0, b0, a1, b1, keepV0=True):
@@ -2475,7 +2565,7 @@ class RegularHeptagon:
         #          _-'
         #        V4       V3
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(0)
@@ -2488,7 +2578,7 @@ class RegularHeptagon:
         returns a new array.
         """
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -2496,22 +2586,22 @@ class RegularHeptagon:
             v2v4_axis = Vec(v[2] - v[4])
             rot_b0 = Rot(axis=v2v4_axis, angle=b0)
             # middle of V1-V5 which is // to v2v4 axis
-            v1v5  = (v[1] + v[5]) / 2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_ = v2v4 + rot_b0 * (v1v5 - v2v4)
             v[1] = v1v5_ + (v[1] - v1v5)
-            v[5]  = v1v5_ + (v[5] - v1v5)
+            v[5] = v1v5_ + (v[5] - v1v5)
             # middle of V0-V6 which is // to v2v4 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v2v4 + rot_b0 * (v0v6 - v2v4)
             v[0] = v0v6_ + (v[0] - v0v6)
-            v[6]  = v0v6_ + (v[6] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot a0
             v2v5 = (v[2] + v[5]) / 2
             v2v5_axis = Vec(v[2] - v[5])
             rot_a0 = Rot(axis=v2v5_axis, angle=a0)
             # middle of V1-V6 which is // to v2v5 axis
-            v1v6  = (v[1] + v[6]) / 2
+            v1v6 = (v[1] + v[6]) / 2
             v1v6_ = v2v5 + rot_a0 * (v1v6 - v2v5)
             v[1] = v1v6_ + (v[1] - v1v6)
             v[6] = v1v6_ + (v[6] - v1v6)
@@ -2543,7 +2633,7 @@ class RegularHeptagon:
         #          _-'
         #        V5       V4
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(1)
@@ -2551,7 +2641,7 @@ class RegularHeptagon:
 
     def fold_g_1_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b0
@@ -2559,22 +2649,22 @@ class RegularHeptagon:
             v3v5_axis = Vec(v[3] - v[5])
             rot_b0 = Rot(axis=v3v5_axis, angle=b0)
             # middle of V2-V6 which is // to v3v5 axis
-            v2v6  = (v[2] + v[6]) / 2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_ = v3v5 + rot_b0 * (v2v6 - v3v5)
             v[2] = v2v6_ + (v[2] - v2v6)
-            v[6]  = v2v6_ + (v[6] - v2v6)
+            v[6] = v2v6_ + (v[6] - v2v6)
             # middle of V1-V0 which is // to v3v5 axis
-            v1v0  = (v[1] + v[0]) / 2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v3v5 + rot_b0 * (v1v0 - v3v5)
             v[1] = v1v0_ + (v[1] - v1v0)
-            v[0]  = v1v0_ + (v[0] - v1v0)
+            v[0] = v1v0_ + (v[0] - v1v0)
 
             # rot a0
             v3v6 = (v[3] + v[6]) / 2
             v3v6_axis = Vec(v[3] - v[6])
             rot_a0 = Rot(axis=v3v6_axis, angle=a0)
             # middle of V2-V0 which is // to v3v6 axis
-            v2v0  = (v[2] + v[0]) / 2
+            v2v0 = (v[2] + v[0]) / 2
             v2v0_ = v3v6 + rot_a0 * (v2v0 - v3v6)
             v[2] = v2v0_ + (v[2] - v2v0)
             v[0] = v2v0_ + (v[0] - v2v0)
@@ -2606,7 +2696,7 @@ class RegularHeptagon:
         #          _-'
         #        V6       V5
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(2)
@@ -2614,7 +2704,7 @@ class RegularHeptagon:
 
     def fold_g_2_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b1
@@ -2622,22 +2712,22 @@ class RegularHeptagon:
             v2v4_axis = Vec(v[2] - v[4])
             rot_b1 = Rot(axis=v2v4_axis, angle=b1)
             # middle of V1-V5 which is // to v2v4 axis
-            v1v5  = (v[1] + v[5]) / 2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_ = v2v4 + rot_b1 * (v1v5 - v2v4)
             v[1] = v1v5_ + (v[1] - v1v5)
-            v[5]  = v1v5_ + (v[5] - v1v5)
+            v[5] = v1v5_ + (v[5] - v1v5)
             # middle of V0-V6 which is // to v2v4 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v2v4 + rot_b1 * (v0v6 - v2v4)
             v[0] = v0v6_ + (v[0] - v0v6)
-            v[6]  = v0v6_ + (v[6] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot a0
             v0v4 = (v[0] + v[4]) / 2
             v0v4_axis = Vec(v[0] - v[4])
             rot_a0 = Rot(axis=v0v4_axis, angle=a0)
             # middle of V5-V6 which is // to v0v4 axis
-            v5v6  = (v[5] + v[6]) / 2
+            v5v6 = (v[5] + v[6]) / 2
             v5v6_ = v0v4 + rot_a0 * (v5v6 - v0v4)
             v[5] = v5v6_ + (v[5] - v5v6)
             v[6] = v5v6_ + (v[6] - v5v6)
@@ -2668,7 +2758,7 @@ class RegularHeptagon:
         #          _-'
         #        V0       V6
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(3)
@@ -2676,7 +2766,7 @@ class RegularHeptagon:
 
     def fold_g_3_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot b1
@@ -2684,22 +2774,22 @@ class RegularHeptagon:
             v3v5_axis = Vec(v[3] - v[5])
             rot_b1 = Rot(axis=v3v5_axis, angle=b1)
             # middle of V2-V6 which is // to v3v5 axis
-            v2v6  = (v[2] + v[6]) / 2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_ = v3v5 + rot_b1 * (v2v6 - v3v5)
             v[2] = v2v6_ + (v[2] - v2v6)
-            v[6]  = v2v6_ + (v[6] - v2v6)
+            v[6] = v2v6_ + (v[6] - v2v6)
             # middle of V1-V0 which is // to v3v5 axis
-            v1v0  = (v[1] + v[0]) / 2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v3v5 + rot_b1 * (v1v0 - v3v5)
             v[1] = v1v0_ + (v[1] - v1v0)
-            v[0]  = v1v0_ + (v[0] - v1v0)
+            v[0] = v1v0_ + (v[0] - v1v0)
 
             # rot a0
             v1v5 = (v[1] + v[5]) / 2
             v1v5_axis = Vec(v[1] - v[5])
             rot_a0 = Rot(axis=v1v5_axis, angle=a0)
             # middle of V6-V0 which is // to v1v5 axis
-            v6v0  = (v[6] + v[0]) / 2
+            v6v0 = (v[6] + v[0]) / 2
             v6v0_ = v1v5 + rot_a0 * (v6v0 - v1v5)
             v[6] = v6v0_ + (v[6] - v6v0)
             v[0] = v6v0_ + (v[0] - v6v0)
@@ -2730,7 +2820,7 @@ class RegularHeptagon:
         #          _-'
         #        V1       V0
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(4)
@@ -2738,7 +2828,7 @@ class RegularHeptagon:
 
     def fold_g_4_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a1
@@ -2746,22 +2836,22 @@ class RegularHeptagon:
             v4v2_axis = Vec(v[4] - v[2])
             rot_a1 = Rot(axis=v4v2_axis, angle=-a1)
             # middle of V1-V5 which is // to v4v2 axis
-            v1v5  = (v[1] + v[5]) / 2
+            v1v5 = (v[1] + v[5]) / 2
             v1v5_ = v4v2 + rot_a1 * (v1v5 - v4v2)
             v[1] = v1v5_ + (v[1] - v1v5)
-            v[5]  = v1v5_ + (v[5] - v1v5)
+            v[5] = v1v5_ + (v[5] - v1v5)
             # middle of V0-V6 which is // to v4v2 axis
-            v0v6  = (v[0] + v[6]) / 2
+            v0v6 = (v[0] + v[6]) / 2
             v0v6_ = v4v2 + rot_a1 * (v0v6 - v4v2)
             v[0] = v0v6_ + (v[0] - v0v6)
-            v[6]  = v0v6_ + (v[6] - v0v6)
+            v[6] = v0v6_ + (v[6] - v0v6)
 
             # rot a0
             v2v6 = (v[2] + v[6]) / 2
             v2v6_axis = Vec(v[2] - v[6])
             rot_a0 = Rot(axis=v2v6_axis, angle=a0)
             # middle of V0-V1 which is // to v2v6 axis
-            v0v1  = (v[0] + v[1]) / 2
+            v0v1 = (v[0] + v[1]) / 2
             v0v1_ = v2v6 + rot_a0 * (v0v1 - v2v6)
             v[0] = v0v1_ + (v[0] - v0v1)
             v[1] = v0v1_ + (v[1] - v0v1)
@@ -2793,7 +2883,7 @@ class RegularHeptagon:
         #        V2       V1
         #
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(5)
@@ -2801,7 +2891,7 @@ class RegularHeptagon:
 
     def fold_g_5_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a1
@@ -2809,22 +2899,22 @@ class RegularHeptagon:
             v5v3_axis = Vec(v[5] - v[3])
             rot_a1 = Rot(axis=v5v3_axis, angle=-a1)
             # middle of V2-V6 which is // to v5v3 axis
-            v2v6  = (v[2] + v[6]) / 2
+            v2v6 = (v[2] + v[6]) / 2
             v2v6_ = v5v3 + rot_a1 * (v2v6 - v5v3)
             v[2] = v2v6_ + (v[2] - v2v6)
-            v[6]  = v2v6_ + (v[6] - v2v6)
+            v[6] = v2v6_ + (v[6] - v2v6)
             # middle of V0-V6 which is // to v5v3 axis
-            v1v0  = (v[1] + v[0]) / 2
+            v1v0 = (v[1] + v[0]) / 2
             v1v0_ = v5v3 + rot_a1 * (v1v0 - v5v3)
             v[1] = v1v0_ + (v[1] - v1v0)
-            v[0]  = v1v0_ + (v[0] - v1v0)
+            v[0] = v1v0_ + (v[0] - v1v0)
 
             # rot a0
             v3v0 = (v[3] + v[0]) / 2
             v3v0_axis = Vec(v[3] - v[0])
             rot_a0 = Rot(axis=v3v0_axis, angle=a0)
             # middle of V1-V2 which is // to v3v0 axis
-            v1v2  = (v[1] + v[2]) / 2
+            v1v2 = (v[1] + v[2]) / 2
             v1v2_ = v3v0 + rot_a0 * (v1v2 - v3v0)
             v[1] = v1v2_ + (v[1] - v1v2)
             v[2] = v1v2_ + (v[2] - v1v2)
@@ -2856,7 +2946,7 @@ class RegularHeptagon:
         #        V3       V2
         #
         #
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(6)
@@ -2864,7 +2954,7 @@ class RegularHeptagon:
 
     def fold_g_6_vs(self, a0, b0, a1, b1, keepV0, Vs):
         v = [v for v in Vs]
-        if (keepV0):
+        if keepV0:
             assert False, "TODO"
         else:
             # rot a0
@@ -2872,10 +2962,10 @@ class RegularHeptagon:
             v4v1_axis = Vec(v[4] - v[1])
             rot_a0 = Rot(axis=v4v1_axis, angle=-a0)
             # middle of V5-V0 which is // to v4v1 axis
-            v5v0  = (v[5] + v[0]) / 2
+            v5v0 = (v[5] + v[0]) / 2
             v5v0_ = v4v1 + rot_a0 * (v5v0 - v4v1)
             v[5] = v5v0_ + (v[5] - v5v0)
-            v[0]  = v5v0_ + (v[0] - v5v0)
+            v[0] = v5v0_ + (v[0] - v5v0)
             v[6] = v4v1 + rot_a0 * (v[6] - v4v1)
 
             # rot a1
@@ -2909,7 +2999,8 @@ class RegularHeptagon:
         for i in range(len(self.Vs)):
             self.Vs[i] = T * self.Vs[i]
 
-def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
+
+def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt=False):
     """Return the a tuple with vertices and the normal of an equilateral
     heptagon for a kite, Vl, Vt, Vr, Vb; the tuple has the following structure:
     ([h0, h1, h2, h3, h4, h5, h6], normal), with h0 = Top.
@@ -2932,7 +3023,7 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
         Vt = Vec(Bottom)
         Vr = Vec(Left)
         Vb = Vec(Top)
-    Vo = (Vl + Vr) /2
+    Vo = (Vl + Vr) / 2
     Dr = Vo - Vr
     Du = Vo - Vt
     w = Dr.norm()
@@ -2940,45 +3031,45 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
     g = (Vo - Vb).norm()
 
     if f == 0:
-        logging.warning('Kite2Hept: f == 0')
+        logging.warning("Kite2Hept: f == 0")
         return
     if w == 0:
-        logging.warning('Kite2Hept: warning w == 0')
+        logging.warning("Kite2Hept: warning w == 0")
         return
-    #if f > g:
+    # if f > g:
     #    f, g = g, f
 
     V = lambda x: math.sqrt(x)
 
     r = f / w
     q = g / w
-    n = V(1.0 + q*q) / 2
-    m = V(1.0 + r*r) / 2
-    k = m*(1.0 + 1.0/n)
+    n = V(1.0 + q * q) / 2
+    m = V(1.0 + r * r) / 2
+    k = m * (1.0 + 1.0 / n)
 
     qkpr = q * k + r
-    root = (k*(2 - k) + r * r)
+    root = k * (2 - k) + r * r
 
-    #assert(root>=0)
+    # assert(root>=0)
     if root < 0:
-        logging.warning('kite2Hept: negative sqrt requested')
+        logging.warning("kite2Hept: negative sqrt requested")
         return
 
-    nom   = (f + g)
+    nom = f + g
     denom = qkpr + V(root)
 
     if denom == 0:
-        logging.warning('kite2Hept: denom == 0')
+        logging.warning("kite2Hept: denom == 0")
         return
 
-    w1    =  nom / denom
+    w1 = nom / denom
 
     w1Rel = w1 / w
     w2Rel = k * w1Rel
     w3Rel = m * w1Rel
 
-    relPos = lambda v0, v1, rat: rat*(v1 - v0) + v0
-    #h0 = Vt
+    relPos = lambda v0, v1, rat: rat * (v1 - v0) + v0
+    # h0 = Vt
     h1 = relPos(Vt, Vr, w1Rel)
     h2 = relPos(Vb, Vr, w2Rel)
     h3 = relPos(Vb, Vr, w3Rel)
@@ -2988,36 +3079,35 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt = False):
 
     N = Dr.cross(Du).normalize()
 
-    #C = (Vt + h1 + h2 + h3 + h4 + h5 + h6) / 7
-    #return ([Vt, h1, h2, h3, h4, h5, h6], N)
+    # C = (Vt + h1 + h2 + h3 + h4 + h5 + h6) / 7
+    # return ([Vt, h1, h2, h3, h4, h5, h6], N)
     # Don't return Vector types, since I had problems with this on a MS. Windows
     # OS.
     return (
-            [
-                Vec([Vt[0], Vt[1], Vt[2]]),
-                Vec([h1[0], h1[1], h1[2]]),
-                Vec([h2[0], h2[1], h2[2]]),
-                Vec([h3[0], h3[1], h3[2]]),
-                Vec([h4[0], h4[1], h4[2]]),
-                Vec([h5[0], h5[1], h5[2]]),
-                Vec([h6[0], h6[1], h6[2]])
-            ],
-            Vec(N)
-        )
+        [
+            Vec([Vt[0], Vt[1], Vt[2]]),
+            Vec([h1[0], h1[1], h1[2]]),
+            Vec([h2[0], h2[1], h2[2]]),
+            Vec([h3[0], h3[1], h3[2]]),
+            Vec([h4[0], h4[1], h4[2]]),
+            Vec([h5[0], h5[1], h5[2]]),
+            Vec([h6[0], h6[1], h6[2]]),
+        ],
+        Vec(N),
+    )
+
 
 class FldHeptagonShape(Geom3D.CompoundShape):
-    def __init__(self, shapes, nFold = 3, mFold = 3,
-            name = 'Folded Regular Heptagons'
-    ):
+    def __init__(self, shapes, nFold=3, mFold=3, name="Folded Regular Heptagons"):
         self.nFold = nFold
         self.mFold = mFold
         self.altNFoldFace = False
         self.altMFoldFace = False
-        Geom3D.CompoundShape.__init__(self, shapes, name = name)
+        Geom3D.CompoundShape.__init__(self, shapes, name=name)
         self.heptagon = RegularHeptagon()
         self.dihedralAngle = 1.2
         self.posAngleMin = 0
-        self.posAngleMax = math.pi/2
+        self.posAngleMax = math.pi / 2
         self.posAngle = 0
         self.inclReflections = True
         self.rotateFold = 0
@@ -3034,18 +3124,18 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.updateShape = True
 
     def __repr__(self):
-        #s = '%s(\n  ' % findModuleClassName(self.__class__, __name__)
-        s = 'FldHeptagonShape(\n  '
-        s = '%sshapes = [\n' % (s)
+        # s = '%s(\n  ' % findModuleClassName(self.__class__, __name__)
+        s = "FldHeptagonShape(\n  "
+        s = "%sshapes = [\n" % (s)
         for shape in self.shapeElements:
-            s = '%s    %s,\n' % (s, repr(shape))
-        s = '%s  ],\n  ' % s
+            s = "%s    %s,\n" % (s, repr(shape))
+        s = "%s  ],\n  " % s
         s = '%snFold = "%s",\n' % (s, self.nFold)
         s = '%smFold = "%s",\n' % (s, self.mFold)
         s = '%sname = "%s"\n' % (s, self.mFold)
-        s = '%s)\n' % (s)
-        if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+        s = "%s)\n" % (s)
+        if __name__ != "__main__":
+            s = "%s.%s" % (__name__, s)
         return s
 
     def gl_draw(self):
@@ -3053,7 +3143,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.setV()
         Geom3D.CompoundShape.gl_draw(self)
 
-    def setEdgeAlternative(self, alt = None, oppositeAlt = None):
+    def setEdgeAlternative(self, alt=None, oppositeAlt=None):
         if alt is not None:
             self.edgeAlternative = alt
         if oppositeAlt is not None:
@@ -3079,14 +3169,14 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def setTriangleFillPosition(self, position):
         logging.warning("implement in derived class")
 
-    def setFold1(self, angle=None, oppositeAngle = None):
+    def setFold1(self, angle=None, oppositeAngle=None):
         if angle is not None:
             self.fold1 = angle
         if oppositeAngle is not None:
             self.oppFold1 = oppositeAngle
         self.updateShape = True
 
-    def setFold2(self, angle=None, oppositeAngle = None):
+    def setFold2(self, angle=None, oppositeAngle=None):
         if angle is not None:
             self.fold2 = angle
         if oppositeAngle is not None:
@@ -3104,12 +3194,18 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         glColor(0.7, 0.5, 0.5)
 
     def getStatusStr(self):
-        return 'T = %02.2f, Angle = %01.2f rad, fold1 = %01.2f (%01.2f) rad, fold2 = %01.2f (%01.2f) rad' % (
+        return (
+            "T = %02.2f, Angle = %01.2f rad, fold1 = %01.2f (%01.2f) "
+            "rad, fold2 = %01.2f (%01.2f) rad"
+            % (
                 self.height,
                 self.dihedralAngle,
-                self.fold1, self.oppFold1,
-                self.fold2, self.oppFold2
+                self.fold1,
+                self.oppFold1,
+                self.fold2,
+                self.oppFold2,
             )
+        )
 
     def getReflPosAngle(self):
         # meant to be implemented by child
@@ -3130,27 +3226,31 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         )
         self.heptagon.translate(H * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
-        self.heptagon.rotate(
-            -geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedralAngle)
-        self.heptagon.translate(self.height*geomtypes.UZ)
+        self.heptagon.rotate(-geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedralAngle)
+        self.heptagon.translate(self.height * geomtypes.UZ)
         if self.posAngle != 0:
             self.heptagon.rotate(-geomtypes.UZ, self.posAngle)
 
     def setV(self):
         self.posHeptagon()
 
+
 class FldHeptagonCtrlWin(wx.Frame):
     refl_min_size = (525, 425)
     rot_min_size = (545, 600)
-    def __init__(self,
-            shape, canvas,
+
+    def __init__(
+            self,
+            shape,
+            canvas,
             maxHeight,
             prePosStrLst,
             symmetryBase,
             trisAlts,
             stringify,
             parent,
-            *args, **kwargs
+            *args,
+            **kwargs,
     ):
         """Create a control window for the scene that folds heptagons
 
@@ -3179,7 +3279,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.symBase = symmetryBase
         self.stringify = stringify
         if not open_file in stringify:
-                self.stringify[open_file] = "From File"
+            self.stringify[open_file] = "From File"
         self.panel = wx.Panel(self, -1)
         self.statusBar = self.CreateStatusBar()
         self.foldMethod = FoldMethod.TRIANGLE
@@ -3190,57 +3290,54 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.specPosIndex = 0
 
         self.mainSizer.Add(
-                self.createControlsSizer(),
-                1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
-            )
+            self.createControlsSizer(), 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
+        )
         self.set_default_size(self.refl_min_size)
         self.panel.SetAutoLayout(True)
         self.panel.SetSizer(self.mainSizer)
         self.Show(True)
         self.panel.Layout()
-        self.prevTrisFill    = -1
+        self.prevTrisFill = -1
         self.prevOppTrisFill = -1
 
     def createControlsSizer(self):
-        self.heightF = 40 # slider step factor, or: 1 / slider step
+        """Create the main sizer with all the control widgets."""
+        self.heightF = 40  # slider step factor, or: 1 / slider step
 
         self.Guis = []
 
         # static adjustments
-        self.trisFillGui = wx.Choice(self.panel,
-                style = wx.RA_VERTICAL,
-                choices = []
-            )
+        self.trisFillGui = wx.Choice(self.panel, style=wx.RA_VERTICAL, choices=[])
         self.Guis.append(self.trisFillGui)
         self.trisFillGui.Bind(wx.EVT_CHOICE, self.onTriangleFill)
         self.setEnableTrisFillItems()
 
-        self.trisPosGui = wx.Choice(self.panel,
-                style = wx.RA_VERTICAL,
-                choices = [
-                    'Position {}'.format(i + 1)
-                    for i in range(self.nr_of_positions)])
+        self.trisPosGui = wx.Choice(
+            self.panel,
+            style=wx.RA_VERTICAL,
+            choices=["Position {}".format(i + 1) for i in range(self.nr_of_positions)],
+        )
         self.Guis.append(self.trisPosGui)
         self.trisPosGui.Bind(wx.EVT_CHOICE, self.onTrisPosition)
         self.setEnableTrisFillItems()
 
-        self.reflGui = wx.CheckBox(self.panel, label = 'Reflections Required')
+        self.reflGui = wx.CheckBox(self.panel, label="Reflections Required")
         self.Guis.append(self.reflGui)
         self.reflGui.SetValue(self.shape.inclReflections)
         self.reflGui.Bind(wx.EVT_CHECKBOX, self.onRefl)
 
-        self.rotateFldGui = wx.Button(self.panel, label = 'Rotate Fold 1/7')
+        self.rotateFldGui = wx.Button(self.panel, label="Rotate Fold 1/7")
         self.rotateFld = 0
         self.Guis.append(self.rotateFldGui)
         self.rotateFldGui.Bind(wx.EVT_BUTTON, self.onRotateFld)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        self.applySymGui = wx.CheckBox(self.panel, label = 'Apply Symmetry')
+        self.applySymGui = wx.CheckBox(self.panel, label="Apply Symmetry")
         self.Guis.append(self.applySymGui)
         self.applySymGui.SetValue(self.shape.apply_symmetries)
         self.applySymGui.Bind(wx.EVT_CHECKBOX, self.onApplySym)
-        self.addTrisGui = wx.CheckBox(self.panel, label = 'Show Triangles')
+        self.addTrisGui = wx.CheckBox(self.panel, label="Show Triangles")
         self.Guis.append(self.addTrisGui)
         self.addTrisGui.SetValue(self.shape.addXtraFs)
         self.addTrisGui.Bind(wx.EVT_CHECKBOX, self.onAddTriangles)
@@ -3256,7 +3353,8 @@ class FldHeptagonCtrlWin(wx.Frame):
             FoldMethod.G.name.capitalize(),
         ]
         self.foldMethodListItems = [
-            FoldMethod.get(self.foldMethodList[i]) for i in range(len(self.foldMethodList))
+            FoldMethod.get(self.foldMethodList[i])
+            for i in range(len(self.foldMethodList))
         ]
         self.valid_fold_incl_refl = {
             True: [
@@ -3271,43 +3369,45 @@ class FldHeptagonCtrlWin(wx.Frame):
                 FoldMethod.W.name.capitalize(),
                 FoldMethod.MIXED.name.capitalize(),
                 FoldMethod.G.name.capitalize(),
-            ]
+            ],
         }
 
-        self.foldMethodGui = wx.RadioBox(self.panel,
-                label = 'Heptagon Fold Method',
-                style = wx.RA_VERTICAL,
-                choices = self.foldMethodList
-            )
+        self.foldMethodGui = wx.RadioBox(
+            self.panel,
+            label="Heptagon Fold Method",
+            style=wx.RA_VERTICAL,
+            choices=self.foldMethodList,
+        )
         for i in range(len(self.foldMethodList)):
-            if (self.foldMethodList[i].upper() == self.foldMethod.name):
+            if self.foldMethodList[i].upper() == self.foldMethod.name:
                 self.foldMethodGui.SetSelection(i)
         self.Guis.append(self.foldMethodGui)
         self.foldMethodGui.Bind(wx.EVT_RADIOBOX, self.onFoldMethod)
         self.show_right_folds()
 
         # predefined positions
-        self.prePosGui = wx.Choice(self.panel,
-                #label = 'Only Regular Faces with:',
-                style = wx.RA_VERTICAL,
-                choices = self.prePosStrLst
-            )
+        self.prePosGui = wx.Choice(
+            self.panel,
+            # label = 'Only Regular Faces with:',
+            style=wx.RA_VERTICAL,
+            choices=self.prePosStrLst,
+        )
         # Don't hardcode which index is dyn_pos, I might reorder the item list
         # one time, and will probably forget to update the default selection..
         for i in range(len(self.prePosStrLst)):
-            if (self.prePosStrLst[i] == self.stringify[dyn_pos]):
+            if self.prePosStrLst[i] == self.stringify[dyn_pos]:
                 self.prePosGui.SetStringSelection(self.stringify[dyn_pos])
                 break
         self.setEnablePrePosItems()
         self.Guis.append(self.prePosGui)
         self.prePosGui.Bind(wx.EVT_CHOICE, self.onPrePos)
 
-        self.openFileButton = wx.Button(self.panel, label = 'Open File')
-        self.firstButton    = wx.Button(self.panel, label = 'First')
-        self.nextButton     = wx.Button(self.panel, label = 'Next')
-        self.nrTxt          = wx.Button(self.panel, label = '---',  style=wx.NO_BORDER)
-        self.prevButton     = wx.Button(self.panel, label = 'Prev')
-        self.lastButton     = wx.Button(self.panel, label = 'Last')
+        self.openFileButton = wx.Button(self.panel, label="Open File")
+        self.firstButton = wx.Button(self.panel, label="First")
+        self.nextButton = wx.Button(self.panel, label="Next")
+        self.nrTxt = wx.Button(self.panel, label="---", style=wx.NO_BORDER)
+        self.prevButton = wx.Button(self.panel, label="Prev")
+        self.lastButton = wx.Button(self.panel, label="Last")
         self.Guis.append(self.openFileButton)
         self.Guis.append(self.firstButton)
         self.Guis.append(self.nextButton)
@@ -3322,82 +3422,80 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         # dynamic adjustments
         self.posAngleGui = wx.Slider(
-                self.panel,
-                value = Geom3D.Rad2Deg * self.shape.posAngle,
-                minValue = Geom3D.Rad2Deg * self.shape.posAngleMin,
-                maxValue = Geom3D.Rad2Deg * self.shape.posAngleMax,
-                style = wx.SL_HORIZONTAL | wx.SL_LABELS
-            )
+            self.panel,
+            value=Geom3D.Rad2Deg * self.shape.posAngle,
+            minValue=Geom3D.Rad2Deg * self.shape.posAngleMin,
+            maxValue=Geom3D.Rad2Deg * self.shape.posAngleMax,
+            style=wx.SL_HORIZONTAL | wx.SL_LABELS,
+        )
         self.Guis.append(self.posAngleGui)
         self.posAngleGui.Bind(wx.EVT_SLIDER, self.onPosAngle)
         self.minFoldAngle = -180
-        self.maxFoldAngle =  180
+        self.maxFoldAngle = 180
         self.dihedralAngleGui = wx.Slider(
-                self.panel,
-                value = Geom3D.Rad2Deg * self.shape.dihedralAngle,
-                minValue = self.minFoldAngle,
-                maxValue = self.maxFoldAngle,
-                style = wx.SL_HORIZONTAL | wx.SL_LABELS
-            )
+            self.panel,
+            value=Geom3D.Rad2Deg * self.shape.dihedralAngle,
+            minValue=self.minFoldAngle,
+            maxValue=self.maxFoldAngle,
+            style=wx.SL_HORIZONTAL | wx.SL_LABELS,
+        )
         self.Guis.append(self.dihedralAngleGui)
         self.dihedralAngleGui.Bind(wx.EVT_SLIDER, self.onDihedralAngle)
         self.fold1Gui = wx.Slider(
-                self.panel,
-                value = Geom3D.Rad2Deg * self.shape.fold1,
-                minValue = self.minFoldAngle,
-                maxValue = self.maxFoldAngle,
-                style = wx.SL_HORIZONTAL | wx.SL_LABELS
-            )
+            self.panel,
+            value=Geom3D.Rad2Deg * self.shape.fold1,
+            minValue=self.minFoldAngle,
+            maxValue=self.maxFoldAngle,
+            style=wx.SL_HORIZONTAL | wx.SL_LABELS,
+        )
         self.Guis.append(self.fold1Gui)
         self.fold1Gui.Bind(wx.EVT_SLIDER, self.onFold1)
         self.fold2Gui = wx.Slider(
-                self.panel,
-                value = Geom3D.Rad2Deg * self.shape.fold2,
-                minValue = self.minFoldAngle,
-                maxValue = self.maxFoldAngle,
-                style = wx.SL_HORIZONTAL | wx.SL_LABELS
-            )
+            self.panel,
+            value=Geom3D.Rad2Deg * self.shape.fold2,
+            minValue=self.minFoldAngle,
+            maxValue=self.maxFoldAngle,
+            style=wx.SL_HORIZONTAL | wx.SL_LABELS,
+        )
         self.Guis.append(self.fold2Gui)
         self.fold2Gui.Bind(wx.EVT_SLIDER, self.onFold2)
         self.fold1OppGui = wx.Slider(
-                self.panel,
-                value = Geom3D.Rad2Deg * self.shape.oppFold1,
-                minValue = self.minFoldAngle,
-                maxValue = self.maxFoldAngle,
-                style = wx.SL_HORIZONTAL | wx.SL_LABELS
-            )
+            self.panel,
+            value=Geom3D.Rad2Deg * self.shape.oppFold1,
+            minValue=self.minFoldAngle,
+            maxValue=self.maxFoldAngle,
+            style=wx.SL_HORIZONTAL | wx.SL_LABELS,
+        )
         self.Guis.append(self.fold1OppGui)
         self.fold1OppGui.Bind(wx.EVT_SLIDER, self.onFold1Opp)
         self.fold2OppGui = wx.Slider(
-                self.panel,
-                value = Geom3D.Rad2Deg * self.shape.oppFold2,
-                minValue = self.minFoldAngle,
-                maxValue = self.maxFoldAngle,
-                style = wx.SL_HORIZONTAL | wx.SL_LABELS
-            )
+            self.panel,
+            value=Geom3D.Rad2Deg * self.shape.oppFold2,
+            minValue=self.minFoldAngle,
+            maxValue=self.maxFoldAngle,
+            style=wx.SL_HORIZONTAL | wx.SL_LABELS,
+        )
         self.Guis.append(self.fold2OppGui)
         self.fold2OppGui.Bind(wx.EVT_SLIDER, self.onFold2Opp)
         self.heightGui = wx.Slider(
-                self.panel,
-                value = self.maxHeight - self.shape.height*self.heightF,
-                minValue = -self.maxHeight * self.heightF,
-                maxValue = self.maxHeight * self.heightF,
-                style = wx.SL_VERTICAL
-            )
+            self.panel,
+            value=self.maxHeight - self.shape.height * self.heightF,
+            minValue=-self.maxHeight * self.heightF,
+            maxValue=self.maxHeight * self.heightF,
+            style=wx.SL_VERTICAL,
+        )
         self.Guis.append(self.heightGui)
         self.heightGui.Bind(wx.EVT_SLIDER, self.onHeight)
         self.__guisNoReflEnabled = True
         if self.shape.inclReflections:
             self.disableGuisNoRefl()
 
-        self.setOrientGui = wx.TextCtrl(
-                self.panel
-            )
+        self.setOrientGui = wx.TextCtrl(self.panel)
         self.Guis.append(self.setOrientGui)
-        self.setOrientButton  = wx.Button(self.panel, label = 'Apply')
+        self.setOrientButton = wx.Button(self.panel, label="Apply")
         self.Guis.append(self.setOrientButton)
         self.setOrientButton.Bind(wx.EVT_BUTTON, self.onSetOrient)
-        self.cleanOrientButton  = wx.Button(self.panel, label = 'Clean')
+        self.cleanOrientButton = wx.Button(self.panel, label="Clean")
         self.Guis.append(self.cleanOrientButton)
         self.cleanOrientButton.Bind(wx.EVT_BUTTON, self.onCleanOrient)
 
@@ -3405,7 +3503,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.Boxes = []
 
         # sizer with view settings
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'View Settings'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="View Settings"))
         settingsSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         settingsSizer.Add(self.applySymGui, 0, wx.EXPAND)
         settingsSizer.Add(self.addTrisGui, 0, wx.EXPAND)
@@ -3414,7 +3512,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         settingsSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         # The sizers holding the special positions
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Special Positions'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Special Positions"))
         posSizerSubV = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         posSizerSubH = wx.BoxSizer(wx.HORIZONTAL)
         posSizerSubH.Add(self.openFileButton, 0, wx.EXPAND)
@@ -3433,8 +3531,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         prePosSizerH.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
         # Alternatives of filling with triangles
-        self.Boxes.append(wx.StaticBox(self.panel,
-                                        label = 'Triangle Fill Alternative'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Triangle Fill Alternative"))
         fillSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         fillSizer.Add(self.trisFillGui, 0, wx.EXPAND)
         fillSizer.Add(self.trisPosGui, 0, wx.EXPAND)
@@ -3448,26 +3545,30 @@ class FldHeptagonCtrlWin(wx.Frame):
         posSizerH = wx.BoxSizer(wx.HORIZONTAL)
         # sizer holding the dynamic adjustments
         specPosDynamic = wx.BoxSizer(wx.VERTICAL)
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Dihedral Angle (Degrees)'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Dihedral Angle (Degrees)"))
         angleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
         angleSizer.Add(self.dihedralAngleGui, 1, wx.EXPAND)
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Fold 1 Angle (Degrees)'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Fold 1 Angle (Degrees)"))
         fold1Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         fold1Sizer.Add(self.fold1Gui, 1, wx.EXPAND)
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Fold 2 Angle (Degrees)'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Fold 2 Angle (Degrees)"))
         fold2Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         fold2Sizer.Add(self.fold2Gui, 1, wx.EXPAND)
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Positional Angle (Degrees)'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Positional Angle (Degrees)"))
         posAngleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
         posAngleSizer.Add(self.posAngleGui, 1, wx.EXPAND)
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Opposite Fold 1 Angle (Degrees)'))
+        self.Boxes.append(
+            wx.StaticBox(self.panel, label="Opposite Fold 1 Angle (Degrees)")
+        )
         oppFold1Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         oppFold1Sizer.Add(self.fold1OppGui, 1, wx.EXPAND)
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Opposite Fold 2 Angle (Degrees)'))
+        self.Boxes.append(
+            wx.StaticBox(self.panel, label="Opposite Fold 2 Angle (Degrees)")
+        )
         oppFold2Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         oppFold2Sizer.Add(self.fold2OppGui, 1, wx.EXPAND)
 
-        self.Boxes.append(wx.StaticBox(self.panel, label = 'Offset T'))
+        self.Boxes.append(wx.StaticBox(self.panel, label="Offset T"))
         heightSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
         heightSizer.Add(self.heightGui, 1, wx.EXPAND)
         specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
@@ -3480,8 +3581,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         posSizerH.Add(specPosDynamic, 3, wx.EXPAND)
         posSizerH.Add(heightSizer, 1, wx.EXPAND)
 
-        self.Boxes.append(wx.StaticBox(self.panel,
-            label = 'Set Orientation Directly (specify array)'))
+        self.Boxes.append(
+            wx.StaticBox(self.panel, label="Set Orientation Directly (specify array)")
+        )
         setOrientSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
         setOrientSizer.Add(self.setOrientGui, 1, wx.EXPAND)
         setOrientSizer.Add(self.setOrientButton, 0, wx.EXPAND)
@@ -3499,8 +3601,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         mainSizer.Add(mainVSizer, 6, wx.EXPAND)
 
         self.errorStr = {
-                'PosEdgeCfg': "ERROR: Impossible combination of position and edge configuration!"
-            }
+            "PosEdgeCfg": "ERROR: Impossible combination of position and edge configuration!"
+        }
 
         return mainSizer
 
@@ -3512,56 +3614,56 @@ class FldHeptagonCtrlWin(wx.Frame):
         return pre_pos_id in psp
 
     def fileStrMapFoldMethodStr(self, filename):
-        res = re.search("-fld_([^.]*)\.", filename)
+        res = re.search(r"-fld_([^.]*)\.", filename)
         if res:
             return res.groups()[0]
         else:
-            self.printFileStrMapWarning(filename, 'fileStrMapFoldMethodStr')
+            self.printFileStrMapWarning(filename, "fileStrMapFoldMethodStr")
 
     def fileStrMapFoldPosStr(self, filename):
-        res = re.search("-fld_[^.]*\.([0-6])-.*", filename)
+        res = re.search(r"-fld_[^.]*\.([0-6])-.*", filename)
         if res:
             return res.groups()[0]
         else:
-            self.printFileStrMapWarning(filename, 'fileStrMapFoldPosStr')
+            self.printFileStrMapWarning(filename, "fileStrMapFoldPosStr")
 
     def fileStrMapHasReflections(self, filename):
-        res = re.search(".*frh-roots-(.*)-fld_.*", filename)
+        res = re.search(r".*frh-roots-(.*)-fld_.*", filename)
         if res:
-            pos_vals = res.groups()[0].split('_')
+            pos_vals = res.groups()[0].split("_")
             nr_pos = len(pos_vals)
-            return (nr_pos == 4) or (nr_pos == 5 and pos_vals[4] == '0')
+            return (nr_pos == 4) or (nr_pos == 5 and pos_vals[4] == "0")
         else:
-            self.printFileStrMapWarning(filename, 'fileStrMapHasReflections')
+            self.printFileStrMapWarning(filename, "fileStrMapHasReflections")
 
     def fileStrMapTrisStr(self, filename):
         # New format: incl -pos:
-        res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.json", filename)
+        res = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.json", filename)
         if res is None:
             # try old method:
-            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
+            res = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
         if res:
             tris_str = res.groups()[0]
             return self.trisAlt.mapFileStrOnStr[tris_str]
         else:
-            self.printFileStrMapWarning(filename, 'fileStrMapTrisStr')
+            self.printFileStrMapWarning(filename, "fileStrMapTrisStr")
 
     def fileStrMapTrisPos(self, filename):
-        res = re.search("-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.json", filename)
+        res = re.search(r"-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.json", filename)
         if res:
             tris_pos = res.groups()[0]
             return int(tris_pos)
         else:
             # try old syntax:
-            res = re.search("-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
+            res = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
             if res:
                 return 0
             else:
-                self.printFileStrMapWarning(filename, 'fileStrMapTrisPos')
-                assert(False)
+                self.printFileStrMapWarning(filename, "fileStrMapTrisPos")
+                assert False
 
     def fileStrMapFoldPos(self, filename):
-        res = re.search("-fld_[^.]*\.([0-7])-.*\.json", filename)
+        res = re.search(r"-fld_[^.]*\.([0-7])-.*\.json", filename)
         if res:
             tris_pos = res.groups()[0]
             return int(tris_pos)
@@ -3611,8 +3713,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         event.Skip()
 
     def onDihedralAngle(self, event):
-        self.shape.setDihedralAngle(
-            Geom3D.Deg2Rad * self.dihedralAngleGui.GetValue())
+        self.shape.setDihedralAngle(Geom3D.Deg2Rad * self.dihedralAngleGui.GetValue())
         self.statusBar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
@@ -3640,52 +3741,52 @@ class FldHeptagonCtrlWin(wx.Frame):
         event.Skip()
 
     def onFold1Opp(self, event):
-        self.shape.setFold1(
-            oppositeAngle = Geom3D.Deg2Rad * self.fold1OppGui.GetValue())
+        self.shape.setFold1(oppositeAngle=Geom3D.Deg2Rad * self.fold1OppGui.GetValue())
         self.statusBar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
     def onFold2Opp(self, event):
-        self.shape.setFold2(
-            oppositeAngle = Geom3D.Deg2Rad * self.fold2OppGui.GetValue())
+        self.shape.setFold2(oppositeAngle=Geom3D.Deg2Rad * self.fold2OppGui.GetValue())
         self.statusBar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
     def onHeight(self, event):
-        self.shape.setHeight(float(self.maxHeight - self.heightGui.GetValue())/self.heightF)
+        self.shape.setHeight(
+            float(self.maxHeight - self.heightGui.GetValue()) / self.heightF
+        )
         self.statusBar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
     def onCleanOrient(self, event):
-        self.setOrientGui.SetValue('')
+        self.setOrientGui.SetValue("")
 
     def onSetOrient(self, event):
-        inputStr = 'ar = %s' % self.setOrientGui.GetValue()
-        ed = {'__name__': 'inputStr'}
+        inputStr = "ar = %s" % self.setOrientGui.GetValue()
+        ed = {"__name__": "inputStr"}
         try:
-                exec(inputStr, ed)
+            exec(inputStr, ed)
         except SyntaxError:
-                self.statusBar.SetStatusText('Syntax error in input string');
-                raise
-        tVal = ed['ar'][0]
-        aVal = ed['ar'][1]
-        fld1 = ed['ar'][2]
-        fld2 = ed['ar'][3]
+            self.statusBar.SetStatusText("Syntax error in input string")
+            raise
+        tVal = ed["ar"][0]
+        aVal = ed["ar"][1]
+        fld1 = ed["ar"][2]
+        fld2 = ed["ar"][3]
         self.heightGui.SetValue(self.maxHeight - self.heightF * tVal)
         self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * aVal)
         self.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
         self.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
-        inclRefl = len(ed['ar']) <= 5
+        inclRefl = len(ed["ar"]) <= 5
         self.shape.inclReflections = inclRefl
         self.reflGui.SetValue(inclRefl)
         if not inclRefl:
             self.enableGuisNoRefl()
-            posVal = ed['ar'][4]
-            oppFld1 = ed['ar'][5]
-            oppFld2 = ed['ar'][6]
+            posVal = ed["ar"][4]
+            oppFld1 = ed["ar"][5]
+            oppFld2 = ed["ar"][6]
             self.fold1OppGui.SetValue(Geom3D.Rad2Deg * oppFld1)
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * oppFld2)
             self.posAngleGui.SetValue(Geom3D.Rad2Deg * posVal)
@@ -3719,15 +3820,16 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.fold1OppGui.Disable()
                 self.fold2OppGui.Disable()
             elif (
-                self.foldMethod == FoldMethod.W
-                or self.foldMethod == FoldMethod.SHELL
-                or self.foldMethod == FoldMethod.MIXED
-                or self.foldMethod == FoldMethod.G
+                    self.foldMethod == FoldMethod.W
+                    or self.foldMethod == FoldMethod.SHELL
+                    or self.foldMethod == FoldMethod.MIXED
+                    or self.foldMethod == FoldMethod.G
             ):
                 self.fold1OppGui.Enable()
                 self.fold2OppGui.Enable()
-            elif (self.foldMethod == FoldMethod.TRAPEZIUM or
-                self.foldMethod == FoldMethod.TRIANGLE
+            elif (
+                    self.foldMethod == FoldMethod.TRAPEZIUM
+                    or self.foldMethod == FoldMethod.TRIANGLE
             ):
                 self.fold1OppGui.Disable()
                 self.fold2OppGui.Enable()
@@ -3746,20 +3848,20 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.__sav_oppFld1 = self.shape.oppFold1
         self.__sav_oppFld2 = self.shape.oppFold2
         self.__sav_posAngle = self.shape.posAngle
-        self.shape.setFold1(oppositeAngle = self.shape.fold1)
-        self.shape.setFold2(oppositeAngle = self.shape.fold2)
+        self.shape.setFold1(oppositeAngle=self.shape.fold1)
+        self.shape.setFold2(oppositeAngle=self.shape.fold2)
         self.setReflPosAngle()
         self.fold1OppGui.SetValue(self.minFoldAngle)
         self.fold2OppGui.SetValue(self.minFoldAngle)
 
-    def enableSlidersNoRefl(self, restore = True):
+    def enableSlidersNoRefl(self, restore=True):
         self.allignFoldSlideBarsWithFoldMethod()
         self.posAngleGui.Enable()
         # the code below is added to be able to check and uncheck "Has
         # Reflections" in a "undo" kind of way.
         if restore:
-            self.shape.setFold1(oppositeAngle = self.__sav_oppFld1)
-            self.shape.setFold2(oppositeAngle = self.__sav_oppFld2)
+            self.shape.setFold1(oppositeAngle=self.__sav_oppFld1)
+            self.shape.setFold2(oppositeAngle=self.__sav_oppFld2)
             self.shape.setPosAngle(self.__sav_posAngle)
             self.fold1OppGui.SetValue(Geom3D.Rad2Deg * self.__sav_oppFld1)
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * self.__sav_oppFld2)
@@ -3774,7 +3876,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.disableSlidersNoRefl()
             self.__guisNoReflEnabled = False
 
-    def enableGuisNoRefl(self, restore = True):
+    def enableGuisNoRefl(self, restore=True):
         if not self.__guisNoReflEnabled:
             self.setEnableTrisFillItems()
             self.trisPosGui.Enable()
@@ -3820,7 +3922,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def setRotateFld(self, rotateFld):
         self.rotateFld = int(rotateFld) % 7
         self.shape.setRotateFold(self.rotateFld)
-        self.rotateFldGui.SetLabel('Rotate Fold %d/7' % (self.rotateFld + 1))
+        self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self.rotateFld + 1))
         self.updateShape()
 
     def onRotateFld(self, event):
@@ -3830,7 +3932,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         # TODO: move to offspring
         # FIXME TODO the string 'Enable Sliders' should be a constant and be
         # imported and used in the Scenes.. (or move to offspring..)
-        return self.prePosGui.GetStringSelection() != 'Enable Sliders'
+        return self.prePosGui.GetStringSelection() != "Enable Sliders"
 
     def saveTrisFillItem(self):
         currentChoice = self.trisAlt.key[self.trisFillGui.GetStringSelection()]
@@ -3855,7 +3957,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.trisAlt = self.trisAlts[self.position]
         self.shape.setTriangleFillPosition(position)
 
-    def setEnableTrisFillItems(self, itemList = None):
+    def setEnableTrisFillItems(self, itemList=None):
         # first time fails
         try:
             currentChoice = self.trisAlt.key[self.trisFillGui.GetStringSelection()]
@@ -3872,12 +3974,14 @@ class FldHeptagonCtrlWin(wx.Frame):
                         # TODO: use the first one that is valid
                         currentChoice = self.trisAlt.strip_I
             else:
-                def isValid (c):
+
+                def isValid(c):
                     c_key = self.trisAlt.key[c]
                     if self.trisAlt.isBaseKey(c_key) or isinstance(c_key, int):
                         return False
                     else:
                         return True
+
                 if not isValid(self.trisAlt.stringify[currentChoice]):
                     try:
                         currentChoice = self.trisAlt.key[self.savTrisNoRefl]
@@ -3908,7 +4012,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     @property
     def trisFill(self):
         s = self.trisFillGui.GetStringSelection()
-        if s == '':
+        if s == "":
             return None
         t = self.trisAlt.key[s]
         if self.shape.inclReflections:
@@ -3925,32 +4029,34 @@ class FldHeptagonCtrlWin(wx.Frame):
             return t[1]
 
     def nvidea_workaround_0(self):
-        self.prevTrisFill    = self.shape.edgeAlternative
+        self.prevTrisFill = self.shape.edgeAlternative
         self.prevOppTrisFill = self.shape.oppEdgeAlternative
 
     def nvidea_workaround(self):
         restoreMyShape = (
-            self.prevTrisFill == self.trisAlt.twist_strip_I and
-            self.prevOppTrisFill == self.trisAlt.twist_strip_I and
-            self.trisFill != self.trisAlt.twist_strip_I and
-            self.oppTrisFill != self.trisAlt.twist_strip_I
+            self.prevTrisFill == self.trisAlt.twist_strip_I
+            and self.prevOppTrisFill == self.trisAlt.twist_strip_I
+            and self.trisFill != self.trisAlt.twist_strip_I
+            and self.oppTrisFill != self.trisAlt.twist_strip_I
         )
         changeMyShape = (
-            self.trisFill == self.trisAlt.twist_strip_I and
-            self.oppTrisFill == self.trisAlt.twist_strip_I
+            self.trisFill == self.trisAlt.twist_strip_I
+            and self.oppTrisFill == self.trisAlt.twist_strip_I
         )
         if changeMyShape:
             if (
-                self.prevTrisFill != self.trisAlt.twist_strip_I and
-                self.prevOppTrisFill != self.trisAlt.twist_strip_I
+                    self.prevTrisFill != self.trisAlt.twist_strip_I
+                    and self.prevOppTrisFill != self.trisAlt.twist_strip_I
             ):
-                logging.info('---------nvidia-seg-fault-work-around-----------')
+                logging.info("---------nvidia-seg-fault-work-around-----------")
                 self.nvidea_workaround_0()
                 self.restoreShape = self.canvas.shape
-            self.shape.setV() # make sure the shape is updated
-            shape =  FldHeptagonShape(self.shape.shapes,
-                self.shape.nFold, self.shape.mFold,
-                name = self.shape.name
+            self.shape.setV()  # make sure the shape is updated
+            shape = FldHeptagonShape(
+                self.shape.shapes,
+                self.shape.nFold,
+                self.shape.mFold,
+                name=self.shape.name,
             )
             shape.altNFoldFace = self.shape.altNFoldFace
             shape.altMFoldFace = self.shape.altMFoldFace
@@ -3982,7 +4088,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.nvidea_workaround()
         self.canvas.paint()
 
-    def onTriangleFill(self, event = None):
+    def onTriangleFill(self, event=None):
         self.nvidea_workaround_0()
         self.shape.setEdgeAlternative(self.trisFill, self.oppTrisFill)
         if event is not None:
@@ -4022,10 +4128,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         for i, show in enumerate(is_valid):
             self.foldMethodGui.ShowItem(i, show)
 
-    def onFoldMethod(self, event = None):
-        self.foldMethod = self.foldMethodListItems[
-                self.foldMethodGui.GetSelection()
-            ]
+    def onFoldMethod(self, event=None):
+        self.foldMethod = self.foldMethodListItems[self.foldMethodGui.GetSelection()]
         self.shape.setFoldMethod(self.foldMethod)
         self.allignFoldSlideBarsWithFoldMethod()
         if event is not None:
@@ -4035,11 +4139,11 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.statusBar.SetStatusText(self.shape.getStatusStr())
             self.updateShape()
 
-    def onFirst(self, event = None):
+    def onFirst(self, event=None):
         self.specPosIndex = 0
         self.onPrePos()
 
-    def onLast(self, event = None):
+    def onLast(self, event=None):
         self.specPosIndex = -1
         self.onPrePos()
 
@@ -4064,7 +4168,11 @@ class FldHeptagonCtrlWin(wx.Frame):
             data = json.load(fd)
         assert type(data) == list, f"Expected a JSON holding a list, got {type(data)}"
         for l in data:
-            assert len(l) in (4, 5, 7), f"Expected elements with a length 4 or 7, got {len(l)}"
+            assert len(l) in (
+                4,
+                5,
+                7,
+            ), f"Expected elements with a length 4 or 7, got {len(l)}"
             for i in l:
                 assert type(i) in (int, float), "Expected a number, got {type(i)}"
         return data
@@ -4094,10 +4202,10 @@ class FldHeptagonCtrlWin(wx.Frame):
                     psp = self.predefRotSpecPos
                 # Oops not good for performance:
                 # TODO only return correct one en add length func
-                self.sav_stdPrePos = [sp['set'] for sp in psp[self.prePos]]
+                self.sav_stdPrePos = [sp["set"] for sp in psp[self.prePos]]
                 return self.sav_stdPrePos
 
-    def onPrev(self, event = None):
+    def onPrev(self, event=None):
         if self.std_pre_pos != []:
             if self.specPosIndex > 0:
                 self.specPosIndex -= 1
@@ -4108,7 +4216,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             self.noPrePosFound()
 
-    def onNext(self, event = None):
+    def onNext(self, event=None):
         if self.std_pre_pos != []:
             try:
                 maxI = len(self.std_pre_pos) - 1
@@ -4116,7 +4224,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                     if self.specPosIndex < maxI - 1:
                         self.specPosIndex += 1
                     else:
-                        self.specPosIndex = -1 # select last
+                        self.specPosIndex = -1  # select last
             except KeyError:
                 pass
             self.onPrePos()
@@ -4131,10 +4239,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def choose_file(self):
         filename = None
-        dlg = wx.FileDialog(self, 'New: Choose a file',
-                self.rDir, '', '*.json', wx.FD_OPEN)
+        dlg = wx.FileDialog(
+            self, "New: Choose a file", self.rDir, "", "*.json", wx.FD_OPEN
+        )
         if dlg.ShowModal() == wx.ID_OK:
-                filename = dlg.GetPath()
+            filename = dlg.GetPath()
         dlg.Destroy()
         return filename
 
@@ -4144,7 +4253,8 @@ class FldHeptagonCtrlWin(wx.Frame):
             return
         self.prePosFileName = filename
         self.foldMethodGui.SetStringSelection(
-            self.fileStrMapFoldMethodStr(self.prePosFileName))
+            self.fileStrMapFoldMethodStr(self.prePosFileName)
+        )
         self.onFoldMethod()
         self.setRotateFld(self.fileStrMapFoldPosStr(self.prePosFileName))
         # Note: Reflections need to be set before triangle fill, otherwise the
@@ -4154,15 +4264,14 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.onRefl()
         # not needed: self.shape.updateShape = True
         self.setEnableTrisFillItems()
-        self.trisFillGui.SetStringSelection(
-            self.fileStrMapTrisStr(self.prePosFileName))
+        self.trisFillGui.SetStringSelection(self.fileStrMapTrisStr(self.prePosFileName))
         self.onTriangleFill()
         self.tris_position = self.fileStrMapTrisPos(self.prePosFileName)
         # it's essential that prePosGui is set to dynamic be4 std_pre_pos is read
         # otherwise something else than dynamic might be read...
         open_file_str = self.stringify[open_file]
         if not open_file_str in self.prePosGui.GetItems():
-                self.prePosGui.Append(open_file_str)
+            self.prePosGui.Append(open_file_str)
         self.prePosGui.SetStringSelection(open_file_str)
         self.reset_std_pre_pos()
         self.onPrePos()
@@ -4177,9 +4286,8 @@ class FldHeptagonCtrlWin(wx.Frame):
             aVal = setting[self.specPosIndex][1]
             fld1 = setting[self.specPosIndex][2]
             fld2 = setting[self.specPosIndex][3]
-            vStr = '[tVal, aVal, fld1, fld2'
-            dbgStr = '  [%.12f, %.12f, %.12f, %.12f' % (
-                                                tVal, aVal, fld1, fld2)
+            vStr = "[tVal, aVal, fld1, fld2"
+            dbgStr = "  [%.12f, %.12f, %.12f, %.12f" % (tVal, aVal, fld1, fld2)
             if len(setting[self.specPosIndex]) > 4:
                 posVal = setting[self.specPosIndex][4]
             else:
@@ -4187,24 +4295,23 @@ class FldHeptagonCtrlWin(wx.Frame):
             if len(setting[self.specPosIndex]) > 5:
                 oppFld1 = setting[self.specPosIndex][5]
                 oppFld2 = setting[self.specPosIndex][6]
-                vStr = '%s, posVal, oppFld1, oppFld2] =' % vStr
-                dbgStr = '%s, %.12f, %.12f, %.12f]' % (
-                                    dbgStr, posVal, oppFld1, oppFld2)
+                vStr = "%s, posVal, oppFld1, oppFld2] =" % vStr
+                dbgStr = "%s, %.12f, %.12f, %.12f]" % (dbgStr, posVal, oppFld1, oppFld2)
             else:
                 oppFld1 = fld1
                 oppFld2 = fld2
-                vStr = '%s] =' % vStr
-                dbgStr = '%s]' % dbgStr
+                vStr = "%s] =" % vStr
+                dbgStr = "%s]" % dbgStr
             logging.info(vStr)
             logging.info(dbgStr)
             # Ensure self.specPosIndex in range:
         nrPos = len(setting)
         maxI = nrPos - 1
-        if (self.specPosIndex > maxI):
+        if self.specPosIndex > maxI:
             self.specPosIndex = maxI
         # keep -1 (last) so switching triangle alternative will keep
         # last selection.
-        elif (self.specPosIndex < -1):
+        elif self.specPosIndex < -1:
             self.specPosIndex = maxI - 1
         self.shape.setDihedralAngle(aVal)
         self.shape.setHeight(tVal)
@@ -4213,13 +4320,13 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.setPosAngle(posVal)
         # For the user: start counting with '1' instead of '0'
         if self.specPosIndex == -1:
-            nr = nrPos # last position
+            nr = nrPos  # last position
         else:
             nr = self.specPosIndex + 1
         # set nr of possible positions
-        self.nrTxt.SetLabel('%d/%d' % (nr, nrPos))
+        self.nrTxt.SetLabel("%d/%d" % (nr, nrPos))
         self.statusBar.SetStatusText(self.shape.getStatusStr())
-        #self.shape.printTrisAngles()
+        # self.shape.printTrisAngles()
 
     def reset_std_pre_pos(self):
         try:
@@ -4232,7 +4339,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     fld1None = 0.0
     fld2None = 0.0
 
-    def onPrePos(self, event = None):
+    def onPrePos(self, event=None):
         c = self.shape
         # remove the "From File" from the pull down list as soon as it is
         # deselected
@@ -4247,40 +4354,40 @@ class FldHeptagonCtrlWin(wx.Frame):
         if self.prePos == dyn_pos:
             if event is not None:
                 self.prePosFileName = None
-            if (self.restoreTris):
+            if self.restoreTris:
                 self.restoreTris = False
                 self.shape.addXtraFs = self.addTrisGui.IsChecked()
                 self.shape.updateShape = True
-            if (self.restoreO3s):
+            if self.restoreO3s:
                 self.restoreO3s = False
                 self.shape.onlyRegFs = False
                 self.shape.updateShape = True
-            self.nrTxt.SetLabel('---')
+            self.nrTxt.SetLabel("---")
         elif self.prePos != open_file:
             # this block is run for predefined spec pos only:
-            if (self.showOnlyHepts()):
+            if self.showOnlyHepts():
                 self.shape.addXtraFs = False
                 self.restoreTris = True
-            elif (self.restoreTris):
+            elif self.restoreTris:
                 self.restoreTris = False
                 self.shape.addXtraFs = self.addTrisGui.IsChecked()
-            if (self.showOnlyO3Tris()):
+            if self.showOnlyO3Tris():
                 self.shape.onlyRegFs = True
                 self.restoreO3s = True
-            elif (self.restoreO3s):
+            elif self.restoreO3s:
                 self.restoreO3s = False
                 self.shape.onlyRegFs = False
 
             # get fold, tris alt
             sps = self.specPosSetup
-            self.foldMethodGui.SetStringSelection(sps['7fold'].name.capitalize())
-            self.trisFillGui.SetStringSelection(self.trisAlt.stringify[sps['tris']])
+            self.foldMethodGui.SetStringSelection(sps["7fold"].name.capitalize())
+            self.trisFillGui.SetStringSelection(self.trisAlt.stringify[sps["tris"]])
             try:
-                self.tris_position = sps['tris-pos']
+                self.tris_position = sps["tris-pos"]
             except KeyError:
                 self.tris_position = 0
             try:
-                rotateFold = sps['fold-rot']
+                rotateFold = sps["fold-rot"]
             except KeyError:
                 rotateFold = 0
             self.setRotateFld(rotateFold)
@@ -4289,10 +4396,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.onTriangleFill()
 
             for gui in [
-                self.dihedralAngleGui, self.posAngleGui,
-                self.heightGui,
-                self.fold1Gui, self.fold2Gui,
-                self.fold1OppGui, self.fold2OppGui
+                    self.dihedralAngleGui,
+                    self.posAngleGui,
+                    self.heightGui,
+                    self.fold1Gui,
+                    self.fold2Gui,
+                    self.fold1OppGui,
+                    self.fold2OppGui,
             ]:
                 gui.SetValue(0)
                 gui.Disable()
@@ -4315,10 +4425,13 @@ class FldHeptagonCtrlWin(wx.Frame):
         # updating the sliders...
         if self.prePos == dyn_pos or self.prePos == open_file:
             for gui in [
-                self.dihedralAngleGui, self.posAngleGui,
-                self.heightGui,
-                self.fold1Gui, self.fold2Gui,
-                self.fold1OppGui, self.fold2OppGui
+                    self.dihedralAngleGui,
+                    self.posAngleGui,
+                    self.heightGui,
+                    self.fold1Gui,
+                    self.fold2Gui,
+                    self.fold1OppGui,
+                    self.fold2OppGui,
             ]:
                 gui.Enable()
             self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
@@ -4332,17 +4445,18 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.fold1OppGui.SetValue(val1)
             self.fold2OppGui.SetValue(val2)
             if not self.shape.inclReflections:
-                self.enableGuisNoRefl(restore = False)
-            self.heightGui.SetValue(
-                self.maxHeight - self.heightF * c.height)
+                self.enableGuisNoRefl(restore=False)
+            self.heightGui.SetValue(self.maxHeight - self.heightF * c.height)
             self.setEnableTrisFillItems()
         self.updateShape()
 
+
 class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
-    def __init__(self,
-        base_isometries = [geomtypes.E],
-        extra_isometry = None,
-        name = 'EqlHeptagonShape'
+    def __init__(
+            self,
+            base_isometries=[geomtypes.E],
+            extra_isometry=None,
+            name="EqlHeptagonShape",
     ):
         """
         Define a shape with many equilateral heptagons.
@@ -4358,21 +4472,21 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
                 isometries.append(extra_isometry * i)
 
         super().__init__(Vs=[], Fs=[], isometries=isometries, name=name)
-        self.showKite      = True
-        self.showHepta     = False
-        self.addFaces      = True
-        self.heptPosAlt    = False
-        self.cullingOn     = False
-        self.showXtra      = False
-        self.triangleAlt   = True
-        self.addXtraEdge   = True
-        self.errorStr      = ''
-        self.opaqueness    = 1.0
+        self.showKite = True
+        self.showHepta = False
+        self.addFaces = True
+        self.heptPosAlt = False
+        self.cullingOn = False
+        self.showXtra = False
+        self.triangleAlt = True
+        self.addXtraEdge = True
+        self.errorStr = ""
+        self.opaqueness = 1.0
 
-        kiteColor          = rgb.oliveDrab[:]
-        heptColor          = rgb.oliveDrab[:]
-        xtraColor          = rgb.brown[:]
-        self.theColors     = [heptColor, kiteColor, xtraColor]
+        kiteColor = rgb.oliveDrab[:]
+        heptColor = rgb.oliveDrab[:]
+        xtraColor = rgb.brown[:]
+        self.theColors = [heptColor, kiteColor, xtraColor]
 
     def setV(self):
         """
@@ -4388,21 +4502,22 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         self.angle = a
         self.setV()
 
-    def setViewSettings(self,
-            addFaces      = None,
-            showKite      = None,
-            showHepta     = None,
-            showXtra      = None,
-            triangleAlt   = None,
-            addXtraEdge   = None,
-            heptPosAlt    = None,
-            cullingOn     = None,
-            edgeR         = None,
-            vertexR       = None,
-            opaqueness    = None
-        ):
+    def setViewSettings(
+            self,
+            addFaces=None,
+            showKite=None,
+            showHepta=None,
+            showXtra=None,
+            triangleAlt=None,
+            addXtraEdge=None,
+            heptPosAlt=None,
+            cullingOn=None,
+            edgeR=None,
+            vertexR=None,
+            opaqueness=None,
+    ):
         if addFaces is not None:
-            self.setFaceProperties(drawFaces = addFaces)
+            self.setFaceProperties(drawFaces=addFaces)
         if showKite is not None:
             self.showKite = showKite
         if showHepta is not None:
@@ -4422,22 +4537,18 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             else:
                 glDisable(GL_CULL_FACE)
         if edgeR is not None:
-            self.setEdgeProperties(radius = edgeR, drawEdges = True)
+            self.setEdgeProperties(radius=edgeR, drawEdges=True)
         if vertexR is not None:
-            self.setVertexProperties(radius = vertexR)
+            self.setVertexProperties(radius=vertexR)
         if opaqueness is not None:
             # TODO...
             self.opaqueness = opaqueness
         if (
-            showKite is not None  # not so efficient perhaps, but works..
-            or
-            showHepta is not None  # not so efficient perhaps, but works..
-            or
-            showXtra is not None  # not so efficient perhaps, but works..
-            or
-            heptPosAlt is not None
-            or
-            addXtraEdge is not None
+                showKite is not None  # not so efficient perhaps, but works..
+                or showHepta is not None  # not so efficient perhaps, but works..
+                or showXtra is not None  # not so efficient perhaps, but works..
+                or heptPosAlt is not None
+                or addXtraEdge is not None
         ):
             self.setV()
 
@@ -4446,15 +4557,21 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def getStatusStr(self):
-        if self.errorStr == '':
-          floatFmt = '%02.2f'
-          fmtStr   = 'H = %s, Angle = %s degrees' % (floatFmt, floatFmt)
-          s        = fmtStr % (self.h, self.angle)
-          return s
+        if self.errorStr == "":
+            floatFmt = "%02.2f"
+            fmtStr = "H = %s, Angle = %s degrees" % (floatFmt, floatFmt)
+            s = fmtStr % (self.h, self.angle)
+            return s
         else:
-          return self.errorStr
+            return self.errorStr
+
 
 class EqlHeptagonCtrlWin(wx.Frame):
+    KITE_ANGLE_STEPS = 200
+
+    kite_angle_factor = 1
+    kite_angle_offset = 1
+
     def __init__(self, shape, canvas, size, *args, **kwargs):
         assert isinstance(shape, EqlHeptagonShape)
         self.shape = shape
@@ -4464,74 +4581,77 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.statusBar = self.CreateStatusBar()
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.mainSizer.Add(
-                self.createControlsSizer(),
-                1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
-            )
+            self.create_ctrl_sizer(), 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
+        )
         self.set_default_size(size)
         self.panel.SetAutoLayout(True)
         self.panel.SetSizer(self.mainSizer)
         self.Show(True)
         self.panel.Layout()
 
-    def setKiteAngleExtremes(self, min, max, steps = 100):
-        # Linear mapping of [0, self.kiteAngleSteps] ->
+    def setKiteAngleExtremes(self, min_angle, max_angle):
+        # Linear mapping of [0, self.KITE_ANGLE_STEPS] ->
         #                   [min, max]
         #
         # min: minimal angle in degrees
         # max: maximum angle in degrees
-        # steps: the amount of steps in the slider.
-        # y = x * (max - min)/self.kiteAngleSteps + min
-        self.kiteAngleSteps = steps
-        self.kiteAngleFactor = (max - min) / steps
-        self.kiteAngleOffset = min
+        # self.KITE_ANGLE_STEPS: the amount of steps in the slider.
+        # y = x * (max - min)/self.KITE_ANGLE_STEPS + min
+        self.kite_angle_factor = (max_angle - min_angle) / self.KITE_ANGLE_STEPS
+        self.kite_angle_offset = min_angle
         # inverse:
-        # x = ( y - min ) /  self.kiteAngleFactor
+        # x = ( y - min ) /  self.kite_angle_factor
 
     def Slider2Angle(self, x):
+        """convert a slider value to an angle value"""
         # angle in degrees
-        return self.kiteAngleFactor * float(x) + self.kiteAngleOffset
+        return self.kite_angle_factor * float(x) + self.kite_angle_offset
 
     def Angle2Slider(self, y):
+        """convert an angle value to a slider value"""
         # angle in degrees
-        return (y - self.kiteAngleOffset) / self.kiteAngleFactor
+        return (y - self.kite_angle_offset) / self.kite_angle_factor
 
-    def createControlsSizer(self):
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
+    def create_ctrl_sizer(self):
+        """Create and return the main sizer with all the control widgets."""
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
         self.kiteAngleGui = wx.Slider(
-                self.panel,
-                value = self.Angle2Slider(self.shape.angle),
-                minValue = 0,
-                maxValue = self.kiteAngleSteps,
-                style = wx.SL_HORIZONTAL
-            )
-        self.panel.Bind(
-            wx.EVT_SLIDER, self.onKiteAngleAdjust, id = self.kiteAngleGui.GetId()
+            self.panel,
+            value=self.Angle2Slider(self.shape.angle),
+            minValue=0,
+            maxValue=self.KITE_ANGLE_STEPS,
+            style=wx.SL_HORIZONTAL,
         )
-        self.kiteAngleBox = wx.StaticBox(self.panel, label = 'Kite Angle')
+        self.panel.Bind(
+            wx.EVT_SLIDER, self.on_kite_angle, id=self.kiteAngleGui.GetId()
+        )
+        self.kiteAngleBox = wx.StaticBox(self.panel, label="Kite Angle")
         self.kiteAngleSizer = wx.StaticBoxSizer(self.kiteAngleBox, wx.HORIZONTAL)
         self.kiteAngleSizer.Add(self.kiteAngleGui, 1, wx.EXPAND)
         self.statusBar.SetStatusText(self.shape.getStatusStr())
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        self.showKiteChk = wx.CheckBox(self.panel, label = 'Show Kite')
+        self.showKiteChk = wx.CheckBox(self.panel, label="Show Kite")
         self.showKiteChk.SetValue(self.shape.showKite)
-        self.showHeptaChk = wx.CheckBox(self.panel, label = 'Show Heptagon')
+        self.showHeptaChk = wx.CheckBox(self.panel, label="Show Heptagon")
         self.showHeptaChk.SetValue(self.shape.showHepta)
-        self.showXtraChk = wx.CheckBox(self.panel, label = 'Show Extra Faces')
+        self.showXtraChk = wx.CheckBox(self.panel, label="Show Extra Faces")
         self.showXtraChk.SetValue(self.shape.showXtra)
-        self.altHeptPosChk = wx.CheckBox(self.panel, label = 'Use Alternative Heptagon Position')
+        self.altHeptPosChk = wx.CheckBox(
+            self.panel, label="Use Alternative Heptagon Position"
+        )
         self.altHeptPosChk.SetValue(self.shape.heptPosAlt)
-        self.triangleAltChk = wx.CheckBox(self.panel, label = 'Triangle Alternative')
+        self.triangleAltChk = wx.CheckBox(self.panel, label="Triangle Alternative")
         self.triangleAltChk.SetValue(self.shape.triangleAlt)
-        self.addXtraEdgeChk = wx.CheckBox(self.panel, label = 'Add Extra Edge')
+        self.addXtraEdgeChk = wx.CheckBox(self.panel, label="Add Extra Edge")
         self.addXtraEdgeChk.SetValue(self.shape.addXtraEdge)
-        self.cullingChk = wx.CheckBox(self.panel, label = 'Draw one sided polygon')
+        self.cullingChk = wx.CheckBox(self.panel, label="Draw one sided polygon")
         self.cullingChk.SetValue(self.shape.cullingOn)
-        self.panel.Bind(wx.EVT_CHECKBOX, self.onViewSettingsChk)
-        self.viewSettingsBox = wx.StaticBox(self.panel, label = 'View Settings')
+        self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
+        self.viewSettingsBox = wx.StaticBox(self.panel, label="View Settings")
         self.viewSettingsSizer = wx.StaticBoxSizer(self.viewSettingsBox, wx.VERTICAL)
 
         self.viewSettingsSizer.Add(self.showKiteChk, 1, wx.EXPAND)
@@ -4548,51 +4668,52 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.columnSubSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.columnSubSizer.Add(self.rowSubSizer, 2, wx.EXPAND)
 
-        mainSizer.Add(self.kiteAngleSizer, 4, wx.EXPAND)
-        mainSizer.Add(self.columnSubSizer, 20, wx.EXPAND)
-        try:
-            self.addSpecialPositions(self.panel, mainSizer)
-        except AttributeError: pass
+        main_sizer.Add(self.kiteAngleSizer, 4, wx.EXPAND)
+        main_sizer.Add(self.columnSubSizer, 20, wx.EXPAND)
 
-        return mainSizer
+        self.add_specials(self.panel, main_sizer)
 
-    def setNoPrePos(self):
-        #sel = self.prePosSelect.SetSelection(0)
-        self.prePosSelected = False
+        return main_sizer
 
-    def onKiteAngleAdjust(self, event):
-        self.setNoPrePos()
+    def add_specials(self, _panel, _sizer):
+        """Could be implemented by offspring to add more widgets"""
+
+    def on_kite_angle(self, event):
+        """Update the shape conform the new edge angles"""
         self.shape.setAngle(self.Slider2Angle(self.kiteAngleGui.GetValue()))
         self.canvas.paint()
         try:
             self.statusBar.SetStatusText(self.shape.getStatusStr())
-        except AttributeError: pass
+        except AttributeError:
+            pass
         event.Skip()
 
-    def onViewSettingsChk(self, event = None):
-        showKite      = self.showKiteChk.IsChecked()
-        showHepta     = self.showHeptaChk.IsChecked()
-        showXtra      = self.showXtraChk.IsChecked()
-        altHeptPos    = self.altHeptPosChk.IsChecked()
-        triangleAlt   = self.triangleAltChk.IsChecked()
-        addXtraEdge   = self.addXtraEdgeChk.IsChecked()
-        cullingOn     = self.cullingChk.IsChecked()
+    def on_view_settings_chk(self, _):
+        """Update the shape drawing conform the settings."""
+        show_kite = self.showKiteChk.IsChecked()
+        show_hepta = self.showHeptaChk.IsChecked()
+        show_extra = self.showXtraChk.IsChecked()
+        alt_hept_pos = self.altHeptPosChk.IsChecked()
+        tri_alt = self.triangleAltChk.IsChecked()
+        add_extra_edge = self.addXtraEdgeChk.IsChecked()
+        culling_on = self.cullingChk.IsChecked()
         self.shape.setViewSettings(
-                showKite      = showKite,
-                showHepta     = showHepta,
-                showXtra      = showXtra,
-                heptPosAlt    = altHeptPos,
-                triangleAlt   = triangleAlt,
-                addXtraEdge   = addXtraEdge,
-                cullingOn     = cullingOn
-            )
+            showKite=show_kite,
+            showHepta=show_hepta,
+            showXtra=show_extra,
+            heptPosAlt=alt_hept_pos,
+            triangleAlt=tri_alt,
+            addXtraEdge=add_extra_edge,
+            cullingOn=culling_on,
+        )
         self.canvas.paint()
         try:
             self.statusBar.SetStatusText(self.shape.getStatusStr())
-        except AttributeError: pass
+        except AttributeError:
+            pass
 
-    # move to general class
     def set_default_size(self, size):
+        """Set the default size of this window"""
         self.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)

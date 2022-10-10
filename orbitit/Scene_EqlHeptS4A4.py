@@ -343,14 +343,14 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             {'a':  24.602778241392063, 's': 'Equilateral Triangles', 't': False,'e': True},
             {'a':  45.464238739313160, 's': 'Three Triangles in One Plane', 't': True,'e': True},
         ]
-        this.setKiteAngleExtremes(this.specialAngles[3]['a'], this.specialAngles[2]['a'], 168)
+        this.setKiteAngleExtremes(this.specialAngles[3]['a'], this.specialAngles[2]['a'])
         kwargs['title'] = TITLE
         heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (338, 570),
             *args, **kwargs
         )
 
-    def addSpecialPositions(this, parentFrame, parentSizer):
+    def add_specials(this, parentFrame, parentSizer):
         labelLst = []
         for i in range(len(this.specialAngles)):
             labelLst.append(this.specialAngles[i]['s'])
@@ -389,8 +389,8 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             this.showXtraChk.SetValue(False)
         if 'e' in angleData:
             this.addXtraEdgeChk.SetValue(angleData['e'])
-        this.onViewSettingsChk(this)
-        # onViewSettingsChk(this) contains:
+        this.on_view_settings_chk(this)
+        # on_view_settings_chk(this) contains:
         #this.canvas.paint()
         #try:
         #    this.statusBar.SetStatusText(this.shape.getStatusStr())

@@ -30,21 +30,21 @@ from orbitit import Geom3D, geomtypes, heptagons, rgb
 TITLE = 'Equilateral Heptagons from Kite'
 
 class Shape(Geom3D.SimpleShape):
-    def __init__(this):
-        Geom3D.SimpleShape.__init__(this, [], [], name = "HeptaFromKite")
-        this.topMin  = 0.0
-        this.topMax  = 2.0
-        this.tailMin = 0.0
-        this.tailMax = 10.0
-        this.sideMin = 0.1
-        this.sideMax = 6.0
-        this.initArrs()
-        this.setKite(
-                this.topMax / 2,
-                this.tailMax / 2,
-                this.sideMax / 2
+    def __init__(self):
+        Geom3D.SimpleShape.__init__(self, [], [], name = "HeptaFromKite")
+        self.topMin  = 0.0
+        self.topMax  = 2.0
+        self.tailMin = 0.0
+        self.tailMax = 10.0
+        self.sideMin = 0.1
+        self.sideMax = 6.0
+        self.initArrs()
+        self.setKite(
+                self.topMax / 2,
+                self.tailMax / 2,
+                self.sideMax / 2
             )
-        this.setViewSettings(
+        self.setViewSettings(
             addFaces      = True,
             useCylinderEs = False,
             useSphereVs   = False,
@@ -52,7 +52,8 @@ class Shape(Geom3D.SimpleShape):
             showHepta     = True
         )
 
-    def glInit(this):
+    @staticmethod
+    def glInit():
         lightPosition = [-5., 5., 200., 0.]
         lightAmbient  = [0.7, 0.7, 0.7, 1.]
         #lightDiffuse  = [1., 1., 1., 1.]
@@ -66,29 +67,29 @@ class Shape(Geom3D.SimpleShape):
         glEnable(GL_LIGHT0)
         #glDisable(GL_DEPTH_TEST)
 
-    def initArrs(this):
-        this.colors = [rgb.red, rgb.yellow]
-        this.kiteFs = [
+    def initArrs(self):
+        self.colors = [rgb.red, rgb.yellow]
+        self.kiteFs = [
                 [0, 2, 1], [0, 3, 2]
             ]
-        this.kiteColors = [0, 0]
-        this.kiteEs = [
+        self.kiteColors = [0, 0]
+        self.kiteEs = [
                 0, 1, 1, 2, 2, 3, 3, 0
             ]
-        this.kiteVsIndices = list(range(4))
-        this.heptaFs = [
+        self.kiteVsIndices = list(range(4))
+        self.heptaFs = [
                 [0, 6, 1],
                 [1, 6, 5],
                 [1, 5, 2],
                 [2, 5, 4],
                 [2, 4, 3],
             ]
-        this.heptaColors = [1, 1, 1, 1, 1]
-        this.heptaEs  = [
+        self.heptaColors = [1, 1, 1, 1, 1]
+        self.heptaEs  = [
                 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0
             ]
-        this.heptaVsIndices = list(range(3, 10))
-        this.allNs = [
+        self.heptaVsIndices = list(range(3, 10))
+        self.allNs = [
                 [0, 0, 1],
                 [0, 0, 1],
                 [0, 0, 1],
@@ -102,11 +103,11 @@ class Shape(Geom3D.SimpleShape):
                 [0, 0, 1],
             ]
 
-    def setV(this):
-        Vt = [0, this.top, 0]
-        Vb = [0, -this.tail, 0]
-        Vl = [-this.side, 0, 0]
-        Vr = [ this.side, 0, 0]
+    def setV(self):
+        Vt = [0, self.top, 0]
+        Vb = [0, -self.tail, 0]
+        Vl = [-self.side, 0, 0]
+        Vr = [ self.side, 0, 0]
         tuple = heptagons.Kite2Hept(Vl, Vt, Vr, Vb)
         if tuple == None: return
         h0, h1, h2, h3, h4, h5, h6 = tuple[0]
@@ -129,14 +130,14 @@ class Shape(Geom3D.SimpleShape):
                 #
                 #               1
                 #
-        this.kiteVs = [
+        self.kiteVs = [
                 geomtypes.Vec3([Vr[0], Vr[1], Vr[2]]),
                 geomtypes.Vec3([Vb[0], Vb[1], Vb[2]]),
                 geomtypes.Vec3([Vl[0], Vl[1], Vl[2]]),
                 geomtypes.Vec3([Vt[0], Vt[1], Vt[2]])
            ]
         d = 1e-4
-        this.heptaVs = [
+        self.heptaVs = [
                 geomtypes.Vec3([Vt[0], Vt[1], Vt[2] + d]),
                 geomtypes.Vec3([h1[0], h1[1], h1[2] + d]),
                 geomtypes.Vec3([h2[0], h2[1], h2[2] + d]),
@@ -149,14 +150,14 @@ class Shape(Geom3D.SimpleShape):
         # the failure occurs at init since showKite and showHepta don't exist
         try:
             Vs = []
-            if this.showKite:
-                Vs.extend(this.kiteVs)
-            if this.showHepta:
-                Vs.extend(this.heptaVs)
-            this.setVertexProperties(Vs = Vs)
+            if self.showKite:
+                Vs.extend(self.kiteVs)
+            if self.showHepta:
+                Vs.extend(self.heptaVs)
+            self.setVertexProperties(Vs = Vs)
         except AttributeError: pass
 
-    def setViewSettings(this,
+    def setViewSettings(self,
             addFaces      = None,
             useCylinderEs = None,
             useSphereVs   = None,
@@ -164,227 +165,227 @@ class Shape(Geom3D.SimpleShape):
             showHepta     = None
         ):
         if addFaces != None:
-            this.setFaceProperties(drawFaces = addFaces)
+            self.setFaceProperties(drawFaces = addFaces)
         if useCylinderEs != None:
             if useCylinderEs:
                 radius = 0.05
             else:
                 radius = 0.00
-            this.setEdgeProperties(radius = radius, drawEdges = True)
+            self.setEdgeProperties(radius = radius, drawEdges = True)
         if useSphereVs != None:
             if useSphereVs:
                 radius = 0.1
             else:
                 radius = 0.00
-            this.setVertexProperties(radius = radius)
+            self.setVertexProperties(radius = radius)
         if showKite != None or showHepta != None:
             Fs = []
             Es = []
             Vs = []
             ColsI = []
             if showKite:
-                Vs.extend(this.kiteVs)
-                Fs.extend(this.kiteFs)
-                Es.extend(this.kiteEs)
-                ColsI.extend(this.kiteColors)
+                Vs.extend(self.kiteVs)
+                Fs.extend(self.kiteFs)
+                Es.extend(self.kiteEs)
+                ColsI.extend(self.kiteColors)
             if showHepta:
                 if Vs != []:
                     lVs = len(Vs)
-                    for face in this.heptaFs:
+                    for face in self.heptaFs:
                         Fs.append([i + lVs for i in face])
-                    Es.extend([i + lVs for i in this.heptaEs])
-                    Vs.extend(this.heptaVs)
-                    ColsI.extend(this.heptaColors)
+                    Es.extend([i + lVs for i in self.heptaEs])
+                    Vs.extend(self.heptaVs)
+                    ColsI.extend(self.heptaColors)
                 else:
-                    Fs.extend(this.heptaFs)
-                    Es.extend(this.heptaEs)
-                    Vs.extend(this.heptaVs)
-                    ColsI.extend(this.heptaColors)
-            this.setVertexProperties(Vs = Vs)
-            this.setEdgeProperties(Es = Es)
-            this.setFaceProperties(Fs = Fs, colors = [this.colors[:], ColsI[:]])
+                    Fs.extend(self.heptaFs)
+                    Es.extend(self.heptaEs)
+                    Vs.extend(self.heptaVs)
+                    ColsI.extend(self.heptaColors)
+            self.setVertexProperties(Vs = Vs)
+            self.setEdgeProperties(Es = Es)
+            self.setFaceProperties(Fs = Fs, colors = [self.colors[:], ColsI[:]])
             # save for setV:
-            this.showKite  = showKite
-            this.showHepta = showHepta
+            self.showKite  = showKite
+            self.showHepta = showHepta
 
-    def setTop(this, top):
-        this.top  = top
-        this.setV()
+    def setTop(self, top):
+        self.top  = top
+        self.setV()
 
-    def setTail(this, tail):
-        this.tail  = tail
-        this.setV()
+    def setTail(self, tail):
+        self.tail  = tail
+        self.setV()
 
-    def setSide(this, side):
-        this.side  = side
-        this.setV()
+    def setSide(self, side):
+        self.side  = side
+        self.setV()
 
-    def setKite(this, top, tail, side):
-        this.top  = top
-        this.tail = tail
-        this.side = side
-        this.setV()
+    def setKite(self, top, tail, side):
+        self.top  = top
+        self.tail = tail
+        self.side = side
+        self.setV()
 
-    def getStatusStr(this):
+    def getStatusStr(self):
         floatFmt = '%02.2f'
         fmtStr   = 'Top = %s, Tail = %s, Side = %s' % (floatFmt, floatFmt, floatFmt)
-        str      = fmtStr % (this.top, this.tail, this.side)
+        str      = fmtStr % (self.top, self.tail, self.side)
         return str
 
     # GUI PART
 
 class CtrlWin(wx.Frame):
-    def __init__(this, shape, canvas, *args, **kwargs):
-        this.shape = shape
-        this.canvas = canvas
-        wx.Frame.__init__(this, *args, **kwargs)
-        this.panel = wx.Panel(this, -1)
-        this.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        this.mainSizer.Add(
-                this.createControlsSizer(),
+    def __init__(self, shape, canvas, *args, **kwargs):
+        self.shape = shape
+        self.canvas = canvas
+        wx.Frame.__init__(self, *args, **kwargs)
+        self.panel = wx.Panel(self, -1)
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.mainSizer.Add(
+                self.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
-        this.set_default_size((438, 312))
-        this.panel.SetAutoLayout(True)
-        this.panel.SetSizer(this.mainSizer)
-        this.Show(True)
-        this.panel.Layout()
+        self.set_default_size((438, 312))
+        self.panel.SetAutoLayout(True)
+        self.panel.SetSizer(self.mainSizer)
+        self.Show(True)
+        self.panel.Layout()
 
-    def createControlsSizer(this):
-        this.sideScale = 100
-        this.topScale  = 100
-        this.tailScale = 100
+    def createControlsSizer(self):
+        self.sideScale = 100
+        self.topScale  = 100
+        self.tailScale = 100
 
-        this.shape.setViewSettings(showHepta = False, showKite  = True)
+        self.shape.setViewSettings(showHepta = False, showKite  = True)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
-        this.kiteSideAdjust = wx.Slider(
-                this.panel,
-                value = this.shape.side * this.sideScale,
-                minValue = this.shape.sideMin * this.sideScale,
-                maxValue = this.shape.sideMax * this.sideScale,
+        self.kiteSideAdjust = wx.Slider(
+                self.panel,
+                value = self.shape.side * self.sideScale,
+                minValue = self.shape.sideMin * self.sideScale,
+                maxValue = self.shape.sideMax * self.sideScale,
                 style = wx.SL_HORIZONTAL
             )
-        this.panel.Bind(wx.EVT_SLIDER, this.onSideAdjust, id = this.kiteSideAdjust.GetId())
-        this.kiteSideBox = wx.StaticBox(this.panel, label = 'Kite Side')
-        this.kiteSideSizer = wx.StaticBoxSizer(this.kiteSideBox, wx.HORIZONTAL)
-        this.kiteSideSizer.Add(this.kiteSideAdjust, 1, wx.EXPAND)
+        self.panel.Bind(wx.EVT_SLIDER, self.onSideAdjust, id = self.kiteSideAdjust.GetId())
+        self.kiteSideBox = wx.StaticBox(self.panel, label = 'Kite Side')
+        self.kiteSideSizer = wx.StaticBoxSizer(self.kiteSideBox, wx.HORIZONTAL)
+        self.kiteSideSizer.Add(self.kiteSideAdjust, 1, wx.EXPAND)
 
-        this.kiteTopAdjust = wx.Slider(
-                this.panel,
-                value = this.shape.top * this.sideScale,
-                maxValue = this.shape.topMax * this.topScale,
-                minValue = this.shape.topMin * this.topScale,
+        self.kiteTopAdjust = wx.Slider(
+                self.panel,
+                value = self.shape.top * self.sideScale,
+                maxValue = self.shape.topMax * self.topScale,
+                minValue = self.shape.topMin * self.topScale,
                 style = wx.SL_VERTICAL
             )
-        this.topRange = (this.shape.topMax - this.shape.topMin) * this.topScale
-        this.panel.Bind(wx.EVT_SLIDER, this.onTopAdjust, id = this.kiteTopAdjust.GetId())
-        this.kiteTopBox = wx.StaticBox(this.panel, label = 'Kite Top')
-        this.kiteTopSizer = wx.StaticBoxSizer(this.kiteTopBox, wx.VERTICAL)
-        this.kiteTopSizer.Add(this.kiteTopAdjust, 1, wx.EXPAND)
-        this.kiteTailAdjust = wx.Slider(
-                this.panel,
-                value = this.shape.tail * this.sideScale,
-                minValue = this.shape.tailMin * this.tailScale,
-                maxValue = this.shape.tailMax * this.tailScale,
+        self.topRange = (self.shape.topMax - self.shape.topMin) * self.topScale
+        self.panel.Bind(wx.EVT_SLIDER, self.onTopAdjust, id = self.kiteTopAdjust.GetId())
+        self.kiteTopBox = wx.StaticBox(self.panel, label = 'Kite Top')
+        self.kiteTopSizer = wx.StaticBoxSizer(self.kiteTopBox, wx.VERTICAL)
+        self.kiteTopSizer.Add(self.kiteTopAdjust, 1, wx.EXPAND)
+        self.kiteTailAdjust = wx.Slider(
+                self.panel,
+                value = self.shape.tail * self.sideScale,
+                minValue = self.shape.tailMin * self.tailScale,
+                maxValue = self.shape.tailMax * self.tailScale,
                 style = wx.SL_VERTICAL
             )
-        this.panel.Bind(wx.EVT_SLIDER, this.onTailAdjust, id = this.kiteTailAdjust.GetId())
-        this.kiteTailBox = wx.StaticBox(this.panel, label = 'Kite Tail')
-        this.kiteTailSizer = wx.StaticBoxSizer(this.kiteTailBox, wx.VERTICAL)
-        this.kiteTailSizer.Add(this.kiteTailAdjust, 1, wx.EXPAND)
+        self.panel.Bind(wx.EVT_SLIDER, self.onTailAdjust, id = self.kiteTailAdjust.GetId())
+        self.kiteTailBox = wx.StaticBox(self.panel, label = 'Kite Tail')
+        self.kiteTailSizer = wx.StaticBoxSizer(self.kiteTailBox, wx.VERTICAL)
+        self.kiteTailSizer.Add(self.kiteTailAdjust, 1, wx.EXPAND)
 
         # GUI for predefined positions
-        this.prePosLst = [
+        self.prePosLst = [
                 'None',
                 'Concave I',
                 'Concave II',
                 'Regular'
             ]
-        this.prePosSelect = wx.RadioBox(this.panel,
+        self.prePosSelect = wx.RadioBox(self.panel,
                 label = 'Predefined Positions',
                 style = wx.RA_VERTICAL,
-                choices = this.prePosLst
+                choices = self.prePosLst
             )
-        this.setNoPrePos()
-        this.panel.Bind(wx.EVT_RADIOBOX, this.onPrePos) #, id = this.prePosSelect.GetId())
+        self.setNoPrePos()
+        self.panel.Bind(wx.EVT_RADIOBOX, self.onPrePos) #, id = self.prePosSelect.GetId())
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        this.showKiteChk = wx.CheckBox(this.panel, label = 'Show Kite')
-        this.showKiteChk.SetValue(this.shape.showKite)
-        this.showHeptaChk = wx.CheckBox(this.panel, label = 'Show Heptagon')
-        this.showHeptaChk.SetValue(this.shape.showHepta)
-        this.panel.Bind(wx.EVT_CHECKBOX, this.onViewSettingsChk)
-        this.viewSettingsBox = wx.StaticBox(this.panel, label = 'View Settings')
-        this.viewSettingsSizer = wx.StaticBoxSizer(this.viewSettingsBox, wx.VERTICAL)
+        self.showKiteChk = wx.CheckBox(self.panel, label = 'Show Kite')
+        self.showKiteChk.SetValue(self.shape.showKite)
+        self.showHeptaChk = wx.CheckBox(self.panel, label = 'Show Heptagon')
+        self.showHeptaChk.SetValue(self.shape.showHepta)
+        self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
+        self.viewSettingsBox = wx.StaticBox(self.panel, label = 'View Settings')
+        self.viewSettingsSizer = wx.StaticBoxSizer(self.viewSettingsBox, wx.VERTICAL)
 
-        this.viewSettingsSizer.Add(this.showKiteChk, 1, wx.EXPAND)
-        this.viewSettingsSizer.Add(this.showHeptaChk, 1, wx.EXPAND)
+        self.viewSettingsSizer.Add(self.showKiteChk, 1, wx.EXPAND)
+        self.viewSettingsSizer.Add(self.showHeptaChk, 1, wx.EXPAND)
 
-        this.rowSubSizer = wx.BoxSizer(wx.VERTICAL)
-        this.rowSubSizer.Add(this.prePosSelect, 1, wx.EXPAND)
-        this.rowSubSizer.Add(this.viewSettingsSizer, 1, wx.EXPAND)
+        self.rowSubSizer = wx.BoxSizer(wx.VERTICAL)
+        self.rowSubSizer.Add(self.prePosSelect, 1, wx.EXPAND)
+        self.rowSubSizer.Add(self.viewSettingsSizer, 1, wx.EXPAND)
 
-        this.columnSubSizer = wx.BoxSizer(wx.HORIZONTAL)
-        this.columnSubSizer.Add(this.kiteTopSizer, 1, wx.EXPAND)
-        this.columnSubSizer.Add(this.kiteTailSizer, 1, wx.EXPAND)
-        this.columnSubSizer.Add(this.rowSubSizer, 2, wx.EXPAND)
+        self.columnSubSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.columnSubSizer.Add(self.kiteTopSizer, 1, wx.EXPAND)
+        self.columnSubSizer.Add(self.kiteTailSizer, 1, wx.EXPAND)
+        self.columnSubSizer.Add(self.rowSubSizer, 2, wx.EXPAND)
 
-        mainSizer.Add(this.kiteSideSizer, 2, wx.EXPAND)
-        mainSizer.Add(this.columnSubSizer, 10, wx.EXPAND)
+        mainSizer.Add(self.kiteSideSizer, 2, wx.EXPAND)
+        mainSizer.Add(self.columnSubSizer, 10, wx.EXPAND)
 
         return mainSizer
 
-    def setNoPrePos(this):
-        sel = this.prePosSelect.SetSelection(0)
-        this.prePosSelected = False
+    def setNoPrePos(self):
+        sel = self.prePosSelect.SetSelection(0)
+        self.pre_pos_selected = False
 
-    def onSideAdjust(this, event):
-        this.setNoPrePos()
-        this.shape.setSide(float(this.kiteSideAdjust.GetValue()) / this.sideScale)
-        this.canvas.paint()
+    def onSideAdjust(self, event):
+        self.setNoPrePos()
+        self.shape.setSide(float(self.kiteSideAdjust.GetValue()) / self.sideScale)
+        self.canvas.paint()
         try:
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
+            self.statusBar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
         event.Skip()
 
-    def onTopAdjust(this, event):
-        this.setNoPrePos()
-        this.shape.setTop(float(this.topRange - this.kiteTopAdjust.GetValue()) / this.topScale)
-        this.canvas.paint()
+    def onTopAdjust(self, event):
+        self.setNoPrePos()
+        self.shape.setTop(float(self.topRange - self.kiteTopAdjust.GetValue()) / self.topScale)
+        self.canvas.paint()
         try:
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
+            self.statusBar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
         event.Skip()
 
-    def onTailAdjust(this, event):
-        this.setNoPrePos()
-        this.shape.setTail(float(this.kiteTailAdjust.GetValue()) / this.tailScale)
-        this.canvas.paint()
+    def onTailAdjust(self, event):
+        self.setNoPrePos()
+        self.shape.setTail(float(self.kiteTailAdjust.GetValue()) / self.tailScale)
+        self.canvas.paint()
         try:
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
+            self.statusBar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
         event.Skip()
 
-    def onPrePos(this, event = None):
-        sel = this.prePosSelect.GetSelection()
+    def onPrePos(self, event = None):
+        sel = self.prePosSelect.GetSelection()
         # if switching from 'None' to a predefined position:
-        if not this.prePosSelected and (sel != 0):
-            this.topSav = this.shape.top
-            this.tailSav = this.shape.tail
-            this.sideSav = this.shape.side
-            this.prePosSelected = True
+        if not self.pre_pos_selected and (sel != 0):
+            self.topSav = self.shape.top
+            self.tailSav = self.shape.tail
+            self.sideSav = self.shape.side
+            self.pre_pos_selected = True
         # TODO: id user selects prepos and then starts sliding, then the
         # selection should become None again.
-        selStr = this.prePosLst[sel]
+        selStr = self.prePosLst[sel]
         if selStr == 'None':
-            top  = this.topSav
-            tail = this.tailSav
-            side = this.sideSav
-            this.prePosSelected = False
+            top  = self.topSav
+            tail = self.tailSav
+            side = self.sideSav
+            self.pre_pos_selected = False
         elif selStr == 'Concave I':
             top  =  0.25
             tail = 10.0
@@ -402,39 +403,39 @@ class CtrlWin(wx.Frame):
             top  = 0.1
             tail = 0.1
             side = 0.1
-        this.shape.setKite(top, tail, side)
-        this.canvas.paint()
-        this.kiteTopAdjust.SetValue(this.topRange - top * this.topScale)
-        this.kiteTailAdjust.SetValue(tail * this.tailScale)
-        this.kiteSideAdjust.SetValue(side * this.sideScale)
+        self.shape.setKite(top, tail, side)
+        self.canvas.paint()
+        self.kiteTopAdjust.SetValue(self.topRange - top * self.topScale)
+        self.kiteTailAdjust.SetValue(tail * self.tailScale)
+        self.kiteSideAdjust.SetValue(side * self.sideScale)
         try:
-            this.statusBar.SetStatusText(this.shape.getStatusStr())
+            self.statusBar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
 
-    def onViewSettingsChk(this, event):
-        showKite      = this.showKiteChk.IsChecked()
-        showHepta     = this.showHeptaChk.IsChecked()
-        this.shape.setViewSettings(
+    def on_view_settings_chk(self, event):
+        showKite = self.showKiteChk.IsChecked()
+        showHepta = self.showHeptaChk.IsChecked()
+        self.shape.setViewSettings(
                 showKite      = showKite,
                 showHepta     = showHepta
             )
-        this.canvas.paint()
+        self.canvas.paint()
 
     # move to general class
-    def set_default_size(this, size):
-        this.SetMinSize(size)
+    def set_default_size(self, size):
+        self.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
-        this.SetSize(size)
+        self.SetSize(size)
 
 class Scene():
-    def __init__(this, parent, canvas):
-        this.shape = Shape()
-        this.ctrlWin = CtrlWin(this.shape, canvas, parent, wx.ID_ANY, TITLE)
+    def __init__(self, parent, canvas):
+        self.shape = Shape()
+        self.ctrlWin = CtrlWin(self.shape, canvas, parent, wx.ID_ANY, TITLE)
 
-    def close(this):
+    def close(self):
         try:
-            this.ctrlWin.Close(True)
+            self.ctrlWin.Close(True)
         except RuntimeError:
             # The user probably closed the window already
             pass

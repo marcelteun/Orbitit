@@ -286,7 +286,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             *args, **kwargs
         )
 
-    def addSpecialPositions(this, parentFrame, parentSizer):
+    def add_specials(this, parentFrame, parentSizer):
         labelLst = []
         for i in range(len(this.specialSolidAngles)):
             labelLst.append(this.specialSolidAngles[i]['s'])
@@ -350,7 +350,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         this.showHeptaChk.SetValue(True)
         this.showXtraChk.SetValue(False)
         this.altHeptPosChk.SetValue(False)
-        this.onViewSettingsChk(this)
+        this.on_view_settings_chk(this)
         if index != 0:
             if this.prefHeptSpecPosGui.GetSelection() != 0:
                 this.prefHeptSpecPosGui.SetSelection(0)
@@ -379,7 +379,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             this.triangleAltChk.SetValue(angleData['t'])
         if 'e' in angleData:
             this.addXtraEdgeChk.SetValue(angleData['e'])
-        this.onViewSettingsChk(this)
+        this.on_view_settings_chk(this)
         if index != 0:
             if this.specialSolidPosGui.GetSelection() != 0:
                 this.specialSolidPosGui.SetSelection(0)
@@ -408,7 +408,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             this.triangleAltChk.SetValue(angleData['t'])
         if 'e' in angleData:
             this.addXtraEdgeChk.SetValue(angleData['e'])
-        this.onViewSettingsChk(this)
+        this.on_view_settings_chk(this)
         if index != 0:
             if this.specialSolidPosGui.GetSelection() != 0:
                 this.specialSolidPosGui.SetSelection(0)
