@@ -285,9 +285,9 @@ class ViewSettingsWindow(wx.Frame):
     """Class for window with all view settings"""
     def __init__(self, canvas, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
-        self.canvas    = canvas
+        self.canvas = canvas
         self.status_bar = self.CreateStatusBar()
-        self.panel     = wx.Panel(self, wx.ID_ANY)
+        self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_contents()
 
     def add_contents(self):
@@ -324,10 +324,10 @@ class ViewSettingsWindow(wx.Frame):
 class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attributes
     """A sizer with all view settings for the view settings window"""
 
-    cull_show_none  = 'Hide'
-    cull_show_both  = 'Show Front and Back Faces'
+    cull_show_none = 'Hide'
+    cull_show_both = 'Show Front and Back Faces'
     cull_show_front = 'Show Only Front Face'
-    cull_show_back  = 'Show Only Back Face'
+    cull_show_back = 'Show Only Back Face'
 
     # pylint: disable=too-many-branches, too-many-statements, too-many-locals
     def __init__(self, parent_win, parent_panel, canvas, *args, **kwargs):
@@ -353,15 +353,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.v_r = v_props['radius']
         self.v_opts_lst = ['hide', 'show']
         if self.v_r > 0:
-            default = 1 # key(1) = 'show'
+            default = 1  # key(1) = 'show'
         else:
-            default = 0 # key(0) = 'hide'
-        self.v_opts_gui  = wx.RadioBox(self.parent_panel,
-            label = 'Vertex Options',
-            style = wx.RA_VERTICAL,
-            choices = self.v_opts_lst
+            default = 0  # key(0) = 'hide'
+        self.v_opts_gui = wx.RadioBox(
+            self.parent_panel,
+            label='Vertex Options',
+            style=wx.RA_VERTICAL,
+            choices=self.v_opts_lst,
         )
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_v_option, id = self.v_opts_gui.GetId())
+        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_v_option, id=self.v_opts_gui.GetId())
         self.v_opts_gui.SetSelection(default)
         # Vertex Radius
         no_of_slider_steps = 40
@@ -371,15 +372,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         s = (self.v_r_max - self.v_r_min) * self.v_r_scale
         if int(s) < no_of_slider_steps:
             self.v_r_scale = (self.v_r_scale * no_of_slider_steps) / s
-        self.v_r_gui = wx.Slider(self.parent_panel,
-            value = self.v_r_scale * self.v_r,
-            minValue = self.v_r_scale * self.v_r_min,
-            maxValue = self.v_r_scale * self.v_r_max,
-            style = wx.SL_HORIZONTAL
+        self.v_r_gui = wx.Slider(
+            self.parent_panel,
+            value=self.v_r_scale * self.v_r,
+            minValue=self.v_r_scale * self.v_r_min,
+            maxValue=self.v_r_scale * self.v_r_max,
+            style=wx.SL_HORIZONTAL,
         )
         self.guis.append(self.v_r_gui)
-        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_v_radius, id = self.v_r_gui.GetId())
-        self.boxes.append(wx.StaticBox(self.parent_panel, label = 'Vertex radius'))
+        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_v_radius, id=self.v_r_gui.GetId())
+        self.boxes.append(wx.StaticBox(self.parent_panel, label='Vertex radius'))
         v_r_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
         # disable if vertices are hidden anyway:
         if default != 1:
@@ -387,7 +389,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         # Vertex Colour
         self.v_col_gui = wx.Button(self.parent_panel, wx.ID_ANY, "Colour")
         self.guis.append(self.v_col_gui)
-        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_v_col, id = self.v_col_gui.GetId())
+        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_v_col, id=self.v_col_gui.GetId())
         # Show / hide edges
         e_props = canvas.shape.getEdgeProperties()
         self.e_r = e_props['radius']
@@ -398,14 +400,15 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             else:
                 default = 2 # key(2) = 'as lines'
         else:
-            default     = 0 # key(0) = 'hide'
-        self.e_opts_gui = wx.RadioBox(self.parent_panel,
-            label = 'Edge Options',
-            style = wx.RA_VERTICAL,
-            choices = self.e_opts_lst
+            default = 0 # key(0) = 'hide'
+        self.e_opts_gui = wx.RadioBox(
+            self.parent_panel,
+            label='Edge Options',
+            style=wx.RA_VERTICAL,
+            choices=self.e_opts_lst,
         )
         self.guis.append(self.e_opts_gui)
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_e_option, id = self.e_opts_gui.GetId())
+        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_e_option, id=self.e_opts_gui.GetId())
         self.e_opts_gui.SetSelection(default)
         # Edge Radius
         no_of_slider_steps = 40
@@ -415,15 +418,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         s = (self.e_r_max - self.e_r_min) * self.e_r_scale
         if int(s) < no_of_slider_steps:
             self.e_r_scale = (self.e_r_scale * no_of_slider_steps) / s
-        self.e_r_gui = wx.Slider(self.parent_panel,
-            value = self.e_r_scale * self.e_r,
-            minValue = self.e_r_scale * self.e_r_min,
-            maxValue = self.e_r_scale * self.e_r_max,
-            style = wx.SL_HORIZONTAL
+        self.e_r_gui = wx.Slider(
+            self.parent_panel,
+            value=self.e_r_scale * self.e_r,
+            minValue=self.e_r_scale * self.e_r_min,
+            maxValue=self.e_r_scale * self.e_r_max,
+            style=wx.SL_HORIZONTAL,
         )
         self.guis.append(self.e_r_gui)
-        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_e_radius, id = self.e_r_gui.GetId())
-        self.boxes.append(wx.StaticBox(self.parent_panel, label = 'Edge radius'))
+        self.parent_panel.Bind(wx.EVT_SLIDER, self.on_e_radius, id=self.e_r_gui.GetId())
+        self.boxes.append(wx.StaticBox(self.parent_panel, label='Edge radius'))
         e_r_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
         # disable if edges are not drawn as scalable items anyway:
         if default != 1:
@@ -431,7 +435,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         # Edge Colour
         self.e_col_gui = wx.Button(self.parent_panel, wx.ID_ANY, "Colour")
         self.guis.append(self.e_col_gui)
-        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_e_col, id = self.e_col_gui.GetId())
+        self.parent_panel.Bind(wx.EVT_BUTTON, self.on_e_col, id=self.e_col_gui.GetId())
         # Show / hide face
         self.f_opts_lst = [
             self.cull_show_both,
@@ -439,13 +443,14 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.cull_show_back,
             self.cull_show_none,
         ]
-        self.f_opts_gui = wx.RadioBox(self.parent_panel,
-            label = 'Face Options',
-            style = wx.RA_VERTICAL,
-            choices = self.f_opts_lst
+        self.f_opts_gui = wx.RadioBox(
+            self.parent_panel,
+            label='Face Options',
+            style=wx.RA_VERTICAL,
+            choices=self.f_opts_lst,
         )
         self.guis.append(self.f_opts_gui)
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_f_option, id = self.f_opts_gui.GetId())
+        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_f_option, id=self.f_opts_gui.GetId())
         f_sizer = wx.BoxSizer(wx.HORIZONTAL)
         f_sizer.Add(self.f_opts_gui, 1, wx.EXPAND)
         if not GL.glIsEnabled(GL.GL_CULL_FACE):
@@ -461,27 +466,29 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 self.f_opts_gui.SetStringSelection(self.cull_show_none)
 
         # Open GL
-        self.boxes.append(wx.StaticBox(self.parent_panel,
-                                                label = 'OpenGL Settings'))
+        self.boxes.append(wx.StaticBox(self.parent_panel, label='OpenGL Settings'))
         back_front_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
         self.guis.append(
-            wx.CheckBox(self.parent_panel,
-                                label = 'Switch Front and Back Face (F3)')
+            wx.CheckBox(self.parent_panel, label='Switch Front and Back Face (F3)'),
         )
         self.front_back_gui = self.guis[-1]
         self.front_back_gui.SetValue(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
-        self.parent_panel.Bind(wx.EVT_CHECKBOX, self.on_front_back,
-                                        id = self.front_back_gui.GetId())
+        self.parent_panel.Bind(
+            wx.EVT_CHECKBOX,
+            self.on_front_back,
+            id=self.front_back_gui.GetId(),
+        )
         # background Colour
         col_txt = wx.StaticText(self.parent_panel, -1, "Background Colour: ")
         self.guis.append(col_txt)
         col = self.canvas.bg_col
-        self.bg_col_gui = wx.lib.colourselect.ColourSelect(self.parent_panel,
-            wx.ID_ANY, colour = (col[0]*255, col[1]*255, col[2]*255),
-            size=wx.Size(40, 30))
+        self.bg_col_gui = wx.lib.colourselect.ColourSelect(
+            self.parent_panel,
+            wx.ID_ANY, colour=(col[0]*255, col[1]*255, col[2]*255),
+            size=wx.Size(40, 30),
+        )
         self.guis.append(self.bg_col_gui)
-        self.parent_panel.Bind(wx.lib.colourselect.EVT_COLOURSELECT,
-            self.on_bg_col)
+        self.parent_panel.Bind(wx.lib.colourselect.EVT_COLOURSELECT, self.on_bg_col)
 
         # Sizers
         v_r_sizer.Add(self.v_r_gui, 1, wx.EXPAND | wx.TOP | wx.LEFT)
@@ -511,28 +518,31 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             default = 0
             self.use_transparency_gui = wx.RadioBox(
                 self.parent_panel,
-                label = 'Use Transparency',
-                style = wx.RA_VERTICAL,
-                choices = ['Yes', 'No']
+                label='Use Transparency',
+                style=wx.RA_VERTICAL,
+                choices=['Yes', 'No'],
             )
             self.guis.append(self.use_transparency_gui)
             self.parent_panel.Bind(
                 wx.EVT_RADIOBOX,
                 self.on_use_transparent,
-                id = self.use_transparency_gui.GetId(),
+                id=self.use_transparency_gui.GetId(),
             )
             self.use_transparency_gui.SetSelection(default)
             f_sizer.Add(self.use_transparency_gui, 1, wx.EXPAND)
 
             default = 0
-            self.show_es_unscaled_gui = wx.RadioBox(self.parent_panel,
-                label = 'Unscaled Edges',
-                style = wx.RA_VERTICAL,
-                choices = ['Show', 'Hide']
+            self.show_es_unscaled_gui = wx.RadioBox(
+                self.parent_panel,
+                label='Unscaled Edges',
+                style=wx.RA_VERTICAL,
+                choices=['Show', 'Hide'],
             )
             self.guis.append(self.show_es_unscaled_gui)
-            self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_show_unscaled_es, id =
-            self.show_es_unscaled_gui.GetId())
+            self.parent_panel.Bind(
+                wx.EVT_RADIOBOX, self.on_show_unscaled_es,
+                id=self.show_es_unscaled_gui.GetId(),
+            )
             self.show_es_unscaled_gui.SetSelection(default)
             f_sizer.Add(self.show_es_unscaled_gui, 1, wx.EXPAND)
 
@@ -543,16 +553,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.cell_scale_offset = min_val
             self.scale_gui = wx.Slider(
                 self.parent_panel,
-                value = 100,
-                minValue = 0,
-                maxValue = steps,
-                style = wx.SL_HORIZONTAL,
+                value=100,
+                minValue=0,
+                maxValue=steps,
+                style=wx.SL_HORIZONTAL,
             )
             self.guis.append(self.scale_gui)
             self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.on_scale, id = self.scale_gui.GetId()
+                wx.EVT_SLIDER, self.on_scale, id=self.scale_gui.GetId()
             )
-            self.boxes.append(wx.StaticBox(self.parent_panel, label = 'Scale Cells'))
+            self.boxes.append(wx.StaticBox(self.parent_panel, label='Scale Cells'))
             scale_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             scale_sizer.Add(self.scale_gui, 1, wx.EXPAND)
 
@@ -563,22 +573,22 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.prj_vol_factor = float(max_val - min_val) / steps
             self.prj_vol_offset = min_val
             self.prj_vol_gui = wx.Slider(
-                    self.parent_panel,
-                    value = self.val_2_slider(
-                            self.prj_vol_factor,
-                            self.prj_vol_offset,
-                            self.canvas.shape.w_prj_vol
-                        ),
-                    minValue = 0,
-                    maxValue = steps,
-                    style = wx.SL_HORIZONTAL
-                )
+                self.parent_panel,
+                value=self.val_2_slider(
+                    self.prj_vol_factor,
+                    self.prj_vol_offset,
+                    self.canvas.shape.w_prj_vol,
+                ),
+                minValue=0,
+                maxValue=steps,
+                style=wx.SL_HORIZONTAL,
+            )
             self.guis.append(self.prj_vol_gui)
             self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.on_prj_vol_adjust, id = self.prj_vol_gui.GetId()
+                wx.EVT_SLIDER, self.on_prj_vol_adjust, id=self.prj_vol_gui.GetId()
             )
             self.boxes.append(
-                wx.StaticBox(self.parent_panel, label = 'Projection Volume W-Coordinate')
+                wx.StaticBox(self.parent_panel, label='Projection Volume W-Coordinate')
             )
             prj_vol_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             prj_vol_sizer.Add(self.prj_vol_gui, 1, wx.EXPAND)
@@ -588,58 +598,58 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.cam_dist_offset = min_val
             self.cam_dist_gui = wx.Slider(
                 self.parent_panel,
-                value = self.val_2_slider(
+                value=self.val_2_slider(
                     self.cam_dist_factor,
                     self.cam_dist_offset,
                     self.canvas.shape.wCameraDistance,
                 ),
-                minValue = 0,
-                maxValue = steps,
-                style = wx.SL_HORIZONTAL,
+                minValue=0,
+                maxValue=steps,
+                style=wx.SL_HORIZONTAL,
             )
             self.guis.append(self.cam_dist_gui)
             self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.on_prj_vol_adjust, id = self.cam_dist_gui.GetId()
+                wx.EVT_SLIDER, self.on_prj_vol_adjust, id=self.cam_dist_gui.GetId()
             )
             self.boxes.append(
-                wx.StaticBox(self.parent_panel, label = 'Camera Distance (from projection volume)')
+                wx.StaticBox(self.parent_panel, label='Camera Distance (from projection volume)')
             )
             cam_dist_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             cam_dist_sizer.Add(self.cam_dist_gui, 1, wx.EXPAND)
 
             # Create a ctrl for specifying a 4D rotation
-            self.boxes.append(wx.StaticBox(parent_panel, label = 'Rotate 4D Object'))
+            self.boxes.append(wx.StaticBox(parent_panel, label='Rotate 4D Object'))
             rotation_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
-            self.boxes.append(wx.StaticBox(parent_panel, label = 'In a Plane Spanned by'))
+            self.boxes.append(wx.StaticBox(parent_panel, label='In a Plane Spanned by'))
             plane_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
             self.v0_gui = geom_gui.Vector4DInput(
-                    self.parent_panel,
-                    #label = 'Vector 1',
-                    rel_float_size = 4,
-                    elem_labels = ['x0', 'y0', 'z0', 'w0']
-                )
+                self.parent_panel,
+                #label='Vector 1',
+                rel_float_size=4,
+                elem_labels=['x0', 'y0', 'z0', 'w0']
+            )
             self.parent_panel.Bind(
-                geom_gui.EVT_VECTOR_UPDATED, self.rotate, id = self.v0_gui.GetId()
+                geom_gui.EVT_VECTOR_UPDATED, self.rotate, id=self.v0_gui.GetId()
             )
             self.v1_gui = geom_gui.Vector4DInput(
-                    self.parent_panel,
-                    #label = 'Vector 1',
-                    rel_float_size = 4,
-                    elem_labels = ['x1', 'y1', 'z1', 'w1']
-                )
+                self.parent_panel,
+                #label='Vector 1',
+                rel_float_size=4,
+                elem_labels=['x1', 'y1', 'z1', 'w1']
+            )
             self.parent_panel.Bind(
-                geom_gui.EVT_VECTOR_UPDATED, self.rotate, id = self.v1_gui.GetId()
+                geom_gui.EVT_VECTOR_UPDATED, self.rotate, id=self.v1_gui.GetId()
             )
             # Exchange planes
             self.switch_planes_gui = wx.CheckBox(
                 self.parent_panel,
-                label = "Use Orthogonal Plane instead",
+                label="Use Orthogonal Plane instead",
             )
             self.switch_planes_gui.SetValue(False)
             self.parent_panel.Bind(
                 wx.EVT_CHECKBOX,
                 self.rotate,
-                id = self.switch_planes_gui.GetId(),
+                id=self.switch_planes_gui.GetId(),
             )
             #self.boxes.append?
             self.guis.append(self.v0_gui)
@@ -656,17 +666,15 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.angle_factor = float(max_val - min_val) / steps
             self.angle_offset = min_val
             self.angle_gui = wx.Slider(
-                    self.parent_panel,
-                    value = 0,
-                    minValue = 0,
-                    maxValue = steps,
-                    style = wx.SL_HORIZONTAL
-                )
-            self.guis.append(self.angle_gui)
-            self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.rotate, id = self.angle_gui.GetId()
+                self.parent_panel,
+                value=0,
+                minValue=0,
+                maxValue=steps,
+                style=wx.SL_HORIZONTAL
             )
-            self.boxes.append(wx.StaticBox(self.parent_panel, label = 'Using Angle'))
+            self.guis.append(self.angle_gui)
+            self.parent_panel.Bind(wx.EVT_SLIDER, self.rotate, id=self.angle_gui.GetId())
+            self.boxes.append(wx.StaticBox(self.parent_panel, label='Using Angle'))
             angle_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             angle_sizer.Add(self.angle_gui, 1, wx.EXPAND)
 
@@ -676,20 +684,20 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.angle_scale_factor = float(max_val - min_val) / steps
             self.angle_scale_offset = min_val
             self.angle_scale_gui = wx.Slider(
-                    self.parent_panel,
-                    value = 0,
-                    minValue = 0,
-                    maxValue = steps,
-                    style = wx.SL_HORIZONTAL
-                )
+                self.parent_panel,
+                value=0,
+                minValue=0,
+                maxValue=steps,
+                style=wx.SL_HORIZONTAL
+            )
             self.guis.append(self.angle_scale_gui)
             self.parent_panel.Bind(
-                wx.EVT_SLIDER, self.rotate, id = self.angle_scale_gui.GetId()
+                wx.EVT_SLIDER, self.rotate, id=self.angle_scale_gui.GetId()
             )
             self.boxes.append(
                 wx.StaticBox(
                     self.parent_panel,
-                    label = 'Set Angle (by Scale) of Rotation in the Orthogonal Plane',
+                    label='Set Angle (by Scale) of Rotation in the Orthogonal Plane',
                 )
             )
             angle_scale_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
@@ -738,16 +746,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.v_opts_lst[sel]
         if sel_str == 'show':
             self.v_r_gui.Enable()
-            self.canvas.shape.setVertexProperties(radius = self.v_r)
+            self.canvas.shape.setVertexProperties(radius=self.v_r)
         elif sel_str == 'hide':
             self.v_r_gui.Disable()
-            self.canvas.shape.setVertexProperties(radius = -1.0)
+            self.canvas.shape.setVertexProperties(radius=-1.0)
         self.canvas.paint()
 
     def on_v_radius(self, _):
         """Handle event '_' to set vertex radius as according to settings"""
         self.v_r = (float(self.v_r_gui.GetValue()) / self.v_r_scale)
-        self.canvas.shape.setVertexProperties(radius = self.v_r)
+        self.canvas.shape.setVertexProperties(radius=self.v_r)
         self.canvas.paint()
         self.set_status_text()
 
@@ -757,10 +765,8 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetColourData()
             rgba = data.GetColour()
-            rgb  = rgba.Get()
-            self.canvas.shape.setVertexProperties(
-                color = [float(i)/255 for i in rgb]
-            )
+            rgb = rgba.Get()
+            self.canvas.shape.setVertexProperties(color=[float(i)/255 for i in rgb])
             self.canvas.paint()
         dlg.Destroy()
 
@@ -770,21 +776,21 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.e_opts_lst[sel]
         if sel_str == 'hide':
             self.e_r_gui.Disable()
-            self.canvas.shape.setEdgeProperties(drawEdges = False)
+            self.canvas.shape.setEdgeProperties(drawEdges=False)
         elif sel_str == 'as cylinders':
             self.e_r_gui.Enable()
-            self.canvas.shape.setEdgeProperties(drawEdges = True)
-            self.canvas.shape.setEdgeProperties(radius = self.e_r)
+            self.canvas.shape.setEdgeProperties(drawEdges=True)
+            self.canvas.shape.setEdgeProperties(radius=self.e_r)
         elif sel_str == 'as lines':
             self.e_r_gui.Disable()
-            self.canvas.shape.setEdgeProperties(drawEdges = True)
-            self.canvas.shape.setEdgeProperties(radius = 0)
+            self.canvas.shape.setEdgeProperties(drawEdges=True)
+            self.canvas.shape.setEdgeProperties(radius=0)
         self.canvas.paint()
 
     def on_e_radius(self, _):
         """Handle event '_' to set edge radius as according to settings"""
         self.e_r = (float(self.e_r_gui.GetValue()) / self.e_r_scale)
-        self.canvas.shape.setEdgeProperties(radius = self.e_r)
+        self.canvas.shape.setEdgeProperties(radius=self.e_r)
         self.canvas.paint()
         self.set_status_text()
 
@@ -794,10 +800,8 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetColourData()
             rgba = data.GetColour()
-            rgb  = rgba.Get()
-            self.canvas.shape.setEdgeProperties(
-                color = [float(i)/255 for i in rgb]
-            )
+            rgb = rgba.Get()
+            self.canvas.shape.setEdgeProperties(color=[float(i)/255 for i in rgb])
             self.canvas.paint()
         dlg.Destroy()
 
@@ -807,13 +811,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
-        self.canvas.shape.setFaceProperties(drawFaces = True)
+        self.canvas.shape.setFaceProperties(drawFaces=True)
         if sel == self.cull_show_both:
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_none:
             # don't use culling here: doesn't work with edge radius and vertext
             # radius > 0
-            self.canvas.shape.setFaceProperties(drawFaces = False)
+            self.canvas.shape.setFaceProperties(drawFaces=False)
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_front:
             GL.glCullFace(GL.GL_FRONT)
@@ -842,7 +846,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
     def on_show_unscaled_es(self, _):
         """Handle event '_' to show or hide unscaled edges of polychoron"""
         self.canvas.shape.setEdgeProperties(
-            showUnscaled = (self.show_es_unscaled_gui.GetSelection() == 0)
+            showUnscaled=(self.show_es_unscaled_gui.GetSelection() == 0),
         )
         self.canvas.paint()
 
@@ -859,25 +863,25 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
     def on_scale(self, _):
         """Handle event '_' to scale cells in polychoron from their centre"""
         scale = self.slider_to_val(
-                self.cell_scale_factor,
-                self.cell_scale_offset,
-                self.scale_gui.GetValue()
-            )
-        self.canvas.shape.setCellProperties(scale = scale)
+            self.cell_scale_factor,
+            self.cell_scale_offset,
+            self.scale_gui.GetValue(),
+        )
+        self.canvas.shape.setCellProperties(scale=scale)
         self.canvas.paint()
 
     def on_prj_vol_adjust(self, e):
         """Handle event 'e' to adjust projection of polychoron to 3D according to settings"""
         cam_dist = self.slider_to_val(
-                self.cam_dist_factor,
-                self.cam_dist_offset,
-                self.cam_dist_gui.GetValue()
-            )
+            self.cam_dist_factor,
+            self.cam_dist_offset,
+            self.cam_dist_gui.GetValue(),
+        )
         w_prj_vol = self.slider_to_val(
-                self.prj_vol_factor,
-                self.prj_vol_offset,
-                self.prj_vol_gui.GetValue()
-            )
+            self.prj_vol_factor,
+            self.prj_vol_offset,
+            self.prj_vol_gui.GetValue(),
+        )
         if (cam_dist > 0) and (w_prj_vol > 0):
             self.parent_win.set_status_text(
                 f"projection volume w = {w_prj_vol:0.2}; camera distance: {cam_dist:0.3}"
@@ -891,7 +895,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 self.parent_win.set_status_text(
                     'Error: Projection volume:  w should be > 0!'
                 )
-        self.canvas.shape.setProjectionProperties(cam_dist, w_prj_vol, dbg = True)
+        self.canvas.shape.setProjectionProperties(cam_dist, w_prj_vol, dbg=True)
         self.canvas.paint()
         e.Skip()
 
@@ -903,15 +907,15 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.parent_win.set_status_text("Please define two vectors spanning a plane")
             return
         angle = self.slider_to_val(
-                self.angle_factor,
-                self.angle_offset,
-                self.angle_gui.GetValue()
-            )
+            self.angle_factor,
+            self.angle_offset,
+            self.angle_gui.GetValue(),
+        )
         scale = self.slider_to_val(
-                self.angle_scale_factor,
-                self.angle_scale_offset,
-                self.angle_scale_gui.GetValue()
-            )
+            self.angle_scale_factor,
+            self.angle_scale_offset,
+            self.angle_scale_gui.GetValue(),
+        )
         if geomtypes.eq(angle, 0):
             return
         try:
@@ -919,17 +923,11 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             # if vectors are exchange, you actually specify the axial plane
             if self.switch_planes_gui.IsChecked():
                 if geomtypes.eq(scale, 0):
-                    r = geomtypes.Rot4(axialPlane = (v1, v0), angle = angle)
+                    r = geomtypes.Rot4(axialPlane=(v1, v0), angle=angle)
                 else:
-                    r = geomtypes.DoubleRot4(
-                            axialPlane = (v1, v0),
-                            angle = (angle, scale*angle)
-                        )
+                    r = geomtypes.DoubleRot4(axialPlane=(v1, v0), angle=(angle, scale*angle))
             else:
-                r = geomtypes.DoubleRot4(
-                    axialPlane = (v1, v0),
-                    angle = (scale*angle, angle),
-                )
+                r = geomtypes.DoubleRot4(axialPlane=(v1, v0), angle=(scale*angle, angle))
             self.canvas.shape.rotate(r)
             self.canvas.paint()
             deg = Geom3D.Rad2Deg * angle
