@@ -659,7 +659,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
             self.import_dir_name = dlg.GetDirectory()
-            logging.info(f"opening file: {filename}")
+            logging.info("opening file: %s", filename)
             filepath = os.path.join(self.import_dir_name, filename)
             if filename[-5:] == '.json':
                 shape = self.import_json(filepath)
@@ -668,7 +668,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                     shape = Geom3D.read_off_file(fd, regen_edges=False)
             verts = shape.Vs
             faces = shape.Fs
-            logging.info(f"read {len(verts)} Vs and {len(faces)} Fs.")
+            logging.info("read %d Vs and %d Fs.", len(verts), len(faces))
             self.show_gui[self._vs_gui_idx].set(verts)
             self.show_gui[self._fs_gui_idx].set(faces)
             self.name = filename

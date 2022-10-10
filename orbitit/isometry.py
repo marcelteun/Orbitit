@@ -242,9 +242,9 @@ class Set(set, base.Orbitit):
 
     def __init__(self, *args):
         try:
-            self._generator
+            self.generator
         except AttributeError:
-            self._generator = {}
+            self.generator = {}
         super().__init__(*args)
         self.short_string = True
 
@@ -267,8 +267,8 @@ class Set(set, base.Orbitit):
             "class": base.class_to_json[self.__class__],
             "data": {},
         }
-        if self._generator:
-            result["data"]["generator"] = self._generator
+        if self.generator:
+            result["data"]["generator"] = self.generator
         else:
             result["data"]["isometries"] = [e.repr_dict for e in self]
         return result
@@ -304,9 +304,9 @@ class Set(set, base.Orbitit):
             if __name__ != '__main__':
                 s = f'{__name__}.{s}'
             return s
-        if self._generator != {}:
+        if self.generator != {}:
             if self.short_string:
-                s = f'{self.__class__.__name__}(setup={self._generator})'
+                s = f'{self.__class__.__name__}(setup={self.generator})'
             else:
                 s = to_s()
         else:
@@ -510,7 +510,7 @@ class Set(set, base.Orbitit):
                 assert  k == 'n' and self.n, (
                     f'Unknown parameter {k} in setup = {str(setup)} for {self.__class__.__name__}'
                 )
-        self._generator = setup
+        self.generator = setup
 
     @classmethod
     def remove_init_par(cls, label):
@@ -530,7 +530,7 @@ class Set(set, base.Orbitit):
     @property
     def setup(self):
         """Fetch the original setup"""
-        return self._generator
+        return self.generator
 
 
 def init_dict(**kwargs):
@@ -1684,7 +1684,7 @@ class A4(Set):
                 o2axis1 = setup['o2axis1']
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
-            self._generator = {
+            self.generator = {
                 'o2axis0': o2axis0,
                 'o2axis1': o2axis1,
             }
@@ -1774,7 +1774,7 @@ class S4A4(Set):
             else:
                 o2axis1 = copy(self.std_setup['o2axis1'])
             self.direct_parent_setup = copy(setup)
-            self._generator = {
+            self.generator = {
                 'o2axis0': o2axis0,
                 'o2axis1': o2axis1,
             }
@@ -1892,7 +1892,7 @@ class A4xI(Set):
         else:
             self.chk_setup(setup)
             a4 = A4(setup=setup)
-            self._generator = a4._generator
+            self.generator = a4.generator
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a4 * ExI())
             self.rot_axes = a4.rot_axes
@@ -1991,7 +1991,7 @@ class S4(Set):
                 o4axis1 = setup['o4axis1']
             else:
                 o4axis1 = copy(self.std_setup['o4axis1'])
-            self._generator = {
+            self.generator = {
                 'o4axis0': o4axis0,
                 'o4axis1': o4axis1,
             }
@@ -2138,7 +2138,7 @@ class S4xI(Set):
         else:
             self.chk_setup(setup)
             s4 = S4(setup=setup)
-            self._generator = s4._generator
+            self.generator = s4.generator
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, s4 * ExI())
             self.rot_axes = s4.rot_axes
@@ -2351,7 +2351,7 @@ class A5(Set):
                 o5axis = setup['o5axis']
             else:
                 o5axis = copy(self.std_setup['o5axis'])
-            self._generator = {
+            self.generator = {
                 'o3axis': o3axis,
                 'o5axis': o5axis,
             }
@@ -2514,7 +2514,7 @@ class A5xI(Set):  # pylint: disable=too-many-instance-attributes
         else:
             self.chk_setup(setup)
             a5 = A5(setup=setup)
-            self._generator = a5._generator
+            self.generator = a5.generator
             self.direct_parent_setup = copy(setup)
             Set.__init__(self, a5 * ExI())
             self.rot_axes = a5.rot_axes

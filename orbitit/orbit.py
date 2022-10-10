@@ -195,12 +195,12 @@ class Orbit(list):  # pylint: disable=too-many-instance-attributes
             # alternative way of colouring by using the direct parents; i.e.
             # the parent with only direct isometries
             assert self.final.mixed
-            if self.final._generator:
+            if self.final.generator:
                 self.final_sym_alt = self.final.direct_parent(setup=self.final.direct_parent_setup)
             else:
                 self.final_sym_alt = self.final.direct_parent(
                     isometries=[isom for isom in self.final if isom.is_direct()])
-            if self.stabiliser._generator:
+            if self.stabiliser.generator:
                 self.stab_sym_alt = self.stabiliser.direct_parent(
                     setup=self.stabiliser.direct_parent_setup)
             else:
