@@ -36,8 +36,8 @@ import math
 import re
 import wx
 
-from OpenGL.GL import glColor, glEnable, glDisable, glBlendFunc
-from OpenGL.GL import GL_CULL_FACE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+from OpenGL.GL import glColor, glBlendFunc
+from OpenGL.GL import GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
 from orbitit import Geom3D, geomtypes, rgb
 from orbitit.geomtypes import Rot3 as Rot
@@ -4476,7 +4476,6 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         self.showHepta = False
         self.addFaces = True
         self.heptPosAlt = False
-        self.cullingOn = False
         self.showXtra = False
         self.triangleAlt = True
         self.addXtraEdge = True
@@ -4511,7 +4510,6 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             triangleAlt=None,
             addXtraEdge=None,
             heptPosAlt=None,
-            cullingOn=None,
             edgeR=None,
             vertexR=None,
             opaqueness=None,
@@ -4531,11 +4529,6 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             self.updateV = True
         if addXtraEdge is not None:
             self.addXtraEdge = addXtraEdge
-        if cullingOn is not None:
-            if cullingOn:
-                glEnable(GL_CULL_FACE)
-            else:
-                glDisable(GL_CULL_FACE)
         if edgeR is not None:
             self.setEdgeProperties(radius=edgeR, drawEdges=True)
         if vertexR is not None:
@@ -4567,6 +4560,7 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
 
 
 class EqlHeptagonCtrlWin(wx.Frame):
+    """Common class for controlling equilateral heptagons."""
     KITE_ANGLE_STEPS = 200
 
     kite_angle_factor = 1
@@ -4589,7 +4583,14 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.Show(True)
         self.panel.Layout()
 
-    def setKiteAngleExtremes(self, min_angle, max_angle):
+    def set_kite_angle_domain(self, min_angle, max_angle):
+        """Set minimum and maximum angle for a kite.
+
+        The kite angle is the angle of a kite with a face of the base model.
+
+        min_angle: mimimum kite angle in degrees
+        max_angle: maximum kite angle in degrees
+        """
         # Linear mapping of [0, self.KITE_ANGLE_STEPS] ->
         #                   [min, max]
         #
@@ -4602,15 +4603,19 @@ class EqlHeptagonCtrlWin(wx.Frame):
         # inverse:
         # x = ( y - min ) /  self.kite_angle_factor
 
-    def Slider2Angle(self, x):
-        """convert a slider value to an angle value"""
-        # angle in degrees
+    def get_angle_val(self, x):
+        """convert a slider value to a kite angle (degrees) value.
+
+        x: the slider value to be converted
+        """
         return self.kite_angle_factor * float(x) + self.kite_angle_offset
 
-    def Angle2Slider(self, y):
-        """convert an angle value to a slider value"""
-        # angle in degrees
-        return (y - self.kite_angle_offset) / self.kite_angle_factor
+    def get_slider_val(self, angle):
+        """convert an angle to a slider value.
+
+        angle: signed angle (in degrees) of the kite with a face of the base model.
+        """
+        return (angle - self.kite_angle_offset) / self.kite_angle_factor
 
     def create_ctrl_sizer(self):
         """Create and return the main sizer with all the control widgets."""
@@ -4619,7 +4624,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         # GUI for dynamic adjustment
         self.kiteAngleGui = wx.Slider(
             self.panel,
-            value=self.Angle2Slider(self.shape.angle),
+            value=self.get_slider_val(self.shape.angle),
             minValue=0,
             maxValue=self.KITE_ANGLE_STEPS,
             style=wx.SL_HORIZONTAL,
@@ -4634,42 +4639,39 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        self.showKiteChk = wx.CheckBox(self.panel, label="Show Kite")
-        self.showKiteChk.SetValue(self.shape.showKite)
-        self.showHeptaChk = wx.CheckBox(self.panel, label="Show Heptagon")
-        self.showHeptaChk.SetValue(self.shape.showHepta)
-        self.showXtraChk = wx.CheckBox(self.panel, label="Show Extra Faces")
-        self.showXtraChk.SetValue(self.shape.showXtra)
-        self.altHeptPosChk = wx.CheckBox(
-            self.panel, label="Use Alternative Heptagon Position"
+        self.view_kite_gui = wx.CheckBox(self.panel, label="Show kite")
+        self.view_kite_gui.SetValue(self.shape.showKite)
+        self.view_hept_gui = wx.CheckBox(self.panel, label="Show heptagon")
+        self.view_hept_gui.SetValue(self.shape.showHepta)
+        self.add_extra_face_gui = wx.CheckBox(self.panel, label="Show extra faces")
+        self.add_extra_face_gui.SetValue(self.shape.showXtra)
+        self.add_extra_edge_gui = wx.CheckBox(self.panel, label="Add extra edge (if extra face)")
+        self.add_extra_edge_gui.SetValue(self.shape.addXtraEdge)
+        self.tri_alt_gui = wx.CheckBox(self.panel, label="Triangle alternative (if extra face)")
+        self.tri_alt_gui.SetValue(self.shape.triangleAlt)
+        self.alt_hept_pos_gui = wx.CheckBox(
+            self.panel, label="Use alternative heptagon position"
         )
-        self.altHeptPosChk.SetValue(self.shape.heptPosAlt)
-        self.triangleAltChk = wx.CheckBox(self.panel, label="Triangle Alternative")
-        self.triangleAltChk.SetValue(self.shape.triangleAlt)
-        self.addXtraEdgeChk = wx.CheckBox(self.panel, label="Add Extra Edge")
-        self.addXtraEdgeChk.SetValue(self.shape.addXtraEdge)
-        self.cullingChk = wx.CheckBox(self.panel, label="Draw one sided polygon")
-        self.cullingChk.SetValue(self.shape.cullingOn)
+        self.alt_hept_pos_gui.SetValue(self.shape.heptPosAlt)
         self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
-        self.viewSettingsBox = wx.StaticBox(self.panel, label="View Settings")
-        self.viewSettingsSizer = wx.StaticBoxSizer(self.viewSettingsBox, wx.VERTICAL)
+        self.view_opt_box = wx.StaticBox(self.panel, label="View settings")
+        self.view_opt_sizer = wx.StaticBoxSizer(self.view_opt_box, wx.VERTICAL)
 
-        self.viewSettingsSizer.Add(self.showKiteChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.showHeptaChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.showXtraChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.altHeptPosChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.triangleAltChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.addXtraEdgeChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.cullingChk, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.view_kite_gui, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.view_hept_gui, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.add_extra_face_gui, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.add_extra_edge_gui, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.tri_alt_gui, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.alt_hept_pos_gui, 1, wx.EXPAND)
 
-        self.rowSubSizer = wx.BoxSizer(wx.VERTICAL)
-        self.rowSubSizer.Add(self.viewSettingsSizer, 1, wx.EXPAND)
+        self.row_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.row_sizer.Add(self.view_opt_sizer, 1, wx.EXPAND)
 
-        self.columnSubSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.columnSubSizer.Add(self.rowSubSizer, 2, wx.EXPAND)
+        self.column_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.column_sizer.Add(self.row_sizer, 2, wx.EXPAND)
 
         main_sizer.Add(self.kiteAngleSizer, 4, wx.EXPAND)
-        main_sizer.Add(self.columnSubSizer, 20, wx.EXPAND)
+        main_sizer.Add(self.column_sizer, 20, wx.EXPAND)
 
         self.add_specials(self.panel, main_sizer)
 
@@ -4680,7 +4682,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
     def on_kite_angle(self, event):
         """Update the shape conform the new edge angles"""
-        self.shape.setAngle(self.Slider2Angle(self.kiteAngleGui.GetValue()))
+        self.shape.setAngle(self.get_angle_val(self.kiteAngleGui.GetValue()))
         self.canvas.paint()
         try:
             self.statusBar.SetStatusText(self.shape.getStatusStr())
@@ -4690,13 +4692,12 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
     def on_view_settings_chk(self, _):
         """Update the shape drawing conform the settings."""
-        show_kite = self.showKiteChk.IsChecked()
-        show_hepta = self.showHeptaChk.IsChecked()
-        show_extra = self.showXtraChk.IsChecked()
-        alt_hept_pos = self.altHeptPosChk.IsChecked()
-        tri_alt = self.triangleAltChk.IsChecked()
-        add_extra_edge = self.addXtraEdgeChk.IsChecked()
-        culling_on = self.cullingChk.IsChecked()
+        show_kite = self.view_kite_gui.IsChecked()
+        show_hepta = self.view_hept_gui.IsChecked()
+        show_extra = self.add_extra_face_gui.IsChecked()
+        alt_hept_pos = self.alt_hept_pos_gui.IsChecked()
+        tri_alt = self.tri_alt_gui.IsChecked()
+        add_extra_edge = self.add_extra_edge_gui.IsChecked()
         self.shape.setViewSettings(
             showKite=show_kite,
             showHepta=show_hepta,
@@ -4704,7 +4705,6 @@ class EqlHeptagonCtrlWin(wx.Frame):
             heptPosAlt=alt_hept_pos,
             triangleAlt=tri_alt,
             addXtraEdge=add_extra_edge,
-            cullingOn=culling_on,
         )
         self.canvas.paint()
         try:

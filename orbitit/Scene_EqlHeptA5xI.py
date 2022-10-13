@@ -61,7 +61,7 @@ class Shape(heptagons.EqlHeptagonShape):
         )
         this.initArrs()
         this.setH(2.618)
-        this.setViewSettings(edgeR = 0.03, vertexR = 0.06)
+        this.setViewSettings(edgeR=0.03, vertexR=0.06)
 
     def setH(this, h):
         this.angle = Geom3D.Rad2Deg * math.atan((h - tau2)/w) #+ atanH0d2
@@ -279,7 +279,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             {'a': -41.536138658834069, 's': 'Equilateral Triangles', 't': True, 'e': True},
             #{'a':  14.020488654174214, 's': 'Equilateral Triangles', 't': False, 'e': True},
         ]
-        this.setKiteAngleExtremes(-60.96845, 82.26)
+        this.set_kite_angle_domain(-60.96845, 82.26)
         kwargs['title'] = TITLE
         heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (332, 650),
@@ -338,18 +338,18 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         angle = angleData['a']
         if index != 0 and this.specialSolidPreviousIndex == 0:
             # save angle in None
-            this.specialSolidAngles[0]['a'] = this.Slider2Angle(
+            this.specialSolidAngles[0]['a'] = this.get_angle_val(
                     this.kiteAngleGui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.specialSolidPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.Angle2Slider(angle))
+        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
         this.shape.setAngle(angle)
 
-        this.showKiteChk.SetValue(True)
-        this.showHeptaChk.SetValue(True)
-        this.showXtraChk.SetValue(False)
-        this.altHeptPosChk.SetValue(False)
+        this.view_kite_gui.SetValue(True)
+        this.view_hept_gui.SetValue(True)
+        this.add_extra_face_gui.SetValue(False)
+        this.alt_hept_pos_gui.SetValue(False)
         this.on_view_settings_chk(this)
         if index != 0:
             if this.prefHeptSpecPosGui.GetSelection() != 0:
@@ -363,22 +363,22 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         angle = angleData['a']
         if index != 0 and this.prefHeptSpecPreviousIndex == 0:
             # save angle in None
-            this.prefHeptSpecAngles[0]['a'] = this.Slider2Angle(
+            this.prefHeptSpecAngles[0]['a'] = this.get_angle_val(
                     this.kiteAngleGui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.prefHeptSpecPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.Angle2Slider(angle))
+        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
         this.shape.setAngle(angle)
 
-        this.showHeptaChk.SetValue(True)
-        this.altHeptPosChk.SetValue(False)
+        this.view_hept_gui.SetValue(True)
+        this.alt_hept_pos_gui.SetValue(False)
         if 't' in angleData:
-            this.showKiteChk.SetValue(False)
-            this.showXtraChk.SetValue(True)
-            this.triangleAltChk.SetValue(angleData['t'])
+            this.view_kite_gui.SetValue(False)
+            this.add_extra_face_gui.SetValue(True)
+            this.tri_alt_gui.SetValue(angleData['t'])
         if 'e' in angleData:
-            this.addXtraEdgeChk.SetValue(angleData['e'])
+            this.add_extra_edge_gui.SetValue(angleData['e'])
         this.on_view_settings_chk(this)
         if index != 0:
             if this.specialSolidPosGui.GetSelection() != 0:
@@ -392,22 +392,22 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         angle = angleData['a']
         if index != 0 and this.altHeptSpecPreviousIndex == 0:
             # save angle in None
-            this.altHeptSpecAngles[0]['a'] = this.Slider2Angle(
+            this.altHeptSpecAngles[0]['a'] = this.get_angle_val(
                     this.kiteAngleGui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.altHeptSpecPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.Angle2Slider(angle))
+        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
         this.shape.setAngle(angle)
 
-        this.showHeptaChk.SetValue(True)
-        this.altHeptPosChk.SetValue(True)
+        this.view_hept_gui.SetValue(True)
+        this.alt_hept_pos_gui.SetValue(True)
         if 't' in angleData:
-            this.showKiteChk.SetValue(False)
-            this.showXtraChk.SetValue(True)
-            this.triangleAltChk.SetValue(angleData['t'])
+            this.view_kite_gui.SetValue(False)
+            this.add_extra_face_gui.SetValue(True)
+            this.tri_alt_gui.SetValue(angleData['t'])
         if 'e' in angleData:
-            this.addXtraEdgeChk.SetValue(angleData['e'])
+            this.add_extra_edge_gui.SetValue(angleData['e'])
         this.on_view_settings_chk(this)
         if index != 0:
             if this.specialSolidPosGui.GetSelection() != 0:

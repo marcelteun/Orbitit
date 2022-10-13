@@ -45,11 +45,11 @@ class Shape(Geom3D.SimpleShape):
                 self.sideMax / 2
             )
         self.setViewSettings(
-            addFaces      = True,
-            useCylinderEs = False,
-            useSphereVs   = False,
-            showKite      = True,
-            showHepta     = True
+            addFaces=True,
+            useCylinderEs=False,
+            useSphereVs=False,
+            showKite=True,
+            showHepta=True,
         )
 
     @staticmethod
@@ -158,11 +158,11 @@ class Shape(Geom3D.SimpleShape):
         except AttributeError: pass
 
     def setViewSettings(self,
-            addFaces      = None,
-            useCylinderEs = None,
-            useSphereVs   = None,
-            showKite      = None,
-            showHepta     = None
+            addFaces=None,
+            useCylinderEs=None,
+            useSphereVs=None,
+            showKite=None,
+            showHepta=None
         ):
         if addFaces != None:
             self.setFaceProperties(drawFaces = addFaces)
@@ -256,7 +256,7 @@ class CtrlWin(wx.Frame):
         self.topScale  = 100
         self.tailScale = 100
 
-        self.shape.setViewSettings(showHepta = False, showKite  = True)
+        self.shape.setViewSettings(showHepta=False, showKite=True)
 
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -314,28 +314,28 @@ class CtrlWin(wx.Frame):
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        self.showKiteChk = wx.CheckBox(self.panel, label = 'Show Kite')
-        self.showKiteChk.SetValue(self.shape.showKite)
-        self.showHeptaChk = wx.CheckBox(self.panel, label = 'Show Heptagon')
-        self.showHeptaChk.SetValue(self.shape.showHepta)
+        self.view_kite_gui = wx.CheckBox(self.panel, label = 'Show Kite')
+        self.view_kite_gui.SetValue(self.shape.showKite)
+        self.view_hept_gui = wx.CheckBox(self.panel, label = 'Show Heptagon')
+        self.view_hept_gui.SetValue(self.shape.showHepta)
         self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
-        self.viewSettingsBox = wx.StaticBox(self.panel, label = 'View Settings')
-        self.viewSettingsSizer = wx.StaticBoxSizer(self.viewSettingsBox, wx.VERTICAL)
+        self.view_opt_box = wx.StaticBox(self.panel, label = 'View Settings')
+        self.view_opt_sizer = wx.StaticBoxSizer(self.view_opt_box, wx.VERTICAL)
 
-        self.viewSettingsSizer.Add(self.showKiteChk, 1, wx.EXPAND)
-        self.viewSettingsSizer.Add(self.showHeptaChk, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.view_kite_gui, 1, wx.EXPAND)
+        self.view_opt_sizer.Add(self.view_hept_gui, 1, wx.EXPAND)
 
-        self.rowSubSizer = wx.BoxSizer(wx.VERTICAL)
-        self.rowSubSizer.Add(self.prePosSelect, 1, wx.EXPAND)
-        self.rowSubSizer.Add(self.viewSettingsSizer, 1, wx.EXPAND)
+        self.row_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.row_sizer.Add(self.prePosSelect, 1, wx.EXPAND)
+        self.row_sizer.Add(self.view_opt_sizer, 1, wx.EXPAND)
 
-        self.columnSubSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.columnSubSizer.Add(self.kiteTopSizer, 1, wx.EXPAND)
-        self.columnSubSizer.Add(self.kiteTailSizer, 1, wx.EXPAND)
-        self.columnSubSizer.Add(self.rowSubSizer, 2, wx.EXPAND)
+        self.column_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.column_sizer.Add(self.kiteTopSizer, 1, wx.EXPAND)
+        self.column_sizer.Add(self.kiteTailSizer, 1, wx.EXPAND)
+        self.column_sizer.Add(self.row_sizer, 2, wx.EXPAND)
 
         mainSizer.Add(self.kiteSideSizer, 2, wx.EXPAND)
-        mainSizer.Add(self.columnSubSizer, 10, wx.EXPAND)
+        mainSizer.Add(self.column_sizer, 10, wx.EXPAND)
 
         return mainSizer
 
@@ -413,12 +413,12 @@ class CtrlWin(wx.Frame):
         except AttributeError: pass
 
     def on_view_settings_chk(self, event):
-        showKite = self.showKiteChk.IsChecked()
-        showHepta = self.showHeptaChk.IsChecked()
+        showKite = self.view_kite_gui.IsChecked()
+        showHepta = self.view_hept_gui.IsChecked()
         self.shape.setViewSettings(
-                showKite      = showKite,
-                showHepta     = showHepta
-            )
+            showKite=showKite,
+            showHepta=showHepta
+        )
         self.canvas.paint()
 
     # move to general class

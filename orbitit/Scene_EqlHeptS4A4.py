@@ -46,7 +46,7 @@ class Shape(heptagons.EqlHeptagonShape):
         )
         this.initArrs()
         this.setH(1.0)
-        this.setViewSettings(edgeR = 0.02, vertexR = 0.04)
+        this.setViewSettings(edgeR=0.02, vertexR=0.04)
 
     def setH(this, h):
         this.angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
@@ -343,7 +343,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             {'a':  24.602778241392063, 's': 'Equilateral Triangles', 't': False,'e': True},
             {'a':  45.464238739313160, 's': 'Three Triangles in One Plane', 't': True,'e': True},
         ]
-        this.setKiteAngleExtremes(this.specialAngles[3]['a'], this.specialAngles[2]['a'])
+        this.set_kite_angle_domain(this.specialAngles[3]['a'], this.specialAngles[2]['a'])
         kwargs['title'] = TITLE
         heptagons.EqlHeptagonCtrlWin.__init__(this,
             shape, canvas, (338, 570),
@@ -370,25 +370,25 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         angle = angleData['a']
         if index != 0 and this.previousIndex == 0:
             # save angle in None
-            this.specialAngles[0]['a'] = this.Slider2Angle(
+            this.specialAngles[0]['a'] = this.get_angle_val(
                     this.kiteAngleGui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.previousIndex = index
-        this.kiteAngleGui.SetValue(this.Angle2Slider(angle))
+        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
         this.shape.setAngle(angle)
 
-        this.showHeptaChk.SetValue(True)
-        this.altHeptPosChk.SetValue(False)
+        this.view_hept_gui.SetValue(True)
+        this.alt_hept_pos_gui.SetValue(False)
         if 't' in angleData:
-            this.showKiteChk.SetValue(False)
-            this.showXtraChk.SetValue(True)
-            this.triangleAltChk.SetValue(angleData['t'])
+            this.view_kite_gui.SetValue(False)
+            this.add_extra_face_gui.SetValue(True)
+            this.tri_alt_gui.SetValue(angleData['t'])
         else:
-            this.showKiteChk.SetValue(True)
-            this.showXtraChk.SetValue(False)
+            this.view_kite_gui.SetValue(True)
+            this.add_extra_face_gui.SetValue(False)
         if 'e' in angleData:
-            this.addXtraEdgeChk.SetValue(angleData['e'])
+            this.add_extra_edge_gui.SetValue(angleData['e'])
         this.on_view_settings_chk(this)
         # on_view_settings_chk(this) contains:
         #this.canvas.paint()
