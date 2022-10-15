@@ -45,21 +45,19 @@ class Shape(heptagons.EqlHeptagonShape):
             name='EglHeptS4A4'
         )
         this.initArrs()
-        this.setH(1.0)
-        this.setViewSettings(edgeR=0.02, vertexR=0.04)
+        this.height = 1.0
 
-    def setH(self, h):
+    def set_height(self, h):
         self._angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
-        super().setH(h)
+        super().set_height(h)
 
     def set_angle(self, a):
         tanA = math.tan(a*Geom3D.Deg2Rad)
-        self.h = (V2 + tanA) / (V2 + 4*tanA)
+        self._height = (V2 + tanA) / (V2 + 4*tanA)
         super().set_angle(a)
 
-    def setV(this):
-        # input this.h
-        St = this.h / (4*this.h - 1)
+    def set_vs(this):
+        St = this.height / (4*this.height - 1)
         if this.alt_hept_pos:
             #
             #    z
@@ -87,21 +85,21 @@ class Shape(heptagons.EqlHeptagonShape):
             # cube and 2, 4, 6, are on the face centres of that cube
             #
             Vs = [
-                    vec( St,      St,     -St),        # 0
-                    vec( 0.0,     1.0,     0.0),
-                    vec( this.h,  this.h,  this.h),
-                    vec( 1.0,     0.0,     0.0),       # 3
+                vec( St, St, -St),  # 0
+                vec( 0.0, 1.0, 0.0),
+                vec( this.height, this.height,  this.height),
+                vec( 1.0, 0.0, 0.0),  # 3
 
-                    vec( St,      St,     -St),        # 4
-                    vec( 1.0,     0.0,     0.0),
-                    vec( this.h, -this.h, -this.h),
-                    vec( 0.0,     0.0,    -1.0),       # 7
+                vec( St, St, -St),  # 4
+                vec( 1.0, 0.0, 0.0),
+                vec( this.height, -this.height, -this.height),
+                vec( 0.0, 0.0, -1.0),  # 7
 
-                    vec( St,      St,     -St),        # 8
-                    vec( 0.0,     0.0,    -1.0),
-                    vec(-this.h,  this.h, -this.h),
-                    vec( 0.0,     1.0,     0.0)        # 11
-                ]
+                vec( St, St, -St),  # 8
+                vec( 0.0, 0.0, -1.0),
+                vec(-this.height, this.height, -this.height),
+                vec( 0.0, 1.0, 0.0)  # 11
+            ]
             # Normals are set below, after calculating the heptagons
             #this.Ns = this.NsAlt
         else:
@@ -133,31 +131,29 @@ class Shape(heptagons.EqlHeptagonShape):
             # cube and 2, 4, 6, are on the face centres of that cube
             #
             Vs = [
-                    vec( this.h,  this.h,  this.h),    # 0
-                    vec( 1.0,     0.0,     0.0),
-                    vec( St,      St,     -St),
-                    vec( 0.0,     1.0,     0.0),       # 3
+                vec(this.height, this.height, this.height),  # 0
+                vec(1.0, 0.0, 0.0),
+                vec(St, St, -St),
+                vec(0.0, 1.0, 0.0),  # 3
 
-                    vec( this.h,  this.h,  this.h),    # 4
-                    vec( 0.0,     1.0,     0.0),
-                    vec(-St,      St,      St),
-                    vec( 0.0,     0.0,     1.0),       # 7
+                vec(this.height, this.height, this.height),  # 4
+                vec(0.0, 1.0, 0.0),
+                vec(-St, St, St),
+                vec(0.0, 0.0, 1.0),  # 7
 
-                    vec( this.h,  this.h,  this.h),    # 8
-                    vec( 0.0,     0.0,     1.0),
-                    vec( St,     -St,      St),
-                    vec( 1.0,     0.0,     0.0)        # 11
-                ]
-            # Normals are set below, after calculating the heptagons
-            #this.Ns = this.NsPref
+                vec(this.height, this.height, this.height),  # 8
+                vec(0.0, 0.0, 1.0),
+                vec(St, -St, St),
+                vec(1.0, 0.0, 0.0)   # 11
+            ]
 
         # add heptagons
         heptN = heptagons.Kite2Hept(Vs[3], Vs[2], Vs[1], Vs[0])
         if heptN == None:
-          this.errorStr = 'No valid equilateral heptagon for this position'
+          this.error_msg = 'No valid equilateral heptagon for this position'
           return
         else:
-          this.errorStr = ''
+          this.error_msg = ''
         Vs.extend(heptN[0]) # V12 - V18
         Ns = list(range(33))
         for i in range(4):
@@ -243,7 +239,7 @@ class Shape(heptagons.EqlHeptagonShape):
             Es.extend(this.xtraEs)
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.setBaseFaceProperties(Fs = Fs, colors = (this.face_col, colIds))
 
     def toPsPiecesStr(this,
             faceIndices=[],
@@ -310,7 +306,7 @@ class Shape(heptagons.EqlHeptagonShape):
         #        [-tV3,  tV3,  tV3],
         #        [ 0.0,  1.0,  0.0]
         #    ]
-        # init heptagons normal, will be set in setV:
+        # init heptagons normal, will be set in set_vs:
         #for i in range(21):
         #    this.NsAlt.append([0, 0, 1])
         #    this.NsPref.append([0, 0, 1])

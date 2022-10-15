@@ -64,20 +64,18 @@ class Shape(heptagons.EqlHeptagonShape):
             name='EglHeptA5xI_GD'
         )
         this.initArrs()
-        this.setH(H0)
-        this.setViewSettings(edgeR=0.01, vertexR=0.02)
+        this.height = H0
 
-    def setH(this, h):
+    def set_height(this, h):
         this._angle = Geom3D.Rad2Deg * math.atan((h - H0) / Ch) #+ atanH0d2
-        super().setH(h)
+        super().set_height(h)
 
     def set_angle(self, a):
-        self.h = Ch * math.tan(a*Geom3D.Deg2Rad) + H0
+        self._height = Ch * math.tan(a*Geom3D.Deg2Rad) + H0
         super().set_angle(a)
 
-    def setV(this):
-        # input this.h
-        St = this.h / (2*math.sqrt(2*Cq)*this.h - Cq)
+    def set_vs(this):
+        St = this.height / (2*math.sqrt(2*Cq)*this.height - Cq)
         #
         #                  2
         #           __..--'-_
@@ -98,20 +96,20 @@ class Shape(heptagons.EqlHeptagonShape):
         # and 0 a face centre.
         #
         Vs = [
-                vec(0.0,      0.0,    this.h),   # 0
-                Rl,
-                vec(0.0,      St,     St/2),
-                vec(-Rl[0],   Rl[1],  Rl[2])     # 3
-            ]
+            vec(0.0, 0.0, this.height),  # 0
+            Rl,
+            vec(0.0, St, St/2),
+            vec(-Rl[0], Rl[1], Rl[2]),  # 3
+        ]
 
         # add heptagons
-        H = HalfTurn(axis=Vs[3])
-        this.errorStr = ''
+        h = HalfTurn(axis=Vs[3])
+        this.error_msg = ''
         if this.alt_hept_pos:
             Ns = Vs
             heptN = heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None:
-              this.errorStr = 'No valid equilateral heptagon for this position'
+              this.error_msg = 'No valid equilateral heptagon for this position'
               return
             Mr = Rot(axis = geomtypes.Vec3(Vs[2]), angle = geomtypes.turn(0.2))
 
@@ -147,7 +145,7 @@ class Shape(heptagons.EqlHeptagonShape):
         else:
             heptN = heptagons.Kite2Hept(Vs[1], Vs[2], Vs[3], Vs[0])
             if heptN == None:
-              this.errorStr = 'No valid equilateral heptagon for this position'
+              this.error_msg = 'No valid equilateral heptagon for this position'
               return
             if this.tri_alt:
                 vt = heptN[0][1]
@@ -170,12 +168,12 @@ class Shape(heptagons.EqlHeptagonShape):
                         vt
                     ]
         if heptN == None:
-            this.errorStr = 'No valid equilateral heptagon for this position'
+            this.error_msg = 'No valid equilateral heptagon for this position'
             return
         else:
-            this.errorStr = ''
+            this.error_msg = ''
         # rotate vt by a half turn, IsoscelesTriangleV NOT auto updated.
-        vt = H * vt
+        vt = h * vt
         IsoscelesTriangleV[2] = vt
         Vs.extend(heptN[0]) # V4 - V10
         Vs.extend(RegularTrianglePartV) # V11 - V13
@@ -209,7 +207,7 @@ class Shape(heptagons.EqlHeptagonShape):
             Es.extend(this.xtraEs)
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.setBaseFaceProperties(Fs = Fs, colors = (this.face_col, colIds))
         this.setVs(Vs)
 
     def toPsPiecesStr(this,
@@ -249,7 +247,7 @@ class Shape(heptagons.EqlHeptagonShape):
         stdStr = super().getStatusStr()
         if this.show_extra and this.add_extra_edge and len(this.xtraEs) == 2:
             if this.update_vs:
-                this.setV()
+                this.set_vs()
             # reference vector, a side of the heptagon:
             vs = this.Vs[0]
             r0 = vs[4]
@@ -454,7 +452,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
 
     def onOpaquenessAdjust(this, event):
         transparency = float(this.transparencyGui.GetValue())
-        this.shape.setViewSettings(opaqueness=1-transparency/100)
+        this.shape.update_view_opt(opaqueness=1-transparency/100)
 
 class Scene(Geom3D.Scene):
     def __init__(this, parent, canvas):

@@ -60,20 +60,18 @@ class Shape(heptagons.EqlHeptagonShape):
             name='EglHeptA5xI'
         )
         this.initArrs()
-        this.setH(2.618)
-        this.setViewSettings(edgeR=0.03, vertexR=0.06)
+        this.height = 2.618
 
-    def setH(this, h):
+    def set_height(this, h):
         this._angle = Geom3D.Rad2Deg * math.atan((h - tau2)/w) #+ atanH0d2
-        super().setH(h)
+        super().set_height(h)
 
     def set_angle(self, a):
-        self.h = w * math.tan(a*Geom3D.Deg2Rad) + tau2
+        self._height = w * math.tan(a*Geom3D.Deg2Rad) + tau2
         super().set_angle(a)
 
-    def setV(this):
-        # input this.h
-        St = this.h / (4 - tau2 - (4 * this.h / tau2))
+    def set_vs(this):
+        St = this.height / (4 - tau2 - (4 * this.height / tau2))
         #    z
         #     ^
         #     |
@@ -94,11 +92,11 @@ class Shape(heptagons.EqlHeptagonShape):
         # and 0 a face centre.
         #
         Vs = [
-                vec(0.0,      0.0,    this.h),   # 0
-                vec(-tau2/2, -w,      tau2),
-                vec(2.0*St,   0.0,   -tau2*St),
-                vec(-tau2/2,  w,      tau2)      # 3
-            ]
+            vec(0.0, 0.0, this.height),  # 0
+            vec(-tau2/2, -w, tau2),
+            vec(2.0*St, 0.0, -tau2*St),
+            vec(-tau2/2, w, tau2),  # 3
+        ]
 
         # add heptagons
         Ns = Vs
@@ -150,12 +148,12 @@ class Shape(heptagons.EqlHeptagonShape):
                         vt
                     ]
         if heptN == None:
-            this.errorStr = 'No valid equilateral heptagon for this position'
+            this.error_msg = 'No valid equilateral heptagon for this position'
             return
         else:
-            this.errorStr = ''
-        H = HalfTurn(axis=Vs[3])
-        vt = H * vt
+            this.error_msg = ''
+        h = HalfTurn(axis=Vs[3])
+        vt = h * vt
         IsoscelesTriangleV[2] = vt
         Vs.extend(heptN[0]) # V4 - V10
         Vs.extend(RegularTrianglePartV) # V11 - V13
@@ -190,7 +188,7 @@ class Shape(heptagons.EqlHeptagonShape):
             Es.extend(this.xtraEs)
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es = Es)
-        this.setBaseFaceProperties(Fs = Fs, colors = (this.theColors, colIds))
+        this.setBaseFaceProperties(Fs = Fs, colors = (this.face_col, colIds))
         this.setVs(Vs)
 
     def toPsPiecesStr(this,
@@ -230,7 +228,7 @@ class Shape(heptagons.EqlHeptagonShape):
         stdStr = super().getStatusStr()
         if this.show_extra and this.add_extra_edge and len(this.xtraEs) == 2:
             if this.update_vs:
-                this.setV()
+                this.set_vs()
             # reference vector, a side of the heptagon:
             vs = this.Vs[0]
             r0 = vs[4]

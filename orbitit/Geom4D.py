@@ -71,7 +71,7 @@ class SimpleShape:
         this.setFaceProperties(
             colors = colors, drawFaces = True
         )
-        this.glInitialised = False
+        this.gl_initialised = False
         # SETTINGS 4D specific:
         this.setCellProperties(
             Cs = Cs, colors = colors, drawCells = False, scale = 1.0
@@ -465,7 +465,7 @@ class SimpleShape:
         this.removeTransparency = not use
         this.updateTransparency = True
 
-    def glInit(this):
+    def gl_init(self):
         """
         Initialise OpenGL for specific shapes
 
@@ -480,11 +480,11 @@ class SimpleShape:
         glEnable(GL_NORMALIZE)
         glDisable(GL_CULL_FACE)
 
-        this.glInitialised = True
+        self.gl_initialised = True
 
     def gl_draw(this):
-        if not this.glInitialised:
-            this.glInit()
+        if not this.gl_initialised:
+            this.gl_init()
         if this.mapToSingeShape:
             this.glDrawSingleRemoveUnscaledEdges()
             this.cell.generateNormals = this.generateNormals
@@ -577,7 +577,7 @@ class SimpleShape:
             this.cell.setVertexProperties(radius = this.v.radius, color = this.v.col)
             this.cell.setEdgeProperties(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
             this.cell.setFaceProperties(drawFaces = this.f.draw)
-            this.cell.glInitialised = True # done as first step in this func
+            this.cell.gl_initialised = True # done as first step in this func
             this.projectedTo3D = True
             this.updateTransparency = False
             if this.e.draw and isScaledDown:
@@ -634,7 +634,7 @@ class SimpleShape:
                 cell.setVertexProperties(radius = this.v.radius, color = this.v.col)
                 cell.setEdgeProperties(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
                 cell.setFaceProperties(drawFaces = False)
-                cell.glInitialised = True
+                cell.gl_initialised = True
                 this.cells.append(cell)
             # Add a shape with faces for each cell
             for i in range(len(this.Cs)):
@@ -652,7 +652,7 @@ class SimpleShape:
                 cell.setEdgeProperties(drawEdges = False)
                 cell.setFaceProperties(drawFace = this.f.draw)
                 cell.scale(this.c.scale)
-                cell.glInitialised = True
+                cell.gl_initialised = True
                 this.cells.append(cell)
             this.projectedTo3D = True
 

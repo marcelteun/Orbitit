@@ -45,13 +45,12 @@ from orbitit.geomtypes import Vec3 as Vec
 
 V3 = math.sqrt(3)
 
-h = math.sin(math.pi / 7)
-RhoH = math.sin(2 * math.pi / 7)
-SigmaH = math.sin(3 * math.pi / 7)
-Rho = RhoH / h
-Sigma = SigmaH / h
-R = 0.5 / h
-H = (1 + Sigma + Rho) * h
+HEPT_DENOM = math.sin(math.pi / 7)
+HEPT_RHO_NUM = math.sin(2 * math.pi / 7)
+HEPT_SIGMA_NUM = math.sin(3 * math.pi / 7)
+HEPT_RHO = HEPT_RHO_NUM / HEPT_DENOM
+HEPT_SIGMA = HEPT_SIGMA_NUM / HEPT_DENOM
+HEPT_HEIGHT = (1 + HEPT_SIGMA + HEPT_RHO) * HEPT_DENOM
 
 only_hepts = -1
 dyn_pos = -2
@@ -430,12 +429,12 @@ class RegularHeptagon:
         #  - V0 = (0, 0, 0)
         self.VsOrg = [
             Vec([0.0, 0.0, 0.0]),
-            Vec([Rho / 2, -h, 0.0]),
-            Vec([Sigma / 2, -(1 + Sigma) * h, 0.0]),
-            Vec([0.5, -H, 0.0]),
-            Vec([-0.5, -H, 0.0]),
-            Vec([-Sigma / 2, -(1 + Sigma) * h, 0.0]),
-            Vec([-Rho / 2, -h, 0.0]),
+            Vec([HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
+            Vec([HEPT_SIGMA / 2, -(1 + HEPT_SIGMA) * HEPT_DENOM, 0.0]),
+            Vec([0.5, -HEPT_HEIGHT, 0.0]),
+            Vec([-0.5, -HEPT_HEIGHT, 0.0]),
+            Vec([-HEPT_SIGMA / 2, -(1 + HEPT_SIGMA) * HEPT_DENOM, 0.0]),
+            Vec([-HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
         ]
         self.Vs = self.VsOrg[:]  # the vertex aray to use.
         self.Fs = [[6, 5, 4, 3, 2, 1, 0]]
@@ -3223,7 +3222,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             fold=self.foldHeptagon,
             rotate=self.rotateFold,
         )
-        self.heptagon.translate(H * geomtypes.UY)
+        self.heptagon.translate(HEPT_HEIGHT * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
         self.heptagon.rotate(-geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedralAngle)
         self.heptagon.translate(self.height * geomtypes.UZ)
@@ -3599,7 +3598,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         main_sizer.Add(mainVSizer, 6, wx.EXPAND)
 
-        self.errorStr = {
+        self.error_msg = {
             "PosEdgeCfg": "ERROR: Impossible combination of position and edge configuration!"
         }
 
@@ -4451,9 +4450,13 @@ class FldHeptagonCtrlWin(wx.Frame):
 
 
 class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
+    """The class defines a base for defining shapes with equilateral polyhedra.
+
+    It should be seen as an abstract base class, for which set_vs needs to be implemented.
+    """
     def __init__(
             self,
-            base_isometries=[geomtypes.E],
+            base_isometries=None,
             extra_isometry=None,
             name="EqlHeptagonShape",
     ):
@@ -4465,8 +4468,10 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             This will double the amount of isometries.
         name: the name to be used for this shape.
         """
-        isometries = [i for i in base_isometries]
-        if extra_isometry != None:
+        if base_isometries is None:
+            base_isometries = [geomtypes.E]
+        isometries = base_isometries.copy()
+        if extra_isometry is not None:
             for i in base_isometries:
                 isometries.append(extra_isometry * i)
 
@@ -4477,29 +4482,50 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         self.show_extra = False
         self.tri_alt = True
         self.add_extra_edge = True
-        self.errorStr = ""
+        self.error_msg = ""
         self.opaqueness = 1.0
         self.update_vs = False
         self._angle = 0
-        self.h = 0
+        self._height = 0
 
-        kiteColor = rgb.oliveDrab[:]
-        heptColor = rgb.oliveDrab[:]
-        xtraColor = rgb.brown[:]
-        self.theColors = [heptColor, kiteColor, xtraColor]
+        kite_col = rgb.oliveDrab[:]
+        hept_col = rgb.oliveDrab[:]
+        extra_col = rgb.brown[:]
+        self.face_col = [hept_col, kite_col, extra_col]
 
-    def setV(self):
+    def set_vs(self):
         """
         Set the vertex array, implemented by derivative
         """
-        pass
 
-    def setH(self, h):
-        self.h = h
-        self.setV()
+    @property
+    def height(self):
+        """The the height of a reference vertex of the kite.
+
+        The vertex is on the main diagonal and normally it can be shared with the centre of the
+        polygon of the polyhedron it is based on.
+        """
+        return self._height
+
+    @height.setter
+    def height(self, h):
+        # using an extra level to be able to overwrite in subclass
+        self.set_height(h)
+
+    def set_height(self, h):
+        """Position the kite by setting the height of a vertex.
+
+        This function can be overwritten by a sub-class.
+        """
+        self._height = h
+        self.set_vs()
 
     @property
     def angle(self):
+        """Return the angle in degrees between the kite and a reference plane.
+
+        Normally the reference planes goes throught the cross diagonal.
+        """
         return self._angle
 
     @angle.setter
@@ -4508,10 +4534,14 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         self.set_angle(a)
 
     def set_angle(self, a):
-        self._angle = a
-        self.setV()
+        """Set the angle of the kite in degrees.
 
-    def setViewSettings(
+        This function can be overwritten by a sub-class.
+        """
+        self._angle = a
+        self.set_vs()
+
+    def update_view_opt(
             self,
             show_kite=None,
             show_hepta=None,
@@ -4519,10 +4549,12 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             tri_alt=None,
             add_extra_edge=None,
             alt_hept_pos=None,
-            edgeR=None,
-            vertexR=None,
             opaqueness=None,
     ):
+        """Update options of how the shape should be drawn.
+
+        Repaint the canvas after this.
+        """
         if show_kite is not None:
             self.show_kite = show_kite
         if show_hepta is not None:
@@ -4536,10 +4568,6 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             self.update_vs = True
         if add_extra_edge is not None:
             self.add_extra_edge = add_extra_edge
-        if edgeR is not None:
-            self.setEdgeProperties(radius=edgeR, drawEdges=True)
-        if vertexR is not None:
-            self.setVertexProperties(radius=vertexR)
         if opaqueness is not None:
             # TODO...
             self.opaqueness = opaqueness
@@ -4550,20 +4578,18 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
                 or alt_hept_pos is not None
                 or add_extra_edge is not None
         ):
-            self.setV()
+            self.set_vs()
 
-    def glInit(self):
-        super().glInit()
+    def gl_init(self):
+        """Set up OpenGL."""
+        super().gl_init()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def get_status_msg(self):
-        if self.errorStr == "":
-            floatFmt = "%02.2f"
-            fmtStr = "H = %s, Angle = %s degrees" % (floatFmt, floatFmt)
-            s = fmtStr % (self.h, self.angle)
-            return s
-        else:
-            return self.errorStr
+        """Return a string expressing the current status."""
+        if not self.error_msg:
+            return f"Height = {self.height:.2f}, Angle = {self.angle:.1f} degrees"
+        return self.error_msg
 
 
 class EqlHeptagonCtrlWin(wx.Frame):
@@ -4705,7 +4731,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         alt_hept_pos = self.alt_hept_pos_gui.IsChecked()
         tri_alt = self.tri_alt_gui.IsChecked()
         add_extra_edge = self.add_extra_edge_gui.IsChecked()
-        self.shape.setViewSettings(
+        self.shape.update_view_opt(
             show_kite=show_kite,
             show_hepta=show_hepta,
             show_extra=show_extra,

@@ -52,27 +52,25 @@ class Shape(heptagons.EqlHeptagonShape):
             name='EglHeptS4xI'
         )
         this.initArrs()
-        this.setH(1.0)
-        this.setViewSettings(edgeR=0.02, vertexR=0.04)
+        this.height = 1.0
 
-    def setH(this, h):
+    def set_height(this, h):
         # TODO: use consistent angles, Dodecahedron uses without const atanHV2
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
         this._angle = Geom3D.Rad2Deg * math.atan(V2 * (h - 1.0)) + this.atanHV2
-        super().setH(h)
+        super().set_height(h)
 
     def set_angle(self, a):
         # TODO: use consistent angles, Dodecahedron uses without const atanHV2
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
         alpha = a - self.atanHV2
-        self.h = hV2 * math.tan(alpha*Geom3D.Deg2Rad) + 1.0
+        self._height = hV2 * math.tan(alpha*Geom3D.Deg2Rad) + 1.0
         super().set_angle(alpha)
 
-    def setV(this):
-        # input this.h
-        St = this.h / (2*this.h - 1)
+    def set_vs(this):
+        St = this.height / (2*this.height - 1)
         if this.alt_hept_pos:
             #
             #    z
@@ -95,21 +93,21 @@ class Shape(heptagons.EqlHeptagonShape):
             #    '------------'
             #
             Vs = [
-                    vec(St,     St,      St),    # 0
-                    vec(0.0,    1.0,    1.0),
-                    vec(0.0,    0.0,    this.h),
-                    vec(1.0,    0.0,    1.0),    # 3
+                vec(St, St, St),  # 0
+                vec(0.0, 1.0, 1.0),
+                vec(0.0, 0.0, this.height),
+                vec(1.0, 0.0, 1.0),  # 3
 
-                    vec(St,     St,      St),    # 4
-                    vec(1.0,    0.0,    1.0),
-                    vec(this.h, 0.0,    0.0),
-                    vec(1.0,    1.0,    0.0),    # 7
+                vec(St, St, St),  # 4
+                vec(1.0, 0.0, 1.0),
+                vec(this.height, 0.0, 0.0),
+                vec(1.0, 1.0, 0.0),  # 7
 
-                    vec(St,     St,      St),    # 8
-                    vec(1.0,    1.0,    0.0),
-                    vec(0.0,    this.h, 0.0),
-                    vec(0.0,    1.0,    1.0)     # 11
-                ]
+                vec(St, St, St),  # 8
+                vec(1.0, 1.0, 0.0),
+                vec(0.0, this.height, 0.0),
+                vec(0.0, 1.0, 1.0)  # 11
+            ]
         else:
             #
             #    z
@@ -132,29 +130,29 @@ class Shape(heptagons.EqlHeptagonShape):
             #    '------------'
             #
             Vs = [
-                    vec(0.0,    0.0,    this.h), # 0
-                    vec(1.0,    0.0,    1.0),
-                    vec(St,     St,      St),
-                    vec(0.0,    1.0,    1.0),    # 3
+                vec(0.0, 0.0, this.height),  # 0
+                vec(1.0, 0.0, 1.0),
+                vec(St, St, St),
+                vec(0.0, 1.0, 1.0),  # 3
 
-                    vec(this.h, 0.0,    0.0),    # 4
-                    vec(1.0,    1.0,    0.0),
-                    vec(St,     St,      St),
-                    vec(1.0,    0.0,    1.0),    # 7
+                vec(this.height, 0.0, 0.0),  # 4
+                vec(1.0, 1.0, 0.0),
+                vec(St, St, St),
+                vec(1.0, 0.0, 1.0),  # 7
 
-                    vec(0.0,    this.h, 0.0),    # 8
-                    vec(0.0,    1.0,    1.0),
-                    vec(St,     St,      St),
-                    vec(1.0,    1.0,    0.0),    # 11
-                ]
+                vec(0.0, this.height, 0.0),  # 8
+                vec(0.0, 1.0, 1.0),
+                vec(St, St, St),
+                vec(1.0, 1.0, 0.0),  # 11
+            ]
 
         # add heptagons
         heptN = heptagons.Kite2Hept(Vs[3], Vs[2], Vs[1], Vs[0])
         if heptN == None:
-          this.errorStr = 'No valid equilateral heptagon for this position'
+          this.error_msg = 'No valid equilateral heptagon for this position'
           return
         else:
-          this.errorStr = ''
+          this.error_msg = ''
         Vs.extend(heptN[0]) # V12 - V18
         Ns = list(range(33))
         for i in range(4):
@@ -290,7 +288,7 @@ class Shape(heptagons.EqlHeptagonShape):
             Es.extend(xtraEs)
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es=Es)
-        this.setBaseFaceProperties(Fs=Fs, colors=(this.theColors, colIds))
+        this.setBaseFaceProperties(Fs=Fs, colors=(this.face_col, colIds))
 
     def toPsPiecesStr(this,
             faceIndices=[],

@@ -55,11 +55,6 @@ class Shape(Geom3D.CompoundShape):
     def __init__(self):
         super().__init__([Geom3D.SimpleShape([], [])])
 
-    #def glInit(self):
-    #    super().glInit()
-    #    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    #    glEnable(GL_BLEND)
-
 
 class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
     """Window with all the controls for the symmetry orbit

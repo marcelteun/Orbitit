@@ -44,13 +44,13 @@ class Shape(Geom3D.SimpleShape):
                 self.tailMax / 2,
                 self.sideMax / 2
             )
-        self.setViewSettings(
+        self.update_view_opt(
             show_kite=True,
             show_hepta=True,
         )
 
     @staticmethod
-    def glInit():
+    def gl_init():
         lightPosition = [-5., 5., 200., 0.]
         lightAmbient  = [0.7, 0.7, 0.7, 1.]
         #lightDiffuse  = [1., 1., 1., 1.]
@@ -100,7 +100,7 @@ class Shape(Geom3D.SimpleShape):
                 [0, 0, 1],
             ]
 
-    def setV(self):
+    def set_vs(self):
         Vt = [0, self.top, 0]
         Vb = [0, -self.tail, 0]
         Vl = [-self.side, 0, 0]
@@ -154,7 +154,7 @@ class Shape(Geom3D.SimpleShape):
             self.setVertexProperties(Vs = Vs)
         except AttributeError: pass
 
-    def setViewSettings(self, show_kite=None, show_hepta=None):
+    def update_view_opt(self, show_kite=None, show_hepta=None):
         if show_kite != None or show_hepta != None:
             Fs = []
             Es = []
@@ -181,27 +181,27 @@ class Shape(Geom3D.SimpleShape):
             self.setVertexProperties(Vs = Vs)
             self.setEdgeProperties(Es = Es)
             self.setFaceProperties(Fs = Fs, colors = [self.colors[:], ColsI[:]])
-            # save for setV:
+            # save for set_vs:
             self.show_kite  = show_kite
             self.show_hepta = show_hepta
 
     def setTop(self, top):
         self.top  = top
-        self.setV()
+        self.set_vs()
 
     def setTail(self, tail):
         self.tail  = tail
-        self.setV()
+        self.set_vs()
 
     def setSide(self, side):
         self.side  = side
-        self.setV()
+        self.set_vs()
 
     def setKite(self, top, tail, side):
         self.top  = top
         self.tail = tail
         self.side = side
-        self.setV()
+        self.set_vs()
 
     def getStatusStr(self):
         floatFmt = '%02.2f'
@@ -233,7 +233,7 @@ class CtrlWin(wx.Frame):
         self.topScale  = 100
         self.tailScale = 100
 
-        self.shape.setViewSettings(show_hepta=False, show_kite=True)
+        self.shape.update_view_opt(show_hepta=False, show_kite=True)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -372,9 +372,9 @@ class CtrlWin(wx.Frame):
             tail = 0.6
             side = 1.6
         elif selStr == 'Regular':
-            top  = 2*heptagons.RhoH
-            tail = top * (2 * heptagons.Rho - 1)
-            side = 1 + heptagons.Sigma
+            top  = 2*heptagons.HEPT_RHO_NUM
+            tail = top * (2 * heptagons.HEPT_RHO_NUM - 1)
+            side = 1 + heptagons.HEPT_SIGMA
         else:
             logging.info("onPrePos: oops, default case")
             top  = 0.1
@@ -392,7 +392,7 @@ class CtrlWin(wx.Frame):
     def on_view_settings_chk(self, event):
         show_kite = self.view_kite_gui.IsChecked()
         show_hepta = self.view_hept_gui.IsChecked()
-        self.shape.setViewSettings(
+        self.shape.update_view_opt(
             show_kite=show_kite,
             show_hepta=show_hepta
         )

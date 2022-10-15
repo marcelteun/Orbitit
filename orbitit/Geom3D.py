@@ -778,7 +778,7 @@ class SimpleShape(base.Orbitit):
         self.fNs = []
         self.generateNormals = True
         self.name = name
-        self.glInitialised = False
+        self.gl_initialised = False
         self.gl = Fields()
         self.gl.sphere = None
         self.gl.cyl = None
@@ -1418,7 +1418,7 @@ class SimpleShape(base.Orbitit):
             s[r] = cnt + 1
         self.spheresRadii.inscribed = s
 
-    def glInit(self):
+    def gl_init(self):
         """
         Initialise OpenGL for specific shapes
 
@@ -1433,15 +1433,15 @@ class SimpleShape(base.Orbitit):
         GL.glEnable(GL.GL_NORMALIZE)
         GL.glDisable(GL.GL_CULL_FACE)
 
-        self.glInitialised = True
+        self.gl_initialised = True
 
     def gl_draw(self):
         """wrap _gl_draw to be able to catch OpenGL errors"""
         if self.Vs == []:
             return
         Es = self.Es
-        if not self.glInitialised:
-            self.glInit()
+        if not self.gl_initialised:
+            self.gl_init()
 
         # Check if unity matrix?
         GL.glPushMatrix()
