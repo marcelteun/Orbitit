@@ -3000,7 +3000,7 @@ class RegularHeptagon:
             self.Vs[i] = T * self.Vs[i]
 
 
-def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt=False):
+def Kite2Hept(Left, Top, Right, Bottom, alt_hept_pos=False):
     """Return the a tuple with vertices and the normal of an equilateral
     heptagon for a kite, Vl, Vt, Vr, Vb; the tuple has the following structure:
     ([h0, h1, h2, h3, h4, h5, h6], normal), with h0 = Top.
@@ -3009,11 +3009,10 @@ def Kite2Hept(Left, Top, Right, Bottom, heptPosAlt=False):
     Top: top coordinate
     Right: right coordinate
     Bottom: bottom coordinate
-    heptPosAlt: 2 possible orientations for the heptagons exists. If false then
-                the preferred position is returned, otherwise the heptagon will
-                be 'upside down'.
+    alt_hept_pos: 2 possible orientations for the heptagons exists. If false then the preferred
+        position is returned, otherwise the heptagon will be 'upside down'.
     """
-    if not heptPosAlt:
+    if not alt_hept_pos:
         Vl = Vec(Left)
         Vt = Vec(Top)
         Vr = Vec(Right)
@@ -3281,20 +3280,20 @@ class FldHeptagonCtrlWin(wx.Frame):
         if not open_file in stringify:
             self.stringify[open_file] = "From File"
         self.panel = wx.Panel(self, -1)
-        self.statusBar = self.CreateStatusBar()
+        self.status_bar = self.CreateStatusBar()
         self.foldMethod = FoldMethod.TRIANGLE
         self.restoreTris = False
         self.restoreO3s = False
         self.shape.foldHeptagon = self.foldMethod
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.specPosIndex = 0
 
-        self.mainSizer.Add(
+        self.main_sizer.Add(
             self.createControlsSizer(), 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
         )
         self.set_default_size(self.refl_min_size)
         self.panel.SetAutoLayout(True)
-        self.panel.SetSizer(self.mainSizer)
+        self.panel.SetSizer(self.main_sizer)
         self.Show(True)
         self.panel.Layout()
         self.prevTrisFill = -1
@@ -3597,14 +3596,14 @@ class FldHeptagonCtrlWin(wx.Frame):
         mainVSizer.Add(setOrientSizer, 0, wx.EXPAND)
         mainVSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
 
-        mainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        mainSizer.Add(mainVSizer, 6, wx.EXPAND)
+        main_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        main_sizer.Add(mainVSizer, 6, wx.EXPAND)
 
         self.errorStr = {
             "PosEdgeCfg": "ERROR: Impossible combination of position and edge configuration!"
         }
 
-        return mainSizer
+        return main_sizer
 
     def isPrePosValid(self, pre_pos_id):
         if self.shape.inclReflections:
@@ -3708,13 +3707,13 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onPosAngle(self, event):
         self.shape.setPosAngle(Geom3D.Deg2Rad * self.posAngleGui.GetValue())
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
     def onDihedralAngle(self, event):
         self.shape.setDihedralAngle(Geom3D.Deg2Rad * self.dihedralAngleGui.GetValue())
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
@@ -3725,7 +3724,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.shape.setFold1(s_val, s_val)
         else:
             self.shape.setFold1(s_val)
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
@@ -3736,19 +3735,19 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.shape.setFold2(s_val, s_val)
         else:
             self.shape.setFold2(s_val)
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
     def onFold1Opp(self, event):
         self.shape.setFold1(oppositeAngle=Geom3D.Deg2Rad * self.fold1OppGui.GetValue())
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
     def onFold2Opp(self, event):
         self.shape.setFold2(oppositeAngle=Geom3D.Deg2Rad * self.fold2OppGui.GetValue())
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
@@ -3756,7 +3755,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.setHeight(
             float(self.maxHeight - self.heightGui.GetValue()) / self.heightF
         )
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
@@ -3769,7 +3768,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         try:
             exec(inputStr, ed)
         except SyntaxError:
-            self.statusBar.SetStatusText("Syntax error in input string")
+            self.status_bar.SetStatusText("Syntax error in input string")
             raise
         tVal = ed["ar"][0]
         aVal = ed["ar"][1]
@@ -3800,7 +3799,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.setHeight(tVal)
         self.shape.setFold1(fld1, oppFld1)
         self.shape.setFold2(fld2, oppFld2)
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
 
@@ -3916,7 +3915,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 else:
                     self.savTrisRefl = self.trisFillGui.GetStringSelection()
                     self.enableGuisNoRefl()
-                self.statusBar.SetStatusText(self.shape.getStatusStr())
+                self.status_bar.SetStatusText(self.shape.getStatusStr())
                 self.updateShape()
 
     def setRotateFld(self, rotateFld):
@@ -4097,7 +4096,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             else:
                 if self.shape.inclReflections:
                     self.setReflPosAngle()
-                self.statusBar.SetStatusText(self.shape.getStatusStr())
+                self.status_bar.SetStatusText(self.shape.getStatusStr())
             self.updateShape()
 
     @property
@@ -4136,7 +4135,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             if self.isPrePos():
                 self.onPrePos(event)
             else:
-                self.statusBar.SetStatusText(self.shape.getStatusStr())
+                self.status_bar.SetStatusText(self.shape.getStatusStr())
             self.updateShape()
 
     def onFirst(self, event=None):
@@ -4179,7 +4178,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def noPrePosFound(self):
         logging.info("Note: no valid positions found")
-        self.statusBar.SetStatusText(s)
+        self.status_bar.SetStatusText(s)
 
     @property
     def std_pre_pos(self):
@@ -4325,7 +4324,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             nr = self.specPosIndex + 1
         # set nr of possible positions
         self.nrTxt.SetLabel("%d/%d" % (nr, nrPos))
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.getStatusStr())
         # self.shape.printTrisAngles()
 
     def reset_std_pre_pos(self):
@@ -4472,15 +4471,17 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
                 isometries.append(extra_isometry * i)
 
         super().__init__(Vs=[], Fs=[], isometries=isometries, name=name)
-        self.showKite = True
-        self.showHepta = False
-        self.addFaces = True
-        self.heptPosAlt = False
-        self.showXtra = False
-        self.triangleAlt = True
-        self.addXtraEdge = True
+        self.show_kite = True
+        self.show_hepta = False
+        self.alt_hept_pos = False
+        self.show_extra = False
+        self.tri_alt = True
+        self.add_extra_edge = True
         self.errorStr = ""
         self.opaqueness = 1.0
+        self.update_vs = False
+        self._angle = 0
+        self.h = 0
 
         kiteColor = rgb.oliveDrab[:]
         heptColor = rgb.oliveDrab[:]
@@ -4497,38 +4498,44 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         self.h = h
         self.setV()
 
-    def setAngle(self, a):
-        self.angle = a
+    @property
+    def angle(self):
+        return self._angle
+
+    @angle.setter
+    def angle(self, a):
+        # using an extra level to be able to overwrite in subclass
+        self.set_angle(a)
+
+    def set_angle(self, a):
+        self._angle = a
         self.setV()
 
     def setViewSettings(
             self,
-            addFaces=None,
-            showKite=None,
-            showHepta=None,
-            showXtra=None,
-            triangleAlt=None,
-            addXtraEdge=None,
-            heptPosAlt=None,
+            show_kite=None,
+            show_hepta=None,
+            show_extra=None,
+            tri_alt=None,
+            add_extra_edge=None,
+            alt_hept_pos=None,
             edgeR=None,
             vertexR=None,
             opaqueness=None,
     ):
-        if addFaces is not None:
-            self.setFaceProperties(drawFaces=addFaces)
-        if showKite is not None:
-            self.showKite = showKite
-        if showHepta is not None:
-            self.showHepta = showHepta
-        if showXtra is not None:
-            self.showXtra = showXtra
-        if heptPosAlt is not None:
-            self.heptPosAlt = heptPosAlt
-        if triangleAlt is not None:
-            self.triangleAlt = triangleAlt
-            self.updateV = True
-        if addXtraEdge is not None:
-            self.addXtraEdge = addXtraEdge
+        if show_kite is not None:
+            self.show_kite = show_kite
+        if show_hepta is not None:
+            self.show_hepta = show_hepta
+        if show_extra is not None:
+            self.show_extra = show_extra
+        if alt_hept_pos is not None:
+            self.alt_hept_pos = alt_hept_pos
+        if tri_alt is not None:
+            self.tri_alt = tri_alt
+            self.update_vs = True
+        if add_extra_edge is not None:
+            self.add_extra_edge = add_extra_edge
         if edgeR is not None:
             self.setEdgeProperties(radius=edgeR, drawEdges=True)
         if vertexR is not None:
@@ -4537,11 +4544,11 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
             # TODO...
             self.opaqueness = opaqueness
         if (
-                showKite is not None  # not so efficient perhaps, but works..
-                or showHepta is not None  # not so efficient perhaps, but works..
-                or showXtra is not None  # not so efficient perhaps, but works..
-                or heptPosAlt is not None
-                or addXtraEdge is not None
+                show_kite is not None  # not so efficient perhaps, but works..
+                or show_hepta is not None  # not so efficient perhaps, but works..
+                or show_extra is not None  # not so efficient perhaps, but works..
+                or alt_hept_pos is not None
+                or add_extra_edge is not None
         ):
             self.setV()
 
@@ -4549,7 +4556,7 @@ class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
         super().glInit()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-    def getStatusStr(self):
+    def get_status_msg(self):
         if self.errorStr == "":
             floatFmt = "%02.2f"
             fmtStr = "H = %s, Angle = %s degrees" % (floatFmt, floatFmt)
@@ -4572,14 +4579,14 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.canvas = canvas
         wx.Frame.__init__(self, *args, **kwargs)
         self.panel = wx.Panel(self, -1)
-        self.statusBar = self.CreateStatusBar()
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.mainSizer.Add(
+        self.status_bar = self.CreateStatusBar()
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer.Add(
             self.create_ctrl_sizer(), 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
         )
         self.set_default_size(size)
         self.panel.SetAutoLayout(True)
-        self.panel.SetSizer(self.mainSizer)
+        self.panel.SetSizer(self.main_sizer)
         self.Show(True)
         self.panel.Layout()
 
@@ -4622,7 +4629,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
-        self.kiteAngleGui = wx.Slider(
+        self.kite_angle_gui = wx.Slider(
             self.panel,
             value=self.get_slider_val(self.shape.angle),
             minValue=0,
@@ -4630,29 +4637,29 @@ class EqlHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL,
         )
         self.panel.Bind(
-            wx.EVT_SLIDER, self.on_kite_angle, id=self.kiteAngleGui.GetId()
+            wx.EVT_SLIDER, self.on_kite_angle, id=self.kite_angle_gui.GetId()
         )
-        self.kiteAngleBox = wx.StaticBox(self.panel, label="Kite Angle")
-        self.kiteAngleSizer = wx.StaticBoxSizer(self.kiteAngleBox, wx.HORIZONTAL)
-        self.kiteAngleSizer.Add(self.kiteAngleGui, 1, wx.EXPAND)
-        self.statusBar.SetStatusText(self.shape.getStatusStr())
+        self.kite_angle_box = wx.StaticBox(self.panel, label="Kite Angle")
+        self.kite_angle_sizer = wx.StaticBoxSizer(self.kite_angle_box, wx.HORIZONTAL)
+        self.kite_angle_sizer.Add(self.kite_angle_gui, 1, wx.EXPAND)
+        self.status_bar.SetStatusText(self.shape.get_status_msg())
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
         self.view_kite_gui = wx.CheckBox(self.panel, label="Show kite")
-        self.view_kite_gui.SetValue(self.shape.showKite)
+        self.view_kite_gui.SetValue(self.shape.show_kite)
         self.view_hept_gui = wx.CheckBox(self.panel, label="Show heptagon")
-        self.view_hept_gui.SetValue(self.shape.showHepta)
+        self.view_hept_gui.SetValue(self.shape.show_hepta)
         self.add_extra_face_gui = wx.CheckBox(self.panel, label="Show extra faces")
-        self.add_extra_face_gui.SetValue(self.shape.showXtra)
+        self.add_extra_face_gui.SetValue(self.shape.show_extra)
         self.add_extra_edge_gui = wx.CheckBox(self.panel, label="Add extra edge (if extra face)")
-        self.add_extra_edge_gui.SetValue(self.shape.addXtraEdge)
+        self.add_extra_edge_gui.SetValue(self.shape.add_extra_edge)
         self.tri_alt_gui = wx.CheckBox(self.panel, label="Triangle alternative (if extra face)")
-        self.tri_alt_gui.SetValue(self.shape.triangleAlt)
+        self.tri_alt_gui.SetValue(self.shape.tri_alt)
         self.alt_hept_pos_gui = wx.CheckBox(
             self.panel, label="Use alternative heptagon position"
         )
-        self.alt_hept_pos_gui.SetValue(self.shape.heptPosAlt)
+        self.alt_hept_pos_gui.SetValue(self.shape.alt_hept_pos)
         self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
         self.view_opt_box = wx.StaticBox(self.panel, label="View settings")
         self.view_opt_sizer = wx.StaticBoxSizer(self.view_opt_box, wx.VERTICAL)
@@ -4670,7 +4677,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.column_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.column_sizer.Add(self.row_sizer, 2, wx.EXPAND)
 
-        main_sizer.Add(self.kiteAngleSizer, 4, wx.EXPAND)
+        main_sizer.Add(self.kite_angle_sizer, 4, wx.EXPAND)
         main_sizer.Add(self.column_sizer, 20, wx.EXPAND)
 
         self.add_specials(self.panel, main_sizer)
@@ -4682,10 +4689,10 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
     def on_kite_angle(self, event):
         """Update the shape conform the new edge angles"""
-        self.shape.setAngle(self.get_angle_val(self.kiteAngleGui.GetValue()))
+        self.shape.set_angle(self.get_angle_val(self.kite_angle_gui.GetValue()))
         self.canvas.paint()
         try:
-            self.statusBar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.get_status_msg())
         except AttributeError:
             pass
         event.Skip()
@@ -4699,16 +4706,16 @@ class EqlHeptagonCtrlWin(wx.Frame):
         tri_alt = self.tri_alt_gui.IsChecked()
         add_extra_edge = self.add_extra_edge_gui.IsChecked()
         self.shape.setViewSettings(
-            showKite=show_kite,
-            showHepta=show_hepta,
-            showXtra=show_extra,
-            heptPosAlt=alt_hept_pos,
-            triangleAlt=tri_alt,
-            addXtraEdge=add_extra_edge,
+            show_kite=show_kite,
+            show_hepta=show_hepta,
+            show_extra=show_extra,
+            alt_hept_pos=alt_hept_pos,
+            tri_alt=tri_alt,
+            add_extra_edge=add_extra_edge,
         )
         self.canvas.paint()
         try:
-            self.statusBar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.get_status_msg())
         except AttributeError:
             pass
 

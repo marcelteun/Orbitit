@@ -69,12 +69,12 @@ class Shape(heptagons.EqlHeptagonShape):
         this.setH(H0)
 
     def setH(this, h):
-        this.angle = Geom3D.Rad2Deg * math.atan((h - H0)/Ca)
+        this._angle = Geom3D.Rad2Deg * math.atan((h - H0)/Ca)
         super().setH(h)
 
-    def setAngle(this, a):
-        this.h     = Ca * math.tan(a*Geom3D.Deg2Rad) + H0
-        super().setAngle(a)
+    def set_angle(this, a):
+        this.h = Ca * math.tan(a*Geom3D.Deg2Rad) + H0
+        super().set_angle(a)
 
     def setV(this):
         # input this.h
@@ -107,7 +107,7 @@ class Shape(heptagons.EqlHeptagonShape):
         # add heptagons
         H = HalfTurn(axis=Vs[3])
         this.errorStr = ''
-        if not this.heptPosAlt:
+        if not this.alt_hept_pos:
             Ns = Vs
             heptN = heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None:
@@ -124,7 +124,7 @@ class Shape(heptagons.EqlHeptagonShape):
             v4 = heptN[0][4]
             p = v3 + (v4 - v3)/tau
             v = Mr*p
-            if this.triangleAlt:
+            if this.tri_alt:
                 vt = heptN[0][6]
                 xtraEdgeIndex = 15
             else:
@@ -149,7 +149,7 @@ class Shape(heptagons.EqlHeptagonShape):
             if heptN == None:
               this.errorStr = 'No valid equilateral heptagon for this position'
               return
-            if this.triangleAlt:
+            if this.tri_alt:
                 vt = heptN[0][1]
                 xtraEdgeIndex = 14
             else:
@@ -189,22 +189,22 @@ class Shape(heptagons.EqlHeptagonShape):
             ).normal()
         Ns.extend([IsoscelesTriangleN for i in range(3)])
         this.xtraEs = []
-        if this.addXtraEdge:
+        if this.add_extra_edge:
             this.xtraEs = [xtraEdgeIndex, 16]
 
         this.setBaseVertexProperties(Vs = Vs, Ns = Ns)
         Fs = []
         Es = []
         colIds = []
-        if this.showKite:
+        if this.show_kite:
             Fs.extend(this.kiteFs)
             Es.extend(this.kiteEs)
             colIds.extend(this.kiteColIds)
-        if this.showHepta:
+        if this.show_hepta:
             Fs.extend(this.heptFs)
             Es.extend(this.heptEs)
             colIds.extend(this.heptColIds)
-        if this.showXtra:
+        if this.show_extra:
             Fs.extend(this.xtraFs)
             Es.extend(this.xtraEs)
             colIds.extend(this.xtraColIds)
@@ -220,13 +220,13 @@ class Shape(heptagons.EqlHeptagonShape):
         ):
         if faceIndices == []:
             offset = 0
-            if this.showKite:
+            if this.show_kite:
                 faceIndices.append(offset)
                 offset += len(this.kiteFs)
-            if this.showHepta:
+            if this.show_hepta:
                 faceIndices.append(offset)
                 offset += len(this.heptFs)
-            if this.showXtra:
+            if this.show_extra:
                 faceIndices.append(offset)
                 faceIndices.append(offset+1)
         return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
@@ -247,8 +247,8 @@ class Shape(heptagons.EqlHeptagonShape):
 
     def getStatusStr(this):
         stdStr = super().getStatusStr()
-        if this.showXtra and this.addXtraEdge and len(this.xtraEs) == 2:
-            if this.updateV:
+        if this.show_extra and this.add_extra_edge and len(this.xtraEs) == 2:
+            if this.update_vs:
                 this.setV()
             # reference vector, a side of the heptagon:
             vs = this.Vs[0]
@@ -260,7 +260,7 @@ class Shape(heptagons.EqlHeptagonShape):
             v1 = vs[this.xtraEs[1]]
             v = v0 - v1
             return '%s, extra edge length: %02.2f' % (stdStr, v.norm()/r.norm())
-        # TODO: if not addXtraEdge: print diff in norms (or both edge lengths)
+        # TODO: if not add_extra_edge: print diff in norms (or both edge lengths)
         else:
             return stdStr
     # GUI PART
@@ -305,7 +305,7 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             shape, canvas, (332, 638),
             *args, **kwargs
         )
-        this.shape.setViewSettings(heptPosAlt=True)
+        this.shape.setViewSettings(alt_hept_pos=True)
         this.alt_hept_pos_gui.SetValue(True)
 
     def add_specials(this, parentFrame, parentSizer):
@@ -374,12 +374,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.specialSolidPreviousIndex == 0:
             # save angle in None
             this.specialSolidAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.specialSolidPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_kite_gui.SetValue(True)
         this.add_extra_face_gui.SetValue(False)
@@ -403,12 +403,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.prefHeptSpecPreviousIndex == 0:
             # save angle in None
             this.prefHeptSpecAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.prefHeptSpecPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_hept_gui.SetValue(True)
         this.alt_hept_pos_gui.SetValue(False)
@@ -432,12 +432,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.altHeptSpecPreviousIndex == 0:
             # save angle in None
             this.altHeptSpecAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.altHeptSpecPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_hept_gui.SetValue(True)
         this.alt_hept_pos_gui.SetValue(True)

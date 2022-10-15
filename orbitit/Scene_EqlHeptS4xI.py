@@ -59,21 +59,21 @@ class Shape(heptagons.EqlHeptagonShape):
         # TODO: use consistent angles, Dodecahedron uses without const atanHV2
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
-        this.angle = Geom3D.Rad2Deg * math.atan(V2 * (h - 1.0)) + this.atanHV2
+        this._angle = Geom3D.Rad2Deg * math.atan(V2 * (h - 1.0)) + this.atanHV2
         super().setH(h)
 
-    def setAngle(this, a):
+    def set_angle(self, a):
         # TODO: use consistent angles, Dodecahedron uses without const atanHV2
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
-        alpha = a - this.atanHV2
-        this.h = hV2 * math.tan(alpha*Geom3D.Deg2Rad) + 1.0
-        super().setAngle(alpha)
+        alpha = a - self.atanHV2
+        self.h = hV2 * math.tan(alpha*Geom3D.Deg2Rad) + 1.0
+        super().set_angle(alpha)
 
     def setV(this):
         # input this.h
         St = this.h / (2*this.h - 1)
-        if this.heptPosAlt:
+        if this.alt_hept_pos:
             #
             #    z
             #     ^
@@ -176,11 +176,11 @@ class Shape(heptagons.EqlHeptagonShape):
 
         xtraEs = []
         # add extra faces:
-        if this.heptPosAlt:
+        if this.alt_hept_pos:
             # Eql triangle
             Vs.extend([Vs[15], Vs[22], Vs[29]])         # V33 - V35
             # Isosceles triangles
-            if this.triangleAlt:
+            if this.tri_alt:
                 Vs.extend([Vs[13], Vs[14], Vs[32]]) # V36 - V38
                 Vs.extend([Vs[20], Vs[21], Vs[18]]) # V39 - V41
                 Vs.extend([Vs[27], Vs[28], Vs[25]]) # V42 - V44
@@ -214,8 +214,8 @@ class Shape(heptagons.EqlHeptagonShape):
                     [42, 43, 44],
                 ]
             this.xtraColIds = [2 for i in range(4)]
-            if this.addXtraEdge:
-                if this.triangleAlt:
+            if this.add_extra_edge:
+                if this.tri_alt:
                     xtraEs = [36, 38, 39, 41, 42, 44]
                 else:
                     xtraEs = [37, 38, 40, 41, 43, 44]
@@ -226,7 +226,7 @@ class Shape(heptagons.EqlHeptagonShape):
             Vs.extend([Vs[22], Vs[23], vec(Vs[22][0], 0, 0)]) # V36 - V38
             Vs.extend([Vs[29], Vs[30], vec(0, Vs[29][1], 0)]) # V39 - V41
             # add isosceles triangles:
-            if this.triangleAlt:
+            if this.tri_alt:
                 v = Vs[13]
                 Vs.extend([Vs[13], Vs[14], vec(v[0], -v[1], v[2])]) # V42 - V44
                 v = Vs[20]
@@ -267,8 +267,8 @@ class Shape(heptagons.EqlHeptagonShape):
                     [48, 49, 50]
                 ]
             this.xtraColIds = [2 for i in range(6)]
-            if this.addXtraEdge:
-                if this.triangleAlt:
+            if this.add_extra_edge:
+                if this.tri_alt:
                     xtraEs = [42, 44, 45, 47, 48, 50]
                 else:
                     xtraEs = [43, 44, 46, 47, 49, 50]
@@ -277,15 +277,15 @@ class Shape(heptagons.EqlHeptagonShape):
         Fs = []
         Es = []
         colIds = []
-        if this.showKite:
+        if this.show_kite:
             Fs.extend(this.kiteFs)
             Es.extend(this.kiteEs)
             colIds.extend(this.kiteColIds)
-        if this.showHepta:
+        if this.show_hepta:
             Fs.extend(this.heptFs)
             Es.extend(this.heptEs)
             colIds.extend(this.heptColIds)
-        if this.showXtra:
+        if this.show_extra:
             Fs.extend(xtraFs)
             Es.extend(xtraEs)
             colIds.extend(this.xtraColIds)
@@ -300,15 +300,15 @@ class Shape(heptagons.EqlHeptagonShape):
         ):
         if faceIndices == []:
             offset = 0
-            if this.showKite:
+            if this.show_kite:
                 faceIndices.append(offset)
                 offset += len(this.kiteFs)
-            if this.showHepta:
+            if this.show_hepta:
                 faceIndices.append(offset)
                 offset += len(this.heptFs)
-            if this.showXtra:
+            if this.show_extra:
                 faceIndices.append(offset)
-                if this.heptPosAlt:
+                if this.alt_hept_pos:
                     faceIndices.append(offset+1)
                 else:
                     faceIndices.append(offset+3)
@@ -424,12 +424,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.minMaxPreviousIndex == 0:
             # save angle in None
             this.minMaxAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.minMaxPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_kite_gui.SetValue(True)
         this.view_hept_gui.SetValue(True)
@@ -449,12 +449,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.prefHeptSpecPreviousIndex == 0:
             # save angle in None
             this.prefHeptSpecAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.prefHeptSpecPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_hept_gui.SetValue(True)
         this.alt_hept_pos_gui.SetValue(False)
@@ -478,12 +478,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.altHeptSpecPreviousIndex == 0:
             # save angle in None
             this.altHeptSpecAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.altHeptSpecPreviousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_hept_gui.SetValue(True)
         this.alt_hept_pos_gui.SetValue(True)

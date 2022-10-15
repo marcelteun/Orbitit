@@ -48,20 +48,19 @@ class Shape(heptagons.EqlHeptagonShape):
         this.setH(1.0)
         this.setViewSettings(edgeR=0.02, vertexR=0.04)
 
-    def setH(this, h):
-        this.angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
+    def setH(self, h):
+        self._angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
         super().setH(h)
 
-    def setAngle(this, a):
-        tanA     = math.tan(a*Geom3D.Deg2Rad)
-        this.h     = (V2 + tanA) / (V2 + 4*tanA)
-        this.setH(this.h)
-        super().setAngle(a)
+    def set_angle(self, a):
+        tanA = math.tan(a*Geom3D.Deg2Rad)
+        self.h = (V2 + tanA) / (V2 + 4*tanA)
+        super().set_angle(a)
 
     def setV(this):
         # input this.h
         St = this.h / (4*this.h - 1)
-        if this.heptPosAlt:
+        if this.alt_hept_pos:
             #
             #    z
             #     ^
@@ -182,17 +181,17 @@ class Shape(heptagons.EqlHeptagonShape):
         Vs.extend([Vs[15], Vs[22], Vs[29]])         # V33 - V35
         # add isosceles triangles:
         this.xtraEs = []
-        if this.triangleAlt:
+        if this.tri_alt:
             Vs.extend([Vs[13], Vs[14], Vs[32]]) # V36 - V38
             Vs.extend([Vs[20], Vs[21], Vs[18]]) # V39 - V41
             Vs.extend([Vs[27], Vs[28], Vs[25]]) # V42 - V44
-            if this.addXtraEdge:
+            if this.add_extra_edge:
                 this.xtraEs = [36, 38, 39, 41, 42, 44]
         else:
             Vs.extend([Vs[13], Vs[14], Vs[14]]) # V36 - V38
             Vs.extend([Vs[20], Vs[21], Vs[21]]) # V39 - V41
             Vs.extend([Vs[27], Vs[28], Vs[28]]) # V42 - V44
-            if this.heptPosAlt:
+            if this.alt_hept_pos:
                 v = Vs[38]
                 Vs[38] = vec(-v[0],  v[1], -v[2])    # HY * V9
                 v = Vs[41]
@@ -204,7 +203,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 Vs[41] = vec(-v[0],  v[1], -v[2])    # HY * V23
             v = Vs[44]
             Vs[44] = vec(-v[0], -v[1],  v[2])    # HZ * V16
-            if this.addXtraEdge:
+            if this.add_extra_edge:
                 this.xtraEs = [37, 38, 40, 41, 43, 44]
 
         # normal of equilateral triangle
@@ -231,15 +230,15 @@ class Shape(heptagons.EqlHeptagonShape):
         Fs = []
         Es = []
         colIds = []
-        if this.showKite:
+        if this.show_kite:
             Fs.extend(this.kiteFs)
             Es.extend(this.kiteEs)
             colIds.extend(this.kiteColIds)
-        if this.showHepta:
+        if this.show_hepta:
             Fs.extend(this.heptFs)
             Es.extend(this.heptEs)
             colIds.extend(this.heptColIds)
-        if this.showXtra:
+        if this.show_extra:
             Fs.extend(this.xtraFs)
             Es.extend(this.xtraEs)
             colIds.extend(this.xtraColIds)
@@ -254,13 +253,13 @@ class Shape(heptagons.EqlHeptagonShape):
         ):
         if faceIndices == []:
             offset = 0
-            if this.showKite:
+            if this.show_kite:
                 faceIndices.append(offset)
                 offset += len(this.kiteFs)
-            if this.showHepta:
+            if this.show_hepta:
                 faceIndices.append(offset)
                 offset += len(this.heptFs)
-            if this.showXtra:
+            if this.show_extra:
                 faceIndices.append(offset)
                 faceIndices.append(offset+3)
         return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
@@ -371,12 +370,12 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if index != 0 and this.previousIndex == 0:
             # save angle in None
             this.specialAngles[0]['a'] = this.get_angle_val(
-                    this.kiteAngleGui.GetValue()
+                    this.kite_angle_gui.GetValue()
                 )
             #TODO save other settings? Make a functions for this.
         this.previousIndex = index
-        this.kiteAngleGui.SetValue(this.get_slider_val(angle))
-        this.shape.setAngle(angle)
+        this.kite_angle_gui.SetValue(this.get_slider_val(angle))
+        this.shape.angle = angle
 
         this.view_hept_gui.SetValue(True)
         this.alt_hept_pos_gui.SetValue(False)
@@ -390,11 +389,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         if 'e' in angleData:
             this.add_extra_edge_gui.SetValue(angleData['e'])
         this.on_view_settings_chk(this)
-        # on_view_settings_chk(this) contains:
-        #this.canvas.paint()
-        #try:
-        #    this.statusBar.SetStatusText(this.shape.getStatusStr())
-        #except AttributeError: pass
 
 
 class Scene(Geom3D.Scene):

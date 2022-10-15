@@ -45,11 +45,8 @@ class Shape(Geom3D.SimpleShape):
                 self.sideMax / 2
             )
         self.setViewSettings(
-            addFaces=True,
-            useCylinderEs=False,
-            useSphereVs=False,
-            showKite=True,
-            showHepta=True,
+            show_kite=True,
+            show_hepta=True,
         )
 
     @staticmethod
@@ -147,48 +144,28 @@ class Shape(Geom3D.SimpleShape):
                 geomtypes.Vec3([h6[0], h6[1], h6[2] + d])
             ]
         # try to set the vertices array.
-        # the failure occurs at init since showKite and showHepta don't exist
+        # the failure occurs at init since show_kite and show_hepta don't exist
         try:
             Vs = []
-            if self.showKite:
+            if self.show_kite:
                 Vs.extend(self.kiteVs)
-            if self.showHepta:
+            if self.show_hepta:
                 Vs.extend(self.heptaVs)
             self.setVertexProperties(Vs = Vs)
         except AttributeError: pass
 
-    def setViewSettings(self,
-            addFaces=None,
-            useCylinderEs=None,
-            useSphereVs=None,
-            showKite=None,
-            showHepta=None
-        ):
-        if addFaces != None:
-            self.setFaceProperties(drawFaces = addFaces)
-        if useCylinderEs != None:
-            if useCylinderEs:
-                radius = 0.05
-            else:
-                radius = 0.00
-            self.setEdgeProperties(radius = radius, drawEdges = True)
-        if useSphereVs != None:
-            if useSphereVs:
-                radius = 0.1
-            else:
-                radius = 0.00
-            self.setVertexProperties(radius = radius)
-        if showKite != None or showHepta != None:
+    def setViewSettings(self, show_kite=None, show_hepta=None):
+        if show_kite != None or show_hepta != None:
             Fs = []
             Es = []
             Vs = []
             ColsI = []
-            if showKite:
+            if show_kite:
                 Vs.extend(self.kiteVs)
                 Fs.extend(self.kiteFs)
                 Es.extend(self.kiteEs)
                 ColsI.extend(self.kiteColors)
-            if showHepta:
+            if show_hepta:
                 if Vs != []:
                     lVs = len(Vs)
                     for face in self.heptaFs:
@@ -205,8 +182,8 @@ class Shape(Geom3D.SimpleShape):
             self.setEdgeProperties(Es = Es)
             self.setFaceProperties(Fs = Fs, colors = [self.colors[:], ColsI[:]])
             # save for setV:
-            self.showKite  = showKite
-            self.showHepta = showHepta
+            self.show_kite  = show_kite
+            self.show_hepta = show_hepta
 
     def setTop(self, top):
         self.top  = top
@@ -240,14 +217,14 @@ class CtrlWin(wx.Frame):
         self.canvas = canvas
         wx.Frame.__init__(self, *args, **kwargs)
         self.panel = wx.Panel(self, -1)
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.mainSizer.Add(
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer.Add(
                 self.createControlsSizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
         self.set_default_size((438, 312))
         self.panel.SetAutoLayout(True)
-        self.panel.SetSizer(self.mainSizer)
+        self.panel.SetSizer(self.main_sizer)
         self.Show(True)
         self.panel.Layout()
 
@@ -256,9 +233,9 @@ class CtrlWin(wx.Frame):
         self.topScale  = 100
         self.tailScale = 100
 
-        self.shape.setViewSettings(showHepta=False, showKite=True)
+        self.shape.setViewSettings(show_hepta=False, show_kite=True)
 
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
         self.kiteSideAdjust = wx.Slider(
@@ -315,9 +292,9 @@ class CtrlWin(wx.Frame):
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
         self.view_kite_gui = wx.CheckBox(self.panel, label = 'Show Kite')
-        self.view_kite_gui.SetValue(self.shape.showKite)
+        self.view_kite_gui.SetValue(self.shape.show_kite)
         self.view_hept_gui = wx.CheckBox(self.panel, label = 'Show Heptagon')
-        self.view_hept_gui.SetValue(self.shape.showHepta)
+        self.view_hept_gui.SetValue(self.shape.show_hepta)
         self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
         self.view_opt_box = wx.StaticBox(self.panel, label = 'View Settings')
         self.view_opt_sizer = wx.StaticBoxSizer(self.view_opt_box, wx.VERTICAL)
@@ -334,10 +311,10 @@ class CtrlWin(wx.Frame):
         self.column_sizer.Add(self.kiteTailSizer, 1, wx.EXPAND)
         self.column_sizer.Add(self.row_sizer, 2, wx.EXPAND)
 
-        mainSizer.Add(self.kiteSideSizer, 2, wx.EXPAND)
-        mainSizer.Add(self.column_sizer, 10, wx.EXPAND)
+        main_sizer.Add(self.kiteSideSizer, 2, wx.EXPAND)
+        main_sizer.Add(self.column_sizer, 10, wx.EXPAND)
 
-        return mainSizer
+        return main_sizer
 
     def setNoPrePos(self):
         sel = self.prePosSelect.SetSelection(0)
@@ -348,7 +325,7 @@ class CtrlWin(wx.Frame):
         self.shape.setSide(float(self.kiteSideAdjust.GetValue()) / self.sideScale)
         self.canvas.paint()
         try:
-            self.statusBar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
         event.Skip()
 
@@ -357,7 +334,7 @@ class CtrlWin(wx.Frame):
         self.shape.setTop(float(self.topRange - self.kiteTopAdjust.GetValue()) / self.topScale)
         self.canvas.paint()
         try:
-            self.statusBar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
         event.Skip()
 
@@ -366,7 +343,7 @@ class CtrlWin(wx.Frame):
         self.shape.setTail(float(self.kiteTailAdjust.GetValue()) / self.tailScale)
         self.canvas.paint()
         try:
-            self.statusBar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
         event.Skip()
 
@@ -409,15 +386,15 @@ class CtrlWin(wx.Frame):
         self.kiteTailAdjust.SetValue(tail * self.tailScale)
         self.kiteSideAdjust.SetValue(side * self.sideScale)
         try:
-            self.statusBar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.getStatusStr())
         except AttributeError: pass
 
     def on_view_settings_chk(self, event):
-        showKite = self.view_kite_gui.IsChecked()
-        showHepta = self.view_hept_gui.IsChecked()
+        show_kite = self.view_kite_gui.IsChecked()
+        show_hepta = self.view_hept_gui.IsChecked()
         self.shape.setViewSettings(
-            showKite=showKite,
-            showHepta=showHepta
+            show_kite=show_kite,
+            show_hepta=show_hepta
         )
         self.canvas.paint()
 
