@@ -37,10 +37,10 @@ trisAlt.baseKey = {
 
 counter = heptagons.Tris_counter()
 
-DYN_POS = heptagons.FaceType.DYN_POS
-OPEN_FILE = heptagons.FaceType.OPEN_FILE
-ONLY_HEPTS = heptagons.FaceType.ONLY_HEPTS
-ONLY_XTRA_O3S = heptagons.FaceType.ONLY_XTRA_O3S
+DYN_POS = heptagons.DYN_POS
+OPEN_FILE = heptagons.OPEN_FILE
+ONLY_HEPTS = heptagons.ONLY_HEPTS
+ONLY_XTRA_O3S = heptagons.ONLY_XTRA_O3S
 T32 = counter.pp()
 T24_S6 = counter.pp()
 T24_S30 = counter.pp()
@@ -632,15 +632,15 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
 
     def showOnlyHepts(this):
         return this.prePos == ONLY_HEPTS and not (
-            this.trisFill is None) and not (
-            this.trisFill == trisAlt.refl_1 or
-            this.trisFill == trisAlt.refl_2)
+            this.tris_fill is None) and not (
+            this.tris_fill == trisAlt.refl_1 or
+            this.tris_fill == trisAlt.refl_2)
 
     def showOnlyO3Tris(this):
         return this.prePos == ONLY_XTRA_O3S and not (
-            this.trisFill is None) and not (
-            this.trisFill == trisAlt.refl_1 or
-            this.trisFill == trisAlt.refl_2)
+            this.tris_fill is None) and not (
+            this.tris_fill == trisAlt.refl_1 or
+            this.tris_fill == trisAlt.refl_2)
 
     rDir = 'data/Data_FldHeptS4'
     rPre = 'frh-roots'
@@ -671,7 +671,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
                 'tris': tris_alt,
                 'fold-rot': self.fileStrMapFoldPos(in_data['file'])
             }
-            logging.info("see file {self.rDir}/{in_data['file']}")
+            logging.info(f"see file {self.rDir}/{in_data['file']}")
             return data
 
     predefReflSpecPos = {

@@ -46,11 +46,11 @@ trisAlt.baseKey = {
 
 counter = heptagons.Tris_counter()
 
-DYN_POS         = heptagons.FaceType.DYN_POS
-OPEN_FILE       = heptagons.FaceType.OPEN_FILE
+DYN_POS         = heptagons.DYN_POS
+OPEN_FILE       = heptagons.OPEN_FILE
 # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
-S_T8            = heptagons.FaceType.ONLY_XTRA_O3S
-S_ONLY_HEPTS    = heptagons.FaceType.ONLY_HEPTS
+S_T8            = heptagons.ONLY_XTRA_O3S
+S_ONLY_HEPTS    = heptagons.ONLY_HEPTS
 S_T16           = counter.pp()
 S_T24           = counter.pp()
 S_T32           = counter.pp()
@@ -694,15 +694,15 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
 
     def showOnlyHepts(this):
         return this.prePos == S_ONLY_HEPTS and not (
-                this.trisFill is None
+                this.tris_fill is None
             ) and not (
-                this.trisFill & heptagons.twist_bit == heptagons.twist_bit)
+                this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
 
     def showOnlyO3Tris(this):
-        return this.prePos == heptagons.FaceType.ONLY_XTRA_O3S and not (
-                this.trisFill is None
+        return this.prePos == heptagons.ONLY_XTRA_O3S and not (
+                this.tris_fill is None
             ) and not (
-                this.trisFill & heptagons.twist_bit == heptagons.twist_bit)
+                this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
 
     rDir = 'data/Data_FldHeptA4'
     rPre = 'frh-roots'
@@ -728,12 +728,12 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             assert tris_str is not None
             tris_str = trisAlt.key[tris_str]
             data = {
-                    'set': in_data['set'],
-                    '7fold': heptagons.FoldMethod.get(fold_method_str),
-                    'tris': tris_str,
-                    'fold-rot': self.fileStrMapFoldPos(in_data['file'])
+                'set': in_data['set'],
+                '7fold': heptagons.FoldMethod.get(fold_method_str),
+                'tris': tris_str,
+                'fold-rot': self.fileStrMapFoldPos(in_data['file'])
             }
-            logging.info("see file {self.rDir}/{in_data['file']}")
+            logging.info(f"see file {self.rDir}/{in_data['file']}")
             return data
 
     predefReflSpecPos = {

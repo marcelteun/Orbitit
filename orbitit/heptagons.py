@@ -52,13 +52,12 @@ HEPT_RHO = HEPT_RHO_NUM / HEPT_DENOM
 HEPT_SIGMA = HEPT_SIGMA_NUM / HEPT_DENOM
 HEPT_HEIGHT = (1 + HEPT_SIGMA + HEPT_RHO) * HEPT_DENOM
 
-class FaceType(Enum):
-    ONLY_HEPTS = -1
-    DYN_POS = -2
-    OPEN_FILE = -3
-    ONLY_XTRA_O3S = -4
-    ALL_EQ_TRIS = -5
-    NO_O3_TRIS = -6
+ONLY_HEPTS = -1
+DYN_POS = -2
+OPEN_FILE = -3
+ONLY_XTRA_O3S = -4
+ALL_EQ_TRIS = -5
+NO_O3_TRIS = -6
 
 tris_fill_base = 0
 
@@ -3239,6 +3238,11 @@ class FldHeptagonCtrlWin(wx.Frame):
     rot_min_size = (545, 600)
     pre_pos_file_name = None
     _std_pre_pos = None
+    _pre_pos_map = None
+
+    # in these the status for the triangle configuration is save (with of without reflections)
+    tris_setup_refl = None
+    tris_setup_no_refl = None
 
     def __init__(
             self,
@@ -3281,9 +3285,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.pre_pos_strings = pre_pos_strings
         self.symBase = symmetryBase
         self.stringify = pre_pos_to_number
+        self._saved_angle = {}
         # One of the items in the UI should an option to read from File.
-        if not FaceType.OPEN_FILE in pre_pos_to_number:
-            self.stringify[FaceType.OPEN_FILE] = "From File"
+        if not OPEN_FILE in pre_pos_to_number:
+            self.stringify[OPEN_FILE] = "From File"
         self.panel = wx.Panel(self, -1)
         self.status_bar = self.CreateStatusBar()
         self.foldMethod = FoldMethod.TRIANGLE
@@ -3311,9 +3316,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.Guis = []
 
         # static adjustments
-        self.trisFillGui = wx.Choice(self.panel, style=wx.RA_VERTICAL, choices=[])
-        self.Guis.append(self.trisFillGui)
-        self.trisFillGui.Bind(wx.EVT_CHOICE, self.onTriangleFill)
+        self.tris_fill_gui = wx.Choice(self.panel, style=wx.RA_VERTICAL, choices=[])
+        self.Guis.append(self.tris_fill_gui)
+        self.tris_fill_gui.Bind(wx.EVT_CHOICE, self.onTriangleFill)
         self.setEnableTrisFillItems()
 
         self.trisPosGui = wx.Choice(
@@ -3396,11 +3401,11 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.RA_VERTICAL,
             choices=self.pre_pos_strings,
         )
-        # Don't hardcode which index is FaceType.DYN_POS, I might reorder the item list
+        # Don't hardcode which index is DYN_POS, I might reorder the item list
         # one time, and will probably forget to update the default selection..
         for i in range(len(self.pre_pos_strings)):
-            if self.pre_pos_strings[i] == self.stringify[FaceType.DYN_POS]:
-                self.pre_pos_gui.SetStringSelection(self.stringify[FaceType.DYN_POS])
+            if self.pre_pos_strings[i] == self.stringify[DYN_POS]:
+                self.pre_pos_gui.SetStringSelection(self.stringify[DYN_POS])
                 break
         self.setEnablePrePosItems()
         self.Guis.append(self.pre_pos_gui)
@@ -3537,7 +3542,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         # Alternatives of filling with triangles
         self.Boxes.append(wx.StaticBox(self.panel, label="Triangle Fill Alternative"))
         fillSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-        fillSizer.Add(self.trisFillGui, 0, wx.EXPAND)
+        fillSizer.Add(self.tris_fill_gui, 0, wx.EXPAND)
         fillSizer.Add(self.trisPosGui, 0, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -3689,12 +3694,12 @@ class FldHeptagonCtrlWin(wx.Frame):
                 if current_pre_pos == pre_pos_id:
                     pre_pos_still_valid = True
             else:
-                if pre_pos_str == self.stringify[FaceType.DYN_POS]:
+                if pre_pos_str == self.stringify[DYN_POS]:
                     self.pre_pos_gui.Append(pre_pos_str)
         if pre_pos_still_valid:
             self.pre_pos_gui.SetStringSelection(self.stringify[current_pre_pos])
         else:
-            self.pre_pos_gui.SetStringSelection(self.stringify[FaceType.DYN_POS])
+            self.pre_pos_gui.SetStringSelection(self.stringify[DYN_POS])
 
     def rmControlsSizer(self):
         # The 'try' is necessary, since the boxes are destroyed in some OS,
@@ -3812,12 +3817,12 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.updateShape()
         event.Skip()
 
-    def onApplySym(self, event):
+    def onApplySym(self, _event):
         self.shape.apply_symmetries = self.applySymGui.IsChecked()
         self.shape.updateShape = True
         self.updateShape()
 
-    def onAddTriangles(self, event):
+    def onAddTriangles(self, _event=None):
         self.shape.addXtraFs = self.addTrisGui.IsChecked()
         self.shape.updateShape = True
         self.updateShape()
@@ -3853,9 +3858,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.posAngleGui.Disable()
         # the code below is added to be able to check and uncheck "Has
         # Reflections" in a "undo" kind of way.
-        self.__sav_oppFld1 = self.shape.oppFold1
-        self.__sav_oppFld2 = self.shape.oppFold2
-        self.__sav_posAngle = self.shape.posAngle
+        self._saved_angle["opp_fold1"] = self.shape.oppFold1
+        self._saved_angle["opp_fold2"] = self.shape.oppFold2
+        self._saved_angle["pos_angle"] = self.shape.posAngle
         self.shape.setFold1(oppositeAngle=self.shape.fold1)
         self.shape.setFold2(oppositeAngle=self.shape.fold2)
         self.setReflPosAngle()
@@ -3868,12 +3873,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         # the code below is added to be able to check and uncheck "Has
         # Reflections" in a "undo" kind of way.
         if restore:
-            self.shape.setFold1(oppositeAngle=self.__sav_oppFld1)
-            self.shape.setFold2(oppositeAngle=self.__sav_oppFld2)
-            self.shape.setPosAngle(self.__sav_posAngle)
-            self.fold1OppGui.SetValue(Geom3D.Rad2Deg * self.__sav_oppFld1)
-            self.fold2OppGui.SetValue(Geom3D.Rad2Deg * self.__sav_oppFld2)
-            self.posAngleGui.SetValue(Geom3D.Rad2Deg * self.__sav_posAngle)
+            opp_fold1 = self._saved_angle["opp_fold1"]
+            opp_fold2 = self._saved_angle["opp_fold2"]
+            hept_angle = self._saved_angle["pos_angle"]
+            self.shape.setFold1(oppositeAngle=opp_fold1)
+            self.shape.setFold2(oppositeAngle=opp_fold2)
+            self.shape.setPosAngle(hept_angle)
+            self.fold1OppGui.SetValue(Geom3D.Rad2Deg * opp_fold1)
+            self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opp_fold2)
+            self.posAngleGui.SetValue(Geom3D.Rad2Deg * hept_angle)
 
     def disableGuisNoRefl(self):
         if self.__guisNoReflEnabled:
@@ -3895,11 +3903,11 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def disableTrisFillGuis(self):
         self.addTrisGui.Disable()
-        self.trisFillGui.Disable()
+        self.tris_fill_gui.Disable()
 
     def enableTrisFillGuis(self):
         self.addTrisGui.Enable()
-        self.trisFillGui.Enable()
+        self.tris_fill_gui.Enable()
 
     def onRefl(self, event=None):
         self.shape.has_reflections = self.reflGui.IsChecked()
@@ -3912,17 +3920,17 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.set_default_size(self.rot_min_size)
         if event is not None:
             if self.is_pre_pos():
-                self.pre_pos_gui.SetStringSelection(self.stringify[FaceType.DYN_POS])
+                self.pre_pos_gui.SetStringSelection(self.stringify[DYN_POS])
                 if not self.shape.has_reflections:
-                    self.__sav_oppFld1 = self.shape.fold1
-                    self.__sav_oppFld2 = self.shape.fold2
+                    self._saved_angle["opp_fold1"] = self.shape.fold1
+                    self._saved_angle["opp_fold2"] = self.shape.fold2
                 self.on_pre_pos(event)
             else:
                 if self.shape.has_reflections:
-                    self.savTrisNoRefl = self.trisFillGui.GetStringSelection()
+                    self.tris_setup_no_refl = self.tris_fill_gui.GetStringSelection()
                     self.disableGuisNoRefl()
                 else:
-                    self.savTrisRefl = self.trisFillGui.GetStringSelection()
+                    self.tris_setup_refl = self.tris_fill_gui.GetStringSelection()
                     self.enableGuisNoRefl()
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
                 self.updateShape()
@@ -3967,19 +3975,19 @@ class FldHeptagonCtrlWin(wx.Frame):
     def setEnableTrisFillItems(self, itemList=None):
         # first time fails
         try:
-            currentChoice = self.trisAlt.key[self.trisFillGui.GetStringSelection()]
+            current_val = self.trisAlt.key[self.tris_fill_gui.GetStringSelection()]
         except KeyError:
-            currentChoice = self.trisAlt.strip_I
+            current_val = self.trisAlt.strip_I
         if itemList is None:
             itemList = self.trisAlt.choiceList
             if self.shape.has_reflections:
                 isValid = lambda c: self.trisAlt.isBaseKey(self.trisAlt.key[c])
-                if not self.trisAlt.isBaseKey(currentChoice):
-                    try:
-                        currentChoice = self.trisAlt.key[self.savTrisRefl]
-                    except AttributeError:
+                if not self.trisAlt.isBaseKey(current_val):
+                    if self.tris_setup_refl is None:
                         # TODO: use the first one that is valid
-                        currentChoice = self.trisAlt.strip_I
+                        current_val = self.trisAlt.strip_I
+                    else:
+                        current_val = self.trisAlt.key[self.tris_setup_refl]
             else:
 
                 def isValid(c):
@@ -3989,36 +3997,40 @@ class FldHeptagonCtrlWin(wx.Frame):
                     else:
                         return True
 
-                if not isValid(self.trisAlt.stringify[currentChoice]):
-                    try:
-                        currentChoice = self.trisAlt.key[self.savTrisNoRefl]
-                    except AttributeError:
+                if not isValid(self.trisAlt.stringify[current_val]):
+                    if self.tris_setup_no_refl is None:
                         # TODO: use the first one that is valid
-                        currentChoice = self.trisAlt.strip_I_strip_I
+                        current_val = self.trisAlt.strip_I_strip_I
+                    else:
+                        current_val = self.trisAlt.key[self.tris_setup_no_refl]
         else:
             isValid = lambda c: True
-        self.trisFillGui.Clear()
-        currentStillValid = False
+        self.tris_fill_gui.Clear()
+        current_still_valid = False
         for choice in itemList:
             if isValid(choice):
-                self.trisFillGui.Append(choice)
-                if currentChoice == self.trisAlt.key[choice]:
-                    currentStillValid = True
+                self.tris_fill_gui.Append(choice)
+                if current_val == self.trisAlt.key[choice]:
+                    current_still_valid = True
                 lastValid = choice
 
-        if currentStillValid:
-            self.trisFillGui.SetStringSelection(self.trisAlt.stringify[currentChoice])
+        if current_still_valid:
+            self.tris_fill_gui.SetStringSelection(self.trisAlt.stringify[current_val])
         else:
             try:
-                self.trisFillGui.SetStringSelection(lastValid)
+                self.tris_fill_gui.SetStringSelection(lastValid)
             except UnboundLocalError:
                 # None are valid...
                 return
-        self.shape.setEdgeAlternative(self.trisFill, self.oppTrisFill)
+        self.shape.setEdgeAlternative(self.tris_fill, self.opp_tris_fill)
 
     @property
-    def trisFill(self):
-        s = self.trisFillGui.GetStringSelection()
+    def tris_fill(self):
+        """Return the current triangle fill setup.
+
+        If the polyhedron is setup not to have any relfections, then return only for one side
+        """
+        s = self.tris_fill_gui.GetStringSelection()
         if s == "":
             return None
         t = self.trisAlt.key[s]
@@ -4028,8 +4040,12 @@ class FldHeptagonCtrlWin(wx.Frame):
             return t[0]
 
     @property
-    def oppTrisFill(self):
-        t = self.trisAlt.key[self.trisFillGui.GetStringSelection()]
+    def opp_tris_fill(self):
+        """Return the current triangle fill setup for the opposite side (of tris_fill).
+
+        If the polyhedron is setup to have relfections, then return the save as for tris_fill).
+        """
+        t = self.trisAlt.key[self.tris_fill_gui.GetStringSelection()]
         if self.shape.has_reflections:
             return t
         else:
@@ -4043,12 +4059,12 @@ class FldHeptagonCtrlWin(wx.Frame):
         restoreMyShape = (
             self.prevTrisFill == self.trisAlt.twist_strip_I
             and self.prevOppTrisFill == self.trisAlt.twist_strip_I
-            and self.trisFill != self.trisAlt.twist_strip_I
-            and self.oppTrisFill != self.trisAlt.twist_strip_I
+            and self.tris_fill != self.trisAlt.twist_strip_I
+            and self.opp_tris_fill != self.trisAlt.twist_strip_I
         )
         changeMyShape = (
-            self.trisFill == self.trisAlt.twist_strip_I
-            and self.oppTrisFill == self.trisAlt.twist_strip_I
+            self.tris_fill == self.trisAlt.twist_strip_I
+            and self.opp_tris_fill == self.trisAlt.twist_strip_I
         )
         if changeMyShape:
             if (
@@ -4083,8 +4099,8 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.addXtraFs = self.shape.addXtraFs
             shape.onlyRegFs = self.shape.onlyRegFs
             shape.useCulling = self.shape.useCulling
-            shape.edgeAlternative = self.trisFill
-            shape.oppEdgeAlternative = self.oppTrisFill
+            shape.edgeAlternative = self.tris_fill
+            shape.oppEdgeAlternative = self.opp_tris_fill
             shape.updateShape = True
             self.canvas.shape = shape
         elif restoreMyShape:
@@ -4096,7 +4112,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onTriangleFill(self, event=None):
         self.nvidea_workaround_0()
-        self.shape.setEdgeAlternative(self.trisFill, self.oppTrisFill)
+        self.shape.setEdgeAlternative(self.tris_fill, self.opp_tris_fill)
         if event is not None:
             if self.is_pre_pos():
                 self.on_pre_pos(event)
@@ -4155,12 +4171,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def pre_pos_val(self, key):
         """Map a position string onto the position number."""
+        if not self._pre_pos_map:
+            self._pre_pos_map = {v: k for k, v in self.stringify.items()}
         try:
-            return self._pre_pos_map[key]
-        except AttributeError:
-            self._pre_pos_map = {}
-            for k, v in self.stringify.items():
-                self._pre_pos_map[v] = k
             return self._pre_pos_map[key]
         except KeyError:
             # Happens when switching from Open File to Only Hepts e.g.
@@ -4185,7 +4198,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         return data
 
     def noPrePosFound(self):
-        logging.info("Note: no valid positions found")
+        s = "Note: no valid pre-defined positions found"
+        logging.info(s)
         self.status_bar.SetStatusText(s)
 
     @property
@@ -4193,8 +4207,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         if self._std_pre_pos:
             return self._std_pre_pos
         pre_pos_id = self.prePos
-        assert pre_pos_id != FaceType.DYN_POS
-        if pre_pos_id == FaceType.OPEN_FILE:
+        if pre_pos_id == DYN_POS:
+            return []
+        if pre_pos_id == OPEN_FILE:
             filename = self.pre_pos_file_name
             if filename is None:
                 return []
@@ -4238,10 +4253,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.noPrePosFound()
 
     def showOnlyHepts(self):
-        return self.prePos == FaceType.ONLY_HEPTS
+        return self.prePos == ONLY_HEPTS
 
     def showOnlyO3Tris(self):
-        return self.prePos == FaceType.ONLY_XTRA_O3S
+        return self.prePos == ONLY_XTRA_O3S
 
     def choose_file(self):
         filename = None
@@ -4257,6 +4272,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         filename = self.choose_file()
         if filename is None:
             return
+        logging.info("Opening file: %s", filename)
         self.pre_pos_file_name = filename
         self.foldMethodGui.SetStringSelection(
             self.fileStrMapFoldMethodStr(self.pre_pos_file_name)
@@ -4270,12 +4286,12 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.onRefl()
         # not needed: self.shape.updateShape = True
         self.setEnableTrisFillItems()
-        self.trisFillGui.SetStringSelection(self.fileStrMapTrisStr(self.pre_pos_file_name))
+        self.tris_fill_gui.SetStringSelection(self.fileStrMapTrisStr(self.pre_pos_file_name))
         self.onTriangleFill()
         self.tris_position = self.fileStrMapTrisPos(self.pre_pos_file_name)
         # it's essential that pre_pos_gui is set to dynamic be4 std_pre_pos is read
         # otherwise something else than dynamic might be read...
-        open_file_str = self.stringify[FaceType.OPEN_FILE]
+        open_file_str = self.stringify[OPEN_FILE]
         if not open_file_str in self.pre_pos_gui.GetItems():
             self.pre_pos_gui.Append(open_file_str)
         self.pre_pos_gui.SetStringSelection(open_file_str)
@@ -4362,15 +4378,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         c = self.shape
         # remove the "From File" from the pull down list as soon as it is
         # deselected
-        if event is not None and self.prePos != FaceType.OPEN_FILE:
-            openFileStr = self.stringify[FaceType.OPEN_FILE]
+        if event is not None and self.prePos != OPEN_FILE:
+            openFileStr = self.stringify[OPEN_FILE]
             n = self.pre_pos_gui.FindString(openFileStr)
             if n >= 0:
                 # deleting will reset the selection, so save and reselect:
                 selStr = self.pre_pos_gui.GetSelection()
                 self.pre_pos_gui.Delete(self.pre_pos_gui.FindString(openFileStr))
                 self.pre_pos_gui.SetSelection(selStr)
-        if self.prePos == FaceType.DYN_POS:
+        if self.prePos == DYN_POS:
             if event is not None:
                 self.pre_pos_file_name = None
             if self.restoreTris:
@@ -4382,7 +4398,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.shape.onlyRegFs = False
                 self.shape.updateShape = True
             self.number_text.SetLabel("---")
-        elif self.prePos != FaceType.OPEN_FILE:
+        elif self.prePos != OPEN_FILE:
             # this block is run for predefined spec pos only:
             if self.showOnlyHepts():
                 self.shape.addXtraFs = False
@@ -4400,7 +4416,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             # get fold, tris alt
             sps = self.special_pos_setup
             self.foldMethodGui.SetStringSelection(sps["7fold"].name.capitalize())
-            self.trisFillGui.SetStringSelection(self.trisAlt.stringify[sps["tris"]])
+            self.tris_fill_gui.SetStringSelection(self.trisAlt.stringify[sps["tris"]])
             try:
                 self.tris_position = sps["tris-pos"]
             except KeyError:
@@ -4429,7 +4445,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.enableGuisNoRefl()
             else:
                 self.disableGuisNoRefl()
-        if self.prePos != FaceType.DYN_POS:
+        if self.prePos != DYN_POS:
             if event is not None:
                 self.reset_std_pre_pos()
             setting = self.std_pre_pos
@@ -4440,9 +4456,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             # shape will not be symmetric. This is not supposed to be handled
             # here: don't overdo it!
             self.updateShapeSettings(setting)
-        # for FaceType.OPEN_FILE it is important that updateShapeSettins is done before
+        # for OPEN_FILE it is important that updateShapeSettins is done before
         # updating the sliders...
-        if self.prePos == FaceType.DYN_POS or self.prePos == FaceType.OPEN_FILE:
+        if self.prePos == DYN_POS or self.prePos == OPEN_FILE:
             for gui in [
                     self.dihedralAngleGui,
                     self.posAngleGui,
@@ -4454,6 +4470,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             ]:
                 gui.Enable()
             self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
+            # Showing triangles is the most general way of showing
+            self.addTrisGui.SetValue(wx.CHK_CHECKED)
+            self.onAddTriangles()
             self.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
             val1 = Geom3D.Rad2Deg * c.fold1
             val2 = Geom3D.Rad2Deg * c.fold2
