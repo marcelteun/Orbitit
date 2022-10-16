@@ -287,7 +287,7 @@ class CtrlWin(wx.Frame):
                 choices = self.prePosLst
             )
         self.setNoPrePos()
-        self.panel.Bind(wx.EVT_RADIOBOX, self.onPrePos) #, id = self.prePosSelect.GetId())
+        self.panel.Bind(wx.EVT_RADIOBOX, self.on_pre_pos) #, id = self.prePosSelect.GetId())
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -347,7 +347,7 @@ class CtrlWin(wx.Frame):
         except AttributeError: pass
         event.Skip()
 
-    def onPrePos(self, event = None):
+    def on_pre_pos(self, event = None):
         sel = self.prePosSelect.GetSelection()
         # if switching from 'None' to a predefined position:
         if not self.pre_pos_selected and (sel != 0):
@@ -376,7 +376,7 @@ class CtrlWin(wx.Frame):
             tail = top * (2 * heptagons.HEPT_RHO_NUM - 1)
             side = 1 + heptagons.HEPT_SIGMA
         else:
-            logging.info("onPrePos: oops, default case")
+            logging.info("on_pre_pos: oops, default case")
             top  = 0.1
             tail = 0.1
             side = 0.1

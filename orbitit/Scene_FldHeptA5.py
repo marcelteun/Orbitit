@@ -67,25 +67,25 @@ trisAlts = [
 
 counter = heptagons.Tris_counter()
 
-dyn_pos       =  heptagons.dyn_pos
-open_file     =  heptagons.open_file
-only_hepts    =  heptagons.only_hepts
-all_eq_tris   =  counter.pp()
-no_o3_tris    =  counter.pp()
-T20_P12       =  counter.pp()
-T60_P12       =  counter.pp()
-T140_P12      =  counter.pp()
-T200          =  counter.pp()
+DYN_POS = heptagons.FaceType.DYN_POS
+OPEN_FILE = heptagons.FaceType.OPEN_FILE
+ONLY_HEPTS = heptagons.FaceType.ONLY_HEPTS
+ALL_EQ_TRIS = counter.pp()
+NO_O3_TRIS = counter.pp()
+T20_P12 = counter.pp()
+T60_P12 = counter.pp()
+T140_P12 = counter.pp()
+T200 = counter.pp()
 
 Stringify = {
-    dyn_pos:      'Enable Sliders',
-    only_hepts:   'Just Heptagons',
-    all_eq_tris:  'All 80 Triangles Equilateral',
-    no_o3_tris:   '48 Triangles',
-    T20_P12:      '20 Triangles and 12 Pentagons',
-    T60_P12:      '60 Triangles and 12 Pentagons',
-    T140_P12:     '140 Triangles and 12 Pentagons',
-    T200:         '200 Triangles',
+    DYN_POS: 'Enable Sliders',
+    ONLY_HEPTS: 'Just Heptagons',
+    ALL_EQ_TRIS: 'All 80 Triangles Equilateral',
+    NO_O3_TRIS: '48 Triangles',
+    T20_P12: '20 Triangles and 12 Pentagons',
+    T60_P12: '60 Triangles and 12 Pentagons',
+    T140_P12: '140 Triangles and 12 Pentagons',
+    T200: '200 Triangles',
 }
 
 def Vlen(v0, v1):
@@ -198,7 +198,7 @@ class Shape(heptagons.FldHeptagonShape):
         if this.updateShape:
             this.setV()
         Vs = this.baseVs
-        if this.inclReflections:
+        if this.has_reflections:
             Es = this.triEs[this.edgeAlternative]
             aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
             bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
@@ -212,7 +212,7 @@ class Shape(heptagons.FldHeptagonShape):
             Es = this.o5triEs[this.edgeAlternative]
             dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 
-        if this.inclReflections:
+        if this.has_reflections:
             s = 'T = %02.2f; |a|: %s, |b|: %s, |c|: %s, |d|: %s' % (
                     this.height, aLen, bLen, cLen, dLen
                 )
@@ -805,8 +805,8 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             shape, canvas,
             12, # maxHeigth
             [ # prePosLst
-                Stringify[only_hepts],
-                Stringify[dyn_pos],
+                Stringify[ONLY_HEPTS],
+                Stringify[DYN_POS],
                 Stringify[T20_P12],
                 Stringify[T60_P12],
                 Stringify[T140_P12],
@@ -819,7 +819,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         )
 
     def showOnlyHepts(this):
-        return this.prePos == only_hepts and not (
+        return this.prePos == ONLY_HEPTS and not (
                 this.trisFill is None
             ) and not (
                 this.trisFill == trisAlt.refl_1 or
@@ -828,7 +828,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             )
 
     def showOnlyO3Tris(this):
-        return this.prePos == heptagons.only_xtra_o3s and not (
+        return this.prePos == heptagons.FaceType.ONLY_XTRA_O3S and not (
                 this.trisFill is None
             ) and not (
                 this.trisFill == trisAlt.refl_1 or
@@ -843,60 +843,60 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         logging.warning(f"unable to interprete filename {filename}")
 
     @property
-    def specPosSetup(this):
-        prePosId = this.prePos
-        if prePosId != open_file and prePosId != dyn_pos:
+    def special_pos_setup(self):
+        prePosId = self.prePos
+        if prePosId != OPEN_FILE and prePosId != DYN_POS:
             # use correct predefined special positions
-            if this.shape.inclReflections:
-                psp = this.predefReflSpecPos
+            if self.shape.has_reflections:
+                psp = self.predefReflSpecPos
             else:
-                psp = this.predefRotSpecPos
-            if this.specPosIndex >= len(psp[this.prePos]):
-                this.specPosIndex = -1
-            data = psp[this.prePos][this.specPosIndex]
+                psp = self.predefRotSpecPos
+            if self.specPosIndex >= len(psp[self.prePos]):
+                self.specPosIndex = -1
+            data = psp[self.prePos][self.specPosIndex]
             if 'file' in data:
-                logging.info("see file {this.rDir}/{in_data['file']}")
+                logging.info("see file {self.rDir}/{in_data['file']}")
             return data
 
     predefReflSpecPos = {
-        only_hepts: [
+        ONLY_HEPTS: [
             {
-                #'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_1-pos-0.json'
                 'set': [2.59804095112, 0.07208941199, -0.07223544999, 2.53866531680],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.refl_1,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_shell.0-refl_2-pos-0.json'
                 'set': [3.54099634761, 0.46203434348, -0.50537193698, 2.35569911915, 1.57079632679],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.refl_2,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1-pos-0.json'
                 'set': [2.59967616789, 0.00000000000, 0.11360610699, 2.44771371251],
                 '7fold': heptagons.FoldMethod.TRIANGLE,
                 'tris': trisAlt.refl_1,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_triangle.0-refl_1-pos-0.json'
                 'set': [2.59967616789, -0.00000000000, 2.29825889037, 0.69387894108],
                 '7fold': heptagons.FoldMethod.TRIANGLE,
                 'tris': trisAlt.refl_1,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1-pos-0.json'
                 'set': [0.78019870723, 2.64930187805, 0.54062307364, 0.00913464936],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.refl_1,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_1-pos-0.json'
                 'set': [2.56440119971, 0.06605029302, -0.42550124895, 0.64274301662],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.refl_1,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2-pos-0.json'
                 'set': [3.41692468489, 0.40788151929, -0.96765917562, 0.84720346804, 1.57079632679],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.refl_2,
             },{
-                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_0-fld_w.0-refl_2-pos-0.json'
                 'set': [-0.78796389438, 2.77826685391, 1.16636078799, 2.12574368211, 1.57079632679],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.refl_2,
@@ -904,25 +904,25 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
         T60_P12: [
             {
-                #'file': 'frh-roots-0_0_0_1-fld_w.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_1-fld_w.0-refl_2-pos-0.json'
                 'set': [1.596941118660, 2.593080381370, 0.403913171960, 0.449605194880, 1.5707963268
                 ],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.refl_2,
             },{
-                #'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.json'
                 'set': [1.655881786380, 2.578935099880, 0.646433762790, -0.461827521280, 1.5707963268
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.refl_2,
             },{
-                #'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.json'
                 'set': [1.655881786380, 2.578935099880, 0.646433762790, -2.317062680690, 1.5707963268
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.refl_2,
             },{
-                #'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.py'
+                #'file': 'frh-roots-0_0_0_1-fld_shell.0-refl_2-pos-0.json'
                 'set': [3.722764049900, -0.024061600030, 0.024067017100, 1.458692444820, 1.5707963268
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
@@ -931,43 +931,43 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
     }
     predefRotSpecPos = {
-        only_hepts: [
+        ONLY_HEPTS: [
             {
-                #'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_strip_II-pos-1.py '
+                #'file': 'frh-roots-1_0_1_0_0_1_0-fld_w.0-shell-opp_strip_II-pos-1.json '
                 'set': [2.190643133767, 0.0, -2.750194494870, 1.320518652645, 0.080811779365, 1.327501379252, 1.320518652644],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.shell_strip_II,
                 'tris-pos': 1
             },{
-                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.json
                 'set': [2.2398383815253, 1.538134037316, -1.753834771439, 2.220230723671, 0.6077158322698, -1.7538347714391, -0.1073726559505],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 1
             },{
-                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.json
                 'set': [2.5964060652451, 0.6303582297009, -1.7538347714387, 2.8348162453136, 0.3892552426313, -1.7538347714394, 1.4996710788234],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 1
             },{
-                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.json
                 'set': [2.5964060652451, 0.6303582297009, -1.7538347714387, 2.8348162453136, 0.3892552426313, -1.7538347714394, 1.4996710788234],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 1
             },{
-                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.json
                 'set': [1.5146302263609, -2.3128908096943, -1.753834771439, -1.8766503426196, -0.4739245692867, -1.753834771439, 1.9319622451753],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 1
             },{
-                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.py
+                #'file': frh-roots-1_0_1_0_0_1_0-fld_w.1-strip_II-opp_shell-pos-1.json
                 'set': [1.5146302263604, -2.3128908096942, 1.7538347714387, 1.1330038160007, -0.4739245692867, 1.7538347714397, -1.3415689033837],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
@@ -977,28 +977,28 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
         T20_P12: [
             {
-                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.json'
                 'set': [3.9285156166, 0.4481183997, -1.1824397375, -0.6742498494, 0.7406212166, 1.0271943946, -2.9154857351],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 0
             }, {
-                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.json'
                 'set': [3.7946099505, 0.4342295954, -1.3000303091, -0.6713165943, 0.6792547664, 1.1292221703, -3.1339879423],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 0
             }, {
-                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.json'
                 'set': [3.2135654837, -0.4036768949, 1.6871643575, 0.8066757021, -2.7177042329, -1.8939034612, -2.3546442874],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
                 'tris-pos': 1,
                 'fold-rot': 0
             }, {
-                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_0_1-fld_w.0-strip_II-opp_shell-pos-1.json'
                 'set': [2.7907235251, -0.3606585776, 1.2610787379, 0.2334086784, -3.0920488367, -1.8938496708, 2.5205702708],
                 '7fold': heptagons.FoldMethod.W,
                 'tris': trisAlt.strip_II_shell,
@@ -1008,7 +1008,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
         T60_P12: [
             {
-                #'file': 'frh-roots-0_1_0_1_1_1_0-fld_shell.0-strip_II-opp_shell-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_1_0-fld_shell.0-strip_II-opp_shell-pos-1.json'
                 'set': [3.567397972268, 0.577608713844, -0.805085622072, -1.564973557413, 0.802103304585, 0.794585079662, 2.557585428357
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
@@ -1018,21 +1018,21 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
         T200: [
             {
-                #'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
+                #'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.json'
                 'set': [4.142695742002, 1.124949218194, 0.821407938281, 3.141592653589, 1.570796326795, -0.566349943870, 0.910396047071
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.shell_strip_II,
                 'tris-pos': 1
             },{
-                #'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
+                #'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.json'
                 'set': [4.142695742003, 1.124949218194, -1.954107826020, 1.286357494175, 1.570796326795, -0.566349943869, -0.944839112344
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.shell_strip_II,
                 'tris-pos': 1
             },{
-                #'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.py'
+                #'file': 'frh-roots-1_0_1_0_1_1_1-fld_shell.0-shell-opp_strip_II-pos-1.json'
                 'set': [2.504073272511, 1.943327879806, 2.108843675970, -1.286357494175, 1.570796326795, 0.721085793819, -0.509380996152
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
@@ -1042,21 +1042,21 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
         T140_P12: [
             {
-                #'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.json'
                 'set': [4.389693800678, 1.613882084912, 0.259202620907, -0.178125410980, 1.279825824143, -0.703784937696, 1.377596588777
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.strip_II_strip_II,
                 'tris-pos': 1
             },{
-                #'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.json'
                 'set': [4.170755846609, 0.821420235107, 0.100700797086, -2.149394471077, 1.035800183137, 0.974085339636, 1.554356155170
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,
                 'tris': trisAlt.strip_II_strip_II,
                 'tris-pos': 1
             },{
-                #'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.py'
+                #'file': 'frh-roots-0_1_0_1_1_1_1-fld_shell.0-strip_II-opp_strip_II-pos-1.json'
                 'set': [4.005419181303, 0.470909001839, -1.360105032126, 0.426263518595, 0.786838873976, 1.479755007849, -0.977504044321
                 ],
                 '7fold': heptagons.FoldMethod.SHELL,

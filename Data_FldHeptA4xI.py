@@ -24,11 +24,11 @@ import heptagons
 
 trisAlt = heptagons.TrisAlt()
 
-dyn_pos		= heptagons.dyn_pos
-only_hepts      = heptagons.only_hepts
-only_xtra_o3s	= heptagons.only_xtra_o3s
-all_eq_tris	= heptagons.all_eq_tris
-no_o3_tris	= heptagons.no_o3_tris
+dyn_pos		= heptagons.FaceType.DYN_POS
+only_hepts      = heptagons.FaceType.ONLY_HEPTS
+only_xtra_o3s	= heptagons.FaceType.ONLY_XTRA_O3S
+all_eq_tris	= heptagons.FaceType.ALL_EQ_TRIS
+no_o3_tris	= heptagons.FaceType.NO_O3_TRIS
 edge_1_1_V2_1	= heptagons.tris_fill_base + 1
 edge_1_V2_1_1	= heptagons.tris_fill_base + 2
 edge_V2_1_1_1	= heptagons.tris_fill_base + 3
