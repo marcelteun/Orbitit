@@ -256,11 +256,12 @@ def toTrisAltKeyStr(tId=None, tStr=None):
 
 
 class Meta_TrisAlt(type):
-    def __init__(self, classname, bases, classdict):
-        type.__init__(self, classname, bases, classdict)
+    def __init__(cls, classname, bases, classdict):
+        type.__init__(cls, classname, bases, classdict)
 
 
-def Def_TrisAlt(name, tris_keys):
+def define_tris_alt(name, tris_keys):
+    """Define a class containing a set of triangle fill alternatives."""
     class_dict = {"mixed": False, "stringify": {}, "key": {}, "baseKey": {}}
     # Always add all primitives:
     for (k, s) in TrisAlt_base.stringify.items():
@@ -294,7 +295,7 @@ def Def_TrisAlt(name, tris_keys):
     return Meta_TrisAlt(name, (TrisAlt_base,), class_dict)
 
 
-TrisAlt = Def_TrisAlt(
+TrisAlt = define_tris_alt(
     "TrisAlt",
     [
         TrisAlt_base.refl_1,
@@ -396,13 +397,13 @@ class FoldMethod(Enum):
     MIXED = 6
 
     @classmethod
-    def get(self, s):
+    def get(cls, s):
         """Get the enum value for a fold name."""
-        for v in self:
+        for v in cls:
             if v.name == s:
                 return v
         s = str.upper(s)
-        for v in self:
+        for v in cls:
             if v.name == s:
                 return v
         return None
@@ -3108,7 +3109,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.posAngleMax = math.pi / 2
         self.posAngle = 0
         self.has_reflections = True
-        self.rotateFold = 0
+        self.rotate_fold = 0
         self.fold1 = 0.0
         self.fold2 = 0.0
         self.oppFold1 = 0.0
@@ -3153,7 +3154,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.updateShape = True
 
     def setRotateFold(self, step):
-        self.rotateFold = step
+        self.rotate_fold = step
         self.updateShape = True
 
     def setDihedralAngle(self, angle):
@@ -3164,7 +3165,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.posAngle = angle
         self.updateShape = True
 
-    def setTriangleFillPosition(self, position):
+    def set_tri_fill_pos(self, position):
         logging.warning("implement in derived class")
 
     def setFold1(self, angle=None, oppositeAngle=None):
@@ -3220,7 +3221,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.oppFold2,
             keepV0=False,
             fold=self.foldHeptagon,
-            rotate=self.rotateFold,
+            rotate=self.rotate_fold,
         )
         self.heptagon.translate(HEPT_HEIGHT * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
@@ -3237,8 +3238,10 @@ class FldHeptagonCtrlWin(wx.Frame):
     refl_min_size = (525, 425)
     rot_min_size = (545, 600)
     pre_pos_file_name = None
+    rotate_fold = 1
     _std_pre_pos = None
     _pre_pos_map = None
+    _direct_syms_only = None
 
     # in these the status for the triangle configuration is save (with of without reflections)
     tris_setup_refl = None
@@ -3251,7 +3254,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             maxHeight,
             pre_pos_strings,
             symmetryBase,
-            trisAlts,
+            triangle_alts,
             pre_pos_to_number,
             parent,
             *args,
@@ -3266,9 +3269,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             with regular folded heptagons. These models were calculated before and added to the
             program. For instance one of strings can be "Heptagons only" for a model with only
             regular folded heptagons.
-        trisAlts: an array consisting of TrisAlt_base derived objects. Each
-                  element in the array expresses which triangle fills are valid
-                  for the position with the same index as the element.
+        triangle_alts: an array consisting of TrisAlt_base derived objects. Each element in the
+            array expresses which triangle fills are valid for the position with the same index as
+            the element.
         pre_pos_to_number: a hash table that maps the strings from prePosStrList to unique numbers.
         *args: standard wx Frame *args
         **kwargs: standard wx Frame **kwargs
@@ -3277,9 +3280,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         wx.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.shape = shape
-        self.trisAlts = trisAlts
-        self.nr_of_positions = len(trisAlts)
-        self.setTriangleFillPosition(0)
+        self.triangle_alts = triangle_alts
+        self.nr_of_positions = len(triangle_alts)
+        self.set_tri_fill_pos(0)
         self.canvas = canvas
         self.maxHeight = maxHeight
         self.pre_pos_strings = pre_pos_strings
@@ -3319,7 +3322,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.tris_fill_gui = wx.Choice(self.panel, style=wx.RA_VERTICAL, choices=[])
         self.Guis.append(self.tris_fill_gui)
         self.tris_fill_gui.Bind(wx.EVT_CHOICE, self.onTriangleFill)
-        self.setEnableTrisFillItems()
+        self.update_triangle_fill_options()
 
         self.trisPosGui = wx.Choice(
             self.panel,
@@ -3328,7 +3331,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.Guis.append(self.trisPosGui)
         self.trisPosGui.Bind(wx.EVT_CHOICE, self.onTrisPosition)
-        self.setEnableTrisFillItems()
+        self.update_triangle_fill_options()
 
         self.reflGui = wx.CheckBox(self.panel, label="Reflections Required")
         self.Guis.append(self.reflGui)
@@ -3336,7 +3339,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.reflGui.Bind(wx.EVT_CHECKBOX, self.onRefl)
 
         self.rotateFldGui = wx.Button(self.panel, label="Rotate Fold 1/7")
-        self.rotateFld = 0
+        self.rotate_fold = 0
         self.Guis.append(self.rotateFldGui)
         self.rotateFldGui.Bind(wx.EVT_BUTTON, self.onRotateFld)
 
@@ -3495,9 +3498,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.Guis.append(self.heightGui)
         self.heightGui.Bind(wx.EVT_SLIDER, self.onHeight)
-        self.__guisNoReflEnabled = True
+        self._direct_syms_only = True
         if self.shape.has_reflections:
-            self.disableGuisNoRefl()
+            self.disable_guis_for_refl()
 
         self.setOrientGui = wx.TextCtrl(self.panel)
         self.Guis.append(self.setOrientGui)
@@ -3796,7 +3799,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.has_reflections = inclRefl
         self.reflGui.SetValue(inclRefl)
         if not inclRefl:
-            self.enableGuisNoRefl()
+            self.enable_guis_for_no_refl()
             posVal = ed["ar"][4]
             oppFld1 = ed["ar"][5]
             oppFld2 = ed["ar"][6]
@@ -3805,7 +3808,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.posAngleGui.SetValue(Geom3D.Rad2Deg * posVal)
             self.shape.setPosAngle(posVal)
         else:
-            self.disableGuisNoRefl()
+            self.disable_guis_for_refl()
             self.setReflPosAngle()
             oppFld1 = fld1
             oppFld2 = fld2
@@ -3883,23 +3886,38 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opp_fold2)
             self.posAngleGui.SetValue(Geom3D.Rad2Deg * hept_angle)
 
-    def disableGuisNoRefl(self):
-        if self.__guisNoReflEnabled:
-            self.setEnableTrisFillItems()
+    def disable_guis_for_refl(self):
+        """Disable some GUIs that aren't valid because reflections are required.
+
+        For instance a pair of heptagons can be rotated around a 2-fold axis. If reflections is
+        required, then there is only one position (0, 90, 180, etc degrees all lead to the same
+        configuration). Some sliders for folding should be disabled as well. Also the heptagon folds
+        must be symmetric and the cannot be rotated.
+
+        Another thing that needs to be done is to update all the options for filling up the space
+        between heptagons with triangles. Only fill configurations that have a mirror symmetry are
+        valid.
+        """
+        if self._direct_syms_only:
+            self.update_triangle_fill_options()
             self.trisPosGui.Disable()
             self.rotateFldGui.Disable()
             self.shape.setRotateFold(0)
             self.disableSlidersNoRefl()
-            self.__guisNoReflEnabled = False
+            self._direct_syms_only = False
 
-    def enableGuisNoRefl(self, restore=True):
-        if not self.__guisNoReflEnabled:
-            self.setEnableTrisFillItems()
+    def enable_guis_for_no_refl(self, restore=True):
+        """Enable some GUIs that aren't valid because reflections are required.
+
+        See disable_guis_for_refl for more info.
+        """
+        if not self._direct_syms_only:
+            self.update_triangle_fill_options()
             self.trisPosGui.Enable()
             self.rotateFldGui.Enable()
-            self.shape.setRotateFold(self.rotateFld)
+            self.shape.setRotateFold(self.rotate_fold)
             self.enableSlidersNoRefl(restore)
-            self.__guisNoReflEnabled = True
+            self._direct_syms_only = True
 
     def disableTrisFillGuis(self):
         self.addTrisGui.Disable()
@@ -3928,21 +3946,27 @@ class FldHeptagonCtrlWin(wx.Frame):
             else:
                 if self.shape.has_reflections:
                     self.tris_setup_no_refl = self.tris_fill_gui.GetStringSelection()
-                    self.disableGuisNoRefl()
+                    self.disable_guis_for_refl()
                 else:
                     self.tris_setup_refl = self.tris_fill_gui.GetStringSelection()
-                    self.enableGuisNoRefl()
+                    self.enable_guis_for_no_refl()
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
                 self.updateShape()
 
-    def setRotateFld(self, rotateFld):
-        self.rotateFld = int(rotateFld) % 7
-        self.shape.setRotateFold(self.rotateFld)
-        self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self.rotateFld + 1))
+    # TODO: make this a property and use a setter here
+    def setRotateFld(self, rotate_fold):
+        """Set the offset for the heptagon rotation.
+
+        For models without reflections a heptagon fold can be rotated to 7 different orientations.
+        rotate_fold: offset between 0 and 7
+        """
+        self.rotate_fold = int(rotate_fold) % 7
+        self.shape.setRotateFold(self.rotate_fold)
+        self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self.rotate_fold + 1))
         self.updateShape()
 
     def onRotateFld(self, event):
-        self.setRotateFld(self.rotateFld + 1)
+        self.setRotateFld(self.rotate_fold + 1)
 
     def is_pre_pos(self):
         """Return whether the UI currently shows a pre-defined model.
@@ -3956,39 +3980,49 @@ class FldHeptagonCtrlWin(wx.Frame):
         # imported and used in the Scenes.. (or move to offspring..)
         return self.pre_pos_gui.GetStringSelection() != "Enable Sliders"
 
-    def setTriangleFillPosition(self, position):
-        """Sets which triangle fills are valid for the current settings
+    def set_tri_fill_pos(self, position):
+        """Sets which triangle fills are valid for the current 2-fold rotation.
 
-        Note that you have to call setEnableTrisFillItems to apply these
+        When a pair of heptagons is rotated around a 2-fold axis (only when no reflections are
+        required) then certain triangle fills don't make sense. The same configuration could be
+        used, but then by connection different vertices. This leads to certain positions for these
+        triangle fills. This functions sets which position is supposed to be used.
+
+        Note that you have to call update_triangle_fill_options to apply these
         settings to the GUI.
 
-        position: an index in self.trisAlts
+        position: an index in self.triangle_alts
         """
         if position < 0:
             position = 0
         if position >= self.nr_of_positions:
             position = self.nr_of_positions - 1
         self.position = position
-        self.trisAlt = self.trisAlts[self.position]
-        self.shape.setTriangleFillPosition(position)
+        self.trisAlt = self.triangle_alts[self.position]
+        self.shape.set_tri_fill_pos(position)
 
-    def setEnableTrisFillItems(self, itemList=None):
+    def update_triangle_fill_options(self):
+        """Fill the triangle fill GUI with valid options.
+
+        Update the list with configurations for filling the space between heptagons with triangles.
+        conform the symmetry. If the model is supposed to have reflections then many configurations
+        become invalid. If the user just removed the reflections again, many configurations need to
+        be added again.
+        """
         # first time fails
         try:
             current_val = self.trisAlt.key[self.tris_fill_gui.GetStringSelection()]
         except KeyError:
             current_val = self.trisAlt.strip_I
-        if itemList is None:
-            itemList = self.trisAlt.choiceList
-            if self.shape.has_reflections:
-                isValid = lambda c: self.trisAlt.isBaseKey(self.trisAlt.key[c])
-                if not self.trisAlt.isBaseKey(current_val):
-                    if self.tris_setup_refl is None:
-                        # TODO: use the first one that is valid
-                        current_val = self.trisAlt.strip_I
-                    else:
-                        current_val = self.trisAlt.key[self.tris_setup_refl]
-            else:
+        if self.shape.has_reflections:
+            isValid = lambda c: self.trisAlt.isBaseKey(self.trisAlt.key[c])
+            if not self.trisAlt.isBaseKey(current_val):
+                if self.tris_setup_refl is None:
+                    # TODO: use the first one that is valid
+                    current_val = self.trisAlt.strip_I
+                else:
+                    current_val = self.trisAlt.key[self.tris_setup_refl]
+        else:
 
                 def isValid(c):
                     c_key = self.trisAlt.key[c]
@@ -4003,11 +4037,10 @@ class FldHeptagonCtrlWin(wx.Frame):
                         current_val = self.trisAlt.strip_I_strip_I
                     else:
                         current_val = self.trisAlt.key[self.tris_setup_no_refl]
-        else:
-            isValid = lambda c: True
+
         self.tris_fill_gui.Clear()
         current_still_valid = False
-        for choice in itemList:
+        for choice in self.trisAlt.choiceList:
             if isValid(choice):
                 self.tris_fill_gui.Append(choice)
                 if current_val == self.trisAlt.key[choice]:
@@ -4088,7 +4121,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.posAngleMax = self.shape.posAngleMax
             shape.posAngle = self.shape.posAngle
             shape.has_reflections = self.shape.has_reflections
-            shape.rotateFold = self.shape.rotateFold
+            shape.rotate_fold = self.shape.rotate_fold
             shape.fold1 = self.shape.fold1
             shape.fold2 = self.shape.fold2
             shape.oppFold1 = self.shape.oppFold1
@@ -4137,8 +4170,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.onTrisPosition()
 
     def onTrisPosition(self, event=None):
-        self.setTriangleFillPosition(self.tris_position)
-        self.setEnableTrisFillItems()
+        self.set_tri_fill_pos(self.tris_position)
+        self.update_triangle_fill_options()
         self.updateShape()
 
     def show_right_folds(self):
@@ -4285,7 +4318,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.reflGui.SetValue(has_reflections)
         self.onRefl()
         # not needed: self.shape.updateShape = True
-        self.setEnableTrisFillItems()
+        self.update_triangle_fill_options()
         self.tris_fill_gui.SetStringSelection(self.fileStrMapTrisStr(self.pre_pos_file_name))
         self.onTriangleFill()
         self.tris_position = self.fileStrMapTrisPos(self.pre_pos_file_name)
@@ -4422,10 +4455,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             except KeyError:
                 self.tris_position = 0
             try:
-                rotateFold = sps["fold-rot"]
+                rotate_fold = sps["fold-rot"]
             except KeyError:
-                rotateFold = 0
-            self.setRotateFld(rotateFold)
+                rotate_fold = 0
+            self.setRotateFld(rotate_fold)
 
             self.onFoldMethod()
             self.onTriangleFill()
@@ -4442,9 +4475,9 @@ class FldHeptagonCtrlWin(wx.Frame):
                 gui.SetValue(0)
                 gui.Disable()
             if not self.shape.has_reflections:
-                self.enableGuisNoRefl()
+                self.enable_guis_for_no_refl()
             else:
-                self.disableGuisNoRefl()
+                self.disable_guis_for_refl()
         if self.prePos != DYN_POS:
             if event is not None:
                 self.reset_std_pre_pos()
@@ -4483,9 +4516,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.fold1OppGui.SetValue(val1)
             self.fold2OppGui.SetValue(val2)
             if not self.shape.has_reflections:
-                self.enableGuisNoRefl(restore=False)
+                self.enable_guis_for_no_refl(restore=False)
             self.heightGui.SetValue(self.maxHeight - self.heightF * c.height)
-            self.setEnableTrisFillItems()
+            self.update_triangle_fill_options()
         self.updateShape()
 
 

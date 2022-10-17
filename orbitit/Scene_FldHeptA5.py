@@ -36,7 +36,7 @@ trisAlt.baseKey = {
     trisAlt.crossed_2: True
 }
 
-TA_1 = heptagons.Def_TrisAlt(
+TA_1 = heptagons.define_tris_alt(
     'TA_1',
     [
         heptagons.TrisAlt_base.refl_1,
@@ -189,7 +189,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.height = 2.7
         this.dihedralAngle = Geom3D.Deg2Rad * 119
         this.initArrs()
-        this.setTriangleFillPosition(0)
+        this.set_tri_fill_pos(0)
         this.setEdgeAlternative(trisAlt.strip_II, trisAlt.strip_II)
         this.setV()
 
@@ -236,7 +236,7 @@ class Shape(heptagons.FldHeptagonShape):
     def nr_of_positions(this):
         return len(this.triFs_alts)
 
-    def setTriangleFillPosition(this, i):
+    def set_tri_fill_pos(this, i):
         this.triangleFillPosition = i
         this.triFs     = this.triFs_alts[i]
         this.triEs     = this.triEs_alts[i]

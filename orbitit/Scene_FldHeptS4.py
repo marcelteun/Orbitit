@@ -250,8 +250,8 @@ class Shape(heptagons.FldHeptagonShape):
             )
         return s
 
-    def setTriangleFillPosition(this, i):
-        logging.warning(f"TODO implement setTriangleFillPosition for {i}")
+    def set_tri_fill_pos(this, i):
+        logging.warning(f"TODO implement set_tri_fill_pos for {i}")
 
     def setV(this):
         #
