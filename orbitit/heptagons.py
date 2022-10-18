@@ -3114,7 +3114,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.fold2 = 0.0
         self.oppFold1 = 0.0
         self.oppFold2 = 0.0
-        self.foldHeptagon = FoldMethod.PARALLEL
+        self.fold_heptagon = FoldMethod.PARALLEL
         self.height = 2.3
         self.apply_symmetries = True
         self.addXtraFs = True
@@ -3149,8 +3149,8 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.oppEdgeAlternative = oppositeAlt
         self.updateShape = True
 
-    def setFoldMethod(self, method):
-        self.foldHeptagon = method
+    def set_fold_method(self, method, update_shape=True):
+        self.fold_heptagon = method
         self.updateShape = True
 
     def setRotateFold(self, step):
@@ -3220,7 +3220,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.oppFold1,
             self.oppFold2,
             keepV0=False,
-            fold=self.foldHeptagon,
+            fold=self.fold_heptagon,
             rotate=self.rotate_fold,
         )
         self.heptagon.translate(HEPT_HEIGHT * geomtypes.UY)
@@ -3241,7 +3241,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     rotate_fold = 1
     _std_pre_pos = None
     _pre_pos_map = None
-    _direct_syms_only = None
+    _sym_incl_refl = True
 
     # in these the status for the triangle configuration is save (with of without reflections)
     tris_setup_refl = None
@@ -3294,10 +3294,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.stringify[OPEN_FILE] = "From File"
         self.panel = wx.Panel(self, -1)
         self.status_bar = self.CreateStatusBar()
-        self.foldMethod = FoldMethod.TRIANGLE
+        self.fold_method_incl_refl = {
+            True: FoldMethod.TRIANGLE,
+            False: FoldMethod.W,
+        }
         self.restoreTris = False
         self.restoreO3s = False
-        self.shape.foldHeptagon = self.foldMethod
+        self.shape.set_fold_method(self.fold_method, update_shape=False)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.specPosIndex = 0
 
@@ -3311,6 +3314,17 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.panel.Layout()
         self.prevTrisFill = -1
         self.prevOppTrisFill = -1
+
+    @property
+    def fold_method(self):
+        """Retrieve the current fold method."""
+        return self.fold_method_incl_refl[self._sym_incl_refl]
+
+    @fold_method.setter
+    def fold_method(self, fold_method):
+        """Set the current fold method."""
+        self.fold_method_incl_refl[self._sym_incl_refl] = fold_method
+        self.shape.set_fold_method(fold_method)
 
     def createControlsSizer(self):
         """Create the main sizer with all the control widgets."""
@@ -3355,7 +3369,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.addTrisGui.Bind(wx.EVT_CHECKBOX, self.onAddTriangles)
 
         # static adjustments
-        self.foldMethodList = [
+        self.fold_method_list = [
             FoldMethod.PARALLEL.name.capitalize(),
             FoldMethod.TRIANGLE.name.capitalize(),
             FoldMethod.SHELL.name.capitalize(),
@@ -3364,10 +3378,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             FoldMethod.MIXED.name.capitalize(),
             FoldMethod.G.name.capitalize(),
         ]
-        self.foldMethodListItems = [
-            FoldMethod.get(self.foldMethodList[i])
-            for i in range(len(self.foldMethodList))
-        ]
+        self.foldMethodListItems = [FoldMethod.get(fold) for fold in self.fold_method_list]
         self.valid_fold_incl_refl = {
             True: [
                 FoldMethod.PARALLEL.name.capitalize(),
@@ -3384,17 +3395,14 @@ class FldHeptagonCtrlWin(wx.Frame):
             ],
         }
 
-        self.foldMethodGui = wx.RadioBox(
+        self.fold_method_gui = wx.RadioBox(
             self.panel,
             label="Heptagon Fold Method",
             style=wx.RA_VERTICAL,
-            choices=self.foldMethodList,
+            choices=self.fold_method_list,
         )
-        for i in range(len(self.foldMethodList)):
-            if self.foldMethodList[i].upper() == self.foldMethod.name:
-                self.foldMethodGui.SetSelection(i)
-        self.Guis.append(self.foldMethodGui)
-        self.foldMethodGui.Bind(wx.EVT_RADIOBOX, self.onFoldMethod)
+        self.Guis.append(self.fold_method_gui)
+        self.fold_method_gui.Bind(wx.EVT_RADIOBOX, self.on_fold_method)
         self.show_right_folds()
 
         # predefined positions
@@ -3498,9 +3506,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.Guis.append(self.heightGui)
         self.heightGui.Bind(wx.EVT_SLIDER, self.onHeight)
-        self._direct_syms_only = True
         if self.shape.has_reflections:
-            self.disable_guis_for_refl()
+            self.disable_guis_for_refl(force=True)
 
         self.setOrientGui = wx.TextCtrl(self.panel)
         self.Guis.append(self.setOrientGui)
@@ -3549,7 +3556,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         fillSizer.Add(self.trisPosGui, 0, wx.EXPAND)
 
         statSizer = wx.BoxSizer(wx.HORIZONTAL)
-        statSizer.Add(self.foldMethodGui, 0, wx.EXPAND)
+        statSizer.Add(self.fold_method_gui, 0, wx.EXPAND)
         statSizer.Add(fillSizer, 0, wx.EXPAND)
         statSizer.Add(settings_sizer, 0, wx.EXPAND)
         statSizer.Add(wx.BoxSizer(), 1, wx.EXPAND)
@@ -3830,22 +3837,23 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.updateShape = True
         self.updateShape()
 
-    def allignFoldSlideBarsWithFoldMethod(self):
+    def allign_slide_bars_with_fold_method(self):
+        """Enable and disable folding slide bars conform the current fold method"""
         if not self.shape.has_reflections:
-            if self.foldMethod == FoldMethod.PARALLEL:
+            if self.fold_method == FoldMethod.PARALLEL:
                 self.fold1OppGui.Disable()
                 self.fold2OppGui.Disable()
             elif (
-                    self.foldMethod == FoldMethod.W
-                    or self.foldMethod == FoldMethod.SHELL
-                    or self.foldMethod == FoldMethod.MIXED
-                    or self.foldMethod == FoldMethod.G
+                    self.fold_method == FoldMethod.W
+                    or self.fold_method == FoldMethod.SHELL
+                    or self.fold_method == FoldMethod.MIXED
+                    or self.fold_method == FoldMethod.G
             ):
                 self.fold1OppGui.Enable()
                 self.fold2OppGui.Enable()
             elif (
-                    self.foldMethod == FoldMethod.TRAPEZIUM
-                    or self.foldMethod == FoldMethod.TRIANGLE
+                    self.fold_method == FoldMethod.TRAPEZIUM
+                    or self.fold_method == FoldMethod.TRIANGLE
             ):
                 self.fold1OppGui.Disable()
                 self.fold2OppGui.Enable()
@@ -3871,7 +3879,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.fold2OppGui.SetValue(self.minFoldAngle)
 
     def enableSlidersNoRefl(self, restore=True):
-        self.allignFoldSlideBarsWithFoldMethod()
+        self.allign_slide_bars_with_fold_method()
         self.posAngleGui.Enable()
         # the code below is added to be able to check and uncheck "Has
         # Reflections" in a "undo" kind of way.
@@ -3886,7 +3894,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opp_fold2)
             self.posAngleGui.SetValue(Geom3D.Rad2Deg * hept_angle)
 
-    def disable_guis_for_refl(self):
+    def disable_guis_for_refl(self, force=False):
         """Disable some GUIs that aren't valid because reflections are required.
 
         For instance a pair of heptagons can be rotated around a 2-fold axis. If reflections is
@@ -3898,26 +3906,28 @@ class FldHeptagonCtrlWin(wx.Frame):
         between heptagons with triangles. Only fill configurations that have a mirror symmetry are
         valid.
         """
-        if self._direct_syms_only:
+        if not self._sym_incl_refl or force:
             self.update_triangle_fill_options()
             self.trisPosGui.Disable()
             self.rotateFldGui.Disable()
             self.shape.setRotateFold(0)
             self.disableSlidersNoRefl()
-            self._direct_syms_only = False
+            self._sym_incl_refl = True
+            self.update_fold_selection()
 
     def enable_guis_for_no_refl(self, restore=True):
-        """Enable some GUIs that aren't valid because reflections are required.
+        """Enable some GUIs that aren't valid because no reflections are needed.
 
         See disable_guis_for_refl for more info.
         """
-        if not self._direct_syms_only:
+        if self._sym_incl_refl:
             self.update_triangle_fill_options()
             self.trisPosGui.Enable()
             self.rotateFldGui.Enable()
             self.shape.setRotateFold(self.rotate_fold)
             self.enableSlidersNoRefl(restore)
-            self._direct_syms_only = True
+            self._sym_incl_refl = False
+            self.update_fold_selection()
 
     def disableTrisFillGuis(self):
         self.addTrisGui.Disable()
@@ -4126,7 +4136,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.fold2 = self.shape.fold2
             shape.oppFold1 = self.shape.oppFold1
             shape.oppFold2 = self.shape.oppFold2
-            shape.foldHeptagon = self.shape.foldHeptagon
+            shape.fold_heptagon[self._sym_incl_refl] = self.shape.fold_heptagon
             shape.height = self.shape.height
             shape.apply_symmetries = self.shape.apply_symmetries
             shape.addXtraFs = self.shape.addXtraFs
@@ -4175,18 +4185,26 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.updateShape()
 
     def show_right_folds(self):
+        """Hide and show the fold method conform the current symmetry"""
         valid_names = self.valid_fold_incl_refl[self.shape.has_reflections]
-        is_valid = [False for _ in self.foldMethodList]
+        is_valid = [False for _ in self.fold_method_list]
         for name in valid_names:
-            i = self.foldMethodList.index(name)
+            i = self.fold_method_list.index(name)
             is_valid[i] = True
         for i, show in enumerate(is_valid):
-            self.foldMethodGui.ShowItem(i, show)
+            self.fold_method_gui.ShowItem(i, show)
 
-    def onFoldMethod(self, event=None):
-        self.foldMethod = self.foldMethodListItems[self.foldMethodGui.GetSelection()]
-        self.shape.setFoldMethod(self.foldMethod)
-        self.allignFoldSlideBarsWithFoldMethod()
+    def update_fold_selection(self):
+        """Update the GUI to select a fold method conform the symmetry."""
+        for i, fold in enumerate(self.fold_method_list):
+            if fold.upper() == self.fold_method.name:
+                self.fold_method_gui.SetSelection(i)
+                break
+
+    def on_fold_method(self, event=None):
+        """Handle the selection of a new fold method"""
+        self.fold_method = self.foldMethodListItems[self.fold_method_gui.GetSelection()]
+        self.allign_slide_bars_with_fold_method()
         if event is not None:
             if self.is_pre_pos():
                 self.on_pre_pos(event)
@@ -4307,10 +4325,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             return
         logging.info("Opening file: %s", filename)
         self.pre_pos_file_name = filename
-        self.foldMethodGui.SetStringSelection(
+        self.fold_method_gui.SetStringSelection(
             self.fileStrMapFoldMethodStr(self.pre_pos_file_name)
         )
-        self.onFoldMethod()
+        self.on_fold_method()
         self.setRotateFld(self.fileStrMapFoldPosStr(self.pre_pos_file_name))
         # Note: Reflections need to be set before triangle fill, otherwise the
         # right triangle fills are not available
@@ -4448,7 +4466,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
             # get fold, tris alt
             sps = self.special_pos_setup
-            self.foldMethodGui.SetStringSelection(sps["7fold"].name.capitalize())
+            self.fold_method_gui.SetStringSelection(sps["7fold"].name.capitalize())
             self.tris_fill_gui.SetStringSelection(self.trisAlt.stringify[sps["tris"]])
             try:
                 self.tris_position = sps["tris-pos"]
@@ -4460,7 +4478,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 rotate_fold = 0
             self.setRotateFld(rotate_fold)
 
-            self.onFoldMethod()
+            self.on_fold_method()
             self.onTriangleFill()
 
             for gui in [
