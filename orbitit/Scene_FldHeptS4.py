@@ -610,8 +610,8 @@ class Shape(heptagons.FldHeptagonShape):
         }
 
 class CtrlWin(heptagons.FldHeptagonCtrlWin):
-    def __init__(this, shape, canvas, *args, **kwargs):
-        heptagons.FldHeptagonCtrlWin.__init__(this,
+    def __init__(self, shape, canvas, *args, **kwargs):
+        heptagons.FldHeptagonCtrlWin.__init__(self,
             shape, canvas,
             8, # maxHeigth
             [ # prePosLst
@@ -630,36 +630,36 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             *args, **kwargs
         )
 
-    def has_only_hepts(this):
-        return this.prePos == ONLY_HEPTS and not (
-            this.tris_fill is None) and not (
-            this.tris_fill == trisAlt.refl_1 or
-            this.tris_fill == trisAlt.refl_2)
+    def has_only_hepts(self):
+        return self.pre_pos_enum == ONLY_HEPTS and not (
+            self.tris_fill is None) and not (
+            self.tris_fill == trisAlt.refl_1 or
+            self.tris_fill == trisAlt.refl_2)
 
-    def has_only_o3_triangles(this):
-        return this.prePos == ONLY_XTRA_O3S and not (
-            this.tris_fill is None) and not (
-            this.tris_fill == trisAlt.refl_1 or
-            this.tris_fill == trisAlt.refl_2)
+    def has_only_o3_triangles(self):
+        return self.pre_pos_enum == ONLY_XTRA_O3S and not (
+            self.tris_fill is None) and not (
+            self.tris_fill == trisAlt.refl_1 or
+            self.tris_fill == trisAlt.refl_2)
 
     rDir = 'data/Data_FldHeptS4'
     rPre = 'frh-roots'
 
-    def printFileStrMapWarning(this, filename, funcname):
+    def printFileStrMapWarning(self, filename, funcname):
         logging.warning(f"unable to interprete filename {filename}")
 
     @property
     def special_pos_setup(self):
-        prePosId = self.prePos
+        prePosId = self.pre_pos_enum
         if prePosId != OPEN_FILE and prePosId != DYN_POS:
             # use correct predefined special positions
             if self.shape.has_reflections:
                 psp = self.predefReflSpecPos
             else:
                 psp = self.predefRotSpecPos
-            if self.specPosIndex >= len(psp[self.prePos]):
+            if self.specPosIndex >= len(psp[self.pre_pos_enum]):
                 self.specPosIndex = -1
-            in_data = psp[self.prePos][self.specPosIndex]
+            in_data = psp[self.pre_pos_enum][self.specPosIndex]
             fold_method_str = self.fileStrMapFoldMethodStr(in_data['file'])
             assert fold_method_str is not None
             tris_str = self.fileStrMapTrisStr(in_data['file'])
@@ -993,5 +993,5 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
     }
 
 class Scene(Geom3D.Scene):
-    def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+    def __init__(self, parent, canvas):
+        Geom3D.Scene.__init__(self, Shape, CtrlWin, parent, canvas)

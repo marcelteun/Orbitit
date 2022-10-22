@@ -693,13 +693,13 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         )
 
     def has_only_hepts(this):
-        return this.prePos == S_ONLY_HEPTS and not (
+        return this.pre_pos_enum == S_ONLY_HEPTS and not (
                 this.tris_fill is None
             ) and not (
                 this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
 
     def has_only_o3_triangles(this):
-        return this.prePos == heptagons.ONLY_XTRA_O3S and not (
+        return this.pre_pos_enum == heptagons.ONLY_XTRA_O3S and not (
                 this.tris_fill is None
             ) and not (
                 this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
@@ -712,16 +712,16 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
 
     @property
     def special_pos_setup(self):
-        prePosId = self.prePos
+        prePosId = self.pre_pos_enum
         if prePosId != OPEN_FILE and prePosId != DYN_POS:
             # use correct predefined special positions
             if self.shape.has_reflections:
                 psp = self.predefReflSpecPos
             else:
                 psp = self.predefRotSpecPos
-            if self.specPosIndex >= len(psp[self.prePos]):
+            if self.specPosIndex >= len(psp[self.pre_pos_enum]):
                 self.specPosIndex = -1
-            in_data = psp[self.prePos][self.specPosIndex]
+            in_data = psp[self.pre_pos_enum][self.specPosIndex]
             fold_method_str = self.fileStrMapFoldMethodStr(in_data['file'])
             assert fold_method_str is not None
             tris_str = self.fileStrMapTrisStr(in_data['file'])

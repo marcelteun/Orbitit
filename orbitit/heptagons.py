@@ -3694,7 +3694,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             return 0
 
     def setEnablePrePosItems(self):
-        current_pre_pos = self.prePos
+        current_pre_pos = self.pre_pos_enum
         self.pre_pos_gui.Clear()
         pre_pos_still_valid = False
         for pre_pos_str in self.pre_pos_strings:
@@ -4213,7 +4213,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.updateShape()
 
     def pre_pos_val(self, key):
-        """Map a position string onto the position number."""
+        """Map a position string onto the position number.
+
+        A position string shall be the string representing OPEN_FILE, DYN_POS, ONLY_HEPTS, etc.
+        """
         if not self._pre_pos_map:
             self._pre_pos_map = {v: k for k, v in self.stringify.items()}
         try:
@@ -4223,13 +4226,16 @@ class FldHeptagonCtrlWin(wx.Frame):
             return -1
 
     @property
-    def prePos(self):
+    def pre_pos_enum(self):
+        """Return the currently selected position enum, e.g. OPEN_FILE, DYN_POS, ONLY_HEPTS, etc."""
         return self.pre_pos_val(self.pre_pos_gui.GetStringSelection())
 
-    def open_pre_pos_file(self, filename):
+    @staticmethod
+    def open_pre_pos_file(filename):
+        """Open a given file in JSON format with predefined folds and offsets."""
         with open(filename, "r") as fd:
             data = json.load(fd)
-        assert type(data) == list, f"Expected a JSON holding a list, got {type(data)}"
+        assert isinstance(data, list), f"Expected a JSON holding a list, got {type(data)}"
         for l in data:
             assert len(l) in (
                 4,
@@ -4237,19 +4243,21 @@ class FldHeptagonCtrlWin(wx.Frame):
                 7,
             ), f"Expected elements with a length 4 or 7, got {len(l)}"
             for i in l:
-                assert type(i) in (int, float), "Expected a number, got {type(i)}"
+                assert isinstance(i, (float, int)), "Expected a number, got {type(i)}"
         return data
 
-    def noPrePosFound(self):
+    def log_no_pre_pos_found(self):
+        """Log on output and on status bar the no predefined positions were found."""
         s = "Note: no valid pre-defined positions found"
         logging.info(s)
         self.status_bar.SetStatusText(s)
 
     @property
     def std_pre_pos(self):
+        """Return all folds and offsets for predefined heptagon that is used"""
         if self._std_pre_pos:
             return self._std_pre_pos
-        pre_pos_id = self.prePos
+        pre_pos_id = self.pre_pos_enum
         if pre_pos_id == DYN_POS:
             return []
         if pre_pos_id == OPEN_FILE:
@@ -4258,16 +4266,15 @@ class FldHeptagonCtrlWin(wx.Frame):
                 return []
             self._std_pre_pos = self.open_pre_pos_file(filename)
             return self._std_pre_pos
+        # use correct predefined special positions
+        if self.shape.has_reflections:
+            psp = self.predefReflSpecPos
         else:
-            # use correct predefined special positions
-            if self.shape.has_reflections:
-                psp = self.predefReflSpecPos
-            else:
-                psp = self.predefRotSpecPos
-            # Oops not good for performance:
-            # TODO only return correct one en add length func
-            self._std_pre_pos = [sp["set"] for sp in psp[self.prePos]]
-            return self._std_pre_pos
+            psp = self.predefRotSpecPos
+        # Oops not good for performance:
+        # TODO only return correct one en add length func
+        self._std_pre_pos = [sp["set"] for sp in psp[self.pre_pos_enum]]
+        return self._std_pre_pos
 
     def on_first(self, _=None):
         """From a loaded JSON file with predefined folds choose the first option."""
@@ -4289,7 +4296,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             # else pre_pos_id == 0 : first one selected don't scroll around
             self.on_pre_pos()
         else:
-            self.noPrePosFound()
+            self.log_no_pre_pos_found()
 
     def on_next(self, _=None):
         """From a loaded JSON file with predefined folds choose the next option."""
@@ -4305,21 +4312,21 @@ class FldHeptagonCtrlWin(wx.Frame):
                 pass
             self.on_pre_pos()
         else:
-            self.noPrePosFound()
+            self.log_no_pre_pos_found()
 
     def has_only_hepts(self):
         """Return whether the current model solely consists of heptagons.
 
         The current model is supposed to be one that is predefined by the program.
         """
-        return self.prePos == ONLY_HEPTS
+        return self.pre_pos_enum == ONLY_HEPTS
 
     def has_only_o3_triangles(self):
         """Return whether the current model has extra triangles on a 3-fold axis only
 
         The current model is supposed to be one that is predefined by the program.
         """
-        return self.prePos == ONLY_XTRA_O3S
+        return self.pre_pos_enum == ONLY_XTRA_O3S
 
     def choose_file(self):
         """Open a dialog to choose a JSON file with predefined values to load."""
@@ -4449,7 +4456,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         c = self.shape
         # remove the "From File" from the pull down list as soon as it is
         # deselected
-        if event is not None and self.prePos != OPEN_FILE:
+        if event is not None and self.pre_pos_enum != OPEN_FILE:
             open_file = self.stringify[OPEN_FILE]
             n = self.pre_pos_gui.FindString(open_file)
             if n >= 0:
@@ -4457,7 +4464,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 selection = self.pre_pos_gui.GetSelection()
                 self.pre_pos_gui.Delete(self.pre_pos_gui.FindString(open_file))
                 self.pre_pos_gui.SetSelection(selection)
-        if self.prePos == DYN_POS:
+        if self.pre_pos_enum == DYN_POS:
             if event is not None:
                 self.pre_pos_file_name = None
             if self.restoreTris:
@@ -4469,7 +4476,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.shape.onlyRegFs = False
                 self.shape.updateShape = True
             self.number_text.SetLabel("---")
-        elif self.prePos != OPEN_FILE:
+        elif self.pre_pos_enum != OPEN_FILE:
             # this block is run for predefined spec pos only:
             if self.has_only_hepts():
                 self.shape.addXtraFs = False
@@ -4516,12 +4523,12 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.enable_guis_for_no_refl()
             else:
                 self.disable_guis_for_refl()
-        if self.prePos != DYN_POS:
+        if self.pre_pos_enum != DYN_POS:
             if event is not None:
                 self.reset_std_pre_pos()
             setting = self.std_pre_pos
             if setting == []:
-                self.noPrePosFound()
+                self.log_no_pre_pos_found()
                 return
             # Note if the setting array uses a none symmetric setting, then the
             # shape will not be symmetric. This is not supposed to be handled
@@ -4529,7 +4536,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.update_shape_settings(setting)
         # for OPEN_FILE it is important that updateShapeSettins is done before
         # updating the sliders...
-        if self.prePos == DYN_POS or self.prePos == OPEN_FILE:
+        if self.pre_pos_enum == DYN_POS or self.pre_pos_enum == OPEN_FILE:
             for gui in [
                     self.dihedralAngleGui,
                     self.posAngleGui,

@@ -820,7 +820,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         )
 
     def has_only_hepts(self):
-        return self.prePos == ONLY_HEPTS and not (
+        return self.pre_pos_enum == ONLY_HEPTS and not (
                 self.tris_fill is None
             ) and not (
                 self.tris_fill == trisAlt.refl_1 or
@@ -829,7 +829,7 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             )
 
     def has_only_o3_triangles(self):
-        return self.prePos == heptagons.ONLY_XTRA_O3S and not (
+        return self.pre_pos_enum == heptagons.ONLY_XTRA_O3S and not (
                 self.tris_fill is None
             ) and not (
                 self.tris_fill == trisAlt.refl_1 or
@@ -845,16 +845,16 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
 
     @property
     def special_pos_setup(self):
-        prePosId = self.prePos
+        prePosId = self.pre_pos_enum
         if prePosId != OPEN_FILE and prePosId != DYN_POS:
             # use correct predefined special positions
             if self.shape.has_reflections:
                 psp = self.predefReflSpecPos
             else:
                 psp = self.predefRotSpecPos
-            if self.specPosIndex >= len(psp[self.prePos]):
+            if self.specPosIndex >= len(psp[self.pre_pos_enum]):
                 self.specPosIndex = -1
-            data = psp[self.prePos][self.specPosIndex]
+            data = psp[self.pre_pos_enum][self.specPosIndex]
             if 'file' in data:
                 logging.info(f"see file {self.rDir}/{data['file']}")
             return data
