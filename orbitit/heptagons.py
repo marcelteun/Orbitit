@@ -3120,7 +3120,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.addXtraFs = True
         self.onlyRegFs = False
         self.useCulling = False
-        self.updateShape = True
+        self.update_shape = True
 
     def __repr__(self):
         # s = '%s(\n  ' % findModuleClassName(self.__class__, __name__)
@@ -3138,7 +3138,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         return s
 
     def gl_draw(self):
-        if self.updateShape:
+        if self.update_shape:
             self.setV()
         Geom3D.CompoundShape.gl_draw(self)
 
@@ -3147,23 +3147,23 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.edgeAlternative = alt
         if oppositeAlt is not None:
             self.oppEdgeAlternative = oppositeAlt
-        self.updateShape = True
+        self.update_shape = True
 
     def set_fold_method(self, method, update_shape=True):
         self.fold_heptagon = method
-        self.updateShape = True
+        self.update_shape = True
 
     def setRotateFold(self, step):
         self.rotate_fold = step
-        self.updateShape = True
+        self.update_shape = True
 
     def setDihedralAngle(self, angle):
         self.dihedralAngle = angle
-        self.updateShape = True
+        self.update_shape = True
 
     def setPosAngle(self, angle):
         self.posAngle = angle
-        self.updateShape = True
+        self.update_shape = True
 
     def set_tri_fill_pos(self, position):
         logging.warning("implement in derived class")
@@ -3173,18 +3173,18 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.fold1 = angle
         if oppositeAngle is not None:
             self.oppFold1 = oppositeAngle
-        self.updateShape = True
+        self.update_shape = True
 
     def setFold2(self, angle=None, oppositeAngle=None):
         if angle is not None:
             self.fold2 = angle
         if oppositeAngle is not None:
             self.oppFold2 = oppositeAngle
-        self.updateShape = True
+        self.update_shape = True
 
     def setHeight(self, height):
         self.height = height
-        self.updateShape = True
+        self.update_shape = True
 
     def edgeColor(self):
         glColor(0.5, 0.5, 0.5)
@@ -3335,7 +3335,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         # static adjustments
         self.tris_fill_gui = wx.Choice(self.panel, style=wx.RA_VERTICAL, choices=[])
         self.Guis.append(self.tris_fill_gui)
-        self.tris_fill_gui.Bind(wx.EVT_CHOICE, self.onTriangleFill)
+        self.tris_fill_gui.Bind(wx.EVT_CHOICE, self.on_triangle_fill)
         self.update_triangle_fill_options()
 
         self.trisPosGui = wx.Choice(
@@ -3344,7 +3344,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             choices=["Position {}".format(i + 1) for i in range(self.nr_of_positions)],
         )
         self.Guis.append(self.trisPosGui)
-        self.trisPosGui.Bind(wx.EVT_CHOICE, self.onTrisPosition)
+        self.trisPosGui.Bind(wx.EVT_CHOICE, self.on_triangle_pos)
         self.update_triangle_fill_options()
 
         self.reflGui = wx.CheckBox(self.panel, label="Reflections Required")
@@ -3732,13 +3732,13 @@ class FldHeptagonCtrlWin(wx.Frame):
     def onPosAngle(self, event):
         self.shape.setPosAngle(Geom3D.Deg2Rad * self.posAngleGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onDihedralAngle(self, event):
         self.shape.setDihedralAngle(Geom3D.Deg2Rad * self.dihedralAngleGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onFold1(self, event):
@@ -3749,7 +3749,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             self.shape.setFold1(s_val)
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onFold2(self, event):
@@ -3760,19 +3760,19 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             self.shape.setFold2(s_val)
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onFold1Opp(self, event):
         self.shape.setFold1(oppositeAngle=Geom3D.Deg2Rad * self.fold1OppGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onFold2Opp(self, event):
         self.shape.setFold2(oppositeAngle=Geom3D.Deg2Rad * self.fold2OppGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onHeight(self, event):
@@ -3780,7 +3780,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             float(self.maxHeight - self.heightGui.GetValue()) / self.heightF
         )
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onCleanOrient(self, event):
@@ -3824,18 +3824,18 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.setFold1(fold_1, opposite_fld1)
         self.shape.setFold2(fold_2, opposite_fld2)
         self.status_bar.SetStatusText(self.shape.getStatusStr())
-        self.updateShape()
+        self.update_shape()
         event.Skip()
 
     def onApplySym(self, _event):
         self.shape.apply_symmetries = self.applySymGui.IsChecked()
-        self.shape.updateShape = True
-        self.updateShape()
+        self.shape.update_shape = True
+        self.update_shape()
 
     def onAddTriangles(self, _event=None):
         self.shape.addXtraFs = self.addTrisGui.IsChecked()
-        self.shape.updateShape = True
-        self.updateShape()
+        self.shape.update_shape = True
+        self.update_shape()
 
     def allign_slide_bars_with_fold_method(self):
         """Enable and disable folding slide bars conform the current fold method"""
@@ -3939,7 +3939,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def onRefl(self, event=None):
         self.shape.has_reflections = self.reflGui.IsChecked()
-        self.shape.updateShape = True
+        self.shape.update_shape = True
         self.show_right_folds()
         self.setEnablePrePosItems()
         if self.shape.has_reflections:
@@ -3961,7 +3961,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                     self.tris_setup_refl = self.tris_fill_gui.GetStringSelection()
                     self.enable_guis_for_no_refl()
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
-                self.updateShape()
+                self.update_shape()
 
     # TODO: make this a property and use a setter here
     def setRotateFld(self, rotate_fold):
@@ -3973,7 +3973,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.rotate_fold = int(rotate_fold) % 7
         self.shape.setRotateFold(self.rotate_fold)
         self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self.rotate_fold + 1))
-        self.updateShape()
+        self.update_shape()
 
     def onRotateFld(self, event):
         self.setRotateFld(self.rotate_fold + 1)
@@ -4095,21 +4095,23 @@ class FldHeptagonCtrlWin(wx.Frame):
             return t[1]
 
     def nvidea_workaround_0(self):
+        """Some work around segmentation fault for NVidia Graphics driver"""
         self.prevTrisFill = self.shape.edgeAlternative
         self.prevOppTrisFill = self.shape.oppEdgeAlternative
 
     def nvidea_workaround(self):
-        restoreMyShape = (
+        """Some work around for NVidia Graphics drivers"""
+        restore_my_shape = (
             self.prevTrisFill == self.trisAlt.twist_strip_I
             and self.prevOppTrisFill == self.trisAlt.twist_strip_I
             and self.tris_fill != self.trisAlt.twist_strip_I
             and self.opp_tris_fill != self.trisAlt.twist_strip_I
         )
-        changeMyShape = (
+        change_my_shape = (
             self.tris_fill == self.trisAlt.twist_strip_I
             and self.opp_tris_fill == self.trisAlt.twist_strip_I
         )
-        if changeMyShape:
+        if change_my_shape:
             if (
                     self.prevTrisFill != self.trisAlt.twist_strip_I
                     and self.prevOppTrisFill != self.trisAlt.twist_strip_I
@@ -4144,16 +4146,18 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.useCulling = self.shape.useCulling
             shape.edgeAlternative = self.tris_fill
             shape.oppEdgeAlternative = self.opp_tris_fill
-            shape.updateShape = True
+            shape.update_shape = True
             self.canvas.shape = shape
-        elif restoreMyShape:
+        elif restore_my_shape:
             self.parent.panel.shape = self.shape
 
-    def updateShape(self):
+    def update_shape(self):
+        """Draw the updated shape on the canvas."""
         self.nvidea_workaround()
         self.canvas.paint()
 
-    def onTriangleFill(self, event=None):
+    def on_triangle_fill(self, event=None):
+        """Handle a new triangle fill configuration from the GUI."""
         self.nvidea_workaround_0()
         self.shape.setEdgeAlternative(self.tris_fill, self.opp_tris_fill)
         if event is not None:
@@ -4163,10 +4167,18 @@ class FldHeptagonCtrlWin(wx.Frame):
                 if self.shape.has_reflections:
                     self.setReflPosAngle()
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
-            self.updateShape()
+            self.update_shape()
 
     @property
     def tris_position(self):
+        """Get the current triangle position.
+
+        The triangle fill can have the same structure but connecting different vertices. Whether
+        this leads to usefull configurations depends on the position angle. For heptagons folds that
+        do not require reflection this angle can vary freely and if you do, then a certain setup
+        doesn't make much sense anymore, since you are twisting all triangles. Then it is time to
+        use the next triangle position.
+        """
         # Note these are called "Position <int>"
         selected = self.trisPosGui.GetSelection()
         # If nothing selected (after changing from having reflections)
@@ -4176,13 +4188,21 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     @tris_position.setter
     def tris_position(self, value):
-        self.trisPosGui.SetSelection(value)
-        self.onTrisPosition()
+        """Set the current triangle position.
 
-    def onTrisPosition(self, event=None):
+        See the property tris_position for more info.
+        """
+        self.trisPosGui.SetSelection(value)
+        self.on_triangle_pos()
+
+    def on_triangle_pos(self, _=None):
+        """Handle GUI event for new triangle position.
+
+        See the property tris_position for more info.
+        """
         self.set_tri_fill_pos(self.tris_position)
         self.update_triangle_fill_options()
-        self.updateShape()
+        self.update_shape()
 
     def show_right_folds(self):
         """Hide and show the fold method conform the current symmetry"""
@@ -4210,7 +4230,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.on_pre_pos(event)
             else:
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
-            self.updateShape()
+            self.update_shape()
 
     def pre_pos_val(self, key):
         """Map a position string onto the position number.
@@ -4357,10 +4377,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         has_reflections = self.fileStrMapHasReflections(self.pre_pos_file_name)
         self.reflGui.SetValue(has_reflections)
         self.onRefl()
-        # not needed: self.shape.updateShape = True
+        # not needed: self.shape.update_shape = True
         self.update_triangle_fill_options()
         self.tris_fill_gui.SetStringSelection(self.fileStrMapTrisStr(self.pre_pos_file_name))
-        self.onTriangleFill()
+        self.on_triangle_fill()
         self.tris_position = self.fileStrMapTrisPos(self.pre_pos_file_name)
         # it's essential that pre_pos_gui is set to dynamic be4 std_pre_pos is read
         # otherwise something else than dynamic might be read...
@@ -4470,11 +4490,11 @@ class FldHeptagonCtrlWin(wx.Frame):
             if self.restoreTris:
                 self.restoreTris = False
                 self.shape.addXtraFs = self.addTrisGui.IsChecked()
-                self.shape.updateShape = True
+                self.shape.update_shape = True
             if self.restoreO3s:
                 self.restoreO3s = False
                 self.shape.onlyRegFs = False
-                self.shape.updateShape = True
+                self.shape.update_shape = True
             self.number_text.SetLabel("---")
         elif self.pre_pos_enum != OPEN_FILE:
             # this block is run for predefined spec pos only:
@@ -4506,7 +4526,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.setRotateFld(rotate_fold)
 
             self.on_fold_method()
-            self.onTriangleFill()
+            self.on_triangle_fill()
 
             for gui in [
                     self.dihedralAngleGui,
@@ -4564,7 +4584,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.enable_guis_for_no_refl(restore=False)
             self.heightGui.SetValue(self.maxHeight - self.heightF * c.height)
             self.update_triangle_fill_options()
-        self.updateShape()
+        self.update_shape()
 
 
 class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):

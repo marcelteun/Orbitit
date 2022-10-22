@@ -195,7 +195,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.setV()
 
     def getStatusStr(this):
-        if this.updateShape:
+        if this.update_shape:
             this.setV()
         Vs = this.baseVs
         Es = this.triEs[this.edgeAlternative]
@@ -337,7 +337,7 @@ class Shape(heptagons.FldHeptagonShape):
         for isom_shape in theShapes:
             isom_shape.show_base_only = not this.apply_symmetries
         this.setShapes(theShapes)
-        this.updateShape = False
+        this.update_shape = False
 
     def getReflPosAngle(this):
         if this.edgeAlternative & heptagons.twist_bit == heptagons.twist_bit:

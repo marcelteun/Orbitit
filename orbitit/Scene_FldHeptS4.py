@@ -200,7 +200,7 @@ class Shape(heptagons.FldHeptagonShape):
     def getStatusStr(this):
         #angle = Geom3D.Rad2Deg * this.dihedralAngle
         s = heptagons.FldHeptagonShape.getStatusStr(this)
-        if this.updateShape:
+        if this.update_shape:
             this.setV()
         #                                  14 = 2'
         #                0
@@ -353,7 +353,7 @@ class Shape(heptagons.FldHeptagonShape):
         for isom_shape in theShapes:
             isom_shape.show_base_only = not this.apply_symmetries
         this.setShapes(theShapes)
-        this.updateShape = False
+        this.update_shape = False
 
     def initArrs(this):
         #
