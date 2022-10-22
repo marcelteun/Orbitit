@@ -3794,35 +3794,35 @@ class FldHeptagonCtrlWin(wx.Frame):
         except SyntaxError:
             self.status_bar.SetStatusText("Syntax error in input string")
             raise
-        tVal = ed["ar"][0]
-        aVal = ed["ar"][1]
-        fld1 = ed["ar"][2]
-        fld2 = ed["ar"][3]
-        self.heightGui.SetValue(self.maxHeight - self.heightF * tVal)
-        self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * aVal)
-        self.fold1Gui.SetValue(Geom3D.Rad2Deg * fld1)
-        self.fold2Gui.SetValue(Geom3D.Rad2Deg * fld2)
+        offset = ed["ar"][0]
+        angle = ed["ar"][1]
+        fold_1 = ed["ar"][2]
+        fold_2 = ed["ar"][3]
+        self.heightGui.SetValue(self.maxHeight - self.heightF * offset)
+        self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * angle)
+        self.fold1Gui.SetValue(Geom3D.Rad2Deg * fold_1)
+        self.fold2Gui.SetValue(Geom3D.Rad2Deg * fold_2)
         inclRefl = len(ed["ar"]) <= 5
         self.shape.has_reflections = inclRefl
         self.reflGui.SetValue(inclRefl)
         if not inclRefl:
             self.enable_guis_for_no_refl()
-            posVal = ed["ar"][4]
-            oppFld1 = ed["ar"][5]
-            oppFld2 = ed["ar"][6]
-            self.fold1OppGui.SetValue(Geom3D.Rad2Deg * oppFld1)
-            self.fold2OppGui.SetValue(Geom3D.Rad2Deg * oppFld2)
-            self.posAngleGui.SetValue(Geom3D.Rad2Deg * posVal)
-            self.shape.setPosAngle(posVal)
+            pos_angle = ed["ar"][4]
+            opposite_fld1 = ed["ar"][5]
+            opposite_fld2 = ed["ar"][6]
+            self.fold1OppGui.SetValue(Geom3D.Rad2Deg * opposite_fld1)
+            self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opposite_fld2)
+            self.posAngleGui.SetValue(Geom3D.Rad2Deg * pos_angle)
+            self.shape.setPosAngle(pos_angle)
         else:
             self.disable_guis_for_refl()
             self.setReflPosAngle()
-            oppFld1 = fld1
-            oppFld2 = fld2
-        self.shape.setDihedralAngle(aVal)
-        self.shape.setHeight(tVal)
-        self.shape.setFold1(fld1, oppFld1)
-        self.shape.setFold2(fld2, oppFld2)
+            opposite_fld1 = fold_1
+            opposite_fld2 = fold_2
+        self.shape.setDihedralAngle(angle)
+        self.shape.setHeight(offset)
+        self.shape.setFold1(fold_1, opposite_fld1)
+        self.shape.setFold2(fold_2, opposite_fld2)
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.updateShape()
         event.Skip()
@@ -4291,9 +4291,9 @@ class FldHeptagonCtrlWin(wx.Frame):
     def onNext(self, event=None):
         if self.std_pre_pos != []:
             try:
-                maxI = len(self.std_pre_pos) - 1
+                max_i = len(self.std_pre_pos) - 1
                 if self.specPosIndex >= 0:
-                    if self.specPosIndex < maxI - 1:
+                    if self.specPosIndex < max_i - 1:
                         self.specPosIndex += 1
                     else:
                         self.specPosIndex = -1  # select last
@@ -4349,59 +4349,64 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.reset_std_pre_pos()
         self.on_pre_pos()
 
-    def updateShapeSettings(self, setting):
+    def update_shape_settings(self, setting):
+        """Update the shape with the new settings from a JSON file."""
         if setting == []:
             return
+
+        if self.specPosIndex >= len(setting):
+            self.specPosIndex = len(setting) - 1
+        offset = setting[self.specPosIndex][0]
+        angle = setting[self.specPosIndex][1]
+        fold_1 = setting[self.specPosIndex][2]
+        fold_2 = setting[self.specPosIndex][3]
+        v_str = "[offset, dihedral_angle, fold_1, fold_2"
+        dbg_str = f"  [{offset:.12f}, {angle:.12f}, {fold_1:.12f}, {fold_2:.12f}"
+        if len(setting[self.specPosIndex]) > 4:
+            pos_angle = setting[self.specPosIndex][4]
         else:
-            if self.specPosIndex >= len(setting):
-                self.specPosIndex = len(setting) - 1
-            tVal = setting[self.specPosIndex][0]
-            aVal = setting[self.specPosIndex][1]
-            fld1 = setting[self.specPosIndex][2]
-            fld2 = setting[self.specPosIndex][3]
-            vStr = "[tVal, aVal, fld1, fld2"
-            dbgStr = "  [%.12f, %.12f, %.12f, %.12f" % (tVal, aVal, fld1, fld2)
-            if len(setting[self.specPosIndex]) > 4:
-                posVal = setting[self.specPosIndex][4]
-            else:
-                posVal = 0
-            if len(setting[self.specPosIndex]) > 5:
-                oppFld1 = setting[self.specPosIndex][5]
-                oppFld2 = setting[self.specPosIndex][6]
-                vStr = "%s, posVal, oppFld1, oppFld2] =" % vStr
-                dbgStr = "%s, %.12f, %.12f, %.12f]" % (dbgStr, posVal, oppFld1, oppFld2)
-            else:
-                oppFld1 = fld1
-                oppFld2 = fld2
-                vStr = "%s] =" % vStr
-                dbgStr = "%s]" % dbgStr
-            logging.info(vStr)
-            logging.info(dbgStr)
-            # Ensure self.specPosIndex in range:
-        nrPos = len(setting)
-        maxI = nrPos - 1
-        if self.specPosIndex > maxI:
-            self.specPosIndex = maxI
+            pos_angle = 0
+        if len(setting[self.specPosIndex]) > 5:
+            opposite_fld1 = setting[self.specPosIndex][5]
+            opposite_fld2 = setting[self.specPosIndex][6]
+            v_str += ", positional_angle, opposite_fold_1, opposite_fold_2] ="
+            dbg_str += ", {:.12f}, {:.12f}, {:.12f}]".format(
+                pos_angle, opposite_fld1, opposite_fld2
+            )
+        else:
+            opposite_fld1 = fold_1
+            opposite_fld2 = fold_2
+            v_str += "] ="
+            dbg_str += "]"
+        logging.info(v_str)
+        logging.info(dbg_str)
+        # Ensure self.specPosIndex in range:
+
+        no_of_pos = len(setting)
+        max_i = no_of_pos - 1
+        if self.specPosIndex > max_i:
+            self.specPosIndex = max_i
         # keep -1 (last) so switching triangle alternative will keep
         # last selection.
         elif self.specPosIndex < -1:
-            self.specPosIndex = maxI - 1
-        self.shape.setDihedralAngle(aVal)
-        self.shape.setHeight(tVal)
-        self.shape.setFold1(fld1, oppFld1)
-        self.shape.setFold2(fld2, oppFld2)
-        self.shape.setPosAngle(posVal)
+            self.specPosIndex = max_i - 1
+        self.shape.setDihedralAngle(angle)
+        self.shape.setHeight(offset)
+        self.shape.setFold1(fold_1, opposite_fld1)
+        self.shape.setFold2(fold_2, opposite_fld2)
+        self.shape.setPosAngle(pos_angle)
         # For the user: start counting with '1' instead of '0'
         if self.specPosIndex == -1:
-            nr = nrPos  # last position
+            nr = no_of_pos  # last position
         else:
             nr = self.specPosIndex + 1
         # set nr of possible positions
-        self.number_text.SetLabel("%d/%d" % (nr, nrPos))
+        self.number_text.SetLabel("%d/%d" % (nr, no_of_pos))
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         # self.shape.printTrisAngles()
 
     def reset_std_pre_pos(self):
+        """Update status so that no predefined heptagon fold is used"""
         self._std_pre_pos = None
 
     tNone = 1.0
@@ -4430,13 +4435,13 @@ class FldHeptagonCtrlWin(wx.Frame):
         # remove the "From File" from the pull down list as soon as it is
         # deselected
         if event is not None and self.prePos != OPEN_FILE:
-            openFileStr = self.stringify[OPEN_FILE]
-            n = self.pre_pos_gui.FindString(openFileStr)
+            open_file = self.stringify[OPEN_FILE]
+            n = self.pre_pos_gui.FindString(open_file)
             if n >= 0:
                 # deleting will reset the selection, so save and reselect:
-                selStr = self.pre_pos_gui.GetSelection()
-                self.pre_pos_gui.Delete(self.pre_pos_gui.FindString(openFileStr))
-                self.pre_pos_gui.SetSelection(selStr)
+                selection = self.pre_pos_gui.GetSelection()
+                self.pre_pos_gui.Delete(self.pre_pos_gui.FindString(open_file))
+                self.pre_pos_gui.SetSelection(selection)
         if self.prePos == DYN_POS:
             if event is not None:
                 self.pre_pos_file_name = None
@@ -4506,7 +4511,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             # Note if the setting array uses a none symmetric setting, then the
             # shape will not be symmetric. This is not supposed to be handled
             # here: don't overdo it!
-            self.updateShapeSettings(setting)
+            self.update_shape_settings(setting)
         # for OPEN_FILE it is important that updateShapeSettins is done before
         # updating the sliders...
         if self.prePos == DYN_POS or self.prePos == OPEN_FILE:
