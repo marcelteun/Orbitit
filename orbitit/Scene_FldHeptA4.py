@@ -692,13 +692,13 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             *args, **kwargs
         )
 
-    def showOnlyHepts(this):
+    def has_only_hepts(this):
         return this.prePos == S_ONLY_HEPTS and not (
                 this.tris_fill is None
             ) and not (
                 this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
 
-    def showOnlyO3Tris(this):
+    def has_only_o3_triangles(this):
         return this.prePos == heptagons.ONLY_XTRA_O3S and not (
                 this.tris_fill is None
             ) and not (

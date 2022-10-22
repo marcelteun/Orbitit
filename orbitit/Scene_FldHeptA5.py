@@ -819,28 +819,28 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             *args, **kwargs
         )
 
-    def showOnlyHepts(this):
-        return this.prePos == ONLY_HEPTS and not (
-                this.tris_fill is None
+    def has_only_hepts(self):
+        return self.prePos == ONLY_HEPTS and not (
+                self.tris_fill is None
             ) and not (
-                this.tris_fill == trisAlt.refl_1 or
-                this.tris_fill == trisAlt.refl_2 or
-                this.tris_fill == trisAlt.crossed_2
+                self.tris_fill == trisAlt.refl_1 or
+                self.tris_fill == trisAlt.refl_2 or
+                self.tris_fill == trisAlt.crossed_2
             )
 
-    def showOnlyO3Tris(this):
-        return this.prePos == heptagons.ONLY_XTRA_O3S and not (
-                this.tris_fill is None
+    def has_only_o3_triangles(self):
+        return self.prePos == heptagons.ONLY_XTRA_O3S and not (
+                self.tris_fill is None
             ) and not (
-                this.tris_fill == trisAlt.refl_1 or
-                this.tris_fill == trisAlt.refl_2 or
-                this.tris_fill == trisAlt.crossed_2
+                self.tris_fill == trisAlt.refl_1 or
+                self.tris_fill == trisAlt.refl_2 or
+                self.tris_fill == trisAlt.crossed_2
             )
 
     rDir = 'data/Data_FldHeptA5'
     rPre = 'frh-roots'
 
-    def printFileStrMapWarning(this, filename, funcname):
+    def printFileStrMapWarning(self, filename, funcname):
         logging.warning(f"unable to interprete filename {filename}")
 
     @property
@@ -1068,5 +1068,5 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
     }
 
 class Scene(Geom3D.Scene):
-    def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+    def __init__(self, parent, canvas):
+        Geom3D.Scene.__init__(self, Shape, CtrlWin, parent, canvas)

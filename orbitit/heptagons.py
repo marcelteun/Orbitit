@@ -3435,10 +3435,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.Guis.append(self.prev_button)
         self.Guis.append(self.last_button)
         self.open_file_button.Bind(wx.EVT_BUTTON, self.on_open_file)
-        self.first_button.Bind(wx.EVT_BUTTON, self.onFirst)
-        self.next_button.Bind(wx.EVT_BUTTON, self.onNext)
-        self.prev_button.Bind(wx.EVT_BUTTON, self.onPrev)
-        self.last_button.Bind(wx.EVT_BUTTON, self.onLast)
+        self.first_button.Bind(wx.EVT_BUTTON, self.on_first)
+        self.next_button.Bind(wx.EVT_BUTTON, self.on_next)
+        self.prev_button.Bind(wx.EVT_BUTTON, self.on_prev)
+        self.last_button.Bind(wx.EVT_BUTTON, self.on_last)
 
         # dynamic adjustments
         self.posAngleGui = wx.Slider(
@@ -4212,14 +4212,6 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
             self.updateShape()
 
-    def onFirst(self, event=None):
-        self.specPosIndex = 0
-        self.on_pre_pos()
-
-    def onLast(self, event=None):
-        self.specPosIndex = -1
-        self.on_pre_pos()
-
     def pre_pos_val(self, key):
         """Map a position string onto the position number."""
         if not self._pre_pos_map:
@@ -4277,7 +4269,18 @@ class FldHeptagonCtrlWin(wx.Frame):
             self._std_pre_pos = [sp["set"] for sp in psp[self.prePos]]
             return self._std_pre_pos
 
-    def onPrev(self, event=None):
+    def on_first(self, _=None):
+        """From a loaded JSON file with predefined folds choose the first option."""
+        self.specPosIndex = 0
+        self.on_pre_pos()
+
+    def on_last(self, _=None):
+        """From a loaded JSON file with predefined folds choose the last option."""
+        self.specPosIndex = -1
+        self.on_pre_pos()
+
+    def on_prev(self, _=None):
+        """From a loaded JSON file with predefined folds choose the previous option."""
         if self.std_pre_pos != []:
             if self.specPosIndex > 0:
                 self.specPosIndex -= 1
@@ -4288,7 +4291,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             self.noPrePosFound()
 
-    def onNext(self, event=None):
+    def on_next(self, _=None):
+        """From a loaded JSON file with predefined folds choose the next option."""
         if self.std_pre_pos != []:
             try:
                 max_i = len(self.std_pre_pos) - 1
@@ -4303,13 +4307,22 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             self.noPrePosFound()
 
-    def showOnlyHepts(self):
+    def has_only_hepts(self):
+        """Return whether the current model solely consists of heptagons.
+
+        The current model is supposed to be one that is predefined by the program.
+        """
         return self.prePos == ONLY_HEPTS
 
-    def showOnlyO3Tris(self):
+    def has_only_o3_triangles(self):
+        """Return whether the current model has extra triangles on a 3-fold axis only
+
+        The current model is supposed to be one that is predefined by the program.
+        """
         return self.prePos == ONLY_XTRA_O3S
 
     def choose_file(self):
+        """Open a dialog to choose a JSON file with predefined values to load."""
         filename = None
         dlg = wx.FileDialog(
             self, "New: Choose a file", self.rDir, "", "*.json", wx.FD_OPEN
@@ -4319,13 +4332,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         dlg.Destroy()
         return filename
 
-    def on_open_file(self, e):
+    def on_open_file(self, _):
+        """Handle opening of a JSON file with predefined folds and positions."""
         filename = self.choose_file()
         if filename is None:
             return
         logging.info("Opening file: %s", filename)
         self.pre_pos_file_name = filename
         self.fold_method_gui.SetStringSelection(
+            # TODO: put these values in the JSON file
             self.fileStrMapFoldMethodStr(self.pre_pos_file_name)
         )
         self.on_fold_method()
@@ -4456,13 +4471,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.number_text.SetLabel("---")
         elif self.prePos != OPEN_FILE:
             # this block is run for predefined spec pos only:
-            if self.showOnlyHepts():
+            if self.has_only_hepts():
                 self.shape.addXtraFs = False
                 self.restoreTris = True
             elif self.restoreTris:
                 self.restoreTris = False
                 self.shape.addXtraFs = self.addTrisGui.IsChecked()
-            if self.showOnlyO3Tris():
+            if self.has_only_o3_triangles():
                 self.shape.onlyRegFs = True
                 self.restoreO3s = True
             elif self.restoreO3s:
