@@ -1320,7 +1320,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         setup: a dictionary with the same structure as isometry.<class-object>.setup
         """
         assert len(setup) == len(self.orient_guis), (
-            "Wrong no. of initialisers for self symmetry"
+            f"Wrong no. of initialisers for {self.get_sym_class(apply_order=False)} symmetry"
             f"(got {len(setup)}, expected {len(self.orient_guis)})"
         )
         sym = self.get_sym_class(apply_order=False)

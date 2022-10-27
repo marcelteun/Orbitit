@@ -110,6 +110,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.select_col_sizer = None
         self._no_of_cols_gui_idx = None
         self.set_default_cols()
+        self._col_pre_selection = 0
 
     def set_default_cols(self):
         """Fill colours with some default values"""
@@ -255,14 +256,14 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.show_gui[self._final_sym_gui_idx].get_selected(),
             self.show_gui[self._stab_sym_gui_idx].get_selected()
         ))
-        no_of_cols_choice_lst = [
-            f"{p['index']} (based on {p['class'].__name__})"
-            for p in self.orbit.higher_order_stab_props
-        ]
-        no_of_cols_choice_lst.extend([
-            f"{p['index']} (based on {p['class'].__name__})"
-            for p in self.orbit.lower_order_stab_props
-        ])
+        no_of_cols_choice_lst = []
+        no_to_index = []
+        for p in self.orbit.higher_order_stab_props:
+            no_of_cols_choice_lst.append(f"{p['index']} (based on {p['class'].__name__})")
+            no_to_index.append(p['index'])
+        for p in self.orbit.lower_order_stab_props:
+            no_of_cols_choice_lst.append(f"{p['index']} (based on {p['class'].__name__})")
+            no_to_index.append(p['index'])
         self.col_guis = []
         self.col_guis.append(
             wx.Choice(self.panel, wx.ID_ANY, choices=no_of_cols_choice_lst)
@@ -278,6 +279,10 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         ][
             self.show_gui[self._stab_sym_gui_idx].get_selected_idx()
         ]
+        # overwrite if self._col_pre_selection (by importing JSON file with colours defined)
+        if self._col_pre_selection != 0 and self._col_pre_selection in no_to_index:
+            self.col_alt[0] = no_to_index.index(self._col_pre_selection)
+            self.col_alt[1] = 0
         self.col_guis[-1].SetSelection(self.col_alt[0])
         self._no_of_cols_gui_idx = len(self.col_guis)-1
         self.on_no_of_col_select(self.col_guis[-1])
@@ -631,6 +636,14 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.show_gui[self._stab_sym_gui_idx].on_set_sym(None)
             self.show_gui[self._stab_sym_gui_idx].setup_sym(stab_sym.setup)
             # TODO: set the colours
+            included_colors = []
+            i = 0
+            for col in shape.shape_colors:
+                if col not in included_colors:
+                    included_colors.append(col)
+                    self.cols[i] = [255 * c for c in col]
+                    i += 1
+            self._col_pre_selection = len(included_colors)
             shape = shape.base_shape
         if isinstance(shape, Geom3D.CompoundShape):
             shape = shape.simple_shape
