@@ -197,7 +197,7 @@ STELLATIONS = [
     {
         "id": "f1g1",
         "Vs": [VS[i] for i in [11, 26, 32, 25, 10, 15, 15, 36, 21, 33, 18, 9, 24]],
-        "Fs": [[0, 1, 2, 3, 4], [3, 4, 5], [5, 6, 7], [6, 7, 8], [8, 9, 10], [10, 11 ,12]],
+        "Fs": [[0, 1, 2, 3, 4], [3, 4, 5], [5, 6, 7], [6, 7, 8], [8, 9, 10], [10, 11, 12]],
         "final": 0,
         "stab": 1,
         "col_alt": 2,
@@ -410,7 +410,7 @@ if __name__ == "__main__":
                 no_of_cols=5,
                 col_alt=data["col_alt"],
             )
-            filename = os.path.join( ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.json")
+            filename = os.path.join(ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.json")
             model.write_json_file(filename)
             print("written", filename)
 
