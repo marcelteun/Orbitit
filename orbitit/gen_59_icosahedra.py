@@ -370,7 +370,7 @@ if __name__ == "__main__":
                 no_of_cols=5,
                 col_alt=data["col_alt"],
             )
-            filename = os.path.join( ARGS.output_dir, f"icosahedron{no}_{data['id']}.json")
+            filename = os.path.join( ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.json")
             model.write_json_file(filename)
             print("written", filename)
 
