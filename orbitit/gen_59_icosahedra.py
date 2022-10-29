@@ -179,6 +179,14 @@ STELLATIONS = [
         "stab": 1,
         "col_alt": 2,
     },
+    {
+        "id": "e1f1",
+        "Vs": [VS[i] for i in [32, 25, 10, 15, 36, 21, 33, 18, 12, 9, 24, 31]],
+        "Fs": [[0, 1, 2], [2, 3, 4], [3, 4, 5, 6, 7, 8], [6, 7, 9], [9, 10, 11]],
+        "final": 0,
+        "stab": 1,
+        "col_alt": 2,
+    },
 ]
 
 if __name__ == "__main__":
@@ -195,12 +203,9 @@ if __name__ == "__main__":
                 no_of_cols=5,
                 col_alt=data["col_alt"],
             )
-            model.write_json_file(
-                os.path.join(
-                    ARGS.output_dir,
-                    f"icosahedron{no}_{data['id']}.json",
-                )
-            )
+            filename = os.path.join( ARGS.output_dir, f"icosahedron{no}_{data['id']}.json")
+            model.write_json_file(filename)
+            print("written", filename)
 
     PARSER = argparse.ArgumentParser(description="Generate the stellation of the icosahedron")
     PARSER.add_argument(
