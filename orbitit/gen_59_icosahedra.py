@@ -81,7 +81,6 @@ VS = [
     Vec3([(5 * V5 + 11) / 2, -(9 * V5 + 19) / 2 / V3, HEIGHT]),  # 46
     Vec3([(7 * V5 + 15) / 2, -TAU_4 / V3, HEIGHT]),  # 47
 ]
-# Actually A5xI should always be used, but A5 is an optimisation
 FINAL_SYM = [
     A5(setup={"o3axis": Vec3([0, 0, 1]), "o5axis": Vec3(VS[2])}),
     A5xI(setup={"o3axis": Vec3([0, 0, 1]), "o5axis": Vec3(VS[2])}),
@@ -346,6 +345,14 @@ STELLATIONS = [
         "final": 1,
         "stab": 1,
         "col_alt": 4,
+    },
+    {
+        "id": "f1",
+        "Vs": [VS[i] for i in [25, 10, 15, 36, 21, 33, 18, 9, 24, 31]],
+        "Fs": [[0, 1, 2], [2, 3, 4], [5, 6, 7], [7, 8, 9]],
+        "final": 0,
+        "stab": 1,
+        "col_alt": 2,
     },
 ]
 
