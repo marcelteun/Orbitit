@@ -23,7 +23,7 @@
 # -----------------------------------------------------------------
 
 
-from orbitit import Geom3D, geomtypes, isometry, rgb
+from orbitit import base, Geom3D, geomtypes, isometry, rgb
 
 
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
@@ -532,3 +532,6 @@ class Shape(Geom3D.OrbitShape):  # pylint: disable=too-many-instance-attributes
             )
 
         return js
+
+
+base.class_to_json[Shape] = "orbit_shape"
