@@ -3275,8 +3275,8 @@ class OrbitShape(SymmetricShape):
         len_s = len(stab_sym)
         len_q = len(fs_quotient_set)
         assert len_f % len_s == 0, f"Expected divisable group length {len_f} / {len_s}"
-        assert len_q == len_f // len_s,\
-            f"Wrong length ({len_q} != {len_f // len_s}) of quotient set (increase precisio?)"
+        #assert len_q == len_f // len_s,\
+        #    f"Wrong length ({len_q} != {len_f // len_s}) of quotient set (increase precisio?)"
         FsOrbit = [coset.get_one() for coset in fs_quotient_set]
         if not quiet:
             logging.info(f"Applying an orbit of order {len(FsOrbit)}")
