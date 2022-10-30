@@ -431,22 +431,31 @@ STELLATIONS = [
 if __name__ == "__main__":
     import argparse
 
-    def generate_models():
-        """Generate models for the stellations."""
-        for no, data in enumerate(STELLATIONS):
-            model = Shape(
-                data,
-                final_sym=FINAL_SYM[data["final"]],
-                stab_sym=STAB_SYM[data["stab"]],
-                name=f"Stellation of Icosahedron no. {no}: {data['id']}",
-                no_of_cols=5,
-                col_alt=data["col_alt"],
-            )
-            filename = os.path.join(ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.json")
-            model.write_json_file(filename)
-            print("written", filename)
+    def generate_model(no, data):
+        """Generate a model for one of the stellations.
+
+        no: the number to be used for this one.
+        data: the data dictionary for this stellation, see STELLATIONS.
+        """
+        model = Shape(
+            data,
+            final_sym=FINAL_SYM[data["final"]],
+            stab_sym=STAB_SYM[data["stab"]],
+            name=f"Stellation of Icosahedron no. {no}: {data['id']}",
+            no_of_cols=5,
+            col_alt=data["col_alt"],
+        )
+        filename = os.path.join(ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.json")
+        model.write_json_file(filename)
+        print("written", filename)
 
     PARSER = argparse.ArgumentParser(description="Generate the stellation of the icosahedron")
+    PARSER.add_argument(
+        "--number",
+        "-n",
+        type=int,
+        help="Only generate the specified number (where 0 is the icosahedron itself)",
+    )
     PARSER.add_argument(
         "--output-dir",
         "-o",
@@ -457,6 +466,11 @@ if __name__ == "__main__":
     ARGS = PARSER.parse_args()
     if not os.path.isdir(ARGS.output_dir):
         os.mkdir(ARGS.output_dir)
-    generate_models()
+
+    if ARGS.number is not None:
+        generate_model(ARGS.number, STELLATIONS[ARGS.number])
+    else:
+        for no, data in enumerate(STELLATIONS):
+            generate_model(no, data)
 
 # vim expandtab sw=4
