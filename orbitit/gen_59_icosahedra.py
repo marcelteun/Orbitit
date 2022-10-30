@@ -606,7 +606,7 @@ if __name__ == "__main__":
     if ARGS.number is not None:
         generate_model(ARGS.number, STELLATIONS[ARGS.number])
     else:
-        for no, data in enumerate(STELLATIONS):
-            generate_model(no, data)
+        for i, d in enumerate(STELLATIONS):
+            generate_model(i, d)
 
 # vim expandtab sw=4
