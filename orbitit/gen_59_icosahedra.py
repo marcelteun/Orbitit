@@ -506,6 +506,14 @@ STELLATIONS = [
         "stab": 1,
         "col_alt": 2,
     },
+    {
+        "id": "Ef1f2",
+        "Vs": [VS[i] for i in [36, 31, 9, 33, 5]],
+        "Fs": [[0, 1, 2, 3, 4]],
+        "final": 0,
+        "stab": 1,
+        "col_alt": 2,
+    },
 ]
 
 if __name__ == "__main__":
