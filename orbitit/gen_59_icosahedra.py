@@ -567,11 +567,12 @@ STELLATIONS = [
 if __name__ == "__main__":
     import argparse
 
-    def generate_model(no, data):
+    def generate_model(no, data, off):
         """Generate a model for one of the stellations.
 
         no: the number to be used for this one.
         data: the data dictionary for this stellation, see STELLATIONS.
+        off: if True then the the models are save in the off-format, otherwise JSON format.
         """
         model = Shape(
             data,
@@ -581,8 +582,13 @@ if __name__ == "__main__":
             no_of_cols=5,
             col_alt=data["col_alt"],
         )
-        filename = os.path.join(ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.json")
-        model.write_json_file(filename)
+        ext = "off" if off else "json"
+        filename = os.path.join(ARGS.output_dir, f"icosahedron{no:02d}_{data['id']}.{ext}")
+        if off:
+            with open(filename, "w") as fd:
+                fd.write(model.to_off())
+        else:
+            model.write_json_file(filename)
         print("written", filename)
 
     PARSER = argparse.ArgumentParser(description="Generate the stellation of the icosahedron")
@@ -591,6 +597,12 @@ if __name__ == "__main__":
         "-n",
         type=int,
         help="Only generate the specified number (where 0 is the icosahedron itself)",
+    )
+    PARSER.add_argument(
+        "--off-format",
+        "-f",
+        action="store_true",
+        help="If specified the models are generated in off-format instead of JSON",
     )
     PARSER.add_argument(
         "--output-dir",
@@ -604,9 +616,9 @@ if __name__ == "__main__":
         os.mkdir(ARGS.output_dir)
 
     if ARGS.number is not None:
-        generate_model(ARGS.number, STELLATIONS[ARGS.number])
+        generate_model(ARGS.number, STELLATIONS[ARGS.number], ARGS.off_format)
     else:
         for i, d in enumerate(STELLATIONS):
-            generate_model(i, d)
+            generate_model(i, d, ARGS.off_format)
 
 # vim expandtab sw=4

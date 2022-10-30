@@ -131,7 +131,7 @@ class TestSimpleShape(unittest.TestCase):
     def test_export_to_off(self):
         """Test export to off-format function"""
         self.ensure_shape()
-        tst_str = self.shape.toOffStr()
+        tst_str = self.shape.to_off()
         result, msg = chk_with_org(self.name + ".off", tst_str)
         self.assertTrue(result, msg)
 

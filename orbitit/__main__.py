@@ -517,7 +517,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     if clean_up:
                         shape = shape.cleanShape(margin)
                     with open(filepath, 'w') as fd:
-                        fd.write(shape.toOffStr(precision, extra_data))
+                        fd.write(shape.to_off(precision, extra_data))
                     self.set_status_text("OFF file written")
                 else:
                     dlg.Show()
@@ -850,7 +850,7 @@ def convert_to_off(shape, fd, precision, margin=0):
     if margin != 0:
         shape = shape.cleanShape(margin)
     # TODO: support for saving extra_data?
-    fd.write(shape.toOffStr(precision))
+    fd.write(shape.to_off(precision))
 
 if __name__ == "__main__":
     import argparse

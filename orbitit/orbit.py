@@ -23,7 +23,8 @@
 # -----------------------------------------------------------------
 
 
-from orbitit import base, Geom3D, geomtypes, isometry, rgb
+from orbitit import base as orbit_base
+from orbitit import Geom3D, geomtypes, isometry, rgb
 
 
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
@@ -493,9 +494,9 @@ class Shape(Geom3D.OrbitShape):  # pylint: disable=too-many-instance-attributes
         """Undo any rotation."""
         self.setVs(self.base_shape.org_Vs)
 
-    def to_off(self):
+    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=True):
         """Return to off-format representation."""
-        s = self.simple_shape.toOffStr(color_floats=True)
+        s = self.simple_shape.to_off(precision, info, color_floats)
         s += f"# Color alternative based on {self.same_col_isom}\n".format(self.same_col_isom)
         s += f"# Used colour alternative {self.col_alt} (max {self.total_no_of_col_alt - 1})"
         return s
@@ -534,4 +535,4 @@ class Shape(Geom3D.OrbitShape):  # pylint: disable=too-many-instance-attributes
         return js
 
 
-base.class_to_json[Shape] = "orbit_shape"
+orbit_base.class_to_json[Shape] = "orbit_shape"

@@ -1708,9 +1708,7 @@ class SimpleShape(base.Orbitit):
         return doc
 
 
-    def toOffStr(
-            self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
-        ):
+    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
@@ -2719,10 +2717,10 @@ class CompoundShape(base.Orbitit):
     def generateNormals(self):
         return self.shapeElements[0].generateNormals
 
-    def toOffStr(self, precision = 15, info = False):
+    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
         if self.merge_needed:
             self.merge_shapes()
-        return self.merged_shape.toOffStr(precision, info)
+        return self.merged_shape.to_off(precision, info, color_floats)
 
     def toPsPiecesStr(self,
             faceIndices=[],
