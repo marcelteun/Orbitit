@@ -190,8 +190,8 @@ class Shape(heptagons.FldHeptagonShape):
         this.xtraTrisShape = xtraTrisShape
         this.trisO3Shape = trisO3Shape
         this.trisO4Shape = trisO4Shape
-        this.posAngleMin = -pos_angle_refl_2
-        this.posAngleMax = pos_angle_refl_2
+        this.pos_angle_min = -pos_angle_refl_2
+        this.pos_angle_max = pos_angle_refl_2
         this.height = 3.9
         this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
         this.initArrs()

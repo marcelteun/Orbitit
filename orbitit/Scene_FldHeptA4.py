@@ -187,9 +187,9 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape = heptagonsShape
         this.xtraTrisShape = xtraTrisShape
         this.trisO3Shape = trisO3Shape
-        this.posAngleMin = -math.pi
-        this.posAngleMax = math.pi
-        this.posAngle = 0
+        this.pos_angle_min = -math.pi
+        this.pos_angle_max = math.pi
+        this.pos_angle = 0
         this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
         this.initArrs()
         this.setV()
@@ -317,7 +317,7 @@ class Shape(heptagons.FldHeptagonShape):
                     )
                     # only draw the folds of the hexagon for the twisted variant
                     # if the hexagon isn't flat.
-                    if (not Geom3D.eq(abs(this.posAngle) % (math.pi/2), math.pi/4)):
+                    if (not Geom3D.eq(abs(this.pos_angle) % (math.pi/2), math.pi/4)):
                         Es.extend(this.twistedEs_A4)
                     colIds = this.triColIds[eAlt][this.has_reflections]
                 else:

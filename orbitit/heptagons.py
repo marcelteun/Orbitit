@@ -3105,11 +3105,11 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         Geom3D.CompoundShape.__init__(self, shapes, name=name)
         self.heptagon = RegularHeptagon()
         self.dihedralAngle = 1.2
-        self.posAngleMin = 0
-        self.posAngleMax = math.pi / 2
-        self.posAngle = 0
+        self.pos_angle_min = 0
+        self.pos_angle_max = math.pi / 2
+        self.pos_angle = 0
         self.has_reflections = True
-        self.rotate_fold = 0
+        self._rotate_fold = 0
         self.fold1 = 0.0
         self.fold2 = 0.0
         self.oppFold1 = 0.0
@@ -3153,8 +3153,13 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.fold_heptagon = method
         self.update_shape = True
 
-    def setRotateFold(self, step):
-        self.rotate_fold = step
+    @property
+    def rotate_fold(self):
+        return self._rotate_fold
+
+    @rotate_fold.setter
+    def rotate_fold(self, step):
+        self._rotate_fold = step
         self.update_shape = True
 
     def setDihedralAngle(self, angle):
@@ -3162,7 +3167,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         self.update_shape = True
 
     def setPosAngle(self, angle):
-        self.posAngle = angle
+        self.pos_angle = angle
         self.update_shape = True
 
     def set_tri_fill_pos(self, position):
@@ -3211,7 +3216,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         if self.edgeAlternative == TrisAlt.refl_1:
             return 0
         else:
-            return self.posAngleMax
+            return self.pos_angle_max
 
     def posHeptagon(self):
         self.heptagon.fold(
@@ -3221,24 +3226,43 @@ class FldHeptagonShape(Geom3D.CompoundShape):
             self.oppFold2,
             keepV0=False,
             fold=self.fold_heptagon,
-            rotate=self.rotate_fold,
+            rotate=self._rotate_fold,
         )
         self.heptagon.translate(HEPT_HEIGHT * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
         self.heptagon.rotate(-geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedralAngle)
         self.heptagon.translate(self.height * geomtypes.UZ)
-        if self.posAngle != 0:
-            self.heptagon.rotate(-geomtypes.UZ, self.posAngle)
+        if self.pos_angle != 0:
+            self.heptagon.rotate(-geomtypes.UZ, self.pos_angle)
 
     def setV(self):
         self.posHeptagon()
 
 
 class FldHeptagonCtrlWin(wx.Frame):
+    """
+    Widgets to control a polyhedron with folded regular heptagons.
+
+    Attributes:
+    - refl_min_size: minimum window size when relfections are included
+    - rot_min_size: minimum window size when only rotations are included
+    - pre_pos_file_name: holds the name when a file was loaded with predefined properies. If none,
+      then no predefined file is being displaued.
+    """
     refl_min_size = (525, 425)
     rot_min_size = (545, 600)
     pre_pos_file_name = None
-    rotate_fold = 1
+
+    """
+    Hidded attributes:
+    _rotate_fold: when no reflections are required then a certain heptagon fold can be used in 7
+        different positions. This attribute expresses the offset of the current option.
+    _std_pre_pos: all folds and offsets for the predefined heptagon that is used
+    _pre_pos_map: maps a string with a certain heptagon setup to a index in the choice list. These
+        options OPEN_FILE, DYN_POS, ONLY_HEPTS, ONLY_O3_TRIANGLES, etc
+    _sym_incl_refl: whether polyhedron symmetry includes reflections.
+    """
+    _rotate_fold = 1
     _std_pre_pos = None
     _pre_pos_map = None
     _sym_incl_refl = True
@@ -3350,12 +3374,12 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.reflGui = wx.CheckBox(self.panel, label="Reflections Required")
         self.Guis.append(self.reflGui)
         self.reflGui.SetValue(self.shape.has_reflections)
-        self.reflGui.Bind(wx.EVT_CHECKBOX, self.onRefl)
+        self.reflGui.Bind(wx.EVT_CHECKBOX, self.on_refl)
 
         self.rotateFldGui = wx.Button(self.panel, label="Rotate Fold 1/7")
-        self.rotate_fold = 0
+        self._rotate_fold = 0
         self.Guis.append(self.rotateFldGui)
-        self.rotateFldGui.Bind(wx.EVT_BUTTON, self.onRotateFld)
+        self.rotateFldGui.Bind(wx.EVT_BUTTON, self.on_rotate_fold)
 
         # View Settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -3441,15 +3465,15 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.last_button.Bind(wx.EVT_BUTTON, self.on_last)
 
         # dynamic adjustments
-        self.posAngleGui = wx.Slider(
+        self.pos_angle_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.posAngle,
-            minValue=Geom3D.Rad2Deg * self.shape.posAngleMin,
-            maxValue=Geom3D.Rad2Deg * self.shape.posAngleMax,
+            value=Geom3D.Rad2Deg * self.shape.pos_angle,
+            minValue=Geom3D.Rad2Deg * self.shape.pos_angle_min,
+            maxValue=Geom3D.Rad2Deg * self.shape.pos_angle_max,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
-        self.Guis.append(self.posAngleGui)
-        self.posAngleGui.Bind(wx.EVT_SLIDER, self.onPosAngle)
+        self.Guis.append(self.pos_angle_gui)
+        self.pos_angle_gui.Bind(wx.EVT_SLIDER, self.onPosAngle)
         self.minFoldAngle = -180
         self.maxFoldAngle = 180
         self.dihedralAngleGui = wx.Slider(
@@ -3563,42 +3587,42 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         pos_sizer_h = wx.BoxSizer(wx.HORIZONTAL)
         # sizer holding the dynamic adjustments
-        specPosDynamic = wx.BoxSizer(wx.VERTICAL)
+        spec_pos_dynamic = wx.BoxSizer(wx.VERTICAL)
         self.Boxes.append(wx.StaticBox(self.panel, label="Dihedral Angle (Degrees)"))
-        angleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
-        angleSizer.Add(self.dihedralAngleGui, 1, wx.EXPAND)
+        angle_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
+        angle_sizer.Add(self.dihedralAngleGui, 1, wx.EXPAND)
         self.Boxes.append(wx.StaticBox(self.panel, label="Fold 1 Angle (Degrees)"))
-        fold1Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-        fold1Sizer.Add(self.fold1Gui, 1, wx.EXPAND)
+        fold1_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        fold1_sizer.Add(self.fold1Gui, 1, wx.EXPAND)
         self.Boxes.append(wx.StaticBox(self.panel, label="Fold 2 Angle (Degrees)"))
-        fold2Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-        fold2Sizer.Add(self.fold2Gui, 1, wx.EXPAND)
+        fold2_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        fold2_sizer.Add(self.fold2Gui, 1, wx.EXPAND)
         self.Boxes.append(wx.StaticBox(self.panel, label="Positional Angle (Degrees)"))
-        posAngleSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
-        posAngleSizer.Add(self.posAngleGui, 1, wx.EXPAND)
+        pos_angle_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.HORIZONTAL)
+        pos_angle_sizer.Add(self.pos_angle_gui, 1, wx.EXPAND)
         self.Boxes.append(
             wx.StaticBox(self.panel, label="Opposite Fold 1 Angle (Degrees)")
         )
-        oppFold1Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-        oppFold1Sizer.Add(self.fold1OppGui, 1, wx.EXPAND)
+        opp_fold1_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        opp_fold1_sizer.Add(self.fold1OppGui, 1, wx.EXPAND)
         self.Boxes.append(
             wx.StaticBox(self.panel, label="Opposite Fold 2 Angle (Degrees)")
         )
-        oppFold2Sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-        oppFold2Sizer.Add(self.fold2OppGui, 1, wx.EXPAND)
+        opp_fold2_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        opp_fold2_sizer.Add(self.fold2OppGui, 1, wx.EXPAND)
 
         self.Boxes.append(wx.StaticBox(self.panel, label="Offset T"))
-        heightSizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
-        heightSizer.Add(self.heightGui, 1, wx.EXPAND)
-        specPosDynamic.Add(angleSizer, 0, wx.EXPAND)
-        specPosDynamic.Add(fold1Sizer, 0, wx.EXPAND)
-        specPosDynamic.Add(fold2Sizer, 0, wx.EXPAND)
-        specPosDynamic.Add(posAngleSizer, 0, wx.EXPAND)
-        specPosDynamic.Add(oppFold1Sizer, 0, wx.EXPAND)
-        specPosDynamic.Add(oppFold2Sizer, 0, wx.EXPAND)
-        specPosDynamic.Add(wx.BoxSizer(), 1, wx.EXPAND)
-        pos_sizer_h.Add(specPosDynamic, 3, wx.EXPAND)
-        pos_sizer_h.Add(heightSizer, 1, wx.EXPAND)
+        height_sizer = wx.StaticBoxSizer(self.Boxes[-1], wx.VERTICAL)
+        height_sizer.Add(self.heightGui, 1, wx.EXPAND)
+        spec_pos_dynamic.Add(angle_sizer, 0, wx.EXPAND)
+        spec_pos_dynamic.Add(fold1_sizer, 0, wx.EXPAND)
+        spec_pos_dynamic.Add(fold2_sizer, 0, wx.EXPAND)
+        spec_pos_dynamic.Add(pos_angle_sizer, 0, wx.EXPAND)
+        spec_pos_dynamic.Add(opp_fold1_sizer, 0, wx.EXPAND)
+        spec_pos_dynamic.Add(opp_fold2_sizer, 0, wx.EXPAND)
+        spec_pos_dynamic.Add(wx.BoxSizer(), 1, wx.EXPAND)
+        pos_sizer_h.Add(spec_pos_dynamic, 3, wx.EXPAND)
+        pos_sizer_h.Add(height_sizer, 1, wx.EXPAND)
 
         self.Boxes.append(
             wx.StaticBox(self.panel, label="Set Orientation Directly (specify array)")
@@ -3730,7 +3754,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.SetSize(size)
 
     def onPosAngle(self, event):
-        self.shape.setPosAngle(Geom3D.Deg2Rad * self.posAngleGui.GetValue())
+        self.shape.setPosAngle(Geom3D.Deg2Rad * self.pos_angle_gui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.update_shape()
         event.Skip()
@@ -3812,7 +3836,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             opposite_fld2 = ed["ar"][6]
             self.fold1OppGui.SetValue(Geom3D.Rad2Deg * opposite_fld1)
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opposite_fld2)
-            self.posAngleGui.SetValue(Geom3D.Rad2Deg * pos_angle)
+            self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * pos_angle)
             self.shape.setPosAngle(pos_angle)
         else:
             self.disable_guis_for_refl()
@@ -3859,28 +3883,34 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.fold2OppGui.Enable()
 
     def setReflPosAngle(self):
-        posAngle = self.shape.getReflPosAngle()
-        self.shape.setPosAngle(posAngle)
-        self.posAngleGui.SetValue(Geom3D.Rad2Deg * posAngle)
+        pos_angle = self.shape.getReflPosAngle()
+        self.shape.setPosAngle(pos_angle)
+        self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * pos_angle)
 
-    def disableSlidersNoRefl(self):
+    def disable_sliders_no_refl(self):
+        """
+        Disable all extra sliders that are only valif for a polyhedron without reflections.
+        """
         self.fold1OppGui.Disable()
         self.fold2OppGui.Disable()
-        self.posAngleGui.Disable()
+        self.pos_angle_gui.Disable()
         # the code below is added to be able to check and uncheck "Has
         # Reflections" in a "undo" kind of way.
         self._saved_angle["opp_fold1"] = self.shape.oppFold1
         self._saved_angle["opp_fold2"] = self.shape.oppFold2
-        self._saved_angle["pos_angle"] = self.shape.posAngle
+        self._saved_angle["pos_angle"] = self.shape.pos_angle
         self.shape.setFold1(oppositeAngle=self.shape.fold1)
         self.shape.setFold2(oppositeAngle=self.shape.fold2)
         self.setReflPosAngle()
         self.fold1OppGui.SetValue(self.minFoldAngle)
         self.fold2OppGui.SetValue(self.minFoldAngle)
 
-    def enableSlidersNoRefl(self, restore=True):
+    def enable_sliders_no_refl(self, restore=True):
+        """
+        Enable all extra sliders that are only valif for a polyhedron without reflections.
+        """
         self.allign_slide_bars_with_fold_method()
-        self.posAngleGui.Enable()
+        self.pos_angle_gui.Enable()
         # the code below is added to be able to check and uncheck "Has
         # Reflections" in a "undo" kind of way.
         if restore:
@@ -3892,7 +3922,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.shape.setPosAngle(hept_angle)
             self.fold1OppGui.SetValue(Geom3D.Rad2Deg * opp_fold1)
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opp_fold2)
-            self.posAngleGui.SetValue(Geom3D.Rad2Deg * hept_angle)
+            self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * hept_angle)
 
     def disable_guis_for_refl(self, force=False):
         """Disable some GUIs that aren't valid because reflections are required.
@@ -3910,7 +3940,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.update_triangle_fill_options()
             self.trisPosGui.Disable()
             self.rotateFldGui.Disable()
-            self.shape.setRotateFold(0)
+            self.shape.rotate_fold = 0
             self.disableSlidersNoRefl()
             self._sym_incl_refl = True
             self.update_fold_selection()
@@ -3924,20 +3954,15 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.update_triangle_fill_options()
             self.trisPosGui.Enable()
             self.rotateFldGui.Enable()
-            self.shape.setRotateFold(self.rotate_fold)
-            self.enableSlidersNoRefl(restore)
+            self.shape.rotate_fold = self._rotate_fold
+            self.enable_sliders_no_refl(restore)
             self._sym_incl_refl = False
             self.update_fold_selection()
 
-    def disableTrisFillGuis(self):
-        self.addTrisGui.Disable()
-        self.tris_fill_gui.Disable()
-
-    def enableTrisFillGuis(self):
-        self.addTrisGui.Enable()
-        self.tris_fill_gui.Enable()
-
-    def onRefl(self, event=None):
+    def on_refl(self, event=None):
+        """
+        Update the polyhedron after changing whether the polyhedron has reflections or not.
+        """
         self.shape.has_reflections = self.reflGui.IsChecked()
         self.shape.update_shape = True
         self.show_right_folds()
@@ -3963,20 +3988,30 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.status_bar.SetStatusText(self.shape.getStatusStr())
                 self.update_shape()
 
-    # TODO: make this a property and use a setter here
-    def setRotateFld(self, rotate_fold):
+    @property
+    def rotate_fold(self):
+        """Return the offset for the heptagon rotation.
+
+        For models without reflections a heptagon fold can be rotated to 7 different orientations.
+        The rotation fold is an integer between 0 and 7
+        """
+        return self._rotate_fold
+
+    @rotate_fold.setter
+    def rotate_fold(self, rotate_fold):
         """Set the offset for the heptagon rotation.
 
         For models without reflections a heptagon fold can be rotated to 7 different orientations.
-        rotate_fold: offset between 0 and 7
+        The rotation fold is an integer between 0 and 7
         """
-        self.rotate_fold = int(rotate_fold) % 7
-        self.shape.setRotateFold(self.rotate_fold)
-        self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self.rotate_fold + 1))
+        self._rotate_fold = int(rotate_fold) % 7
+        self.shape.rotate_fold = self._rotate_fold
+        self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self._rotate_fold + 1))
         self.update_shape()
 
-    def onRotateFld(self, event):
-        self.setRotateFld(self.rotate_fold + 1)
+    def on_rotate_fold(self, _):
+        """Rotate the current kind of heptagon fold one step clockwise."""
+        self.rotate_fold = self._rotate_fold + 1
 
     def is_pre_pos(self):
         """Return whether the UI currently shows a pre-defined model.
@@ -4025,7 +4060,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         except KeyError:
             current_val = self.trisAlt.strip_I
         if self.shape.has_reflections:
-            isValid = lambda c: self.trisAlt.isBaseKey(self.trisAlt.key[c])
+            is_valid = lambda c: self.trisAlt.isBaseKey(self.trisAlt.key[c])
             if not self.trisAlt.isBaseKey(current_val):
                 if self.tris_setup_refl is None:
                     # TODO: use the first one that is valid
@@ -4033,15 +4068,13 @@ class FldHeptagonCtrlWin(wx.Frame):
                 else:
                     current_val = self.trisAlt.key[self.tris_setup_refl]
         else:
-
-                def isValid(c):
+                def is_valid(c):
                     c_key = self.trisAlt.key[c]
                     if self.trisAlt.isBaseKey(c_key) or isinstance(c_key, int):
                         return False
-                    else:
-                        return True
+                    return True
 
-                if not isValid(self.trisAlt.stringify[current_val]):
+                if not is_valid(self.trisAlt.stringify[current_val]):
                     if self.tris_setup_no_refl is None:
                         # TODO: use the first one that is valid
                         current_val = self.trisAlt.strip_I_strip_I
@@ -4051,17 +4084,17 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.tris_fill_gui.Clear()
         current_still_valid = False
         for choice in self.trisAlt.choiceList:
-            if isValid(choice):
+            if is_valid(choice):
                 self.tris_fill_gui.Append(choice)
                 if current_val == self.trisAlt.key[choice]:
                     current_still_valid = True
-                lastValid = choice
+                last_valid = choice
 
         if current_still_valid:
             self.tris_fill_gui.SetStringSelection(self.trisAlt.stringify[current_val])
         else:
             try:
-                self.tris_fill_gui.SetStringSelection(lastValid)
+                self.tris_fill_gui.SetStringSelection(last_valid)
             except UnboundLocalError:
                 # None are valid...
                 return
@@ -4079,8 +4112,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         t = self.trisAlt.key[s]
         if self.shape.has_reflections:
             return t
-        else:
-            return t[0]
+        return t[0]
 
     @property
     def opp_tris_fill(self):
@@ -4091,8 +4123,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         t = self.trisAlt.key[self.tris_fill_gui.GetStringSelection()]
         if self.shape.has_reflections:
             return t
-        else:
-            return t[1]
+        return t[1]
 
     def nvidea_workaround_0(self):
         """Some work around segmentation fault for NVidia Graphics driver"""
@@ -4129,16 +4160,16 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.altMFoldFace = self.shape.altMFoldFace
             shape.heptagon = self.shape.heptagon
             shape.dihedralAngle = self.shape.dihedralAngle
-            shape.posAngleMin = self.shape.posAngleMin
-            shape.posAngleMax = self.shape.posAngleMax
-            shape.posAngle = self.shape.posAngle
+            shape.pos_angle_min = self.shape.pos_angle_min
+            shape.pos_angle_max = self.shape.pos_angle_max
+            shape.pos_angle = self.shape.pos_angle
             shape.has_reflections = self.shape.has_reflections
             shape.rotate_fold = self.shape.rotate_fold
             shape.fold1 = self.shape.fold1
             shape.fold2 = self.shape.fold2
             shape.oppFold1 = self.shape.oppFold1
             shape.oppFold2 = self.shape.oppFold2
-            shape.fold_heptagon[self._sym_incl_refl] = self.shape.fold_heptagon
+            shape.fold_heptagon = self.shape.fold_heptagon
             shape.height = self.shape.height
             shape.apply_symmetries = self.shape.apply_symmetries
             shape.addXtraFs = self.shape.addXtraFs
@@ -4146,7 +4177,6 @@ class FldHeptagonCtrlWin(wx.Frame):
             shape.useCulling = self.shape.useCulling
             shape.edgeAlternative = self.tris_fill
             shape.oppEdgeAlternative = self.opp_tris_fill
-            shape.update_shape = True
             self.canvas.shape = shape
         elif restore_my_shape:
             self.parent.panel.shape = self.shape
@@ -4371,12 +4401,12 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.fileStrMapFoldMethodStr(self.pre_pos_file_name)
         )
         self.on_fold_method()
-        self.setRotateFld(self.fileStrMapFoldPosStr(self.pre_pos_file_name))
+        self.rotate_fold = self.fileStrMapFoldPosStr(self.pre_pos_file_name)
         # Note: Reflections need to be set before triangle fill, otherwise the
         # right triangle fills are not available
         has_reflections = self.fileStrMapHasReflections(self.pre_pos_file_name)
         self.reflGui.SetValue(has_reflections)
-        self.onRefl()
+        self.on_refl()
         # not needed: self.shape.update_shape = True
         self.update_triangle_fill_options()
         self.tris_fill_gui.SetStringSelection(self.fileStrMapTrisStr(self.pre_pos_file_name))
@@ -4523,14 +4553,14 @@ class FldHeptagonCtrlWin(wx.Frame):
                 rotate_fold = sps["fold-rot"]
             except KeyError:
                 rotate_fold = 0
-            self.setRotateFld(rotate_fold)
+            self.rotate_fold = rotate_fold
 
             self.on_fold_method()
             self.on_triangle_fill()
 
             for gui in [
                     self.dihedralAngleGui,
-                    self.posAngleGui,
+                    self.pos_angle_gui,
                     self.heightGui,
                     self.fold1Gui,
                     self.fold2Gui,
@@ -4559,7 +4589,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         if self.pre_pos_enum == DYN_POS or self.pre_pos_enum == OPEN_FILE:
             for gui in [
                     self.dihedralAngleGui,
-                    self.posAngleGui,
+                    self.pos_angle_gui,
                     self.heightGui,
                     self.fold1Gui,
                     self.fold2Gui,
@@ -4571,7 +4601,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             # Showing triangles is the most general way of showing
             self.addTrisGui.SetValue(wx.CHK_CHECKED)
             self.onAddTriangles()
-            self.posAngleGui.SetValue(Geom3D.Rad2Deg * c.posAngle)
+            self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * c.pos_angle)
             val1 = Geom3D.Rad2Deg * c.fold1
             val2 = Geom3D.Rad2Deg * c.fold2
             self.fold1Gui.SetValue(val1)

@@ -184,8 +184,8 @@ class Shape(heptagons.FldHeptagonShape):
         this.xtraTrisShape = xtraTrisShape
         this.trisO3Shape = trisO3Shape
         this.trisO5Shape = trisO5Shape
-        this.posAngleMin = -math.pi/2
-        this.posAngleMax = math.pi/2
+        this.pos_angle_min = -math.pi/2
+        this.pos_angle_max = math.pi/2
         this.height = 2.7
         this.dihedralAngle = Geom3D.Deg2Rad * 119
         this.initArrs()
