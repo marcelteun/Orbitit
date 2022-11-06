@@ -339,7 +339,9 @@ class Shape(heptagons.FldHeptagonShape):
         this.setShapes(theShapes)
         this.update_shape = False
 
-    def getReflPosAngle(this):
+    @property
+    def refl_pos_angle(this):
+        """Return the pos angle for a polyhedron with reflections."""
         if this.edgeAlternative & heptagons.twist_bit == heptagons.twist_bit:
             return math.pi/4
         else:
