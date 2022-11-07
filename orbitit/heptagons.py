@@ -3391,11 +3391,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.applySymGui = wx.CheckBox(self.panel, label="Apply Symmetry")
         self.Guis.append(self.applySymGui)
         self.applySymGui.SetValue(self.shape.apply_symmetries)
-        self.applySymGui.Bind(wx.EVT_CHECKBOX, self.onApplySym)
+        self.applySymGui.Bind(wx.EVT_CHECKBOX, self.on_apply_symmetry)
         self.addTrisGui = wx.CheckBox(self.panel, label="Show Triangles")
         self.Guis.append(self.addTrisGui)
         self.addTrisGui.SetValue(self.shape.addXtraFs)
-        self.addTrisGui.Bind(wx.EVT_CHECKBOX, self.onAddTriangles)
+        self.addTrisGui.Bind(wx.EVT_CHECKBOX, self.on_add_triangles)
 
         # static adjustments
         self.fold_method_list = [
@@ -3542,10 +3542,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.Guis.append(self.setOrientGui)
         self.setOrientButton = wx.Button(self.panel, label="Apply")
         self.Guis.append(self.setOrientButton)
-        self.setOrientButton.Bind(wx.EVT_BUTTON, self.onSetOrient)
+        self.setOrientButton.Bind(wx.EVT_BUTTON, self.on_set_fold_values)
         self.cleanOrientButton = wx.Button(self.panel, label="Clean")
         self.Guis.append(self.cleanOrientButton)
-        self.cleanOrientButton.Bind(wx.EVT_BUTTON, self.onCleanOrient)
+        self.cleanOrientButton.Bind(wx.EVT_BUTTON, self.on_clean_fold_values)
 
         # Sizers
         self.Boxes = []
@@ -3812,33 +3812,52 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.update_shape()
         event.Skip()
 
-    def onCleanOrient(self, event):
+    def on_clean_fold_values(self, _):
+        """Clean translation and all fold values that can be set through array"""
         self.setOrientGui.SetValue("")
 
-    def onSetOrient(self, event):
-        inputStr = "ar = %s" % self.setOrientGui.GetValue()
-        ed = {"__name__": "inputStr"}
+    def on_set_fold_values(self, event):
+        """Apply all fold values and translations from input array in the GUI."""
+        str_value = self.setOrientGui.GetValue()
+        if not str_value:
+            return
+        err_str = "Syntax error in input string"
         try:
-            exec(inputStr, ed)
-        except SyntaxError:
-            self.status_bar.SetStatusText("Syntax error in input string")
-            raise
-        offset = ed["ar"][0]
-        angle = ed["ar"][1]
-        fold_1 = ed["ar"][2]
-        fold_2 = ed["ar"][3]
+            ar = json.loads(str_value)
+        except json.JSONDecodeError:
+            self.status_bar.SetStatusText(err_str + ": expected a list of floats")
+            return
+        if not isinstance(ar, list):
+            self.status_bar.SetStatusText(err_str + ": expected a list")
+            return
+        if len(ar) < 4:
+            self.status_bar.SetStatusText(err_str + ": list too short")
+            return
+        if len(ar) > 7:
+            self.status_bar.SetStatusText(err_str + ": list too long")
+            return
+        for f in ar:
+            try:
+                float(f)
+            except ValueError:
+                self.status_bar.SetStatusText(err_str + f": expected float, got '{f}'")
+                return
+        offset = ar[0]
+        angle = ar[1]
+        fold_1 = ar[2]
+        fold_2 = ar[3]
         self.heightGui.SetValue(self.maxHeight - self.heightF * offset)
         self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * angle)
         self.fold1Gui.SetValue(Geom3D.Rad2Deg * fold_1)
         self.fold2Gui.SetValue(Geom3D.Rad2Deg * fold_2)
-        inclRefl = len(ed["ar"]) <= 5
-        self.shape.has_reflections = inclRefl
-        self.reflGui.SetValue(inclRefl)
-        if not inclRefl:
+        include_refl = len(ar) <= 5
+        self.shape.has_reflections = include_refl
+        self.reflGui.SetValue(include_refl)
+        if not include_refl:
             self.enable_guis_for_no_refl()
-            pos_angle = ed["ar"][4]
-            opposite_fld1 = ed["ar"][5]
-            opposite_fld2 = ed["ar"][6]
+            pos_angle = ar[4]
+            opposite_fld1 = ar[5]
+            opposite_fld2 = ar[6]
             self.fold1OppGui.SetValue(Geom3D.Rad2Deg * opposite_fld1)
             self.fold2OppGui.SetValue(Geom3D.Rad2Deg * opposite_fld2)
             self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * pos_angle)
@@ -3856,12 +3875,14 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.update_shape()
         event.Skip()
 
-    def onApplySym(self, _event):
+    def on_apply_symmetry(self, _event):
+        """Handle GUI event to apply the final symmetry."""
         self.shape.apply_symmetries = self.applySymGui.IsChecked()
         self.shape.update_shape = True
         self.update_shape()
 
-    def onAddTriangles(self, _event=None):
+    def on_add_triangles(self, _event=None):
+        """Handle GUI event to show the extra triangles."""
         self.shape.addXtraFs = self.addTrisGui.IsChecked()
         self.shape.update_shape = True
         self.update_shape()
@@ -4603,7 +4624,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.dihedralAngleGui.SetValue(Geom3D.Rad2Deg * c.dihedralAngle)
             # Showing triangles is the most general way of showing
             self.addTrisGui.SetValue(wx.CHK_CHECKED)
-            self.onAddTriangles()
+            self.on_add_triangles()
             self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * c.pos_angle)
             val1 = Geom3D.Rad2Deg * c.fold1
             val2 = Geom3D.Rad2Deg * c.fold2
