@@ -3872,18 +3872,15 @@ class FldHeptagonCtrlWin(wx.Frame):
             if self.fold_method == FoldMethod.PARALLEL:
                 self.fold1OppGui.Disable()
                 self.fold2OppGui.Disable()
-            elif (
-                    self.fold_method == FoldMethod.W
-                    or self.fold_method == FoldMethod.SHELL
-                    or self.fold_method == FoldMethod.MIXED
-                    or self.fold_method == FoldMethod.G
+            elif self.fold_method in (
+                FoldMethod.W,
+                FoldMethod.SHELL,
+                FoldMethod.MIXED,
+                FoldMethod.G,
             ):
                 self.fold1OppGui.Enable()
                 self.fold2OppGui.Enable()
-            elif (
-                    self.fold_method == FoldMethod.TRAPEZIUM
-                    or self.fold_method == FoldMethod.TRIANGLE
-            ):
+            elif self.fold_method in (FoldMethod.TRAPEZIUM, FoldMethod.TRIANGLE):
                 self.fold1OppGui.Disable()
                 self.fold2OppGui.Enable()
 
@@ -4049,8 +4046,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         position: an index in self.triangle_alts
         """
-        if position < 0:
-            position = 0
+        position = max(position, 0)
         if position >= self.nr_of_positions:
             position = self.nr_of_positions - 1
         self.position = position
@@ -4071,7 +4067,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         except KeyError:
             current_val = self.trisAlt.strip_I
         if self.shape.has_reflections:
-            is_valid = lambda c: self.trisAlt.isBaseKey(self.trisAlt.key[c])
+            def is_valid(c):
+                return self.trisAlt.isBaseKey(self.trisAlt.key[c])
             if not self.trisAlt.isBaseKey(current_val):
                 if self.tris_setup_refl is None:
                     # TODO: use the first one that is valid
@@ -4154,10 +4151,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             and self.opp_tris_fill == self.trisAlt.twist_strip_I
         )
         if change_my_shape:
-            if (
-                    self.prevTrisFill != self.trisAlt.twist_strip_I
-                    and self.prevOppTrisFill != self.trisAlt.twist_strip_I
-            ):
+            if self.trisAlt.twist_strip_I not in (self.prevTrisFill, self.prevOppTrisFill):
                 logging.info("---------nvidia-seg-fault-work-around-----------")
                 self.nvidea_workaround_0()
             self.shape.setV()  # make sure the shape is updated
@@ -4223,9 +4217,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         # Note these are called "Position <int>"
         selected = self.trisPosGui.GetSelection()
         # If nothing selected (after changing from having reflections)
-        if selected < 0:
-            selected = 0
-        return selected
+        return max(selected, 0)
 
     @tris_position.setter
     def tris_position(self, value):
@@ -4480,11 +4472,11 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.pos_angle = pos_angle
         # For the user: start counting with '1' instead of '0'
         if self.specPosIndex == -1:
-            nr = no_of_pos  # last position
+            pos_no = no_of_pos  # last position
         else:
-            nr = self.specPosIndex + 1
+            pos_no = self.specPosIndex + 1
         # set nr of possible positions
-        self.number_text.SetLabel("%d/%d" % (nr, no_of_pos))
+        self.number_text.SetLabel(f"{pos_no}/{no_of_pos}")
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         # self.shape.printTrisAngles()
 
@@ -4597,7 +4589,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.update_shape_settings(setting)
         # for OPEN_FILE it is important that updateShapeSettins is done before
         # updating the sliders...
-        if self.pre_pos_enum == DYN_POS or self.pre_pos_enum == OPEN_FILE:
+        if self.pre_pos_enum in (DYN_POS, OPEN_FILE):
             for gui in [
                     self.dihedralAngleGui,
                     self.pos_angle_gui,
