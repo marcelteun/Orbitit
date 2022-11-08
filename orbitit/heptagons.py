@@ -189,7 +189,7 @@ class TrisAlt_base(object):
         if not isinstance(tId, int):
             tStr0 = self.stringify[tId[0]]
             tStr1 = self.stringify[tId[1]]
-            tStr = "%s-opp_%s" % (tStr0, tStr1)
+            tStr = f"{tStr0}-opp_{tStr1}"
         elif tStr is None:
             tStr = self.stringify[tId]
 
@@ -224,15 +224,12 @@ def toTrisAltKeyStr(tId=None, tStr=None):
         tId = TrisAlt_base.key[tStr]
     if not isinstance(tId, int):
         if tId[0] & loose_bit and tId[1] & loose_bit:
-            tStr = "{}_1loose_{}".format(
-                TrisAlt_base.stringify[tId[0] & ~loose_bit],
-                TrisAlt_base.stringify[tId[1] & ~loose_bit],
+            tStr = (
+                f"{TrisAlt_base.stringify[tId[0] & ~loose_bit]}_1loose_"
+                f"{TrisAlt_base.stringify[tId[1] & ~loose_bit]}"
             )
         elif tId[0] & loose_bit:
-            tStr = "{}__{}".format(
-                TrisAlt_base.stringify[tId[0]],
-                TrisAlt_base.stringify[tId[1]],
-            )
+            tStr = f"{TrisAlt_base.stringify[tId[0]]}__{TrisAlt_base.stringify[tId[1]]}"
         # TODO: remove share under new position
         elif (
                 tId[0] == TrisAlt_base.twist_strip_I
@@ -240,10 +237,7 @@ def toTrisAltKeyStr(tId=None, tStr=None):
         ):
             tStr = "twist_strip_I_strip_I"
         else:
-            tStr = "%s_%s" % (
-                TrisAlt_base.stringify[tId[0]],
-                TrisAlt_base.stringify[tId[1]],
-            )
+            tStr = f"{TrisAlt_base.stringify[tId[0]]}_{TrisAlt_base.stringify[tId[1]]}"
     elif tStr is None:
         tStr = TrisAlt_base.stringify[tId]
     t = "_".join(tStr.split())
@@ -273,11 +267,11 @@ def define_tris_alt(name, tris_keys):
             class_dict["baseKey"][k] = True
         else:
             # must be a tuple of 2
-            assert len(k) == 2, "Exptected 2 tuple, got: %s." % k
+            assert len(k) == 2, f"Exptected 2 tuple, got: {k}."
             if k[0] & loose_bit and k[1] & loose_bit:
-                s = "%s - 1 loose - %s" % (
-                    TrisAlt_base.stringify[k[0] & ~loose_bit],
-                    TrisAlt_base.stringify[k[1] & ~loose_bit],
+                s = (
+                    f"{TrisAlt_base.stringify[k[0] & ~loose_bit]} - 1 loose - "
+                    f"{TrisAlt_base.stringify[k[1] & ~loose_bit]}"
                 )
             elif (
                     k[0] == TrisAlt_base.twist_strip_I
@@ -285,10 +279,7 @@ def define_tris_alt(name, tris_keys):
             ):
                 s = "strip I - twisted - strip I"
             else:
-                s = "%s - %s" % (
-                    TrisAlt_base.stringify[k[0]],
-                    TrisAlt_base.stringify[k[1]],
-                )
+                s = f"{TrisAlt_base.stringify[k[0]]} - {TrisAlt_base.stringify[k[1]]}"
             class_dict["stringify"][k] = s
             class_dict["key"][s] = k
             class_dict[toTrisAltKeyStr(k)] = k
@@ -3123,17 +3114,17 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 
     def __repr__(self):
         # s = '%s(\n  ' % findModuleClassName(self.__class__, __name__)
-        s = "FldHeptagonShape(\n  "
-        s = "%sshapes = [\n" % (s)
+        s = "FldHeptagonShape(\n"
+        s += "  shapes = [\n"
         for shape in self.shapeElements:
-            s = "%s    %s,\n" % (s, repr(shape))
-        s = "%s  ],\n  " % s
-        s = '%snFold = "%s",\n' % (s, self.nFold)
-        s = '%smFold = "%s",\n' % (s, self.mFold)
-        s = '%sname = "%s"\n' % (s, self.mFold)
-        s = "%s)\n" % (s)
+            s += f"    {repr(shape)},\n"
+        s += f"  ],\n  "
+        s += f'nFold = "{self.nFold}",\n'
+        s += f'mFold = "{self.mFold}",\n'
+        s += f'name = "{self.mFold}-{self.nFold}"\n'
+        s += ")\n"
         if __name__ != "__main__":
-            s = "%s.%s" % (__name__, s)
+            s = f"{__name__}.{s}"
         return s
 
     def gl_draw(self):
@@ -3203,16 +3194,9 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 
     def getStatusStr(self):
         return (
-            "T = %02.2f, Angle = %01.2f rad, fold1 = %01.2f (%01.2f) "
-            "rad, fold2 = %01.2f (%01.2f) rad"
-            % (
-                self.height,
-                self.dihedralAngle,
-                self.fold1,
-                self.oppFold1,
-                self.fold2,
-                self.oppFold2,
-            )
+            f"T = {self.height:02.2f}, Angle = {self.dihedralAngle:01.2f} rad, "
+            f"fold1 = {self.fold1:01.2f} ({self.oppFold1:01.2f}) rad, "
+            f"fold2 = {self.fold2:01.2f} ({self.oppFold2:01.2f}) rad"
         )
 
     @property
@@ -3370,7 +3354,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.trisPosGui = wx.Choice(
             self.panel,
             style=wx.RA_VERTICAL,
-            choices=["Position {}".format(i + 1) for i in range(self.nr_of_positions)],
+            choices=[f"Position {i + 1}" for i in range(self.nr_of_positions)],
         )
         self.Guis.append(self.trisPosGui)
         self.trisPosGui.Bind(wx.EVT_CHOICE, self.on_triangle_pos)
@@ -4035,7 +4019,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         """
         self._rotate_fold = int(rotate_fold) % 7
         self.shape.rotate_fold = self._rotate_fold
-        self.rotateFldGui.SetLabel("Rotate Fold %d/7" % (self._rotate_fold + 1))
+        self.rotateFldGui.SetLabel(f"Rotate Fold {self._rotate_fold + 1}/7")
         self.update_shape()
 
     def on_rotate_fold(self, _):
@@ -4466,9 +4450,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             opposite_fld1 = setting[self.specPosIndex][5]
             opposite_fld2 = setting[self.specPosIndex][6]
             v_str += ", positional_angle, opposite_fold_1, opposite_fold_2] ="
-            dbg_str += ", {:.12f}, {:.12f}, {:.12f}]".format(
-                pos_angle, opposite_fld1, opposite_fld2
-            )
+            dbg_str += f", {pos_angle:.12f}, {opposite_fld1:.12f}, {opposite_fld2:.12f}]"
         else:
             opposite_fld1 = fold_1
             opposite_fld2 = fold_2
