@@ -3649,64 +3649,79 @@ class FldHeptagonCtrlWin(wx.Frame):
             psp = self.predefRotSpecPos
         return pre_pos_id in psp
 
-    def fileStrMapFoldMethodStr(self, filename):
-        res = re.search(r"-fld_([^.]*)\.", filename)
-        if res:
-            return res.groups()[0]
-        else:
-            self.printFileStrMapWarning(filename, "fileStrMapFoldMethodStr")
+    def filename_map_fold_method(self, filename):
+        """From a JSON with predefined positioned return the heptagon fold name."""
+        result = re.search(r"-fld_([^.]*)\.", filename)
+        if result:
+            return result.groups()[0]
+        self.printFileStrMapWarning(filename, "filename_map_fold_method")
+        return ""
 
-    def fileStrMapFoldPosStr(self, filename):
-        res = re.search(r"-fld_[^.]*\.([0-6])-.*", filename)
-        if res:
-            return res.groups()[0]
-        else:
-            self.printFileStrMapWarning(filename, "fileStrMapFoldPosStr")
+    def filename_map_fold_pos_str(self, filename):
+        """Extract the fold position from the filename and return as string.
 
-    def fileStrMapHasReflections(self, filename):
-        res = re.search(r".*frh-roots-(.*)-fld_.*", filename)
-        if res:
-            pos_vals = res.groups()[0].split("_")
-            nr_pos = len(pos_vals)
-            return (nr_pos == 4) or (nr_pos == 5 and pos_vals[4] == "0")
-        else:
-            self.printFileStrMapWarning(filename, "fileStrMapHasReflections")
+        The fold position can be an integer between 0 - 6 that states how a certain heptagon fold i
+        oriented inside the heptagon. This is only used for polyhedra that don't include
+        reflections. If the polyhedron does include reflections, then there is normally only 1
+        valid orientation.
+        """
+        result = re.search(r"-fld_[^.]*\.([0-6])-.*", filename)
+        if result:
+            return result.groups()[0]
+        self.printFileStrMapWarning(filename, "filename_map_fold_pos_str")
+        return ""
 
-    def fileStrMapTrisStr(self, filename):
+    def filename_map_fold_pos(self, filename):
+        """Extract the fold position from the filename and return as string.
+
+        See filename_map_fold_pos_str for more info.
+        """
+        fold_pos = self.filename_map_fold_pos_str(filename)
+        if fold_pos:
+            return int(fold_pos)
+        return 0
+
+    def filename_map_has_reflections(self, filename):
+        """From a JSON with predefined positioned check whether there are opposite symmetries."""
+        slider_values = re.search(r".*frh-roots-(.*)-fld_.*", filename)
+        if slider_values:
+            pos_vals = slider_values.groups()[0].split("_")
+            no_of_vals = len(pos_vals)
+            return (no_of_vals == 4) or (no_of_vals == 5 and pos_vals[4] == "0")
+        self.printFileStrMapWarning(filename, "filename_map_has_reflections")
+        return True
+
+    def filename_map_tris_fill(self, filename):
+        """From a JSON with predefined positioned get the triangle fill configuration."""
         # New format: incl -pos:
-        res = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.json", filename)
-        if res is None:
+        result = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\-pos-.*.json", filename)
+        if result is None:
             # try old method:
-            res = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
-        if res:
-            tris_str = res.groups()[0]
+            result = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
+        if result:
+            tris_str = result.groups()[0]
             return self.trisAlt.mapFileStrOnStr[tris_str]
-        else:
-            self.printFileStrMapWarning(filename, "fileStrMapTrisStr")
+        self.printFileStrMapWarning(filename, "filename_map_tris_fill")
+        return ""
 
-    def fileStrMapTrisPos(self, filename):
-        res = re.search(r"-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.json", filename)
-        if res:
-            tris_pos = res.groups()[0]
-            return int(tris_pos)
-        else:
-            # try old syntax:
-            res = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
-            if res:
-                return 0
-            else:
-                self.printFileStrMapWarning(filename, "fileStrMapTrisPos")
-                assert False
+    def filename_map_tris_pos(self, filename):
+        """From a JSON with predefined positioned get the position a triangle fill.
 
-    def fileStrMapFoldPos(self, filename):
-        res = re.search(r"-fld_[^.]*\.([0-7])-.*\.json", filename)
-        if res:
-            tris_pos = res.groups()[0]
+        Depending on the rotation around a 2-fold axis, aka the positional angle, a certain triangle
+        fill can connect different heptagon vertices.
+        """
+        result = re.search(r"-fld_[^.]*\.[0-7]-[^.]*-pos-([0-9]*)\.json", filename)
+        if result:
+            tris_pos = result.groups()[0]
             return int(tris_pos)
+        # try old syntax:
+        if not re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename):
+            self.printFileStrMapWarning(filename, "filename_map_tris_pos")
+            raise ValueError(f"Unexpected filename {filename}")
         return 0
 
     def set_enable_prepos_items(self):
-        """Fill list that contains the options for the predefines postions.
+        """Fill list that contains the options for the predefined postions.
 
         This list also contains the option to enable the sliders. This list is different depending
         on the fact whether the user selected a polyhedron with opposite symmetries or not.
@@ -4422,20 +4437,20 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.pre_pos_file_name = filename
         self.fold_method_gui.SetStringSelection(
             # TODO: put these values in the JSON file
-            self.fileStrMapFoldMethodStr(self.pre_pos_file_name)
+            self.filename_map_fold_method(self.pre_pos_file_name)
         )
         self.on_fold_method()
-        self.rotate_fold = self.fileStrMapFoldPosStr(self.pre_pos_file_name)
+        self.rotate_fold = self.filename_map_fold_pos_str(self.pre_pos_file_name)
         # Note: Reflections need to be set before triangle fill, otherwise the
         # right triangle fills are not available
-        has_reflections = self.fileStrMapHasReflections(self.pre_pos_file_name)
+        has_reflections = self.filename_map_has_reflections(self.pre_pos_file_name)
         self.reflGui.SetValue(has_reflections)
         self.on_refl()
         # not needed: self.shape.update_shape = True
         self.update_triangle_fill_options()
-        self.tris_fill_gui.SetStringSelection(self.fileStrMapTrisStr(self.pre_pos_file_name))
+        self.tris_fill_gui.SetStringSelection(self.filename_map_tris_fill(self.pre_pos_file_name))
         self.on_triangle_fill()
-        self.tris_position = self.fileStrMapTrisPos(self.pre_pos_file_name)
+        self.tris_position = self.filename_map_tris_pos(self.pre_pos_file_name)
         # it's essential that pre_pos_gui is set to dynamic be4 std_pre_pos is read
         # otherwise something else than dynamic might be read...
         open_file_str = self.stringify[OPEN_FILE]

@@ -724,16 +724,16 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             if self.specPosIndex >= len(psp[self.pre_pos_enum]):
                 self.specPosIndex = -1
             in_data = psp[self.pre_pos_enum][self.specPosIndex]
-            fold_method_str = self.fileStrMapFoldMethodStr(in_data['file'])
+            fold_method_str = self.filename_map_fold_method(in_data['file'])
             assert fold_method_str is not None
-            tris_str = self.fileStrMapTrisStr(in_data['file'])
+            tris_str = self.filename_map_tris_fill(in_data['file'])
             assert tris_str is not None
             tris_str = trisAlt.key[tris_str]
             data = {
                 'set': in_data['set'],
                 '7fold': heptagons.FoldMethod.get(fold_method_str),
                 'tris': tris_str,
-                'fold-rot': self.fileStrMapFoldPos(in_data['file'])
+                'fold-rot': self.filename_map_fold_pos(in_data['file'])
             }
             logging.info(f"see file {self.rDir}/{in_data['file']}")
             return data
