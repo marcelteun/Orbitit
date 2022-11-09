@@ -333,8 +333,8 @@ class Scene:
         calling the function this.createControlsSizer(), which takes one
         parameter, which is the ctrlPanel of the control window.
       - implement a function close, which should release all GUIs in
-        rmControlsSizer. The close function calls the function
-        this.rmControlsSizer().
+        rm_ctrl_sizer. The close function calls the function
+        this.rm_ctrl_sizer().
     Optionally a scene can implement
       - a function setArcBallRadius to set the relative radius of the sphere of
         the arc ball navigation. It shall except one radius parameter.
@@ -344,7 +344,7 @@ class Scene:
     which should be a descendent of Scenes.Interactive3DCanvas.
     To summarise, the descendent of this class should:
       - implement this.createControlsSizer(ctrlPanel)
-      - implement this.rmControlsSizer()
+      - implement this.rm_ctrl_sizer()
       - call the init of this class with a class SceneCanvas, which is a
         descendent of Scenes.Interactive3DCanvas.
     """
@@ -373,7 +373,7 @@ class Scene:
 
     def close(this):
         try:
-            this.rmControlsSizer()
+            this.rm_ctrl_sizer()
             this.canvas.Destroy()
             this.canvasFrame.Destroy()
         except RuntimeError:

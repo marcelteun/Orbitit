@@ -3431,7 +3431,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             if self.pre_pos_strings[i] == self.stringify[DYN_POS]:
                 self.pre_pos_gui.SetStringSelection(self.stringify[DYN_POS])
                 break
-        self.setEnablePrePosItems()
+        self.set_enable_prepos_items()
         self.Guis.append(self.pre_pos_gui)
         self.pre_pos_gui.Bind(wx.EVT_CHOICE, self.on_pre_pos)
 
@@ -3462,7 +3462,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.Guis.append(self.pos_angle_gui)
-        self.pos_angle_gui.Bind(wx.EVT_SLIDER, self.onPosAngle)
+        self.pos_angle_gui.Bind(wx.EVT_SLIDER, self.on_pos_angle)
         self.minFoldAngle = -180
         self.maxFoldAngle = 180
         self.dihedralAngleGui = wx.Slider(
@@ -3473,7 +3473,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.Guis.append(self.dihedralAngleGui)
-        self.dihedralAngleGui.Bind(wx.EVT_SLIDER, self.onDihedralAngle)
+        self.dihedralAngleGui.Bind(wx.EVT_SLIDER, self.on_dihedral_angle)
         self.fold1Gui = wx.Slider(
             self.panel,
             value=Geom3D.Rad2Deg * self.shape.fold1,
@@ -3482,7 +3482,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.Guis.append(self.fold1Gui)
-        self.fold1Gui.Bind(wx.EVT_SLIDER, self.onFold1)
+        self.fold1Gui.Bind(wx.EVT_SLIDER, self.on_fold1)
         self.fold2Gui = wx.Slider(
             self.panel,
             value=Geom3D.Rad2Deg * self.shape.fold2,
@@ -3491,7 +3491,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.Guis.append(self.fold2Gui)
-        self.fold2Gui.Bind(wx.EVT_SLIDER, self.onFold2)
+        self.fold2Gui.Bind(wx.EVT_SLIDER, self.on_fold2)
         self.fold1OppGui = wx.Slider(
             self.panel,
             value=Geom3D.Rad2Deg * self.shape.oppFold1,
@@ -3500,7 +3500,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.Guis.append(self.fold1OppGui)
-        self.fold1OppGui.Bind(wx.EVT_SLIDER, self.onFold1Opp)
+        self.fold1OppGui.Bind(wx.EVT_SLIDER, self.on_opp_fold1)
         self.fold2OppGui = wx.Slider(
             self.panel,
             value=Geom3D.Rad2Deg * self.shape.oppFold2,
@@ -3509,7 +3509,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.Guis.append(self.fold2OppGui)
-        self.fold2OppGui.Bind(wx.EVT_SLIDER, self.onFold2Opp)
+        self.fold2OppGui.Bind(wx.EVT_SLIDER, self.on_opp_fold2)
         self.heightGui = wx.Slider(
             self.panel,
             value=self.maxHeight - self.shape.height * self.heightF,
@@ -3518,7 +3518,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             style=wx.SL_VERTICAL,
         )
         self.Guis.append(self.heightGui)
-        self.heightGui.Bind(wx.EVT_SLIDER, self.onHeight)
+        self.heightGui.Bind(wx.EVT_SLIDER, self.on_height)
         if self.shape.has_reflections:
             self.disable_guis_for_refl(force=True)
 
@@ -3703,10 +3703,14 @@ class FldHeptagonCtrlWin(wx.Frame):
         if res:
             tris_pos = res.groups()[0]
             return int(tris_pos)
-        else:
-            return 0
+        return 0
 
-    def setEnablePrePosItems(self):
+    def set_enable_prepos_items(self):
+        """Fill list that contains the options for the predefines postions.
+
+        This list also contains the option to enable the sliders. This list is different depending
+        on the fact whether the user selected a polyhedron with opposite symmetries or not.
+        """
         current_pre_pos = self.pre_pos_enum
         self.pre_pos_gui.Clear()
         pre_pos_still_valid = False
@@ -3724,37 +3728,45 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             self.pre_pos_gui.SetStringSelection(self.stringify[DYN_POS])
 
-    def rmControlsSizer(self):
+    def rm_ctrl_sizer(self):
+        """Release all GUI resources related to the control window.
+
+        This function is called e.g. when the user switches to another scene.
+        """
         # The 'try' is necessary, since the boxes are destroyed in some OS,
         # while this is necessary for Ubuntu Hardy Heron.
-        for Box in self.Boxes:
+        for box in self.Boxes:
             try:
-                Box.Destroy()
+                box.Destroy()
             except RuntimeError:
                 # The user probably closed the window already
                 pass
-        for Gui in self.Guis:
-            Gui.Destroy()
+        for gui in self.Guis:
+            gui.Destroy()
 
     def set_default_size(self, size):
+        """Set minimum window size for the control window."""
         self.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
         self.SetSize(size)
 
-    def onPosAngle(self, event):
+    def on_pos_angle(self, event):
+        """Apply rotation angle around 2-fold axis of heptagon in GUI to polyhedron."""
         self.shape.pos_angle = Geom3D.Deg2Rad * self.pos_angle_gui.GetValue()
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.update_shape()
         event.Skip()
 
-    def onDihedralAngle(self, event):
+    def on_dihedral_angle(self, event):
+        """Apply new angle between two heptagons sharing an edge in GUI to polyhedron."""
         self.shape.setDihedralAngle(Geom3D.Deg2Rad * self.dihedralAngleGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.update_shape()
         event.Skip()
 
-    def onFold1(self, event):
+    def on_fold1(self, event):
+        """Apply new fold of diagonal no. 1 in GUI of base heptagon to polyhedron."""
         val = self.fold1Gui.GetValue()
         s_val = Geom3D.Deg2Rad * val
         if self.shape.has_reflections:
@@ -3765,7 +3777,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.update_shape()
         event.Skip()
 
-    def onFold2(self, event):
+    def on_fold2(self, event):
+        """Apply new fold of diagonal no. 2 in GUI of base heptagon to polyhedron."""
         val = self.fold2Gui.GetValue()
         s_val = Geom3D.Deg2Rad * val
         if self.shape.has_reflections:
@@ -3776,19 +3789,22 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.update_shape()
         event.Skip()
 
-    def onFold1Opp(self, event):
+    def on_opp_fold1(self, event):
+        """Apply new fold of opposite diagonal no. 1 in GUI of base heptagon to polyhedron."""
         self.shape.setFold1(oppositeAngle=Geom3D.Deg2Rad * self.fold1OppGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.update_shape()
         event.Skip()
 
-    def onFold2Opp(self, event):
+    def on_opp_fold2(self, event):
+        """Apply new fold of opposite diagonal no. 2 in GUI of base heptagon to polyhedron."""
         self.shape.setFold2(oppositeAngle=Geom3D.Deg2Rad * self.fold2OppGui.GetValue())
         self.status_bar.SetStatusText(self.shape.getStatusStr())
         self.update_shape()
         event.Skip()
 
-    def onHeight(self, event):
+    def on_height(self, event):
+        """Apply new translation in GUI of base heptagon to polyhedron."""
         self.shape.setHeight(
             float(self.maxHeight - self.heightGui.GetValue()) / self.heightF
         )
@@ -3979,7 +3995,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.shape.has_reflections = self.reflGui.IsChecked()
         self.shape.update_shape = True
         self.show_right_folds()
-        self.setEnablePrePosItems()
+        self.set_enable_prepos_items()
         if self.shape.has_reflections:
             self.set_default_size(self.refl_min_size)
         else:
