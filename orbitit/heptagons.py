@@ -4282,6 +4282,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             is_valid[i] = True
         for i, show in enumerate(is_valid):
             self.fold_method_gui.ShowItem(i, show)
+        # It might be that the current fold method isn't valid anymore:
+        if not is_valid[self.fold_method_gui.GetSelection()]:
+            self.fold_method_gui.SetSelection(is_valid.index(True))
+            self.on_fold_method()
 
     def update_fold_selection(self):
         """Update the GUI to select a fold method conform the symmetry."""
