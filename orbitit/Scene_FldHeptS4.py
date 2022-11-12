@@ -30,7 +30,7 @@ from orbitit.geomtypes import Vec3 as Vec
 TITLE = 'Polyhedra with Folded Regular Heptagons and Cube Symmetry'
 
 trisAlt = heptagons.TrisAlt()
-trisAlt.baseKey = {
+trisAlt.base_key = {
     trisAlt.refl_1: True,
     trisAlt.refl_2: True,
 }

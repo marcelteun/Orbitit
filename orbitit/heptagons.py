@@ -177,7 +177,7 @@ class TrisAltBase(object):
         stringify[arot_star]: arot_star,
     }
 
-    def isBaseKey(self, k):
+    def is_base_key(self, k):
         """Check whether key 'k' is a base key
 
         A base key is a key that is used for one side of triangle fill and it is not combined with
@@ -186,11 +186,11 @@ class TrisAltBase(object):
         k: a number built up from TrisAltBase numbers
         """
         try:
-            return self.baseKey[k]
+            return self.base_key[k]
         except KeyError:
             return False
 
-    def toFileStr(self, tId=None, tStr=None):
+    def to_files_str(self, tId=None, tStr=None):
         """Convert triangle fill alternative to unique string suited for filenames
 
         For filenames no spaces shall be used and these are mainly replaced by '_' and periods are
@@ -216,7 +216,7 @@ class TrisAltBase(object):
         t = t.replace("rot.", "rot")
         return t
 
-    baseKey = {}
+    base_key = {}
 
     def __init__(self):
         # TODO? Note that only s that aren't primitives (isinstance(x, int))
@@ -227,7 +227,7 @@ class TrisAltBase(object):
         self.mapFileStrOnStr = {}
         self.mapFileStrOnKey = {}
         for (tStr, tId) in self.key.items():
-            fileStr = self.toFileStr(tStr=tStr)
+            fileStr = self.to_files_str(tStr=tStr)
             self.mapKeyOnFileStr[tId] = fileStr
             self.mapStrOnFileStr[tStr] = fileStr
             self.mapFileStrOnStr[fileStr] = tStr
@@ -280,7 +280,7 @@ class Meta_TrisAlt(type):
 
 def define_tris_alt(name, tris_keys):
     """Define a class containing a set of triangle fill alternatives."""
-    class_dict = {"mixed": False, "stringify": {}, "key": {}, "baseKey": {}}
+    class_dict = {"mixed": False, "stringify": {}, "key": {}, "base_key": {}}
     # Always add all primitives:
     for (k, s) in TrisAltBase.stringify.items():
         class_dict["stringify"][k] = s
@@ -288,7 +288,7 @@ def define_tris_alt(name, tris_keys):
         class_dict[toTrisAltKeyStr(k)] = k
     for k in tris_keys:
         if isinstance(k, int):
-            class_dict["baseKey"][k] = True
+            class_dict["base_key"][k] = True
         else:
             # must be a tuple of 2
             assert len(k) == 2, f"Exptected 2 tuple, got: {k}."
@@ -4179,8 +4179,8 @@ class FldHeptagonCtrlWin(wx.Frame):
             current_val = self.tris_alt.strip_I
         if self.shape.has_reflections:
             def is_valid(c):
-                return self.tris_alt.isBaseKey(self.tris_alt.key[c])
-            if not self.tris_alt.isBaseKey(current_val):
+                return self.tris_alt.is_base_key(self.tris_alt.key[c])
+            if not self.tris_alt.is_base_key(current_val):
                 if self.tris_setup_refl is None:
                     # TODO: use the first one that is valid
                     current_val = self.tris_alt.strip_I
@@ -4189,7 +4189,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         else:
             def is_valid(c):
                 c_key = self.tris_alt.key[c]
-                if self.tris_alt.isBaseKey(c_key) or isinstance(c_key, int):
+                if self.tris_alt.is_base_key(c_key) or isinstance(c_key, int):
                     return False
                 return True
 

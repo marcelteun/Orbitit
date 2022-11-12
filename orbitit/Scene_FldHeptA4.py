@@ -32,7 +32,7 @@ TITLE = 'Polyhedra with Folded Regular Heptagons and Tetrahedral Symmetry'
 V2 = math.sqrt(2)
 
 trisAlt = heptagons.TrisAlt()
-trisAlt.baseKey = {
+trisAlt.base_key = {
     trisAlt.strip_I: True,
     trisAlt.strip_II: True,
     trisAlt.star: True,
