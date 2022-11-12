@@ -81,7 +81,7 @@ class Tris_counter:
         return i
 
 
-class TrisAltBase(object):
+class TrisAltBase():
     """A base class holding names for triangle filling options, one side only."""
     # Note nrs should be different from below
     refl_1 = 0
@@ -190,7 +190,7 @@ class TrisAltBase(object):
         except KeyError:
             return False
 
-    def to_files_str(self, tId=None, tStr=None):
+    def to_files_str(self, triangle_id=None, triangle_str=None):
         """Convert triangle fill alternative to unique string suited for filenames
 
         For filenames no spaces shall be used and these are mainly replaced by '_' and periods are
@@ -199,17 +199,18 @@ class TrisAltBase(object):
         triangle_id: a number built up from TrisAltBase numbers, or a 2-tuple of these numbers
         triangle_str: a human readable string representation of the triangle alternative.
         """
-        assert tId is not None or tStr is not None
-        if tId is None:
-            tId = self.key[tStr]
-        if not isinstance(tId, int):
-            tStr0 = self.stringify[tId[0]]
-            tStr1 = self.stringify[tId[1]]
-            tStr = f"{tStr0}-opp_{tStr1}"
-        elif tStr is None:
-            tStr = self.stringify[tId]
+        assert triangle_id is not None or triangle_str is not None
+        if triangle_id is None:
+            triangle_id = self.key[triangle_str]
+        if not isinstance(triangle_id, int):
+            triangle_str = "{}-opp_{}".format(
+                self.stringify[triangle_id[0]],
+                self.stringify[triangle_id[1]],
+            )
+        elif triangle_str is None:
+            triangle_str = self.stringify[triangle_id]
 
-        t = "_".join(tStr.split()).lower().replace("ernative", "")
+        t = "_".join(triangle_str.split()).lower().replace("ernative", "")
         t = t.replace("_ii", "_II")
         t = t.replace("_i", "_I")
         t = t.replace("alt.", "alt")
@@ -221,20 +222,20 @@ class TrisAltBase(object):
     def __init__(self):
         # TODO? Note that only s that aren't primitives (isinstance(x, int))
         # should be added here.
-        self.choiceList = [*self.stringify.values()]
-        self.mapKeyOnFileStr = {}
-        self.mapStrOnFileStr = {}
-        self.mapFileStrOnStr = {}
-        self.mapFileStrOnKey = {}
-        for (tStr, tId) in self.key.items():
-            fileStr = self.to_files_str(tStr=tStr)
-            self.mapKeyOnFileStr[tId] = fileStr
-            self.mapStrOnFileStr[tStr] = fileStr
-            self.mapFileStrOnStr[fileStr] = tStr
-            self.mapFileStrOnKey[fileStr] = tId
+        self.choice_list = [*self.stringify.values()]
+        self.map_id_on_file_str = {}
+        self.map_file_str_on_id = {}
+        self.map_str_on_file_str = {}
+        self.map_file_str_on_str = {}
+        for (triangle_str, triangle_id) in self.key.items():
+            file_str = self.to_files_str(triangle_str=triangle_str)
+            self.map_id_on_file_str[triangle_id] = file_str
+            self.map_file_str_on_id[file_str] = triangle_id
+            self.map_str_on_file_str[triangle_str] = file_str
+            self.map_file_str_on_str[file_str] = triangle_str
 
 
-def toTrisAltKeyStr(tId=None, tStr=None):
+def to_triangle_python_name(triangle_id=None, triangle_str=None):
     """Convert triangle fill alternative to an unique string suited for Python attribute names.
 
     Spaces shall converted to '_' and periods are exchanged. Besides that there are some other
@@ -243,28 +244,34 @@ def toTrisAltKeyStr(tId=None, tStr=None):
     triangle_id: a number built up from TrisAltBase numbers, or a 2-tuple of these numbers
     triangle_str: a human readable string representation of the triangle alternative.
     """
-    assert tId is not None or tStr is not None
-    if tId is None:
-        tId = TrisAltBase.key[tStr]
-    if not isinstance(tId, int):
-        if tId[0] & loose_bit and tId[1] & loose_bit:
-            tStr = (
-                f"{TrisAltBase.stringify[tId[0] & ~loose_bit]}_1loose_"
-                f"{TrisAltBase.stringify[tId[1] & ~loose_bit]}"
+    assert triangle_id is not None or triangle_str is not None
+    if triangle_id is None:
+        triangle_id = TrisAltBase.key[triangle_str]
+    if not isinstance(triangle_id, int):
+        if triangle_id[0] & loose_bit and triangle_id[1] & loose_bit:
+            triangle_str = (
+                f"{TrisAltBase.stringify[triangle_id[0] & ~loose_bit]}_1loose_"
+                f"{TrisAltBase.stringify[triangle_id[1] & ~loose_bit]}"
             )
-        elif tId[0] & loose_bit:
-            tStr = f"{TrisAltBase.stringify[tId[0]]}__{TrisAltBase.stringify[tId[1]]}"
+        elif triangle_id[0] & loose_bit:
+            triangle_str = "{}__{}".format(
+                TrisAltBase.stringify[triangle_id[0]],
+                TrisAltBase.stringify[triangle_id[1]],
+            )
         # TODO: remove share under new position
         elif (
-                tId[0] == TrisAltBase.twist_strip_I
-                and tId[1] == TrisAltBase.twist_strip_I
+                triangle_id[0] == TrisAltBase.twist_strip_I
+                and triangle_id[1] == TrisAltBase.twist_strip_I
         ):
-            tStr = "twist_strip_I_strip_I"
+            triangle_str = "twist_strip_I_strip_I"
         else:
-            tStr = f"{TrisAltBase.stringify[tId[0]]}_{TrisAltBase.stringify[tId[1]]}"
-    elif tStr is None:
-        tStr = TrisAltBase.stringify[tId]
-    t = "_".join(tStr.split())
+            triangle_str = "{}_{}".format(
+                TrisAltBase.stringify[triangle_id[0]],
+                TrisAltBase.stringify[triangle_id[1]],
+            )
+    elif triangle_str is None:
+        triangle_str = TrisAltBase.stringify[triangle_id]
+    t = "_".join(triangle_str.split())
     t = t.replace("_ii", "_II")
     t = t.replace("_i", "_I")
     t = t.replace("alt._rot.", "arot")
@@ -273,19 +280,33 @@ def toTrisAltKeyStr(tId=None, tStr=None):
     return t
 
 
-class Meta_TrisAlt(type):
+class MetaTrisAlt(type):
+    """Meta class to define triangle fill alternatives."""
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
 
 
 def define_tris_alt(name, tris_keys):
-    """Define a class containing a set of triangle fill alternatives."""
+    """Define a class containing a set of triangle fill alternatives.
+
+    The class will contain the following attributes:
+      - a stringify dict: this maps a ID (integer, or tuple of integers) on a human readable string
+        that can be used in the UI.
+      - a key dict: this is the inverse map of the stringify dict.
+      - base_key: A base key is a key that is used for one side of triangle fill and it is not
+            combined with one of the bits (e.g. loose_bit). This attribute hold True for any kay
+            that is a base key. Otherwise it is either set to False of the key isn't an element of
+            the dictionary.
+      - mixed
+      - and the rest: the rest are filename suited strings mapped on their triangle fill
+        alternative IDs. See to_triangle_python_name.
+    """
     class_dict = {"mixed": False, "stringify": {}, "key": {}, "base_key": {}}
     # Always add all primitives:
     for (k, s) in TrisAltBase.stringify.items():
         class_dict["stringify"][k] = s
         class_dict["key"][s] = k
-        class_dict[toTrisAltKeyStr(k)] = k
+        class_dict[to_triangle_python_name(k)] = k
     for k in tris_keys:
         if isinstance(k, int):
             class_dict["base_key"][k] = True
@@ -306,8 +327,8 @@ def define_tris_alt(name, tris_keys):
                 s = f"{TrisAltBase.stringify[k[0]]} - {TrisAltBase.stringify[k[1]]}"
             class_dict["stringify"][k] = s
             class_dict["key"][s] = k
-            class_dict[toTrisAltKeyStr(k)] = k
-    return Meta_TrisAlt(name, (TrisAltBase,), class_dict)
+            class_dict[to_triangle_python_name(k)] = k
+    return MetaTrisAlt(name, (TrisAltBase,), class_dict)
 
 
 TrisAlt = define_tris_alt(
@@ -3775,7 +3796,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             result = re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename)
         if result:
             tris_str = result.groups()[0]
-            return self.tris_alt.mapFileStrOnStr[tris_str]
+            return self.tris_alt.map_file_str_on_str[tris_str]
         self.printFileStrMapWarning(filename, "filename_map_tris_fill")
         return ""
 
@@ -4202,7 +4223,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         self.tris_fill_gui.Clear()
         current_still_valid = False
-        for choice in self.tris_alt.choiceList:
+        for choice in self.tris_alt.choice_list:
             if is_valid(choice):
                 self.tris_fill_gui.Append(choice)
                 if current_val == self.tris_alt.key[choice]:
