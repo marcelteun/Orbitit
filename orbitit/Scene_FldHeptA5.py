@@ -39,26 +39,26 @@ trisAlt.baseKey = {
 TA_1 = heptagons.define_tris_alt(
     'TA_1',
     [
-        heptagons.TrisAlt_base.refl_1,
-        heptagons.TrisAlt_base.refl_2,
-        heptagons.TrisAlt_base.crossed_2,
-        (heptagons.TrisAlt_base.strip_I, heptagons.TrisAlt_base.strip_I),
-        (heptagons.TrisAlt_base.strip_I, heptagons.TrisAlt_base.strip_II),
-        (heptagons.TrisAlt_base.strip_I, heptagons.TrisAlt_base.star),
-        (heptagons.TrisAlt_base.strip_I, heptagons.TrisAlt_base.star_1_loose),
-        (heptagons.TrisAlt_base.strip_I, heptagons.TrisAlt_base.strip_1_loose),
+        heptagons.TrisAltBase.refl_1,
+        heptagons.TrisAltBase.refl_2,
+        heptagons.TrisAltBase.crossed_2,
+        (heptagons.TrisAltBase.strip_I, heptagons.TrisAltBase.strip_I),
+        (heptagons.TrisAltBase.strip_I, heptagons.TrisAltBase.strip_II),
+        (heptagons.TrisAltBase.strip_I, heptagons.TrisAltBase.star),
+        (heptagons.TrisAltBase.strip_I, heptagons.TrisAltBase.star_1_loose),
+        (heptagons.TrisAltBase.strip_I, heptagons.TrisAltBase.strip_1_loose),
 
-        (heptagons.TrisAlt_base.strip_II, heptagons.TrisAlt_base.strip_I),
-        (heptagons.TrisAlt_base.strip_II, heptagons.TrisAlt_base.strip_II),
-        (heptagons.TrisAlt_base.strip_II, heptagons.TrisAlt_base.star),
-        (heptagons.TrisAlt_base.strip_II, heptagons.TrisAlt_base.star_1_loose),
-        (heptagons.TrisAlt_base.strip_II, heptagons.TrisAlt_base.strip_1_loose),
+        (heptagons.TrisAltBase.strip_II, heptagons.TrisAltBase.strip_I),
+        (heptagons.TrisAltBase.strip_II, heptagons.TrisAltBase.strip_II),
+        (heptagons.TrisAltBase.strip_II, heptagons.TrisAltBase.star),
+        (heptagons.TrisAltBase.strip_II, heptagons.TrisAltBase.star_1_loose),
+        (heptagons.TrisAltBase.strip_II, heptagons.TrisAltBase.strip_1_loose),
 
-        (heptagons.TrisAlt_base.star, heptagons.TrisAlt_base.strip_I),
-        (heptagons.TrisAlt_base.star, heptagons.TrisAlt_base.strip_II),
-        (heptagons.TrisAlt_base.star, heptagons.TrisAlt_base.star),
-        (heptagons.TrisAlt_base.star, heptagons.TrisAlt_base.star_1_loose),
-        (heptagons.TrisAlt_base.star, heptagons.TrisAlt_base.strip_1_loose)
+        (heptagons.TrisAltBase.star, heptagons.TrisAltBase.strip_I),
+        (heptagons.TrisAltBase.star, heptagons.TrisAltBase.strip_II),
+        (heptagons.TrisAltBase.star, heptagons.TrisAltBase.star),
+        (heptagons.TrisAltBase.star, heptagons.TrisAltBase.star_1_loose),
+        (heptagons.TrisAltBase.star, heptagons.TrisAltBase.strip_1_loose)
     ]
 )
 trisAlts = [

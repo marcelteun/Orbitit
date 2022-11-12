@@ -81,7 +81,7 @@ class Tris_counter:
         return i
 
 
-class TrisAlt_base(object):
+class TrisAltBase(object):
     """A base class holding names for triangle filling options, one side only."""
     # Note nrs should be different from below
     refl_1 = 0
@@ -245,25 +245,25 @@ def toTrisAltKeyStr(tId=None, tStr=None):
     """
     assert tId is not None or tStr is not None
     if tId is None:
-        tId = TrisAlt_base.key[tStr]
+        tId = TrisAltBase.key[tStr]
     if not isinstance(tId, int):
         if tId[0] & loose_bit and tId[1] & loose_bit:
             tStr = (
-                f"{TrisAlt_base.stringify[tId[0] & ~loose_bit]}_1loose_"
-                f"{TrisAlt_base.stringify[tId[1] & ~loose_bit]}"
+                f"{TrisAltBase.stringify[tId[0] & ~loose_bit]}_1loose_"
+                f"{TrisAltBase.stringify[tId[1] & ~loose_bit]}"
             )
         elif tId[0] & loose_bit:
-            tStr = f"{TrisAlt_base.stringify[tId[0]]}__{TrisAlt_base.stringify[tId[1]]}"
+            tStr = f"{TrisAltBase.stringify[tId[0]]}__{TrisAltBase.stringify[tId[1]]}"
         # TODO: remove share under new position
         elif (
-                tId[0] == TrisAlt_base.twist_strip_I
-                and tId[1] == TrisAlt_base.twist_strip_I
+                tId[0] == TrisAltBase.twist_strip_I
+                and tId[1] == TrisAltBase.twist_strip_I
         ):
             tStr = "twist_strip_I_strip_I"
         else:
-            tStr = f"{TrisAlt_base.stringify[tId[0]]}_{TrisAlt_base.stringify[tId[1]]}"
+            tStr = f"{TrisAltBase.stringify[tId[0]]}_{TrisAltBase.stringify[tId[1]]}"
     elif tStr is None:
-        tStr = TrisAlt_base.stringify[tId]
+        tStr = TrisAltBase.stringify[tId]
     t = "_".join(tStr.split())
     t = t.replace("_ii", "_II")
     t = t.replace("_i", "_I")
@@ -282,7 +282,7 @@ def define_tris_alt(name, tris_keys):
     """Define a class containing a set of triangle fill alternatives."""
     class_dict = {"mixed": False, "stringify": {}, "key": {}, "baseKey": {}}
     # Always add all primitives:
-    for (k, s) in TrisAlt_base.stringify.items():
+    for (k, s) in TrisAltBase.stringify.items():
         class_dict["stringify"][k] = s
         class_dict["key"][s] = k
         class_dict[toTrisAltKeyStr(k)] = k
@@ -294,88 +294,88 @@ def define_tris_alt(name, tris_keys):
             assert len(k) == 2, f"Exptected 2 tuple, got: {k}."
             if k[0] & loose_bit and k[1] & loose_bit:
                 s = (
-                    f"{TrisAlt_base.stringify[k[0] & ~loose_bit]} - 1 loose - "
-                    f"{TrisAlt_base.stringify[k[1] & ~loose_bit]}"
+                    f"{TrisAltBase.stringify[k[0] & ~loose_bit]} - 1 loose - "
+                    f"{TrisAltBase.stringify[k[1] & ~loose_bit]}"
                 )
             elif (
-                    k[0] == TrisAlt_base.twist_strip_I
-                    and k[1] == TrisAlt_base.twist_strip_I
+                    k[0] == TrisAltBase.twist_strip_I
+                    and k[1] == TrisAltBase.twist_strip_I
             ):
                 s = "strip I - twisted - strip I"
             else:
-                s = f"{TrisAlt_base.stringify[k[0]]} - {TrisAlt_base.stringify[k[1]]}"
+                s = f"{TrisAltBase.stringify[k[0]]} - {TrisAltBase.stringify[k[1]]}"
             class_dict["stringify"][k] = s
             class_dict["key"][s] = k
             class_dict[toTrisAltKeyStr(k)] = k
-    return Meta_TrisAlt(name, (TrisAlt_base,), class_dict)
+    return Meta_TrisAlt(name, (TrisAltBase,), class_dict)
 
 
 TrisAlt = define_tris_alt(
     "TrisAlt",
     [
-        TrisAlt_base.refl_1,
-        TrisAlt_base.refl_2,
-        TrisAlt_base.crossed_2,
-        TrisAlt_base.strip_1_loose,
-        TrisAlt_base.strip_I,
-        TrisAlt_base.strip_II,
-        TrisAlt_base.star,
-        TrisAlt_base.star_1_loose,
-        TrisAlt_base.alt_strip_I,
-        TrisAlt_base.alt_strip_II,
-        TrisAlt_base.alt_strip_1_loose,
-        TrisAlt_base.twist_strip_I,
-        TrisAlt_base.rot_strip_1_loose,
-        TrisAlt_base.rot_star_1_loose,
-        TrisAlt_base.arot_strip_1_loose,
-        TrisAlt_base.arot_star_1_loose,
-        (TrisAlt_base.strip_I, TrisAlt_base.strip_I),
-        (TrisAlt_base.strip_I, TrisAlt_base.strip_II),
-        (TrisAlt_base.strip_I, TrisAlt_base.star),
-        (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_I),
-        (TrisAlt_base.strip_I, TrisAlt_base.alt_strip_II),
-        (TrisAlt_base.strip_II, TrisAlt_base.strip_I),
-        (TrisAlt_base.strip_II, TrisAlt_base.strip_II),
-        (TrisAlt_base.strip_II, TrisAlt_base.star),
-        (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_I),
-        (TrisAlt_base.strip_II, TrisAlt_base.alt_strip_II),
-        (TrisAlt_base.star, TrisAlt_base.strip_I),
-        (TrisAlt_base.star, TrisAlt_base.strip_II),
-        (TrisAlt_base.star, TrisAlt_base.star),
-        (TrisAlt_base.star, TrisAlt_base.alt_strip_I),
-        (TrisAlt_base.star, TrisAlt_base.alt_strip_II),
-        (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_I),
-        (TrisAlt_base.alt_strip_I, TrisAlt_base.strip_II),
-        (TrisAlt_base.alt_strip_I, TrisAlt_base.star),
-        (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_I),
-        (TrisAlt_base.alt_strip_I, TrisAlt_base.alt_strip_II),
-        (TrisAlt_base.twist_strip_I, TrisAlt_base.twist_strip_I),
-        (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_I),
-        (TrisAlt_base.alt_strip_II, TrisAlt_base.strip_II),
-        (TrisAlt_base.alt_strip_II, TrisAlt_base.star),
-        (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_I),
-        (TrisAlt_base.alt_strip_II, TrisAlt_base.alt_strip_II),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.strip_1_loose),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.star_1_loose),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.alt_strip_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.strip_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.star_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.alt_strip_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.strip_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.star_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.alt_strip_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.rot_strip_1_loose),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_strip_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_strip_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.arot_strip_1_loose),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_strip_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_strip_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.rot_star_1_loose),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.rot_star_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.rot_star_1_loose),
-        (TrisAlt_base.star_1_loose, TrisAlt_base.arot_star_1_loose),
-        (TrisAlt_base.strip_1_loose, TrisAlt_base.arot_star_1_loose),
-        (TrisAlt_base.alt_strip_1_loose, TrisAlt_base.arot_star_1_loose),
+        TrisAltBase.refl_1,
+        TrisAltBase.refl_2,
+        TrisAltBase.crossed_2,
+        TrisAltBase.strip_1_loose,
+        TrisAltBase.strip_I,
+        TrisAltBase.strip_II,
+        TrisAltBase.star,
+        TrisAltBase.star_1_loose,
+        TrisAltBase.alt_strip_I,
+        TrisAltBase.alt_strip_II,
+        TrisAltBase.alt_strip_1_loose,
+        TrisAltBase.twist_strip_I,
+        TrisAltBase.rot_strip_1_loose,
+        TrisAltBase.rot_star_1_loose,
+        TrisAltBase.arot_strip_1_loose,
+        TrisAltBase.arot_star_1_loose,
+        (TrisAltBase.strip_I, TrisAltBase.strip_I),
+        (TrisAltBase.strip_I, TrisAltBase.strip_II),
+        (TrisAltBase.strip_I, TrisAltBase.star),
+        (TrisAltBase.strip_I, TrisAltBase.alt_strip_I),
+        (TrisAltBase.strip_I, TrisAltBase.alt_strip_II),
+        (TrisAltBase.strip_II, TrisAltBase.strip_I),
+        (TrisAltBase.strip_II, TrisAltBase.strip_II),
+        (TrisAltBase.strip_II, TrisAltBase.star),
+        (TrisAltBase.strip_II, TrisAltBase.alt_strip_I),
+        (TrisAltBase.strip_II, TrisAltBase.alt_strip_II),
+        (TrisAltBase.star, TrisAltBase.strip_I),
+        (TrisAltBase.star, TrisAltBase.strip_II),
+        (TrisAltBase.star, TrisAltBase.star),
+        (TrisAltBase.star, TrisAltBase.alt_strip_I),
+        (TrisAltBase.star, TrisAltBase.alt_strip_II),
+        (TrisAltBase.alt_strip_I, TrisAltBase.strip_I),
+        (TrisAltBase.alt_strip_I, TrisAltBase.strip_II),
+        (TrisAltBase.alt_strip_I, TrisAltBase.star),
+        (TrisAltBase.alt_strip_I, TrisAltBase.alt_strip_I),
+        (TrisAltBase.alt_strip_I, TrisAltBase.alt_strip_II),
+        (TrisAltBase.twist_strip_I, TrisAltBase.twist_strip_I),
+        (TrisAltBase.alt_strip_II, TrisAltBase.strip_I),
+        (TrisAltBase.alt_strip_II, TrisAltBase.strip_II),
+        (TrisAltBase.alt_strip_II, TrisAltBase.star),
+        (TrisAltBase.alt_strip_II, TrisAltBase.alt_strip_I),
+        (TrisAltBase.alt_strip_II, TrisAltBase.alt_strip_II),
+        (TrisAltBase.strip_1_loose, TrisAltBase.strip_1_loose),
+        (TrisAltBase.strip_1_loose, TrisAltBase.star_1_loose),
+        (TrisAltBase.strip_1_loose, TrisAltBase.alt_strip_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.strip_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.star_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.alt_strip_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.strip_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.star_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.alt_strip_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.rot_strip_1_loose),
+        (TrisAltBase.strip_1_loose, TrisAltBase.rot_strip_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.rot_strip_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.arot_strip_1_loose),
+        (TrisAltBase.strip_1_loose, TrisAltBase.arot_strip_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.arot_strip_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.rot_star_1_loose),
+        (TrisAltBase.strip_1_loose, TrisAltBase.rot_star_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.rot_star_1_loose),
+        (TrisAltBase.star_1_loose, TrisAltBase.arot_star_1_loose),
+        (TrisAltBase.strip_1_loose, TrisAltBase.arot_star_1_loose),
+        (TrisAltBase.alt_strip_1_loose, TrisAltBase.arot_star_1_loose),
     ],
 )
 
@@ -3358,7 +3358,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             with regular folded heptagons. These models were calculated before and added to the
             program. For instance one of strings can be "Heptagons only" for a model with only
             regular folded heptagons.
-        triangle_alts: an array consisting of TrisAlt_base derived objects. Each element in the
+        triangle_alts: an array consisting of TrisAltBase derived objects. Each element in the
             array expresses which triangle fills are valid for the position with the same index as
             the element.
         pre_pos_to_number: a hash table that maps the strings from prePosStrList to unique numbers.
