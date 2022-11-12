@@ -107,7 +107,7 @@ class Shape(heptagons.EqlHeptagonShape):
         this.error_msg = ''
         if this.alt_hept_pos:
             Ns = Vs
-            heptN = heptagons.Kite2Hept(Vs[3], Vs[0], Vs[1], Vs[2])
+            heptN = heptagons.kite_to_hept(Vs[3], Vs[0], Vs[1], Vs[2])
             if heptN == None:
               this.error_msg = 'No valid equilateral heptagon for this position'
               return
@@ -143,7 +143,7 @@ class Shape(heptagons.EqlHeptagonShape):
                         vt
                     ]
         else:
-            heptN = heptagons.Kite2Hept(Vs[1], Vs[2], Vs[3], Vs[0])
+            heptN = heptagons.kite_to_hept(Vs[1], Vs[2], Vs[3], Vs[0])
             if heptN == None:
               this.error_msg = 'No valid equilateral heptagon for this position'
               return

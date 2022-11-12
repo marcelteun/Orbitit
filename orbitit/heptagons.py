@@ -2991,50 +2991,48 @@ class RegularHeptagon:
             self.Vs[i] = T * self.Vs[i]
 
 
-def Kite2Hept(Left, Top, Right, Bottom, alt_hept_pos=False):
+def kite_to_hept(left, top, right, bottom, alt_hept_pos=False):
     """Return the a tuple with vertices and the normal of an equilateral
-    heptagon for a kite, Vl, Vt, Vr, Vb; the tuple has the following structure:
-    ([h0, h1, h2, h3, h4, h5, h6], normal), with h0 = Top.
+    heptagon for a kite, v_left, v_top, v_right, v_bottom; the tuple has the following structure:
+    ([h0, h1, h2, h3, h4, h5, h6], normal), with h0 = top.
 
-    Left: left coordinate
-    Top: top coordinate
-    Right: right coordinate
-    Bottom: bottom coordinate
+    left: left coordinate
+    top: top coordinate
+    right: right coordinate
+    bottom: bottom coordinate
     alt_hept_pos: 2 possible orientations for the heptagons exists. If false then the preferred
         position is returned, otherwise the heptagon will be 'upside down'.
     """
     if not alt_hept_pos:
-        Vl = Vec(Left)
-        Vt = Vec(Top)
-        Vr = Vec(Right)
-        Vb = Vec(Bottom)
+        v_left = Vec(left)
+        v_top = Vec(top)
+        v_right = Vec(right)
+        v_bottom = Vec(bottom)
     else:
-        Vl = Vec(Right)
-        Vt = Vec(Bottom)
-        Vr = Vec(Left)
-        Vb = Vec(Top)
-    Vo = (Vl + Vr) / 2
-    Dr = Vo - Vr
-    Du = Vo - Vt
-    w = Dr.norm()
-    f = Du.norm()
-    g = (Vo - Vb).norm()
+        v_left = Vec(right)
+        v_top = Vec(bottom)
+        v_right = Vec(left)
+        v_bottom = Vec(top)
+    v_o = (v_left + v_right) / 2
+    d_r = v_o - v_right
+    d_u = v_o - v_top
+    w = d_r.norm()
+    f = d_u.norm()
+    g = (v_o - v_bottom).norm()
 
     if f == 0:
-        logging.warning("Kite2Hept: f == 0")
+        logging.warning("kite_to_hept: f == 0")
         return ()
     if w == 0:
-        logging.warning("Kite2Hept: warning w == 0")
+        logging.warning("kite_to_hept: warning w == 0")
         return ()
     # if f > g:
     #    f, g = g, f
 
-    V = lambda x: math.sqrt(x)
-
     r = f / w
     q = g / w
-    n = V(1.0 + q * q) / 2
-    m = V(1.0 + r * r) / 2
+    n = math.sqrt(1.0 + q * q) / 2
+    m = math.sqrt(1.0 + r * r) / 2
     k = m * (1.0 + 1.0 / n)
 
     qkpr = q * k + r
@@ -3046,7 +3044,7 @@ def Kite2Hept(Left, Top, Right, Bottom, alt_hept_pos=False):
         return ()
 
     nom = f + g
-    denom = qkpr + V(root)
+    denom = qkpr + math.sqrt(root)
 
     if denom == 0:
         logging.warning("kite2Hept: denom == 0")
@@ -3054,28 +3052,31 @@ def Kite2Hept(Left, Top, Right, Bottom, alt_hept_pos=False):
 
     w1 = nom / denom
 
-    w1Rel = w1 / w
-    w2Rel = k * w1Rel
-    w3Rel = m * w1Rel
+    w1_factor = w1 / w
+    w2_factor = k * w1_factor
+    w3_factor = m * w1_factor
 
-    relPos = lambda v0, v1, rat: rat * (v1 - v0) + v0
-    # h0 = Vt
-    h1 = relPos(Vt, Vr, w1Rel)
-    h2 = relPos(Vb, Vr, w2Rel)
-    h3 = relPos(Vb, Vr, w3Rel)
-    h4 = relPos(Vb, Vl, w3Rel)
-    h5 = relPos(Vb, Vl, w2Rel)
-    h6 = relPos(Vt, Vl, w1Rel)
+    def rel_position(v0, v1, rat):
+        return rat * (v1 - v0) + v0
 
-    N = Dr.cross(Du).normalize()
 
-    # C = (Vt + h1 + h2 + h3 + h4 + h5 + h6) / 7
-    # return ([Vt, h1, h2, h3, h4, h5, h6], N)
+    # h0 = v_top
+    h1 = rel_position(v_top, v_right, w1_factor)
+    h2 = rel_position(v_bottom, v_right, w2_factor)
+    h3 = rel_position(v_bottom, v_right, w3_factor)
+    h4 = rel_position(v_bottom, v_left, w3_factor)
+    h5 = rel_position(v_bottom, v_left, w2_factor)
+    h6 = rel_position(v_top, v_left, w1_factor)
+
+    n = d_r.cross(d_u).normalize()
+
+    # C = (v_top + h1 + h2 + h3 + h4 + h5 + h6) / 7
+    # return ([v_top, h1, h2, h3, h4, h5, h6], n)
     # Don't return Vector types, since I had problems with this on a MS. Windows
     # OS.
     return (
         [
-            Vec([Vt[0], Vt[1], Vt[2]]),
+            Vec([v_top[0], v_top[1], v_top[2]]),
             Vec([h1[0], h1[1], h1[2]]),
             Vec([h2[0], h2[1], h2[2]]),
             Vec([h3[0], h3[1], h3[2]]),
@@ -3083,7 +3084,7 @@ def Kite2Hept(Left, Top, Right, Bottom, alt_hept_pos=False):
             Vec([h5[0], h5[1], h5[2]]),
             Vec([h6[0], h6[1], h6[2]]),
         ],
-        Vec(N),
+        Vec(n),
     )
 
 

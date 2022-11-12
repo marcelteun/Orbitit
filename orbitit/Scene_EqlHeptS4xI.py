@@ -147,7 +147,7 @@ class Shape(heptagons.EqlHeptagonShape):
             ]
 
         # add heptagons
-        heptN = heptagons.Kite2Hept(Vs[3], Vs[2], Vs[1], Vs[0])
+        heptN = heptagons.kite_to_hept(Vs[3], Vs[2], Vs[1], Vs[0])
         if heptN == None:
           this.error_msg = 'No valid equilateral heptagon for this position'
           return
@@ -159,13 +159,13 @@ class Shape(heptagons.EqlHeptagonShape):
             Ns[i] = heptN[1]
         for i in range(12, 19):
             Ns[i] = heptN[1]
-        heptN = heptagons.Kite2Hept(Vs[7], Vs[6], Vs[5], Vs[4])
+        heptN = heptagons.kite_to_hept(Vs[7], Vs[6], Vs[5], Vs[4])
         Vs.extend(heptN[0]) # V19 - V25
         for i in range(4, 8):
             Ns[i] = heptN[1]
         for i in range(19, 26):
             Ns[i] = heptN[1]
-        heptN = heptagons.Kite2Hept(Vs[11], Vs[10], Vs[9], Vs[8])
+        heptN = heptagons.kite_to_hept(Vs[11], Vs[10], Vs[9], Vs[8])
         Vs.extend(heptN[0]) # V26 - V32
         for i in range(8, 12):
             Ns[i] = heptN[1]

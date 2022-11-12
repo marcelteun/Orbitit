@@ -105,7 +105,7 @@ class Shape(Geom3D.SimpleShape):
         Vb = [0, -self.tail, 0]
         Vl = [-self.side, 0, 0]
         Vr = [ self.side, 0, 0]
-        tuple = heptagons.Kite2Hept(Vl, Vt, Vr, Vb)
+        tuple = heptagons.kite_to_hept(Vl, Vt, Vr, Vb)
         if tuple == None: return
         h0, h1, h2, h3, h4, h5, h6 = tuple[0]
 
