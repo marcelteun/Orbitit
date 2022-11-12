@@ -36,7 +36,7 @@ import math
 import re
 import wx
 
-from OpenGL.GL import glColor, glBlendFunc
+from OpenGL.GL import glBlendFunc
 from OpenGL.GL import GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
 from orbitit import Geom3D, geomtypes, rgb
@@ -3132,7 +3132,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
 
     def gl_draw(self):
         if self.update_shape:
-            self.setV()
+            self.set_vertices()
         Geom3D.CompoundShape.gl_draw(self)
 
     def setEdgeAlternative(self, alt=None, opposite_alt=None):
@@ -3176,31 +3176,37 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def set_tri_fill_pos(self, position):
         logging.warning("implement in derived class")
 
-    def setFold1(self, angle=None, oppositeAngle=None):
+    def set_fold1(self, angle=None, opposite_angle=None):
+        """Set the fold angle (radians) around the first (pair of) heptagon diagonals.
+
+        If reflections are required then only angle needs to be set and the same angle will be used
+        for the opposite heptagon. Otherwise specify both angle and opposite_angle.
+        """
         if angle is not None:
             self.fold1 = angle
-        if oppositeAngle is not None:
-            self.oppFold1 = oppositeAngle
+        if opposite_angle is not None:
+            self.oppFold1 = opposite_angle
         self.update_shape = True
 
-    def setFold2(self, angle=None, oppositeAngle=None):
+    def set_fold2(self, angle=None, opposite_angle=None):
+        """Set the fold angle (radians) around the second (pair of) heptagon diagonals.
+
+        If reflections are required then only angle needs to be set and the same angle will be used
+        for the opposite heptagon. Otherwise specify both angle and opposite_angle.
+        """
         if angle is not None:
             self.fold2 = angle
-        if oppositeAngle is not None:
-            self.oppFold2 = oppositeAngle
+        if opposite_angle is not None:
+            self.oppFold2 = opposite_angle
         self.update_shape = True
 
-    def setHeight(self, height):
+    def set_height(self, height):
+        """Set distance between the (unfolded) heptagon and the origin."""
         self.height = height
         self.update_shape = True
 
-    def edgeColor(self):
-        glColor(0.5, 0.5, 0.5)
-
-    def vertColor(self):
-        glColor(0.7, 0.5, 0.5)
-
-    def getStatusStr(self):
+    def get_status_str(self):
+        """Return a string to be written on the status bar for the user."""
         return (
             f"T = {self.height:02.2f}, Angle = {self.dihedralAngle:01.2f} rad, "
             f"fold1 = {self.fold1:01.2f} ({self.oppFold1:01.2f}) rad, "
@@ -3212,10 +3218,15 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         """Return the pos angle for a polyhedron with reflections."""
         if self.edge_alt == TrisAlt.refl_1:
             return 0
-        else:
-            return self.pos_angle_max
+        return self.pos_angle_max
 
-    def posHeptagon(self):
+    def position_heptagon(self):
+        """
+        Define all vertices of the heptagon according to the current settings.
+
+        Fold the parts of the heptagon, put it at the correct height, rotate it around the 2-fold
+        axis with the right angle, and use the corrent dihedral angle by rotating around one edge.
+        """
         self.heptagon.fold(
             self.fold1,
             self.fold2,
@@ -3232,8 +3243,9 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         if self._pos_angle != 0:
             self.heptagon.rotate(-geomtypes.UZ, self._pos_angle)
 
-    def setV(self):
-        self.posHeptagon()
+    def set_vertices(self):
+        """Make sure all vertices of the polyhedron are set."""
+        self.position_heptagon()
 
 
 class FldHeptagonCtrlWin(wx.Frame):
@@ -3775,14 +3787,14 @@ class FldHeptagonCtrlWin(wx.Frame):
     def on_pos_angle(self, event):
         """Apply rotation angle around 2-fold axis of heptagon in GUI to polyhedron."""
         self.shape.pos_angle = Geom3D.Deg2Rad * self.pos_angle_gui.GetValue()
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_dihedral_angle(self, event):
         """Apply new angle between two heptagons sharing an edge in GUI to polyhedron."""
         self.shape.setDihedralAngle(Geom3D.Deg2Rad * self.dihedral_angle_gui.GetValue())
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
@@ -3791,10 +3803,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         val = self.fold1_gui.GetValue()
         s_val = Geom3D.Deg2Rad * val
         if self.shape.has_reflections:
-            self.shape.setFold1(s_val, s_val)
+            self.shape.set_fold1(s_val, s_val)
         else:
-            self.shape.setFold1(s_val)
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+            self.shape.set_fold1(s_val)
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
@@ -3803,33 +3815,33 @@ class FldHeptagonCtrlWin(wx.Frame):
         val = self.fold2_gui.GetValue()
         s_val = Geom3D.Deg2Rad * val
         if self.shape.has_reflections:
-            self.shape.setFold2(s_val, s_val)
+            self.shape.set_fold2(s_val, s_val)
         else:
-            self.shape.setFold2(s_val)
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+            self.shape.set_fold2(s_val)
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_opp_fold1(self, event):
         """Apply new fold of opposite diagonal no. 1 in GUI of base heptagon to polyhedron."""
-        self.shape.setFold1(oppositeAngle=Geom3D.Deg2Rad * self.opp_fold1_gui.GetValue())
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.shape.set_fold1(opposite_angle=Geom3D.Deg2Rad * self.opp_fold1_gui.GetValue())
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_opp_fold2(self, event):
         """Apply new fold of opposite diagonal no. 2 in GUI of base heptagon to polyhedron."""
-        self.shape.setFold2(oppositeAngle=Geom3D.Deg2Rad * self.opp_fold2_gui.GetValue())
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.shape.set_fold2(opposite_angle=Geom3D.Deg2Rad * self.opp_fold2_gui.GetValue())
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_height(self, event):
         """Apply new translation in GUI of base heptagon to polyhedron."""
-        self.shape.setHeight(
+        self.shape.set_height(
             float(self.max_height - self.height_gui.GetValue()) / self.height_factor
         )
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
@@ -3889,10 +3901,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             opposite_fld1 = fold_1
             opposite_fld2 = fold_2
         self.shape.setDihedralAngle(angle)
-        self.shape.setHeight(offset)
-        self.shape.setFold1(fold_1, opposite_fld1)
-        self.shape.setFold2(fold_2, opposite_fld2)
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.shape.set_height(offset)
+        self.shape.set_fold1(fold_1, opposite_fld1)
+        self.shape.set_fold2(fold_2, opposite_fld2)
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
@@ -3949,8 +3961,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         self._saved_angle["opp_fold1"] = self.shape.oppFold1
         self._saved_angle["opp_fold2"] = self.shape.oppFold2
         self._saved_angle["pos_angle"] = self.shape.pos_angle
-        self.shape.setFold1(oppositeAngle=self.shape.fold1)
-        self.shape.setFold2(oppositeAngle=self.shape.fold2)
+        self.shape.set_fold1(opposite_angle=self.shape.fold1)
+        self.shape.set_fold2(opposite_angle=self.shape.fold2)
         self.update_to_refl_pos_angle()
         self.opp_fold1_gui.SetValue(self.min_fold_angle)
         self.opp_fold2_gui.SetValue(self.min_fold_angle)
@@ -3967,8 +3979,8 @@ class FldHeptagonCtrlWin(wx.Frame):
             opp_fold1 = self._saved_angle["opp_fold1"]
             opp_fold2 = self._saved_angle["opp_fold2"]
             hept_angle = self._saved_angle["pos_angle"]
-            self.shape.setFold1(oppositeAngle=opp_fold1)
-            self.shape.setFold2(oppositeAngle=opp_fold2)
+            self.shape.set_fold1(opposite_angle=opp_fold1)
+            self.shape.set_fold2(opposite_angle=opp_fold2)
             self.shape.pos_angle = hept_angle
             self.opp_fold1_gui.SetValue(Geom3D.Rad2Deg * opp_fold1)
             self.opp_fold2_gui.SetValue(Geom3D.Rad2Deg * opp_fold2)
@@ -4035,7 +4047,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 else:
                     self.tris_setup_refl = self.tris_fill_gui.GetStringSelection()
                     self.enable_guis_for_no_refl()
-                self.status_bar.SetStatusText(self.shape.getStatusStr())
+                self.status_bar.SetStatusText(self.shape.get_status_str())
                 self.update_shape()
 
     @property
@@ -4196,7 +4208,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             if self.tris_alt.twist_strip_I not in (self.prev_tris_fill, self.prev_opp_tris_fill):
                 logging.info("---------nvidia-seg-fault-work-around-----------")
                 self.nvidea_workaround_0()
-            self.shape.setV()  # make sure the shape is updated
+            self.shape.set_vertices()  # make sure the shape is updated
             shape = FldHeptagonShape(
                 self.shape.shapes,
                 self.shape.nFold,
@@ -4243,7 +4255,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             else:
                 if self.shape.has_reflections:
                     self.update_to_refl_pos_angle()
-                self.status_bar.SetStatusText(self.shape.getStatusStr())
+                self.status_bar.SetStatusText(self.shape.get_status_str())
             self.update_shape()
 
     @property
@@ -4308,7 +4320,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             if self.is_pre_pos():
                 self.on_pre_pos(event)
             else:
-                self.status_bar.SetStatusText(self.shape.getStatusStr())
+                self.status_bar.SetStatusText(self.shape.get_status_str())
             self.update_shape()
 
     def pre_pos_val(self, key):
@@ -4510,9 +4522,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         elif self.special_pos_idx < -1:
             self.special_pos_idx = max_i - 1
         self.shape.setDihedralAngle(angle)
-        self.shape.setHeight(offset)
-        self.shape.setFold1(fold_1, opposite_fld1)
-        self.shape.setFold2(fold_2, opposite_fld2)
+        self.shape.set_height(offset)
+        self.shape.set_fold1(fold_1, opposite_fld1)
+        self.shape.set_fold2(fold_2, opposite_fld2)
         self.shape.pos_angle = pos_angle
         # For the user: start counting with '1' instead of '0'
         if self.special_pos_idx == -1:
@@ -4521,7 +4533,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             pos_no = self.special_pos_idx + 1
         # set nr of possible positions
         self.number_text.SetLabel(f"{pos_no}/{no_of_pos}")
-        self.status_bar.SetStatusText(self.shape.getStatusStr())
+        self.status_bar.SetStatusText(self.shape.get_status_str())
         # self.shape.printTrisAngles()
 
     def reset_std_pre_pos(self):

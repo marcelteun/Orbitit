@@ -192,11 +192,11 @@ class Shape(heptagons.FldHeptagonShape):
         this.pos_angle = 0
         this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
         this.initArrs()
-        this.setV()
+        this.set_vertices()
 
-    def getStatusStr(this):
+    def get_status_str(this):
         if this.update_shape:
-            this.setV()
+            this.set_vertices()
         Vs = this.baseVs
         Es = this.triEs[this.edge_alt]
         aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
@@ -234,8 +234,8 @@ class Shape(heptagons.FldHeptagonShape):
         heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
         # TODO correct edge alternative?
 
-    def setV(this):
-        this.posHeptagon()
+    def set_vertices(this):
+        this.position_heptagon()
         Vs = this.heptagon.Vs[:]
 
         #            5" = 18                 12 = 2"

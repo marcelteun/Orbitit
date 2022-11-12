@@ -191,13 +191,13 @@ class Shape(heptagons.FldHeptagonShape):
         this.initArrs()
         this.set_tri_fill_pos(0)
         this.setEdgeAlternative(trisAlt.strip_II, trisAlt.strip_II)
-        this.setV()
+        this.set_vertices()
 
-    def getStatusStr(this):
+    def get_status_str(this):
         #angle = Geom3D.Rad2Deg * this.dihedralAngle
-        s = heptagons.FldHeptagonShape.getStatusStr(this)
+        s = heptagons.FldHeptagonShape.get_status_str(this)
         if this.update_shape:
-            this.setV()
+            this.set_vertices()
         Vs = this.baseVs
         if this.has_reflections:
             Es = this.triEs[this.edge_alt]
@@ -251,7 +251,7 @@ class Shape(heptagons.FldHeptagonShape):
     def setEdgeAlternative(this, alt = None, oppositeAlt = None):
         heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
 
-    def setV(this):
+    def set_vertices(this):
         #
         # o3:
         #     0 -> 9 -> 10
@@ -284,7 +284,7 @@ class Shape(heptagons.FldHeptagonShape):
         #
         #         2' = 8                7 = 5'
 
-        this.posHeptagon()
+        this.position_heptagon()
         Vs = this.heptagon.Vs[:]
         Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[7]
         Vs.append(Vec([-Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[8]

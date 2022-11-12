@@ -195,13 +195,13 @@ class Shape(heptagons.FldHeptagonShape):
         this.height = 3.9
         this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
         this.initArrs()
-        this.setV()
+        this.set_vertices()
 
-    def getStatusStr(this):
+    def get_status_str(this):
         #angle = Geom3D.Rad2Deg * this.dihedralAngle
-        s = heptagons.FldHeptagonShape.getStatusStr(this)
+        s = heptagons.FldHeptagonShape.get_status_str(this)
         if this.update_shape:
-            this.setV()
+            this.set_vertices()
         #                                  14 = 2'
         #                0
         #   13                      12 = o3 centre
@@ -253,7 +253,7 @@ class Shape(heptagons.FldHeptagonShape):
     def set_tri_fill_pos(this, i):
         logging.warning(f"TODO implement set_tri_fill_pos for {i}")
 
-    def setV(this):
+    def set_vertices(this):
         #
         # o4: 5 -> 18 -> 19 -> 20
         #     0 -> 21 -> 22 -> 23
@@ -278,7 +278,7 @@ class Shape(heptagons.FldHeptagonShape):
         #
         #               o3: 7 -> 24 -> 25
         #                   0 -> 26 -> 27
-        this.posHeptagon()
+        this.position_heptagon()
         Vs = this.heptagon.Vs[:]
         Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[7]
         Vs.append(o3fld * Vs[0])                # Vs[8]
