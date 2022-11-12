@@ -183,7 +183,6 @@ class Shape(heptagons.FldHeptagonShape):
         )
         heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape, trisO4Shape],
-            4, 3,
             name='FoldedRegHeptS4xI'
         )
         this.heptagonsShape = heptagonsShape
@@ -193,12 +192,11 @@ class Shape(heptagons.FldHeptagonShape):
         this.pos_angle_min = -pos_angle_refl_2
         this.pos_angle_max = pos_angle_refl_2
         this.height = 3.9
-        this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
+        this.set_edge_alt(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
         this.initArrs()
         this.set_vertices()
 
     def get_status_str(this):
-        #angle = Geom3D.Rad2Deg * this.dihedralAngle
         s = heptagons.FldHeptagonShape.get_status_str(this)
         if this.update_shape:
             this.set_vertices()
@@ -318,7 +316,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         # TODO rm:
-        if this.addXtraFs:
+        if this.add_extra_faces:
             Fs = this.o3triFs[this.edge_alt][:]
             Es = this.o3triEs[this.edge_alt][:]
             this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
@@ -331,7 +329,7 @@ class Shape(heptagons.FldHeptagonShape):
             this.trisO4Shape.setBaseEdgeProperties(Es = Es)
             this.trisO4Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO4Shape)
-            if (not this.onlyRegFs):
+            if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
                 if this.opposite_edge_alt & heptagons.rot_bit:

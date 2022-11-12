@@ -181,7 +181,6 @@ class Shape(heptagons.FldHeptagonShape):
         )
         heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape],
-            3, 3,
             name='FoldedRegHeptA4'
         )
         this.heptagonsShape = heptagonsShape
@@ -190,7 +189,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.pos_angle_min = -math.pi
         this.pos_angle_max = math.pi
         this.pos_angle = 0
-        this.setEdgeAlternative(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
+        this.set_edge_alt(trisAlt.strip_1_loose, trisAlt.strip_1_loose)
         this.initArrs()
         this.set_vertices()
 
@@ -230,8 +229,8 @@ class Shape(heptagons.FldHeptagonShape):
     def set_tri_fill_pos(this, i):
         logging.warning(f"TODO implement set_tri_fill_pos for {i}")
 
-    def setEdgeAlternative(this, alt = None, oppositeAlt = None):
-        heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
+    def set_edge_alt(this, alt = None, oppositeAlt = None):
+        heptagons.FldHeptagonShape.set_edge_alt(this, alt, oppositeAlt)
         # TODO correct edge alternative?
 
     def set_vertices(this):
@@ -285,7 +284,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
-        if this.addXtraFs:
+        if this.add_extra_faces:
             Es      = this.o3triEs[this.edge_alt][:]
             Fs      = this.o3triFs[this.edge_alt][:]
             Es.extend(this.oppO3triEs[this.opposite_edge_alt])
@@ -294,7 +293,7 @@ class Shape(heptagons.FldHeptagonShape):
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
-            if (not this.onlyRegFs):
+            if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
                 if this.opposite_edge_alt & heptagons.rot_bit:

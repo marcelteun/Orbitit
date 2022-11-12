@@ -177,7 +177,6 @@ class Shape(heptagons.FldHeptagonShape):
         )
         heptagons.FldHeptagonShape.__init__(this,
             [heptagonsShape, xtraTrisShape, trisO3Shape, trisO5Shape],
-            5, 3,
             name='FoldedRegHeptA5xI'
         )
         this.heptagonsShape = heptagonsShape
@@ -187,14 +186,13 @@ class Shape(heptagons.FldHeptagonShape):
         this.pos_angle_min = -math.pi/2
         this.pos_angle_max = math.pi/2
         this.height = 2.7
-        this.dihedralAngle = Geom3D.Deg2Rad * 119
+        this.dihedral_angle = Geom3D.Deg2Rad * 119
         this.initArrs()
         this.set_tri_fill_pos(0)
-        this.setEdgeAlternative(trisAlt.strip_II, trisAlt.strip_II)
+        this.set_edge_alt(trisAlt.strip_II, trisAlt.strip_II)
         this.set_vertices()
 
     def get_status_str(this):
-        #angle = Geom3D.Rad2Deg * this.dihedralAngle
         s = heptagons.FldHeptagonShape.get_status_str(this)
         if this.update_shape:
             this.set_vertices()
@@ -248,8 +246,8 @@ class Shape(heptagons.FldHeptagonShape):
         this.o3triFs   = this.o3triFs_alts[i]
         this.triColIds = this.triColIds_alts[i]
 
-    def setEdgeAlternative(this, alt = None, oppositeAlt = None):
-        heptagons.FldHeptagonShape.setEdgeAlternative(this, alt, oppositeAlt)
+    def set_edge_alt(this, alt = None, oppositeAlt = None):
+        heptagons.FldHeptagonShape.set_edge_alt(this, alt, oppositeAlt)
 
     def set_vertices(this):
         #
@@ -336,7 +334,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
-        if this.addXtraFs:
+        if this.add_extra_faces:
             assert this.edge_alt in this.o5triFs, \
                 "this triangle fill isn't implemented for A5"
             Fs = this.o5triFs[this.edge_alt][:]
@@ -351,7 +349,7 @@ class Shape(heptagons.FldHeptagonShape):
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
-            if (not this.onlyRegFs):
+            if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
                 if this.triangleFillPosition == 0:
