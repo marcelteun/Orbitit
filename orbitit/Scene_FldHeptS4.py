@@ -35,34 +35,34 @@ trisAlt.base_key = {
     trisAlt.refl_2: True,
 }
 
-counter = heptagons.Tris_counter()
+counter = heptagons.TrisCounter()
 
 DYN_POS = heptagons.DYN_POS
 OPEN_FILE = heptagons.OPEN_FILE
 ONLY_HEPTS = heptagons.ONLY_HEPTS
 ONLY_XTRA_O3S = heptagons.ONLY_XTRA_O3S
-T32 = counter.pp()
-T24_S6 = counter.pp()
-T24_S30 = counter.pp()
-T32_S24 = counter.pp()
-T56_S6 = counter.pp()
-S_T8_S6 = counter.pp()
-ALL_EQ_TRIS = counter.pp()
-NO_O3_TRIS = counter.pp()
-edge_1_1_V2_1 = counter.pp()
-edge_1_V2_1_1 = counter.pp()
-edge_V2_1_1_1 = counter.pp()
-edge_V2_1_V2_1 = counter.pp()
-squares_24 = counter.pp()
-edge_0_1_1_1 = counter.pp()
-edge_0_1_V2_1 = counter.pp()
-tris_24 = counter.pp()
-edge_1_1_0_1 = counter.pp()
-edge_1_0_1_1 = counter.pp()
-edge_V2_1_0_1 = counter.pp()
-edge_V2_1_1_0 = counter.pp()
-square_12 = counter.pp()
-edge_0_V2_1_1 = counter.pp()
+T32 = counter.get_next_id()
+T24_S6 = counter.get_next_id()
+T24_S30 = counter.get_next_id()
+T32_S24 = counter.get_next_id()
+T56_S6 = counter.get_next_id()
+S_T8_S6 = counter.get_next_id()
+ALL_EQ_TRIS = counter.get_next_id()
+NO_O3_TRIS = counter.get_next_id()
+edge_1_1_V2_1 = counter.get_next_id()
+edge_1_V2_1_1 = counter.get_next_id()
+edge_V2_1_1_1 = counter.get_next_id()
+edge_V2_1_V2_1 = counter.get_next_id()
+squares_24 = counter.get_next_id()
+edge_0_1_1_1 = counter.get_next_id()
+edge_0_1_V2_1 = counter.get_next_id()
+tris_24 = counter.get_next_id()
+edge_1_1_0_1 = counter.get_next_id()
+edge_1_0_1_1 = counter.get_next_id()
+edge_V2_1_0_1 = counter.get_next_id()
+edge_V2_1_1_0 = counter.get_next_id()
+square_12 = counter.get_next_id()
+edge_0_V2_1_1 = counter.get_next_id()
 
 Stringify = {
     DYN_POS:        'Enable Sliders',

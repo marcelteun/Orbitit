@@ -66,17 +66,17 @@ trisAlts = [
     TA_1()
 ]
 
-counter = heptagons.Tris_counter()
+counter = heptagons.TrisCounter()
 
 DYN_POS = heptagons.DYN_POS
 OPEN_FILE = heptagons.OPEN_FILE
 ONLY_HEPTS = heptagons.ONLY_HEPTS
-ALL_EQ_TRIS = counter.pp()
-NO_O3_TRIS = counter.pp()
-T20_P12 = counter.pp()
-T60_P12 = counter.pp()
-T140_P12 = counter.pp()
-T200 = counter.pp()
+ALL_EQ_TRIS = counter.get_next_id()
+NO_O3_TRIS = counter.get_next_id()
+T20_P12 = counter.get_next_id()
+T60_P12 = counter.get_next_id()
+T140_P12 = counter.get_next_id()
+T200 = counter.get_next_id()
 
 Stringify = {
     DYN_POS: 'Enable Sliders',

@@ -68,14 +68,20 @@ twist_bit = 64
 TRIS_OFFSET = 128
 
 
-class Tris_counter:
+class TrisCounter:
+    """Count calls.
+
+    Used to give unique IDs to special positions for folded regular heptagons.
+    """
     def __init__(self):
         self.reset(TRIS_OFFSET)
 
     def reset(self, v):
+        """Reset counter to value 'v'."""
         self.counter = v
 
-    def pp(self):
+    def get_next_id(self):
+        """Return new ID and increase counter."""
         i = self.counter
         self.counter += 1
         return i

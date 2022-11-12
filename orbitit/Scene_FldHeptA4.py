@@ -44,45 +44,45 @@ trisAlt.base_key = {
     trisAlt.twist_strip_I: True
 }
 
-counter = heptagons.Tris_counter()
+counter = heptagons.TrisCounter()
 
 DYN_POS         = heptagons.DYN_POS
 OPEN_FILE       = heptagons.OPEN_FILE
 # symmtric edge lengths: b0 == b1, c0 == c1, d0 == d1
 S_T8            = heptagons.ONLY_XTRA_O3S
 S_ONLY_HEPTS    = heptagons.ONLY_HEPTS
-S_T16           = counter.pp()
-S_T24           = counter.pp()
-S_T32           = counter.pp()
-S_T40           = counter.pp()
-S_T48           = counter.pp()
-S_T56           = counter.pp()
-S_T80           = counter.pp()
+S_T16           = counter.get_next_id()
+S_T24           = counter.get_next_id()
+S_T32           = counter.get_next_id()
+S_T40           = counter.get_next_id()
+S_T48           = counter.get_next_id()
+S_T56           = counter.get_next_id()
+S_T80           = counter.get_next_id()
 
 # symmtric edge lengths with flat squares
-S_T16_S12       = counter.pp()
+S_T16_S12       = counter.get_next_id()
 
 # symmtric edge lengths with folded squares
-S_S12           = counter.pp()
-S_T8_S12        = counter.pp()
-S_S24           = counter.pp()
-S_T8_S24        = counter.pp()
-S_T24_S12       = counter.pp()
-S_T8_S36        = counter.pp()
-S_T32_S12       = counter.pp()
-S_T32_S24       = counter.pp()
-S_T56_S12       = counter.pp()
+S_S12           = counter.get_next_id()
+S_T8_S12        = counter.get_next_id()
+S_S24           = counter.get_next_id()
+S_T8_S24        = counter.get_next_id()
+S_T24_S12       = counter.get_next_id()
+S_T8_S36        = counter.get_next_id()
+S_T32_S12       = counter.get_next_id()
+S_T32_S24       = counter.get_next_id()
+S_T56_S12       = counter.get_next_id()
 
 # symmtric edge lengths with hexagon
-S_T24_H4        = counter.pp()
+S_T24_H4        = counter.get_next_id()
 
 # non-symmetryc edge lengths
-T8              = counter.pp()
-T16             = counter.pp()
-T24             = counter.pp()
-T32             = counter.pp()
-T40             = counter.pp()
-T64             = counter.pp()
+T8              = counter.get_next_id()
+T16             = counter.get_next_id()
+T24             = counter.get_next_id()
+T32             = counter.get_next_id()
+T40             = counter.get_next_id()
+T64             = counter.get_next_id()
 
 Stringify = {
     DYN_POS:            'Enable Sliders',
