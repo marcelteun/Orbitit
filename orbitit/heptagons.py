@@ -443,6 +443,7 @@ class RegularHeptagon:
             fold=FoldMethod.PARALLEL,
             rotate=0,
     ):
+        """Fold the heptagon around 2, 3, or 4 axes using the specified fold method"""
         method = {
             FoldMethod.PARALLEL: self.fold_parallel,
             FoldMethod.TRAPEZIUM: self.fold_trapezium,
@@ -455,6 +456,11 @@ class RegularHeptagon:
         method[fold](a0, b0, a1, b1, keep_v0, rotate)
 
     def fold_parallel(self, a, b, _=None, __=None, keep_v0=True, rotate=0):
+        """Fold around the 2 parallel diagonals, two options
+
+        In rotate 0 the parallel lines are between vertices 1-6, and 2-5
+        In rotate 1 the parallel lines are between vertices 0-2, and 6-3
+        """
         if rotate == 0:
             self.fold_parallel_0(a, b, keep_v0)
         else:
@@ -822,7 +828,7 @@ class RegularHeptagon:
 
     def fold_shell_es_fs(self, no):
         """
-        Set self.Es and self.FS for shell fold and specified position.
+        Set self.Es and self.FS for shell-fold and specified position.
 
         no: number to shift up
         """
@@ -860,8 +866,7 @@ class RegularHeptagon:
         ]
 
     def fold_shell_0(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Set vertices, edges and faces for a shell-fold in position 0.
 
         The fold angle a refers the axes V0-V2 and V0-V5 and
         the fold angle b0 refers the axes V0-V3 and V0-V4.
@@ -884,7 +889,7 @@ class RegularHeptagon:
         self.fold_shell_0_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_shell_0_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_0, see that one for more info
+        """Set vertices for a shell-fold in position 0.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -928,8 +933,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_shell_1(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'shell'.
+        """Set vertices, edges and faces for a shell-fold in position 1.
 
         the fold angle a0 refers to the axes V1-V4,
         The fold angle b0 refers to the axes V1-V3,
@@ -954,7 +958,7 @@ class RegularHeptagon:
         self.fold_shell_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_shell_1_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_1, see that one for more info
+        """Set vertices for a shell-fold in position 1.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1000,8 +1004,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_shell_2(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'shell'.
+        """Set vertices, edges and faces for a shell-fold in position 2.
 
         the fold angle a0 refers to the axes V2-V5,
         The fold angle b0 refers to the axes V2-V4,
@@ -1026,7 +1029,7 @@ class RegularHeptagon:
         self.fold_shell_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_shell_2_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_2, see that one for more info
+        """Set vertices for a shell-fold in position 2.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1080,8 +1083,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_shell_3(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'shell'.
+        """Set vertices, edges and faces for a shell-fold in position 3.
 
         the fold angle a0 refers to the axes V3-V6,
         The fold angle b0 refers to the axes V3-V5,
@@ -1106,7 +1108,7 @@ class RegularHeptagon:
         self.fold_shell_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_shell_3_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_3, see that one for more info
+        """Set vertices for a shell-fold in position 3.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1160,8 +1162,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_shell_4(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'shell'.
+        """Set vertices, edges and faces for a shell-fold in position 4.
 
         the fold angle a0 refers to the axes V4-V0,
         The fold angle b0 refers to the axes V4-V6,
@@ -1186,7 +1187,7 @@ class RegularHeptagon:
         self.fold_shell_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_shell_4_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_3, see that one for more info
+        """Set vertices for a shell-fold in position 4.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1240,8 +1241,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_shell_5(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'shell'.
+        """Set vertices, edges and faces for a shell-fold in position 5.
 
         the fold angle a0 refers to the axes V5-V1,
         The fold angle b0 refers to the axes V5-V0,
@@ -1266,7 +1266,7 @@ class RegularHeptagon:
         self.fold_shell_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_shell_5_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_3, see that one for more info
+        """Set vertices for a shell-fold in position 5.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1320,8 +1320,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_shell_6(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'shell'.
+        """Set vertices for a shell-fold in position 6.
 
         the fold angle a0 refers to the axes V1-V4,
         The fold angle b0 refers to the axes V1-V3,
@@ -1384,7 +1383,7 @@ class RegularHeptagon:
 
     def fold_w_es_fs(self, no):
         """
-        Set self.Es and self.FS for shell fold and specified position.
+        Set self.Es and self.FS for W-fold and specified position.
 
         no: number to shift up
         """
@@ -1432,8 +1431,7 @@ class RegularHeptagon:
         ]
 
     def fold_w0(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around 4 diagonals in the shape of the character 'W'.
+        """Return heptagon vertices for W-fold in position 0.
 
         the fold angle a0 refers to the axis V0-V3,
         the fold angle a1 refers to the axis V0-V4,
@@ -1486,7 +1484,7 @@ class RegularHeptagon:
         self.fold_w_es_fs(0)
 
     def fold_w1_help(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_w1, see that one for more info
+        """Return heptagon vertices for W-fold in position 1.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1548,7 +1546,7 @@ class RegularHeptagon:
             return v
 
     def fold_w2_help(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_w1, see that one for more info
+        """Return heptagon vertices for W-fold in position 2.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1610,7 +1608,7 @@ class RegularHeptagon:
         return v
 
     def fold_w3_help(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_w3, see that one for more info
+        """Return heptagon vertices for W-fold in position 3.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1664,7 +1662,7 @@ class RegularHeptagon:
             return v
 
     def fold_w4_help(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_w3, see that one for more info
+        """Return heptagon vertices for W-fold in position 4.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1719,6 +1717,7 @@ class RegularHeptagon:
             return v
 
     def fold_w5_help(self, a0, b0, a1, b1, keep_v0, verts):
+        """Return heptagon vertices for W-fold in position 5."""
         #
         #               5
         #               ^
@@ -1742,6 +1741,7 @@ class RegularHeptagon:
         return [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
 
     def fold_w6_help(self, a0, b0, a1, b1, keep_v0, verts):
+        """Return heptagon vertices for W-fold in position 6."""
         #
         #               6
         #               ^
@@ -1849,8 +1849,7 @@ class RegularHeptagon:
         self.Vs = self.fold_w6_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed(self, a0, b0, a1, b1, keep_v0=True, rotate=0):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold.
 
         For rotate == 0:
         The fold angle a0 refers the axis V0-V3
@@ -1924,8 +1923,7 @@ class RegularHeptagon:
         ]
 
     def fold_mixed_0(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 0.
 
         The fold angle a0 refers the axis V0-V3
         the fold angle b0 refers the axis V0-V2
@@ -1953,7 +1951,7 @@ class RegularHeptagon:
             self.fold_mixed_0_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_0_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_1, see that one for more info
+        """Define the vertices for a mixed-fold position 0.
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -1999,8 +1997,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_mixed_1(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 1.
 
         The fold angle a0 refers the axis V1-V4
         the fold angle b0 refers the axis V1-V3
@@ -2028,6 +2025,7 @@ class RegularHeptagon:
             self.fold_mixed_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_1_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a mixed-fold position 1."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2069,8 +2067,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_mixed_2(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 2.
 
         The fold angle a0 refers the axis V2-V5
         the fold angle b0 refers the axis V2-V4
@@ -2100,6 +2097,7 @@ class RegularHeptagon:
             self.fold_mixed_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_2_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a mixed-fold position 2."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2149,8 +2147,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_mixed_3(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 3.
 
         The fold angle a0 refers the axis V3-V6
         the fold angle b0 refers the axis V3-V5
@@ -2178,6 +2175,7 @@ class RegularHeptagon:
             self.fold_mixed_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_3_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a mixed-fold position 3."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2227,8 +2225,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_mixed_4(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 4.
 
         The fold angle a0 refers the axis V4-V0
         the fold angle b0 refers the axis V4-V6
@@ -2256,6 +2253,7 @@ class RegularHeptagon:
             self.fold_mixed_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_4_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a mixed-fold position 4."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2300,8 +2298,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_mixed_5(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 5.
 
         The fold angle a0 refers the axis V5-V1
         the fold angle b0 refers the axis V5-V0
@@ -2329,6 +2326,7 @@ class RegularHeptagon:
             self.fold_mixed_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_5_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a mixed-fold position 5."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2382,8 +2380,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_mixed_6(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges and faces for a mixed-fold position 6.
 
         The fold angle a0 refers the axis V6-V2
         the fold angle b0 refers the axis V6-V1
@@ -2411,6 +2408,7 @@ class RegularHeptagon:
             self.fold_mixed_6_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_6_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a mixed-fold position 6."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2536,8 +2534,7 @@ class RegularHeptagon:
         ]
 
     def fold_g_0(self, a0, b0, a1, b1, keep_v0=True):
-        """
-        Fold around the 4 diagonals from Vi, where i is the value of rotate e.g. V0.
+        """Define the vertices, edges, and faces for a G-fold the standard position (0).
 
         The fold angle a0 refers the axis V0-V3
         the fold angle b0 refers the axis V0-V2
@@ -2564,7 +2561,7 @@ class RegularHeptagon:
             self.fold_g_0_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_0_vs(self, a0, b0, a1, b1, keep_v0, verts):
-        """Helper function for fold_shell_1, see that one for more info
+        """Define the vertices for a G-fold the standard position (0).
 
         verts: the array with vertex numbers.
         returns a new array.
@@ -2614,6 +2611,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_1(self, a0, b0, a1, b1, keep_v0=True):
+        """Define the vertices, edges and faces for a G-fold position 1."""
         #            V1
         #            /\
         #     V0    /  '.    V2
@@ -2632,6 +2630,7 @@ class RegularHeptagon:
             self.fold_g_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_1_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a G-fold position 1."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2677,6 +2676,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_2(self, a0, b0, a1, b1, keep_v0=True):
+        """Define the vertices, edges and faces for a G-fold position 2."""
         #            V2
         #            /\
         #     V1    /  '.    V3
@@ -2695,6 +2695,7 @@ class RegularHeptagon:
             self.fold_g_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_2_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a G-fold position 2."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2739,6 +2740,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_3(self, a0, b0, a1, b1, keep_v0=True):
+        """Define the vertices, edges and faces for a G-fold position 3."""
         #            V3
         #            /\
         #     V2    /  '.    V4
@@ -2757,6 +2759,7 @@ class RegularHeptagon:
             self.fold_g_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_3_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a G-fold position 3."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2801,6 +2804,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_4(self, a0, b0, a1, b1, keep_v0=True):
+        """Define the vertices, edges and faces for a G-fold position 4."""
         #            V4
         #            /\
         #     V3    /  '.    V5
@@ -2819,6 +2823,7 @@ class RegularHeptagon:
             self.fold_g_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_4_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a G-fold position 4."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2863,6 +2868,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_5(self, a0, b0, a1, b1, keep_v0=True):
+        """Define the vertices, edges and faces for a G-fold position 5."""
         #            V5
         #            /\
         #     V4    /  '.    V6
@@ -2882,6 +2888,7 @@ class RegularHeptagon:
             self.fold_g_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_5_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a G-fold position 5."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
@@ -2926,6 +2933,7 @@ class RegularHeptagon:
         self.Vs = v
 
     def fold_g_6(self, a0, b0, a1, b1, keep_v0=True):
+        """Define the vertices, edges and faces for a G-fold position 6."""
         #            V6
         #            /\
         #     V5    /  '.    V0
@@ -2945,6 +2953,7 @@ class RegularHeptagon:
             self.fold_g_6_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_6_vs(self, a0, b0, a1, b1, keep_v0, verts):
+        """Define the vertices for a G-fold position 6."""
         v = verts.copy()
         if keep_v0:
             assert False, "TODO"
