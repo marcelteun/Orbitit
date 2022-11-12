@@ -219,7 +219,7 @@ class CtrlWin(wx.Frame):
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(
-                self.createControlsSizer(),
+                self.create_control_sizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
         self.set_default_size((438, 312))
@@ -228,7 +228,7 @@ class CtrlWin(wx.Frame):
         self.Show(True)
         self.panel.Layout()
 
-    def createControlsSizer(self):
+    def create_control_sizer(self):
         self.sideScale = 100
         self.topScale  = 100
         self.tailScale = 100

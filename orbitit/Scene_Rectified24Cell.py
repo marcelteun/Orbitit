@@ -642,7 +642,7 @@ class CtrlWin(wx.Frame):
         this.panel = wx.Panel(this, -1)
         this.mainSizer = wx.BoxSizer(wx.VERTICAL)
         this.mainSizer.Add(
-                this.createControlsSizer(),
+                this.create_control_sizer(),
                 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
             )
         this.set_default_size((475, 550))
@@ -651,7 +651,7 @@ class CtrlWin(wx.Frame):
         this.Show(True)
         this.panel.Layout()
 
-    def createControlsSizer(this):
+    def create_control_sizer(this):
         ctrlSizer = wx.BoxSizer(wx.VERTICAL)
 
         str = 'cell %d'

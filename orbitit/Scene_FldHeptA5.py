@@ -200,17 +200,17 @@ class Shape(heptagons.FldHeptagonShape):
             this.setV()
         Vs = this.baseVs
         if this.has_reflections:
-            Es = this.triEs[this.edgeAlternative]
+            Es = this.triEs[this.edge_alt]
             aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
             bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
             cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
             dLen = '%2.2f' % Vlen(Vs[Es[6]], Vs[Es[7]])
         else:
-            Es = this.triEs[this.edgeAlternative]
+            Es = this.triEs[this.edge_alt]
             aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
             bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
             cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
-            Es = this.o5triEs[this.edgeAlternative]
+            Es = this.o5triEs[this.edge_alt]
             dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
 
         if this.has_reflections:
@@ -218,11 +218,11 @@ class Shape(heptagons.FldHeptagonShape):
                     this.height, aLen, bLen, cLen, dLen
                 )
         else:
-            Es = this.oppTriEs[this.oppEdgeAlternative]
+            Es = this.oppTriEs[this.opposite_edge_alt]
             opp_bLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
             opp_cLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
-            Es = this.o3triEs[this.oppEdgeAlternative]
-            if this.oppEdgeAlternative != trisAlt.refl_1:
+            Es = this.o3triEs[this.opposite_edge_alt]
+            if this.opposite_edge_alt != trisAlt.refl_1:
                 opp_dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
             else:
                 opp_dLen = '-'
@@ -337,16 +337,16 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.addXtraFs:
-            assert this.edgeAlternative in this.o5triFs, \
+            assert this.edge_alt in this.o5triFs, \
                 "this triangle fill isn't implemented for A5"
-            Fs = this.o5triFs[this.edgeAlternative][:]
-            Es = this.o5triEs[this.edgeAlternative][:]
+            Fs = this.o5triFs[this.edge_alt][:]
+            Es = this.o5triEs[this.edge_alt][:]
             this.trisO5Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO5Shape.setBaseEdgeProperties(Es = Es)
             this.trisO5Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO5Shape)
-            Es = this.o3triEs[this.oppEdgeAlternative][:]
-            Fs = this.o3triFs[this.oppEdgeAlternative][:]
+            Es = this.o3triEs[this.opposite_edge_alt][:]
+            Fs = this.o3triFs[this.opposite_edge_alt][:]
             this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
@@ -355,18 +355,18 @@ class Shape(heptagons.FldHeptagonShape):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
                 if this.triangleFillPosition == 0:
-                    if this.oppEdgeAlternative & heptagons.rot_bit:
-                        eAlt = this.oppEdgeAlternative
+                    if this.opposite_edge_alt & heptagons.rot_bit:
+                        eAlt = this.opposite_edge_alt
                     else:
-                        eAlt = this.edgeAlternative
+                        eAlt = this.edge_alt
                     colIds = this.triColIds[eAlt]
                 else:
-                    colIds = this.triColIds[this.edgeAlternative][:3]
-                    colIds.extend(this.triColIds[this.oppEdgeAlternative][3:])
-                Fs = this.triFs[this.edgeAlternative][:]
-                Fs.extend(this.oppTriFs[this.oppEdgeAlternative])
-                Es = this.triEs[this.edgeAlternative][:]
-                Es.extend(this.oppTriEs[this.oppEdgeAlternative])
+                    colIds = this.triColIds[this.edge_alt][:3]
+                    colIds.extend(this.triColIds[this.opposite_edge_alt][3:])
+                Fs = this.triFs[this.edge_alt][:]
+                Fs.extend(this.oppTriFs[this.opposite_edge_alt])
+                Es = this.triEs[this.edge_alt][:]
+                Es.extend(this.oppTriEs[this.opposite_edge_alt])
                 this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
                 this.xtraTrisShape.setBaseFaceProperties(
@@ -813,7 +813,6 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
                 Stringify[T140_P12],
                 Stringify[T200],
             ],
-            isometry.A5,
             trisAlts,
             Stringify,
             *args, **kwargs
@@ -852,9 +851,9 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
                 psp = self.predefReflSpecPos
             else:
                 psp = self.predefRotSpecPos
-            if self.specPosIndex >= len(psp[self.pre_pos_enum]):
-                self.specPosIndex = -1
-            data = psp[self.pre_pos_enum][self.specPosIndex]
+            if self.special_pos_idx >= len(psp[self.pre_pos_enum]):
+                self.special_pos_idx = -1
+            data = psp[self.pre_pos_enum][self.special_pos_idx]
             if 'file' in data:
                 logging.info(f"see file {self.rDir}/{data['file']}")
             return data

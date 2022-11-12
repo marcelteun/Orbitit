@@ -330,7 +330,7 @@ class Scene:
       - set_default_size, that sets the size of the control frame
     A scene is supposed to
       - create a sizer this.ctrlSizer during object creation. This is done by
-        calling the function this.createControlsSizer(), which takes one
+        calling the function this.create_control_sizer(), which takes one
         parameter, which is the ctrlPanel of the control window.
       - implement a function close, which should release all GUIs in
         rm_ctrl_sizer. The close function calls the function
@@ -343,7 +343,7 @@ class Scene:
     contents is supposed to be created in the class with the name SceneCanvas,
     which should be a descendent of Scenes.Interactive3DCanvas.
     To summarise, the descendent of this class should:
-      - implement this.createControlsSizer(ctrlPanel)
+      - implement this.create_control_sizer(ctrlPanel)
       - implement this.rm_ctrl_sizer()
       - call the init of this class with a class SceneCanvas, which is a
         descendent of Scenes.Interactive3DCanvas.
@@ -357,7 +357,7 @@ class Scene:
         this.statusBar = this.canvasFrame.CreateStatusBar()
         this.canvas = SceneCanvas(this.canvasFrame)
         this.canvasFrame.Show(True)
-        this.createControlsSizer(this.ctrlPanel)
+        this.create_control_sizer(this.ctrlPanel)
 
     def setArcBallRadius(this, R = 0.8):
         this.canvas.setArcBallRadius(R = R)
