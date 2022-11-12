@@ -296,7 +296,7 @@ class Shape(heptagons.FldHeptagonShape):
             if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
-                if this.opposite_edge_alt & heptagons.rot_bit:
+                if this.opposite_edge_alt & heptagons.ROT_BIT:
                     eAlt = this.opposite_edge_alt
                 else:
                     eAlt = this.edge_alt
@@ -341,7 +341,7 @@ class Shape(heptagons.FldHeptagonShape):
     @property
     def refl_pos_angle(this):
         """Return the pos angle for a polyhedron with reflections."""
-        if this.edge_alt & heptagons.twist_bit == heptagons.twist_bit:
+        if this.edge_alt & heptagons.TWIST_BIT == heptagons.TWIST_BIT:
             return math.pi/4
         else:
             return 0
@@ -696,13 +696,13 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         return this.pre_pos_enum == S_ONLY_HEPTS and not (
                 this.tris_fill is None
             ) and not (
-                this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
+                this.tris_fill & heptagons.TWIST_BIT == heptagons.TWIST_BIT)
 
     def has_only_o3_triangles(this):
         return this.pre_pos_enum == heptagons.ONLY_XTRA_O3S and not (
                 this.tris_fill is None
             ) and not (
-                this.tris_fill & heptagons.twist_bit == heptagons.twist_bit)
+                this.tris_fill & heptagons.TWIST_BIT == heptagons.TWIST_BIT)
 
     rDir = 'data/Data_FldHeptA4'
     rPre = 'frh-roots'

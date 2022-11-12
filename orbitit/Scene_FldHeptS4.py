@@ -332,7 +332,7 @@ class Shape(heptagons.FldHeptagonShape):
             if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
                 # choosing the colours.
-                if this.opposite_edge_alt & heptagons.rot_bit:
+                if this.opposite_edge_alt & heptagons.ROT_BIT:
                     eAlt = this.opposite_edge_alt
                 else:
                     eAlt = this.edge_alt

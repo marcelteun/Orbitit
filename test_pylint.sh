@@ -4,6 +4,7 @@ chk_files="
 	orbitit/geom_gui.py
 	orbitit/geomtypes.py
 	orbitit/gen_59_icosahedra.py
+	orbitit/heptagons.py
 	orbitit/isometry.py
 	orbitit/main_dlg.py
 	orbitit/main_win.py

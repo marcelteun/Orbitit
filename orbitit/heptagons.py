@@ -59,12 +59,12 @@ ONLY_XTRA_O3S = -4
 ALL_EQ_TRIS = -5
 NO_O3_TRIS = -6
 
-tris_fill_base = 0
+TRIS_FILL_BASE = 0
 
-alt_bit = 8
-loose_bit = 16
-rot_bit = 32
-twist_bit = 64
+ALT_BIT = 8
+LOOSE_BIT = 16
+ROT_BIT = 32
+TWIST_BIT = 64
 TRIS_OFFSET = 128
 
 
@@ -96,23 +96,23 @@ class TrisAltBase():
     star = 3
     refl_2 = 4
     crossed_2 = 5
-    strip_1_loose = strip_I | loose_bit
-    star_1_loose = star | loose_bit
-    alt_strip_I = strip_I | alt_bit
-    alt_strip_II = strip_II | alt_bit
-    alt_strip_1_loose = strip_I | loose_bit | alt_bit
-    rot_strip_1_loose = strip_I | loose_bit | rot_bit
-    arot_strip_1_loose = strip_I | loose_bit | alt_bit | rot_bit
-    rot_star_1_loose = star | loose_bit | rot_bit
-    arot_star_1_loose = star | loose_bit | alt_bit | rot_bit
-    rot_strip_I = strip_I | rot_bit
-    rot_star = star | rot_bit
-    arot_strip_I = strip_I | alt_bit | rot_bit
-    arot_star = star | alt_bit | rot_bit
+    strip_1_loose = strip_I | LOOSE_BIT
+    star_1_loose = star | LOOSE_BIT
+    alt_strip_I = strip_I | ALT_BIT
+    alt_strip_II = strip_II | ALT_BIT
+    alt_strip_1_loose = strip_I | LOOSE_BIT | ALT_BIT
+    rot_strip_1_loose = strip_I | LOOSE_BIT | ROT_BIT
+    arot_strip_1_loose = strip_I | LOOSE_BIT | ALT_BIT | ROT_BIT
+    rot_star_1_loose = star | LOOSE_BIT | ROT_BIT
+    arot_star_1_loose = star | LOOSE_BIT | ALT_BIT | ROT_BIT
+    rot_strip_I = strip_I | ROT_BIT
+    rot_star = star | ROT_BIT
+    arot_strip_I = strip_I | ALT_BIT | ROT_BIT
+    arot_star = star | ALT_BIT | ROT_BIT
     # TODO: this is a new position really
     # TODO: rename to refl2 for S4A4
     # TODO: rename to some 1 - loose variant for A4
-    twist_strip_I = strip_I | twist_bit
+    twist_strip_I = strip_I | TWIST_BIT
 
     stringify = {
         refl_1: "refl 1",
@@ -187,7 +187,7 @@ class TrisAltBase():
         """Check whether key 'k' is a base key
 
         A base key is a key that is used for one side of triangle fill and it is not combined with
-        one of the bits (e.g. loose_bit)
+        one of the bits (e.g. LOOSE_BIT)
 
         k: a number built up from TrisAltBase numbers
         """
@@ -254,12 +254,12 @@ def to_triangle_python_name(triangle_id=None, triangle_str=None):
     if triangle_id is None:
         triangle_id = TrisAltBase.key[triangle_str]
     if not isinstance(triangle_id, int):
-        if triangle_id[0] & loose_bit and triangle_id[1] & loose_bit:
+        if triangle_id[0] & LOOSE_BIT and triangle_id[1] & LOOSE_BIT:
             triangle_str = (
-                f"{TrisAltBase.stringify[triangle_id[0] & ~loose_bit]}_1loose_"
-                f"{TrisAltBase.stringify[triangle_id[1] & ~loose_bit]}"
+                f"{TrisAltBase.stringify[triangle_id[0] & ~LOOSE_BIT]}_1loose_"
+                f"{TrisAltBase.stringify[triangle_id[1] & ~LOOSE_BIT]}"
             )
-        elif triangle_id[0] & loose_bit:
+        elif triangle_id[0] & LOOSE_BIT:
             triangle_str = "{}__{}".format(
                 TrisAltBase.stringify[triangle_id[0]],
                 TrisAltBase.stringify[triangle_id[1]],
@@ -300,7 +300,7 @@ def define_tris_alt(name, tris_keys):
         that can be used in the UI.
       - a key dict: this is the inverse map of the stringify dict.
       - base_key: A base key is a key that is used for one side of triangle fill and it is not
-            combined with one of the bits (e.g. loose_bit). This attribute hold True for any kay
+            combined with one of the bits (e.g. LOOSE_BIT). This attribute hold True for any kay
             that is a base key. Otherwise it is either set to False of the key isn't an element of
             the dictionary.
       - mixed
@@ -319,10 +319,10 @@ def define_tris_alt(name, tris_keys):
         else:
             # must be a tuple of 2
             assert len(k) == 2, f"Exptected 2 tuple, got: {k}."
-            if k[0] & loose_bit and k[1] & loose_bit:
+            if k[0] & LOOSE_BIT and k[1] & LOOSE_BIT:
                 s = (
-                    f"{TrisAltBase.stringify[k[0] & ~loose_bit]} - 1 loose - "
-                    f"{TrisAltBase.stringify[k[1] & ~loose_bit]}"
+                    f"{TrisAltBase.stringify[k[0] & ~LOOSE_BIT]} - 1 loose - "
+                    f"{TrisAltBase.stringify[k[1] & ~LOOSE_BIT]}"
                 )
             elif (
                     k[0] == TrisAltBase.twist_strip_I
