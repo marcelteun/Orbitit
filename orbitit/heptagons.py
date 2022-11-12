@@ -82,6 +82,7 @@ class Tris_counter:
 
 
 class TrisAlt_base(object):
+    """A base class holding names for triangle filling options, one side only."""
     # Note nrs should be different from below
     refl_1 = 0
     strip_I = 1
@@ -177,12 +178,27 @@ class TrisAlt_base(object):
     }
 
     def isBaseKey(self, k):
+        """Check whether key 'k' is a base key
+
+        A base key is a key that is used for one side of triangle fill and it is not combined with
+        one of the bits (e.g. loose_bit)
+
+        k: a number built up from TrisAltBase numbers
+        """
         try:
             return self.baseKey[k]
         except KeyError:
             return False
 
     def toFileStr(self, tId=None, tStr=None):
+        """Convert triangle fill alternative to unique string suited for filenames
+
+        For filenames no spaces shall be used and these are mainly replaced by '_' and periods are
+        exchanged. Besides that there are some other conversions for historical reasons.
+
+        triangle_id: a number built up from TrisAltBase numbers, or a 2-tuple of these numbers
+        triangle_str: a human readable string representation of the triangle alternative.
+        """
         assert tId is not None or tStr is not None
         if tId is None:
             tId = self.key[tStr]
@@ -219,6 +235,14 @@ class TrisAlt_base(object):
 
 
 def toTrisAltKeyStr(tId=None, tStr=None):
+    """Convert triangle fill alternative to an unique string suited for Python attribute names.
+
+    Spaces shall converted to '_' and periods are exchanged. Besides that there are some other
+    conversions for historical reasons.
+
+    triangle_id: a number built up from TrisAltBase numbers, or a 2-tuple of these numbers
+    triangle_str: a human readable string representation of the triangle alternative.
+    """
     assert tId is not None or tStr is not None
     if tId is None:
         tId = TrisAlt_base.key[tStr]
