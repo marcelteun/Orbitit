@@ -420,7 +420,7 @@ class RegularHeptagon:
         #  - parallel to the XOY-plane.
         #  - a mirror axis parallel to the Y-axis
         #  - V0 = (0, 0, 0)
-        self.VsOrg = [
+        self.vs_org = [
             Vec([0.0, 0.0, 0.0]),
             Vec([HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
             Vec([HEPT_SIGMA / 2, -(1 + HEPT_SIGMA) * HEPT_DENOM, 0.0]),
@@ -429,9 +429,9 @@ class RegularHeptagon:
             Vec([-HEPT_SIGMA / 2, -(1 + HEPT_SIGMA) * HEPT_DENOM, 0.0]),
             Vec([-HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
         ]
-        self.Vs = self.VsOrg[:]  # the vertex aray to use.
-        self.Fs = [[6, 5, 4, 3, 2, 1, 0]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
+        self.Vs = self.vs_org.copy() # pylint: disable=C0103
+        self.Fs = [[6, 5, 4, 3, 2, 1, 0]]  # pylint: disable=C0103
+        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]  # pylint: disable=C0103
 
     def fold(
             self,
@@ -455,7 +455,7 @@ class RegularHeptagon:
         }
         method[fold](a0, b0, a1, b1, keep_v0, rotate)
 
-    def fold_parallel(self, a, b, _=None, __=None, keep_v0=True, rotate=0):
+    def fold_parallel(self, a, b, _=None, __=None, keep_v0=True, rotate=0):  # pylint: disable=C0103
         """Fold around the 2 parallel diagonals, two options
 
         In rotate 0 the parallel lines are between vertices 1-6, and 2-5
@@ -509,71 +509,71 @@ class RegularHeptagon:
             #   (0, 0) .-------.-------.------.
             #   self. V[0]   V[1]    V[2]    V[3]
             d_v2 = [
-                self.VsOrg[2][1] - self.VsOrg[1][1],
-                self.VsOrg[2][2] - self.VsOrg[1][2],
+                self.vs_org[2][1] - self.vs_org[1][1],
+                self.vs_org[2][2] - self.vs_org[1][2],
             ]
             v2 = Vec(
                 [
-                    self.VsOrg[2][0],
-                    self.VsOrg[1][1] + cosa * d_v2[0] - sina * d_v2[1],
-                    self.VsOrg[1][2] + cosa * d_v2[1] + sina * d_v2[0],
+                    self.vs_org[2][0],
+                    self.vs_org[1][1] + cosa * d_v2[0] - sina * d_v2[1],
+                    self.vs_org[1][2] + cosa * d_v2[1] + sina * d_v2[0],
                 ]
             )
             # Similarly:
             d_v3_tmp = [
-                self.VsOrg[3][1] - self.VsOrg[1][1],
-                self.VsOrg[3][2] - self.VsOrg[1][2],
+                self.vs_org[3][1] - self.vs_org[1][1],
+                self.vs_org[3][2] - self.vs_org[1][2],
             ]
             v3_tmp = [
-                self.VsOrg[1][1] + cosa * d_v3_tmp[0] - sina * d_v3_tmp[1],
-                self.VsOrg[1][2] + cosa * d_v3_tmp[1] + sina * d_v3_tmp[0],
+                self.vs_org[1][1] + cosa * d_v3_tmp[0] - sina * d_v3_tmp[1],
+                self.vs_org[1][2] + cosa * d_v3_tmp[1] + sina * d_v3_tmp[0],
             ]
             # now rotate beta:
             d_v3 = [v3_tmp[0] - v2[1], v3_tmp[1] - v2[2]]
             v3 = Vec(
                 [
-                    self.VsOrg[3][0],
+                    self.vs_org[3][0],
                     v2[1] + cosb * d_v3[0] - sinb * d_v3[1],
                     v2[2] + cosb * d_v3[1] + sinb * d_v3[0],
                 ]
             )
             self.Vs = [
-                self.VsOrg[0],
-                self.VsOrg[1],
+                self.vs_org[0],
+                self.vs_org[1],
                 v2,
                 v3,
                 Vec([-v3[0], v3[1], v3[2]]),
                 Vec([-v2[0], v2[1], v2[2]]),
-                self.VsOrg[6],
+                self.vs_org[6],
             ]
         else:
             # similar to before, except the roles of the vertices are switched
             # i.e. keep V[3] constant...
             d_v1 = [
-                self.VsOrg[1][1] - self.VsOrg[2][1],
-                self.VsOrg[1][2] - self.VsOrg[2][2],
+                self.vs_org[1][1] - self.vs_org[2][1],
+                self.vs_org[1][2] - self.vs_org[2][2],
             ]
             v1 = Vec(
                 [
-                    self.VsOrg[1][0],
-                    self.VsOrg[2][1] + cosa * d_v1[0] - sina * d_v1[1],
-                    self.VsOrg[2][2] + cosa * d_v1[1] + sina * d_v1[0],
+                    self.vs_org[1][0],
+                    self.vs_org[2][1] + cosa * d_v1[0] - sina * d_v1[1],
+                    self.vs_org[2][2] + cosa * d_v1[1] + sina * d_v1[0],
                 ]
             )
             # Similarly:
             d_v0_tmp = [
-                self.VsOrg[0][1] - self.VsOrg[2][1],
-                self.VsOrg[0][2] - self.VsOrg[2][2],
+                self.vs_org[0][1] - self.vs_org[2][1],
+                self.vs_org[0][2] - self.vs_org[2][2],
             ]
             v0_tmp = [
-                self.VsOrg[2][1] + cosa * d_v0_tmp[0] - sina * d_v0_tmp[1],
-                self.VsOrg[2][2] + cosa * d_v0_tmp[1] + sina * d_v0_tmp[0],
+                self.vs_org[2][1] + cosa * d_v0_tmp[0] - sina * d_v0_tmp[1],
+                self.vs_org[2][2] + cosa * d_v0_tmp[1] + sina * d_v0_tmp[0],
             ]
             # now rotate beta:
             d_v0 = [v0_tmp[0] - v1[1], v0_tmp[1] - v1[2]]
             v0 = Vec(
                 [
-                    self.VsOrg[0][0],
+                    self.vs_org[0][0],
                     v1[1] + cosb * d_v0[0] - sinb * d_v0[1],
                     v1[2] + cosb * d_v0[1] + sinb * d_v0[0],
                 ]
@@ -581,10 +581,10 @@ class RegularHeptagon:
             self.Vs = [
                 v0,
                 v1,
-                self.VsOrg[2],
-                self.VsOrg[3],
-                self.VsOrg[4],
-                self.VsOrg[5],
+                self.vs_org[2],
+                self.vs_org[3],
+                self.vs_org[4],
+                self.vs_org[5],
                 Vec([-v1[0], v1[1], v1[2]]),
             ]
 
@@ -615,14 +615,14 @@ class RegularHeptagon:
         if keep_v0:
             assert False, "TODO"
         else:
-            v3v6 = (self.VsOrg[3] + self.VsOrg[6]) / 2
-            v3v6_axis = Vec(self.VsOrg[3] - self.VsOrg[6])
-            v0v2 = (self.VsOrg[0] + self.VsOrg[2]) / 2
+            v3v6 = (self.vs_org[3] + self.vs_org[6]) / 2
+            v3v6_axis = Vec(self.vs_org[3] - self.vs_org[6])
+            v0v2 = (self.vs_org[0] + self.vs_org[2]) / 2
             rot_a = Rot(axis=v3v6_axis, angle=a)
             v0v2_rot = v3v6 + rot_a * (v0v2 - v3v6)
-            v0 = v0v2_rot + (self.VsOrg[0] - v0v2)
-            v2 = v0v2_rot + (self.VsOrg[2] - v0v2)
-            v1_tmp = v3v6 + rot_a * (self.VsOrg[1] - v3v6)
+            v0 = v0v2_rot + (self.vs_org[0] - v0v2)
+            v2 = v0v2_rot + (self.vs_org[2] - v0v2)
+            v1_tmp = v3v6 + rot_a * (self.vs_org[1] - v3v6)
 
             v0v2_axis = Vec(v2 - v0)
             rot_b = Rot(axis=v0v2_axis, angle=b)
@@ -631,10 +631,10 @@ class RegularHeptagon:
                 v0,
                 v1,
                 v2,
-                self.VsOrg[3],
-                self.VsOrg[4],
-                self.VsOrg[5],
-                self.VsOrg[6],
+                self.vs_org[3],
+                self.vs_org[4],
+                self.vs_org[5],
+                self.vs_org[6],
             ]
 
     def fold_trapezium(self, a, b0, _=None, b1=None, keep_v0=True, rotate=0):
@@ -660,6 +660,7 @@ class RegularHeptagon:
         #          4       3
         #
         #
+        _ = rotate  # TODO: implement
         self.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 4, 6, 6, 1, 1, 3]
         cosa = math.cos(a)
@@ -667,72 +668,72 @@ class RegularHeptagon:
         if keep_v0:
             # see fold_parallel
             d_v2_tmp = [
-                self.VsOrg[2][1] - self.VsOrg[1][1],
-                self.VsOrg[2][2] - self.VsOrg[1][2],
+                self.vs_org[2][1] - self.vs_org[1][1],
+                self.vs_org[2][2] - self.vs_org[1][2],
             ]
             v2_tmp = Vec(
                 [
-                    self.VsOrg[2][0],
-                    self.VsOrg[1][1] + cosa * d_v2_tmp[0] - sina * d_v2_tmp[1],
-                    self.VsOrg[1][2] + cosa * d_v2_tmp[1] + sina * d_v2_tmp[0],
+                    self.vs_org[2][0],
+                    self.vs_org[1][1] + cosa * d_v2_tmp[0] - sina * d_v2_tmp[1],
+                    self.vs_org[1][2] + cosa * d_v2_tmp[1] + sina * d_v2_tmp[0],
                 ]
             )
             d_v3 = [
-                self.VsOrg[3][1] - self.VsOrg[1][1],
-                self.VsOrg[3][2] - self.VsOrg[1][2],
+                self.vs_org[3][1] - self.vs_org[1][1],
+                self.vs_org[3][2] - self.vs_org[1][2],
             ]
             v3 = Vec(
                 [
-                    self.VsOrg[3][0],
-                    self.VsOrg[1][1] + cosa * d_v3[0] - sina * d_v3[1],
-                    self.VsOrg[1][2] + cosa * d_v3[1] + sina * d_v3[0],
+                    self.vs_org[3][0],
+                    self.vs_org[1][1] + cosa * d_v3[0] - sina * d_v3[1],
+                    self.vs_org[1][2] + cosa * d_v3[1] + sina * d_v3[0],
                 ]
             )
             v4 = Vec([-v3[0], v3[1], v3[2]])
-            v1v3 = (self.VsOrg[1] + v3) / 2
-            v1v3_axis = Vec(v3 - self.VsOrg[1])
+            v1v3 = (self.vs_org[1] + v3) / 2
+            v1v3_axis = Vec(v3 - self.vs_org[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             v2 = v1v3 + r * (v2_tmp - v1v3)
             if not Geom3D.eq(b0, b1):
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
-                v4v6 = (v4 + self.VsOrg[6]) / 2
-                v4v6_axis = Vec(self.VsOrg[6] - v4)
+                v4v6 = (v4 + self.vs_org[6]) / 2
+                v4v6_axis = Vec(self.vs_org[6] - v4)
                 r = Rot(axis=v4v6_axis, angle=b1)
                 v5_tmp = Vec([-v2_tmp[0], v2_tmp[1], v2_tmp[2]])
                 v5 = v4v6 + r * (v5_tmp - v4v6)
-            self.Vs = [self.VsOrg[0], self.VsOrg[1], v2, v3, v4, v5, self.VsOrg[6]]
+            self.Vs = [self.vs_org[0], self.vs_org[1], v2, v3, v4, v5, self.vs_org[6]]
         else:
             d_v0 = [
-                self.VsOrg[0][1] - self.VsOrg[1][1],
-                self.VsOrg[0][2] - self.VsOrg[1][2],
+                self.vs_org[0][1] - self.vs_org[1][1],
+                self.vs_org[0][2] - self.vs_org[1][2],
             ]
             v0 = Vec(
                 [
-                    self.VsOrg[0][0],
-                    self.VsOrg[1][1] + cosa * d_v0[0] - sina * d_v0[1],
-                    self.VsOrg[1][2] + cosa * d_v0[1] + sina * d_v0[0],
+                    self.vs_org[0][0],
+                    self.vs_org[1][1] + cosa * d_v0[0] - sina * d_v0[1],
+                    self.vs_org[1][2] + cosa * d_v0[1] + sina * d_v0[0],
                 ]
             )
-            v1v3 = (self.VsOrg[1] + self.VsOrg[3]) / 2
-            v1v3_axis = Vec(self.VsOrg[3] - self.VsOrg[1])
+            v1v3 = (self.vs_org[1] + self.vs_org[3]) / 2
+            v1v3_axis = Vec(self.vs_org[3] - self.vs_org[1])
             r = Rot(axis=v1v3_axis, angle=b0)
-            v2 = v1v3 + r * (self.VsOrg[2] - v1v3)
+            v2 = v1v3 + r * (self.vs_org[2] - v1v3)
             if Geom3D.eq(b0, b1):
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
-                v4v6 = (self.VsOrg[4] + self.VsOrg[6]) / 2
-                v4v6_axis = Vec(self.VsOrg[6] - self.VsOrg[4])
+                v4v6 = (self.vs_org[4] + self.vs_org[6]) / 2
+                v4v6_axis = Vec(self.vs_org[6] - self.vs_org[4])
                 r = Rot(axis=v4v6_axis, angle=b1)
-                v5 = v4v6 + r * (self.VsOrg[5] - v4v6)
+                v5 = v4v6 + r * (self.vs_org[5] - v4v6)
             self.Vs = [
                 v0,
-                self.VsOrg[1],
+                self.vs_org[1],
                 v2,
-                self.VsOrg[3],
-                self.VsOrg[4],
+                self.vs_org[3],
+                self.vs_org[4],
                 v5,
-                self.VsOrg[6],
+                self.vs_org[6],
             ]
 
     def fold_triangle(self, a, b0, _=None, b1=None, keep_v0=True, rotate=0):
@@ -756,40 +757,41 @@ class RegularHeptagon:
         #
         #            4       3
         #
+        _ = rotate  # TODO: implement
         self.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
-        rot0_2 = Rot(axis=self.VsOrg[2] - self.VsOrg[0], angle=b0)
-        v1 = rot0_2 * self.VsOrg[1]
+        rot0_2 = Rot(axis=self.vs_org[2] - self.vs_org[0], angle=b0)
+        v1 = rot0_2 * self.vs_org[1]
         if Geom3D.eq(b0, b1):
             v6 = Vec([-v1[0], v1[1], v1[2]])
         else:
-            rot5_0 = Rot(axis=self.VsOrg[0] - self.VsOrg[5], angle=b1)
-            v6 = rot5_0 * self.VsOrg[6]
-        v2 = self.VsOrg[2]
+            rot5_0 = Rot(axis=self.vs_org[0] - self.vs_org[5], angle=b1)
+            v6 = rot5_0 * self.vs_org[6]
+        v2 = self.vs_org[2]
         if keep_v0:
-            rot5_2 = Rot(axis=self.VsOrg[5] - self.VsOrg[2], angle=a)
-            v3 = rot5_2 * (self.VsOrg[3] - v2) + v2
+            rot5_2 = Rot(axis=self.vs_org[5] - self.vs_org[2], angle=a)
+            v3 = rot5_2 * (self.vs_org[3] - v2) + v2
             self.Vs = [
-                self.VsOrg[0],
+                self.vs_org[0],
                 v1,
-                self.VsOrg[2],
+                self.vs_org[2],
                 v3,
                 Vec([-v3[0], v3[1], v3[2]]),
-                self.VsOrg[5],
+                self.vs_org[5],
                 v6,
             ]
         else:
-            rot2_5 = Rot(axis=self.VsOrg[2] - self.VsOrg[5], angle=a)
-            v0 = rot2_5 * (self.VsOrg[0] - v2) + v2
+            rot2_5 = Rot(axis=self.vs_org[2] - self.vs_org[5], angle=a)
+            v0 = rot2_5 * (self.vs_org[0] - v2) + v2
             v1 = rot2_5 * (v1 - v2) + v2
             v6 = rot2_5 * (v6 - v2) + v2
             self.Vs = [
                 v0,
                 v1,
-                self.VsOrg[2],
-                self.VsOrg[3],
-                self.VsOrg[4],
-                self.VsOrg[5],
+                self.vs_org[2],
+                self.vs_org[3],
+                self.vs_org[4],
+                self.vs_org[5],
                 v6,
             ]
 
@@ -886,7 +888,7 @@ class RegularHeptagon:
         #           4         3
         #
         self.fold_shell_es_fs(0)
-        self.fold_shell_0_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_shell_0_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_shell_0_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Set vertices for a shell-fold in position 0.
@@ -955,7 +957,7 @@ class RegularHeptagon:
         #           5         4
         #
         self.fold_shell_es_fs(1)
-        self.fold_shell_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_shell_1_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_shell_1_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Set vertices for a shell-fold in position 1.
@@ -1026,7 +1028,7 @@ class RegularHeptagon:
         #           6         5
         #
         self.fold_shell_es_fs(2)
-        self.fold_shell_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_shell_2_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_shell_2_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Set vertices for a shell-fold in position 2.
@@ -1105,7 +1107,7 @@ class RegularHeptagon:
         #           0         6
         #
         self.fold_shell_es_fs(3)
-        self.fold_shell_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_shell_3_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_shell_3_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Set vertices for a shell-fold in position 3.
@@ -1184,7 +1186,7 @@ class RegularHeptagon:
         #           1         0
         #
         self.fold_shell_es_fs(4)
-        self.fold_shell_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_shell_4_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_shell_4_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Set vertices for a shell-fold in position 4.
@@ -1263,7 +1265,7 @@ class RegularHeptagon:
         #           2         1
         #
         self.fold_shell_es_fs(5)
-        self.fold_shell_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_shell_5_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_shell_5_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Set vertices for a shell-fold in position 5.
@@ -1350,13 +1352,13 @@ class RegularHeptagon:
             -b0,
             keep_v0,
             [
-                self.VsOrg[0],
-                self.VsOrg[6],
-                self.VsOrg[5],
-                self.VsOrg[4],
-                self.VsOrg[3],
-                self.VsOrg[2],
-                self.VsOrg[1],
+                self.vs_org[0],
+                self.vs_org[6],
+                self.vs_org[5],
+                self.vs_org[4],
+                self.vs_org[3],
+                self.vs_org[2],
+                self.vs_org[1],
             ],
         )
         self.Vs = [
@@ -1370,6 +1372,7 @@ class RegularHeptagon:
         ]
 
     def fold_w(self, a0, b0, a1, b1, keep_v0=True, rotate=0):
+        """Define vertices, edges and faces for a W-fold."""
         prj = [
             self.fold_w0,
             self.fold_w1,
@@ -1454,10 +1457,10 @@ class RegularHeptagon:
         #          4         3
         #
         _ = keep_v0  # TODO: implement
-        rot0_3 = Rot(axis=self.VsOrg[3] - self.VsOrg[0], angle=a0)
-        v1 = rot0_3 * self.VsOrg[1]
-        v2_tmp = rot0_3 * self.VsOrg[2]
-        rot1_3 = Rot(axis=self.VsOrg[3] - v1, angle=b0)
+        rot0_3 = Rot(axis=self.vs_org[3] - self.vs_org[0], angle=a0)
+        v1 = rot0_3 * self.vs_org[1]
+        v2_tmp = rot0_3 * self.vs_org[2]
+        rot1_3 = Rot(axis=self.vs_org[3] - v1, angle=b0)
         v2 = rot1_3 * (v2_tmp - v1) + v1
         if Geom3D.eq(a0, a1):
             v6 = Vec([-v1[0], v1[1], v1[2]])
@@ -1465,20 +1468,20 @@ class RegularHeptagon:
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v5 = Vec([-v2_tmp[0], v2_tmp[1], v2_tmp[2]])
-                rot4_6 = Rot(axis=v6 - self.VsOrg[4], angle=b1)
+                rot4_6 = Rot(axis=v6 - self.vs_org[4], angle=b1)
                 v5 = rot4_6 * (v5 - v6) + v6
         else:
-            rot4_0 = Rot(axis=self.VsOrg[0] - self.VsOrg[4], angle=a1)
-            v6 = rot4_0 * self.VsOrg[6]
-            v5 = rot4_0 * self.VsOrg[5]
-            rot4_6 = Rot(axis=v6 - self.VsOrg[4], angle=b1)
+            rot4_0 = Rot(axis=self.vs_org[0] - self.vs_org[4], angle=a1)
+            v6 = rot4_0 * self.vs_org[6]
+            v5 = rot4_0 * self.vs_org[5]
+            rot4_6 = Rot(axis=v6 - self.vs_org[4], angle=b1)
             v5 = rot4_6 * (v5 - v6) + v6
         self.Vs = [
-            self.VsOrg[0],
+            self.vs_org[0],
             v1,
             v2,
-            self.VsOrg[3],
-            self.VsOrg[4],
+            self.vs_org[3],
+            self.vs_org[4],
             v5,
             v6,
         ]
@@ -1779,7 +1782,7 @@ class RegularHeptagon:
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
         self.fold_w_es_fs(1)
-        self.fold_w1_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_w1_help(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_w2(self, a0, b0, a1, b1, keep_v0=True):
         """
@@ -1793,7 +1796,7 @@ class RegularHeptagon:
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
         self.fold_w_es_fs(2)
-        self.fold_w2_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_w2_help(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_w3(self, a0, b0, a1, b1, keep_v0=True):
         """
@@ -1807,7 +1810,7 @@ class RegularHeptagon:
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
         self.fold_w_es_fs(3)
-        self.fold_w3_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_w3_help(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_w4(self, a0, b0, a1, b1, keep_v0=True):
         """
@@ -1821,7 +1824,7 @@ class RegularHeptagon:
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
         self.fold_w_es_fs(4)
-        self.fold_w4_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_w4_help(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_w5(self, a0, b0, a1, b1, keep_v0=True):
         """
@@ -1835,7 +1838,7 @@ class RegularHeptagon:
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
         self.fold_w_es_fs(5)
-        self.fold_w5_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_w5_help(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_w6(self, a0, b0, a1, b1, keep_v0=True):
         """
@@ -1849,7 +1852,7 @@ class RegularHeptagon:
         during folding, otherwise the edge V3 - V4 is kept invariant
         """
         self.fold_w_es_fs(6)
-        self.fold_w6_help(a0, b0, a1, b1, keep_v0, self.VsOrg)
+        self.fold_w6_help(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed(self, a0, b0, a1, b1, keep_v0=True, rotate=0):
         """Define the vertices, edges and faces for a mixed-fold.
@@ -1951,7 +1954,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(0)
-            self.fold_mixed_0_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_0_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_0_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 0.
@@ -2025,7 +2028,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(1)
-            self.fold_mixed_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_1_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_1_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 1."""
@@ -2097,7 +2100,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(2)
-            self.fold_mixed_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_2_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_2_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 2."""
@@ -2175,7 +2178,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(3)
-            self.fold_mixed_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_3_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_3_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 3."""
@@ -2253,7 +2256,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(4)
-            self.fold_mixed_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_4_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_4_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 4."""
@@ -2326,7 +2329,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(5)
-            self.fold_mixed_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_5_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_5_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 5."""
@@ -2408,7 +2411,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_mixed_es_fs(6)
-            self.fold_mixed_6_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_mixed_6_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_mixed_6_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a mixed-fold position 6."""
@@ -2561,7 +2564,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(0)
-            self.fold_g_0_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_0_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_0_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold the standard position (0).
@@ -2630,7 +2633,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(1)
-            self.fold_g_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_1_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_1_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold position 1."""
@@ -2695,7 +2698,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(2)
-            self.fold_g_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_2_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_2_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold position 2."""
@@ -2759,7 +2762,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(3)
-            self.fold_g_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_3_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_3_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold position 3."""
@@ -2823,7 +2826,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(4)
-            self.fold_g_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_4_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_4_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold position 4."""
@@ -2888,7 +2891,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(5)
-            self.fold_g_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_5_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_5_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold position 5."""
@@ -2953,7 +2956,7 @@ class RegularHeptagon:
             assert False, "TODO"
         else:
             self.fold_g_es_fs(6)
-            self.fold_g_6_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
+            self.fold_g_6_vs(a0, b0, a1, b1, keep_v0, self.vs_org)
 
     def fold_g_6_vs(self, a0, b0, a1, b1, keep_v0, verts):
         """Define the vertices for a G-fold position 6."""
