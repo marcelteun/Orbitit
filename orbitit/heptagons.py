@@ -3945,10 +3945,10 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.opp_fold1_gui.Disable()
                 self.opp_fold2_gui.Disable()
             elif self.fold_method in (
-                FoldMethod.W,
-                FoldMethod.SHELL,
-                FoldMethod.MIXED,
-                FoldMethod.G,
+                    FoldMethod.W,
+                    FoldMethod.SHELL,
+                    FoldMethod.MIXED,
+                    FoldMethod.G,
             ):
                 self.opp_fold1_gui.Enable()
                 self.opp_fold2_gui.Enable()
