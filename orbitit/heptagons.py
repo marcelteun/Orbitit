@@ -205,7 +205,7 @@ class TrisAlt_base(object):
     def __init__(self):
         # TODO? Note that only s that aren't primitives (isinstance(x, int))
         # should be added here.
-        self.choiceList = [s for s in self.stringify.values()]
+        self.choiceList = [*self.stringify.values()]
         self.mapKeyOnFileStr = {}
         self.mapStrOnFileStr = {}
         self.mapFileStrOnStr = {}
@@ -889,7 +889,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -959,7 +959,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1031,7 +1031,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1111,7 +1111,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1191,7 +1191,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1271,7 +1271,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1491,7 +1491,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         #
         #               1
         #               ^
@@ -1565,7 +1565,7 @@ class RegularHeptagon:
         #          "         "
         #          6         5
         #
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1627,7 +1627,7 @@ class RegularHeptagon:
         #          "         "
         #          0         6
         #
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1681,7 +1681,7 @@ class RegularHeptagon:
         #          "         "
         #          1         0
         #
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -1958,7 +1958,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2028,7 +2028,7 @@ class RegularHeptagon:
             self.fold_mixed_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_1_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2100,7 +2100,7 @@ class RegularHeptagon:
             self.fold_mixed_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_2_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2178,7 +2178,7 @@ class RegularHeptagon:
             self.fold_mixed_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_3_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2256,7 +2256,7 @@ class RegularHeptagon:
             self.fold_mixed_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_4_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2329,7 +2329,7 @@ class RegularHeptagon:
             self.fold_mixed_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_5_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2411,7 +2411,7 @@ class RegularHeptagon:
             self.fold_mixed_6_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_mixed_6_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2569,7 +2569,7 @@ class RegularHeptagon:
         Vs: the array with vertex numbers.
         returns a new array.
         """
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2632,7 +2632,7 @@ class RegularHeptagon:
             self.fold_g_1_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_1_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2695,7 +2695,7 @@ class RegularHeptagon:
             self.fold_g_2_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_2_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2757,7 +2757,7 @@ class RegularHeptagon:
             self.fold_g_3_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_3_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2819,7 +2819,7 @@ class RegularHeptagon:
             self.fold_g_4_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_4_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2882,7 +2882,7 @@ class RegularHeptagon:
             self.fold_g_5_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_5_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
@@ -2945,7 +2945,7 @@ class RegularHeptagon:
             self.fold_g_6_vs(a0, b0, a1, b1, keep_v0, self.VsOrg)
 
     def fold_g_6_vs(self, a0, b0, a1, b1, keep_v0, Vs):
-        v = [v for v in Vs]
+        v = Vs.copy()
         if keep_v0:
             assert False, "TODO"
         else:
