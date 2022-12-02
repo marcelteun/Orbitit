@@ -3048,8 +3048,8 @@ class RegularHeptagon:
 
     def translate(self, t):
         """Translate the heptagon by t (geomtypes.Vec3)."""
-        for i in range(len(self.Vs)):
-            self.Vs[i] = t + self.Vs[i]
+        for i, vs in enumerate(self.Vs):
+            self.Vs[i] = t + vs
 
     def rotate(self, axis, angle):
         """Rotate the heptagon by the specified angle (radians) around the specified axis."""
@@ -3057,8 +3057,8 @@ class RegularHeptagon:
 
     def transform(self, t):
         """Transform the heptagon by t (geomtypes.Transform3)."""
-        for i in range(len(self.Vs)):
-            self.Vs[i] = t * self.Vs[i]
+        for i, vs in enumerate(self.Vs):
+            self.Vs[i] = t * vs
 
 
 def kite_to_hept(left, top, right, bottom, alt_hept_pos=False):
@@ -3195,7 +3195,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
         s += "  shapes = [\n"
         for shape in self.shapeElements:
             s += f"    {repr(shape)},\n"
-        s += f"  ],\n  "
+        s += "  ],\n  "
         s += f'name = "{self.name}"\n'
         s += ")\n"
         if __name__ != "__main__":
@@ -3529,8 +3529,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         # Don't hardcode which index is DYN_POS, I might reorder the item list
         # one time, and will probably forget to update the default selection..
-        for i in range(len(self.pre_pos_strings)):
-            if self.pre_pos_strings[i] == self.stringify[DYN_POS]:
+        for pre_pos_string in self.pre_pos_strings:
+            if pre_pos_string == self.stringify[DYN_POS]:
                 self.pre_pos_gui.SetStringSelection(self.stringify[DYN_POS])
                 break
         self.set_enable_prepos_items()
