@@ -75,13 +75,21 @@ class DisabledDropTarget(wx.TextDropTarget):  # pylint: disable=too-few-public-m
 
 class IntInput(wx.TextCtrl):
     """An input field for typing integer numbers"""
-    def __init__(self, parent, ident, value, *args, **kwargs):
-        """Create an input field for typing integer numbers"""
+    def __init__(self, parent, ident, value, *args, max_len=10, **kwargs):
+        """Create an input field for typing integer numbers
+
+        parent: the parent widget.
+        ident: unique ID to use (use wx.ID_ANY if you don't care)
+        value: the initial value
+        max_len: the amount of characters that should fit. This is used to calculate the minimum
+            size of the widget.
+        """
         super().__init__(parent, ident, str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         # self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
         self.val_updated = False
-        self.SetMaxLength(18)
+        self.SetMaxLength(max_len)
+        self.SetMinSize(self.GetTextExtent(max_len * "8"))
         self.SetDropTarget(DisabledDropTarget(
             reason='may break string format for signed integer'))
         self.Bind(wx.EVT_CHAR, self.on_char)
@@ -193,12 +201,20 @@ class IntInput(wx.TextCtrl):
 
 class FloatInput(wx.TextCtrl):
     """An input field for typing floating point numbers"""
-    def __init__(self, parent, ident, value, *args, **kwargs):
-        """Create an input field for typing floating point numbers"""
+    def __init__(self, parent, ident, value, *args, max_len=18, **kwargs):
+        """Create an input field for typing floating point numbers
+
+        parent: the parent widget.
+        ident: unique ID to use (use wx.ID_ANY if you don't care)
+        value: the initial value
+        max_len: the amount of characters that should fit. This is used to calculate the minimum
+            size of the widget.
+        """
         wx.TextCtrl.__init__(self, parent, ident, self.to_str(value), *args, **kwargs)
         # Set defaults: style and width if not set by caller
         # self.SetStyle(0, -1, wx.TE_PROCESS_ENTER | wx.TE_DONTWRAP)
-        self.SetMaxLength(18)
+        self.SetMaxLength(max_len)
+        self.SetMinSize(self.GetTextExtent(max_len * "8"))
         self.SetDropTarget(DisabledDropTarget(
             reason='may break string format for floating point'))
         self.Bind(wx.EVT_CHAR, self.on_char)
@@ -322,12 +338,15 @@ class FloatInput(wx.TextCtrl):
 
 class LabeledIntInput(wx.BoxSizer):
     """A control embedded in a sizer for providing an integer with a label"""
-    def __init__(self,
-                 panel,
-                 label='',
-                 init=0,
-                 width=-1,
-                 orientation=wx.HORIZONTAL):
+    def __init__(
+        self,
+        panel,
+        label='',
+        init=0,
+        width=-1,
+        orientation=wx.HORIZONTAL,
+        max_len=10,
+    ):
         """
         Create a control embedded in a sizer for providing an integer.
 
@@ -336,9 +355,10 @@ class LabeledIntInput(wx.BoxSizer):
         label: the label to be used for the box, default ''
         init: initial value used in input
         width: width of the face index fields.
-        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
-                     is default. Defines the orientation of the label - int
-                     input.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is default. Defines
+            the orientation of the label - int input.
+        max_len: the amount of characters that should fit. This is used to calculate the minimum
+            size of the widget.
         """
         self.boxes = []
         wx.BoxSizer.__init__(self, orientation)
@@ -349,8 +369,7 @@ class LabeledIntInput(wx.BoxSizer):
         if not isinstance(init, int):
             logging.info("%s warning: initialiser not an int (%s)", self.__class__, init)
             init = 0
-        self.boxes.append(IntInput(
-            panel, wx.ID_ANY, init, size=(width, -1)))
+        self.boxes.append(IntInput(panel, wx.ID_ANY, init, size=(width, -1), max_len=max_len))
         self.Add(self.boxes[-1], 0, wx.EXPAND)
         self.int_gui_idx = len(self.boxes) - 1
 
@@ -385,19 +404,19 @@ class Vector3DInput(wx.BoxSizer):
                  panel,
                  label='',
                  v=None,
+                 max_len=18,
                  orientation=wx.HORIZONTAL):
         """
         Create a control embedded in a sizer for defining a 3D vector
 
         panel: the panel the input will be a part of.
         label: the label to be used for the box, default ''
-        length: initialise the input with length amount of 3D vectors.
+        v: initial value. A vector of (at least) three valid values.
+        max_len: the maximum amount of characters that fit in this input. From this number the
+            minimum size of the widget is calculated.
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
                      is default. Defines the orientation of the separate vector
                      items.
-        elem_labels: option labels for the vector items. It is an array
-                       consisting of 4 strings On default
-                       ['index', 'x', 'y', 'z'] is used.
         """
         self.panel = panel
         self.boxes = []
@@ -409,7 +428,7 @@ class Vector3DInput(wx.BoxSizer):
         self.Add(self.boxes[-1], 1, wx.EXPAND)
         self._vec = []
         for _ in range(3):
-            self._vec.append(FloatInput(self.panel, wx.ID_ANY, 0))
+            self._vec.append(FloatInput(self.panel, wx.ID_ANY, 0, max_len=max_len))
             self.Add(self._vec[-1], 0, wx.EXPAND)
         if v is not None:
             self.set_vertex(v)
@@ -451,19 +470,21 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
     """
     __head_lables = ['index', 'x', 'y', 'z']
 
-    def __init__(self, parent, length, orientation=wx.HORIZONTAL):
+    def __init__(self, parent, length, orientation=wx.HORIZONTAL, max_len=18):
         """
         Create a panel defining a set of 3D vectors
 
         parent: the parent widget.
         length: initialise with length amount of 3D vectors.
-        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
-                     is default. Defines the orientation of the separate vector
-                     items.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is default. Defines
+            the orientation of the separate vector items.
+        max_len: the maximum amount of characters in the inputs. This is used to calculate the
+            minimal size.
         """
 
         wxXtra.ScrolledPanel.__init__(self, parent)
 
+        self.max_len = max_len
         self.boxes = []
         opp_orient = opposite_orientation(orientation)
         vectors_sizer = wx.BoxSizer(orientation)
@@ -518,7 +539,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
                     f = 0
                 else:
                     f = vs[n][i-1]
-                self._vec[-1].append(FloatInput(self, wx.ID_ANY, f))
+                self._vec[-1].append(FloatInput(self, wx.ID_ANY, f, max_len=self.max_len))
                 self.column_sizers[i].Add(self._vec[-1][-1], 1, wx.EXPAND)
         self.Layout()
 
@@ -620,7 +641,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
         self.boxes.append(wx.Button(self, wx.ID_ANY, "Vertices Add Times:"))
         add_sizer.Add(self.boxes[-1], 1, wx.EXPAND)
         self.Bind(wx.EVT_BUTTON, self.on_add, id=self.boxes[-1].GetId())
-        self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1)))
+        self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1), max_len=5))
         self._add_no_of_v_idx = len(self.boxes) - 1
         add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
         main_sizer.Add(add_sizer, 1, wx.EXPAND)
@@ -699,25 +720,28 @@ class Vector4DInput(wx.StaticBoxSizer):
     __ctrlIdIndex = 0
     __defaultLabels = ['x', 'y', 'z', 'w']
 
-    def __init__(self,
-                 panel,
-                 label='',
-                 orientation=wx.HORIZONTAL,
-                 rel_float_size=4,
-                 elem_labels=None):
+    def __init__(
+        self,
+        panel,
+        label='',
+        orientation=wx.HORIZONTAL,
+        rel_float_size=4,
+        elem_labels=None,
+        max_len=18,
+    ):
         """
         Create a control embedded in a sizer for defining 4D vectors
 
         panel: the panel the input will be a part of.
         label: the label to be used for the box, default ''
-        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
-                     is default. Defines the orientation of the separate vector
-                     items.
-        rel_float_size: it defines the size of the input fields relative to
-                           the vector item labels 'x', 'y',..,'z' (with size 1)
-        elem_labels: option labels for the vector items. It is an array
-                       consisting of 4 strings On default ['x', 'y', 'z', 'w']
-                       is used.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is default. Defines
+            the orientation of the separate vector items.
+        rel_float_size: it defines the size of the input fields relative to the vector item labels
+            'x', 'y',..,'z' (with size 1)
+        elem_labels: option labels for the vector items. It is an array consisting of 4 strings On
+            default ['x', 'y', 'z', 'w'] is used.
+        max_len: the maximum amount of characters that fit in this input. From this number the
+            minimum size of the widget is calculated.
         """
         self.boxes = [wx.StaticBox(panel, label=label)]
         wx.StaticBoxSizer.__init__(self, self.boxes[-1], orientation)
@@ -734,10 +758,10 @@ class Vector4DInput(wx.StaticBoxSizer):
                           style=wx.TE_RIGHT | wx.ALIGN_CENTRE_VERTICAL)
         ]
         self._vec = [
-            FloatInput(panel, wx.ID_ANY, 0),
-            FloatInput(panel, wx.ID_ANY, 0),
-            FloatInput(panel, wx.ID_ANY, 0),
-            FloatInput(panel, wx.ID_ANY, 0)
+            FloatInput(panel, wx.ID_ANY, 0, max_len=max_len),
+            FloatInput(panel, wx.ID_ANY, 0, max_len=max_len),
+            FloatInput(panel, wx.ID_ANY, 0, max_len=max_len),
+            FloatInput(panel, wx.ID_ANY, 0, max_len=max_len),
         ]
         for i in range(4):
             if orientation == wx.HORIZONTAL:
@@ -798,29 +822,34 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
 
     This cannot grow or shrink in size through a GUI itself
     """
-    def __init__(self,
-                 parent,
-                 no_of_faces=0,
-                 face_len=0,
-                 width=40,
-                 orientation=wx.HORIZONTAL):
+    def __init__(
+        self,
+        parent,
+        no_of_faces=0,
+        face_len=0,
+        width=40,
+        orientation=wx.HORIZONTAL,
+        max_index_no=5,
+    ):
         """
         Create a control embedded in a sizer for defining a set of faces
 
         parent: the parent widget.
         no_of_faces: initialise the input with no_of_faces amount of faces.
-        face_len: initialise the faces with face_len vertices. Also the default
-                  value for adding faces.
+        face_len: initialise the faces with face_len vertices. Also the default value for adding
+            faces.
         width: width of the face index fields.
-        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
-                     is default. Defines the orientation of the separate face
-                     items.
+        orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former is default. Defines
+            the orientation of the separate face items.
+        max_index_no: the maximum number of faces / vertices to be used. This will decide how big
+            the text input will be and the minimal size will be set from this.
         """
         wxXtra.ScrolledPanel.__init__(self, parent)
         self.parent = parent
         self.width = width
         self.face_len = face_len
         self.orientation = orientation
+        self.max_index_no = max_index_no
         opp_orient = opposite_orientation(orientation)
 
         self._faces = []
@@ -867,7 +896,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
             else:
                 val = 0
             self._faces[-1].append(
-                IntInput(self, wx.ID_ANY, val, size=(self.width, -1))
+                IntInput(self, wx.ID_ANY, val, size=(self.width, -1), max_len=self.max_index_no)
             )
             face_sizer.Add(self._faces[-1][-1], 0, wx.EXPAND)
         self.vertex_idx_sizer.Add(face_sizer, 0, wx.EXPAND)
@@ -937,11 +966,14 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
 
 class FaceSetDynamicPanel(wx.Panel):
     """A control for defining a set of faces, which can grow and shrink"""
-    def __init__(self,
-                 parent,
-                 no_of_faces=0,
-                 face_len=0,
-                 orientation=wx.HORIZONTAL):
+    def __init__(
+        self,
+        parent,
+        no_of_faces=0,
+        face_len=0,
+        orientation=wx.HORIZONTAL,
+        max_index_no=5,
+    ):
         """
         Create a control for defining a set of faces
 
@@ -954,10 +986,13 @@ class FaceSetDynamicPanel(wx.Panel):
         orientation: one of wx.HORIZONTAL or wx.VERTICAL, of which the former
                      is default. Defines the orientation of the separate face
                      items.
+        max_index_no: the maximum number of faces / vertices to be used. This will decide how big
+            the text input will be and the minimal size will be set from this.
         """
         self.parent = parent
         wx.Panel.__init__(self, parent)
         self.face_len = face_len
+        self.max_index_no = max_index_no
 
         self.boxes = []
         opp_orient = opposite_orientation(orientation)
@@ -971,14 +1006,13 @@ class FaceSetDynamicPanel(wx.Panel):
 
         # Add button:
         add_sizer = wx.BoxSizer(orientation)
-        self.boxes.append(IntInput(
-            self, wx.ID_ANY, face_len, size=(40, -1)))
+        self.boxes.append(IntInput(self, wx.ID_ANY, face_len, size=(40, -1), max_len=max_index_no))
         self._face_len_idx = len(self.boxes) - 1
         add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
         self.boxes.append(wx.Button(self, wx.ID_ANY, "-Faces Add Times:"))
         add_sizer.Add(self.boxes[-1], 1, wx.EXPAND)
         self.Bind(wx.EVT_BUTTON, self.on_add, id=self.boxes[-1].GetId())
-        self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1)))
+        self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1), max_len=max_index_no))
         self._nr_of_faces_idx = len(self.boxes) - 1
         add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
         main_sizer.Add(add_sizer, 0, wx.EXPAND)
@@ -1363,12 +1397,15 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
 class AxisRotateSizer(wx.BoxSizer):
     """Class with sizer for defining a rotation"""
-    def __init__(self,
-                 panel,
-                 on_angle_callback,
-                 min_angle=-180,
-                 max_angle=180,
-                 initial_angle=0):
+    def __init__(
+        self,
+        panel,
+        on_angle_callback,
+        min_angle=-180,
+        max_angle=180,
+        initial_angle=0,
+        max_len=8,
+    ):
         """
         Create a sizer for setting a rotation.
 
@@ -1382,6 +1419,8 @@ class AxisRotateSizer(wx.BoxSizer):
         min_angle: minimum of the angle domain for the slide bar.
         max_angle: maximum of the angle domain for the slide bar.
         initial_angle: the angle that will be used from the beginning.
+        max_len: the amount characters to fit in the float inputs (angle, and angle step). The
+            minimum size will be calculated from this.
         """
         self.current_angle = initial_angle
         self.on_angle = on_angle_callback
@@ -1402,7 +1441,7 @@ class AxisRotateSizer(wx.BoxSizer):
             self._on_angle_set,
             id=self.show_gui[-1].GetId())
         rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
-        self.show_gui.append(FloatInput(panel, wx.ID_ANY, initial_angle))
+        self.show_gui.append(FloatInput(panel, wx.ID_ANY, initial_angle, max_len=max_len))
         self.show_gui[-1].bind_on_set(self._on_angle_typed)
         self._typed_angle_gui_idx = len(self.show_gui) - 1
         rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
@@ -1431,7 +1470,7 @@ class AxisRotateSizer(wx.BoxSizer):
             self._on_angle_step_up,
             id=self.show_gui[-1].GetId())
         rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
-        self.show_gui.append(FloatInput(panel, wx.ID_ANY, 0.1))
+        self.show_gui.append(FloatInput(panel, wx.ID_ANY, 0.1, max_len=max_len))
         self._dir_angle_step_idx = len(self.show_gui) - 1
         rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
