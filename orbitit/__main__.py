@@ -37,6 +37,7 @@ from OpenGL import GL
 from orbitit import (  # pylint: disable=ungrouped-imports
     base,
     Geom3D,
+    geomtypes,
     Scene_24Cell,
     Scene_5Cell,
     Scene_8Cell,
@@ -446,7 +447,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.SetTitle(f'Added: {os.path.basename(filename)}')
         dlg.Destroy()
 
-    # TODO: turn into saving a JSON file
     def on_save_json(self, _):
         """Handle event '_' to export the current shape to a JSON file"""
         dlg = wx.FileDialog(
@@ -470,10 +470,15 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 else:
                     filename = f'{filename}json'
             logging.info("writing to file %s", filepath)
-            # TODO add precision through setting:
             shape = self.panel.shape
             shape.name = filename
+            # TODO add precision through setting:
+            precision = geomtypes.FLOAT_OUT_PRECISION
+            org_precision, geomtypes.float_out_precision = (
+                geomtypes.float_out_precision, precision
+            )
             shape.write_json_file(filepath)
+            geomtypes.float_out_precision = org_precision
             self.set_status_text("JSON file written")
         dlg.Destroy()
 

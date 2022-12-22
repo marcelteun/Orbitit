@@ -59,6 +59,7 @@ DEFAULT_EQ_FLOAT_MARGIN = 1.0*10**-FLOAT_PRECISION
 
 # Used for output: use a bit more than when comparing, to not loose when rounding.
 FLOAT_OUT_PRECISION = 12
+float_out_precision = FLOAT_OUT_PRECISION
 
 # Disable pylint warning: Constant name "_eq_float_margin" doesn't conform to
 # UPPER_CASE naming style (invalid-name)
@@ -101,7 +102,7 @@ def eq(a, b, margin=None):
     return abs(a - b) < margin
 
 
-def f2s(f, precision=FLOAT_OUT_PRECISION):
+def f2s(f, precision=None):
     """Get string representation of a float or int with certain precision
 
     The floating point notation is used with a certain precision. Scientific notication is prevented
@@ -110,6 +111,8 @@ def f2s(f, precision=FLOAT_OUT_PRECISION):
 
     precision: maximum amount of decimal places used for writing out the floating point number.
     """
+    if not precision:
+        precision = float_out_precision
     fmt = f"{{:0.{precision}f}}"
     s = fmt.format(f)
     s = s.rstrip('0').rstrip('.')
