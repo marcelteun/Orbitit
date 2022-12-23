@@ -2399,6 +2399,8 @@ class CompoundShape(base.Orbitit):
         """
         self.name = name
         self.merge_needed = False
+        # This is save so heirs can still use repr_dict from this class
+        self.json_class = CompoundShape
         self.setShapes(shapes)
         if regen_edges:
             self.regen_edges()
@@ -2428,7 +2430,7 @@ class CompoundShape(base.Orbitit):
     def repr_dict(self):
         """Return a short representation of the object."""
         return {
-            'class': base.class_to_json[self.__class__],
+            'class': base.class_to_json[self.json_class],
             "data": {
                 "name": self.name,
                 "shapes": [s.repr_dict for s in self.shapes],
@@ -3287,6 +3289,8 @@ class OrbitShape(SymmetricShape):
             name=name,
             regen_edges=regen_edges
         )
+        # This is save so heirs can still use repr_dict from this class
+        self.json_class = OrbitShape
         self.final_sym = final_sym
         self.stab_sym = stab_sym
         if colors != []:
@@ -3296,7 +3300,7 @@ class OrbitShape(SymmetricShape):
     def repr_dict(self):
         """Return a short representation of the object."""
         return {
-            'class': base.class_to_json[self.__class__],
+            'class': base.class_to_json[self.json_class],
             'data': {
                 'name': self.name,
                 'vs': self.base_shape.Vs,

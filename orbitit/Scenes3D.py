@@ -135,7 +135,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
                 attribList = [
                     wx.glcanvas.WX_GL_RGBA,
                     wx.glcanvas.WX_GL_DOUBLEBUFFER,
-                    wx.glcanvas.WX_GL_STENCIL_SIZE, 8
+                    wx.glcanvas.WX_GL_STENCIL_SIZE, 8,
                 ]
             )
         this.context = wx.glcanvas.GLContext(this)
