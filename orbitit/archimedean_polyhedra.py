@@ -44,6 +44,59 @@ def shape_to_filename(shape):
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
+# Cuboctahedron
+class Cuboctahedron_3_S4xI_D3C3(Shape):
+    """The 8 triangles of the cuboctahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, 0, 1]),
+            Vec3([1, 1, 0]),
+            Vec3([0, 1, 1]),
+        ],
+        "Fs": [[0, 1, 2]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C3(setup=S4_O3),
+            name="Cuboctahedron {3} S4xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Cuboctahedron_4_S4xI_D4C4(Shape):
+    """The 6 squares of the cuboctahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, 0, 1]),
+            Vec3([0, 1, 1]),
+            Vec3([-1, 0, 1]),
+            Vec3([0, -1, 1]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C4(),
+            name="Cuboctahedron {4} S4xI / D4C4",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Cuboctahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                Cuboctahedron_3_S4xI_D3C3(cols=[Shape.cols[0]]),
+                Cuboctahedron_4_S4xI_D4C4(cols=[Shape.cols[1]]),
+            ],
+            name="cuboctahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Snub Cube
 class SnubCube_3_S4_C3(Shape):
     """The 8 triangles of the snub cube sharing a 3-fold axis."""
@@ -251,6 +304,7 @@ if __name__ == "__main__":
     import argparse
 
     models = [
+        Cuboctahedron(),
         SnubCube(),
         SnubDodecahedron(),
         TruncatedTetrahedron(),
