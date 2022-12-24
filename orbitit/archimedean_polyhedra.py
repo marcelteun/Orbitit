@@ -24,6 +24,8 @@ t /= 3
 α = ξ - 1 / ξ
 β = τ * (ξ + τ) + τ / ξ
 
+A4_O3 = {"axis": Vec3([1, 1, 1])}
+
 S4_O3 = {"axis": Vec3([1, 1, 1])}
 
 A5_O3 = {"axis": Vec3([1, 1, 1])}
@@ -41,6 +43,8 @@ def shape_to_filename(shape):
 # The Archimedean solids in alphabetical order
 #------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
+# Snub Cube
 class SnubCube_3_S4_C3(Shape):
     """The 8 triangles of the snub cube sharing a 3-fold axis."""
     base = {
@@ -113,6 +117,8 @@ class SnubCube(CompoundShape):
             name="snub cube",
         )
 
+#------------------------------------------------------------------------------
+# Snub Dodecahedron
 class SnubDodecahedron_3_A5_E(Shape):
     """The 60 triangles of the snub dodecahedron not sharing a symmetry."""
     base = {
@@ -186,12 +192,68 @@ class SnubDodecahedron(CompoundShape):
             name="snub dodecahedron",
         )
 
+#------------------------------------------------------------------------------
+# Truncated Tetrahedron
+class TruncatedTetrahedron_3_S4A4_D3C3(Shape):
+    """The 4 triangles of the truncated tetrahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, 1, 3]),
+            Vec3([3, 1, 1]),
+            Vec3([1, 3, 1]),
+        ],
+        "Fs": [[0, 1, 2]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A4(),
+            stab_sym=sym.C3(setup=A4_O3),
+            name="Truncated tetrahedron {3} S4A4 / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedTetrahedron_6_S4A4_D3C3(Shape):
+    """The 6 hexagons of the truncated tetrahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, 1, 3]),
+            Vec3([1, 3, 1]),
+            Vec3([-1, 3, -1]),
+            Vec3([-3, 1, -1]),
+            Vec3([-3, -1, 1]),
+            Vec3([-1, -1, 3]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A4(),
+            stab_sym=sym.C3(setup={"axis": Vec3([-1, 1, 1])}),
+            name="Truncated tetrahedron {6} S4A4 / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedTetrahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                TruncatedTetrahedron_3_S4A4_D3C3(cols=[Shape.cols[0]]),
+                TruncatedTetrahedron_6_S4A4_D3C3(cols=[Shape.cols[1]]),
+            ],
+            name="truncated tetrahedron",
+        )
+
 if __name__ == "__main__":
     import argparse
 
     models = [
         SnubCube(),
         SnubDodecahedron(),
+        TruncatedTetrahedron(),
     ]
     for model in models:
         for shape in model.shapes:
