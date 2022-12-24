@@ -305,6 +305,62 @@ class TruncatedCube(CompoundShape):
         )
 
 #------------------------------------------------------------------------------
+# Truncated Octahedron
+class TruncatedOctahedron_6_S4xI_D3C3(Shape):
+    """The 8 hexahedron of the truncated cube."""
+    base = {
+        "Vs": [
+            Vec3([1, 0, 2]),
+            Vec3([2, 0, 1]),
+            Vec3([2, 1, 0]),
+            Vec3([1, 2, 0]),
+            Vec3([0, 2, 1]),
+            Vec3([0, 1, 2]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C3(setup=S4_O3),
+            name="Truncated octahedron {6} S4xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedOctahedron_4_S4xI_D4C4(Shape):
+    """The 8 octagons of the truncated cube."""
+    base = {
+        "Vs": [
+            Vec3([1, 0, 2]),
+            Vec3([0, 1, 2]),
+            Vec3([-1, 0, 2]),
+            Vec3([0, -1, 2]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C4(),
+            name="Truncated octahedron {4} S4xI / D4C4",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedOctahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                TruncatedOctahedron_6_S4xI_D3C3(cols=[Shape.cols[0]]),
+                TruncatedOctahedron_4_S4xI_D4C4(cols=[Shape.cols[1]]),
+            ],
+            name="truncated octahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Truncated Tetrahedron
 class TruncatedTetrahedron_3_S4A4_D3C3(Shape):
     """The 4 triangles of the truncated tetrahedron."""
@@ -367,6 +423,7 @@ if __name__ == "__main__":
         SnubCube(),
         SnubDodecahedron(),
         TruncatedCube(),
+        TruncatedOctahedron(),
         TruncatedTetrahedron(),
     ]
     for model in models:
