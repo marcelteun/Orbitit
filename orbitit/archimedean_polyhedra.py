@@ -157,6 +157,82 @@ class Icosidodecahedron(CompoundShape):
         )
 
 #------------------------------------------------------------------------------
+# Rhombicosidodecahedron
+class Rhombicosidodecahedron_5_A5xI_D5C5(Shape):
+    """The 12 pentagons of the rhombicosidodecahedron"""
+    base = {
+        "Vs": [
+            Vec3([1, -1, τ**3]),
+            Vec3([τ + 1, -τ, 2 * τ]),
+            Vec3([τ + 2, 0, τ + 1]),
+            Vec3([τ + 1, τ, 2 * τ]),
+            Vec3([1, 1, τ**3]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C5(setup=A5_O5),
+            name="Rhombicosidodecahedron {5} A5xI / D5C5",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Rhombicosidodecahedron_3_A5xI_D3C3(Shape):
+    """The 20 triangles of the rhombicosidodecahedron"""
+    base = {
+        "Vs": [
+            Vec3([τ + 1, τ, 2 * τ]),
+            Vec3([2 * τ, τ + 1, τ]),
+            Vec3([τ, 2 * τ, τ + 1]),
+        ],
+        "Fs": [[0, 1, 2]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C3(setup=A5_O3),
+            name="Rhombicosidodecahedron {3} A5xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Rhombicosidodecahedron_4_A5xI_D2C2(Shape):
+    """The 30 squares of the rhombicosidodecahedron"""
+    base = {
+        "Vs": [
+            Vec3([1, 1, τ**3]),
+            Vec3([-1, 1, τ**3]),
+            Vec3([-1, -1, τ**3]),
+            Vec3([1, -1, τ**3]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C2(),
+            name="Rhombicosidodecahedron {4} A5xI / D2C2",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Rhombicosidodecahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                Rhombicosidodecahedron_5_A5xI_D5C5(cols=[Shape.cols[0]]),
+                Rhombicosidodecahedron_3_A5xI_D3C3(cols=[Shape.cols[1]]),
+                Rhombicosidodecahedron_4_A5xI_D2C2(cols=[Shape.cols[2]]),
+            ],
+            name="rhombicosidodecahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Rhombicuboctahedron
 class Rhombicuboctahedron_3_S4xI_D3C3(Shape):
     """The 8 triangles of the rhombicuboctahedron."""
@@ -753,6 +829,7 @@ if __name__ == "__main__":
     models = [
         Cuboctahedron(),
         Icosidodecahedron(),
+        Rhombicosidodecahedron(),
         Rhombicuboctahedron(),
         SnubCube(),
         SnubDodecahedron(),
