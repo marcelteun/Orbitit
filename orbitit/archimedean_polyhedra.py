@@ -953,13 +953,18 @@ if __name__ == "__main__":
         "--out-dir", "-o",
         default="",
         metavar="DIR",
-        help="Specify possible output directory. Should exist."
+        help="Specify possible output directory. Should exist.",
     )
     parser.add_argument(
         "--seperate-orbits", "-s",
         action='store_true',
         help="Also save the seperate parts consisting of one kind of polygon described by one "
-        "orbit. This is always saved in JSON."
+        "orbit. This is always saved in JSON.",
+    )
+    parser.add_argument(
+        "--json", "-j",
+        action='store_true',
+        help="Save the complete polyhedron in JSON format (default OFF)",
     )
     args = parser.parse_args()
     out_dir = Path(args.out_dir)
@@ -1006,7 +1011,12 @@ if __name__ == "__main__":
                 filename = out_dir / shape_to_filename(model_shape)
                 model_shape.write_json_file(filename)
                 print(f"written {filename}")
-        filename = out_dir / Path(model.name.lower().replace(" ", "_") + ".off")
-        with open(filename, "w") as fd:
-            fd.write(model.to_off())
-            print(f"written {filename}")
+        filename = model.name.lower().replace(" ", "_")
+        if args.json:
+            filename = out_dir / Path(filename + ".json")
+            model.write_json_file(filename)
+        else:
+            filename = out_dir / Path(filename + ".off")
+            with open(filename, "w") as fd:
+                fd.write(model.to_off())
+        print(f"written {filename}")
