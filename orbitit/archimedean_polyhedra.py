@@ -13,6 +13,7 @@ V5 = V(5)
 
 γ = V2 - 1
 ω = V2 + 1
+ψ = ω + V2
 
 # related to the snub cube
 δ_ = 3*V(33)
@@ -383,6 +384,88 @@ class TruncatedCube(CompoundShape):
         )
 
 #------------------------------------------------------------------------------
+# Truncated Cuboctahedron
+class TruncatedCuboctahedron_6_S4xI_D3C3(Shape):
+    """The 8 hexagons of the truncated cuboctahedron."""
+    base = {
+        "Vs": [
+            Vec3([ω, 1, ψ]),
+            Vec3([ψ, 1, ω]),
+            Vec3([ψ, ω, 1]),
+            Vec3([ω, ψ, 1]),
+            Vec3([1, ψ, ω]),
+            Vec3([1, ω, ψ]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C3(setup=S4_O3),
+            name="Truncated cuboctahedron {6} S4xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedCuboctahedron_8_S4xI_D4C4(Shape):
+    """The 6 octagons of the truncated cuboctahedron."""
+    base = {
+        "Vs": [
+            Vec3([ω, 1, ψ]),
+            Vec3([1, ω, ψ]),
+            Vec3([-1, ω, ψ]),
+            Vec3([-ω, 1, ψ]),
+            Vec3([-ω, -1, ψ]),
+            Vec3([-1, -ω, ψ]),
+            Vec3([1, -ω, ψ]),
+            Vec3([ω, -1, ψ]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5, 6, 7]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C4(),
+            name="Truncated cuboctahedron {8} S4xI / D4C4",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedCuboctahedron_4_S4xI_D2C2(Shape):
+    """The 12 squares of the truncated cuboctahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, ω, ψ]),
+            Vec3([1, ψ, ω]),
+            Vec3([-1, ψ, ω]),
+            Vec3([-1, ω, ψ]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C2(setup=S4_O2),
+            name="Truncated cuboctahedron {4} S4xI / D2C2",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedCuboctahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                TruncatedCuboctahedron_6_S4xI_D3C3(cols=[Shape.cols[0]]),
+                TruncatedCuboctahedron_8_S4xI_D4C4(cols=[Shape.cols[1]]),
+                TruncatedCuboctahedron_4_S4xI_D2C2(cols=[Shape.cols[2]]),
+            ],
+            name="truncated cuboctahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Truncated Octahedron
 class TruncatedOctahedron_6_S4xI_D3C3(Shape):
     """The 8 hexahedron of the truncated cube."""
@@ -502,6 +585,7 @@ if __name__ == "__main__":
         SnubCube(),
         SnubDodecahedron(),
         TruncatedCube(),
+        TruncatedCuboctahedron(),
         TruncatedOctahedron(),
         TruncatedTetrahedron(),
     ]
