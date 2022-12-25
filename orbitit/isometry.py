@@ -696,6 +696,7 @@ class Cn(Set, metaclass=MetaCn):
                 axis = setup['axis']
             else:
                 axis = copy(self.std_setup['axis'])
+                self.generator['axis'] = axis
             if self.n != 0:
                 n = self.n
             else:
@@ -703,6 +704,7 @@ class Cn(Set, metaclass=MetaCn):
                     n = setup['n']
                 else:
                     n = copy(self.std_setup['n'])
+                    self.generator['n'] = n
                 if n == 0:
                     n = 1
                 # If self.n is hard-code (e.g. for C3)
@@ -1210,10 +1212,12 @@ class Dn(Set, metaclass=MetaDn):
                 axis_n = setup['axis_n']
             else:
                 axis_n = copy(self.std_setup['axis_n'])
+                self.generator['axis_n'] = axis_n
             if 'axis_2' in keys:
                 axis_2 = setup['axis_2']
             else:
                 axis_2 = copy(self.std_setup['axis_2'])
+                self.generator['axis_2'] = axis_2
             if self.n != 0:
                 # If self.n is hard-code (e.g. for D3)
                 # then if you specify n it should be the correct value
@@ -1225,6 +1229,7 @@ class Dn(Set, metaclass=MetaDn):
                     n = setup['n']
                 else:
                     n = 2
+                self.generator['n'] = n
                 if n == 0:
                     n = 1
 
