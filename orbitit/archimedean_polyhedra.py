@@ -955,6 +955,12 @@ if __name__ == "__main__":
         metavar="DIR",
         help="Specify possible output directory. Should exist."
     )
+    parser.add_argument(
+        "--seperate-orbits", "-s",
+        action='store_true',
+        help="Also save the seperate parts consisting of one kind of polygon described by one "
+        "orbit. This is always saved in JSON."
+    )
     args = parser.parse_args()
     out_dir = Path(args.out_dir)
 
@@ -995,10 +1001,11 @@ if __name__ == "__main__":
         TruncatedTetrahedron(),
     ]
     for model in MODELS:
-        for model_shape in model.shapes:
-            filename = out_dir / shape_to_filename(model_shape)
-            model_shape.write_json_file(filename)
-            print(f"written {filename}")
+        if args.seperate_orbits:
+            for model_shape in model.shapes:
+                filename = out_dir / shape_to_filename(model_shape)
+                model_shape.write_json_file(filename)
+                print(f"written {filename}")
         filename = out_dir / Path(model.name.lower().replace(" ", "_") + ".off")
         with open(filename, "w") as fd:
             fd.write(model.to_off())
