@@ -714,6 +714,90 @@ class TruncatedIcosahedron(CompoundShape):
         )
 
 #------------------------------------------------------------------------------
+# Truncated Icosidodecahedron
+class TruncatedIcosidodecahedron_10_A5xI_D5C5(Shape):
+    """The 12 decagons of the truncated icosidodecahedron."""
+    base = {
+        "Vs": [
+            Vec3([τ - 1, 1 - τ, τ + 3]),
+            Vec3([2 / τ, -τ, 2 * τ + 1]),
+            Vec3([2 * τ - 1, -2, τ + 2]),
+            Vec3([2 * τ, -τ, 3]),
+            Vec3([3 * τ - 1, 1 - τ, τ + 1]),
+            Vec3([3 * τ - 1, τ - 1, τ + 1]),
+            Vec3([2 * τ, τ, 3]),
+            Vec3([2 * τ - 1, 2, τ + 2]),
+            Vec3([2 / τ, τ, 2 * τ + 1]),
+            Vec3([τ - 1, τ - 1, τ + 3]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C5(setup=A5_O5),
+            name="Truncated icosidodecahedron {10} A5xI / D5C5",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedIcosidodecahedron_6_A5xI_D3C3(Shape):
+    """The 20 hexagons of the truncated icosidodecahedron."""
+    base = {
+        "Vs": [
+            Vec3([2 * τ - 1, 2, τ + 2]),
+            Vec3([2 * τ, τ, 3]),
+            Vec3([τ + 2, 2 * τ - 1, 2]),
+            Vec3([3, 2 * τ, τ]),
+            Vec3([2, τ + 2, 2 * τ - 1]),
+            Vec3([τ, 3, 2 * τ]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C3(setup=A5_O3),
+            name="Truncated icosidodecahedron {6} A5xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedIcosidodecahedron_4_A5xI_D2C2(Shape):
+    """The 30 squares of the truncated icosidodecahedron."""
+    base = {
+        "Vs": [
+            Vec3([τ - 1, τ - 1, τ + 3]),
+            Vec3([1 - τ, τ - 1, τ + 3]),
+            Vec3([1 - τ, 1 - τ, τ + 3]),
+            Vec3([τ - 1, 1 - τ, τ + 3]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C2(),
+            name="Truncated icosidodecahedron {4} A5xI / D2C2",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedIcosidodecahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                TruncatedIcosidodecahedron_10_A5xI_D5C5(cols=[Shape.cols[0]]),
+                TruncatedIcosidodecahedron_6_A5xI_D3C3(cols=[Shape.cols[1]]),
+                TruncatedIcosidodecahedron_4_A5xI_D2C2(cols=[Shape.cols[2]]),
+            ],
+            name="truncated icosidodecahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Truncated Octahedron
 class TruncatedOctahedron_6_S4xI_D3C3(Shape):
     """The 8 hexagons of the truncated cube."""
@@ -838,6 +922,7 @@ if __name__ == "__main__":
         TruncatedCuboctahedron(),
         TruncatedDodecahedron(),
         TruncatedIcosahedron(),
+        TruncatedIcosidodecahedron(),
         TruncatedOctahedron(),
         TruncatedTetrahedron(),
     ]
