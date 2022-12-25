@@ -24,7 +24,7 @@
 # The following is because of the class names. I keep the naming because the capitals are used in
 # mathematics and theay are nest separated by _
 # I also would like to keep the Greek variable names without using capitals.
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,too-many-lines
 from math import sqrt as V
 import re
 
@@ -32,6 +32,12 @@ from orbitit.Geom3D import CompoundShape
 from orbitit.geomtypes import Vec3
 from orbitit import isometry as sym
 from orbitit.orbit import Shape
+
+DESCR = """Generate SW models for Archimedean solids.
+
+One can choose to generate all or just one and which file format. If no argument is given all models
+will be generated in the OFF format.
+"""
 
 V2 = V(2)
 V5 = V(5)
@@ -62,19 +68,6 @@ S4_O3 = {"axis": Vec3([1, 1, 1])}
 
 A5_O3 = {"axis": Vec3([1, 1, 1])}
 A5_O5 = {"axis": Vec3([1, 0, τ])}
-
-def shape_to_filename(shape):
-    """Create a suitable filename from shape.name.
-
-    This function assumes a certain naming; one that is used below and it will remove spaces and use
-    lower case letter for the words, but not for the algebraic group names for the symmetries.
-    """
-    name, polygon, shape_sym = re.split("[{}]", shape.name)
-    name = name.strip().lower()
-    name = name.replace(" ", "_")
-    polygon = polygon.strip().replace("/", "_")
-    shape_sym = re.sub(" */ *", "_", shape_sym.strip())
-    return f"{name}_bas_{polygon}_{shape_sym}.json"
 
 #------------------------------------------------------------------------------
 # The Archimedean solids in alphabetical order
@@ -952,6 +945,40 @@ class TruncatedTetrahedron(CompoundShape):
         )
 
 if __name__ == "__main__":
+    from argparse import ArgumentParser
+    from pathlib import Path
+
+    parser = ArgumentParser(DESCR)
+    parser.add_argument(
+        "--out-dir", "-o",
+        default="",
+        metavar="DIR",
+        help="Specify possible output directory. Should exist."
+    )
+    args = parser.parse_args()
+    out_dir = Path(args.out_dir)
+
+    def shape_to_filename(shape):
+        """Create a suitable filename from shape.name.
+
+        This function assumes a certain naming; one that is used below and it will remove spaces and
+        use lower case letter for the words, but not for the algebraic group names for the
+        symmetries.
+        """
+        name, polygon, shape_sym = re.split("[{}]", shape.name)
+        name = name.strip().lower()
+        name = name.replace(" ", "_")
+        polygon = polygon.strip().replace("/", "_")
+        shape_sym = re.sub(" */ *", "_", shape_sym.strip())
+        return Path(f"{name}_bas_{polygon}_{shape_sym}.json")
+
+    if args.out_dir:
+        out_dir = Path(args.out_dir)
+        if not out_dir.is_dir():
+            raise ValueError(f"The path '{args.out_dir}' doesn't exist")
+    else:
+        out_dir = Path("")
+
     MODELS = [
         Cuboctahedron(),
         Icosidodecahedron(),
@@ -969,10 +996,10 @@ if __name__ == "__main__":
     ]
     for model in MODELS:
         for model_shape in model.shapes:
-            filename = shape_to_filename(model_shape)
+            filename = out_dir / shape_to_filename(model_shape)
             model_shape.write_json_file(filename)
             print(f"written {filename}")
-        filename = model.name.lower().replace(" ", "_") + ".off"
+        filename = out_dir / Path(model.name.lower().replace(" ", "_") + ".off")
         with open(filename, "w") as fd:
             fd.write(model.to_off())
             print(f"written {filename}")
