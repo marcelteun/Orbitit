@@ -580,6 +580,63 @@ class TruncatedDodecahedron(CompoundShape):
         )
 
 #------------------------------------------------------------------------------
+# Truncated Icosahedron
+class TruncatedIcosahedron_5_A5xI_D5C5(Shape):
+    """The 12 pentagons of the truncated icosahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, 0, 3 * τ]),
+            Vec3([2, -τ, 2 * τ + 1]),
+            Vec3([τ + 2, -1, 2 * τ]),
+            Vec3([τ + 2, 1, 2 * τ]),
+            Vec3([2, τ, 2 * τ + 1]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C5(setup=A5_O5),
+            name="Truncated icosahedron {5} A5xI / D5C5",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedIcosahedron_6_A5xI_D3C3(Shape):
+    """The 20 hexagons of the truncated icosahedron."""
+    base = {
+        "Vs": [
+            Vec3([2, τ, 2 * τ + 1]),
+            Vec3([τ + 2, 1, 2 * τ]),
+            Vec3([2 * τ + 1, 2, τ]),
+            Vec3([2 * τ, τ + 2, 1]),
+            Vec3([τ, 2 * τ + 1, 2]),
+            Vec3([1, 2 * τ, τ + 2]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4, 5]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C3(setup=A5_O3),
+            name="Truncated icosahedron {6} A5xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class TruncatedIcosahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                TruncatedIcosahedron_5_A5xI_D5C5(cols=[Shape.cols[0]]),
+                TruncatedIcosahedron_6_A5xI_D3C3(cols=[Shape.cols[1]]),
+            ],
+            name="truncated icosahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Truncated Octahedron
 class TruncatedOctahedron_6_S4xI_D3C3(Shape):
     """The 8 hexagons of the truncated cube."""
@@ -702,6 +759,7 @@ if __name__ == "__main__":
         TruncatedCube(),
         TruncatedCuboctahedron(),
         TruncatedDodecahedron(),
+        TruncatedIcosahedron(),
         TruncatedOctahedron(),
         TruncatedTetrahedron(),
     ]
