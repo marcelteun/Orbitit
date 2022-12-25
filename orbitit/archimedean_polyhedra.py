@@ -12,6 +12,8 @@ V5 = V(5)
 τ = (V5 + 1) / 2
 
 γ = V2 - 1
+ω = V2 + 1
+
 # related to the snub cube
 δ_ = 3*V(33)
 t = (19 + δ_)**(1/3)
@@ -28,6 +30,7 @@ t /= 3
 
 A4_O3 = {"axis": Vec3([1, 1, 1])}
 
+S4_O2 = {"axis": Vec3([0, 1, 1])}
 S4_O3 = {"axis": Vec3([1, 1, 1])}
 
 A5_O3 = {"axis": Vec3([1, 1, 1])}
@@ -96,6 +99,81 @@ class Cuboctahedron(CompoundShape):
                 Cuboctahedron_4_S4xI_D4C4(cols=[Shape.cols[1]]),
             ],
             name="cuboctahedron",
+        )
+
+#------------------------------------------------------------------------------
+# Rhombicuboctahedron
+class Rhombicuboctahedron_3_S4xI_D3C3(Shape):
+    """The 8 triangles of the rhombicuboctahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, 1, ω]),
+            Vec3([ω, 1, 1]),
+            Vec3([1, ω, 1]),
+        ],
+        "Fs": [[0, 1, 2]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C3(setup=S4_O3),
+            name="Rhombicuboctahedron {3} S4xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Rhombicuboctahedron_4_S4xI_D2C2(Shape):
+    """The 12 squares of the rhombicuboctahedron sharing a 2-fold axis."""
+    base = {
+        "Vs": [
+            Vec3([1, 1, ω]),
+            Vec3([1, ω, 1]),
+            Vec3([-1, ω, 1]),
+            Vec3([-1, 1, ω]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C2(setup=S4_O2),
+            name="Rhombicuboctahedron {4} S4xI / D2C2",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Rhombicuboctahedron_4_S4xI_D4C4(Shape):
+    """The 6 squares of the rhombicuboctahedron sharing a 4-fold axis."""
+    base = {
+        "Vs": [
+            Vec3([1, 1, ω]),
+            Vec3([-1, 1, ω]),
+            Vec3([-1, -1, ω]),
+            Vec3([1, -1, ω]),
+        ],
+        "Fs": [[0, 1, 2, 3]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.S4(),
+            stab_sym=sym.C4(),
+            name="Rhombicuboctahedron {4} S4xI / D4C4",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Rhombicuboctahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                Rhombicuboctahedron_3_S4xI_D3C3(cols=[Shape.cols[0]]),
+                Rhombicuboctahedron_4_S4xI_D2C2(cols=[Shape.cols[1]]),
+                Rhombicuboctahedron_4_S4xI_D4C4(cols=[Shape.cols[2]]),
+            ],
+            name="rhombicuboctahedron",
         )
 
 #------------------------------------------------------------------------------
@@ -420,6 +498,7 @@ if __name__ == "__main__":
 
     models = [
         Cuboctahedron(),
+        Rhombicuboctahedron(),
         SnubCube(),
         SnubDodecahedron(),
         TruncatedCube(),
