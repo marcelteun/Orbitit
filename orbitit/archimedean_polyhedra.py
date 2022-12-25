@@ -103,6 +103,60 @@ class Cuboctahedron(CompoundShape):
         )
 
 #------------------------------------------------------------------------------
+# Icosidodecahedron
+class Icosidodecahedron_3_A5xI_D3C3(Shape):
+    """The 20 triangles of the icosidodecahedron."""
+    base = {
+        "Vs": [
+            Vec3([1, τ, τ + 1]),
+            Vec3([τ + 1, 1, τ]),
+            Vec3([τ, τ + 1, 1]),
+        ],
+        "Fs": [[0, 1, 2]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C3(setup=A5_O3),
+            name="Icosidodecahedron {3} A5xI / D3C3",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Icosidodecahedron_5_A5xI_D5C5(Shape):
+    """The 12 pentagons of the icosidodecahedron."""
+    base = {
+        "Vs": [
+            Vec3([0, 0, 2 * τ]),
+            Vec3([1, -τ, τ + 1]),
+            Vec3([τ + 1, -1, τ]),
+            Vec3([τ + 1, 1, τ]),
+            Vec3([1, τ, τ + 1]),
+        ],
+        "Fs": [[0, 1, 2, 3, 4]],
+    }
+    def __init__(self, no_of_cols=1, **kwargs):
+        super().__init__(
+            self.base,
+            final_sym=sym.A5(),
+            stab_sym=sym.C5(setup=A5_O5),
+            name="Icosidodecahedron {5} A5xI / D5C5",
+            no_of_cols=no_of_cols,
+            **kwargs,
+        )
+
+class Icosidodecahedron(CompoundShape):
+    def __init__(self):
+        super().__init__(
+            [
+                Icosidodecahedron_3_A5xI_D3C3(cols=[Shape.cols[0]]),
+                Icosidodecahedron_5_A5xI_D5C5(cols=[Shape.cols[1]]),
+            ],
+            name="icosidodecahedron",
+        )
+
+#------------------------------------------------------------------------------
 # Rhombicuboctahedron
 class Rhombicuboctahedron_3_S4xI_D3C3(Shape):
     """The 8 triangles of the rhombicuboctahedron."""
@@ -468,7 +522,7 @@ class TruncatedCuboctahedron(CompoundShape):
 #------------------------------------------------------------------------------
 # Truncated Octahedron
 class TruncatedOctahedron_6_S4xI_D3C3(Shape):
-    """The 8 hexahedron of the truncated cube."""
+    """The 8 hexagons of the truncated cube."""
     base = {
         "Vs": [
             Vec3([1, 0, 2]),
@@ -581,6 +635,7 @@ if __name__ == "__main__":
 
     models = [
         Cuboctahedron(),
+        Icosidodecahedron(),
         Rhombicuboctahedron(),
         SnubCube(),
         SnubDodecahedron(),
