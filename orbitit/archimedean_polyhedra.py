@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Classes defining the 13 Archimedean polyhedra."""
+from math import sqrt as V
+import re
+
 from orbitit.Geom3D import CompoundShape
 from orbitit.geomtypes import Vec3
-from math import sqrt as V
 from orbitit import isometry as sym
 from orbitit.orbit import Shape
-import re
 
 V2 = V(2)
 V5 = V(5)
@@ -430,7 +431,7 @@ class SnubDodecahedron_5_A5_C5(Shape):
             Vec3([α + β / τ - τ, -α * τ + β - 1 / τ, α / τ + β * τ + 1]),
             Vec3([2 * α, -2, 2 * β]),
             Vec3([α + β / τ + τ, α * τ - β - 1 / τ, α / τ + β * τ - 1]),
-            Vec3([-α / τ + β * τ + 1,  + α - β / τ + τ, α * τ + β - 1 / τ]),
+            Vec3([-α / τ + β * τ + 1, + α - β / τ + τ, α * τ + β - 1 / τ]),
             Vec3([-α / τ + β * τ - 1, -α + β / τ + τ, α * τ + β + 1 / τ]),
         ],
         "Fs": [[0, 1, 2, 3, 4]],
@@ -826,7 +827,7 @@ class TruncatedTetrahedron(CompoundShape):
 if __name__ == "__main__":
     import argparse
 
-    models = [
+    MODELS = [
         Cuboctahedron(),
         Icosidodecahedron(),
         Rhombicosidodecahedron(),
@@ -840,7 +841,7 @@ if __name__ == "__main__":
         TruncatedOctahedron(),
         TruncatedTetrahedron(),
     ]
-    for model in models:
+    for model in MODELS:
         for shape in model.shapes:
             filename = shape_to_filename(shape)
             shape.write_json_file(filename)
