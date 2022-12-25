@@ -1,5 +1,30 @@
 #!/usr/bin/env python3
 """Classes defining the 13 Archimedean polyhedra."""
+
+# Copyright (C) 2022 Marcel Tunnissen
+#
+# License: GNU Public License version 2
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not,
+# check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+# or write to the Free Software Foundation,
+# ------------------------------------------------------------------
+#
+# The following is because of the class names. I keep the naming because the capitals are used in
+# mathematics and theay are nest separated by _
+# I also would like to keep the Greek variable names without using capitals.
+# pylint: disable=invalid-name
 from math import sqrt as V
 import re
 
@@ -39,12 +64,17 @@ A5_O3 = {"axis": Vec3([1, 1, 1])}
 A5_O5 = {"axis": Vec3([1, 0, τ])}
 
 def shape_to_filename(shape):
-    name, polygon, sym = re.split("[{}]", shape.name)
+    """Create a suitable filename from shape.name.
+
+    This function assumes a certain naming; one that is used below and it will remove spaces and use
+    lower case letter for the words, but not for the algebraic group names for the symmetries.
+    """
+    name, polygon, shape_sym = re.split("[{}]", shape.name)
     name = name.strip().lower()
     name = name.replace(" ", "_")
     polygon = polygon.strip().replace("/", "_")
-    sym = re.sub(" */ *", "_", sym.strip())
-    return f"{name}_bas_{polygon}_{sym}.json"
+    shape_sym = re.sub(" */ *", "_", shape_sym.strip())
+    return f"{name}_bas_{polygon}_{shape_sym}.json"
 
 #------------------------------------------------------------------------------
 # The Archimedean solids in alphabetical order
@@ -94,6 +124,7 @@ class Cuboctahedron_4_S4xI_D4C4(Shape):
         )
 
 class Cuboctahedron(CompoundShape):
+    """Define a cuboctahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -148,6 +179,7 @@ class Icosidodecahedron_5_A5xI_D5C5(Shape):
         )
 
 class Icosidodecahedron(CompoundShape):
+    """Define an icosidodecahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -223,6 +255,7 @@ class Rhombicosidodecahedron_4_A5xI_D2C2(Shape):
         )
 
 class Rhombicosidodecahedron(CompoundShape):
+    """Define a rhombicosidodecahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -298,6 +331,7 @@ class Rhombicuboctahedron_4_S4xI_D4C4(Shape):
         )
 
 class Rhombicuboctahedron(CompoundShape):
+    """Define a rhombicuboctahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -372,6 +406,7 @@ class SnubCube_4_S4_C4(Shape):
         )
 
 class SnubCube(CompoundShape):
+    """Define a sub cube."""
     def __init__(self):
         super().__init__(
             [
@@ -447,6 +482,7 @@ class SnubDodecahedron_5_A5_C5(Shape):
         )
 
 class SnubDodecahedron(CompoundShape):
+    """Define a snub dodecahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -505,6 +541,7 @@ class TruncatedCube_8_S4xI_D4C4(Shape):
         )
 
 class TruncatedCube(CompoundShape):
+    """Define a truncated cube."""
     def __init__(self):
         super().__init__(
             [
@@ -586,6 +623,7 @@ class TruncatedCuboctahedron_4_S4xI_D2C2(Shape):
         )
 
 class TruncatedCuboctahedron(CompoundShape):
+    """Define a truncated cuboctahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -647,6 +685,7 @@ class TruncatedDodecahedron_10_A5xI_D5C5(Shape):
         )
 
 class TruncatedDodecahedron(CompoundShape):
+    """Define a truncated dodecahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -704,6 +743,7 @@ class TruncatedIcosahedron_6_A5xI_D3C3(Shape):
         )
 
 class TruncatedIcosahedron(CompoundShape):
+    """Define a truncated icosahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -787,6 +827,7 @@ class TruncatedIcosidodecahedron_4_A5xI_D2C2(Shape):
         )
 
 class TruncatedIcosidodecahedron(CompoundShape):
+    """Define a truncated icosidodecahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -844,6 +885,7 @@ class TruncatedOctahedron_4_S4xI_D4C4(Shape):
         )
 
 class TruncatedOctahedron(CompoundShape):
+    """Define a truncated octahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -899,6 +941,7 @@ class TruncatedTetrahedron_6_S4A4_D3C3(Shape):
         )
 
 class TruncatedTetrahedron(CompoundShape):
+    """Define a truncated tetrahedron."""
     def __init__(self):
         super().__init__(
             [
@@ -909,8 +952,6 @@ class TruncatedTetrahedron(CompoundShape):
         )
 
 if __name__ == "__main__":
-    import argparse
-
     MODELS = [
         Cuboctahedron(),
         Icosidodecahedron(),
@@ -927,9 +968,9 @@ if __name__ == "__main__":
         TruncatedTetrahedron(),
     ]
     for model in MODELS:
-        for shape in model.shapes:
-            filename = shape_to_filename(shape)
-            shape.write_json_file(filename)
+        for model_shape in model.shapes:
+            filename = shape_to_filename(model_shape)
+            model_shape.write_json_file(filename)
             print(f"written {filename}")
         filename = model.name.lower().replace(" ", "_") + ".off"
         with open(filename, "w") as fd:
