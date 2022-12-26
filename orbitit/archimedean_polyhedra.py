@@ -947,27 +947,7 @@ class TruncatedTetrahedron(CompoundShape):
 if __name__ == "__main__":
     from argparse import ArgumentParser
     from pathlib import Path
-
-    parser = ArgumentParser(DESCR)
-    parser.add_argument(
-        "--out-dir", "-o",
-        default="",
-        metavar="DIR",
-        help="Specify possible output directory. Should exist.",
-    )
-    parser.add_argument(
-        "--seperate-orbits", "-s",
-        action='store_true',
-        help="Also save the seperate parts consisting of one kind of polygon described by one "
-        "orbit. This is always saved in JSON.",
-    )
-    parser.add_argument(
-        "--json", "-j",
-        action='store_true',
-        help="Save the complete polyhedron in JSON format (default OFF)",
-    )
-    args = parser.parse_args()
-    out_dir = Path(args.out_dir)
+    from orbitit import geomtypes
 
     def shape_to_filename(shape):
         """Create a suitable filename from shape.name.
@@ -983,12 +963,42 @@ if __name__ == "__main__":
         shape_sym = re.sub(" */ *", "_", shape_sym.strip())
         return Path(f"{name}_bas_{polygon}_{shape_sym}.json")
 
+    parser = ArgumentParser(DESCR)
+    parser.add_argument(
+        "--out-dir", "-o",
+        default="",
+        metavar="DIR",
+        help="Specify possible output directory. Should exist.",
+    )
+    parser.add_argument(
+        "--precision", "-p",
+        metavar="NO-OF-DIGITS",
+        type=int,
+        help="Specify number of decimals to use when saving files. Negative numbers are ignored",
+    )
+    parser.add_argument(
+        "--seperate-orbits", "-s",
+        action='store_true',
+        help="Also save the seperate parts consisting of one kind of polygon described by one "
+        "orbit. This is always saved in JSON.",
+    )
+    parser.add_argument(
+        "--json", "-j",
+        action='store_true',
+        help="Save the complete polyhedron in JSON format (default OFF)",
+    )
+    args = parser.parse_args()
+    out_dir = Path(args.out_dir)
+
     if args.out_dir:
         out_dir = Path(args.out_dir)
         if not out_dir.is_dir():
             raise ValueError(f"The path '{args.out_dir}' doesn't exist")
     else:
         out_dir = Path("")
+
+    if args.precision and args.precision > 0:
+        geomtypes.float_out_precision = args.precision
 
     MODELS = [
         Cuboctahedron(),
@@ -1018,5 +1028,6 @@ if __name__ == "__main__":
         else:
             filename = out_dir / Path(filename + ".off")
             with open(filename, "w") as fd:
-                fd.write(model.to_off())
+                model.clean_shape(geomtypes.FLOAT_PRECISION)
+                fd.write(model.to_off(precision=geomtypes.float_out_precision))
         print(f"written {filename}")
