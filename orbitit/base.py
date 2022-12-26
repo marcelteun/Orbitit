@@ -75,3 +75,48 @@ def find_module_class_name(c, m):
         return None
 
     return rec(c)
+
+def add_std_arguments_for_generating_models(parser, models_list, add_separate=True):
+    """Add program arguments for generating standard polyhedra.
+
+    parser: initialised argparser
+    models_list: list of strings with models that are supported by the script.
+    add_separate: set to True if models can be compound models
+    """
+    parser.add_argument(
+        "--indent", "-i",
+        metavar="NO-OF-SPACES",
+        type=int,
+        help="When using JSON format indent each line with the specified number of spaces to make "
+        "it human readable. Note that the file size might increase significantly.",
+    )
+    parser.add_argument(
+        "--models", "-m",
+        metavar="NAME",
+        nargs="*",
+        help=f"Specifiy which model(s) to generate. Specify one of {models_list}. If nothing is "
+        "specified all of them will be generated."
+    )
+    parser.add_argument(
+        "--out-dir", "-o",
+        default="",
+        metavar="DIR",
+        help="Specify possible output directory. Should exist.",
+    )
+    parser.add_argument(
+        "--precision", "-p",
+        metavar="NO-OF-DIGITS",
+        type=int,
+        help="Specify number of decimals to use when saving files. Negative numbers are ignored",
+    )
+    parser.add_argument(
+        "--seperate-orbits", "-s",
+        action='store_true',
+        help="Also save the seperate parts consisting of one kind of polygon described by one "
+        "orbit. This is always saved in JSON.",
+    )
+    parser.add_argument(
+        "--json", "-j",
+        action='store_true',
+        help="Save the complete polyhedron in JSON format (default OFF)",
+    )
