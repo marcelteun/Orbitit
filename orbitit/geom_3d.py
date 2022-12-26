@@ -180,12 +180,15 @@ def read_off_file(fd, regen_edges=True, name=""):
                 state = states["readVs"]
                 Vs = []
                 logging.debug(
-                    f"will read {no_of_vs} vertices, {no_of_fs} faces and {no_of_es} edges"
+                    "will read %d vertices, %d faces and %d edges",
+                    no_of_vs,
+                    no_of_fs,
+                    no_of_es,
                 )
             elif state == states["readVs"]:
                 # the function assumes: no comments in beween (x, y, z) of Vs
                 Vs.append(geomtypes.Vec3(words[0:3]))
-                logging.debug(f"V[{i}] = {Vs[-1]}")
+                logging.debug("V[%d] = %s", i, Vs[-1])
                 i = i + 1
                 if i == no_of_vs:
                     state = states["readFs"]
@@ -225,21 +228,19 @@ def read_off_file(fd, regen_edges=True, name=""):
                                         for j in range(len_f + 1, len_f + 4)
                                     ]
                                 )
-                        logging.debug(f"face[{i}] = {Fs[-1]}")
-                        logging.debug(f"col[{i}] = {cols[-1]}")
+                        logging.debug("face[%d] = %s", i, Fs[-1])
+                        logging.debug("col[%d] = %s", i, cols[-1])
                     else:
                         if len_f == 2:
                             # this is an edge really...
                             Es.extend(face)
                             eRadius = 0.15
-                            logging.debug(f"face[{i}] = {face} is an edge")
+                            logging.debug("face[%d] = %s is an edge", i, face)
                             # what about different edge colours?
                         else:
                             # since vertices are defined explicitely, show them
                             vRadius = 0.05
-                            logging.info(
-                                f"ignoring face {i} with only {len_f} vertices"
-                            )
+                            logging.info("ignoring face %d with only %d vertices", i, len_f)
                     i = i + 1
                     if i == no_of_fs:
                         state = states["readOk"]
@@ -371,7 +372,7 @@ class Line:
             for i in range(1, self.dimension):
                 if not eq(c[i], p[i], margin=margin):
                     logging.warning(
-                        f"The point is not on the line; yDiff = {c[i] - p[i]}"
+                        "The point is not on the line; yDiff = %f", c[i] - p[i]
                     )
                     raise PrecisionError("The point is not one the line")
         if self.isSegment:
@@ -379,7 +380,7 @@ class Line:
                 (t >= 0 or eq(t, 0, margin=margin))
                 and (t <= 1 or eq(t, 1, margin=margin))
             ):
-                logging.warning(f"The point is not on the line segment; t = {t}")
+                logging.warning("The point is not on the line segment; t = %f", t)
                 raise PrecisionError("The point is not on the line segment")
         return t
 
@@ -444,15 +445,20 @@ class Line2D(Line):
         # the line intersects the sides of iFacet.
         pOnLineAtEdges = []
         no_of_vs = len(iFacet)
-        logging.debug(f"facet indices: {iFacet}")
+        logging.debug("facet indices: %s", iFacet)
         vertexIntersections = []
         for vertexNr in range(no_of_vs):
             v0 = FacetVs[iFacet[vertexNr]]
             v1 = FacetVs[iFacet[(vertexNr + 1) % no_of_vs]]
             v0 = geomtypes.Vec(v0)
             v1 = geomtypes.Vec(v1)
-            logging.debug(f"==> intersect line with edge nr {vertexNr} = {v0} -> {v1}")
-            logging.debug(f"(with this current line obect: {self.p} + t*{self.v})")
+            logging.debug(
+                "==> intersect line with edge nr %d = %s -> %s",
+                vertexNr,
+                v0,
+                v1,
+            )
+            logging.debug("(with this current line object: %s + t*%s)", self.p, self.v)
 
             # PART 1.
             edgePV3D = Line3D(v0, v=v1 - v0)
@@ -463,7 +469,7 @@ class Line2D(Line):
                 tEq1 = eq(t, 1, margin)
                 if (t >= 0 or tEq0) and (t <= 1 or tEq1):
                     logging.debug(
-                        f"edge intersects plane z = {z0}, in a point (t = {t})"
+                        "edge intersects plane z = %f, in a point (t = %f)", z0, t
                     )
                     try:
                         s = self.getFactor(edgePV3D.getPoint(t), margin=margin)
@@ -471,14 +477,14 @@ class Line2D(Line):
                         s = None
                 else:
                     logging.debug(
-                        f"edge intersects plane z = {z0} but only if extended (t = {t})"
+                        "edge intersects plane z = %f but only if extended (t = %f)", z0, t
                     )
             else:
                 # Either the edge lies in the plane z = z0
                 # or it is parallel with this plane
                 liesInPlane = eq(v0[2], z0, margin)
                 if liesInPlane:
-                    logging.debug(f"edge lies in plane z = {z0}")
+                    logging.debug("edge lies in plane z = %f", z0)
                     edgePV2D = Line2D(v0, v=v1 - v0)
                     t = edgePV2D.intersectLineGetFactor(self, margin)
                     if t is not None:
@@ -487,9 +493,7 @@ class Line2D(Line):
                         if (t >= 0 or tEq0) and (t <= 1 or tEq1):
                             s = self.intersectLineGetFactor(edgePV2D, margin)
                         else:
-                            logging.debug(
-                                f"edge intersects line but only if extended (t = {t})"
-                            )
+                            logging.debug("edge intersects line but only if extended (t = %f)", t)
                     else:
                         # fix getFactor so that just getFactor is needed.
                         if self.vOnLine(v0, margin):
@@ -500,11 +504,9 @@ class Line2D(Line):
                         else:
                             logging.debug("edge is parallel to the line")
                 else:
-                    logging.debug(
-                        f"edge parallel to plane z = {z0} (no point of intersection)"
-                    )
+                    logging.debug("edge parallel to plane z = %f (no point of intersection)", z0)
             if s is not None:
-                logging.debug(f"FOUND s = {s} with v = {self.getPoint(s)}")
+                logging.debug("FOUND s = %s with v = %s", s, self.getPoint(s))
                 # ie. in this case tEq0 and tEq1 should be defined
                 # only add vertex intersections once (otherwise you add the
                 # intersection for edge_i and edge_i+1
@@ -516,12 +518,12 @@ class Line2D(Line):
                         vertexIntersections.append([vertexNr, len(pOnLineAtEdges)])
                         logging.debug("vertex intersection at v0")
                     pOnLineAtEdges.append(s)
-                    logging.debug(f"added s = {s}")
+                    logging.debug("added s = %s", s)
                 else:
                     logging.debug("vertex intersection at v1, ignored")
 
-        logging.debug(f"line intersects edges (vertices) at s = {pOnLineAtEdges}")
-        logging.debug(f"vertex intersections: {vertexIntersections}")
+        logging.debug("line intersects edges (vertices) at s = %s", pOnLineAtEdges)
+        logging.debug("vertex intersections: %s", vertexIntersections)
         nrOfIntersectionsWithVertices = len(vertexIntersections)
         allowOddNrOfIntersections = False
         if nrOfIntersectionsWithVertices == 0:
@@ -565,19 +567,21 @@ class Line2D(Line):
                 # more than 2: complex cases.
                 logging.debug(
                     "Intersections through more than 2 vertices (not on one edge)\n"
-                    f"\tvertexIntersections: {vertexIntersections}\n"
-                    f"\tpOnLineAtEdges: {pOnLineAtEdges}\n"
-                    "\twill draw one long line, instead of segments"
+                    "\tvertexIntersections: %s\n"
+                    "\tpOnLineAtEdges: %s\n"
+                    "\twill draw one long line, instead of segments",
+                    vertexIntersections,
+                    pOnLineAtEdges
                 )
                 # assert False, 'ToDo'
                 # if an assert is not wanted, choose pass.
                 # allowOddNrOfIntersections = True
                 pOnLineAtEdges.sort()
                 pOnLineAtEdges = [pOnLineAtEdges[0], pOnLineAtEdges[-1]]
-                logging.debug(f"\tusing pOnLineAtEdges {pOnLineAtEdges}")
+                logging.debug("\tusing pOnLineAtEdges %s", pOnLineAtEdges)
         pOnLineAtEdges.sort()
 
-        logging.debug(f"pOnLineAtEdges {pOnLineAtEdges} after clean up")
+        logging.debug("pOnLineAtEdges %s after clean up", pOnLineAtEdges)
         assert (
             len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections
         ), "The nr of intersections should be even, are all edges unique and do they form one closed face?"
@@ -1925,24 +1929,24 @@ class SimpleShape(base.Orbitit):
         offset = 0
         if logging.root.level < logging.DEBUG:
             for i in range(len(self.Vs)):
-                logging.debug(f"V[{i}] = {self.Vs[i]}")
+                logging.debug("V[%d] = %s", i, self.Vs[i])
         geomtypes.set_eq_float_margin(margin)
         try:
             for i in face_indices:
-                logging.debug(f"checking face {i + 1} (of {len(face_indices)})")
+                logging.debug("checking face %d (of %d)", i + 1, len(face_indices))
                 Vs = []
                 pointsIn2D = []
                 Es = []
                 face = self.Fs[i]
                 # find out norm
-                logging.debug(f"face idx: {face}")
+                logging.debug("face idx: %d", face)
                 face_pl = facePlane(self.Vs, face)
                 if face_pl is None:
                     continue  # not a face
                 norm = face_pl.N
                 if norm is None:
                     continue  # not a face.
-                logging.debug(f"norm before {norm}")
+                logging.debug("norm before %f", norm)
                 # Find out how to rotate the faces such that the norm of the base face
                 # is parallel to the z-axis to work with a 2D situation:
                 # Rotate around the cross product of z-axis and norm
@@ -1959,9 +1963,9 @@ class SimpleShape(base.Orbitit):
                     to2DAngle = 0.0
                 PsPoints = []
                 if not to2DAngle == 0:
-                    logging.debug(f"to2DAngle: {to2DAngle}")
+                    logging.debug("to2DAngle: %f", to2DAngle)
                     to2Daxis = norm.cross(zAxis)
-                    logging.debug(f"to2Daxis: {to2Daxis}")
+                    logging.debug("to2Daxis: %f", to2Daxis)
                     Mrot = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
                     # add vertices to vertex array
                     for v in self.Vs:
@@ -1972,10 +1976,10 @@ class SimpleShape(base.Orbitit):
                     pointsIn2D = [[v[0], v[1]] for v in self.Vs]
                 # set z-value for the z-plane, ie plane of intersection
                 zBaseFace = Vs[face[0]][2]
-                logging.debug(f"zBaseFace = {zBaseFace}")
+                logging.debug("zBaseFace = %s", zBaseFace)
                 # add edges from shares
                 basePlane = facePlane(Vs, face)
-                logging.debug(f"basePlane {basePlane}")
+                logging.debug("basePlane %s", basePlane)
                 # split faces into
                 # 1. facets that ly in the plane: baseFacets, the other facets
                 #    will be intersected with these.
@@ -1986,9 +1990,11 @@ class SimpleShape(base.Orbitit):
                 Lois = []
                 for intersectingFacet in self.Fs:
                     logging.debug(
-                        f"Intersecting face[{self.Fs.index(intersectingFacet)}] = {intersectingFacet}"
+                        "Intersecting face[%d] = %s",
+                        self.Fs.index(intersectingFacet),
+                        intersectingFacet,
                     )
-                    logging.debug(f"with face[{i}] = {face}")
+                    logging.debug("with face[%d] = %s", i, face)
                     intersectingPlane = facePlane(Vs, intersectingFacet)
                     # First check if this facet has an edge in common
                     facesShareAnEdge = False
@@ -2025,12 +2031,10 @@ class SimpleShape(base.Orbitit):
                             baseFacets.append(intersectingFacet)
                             # also add to PS array of lines.
                             Es.append(intersectingFacet)
-                            logging.debug(
-                                f"In Plane: intersectingFacet {intersectingFacet}"
-                            )
+                            logging.debug("In Plane: intersectingFacet %s", intersectingFacet)
                     else:  # Loi3D is not None:
-                        logging.debug(f"intersectingPlane {intersectingPlane}")
-                        logging.debug(f"Loi3D {Loi3D}")
+                        logging.debug("intersectingPlane %s", intersectingPlane)
+                        logging.debug("Loi3D %s", Loi3D)
                         assert eq(Loi3D.v[2], 0, 100 * margin), (
                             "all intersection lines should be paralell to z = 0, but z varies with %f"
                             % (Loi3D.v[2])
@@ -2051,7 +2055,7 @@ class SimpleShape(base.Orbitit):
                         pInLoiFacet = loi2D.intersectWithFacet(
                             Vs, intersectingFacet, Loi3D.p[2], margin
                         )
-                        logging.debug(f"pInLoiFacet {pInLoiFacet}")
+                        logging.debug("pInLoiFacet %s", pInLoiFacet)
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
                             # if debug: Lois[-1].append(self.Fs.index(intersectingFacet))
@@ -2059,13 +2063,13 @@ class SimpleShape(base.Orbitit):
                 for loiData in Lois:
                     loi2D = loiData[0]
                     pInLoiFacet = loiData[1]
-                    logging.debug(f"phase 2: check iFacet nr: {loiData[-1]}")
+                    logging.debug("phase 2: check iFacet nr: %d", loiData[-1])
                     # Now Intersect loi with the baseFacets.
                     for baseFacet in baseFacets:
                         pInLoiBase = loi2D.intersectWithFacet(
                             Vs, baseFacet, loiData[2], margin
                         )
-                        logging.debug(f"pInLoiBase {pInLoiBase}")
+                        logging.debug("pInLoiBase %s", pInLoiBase)
                         # Now combine the results of pInLoiFacet and pInLoiBase:
                         # Only keep intersections that fall within 2 segments for
                         # both pInLoiFacet and pInLoiBase.
@@ -2205,7 +2209,7 @@ class SimpleShape(base.Orbitit):
             assert len(face) > 2, "a face should at least be a triangle"
             # find out norm
             norm = PPPnorm(self.Vs[face[0]], self.Vs[face[1]], self.Vs[face[2]])
-            logging.debug(f"norm before {norm}")
+            logging.debug("norm before %f", norm)
             # Find out how to rotate the faces such that the norm of the base face
             # is parallel to the z-axis to work with a 2D situation:
             # Rotate around the cross product of z-axis and norm
@@ -2225,10 +2229,10 @@ class SimpleShape(base.Orbitit):
                 pointsIn2D = [[v[0], v[1]] for v in self.Vs]
             # set z-value for the z-plane, ie plane of intersection
             zBaseFace = Vs[face[0]][2]
-            logging.debug(f"zBaseFace = {zBaseFace}")
+            logging.debug("zBaseFace = %s", zBaseFace)
             # add edges from shares
             basePlane = Plane(Vs[face[0]], Vs[face[1]], Vs[face[2]])
-            logging.debug(f"basePlane {basePlane}")
+            logging.debug("basePlane %s", basePlane)
             # split faces into
             # 1. facets that ly in the plane: baseFacets, the other facets
             #    will be intersected with these.
@@ -2239,9 +2243,11 @@ class SimpleShape(base.Orbitit):
             Lois = []
             for intersectingFacet in self.Fs:
                 logging.debug(
-                    f"Intersecting face[{self.Fs.index(intersectingFacet)}] = {intersectingFacet}"
+                    "Intersecting face[%d] = %s",
+                    self.Fs.index(intersectingFacet),
+                    intersectingFacet,
                 )
-                logging.debug(f"with face[{i}] = {face}")
+                logging.debug("with face[%d] = %s", i, face)
                 intersectingPlane = Plane(
                     Vs[intersectingFacet[0]],
                     Vs[intersectingFacet[1]],
@@ -2286,12 +2292,10 @@ class SimpleShape(base.Orbitit):
                             baseFacets.append(intersectingFacet)
                             # also add to PS array of lines.
                             Es.append(intersectingFacet)
-                            logging.debug(
-                                f"In Plane: intersectingFacet {intersectingFacet}"
-                            )
+                            logging.debug("In Plane: intersectingFacet %s", intersectingFacet)
                     else:  # Loi3D is not None:
-                        logging.debug(f"intersectingPlane {intersectingPlane}")
-                        logging.debug(f"Loi3D {Loi3D}")
+                        logging.debug("intersectingPlane %s", intersectingPlane)
+                        logging.debug("Loi3D %s", Loi3D)
                         assert eq(Loi3D.v[2], 0, margin), (
                             "all intersection lines should be paralell to z = 0, but z varies with %f"
                             % (Loi3D.v[2])
@@ -2312,7 +2316,8 @@ class SimpleShape(base.Orbitit):
                         pInLoiFacet = loi2D.intersectWithFacet(
                             Vs, intersectingFacet, Loi3D.p[2], margin
                         )
-                        logging.debug(f"pInLoiFacet {pInLoiFacet}")
+
+                        logging.debug("pInLoiFacet %s", pInLoiFacet)
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
                             # if debug: Lois[-1].append(self.Fs.index(intersectingFacet))
@@ -2335,13 +2340,13 @@ class SimpleShape(base.Orbitit):
             for loiData in Lois:
                 loi2D = loiData[0]
                 pInLoiFacet = loiData[1]
-                logging.debug(f"phase 2: check iFacet no: {loiData[-1]}")
+                logging.debug("phase 2: check iFacet no: %f", loiData[-1])
                 # Now Intersect loi with the baseFacets.
                 for baseFacet in baseFacets:
                     pInLoiBase = loi2D.intersectWithFacet(
                         Vs, baseFacet, loiData[2], margin
                     )
-                    logging.debug(f"pInLoiBase {pInLoiBase}")
+                    logging.debug("pInLoiBase %s", pInLoiBase)
                     # Now combine the results of pInLoiFacet and pInLoiBase:
                     # Only keep intersections that fall within 2 segments for
                     # both pInLoiFacet and pInLoiBase.
@@ -3204,7 +3209,7 @@ class SymmetricShape(CompoundShape):
                 CompoundShape.setEdgeProperties(
                     self, radius=radius, color=color, drawEdges=drawEdges
                 )
-                logging.info(f"radius {radius}")
+                logging.info("radius %f", radius)
                 self.merge_needed = True
 
     def getBaseEdgeProperties(self):
