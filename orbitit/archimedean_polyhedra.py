@@ -26,7 +26,6 @@
 # I also would like to keep the Greek variable names without using capitals.
 # pylint: disable=invalid-name,too-many-lines
 from math import sqrt as V
-import re
 
 from orbitit.geom_3d import CompoundShape
 from orbitit.geomtypes import Vec3
@@ -947,6 +946,7 @@ class TruncatedTetrahedron(CompoundShape):
 if __name__ == "__main__":
     from argparse import ArgumentParser
     from pathlib import Path
+    import re
     from orbitit import geomtypes
 
     def shape_to_filename(shape):
@@ -963,7 +963,7 @@ if __name__ == "__main__":
         shape_sym = re.sub(" */ *", "_", shape_sym.strip())
         return Path(f"{name}_bas_{polygon}_{shape_sym}.json")
 
-    models_map = {
+    MODELS_MAP = {
         "cuboctahedron": Cuboctahedron(),
         "icosidodecahedron": Icosidodecahedron(),
         "rhombicosidodecahedron": Rhombicosidodecahedron(),
@@ -979,77 +979,77 @@ if __name__ == "__main__":
         "truncatedTetrahedron": TruncatedTetrahedron(),
     }
 
-    parser = ArgumentParser(DESCR)
-    parser.add_argument(
+    PARSER = ArgumentParser(DESCR)
+    PARSER.add_argument(
         "--indent", "-i",
         metavar="NO-OF-SPACES",
         type=int,
         help="When using JSON format indent each line with the specified number of spaces to make "
         "it human readable. Note that the file size might increase significantly.",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "--models", "-m",
         metavar="NAME",
         nargs="*",
-        help=f"Specifiy which model(s) to generate. Specify one of {list(models_map.keys())}. If "
+        help=f"Specifiy which model(s) to generate. Specify one of {list(MODELS_MAP.keys())}. If "
         "nothing is specified all of them will be generated."
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "--out-dir", "-o",
         default="",
         metavar="DIR",
         help="Specify possible output directory. Should exist.",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "--precision", "-p",
         metavar="NO-OF-DIGITS",
         type=int,
         help="Specify number of decimals to use when saving files. Negative numbers are ignored",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "--seperate-orbits", "-s",
         action='store_true',
         help="Also save the seperate parts consisting of one kind of polygon described by one "
         "orbit. This is always saved in JSON.",
     )
-    parser.add_argument(
+    PARSER.add_argument(
         "--json", "-j",
         action='store_true',
         help="Save the complete polyhedron in JSON format (default OFF)",
     )
-    args = parser.parse_args()
-    out_dir = Path(args.out_dir)
+    ARGS = PARSER.parse_args()
+    OUT_DIR = Path(ARGS.out_dir)
 
-    if args.out_dir:
-        out_dir = Path(args.out_dir)
-        if not out_dir.is_dir():
-            raise ValueError(f"The path '{args.out_dir}' doesn't exist")
+    if ARGS.out_dir:
+        OUT_DIR = Path(ARGS.out_dir)
+        if not OUT_DIR.is_dir():
+            raise ValueError(f"The path '{ARGS.out_dir}' doesn't exist")
     else:
-        out_dir = Path("")
+        OUT_DIR = Path("")
 
-    if args.precision and args.precision > 0:
-        geomtypes.float_out_precision = args.precision
+    if ARGS.precision and ARGS.precision > 0:
+        geomtypes.float_out_precision = ARGS.precision
 
-    if args.models:
-        models = [models_map[name] for name in args.models]
+    if ARGS.models:
+        MODELS = [MODELS_MAP[name] for name in ARGS.models]
     else:
-        models = list(models_map.values())
-    for model in models:
-        if args.seperate_orbits:
+        MODELS = list(MODELS_MAP.values())
+    for model in MODELS:
+        if ARGS.seperate_orbits:
             for model_shape in model.shapes:
-                filename = out_dir / shape_to_filename(model_shape)
-                if args.indent:
-                    model_shape.json_indent = args.indent
+                filename = OUT_DIR / shape_to_filename(model_shape)
+                if ARGS.indent:
+                    model_shape.json_indent = ARGS.indent
                 model_shape.write_json_file(filename)
                 print(f"written {filename}")
         filename = model.name.lower().replace(" ", "_")
-        if args.json:
-            filename = out_dir / Path(filename + ".json")
-            if args.indent:
-                model.json_indent = args.indent
+        if ARGS.json:
+            filename = OUT_DIR / Path(filename + ".json")
+            if ARGS.indent:
+                model.json_indent = ARGS.indent
             model.write_json_file(filename)
         else:
-            filename = out_dir / Path(filename + ".off")
+            filename = OUT_DIR / Path(filename + ".off")
             with open(filename, "w") as fd:
                 model.clean_shape(geomtypes.FLOAT_PRECISION)
                 fd.write(model.to_off(precision=geomtypes.float_out_precision))
