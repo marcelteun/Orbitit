@@ -520,7 +520,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     except AttributeError:
                         pass
                     if clean_up:
-                        shape = shape.cleanShape(margin)
+                        shape = shape.clean_shape(margin)
                     with open(filepath, 'w') as fd:
                         fd.write(shape.to_off(precision, extra_data))
                     self.set_status_text("OFF file written")
@@ -570,7 +570,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                         shape = shape.simple_shape
                     except AttributeError:
                         pass
-                    shape = shape.cleanShape(margin)
+                    shape = shape.clean_shape(margin)
                     with open(filepath, 'w') as fd:
                         try:
                             fd.write(
@@ -843,17 +843,17 @@ def convert_to_off(shape, fd, precision, margin=0):
     Save the shape to the fd file descriptor in .off format
 
     precision: how many decimals to write.
-    margin: what margin to use to require that 2 floating numbers are equal.
-            If not specified or 0, then no cleaning up is done, meaning that no
-            attempt is made of merging vertices that have the same coordinate.
-            Neither are faces with the same coordinates filtered out.
+    margin: what margin to use to require that 2 floating numbers are equal. It is specified in the
+        number of decimals. If not specified or 0, then no cleaning up is done, meaning that no
+        attempt is made of merging vertices that have the same coordinate. Neither are faces with
+        the same coordinates filtered out.
     """
     try:
         shape = shape.simple_shape
     except AttributeError:
         pass
     if margin != 0:
-        shape = shape.cleanShape(margin)
+        shape = shape.clean_shape(margin)
     # TODO: support for saving extra_data?
     fd.write(shape.to_off(precision))
 

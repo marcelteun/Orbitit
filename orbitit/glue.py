@@ -274,7 +274,7 @@ def cleanUpVsFs(Vs, Fs):
             f[faceIndex] = f[faceIndex] - vRemoved[f[faceIndex]]
     return vUsage
 
-def mergeVs(Vs, Fs, precision = 12):
+def mergeVs(Vs, Fs, precision=12):
     """
     Merges vertices that are equal into one vertex.
 

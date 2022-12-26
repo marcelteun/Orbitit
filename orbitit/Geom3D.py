@@ -907,10 +907,13 @@ class SimpleShape(base.Orbitit):
         return shape
 
 
-    def cleanShape(self, precision):
+    def clean_shape(self, precision):
         """Return a new shape for which vertices are merged and degenerated faces are deleted.
 
         The shape will not have any edges.
+
+        precision: number of decimals to consider when deciding whether two floating point numbers
+            are equal.
         """
         vProps = self.getVertexProperties()
         fProps = self.getFaceProperties()
@@ -2524,12 +2527,15 @@ class CompoundShape(base.Orbitit):
             self.merge_shapes()
         return self.merged_shape
 
-    def cleanShape(self, precision):
+    def clean_shape(self, precision):
         """Return a new shape for which vertices are merged and degenerated faces are deleted.
 
         The shape will not have any edges.
+
+        precision: number of decimals to consider when deciding whether two floating point numbers
+            are equal.
         """
-        self.simple_shape.cleanShape(precision)
+        self.simple_shape.clean_shape(precision)
 
     def gl_draw(self):
         """Draws the compound shape as compound shape
