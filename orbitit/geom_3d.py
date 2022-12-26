@@ -305,7 +305,7 @@ class Line:
         p1 should have accessable [0] .. [d-1] indices.
         """
         assert (
-            p1 == None or v == None
+            p1 is None or v is None
         ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
         self.dimension = d
         self.isSegment = isSegment
@@ -328,7 +328,7 @@ class Line:
         )
 
     def getPoint(self, t):
-        """Returns the point on the line that equals to self.b + t*self.v (or [] when t == None)"""
+        """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)"""
         if t is not None:
             return [self.p[i] + t * (self.v[i]) for i in range(self.dimension)]
         else:
@@ -354,7 +354,7 @@ class Line:
         Return True is V is on the line, False otherwise
         """
         t = self.getFactorAt(v[0], 0, margin)
-        if t == None:
+        if t is None:
             t = self.getFactorAt(v[1], 1, margin)
         assert t is not None
         return Veq(self.getPoint(t), v, margin, min(len(v), self.dimension))
@@ -363,7 +363,7 @@ class Line:
         """Assuming the point p lies on the line, the factor is returned."""
         for i in range(self.dimension):
             t = self.getFactorAt(p[i], i, margin=margin)
-            if not t == None:
+            if not t is None:
                 break
         assert t is not None
         if check:
@@ -595,12 +595,12 @@ class Line3D(Line):
         """
         # make sure to have vec types internally
         p0 = geomtypes.Vec3(p0)
-        if p1 == None:
+        if p1 is None:
             assert v is not None
             v = geomtypes.Vec3(v)
             Line.__init__(self, p0, v=v, d=3, isSegment=isSegment)
         else:
-            assert v == None
+            assert v is None
             p1 = geomtypes.Vec3(p1)
             Line.__init__(self, p0, p1, d=3, isSegment=isSegment)
 
@@ -680,7 +680,7 @@ class Triangle:
         self.N = None
 
     def normal(self, normalise=False):
-        if self.N == None:
+        if self.N is None:
             self.N = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
             if normalise:
                 try:
@@ -723,7 +723,7 @@ class Plane:
         If the planes are parallel None is returned (even if the planes define
         the same plane) otherwise a line is returned.
         """
-        if plane == None:
+        if plane is None:
             return None
         N0 = self.N
         N1 = plane.N
@@ -1183,7 +1183,7 @@ class SimpleShape(base.Orbitit):
             sub-array describes one face. Each n-sided face is desribed by n
             indices. Empty on default. Using triangular faces only gives a
             better performance.
-            If Fs == None, then the previous specified value will be used.
+            If Fs is None, then the previous specified value will be used.
         colors: A tuple that defines the colour of the faces. The tuple consists
                 of the following two items:
                 0. colour definitions:
@@ -1292,7 +1292,7 @@ class SimpleShape(base.Orbitit):
             self.fNsNormalised = normalise
 
     def createVertexNormals(self, normalise, Vs=None):
-        if Vs == None:
+        if Vs is None:
             Vs = self.Vs
         self.createFaceNormals(normalise)
         # only use a vertex once, since the normal can be different
@@ -1937,10 +1937,10 @@ class SimpleShape(base.Orbitit):
                 # find out norm
                 logging.debug(f"face idx: {face}")
                 face_pl = facePlane(self.Vs, face)
-                if face_pl == None:
+                if face_pl is None:
                     continue  # not a face
                 norm = face_pl.N
-                if norm == None:
+                if norm is None:
                     continue  # not a face.
                 logging.debug(f"norm before {norm}")
                 # Find out how to rotate the faces such that the norm of the base face
@@ -2017,7 +2017,7 @@ class SimpleShape(base.Orbitit):
                     if facesShareAnEdge:
                         logging.debug("Intersecting face shares an edge")
                         pass
-                    elif Loi3D == None:
+                    elif Loi3D is None:
                         logging.debug("No intersection for face")
                         # the face is parallel or lies in the plane
                         if zBaseFace == Vs[intersectingFacet[0]][2]:
@@ -2278,7 +2278,7 @@ class SimpleShape(base.Orbitit):
                     logging.debug("Intersecting face shares an edge")
                 else:
                     Loi3D = basePlane.intersectWithPlane(intersectingPlane)
-                    if Loi3D == None:
+                    if Loi3D is None:
                         logging.debug("No intersection for face")
                         # the face is parallel or lies in the plane
                         if zBaseFace == Vs[intersectingFacet[0]][2]:
@@ -3139,7 +3139,7 @@ class SymmetricShape(CompoundShape):
                 Ns = dict["Ns"]
             except KeyError:
                 pass
-            if not (Vs == None and Ns == None):
+            if not (Vs is None and Ns is None):
                 self.base_shape.setVertexProperties(Vs=Vs, Ns=Ns)
                 self.needs_apply_isoms = True
             radius = None
@@ -3152,7 +3152,7 @@ class SymmetricShape(CompoundShape):
                 color = dict["color"]
             except KeyError:
                 pass
-            if not (radius == None and color == None):
+            if not (radius is None and color is None):
                 self.setVertexProperties(radius=radius, color=color)
         else:
             logging.warning("No parameters specified: ignoring method call")
@@ -3199,7 +3199,7 @@ class SymmetricShape(CompoundShape):
                 drawEdges = dict["drawEdges"]
             except KeyError:
                 pass
-            if not (radius == None and color == None and drawEdges == None):
+            if not (radius is None and color is None and drawEdges is None):
                 self.setEdgeProperties(radius=radius, color=color, drawEdges=drawEdges)
                 CompoundShape.setEdgeProperties(
                     self, radius=radius, color=color, drawEdges=drawEdges
