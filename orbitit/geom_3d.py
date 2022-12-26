@@ -124,9 +124,9 @@ def Veq(Va, Vb, margin=defaultFloatMargin, d=3):
     return result
 
 
-def is_int(str):
+def is_int(int_str):
     try:
-        _ = int(str)
+        _ = int(int_str)
         return True
     except ValueError:
         return False
@@ -1073,23 +1073,23 @@ class SimpleShape(base.Orbitit):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                edge_dict = dictPar
             else:
-                dict = kwargs
-            if "Es" in dict and dict["Es"] is not None:
-                self.Es = dict["Es"]
+                edge_dict = kwargs
+            if "Es" in edge_dict and edge_dict["Es"] is not None:
+                self.Es = edge_dict["Es"]
                 self.EsRange = range(0, len(self.Es), 2)
-            if "radius" in dict and dict["radius"] is not None:
-                self.gl.eRadius = dict["radius"]
-                self.gl.useCylinderEs = dict["radius"] > 0.0
+            if "radius" in edge_dict and edge_dict["radius"] is not None:
+                self.gl.eRadius = edge_dict["radius"]
+                self.gl.useCylinderEs = edge_dict["radius"] > 0.0
                 if self.gl.useCylinderEs:
                     if self.gl.cyl is not None:
                         del self.gl.cyl
-                    self.gl.cyl = Scenes3D.P2PCylinder(radius=dict["radius"])
-            if "color" in dict and dict["color"] is not None:
-                self.gl.eCol = dict["color"]
-            if "drawEdges" in dict and dict["drawEdges"] is not None:
-                self.gl.drawEdges = dict["drawEdges"]
+                    self.gl.cyl = Scenes3D.P2PCylinder(radius=edge_dict["radius"])
+            if "color" in edge_dict and edge_dict["color"] is not None:
+                self.gl.eCol = edge_dict["color"]
+            if "drawEdges" in edge_dict and edge_dict["drawEdges"] is not None:
+                self.gl.drawEdges = edge_dict["drawEdges"]
 
     def getEdgeProperties(self):
         """
@@ -1166,16 +1166,16 @@ class SimpleShape(base.Orbitit):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                face_dict = dictPar
             else:
-                dict = kwargs
-            if "Fs" in dict and dict["Fs"] is not None:
-                self.__setFs(dict["Fs"])
-            if "colors" in dict and dict["colors"] is not None:
-                self.setFaceColors(dict["colors"])
+                face_dict = kwargs
+            if "Fs" in face_dict and face_dict["Fs"] is not None:
+                self.__setFs(face_dict["Fs"])
+            if "colors" in face_dict and face_dict["colors"] is not None:
+                self.setFaceColors(face_dict["colors"])
             self.divideColorWrapper()
-            if "drawFaces" in dict and dict["drawFaces"] is not None:
-                self.setEnableDrawFaces(dict["drawFaces"])
+            if "drawFaces" in face_dict and face_dict["drawFaces"] is not None:
+                self.setEnableDrawFaces(face_dict["drawFaces"])
 
     def getFaceProperties(self):
         """
@@ -1557,12 +1557,12 @@ class SimpleShape(base.Orbitit):
                 nrUsed = glue.getVUsageIn1D(self.Vs, self.Es)
                 nrUsed = glue.getVUsageIn2D(self.Vs, self.Fs, nrUsed)
                 g = vec(0, 0, 0)
-                sum = 0
+                total = 0
                 for vIndex in self.VsRange:
                     g = g + nrUsed[vIndex] * geomtypes.Vec3(self.Vs[vIndex])
-                    sum = sum + nrUsed[vIndex]
-                if sum != 0:
-                    g = g / sum
+                    total += nrUsed[vIndex]
+                if total != 0:
+                    g = g / total
                 Vs = [self.scalingFactor * (geomtypes.Vec3(v) - g) + g for v in self.Vs]
 
             # At least on Ubuntu 8.04 conversion is not needed
@@ -2678,23 +2678,23 @@ class CompoundShape(base.Orbitit):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                vertex_dict = dictPar
             else:
-                dict = kwargs
-            if "Vs" in dict and dict["Vs"] is not None:
-                Vs = dict["Vs"]
+                vertex_dict = kwargs
+            if "Vs" in vertex_dict and vertex_dict["Vs"] is not None:
+                Vs = vertex_dict["Vs"]
             else:
                 Vs = [None for shape in self.shapeElements]
-            if "Ns" in dict and dict["Ns"] is not None:
-                Ns = dict["Ns"]
+            if "Ns" in vertex_dict and vertex_dict["Ns"] is not None:
+                Ns = vertex_dict["Ns"]
             else:
                 Ns = [None for shape in self.shapeElements]
-            if "radius" in dict:
-                radius = dict["radius"]
+            if "radius" in vertex_dict:
+                radius = vertex_dict["radius"]
             else:
                 radius = None
-            if "color" in dict:
-                color = dict["color"]
+            if "color" in vertex_dict:
+                color = vertex_dict["color"]
             else:
                 color = None
         assert len(Vs) == len(self.shapeElements)
@@ -2730,23 +2730,23 @@ class CompoundShape(base.Orbitit):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                edge_dict = dictPar
             else:
-                dict = kwargs
-            if "Es" in dict and dict["Es"] is not None:
-                Es = dict["Es"]
+                edge_dict = kwargs
+            if "Es" in edge_dict and edge_dict["Es"] is not None:
+                Es = edge_dict["Es"]
             else:
                 Es = [None for shape in self.shapeElements]
-            if "radius" in dict:
-                radius = dict["radius"]
+            if "radius" in edge_dict:
+                radius = edge_dict["radius"]
             else:
                 radius = None
-            if "color" in dict:
-                color = dict["color"]
+            if "color" in edge_dict:
+                color = edge_dict["color"]
             else:
                 color = None
-            if "drawEdges" in dict:
-                drawEdges = dict["drawEdges"]
+            if "drawEdges" in edge_dict:
+                drawEdges = edge_dict["drawEdges"]
             else:
                 drawEdges = None
         for i in range(len(self.shapeElements)):
@@ -2780,19 +2780,19 @@ class CompoundShape(base.Orbitit):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                face_dict = dictPar
             else:
-                dict = kwargs
-            if "Fs" in dict and dict["Fs"] is not None:
-                Fs = dict["Fs"]
+                face_dict = kwargs
+            if "Fs" in face_dict and face_dict["Fs"] is not None:
+                Fs = face_dict["Fs"]
             else:
                 Fs = [None for shape in self.shapeElements]
-            if "colors" in dict and dict["colors"] is not None:
-                colors = dict["colors"]
+            if "colors" in face_dict and face_dict["colors"] is not None:
+                colors = face_dict["colors"]
             else:
                 colors = [None for shape in self.shapeElements]
-            if "drawFaces" in dict:
-                drawFaces = dict["drawFaces"]
+            if "drawFaces" in face_dict:
+                drawFaces = face_dict["drawFaces"]
             else:
                 drawFaces = None
         for i in range(len(self.shapeElements)):
@@ -3131,17 +3131,17 @@ class SymmetricShape(CompoundShape):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                vertex_dict = dictPar
             else:
-                dict = kwargs
+                vertex_dict = kwargs
             Vs = None
             try:
-                Vs = dict["Vs"]
+                Vs = vertex_dict["Vs"]
             except KeyError:
                 pass
             Ns = None
             try:
-                Ns = dict["Ns"]
+                Ns = vertex_dict["Ns"]
             except KeyError:
                 pass
             if not (Vs is None and Ns is None):
@@ -3149,12 +3149,12 @@ class SymmetricShape(CompoundShape):
                 self.needs_apply_isoms = True
             radius = None
             try:
-                radius = dict["radius"]
+                radius = vertex_dict["radius"]
             except KeyError:
                 pass
             color = None
             try:
-                color = dict["color"]
+                color = vertex_dict["color"]
             except KeyError:
                 pass
             if not (radius is None and color is None):
@@ -3183,25 +3183,25 @@ class SymmetricShape(CompoundShape):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                edge_dict = dictPar
             else:
-                dict = kwargs
-            if "Es" in dict and dict["Es"] is not None:
-                self.base_shape.setEdgeProperties(Es=dict["Es"])
+                edge_dict = kwargs
+            if "Es" in edge_dict and edge_dict["Es"] is not None:
+                self.base_shape.setEdgeProperties(Es=edge_dict["Es"])
                 self.needs_apply_isoms = True
             radius = None
             try:
-                radius = dict["radius"]
+                radius = edge_dict["radius"]
             except KeyError:
                 pass
             color = None
             try:
-                color = dict["color"]
+                color = edge_dict["color"]
             except KeyError:
                 pass
             drawEdges = None
             try:
-                drawEdges = dict["drawEdges"]
+                drawEdges = edge_dict["drawEdges"]
             except KeyError:
                 pass
             if not (radius is None and color is None and drawEdges is None):
@@ -3232,18 +3232,18 @@ class SymmetricShape(CompoundShape):
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
-                dict = dictPar
+                face_dict = dictPar
             else:
-                dict = kwargs
-            if "Fs" in dict and dict["Fs"] is not None:
-                self.base_shape.setFaceProperties(Fs=dict["Fs"])
+                face_dict = kwargs
+            if "Fs" in face_dict and face_dict["Fs"] is not None:
+                self.base_shape.setFaceProperties(Fs=face_dict["Fs"])
                 self.needs_apply_isoms = True
-            if "colors" in dict and dict["colors"] is not None:
-                self.setFaceColors([dict["colors"]])
+            if "colors" in face_dict and face_dict["colors"] is not None:
+                self.setFaceColors([face_dict["colors"]])
                 # taken care of by the function above:
                 self.merge_needed = True
-            if "drawFaces" in dict and dict["drawFaces"] is not None:
-                self.setEnableDrawFaces(dict["drawFaces"])
+            if "drawFaces" in face_dict and face_dict["drawFaces"] is not None:
+                self.setEnableDrawFaces(face_dict["drawFaces"])
 
     def getBaseFaceProperties(self):
         """
