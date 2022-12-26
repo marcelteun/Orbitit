@@ -59,7 +59,7 @@ DEFAULT_EQ_FLOAT_MARGIN = 1.0*10**-FLOAT_PRECISION
 
 # Used for output: use a bit more than when comparing, to not loose when rounding.
 FLOAT_OUT_PRECISION = 12
-float_out_precision = FLOAT_OUT_PRECISION
+float_out_precision = FLOAT_OUT_PRECISION  # pylint: disable=invalid-name
 
 # Disable pylint warning: Constant name "_eq_float_margin" doesn't conform to
 # UPPER_CASE naming style (invalid-name)
