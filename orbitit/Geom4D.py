@@ -656,14 +656,14 @@ class SimpleShape:
                 this.cells.append(cell)
             this.projectedTo3D = True
 
-    def toPsPiecesStr(this,
-            faceIndices=[],
+    def to_postscript(this,
+            face_indices=[],
             scaling=1,
             precision=7,
             margin=1.0e5*geom_3d.defaultFloatMargin,
             pageSize=PS.PageSizeA4,
         ):
         if this.mapToSingeShape:
-            return this.cell.toPsPiecesStr(faceIndices, scaling, precision, margin, pageSize)
+            return this.cell.to_postscript(face_indices, scaling, precision, margin, pageSize)
         else:
-            assert False, 'toPsPiecesStr not supported for mapping to split draw'
+            assert False, 'to_postscript not supported for mapping to split draw'

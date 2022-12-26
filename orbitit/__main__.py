@@ -574,7 +574,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     with open(filepath, 'w') as fd:
                         try:
                             fd.write(
-                                shape.toPsPiecesStr(
+                                shape.to_postscript(
                                     scaling=scale_factor,
                                     precision=precision,
                                     margin=math.pow(10, -margin)
@@ -831,7 +831,7 @@ class MainPanel(wx.Panel):
 def convert_to_ps(shape, fd, scale, precision, margin):
     """Convert shape to PostScript and save to file descriptor fd"""
     fd.write(
-        shape.toPsPiecesStr(
+        shape.to_postscript(
             scaling=scale,
             precision=precision,
             margin=math.pow(10, -margin),

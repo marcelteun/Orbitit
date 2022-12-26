@@ -290,27 +290,27 @@ class Shape(heptagons.EqlHeptagonShape):
         this.setBaseEdgeProperties(Es=Es)
         this.setBaseFaceProperties(Fs=Fs, colors=(this.face_col, colIds))
 
-    def toPsPiecesStr(this,
-            faceIndices=[],
+    def to_postscript(this,
+            face_indices=[],
             scaling=1,
             precision=7,
             margin=1.0e-10,
         ):
-        if faceIndices == []:
+        if face_indices == []:
             offset = 0
             if this.show_kite:
-                faceIndices.append(offset)
+                face_indices.append(offset)
                 offset += len(this.kiteFs)
             if this.show_hepta:
-                faceIndices.append(offset)
+                face_indices.append(offset)
                 offset += len(this.heptFs)
             if this.show_extra:
-                faceIndices.append(offset)
+                face_indices.append(offset)
                 if this.alt_hept_pos:
-                    faceIndices.append(offset+1)
+                    face_indices.append(offset+1)
                 else:
-                    faceIndices.append(offset+3)
-        return super().toPsPiecesStr(faceIndices, scaling, precision, margin)
+                    face_indices.append(offset+3)
+        return super().to_postscript(face_indices, scaling, precision, margin)
 
     def initArrs(this):
         this.kiteFs = [

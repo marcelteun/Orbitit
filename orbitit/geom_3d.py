@@ -54,7 +54,7 @@ from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, 
 # - Add possible scene objects, containing shapes.
 # - add transforms
 # - add print pieces (cp from p3D)
-# - function toPsPiecesStr finds intersection: this should be part of a separate
+# - function to_postscript finds intersection: this should be part of a separate
 #   functons mapping the SimpleShape on a shape consisting of none intersecting
 #   pieces. This could be a child of SimpleShape.
 # - add function to filter out vertices that ly within a certain area: these
@@ -731,7 +731,7 @@ class Plane:
             return None
         V = N0.cross(N1)
         # V = V.normalise()
-        # for toPsPiecesStr self.N == [0, 0, 1]; hanlde more efficiently.
+        # for to_postscript self.N == [0, 0, 1]; hanlde more efficiently.
         if N0 == geomtypes.Vec([0, 0, 1]):
             # simplified situation from below:
             z = -self.D
@@ -1895,9 +1895,9 @@ class SimpleShape(base.Orbitit):
         s = w("# END")
         return s
 
-    def toPsPiecesStr(
+    def to_postscript(
         self,
-        faceIndices=[],
+        face_indices=None,
         scaling=1,
         precision=7,
         margin=1.0e5 * defaultFloatMargin,
@@ -1910,18 +1910,17 @@ class SimpleShape(base.Orbitit):
         The function will for each face check whether it intersects another
         face. By these intersections the face is divided into pieces. All pieces
         are printed, not only the ones that are visible from the outside.
-        faceIndices: an array of faces for which the pieces should be printed.
-                     Since many objects have symmetry it is not needed to
-                     calculate the pieces for each face.
-        scaling: All pieces in all faces are scaled by a certain factor in the
-                 resulting PS string. This factor can be adjusted later in the
-                 file itself (after printing the string to a file).
+        face_indices: an array of faces for which the pieces should be printed. Since many objects
+            have symmetry it is not needed to calculate the pieces for each face.
+        scaling: All pieces in all faces are scaled by a certain factor in the resulting PS string.
+            This factor can be adjusted later in the file itself (after printing the string to a
+            file).
         precision: The precision to be used for the coordinates of the vertices.
-        margin: A margin to be used when comparing floats: e.g. to recognise
-                that 2 vertices have "the same" coordinates.
+        margin: A margin to be used when comparing floats: e.g. to recognise that 2 vertices have
+            "the same" coordinates.
         """
-        if faceIndices == []:
-            faceIndices = list(range(len(self.Fs)))
+        if not face_indices:
+            face_indices = list(range(len(self.Fs)))
         PsDoc = PS.doc(title=self.name, pageSize=pageSize)
         offset = 0
         if logging.root.level < logging.DEBUG:
@@ -1929,8 +1928,8 @@ class SimpleShape(base.Orbitit):
                 logging.debug(f"V[{i}] = {self.Vs[i]}")
         geomtypes.set_eq_float_margin(margin)
         try:
-            for i in faceIndices:
-                logging.debug(f"checking face {i + 1} (of {len(faceIndices)})")
+            for i in face_indices:
+                logging.debug(f"checking face {i + 1} (of {len(face_indices)})")
                 Vs = []
                 pointsIn2D = []
                 Es = []
@@ -2136,7 +2135,7 @@ class SimpleShape(base.Orbitit):
 
     def intersectFacets(
         self,
-        faceIndices=[],
+        face_indices=None,
         margin=1.0e5 * defaultFloatMargin,
     ):
         """
@@ -2146,8 +2145,8 @@ class SimpleShape(base.Orbitit):
         The function will for each face check whether it intersects another
         face. By these intersections the face is divided into pieces. All pieces
         will form a new shape.
-        faceIndices: an optional array of faces for which the pieces should be
-                     intersected. If [], then all faces will be intersected.
+        face_indices: an optional array of faces for which the pieces should be intersected. If
+            None, then all faces will be intersected.
         margin: A margin to be used when comparing floats: e.g. to recognise
                 that 2 vertices have "the same" coordinates.
         """
@@ -2193,10 +2192,10 @@ class SimpleShape(base.Orbitit):
         # S Fortune - Proceedings of the third ACM symposium on Solid modeling and, 1995 - portal.acm.org Polyhedral modelling with exact arithmetic
         #
 
-        if faceIndices == []:
-            faceIndices = list(range(len(self.Fs)))
+        if not face_indices:
+            face_indices = list(range(len(self.Fs)))
         margin, geomtypes.eq_float_margin = geomtypes.eq_float_margin, margin
-        for i in faceIndices:
+        for i in face_indices:
             # TODO: problem Vs is calculated per face...
             #       clean up later...?
             Vs = []
@@ -2840,9 +2839,9 @@ class CompoundShape(base.Orbitit):
             self.merge_shapes()
         return self.merged_shape.to_off(precision, info, color_floats)
 
-    def toPsPiecesStr(
+    def to_postscript(
         self,
-        faceIndices=[],
+        face_indices=None,
         scaling=1,
         precision=7,
         margin=1.0e5 * defaultFloatMargin,
@@ -2850,9 +2849,7 @@ class CompoundShape(base.Orbitit):
     ):
         if self.merge_needed:
             self.merge_shapes()
-        return self.merged_shape.toPsPiecesStr(
-            faceIndices, scaling, precision, margin, pageSize
-        )
+        return self.merged_shape.to_postscript(face_indices, scaling, precision, margin, pageSize)
 
     def toX3dDoc(self, id="SISH", precision=5, edgeRadius=0):
         if self.merge_needed:
@@ -3259,9 +3256,9 @@ class SymmetricShape(CompoundShape):
                 self.apply_isoms()
             CompoundShape.gl_draw(self)
 
-    def toPsPiecesStr(
+    def to_postscript(
         self,
-        faceIndices=[],
+        face_indices=None,
         scaling=1,
         precision=7,
         margin=1.0e5 * defaultFloatMargin,
@@ -3269,11 +3266,11 @@ class SymmetricShape(CompoundShape):
     ):
         if self.merge_needed:
             self.merge_shapes()
-        if faceIndices == []:
+        if not face_indices:
             # no need to print all faces in orbited, because of symmetry
-            faceIndices = list(range(len(self.base_shape.Fs)))
-        return self.simple_shape.toPsPiecesStr(
-            faceIndices, scaling, precision, margin, pageSize
+            face_indices = list(range(len(self.base_shape.Fs)))
+        return self.simple_shape.to_postscript(
+            face_indices, scaling, precision, margin, pageSize
         )
 
 
