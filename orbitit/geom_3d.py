@@ -849,6 +849,8 @@ class SimpleShape(base.Orbitit):
         self.gl = Fields()
         self.gl.sphere = None
         self.gl.cyl = None
+        # This is save so heirs can still use repr_dict from this class
+        self.json_class = SimpleShape
         self.gl.alwaysSetVertices = (
             False  # set to true if a scene contains more than 1 shape
         )
@@ -902,7 +904,7 @@ class SimpleShape(base.Orbitit):
         Only essential parts are saved. E.g. orientation isn't essential here.
         """
         return {
-            "class": base.class_to_json[self.__class__],
+            "class": base.class_to_json[self.json_class],
             "data": {
                 "name": self.name,
                 "vs": self.Vs,
@@ -2830,6 +2832,8 @@ class SymmetricShape(CompoundShape):
         if regen_edges:
             self.base_shape.regen_edges()
         super().__init__([self.base_shape], name=name)
+        # This is save so heirs can still use repr_dict from this class
+        self.json_class = SymmetricShape
         self.setFaceColors(colors)
         self.isometries = isometries if isometries else [E]
         self.order = len(isometries)
@@ -2907,7 +2911,7 @@ class SymmetricShape(CompoundShape):
         """Return a short representation of the object."""
         # Note that orientation IS essential here.
         return {
-            "class": base.class_to_json[self.__class__],
+            "class": base.class_to_json[self.json_class],
             "data": {
                 "name": self.name,
                 "vs": self.base_shape.Vs,
