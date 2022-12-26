@@ -19,7 +19,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 
 import copy
@@ -61,24 +61,24 @@ from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, 
 
 vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
-E = geomtypes.E     # Identity
-I = geomtypes.I     # Central inversion
+E = geomtypes.E  # Identity
+I = geomtypes.I  # Central inversion
 
 # constant that have deal with angles
-Rad2Deg = 180.0/math.pi
-Deg2Rad = math.pi/180
-R1_2 = math.pi      # 1/2 of a circle
+Rad2Deg = 180.0 / math.pi
+Deg2Rad = math.pi / 180
+R1_2 = math.pi  # 1/2 of a circle
 
-R1_3 = 2*math.pi/3  # 1/3 of a circle
-R2_3 = 2*R1_3       # 2/3 of a circle
+R1_3 = 2 * math.pi / 3  # 1/3 of a circle
+R2_3 = 2 * R1_3  # 2/3 of a circle
 
-R1_4 = math.pi/2    # 1/4 of a circle
-R3_4 = 3*R1_4       # 3/4 of a circle
+R1_4 = math.pi / 2  # 1/4 of a circle
+R3_4 = 3 * R1_4  # 3/4 of a circle
 
-R1_5 = 2*math.pi/5  # 1/5 of a circle
-R2_5 = 2*R1_5       # 2/5 of a circle
-R3_5 = 3*R1_5       # 3/5 of a circle
-R4_5 = 4*R1_5       # 4/5 of a circle
+R1_5 = 2 * math.pi / 5  # 1/5 of a circle
+R2_5 = 2 * R1_5  # 2/5 of a circle
+R3_5 = 3 * R1_5  # 3/5 of a circle
+R4_5 = 4 * R1_5  # 4/5 of a circle
 
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
@@ -86,7 +86,8 @@ V5 = math.sqrt(5)
 
 defaultFloatMargin = 1.0e-15
 
-def eq(a, b, margin = defaultFloatMargin):
+
+def eq(a, b, margin=defaultFloatMargin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
 
@@ -97,8 +98,9 @@ def eq(a, b, margin = defaultFloatMargin):
     """
     return abs(a - b) < margin
 
+
 # rm with cgtypes dependency
-def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
+def Veq(Va, Vb, margin=defaultFloatMargin, d=3):
     """
     Check if 2 'd' dimensional floating point vectors 'Va' and 'Vb' are close
     enough to be called equal.
@@ -116,6 +118,7 @@ def Veq(Va, Vb, margin = defaultFloatMargin, d = 3):
         result = result and eq(Va[i], Vb[i], margin)
     return result
 
+
 def is_int(str):
     try:
         _ = int(str)
@@ -123,7 +126,8 @@ def is_int(str):
     except ValueError:
         return False
 
-def read_off_file(fd, regen_edges=True, name=''):
+
+def read_off_file(fd, regen_edges=True, name=""):
     """Reads an the std 'off' format of a 3D object and returns an object of the
     SimpleShape class.
 
@@ -134,7 +138,7 @@ def read_off_file(fd, regen_edges=True, name=''):
         optimised and can take a long time.
     return: an object of the SimpleShape class.
     """
-    states = {'checkOff': 0, 'readSizes': 1, 'readVs': 2, 'readFs': 3, 'readOk': 4}
+    states = {"checkOff": 0, "readSizes": 1, "readVs": 2, "readFs": 3, "readOk": 4}
     no_of_vs = 0
     no_of_fs = 0
     no_of_es = 0
@@ -142,22 +146,22 @@ def read_off_file(fd, regen_edges=True, name=''):
     i = 0
     # A dictionary where the key and value pairs are exchanged, for debugging
     # purposes:
-    statesRev   = {}
+    statesRev = {}
     for (key, value) in states.items():
         statesRev[value] = key
-    state = states['checkOff']
+    state = states["checkOff"]
     vRadius = 0
     eRadius = 0
     for line in fd:
         words = line.split()
-        if len(words) > 0 and words[0][0] != '#':
-            if state == states['checkOff']:
-                if words[0] == 'OFF':
-                    state = states['readSizes']
+        if len(words) > 0 and words[0][0] != "#":
+            if state == states["checkOff"]:
+                if words[0] == "OFF":
+                    state = states["readSizes"]
                 else:
                     break
-                logging.debug('OFF file format recognised')
-            elif state == states['readSizes']:
+                logging.debug("OFF file format recognised")
+            elif state == states["readSizes"]:
                 # the function assumes: no comments in beween the 3 nrs
                 assert words[0].isdigit()
                 assert words[1].isdigit()
@@ -167,46 +171,54 @@ def read_off_file(fd, regen_edges=True, name=''):
                 no_of_es = int(words[2])
                 # Dont check Euler: in a compound for each part F + V - E = 2
                 # So the difference 2 becomes 2n for a compound of n.
-                #assert no_of_es + 2 == no_of_fs + no_of_vs
-                state = states['readVs']
+                # assert no_of_es + 2 == no_of_fs + no_of_vs
+                state = states["readVs"]
                 Vs = []
                 logging.debug(
                     f"will read {no_of_vs} vertices, {no_of_fs} faces and {no_of_es} edges"
                 )
-            elif state == states['readVs']:
+            elif state == states["readVs"]:
                 # the function assumes: no comments in beween (x, y, z) of Vs
                 Vs.append(geomtypes.Vec3(words[0:3]))
                 logging.debug(f"V[{i}] = {Vs[-1]}")
                 i = i + 1
                 if i == no_of_vs:
-                    state = states['readFs']
+                    state = states["readFs"]
                     Fs = []
                     cols = []
                     fColors = [i for i in range(no_of_fs)]
                     i = 0
                     if no_of_fs == 0:
-                        state = states['readOk']
+                        state = states["readOk"]
                         logging.info("Note: the OFF file only contains vertices")
                         vRadius = 0.05
-            elif state == states['readFs']:
+            elif state == states["readFs"]:
                 # the function assumes: no comments in beween "q i0 .. iq-1 r g b"
-                assert words[0].isdigit(), "error interpreting line as face {}".format(words)
+                assert words[0].isdigit(), "error interpreting line as face {}".format(
+                    words
+                )
                 len_f = int(words[0])
                 if len_f > 0:
-                    assert (len(words) >= len_f + 4 or len(words) == len_f + 1)
+                    assert len(words) >= len_f + 4 or len(words) == len_f + 1
                     face = [int(words[j]) for j in range(1, len_f + 1)]
                     if len_f >= 3:
                         Fs.append(face)
                         if len(words) == len_f + 1:
                             cols.append([0.8, 0.8, 0.8])
                         else:
-                            if is_int(words[len_f+1]):
+                            if is_int(words[len_f + 1]):
                                 cols.append(
-                                    [float(words[j])/255 for j in range(len_f+1, len_f+4)]
+                                    [
+                                        float(words[j]) / 255
+                                        for j in range(len_f + 1, len_f + 4)
+                                    ]
                                 )
                             else:
                                 cols.append(
-                                    [float(words[j]) for j in range(len_f+1, len_f+4)]
+                                    [
+                                        float(words[j])
+                                        for j in range(len_f + 1, len_f + 4)
+                                    ]
                                 )
                         logging.debug(f"face[{i}] = {Fs[-1]}")
                         logging.debug(f"col[{i}] = {cols[-1]}")
@@ -220,33 +232,40 @@ def read_off_file(fd, regen_edges=True, name=''):
                         else:
                             # since vertices are defined explicitely, show them
                             vRadius = 0.05
-                            logging.INFO(f"ignoring face {i} with only {len_f} vertices")
+                            logging.info(
+                                f"ignoring face {i} with only {len_f} vertices"
+                            )
                     i = i + 1
                     if i == no_of_fs:
-                        state = states['readOk']
-                        break;
+                        state = states["readOk"]
+                        break
             else:
                 break
-    assert state == states['readOk'], """
+    assert (
+        state == states["readOk"]
+    ), """
         EOF occurred while not done reading:
             Would read %d Vs and %d Fs;
             current state %s with %d items read""" % (
-            no_of_vs, no_of_fs,
-            statesRev[state], i
-        )
-    shape = SimpleShape(Vs, Fs, Es, colors = (cols, fColors))
+        no_of_vs,
+        no_of_fs,
+        statesRev[state],
+        i,
+    )
+    shape = SimpleShape(Vs, Fs, Es, colors=(cols, fColors))
     # Note that Orbitit's panel.setShape will ignore these anyway...
     if vRadius != 0:
-        shape.setVertexProperties(radius = vRadius)
+        shape.setVertexProperties(radius=vRadius)
     if eRadius != 0:
-        shape.setEdgeProperties(radius = eRadius)
-    if name != '':
+        shape.setEdgeProperties(radius=eRadius)
+    if name != "":
         shape.name = name
     # If the file defines edges (faces of length 2) then don't recreate any
     # edges, even if requested
     if regen_edges and len(Es) == 0:
         shape.regen_edges()
     return shape
+
 
 def saveFile(fd, shape):
     """
@@ -257,18 +276,22 @@ def saveFile(fd, shape):
     fd.write("import orbitit\n")
     fd.write("shape = %s" % repr(shape))
 
+
 class Fields:
     """
     This class is an empty class to be able to set some fields, like structures
     in C.
     """
+
     pass
+
 
 class PrecisionError(ValueError):
     "Possible error caused bby floats not being equals exactly"
 
+
 class Line:
-    def __init__(self, p0, p1 = None, v = None, d = 3, isSegment = False):
+    def __init__(self, p0, p1=None, v=None, d=3, isSegment=False):
         """
         Define a line in a d dimensional space.
 
@@ -276,7 +299,9 @@ class Line:
         line or specify a base point p0 and directional vector v. Points p0 and
         p1 should have accessable [0] .. [d-1] indices.
         """
-        assert p1 == None or v == None, 'Specify either 2 points p0 and p1 or a base point p0 and a direction v!'
+        assert (
+            p1 == None or v == None
+        ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
         self.dimension = d
         self.isSegment = isSegment
         if p1 != None:
@@ -285,7 +310,7 @@ class Line:
             self.setBaseDir(p0, v)
 
     def setPoints(self, p0, p1):
-        d = [ p1[i] - p0[i] for i in range(self.dimension)]
+        d = [p1[i] - p0[i] for i in range(self.dimension)]
         self.setBaseDir(p0, d)
 
     def setBaseDir(self, p, v):
@@ -294,22 +319,17 @@ class Line:
 
     def factorInSegment(self, t, margin):
         return (
-            t != None
-            and
-            (t >= 0 or eq(t, 0, margin))
-            and
-            (t <= 1 or eq(t, 1, margin))
+            t != None and (t >= 0 or eq(t, 0, margin)) and (t <= 1 or eq(t, 1, margin))
         )
 
     def getPoint(self, t):
-        """Returns the point on the line that equals to self.b + t*self.v (or [] when t == None)
-        """
+        """Returns the point on the line that equals to self.b + t*self.v (or [] when t == None)"""
         if t != None:
-            return [ self.p[i] + t * (self.v[i]) for i in range(self.dimension) ]
+            return [self.p[i] + t * (self.v[i]) for i in range(self.dimension)]
         else:
             return []
 
-    def getFactorAt(self, c, i, margin = defaultFloatMargin):
+    def getFactorAt(self, c, i, margin=defaultFloatMargin):
         """
         Get the factor for one element constant. For an n-dimensional line it
         returns None if:
@@ -324,7 +344,7 @@ class Line:
         else:
             return None
 
-    def vOnLine(self, v, margin = defaultFloatMargin):
+    def vOnLine(self, v, margin=defaultFloatMargin):
         """
         Return True is V is on the line, False otherwise
         """
@@ -334,33 +354,33 @@ class Line:
         assert t != None
         return Veq(self.getPoint(t), v, margin, min(len(v), self.dimension))
 
-
-    def getFactor(self, p, check = True, margin = defaultFloatMargin):
-        """Assuming the point p lies on the line, the factor is returned.
-        """
+    def getFactor(self, p, check=True, margin=defaultFloatMargin):
+        """Assuming the point p lies on the line, the factor is returned."""
         for i in range(self.dimension):
-            t =  self.getFactorAt(p[i], i, margin = margin)
+            t = self.getFactorAt(p[i], i, margin=margin)
             if not t == None:
                 break
         assert t != None
         if check:
             c = self.getPoint(t)
             for i in range(1, self.dimension):
-                if not eq(c[i], p[i], margin = margin):
-                    logging.warning(f"The point is not on the line; yDiff = {c[i] - p[i]}")
+                if not eq(c[i], p[i], margin=margin):
+                    logging.warning(
+                        f"The point is not on the line; yDiff = {c[i] - p[i]}"
+                    )
                     raise PrecisionError("The point is not one the line")
         if self.isSegment:
             if not (
-                (t >= 0 or eq(t, 0, margin = margin))
-                and
-                (t <= 1 or eq(t, 1, margin = margin))
+                (t >= 0 or eq(t, 0, margin=margin))
+                and (t <= 1 or eq(t, 1, margin=margin))
             ):
                 logging.warning(f"The point is not on the line segment; t = {t}")
                 raise PrecisionError("The point is not on the line segment")
         return t
 
+
 class Line2D(Line):
-    def __init__(self, p0, p1 = None, v = None, isSegment = False):
+    def __init__(self, p0, p1=None, v=None, isSegment=False):
         """
         Define a line in a 2D plane.
 
@@ -368,29 +388,31 @@ class Line2D(Line):
         a base point p0 and directional vector v. Points p0 and p1 should have
         accessable [0] and [1] indices.
         """
-        Line.__init__(self, p0, p1, v, d = 2, isSegment = isSegment)
+        Line.__init__(self, p0, p1, v, d=2, isSegment=isSegment)
 
-    def intersectLineGetFactor(self, l, margin = 10 * defaultFloatMargin):
+    def intersectLineGetFactor(self, l, margin=10 * defaultFloatMargin):
         """Gets the factor for v for which the line l intersects this line
 
         i.e. the point of intersection is specified by self.p + restult * self.v
         If the lines are parallel, then None is returned.
         """
-        nom = (l.v[0]*self.v[1]) - (l.v[1]*self.v[0])
+        nom = (l.v[0] * self.v[1]) - (l.v[1] * self.v[0])
         if not eq(nom, 0, margin):
-            denom = l.v[0]*(l.p[1] - self.p[1]) + l.v[1]*(self.p[0] - l.p[0])
+            denom = l.v[0] * (l.p[1] - self.p[1]) + l.v[1] * (self.p[0] - l.p[0])
             return denom / nom
         else:
             return None
 
     def intersectLine(self, l):
-        """returns the point of intersection with line l or None if the line is parallel.
-        """
+        """returns the point of intersection with line l or None if the line is parallel."""
         return self.getPoint(self.intersectLineGetFactor(l))
 
-    def intersectWithFacet(self, FacetVs, iFacet,
+    def intersectWithFacet(
+        self,
+        FacetVs,
+        iFacet,
         z0=0.0,
-        margin=defaultFloatMargin ,
+        margin=defaultFloatMargin,
     ):
         """
         Intersect the 2D line object in plane z = Z0 with a 3D facet and return
@@ -428,28 +450,31 @@ class Line2D(Line):
             logging.debug(f"(with this current line obect: {self.p} + t*{self.v})")
 
             # PART 1.
-            edgePV3D = Line3D(v0, v = v1-v0)
-            t = edgePV3D.getFactorAt(z0, 2, margin = margin)
+            edgePV3D = Line3D(v0, v=v1 - v0)
+            t = edgePV3D.getFactorAt(z0, 2, margin=margin)
             s = None
             if t != None:
                 tEq0 = eq(t, 0, margin)
                 tEq1 = eq(t, 1, margin)
                 if (t >= 0 or tEq0) and (t <= 1 or tEq1):
-                    logging.debug(f"edge intersects plane z = {z0}, in a point (t = {t})")
+                    logging.debug(
+                        f"edge intersects plane z = {z0}, in a point (t = {t})"
+                    )
                     try:
-                        s = self.getFactor(edgePV3D.getPoint(t),
-                                                                margin = margin)
+                        s = self.getFactor(edgePV3D.getPoint(t), margin=margin)
                     except PrecisionError:
                         s = None
                 else:
-                    logging.debug(f"edge intersects plane z = {z0} but only if extended (t = {t})")
+                    logging.debug(
+                        f"edge intersects plane z = {z0} but only if extended (t = {t})"
+                    )
             else:
                 # Either the edge lies in the plane z = z0
                 # or it is parallel with this plane
                 liesInPlane = eq(v0[2], z0, margin)
                 if liesInPlane:
                     logging.debug(f"edge lies in plane z = {z0}")
-                    edgePV2D = Line2D(v0, v = v1-v0)
+                    edgePV2D = Line2D(v0, v=v1 - v0)
                     t = edgePV2D.intersectLineGetFactor(self, margin)
                     if t != None:
                         tEq0 = eq(t, 0, margin)
@@ -457,18 +482,22 @@ class Line2D(Line):
                         if (t >= 0 or tEq0) and (t <= 1 or tEq1):
                             s = self.intersectLineGetFactor(edgePV2D, margin)
                         else:
-                            logging.debug(f"edge intersects line but only if extended (t = {t})")
+                            logging.debug(
+                                f"edge intersects line but only if extended (t = {t})"
+                            )
                     else:
                         # fix getFactor so that just getFactor is needed.
                         if self.vOnLine(v0, margin):
                             tEq0 = True
                             tEq1 = False
-                            s = self.getFactor(v0, margin = margin)
+                            s = self.getFactor(v0, margin=margin)
                             logging.debug("edge is on the line")
                         else:
                             logging.debug("edge is parallel to the line")
                 else:
-                    logging.debug(f"edge parallel to plane z = {z0} (no point of intersection)")
+                    logging.debug(
+                        f"edge parallel to plane z = {z0} (no point of intersection)"
+                    )
             if s != None:
                 logging.debug(f"FOUND s = {s} with v = {self.getPoint(s)}")
                 # ie. in this case tEq0 and tEq1 should be defined
@@ -504,7 +533,7 @@ class Line2D(Line):
         elif nrOfIntersectionsWithVertices == 2:
             # if these 2 vertices form an edge:
             vertexIndexDelta = vertexIntersections[1][0] - vertexIntersections[0][0]
-            if (vertexIndexDelta == 1 or vertexIndexDelta == no_of_vs - 1):
+            if vertexIndexDelta == 1 or vertexIndexDelta == no_of_vs - 1:
                 # (part of) the line of intersection is an edge
                 # keep it (note that the edge might continue in a line of
                 # intersection for a concave facet, which might lead to an odd
@@ -520,10 +549,8 @@ class Line2D(Line):
                 # v6. So either a difference of 1 or at least 5 is allowed.
                 if not (
                     vertexIndexDelta == 1
-                    or
-                    vertexIndexDelta >= no_of_vs - (
-                        nrOfIntersectionsWithVertices - 1
-                    )
+                    or vertexIndexDelta
+                    >= no_of_vs - (nrOfIntersectionsWithVertices - 1)
                 ):
                     allOnOneEdge = False
             if allOnOneEdge:
@@ -537,20 +564,23 @@ class Line2D(Line):
                     f"\tpOnLineAtEdges: {pOnLineAtEdges}\n"
                     "\twill draw one long line, instead of segments"
                 )
-                #assert False, 'ToDo'
+                # assert False, 'ToDo'
                 # if an assert is not wanted, choose pass.
-                #allowOddNrOfIntersections = True
+                # allowOddNrOfIntersections = True
                 pOnLineAtEdges.sort()
                 pOnLineAtEdges = [pOnLineAtEdges[0], pOnLineAtEdges[-1]]
                 logging.debug(f"\tusing pOnLineAtEdges {pOnLineAtEdges}")
         pOnLineAtEdges.sort()
 
         logging.debug(f"pOnLineAtEdges {pOnLineAtEdges} after clean up")
-        assert len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections, "The nr of intersections should be even, are all edges unique and do they form one closed face?"
+        assert (
+            len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections
+        ), "The nr of intersections should be even, are all edges unique and do they form one closed face?"
         return pOnLineAtEdges
 
+
 class Line3D(Line):
-    def __init__(self, p0, p1 = None, v = None, isSegment = False):
+    def __init__(self, p0, p1=None, v=None, isSegment=False):
         """
         Define a line in 3D space.
 
@@ -563,15 +593,15 @@ class Line3D(Line):
         if p1 == None:
             assert v != None
             v = geomtypes.Vec3(v)
-            Line.__init__(self, p0, v = v, d = 3, isSegment = isSegment)
+            Line.__init__(self, p0, v=v, d=3, isSegment=isSegment)
         else:
             assert v == None
             p1 = geomtypes.Vec3(p1)
-            Line.__init__(self, p0, p1, d = 3, isSegment = isSegment)
+            Line.__init__(self, p0, p1, d=3, isSegment=isSegment)
 
     # redefine to get vec3 types:
     def setPoints(self, p0, p1):
-        self.setBaseDir(p0, p1-p0)
+        self.setBaseDir(p0, p1 - p0)
 
     def getPoint(self, t):
         if t != None:
@@ -581,27 +611,28 @@ class Line3D(Line):
 
     def squareDistance2Point(self, P):
         # p81 of E.Lengyel
-        q = vec(P)
+        q = geomtypes.Vec3(P)
         hyp = q - self.p
-        prjQ = hyp*self.v
-        return (hyp*hyp) - ((prjQ*prjQ) / (self.v*self.v))
+        prjQ = hyp * self.v
+        return (hyp * hyp) - ((prjQ * prjQ) / (self.v * self.v))
 
     def Discriminant2Line(self, L):
         # p82 of E.Lengyel
-        dot = (self.v*L.v)
-        return (self.v*self.v)*(L.v*L.v) - dot*dot
+        dot = self.v * L.v
+        return (self.v * self.v) * (L.v * L.v) - dot * dot
 
     def isParallel2Line(self, L):
         # p82 of E.Lengyel
         return self.Discriminant2Line(L) == 0
 
-    def intersectWithLine(self, L, check = True, margin = defaultFloatMargin):
+    def intersectWithLine(self, L, check=True, margin=defaultFloatMargin):
         D = self.Discriminant2Line(L)
-        if D == 0: return None
+        if D == 0:
+            return None
         dx = (L.p - self.p) * self.v
         dy = (self.p - L.p) * L.v
         vpvq = self.v * L.v
-        s = ((L.v * L.v) * dx +  vpvq * dy) / D
+        s = ((L.v * L.v) * dx + vpvq * dy) / D
         if self.isSegment and not self.factorInSegment(s, margin):
             result = None
         else:
@@ -612,35 +643,49 @@ class Line3D(Line):
                     result = None
                 else:
                     checkWith = L.getPoint(t)
-                    if (not Veq(result, checkWith, margin = margin)):
+                    if not Veq(result, checkWith, margin=margin):
                         result = None
                     else:
                         # for a better precision:
                         result = (result + checkWith) / 2
         return result
 
-    def toStr(self, precision = 2):
-        formatStr = "(x, y, z) = (%%0.%df, %%0.%df, %%0.%df) + t * (%%0.%df, %%0.%df, %%0.%df)" % (precision, precision, precision, precision, precision, precision)
-        return formatStr % (self.p[0], self.p[1], self.p[2], self.v[0], self.v[1], self.v[2])
+    def toStr(self, precision=2):
+        formatStr = (
+            "(x, y, z) = (%%0.%df, %%0.%df, %%0.%df) + t * (%%0.%df, %%0.%df, %%0.%df)"
+            % (precision, precision, precision, precision, precision, precision)
+        )
+        return formatStr % (
+            self.p[0],
+            self.p[1],
+            self.p[2],
+            self.v[0],
+            self.v[1],
+            self.v[2],
+        )
+
 
 class Triangle:
     def __init__(self, v0, v1, v2):
         self.v = [
-                vec(v0[0], v0[1], v0[2]),
-                vec(v1[0], v1[1], v1[2]),
-                vec(v2[0], v2[1], v2[2])
-            ]
+            vec(v0[0], v0[1], v0[2]),
+            vec(v1[0], v1[1], v1[2]),
+            vec(v2[0], v2[1], v2[2]),
+        ]
         self.N = None
 
-    def normal(self, normalise = False):
+    def normal(self, normalise=False):
         if self.N == None:
             self.N = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
             if normalise:
-                try: self.N = self.N.normalize()
-                except ZeroDivisionError: pass
+                try:
+                    self.N = self.N.normalize()
+                except ZeroDivisionError:
+                    pass
             return self.N
         else:
             return self.N
+
 
 class Plane:
     """Create a plane from 3 points in the plane.
@@ -650,16 +695,16 @@ class Plane:
     and a 'D' such that for a point P in the plane 'D' = -N.P, i.e. Nx x + Ny y
     + Nz z + D = 0 is the equation of the plane.
     """
+
     def __init__(self, P0, P1, P2):
-        assert(not P0 == P1), '\n  P0 = %s,\n  P1 = %s' % (str(P0), str(P1))
-        assert(not P0 == P2), '\n  P0 = %s,\n  P2 = %s' % (str(P0), str(P2))
-        assert(not P1 == P2), '\n  P1 = %s,\n  P2 = %s' % (str(P1), str(P2))
+        assert not P0 == P1, "\n  P0 = %s,\n  P1 = %s" % (str(P0), str(P1))
+        assert not P0 == P2, "\n  P0 = %s,\n  P2 = %s" % (str(P0), str(P2))
+        assert not P1 == P2, "\n  P1 = %s,\n  P2 = %s" % (str(P1), str(P2))
         self.N = self.norm(P0, P1, P2)
         self.D = -self.N * geomtypes.Vec3(P0)
 
     def norm(self, P0, P1, P2):
-        """calculate the norm for the plane
-        """
+        """calculate the norm for the plane"""
         v1 = geomtypes.Vec3(P0) - geomtypes.Vec3(P1)
         v2 = geomtypes.Vec3(P0) - geomtypes.Vec3(P2)
         cross = v1.cross(v2)
@@ -680,23 +725,29 @@ class Plane:
         if N0 == N1 or N0 == -N1:
             return None
         V = N0.cross(N1)
-        #V = V.normalise()
+        # V = V.normalise()
         # for toPsPiecesStr self.N == [0, 0, 1]; hanlde more efficiently.
         if N0 == geomtypes.Vec([0, 0, 1]):
             # simplified situation from below:
             z = -self.D
             M = geomtypes.Mat([geomtypes.Vec(N1[0:2]), geomtypes.Vec(V[0:2])])
-            Q = M.solve(geomtypes.Vec([-plane.D - N1[2]*z, -V[2]*z]))
+            Q = M.solve(geomtypes.Vec([-plane.D - N1[2] * z, -V[2] * z]))
             Q = geomtypes.Vec([Q[0], Q[1], z])
         else:
             # See bottom of page 86 of Maths for 3D Game Programming.
             M = geomtypes.Mat([N0, N1, V])
             Q = M.solve(geomtypes.Vec([-self.D, -plane.D, 0]))
-        return Line3D(Q, v = V)
+        return Line3D(Q, v=V)
 
-    def toStr(self, precision = 2):
-        formatStr = "%%0.%df*x + %%0.%df*y + %%0.%df*z + %%0.%df = 0)" % (precision, precision, precision, precision)
+    def toStr(self, precision=2):
+        formatStr = "%%0.%df*x + %%0.%df*y + %%0.%df*z + %%0.%df = 0)" % (
+            precision,
+            precision,
+            precision,
+            precision,
+        )
         return formatStr % (self.N[0], self.N[1], self.N[2], self.D)
+
 
 def facePlane(Vs, face):
     """
@@ -706,18 +757,14 @@ def facePlane(Vs, face):
     face: the indices in Vs that form the face.
     Returns None if the vertices do not define a plane.
     """
-    assert len(face) > 2, 'a face should at least be a triangle'
+    assert len(face) > 2, "a face should at least be a triangle"
     plane = None
     planeFound = False
     fi_0 = 1
     fi_1 = 2
     while not planeFound:
         try:
-            plane = Plane(
-                    Vs[face[0]],
-                    Vs[face[fi_0]],
-                    Vs[face[fi_1]]
-                )
+            plane = Plane(Vs[face[0]], Vs[face[fi_0]], Vs[face[fi_1]])
             planeFound = True
         except ValueError or AssertionError:
             fi_1 += 1
@@ -729,10 +776,11 @@ def facePlane(Vs, face):
                     break
     return plane
 
-TRI_CW = 1 # clockwise triangle vertices to get outer normal
-TRI_CCW = 2 # counter-clockwise triangle vertices to get outer normal
+
+TRI_CW = 1  # clockwise triangle vertices to get outer normal
+TRI_CCW = 2  # counter-clockwise triangle vertices to get outer normal
 TRI_OUT = 3  # the normal pointing away from the origin is the normal
-TRI_IN = 4 # the normal pointing towards from the origin is the normal
+TRI_IN = 4  # the normal pointing towards from the origin is the normal
 
 
 class SimpleShape(base.Orbitit):
@@ -741,13 +789,9 @@ class SimpleShape(base.Orbitit):
     """
     This class decribes a simple 3D object consisting of faces and edges.
     """
-    def __init__(self,
-        Vs, Fs,
-        Es=[],
-        Ns=[],
-        colors=None,
-        name="SimpleShape",
-        orientation=None
+
+    def __init__(
+        self, Vs, Fs, Es=[], Ns=[], colors=None, name="SimpleShape", orientation=None
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -782,13 +826,15 @@ class SimpleShape(base.Orbitit):
         self.gl = Fields()
         self.gl.sphere = None
         self.gl.cyl = None
-        self.gl.alwaysSetVertices = False # set to true if a scene contains more than 1 shape
+        self.gl.alwaysSetVertices = (
+            False  # set to true if a scene contains more than 1 shape
+        )
         if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
         self.scalingFactor = 1.0
-        self.setVertexProperties(Vs=Vs, Ns=Ns, radius=-1., color=[1. , 1. , .8 ])
+        self.setVertexProperties(Vs=Vs, Ns=Ns, radius=-1.0, color=[1.0, 1.0, 0.8])
         self.setEdgeProperties(
-            Es=Es, radius=-1., color=[0.1, 0.1, 0.1], drawEdges=True
+            Es=Es, radius=-1.0, color=[0.1, 0.1, 0.1], drawEdges=True
         )
         self.setFaceProperties(Fs=Fs, colors=colors, drawFaces=True)
         self.defaultColor = rgb.yellow
@@ -800,30 +846,30 @@ class SimpleShape(base.Orbitit):
             self.orientation = geomtypes.E
 
     def __repr__(self):
-        #s = indent.Str('%s(\n' % base.find_module_class_name(self.__class__, __name__))
-        s = indent.Str('SimpleShape(\n')
-        s = s.add_incr_line('Vs=[')
+        # s = indent.Str('%s(\n' % base.find_module_class_name(self.__class__, __name__))
+        s = indent.Str("SimpleShape(\n")
+        s = s.add_incr_line("Vs=[")
         s.incr()
         try:
-            s = s.glue_line(',\n'.join(
-                indent.Str(repr(v)).reindent(s.indent) for v in self.Vs)
+            s = s.glue_line(
+                ",\n".join(indent.Str(repr(v)).reindent(s.indent) for v in self.Vs)
             )
         except AttributeError:
             logging.error("Are you sure the vertices are all of type geomtypes.Vec3?")
             raise
-        s = s.add_decr_line('],')
-        s = s.add_line('Fs=[')
+        s = s.add_decr_line("],")
+        s = s.add_line("Fs=[")
         s.incr()
-        s = s.glue_line(',\n'.join(
-            indent.Str(repr(f)).reindent(s.indent) for f in self.Fs)
+        s = s.glue_line(
+            ",\n".join(indent.Str(repr(f)).reindent(s.indent) for f in self.Fs)
         )
-        s = s.add_decr_line('],')
-        s = s.add_line('Es=%s,' % repr(self.Es))
-        s = s.add_line('colors=%s,' % repr(self.colorData))
+        s = s.add_decr_line("],")
+        s = s.add_line("Es=%s," % repr(self.Es))
+        s = s.add_line("colors=%s," % repr(self.colorData))
         s = s.add_line('name="%s"' % self.name)
-        s = s.add_decr_line(')')
-        if __name__ != '__main__':
-            s = s.insert('%s.' % __name__)
+        s = s.add_decr_line(")")
+        if __name__ != "__main__":
+            s = s.insert("%s." % __name__)
         return s
 
     @property
@@ -833,13 +879,13 @@ class SimpleShape(base.Orbitit):
         Only essential parts are saved. E.g. orientation isn't essential here.
         """
         return {
-            'class': base.class_to_json[self.__class__],
-            'data': {
-                'name': self.name,
-                'vs': self.Vs,
-                'fs': self.Fs,
-                'cols': self.colorData[0],
-                'face_cols': self.colorData[1],
+            "class": base.class_to_json[self.__class__],
+            "data": {
+                "name": self.name,
+                "vs": self.Vs,
+                "fs": self.Fs,
+                "cols": self.colorData[0],
+                "face_cols": self.colorData[1],
             },
         }
 
@@ -849,7 +895,7 @@ class SimpleShape(base.Orbitit):
             [geomtypes.Vec3(v) for v in data["vs"]],
             data["fs"],
             colors=(data["cols"], data["face_cols"]),
-            name=data["name"]
+            name=data["name"],
         )
 
     def saveFile(self, fd):
@@ -876,8 +922,8 @@ class SimpleShape(base.Orbitit):
         """
         v_props = self.getVertexProperties()
         f_props = self.getFaceProperties()
-        fs = f_props['Fs']
-        org_cols = f_props['colors']
+        fs = f_props["Fs"]
+        org_cols = f_props["colors"]
         d = dict()
         for i, face in enumerate(fs):
             face_cp = face[:]
@@ -901,11 +947,10 @@ class SimpleShape(base.Orbitit):
         new_cols = (copy.deepcopy(org_cols[0]), col_idx)
         shape = SimpleShape([], [], [])
         shape.setVertexProperties(v_props)
-        f_props['Fs'] = new_fs
-        f_props['colors'] = new_cols
+        f_props["Fs"] = new_fs
+        f_props["colors"] = new_cols
         shape.setFaceProperties(f_props)
         return shape
-
 
     def clean_shape(self, precision):
         """Return a new shape for which vertices are merged and degenerated faces are deleted.
@@ -917,22 +962,22 @@ class SimpleShape(base.Orbitit):
         """
         vProps = self.getVertexProperties()
         fProps = self.getFaceProperties()
-        cpVs = copy.deepcopy(vProps['Vs'])
-        cpFs = copy.deepcopy(fProps['Fs'])
+        cpVs = copy.deepcopy(vProps["Vs"])
+        cpFs = copy.deepcopy(fProps["Fs"])
         glue.mergeVs(cpVs, cpFs, precision)
         # this may result on less faces, which breaks the colours!
         # TODO either update the colors immediately or return an array with
         # deleted face indices.
         glue.cleanUpVsFs(cpVs, cpFs)
-        vProps['Vs'] = cpVs
-        fProps['Fs'] = cpFs
+        vProps["Vs"] = cpVs
+        fProps["Fs"] = cpFs
         shape = SimpleShape([], [], [])
         shape.setVertexProperties(vProps)
         shape.setFaceProperties(fProps)
         return shape
 
     def setVs(self, Vs):
-        self.setVertexProperties(Vs = Vs)
+        self.setVertexProperties(Vs=Vs)
 
     def setVertexProperties(self, dict_par=None, **kwargs):
         """
@@ -956,21 +1001,22 @@ class SimpleShape(base.Orbitit):
                 the_dict = dict_par
             else:
                 the_dict = kwargs
-            if 'Vs' in the_dict and the_dict['Vs'] != None:
+            if "Vs" in the_dict and the_dict["Vs"] != None:
                 self.Vs = [geomtypes.Vec3(v) for v in the_dict["Vs"]]
                 self.VsRange = range(len(self.Vs))
                 self.gl.updateVs = True
                 self.fNsUp2date = False
-            if 'Ns' in the_dict and the_dict['Ns'] != None:
-                self.Ns = the_dict['Ns']
-            if 'radius' in the_dict and the_dict['radius'] != None:
-                self.gl.vRadius     = the_dict['radius']
-                self.gl.addSphereVs = the_dict['radius'] > 0.0
+            if "Ns" in the_dict and the_dict["Ns"] != None:
+                self.Ns = the_dict["Ns"]
+            if "radius" in the_dict and the_dict["radius"] != None:
+                self.gl.vRadius = the_dict["radius"]
+                self.gl.addSphereVs = the_dict["radius"] > 0.0
                 if self.gl.addSphereVs:
-                    if self.gl.sphere != None: del self.gl.sphere
-                    self.gl.sphere = Scenes3D.VSphere(radius = the_dict['radius'])
-            if 'color' in the_dict and the_dict['color'] != None:
-                self.gl.vCol = the_dict['color']
+                    if self.gl.sphere != None:
+                        del self.gl.sphere
+                    self.gl.sphere = Scenes3D.VSphere(radius=the_dict["radius"])
+            if "color" in the_dict and the_dict["color"] != None:
+                self.gl.vCol = the_dict["color"]
 
     def getVertexProperties(self):
         """
@@ -986,16 +1032,16 @@ class SimpleShape(base.Orbitit):
             value is not set. If the value is set it is used by gl_draw
         """
         return {
-            'Vs': self.Vs,
-            'radius': self.gl.vRadius,
-            'color': self.gl.vCol,
-            'Ns': self.Ns
+            "Vs": self.Vs,
+            "radius": self.gl.vRadius,
+            "color": self.gl.vCol,
+            "Ns": self.Ns,
         }
 
     def gl_alwaysSetVertices(self, do):
         self.gl.alwaysSetVertices = do
 
-    def setEdgeProperties(self, dictPar = None, **kwargs):
+    def setEdgeProperties(self, dictPar=None, **kwargs):
         """
         Specify the edges and set how they are drawn in OpenGL.
 
@@ -1017,19 +1063,20 @@ class SimpleShape(base.Orbitit):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Es' in dict and dict['Es'] != None:
-                self.Es = dict['Es']
+            if "Es" in dict and dict["Es"] != None:
+                self.Es = dict["Es"]
                 self.EsRange = range(0, len(self.Es), 2)
-            if 'radius' in dict and dict['radius'] != None:
-                self.gl.eRadius       = dict['radius']
-                self.gl.useCylinderEs = dict['radius'] > 0.0
+            if "radius" in dict and dict["radius"] != None:
+                self.gl.eRadius = dict["radius"]
+                self.gl.useCylinderEs = dict["radius"] > 0.0
                 if self.gl.useCylinderEs:
-                    if self.gl.cyl != None: del self.gl.cyl
-                    self.gl.cyl = Scenes3D.P2PCylinder(radius = dict['radius'])
-            if 'color' in dict and dict['color'] != None:
-                self.gl.eCol = dict['color']
-            if 'drawEdges' in dict and dict['drawEdges'] != None:
-                self.gl.drawEdges = dict['drawEdges']
+                    if self.gl.cyl != None:
+                        del self.gl.cyl
+                    self.gl.cyl = Scenes3D.P2PCylinder(radius=dict["radius"])
+            if "color" in dict and dict["color"] != None:
+                self.gl.eCol = dict["color"]
+            if "drawEdges" in dict and dict["drawEdges"] != None:
+                self.gl.drawEdges = dict["drawEdges"]
 
     def getEdgeProperties(self):
         """
@@ -1046,11 +1093,12 @@ class SimpleShape(base.Orbitit):
         drawEdges: settings that expresses whether the edges should be drawn at
                    all.
         """
-        return {'Es': self.Es,
-                'radius': self.gl.eRadius,
-                'color': self.gl.eCol,
-                'drawEdges': self.gl.drawEdges
-            }
+        return {
+            "Es": self.Es,
+            "radius": self.gl.eRadius,
+            "color": self.gl.eCol,
+            "drawEdges": self.gl.drawEdges,
+        }
 
     def regen_edges(self):
         """
@@ -1063,26 +1111,31 @@ class SimpleShape(base.Orbitit):
         """
         Es2D = []
         Es = []
+
         def addEdge(i, j):
-            if   i < j: edge = [i, j]
-            elif i > j: edge = [j, i]
-            else: return
+            if i < j:
+                edge = [i, j]
+            elif i > j:
+                edge = [j, i]
+            else:
+                return
             if not edge in Es2D:
                 Es2D.append(edge)
                 Es.extend(edge)
+
         for face in self.Fs:
             lastIndex = len(face) - 1
             for i in range(lastIndex):
-                addEdge(face[i], face[i+1])
+                addEdge(face[i], face[i + 1])
             # handle the edge from the last vertex to the first vertex separately
             # (instead of using % for every index)
             addEdge(face[lastIndex], face[0])
-        self.setEdgeProperties(Es = Es)
+        self.setEdgeProperties(Es=Es)
 
     def setFs(self, Fs):
-        self.setFaceProperties(Fs = Fs)
+        self.setFaceProperties(Fs=Fs)
 
-    def setFaceProperties(self, dictPar = None, **kwargs):
+    def setFaceProperties(self, dictPar=None, **kwargs):
         """
         Define the properties of the faces.
 
@@ -1103,13 +1156,13 @@ class SimpleShape(base.Orbitit):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Fs' in dict and dict['Fs'] != None:
-                self.__setFs(dict['Fs'])
-            if 'colors' in dict and dict['colors'] != None:
-                self.setFaceColors(dict['colors'])
+            if "Fs" in dict and dict["Fs"] != None:
+                self.__setFs(dict["Fs"])
+            if "colors" in dict and dict["colors"] != None:
+                self.setFaceColors(dict["colors"])
             self.divideColorWrapper()
-            if 'drawFaces' in dict and dict['drawFaces'] != None:
-                self.setEnableDrawFaces(dict['drawFaces'])
+            if "drawFaces" in dict and dict["drawFaces"] != None:
+                self.setEnableDrawFaces(dict["drawFaces"])
 
     def getFaceProperties(self):
         """
@@ -1138,18 +1191,15 @@ class SimpleShape(base.Orbitit):
                    face colors are set by some default algorithm.
         drawFaces: settings that expresses whether the faces should be drawn.
         """
-        return {'Fs': self.Fs,
-                'colors': self.colorData,
-                'drawFaces': self.gl.drawFaces
-            }
+        return {"Fs": self.Fs, "colors": self.colorData, "drawFaces": self.gl.drawFaces}
 
     def triangulate(self, Fs):
         ts = []
         for f in Fs:
             triF = []
-            for i in range(1, len(f)-1):
+            for i in range(1, len(f) - 1):
                 # i+1 before i, to keep clock-wise direction
-                triF.extend([f[0], f[i+1], f[i]])
+                triF.extend([f[0], f[i + 1], f[i]])
             ts.append(triF)
         return ts
 
@@ -1160,7 +1210,7 @@ class SimpleShape(base.Orbitit):
         Fs: see getFaceProperties.
         """
         for f in Fs:
-            assert (len(f) > 2), "A face should have at least 3 vertices"
+            assert len(f) > 2, "A face should have at least 3 vertices"
         self.Fs = Fs
         self.TriangulatedFs = self.triangulate(Fs)
         self.FsLen = len(self.Fs)
@@ -1177,9 +1227,9 @@ class SimpleShape(base.Orbitit):
         colors: see getFaceProperties.
         """
         if colors[0] is not None:
-            colorDefs  = colors[0]
+            colorDefs = colors[0]
         else:
-            colorDefs  = self.colorData[0]
+            colorDefs = self.colorData[0]
         if colors[1] is not None:
             fColors = colors[1]
         else:
@@ -1187,7 +1237,7 @@ class SimpleShape(base.Orbitit):
         self.colorData = (colorDefs, fColors)
         self.nrOfColors = len(colorDefs)
         self.colRange = range(self.nrOfColors)
-        assert(self.nrOfColors > 0), 'Empty colorDefs: %s' % colorDefs
+        assert self.nrOfColors > 0, "Empty colorDefs: %s" % colorDefs
 
     def getFaceColors(self):
         """
@@ -1209,18 +1259,16 @@ class SimpleShape(base.Orbitit):
 
     def generate_face_normal(self, f, normalise):
         l = len(f)
-        assert l > 2, 'An face should at least have 2 vertices'
+        assert l > 2, "An face should at least have 2 vertices"
         if l < 3:
-            assert False, 'Normal for digons not implemented'
+            assert False, "Normal for digons not implemented"
             # TODO: what to do here?
-        normal = Triangle(
-            self.Vs[f[0]], self.Vs[f[1]], self.Vs[f[2]]
-        ).normal(normalise)
+        normal = Triangle(self.Vs[f[0]], self.Vs[f[1]], self.Vs[f[2]]).normal(normalise)
         if self.normal_direction == TRI_OUT or self.normal_direction == TRI_IN:
             v0 = geomtypes.Vec3(self.Vs[f[0]])
             outwards = v0.norm() < (v0 + normal).norm()
-            if ((outwards and self.normal_direction == TRI_IN) or
-                (not outwards and self.normal_direction == TRI_OUT)
+            if (outwards and self.normal_direction == TRI_IN) or (
+                not outwards and self.normal_direction == TRI_OUT
             ):
                 normal = -normal
         return normal
@@ -1235,7 +1283,8 @@ class SimpleShape(base.Orbitit):
             self.fNsNormalised = normalise
 
     def createVertexNormals(self, normalise, Vs=None):
-        if Vs == None: Vs = self.Vs
+        if Vs == None:
+            Vs = self.Vs
         self.createFaceNormals(normalise)
         # only use a vertex once, since the normal can be different
         self.nVs = []
@@ -1244,9 +1293,11 @@ class SimpleShape(base.Orbitit):
             self.vNs.extend([normal for vi in face])
             self.nVs.extend([[Vs[vi][0], Vs[vi][1], Vs[vi][2]] for vi in face])
         self.createVertexNormals_vi = -1
+
         def inc():
             self.createVertexNormals_vi += 1
             return self.createVertexNormals_vi
+
         self.nFs = [[inc() for i in face] for face in self.Fs]
         self.TriangulatedFs = self.triangulate(self.nFs)
         # Now for the edge vertices. Note that edge vertices aren't necessarily
@@ -1266,24 +1317,28 @@ class SimpleShape(base.Orbitit):
         l2e = {}
         for ei in self.EsRange:
             vi0 = self.Es[ei]
-            vi1 = self.Es[ei+1]
-            if vi0 < vi1: t = (vi0, vi1)
-            else:         t = (vi1, vi0)
-            l = (geomtypes.Vec3(self.Vs[vi1]) - geomtypes.Vec3(self.Vs[vi0])
-                ).norm()
+            vi1 = self.Es[ei + 1]
+            if vi0 < vi1:
+                t = (vi0, vi1)
+            else:
+                t = (vi1, vi0)
+            l = (geomtypes.Vec3(self.Vs[vi1]) - geomtypes.Vec3(self.Vs[vi0])).norm()
             e2l[t] = l
             l = round(l, precision)
-            try: l2e[l].append(t)
-            except KeyError: l2e[l] = [t]
+            try:
+                l2e[l].append(t)
+            except KeyError:
+                l2e[l] = [t]
         self.e2l = e2l
         self.l2e = l2e
         return l2e
 
     def createDihedralAngles(self, precision=12):
-        self.createFaceNormals(normalise = False)
+        self.createFaceNormals(normalise=False)
         e2d = {}
         d2e = {}
         lFs = len(self.Fs)
+
         def addDihedralAngle(fi, cFace, cfi, vi, i, viRef, e2d, d2e):
             # fi: face index of face under investigation
             # cFace: the face we are checking against (a list of vertex indices)
@@ -1297,35 +1352,46 @@ class SimpleShape(base.Orbitit):
             # d2e: dictionary mapping dihedral angles on edges, using angles as
             #      tuples
             _i = i - 1
-            if _i < 0: _i = len(cFace) - 1
+            if _i < 0:
+                _i = len(cFace) - 1
             i_ = i + 1
-            if i_ >= len(cFace): i_ = 0
+            if i_ >= len(cFace):
+                i_ = 0
             # if the vertex vi - viRef is part of cFace
-            if (cFace[_i] == viRef or cFace[i_] == viRef):
+            if cFace[_i] == viRef or cFace[i_] == viRef:
                 # add the angle to d array.
-                if vi < viRef: t = (vi, viRef)
-                else:          t = (viRef, vi)
+                if vi < viRef:
+                    t = (vi, viRef)
+                else:
+                    t = (viRef, vi)
                 angle = math.pi - self.fNs[fi].angle(self.fNs[cfi])
                 angle = round(angle, precision)
-                try: e2d[t].append(angle)
-                except KeyError: e2d[t] = [angle]
-                try: d2e[angle].append(t)
-                except KeyError: d2e[angle] = [t]
+                try:
+                    e2d[t].append(angle)
+                except KeyError:
+                    e2d[t] = [angle]
+                try:
+                    d2e[angle].append(t)
+                except KeyError:
+                    d2e[angle] = [t]
+
         for face, fi in zip(self.Fs, self.FsRange):
             f_ = face[:]
             f_.append(face[0])
             l = len(f_)
             for fii in range(1, l, 2):
                 vi = f_[fii]
-                vip = f_[fii-1] # previous x
-                if fii >= l-1:
-                    vin = -1 # no next
+                vip = f_[fii - 1]  # previous x
+                if fii >= l - 1:
+                    vin = -1  # no next
                 else:
-                    vin = f_[fii+1] # next
-                for nfi in range(fi+1, lFs):
+                    vin = f_[fii + 1]  # next
+                for nfi in range(fi + 1, lFs):
                     nFace = self.Fs[nfi]
-                    try: i = nFace.index(vi)
-                    except ValueError: i = -1
+                    try:
+                        i = nFace.index(vi)
+                    except ValueError:
+                        i = -1
                     if i >= 0:
                         addDihedralAngle(fi, nFace, nfi, vi, i, vip, e2d, d2e)
                         addDihedralAngle(fi, nFace, nfi, vi, i, vin, e2d, d2e)
@@ -1342,20 +1408,14 @@ class SimpleShape(base.Orbitit):
         colours than faces. These trivial cases do not need to be implemented by
         every descendent.
         """
-        if (len(self.colorData[1]) != self.FsLen):
+        if len(self.colorData[1]) != self.FsLen:
             if self.nrOfColors == 1:
-                self.colorData = (
-                        self.colorData[0],
-                        [0 for i in self.FsRange]
-                    )
+                self.colorData = (self.colorData[0], [0 for i in self.FsRange])
             elif self.nrOfColors < self.FsLen:
                 self.divideColor()
             else:
-                self.colorData = (
-                        self.colorData[0],
-                        list(range(self.FsLen))
-                    )
-            assert(len(self.colorData[1]) == self.FsLen)
+                self.colorData = (self.colorData[0], list(range(self.FsLen)))
+            assert len(self.colorData[1]) == self.FsLen
         # generate an array with Equal coloured faces:
         self.EqColFs = [[] for col in range(self.nrOfColors)]
         for i in self.FsRange:
@@ -1390,34 +1450,40 @@ class SimpleShape(base.Orbitit):
         ]
 
     def calculateSphereRadii(self, precision=12):
-        """Calculate the radii for the circumscribed, inscribed and mid sphere(s)
-        """
+        """Calculate the radii for the circumscribed, inscribed and mid sphere(s)"""
         # calculate the circumscribed spheres:
         self.spheresRadii = Fields()
         self.spheresRadii.precision = precision
         s = {}
         for v in self.Vs:
             r = round(v.norm(), precision)
-            try: cnt = s[r]
-            except KeyError: cnt = 0
+            try:
+                cnt = s[r]
+            except KeyError:
+                cnt = 0
             s[r] = cnt + 1
         self.spheresRadii.circumscribed = s
         s = {}
         for i in self.EsRange:
-            v = (self.Vs[self.Es[i]] +  self.Vs[self.Es[i+1]]) / 2
+            v = (self.Vs[self.Es[i]] + self.Vs[self.Es[i + 1]]) / 2
             r = round(v.norm(), precision)
-            try: cnt = s[r]
-            except KeyError: cnt = 0
+            try:
+                cnt = s[r]
+            except KeyError:
+                cnt = 0
             s[r] = cnt + 1
         self.spheresRadii.mid = s
         s = {}
-        try: G = self.fGs
+        try:
+            G = self.fGs
         except AttributeError:
             self.calculateFacesG()
         for g in self.fGs:
             r = round(g.norm(), precision)
-            try: cnt = s[r]
-            except KeyError: cnt = 0
+            try:
+                cnt = s[r]
+            except KeyError:
+                cnt = 0
             s[r] = cnt + 1
         self.spheresRadii.inscribed = s
 
@@ -1429,7 +1495,7 @@ class SimpleShape(base.Orbitit):
         this shape. This function is called in gl_draw for the first time gl_draw
         is called.
         """
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
         GL.glEnable(GL.GL_DEPTH_TEST)
@@ -1480,11 +1546,11 @@ class SimpleShape(base.Orbitit):
                 g = vec(0, 0, 0)
                 sum = 0
                 for vIndex in self.VsRange:
-                    g = g + nrUsed[vIndex] * vec(self.Vs[vIndex])
+                    g = g + nrUsed[vIndex] * geomtypes.Vec3(self.Vs[vIndex])
                     sum = sum + nrUsed[vIndex]
                 if sum != 0:
                     g = g / sum
-                Vs = [self.scalingFactor * (vec(v) - g) + g for v in self.Vs]
+                Vs = [self.scalingFactor * (geomtypes.Vec3(v) - g) + g for v in self.Vs]
 
             # At least on Ubuntu 8.04 conversion is not needed
             # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
@@ -1494,13 +1560,15 @@ class SimpleShape(base.Orbitit):
                         return
                     Ns = self.Ns
                 except TypeError:
-                    Vs = [ [v[0], v[1], v[2]] for v in Vs ]
+                    Vs = [[v[0], v[1], v[2]] for v in Vs]
                     logging.info("gl_draw: converting Vs(Ns); vec3 type not accepted")
                     if not GL.glVertexPointerf(Vs):
                         return
-                    Ns = [ [v[0], v[1], v[2]] for v in self.Ns ]
+                    Ns = [[v[0], v[1], v[2]] for v in self.Ns]
                 if Ns != []:
-                    assert len(Ns) == len(Vs), 'the normal vector array Ns should have as many normals as  vertices.'
+                    assert len(Ns) == len(
+                        Vs
+                    ), "the normal vector array Ns should have as many normals as  vertices."
                     GL.glNormalPointerf(Ns)
                     self.NsSaved = Ns
                 else:
@@ -1512,11 +1580,11 @@ class SimpleShape(base.Orbitit):
                         return
                     Ns = self.Ns
                 except TypeError:
-                    Vs = [ [v[0], v[1], v[2]] for v in Vs ]
+                    Vs = [[v[0], v[1], v[2]] for v in Vs]
                     logging.info("gl_draw: converting Vs(Ns); vec3 type not accepted")
                     if not GL.glVertexPointerf(Vs):
                         return
-                    Ns = [ [n[0], n[1], n[2]] for n in self.Ns ]
+                    Ns = [[n[0], n[1], n[2]] for n in self.Ns]
                 GL.glNormalPointerf(Ns)
                 self.NsSaved = Ns
             else:
@@ -1541,8 +1609,7 @@ class SimpleShape(base.Orbitit):
                 self.gl.sphere.draw(self.Vs[i])
         # EDGES
         if self.gl.drawEdges:
-            if self.generateNormals and (
-                self.Ns == [] or len(self.Ns) != len(self.Vs)):
+            if self.generateNormals and (self.Ns == [] or len(self.Ns) != len(self.Vs)):
                 Es = self.nEs
                 Vs = self.nVs
             else:
@@ -1551,15 +1618,12 @@ class SimpleShape(base.Orbitit):
             GL.glColor(self.gl.eCol[0], self.gl.eCol[1], self.gl.eCol[2])
             if self.gl.useCylinderEs:
                 # draw edges as cylinders
-                #for i in range(0, len(self.Es), 2):
+                # for i in range(0, len(self.Es), 2):
                 for i in self.EsRange:
-                    self.gl.cyl.draw(
-                            v0 = Vs[Es[i]],
-                            v1 = Vs[Es[i+1]]
-                        )
+                    self.gl.cyl.draw(v0=Vs[Es[i]], v1=Vs[Es[i + 1]])
             else:
                 # draw edges as lines
-                GL.glPolygonOffset(1.0, 3.)
+                GL.glPolygonOffset(1.0, 3.0)
                 GL.glDisable(GL.GL_POLYGON_OFFSET_FILL)
                 GL.glDrawElementsui(GL.GL_LINES, Es)
                 GL.glEnable(GL.GL_POLYGON_OFFSET_FILL)
@@ -1581,14 +1645,17 @@ class SimpleShape(base.Orbitit):
                         # TODO: This part belongs to a GLinit:
                         GL.glClearStencil(0)
                         stencilBits = GL.glGetIntegerv(GL.GL_STENCIL_BITS)
-                        assert stencilBits > 0, 'Only triangle faces are supported, since there is no stencil bit'
+                        assert (
+                            stencilBits > 0
+                        ), "Only triangle faces are supported, since there is no stencil bit"
                         # << TODO: end part that belongs to a GLinit
                         GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
                         # use stecil buffer to triangulate.
-                        GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE,
-                                       GL.GL_FALSE, GL.GL_FALSE)
+                        GL.glColorMask(
+                            GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE
+                        )
                         GL.glDepthMask(GL.GL_FALSE)
-                        #glDepthFunc(GL.GL_ALWAYS)
+                        # glDepthFunc(GL.GL_ALWAYS)
                         # Enable Stencil, always pass test
                         GL.glEnable(GL.GL_STENCIL_TEST)
                         # always pass stencil test
@@ -1600,11 +1667,10 @@ class SimpleShape(base.Orbitit):
                         # Create triangulated stencil:
                         GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
                         # Reset colour mask and depth settings.
-                        #glDepthFunc(GL.GL_LESS)
+                        # glDepthFunc(GL.GL_LESS)
                         if len(c) == 3:
                             GL.glDepthMask(GL.GL_TRUE)
-                        GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE,
-                                       GL.GL_TRUE, GL.GL_TRUE)
+                        GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
                         # Draw only where stencil equals 1 (masked to 1)
                         # GL_INVERT was used, i.e. in case of e.g. 8 bits the value is
                         # either 0 or 0xff, but only the last bit is checked.
@@ -1618,7 +1684,7 @@ class SimpleShape(base.Orbitit):
                         # ready, disable stencil
                         GL.glDisable(GL.GL_STENCIL_TEST)
 
-    def toX3dNode(self, id='SISH', precision=5, edgeRadius=0):
+    def toX3dNode(self, id="SISH", precision=5, edgeRadius=0):
         """
         Converts this SimpleShape to a X3dNode class and returns the result.
 
@@ -1632,66 +1698,72 @@ class SimpleShape(base.Orbitit):
                     used (the latter will lead to a much heavier file, that will
                     be rendered much slower).
         """
-        vName = '%sVs' % id
-        sName = '%sTransform' % id
+        vName = "%sVs" % id
+        sName = "%sTransform" % id
         shapes = [
-                X3D.Node('Shape',
-                    appearance = X3D.Node('Appearance',
-                        material = X3D.Node('Material',
-                            diffuseColor = X3D.FloatVec([1, 1, 1], 0)
-                        )
+            X3D.Node(
+                "Shape",
+                appearance=X3D.Node(
+                    "Appearance",
+                    material=X3D.Node(
+                        "Material", diffuseColor=X3D.FloatVec([1, 1, 1], 0)
                     ),
-                    geometry = X3D.Node('IndexedFaceSet',
-                        color = X3D.Node(
-                                'Color',
-                                color = [ X3D.FloatVec(col, precision)
-                                        for col in self.colorData[0]
-                                    ]
-                            ),
-                        coord = X3D.Node(
-                                'Coordinate',
-                                DEF = vName,
-                                point = [ X3D.FloatVec(v, precision)
-                                        for v in self.Vs
-                                    ]
-                            ),
-                        coordIndex = [ X3D.Index(i) for i in self.Fs],
-                        colorIndex = self.colorData[1],
-                        normalPerVertex = False,
-                        colorPerVertex  = False,
-                        ccw             = False,
-                        solid           = False,
-                        creaseAngle     = 0.5
-                    )
-                )
-            ]
+                ),
+                geometry=X3D.Node(
+                    "IndexedFaceSet",
+                    color=X3D.Node(
+                        "Color",
+                        color=[
+                            X3D.FloatVec(col, precision) for col in self.colorData[0]
+                        ],
+                    ),
+                    coord=X3D.Node(
+                        "Coordinate",
+                        DEF=vName,
+                        point=[X3D.FloatVec(v, precision) for v in self.Vs],
+                    ),
+                    coordIndex=[X3D.Index(i) for i in self.Fs],
+                    colorIndex=self.colorData[1],
+                    normalPerVertex=False,
+                    colorPerVertex=False,
+                    ccw=False,
+                    solid=False,
+                    creaseAngle=0.5,
+                ),
+            )
+        ]
         if not (self.Es == []):
             if edgeRadius <= 0:
                 Es = []
                 for i in range(0, len(self.Es), 2):
-                    Es.append([self.Es[i], self.Es[i+1]])
-                shapes.append(X3D.Node('Shape',
-                    appearance = X3D.Node('Appearance',
-                        material = X3D.Node('Material',
-                            diffuseColor = X3D.FloatVec([0, 0, 0], 1)
-                        )
-                    ),
-                    geometry = X3D.Node('IndexedLineSet',
-                        coord = X3D.Node('Coordinate', USE = vName),
-                        coordIndex = [ X3D.Index(i) for i in Es]
+                    Es.append([self.Es[i], self.Es[i + 1]])
+                shapes.append(
+                    X3D.Node(
+                        "Shape",
+                        appearance=X3D.Node(
+                            "Appearance",
+                            material=X3D.Node(
+                                "Material", diffuseColor=X3D.FloatVec([0, 0, 0], 1)
+                            ),
+                        ),
+                        geometry=X3D.Node(
+                            "IndexedLineSet",
+                            coord=X3D.Node("Coordinate", USE=vName),
+                            coordIndex=[X3D.Index(i) for i in Es],
+                        ),
                     )
-                ))
+                )
             else:
                 Es2D = []
                 i = 0
                 # TODO cylinderEdgesToX3d shoudl accept a flat array...
                 while i < len(self.Es):
-                    Es2D.append([self.Es[i], self.Es[i+1]])
+                    Es2D.append([self.Es[i], self.Es[i + 1]])
                     i += 2
                 shapes.append(glue.cylinderEdgesToX3d(Es2D, self.Vs, edgeRadius))
-        return X3D.Node('Transform', DEF = sName, children = shapes)
+        return X3D.Node("Transform", DEF=sName, children=shapes)
 
-    def toX3dDoc(self, id='SISH', precision=5, edgeRadius=0):
+    def toX3dDoc(self, id="SISH", precision=5, edgeRadius=0):
         """
         Converts this SimpleShape to a X3dDoc class and returns the result.
 
@@ -1710,8 +1782,9 @@ class SimpleShape(base.Orbitit):
         doc.addNode(self.toX3dNode(id, precision, edgeRadius))
         return doc
 
-
-    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
+    def to_off(
+        self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
+    ):
         """
         Converts this SimpleShape to a string in the 3D 'off' format and returns
         the result.
@@ -1721,7 +1794,7 @@ class SimpleShape(base.Orbitit):
         color_floats: whether to export the colours as floating point numbers
                       between 0 and 1. If False an integer 0 to 255 is used.
         """
-        w = lambda a: '{}{}\n'.format(s, a)
+        w = lambda a: "{}{}\n".format(s, a)
         s = ""
         s = w("OFF")
         s = w("#")
@@ -1738,8 +1811,8 @@ class SimpleShape(base.Orbitit):
                 s = w(
                     "# Dihedral angle: {} rad ({} degrees) for {} edges".format(
                         geomtypes.f2s(a, precision),
-                        geomtypes.f2s(a*Rad2Deg, precision),
-                        len(Es)
+                        geomtypes.f2s(a * Rad2Deg, precision),
+                        len(Es),
                     )
                 )
                 if len(Es) > 2:
@@ -1783,42 +1856,44 @@ class SimpleShape(base.Orbitit):
                 s += "  {:g} {:g} {:g}".format(color[0], color[1], color[2])
             else:
                 s += "  {:d} {:d} {:d}".format(
-                    int(color[0]*255),
-                    int(color[1]*255),
-                    int(color[2]*255),
+                    int(color[0] * 255),
+                    int(color[1] * 255),
+                    int(color[2] * 255),
                 )
             return s
+
         if oneColor:
             for face in self.Fs:
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s += f"{face_str(face)}\n"
         else:
-            self.createFaceNormals(normalise = True)
+            self.createFaceNormals(normalise=True)
             for i in range(no_of_faces):
                 face = self.Fs[i]
                 color = self.colorData[0][self.colorData[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
-                s = '%s%s\n' % (s, face_str(face))
-                fnStr = '%s %s %s' % (
-                        geomtypes.f2s(self.fNs[i][0], precision),
-                        geomtypes.f2s(self.fNs[i][1], precision),
-                        geomtypes.f2s(self.fNs[i][2], precision)
-                    )
+                s = "%s%s\n" % (s, face_str(face))
+                fnStr = "%s %s %s" % (
+                    geomtypes.f2s(self.fNs[i][0], precision),
+                    geomtypes.f2s(self.fNs[i][1], precision),
+                    geomtypes.f2s(self.fNs[i][2], precision),
+                )
                 if info:
                     s = w(f"# face normal: {fnStr}")
         if info:
             for i in range(no_of_edges):
-                s = w("# edge: {:d} {:d}".format(self.Es[2*i], self.Es[2*i + 1]))
+                s = w("# edge: {:d} {:d}".format(self.Es[2 * i], self.Es[2 * i + 1]))
         s = w("# END")
         return s
 
-    def toPsPiecesStr(self,
-            faceIndices=[],
-            scaling=1,
-            precision=7,
-            margin=1.0e5*defaultFloatMargin,
-            pageSize=PS.PageSizeA4,
-        ):
+    def toPsPiecesStr(
+        self,
+        faceIndices=[],
+        scaling=1,
+        precision=7,
+        margin=1.0e5 * defaultFloatMargin,
+        pageSize=PS.PageSizeA4,
+    ):
         """
         Returns a string in PS format that shows the pieces of faces that can
         be used for constructing a physical model of the object.
@@ -1838,7 +1913,7 @@ class SimpleShape(base.Orbitit):
         """
         if faceIndices == []:
             faceIndices = list(range(len(self.Fs)))
-        PsDoc = PS.doc(title = self.name, pageSize = pageSize)
+        PsDoc = PS.doc(title=self.name, pageSize=pageSize)
         offset = 0
         if logging.root.level < logging.DEBUG:
             for i in range(len(self.Vs)):
@@ -1849,14 +1924,16 @@ class SimpleShape(base.Orbitit):
                 logging.debug(f"checking face {i + 1} (of {len(faceIndices)})")
                 Vs = []
                 pointsIn2D = []
-                Es  = []
+                Es = []
                 face = self.Fs[i]
                 # find out norm
                 logging.debug(f"face idx: {face}")
                 face_pl = facePlane(self.Vs, face)
-                if face_pl == None: continue # not a face
+                if face_pl == None:
+                    continue  # not a face
                 norm = face_pl.N
-                if norm == None: continue # not a face.
+                if norm == None:
+                    continue  # not a face.
                 logging.debug(f"norm before {norm}")
                 # Find out how to rotate the faces such that the norm of the base face
                 # is parallel to the z-axis to work with a 2D situation:
@@ -1877,10 +1954,10 @@ class SimpleShape(base.Orbitit):
                     logging.debug(f"to2DAngle: {to2DAngle}")
                     to2Daxis = norm.cross(zAxis)
                     logging.debug(f"to2Daxis: {to2Daxis}")
-                    Mrot = geomtypes.Rot3(angle = to2DAngle, axis = to2Daxis)
+                    Mrot = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
                     # add vertices to vertex array
                     for v in self.Vs:
-                        Vs.append(Mrot*v)
+                        Vs.append(Mrot * v)
                         pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
                 else:
                     Vs = self.Vs[:]
@@ -1915,12 +1992,13 @@ class SimpleShape(base.Orbitit):
                         l = len(intersectingFacet)
                         for p in range(l):
                             if intersectingFacet[p] in face:
-                                q = p+1
-                                if q == l: q = 0
+                                q = p + 1
+                                if q == l:
+                                    q = 0
                                 if intersectingFacet[q] in face:
                                     pIndex = face.index(intersectingFacet[p])
                                     qIndex = face.index(intersectingFacet[q])
-                                    delta =  abs(pIndex - qIndex)
+                                    delta = abs(pIndex - qIndex)
                                     if (delta == 1) or (delta == len(face) - 1):
                                         facesShareAnEdge = True
                                         break
@@ -1939,19 +2017,24 @@ class SimpleShape(base.Orbitit):
                             baseFacets.append(intersectingFacet)
                             # also add to PS array of lines.
                             Es.append(intersectingFacet)
-                            logging.debug(f"In Plane: intersectingFacet {intersectingFacet}")
-                    else: # Loi3D != None:
+                            logging.debug(
+                                f"In Plane: intersectingFacet {intersectingFacet}"
+                            )
+                    else:  # Loi3D != None:
                         logging.debug(f"intersectingPlane {intersectingPlane}")
                         logging.debug(f"Loi3D {Loi3D}")
-                        assert eq(Loi3D.v[2], 0, 100 * margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
-                        assert eq(Loi3D.p[2], zBaseFace, 100 * margin), "all intersection lines should ly on z==%f, but z differs %f" % (
-                                        zBaseFace, zBaseFace-Loi3D.p[2]
-                                    )
+                        assert eq(Loi3D.v[2], 0, 100 * margin), (
+                            "all intersection lines should be paralell to z = 0, but z varies with %f"
+                            % (Loi3D.v[2])
+                        )
+                        assert eq(Loi3D.p[2], zBaseFace, 100 * margin), (
+                            "all intersection lines should ly on z==%f, but z differs %f"
+                            % (zBaseFace, zBaseFace - Loi3D.p[2])
+                        )
                         # loi2D = lineofintersection
                         loi2D = Line2D(
-                                [Loi3D.p[0], Loi3D.p[1]],
-                                v = [Loi3D.v[0], Loi3D.v[1]]
-                            )
+                            [Loi3D.p[0], Loi3D.p[1]], v=[Loi3D.v[0], Loi3D.v[1]]
+                        )
                         # now find the segment of loi2D within the intersectingFacet.
                         # TODO The next call is strange. It is a call to a Line2D
                         # intersecting a 3D facet. It should be a mode dedicated
@@ -1963,15 +2046,17 @@ class SimpleShape(base.Orbitit):
                         logging.debug(f"pInLoiFacet {pInLoiFacet}")
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
-                            #if debug: Lois[-1].append(self.Fs.index(intersectingFacet))
+                            # if debug: Lois[-1].append(self.Fs.index(intersectingFacet))
                 # for each intersecting line segment:
                 for loiData in Lois:
-                    loi2D       = loiData[0]
+                    loi2D = loiData[0]
                     pInLoiFacet = loiData[1]
                     logging.debug(f"phase 2: check iFacet nr: {loiData[-1]}")
                     # Now Intersect loi with the baseFacets.
                     for baseFacet in baseFacets:
-                        pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet, loiData[2], margin)
+                        pInLoiBase = loi2D.intersectWithFacet(
+                            Vs, baseFacet, loiData[2], margin
+                        )
                         logging.debug(f"pInLoiBase {pInLoiBase}")
                         # Now combine the results of pInLoiFacet and pInLoiBase:
                         # Only keep intersections that fall within 2 segments for
@@ -1981,20 +2066,23 @@ class SimpleShape(base.Orbitit):
                         nextBaseSeg = True
                         nextFacetSeg = True
                         no_of_vs = len(pointsIn2D)
+
                         def addPsLine(t0, t1, loi2D, no_of_vs):
                             pointsIn2D.append(loi2D.getPoint(t0))
                             pointsIn2D.append(loi2D.getPoint(t1))
-                            Es.append([no_of_vs, no_of_vs+1])
+                            Es.append([no_of_vs, no_of_vs + 1])
                             return no_of_vs + 2
-                        while (baseSegmentNr < len(pInLoiBase) // 2) and \
-                            (facetSegmentNr < len(pInLoiFacet) // 2):
+
+                        while (baseSegmentNr < len(pInLoiBase) // 2) and (
+                            facetSegmentNr < len(pInLoiFacet) // 2
+                        ):
                             if nextBaseSeg:
-                                b0 = pInLoiBase[2*baseSegmentNr]
-                                b1 = pInLoiBase[2*baseSegmentNr + 1]
+                                b0 = pInLoiBase[2 * baseSegmentNr]
+                                b1 = pInLoiBase[2 * baseSegmentNr + 1]
                                 nextBaseSeg = False
                             if nextFacetSeg:
-                                f0 = pInLoiFacet[2*facetSegmentNr]
-                                f1 = pInLoiFacet[2*facetSegmentNr + 1]
+                                f0 = pInLoiFacet[2 * facetSegmentNr]
+                                f1 = pInLoiFacet[2 * facetSegmentNr + 1]
                                 nextFacetSeg = False
                             # Note that always holds f0 < f1 and b0 < b1
                             if f1 < b0 or eq(f1, b0):
@@ -2037,10 +2125,11 @@ class SimpleShape(base.Orbitit):
 
         return PsDoc.toStr()
 
-    def intersectFacets(self,
-            faceIndices=[],
-            margin=1.0e5*defaultFloatMargin,
-        ):
+    def intersectFacets(
+        self,
+        faceIndices=[],
+        margin=1.0e5 * defaultFloatMargin,
+    ):
         """
         Returns a simple shape object for which the faces do not intersect
         anymore.
@@ -2103,15 +2192,11 @@ class SimpleShape(base.Orbitit):
             #       clean up later...?
             Vs = []
             pointsIn2D = []
-            Es  = []
+            Es = []
             face = self.Fs[i]
-            assert len(face) > 2, 'a face should at least be a triangle'
+            assert len(face) > 2, "a face should at least be a triangle"
             # find out norm
-            norm = PPPnorm(
-                    self.Vs[face[0]],
-                    self.Vs[face[1]],
-                    self.Vs[face[2]]
-                )
+            norm = PPPnorm(self.Vs[face[0]], self.Vs[face[1]], self.Vs[face[2]])
             logging.debug(f"norm before {norm}")
             # Find out how to rotate the faces such that the norm of the base face
             # is parallel to the z-axis to work with a 2D situation:
@@ -2122,10 +2207,10 @@ class SimpleShape(base.Orbitit):
             PsPoints = []
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
-                Mrot = geomtypes.Rot3(angle = to2DAngle, axis = to2Daxis)
+                Mrot = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
                 # add vertices to vertex array
                 for v in self.Vs:
-                    Vs.append(Mrot*vec(v))
+                    Vs.append(Mrot * vec(v))
                     pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
             else:
                 Vs = self.Vs[:]
@@ -2134,11 +2219,7 @@ class SimpleShape(base.Orbitit):
             zBaseFace = Vs[face[0]][2]
             logging.debug(f"zBaseFace = {zBaseFace}")
             # add edges from shares
-            basePlane = Plane(
-                    Vs[face[0]],
-                    Vs[face[1]],
-                    Vs[face[2]]
-                )
+            basePlane = Plane(Vs[face[0]], Vs[face[1]], Vs[face[2]])
             logging.debug(f"basePlane {basePlane}")
             # split faces into
             # 1. facets that ly in the plane: baseFacets, the other facets
@@ -2154,10 +2235,10 @@ class SimpleShape(base.Orbitit):
                 )
                 logging.debug(f"with face[{i}] = {face}")
                 intersectingPlane = Plane(
-                        Vs[intersectingFacet[0]],
-                        Vs[intersectingFacet[1]],
-                        Vs[intersectingFacet[2]]
-                    )
+                    Vs[intersectingFacet[0]],
+                    Vs[intersectingFacet[1]],
+                    Vs[intersectingFacet[2]],
+                )
                 # First check if this facet has at least one edge in common
                 facesShareAnEdge = False
                 # if this facet has the face itself:
@@ -2170,12 +2251,13 @@ class SimpleShape(base.Orbitit):
                     nrOfVsIntersectingFacet = len(intersectingFacet)
                     for p in range(nrOfVsIntersectingFacet):
                         if intersectingFacet[p] in face:
-                            q = p+1
-                            if q == nrOfVsIntersectingFacet: q = 0
+                            q = p + 1
+                            if q == nrOfVsIntersectingFacet:
+                                q = 0
                             if intersectingFacet[q] in face:
                                 pIndex = face.index(intersectingFacet[p])
                                 qIndex = face.index(intersectingFacet[q])
-                                delta =  abs(pIndex - qIndex)
+                                delta = abs(pIndex - qIndex)
                                 if (delta == 1) or (delta == len(face) - 1):
                                     facesShareAnEdge = True
                                     break
@@ -2196,19 +2278,24 @@ class SimpleShape(base.Orbitit):
                             baseFacets.append(intersectingFacet)
                             # also add to PS array of lines.
                             Es.append(intersectingFacet)
-                            logging.debug(f"In Plane: intersectingFacet {intersectingFacet}")
-                    else: # Loi3D != None:
+                            logging.debug(
+                                f"In Plane: intersectingFacet {intersectingFacet}"
+                            )
+                    else:  # Loi3D != None:
                         logging.debug(f"intersectingPlane {intersectingPlane}")
                         logging.debug(f"Loi3D {Loi3D}")
-                        assert eq(Loi3D.v[2], 0, margin), "all intersection lines should be paralell to z = 0, but z varies with %f" % (Loi3D.v[2])
-                        assert eq(Loi3D.p[2], zBaseFace, margin), "all intersection lines should ly on z==%f, but z differs %f" % (
-                                        zBaseFace, zBaseFace-Loi3D.p[2]
-                                    )
+                        assert eq(Loi3D.v[2], 0, margin), (
+                            "all intersection lines should be paralell to z = 0, but z varies with %f"
+                            % (Loi3D.v[2])
+                        )
+                        assert eq(Loi3D.p[2], zBaseFace, margin), (
+                            "all intersection lines should ly on z==%f, but z differs %f"
+                            % (zBaseFace, zBaseFace - Loi3D.p[2])
+                        )
                         # loi2D = lineofintersection
                         loi2D = Line2D(
-                                [Loi3D.p[0], Loi3D.p[1]],
-                                v = [Loi3D.v[0], Loi3D.v[1]]
-                            )
+                            [Loi3D.p[0], Loi3D.p[1]], v=[Loi3D.v[0], Loi3D.v[1]]
+                        )
                         # now find the segment of loi2D within the intersectingFacet.
                         # TODO The next call is strange. It is a call to a Line2D
                         # intersecting a 3D facet. It should be a mode dedicated
@@ -2220,7 +2307,7 @@ class SimpleShape(base.Orbitit):
                         logging.debug(f"pInLoiFacet {pInLoiFacet}")
                         if pInLoiFacet != []:
                             Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
-                            #if debug: Lois[-1].append(self.Fs.index(intersectingFacet))
+                            # if debug: Lois[-1].append(self.Fs.index(intersectingFacet))
 
             # Now that all facets are checked for intersections,
             # find a gravity point for settings x and y offset (TODO: PS only)
@@ -2238,12 +2325,14 @@ class SimpleShape(base.Orbitit):
             # basefacets.
             # for each intersecting line segment:
             for loiData in Lois:
-                loi2D       = loiData[0]
+                loi2D = loiData[0]
                 pInLoiFacet = loiData[1]
                 logging.debug(f"phase 2: check iFacet no: {loiData[-1]}")
                 # Now Intersect loi with the baseFacets.
                 for baseFacet in baseFacets:
-                    pInLoiBase = loi2D.intersectWithFacet(Vs, baseFacet, loiData[2], margin)
+                    pInLoiBase = loi2D.intersectWithFacet(
+                        Vs, baseFacet, loiData[2], margin
+                    )
                     logging.debug(f"pInLoiBase {pInLoiBase}")
                     # Now combine the results of pInLoiFacet and pInLoiBase:
                     # Only keep intersections that fall within 2 segments for
@@ -2253,20 +2342,23 @@ class SimpleShape(base.Orbitit):
                     nextBaseSeg = True
                     nextFacetSeg = True
                     no_of_vs = len(pointsIn2D)
+
                     def addPsLine(t0, t1, loi2D, no_of_vs):
                         pointsIn2D.append(loi2D.getPoint(t0))
                         pointsIn2D.append(loi2D.getPoint(t1))
-                        Es.append([no_of_vs, no_of_vs+1])
+                        Es.append([no_of_vs, no_of_vs + 1])
                         return no_of_vs + 2
-                    while (baseSegmentNr < len(pInLoiBase)/2) and \
-                        (facetSegmentNr < len(pInLoiFacet)/2):
+
+                    while (baseSegmentNr < len(pInLoiBase) / 2) and (
+                        facetSegmentNr < len(pInLoiFacet) / 2
+                    ):
                         if nextBaseSeg:
-                            b0 = pInLoiBase[2*baseSegmentNr]
-                            b1 = pInLoiBase[2*baseSegmentNr + 1]
+                            b0 = pInLoiBase[2 * baseSegmentNr]
+                            b1 = pInLoiBase[2 * baseSegmentNr + 1]
                             nextBaseSeg = False
                         if nextFacetSeg:
-                            f0 = pInLoiFacet[2*facetSegmentNr]
-                            f1 = pInLoiFacet[2*facetSegmentNr + 1]
+                            f0 = pInLoiFacet[2 * facetSegmentNr]
+                            f1 = pInLoiFacet[2 * facetSegmentNr + 1]
                             nextFacetSeg = False
                         # Note that always holds f0 < f1 and b0 < b1
                         if f1 < b0 or eq(f1, b0):
@@ -2308,55 +2400,60 @@ class SimpleShape(base.Orbitit):
             # TODO rewrite func, for this shape
             xOffset -= 100
             PsDoc.addPageStr(
-                    facesToPs(
-                        pointsIn2D, Es, scaling, xOffset,
-                        yOffset, precision = precision
-                    )
+                facesToPs(
+                    pointsIn2D, Es, scaling, xOffset, yOffset, precision=precision
                 )
+            )
 
         # restore margin
         geomtypes.eq_float_margin = margin
 
-    def getDome(self, level = 2):
+    def getDome(self, level=2):
         shape = None
         # check if level is in supported domain
-        if level < 1 or level > 2: return shape
+        if level < 1 or level > 2:
+            return shape
         fprop = self.getFaceProperties()
-        cols = fprop['colors']
+        cols = fprop["colors"]
         Vs = self.Vs[:]
         nrOrgVs = len(self.Vs)
-        try: G = self.fGs
+        try:
+            G = self.fGs
         except AttributeError:
             self.calculateFacesG()
-        try: outSphere = self.spheresRadii.circumscribed
+        try:
+            outSphere = self.spheresRadii.circumscribed
         except AttributeError:
             self.calculateSphereRadii()
             outSphere = self.spheresRadii.circumscribed
         R = reduce(max, iter(outSphere.keys()))
         Fs = []
         colIndices = []
+
         def addPrjVs(xVs):
             # func global Vs, R
             Vs.extend([R * x.normalize() for x in xVs])
+
         def domiseLevel1(f, i):
             # return xFs
             # func global nrOrgVs, cols
             # assumes that the gravity centres will be added to Vs in face order
             # independently.
             l = len(f)
-            return [[i+nrOrgVs, f[j], f[(j+1) % l]] for j in range(l)]
+            return [[i + nrOrgVs, f[j], f[(j + 1) % l]] for j in range(l)]
+
         def domiseLevel2(f):
             # f can only be a triangle: no check
             # return (xVs, xFs) tuple
             # func global: Vs
             xVs = []
-            xVs = [(Vs[f[i]] + Vs[f[(i+1) % 3]]) / 2  for i in range(3)]
+            xVs = [(Vs[f[i]] + Vs[f[(i + 1) % 3]]) / 2 for i in range(3)]
             vOffset = len(Vs)
             xFs = [
                 [vOffset, vOffset + 1, vOffset + 2],
-                [f[0]   , vOffset    , vOffset + 2],
-                [f[1]   , vOffset + 1, vOffset    ],
-                [f[2]   , vOffset + 2, vOffset + 1]
+                [f[0], vOffset, vOffset + 2],
+                [f[1], vOffset + 1, vOffset],
+                [f[2], vOffset + 2, vOffset + 1],
             ]
             return (xVs, xFs)
 
@@ -2374,16 +2471,17 @@ class SimpleShape(base.Orbitit):
                     tmpFs = domiseLevel1(f, i)
                     # add the gravity centres as assumed by domiseLevel1:
                     addPrjVs(self.fGs)
-                    xFs   = []
+                    xFs = []
                     for sf in tmpFs:
                         xVs, sxFs = domiseLevel2(sf)
                         addPrjVs(xVs)
                         xFs.extend(sxFs)
             Fs.extend(xFs)
             colIndices.extend([cols[1][i] for j in range(len(xFs))])
-        shape = SimpleShape(Vs, Fs, [], colors = (cols[0], colIndices))
+        shape = SimpleShape(Vs, Fs, [], colors=(cols[0], colIndices))
         shape.regen_edges()
         return shape
+
 
 class CompoundShape(base.Orbitit):
     """
@@ -2391,6 +2489,7 @@ class CompoundShape(base.Orbitit):
     SimpleShapes. The resulting shape can be treated as one, e.g. it can be
     exported as one 'OFF' file.
     """
+
     def __init__(
         self,
         shapes,
@@ -2416,34 +2515,39 @@ class CompoundShape(base.Orbitit):
             return repr(self.shapeElements[0])
         else:
             s = indent.Str(
-                '%s(\n' % base.find_module_class_name(self.__class__, __name__))
-            s = s.add_incr_line('shapes=[')
-            s.incr()
-            s = s.glue_line(',\n'.join(
-                repr(shape).reindent(s.indent) for shape in self.shapeElements)
+                "%s(\n" % base.find_module_class_name(self.__class__, __name__)
             )
-            s = s.add_decr_line('],')
+            s = s.add_incr_line("shapes=[")
+            s.incr()
+            s = s.glue_line(
+                ",\n".join(
+                    repr(shape).reindent(s.indent) for shape in self.shapeElements
+                )
+            )
+            s = s.add_decr_line("],")
             s = s.add_line('name="%s"' % self.name)
-            s = s.add_decr_line(')')
-            if __name__ != '__main__':
-                s = s.insert('%s.' % __name__)
+            s = s.add_decr_line(")")
+            if __name__ != "__main__":
+                s = s.insert("%s." % __name__)
             return s
 
     @property
     def repr_dict(self):
         """Return a short representation of the object."""
         return {
-            'class': base.class_to_json[self.json_class],
+            "class": base.class_to_json[self.json_class],
             "data": {
                 "name": self.name,
                 "shapes": [s.repr_dict for s in self.shapes],
-            }
+            },
         }
 
     @classmethod
     def from_dict_data(cls, data):
         return cls(
-            shapes=[base.json_to_class[s["class"]].from_json_dict(s) for s in data["shapes"]],
+            shapes=[
+                base.json_to_class[s["class"]].from_json_dict(s) for s in data["shapes"]
+            ],
             name=data["name"],
         )
 
@@ -2462,8 +2566,9 @@ class CompoundShape(base.Orbitit):
         shape.gl.alwaysSetVertices = True
         self.shapeElements.append(shape)
         if len(self.shapeElements) > 1:
-            self.shapeElements[-1].generateNormals =\
-                self.shapeElements[0].generateNormals
+            self.shapeElements[-1].generateNormals = self.shapeElements[
+                0
+            ].generateNormals
         self.merge_needed = True
 
     @property
@@ -2499,7 +2604,7 @@ class CompoundShape(base.Orbitit):
         colorDefs = []
         colorIndices = []
         for s in self.shapeElements:
-            VsOffset  = len(Vs)
+            VsOffset = len(Vs)
             colOffset = len(colorDefs)
             s = s.simple_shape
             # Apply shape orientation here, needed, since the can be different
@@ -2509,20 +2614,18 @@ class CompoundShape(base.Orbitit):
             for v in s.Ns:
                 Ns.append(s.orientation * v)
             # offset all faces:
-            Fs.extend([[ i+VsOffset for i in f] for f in s.Fs])
-            Es.extend([ i+VsOffset for i in s.Es])
+            Fs.extend([[i + VsOffset for i in f] for f in s.Fs])
+            Es.extend([i + VsOffset for i in s.Es])
             colorDefs.extend(s.colorData[0])
-            colorIndices.extend([ i+colOffset for i in s.colorData[1]])
+            colorIndices.extend([i + colOffset for i in s.colorData[1]])
         self.merged_shape = SimpleShape(
-                Vs = Vs, Fs = Fs, Es = Es, Ns = Ns,
-                colors = (colorDefs, colorIndices)
-            )
+            Vs=Vs, Fs=Fs, Es=Es, Ns=Ns, colors=(colorDefs, colorIndices)
+        )
         self.merge_needed = False
 
     @property
     def simple_shape(self):
-        """Return the compound shape as a simple merged and flat shape
-        """
+        """Return the compound shape as a simple merged and flat shape"""
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape
@@ -2550,7 +2653,7 @@ class CompoundShape(base.Orbitit):
             shape.regen_edges()
         self.merge_needed = True
 
-    def setVertexProperties(self, dictPar = None, **kwargs):
+    def setVertexProperties(self, dictPar=None, **kwargs):
         """Set the vertex properties for a whole compound shape at once
 
         Vs: This is an array of Vs. One Vs array for each shape element
@@ -2565,27 +2668,27 @@ class CompoundShape(base.Orbitit):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Vs' in dict and dict['Vs'] != None:
-                Vs = dict['Vs']
+            if "Vs" in dict and dict["Vs"] != None:
+                Vs = dict["Vs"]
             else:
                 Vs = [None for shape in self.shapeElements]
-            if 'Ns' in dict and dict['Ns'] != None:
-                Ns = dict['Ns']
+            if "Ns" in dict and dict["Ns"] != None:
+                Ns = dict["Ns"]
             else:
                 Ns = [None for shape in self.shapeElements]
-            if 'radius' in dict:
-                radius = dict['radius']
+            if "radius" in dict:
+                radius = dict["radius"]
             else:
                 radius = None
-            if 'color' in dict:
-                color = dict['color']
+            if "color" in dict:
+                color = dict["color"]
             else:
                 color = None
         assert len(Vs) == len(self.shapeElements)
         assert len(Ns) == len(self.shapeElements)
         for i in range(len(self.shapeElements)):
             self.shapeElements[i].setVertexProperties(
-                Vs = Vs[i], Ns = Ns[i], radius = radius, color = color
+                Vs=Vs[i], Ns=Ns[i], radius=radius, color=color
             )
         self.merge_needed = True
 
@@ -2597,13 +2700,13 @@ class CompoundShape(base.Orbitit):
         # Note: cannot use the megedShape, since the Vs is not an array of Vs
         d = self.shapeElements[0].getVertexProperties()
         return {
-            'Vs': self.Vs,
-            'radius': d['radius'],
-            'color': d['color'],
-            'Ns': self.Ns
+            "Vs": self.Vs,
+            "radius": d["radius"],
+            "color": d["color"],
+            "Ns": self.Ns,
         }
 
-    def setEdgeProperties(self, dictPar = None, **kwargs):
+    def setEdgeProperties(self, dictPar=None, **kwargs):
         """Set the edge properties for a whole compound shape at once
 
         Es: This is an array of Es. One Es array for each shape element
@@ -2617,25 +2720,25 @@ class CompoundShape(base.Orbitit):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Es' in dict and dict['Es'] != None:
-                Es = dict['Es']
+            if "Es" in dict and dict["Es"] != None:
+                Es = dict["Es"]
             else:
                 Es = [None for shape in self.shapeElements]
-            if 'radius' in dict:
-                radius = dict['radius']
+            if "radius" in dict:
+                radius = dict["radius"]
             else:
                 radius = None
-            if 'color' in dict:
-                color = dict['color']
+            if "color" in dict:
+                color = dict["color"]
             else:
                 color = None
-            if 'drawEdges' in dict:
-                drawEdges = dict['drawEdges']
+            if "drawEdges" in dict:
+                drawEdges = dict["drawEdges"]
             else:
                 drawEdges = None
         for i in range(len(self.shapeElements)):
             self.shapeElements[i].setEdgeProperties(
-                Es = Es[i], radius = radius, color = color, drawEdges = drawEdges
+                Es=Es[i], radius=radius, color=color, drawEdges=drawEdges
             )
         self.merge_needed = True
 
@@ -2646,13 +2749,13 @@ class CompoundShape(base.Orbitit):
         """
         d = self.shapeElements[0].getEdgeProperties()
         return {
-            'Es': self.Es,
-            'radius': d['radius'],
-            'color': d['color'],
-            'drawEdges': d['drawEdges']
+            "Es": self.Es,
+            "radius": d["radius"],
+            "color": d["color"],
+            "drawEdges": d["drawEdges"],
         }
 
-    def setFaceProperties(self, dictPar = None, **kwargs):
+    def setFaceProperties(self, dictPar=None, **kwargs):
         """Set the face properties for a whole compound shape at once
 
         Fs: This is an array of Es. One Es array for each shape element
@@ -2667,21 +2770,21 @@ class CompoundShape(base.Orbitit):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Fs' in dict and dict['Fs'] != None:
-                Fs = dict['Fs']
+            if "Fs" in dict and dict["Fs"] != None:
+                Fs = dict["Fs"]
             else:
                 Fs = [None for shape in self.shapeElements]
-            if 'colors' in dict and dict['colors'] != None:
-                colors = dict['colors']
+            if "colors" in dict and dict["colors"] != None:
+                colors = dict["colors"]
             else:
                 colors = [None for shape in self.shapeElements]
-            if 'drawFaces' in dict:
-                drawFaces = dict['drawFaces']
+            if "drawFaces" in dict:
+                drawFaces = dict["drawFaces"]
             else:
                 drawFaces = None
         for i in range(len(self.shapeElements)):
             self.shapeElements[i].setFaceProperties(
-                Fs = Fs[i], colors = colors[i], drawFaces = drawFaces
+                Fs=Fs[i], colors=colors[i], drawFaces=drawFaces
             )
         self.merge_needed = True
 
@@ -2691,11 +2794,7 @@ class CompoundShape(base.Orbitit):
         See setFaceProperties what to expect.
         """
         d = self.shapeElements[0].getFaceProperties()
-        return {
-            'Fs': self.Fs,
-            'colors': self.colorData,
-            'drawFaces': d['drawFaces']
-        }
+        return {"Fs": self.Fs, "colors": self.colorData, "drawFaces": d["drawFaces"]}
 
     @property
     def dimension(self):
@@ -2725,31 +2824,37 @@ class CompoundShape(base.Orbitit):
     def generateNormals(self):
         return self.shapeElements[0].generateNormals
 
-    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
+    def to_off(
+        self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
+    ):
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.to_off(precision, info, color_floats)
 
-    def toPsPiecesStr(self,
-            faceIndices=[],
-            scaling=1,
-            precision=7,
-            margin=1.0e5*defaultFloatMargin,
-            pageSize=PS.PageSizeA4,
+    def toPsPiecesStr(
+        self,
+        faceIndices=[],
+        scaling=1,
+        precision=7,
+        margin=1.0e5 * defaultFloatMargin,
+        pageSize=PS.PageSizeA4,
     ):
         if self.merge_needed:
             self.merge_shapes()
-        return self.merged_shape.toPsPiecesStr(faceIndices, scaling, precision, margin, pageSize)
+        return self.merged_shape.toPsPiecesStr(
+            faceIndices, scaling, precision, margin, pageSize
+        )
 
-    def toX3dDoc(self, id = 'SISH', precision = 5, edgeRadius = 0):
+    def toX3dDoc(self, id="SISH", precision=5, edgeRadius=0):
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.toX3dDoc(id, precision, edgeRadius)
 
-    def getDome(self, level = 2):
+    def getDome(self, level=2):
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.getDome(level)
+
 
 class SymmetricShape(CompoundShape):
     """
@@ -2760,7 +2865,9 @@ class SymmetricShape(CompoundShape):
 
     Colours can be specified for whole transformations of the base shape.
     """
-    def __init__(self,
+
+    def __init__(
+        self,
         Vs,
         Fs,
         Es=[],
@@ -2795,7 +2902,9 @@ class SymmetricShape(CompoundShape):
         """
         # this is before creating the base shape, since it check "colors"
         self.base_shape = SimpleShape(
-            Vs, Fs, Es,
+            Vs,
+            Fs,
+            Es,
             Ns=Ns,
             colors=([colors[0]], []) if colors else None,
             orientation=orientation,
@@ -2811,62 +2920,68 @@ class SymmetricShape(CompoundShape):
 
     def __repr__(self):
         # comment out class name, see comment at __fix_repr__ below:
-        #s = indent.Str('%s(\n' % base.find_module_class_name(self.__class__, __name__))
-        s = indent.Str('SymmetricShape(\n')
-        s = s.add_incr_line('Vs=[')
+        # s = indent.Str('%s(\n' % base.find_module_class_name(self.__class__, __name__))
+        s = indent.Str("SymmetricShape(\n")
+        s = s.add_incr_line("Vs=[")
         s.incr()
         try:
-            s = s.glue_line(',\n'.join(
-                indent.Str(repr(v)).reindent(s.indent) for v in self.base_shape.Vs)
+            s = s.glue_line(
+                ",\n".join(
+                    indent.Str(repr(v)).reindent(s.indent) for v in self.base_shape.Vs
+                )
             )
         except AttributeError:
             logging.error("Are you sure the vertices are all of type geomtypes.Vec3?")
             raise
-        s = s.add_decr_line('],')
-        s = s.add_line('Fs=[')
+        s = s.add_decr_line("],")
+        s = s.add_line("Fs=[")
         s.incr()
-        s = s.glue_line(',\n'.join(
-            indent.Str(repr(f)).reindent(s.indent) for f in self.base_shape.Fs)
+        s = s.glue_line(
+            ",\n".join(
+                indent.Str(repr(f)).reindent(s.indent) for f in self.base_shape.Fs
+            )
         )
-        s = s.add_decr_line('],')
+        s = s.add_decr_line("],")
         if self.base_shape.Es != []:
-            s = s.add_line('Es=%s,' % repr(self.base_shape.Es))
+            s = s.add_line("Es=%s," % repr(self.base_shape.Es))
         if self.base_shape.Ns != []:
-            s = s.add_incr_line('Ns=[')
+            s = s.add_incr_line("Ns=[")
             s.incr()
             try:
-                s = s.glue_line(',\n'.join(
-                    repr(n).reindent(s.indent) for n in self.base_shape.Ns)
+                s = s.glue_line(
+                    ",\n".join(repr(n).reindent(s.indent) for n in self.base_shape.Ns)
                 )
             except AttributeError:
-                logging.error("Are you sure the normals are all of type geomtypes.Vec3?")
+                logging.error(
+                    "Are you sure the normals are all of type geomtypes.Vec3?"
+                )
                 raise
-            s = s.add_decr_line('],')
-        s = s.add_line('colors=[')
+            s = s.add_decr_line("],")
+        s = s.add_line("colors=[")
         s.incr()
         cols = self.getFaceColors()
-        s = s.glue_line(',\n'.join(
-            indent.Str(repr(c)).reindent(s.indent) for c in cols)
+        s = s.glue_line(
+            ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
-        s = s.add_decr_line('],')
+        s = s.add_decr_line("],")
         if self.isometries != None:
-            s = s.add_line('isometries=[')
+            s = s.add_line("isometries=[")
             s.incr()
             s = s.glue_line(
-                ',\n'.join(
+                ",\n".join(
                     indent.Str(repr(i)).reindent(s.indent) for i in self.isometries
                 )
             )
-            s = s.add_decr_line('],')
+            s = s.add_decr_line("],")
         s = s.add_line("name='%s'," % self.name)
         s = s.glue_line(
-            indent.Str(
-                'orientation=%s' % repr(self.base_shape.orientation)
-            ).reindent(s.indent)
+            indent.Str("orientation=%s" % repr(self.base_shape.orientation)).reindent(
+                s.indent
+            )
         )
-        s = s.add_decr_line(')')
-        if __name__ != '__main__':
-            s = s.insert('%s.' % __name__)
+        s = s.add_decr_line(")")
+        if __name__ != "__main__":
+            s = s.insert("%s." % __name__)
         return s
 
     @property
@@ -2874,14 +2989,14 @@ class SymmetricShape(CompoundShape):
         """Return a short representation of the object."""
         # Note that orientation IS essential here.
         return {
-            'class': base.class_to_json[self.__class__],
-            'data': {
-                'name': self.name,
-                'vs': self.base_shape.Vs,
-                'fs': self.base_shape.Fs,
-                'cols': self.shape_colors,
-                'orientation': self.base_shape.orientation.repr_dict,
-                'isometries': [i.repr_dict for i in self.isometries],
+            "class": base.class_to_json[self.__class__],
+            "data": {
+                "name": self.name,
+                "vs": self.base_shape.Vs,
+                "fs": self.base_shape.Fs,
+                "cols": self.shape_colors,
+                "orientation": self.base_shape.orientation.repr_dict,
+                "isometries": [i.repr_dict for i in self.isometries],
             },
         }
 
@@ -2919,7 +3034,7 @@ class SymmetricShape(CompoundShape):
         """
         if not colors:
             colors = [rgb.gray95[:]]
-        assert len(colors) > 0, 'colors should have at least one element'
+        assert len(colors) > 0, "colors should have at least one element"
         return colors
 
     def setFaceColors(self, colors):
@@ -2939,11 +3054,9 @@ class SymmetricShape(CompoundShape):
         """
         Divide the shape colors over the isometries and re-assign class field.
         """
-        if (self.nrOfShapeColorDefs != self.order):
+        if self.nrOfShapeColorDefs != self.order:
             if self.nrOfShapeColorDefs == 1:
-                colorDataPerShape = [
-                        self.shape_colors[0] for i in range(self.order)
-                    ]
+                colorDataPerShape = [self.shape_colors[0] for i in range(self.order)]
             elif self.nrOfShapeColorDefs < self.order:
                 div = self.order // self.nrOfShapeColorDefs
                 mod = self.order % self.nrOfShapeColorDefs
@@ -2952,11 +3065,13 @@ class SymmetricShape(CompoundShape):
                     colorDataPerShape.extend(self.shape_colors)
                 colorDataPerShape.extend(self.shape_colors[:mod])
             else:
-                colorDataPerShape = self.shape_colors[:self.order],
+                colorDataPerShape = (self.shape_colors[: self.order],)
             self.shape_colors = colorDataPerShape
         self.nrOfShapeColorDefs = len(self.shape_colors)
-        assert (self.nrOfShapeColorDefs == self.order), '%d != %d' % (
-            self.nrOfShapeColorDefs, self.order)
+        assert self.nrOfShapeColorDefs == self.order, "%d != %d" % (
+            self.nrOfShapeColorDefs,
+            self.order,
+        )
 
     def apply_isoms(self):
         """
@@ -2972,9 +3087,9 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.Vs,
                 self.base_shape.Fs,
                 self.base_shape.Es,
-                Ns = self.base_shape.Ns,
-                colors = ([self.shape_colors[i]], []),
-                orientation = isom * self.base_shape.orientation
+                Ns=self.base_shape.Ns,
+                colors=([self.shape_colors[i]], []),
+                orientation=isom * self.base_shape.orientation,
             )
             for i, isom in enumerate(self.isometries)
         ]
@@ -2983,7 +3098,7 @@ class SymmetricShape(CompoundShape):
 
     def setVs(self, Vs):
         assert len(Vs) == len(self.base_shape.Vs)
-        self.base_shape.setVertexProperties(Vs = Vs)
+        self.base_shape.setVertexProperties(Vs=Vs)
         self.merge_needed = True
         self.needs_apply_isoms = True
 
@@ -2991,7 +3106,7 @@ class SymmetricShape(CompoundShape):
         self.base_shape.orientation = orientation
         self.needs_apply_isoms = True
 
-    def setBaseVertexProperties(self, dictPar = None, **kwargs):
+    def setBaseVertexProperties(self, dictPar=None, **kwargs):
         """
         Set the vertices and how/whether vertices are drawn in OpenGL for the
         base element.
@@ -3009,22 +3124,30 @@ class SymmetricShape(CompoundShape):
             else:
                 dict = kwargs
             Vs = None
-            try: Vs = dict['Vs']
-            except KeyError: pass
+            try:
+                Vs = dict["Vs"]
+            except KeyError:
+                pass
             Ns = None
-            try: Ns = dict['Ns']
-            except KeyError: pass
+            try:
+                Ns = dict["Ns"]
+            except KeyError:
+                pass
             if not (Vs == None and Ns == None):
-                self.base_shape.setVertexProperties(Vs = Vs, Ns = Ns)
+                self.base_shape.setVertexProperties(Vs=Vs, Ns=Ns)
                 self.needs_apply_isoms = True
             radius = None
-            try: radius = dict['radius']
-            except KeyError: pass
+            try:
+                radius = dict["radius"]
+            except KeyError:
+                pass
             color = None
-            try: color = dict['color']
-            except KeyError: pass
+            try:
+                color = dict["color"]
+            except KeyError:
+                pass
             if not (radius == None and color == None):
-                self.setVertexProperties(radius = radius, color = color)
+                self.setVertexProperties(radius=radius, color=color)
         else:
             logging.warning("No parameters specified: ignoring method call")
 
@@ -3036,7 +3159,7 @@ class SymmetricShape(CompoundShape):
         """
         return self.base_shape.getVertexProperties()
 
-    def setBaseEdgeProperties(self, dictPar = None, **kwargs):
+    def setBaseEdgeProperties(self, dictPar=None, **kwargs):
         """
         Specify the edges and set how they are drawn in OpenGL.
 
@@ -3052,24 +3175,29 @@ class SymmetricShape(CompoundShape):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Es' in dict and dict['Es'] != None:
-                self.base_shape.setEdgeProperties(Es = dict['Es'])
+            if "Es" in dict and dict["Es"] != None:
+                self.base_shape.setEdgeProperties(Es=dict["Es"])
                 self.needs_apply_isoms = True
             radius = None
-            try: radius = dict['radius']
-            except KeyError: pass
+            try:
+                radius = dict["radius"]
+            except KeyError:
+                pass
             color = None
-            try: color = dict['color']
-            except KeyError: pass
+            try:
+                color = dict["color"]
+            except KeyError:
+                pass
             drawEdges = None
-            try: drawEdges = dict['drawEdges']
-            except KeyError: pass
+            try:
+                drawEdges = dict["drawEdges"]
+            except KeyError:
+                pass
             if not (radius == None and color == None and drawEdges == None):
-                self.setEdgeProperties(
-                    radius = radius, color = color, drawEdges = drawEdges
+                self.setEdgeProperties(radius=radius, color=color, drawEdges=drawEdges)
+                CompoundShape.setEdgeProperties(
+                    self, radius=radius, color=color, drawEdges=drawEdges
                 )
-                CompoundShape.setEdgeProperties(self,
-                        radius = radius, color = color, drawEdges = drawEdges)
                 logging.info(f"radius {radius}")
                 self.merge_needed = True
 
@@ -3081,7 +3209,7 @@ class SymmetricShape(CompoundShape):
         """
         return self.base_shape.getEdgeProperties()
 
-    def setBaseFaceProperties(self, dictPar = None, **kwargs):
+    def setBaseFaceProperties(self, dictPar=None, **kwargs):
         """
         Define the properties of the faces for the base element.
 
@@ -3096,15 +3224,15 @@ class SymmetricShape(CompoundShape):
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Fs' in dict and dict['Fs'] != None:
-                self.base_shape.setFaceProperties(Fs = dict['Fs'])
+            if "Fs" in dict and dict["Fs"] != None:
+                self.base_shape.setFaceProperties(Fs=dict["Fs"])
                 self.needs_apply_isoms = True
-            if 'colors' in dict and dict['colors'] != None:
-                self.setFaceColors([dict['colors']])
+            if "colors" in dict and dict["colors"] != None:
+                self.setFaceColors([dict["colors"]])
                 # taken care of by the function above:
                 self.merge_needed = True
-            if 'drawFaces' in dict and dict['drawFaces'] != None:
-                self.setEnableDrawFaces(dict['drawFaces'])
+            if "drawFaces" in dict and dict["drawFaces"] != None:
+                self.setEnableDrawFaces(dict["drawFaces"])
 
     def getBaseFaceProperties(self):
         """
@@ -3122,26 +3250,31 @@ class SymmetricShape(CompoundShape):
                 self.apply_isoms()
             CompoundShape.gl_draw(self)
 
-    def toPsPiecesStr(self,
-            faceIndices=[],
-            scaling=1,
-            precision=7,
-            margin=1.0e5*defaultFloatMargin,
-            pageSize=PS.PageSizeA4,
-        ):
+    def toPsPiecesStr(
+        self,
+        faceIndices=[],
+        scaling=1,
+        precision=7,
+        margin=1.0e5 * defaultFloatMargin,
+        pageSize=PS.PageSizeA4,
+    ):
         if self.merge_needed:
             self.merge_shapes()
         if faceIndices == []:
             # no need to print all faces in orbited, because of symmetry
             faceIndices = list(range(len(self.base_shape.Fs)))
         return self.simple_shape.toPsPiecesStr(
-            faceIndices, scaling, precision, margin, pageSize)
+            faceIndices, scaling, precision, margin, pageSize
+        )
+
 
 class SymmetricShapeSplitCols(SymmetricShape):
     """
     Same as a symmetric shape except that on can define a colour for each individual face.
     """
-    def __init__(self,
+
+    def __init__(
+        self,
         Vs,
         Fs,
         Es=[],
@@ -3179,7 +3312,8 @@ class SymmetricShapeSplitCols(SymmetricShape):
         """
         # this is before creating the base shape, since it check "colors"
         super().__init__(
-            Vs, Fs, Es, Ns, colors, isometries, regen_edges, orientation, name)
+            Vs, Fs, Es, Ns, colors, isometries, regen_edges, orientation, name
+        )
 
     def _chk_face_colors_par(self, colors):
         """Check whether the colors parameters is valid.
@@ -3188,10 +3322,11 @@ class SymmetricShapeSplitCols(SymmetricShape):
         """
         if not colors:
             colors = [([rgb.gray95[:]], [])]
-        assert len(colors) > 0, 'colors should have at least one element'
+        assert len(colors) > 0, "colors should have at least one element"
         for c in colors:
-            assert len(c) == 2, \
-                f'a colors element should be a 2-tuple (colors, face_i), got {c}'
+            assert (
+                len(c) == 2
+            ), f"a colors element should be a 2-tuple (colors, face_i), got {c}"
         return colors
 
     def apply_isoms(self):
@@ -3208,14 +3343,15 @@ class SymmetricShapeSplitCols(SymmetricShape):
                 self.base_shape.Vs,
                 self.base_shape.Fs,
                 self.base_shape.Es,
-                Ns = self.base_shape.Ns,
-                colors = self.shape_colors[i],
-                orientation = isom * self.base_shape.orientation
+                Ns=self.base_shape.Ns,
+                colors=self.shape_colors[i],
+                orientation=isom * self.base_shape.orientation,
             )
             for i, isom in enumerate(self.isometries)
         ]
         self.setShapes(shapes)
         self.needs_apply_isoms = False
+
 
 class OrbitShape(SymmetricShape):
     """
@@ -3229,7 +3365,8 @@ class OrbitShape(SymmetricShape):
     complete shape.
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         Vs,
         Fs,
         Es=[],
@@ -3239,7 +3376,7 @@ class OrbitShape(SymmetricShape):
         colors=[],
         regen_edges=True,
         name="OrbitShape",
-        quiet=False
+        quiet=False,
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -3273,7 +3410,7 @@ class OrbitShape(SymmetricShape):
         colors: the colours per isometry. (use [] for none)
         """
         try:
-            fs_quotient_set = final_sym  / stab_sym
+            fs_quotient_set = final_sym / stab_sym
         except isometry.ImproperSubgroupError:
             logging.error("Stabiliser not a subgroup of final symmetry")
             raise
@@ -3281,19 +3418,13 @@ class OrbitShape(SymmetricShape):
         len_s = len(stab_sym)
         len_q = len(fs_quotient_set)
         assert len_f % len_s == 0, f"Expected divisable group length {len_f} / {len_s}"
-        #assert len_q == len_f // len_s,\
+        # assert len_q == len_f // len_s,\
         #    f"Wrong length ({len_q} != {len_f // len_s}) of quotient set (increase precisio?)"
         FsOrbit = [coset.get_one() for coset in fs_quotient_set]
         if not quiet:
             logging.info(f"Applying an orbit of order {len(FsOrbit)}")
         super().__init__(
-            Vs,
-            Fs,
-            Es,
-            Ns,
-            isometries=FsOrbit,
-            name=name,
-            regen_edges=regen_edges
+            Vs, Fs, Es, Ns, isometries=FsOrbit, name=name, regen_edges=regen_edges
         )
         # This is save so heirs can still use repr_dict from this class
         self.json_class = OrbitShape
@@ -3306,14 +3437,14 @@ class OrbitShape(SymmetricShape):
     def repr_dict(self):
         """Return a short representation of the object."""
         return {
-            'class': base.class_to_json[self.json_class],
-            'data': {
-                'name': self.name,
-                'vs': self.base_shape.Vs,
-                'fs': self.base_shape.Fs,
-                'cols': self.shape_colors,
-                'final_sym': self.final_sym.repr_dict,
-                'stab_sym': self.stab_sym.repr_dict,
+            "class": base.class_to_json[self.json_class],
+            "data": {
+                "name": self.name,
+                "vs": self.base_shape.Vs,
+                "fs": self.base_shape.Fs,
+                "cols": self.shape_colors,
+                "final_sym": self.final_sym.repr_dict,
+                "stab_sym": self.stab_sym.repr_dict,
             },
         }
 
@@ -3322,8 +3453,8 @@ class OrbitShape(SymmetricShape):
         return cls(
             data["vs"],
             data["fs"],
-            final_sym = isometry.Set.from_json_dict(data["final_sym"]),
-            stab_sym = isometry.Set.from_json_dict(data["stab_sym"]),
+            final_sym=isometry.Set.from_json_dict(data["final_sym"]),
+            stab_sym=isometry.Set.from_json_dict(data["stab_sym"]),
             colors=data["cols"],
             name=data["name"],
         )
@@ -3335,71 +3466,77 @@ class OrbitShape(SymmetricShape):
         # provide an array of colours and a symmetry (and index) on which the
         # colouring is based. For now fall back on the parental repr.
         s = indent.Str(f"{base.find_module_class_name(self.__class__, __name__)}(\n")
-        s = s.add_incr_line('Vs=[')
+        s = s.add_incr_line("Vs=[")
         s.incr()
         try:
-            s = s.glue_line(',\n'.join(
-                indent.Str(repr(v)).reindent(s.indent) for v in self.base_shape.Vs)
+            s = s.glue_line(
+                ",\n".join(
+                    indent.Str(repr(v)).reindent(s.indent) for v in self.base_shape.Vs
+                )
             )
         except AttributeError:
             logging.error("Are you sure the vertices are all of type geomtypes.Vec3?")
             raise
-        s = s.add_decr_line('],')
-        s = s.add_line('Fs=[')
+        s = s.add_decr_line("],")
+        s = s.add_line("Fs=[")
         s.incr()
-        s = s.glue_line(',\n'.join(
-            indent.Str(repr(f)).reindent(s.indent) for f in self.base_shape.Fs)
+        s = s.glue_line(
+            ",\n".join(
+                indent.Str(repr(f)).reindent(s.indent) for f in self.base_shape.Fs
+            )
         )
-        s = s.add_decr_line('],')
+        s = s.add_decr_line("],")
         if self.base_shape.Es != []:
-            s = s.add_line('Es=%s,' % repr(self.base_shape.Es))
+            s = s.add_line("Es=%s," % repr(self.base_shape.Es))
         if self.base_shape.Ns != []:
-            s = s.add_incr_line('Ns=[')
+            s = s.add_incr_line("Ns=[")
             s.incr()
             try:
-                s = s.glue_line(',\n'.join(
-                    repr(n).reindent(s.indent) for n in self.base_shape.Ns)
+                s = s.glue_line(
+                    ",\n".join(repr(n).reindent(s.indent) for n in self.base_shape.Ns)
                 )
             except AttributeError:
-                logging.error("Are you sure the normals are all of type geomtypes.Vec3?")
+                logging.error(
+                    "Are you sure the normals are all of type geomtypes.Vec3?"
+                )
                 raise
-            s = s.add_decr_line('],')
-        s = s.add_line('colors=[')
+            s = s.add_decr_line("],")
+        s = s.add_line("colors=[")
         s.incr()
         cols = self.getFaceColors()
-        s = s.glue_line(',\n'.join(
-            indent.Str(repr(c)).reindent(s.indent) for c in cols)
+        s = s.glue_line(
+            ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
-        s = s.add_decr_line('],')
-        s = s.add_line('final_sym=')
+        s = s.add_decr_line("],")
+        s = s.add_line("final_sym=")
         s.incr()
         s = s.glue_line((repr(self.final_sym) + ",").reindent(s.indent))
         s.decr()
-        s = s.add_line('stab_sym=')
+        s = s.add_line("stab_sym=")
         s.incr()
         s = s.glue_line((repr(self.stab_sym) + ",").reindent(s.indent))
         s.decr()
         s = s.add_line("name='%s'," % self.name)
-        s = s.add_decr_line(')')
-        if __name__ != '__main__':
-            s = s.insert('%s.' % __name__)
+        s = s.add_decr_line(")")
+        if __name__ != "__main__":
+            s = s.insert("%s." % __name__)
         return s
 
         return s
-        s = '%sfinal_sym = %s,\n  stab_sym = %s,\n  ' % (
-                s,
-                repr(self.final_sym),
-                repr(self.stab_sym)
-            )
+        s = "%sfinal_sym = %s,\n  stab_sym = %s,\n  " % (
+            s,
+            repr(self.final_sym),
+            repr(self.stab_sym),
+        )
         cols = self.getFaceColors()
-        s = '%scolors = [\n  ' % (s)
+        s = "%scolors = [\n  " % (s)
         for subShapeCols in cols:
-            s = '%s  %s,\n  ' % (s, repr(subShapeCols))
-        s = '%s],\n  ' % (s)
+            s = "%s  %s,\n  " % (s, repr(subShapeCols))
+        s = "%s],\n  " % (s)
         s = '%sname = "%s"\n' % (s, self.name)
-        s = '%s)\n' % (s)
-        if __name__ != '__main__':
-            s = '%s.%s' % (__name__, s)
+        s = "%s)\n" % (s)
+        if __name__ != "__main__":
+            s = "%s.%s" % (__name__, s)
         return s
 
     def setColours(self, colours, stab_sym):
@@ -3419,7 +3556,8 @@ class OrbitShape(SymmetricShape):
         """
         pass
 
-class Scene():
+
+class Scene:
     """
     Used for creating scenes in the PolyhedraBrowser.
 
@@ -3434,6 +3572,7 @@ class Scene():
        where MyShape is the class from step 1 and MyCtrlWin is the class from
        step 2.
     """
+
     def __init__(self, ShapeClass, CtrlWinClass, parent, canvas):
         """Create an object of the Scene class
 
