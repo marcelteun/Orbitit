@@ -1,7 +1,7 @@
 #!/bin/sh -e
 chk_files="
 	orbitit/__main__.py
-	orbitit/archimedean_polyhedra.py
+	orbitit/archimedean_solids.py
 	orbitit/geom_gui.py
 	orbitit/geomtypes.py
 	orbitit/gen_59_icosahedra.py
@@ -10,6 +10,7 @@ chk_files="
 	orbitit/main_dlg.py
 	orbitit/main_win.py
 	orbitit/orbit.py
+	orbitit/platonic_solids.py
 	orbitit/rgb.py
 	orbitit/scene_orbit.py
 "
