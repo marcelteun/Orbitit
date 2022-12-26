@@ -981,10 +981,11 @@ if __name__ == "__main__":
 
     parser = ArgumentParser(DESCR)
     parser.add_argument(
-        "--out-dir", "-o",
-        default="",
-        metavar="DIR",
-        help="Specify possible output directory. Should exist.",
+        "--indent", "-i",
+        metavar="NO-OF-SPACES",
+        type=int,
+        help="When using JSON format indent each line with the specified number of spaces to make "
+        "it human readable. Note that the file size might increase significantly.",
     )
     parser.add_argument(
         "--models", "-m",
@@ -992,6 +993,12 @@ if __name__ == "__main__":
         nargs="*",
         help=f"Specifiy which model(s) to generate. Specify one of {list(models_map.keys())}. If "
         "nothing is specified all of them will be generated."
+    )
+    parser.add_argument(
+        "--out-dir", "-o",
+        default="",
+        metavar="DIR",
+        help="Specify possible output directory. Should exist.",
     )
     parser.add_argument(
         "--precision", "-p",
@@ -1031,11 +1038,15 @@ if __name__ == "__main__":
         if args.seperate_orbits:
             for model_shape in model.shapes:
                 filename = out_dir / shape_to_filename(model_shape)
+                if args.indent:
+                    model_shape.json_indent = args.indent
                 model_shape.write_json_file(filename)
                 print(f"written {filename}")
         filename = model.name.lower().replace(" ", "_")
         if args.json:
             filename = out_dir / Path(filename + ".json")
+            if args.indent:
+                model.json_indent = args.indent
             model.write_json_file(filename)
         else:
             filename = out_dir / Path(filename + ".off")
