@@ -1,6 +1,7 @@
 #!/bin/sh -e
 chk_files="
 	orbitit/__main__.py
+	orbitit/archimedean_polyhedra.py
 	orbitit/geom_gui.py
 	orbitit/geomtypes.py
 	orbitit/gen_59_icosahedra.py
