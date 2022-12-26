@@ -309,9 +309,9 @@ class Line:
         ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
         self.dimension = d
         self.isSegment = isSegment
-        if p1 != None:
+        if p1 is not None:
             self.setPoints(p0, p1)
-        elif v != None:
+        elif v is not None:
             self.setBaseDir(p0, v)
 
     def setPoints(self, p0, p1):
@@ -324,12 +324,12 @@ class Line:
 
     def factorInSegment(self, t, margin):
         return (
-            t != None and (t >= 0 or eq(t, 0, margin)) and (t <= 1 or eq(t, 1, margin))
+            t is not None and (t >= 0 or eq(t, 0, margin)) and (t <= 1 or eq(t, 1, margin))
         )
 
     def getPoint(self, t):
         """Returns the point on the line that equals to self.b + t*self.v (or [] when t == None)"""
-        if t != None:
+        if t is not None:
             return [self.p[i] + t * (self.v[i]) for i in range(self.dimension)]
         else:
             return []
@@ -356,7 +356,7 @@ class Line:
         t = self.getFactorAt(v[0], 0, margin)
         if t == None:
             t = self.getFactorAt(v[1], 1, margin)
-        assert t != None
+        assert t is not None
         return Veq(self.getPoint(t), v, margin, min(len(v), self.dimension))
 
     def getFactor(self, p, check=True, margin=defaultFloatMargin):
@@ -365,7 +365,7 @@ class Line:
             t = self.getFactorAt(p[i], i, margin=margin)
             if not t == None:
                 break
-        assert t != None
+        assert t is not None
         if check:
             c = self.getPoint(t)
             for i in range(1, self.dimension):
@@ -458,7 +458,7 @@ class Line2D(Line):
             edgePV3D = Line3D(v0, v=v1 - v0)
             t = edgePV3D.getFactorAt(z0, 2, margin=margin)
             s = None
-            if t != None:
+            if t is not None:
                 tEq0 = eq(t, 0, margin)
                 tEq1 = eq(t, 1, margin)
                 if (t >= 0 or tEq0) and (t <= 1 or tEq1):
@@ -481,7 +481,7 @@ class Line2D(Line):
                     logging.debug(f"edge lies in plane z = {z0}")
                     edgePV2D = Line2D(v0, v=v1 - v0)
                     t = edgePV2D.intersectLineGetFactor(self, margin)
-                    if t != None:
+                    if t is not None:
                         tEq0 = eq(t, 0, margin)
                         tEq1 = eq(t, 1, margin)
                         if (t >= 0 or tEq0) and (t <= 1 or tEq1):
@@ -503,7 +503,7 @@ class Line2D(Line):
                     logging.debug(
                         f"edge parallel to plane z = {z0} (no point of intersection)"
                     )
-            if s != None:
+            if s is not None:
                 logging.debug(f"FOUND s = {s} with v = {self.getPoint(s)}")
                 # ie. in this case tEq0 and tEq1 should be defined
                 # only add vertex intersections once (otherwise you add the
@@ -596,7 +596,7 @@ class Line3D(Line):
         # make sure to have vec types internally
         p0 = geomtypes.Vec3(p0)
         if p1 == None:
-            assert v != None
+            assert v is not None
             v = geomtypes.Vec3(v)
             Line.__init__(self, p0, v=v, d=3, isSegment=isSegment)
         else:
@@ -609,7 +609,7 @@ class Line3D(Line):
         self.setBaseDir(p0, p1 - p0)
 
     def getPoint(self, t):
-        if t != None:
+        if t is not None:
             return self.p + t * self.v
         else:
             return []
@@ -1005,26 +1005,26 @@ class SimpleShape(base.Orbitit):
         This can be used to copy settings from one shape to another.
         If dict_par is used and kwargs, then only the dict_par will be used.
         """
-        if dict_par != None or kwargs != {}:
-            if dict_par != None:
+        if dict_par is not None or kwargs != {}:
+            if dict_par is not None:
                 the_dict = dict_par
             else:
                 the_dict = kwargs
-            if "Vs" in the_dict and the_dict["Vs"] != None:
+            if "Vs" in the_dict and the_dict["Vs"] is not None:
                 self.Vs = [geomtypes.Vec3(v) for v in the_dict["Vs"]]
                 self.VsRange = range(len(self.Vs))
                 self.gl.updateVs = True
                 self.fNsUp2date = False
-            if "Ns" in the_dict and the_dict["Ns"] != None:
+            if "Ns" in the_dict and the_dict["Ns"] is not None:
                 self.Ns = the_dict["Ns"]
-            if "radius" in the_dict and the_dict["radius"] != None:
+            if "radius" in the_dict and the_dict["radius"] is not None:
                 self.gl.vRadius = the_dict["radius"]
                 self.gl.addSphereVs = the_dict["radius"] > 0.0
                 if self.gl.addSphereVs:
-                    if self.gl.sphere != None:
+                    if self.gl.sphere is not None:
                         del self.gl.sphere
                     self.gl.sphere = Scenes3D.VSphere(radius=the_dict["radius"])
-            if "color" in the_dict and the_dict["color"] != None:
+            if "color" in the_dict and the_dict["color"] is not None:
                 self.gl.vCol = the_dict["color"]
 
     def getVertexProperties(self):
@@ -1067,24 +1067,24 @@ class SimpleShape(base.Orbitit):
         This can be used drawFacesto copy settings from one shape to another.
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Es" in dict and dict["Es"] != None:
+            if "Es" in dict and dict["Es"] is not None:
                 self.Es = dict["Es"]
                 self.EsRange = range(0, len(self.Es), 2)
-            if "radius" in dict and dict["radius"] != None:
+            if "radius" in dict and dict["radius"] is not None:
                 self.gl.eRadius = dict["radius"]
                 self.gl.useCylinderEs = dict["radius"] > 0.0
                 if self.gl.useCylinderEs:
-                    if self.gl.cyl != None:
+                    if self.gl.cyl is not None:
                         del self.gl.cyl
                     self.gl.cyl = Scenes3D.P2PCylinder(radius=dict["radius"])
-            if "color" in dict and dict["color"] != None:
+            if "color" in dict and dict["color"] is not None:
                 self.gl.eCol = dict["color"]
-            if "drawEdges" in dict and dict["drawEdges"] != None:
+            if "drawEdges" in dict and dict["drawEdges"] is not None:
                 self.gl.drawEdges = dict["drawEdges"]
 
     def getEdgeProperties(self):
@@ -1160,17 +1160,17 @@ class SimpleShape(base.Orbitit):
         This can be used to copy settings from one shape to another.
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Fs" in dict and dict["Fs"] != None:
+            if "Fs" in dict and dict["Fs"] is not None:
                 self.__setFs(dict["Fs"])
-            if "colors" in dict and dict["colors"] != None:
+            if "colors" in dict and dict["colors"] is not None:
                 self.setFaceColors(dict["colors"])
             self.divideColorWrapper()
-            if "drawFaces" in dict and dict["drawFaces"] != None:
+            if "drawFaces" in dict and dict["drawFaces"] is not None:
                 self.setEnableDrawFaces(dict["drawFaces"])
 
     def getFaceProperties(self):
@@ -2028,7 +2028,7 @@ class SimpleShape(base.Orbitit):
                             logging.debug(
                                 f"In Plane: intersectingFacet {intersectingFacet}"
                             )
-                    else:  # Loi3D != None:
+                    else:  # Loi3D is not None:
                         logging.debug(f"intersectingPlane {intersectingPlane}")
                         logging.debug(f"Loi3D {Loi3D}")
                         assert eq(Loi3D.v[2], 0, 100 * margin), (
@@ -2289,7 +2289,7 @@ class SimpleShape(base.Orbitit):
                             logging.debug(
                                 f"In Plane: intersectingFacet {intersectingFacet}"
                             )
-                    else:  # Loi3D != None:
+                    else:  # Loi3D is not None:
                         logging.debug(f"intersectingPlane {intersectingPlane}")
                         logging.debug(f"Loi3D {Loi3D}")
                         assert eq(Loi3D.v[2], 0, margin), (
@@ -2671,16 +2671,16 @@ class CompoundShape(base.Orbitit):
 
         See the same function in SimpleShape.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Vs" in dict and dict["Vs"] != None:
+            if "Vs" in dict and dict["Vs"] is not None:
                 Vs = dict["Vs"]
             else:
                 Vs = [None for shape in self.shapeElements]
-            if "Ns" in dict and dict["Ns"] != None:
+            if "Ns" in dict and dict["Ns"] is not None:
                 Ns = dict["Ns"]
             else:
                 Ns = [None for shape in self.shapeElements]
@@ -2723,12 +2723,12 @@ class CompoundShape(base.Orbitit):
 
         See the same function in SimpleShape.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Es" in dict and dict["Es"] != None:
+            if "Es" in dict and dict["Es"] is not None:
                 Es = dict["Es"]
             else:
                 Es = [None for shape in self.shapeElements]
@@ -2773,16 +2773,16 @@ class CompoundShape(base.Orbitit):
 
         See the same function in SimpleShape.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Fs" in dict and dict["Fs"] != None:
+            if "Fs" in dict and dict["Fs"] is not None:
                 Fs = dict["Fs"]
             else:
                 Fs = [None for shape in self.shapeElements]
-            if "colors" in dict and dict["colors"] != None:
+            if "colors" in dict and dict["colors"] is not None:
                 colors = dict["colors"]
             else:
                 colors = [None for shape in self.shapeElements]
@@ -2970,7 +2970,7 @@ class SymmetricShape(CompoundShape):
             ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
         s = s.add_decr_line("],")
-        if self.isometries != None:
+        if self.isometries is not None:
             s = s.add_line("isometries=[")
             s.incr()
             s = s.glue_line(
@@ -3124,8 +3124,8 @@ class SymmetricShape(CompoundShape):
         - Ns.
         Check SimpleShape.setVertexProperties for more details.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
@@ -3176,12 +3176,12 @@ class SymmetricShape(CompoundShape):
           - drawEdges.
         Check SimpleShape.setEdgeProperties for more details.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Es" in dict and dict["Es"] != None:
+            if "Es" in dict and dict["Es"] is not None:
                 self.base_shape.setEdgeProperties(Es=dict["Es"])
                 self.needs_apply_isoms = True
             radius = None
@@ -3225,19 +3225,19 @@ class SymmetricShape(CompoundShape):
           - drawFaces.
         Check SimpleShape.setFaceProperties for more details.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Fs" in dict and dict["Fs"] != None:
+            if "Fs" in dict and dict["Fs"] is not None:
                 self.base_shape.setFaceProperties(Fs=dict["Fs"])
                 self.needs_apply_isoms = True
-            if "colors" in dict and dict["colors"] != None:
+            if "colors" in dict and dict["colors"] is not None:
                 self.setFaceColors([dict["colors"]])
                 # taken care of by the function above:
                 self.merge_needed = True
-            if "drawFaces" in dict and dict["drawFaces"] != None:
+            if "drawFaces" in dict and dict["drawFaces"] is not None:
                 self.setEnableDrawFaces(dict["drawFaces"])
 
     def getBaseFaceProperties(self):
