@@ -28,7 +28,7 @@
 from math import sqrt as V
 import re
 
-from orbitit.Geom3D import CompoundShape
+from orbitit.geom_3d import CompoundShape
 from orbitit.geomtypes import Vec3
 from orbitit import isometry as sym
 from orbitit.orbit import Shape

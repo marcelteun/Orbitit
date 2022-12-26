@@ -24,7 +24,7 @@ import wx
 import math
 from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
 
-from orbitit import Geom3D, Geom4D, rgb
+from orbitit import geom_3d, Geom4D, rgb
 
 TITLE = '5-Cell'
 
@@ -231,6 +231,6 @@ class CtrlWin(wx.Frame):
         # (I believe it is needed for Windows as well)
         this.SetSize(size)
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(this, Shape, CtrlWin, parent, canvas)

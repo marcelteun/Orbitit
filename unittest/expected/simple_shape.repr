@@ -1,4 +1,4 @@
-orbitit.Geom3D.SimpleShape(
+orbitit.geom_3d.SimpleShape(
     Vs=[
         orbitit.geomtypes.Vec3([1, 1, 1]),
         orbitit.geomtypes.Vec3([-1, 1, 1]),

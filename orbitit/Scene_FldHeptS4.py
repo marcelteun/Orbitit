@@ -23,7 +23,7 @@
 import logging
 import math
 
-from orbitit import Geom3D, geomtypes, isometry, heptagons, rgb
+from orbitit import geom_3d, geomtypes, isometry, heptagons, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
@@ -149,21 +149,21 @@ for isom in isomS4:
 
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-        heptagonsShape = Geom3D.SymmetricShape(
+        heptagonsShape = geom_3d.SymmetricShape(
             Vs=[],
             Fs=[],
             isometries=isomS4,
             name='FoldedHeptagonsS4',
             regen_edges=False
         )
-        xtraTrisShape = Geom3D.SymmetricShapeSplitCols(
+        xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
             Vs=[],
             Fs=[],
             isometries=isomS4,
             name='xtraTrisS4',
             regen_edges=False
         )
-        trisO3Shape = Geom3D.OrbitShape(
+        trisO3Shape = geom_3d.OrbitShape(
             Vs=[],
             Fs=[],
             final_sym=isomS4,
@@ -172,7 +172,7 @@ class Shape(heptagons.FldHeptagonShape):
             name='o3TrisS4',
             regen_edges=False
         )
-        trisO4Shape = Geom3D.OrbitShape(
+        trisO4Shape = geom_3d.OrbitShape(
             Vs=[],
             Fs=[],
             final_sym=isomS4,
@@ -989,6 +989,6 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
             }],
     }
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(self, parent, canvas):
-        Geom3D.Scene.__init__(self, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(self, Shape, CtrlWin, parent, canvas)

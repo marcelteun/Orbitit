@@ -24,7 +24,7 @@
 import logging
 import math
 
-from orbitit import Geom3D, geomtypes, glue, PS, rgb
+from orbitit import geom_3d, geomtypes, glue, PS, rgb
 
 from OpenGL.GLU import *
 from OpenGL.GL import *
@@ -51,11 +51,11 @@ class SimpleShape:
         """
         this.dimension = 4
         this.generateNormals = False
-        this.v = Geom3D.Fields()
-        this.e = Geom3D.Fields()
-        this.f = Geom3D.Fields()
-        this.c = Geom3D.Fields()
-        # SETTINGS similar to Geom3D.SimpleShape:
+        this.v = geom_3d.Fields()
+        this.e = geom_3d.Fields()
+        this.f = geom_3d.Fields()
+        this.c = geom_3d.Fields()
+        # SETTINGS similar to geom_3d.SimpleShape:
         this.name = name
         if colors[0] == []:
             colors = ([rgb.gray95[:]], [])
@@ -445,7 +445,7 @@ class SimpleShape:
         Vs3D = []
         for v in Vs4D:
             wV = v[3]
-            if not Geom3D.eq(this.wCamera, wV):
+            if not geom_3d.eq(this.wCamera, wV):
                 scale = this.wCameraDistance / (this.wCamera - wV)
                 Vs3D.append([scale * v[0], scale * v[1], scale * v[2]])
             else:
@@ -496,7 +496,7 @@ class SimpleShape:
                 cell.gl_draw()
 
     def glDrawSingleRemoveUnscaledEdges(this):
-        isScaledDown = not Geom3D.eq(this.c.scale, 1.0, margin = 0.001)
+        isScaledDown = not geom_3d.eq(this.c.scale, 1.0, margin = 0.001)
         if not this.projectedTo3D:
             try:
                 del this.cell
@@ -569,7 +569,7 @@ class SimpleShape:
                 shapeVs.extend(cellVs)
                 shapeFs.extend(cellFs)
                 # for shapeColIndices.extend() see above
-            this.cell = Geom3D.SimpleShape(
+            this.cell = geom_3d.SimpleShape(
                     shapeVs, shapeFs, shapeEs, [], # Vs , Fs, Es, Ns
                     (shapeCols, shapeColIndices),
                     name = '%s_projection' % (this.name)
@@ -627,7 +627,7 @@ class SimpleShape:
             this.cells = []
             # Add a cell for just the edges:
             if this.e.draw:
-                cell = Geom3D.SimpleShape(
+                cell = geom_3d.SimpleShape(
                         Vs3D, [], this.Es, [], # Vs , Fs, Es, Ns
                         name = '%s_Es' % (this.name)
                     )
@@ -642,7 +642,7 @@ class SimpleShape:
                     colors = (this.c.col[0][this.c.col[1][i]], [])
                 else:
                     colors = (this.f.col[0], this.f.col[1][i])
-                cell = Geom3D.SimpleShape(
+                cell = geom_3d.SimpleShape(
                         Vs3D, this.Cs[i], [], [], # Vs , Fs, Es, Ns
                         colors,
                         name = '%s_%d' % (this.name, i)
@@ -660,7 +660,7 @@ class SimpleShape:
             faceIndices=[],
             scaling=1,
             precision=7,
-            margin=1.0e5*Geom3D.defaultFloatMargin,
+            margin=1.0e5*geom_3d.defaultFloatMargin,
             pageSize=PS.PageSizeA4,
         ):
         if this.mapToSingeShape:

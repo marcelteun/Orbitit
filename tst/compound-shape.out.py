@@ -1,9 +1,9 @@
 import geomtypes
-import Geom3D
+import geom_3d
 import isometry
-shape = Geom3D.CompoundShape(
+shape = geom_3d.CompoundShape(
     shapes = [
-        Geom3D.SimpleShape(
+        geom_3d.SimpleShape(
             Vs = [
                 geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
@@ -28,7 +28,7 @@ shape = Geom3D.CompoundShape(
             colors = ([[0.99609400000000003, 0.0, 0.0]], [0, 0, 0, 0, 0, 0]),
             name = "SimpleShape"
         ),
-        Geom3D.SimpleShape(
+        geom_3d.SimpleShape(
             Vs = [
                 geomtypes.Vec3([0.0, 0.0, 2.0]),
                 geomtypes.Vec3([2.0, 0.0, 0.0]),

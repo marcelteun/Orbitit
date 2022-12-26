@@ -36,7 +36,7 @@ from OpenGL import GL
 
 from orbitit import (  # pylint: disable=ungrouped-imports
     base,
-    Geom3D,
+    geom_3d,
     geomtypes,
     Scene_24Cell,
     Scene_5Cell,
@@ -95,7 +95,7 @@ def read_shape_file(filename):
     if filename is not None:
         if is_off_model(filename):
             with open(filename, 'r') as fd:
-                shape = Geom3D.read_off_file(fd)
+                shape = geom_3d.read_off_file(fd)
         elif is_json_model(filename):
             shape = base.Orbitit.from_json_file(filename)
         else:
@@ -399,12 +399,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self.set_status_text("ERROR reading file")
             raise ValueError(f"Invalid input file {filename}")
 
-        if isinstance(shape, Geom3D.CompoundShape):
+        if isinstance(shape, geom_3d.CompoundShape):
             # convert to SimpleShape first, since adding to SymmetricShape
             # will not work.
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
-        shape = Geom3D.CompoundShape([shape], name=filename)
+        shape = geom_3d.CompoundShape([shape], name=filename)
         self.panel.shape = shape
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
@@ -431,10 +431,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             path = os.path.join(self.import_dir_name, filename)
             if is_off_model(filename):
                 with open(path, 'r') as fd:
-                    shape = Geom3D.read_off_file(fd)
+                    shape = geom_3d.read_off_file(fd)
             else:
                 shape = base.Orbitit.from_json_file(path)
-            if isinstance(shape, Geom3D.CompoundShape):
+            if isinstance(shape, geom_3d.CompoundShape):
                 # convert to SimpleShape first, since adding a SymmetricShape
                 # will not work.
                 shape = shape.simple_shape
@@ -581,7 +581,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                                 )
                             )
                             self.set_status_text("PS file written")
-                        except Geom3D.PrecisionError:
+                        except geom_3d.PrecisionError:
                             self.set_status_text(
                                 "Precision error, try to decrease float margin")
                 else:
@@ -952,7 +952,7 @@ if __name__ == "__main__":
                     IN_SHAPE, o_fd, PROG_ARGS.scale, PROG_ARGS.precision, PROG_ARGS.margin
                 )
     else:
-        IN_SHAPE = Geom3D.SimpleShape([], [])
+        IN_SHAPE = geom_3d.SimpleShape([], [])
 
     if START_GUI:
         APP = wx.App(False)

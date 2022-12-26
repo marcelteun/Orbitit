@@ -24,7 +24,7 @@
 
 
 from orbitit import base as orbit_base
-from orbitit import Geom3D, geomtypes, isometry, rgb
+from orbitit import geom_3d, geomtypes, isometry, rgb
 
 
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
@@ -260,12 +260,12 @@ class Orbit(list):  # pylint: disable=too-many-instance-attributes
         return self.lower_order_stabs[n]
 
 
-class Shape(Geom3D.OrbitShape):  # pylint: disable=too-many-instance-attributes
-    """An extension of the Geom3D.OrbitShape.
+class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
+    """An extension of the geom_3d.OrbitShape.
 
     The colours a standardised and the descriptive can be rotated.
     """
-    # TODO: move to Geom3D.OrbitShape
+    # TODO: move to geom_3d.OrbitShape
     # standard colours
     cols_blue = [
         rgb.royalBlue,
@@ -384,7 +384,7 @@ class Shape(Geom3D.OrbitShape):  # pylint: disable=too-many-instance-attributes
                  the symmetry (name) that the elements with the same colour
                  should have, e.g. 'C4'.
         """
-        Geom3D.OrbitShape.__init__(
+        geom_3d.OrbitShape.__init__(
             self,
             base['Vs'],
             base['Fs'],

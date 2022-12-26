@@ -26,7 +26,7 @@
 # pylint: disable=too-many-lines,too-many-statements,too-many-locals
 import unittest
 
-from orbitit import Geom3D
+from orbitit import geom_3d
 from tst_geom3d import get_path, IN_DIR, OUT_DIR, TestSimpleShape
 
 red = (.8, .1, .1)
@@ -45,7 +45,7 @@ class TestUniformShape1(TestSimpleShape):
     def def_shape(self):
         name = get_path(self.name + ".off", IN_DIR)
         with open(name, 'r') as fd:
-            self.shape = Geom3D.read_off_file(fd, regen_edges=True)
+            self.shape = geom_3d.read_off_file(fd, regen_edges=True)
 
 
 class TestUniformShape2(TestUniformShape1):

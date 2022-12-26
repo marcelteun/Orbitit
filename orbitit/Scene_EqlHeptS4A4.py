@@ -23,7 +23,7 @@
 import wx
 import math
 
-from orbitit import Geom3D, geomtypes, heptagons
+from orbitit import geom_3d, geomtypes, heptagons
 
 TITLE = 'Equilateral Heptagons Tetrahedron'
 
@@ -48,11 +48,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = 1.0
 
     def set_height(self, h):
-        self._angle = Geom3D.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
+        self._angle = geom_3d.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
         super().set_height(h)
 
     def set_angle(self, a):
-        tanA = math.tan(a*Geom3D.Deg2Rad)
+        tanA = math.tan(a*geom_3d.Deg2Rad)
         self._height = (V2 + tanA) / (V2 + 4*tanA)
         super().set_angle(a)
 
@@ -208,7 +208,7 @@ class Shape(heptagons.EqlHeptagonShape):
         # normal of isosceles triangles
         for i in range(3):
             o = 36 + 3*i
-            IsoscelesTriangleN = Geom3D.Triangle(
+            IsoscelesTriangleN = geom_3d.Triangle(
                 Vs[o],
                 Vs[o+1],
                 Vs[o+2]
@@ -387,6 +387,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         this.on_view_settings_chk(this)
 
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(this, Shape, CtrlWin, parent, canvas)

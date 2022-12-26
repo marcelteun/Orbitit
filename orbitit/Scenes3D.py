@@ -26,7 +26,7 @@ import os
 import wx
 from wx import glcanvas
 
-from orbitit import Geom3D, geomtypes
+from orbitit import geom_3d, geomtypes
 
 # work-around for PyOpenGL bug (see commit message)
 from OpenGL.GLU import *
@@ -106,7 +106,7 @@ class P2PCylinder:
         #      = [-e[1], e[0], 0]
         glPushMatrix();
         glTranslatef(v0[0], v0[1], v0[2]);
-        glRotatef(math.acos(e[2]/eLen) * Geom3D.Rad2Deg, -e[1], e[0], 0.);
+        glRotatef(math.acos(e[2]/eLen) * geom_3d.Rad2Deg, -e[1], e[0], 0.);
         gluCylinder(this.quad, this.radius, this.radius, eLen, this.slices, this.stacks)
         glPopMatrix();
 
@@ -249,7 +249,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             glLoadMatrixd(this.Moriginal)
             glScalef(this.currentScale, this.currentScale, this.currentScale)
             geomtypes.set_eq_float_margin(1.0e-14)
-            angle = Geom3D.Rad2Deg*this.movingRepos.angle()
+            angle = geom_3d.Rad2Deg*this.movingRepos.angle()
             axis  = this.movingRepos.axis()
             geomtypes.reset_eq_float_margin()
             glRotatef(angle, axis[0], axis[1], axis[2])

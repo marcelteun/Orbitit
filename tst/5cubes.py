@@ -1,5 +1,5 @@
-from orbitit import Geom3D, geomtypes
-shape = Geom3D.SymmetricShape(
+from orbitit import geom_3d, geomtypes
+shape = geom_3d.SymmetricShape(
   Vs = [
     geomtypes.Vec3([1.0, 1.0, 1.0]),
     geomtypes.Vec3([-1.0, 1.0, 1.0]),

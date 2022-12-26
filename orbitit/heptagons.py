@@ -39,7 +39,7 @@ import wx
 from OpenGL.GL import glBlendFunc
 from OpenGL.GL import GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
-from orbitit import Geom3D, geomtypes, rgb
+from orbitit import geom_3d, geomtypes, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
@@ -745,7 +745,7 @@ class RegularHeptagon:
             v1v3_axis = Vec(v3 - self.vs_org[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             v2 = v1v3 + r * (v2_tmp - v1v3)
-            if not Geom3D.eq(b0, b1):
+            if not geom_3d.eq(b0, b1):
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v4v6 = (v4 + self.vs_org[6]) / 2
@@ -770,7 +770,7 @@ class RegularHeptagon:
             v1v3_axis = Vec(self.vs_org[3] - self.vs_org[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             v2 = v1v3 + r * (self.vs_org[2] - v1v3)
-            if Geom3D.eq(b0, b1):
+            if geom_3d.eq(b0, b1):
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v4v6 = (self.vs_org[4] + self.vs_org[6]) / 2
@@ -813,7 +813,7 @@ class RegularHeptagon:
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
         rot0_2 = Rot(axis=self.vs_org[2] - self.vs_org[0], angle=b0)
         v1 = rot0_2 * self.vs_org[1]
-        if Geom3D.eq(b0, b1):
+        if geom_3d.eq(b0, b1):
             v6 = Vec([-v1[0], v1[1], v1[2]])
         else:
             rot5_0 = Rot(axis=self.vs_org[0] - self.vs_org[5], angle=b1)
@@ -1513,9 +1513,9 @@ class RegularHeptagon:
         v2_tmp = rot0_3 * self.vs_org[2]
         rot1_3 = Rot(axis=self.vs_org[3] - v1, angle=b0)
         v2 = rot1_3 * (v2_tmp - v1) + v1
-        if Geom3D.eq(a0, a1):
+        if geom_3d.eq(a0, a1):
             v6 = Vec([-v1[0], v1[1], v1[2]])
-            if Geom3D.eq(b0, b1):
+            if geom_3d.eq(b0, b1):
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v5 = Vec([-v2_tmp[0], v2_tmp[1], v2_tmp[2]])
@@ -3158,7 +3158,7 @@ def kite_to_hept(left, top, right, bottom, alt_hept_pos=False):
     )
 
 
-class FldHeptagonShape(Geom3D.CompoundShape):
+class FldHeptagonShape(geom_3d.CompoundShape):
     """Base class for symmetric polyhedra with folded regular heptagons.
 
     The polyhedron consists with two heptagons sharing an edge, where the centre of the edge is
@@ -3169,7 +3169,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     opposite_edge_alt = 0
 
     def __init__(self, shapes, name="Folded Regular Heptagons"):
-        Geom3D.CompoundShape.__init__(self, shapes, name=name)
+        geom_3d.CompoundShape.__init__(self, shapes, name=name)
         self.heptagon = RegularHeptagon()
         self.dihedral_angle = 1.2
         self.pos_angle_min = 0
@@ -3205,7 +3205,7 @@ class FldHeptagonShape(Geom3D.CompoundShape):
     def gl_draw(self):
         if self.update_shape:
             self.set_vertices()
-        Geom3D.CompoundShape.gl_draw(self)
+        geom_3d.CompoundShape.gl_draw(self)
 
     def set_edge_alt(self, alt=None, opposite_alt=None):
         """Set how to connected vertices of different heptagons to get triangles.
@@ -3378,7 +3378,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     ):
         """Create a control window for the scene that folds heptagons
 
-        shape: the Geom3D shape object that is shown
+        shape: the geom_3d shape object that is shown
         canvas: wx canvas to be used
         max_height: max translation height to be used for the heptagon
         pre_pos_strings: a list with representation strings, used in the UI, with predefined models
@@ -3558,9 +3558,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         # dynamic adjustments
         self.pos_angle_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.pos_angle,
-            minValue=Geom3D.Rad2Deg * self.shape.pos_angle_min,
-            maxValue=Geom3D.Rad2Deg * self.shape.pos_angle_max,
+            value=geom_3d.Rad2Deg * self.shape.pos_angle,
+            minValue=geom_3d.Rad2Deg * self.shape.pos_angle_min,
+            maxValue=geom_3d.Rad2Deg * self.shape.pos_angle_max,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.guis.append(self.pos_angle_gui)
@@ -3569,7 +3569,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.max_fold_angle = 180
         self.dihedral_angle_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.dihedral_angle,
+            value=geom_3d.Rad2Deg * self.shape.dihedral_angle,
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3578,7 +3578,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.dihedral_angle_gui.Bind(wx.EVT_SLIDER, self.on_dihedral_angle)
         self.fold1_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.fold1,
+            value=geom_3d.Rad2Deg * self.shape.fold1,
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3587,7 +3587,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.fold1_gui.Bind(wx.EVT_SLIDER, self.on_fold1)
         self.fold2_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.fold2,
+            value=geom_3d.Rad2Deg * self.shape.fold2,
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3596,7 +3596,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.fold2_gui.Bind(wx.EVT_SLIDER, self.on_fold2)
         self.opp_fold1_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.opposite_fold1,
+            value=geom_3d.Rad2Deg * self.shape.opposite_fold1,
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3605,7 +3605,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.opp_fold1_gui.Bind(wx.EVT_SLIDER, self.on_opp_fold1)
         self.opp_fold2_gui = wx.Slider(
             self.panel,
-            value=Geom3D.Rad2Deg * self.shape.opposite_fold2,
+            value=geom_3d.Rad2Deg * self.shape.opposite_fold2,
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3870,14 +3870,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def on_pos_angle(self, event):
         """Apply rotation angle around 2-fold axis of heptagon in GUI to polyhedron."""
-        self.shape.pos_angle = Geom3D.Deg2Rad * self.pos_angle_gui.GetValue()
+        self.shape.pos_angle = geom_3d.Deg2Rad * self.pos_angle_gui.GetValue()
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_dihedral_angle(self, event):
         """Apply new angle between two heptagons sharing an edge in GUI to polyhedron."""
-        self.shape.set_dihedral_angle(Geom3D.Deg2Rad * self.dihedral_angle_gui.GetValue())
+        self.shape.set_dihedral_angle(geom_3d.Deg2Rad * self.dihedral_angle_gui.GetValue())
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
@@ -3885,7 +3885,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def on_fold1(self, event):
         """Apply new fold of diagonal no. 1 in GUI of base heptagon to polyhedron."""
         val = self.fold1_gui.GetValue()
-        s_val = Geom3D.Deg2Rad * val
+        s_val = geom_3d.Deg2Rad * val
         if self.shape.has_reflections:
             self.shape.set_fold1(s_val, s_val)
         else:
@@ -3897,7 +3897,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     def on_fold2(self, event):
         """Apply new fold of diagonal no. 2 in GUI of base heptagon to polyhedron."""
         val = self.fold2_gui.GetValue()
-        s_val = Geom3D.Deg2Rad * val
+        s_val = geom_3d.Deg2Rad * val
         if self.shape.has_reflections:
             self.shape.set_fold2(s_val, s_val)
         else:
@@ -3908,14 +3908,14 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def on_opp_fold1(self, event):
         """Apply new fold of opposite diagonal no. 1 in GUI of base heptagon to polyhedron."""
-        self.shape.set_fold1(opposite_angle=Geom3D.Deg2Rad * self.opp_fold1_gui.GetValue())
+        self.shape.set_fold1(opposite_angle=geom_3d.Deg2Rad * self.opp_fold1_gui.GetValue())
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_opp_fold2(self, event):
         """Apply new fold of opposite diagonal no. 2 in GUI of base heptagon to polyhedron."""
-        self.shape.set_fold2(opposite_angle=Geom3D.Deg2Rad * self.opp_fold2_gui.GetValue())
+        self.shape.set_fold2(opposite_angle=geom_3d.Deg2Rad * self.opp_fold2_gui.GetValue())
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
@@ -3964,9 +3964,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         fold_1 = ar[2]
         fold_2 = ar[3]
         self.height_gui.SetValue(self.max_height - self.height_factor * offset)
-        self.dihedral_angle_gui.SetValue(Geom3D.Rad2Deg * angle)
-        self.fold1_gui.SetValue(Geom3D.Rad2Deg * fold_1)
-        self.fold2_gui.SetValue(Geom3D.Rad2Deg * fold_2)
+        self.dihedral_angle_gui.SetValue(geom_3d.Rad2Deg * angle)
+        self.fold1_gui.SetValue(geom_3d.Rad2Deg * fold_1)
+        self.fold2_gui.SetValue(geom_3d.Rad2Deg * fold_2)
         include_refl = len(ar) <= 5
         self.shape.has_reflections = include_refl
         self.refl_gui.SetValue(include_refl)
@@ -3975,9 +3975,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             pos_angle = ar[4]
             opposite_fld1 = ar[5]
             opposite_fld2 = ar[6]
-            self.opp_fold1_gui.SetValue(Geom3D.Rad2Deg * opposite_fld1)
-            self.opp_fold2_gui.SetValue(Geom3D.Rad2Deg * opposite_fld2)
-            self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * pos_angle)
+            self.opp_fold1_gui.SetValue(geom_3d.Rad2Deg * opposite_fld1)
+            self.opp_fold2_gui.SetValue(geom_3d.Rad2Deg * opposite_fld2)
+            self.pos_angle_gui.SetValue(geom_3d.Rad2Deg * pos_angle)
             self.shape.pos_angle = pos_angle
         else:
             self.disable_guis_for_refl()
@@ -4031,7 +4031,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         """Update the shape and GUI to reflect the pos angle for a polyhedron with reflections."""
         pos_angle = self.refl_pos_angle
         self.shape.pos_angle = pos_angle
-        self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * pos_angle)
+        self.pos_angle_gui.SetValue(geom_3d.Rad2Deg * pos_angle)
 
     def disable_sliders_no_refl(self):
         """
@@ -4066,9 +4066,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.shape.set_fold1(opposite_angle=opp_fold1)
             self.shape.set_fold2(opposite_angle=opp_fold2)
             self.shape.pos_angle = hept_angle
-            self.opp_fold1_gui.SetValue(Geom3D.Rad2Deg * opp_fold1)
-            self.opp_fold2_gui.SetValue(Geom3D.Rad2Deg * opp_fold2)
-            self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * hept_angle)
+            self.opp_fold1_gui.SetValue(geom_3d.Rad2Deg * opp_fold1)
+            self.opp_fold2_gui.SetValue(geom_3d.Rad2Deg * opp_fold2)
+            self.pos_angle_gui.SetValue(geom_3d.Rad2Deg * hept_angle)
 
     def disable_guis_for_refl(self, force=False):
         """Disable some GUIs that aren't valid because reflections are required.
@@ -4735,17 +4735,17 @@ class FldHeptagonCtrlWin(wx.Frame):
             ]:
                 gui.Enable()
             s = self.shape
-            self.dihedral_angle_gui.SetValue(Geom3D.Rad2Deg * s.dihedral_angle)
+            self.dihedral_angle_gui.SetValue(geom_3d.Rad2Deg * s.dihedral_angle)
             # Showing triangles is the most general way of showing
             self.add_tris_gui.SetValue(wx.CHK_CHECKED)
             self.on_add_triangles()
-            self.pos_angle_gui.SetValue(Geom3D.Rad2Deg * s.pos_angle)
-            val1 = Geom3D.Rad2Deg * s.fold1
-            val2 = Geom3D.Rad2Deg * s.fold2
+            self.pos_angle_gui.SetValue(geom_3d.Rad2Deg * s.pos_angle)
+            val1 = geom_3d.Rad2Deg * s.fold1
+            val2 = geom_3d.Rad2Deg * s.fold2
             self.fold1_gui.SetValue(val1)
             self.fold2_gui.SetValue(val2)
-            val1 = Geom3D.Rad2Deg * s.opposite_fold1
-            val2 = Geom3D.Rad2Deg * s.opposite_fold2
+            val1 = geom_3d.Rad2Deg * s.opposite_fold1
+            val2 = geom_3d.Rad2Deg * s.opposite_fold2
             self.opp_fold1_gui.SetValue(val1)
             self.opp_fold2_gui.SetValue(val2)
             if not self.shape.has_reflections:
@@ -4755,7 +4755,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.update_shape()
 
 
-class EqlHeptagonShape(Geom3D.SymmetricShapeSplitCols):
+class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
     """The class defines a base for defining shapes with equilateral polyhedra.
 
     It should be seen as an abstract base class, for which set_vs needs to be implemented.

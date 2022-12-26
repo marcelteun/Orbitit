@@ -23,7 +23,7 @@
 import logging
 import math
 
-from orbitit import Geom3D, geomtypes, isometry, heptagons, rgb
+from orbitit import geom_3d, geomtypes, isometry, heptagons, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
@@ -167,13 +167,13 @@ isomsO3 = isometry.D2()
 
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-        heptagonsShape = Geom3D.SymmetricShape(
+        heptagonsShape = geom_3d.SymmetricShape(
             Vs=[], Fs=[], isometries=isometry.A4(), name="FoldedHeptagonsA4"
         )
-        xtraTrisShape = Geom3D.SymmetricShapeSplitCols(
+        xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
             Vs=[], Fs=[], isometries=isometry.A4(), name="xtraTrisA4"
         )
-        trisO3Shape = Geom3D.SymmetricShape(
+        trisO3Shape = geom_3d.SymmetricShape(
             Vs=[], Fs=[], isometries=isomsO3, colors=[rgb.cyan[:]], name="o3TrisA4"
         )
         heptagons.FldHeptagonShape.__init__(
@@ -303,7 +303,7 @@ class Shape(heptagons.FldHeptagonShape):
                     )
                     # only draw the folds of the hexagon for the twisted variant
                     # if the hexagon isn't flat.
-                    if not Geom3D.eq(abs(this.pos_angle) % (math.pi / 2), math.pi / 4):
+                    if not geom_3d.eq(abs(this.pos_angle) % (math.pi / 2), math.pi / 4):
                         Es.extend(this.twistedEs_A4)
                     colIds = this.triColIds[eAlt][this.has_reflections]
                 else:
@@ -610,13 +610,13 @@ class Shape(heptagons.FldHeptagonShape):
         # for 1 loose:
         d = 1
         for i in range(2):
-            norm0 = Geom3D.Triangle(
+            norm0 = geom_3d.Triangle(
                 this.base_shape.Vs[tris[i][0]],
                 this.base_shape.Vs[tris[i][1]],
                 this.base_shape.Vs[tris[i][2]],
             ).normal(True)
             logging.info("norm0: {norm0}")
-            norm1 = Geom3D.Triangle(
+            norm1 = geom_3d.Triangle(
                 this.base_shape.Vs[tris[i + d][0]],
                 this.base_shape.Vs[tris[i + d][1]],
                 this.base_shape.Vs[tris[i + d][2]],
@@ -624,7 +624,7 @@ class Shape(heptagons.FldHeptagonShape):
             logging.info("norm1: {norm1}")
             inprod = norm0 * norm1
             logging.info(
-                f"Tris angle {i}: {math.acos(inprod) * Geom3D.Rad2Deg:.6f} degrees"
+                f"Tris angle {i}: {math.acos(inprod) * geom_3d.Rad2Deg:.6f} degrees"
             )
         logging.info("------------")
 
@@ -1762,6 +1762,6 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
     }
 
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(this, Shape, CtrlWin, parent, canvas)

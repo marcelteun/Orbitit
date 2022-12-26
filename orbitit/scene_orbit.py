@@ -45,15 +45,15 @@ import os
 import wx
 import wx.lib.colourselect as wxLibCS
 
-from orbitit import base, Geom3D, geom_gui, geomtypes, isometry, orbit, rgb
+from orbitit import base, geom_3d, geom_gui, geomtypes, isometry, orbit, rgb
 
 TITLE = 'Create Polyhedron by Orbiting'
 
 
-class Shape(Geom3D.CompoundShape):
+class Shape(geom_3d.CompoundShape):
     """Simple wrapper for the Shape being used."""
     def __init__(self):
-        super().__init__([Geom3D.SimpleShape([], [])])
+        super().__init__([geom_3d.SimpleShape([], [])])
 
 
 class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
@@ -379,7 +379,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.final_sym_setup[final_sym_idx] = final_sym_obj.setup
         self.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup
         try:
-            self.shape = Geom3D.OrbitShape(
+            self.shape = geom_3d.OrbitShape(
                 verts,
                 faces,
                 final_sym=final_sym_obj,
@@ -437,7 +437,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         else:
             rot = geomtypes.Rot3(
                 axis=axis,
-                angle=Geom3D.Deg2Rad * angle
+                angle=geom_3d.Deg2Rad * angle
             )
         try:
             self.shape.setBaseOrientation(rot)
@@ -505,7 +505,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 stab_sym = self.orbit.stab_sym_alt
                 verts = self.shape.getBaseVertexProperties()['Vs']
                 faces = self.shape.getBaseFaceProperties()['Fs']
-                self.shape = Geom3D.OrbitShape(
+                self.shape = geom_3d.OrbitShape(
                     verts,
                     faces,
                     final_sym=final_sym,
@@ -622,11 +622,11 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         shape is returned.
         """
         shape = base.Orbitit.from_json_file(filename)
-        if not isinstance(shape, Geom3D.SimpleShape) and\
-               not isinstance(shape, Geom3D.CompoundShape):
+        if not isinstance(shape, geom_3d.SimpleShape) and\
+               not isinstance(shape, geom_3d.CompoundShape):
             self.status_text("The JSON file doesn't represent a shape", logging.ERROR)
         # For Compound derived shapes (isinstance) use merge:
-        if isinstance(shape, Geom3D.OrbitShape):
+        if isinstance(shape, geom_3d.OrbitShape):
             final_sym = shape.final_sym
             stab_sym = shape.stab_sym
             self.show_gui[self._final_sym_gui_idx].set_selected_class(type(final_sym))
@@ -645,7 +645,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                     i += 1
             self._col_pre_selection = len(included_colors)
             shape = shape.base_shape
-        if isinstance(shape, Geom3D.CompoundShape):
+        if isinstance(shape, geom_3d.CompoundShape):
             shape = shape.simple_shape
         return shape
 
@@ -673,7 +673,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 shape = self.import_json(filepath)
             else:
                 with  open(filepath) as fd:
-                    shape = Geom3D.read_off_file(fd, regen_edges=False)
+                    shape = geom_3d.read_off_file(fd, regen_edges=False)
             verts = shape.Vs
             faces = shape.Fs
             logging.info("read %d Vs and %d Fs.", len(verts), len(faces))
@@ -683,7 +683,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         dlg.Destroy()
 
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     """Implementation of the scene: control window and the shape"""
     def __init__(self, parent, canvas):
-        Geom3D.Scene.__init__(self, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(self, Shape, CtrlWin, parent, canvas)

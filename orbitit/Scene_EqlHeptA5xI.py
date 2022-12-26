@@ -23,7 +23,7 @@
 import wx
 import math
 
-from orbitit import Geom3D, geomtypes, heptagons
+from orbitit import geom_3d, geomtypes, heptagons
 from orbitit.geomtypes import HalfTurn3 as HalfTurn
 from orbitit.geomtypes import Rot3 as Rot
 
@@ -36,7 +36,7 @@ tau  = (1.0 + V5)/2
 tau2 = tau + 1.0
 w    = math.sqrt(tau2 + 1.0)/2
 
-atanH0d2 = Geom3D.Rad2Deg * math.atan(tau2/2)
+atanH0d2 = geom_3d.Rad2Deg * math.atan(tau2/2)
 halfTurn = HalfTurn(axis=geomtypes.UY)
 
 class Shape(heptagons.EqlHeptagonShape):
@@ -63,11 +63,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = 2.618
 
     def set_height(this, h):
-        this._angle = Geom3D.Rad2Deg * math.atan((h - tau2)/w) #+ atanH0d2
+        this._angle = geom_3d.Rad2Deg * math.atan((h - tau2)/w) #+ atanH0d2
         super().set_height(h)
 
     def set_angle(self, a):
-        self._height = w * math.tan(a*Geom3D.Deg2Rad) + tau2
+        self._height = w * math.tan(a*geom_3d.Deg2Rad) + tau2
         super().set_angle(a)
 
     def set_vs(this):
@@ -161,7 +161,7 @@ class Shape(heptagons.EqlHeptagonShape):
         Ns = [heptN[1] for i in range(11)]
         RegularTrianglePartN = RegularTrianglePartV[2]
         Ns.extend([RegularTrianglePartN for i in range(3)])
-        IsoscelesTriangleN = Geom3D.Triangle(
+        IsoscelesTriangleN = geom_3d.Triangle(
                 IsoscelesTriangleV[0],
                 IsoscelesTriangleV[1],
                 IsoscelesTriangleV[2]
@@ -412,6 +412,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
             if this.prefHeptSpecPosGui.GetSelection() != 0:
                 this.prefHeptSpecPosGui.SetSelection(0)
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(this, Shape, CtrlWin, parent, canvas)

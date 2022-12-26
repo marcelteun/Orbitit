@@ -3567,13 +3567,13 @@ class Scene(ABC):
     Used for creating scenes in the PolyhedraBrowser.
 
     To implement a scene one typically needs to do the following:
-    1. implement a class derived from Geom3D.SimpleShape
+    1. implement a class derived from geom_3d.SimpleShape
     2. implement a class derived from a wx.Frame window that controls the layout
        of a shape object from step 1.
     3. implement a scene class derived from this class as follows:
-       class MyScene(Geom3D.Scene):
+       class MyScene(geom_3d.Scene):
            def __init__(self, parent, canvas):
-               Geom3D.Scene.__init__(self, MyShape, MyCtrlWin, parent, canvas)
+               geom_3d.Scene.__init__(self, MyShape, MyCtrlWin, parent, canvas)
        where MyShape is the class from step 1 and MyCtrlWin is the class from
        step 2.
     """
@@ -3581,7 +3581,7 @@ class Scene(ABC):
     def __init__(self, ShapeClass, CtrlWinClass, parent, canvas):
         """Create an object of the Scene class
 
-        ShapeClass: a class derived from Geom3D.SimpleShape
+        ShapeClass: a class derived from geom_3d.SimpleShape
         CtrlWineClass: a class derived from wx.Frame implementing controls to
                        change the properties of the shape dynamically.
         parent: the main window of the application.

@@ -1,5 +1,5 @@
 import orbitit
-shape = orbitit.Geom3D.SimpleShape(
+shape = orbitit.geom_3d.SimpleShape(
     Vs=[
         orbitit.geomtypes.Vec3([1, 1, 1]),
         orbitit.geomtypes.Vec3([-1, 1, 1]),

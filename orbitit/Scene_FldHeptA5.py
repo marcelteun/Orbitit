@@ -23,7 +23,7 @@
 import logging
 import math
 
-from orbitit import Geom3D, geomtypes, isometry, heptagons, rgb
+from orbitit import geom_3d, geomtypes, isometry, heptagons, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
@@ -143,21 +143,21 @@ for isom in isomA5:
 
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
-        heptagonsShape = Geom3D.SymmetricShape(
+        heptagonsShape = geom_3d.SymmetricShape(
             Vs=[],
             Fs=[],
             isometries=isomA5,
             name='FoldedHeptagonsA5',
             regen_edges=False
         )
-        xtraTrisShape = Geom3D.SymmetricShapeSplitCols(
+        xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
             Vs=[],
             Fs=[],
             isometries=isomA5,
             name='xtraTrisA5',
             regen_edges=False
         )
-        trisO3Shape = Geom3D.OrbitShape(
+        trisO3Shape = geom_3d.OrbitShape(
             Vs=[],
             Fs=[],
             final_sym=isomA5,
@@ -166,7 +166,7 @@ class Shape(heptagons.FldHeptagonShape):
             name='o3TrisA5',
             regen_edges=False
         )
-        trisO5Shape = Geom3D.OrbitShape(
+        trisO5Shape = geom_3d.OrbitShape(
             Vs=[],
             Fs=[],
             final_sym=isomA5,
@@ -186,7 +186,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.pos_angle_min = -math.pi/2
         this.pos_angle_max = math.pi/2
         this.height = 2.7
-        this.dihedral_angle = Geom3D.Deg2Rad * 119
+        this.dihedral_angle = geom_3d.Deg2Rad * 119
         this.initArrs()
         this.set_tri_fill_pos(0)
         this.set_edge_alt(trisAlt.strip_II, trisAlt.strip_II)
@@ -1064,6 +1064,6 @@ class CtrlWin(heptagons.FldHeptagonCtrlWin):
         ],
     }
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(self, parent, canvas):
-        Geom3D.Scene.__init__(self, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(self, Shape, CtrlWin, parent, canvas)

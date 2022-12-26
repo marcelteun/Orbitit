@@ -28,7 +28,7 @@ import math
 from os import path
 import unittest
 
-from orbitit import Geom3D, geomtypes, isometry
+from orbitit import geom_3d, geomtypes, isometry
 
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)
@@ -57,7 +57,7 @@ def get_cube():
           [2, 1, 5, 6],
           [3, 2, 6, 7],
           [7, 6, 5, 4]]
-    return Geom3D.SimpleShape(Vs=Vs, Fs=Fs,
+    return geom_3d.SimpleShape(Vs=Vs, Fs=Fs,
                               colors=([red, yellow, blue], [0, 1, 2, 1, 2, 0]))
 
 
@@ -77,7 +77,7 @@ def get_octahedron():
           [5, 3, 2],
           [5, 4, 3],
           [5, 1, 4]]
-    return Geom3D.SimpleShape(Vs=Vs, Fs=Fs,
+    return geom_3d.SimpleShape(Vs=Vs, Fs=Fs,
                               colors=([yellow], []))
 
 
@@ -105,7 +105,7 @@ def chk_with_org(filename, chk_str):
 
 
 class TestSimpleShape(unittest.TestCase):
-    """Unit tests for Geom3D.CompoundShape"""
+    """Unit tests for geom_3d.CompoundShape"""
     shape = get_cube()
     name = "simple_shape"
     ps_margin = 10
@@ -150,13 +150,13 @@ class TestSimpleShape(unittest.TestCase):
 
 
 class TestCompoundShape(TestSimpleShape):
-    """Unit tests for Geom3D.CompoundShape"""
-    shape = Geom3D.CompoundShape([get_cube(), get_octahedron()], "abc")
+    """Unit tests for geom_3d.CompoundShape"""
+    shape = geom_3d.CompoundShape([get_cube(), get_octahedron()], "abc")
     name = "compound_shape"
 
 
 class TestSymmetricShape(TestSimpleShape):
-    """Unit test for Geom3D.SymmetricShape"""
+    """Unit test for geom_3d.SymmetricShape"""
     shape = None
     name = "isom_12cubes"
     scale = 50
@@ -167,7 +167,7 @@ class TestSymmetricShape(TestSimpleShape):
         The descriptive doesn't use the default orientation
         """
         v2_div_2 = math.sqrt(2) / 2
-        self.shape = Geom3D.SymmetricShape(
+        self.shape = geom_3d.SymmetricShape(
             Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
@@ -240,7 +240,7 @@ class TestSymmetricShape(TestSimpleShape):
 
 
 class TestSymmetricShape1(TestSimpleShape):
-    """More unit test for Geom3D.SymmetricShape"""
+    """More unit test for geom_3d.SymmetricShape"""
     shape = None
     name = "isom_5cubes"
     scale = 50
@@ -252,7 +252,7 @@ class TestSymmetricShape1(TestSimpleShape):
         """
         a = 0.809016994375
         b = 0.309016994375
-        self.shape = Geom3D.SymmetricShape(
+        self.shape = geom_3d.SymmetricShape(
             Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
@@ -297,7 +297,7 @@ class TestSymmetricShape1(TestSimpleShape):
 
 
 class TestOrbitShape(TestSimpleShape):
-    """More unit test for Geom3D.OrbitShape"""
+    """More unit test for geom_3d.OrbitShape"""
     shape = None
     name = "orbit_5cubes"
     scale = 50
@@ -307,7 +307,7 @@ class TestOrbitShape(TestSimpleShape):
 
         The descriptive uses the default orientation
         """
-        self.shape = Geom3D.OrbitShape(
+        self.shape = geom_3d.OrbitShape(
             Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),

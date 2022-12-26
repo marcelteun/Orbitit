@@ -25,13 +25,13 @@ import wx
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
-from orbitit import Geom3D, geomtypes, heptagons, rgb
+from orbitit import geom_3d, geomtypes, heptagons, rgb
 
 TITLE = 'Equilateral Heptagons from Kite'
 
-class Shape(Geom3D.SimpleShape):
+class Shape(geom_3d.SimpleShape):
     def __init__(self):
-        Geom3D.SimpleShape.__init__(self, [], [], name = "HeptaFromKite")
+        geom_3d.SimpleShape.__init__(self, [], [], name = "HeptaFromKite")
         self.topMin  = 0.0
         self.topMax  = 2.0
         self.tailMin = 0.0

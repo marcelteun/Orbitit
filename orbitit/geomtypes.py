@@ -1391,7 +1391,7 @@ class DoubleRot4(Transform4):
         r1 = Rot4(axialPlane=ortho_plane, angle=angle[1])
         return super().__new__(cls, (r1[0]*r0[0], r0[1]*r1[1]))
 
-# TODO implement Geom3D.Line3D here (in this file)
+# TODO implement geom_3d.Line3D here (in this file)
 
 # forced to use some matrix functions and don't want to add a dependency on a
 # big python package.

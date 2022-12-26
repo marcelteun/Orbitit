@@ -24,7 +24,7 @@
 import wx
 import math
 
-from orbitit import Geom3D, geomtypes, heptagons
+from orbitit import geom_3d, geomtypes, heptagons
 from orbitit.geomtypes import HalfTurn3 as HalfTurn
 from orbitit.geomtypes import Rot3 as Rot
 
@@ -41,7 +41,7 @@ H0   = math.sqrt(50 - 10*V5)/10
 Ch   = math.sqrt(25 + 10*V5)/10
 Rl   = vec(-w, Ch, H0)
 
-atanH0d2 = Geom3D.Rad2Deg * math.atan(tau2/2)
+atanH0d2 = geom_3d.Rad2Deg * math.atan(tau2/2)
 
 class Shape(heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
@@ -67,11 +67,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = H0
 
     def set_height(this, h):
-        this._angle = Geom3D.Rad2Deg * math.atan((h - H0) / Ch) #+ atanH0d2
+        this._angle = geom_3d.Rad2Deg * math.atan((h - H0) / Ch) #+ atanH0d2
         super().set_height(h)
 
     def set_angle(self, a):
-        self._height = Ch * math.tan(a*Geom3D.Deg2Rad) + H0
+        self._height = Ch * math.tan(a*geom_3d.Deg2Rad) + H0
         super().set_angle(a)
 
     def set_vs(this):
@@ -180,7 +180,7 @@ class Shape(heptagons.EqlHeptagonShape):
         Vs.extend(IsoscelesTriangleV) # V14 - V16
         Ns = [heptN[1] for i in range(11)]
         Ns.extend([RegularTrianglePartN for i in range(3)])
-        IsoscelesTriangleN = Geom3D.Triangle(
+        IsoscelesTriangleN = geom_3d.Triangle(
                 IsoscelesTriangleV[0],
                 IsoscelesTriangleV[1],
                 IsoscelesTriangleV[2]
@@ -454,6 +454,6 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         transparency = float(this.transparencyGui.GetValue())
         this.shape.update_view_opt(opaqueness=1-transparency/100)
 
-class Scene(Geom3D.Scene):
+class Scene(geom_3d.Scene):
     def __init__(this, parent, canvas):
-        Geom3D.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
+        geom_3d.Scene.__init__(this, Shape, CtrlWin, parent, canvas)
