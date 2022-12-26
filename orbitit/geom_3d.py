@@ -89,6 +89,16 @@ V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 
+TAU = (V5 + 1) / 2
+
+# rotation needed from standard isometries.A5 where the z-axis is shared with a 2-fold axis to a
+# position where the z-axis is shared with a 5-fold axis
+A5_Z_O2_TO_O5 = geomtypes.Rot3(angle=math.atan(TAU), axis=geomtypes.Vec3([1, 0, 0]))
+
+# rotation needed from standard isometries.A5 where the z-axis is shared with a 2-fold axis to a
+# position where the z-axis is shared with a 3-fold axis
+A5_Z_O2_TO_O3 = geomtypes.Rot3(angle=math.atan(2 - TAU), axis=geomtypes.Vec3([1, 0, 0]))
+
 defaultFloatMargin = 1.0e-15
 
 
