@@ -20,17 +20,22 @@
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+# Old sins:
+# pylint: disable=too-many-lines,too-many-return-statements,
+# pylint: disable=too-many-locals,too-many-statements,too-many-ancestors
+# pylint: disable=too-many-instance-attributes,too-many-arguments
+# pylint: disable=too-many-branches,too-many-nested-blocks
+# pylint: disable=too-few-public-methods
 
 
+from abc import ABC
 import copy
 import logging
 import math
+from functools import reduce
 import wx
-import sys
-import os
 
 from OpenGL import GL
-from functools import reduce
 
 from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, X3D
 
@@ -3557,7 +3562,7 @@ class OrbitShape(SymmetricShape):
         pass
 
 
-class Scene:
+class Scene(ABC):
     """
     Used for creating scenes in the PolyhedraBrowser.
 
@@ -3584,11 +3589,12 @@ class Scene:
                 OpenGL.
         """
         self.shape = ShapeClass()
-        self.ctrlWin = CtrlWinClass(self.shape, canvas, parent, wx.ID_ANY)
+        self.ctrl_win = CtrlWinClass(self.shape, canvas, parent, wx.ID_ANY)
 
     def close(self):
+        """Close the current scene and destroy all its widgets"""
         try:
-            self.ctrlWin.Close(True)
+            self.ctrl_win.Close(True)
         except RuntimeError:
             # The user probably closed the window already
             pass

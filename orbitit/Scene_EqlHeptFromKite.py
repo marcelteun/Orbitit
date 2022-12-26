@@ -408,11 +408,11 @@ class CtrlWin(wx.Frame):
 class Scene():
     def __init__(self, parent, canvas):
         self.shape = Shape()
-        self.ctrlWin = CtrlWin(self.shape, canvas, parent, wx.ID_ANY, TITLE)
+        self.ctrl_win = CtrlWin(self.shape, canvas, parent, wx.ID_ANY, TITLE)
 
     def close(self):
         try:
-            self.ctrlWin.Close(True)
+            self.ctrl_win.Close(True)
         except RuntimeError:
             # The user probably closed the window already
             pass
