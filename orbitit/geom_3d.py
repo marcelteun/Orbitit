@@ -37,7 +37,7 @@ import wx
 
 from OpenGL import GL
 
-from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D, X3D
+from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D
 
 # TODO:
 # - Test the gl stuf of SimpleShape: create an Interactive3DCanvas
@@ -1697,104 +1697,6 @@ class SimpleShape(base.Orbitit):
                         # ready, disable stencil
                         GL.glDisable(GL.GL_STENCIL_TEST)
 
-    def toX3dNode(self, id="SISH", precision=5, edgeRadius=0):
-        """
-        Converts this SimpleShape to a X3dNode class and returns the result.
-
-        id: A string that will be used to refer to this shape in X3D.
-        precision: The precision that will be used for the coordinates of the
-                   vertices when printing the result to an X3D or VRML formatted
-                   string.
-        edgeRadius: Optinal radius of the edges to be used when printing the
-                    result to an X3D or VRML formatted string. If 0.0 then the
-                    edges will be drawn as lines, otherwise cylinders will be
-                    used (the latter will lead to a much heavier file, that will
-                    be rendered much slower).
-        """
-        vName = "%sVs" % id
-        sName = "%sTransform" % id
-        shapes = [
-            X3D.Node(
-                "Shape",
-                appearance=X3D.Node(
-                    "Appearance",
-                    material=X3D.Node(
-                        "Material", diffuseColor=X3D.FloatVec([1, 1, 1], 0)
-                    ),
-                ),
-                geometry=X3D.Node(
-                    "IndexedFaceSet",
-                    color=X3D.Node(
-                        "Color",
-                        color=[
-                            X3D.FloatVec(col, precision) for col in self.colorData[0]
-                        ],
-                    ),
-                    coord=X3D.Node(
-                        "Coordinate",
-                        DEF=vName,
-                        point=[X3D.FloatVec(v, precision) for v in self.Vs],
-                    ),
-                    coordIndex=[X3D.Index(i) for i in self.Fs],
-                    colorIndex=self.colorData[1],
-                    normalPerVertex=False,
-                    colorPerVertex=False,
-                    ccw=False,
-                    solid=False,
-                    creaseAngle=0.5,
-                ),
-            )
-        ]
-        if not (self.Es == []):
-            if edgeRadius <= 0:
-                Es = []
-                for i in range(0, len(self.Es), 2):
-                    Es.append([self.Es[i], self.Es[i + 1]])
-                shapes.append(
-                    X3D.Node(
-                        "Shape",
-                        appearance=X3D.Node(
-                            "Appearance",
-                            material=X3D.Node(
-                                "Material", diffuseColor=X3D.FloatVec([0, 0, 0], 1)
-                            ),
-                        ),
-                        geometry=X3D.Node(
-                            "IndexedLineSet",
-                            coord=X3D.Node("Coordinate", USE=vName),
-                            coordIndex=[X3D.Index(i) for i in Es],
-                        ),
-                    )
-                )
-            else:
-                Es2D = []
-                i = 0
-                # TODO cylinderEdgesToX3d shoudl accept a flat array...
-                while i < len(self.Es):
-                    Es2D.append([self.Es[i], self.Es[i + 1]])
-                    i += 2
-                shapes.append(glue.cylinderEdgesToX3d(Es2D, self.Vs, edgeRadius))
-        return X3D.Node("Transform", DEF=sName, children=shapes)
-
-    def toX3dDoc(self, id="SISH", precision=5, edgeRadius=0):
-        """
-        Converts this SimpleShape to a X3dDoc class and returns the result.
-
-        id: A string that will be used to refer to this shape in X3D.
-        precision: The precision that will be used for the coordinates of the
-                   vertices when printing the result to an X3D or VRML formatted
-                   string.
-        edgeRadius: Optinal radius of the edges to be used when printing the
-                    result to an X3D or VRML formatted string. If 0.0 then the
-                    edges will be drawn as lines, otherwise cylinders will be
-                    used (the latter will lead to a much heavier file, that will
-                    be rendered much slower).
-        """
-        doc = X3D.Doc()
-        doc.addStdMeta(self.name)
-        doc.addNode(self.toX3dNode(id, precision, edgeRadius))
-        return doc
-
     def to_off(
         self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
     ):
@@ -2855,11 +2757,6 @@ class CompoundShape(base.Orbitit):
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.to_postscript(face_indices, scaling, precision, margin, pageSize)
-
-    def toX3dDoc(self, id="SISH", precision=5, edgeRadius=0):
-        if self.merge_needed:
-            self.merge_shapes()
-        return self.merged_shape.toX3dDoc(id, precision, edgeRadius)
 
     def getDome(self, level=2):
         if self.merge_needed:

@@ -54,7 +54,6 @@ from orbitit import (  # pylint: disable=ungrouped-imports
     Scene_Rectified8Cell,
     scene_orbit,
     Scenes3D,
-    X3D,
     main_dlg,
     main_win,
 )
@@ -238,10 +237,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
         menu_item = wx.MenuItem(export, wx.ID_ANY, text="&PS\tCtrl+P")
         self.Bind(wx.EVT_MENU, self.on_save_ps, id=menu_item.GetId())
-        export.Append(menu_item)
-
-        menu_item = wx.MenuItem(export, wx.ID_ANY, text="&VRML\tCtrl+V")
-        self.Bind(wx.EVT_MENU, self.on_save_wrl, id=menu_item.GetId())
         export.Append(menu_item)
 
         menu.AppendSubMenu(export, "&Export")
@@ -590,35 +585,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             else:
                 break
         # done while: file choosen
-        dlg.Destroy()
-
-    def on_save_wrl(self, _):
-        """Handle event '_' to export the current shape to VRML format"""
-        dlg = wx.FileDialog(
-            self,
-            'Save as .vrml file', self.export_dir_name, '', '*.wrl',
-            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
-        )
-        if dlg.ShowModal() == wx.ID_OK:
-            filepath = dlg.GetPath()
-            filename = dlg.GetFilename()
-            self.export_dir_name = filepath.rsplit('/', 1)[0]
-            name_ext = filename.split('.')
-            if len(name_ext) == 1:
-                filename = f'{filename}.wrl'
-            elif name_ext[-1].lower() != 'wrl':
-                if name_ext[-1] != '':
-                    filename = f'{filename}.wrl'
-                else:
-                    filename = f'{filename}wrl'
-            logging.info("writing to file %s", filepath)
-            # TODO precision through setting:
-            r = self.panel.shape.getEdgeProperties()['radius']
-            x3d_obj = self.panel.shape.toX3dDoc(edgeRadius=r)
-            x3d_obj.setFormat(X3D.VRML_FMT)
-            with open(filepath, 'w') as fd:
-                fd.write(x3d_obj.toStr())
-            self.set_status_text("VRML file written")
         dlg.Destroy()
 
     def on_view_settings(self, _):
