@@ -963,12 +963,35 @@ if __name__ == "__main__":
         shape_sym = re.sub(" */ *", "_", shape_sym.strip())
         return Path(f"{name}_bas_{polygon}_{shape_sym}.json")
 
+    models_map = {
+        "cuboctahedron": Cuboctahedron(),
+        "icosidodecahedron": Icosidodecahedron(),
+        "rhombicosidodecahedron": Rhombicosidodecahedron(),
+        "rhombicuboctahedron": Rhombicuboctahedron(),
+        "snubCube": SnubCube(),
+        "snubDodecahedron": SnubDodecahedron(),
+        "truncatedCube": TruncatedCube(),
+        "truncatedCuboctahedron": TruncatedCuboctahedron(),
+        "truncatedDodecahedron": TruncatedDodecahedron(),
+        "truncatedIcosahedron": TruncatedIcosahedron(),
+        "truncatedIcosidodecahedron": TruncatedIcosidodecahedron(),
+        "truncatedOctahedron": TruncatedOctahedron(),
+        "truncatedTetrahedron": TruncatedTetrahedron(),
+    }
+
     parser = ArgumentParser(DESCR)
     parser.add_argument(
         "--out-dir", "-o",
         default="",
         metavar="DIR",
         help="Specify possible output directory. Should exist.",
+    )
+    parser.add_argument(
+        "--models", "-m",
+        metavar="NAME",
+        nargs="*",
+        help=f"Specifiy which model(s) to generate. Specify one of {list(models_map.keys())}. If "
+        "nothing is specified all of them will be generated."
     )
     parser.add_argument(
         "--precision", "-p",
@@ -1000,22 +1023,11 @@ if __name__ == "__main__":
     if args.precision and args.precision > 0:
         geomtypes.float_out_precision = args.precision
 
-    MODELS = [
-        Cuboctahedron(),
-        Icosidodecahedron(),
-        Rhombicosidodecahedron(),
-        Rhombicuboctahedron(),
-        SnubCube(),
-        SnubDodecahedron(),
-        TruncatedCube(),
-        TruncatedCuboctahedron(),
-        TruncatedDodecahedron(),
-        TruncatedIcosahedron(),
-        TruncatedIcosidodecahedron(),
-        TruncatedOctahedron(),
-        TruncatedTetrahedron(),
-    ]
-    for model in MODELS:
+    if args.models:
+        models = [models_map[name] for name in args.models]
+    else:
+        models = list(models_map.values())
+    for model in models:
         if args.seperate_orbits:
             for model_shape in model.shapes:
                 filename = out_dir / shape_to_filename(model_shape)
