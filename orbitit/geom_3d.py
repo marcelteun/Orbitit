@@ -796,7 +796,7 @@ class SimpleShape(base.Orbitit):
     """
 
     def __init__(
-        self, Vs, Fs, Es=[], Ns=[], colors=None, name="SimpleShape", orientation=None
+        self, Vs, Fs, Es=None, Ns=None, colors=None, name="SimpleShape", orientation=None
     ):
         """
         Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -823,6 +823,10 @@ class SimpleShape(base.Orbitit):
             exporting to other formats, like PS.
         orientation: orientation of the base shape. This is an isometry operation.
         """
+        if not Es:
+            Es = []
+        if not Ns:
+            Ns = []
         self.dimension = 3
         self.fNs = []
         self.generateNormals = True
@@ -2875,10 +2879,10 @@ class SymmetricShape(CompoundShape):
         self,
         Vs,
         Fs,
-        Es=[],
-        Ns=[],
+        Es=None,
+        Ns=None,
         colors=None,
-        isometries=[E],
+        isometries=None,
         regen_edges=True,
         orientation=None,
         name="SymmetricShape",
@@ -2918,7 +2922,7 @@ class SymmetricShape(CompoundShape):
             self.base_shape.regen_edges()
         super().__init__([self.base_shape], name=name)
         self.setFaceColors(colors)
-        self.isometries = isometries
+        self.isometries = isometries if isometries else [E]
         self.order = len(isometries)
         self.needs_apply_isoms = True
         self.show_base_only = False
@@ -3278,48 +3282,6 @@ class SymmetricShapeSplitCols(SymmetricShape):
     Same as a symmetric shape except that on can define a colour for each individual face.
     """
 
-    def __init__(
-        self,
-        Vs,
-        Fs,
-        Es=[],
-        Ns=[],
-        colors=None,
-        isometries=[E],
-        regen_edges=True,
-        orientation=None,
-        name="SymmetricShape",
-    ):
-        """
-        Vs: the vertices in the 3D object: an array of 3 dimension arrays, which
-            are the coordinates of the vertices.
-        Fs: an array of faces. Each face is an array of vertex indices, in the
-            order in which the vertices appear in the face.
-        Es: optional parameter edges. An array of edges. Each edges is 2
-            dimensional array that contain the vertex indices of the edge.
-        Ns: optional array of normals (per vertex) This value might be [] in
-            which case the normalised vertices are used. If the value is set it
-            is used by gl_draw
-        colors: optional array parameter describing the colours. Each element
-                consists of a tuple similar to the the 'colors' parameter from
-                SimpleShape; see the __init__ function of that class. The tuples
-                will be used to divide the colours over the different elements
-                of all the isometries.
-        isometries: a list of all isometries that are needed to reproduce all
-            parts of the shape can can be transformed from the specified base
-            element through an isometry.
-        regen_edges: if set to True then the shape will recreate the edges for all faces, i.e. all
-            faces will be surrounded by edges. Edges will be filtered so that shared edges between
-            faces, i.e. edges that have the same vertex index, only appear once. The creation of
-            edges is not optimised and can take a long time.
-        orientation: orientation of the base shape. This is an isometry operation.
-        name: a string identifier representing the model.
-        """
-        # this is before creating the base shape, since it check "colors"
-        super().__init__(
-            Vs, Fs, Es, Ns, colors, isometries, regen_edges, orientation, name
-        )
-
     def _chk_face_colors_par(self, colors):
         """Check whether the colors parameters is valid.
 
@@ -3374,11 +3336,11 @@ class OrbitShape(SymmetricShape):
         self,
         Vs,
         Fs,
-        Es=[],
-        Ns=[],
+        Es=None,
+        Ns=None,
         final_sym=isometry.E,
         stab_sym=isometry.E,
-        colors=[],
+        colors=None,
         regen_edges=True,
         name="OrbitShape",
         quiet=False,
@@ -3425,11 +3387,11 @@ class OrbitShape(SymmetricShape):
         assert len_f % len_s == 0, f"Expected divisable group length {len_f} / {len_s}"
         # assert len_q == len_f // len_s,\
         #    f"Wrong length ({len_q} != {len_f // len_s}) of quotient set (increase precisio?)"
-        FsOrbit = [coset.get_one() for coset in fs_quotient_set]
+        fs_orbit = [coset.get_one() for coset in fs_quotient_set]
         if not quiet:
-            logging.info(f"Applying an orbit of order {len(FsOrbit)}")
+            logging.info("Applying an orbit of order %d", len(fs_orbit))
         super().__init__(
-            Vs, Fs, Es, Ns, isometries=FsOrbit, name=name, regen_edges=regen_edges
+            Vs, Fs, Es, Ns, isometries=fs_orbit, name=name, regen_edges=regen_edges
         )
         # This is save so heirs can still use repr_dict from this class
         self.json_class = OrbitShape
@@ -3527,24 +3489,7 @@ class OrbitShape(SymmetricShape):
             s = s.insert("%s." % __name__)
         return s
 
-        return s
-        s = "%sfinal_sym = %s,\n  stab_sym = %s,\n  " % (
-            s,
-            repr(self.final_sym),
-            repr(self.stab_sym),
-        )
-        cols = self.getFaceColors()
-        s = "%scolors = [\n  " % (s)
-        for subShapeCols in cols:
-            s = "%s  %s,\n  " % (s, repr(subShapeCols))
-        s = "%s],\n  " % (s)
-        s = '%sname = "%s"\n' % (s, self.name)
-        s = "%s)\n" % (s)
-        if __name__ != "__main__":
-            s = "%s.%s" % (__name__, s)
-        return s
-
-    def setColours(self, colours, stab_sym):
+    def set_cols(self, colours, stab_sym):
         """
         Use the colours as specied and divide them according stab_sym
 
@@ -3559,7 +3504,6 @@ class OrbitShape(SymmetricShape):
             __init__. former is used as stab_sym at object creation and the latter as final_sym.
             CONTINUE here: testing cube example.., really need to read a Scene...
         """
-        pass
 
 
 class Scene(ABC):
