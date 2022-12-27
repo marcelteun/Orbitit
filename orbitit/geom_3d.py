@@ -1464,9 +1464,9 @@ class SimpleShape(base.Orbitit):
         fColors.extend(list(range(mod)))
         self.colorData = (self.colorData[0], fColors)
 
-    def rotate(self, rot):
-        """Rotate the model using the specified geomtypes.Rot3 object."""
-        self.Vs = [rot * v for v in self.Vs]
+    def transform(self, trans):
+        """Transform the model using the specified instance of a geomtypes.Trans3 object."""
+        self.Vs = [trans * v for v in self.Vs]
         self.gl.updateVs = True
 
     def scale(self, factor):
@@ -2737,10 +2737,10 @@ class CompoundShape(base.Orbitit):
         d = self._shapes[0].getFaceProperties()
         return {"Fs": self.Fs, "colors": self.colorData, "drawFaces": d["drawFaces"]}
 
-    def rotate(self, rot):
-        """Rotate the model using the specified geomtypes.Rot3 object."""
+    def transform(self, trans):
+        """Transform the model using the specified instance of a geomtypes.Trans3 object."""
         for shape in self._shapes:
-            shape.rotate(rot)
+            shape.transform(trans)
         self.merge_needed = True
 
     def scale(self, factor):
@@ -3197,19 +3197,19 @@ class SymmetricShape(CompoundShape):
         """
         return self.base_shape.getFaceProperties()
 
-    def rotate(self, rot):
-        """Rotate the model using the specified geomtypes.Rot3 object."""
-        def adjust_transform(trans):
-            """Adjust the transform to global rot so the same result is obtained"""
-            if trans.is_rot():
-                return geomtypes.Rot3(angle=trans.angle(), axis=rot * trans.axis())
-            elif trans.is_rot_inv():
-                return geomtypes.RotInv3(angle=trans.angle(), axis=rot * trans.axis())
-            else:  # reflection
-                return geomtypes.Refl3(normal=rot * trans.plane_normal())
+    def transform(self, trans):
+        """Transform the model using the specified instance of a geomtypes.Trans3 object."""
+        def adjust_transform(isom):
+            """Adjust the transform to global trans so the same result is obtained"""
+            if isom.is_rot():
+                return geomtypes.Rot3(angle=isom.angle(), axis=trans * isom.axis())
+            if isom.is_rot_inv():
+                return geomtypes.RotInv3(angle=isom.angle(), axis=trans * isom.axis())
+            # reflection
+            return geomtypes.Refl3(normal=trans * isom.plane_normal())
 
         self.isometries = [adjust_transform(isom) for isom in self.isometries]
-        self.orientation = rot * self.orientation
+        self.orientation = trans * self.orientation
         self.needs_apply_isoms = True
 
     def scale(self, factor):

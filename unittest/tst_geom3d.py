@@ -168,7 +168,7 @@ class TestSimpleShapeExtended(TestSimpleShape):
     def test_rotate(self):
         """Test scale and export to off-format"""
         self.ensure_shape()
-        self.shape.rotate(geomtypes.Rot3(angle=0.3, axis=geomtypes.Vec3([1, 2, 3])))
+        self.shape.transform(geomtypes.Rot3(angle=0.3, axis=geomtypes.Vec3([1, 2, 3])))
         tst_str = self.shape.to_off(precision=15)
         result, msg = chk_with_org("rotated_" + self.name + ".off", tst_str)
         self.assertTrue(result, msg)

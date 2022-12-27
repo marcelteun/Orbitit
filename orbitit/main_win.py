@@ -223,20 +223,14 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         if geom_3d.eq(axis.norm(), 0):
             self.set_status_text("Please define a proper axis")
             return
-        transform = geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis)
-        # Assume compound shape
-        new_vs = [
-            [transform * geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.set_vertex_props(Vs=new_vs)
+        self.canvas.shape.transform(geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis))
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_invert(self, _=None):
         """Handle event '_' to invert shape"""
         # Assume compound shape
-        new_vs = [
-            [-geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.set_vertex_props(Vs=new_vs)
+        self.canvas.shape.scale(-1)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
