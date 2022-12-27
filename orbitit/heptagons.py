@@ -3193,7 +3193,7 @@ class FldHeptagonShape(geom_3d.CompoundShape):
         # s = '%s(\n  ' % findModuleClassName(self.__class__, __name__)
         s = "FldHeptagonShape(\n"
         s += "  shapes = [\n"
-        for shape in self.shapeElements:
+        for shape in self.shapes:
             s += f"    {repr(shape)},\n"
         s += "  ],\n  "
         s += f'name = "{self.name}"\n'

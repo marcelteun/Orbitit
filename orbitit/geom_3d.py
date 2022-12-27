@@ -856,7 +856,7 @@ class SimpleShape(base.Orbitit):
         )
         if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
-        self.scalingFactor = 1.0
+        self.zoom_factor = 1.0
         self.set_vertex_props(Vs=Vs, Ns=Ns, radius=-1.0, color=[1.0, 1.0, 0.8])
         self.set_edge_props(
             Es=Es, radius=-1.0, color=[0.1, 0.1, 0.1], drawEdges=True
@@ -1464,8 +1464,22 @@ class SimpleShape(base.Orbitit):
         fColors.extend(list(range(mod)))
         self.colorData = (self.colorData[0], fColors)
 
-    def scale(self, scale):
-        self.scalingFactor = scale
+    def rotate(self, rot):
+        """Rotate the model using the specified geomtypes.Rot3 object."""
+        self.Vs = [rot * v for v in self.Vs]
+        self.gl.updateVs = True
+
+    def scale(self, factor):
+        """Scale the vertices of the object."""
+        self.Vs = [factor * v for v in self.Vs]
+        self.gl.updateVs = True
+
+    def zoom(self, factor):
+        """Use the specified factor to zoom in when drawing the 3D object.
+
+        This is used for scaling polychora cells
+        """
+        self.zoom_factor = factor
         self.gl.updateVs = True
 
     def calculateFacesG(self):
@@ -1563,7 +1577,7 @@ class SimpleShape(base.Orbitit):
         if self.gl.updateVs:
             # calculate the gravitational centre. Only calculate the vertices
             # that are used:
-            if eq(self.scalingFactor, 1.0):
+            if eq(self.zoom_factor, 1.0):
                 Vs = self.Vs
             else:
                 nrUsed = glue.getVUsageIn1D(self.Vs, self.Es)
@@ -1575,7 +1589,7 @@ class SimpleShape(base.Orbitit):
                     total += nrUsed[vIndex]
                 if total != 0:
                     g = g / total
-                Vs = [self.scalingFactor * (geomtypes.Vec3(v) - g) + g for v in self.Vs]
+                Vs = [self.zoom_factor * (geomtypes.Vec3(v) - g) + g for v in self.Vs]
 
             # At least on Ubuntu 8.04 conversion is not needed
             # On windows and Ubuntu 9.10 the Vs cannot be an array of vec3...
@@ -2438,8 +2452,8 @@ class CompoundShape(base.Orbitit):
         """
         Returns a python string that can be interpreted by Python for the shape
         """
-        if len(self.shapeElements) == 1:
-            return repr(self.shapeElements[0])
+        if len(self._shapes) == 1:
+            return repr(self._shapes[0])
         else:
             s = indent.Str(
                 "%s(\n" % base.find_module_class_name(self.__class__, __name__)
@@ -2448,7 +2462,7 @@ class CompoundShape(base.Orbitit):
             s.incr()
             s = s.glue_line(
                 ",\n".join(
-                    repr(shape).reindent(s.indent) for shape in self.shapeElements
+                    repr(shape).reindent(s.indent) for shape in self._shapes
                 )
             )
             s = s.add_decr_line("],")
@@ -2491,19 +2505,19 @@ class CompoundShape(base.Orbitit):
         Add shape 'shape' to the current compound.
         """
         shape.gl.alwaysSetVertices = True
-        self.shapeElements.append(shape)
-        if len(self.shapeElements) > 1:
-            self.shapeElements[-1].generateNormals = self.shapeElements[
+        self._shapes.append(shape)
+        if len(self._shapes) > 1:
+            self._shapes[-1].generateNormals = self._shapes[
                 0
             ].generateNormals
         self.merge_needed = True
 
     @property
     def shapes(self):
-        return self.shapeElements
+        return self._shapes
 
     def gl_alwaysSetVertices(self, do):
-        for shape in self.shapeElements:
+        for shape in self._shapes:
             shape.gl_alwaysSetVertices(do)
 
     def setShapes(self, shapes):
@@ -2513,16 +2527,16 @@ class CompoundShape(base.Orbitit):
         Note: you need to make sure yourself to have the generateNormals set
         consistently for all shapes.
         """
-        self.shapeElements = shapes
+        self._shapes = shapes
         self.gl_alwaysSetVertices(True)
         self.merge_needed = True
 
     def merge_shapes(self):
-        """Using the current array of shapes as defined in shapeElements,
+        """Using the current array of shapes as defined in _shapes,
         initialise this object as a simple Shape.
 
         The function will create one Vs, Fs, and Es from the current definition
-        of shapeElements and will initialise this object as a SimpleShape.
+        of _shapes and will initialise this object as a SimpleShape.
         """
         Vs = []
         Fs = []
@@ -2530,7 +2544,7 @@ class CompoundShape(base.Orbitit):
         Ns = []
         colorDefs = []
         colorIndices = []
-        for s in self.shapeElements:
+        for s in self._shapes:
             VsOffset = len(Vs)
             colOffset = len(colorDefs)
             s = s.simple_shape
@@ -2572,11 +2586,11 @@ class CompoundShape(base.Orbitit):
 
         If you want to draw it as one, draw the SimpleShape instead
         """
-        for shape in self.shapeElements:
+        for shape in self._shapes:
             shape.gl_draw()
 
     def regen_edges(self):
-        for shape in self.shapeElements:
+        for shape in self._shapes:
             shape.regen_edges()
         self.merge_needed = True
 
@@ -2598,11 +2612,11 @@ class CompoundShape(base.Orbitit):
             if "Vs" in vertex_dict and vertex_dict["Vs"] is not None:
                 Vs = vertex_dict["Vs"]
             else:
-                Vs = [None for shape in self.shapeElements]
+                Vs = [None for shape in self._shapes]
             if "Ns" in vertex_dict and vertex_dict["Ns"] is not None:
                 Ns = vertex_dict["Ns"]
             else:
-                Ns = [None for shape in self.shapeElements]
+                Ns = [None for shape in self._shapes]
             if "radius" in vertex_dict:
                 radius = vertex_dict["radius"]
             else:
@@ -2611,10 +2625,10 @@ class CompoundShape(base.Orbitit):
                 color = vertex_dict["color"]
             else:
                 color = None
-        assert len(Vs) == len(self.shapeElements)
-        assert len(Ns) == len(self.shapeElements)
-        for i in range(len(self.shapeElements)):
-            self.shapeElements[i].set_vertex_props(
+        assert len(Vs) == len(self._shapes)
+        assert len(Ns) == len(self._shapes)
+        for i in range(len(self._shapes)):
+            self._shapes[i].set_vertex_props(
                 Vs=Vs[i], Ns=Ns[i], radius=radius, color=color
             )
         self.merge_needed = True
@@ -2625,7 +2639,7 @@ class CompoundShape(base.Orbitit):
         See set_vertex_props what to expect.
         """
         # Note: cannot use the megedShape, since the Vs is not an array of Vs
-        d = self.shapeElements[0].getVertexProperties()
+        d = self._shapes[0].getVertexProperties()
         return {
             "Vs": self.Vs,
             "radius": d["radius"],
@@ -2650,7 +2664,7 @@ class CompoundShape(base.Orbitit):
             if "Es" in edge_dict and edge_dict["Es"] is not None:
                 Es = edge_dict["Es"]
             else:
-                Es = [None for shape in self.shapeElements]
+                Es = [None for shape in self._shapes]
             if "radius" in edge_dict:
                 radius = edge_dict["radius"]
             else:
@@ -2663,8 +2677,8 @@ class CompoundShape(base.Orbitit):
                 drawEdges = edge_dict["drawEdges"]
             else:
                 drawEdges = None
-        for i in range(len(self.shapeElements)):
-            self.shapeElements[i].set_edge_props(
+        for i in range(len(self._shapes)):
+            self._shapes[i].set_edge_props(
                 Es=Es[i], radius=radius, color=color, drawEdges=drawEdges
             )
         self.merge_needed = True
@@ -2674,7 +2688,7 @@ class CompoundShape(base.Orbitit):
 
         See set_edge_props what to expect.
         """
-        d = self.shapeElements[0].getEdgeProperties()
+        d = self._shapes[0].getEdgeProperties()
         return {
             "Es": self.Es,
             "radius": d["radius"],
@@ -2700,17 +2714,17 @@ class CompoundShape(base.Orbitit):
             if "Fs" in face_dict and face_dict["Fs"] is not None:
                 Fs = face_dict["Fs"]
             else:
-                Fs = [None for shape in self.shapeElements]
+                Fs = [None for shape in self._shapes]
             if "colors" in face_dict and face_dict["colors"] is not None:
                 colors = face_dict["colors"]
             else:
-                colors = [None for shape in self.shapeElements]
+                colors = [None for shape in self._shapes]
             if "drawFaces" in face_dict:
                 drawFaces = face_dict["drawFaces"]
             else:
                 drawFaces = None
-        for i in range(len(self.shapeElements)):
-            self.shapeElements[i].set_face_props(
+        for i in range(len(self._shapes)):
+            self._shapes[i].set_face_props(
                 Fs=Fs[i], colors=colors[i], drawFaces=drawFaces
             )
         self.merge_needed = True
@@ -2720,36 +2734,48 @@ class CompoundShape(base.Orbitit):
 
         See set_face_props what to expect.
         """
-        d = self.shapeElements[0].getFaceProperties()
+        d = self._shapes[0].getFaceProperties()
         return {"Fs": self.Fs, "colors": self.colorData, "drawFaces": d["drawFaces"]}
+
+    def rotate(self, rot):
+        """Rotate the model using the specified geomtypes.Rot3 object."""
+        for shape in self._shapes:
+            shape.rotate(rot)
+        self.merge_needed = True
+
+    def scale(self, factor):
+        """Scale the vertices of the object."""
+        for shape in self._shapes:
+            shape.scale(factor)
+        self.merge_needed = True
 
     @property
     def dimension(self):
-        return self.shapeElements[0].dimension
+        return self._shapes[0].dimension
 
     @property
     def Vs(self):
-        return [shape.Vs for shape in self.shapeElements]
+        return [shape.Vs for shape in self._shapes]
 
     @property
     def Ns(self):
-        return [shape.Ns for shape in self.shapeElements]
+        return [shape.Ns for shape in self._shapes]
 
     @property
     def Es(self):
-        return [shape.Es for shape in self.shapeElements]
+        return [shape.Es for shape in self._shapes]
 
     @property
     def Fs(self):
-        return [shape.Fs for shape in self.shapeElements]
+        return [shape.Fs for shape in self._shapes]
 
     @property
     def colorData(self):
-        return [shape.colorData for shape in self.shapeElements]
+        return [shape.colorData for shape in self._shapes]
 
     @property
     def generateNormals(self):
-        return self.shapeElements[0].generateNormals
+        return self._shapes[0].generateNormals
 
     def to_off(
         self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
@@ -3024,7 +3050,14 @@ class SymmetricShape(CompoundShape):
         self.merge_needed = True
         self.needs_apply_isoms = True
 
-    def setBaseOrientation(self, orientation):
+    @property
+    def orientation(self):
+        """Get the base shape orientation."""
+        return self.base_shape.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        """Set the base shape orientation."""
         self.base_shape.orientation = orientation
         self.needs_apply_isoms = True
 
@@ -3163,6 +3196,26 @@ class SymmetricShape(CompoundShape):
         See SimpleShape.getFaceProperties for more.
         """
         return self.base_shape.getFaceProperties()
+
+    def rotate(self, rot):
+        """Rotate the model using the specified geomtypes.Rot3 object."""
+        def adjust_transform(trans):
+            """Adjust the transform to global rot so the same result is obtained"""
+            if trans.is_rot():
+                return geomtypes.Rot3(angle=trans.angle(), axis=rot * trans.axis())
+            elif trans.is_rot_inv():
+                return geomtypes.RotInv3(angle=trans.angle(), axis=rot * trans.axis())
+            else:  # reflection
+                return geomtypes.Refl3(normal=rot * trans.plane_normal())
+
+        self.isometries = [adjust_transform(isom) for isom in self.isometries]
+        self.orientation = rot * self.orientation
+        self.needs_apply_isoms = True
+
+    def scale(self, factor):
+        """Scale the vertices of the object."""
+        self.base_shape.scale(factor)
+        self.needs_apply_isoms = True
 
     def gl_draw(self):
         if self.show_base_only:

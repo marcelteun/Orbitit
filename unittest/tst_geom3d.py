@@ -106,11 +106,15 @@ def chk_with_org(filename, chk_str):
 
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.CompoundShape"""
-    shape = get_cube()
+    shape = None
     name = "simple_shape"
     ps_margin = 10
     ps_precision = 7
     scale = 1
+
+    def def_shape(self):
+        """Define shape"""
+        self.shape = get_cube()
 
     def ensure_shape(self):
         """Make sure the shape is defined"""
@@ -149,13 +153,38 @@ class TestSimpleShape(unittest.TestCase):
         self.assertTrue(result, msg)
 
 
-class TestCompoundShape(TestSimpleShape):
+class TestSimpleShapeExtended(TestSimpleShape):
     """Unit tests for geom_3d.CompoundShape"""
-    shape = geom_3d.CompoundShape([get_cube(), get_octahedron()], "abc")
+
+    def test_scale(self):
+        """Test scale and export to off-format"""
+        self.ensure_shape()
+        self.shape.scale(2)
+        tst_str = self.shape.to_off(precision=15)
+        result, msg = chk_with_org("scaled_" + self.name + ".off", tst_str)
+        self.assertTrue(result, msg)
+        self.shape = None
+
+    def test_rotate(self):
+        """Test scale and export to off-format"""
+        self.ensure_shape()
+        self.shape.rotate(geomtypes.Rot3(angle=0.3, axis=geomtypes.Vec3([1, 2, 3])))
+        tst_str = self.shape.to_off(precision=15)
+        result, msg = chk_with_org("rotated_" + self.name + ".off", tst_str)
+        self.assertTrue(result, msg)
+        self.shape = None
+
+
+class TestCompoundShape(TestSimpleShapeExtended):
+    """Unit tests for geom_3d.CompoundShape"""
     name = "compound_shape"
 
+    def def_shape(self):
+        """Define shape"""
+        self.shape = geom_3d.CompoundShape([get_cube(), get_octahedron()], "abc")
 
-class TestSymmetricShape(TestSimpleShape):
+
+class TestSymmetricShape(TestSimpleShapeExtended):
     """Unit test for geom_3d.SymmetricShape"""
     shape = None
     name = "isom_12cubes"
@@ -239,7 +268,7 @@ class TestSymmetricShape(TestSimpleShape):
         #self.shape.json_indent = 2
 
 
-class TestSymmetricShape1(TestSimpleShape):
+class TestSymmetricShape1(TestSimpleShapeExtended):
     """More unit test for geom_3d.SymmetricShape"""
     shape = None
     name = "isom_5cubes"
@@ -295,8 +324,49 @@ class TestSymmetricShape1(TestSimpleShape):
         # for debugging:
         #self.shape.json_indent = 2
 
+class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
+    """More unit test for geom_3d.SymmetricShape with different isometries.
 
-class TestOrbitShape(TestSimpleShape):
+    Different isometries as in reflections, rotary inversion.
+    """
+    shape = None
+    name = "different_isoms"
+    scale = 50
+
+    def def_shape(self):
+        """Define an SymmetricShape consisting of irregular tetrahedra
+
+        The descriptive uses the default orientation
+        """
+        self.shape = geom_3d.SymmetricShape(
+            Vs=[geomtypes.Vec3([1.0, -0.5, 1.0]),
+                geomtypes.Vec3([-1.0, 1.0, 1.0]),
+                geomtypes.Vec3([1.0, 1.0, -1.0]),
+                geomtypes.Vec3([-1.0, -1.0, -1.0]),
+            ],
+            Fs=[
+                [0, 2, 1],
+                [0, 1, 3],
+                [0, 3, 2],
+                [1, 2, 3],
+            ],
+            colors=[
+                [0.996094, 0.839844, 0.0],
+                [0.132812, 0.542969, 0.132812],
+                [0.542969, 0.0, 0.0],
+            ],
+            isometries=[
+                geomtypes.Rot3(angle=0, axis=geomtypes.Vec3([1, 0, 0])),
+                geomtypes.Refl3(normal=geomtypes.Vec3([1, 0, 0])),
+                geomtypes.RotInv3(angle=2*math.pi/3, axis=geomtypes.Vec3([-1, 1, 1])),
+            ],
+            name=self.name,
+            #orientation=geomtypes.Rot3(angle=math.pi/4, axis=geomtypes.Vec3([0, 0, 1]))
+        )
+        # for debugging:
+        #self.shape.json_indent = 2
+
+class TestOrbitShape(TestSimpleShapeExtended):
     """More unit test for geom_3d.OrbitShape"""
     shape = None
     name = "orbit_5cubes"

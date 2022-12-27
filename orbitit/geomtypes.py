@@ -620,6 +620,7 @@ class Transform3(tuple, base.Orbitit):
             return self.RotInv
         raise UnsupportedTransform(f"Not a (supported) transform: {self[1].norm()} != 1?")
 
+    # TODO make this a property e.a.
     def angle(self):
         """In case this transform contains a rotation, return the angle
 
@@ -641,6 +642,7 @@ class Transform3(tuple, base.Orbitit):
             "(-reflection)"
         )
 
+    # TODO make this a property e.a.
     def axis(self):
         """In case this transform contains a rotation, return the axis
 

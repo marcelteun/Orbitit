@@ -651,7 +651,7 @@ class SimpleShape:
                 cell.set_vertex_props(radius = -1)
                 cell.set_edge_props(drawEdges = False)
                 cell.set_face_props(drawFace = this.f.draw)
-                cell.scale(this.c.scale)
+                cell.zoom(this.c.scale)
                 cell.gl_initialised = True
                 this.cells.append(cell)
             this.projectedTo3D = True

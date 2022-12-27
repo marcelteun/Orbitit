@@ -440,7 +440,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 angle=geom_3d.Deg2Rad * angle
             )
         try:
-            self.shape.setBaseOrientation(rot)
+            self.shape.orientation = rot
         except AttributeError:
             self.status_text(
                 'Apply symmetry first, before pulling the slide-bar',
