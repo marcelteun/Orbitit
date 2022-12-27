@@ -182,8 +182,9 @@ if __name__ == "__main__":
     ARGS = PARSER.parse_args()
     OUT_DIR = Path(ARGS.out_dir)
 
+    # TODO: share even more code. Perhaps make a class
     if ARGS.out_dir:
-        OUT_DIR = Path(ARGS.OUT_DIR)
+        OUT_DIR = Path(ARGS.out_dir)
         if not OUT_DIR.is_dir():
             raise ValueError(f"The path '{ARGS.out_dir}' doesn't exist")
     else:
