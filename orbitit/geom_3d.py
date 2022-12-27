@@ -350,8 +350,7 @@ class Line:
         """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)"""
         if t is not None:
             return [self.p[i] + t * (self.v[i]) for i in range(self.dimension)]
-        else:
-            return []
+        return []
 
     def getFactorAt(self, c, i, margin=defaultFloatMargin):
         """
@@ -365,8 +364,7 @@ class Line:
         """
         if not eq(self.v[i], 0.0, margin):
             return (c - self.p[i]) / self.v[i]
-        else:
-            return None
+        return None
 
     def vOnLine(self, v, margin=defaultFloatMargin):
         """
@@ -424,8 +422,7 @@ class Line2D(Line):
         if not eq(nom, 0, margin):
             denom = l.v[0] * (l.p[1] - self.p[1]) + l.v[1] * (self.p[0] - l.p[0])
             return denom / nom
-        else:
-            return None
+        return None
 
     def intersectLine(self, l):
         """returns the point of intersection with line l or None if the line is parallel."""
@@ -633,8 +630,7 @@ class Line3D(Line):
     def getPoint(self, t):
         if t is not None:
             return self.p + t * self.v
-        else:
-            return []
+        return []
 
     def squareDistance2Point(self, P):
         # p81 of E.Lengyel
@@ -710,8 +706,7 @@ class Triangle:
                 except ZeroDivisionError:
                     pass
             return self.N
-        else:
-            return self.N
+        return self.N
 
 
 class Plane:
@@ -2462,23 +2457,22 @@ class CompoundShape(base.Orbitit):
         """
         if len(self._shapes) == 1:
             return repr(self._shapes[0])
-        else:
-            s = indent.Str(
-                "%s(\n" % base.find_module_class_name(self.__class__, __name__)
+        s = indent.Str(
+            "%s(\n" % base.find_module_class_name(self.__class__, __name__)
+        )
+        s = s.add_incr_line("shapes=[")
+        s.incr()
+        s = s.glue_line(
+            ",\n".join(
+                repr(shape).reindent(s.indent) for shape in self._shapes
             )
-            s = s.add_incr_line("shapes=[")
-            s.incr()
-            s = s.glue_line(
-                ",\n".join(
-                    repr(shape).reindent(s.indent) for shape in self._shapes
-                )
-            )
-            s = s.add_decr_line("],")
-            s = s.add_line('name="%s"' % self.name)
-            s = s.add_decr_line(")")
-            if __name__ != "__main__":
-                s = s.insert("%s." % __name__)
-            return s
+        )
+        s = s.add_decr_line("],")
+        s = s.add_line('name="%s"' % self.name)
+        s = s.add_decr_line(")")
+        if __name__ != "__main__":
+            s = s.insert("%s." % __name__)
+        return s
 
     @property
     def repr_dict(self):
