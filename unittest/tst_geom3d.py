@@ -366,6 +366,26 @@ class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
         # for debugging:
         #self.shape.json_indent = 2
 
+class TstSymmetricShapeDifferentIsometries2(TestSymmetricShapeDifferentIsometries1):
+    """More unit test for geom_3d.SymmetricShape with different isometries.
+
+    Different isometries as in reflections, rotary inversion.
+    """
+    shape = None
+    name = "different_isoms2"
+    scale = 50
+
+    def def_shape(self):
+        """Define an SymmetricShape consisting of irregular tetrahedra
+
+        The descriptive doesn't use the default orientation
+        """
+        super().def_shape()
+        self.shape.orientation = geomtypes.Rot3(angle=math.pi/4, axis=geomtypes.Vec3([0, 0, 1]))
+        self.shape.name = self.name
+        # for debugging:
+        #self.shape.json_indent = 2
+
 class TestOrbitShape(TestSimpleShapeExtended):
     """More unit test for geom_3d.OrbitShape"""
     shape = None
