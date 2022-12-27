@@ -42,7 +42,7 @@ from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D
 # TODO:
 # - Test the gl stuf of SimpleShape: create an Interactive3DCanvas
 #   the Symmetry stuff should not contain any shape stuff
-# - In SimpleShape I split the setFaceProperties in functions that set separate
+# - In SimpleShape I split the set_face_props in functions that set separate
 #   properties. Do something similar for Edges and Vertices.
 # - Add a flatten option to the Symmetric Face: resulting will be a SimpleShape
 #   that can be exported.
@@ -271,9 +271,9 @@ def read_off_file(fd, regen_edges=True, name=""):
     shape = SimpleShape(Vs, Fs, Es, colors=(cols, fColors))
     # Note that Orbitit's panel.setShape will ignore these anyway...
     if vRadius != 0:
-        shape.setVertexProperties(radius=vRadius)
+        shape.set_vertex_props(radius=vRadius)
     if eRadius != 0:
-        shape.setEdgeProperties(radius=eRadius)
+        shape.set_edge_props(radius=eRadius)
     if name != "":
         shape.name = name
     # If the file defines edges (faces of length 2) then don't recreate any
@@ -857,11 +857,11 @@ class SimpleShape(base.Orbitit):
         if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
         self.scalingFactor = 1.0
-        self.setVertexProperties(Vs=Vs, Ns=Ns, radius=-1.0, color=[1.0, 1.0, 0.8])
-        self.setEdgeProperties(
+        self.set_vertex_props(Vs=Vs, Ns=Ns, radius=-1.0, color=[1.0, 1.0, 0.8])
+        self.set_edge_props(
             Es=Es, radius=-1.0, color=[0.1, 0.1, 0.1], drawEdges=True
         )
-        self.setFaceProperties(Fs=Fs, colors=colors, drawFaces=True)
+        self.set_face_props(Fs=Fs, colors=colors, drawFaces=True)
         self.defaultColor = rgb.yellow
         if orientation:
             self.orientation = orientation
@@ -971,10 +971,10 @@ class SimpleShape(base.Orbitit):
                     col_idx.append(org_cols[1][i[0]])
         new_cols = (copy.deepcopy(org_cols[0]), col_idx)
         shape = SimpleShape([], [], [])
-        shape.setVertexProperties(v_props)
+        shape.set_vertex_props(v_props)
         f_props["Fs"] = new_fs
         f_props["colors"] = new_cols
-        shape.setFaceProperties(f_props)
+        shape.set_face_props(f_props)
         return shape
 
     def clean_shape(self, precision):
@@ -997,14 +997,14 @@ class SimpleShape(base.Orbitit):
         vProps["Vs"] = cpVs
         fProps["Fs"] = cpFs
         shape = SimpleShape([], [], [])
-        shape.setVertexProperties(vProps)
-        shape.setFaceProperties(fProps)
+        shape.set_vertex_props(vProps)
+        shape.set_face_props(fProps)
         return shape
 
     def setVs(self, Vs):
-        self.setVertexProperties(Vs=Vs)
+        self.set_vertex_props(Vs=Vs)
 
-    def setVertexProperties(self, dict_par=None, **kwargs):
+    def set_vertex_props(self, dict_par=None, **kwargs):
         """
         Set the vertices and how/whether vertices are drawn in OpenGL.
 
@@ -1045,7 +1045,7 @@ class SimpleShape(base.Orbitit):
 
     def getVertexProperties(self):
         """
-        Return the current vertex properties as can be set by setVertexProperties.
+        Return the current vertex properties as can be set by set_vertex_props.
 
         Returned is a dictionary with the keywords Vs, radius, color.
         Vs: an array of vertices.
@@ -1066,7 +1066,7 @@ class SimpleShape(base.Orbitit):
     def gl_alwaysSetVertices(self, do):
         self.gl.alwaysSetVertices = do
 
-    def setEdgeProperties(self, dictPar=None, **kwargs):
+    def set_edge_props(self, dictPar=None, **kwargs):
         """
         Specify the edges and set how they are drawn in OpenGL.
 
@@ -1105,7 +1105,7 @@ class SimpleShape(base.Orbitit):
 
     def getEdgeProperties(self):
         """
-        Return the current edge properties as can be set by setEdgeProperties.
+        Return the current edge properties as can be set by set_edge_props.
 
         Returned is a dictionary with the keywords Es, radius, color, drawEdges
         Es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
@@ -1155,12 +1155,12 @@ class SimpleShape(base.Orbitit):
             # handle the edge from the last vertex to the first vertex separately
             # (instead of using % for every index)
             addEdge(face[lastIndex], face[0])
-        self.setEdgeProperties(Es=Es)
+        self.set_edge_props(Es=Es)
 
     def setFs(self, Fs):
-        self.setFaceProperties(Fs=Fs)
+        self.set_face_props(Fs=Fs)
 
-    def setFaceProperties(self, dictPar=None, **kwargs):
+    def set_face_props(self, dictPar=None, **kwargs):
         """
         Define the properties of the faces.
 
@@ -1191,7 +1191,7 @@ class SimpleShape(base.Orbitit):
 
     def getFaceProperties(self):
         """
-        Return the current face properties as can be set by setFaceProperties.
+        Return the current face properties as can be set by set_face_props.
 
         Returned is a dictionary with the keywords Fs, colors, and drawFaces.
         Fs: Optional array of faces, that do not need to be triangular. It is a
@@ -1555,8 +1555,8 @@ class SimpleShape(base.Orbitit):
         Draw the base element according to the definition of the Vs, Es, Fs and
         colour settings.
 
-        Use self.setVertexProperties(), and setEdgeProperties and
-        setFaceProperties to specify how and whether to draw the vertices, edges
+        Use self.set_vertex_props(), and set_edge_props and
+        set_face_props to specify how and whether to draw the vertices, edges
         and faces respectively.
         """
         GL.glMultMatrixd(self.orientation.glMatrix())
@@ -2580,7 +2580,7 @@ class CompoundShape(base.Orbitit):
             shape.regen_edges()
         self.merge_needed = True
 
-    def setVertexProperties(self, dictPar=None, **kwargs):
+    def set_vertex_props(self, dictPar=None, **kwargs):
         """Set the vertex properties for a whole compound shape at once
 
         Vs: This is an array of Vs. One Vs array for each shape element
@@ -2614,7 +2614,7 @@ class CompoundShape(base.Orbitit):
         assert len(Vs) == len(self.shapeElements)
         assert len(Ns) == len(self.shapeElements)
         for i in range(len(self.shapeElements)):
-            self.shapeElements[i].setVertexProperties(
+            self.shapeElements[i].set_vertex_props(
                 Vs=Vs[i], Ns=Ns[i], radius=radius, color=color
             )
         self.merge_needed = True
@@ -2622,7 +2622,7 @@ class CompoundShape(base.Orbitit):
     def getVertexProperties(self):
         """Return a dictionary of the vertex properties of the compound
 
-        See setVertexProperties what to expect.
+        See set_vertex_props what to expect.
         """
         # Note: cannot use the megedShape, since the Vs is not an array of Vs
         d = self.shapeElements[0].getVertexProperties()
@@ -2633,7 +2633,7 @@ class CompoundShape(base.Orbitit):
             "Ns": self.Ns,
         }
 
-    def setEdgeProperties(self, dictPar=None, **kwargs):
+    def set_edge_props(self, dictPar=None, **kwargs):
         """Set the edge properties for a whole compound shape at once
 
         Es: This is an array of Es. One Es array for each shape element
@@ -2664,7 +2664,7 @@ class CompoundShape(base.Orbitit):
             else:
                 drawEdges = None
         for i in range(len(self.shapeElements)):
-            self.shapeElements[i].setEdgeProperties(
+            self.shapeElements[i].set_edge_props(
                 Es=Es[i], radius=radius, color=color, drawEdges=drawEdges
             )
         self.merge_needed = True
@@ -2672,7 +2672,7 @@ class CompoundShape(base.Orbitit):
     def getEdgeProperties(self):
         """Return a dictionary of the edge properties of the compound
 
-        See setEdgeProperties what to expect.
+        See set_edge_props what to expect.
         """
         d = self.shapeElements[0].getEdgeProperties()
         return {
@@ -2682,7 +2682,7 @@ class CompoundShape(base.Orbitit):
             "drawEdges": d["drawEdges"],
         }
 
-    def setFaceProperties(self, dictPar=None, **kwargs):
+    def set_face_props(self, dictPar=None, **kwargs):
         """Set the face properties for a whole compound shape at once
 
         Fs: This is an array of Es. One Es array for each shape element
@@ -2710,7 +2710,7 @@ class CompoundShape(base.Orbitit):
             else:
                 drawFaces = None
         for i in range(len(self.shapeElements)):
-            self.shapeElements[i].setFaceProperties(
+            self.shapeElements[i].set_face_props(
                 Fs=Fs[i], colors=colors[i], drawFaces=drawFaces
             )
         self.merge_needed = True
@@ -2718,7 +2718,7 @@ class CompoundShape(base.Orbitit):
     def getFaceProperties(self):
         """Return a dictionary of the face properties of the compound
 
-        See setFaceProperties what to expect.
+        See set_face_props what to expect.
         """
         d = self.shapeElements[0].getFaceProperties()
         return {"Fs": self.Fs, "colors": self.colorData, "drawFaces": d["drawFaces"]}
@@ -3020,7 +3020,7 @@ class SymmetricShape(CompoundShape):
 
     def setVs(self, Vs):
         assert len(Vs) == len(self.base_shape.Vs)
-        self.base_shape.setVertexProperties(Vs=Vs)
+        self.base_shape.set_vertex_props(Vs=Vs)
         self.merge_needed = True
         self.needs_apply_isoms = True
 
@@ -3038,7 +3038,7 @@ class SymmetricShape(CompoundShape):
         - radius,
         - color.
         - Ns.
-        Check SimpleShape.setVertexProperties for more details.
+        Check SimpleShape.set_vertex_props for more details.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -3056,7 +3056,7 @@ class SymmetricShape(CompoundShape):
             except KeyError:
                 pass
             if not (Vs is None and Ns is None):
-                self.base_shape.setVertexProperties(Vs=Vs, Ns=Ns)
+                self.base_shape.set_vertex_props(Vs=Vs, Ns=Ns)
                 self.needs_apply_isoms = True
             radius = None
             try:
@@ -3069,7 +3069,7 @@ class SymmetricShape(CompoundShape):
             except KeyError:
                 pass
             if not (radius is None and color is None):
-                self.setVertexProperties(radius=radius, color=color)
+                self.set_vertex_props(radius=radius, color=color)
         else:
             logging.warning("No parameters specified: ignoring method call")
 
@@ -3090,7 +3090,7 @@ class SymmetricShape(CompoundShape):
           - radius,
           - color,
           - drawEdges.
-        Check SimpleShape.setEdgeProperties for more details.
+        Check SimpleShape.set_edge_props for more details.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -3098,7 +3098,7 @@ class SymmetricShape(CompoundShape):
             else:
                 edge_dict = kwargs
             if "Es" in edge_dict and edge_dict["Es"] is not None:
-                self.base_shape.setEdgeProperties(Es=edge_dict["Es"])
+                self.base_shape.set_edge_props(Es=edge_dict["Es"])
                 self.needs_apply_isoms = True
             radius = None
             try:
@@ -3116,8 +3116,8 @@ class SymmetricShape(CompoundShape):
             except KeyError:
                 pass
             if not (radius is None and color is None and drawEdges is None):
-                self.setEdgeProperties(radius=radius, color=color, drawEdges=drawEdges)
-                CompoundShape.setEdgeProperties(
+                self.set_edge_props(radius=radius, color=color, drawEdges=drawEdges)
+                CompoundShape.set_edge_props(
                     self, radius=radius, color=color, drawEdges=drawEdges
                 )
                 logging.info("radius %f", radius)
@@ -3139,7 +3139,7 @@ class SymmetricShape(CompoundShape):
           - Fs,
           - colors,
           - drawFaces.
-        Check SimpleShape.setFaceProperties for more details.
+        Check SimpleShape.set_face_props for more details.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -3147,7 +3147,7 @@ class SymmetricShape(CompoundShape):
             else:
                 face_dict = kwargs
             if "Fs" in face_dict and face_dict["Fs"] is not None:
-                self.base_shape.setFaceProperties(Fs=face_dict["Fs"])
+                self.base_shape.set_face_props(Fs=face_dict["Fs"])
                 self.needs_apply_isoms = True
             if "colors" in face_dict and face_dict["colors"] is not None:
                 self.setFaceColors([face_dict["colors"]])

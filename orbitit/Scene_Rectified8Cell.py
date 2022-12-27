@@ -265,7 +265,7 @@ class Shape(Geom4D.SimpleShape):
                         Cs.append([])
                         colIds.append([])
         this.setCellProperties(Cs = Cs)
-        this.setFaceProperties(colors = (Cols, colIds))
+        this.set_face_props(colors = (Cols, colIds))
 
     def gl_init(self):
         super().glInit()

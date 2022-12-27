@@ -408,7 +408,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 and
                 self.panel.shape.getVertexProperties()['radius'] <= 0
         ):
-            self.panel.shape.setVertexProperties(radius=0.05)
+            self.panel.shape.set_vertex_props(radius=0.05)
         self.SetTitle(os.path.basename(filename))
         # Save for reload:
         self.current_file = filename
@@ -776,14 +776,14 @@ class MainPanel(wx.Panel):
         old_v_settings = old_shape.getVertexProperties()
         del old_v_settings['Vs']
         del old_v_settings['Ns']
-        self.canvas.shape.setVertexProperties(old_v_settings)
+        self.canvas.shape.set_vertex_props(old_v_settings)
         # Use all the edge settings except for Es
         old_e_settings = old_shape.getEdgeProperties()
         del old_e_settings['Es']
-        self.canvas.shape.setEdgeProperties(old_e_settings)
+        self.canvas.shape.set_edge_props(old_e_settings)
         # Use only the 'drawFaces' setting:
         old_f_settings = {'drawFaces': old_shape.getFaceProperties()['drawFaces']}
-        self.canvas.shape.setFaceProperties(old_f_settings)
+        self.canvas.shape.set_face_props(old_f_settings)
         # if the shape generates the normals itself:
         # TODO: handle that this.Ns is set correctly, i.e. normalised
         if shape.generateNormals:

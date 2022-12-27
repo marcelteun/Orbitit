@@ -151,7 +151,7 @@ class Shape(geom_3d.SimpleShape):
                 Vs.extend(self.kiteVs)
             if self.show_hepta:
                 Vs.extend(self.heptaVs)
-            self.setVertexProperties(Vs = Vs)
+            self.set_vertex_props(Vs = Vs)
         except AttributeError: pass
 
     def update_view_opt(self, show_kite=None, show_hepta=None):
@@ -178,9 +178,9 @@ class Shape(geom_3d.SimpleShape):
                     Es.extend(self.heptaEs)
                     Vs.extend(self.heptaVs)
                     ColsI.extend(self.heptaColors)
-            self.setVertexProperties(Vs = Vs)
-            self.setEdgeProperties(Es = Es)
-            self.setFaceProperties(Fs = Fs, colors = [self.colors[:], ColsI[:]])
+            self.set_vertex_props(Vs = Vs)
+            self.set_edge_props(Es = Es)
+            self.set_face_props(Fs = Fs, colors = [self.colors[:], ColsI[:]])
             # save for set_vs:
             self.show_kite  = show_kite
             self.show_hepta = show_hepta

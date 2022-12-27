@@ -141,7 +141,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def update_shape_cols(self):
         """Update the face colours of the current shape"""
-        self.canvas.shape.setFaceProperties(colors=self.cols)
+        self.canvas.shape.set_face_props(colors=self.cols)
         self.canvas.paint()
 
     def close(self):
@@ -227,7 +227,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         # Assume compound shape
         new_vs = [
             [transform * geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.setVertexProperties(Vs=new_vs)
+        self.canvas.shape.set_vertex_props(Vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -236,7 +236,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         # Assume compound shape
         new_vs = [
             [-geomtypes.Vec3(v) for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.setVertexProperties(Vs=new_vs)
+        self.canvas.shape.set_vertex_props(Vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -246,7 +246,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         new_vs = [
             [geomtypes.Vec3(v) + self.translation.get_vertex()
              for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.setVertexProperties(Vs=new_vs)
+        self.canvas.shape.set_vertex_props(Vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -259,7 +259,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def on_reset(self, _=None):
         """Handle event '_' to undo all transforms"""
-        self.canvas.shape.setVertexProperties(Vs=self.org_org_vs)
+        self.canvas.shape.set_vertex_props(Vs=self.org_org_vs)
         self.canvas.paint()
         self.org_vs = self.org_org_vs
 
@@ -746,16 +746,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.v_opts_lst[sel]
         if sel_str == 'show':
             self.v_r_gui.Enable()
-            self.canvas.shape.setVertexProperties(radius=self.v_r)
+            self.canvas.shape.set_vertex_props(radius=self.v_r)
         elif sel_str == 'hide':
             self.v_r_gui.Disable()
-            self.canvas.shape.setVertexProperties(radius=-1.0)
+            self.canvas.shape.set_vertex_props(radius=-1.0)
         self.canvas.paint()
 
     def on_v_radius(self, _):
         """Handle event '_' to set vertex radius as according to settings"""
         self.v_r = (float(self.v_r_gui.GetValue()) / self.v_r_scale)
-        self.canvas.shape.setVertexProperties(radius=self.v_r)
+        self.canvas.shape.set_vertex_props(radius=self.v_r)
         self.canvas.paint()
         self.set_status_text()
 
@@ -766,7 +766,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.setVertexProperties(color=[float(i)/255 for i in rgb])
+            self.canvas.shape.set_vertex_props(color=[float(i)/255 for i in rgb])
             self.canvas.paint()
         dlg.Destroy()
 
@@ -776,21 +776,21 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.e_opts_lst[sel]
         if sel_str == 'hide':
             self.e_r_gui.Disable()
-            self.canvas.shape.setEdgeProperties(drawEdges=False)
+            self.canvas.shape.set_edge_props(drawEdges=False)
         elif sel_str == 'as cylinders':
             self.e_r_gui.Enable()
-            self.canvas.shape.setEdgeProperties(drawEdges=True)
-            self.canvas.shape.setEdgeProperties(radius=self.e_r)
+            self.canvas.shape.set_edge_props(drawEdges=True)
+            self.canvas.shape.set_edge_props(radius=self.e_r)
         elif sel_str == 'as lines':
             self.e_r_gui.Disable()
-            self.canvas.shape.setEdgeProperties(drawEdges=True)
-            self.canvas.shape.setEdgeProperties(radius=0)
+            self.canvas.shape.set_edge_props(drawEdges=True)
+            self.canvas.shape.set_edge_props(radius=0)
         self.canvas.paint()
 
     def on_e_radius(self, _):
         """Handle event '_' to set edge radius as according to settings"""
         self.e_r = (float(self.e_r_gui.GetValue()) / self.e_r_scale)
-        self.canvas.shape.setEdgeProperties(radius=self.e_r)
+        self.canvas.shape.set_edge_props(radius=self.e_r)
         self.canvas.paint()
         self.set_status_text()
 
@@ -801,7 +801,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.setEdgeProperties(color=[float(i)/255 for i in rgb])
+            self.canvas.shape.set_edge_props(color=[float(i)/255 for i in rgb])
             self.canvas.paint()
         dlg.Destroy()
 
@@ -811,13 +811,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
-        self.canvas.shape.setFaceProperties(drawFaces=True)
+        self.canvas.shape.set_face_props(drawFaces=True)
         if sel == self.cull_show_both:
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_none:
             # don't use culling here: doesn't work with edge radius and vertext
             # radius > 0
-            self.canvas.shape.setFaceProperties(drawFaces=False)
+            self.canvas.shape.set_face_props(drawFaces=False)
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_front:
             GL.glCullFace(GL.GL_FRONT)
@@ -845,7 +845,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_show_unscaled_es(self, _):
         """Handle event '_' to show or hide unscaled edges of polychoron"""
-        self.canvas.shape.setEdgeProperties(
+        self.canvas.shape.set_edge_props(
             showUnscaled=(self.show_es_unscaled_gui.GetSelection() == 0),
         )
         self.canvas.paint()
