@@ -91,6 +91,14 @@ V5 = math.sqrt(5)
 
 TAU = (V5 + 1) / 2
 
+# rotation needed from standard isometries.A4 where the z-axis is shared with a 2-fold axis to a
+# position where the z-axis is shared with a 3-fold axis.
+A4_Z_O2_TO_O3 = geomtypes.Rot3(angle=math.atan(V2), axis=geomtypes.Vec3([1, 1, 0]))
+A4_Z_O2_TO_O3 = geomtypes.Rot3(angle=math.pi / 4, axis=geomtypes.Vec3([0, 0, 1])) * A4_Z_O2_TO_O3
+
+S4_Z_O4_TO_O3 = A4_Z_O2_TO_O3
+S4_Z_O4_TO_O2 = geomtypes.Rot3(angle=math.pi / 4, axis=geomtypes.Vec3([0, 1, 0]))
+
 # rotation needed from standard isometries.A5 where the z-axis is shared with a 2-fold axis to a
 # position where the z-axis is shared with a 5-fold axis
 A5_Z_O2_TO_O5 = geomtypes.Rot3(angle=math.atan(TAU), axis=geomtypes.Vec3([1, 0, 0]))

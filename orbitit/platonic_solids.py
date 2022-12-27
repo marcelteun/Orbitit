@@ -22,8 +22,9 @@
 # ------------------------------------------------------------------
 from math import sqrt as V
 
+from orbitit.base import add_std_arguments_for_generating_models
+from orbitit.geom_3d import A5_Z_O2_TO_O3, A5_Z_O2_TO_O5, A4_Z_O2_TO_O3, S4_Z_O4_TO_O2
 from orbitit.geomtypes import Vec3
-from orbitit.geom_3d import SimpleShape
 from orbitit import isometry as sym
 from orbitit.orbit import Shape as OrbitShape
 
@@ -69,6 +70,13 @@ class Tetrahedron(OrbitShape):
             **kwargs,
         )
 
+class TetrahedronZO3(Tetrahedron):
+    """Model of tetrahedron where the z-axis is shared with a 3-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A4_Z_O2_TO_O3)
+        self.name = "tetrahedron_z_o3"
+
 #------------------------------------------------------------------------------
 # Cube
 class Cube(OrbitShape):
@@ -92,6 +100,20 @@ class Cube(OrbitShape):
             **kwargs,
         )
 
+class CubeZO3(Cube):
+    """Model of cube where the z-axis is shared with a 3-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A4_Z_O2_TO_O3)
+        self.name = "cube_z_o3"
+
+class CubeZO2(Cube):
+    """Model of cube where the z-axis is shared with a 2-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(S4_Z_O4_TO_O2)
+        self.name = "cube_z_o2"
+
 #------------------------------------------------------------------------------
 # Octahedron
 class Octahedron(OrbitShape):
@@ -113,6 +135,20 @@ class Octahedron(OrbitShape):
             no_of_cols=no_of_cols,
             **kwargs,
         )
+
+class OctahedronZO3(Octahedron):
+    """Model of octahedron where the z-axis is shared with a 3-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A4_Z_O2_TO_O3)
+        self.name = "octahedron_z_o3"
+
+class OctahedronZO2(Octahedron):
+    """Model of octahedron where the z-axis is shared with a 2-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(S4_Z_O4_TO_O2)
+        self.name = "octahedron_z_o2"
 
 #------------------------------------------------------------------------------
 # Dodecahedron
@@ -138,6 +174,20 @@ class Dodecahedron(OrbitShape):
             **kwargs,
         )
 
+class DodecahedronZO3(Dodecahedron):
+    """Model of dodecahedron where the z-axis is shared with a 3-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A5_Z_O2_TO_O3)
+        self.name = "dodecahedron_z_o3"
+
+class DodecahedronZO5(Dodecahedron):
+    """Model of dodecahedron where the z-axis is shared with a 3-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A5_Z_O2_TO_O5)
+        self.name = "dodecahedron_z_o5"
+
 #------------------------------------------------------------------------------
 # Icosahedron
 class Icosahedron(OrbitShape):
@@ -160,6 +210,20 @@ class Icosahedron(OrbitShape):
             **kwargs,
         )
 
+class IcosahedronZO3(Icosahedron):
+    """Model of icosahedron where the z-axis is shared with a 3-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A5_Z_O2_TO_O3)
+        self.name = "icosahedron_z_o3"
+
+class IcosahedronZO5(Icosahedron):
+    """Model of icosahedron where the z-axis is shared with a 5-fold axis."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform(A5_Z_O2_TO_O5)
+        self.name = "icosahedron_z_o5"
+
 if __name__ == "__main__":
     from argparse import ArgumentParser
     from pathlib import Path
@@ -171,10 +235,19 @@ if __name__ == "__main__":
 
     MODELS_MAP = {
         "tetrahedron": Tetrahedron(),
+        "tetrahedron_z_o3": TetrahedronZO3(),
         "cube": Cube(),
+        "cube_z_o3": CubeZO3(),
+        "cube_z_o2": CubeZO2(),
         "octahedron": Octahedron(),
+        "octahedron_z_o3": OctahedronZO3(),
+        "octahedron_z_o2": OctahedronZO2(),
         "dodecahedron": Dodecahedron(),
+        "dodecahedron_z_o3": DodecahedronZO3(),
+        "dodecahedron_z_o5": DodecahedronZO5(),
         "icosahedron": Icosahedron(),
+        "icosahedron_z_o3": IcosahedronZO3(),
+        "icosahedron_z_o5": IcosahedronZO5(),
     }
 
     PARSER = ArgumentParser(DESCR)
