@@ -335,7 +335,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.show_gui[self._gen_stab_sym_gui_idx].SetLabel("Show Stabilisers")
         self.panel.Layout()
 
-    def on_generate_stab_list(self, _):
+    def on_generate_stab_list(self, _=None):
         """Generate which subgroups there are for the selected symmetries
 
         This is only important for the cyclic and the dihedral groups where the
@@ -632,6 +632,10 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.show_gui[self._final_sym_gui_idx].set_selected_class(type(final_sym))
             self.show_gui[self._final_sym_gui_idx].on_set_sym(None)
             self.show_gui[self._final_sym_gui_idx].setup_sym(final_sym.setup)
+            # This will show the list of stabilizer symmetries. Otherwise this is hidden and when
+            # Show Stabilizers is chosen, the list will be re-generated (see comment inside method)
+            # and nothing will be selected.
+            self.on_generate_stab_list()
             self.show_gui[self._stab_sym_gui_idx].set_selected_class(type(stab_sym))
             self.show_gui[self._stab_sym_gui_idx].on_set_sym(None)
             self.show_gui[self._stab_sym_gui_idx].setup_sym(stab_sym.setup)
