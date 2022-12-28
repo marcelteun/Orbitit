@@ -1544,6 +1544,9 @@ class SimpleShape(base.Orbitit):
         GL.glEnable(GL.GL_NORMALIZE)
         GL.glDisable(GL.GL_CULL_FACE)
 
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        GL.glEnable(GL.GL_BLEND)
+
         self.gl_initialised = True
 
     def gl_draw(self):
@@ -1677,7 +1680,9 @@ class SimpleShape(base.Orbitit):
                 if len(c) == 3:
                     GL.glColor(c[0], c[1], c[2])
                 else:
-                    GL.glColor(c[0], c[1], c[2], c[3])
+                    a = max(c[3], 0)
+                    a = min(a, 1)
+                    GL.glColor(c[0], c[1], c[2], a)
                 for faceIndex in self.EqColFs[colIndex]:
                     triangles = self.TriangulatedFs[faceIndex]
                     # Note triangles is a flat (ie 1D) array
@@ -1697,7 +1702,6 @@ class SimpleShape(base.Orbitit):
                             GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE
                         )
                         GL.glDepthMask(GL.GL_FALSE)
-                        # glDepthFunc(GL.GL_ALWAYS)
                         # Enable Stencil, always pass test
                         GL.glEnable(GL.GL_STENCIL_TEST)
                         # always pass stencil test
@@ -1709,9 +1713,7 @@ class SimpleShape(base.Orbitit):
                         # Create triangulated stencil:
                         GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
                         # Reset colour mask and depth settings.
-                        # glDepthFunc(GL.GL_LESS)
-                        if len(c) == 3:
-                            GL.glDepthMask(GL.GL_TRUE)
+                        GL.glDepthMask(GL.GL_TRUE)
                         GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
                         # Draw only where stencil equals 1 (masked to 1)
                         # GL_INVERT was used, i.e. in case of e.g. 8 bits the value is
@@ -1721,8 +1723,6 @@ class SimpleShape(base.Orbitit):
                         GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
                         # Now, write according to stencil
                         GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
-                        if len(c) > 3:
-                            GL.glDepthMask(GL.GL_TRUE)
                         # ready, disable stencil
                         GL.glDisable(GL.GL_STENCIL_TEST)
 
