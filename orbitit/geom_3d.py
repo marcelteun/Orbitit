@@ -845,7 +845,7 @@ class SimpleShape(base.Orbitit):
         if not Ns:
             Ns = []
         self.dimension = 3
-        self.fNs = []
+        self.face_normals = []
         self.generateNormals = True
         self.name = name
         self.gl_initialised = False
@@ -1033,7 +1033,7 @@ class SimpleShape(base.Orbitit):
                 self.Vs = [geomtypes.Vec3(v) for v in the_dict["Vs"]]
                 self.VsRange = range(len(self.Vs))
                 self.gl.updateVs = True
-                self.fNsUp2date = False
+                self.face_normals_up_to_date = False
             if "Ns" in the_dict and the_dict["Ns"] is not None:
                 self.Ns = the_dict["Ns"]
             if "radius" in the_dict and the_dict["radius"] is not None:
@@ -1243,7 +1243,7 @@ class SimpleShape(base.Orbitit):
         self.TriangulatedFs = self.triangulate(Fs)
         self.FsLen = len(self.Fs)
         self.FsRange = range(self.FsLen)
-        self.fNsUp2date = False
+        self.face_normals_up_to_date = False
         # if you autogenerate the vertex normal, using the faces, you need to
         # regenerate by setting self.gl.updateVs
         self.gl.updateVs = self.generateNormals
@@ -1301,25 +1301,38 @@ class SimpleShape(base.Orbitit):
                 normal = -normal
         return normal
 
-    def createFaceNormals(self, normalise):
-        # TODO use smarter sol than self.fNsNormalised != normalise:
+    def create_face_normals(self, normalise):
+        """Create face normals and save in self.
+
+        normalise: boolean stating whether to normalise the normals.
+
+        return: none
+        """
+        # TODO use smarter sol than self.face_normals_len_1 != normalise:
         # if already normalised, you never need to recalc
         # if not yet normalised, but required, just normalise.
-        if not self.fNsUp2date or self.fNsNormalised != normalise:
-            self.fNs = [self.generate_face_normal(f, normalise) for f in self.Fs]
-            self.fNsUp2date = True
-            self.fNsNormalised = normalise
+        if not self.face_normals_up_to_date or self.face_normals_len_1 != normalise:
+            self.face_normals = [self.generate_face_normal(f, normalise) for f in self.Fs]
+            self.face_normals_up_to_date = True
+            self.face_normals_len_1 = normalise
 
-    def createVertexNormals(self, normalise, Vs=None):
-        if Vs is None:
-            Vs = self.Vs
-        self.createFaceNormals(normalise)
+    def create_vertex_normals(self, normalise, vs=None):
+        """Create vertex normals and save in self.
+
+        vs: and array with vertices to create normals for. Is not set, then self.Vs is used.
+        normalise: boolean stating whether to normalise the normals.
+
+        return: none
+        """
+        if vs is None:
+            vs = self.Vs
+        self.create_face_normals(normalise)
         # only use a vertex once, since the normal can be different
         self.nVs = []
         self.vNs = []
-        for face, normal in zip(self.Fs, self.fNs):
+        for face, normal in zip(self.Fs, self.face_normals):
             self.vNs.extend([normal for vi in face])
-            self.nVs.extend([[Vs[vi][0], Vs[vi][1], Vs[vi][2]] for vi in face])
+            self.nVs.extend([[vs[vi][0], vs[vi][1], vs[vi][2]] for vi in face])
         self.createVertexNormals_vi = -1
 
         def inc():
@@ -1331,16 +1344,16 @@ class SimpleShape(base.Orbitit):
         # Now for the edge vertices. Note that edge vertices aren't necessarily
         # part of the face vertices.
         edgeIndexOffset = len(self.nVs)
-        self.nVs.extend(Vs)
+        self.nVs.extend(vs)
         if normalise:
-            for v in Vs:
+            for v in vs:
                 self.vNs.append(v.normalize())
         else:
-            for v in Vs:
+            for v in vs:
                 self.vNs.append(v)
         self.nEs = [oldVi + edgeIndexOffset for oldVi in self.Es]
 
-    def createEdgeLengths(self, precision=12):
+    def create_edge_lengths(self, precision=12):
         e2l = {}
         l2e = {}
         for ei in self.EsRange:
@@ -1362,7 +1375,7 @@ class SimpleShape(base.Orbitit):
         return l2e
 
     def createDihedralAngles(self, precision=12):
-        self.createFaceNormals(normalise=False)
+        self.create_face_normals(normalise=False)
         e2d = {}
         d2e = {}
         lFs = len(self.Fs)
@@ -1392,7 +1405,7 @@ class SimpleShape(base.Orbitit):
                     t = (vi, viRef)
                 else:
                     t = (viRef, vi)
-                angle = math.pi - self.fNs[fi].angle(self.fNs[cfi])
+                angle = math.pi - self.face_normals[fi].angle(self.face_normals[cfi])
                 angle = round(angle, precision)
                 try:
                     e2d[t].append(angle)
@@ -1632,7 +1645,7 @@ class SimpleShape(base.Orbitit):
                 GL.glNormalPointerf(normals)
                 self.NsSaved = normals
             else:
-                self.createVertexNormals(True, Vs)
+                self.create_vertex_normals(True, Vs)
                 if self.nVs != []:
                     if not GL.glVertexPointerf(self.nVs):
                         return
@@ -1760,7 +1773,7 @@ class SimpleShape(base.Orbitit):
                 )
                 if len(Es) > 2:
                     s = w(f"#                 E.g. {Es[0]}, {Es[1]}, {Es[2]} etc")
-            l2e = self.createEdgeLengths()
+            l2e = self.create_edge_lengths()
             for l, Es in l2e.items():
                 s = w(f"# Length: {geomtypes.f2s(l, precision)} for {len(Es)} edges")
                 if len(Es) > 2:
@@ -1810,16 +1823,16 @@ class SimpleShape(base.Orbitit):
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s += f"{face_str(face)}\n"
         else:
-            self.createFaceNormals(normalise=True)
+            self.create_face_normals(normalise=True)
             for i in range(no_of_faces):
                 face = self.Fs[i]
                 color = self.colorData[0][self.colorData[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s = "%s%s\n" % (s, face_str(face))
                 fnStr = "%s %s %s" % (
-                    geomtypes.f2s(self.fNs[i][0], precision),
-                    geomtypes.f2s(self.fNs[i][1], precision),
-                    geomtypes.f2s(self.fNs[i][2], precision),
+                    geomtypes.f2s(self.face_normals[i][0], precision),
+                    geomtypes.f2s(self.face_normals[i][1], precision),
+                    geomtypes.f2s(self.face_normals[i][2], precision),
                 )
                 if info:
                     s = w(f"# face normal: {fnStr}")
