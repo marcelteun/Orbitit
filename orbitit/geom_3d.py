@@ -1517,7 +1517,7 @@ class SimpleShape(base.Orbitit):
         self.spheresRadii.mid = s
         s = {}
         try:
-            G = self.fGs
+            self.fGs
         except AttributeError:
             self.calculateFacesG()
         for g in self.fGs:
@@ -1553,7 +1553,6 @@ class SimpleShape(base.Orbitit):
         """wrap _gl_draw to be able to catch OpenGL errors"""
         if self.Vs == []:
             return
-        Es = self.Es
         if not self.gl_initialised:
             self.gl_init()
 
@@ -1857,7 +1856,6 @@ class SimpleShape(base.Orbitit):
         if not face_indices:
             face_indices = list(range(len(self.Fs)))
         PsDoc = PS.doc(title=self.name, pageSize=pageSize)
-        offset = 0
         if logging.root.level < logging.DEBUG:
             for i in range(len(self.Vs)):
                 logging.debug("V[%d] = %s", i, self.Vs[i])
@@ -1892,7 +1890,6 @@ class SimpleShape(base.Orbitit):
                     to2DAngle = 0.0
                 elif eq(to2DAngle, -math.pi, margin):
                     to2DAngle = 0.0
-                PsPoints = []
                 if not to2DAngle == 0:
                     logging.debug("to2DAngle: %f", to2DAngle)
                     to2Daxis = norm.cross(zAxis)
@@ -2058,7 +2055,7 @@ class SimpleShape(base.Orbitit):
                             if nextFacetSeg:
                                 facetSegmentNr += 1
                 PsDoc.addLineSegments(pointsIn2D, Es, scaling, precision)
-        except AssertionError as PrecisionError:
+        except AssertionError:
             # catching assertion errors, to be able to set back margin
             geomtypes.set_eq_float_margin(margin)
             raise
@@ -2147,7 +2144,6 @@ class SimpleShape(base.Orbitit):
             # with an angle equal to the dot product of the normalised vectors.
             zAxis = vec(0, 0, 1)
             to2DAngle = math.acos(zAxis * norm)
-            PsPoints = []
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
                 Mrot = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
@@ -2362,7 +2358,7 @@ class SimpleShape(base.Orbitit):
         Vs = self.Vs[:]
         nrOrgVs = len(self.Vs)
         try:
-            G = self.fGs
+            self.fGs
         except AttributeError:
             self.calculateFacesG()
         try:
@@ -3011,7 +3007,7 @@ class SymmetricShape(CompoundShape):
                 div = self.order // self.nrOfShapeColorDefs
                 mod = self.order % self.nrOfShapeColorDefs
                 colorDataPerShape = []
-                for i in range(div):
+                for _ in range(div):
                     colorDataPerShape.extend(self.shape_colors)
                 colorDataPerShape.extend(self.shape_colors[:mod])
             else:
