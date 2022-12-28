@@ -1375,60 +1375,61 @@ class SimpleShape(base.Orbitit):
         return l2e
 
     def _get_dihedral_angles(self, precision=12):
-        self.create_face_normals(normalise=False)
-        dihedral_to_edge = {}
-        fs_len = len(self.Fs)
+        """Get all different dihedral angles.
 
-        def add_dihedral_angle(fi, chk_face, cfi, vi, i, v_ref_idx, dihedral_to_edge):
-            # fi: face index of face under investigation
-            # chk_face: the face we are checking against (a list of vertex indices)
-            # cfi: index of face we are checking against
-            # vi: vertex index we are looking at (which is part of the face
-            #     under investigation and of chk_face)
-            # i: index of vi in chk_face.
-            # v_ref_idx: the vertex that will be checked for in chk_face.
-            # dihedral_to_edge: dictionary mapping dihedral angles on edges, using angles as
-            #      tuples
-            _i = i - 1
-            if _i < 0:
-                _i = len(chk_face) - 1
-            i_ = i + 1
-            if i_ >= len(chk_face):
-                i_ = 0
-            # if the vertex vi - v_ref_idx is part of chk_face
-            if chk_face[_i] == v_ref_idx or chk_face[i_] == v_ref_idx:
-                # add the angle to d array.
-                if vi < v_ref_idx:
-                    t = (vi, v_ref_idx)
+        precision: number of decimals to take into account to interpret as unique angle
+
+        return: a dictionary where the keys are the unique dihedral angles and the values are a list
+        of edges, where each edge is a tuple with a pair of vertex indices.
+        """
+        self.create_face_normals(normalise=False)
+        dihedral_to_edge = {}  # the result
+        no_of_faces = len(self.Fs)
+
+        def add_dihedral_angle(face_idx, chk_face, cfi, edge, v0_chk_face_idx):
+            """Add one dihedral angle to the global dihedral_to_edge
+
+            face_idx: the index of the face under investigation
+            chk_face: the face we are checking against holding a list of vertex indices
+            cfi: the index of chk_face in the list of faces
+            edge: an edge consisting of a pair vertex indices (in a tuple). The dihedral angle for
+                this face will be added.
+            v0_chk_face_idx: index of edge[0] in chk_face.
+
+            return: None.
+            """
+            v0_idx, v1_idx = edge
+            i_prev = v0_chk_face_idx - 1
+            if i_prev < 0:
+                i_prev = len(chk_face) - 1
+            i_next = v0_chk_face_idx + 1
+            if i_next >= len(chk_face):
+                i_next = 0
+            # if the vertex v0_idx - v1_idx is part of chk_face
+            if chk_face[i_prev] == v1_idx or chk_face[i_next] == v1_idx:
+                # found: add the angle and edge to dihedral_to_edge
+                if v0_idx < v1_idx:
+                    t = (v0_idx, v1_idx)
                 else:
-                    t = (v_ref_idx, vi)
-                angle = math.pi - self.face_normals[fi].angle(self.face_normals[cfi])
+                    t = (v1_idx, v0_idx)
+                angle = math.pi - self.face_normals[face_idx].angle(self.face_normals[cfi])
                 angle = round(angle, precision)
                 try:
                     dihedral_to_edge[angle].append(t)
                 except KeyError:
                     dihedral_to_edge[angle] = [t]
 
-        for face, fi in zip(self.Fs, self.FsRange):
-            f_ = face[:]
-            f_.append(face[0])
-            l = len(f_)
-            for fii in range(1, l, 2):
-                vi = f_[fii]
-                vip = f_[fii - 1]  # previous x
-                if fii >= l - 1:
-                    vin = -1  # no next
-                else:
-                    vin = f_[fii + 1]  # next
-                for nfi in range(fi + 1, fs_len):
-                    chk_face = self.Fs[nfi]
+        for face_idx, face in enumerate(self.Fs):
+            no_of_indices = len(face)
+            for edge in [(v_idx, face[(i + 1) % no_of_indices]) for i, v_idx in enumerate(face)]:
+                for next_face_idx in range(face_idx + 1, no_of_faces):
+                    chk_face = self.Fs[next_face_idx]
                     try:
-                        i = chk_face.index(vi)
+                        i = chk_face.index(edge[0])
                     except ValueError:
                         i = -1
                     if i >= 0:
-                        add_dihedral_angle(fi, chk_face, nfi, vi, i, vip, dihedral_to_edge)
-                        add_dihedral_angle(fi, chk_face, nfi, vi, i, vin, dihedral_to_edge)
+                        add_dihedral_angle(face_idx, chk_face, next_face_idx, edge, i)
         return dihedral_to_edge
 
     def divideColorWrapper(self):
