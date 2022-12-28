@@ -548,7 +548,6 @@ class E(Set):
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
-        self.chk_setup(setup)
         if isometries:
             assert len(isometries) == 1, \
                 f'Class E should contain exactly one isometry, got {len(isometries)}'
@@ -593,7 +592,6 @@ class ExI(Set):
     def __init__(self, isometries=None, setup=None):
         if setup is None:
             setup = {}
-        self.chk_setup(setup)
         if isometries:
             assert len(isometries) == 2, \
                 'Class ExI should contain exactly two isometries'
@@ -971,9 +969,9 @@ class CnxI(Set, metaclass=MetaCnxI):
             # then if you specify n it should be the correct value
             assert self.n in (0, s['n'])
             cn = Cn(setup=s)
+            self.n = cn.n
             self.direct_parent = C(self.n)
             self.direct_parent_setup = copy(s)
-            self.n = cn.n
             Set.__init__(self, cn * ExI())
             self.rot_axes = {'n': cn.rot_axes['n']}
             self.order = 2 * cn.order
@@ -1090,6 +1088,7 @@ class DnCn(Set, metaclass=MetaDnCn):
             else:
                 s['axis'] = copy(self.std_setup['axis_n'])
             cn = Cn(setup=s)
+            self.n = s['n']
             self.direct_parent = C(self.n)
             self.direct_parent_setup = copy(s)
             if 'normal_r' in setup:
@@ -1100,7 +1099,6 @@ class DnCn(Set, metaclass=MetaDnCn):
             del s['axis']
             dn = Dn(setup=s)
             Set.__init__(self, cn | ((dn-cn) * geomtypes.I))
-            self.n = s['n']
             self.rot_axes = {'n': cn.rot_axes['n']}
             self.refl_normals = dn.rot_axes[2]
             self.order = dn.order
@@ -1380,11 +1378,11 @@ class DnxI(Set, metaclass=MetaDnxI):
             # then if you specify n it should be the correct value
             assert self.n in (0, s['n'])
             dn = Dn(setup=s)
+            self.n = dn.n
             self.direct_parent = D(self.n)
             self.direct_parent_setup = copy(s)
             Set.__init__(self, dn * ExI())
             self.rot_axes = {'n': dn.rot_axes['n'], 2: dn.rot_axes[2][:]}
-            self.n = dn.n
             self.refl_normals = []
             for isom in self:
                 if isom.is_refl():
