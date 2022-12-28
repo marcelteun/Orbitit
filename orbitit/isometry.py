@@ -843,6 +843,7 @@ class C2nCn(Set, metaclass=MetaC2nCn):
             cn = Cn(setup=s)
             self.n = cn.n
             if self.n != 1:
+                self.direct_parent = C(self.n)
                 self.direct_parent_setup = copy(s)
             else:
                 self.direct_parent_setup = None
