@@ -1374,47 +1374,40 @@ class SimpleShape(base.Orbitit):
         self.l2e = l2e
         return l2e
 
-    def createDihedralAngles(self, precision=12):
+    def _get_dihedral_angles(self, precision=12):
         self.create_face_normals(normalise=False)
-        e2d = {}
-        d2e = {}
-        lFs = len(self.Fs)
+        dihedral_to_edge = {}
+        fs_len = len(self.Fs)
 
-        def addDihedralAngle(fi, cFace, cfi, vi, i, viRef, e2d, d2e):
+        def add_dihedral_angle(fi, chk_face, cfi, vi, i, v_ref_idx, dihedral_to_edge):
             # fi: face index of face under investigation
-            # cFace: the face we are checking against (a list of vertex indices)
+            # chk_face: the face we are checking against (a list of vertex indices)
             # cfi: index of face we are checking against
             # vi: vertex index we are looking at (which is part of the face
-            #     under investigation and of cFace)
-            # i: index of vi in cFace.
-            # viRef: the vertex that will be checked for in cFace.
-            # e2d: dictionary mapping edges on dihedral angles, using index
-            #      tuples as keys
-            # d2e: dictionary mapping dihedral angles on edges, using angles as
+            #     under investigation and of chk_face)
+            # i: index of vi in chk_face.
+            # v_ref_idx: the vertex that will be checked for in chk_face.
+            # dihedral_to_edge: dictionary mapping dihedral angles on edges, using angles as
             #      tuples
             _i = i - 1
             if _i < 0:
-                _i = len(cFace) - 1
+                _i = len(chk_face) - 1
             i_ = i + 1
-            if i_ >= len(cFace):
+            if i_ >= len(chk_face):
                 i_ = 0
-            # if the vertex vi - viRef is part of cFace
-            if cFace[_i] == viRef or cFace[i_] == viRef:
+            # if the vertex vi - v_ref_idx is part of chk_face
+            if chk_face[_i] == v_ref_idx or chk_face[i_] == v_ref_idx:
                 # add the angle to d array.
-                if vi < viRef:
-                    t = (vi, viRef)
+                if vi < v_ref_idx:
+                    t = (vi, v_ref_idx)
                 else:
-                    t = (viRef, vi)
+                    t = (v_ref_idx, vi)
                 angle = math.pi - self.face_normals[fi].angle(self.face_normals[cfi])
                 angle = round(angle, precision)
                 try:
-                    e2d[t].append(angle)
+                    dihedral_to_edge[angle].append(t)
                 except KeyError:
-                    e2d[t] = [angle]
-                try:
-                    d2e[angle].append(t)
-                except KeyError:
-                    d2e[angle] = [t]
+                    dihedral_to_edge[angle] = [t]
 
         for face, fi in zip(self.Fs, self.FsRange):
             f_ = face[:]
@@ -1427,18 +1420,16 @@ class SimpleShape(base.Orbitit):
                     vin = -1  # no next
                 else:
                     vin = f_[fii + 1]  # next
-                for nfi in range(fi + 1, lFs):
-                    nFace = self.Fs[nfi]
+                for nfi in range(fi + 1, fs_len):
+                    chk_face = self.Fs[nfi]
                     try:
-                        i = nFace.index(vi)
+                        i = chk_face.index(vi)
                     except ValueError:
                         i = -1
                     if i >= 0:
-                        addDihedralAngle(fi, nFace, nfi, vi, i, vip, e2d, d2e)
-                        addDihedralAngle(fi, nFace, nfi, vi, i, vin, e2d, d2e)
-        self.e2d = e2d
-        self.d2e = d2e
-        return d2e
+                        add_dihedral_angle(fi, chk_face, nfi, vi, i, vip, dihedral_to_edge)
+                        add_dihedral_angle(fi, chk_face, nfi, vi, i, vin, dihedral_to_edge)
+        return dihedral_to_edge
 
     def divideColorWrapper(self):
         """
@@ -1762,8 +1753,8 @@ class SimpleShape(base.Orbitit):
             s = w(f"# inscribed sphere(s)    : {self.spheresRadii.inscribed}")
             s = w(f"# mid sphere(s)          : {self.spheresRadii.mid}")
             s = w(f"# circumscribed sphere(s): {self.spheresRadii.circumscribed}")
-            d = self.createDihedralAngles()
-            for a, Es in d.items():
+            dihedral_to_angle = self._get_dihedral_angles()
+            for a, Es in dihedral_to_angle.items():
                 s = w(
                     "# Dihedral angle: {} rad ({} degrees) for {} edges".format(
                         geomtypes.f2s(a, precision),
