@@ -660,7 +660,7 @@ class SimpleShape:
             face_indices=[],
             scaling=1,
             precision=7,
-            margin=1.0e5*geom_3d.defaultFloatMargin,
+            margin=1.0e5*geom_3d.default_float_margin,
             pageSize=PS.PageSizeA4,
         ):
         if this.mapToSingeShape:

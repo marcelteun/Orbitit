@@ -64,7 +64,7 @@ from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D
 # Done
 # - edges after reading off file
 
-vec = lambda x, y, z: geomtypes.Vec3([x, y, z])
+VEC = lambda x, y, z: geomtypes.Vec3([x, y, z])
 
 E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
@@ -107,10 +107,10 @@ A5_Z_O2_TO_O5 = geomtypes.Rot3(angle=math.atan(TAU), axis=geomtypes.Vec3([1, 0, 
 # position where the z-axis is shared with a 3-fold axis
 A5_Z_O2_TO_O3 = geomtypes.Rot3(angle=math.atan(2 - TAU), axis=geomtypes.Vec3([1, 0, 0]))
 
-defaultFloatMargin = 1.0e-15
+default_float_margin = geomtypes._eq_float_margin
 
 
-def eq(a, b, margin=defaultFloatMargin):
+def eq(a, b, margin=default_float_margin):
     """
     Check if 2 floats 'a' and 'b' are close enough to be called equal.
 
@@ -123,13 +123,13 @@ def eq(a, b, margin=defaultFloatMargin):
 
 
 # rm with cgtypes dependency
-def Veq(Va, Vb, margin=defaultFloatMargin, d=3):
+def vec_eq(v0, v1, margin=default_float_margin, d=3):
     """
-    Check if 2 'd' dimensional floating point vectors 'Va' and 'Vb' are close
+    Check if 2 'd' dimensional floating point vectors 'v0' and 'v1' are close
     enough to be called equal.
 
-    Va: a floating point number.
-    Vb: a floating point number.
+    v0: a floating point number.
+    v1: a floating point number.
     margin: The function returns True if all elements ly within a margin of each
             other. I.e. the maximum distance for vectors to be called equal is
              ____________           ___
@@ -138,7 +138,7 @@ def Veq(Va, Vb, margin=defaultFloatMargin, d=3):
     """
     result = True
     for i in range(d):
-        result = result and eq(Va[i], Vb[i], margin)
+        result = result and eq(v0[i], v1[i], margin)
     return result
 
 
@@ -352,7 +352,7 @@ class Line:
             return [self.p[i] + t * (self.v[i]) for i in range(self.dimension)]
         return []
 
-    def getFactorAt(self, c, i, margin=defaultFloatMargin):
+    def getFactorAt(self, c, i, margin=default_float_margin):
         """
         Get the factor for one element constant. For an n-dimensional line it
         returns None if:
@@ -366,7 +366,7 @@ class Line:
             return (c - self.p[i]) / self.v[i]
         return None
 
-    def vOnLine(self, v, margin=defaultFloatMargin):
+    def vOnLine(self, v, margin=default_float_margin):
         """
         Return True is V is on the line, False otherwise
         """
@@ -374,9 +374,9 @@ class Line:
         if t is None:
             t = self.getFactorAt(v[1], 1, margin)
         assert t is not None
-        return Veq(self.getPoint(t), v, margin, min(len(v), self.dimension))
+        return vec_eq(self.getPoint(t), v, margin, min(len(v), self.dimension))
 
-    def getFactor(self, p, check=True, margin=defaultFloatMargin):
+    def getFactor(self, p, check=True, margin=default_float_margin):
         """Assuming the point p lies on the line, the factor is returned."""
         for i in range(self.dimension):
             t = self.getFactorAt(p[i], i, margin=margin)
@@ -412,7 +412,7 @@ class Line2D(Line):
         """
         Line.__init__(self, p0, p1, v, d=2, isSegment=isSegment)
 
-    def intersectLineGetFactor(self, l, margin=10 * defaultFloatMargin):
+    def intersectLineGetFactor(self, l, margin=10 * default_float_margin):
         """Gets the factor for v for which the line l intersects this line
 
         i.e. the point of intersection is specified by self.p + restult * self.v
@@ -433,7 +433,7 @@ class Line2D(Line):
         FacetVs,
         iFacet,
         z0=0.0,
-        margin=defaultFloatMargin,
+        margin=default_float_margin,
     ):
         """
         Intersect the 2D line object in plane z = Z0 with a 3D facet and return
@@ -610,9 +610,9 @@ class Line3D(Line):
 
         Either specify two distinctive points p0 and p1 on the line or specify
         a base point p0 and directional vector v. Points p0 and p1 should have
-        a length of 3 and may be vec.
+        a length of 3 and may be a geom_types.Vec3 type.
         """
-        # make sure to have vec types internally
+        # make sure to have vector types internally
         p0 = geomtypes.Vec3(p0)
         if p1 is None:
             assert v is not None
@@ -648,7 +648,7 @@ class Line3D(Line):
         # p82 of E.Lengyel
         return self.Discriminant2Line(L) == 0
 
-    def intersectWithLine(self, L, check=True, margin=defaultFloatMargin):
+    def intersectWithLine(self, L, check=True, margin=default_float_margin):
         D = self.Discriminant2Line(L)
         if D == 0:
             return None
@@ -666,7 +666,7 @@ class Line3D(Line):
                     result = None
                 else:
                     checkWith = L.getPoint(t)
-                    if not Veq(result, checkWith, margin=margin):
+                    if not vec_eq(result, checkWith, margin=margin):
                         result = None
                     else:
                         # for a better precision:
@@ -691,9 +691,9 @@ class Line3D(Line):
 class Triangle:
     def __init__(self, v0, v1, v2):
         self.v = [
-            vec(v0[0], v0[1], v0[2]),
-            vec(v1[0], v1[1], v1[2]),
-            vec(v2[0], v2[1], v2[2]),
+            VEC(v0[0], v0[1], v0[2]),
+            VEC(v1[0], v1[1], v1[2]),
+            VEC(v2[0], v2[1], v2[2]),
         ]
         self.N = None
 
@@ -1465,12 +1465,12 @@ class SimpleShape(base.Orbitit):
         """
         div = self.FsLen // self.nrOfColors
         mod = self.FsLen % self.nrOfColors
-        fColors = []
+        face_cols = []
         colorIRange = list(range(self.nrOfColors))
         for i in range(div):
-            fColors.extend(colorIRange)
-        fColors.extend(list(range(mod)))
-        self.colorData = (self.colorData[0], fColors)
+            face_cols.extend(colorIRange)
+        face_cols.extend(list(range(mod)))
+        self.colorData = (self.colorData[0], face_cols)
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
@@ -1492,7 +1492,7 @@ class SimpleShape(base.Orbitit):
 
     def calculateFacesG(self):
         self.fGs = [
-            reduce(lambda t, i: t + self.Vs[i], f, vec(0, 0, 0)) / len(f)
+            reduce(lambda t, i: t + self.Vs[i], f, VEC(0, 0, 0)) / len(f)
             for f in self.Fs
         ]
 
@@ -1592,7 +1592,7 @@ class SimpleShape(base.Orbitit):
             else:
                 v_usage = glue.getVUsageIn1D(self.Vs, self.Es)
                 v_usage = glue.getVUsageIn2D(self.Vs, self.Fs, v_usage)
-                g = vec(0, 0, 0)
+                g = VEC(0, 0, 0)
                 total = 0
                 for v_idx in self.VsRange:
                     g = g + v_usage[v_idx] * geomtypes.Vec3(self.Vs[v_idx])
@@ -1839,7 +1839,7 @@ class SimpleShape(base.Orbitit):
         face_indices=None,
         scaling=1,
         precision=7,
-        margin=1.0e5 * defaultFloatMargin,
+        margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
         """
@@ -1885,7 +1885,7 @@ class SimpleShape(base.Orbitit):
                 # is parallel to the z-axis to work with a 2D situation:
                 # Rotate around the cross product of z-axis and norm
                 # with an angle equal to the dot product of the normalised vectors.
-                zAxis = vec(0, 0, 1)
+                zAxis = VEC(0, 0, 1)
                 to2DAngle = math.acos(zAxis * norm)
                 if eq(to2DAngle, 2 * math.pi, margin):
                     to2DAngle = 0.0
@@ -2073,7 +2073,7 @@ class SimpleShape(base.Orbitit):
     def intersectFacets(
         self,
         face_indices=None,
-        margin=1.0e5 * defaultFloatMargin,
+        margin=1.0e5 * default_float_margin,
     ):
         """
         Returns a simple shape object for which the faces do not intersect
@@ -2147,14 +2147,14 @@ class SimpleShape(base.Orbitit):
             # is parallel to the z-axis to work with a 2D situation:
             # Rotate around the cross product of z-axis and norm
             # with an angle equal to the dot product of the normalised vectors.
-            zAxis = vec(0, 0, 1)
+            zAxis = VEC(0, 0, 1)
             to2DAngle = math.acos(zAxis * norm)
             if to2DAngle != 0:
                 to2Daxis = norm.cross(zAxis)
                 Mrot = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
                 # add vertices to vertex array
                 for v in self.Vs:
-                    Vs.append(Mrot * vec(v))
+                    Vs.append(Mrot * VEC(v))
                     pointsIn2D.append([Vs[-1][0], Vs[-1][1]])
             else:
                 Vs = self.Vs[:]
@@ -2792,7 +2792,7 @@ class CompoundShape(base.Orbitit):
         face_indices=None,
         scaling=1,
         precision=7,
-        margin=1.0e5 * defaultFloatMargin,
+        margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
         if self.merge_needed:
@@ -3233,7 +3233,7 @@ class SymmetricShape(CompoundShape):
         face_indices=None,
         scaling=1,
         precision=7,
-        margin=1.0e5 * defaultFloatMargin,
+        margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
         if self.merge_needed:
