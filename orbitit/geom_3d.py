@@ -1586,13 +1586,13 @@ class SimpleShape(base.Orbitit):
             if eq(self.zoom_factor, 1.0):
                 Vs = self.Vs
             else:
-                nrUsed = glue.getVUsageIn1D(self.Vs, self.Es)
-                nrUsed = glue.getVUsageIn2D(self.Vs, self.Fs, nrUsed)
+                v_usage = glue.getVUsageIn1D(self.Vs, self.Es)
+                v_usage = glue.getVUsageIn2D(self.Vs, self.Fs, v_usage)
                 g = vec(0, 0, 0)
                 total = 0
-                for vIndex in self.VsRange:
-                    g = g + nrUsed[vIndex] * geomtypes.Vec3(self.Vs[vIndex])
-                    total += nrUsed[vIndex]
+                for v_idx in self.VsRange:
+                    g = g + v_usage[v_idx] * geomtypes.Vec3(self.Vs[v_idx])
+                    total += v_usage[v_idx]
                 if total != 0:
                     g = g / total
                 Vs = [self.zoom_factor * (geomtypes.Vec3(v) - g) + g for v in self.Vs]
@@ -1603,19 +1603,19 @@ class SimpleShape(base.Orbitit):
                 try:
                     if not GL.glVertexPointerf(Vs):
                         return
-                    Ns = self.Ns
+                    normals = self.Ns
                 except TypeError:
                     Vs = [[v[0], v[1], v[2]] for v in Vs]
                     logging.info("gl_draw: converting Vs(Ns); vec3 type not accepted")
                     if not GL.glVertexPointerf(Vs):
                         return
-                    Ns = [[v[0], v[1], v[2]] for v in self.Ns]
-                if Ns != []:
-                    assert len(Ns) == len(
+                    normals = [[v[0], v[1], v[2]] for v in self.Ns]
+                if normals != []:
+                    assert len(normals) == len(
                         Vs
-                    ), "the normal vector array Ns should have as many normals as  vertices."
-                    GL.glNormalPointerf(Ns)
-                    self.NsSaved = Ns
+                    ), "the normal vector array 'normals' should have as many normals as vertices."
+                    GL.glNormalPointerf(normals)
+                    self.NsSaved = normals
                 else:
                     GL.glNormalPointerf(Vs)
                     self.NsSaved = Vs
@@ -1623,15 +1623,15 @@ class SimpleShape(base.Orbitit):
                 try:
                     if not GL.glVertexPointerf(Vs):
                         return
-                    Ns = self.Ns
+                    normals = self.Ns
                 except TypeError:
                     Vs = [[v[0], v[1], v[2]] for v in Vs]
                     logging.info("gl_draw: converting Vs(Ns); vec3 type not accepted")
                     if not GL.glVertexPointerf(Vs):
                         return
-                    Ns = [[n[0], n[1], n[2]] for n in self.Ns]
-                GL.glNormalPointerf(Ns)
-                self.NsSaved = Ns
+                    normals = [[n[0], n[1], n[2]] for n in self.Ns]
+                GL.glNormalPointerf(normals)
+                self.NsSaved = normals
             else:
                 self.createVertexNormals(True, Vs)
                 if self.nVs != []:
@@ -1675,25 +1675,25 @@ class SimpleShape(base.Orbitit):
 
         # FACES
         if self.gl.drawFaces:
-            for colIndex in self.colRange:
-                c = self.colorData[0][colIndex]
+            for col_idx in self.colRange:
+                c = self.colorData[0][col_idx]
                 if len(c) == 3:
                     GL.glColor(c[0], c[1], c[2])
                 else:
                     a = max(c[3], 0)
                     a = min(a, 1)
                     GL.glColor(c[0], c[1], c[2], a)
-                for faceIndex in self.EqColFs[colIndex]:
-                    triangles = self.TriangulatedFs[faceIndex]
+                for face_idx in self.EqColFs[col_idx]:
+                    triangles = self.TriangulatedFs[face_idx]
                     # Note triangles is a flat (ie 1D) array
                     if len(triangles) == 3:
                         GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
                     else:
                         # TODO: This part belongs to a GLinit:
                         GL.glClearStencil(0)
-                        stencilBits = GL.glGetIntegerv(GL.GL_STENCIL_BITS)
+                        stencil_bits = GL.glGetIntegerv(GL.GL_STENCIL_BITS)
                         assert (
-                            stencilBits > 0
+                            stencil_bits > 0
                         ), "Only triangle faces are supported, since there is no stencil bit"
                         # << TODO: end part that belongs to a GLinit
                         GL.glClear(GL.GL_STENCIL_BUFFER_BIT)
