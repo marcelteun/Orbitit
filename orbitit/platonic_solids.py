@@ -53,7 +53,7 @@ A5_O5 = {"axis": Vec3([1, 0, TAU])}
 class Tetrahedron(OrbitShape):
     """Model of tetrahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, -1, 1]),
             Vec3([1, 1, -1]),
             Vec3([-1, 1, 1]),
@@ -82,7 +82,7 @@ class TetrahedronZO3(Tetrahedron):
 class Cube(OrbitShape):
     """Model of cube."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, 1]),
             Vec3([-1, 1, 1]),
             Vec3([-1, -1, 1]),
@@ -119,7 +119,7 @@ class CubeZO2(Cube):
 class Octahedron(OrbitShape):
     """Model of octahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([0, 0, 1]),
             Vec3([1, 0, 0]),
             Vec3([0, 1, 0]),
@@ -155,7 +155,7 @@ class OctahedronZO2(Octahedron):
 class Dodecahedron(OrbitShape):
     """Model of dodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([0, -1, TAU + 1]),
             Vec3([TAU, -TAU, TAU]),
             Vec3([TAU + 1, 0, 1]),
@@ -193,7 +193,7 @@ class DodecahedronZO5(Dodecahedron):
 class Icosahedron(OrbitShape):
     """Model of icosahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 0, TAU]),
             Vec3([TAU, 1, 0]),
             Vec3([0, TAU, 1]),

@@ -35,7 +35,7 @@ V5 = math.sqrt(5)
 V6 = V2*V3
 V10= V2*V5
 
-Vs = [
+vs = [
 
 #        [ -l, -l/V3,   -l/V6, -l/V10 ],  #  0
 #        [  l, -l/V3,   -l/V6, -l/V10 ],  #  1
@@ -109,7 +109,7 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            Vs, Cs = Cs, Es = Es, Ns = [],
+            vs, Cs = Cs, Es = Es, Ns = [],
             colors = (Cols, cols),
             name = TITLE
         )

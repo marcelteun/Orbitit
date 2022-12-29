@@ -29,35 +29,35 @@ import math
 
 from orbitit import geomtypes
 
-def getVUsageIn1D(Vs, Es, vUsage = None):
+def getVUsageIn1D(vs, Es, vUsage = None):
     """
-    Check how often the vertices in Vs are referred through the 1D array Es
+    Check how often the vertices in vs are referred through the 1D array Es
 
-    Returns an array of lenth Vs with the amount.
-    vUsage (of length Vs) can be used as initialisation value for this array.
+    Returns an array of lenth vs with the amount.
+    vUsage (of length vs) can be used as initialisation value for this array.
     """
     if vUsage == None:
-        vUsage = [0 for v in Vs]
+        vUsage = [0 for v in vs]
     for vIndex in Es:
         vUsage[vIndex] = vUsage[vIndex] + 1
     return vUsage
 
-def getVUsageIn2D(Vs, Fs, vUsage = None):
+def getVUsageIn2D(vs, Fs, vUsage = None):
     """
-    Check how often the vertices in Vs are referred through the 2D array Fs
+    Check how often the vertices in vs are referred through the 2D array Fs
 
-    Returns an array of lenth Vs with the amount.
-    vUsage (of length Vs) can be used as initialisation value for this array.
+    Returns an array of lenth vs with the amount.
+    vUsage (of length vs) can be used as initialisation value for this array.
     """
     if vUsage == None:
-        vUsage = [0 for v in Vs]
+        vUsage = [0 for v in vs]
     for f in Fs:
         for vIndex in f:
             vUsage[vIndex] = vUsage[vIndex] + 1
     return vUsage
 
-def cleanUpVsFs(Vs, Fs):
-    """cleanup Vs and update Fs by removing unused vertices.
+def cleanUpVsFs(vs, Fs):
+    """cleanup vs and update Fs by removing unused vertices.
 
     Note that the arrays themselves are updated. If this is not wanted, send in
     copies.
@@ -66,20 +66,20 @@ def cleanUpVsFs(Vs, Fs):
     """
     # The clean up is done as follows:
     # first construct an array of unused vertex indices
-    # remove all unused indices from Vs and subtract the approproate amount
+    # remove all unused indices from vs and subtract the approproate amount
     # from the indices in Fs that are bigger
     # vUsage contains for each vertex a tuple that expresses:
     # - how ofter the vertex is used:
     # After the unused vertices are deleted, vReoved will contain:
     # - how many vertices that come before this (vertex) index are deleted.
     #
-    vUsage = getVUsageIn2D(Vs, Fs)
+    vUsage = getVUsageIn2D(vs, Fs)
     vRemoved = [0 for x in vUsage]
     notUsed = 0 # counts the amount of vertices that are not used until vertex i
     for i in range(len(vUsage)):
         # If the vertex is not used
         if vUsage[i - notUsed] == 0:
-            del Vs[i - notUsed]
+            del vs[i - notUsed]
             del vUsage[i - notUsed]
             notUsed += 1
         # change the value of vUsage to the amount of vertices that are (not
@@ -90,16 +90,16 @@ def cleanUpVsFs(Vs, Fs):
             f[faceIndex] = f[faceIndex] - vRemoved[f[faceIndex]]
     return vUsage
 
-def mergeVs(Vs, Fs, precision=12):
+def mergeVs(vs, Fs, precision=12):
     """
     Merges vertices that are equal into one vertex.
 
     Note that this might change the content of Fs and Es.
-    Note that Vs is not cleaned up. This means that some vertices might not be
+    Note that vs is not cleaned up. This means that some vertices might not be
     used. The return value indicates if some vertices are unused now.
     """
     replaced = False
-    replace_by = [-1 for v in Vs]
+    replace_by = [-1 for v in vs]
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
     geomtypes.set_eq_float_margin(math.pow(10, -precision))
@@ -107,11 +107,11 @@ def mergeVs(Vs, Fs, precision=12):
     log_handler = logging.getLogger().handlers[0]
     end_bac, log_handler.terminator = log_handler.terminator, '\r'
 
-    for i in range(len(Vs) - 1, -1, -1):
-        logging.info(f"checking vertex {len(Vs) - i} (of {len(Vs)})")
-        v = Vs[i]
+    for i in range(len(vs) - 1, -1, -1):
+        logging.info(f"checking vertex {len(vs) - i} (of {len(vs)})")
+        v = vs[i]
         for j in range(i):
-            if v == Vs[j]:
+            if v == vs[j]:
                 replaced = True
                 replace_by[i] = j
                 break

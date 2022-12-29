@@ -146,39 +146,39 @@ class Shape(geom_3d.SimpleShape):
         # try to set the vertices array.
         # the failure occurs at init since show_kite and show_hepta don't exist
         try:
-            Vs = []
+            vs = []
             if self.show_kite:
-                Vs.extend(self.kiteVs)
+                vs.extend(self.kiteVs)
             if self.show_hepta:
-                Vs.extend(self.heptaVs)
-            self.set_vertex_props(Vs = Vs)
+                vs.extend(self.heptaVs)
+            self.set_vertex_props(vs = vs)
         except AttributeError: pass
 
     def update_view_opt(self, show_kite=None, show_hepta=None):
         if show_kite != None or show_hepta != None:
             Fs = []
             Es = []
-            Vs = []
+            vs = []
             ColsI = []
             if show_kite:
-                Vs.extend(self.kiteVs)
+                vs.extend(self.kiteVs)
                 Fs.extend(self.kiteFs)
                 Es.extend(self.kiteEs)
                 ColsI.extend(self.kiteColors)
             if show_hepta:
-                if Vs != []:
-                    lVs = len(Vs)
+                if vs != []:
+                    lVs = len(vs)
                     for face in self.heptaFs:
                         Fs.append([i + lVs for i in face])
                     Es.extend([i + lVs for i in self.heptaEs])
-                    Vs.extend(self.heptaVs)
+                    vs.extend(self.heptaVs)
                     ColsI.extend(self.heptaColors)
                 else:
                     Fs.extend(self.heptaFs)
                     Es.extend(self.heptaEs)
-                    Vs.extend(self.heptaVs)
+                    vs.extend(self.heptaVs)
                     ColsI.extend(self.heptaColors)
-            self.set_vertex_props(Vs = Vs)
+            self.set_vertex_props(vs=vs)
             self.set_edge_props(Es = Es)
             self.set_face_props(Fs = Fs, colors = [self.colors[:], ColsI[:]])
             # save for set_vs:

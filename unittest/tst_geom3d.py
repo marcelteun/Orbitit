@@ -41,7 +41,7 @@ IN_DIR = "expected"
 
 def get_cube():
     """Return a shape describing one cube"""
-    Vs = [geomtypes.Vec3([ 1,  1,  1]),
+    vs = [geomtypes.Vec3([ 1,  1,  1]),
           geomtypes.Vec3([-1,  1,  1]),
           geomtypes.Vec3([-1, -1,  1]),
           geomtypes.Vec3([ 1, -1,  1]),
@@ -57,13 +57,13 @@ def get_cube():
           [2, 1, 5, 6],
           [3, 2, 6, 7],
           [7, 6, 5, 4]]
-    return geom_3d.SimpleShape(Vs=Vs, Fs=Fs,
+    return geom_3d.SimpleShape(vs=vs, Fs=Fs,
                               colors=([red, yellow, blue], [0, 1, 2, 1, 2, 0]))
 
 
 def get_octahedron():
     """Return a shape describing one octahedron"""
-    Vs = [geomtypes.Vec3([ 0,  0,  2]),
+    vs = [geomtypes.Vec3([ 0,  0,  2]),
           geomtypes.Vec3([ 2,  0,  0]),
           geomtypes.Vec3([ 0,  2,  0]),
           geomtypes.Vec3([-2,  0,  0]),
@@ -77,7 +77,7 @@ def get_octahedron():
           [5, 3, 2],
           [5, 4, 3],
           [5, 1, 4]]
-    return geom_3d.SimpleShape(Vs=Vs, Fs=Fs,
+    return geom_3d.SimpleShape(vs=vs, Fs=Fs,
                               colors=([yellow], []))
 
 
@@ -197,7 +197,7 @@ class TestSymmetricShape(TestSimpleShapeExtended):
         """
         v2_div_2 = math.sqrt(2) / 2
         self.shape = geom_3d.SymmetricShape(
-            Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+            vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, -1.0, 1.0]),
@@ -282,7 +282,7 @@ class TestSymmetricShape1(TestSimpleShapeExtended):
         a = 0.809016994375
         b = 0.309016994375
         self.shape = geom_3d.SymmetricShape(
-            Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+            vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, -1.0, 1.0]),
@@ -339,7 +339,7 @@ class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
         The descriptive uses the default orientation
         """
         self.shape = geom_3d.SymmetricShape(
-            Vs=[geomtypes.Vec3([1.0, -0.5, 1.0]),
+            vs=[geomtypes.Vec3([1.0, -0.5, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
@@ -398,7 +398,7 @@ class TestOrbitShape(TestSimpleShapeExtended):
         The descriptive uses the default orientation
         """
         self.shape = geom_3d.OrbitShape(
-            Vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+            vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, -1.0, 1.0]),

@@ -33,7 +33,7 @@ TITLE = 'Rectified 24-Cell'
 V2  = math.sqrt(2)
 dV2 = 2*V2
 
-Vs = [
+vs = [
         [  0,  V2,  V2,  dV2],  #  0
         [ V2,   0,  V2,  dV2],  #  1
         [  0, -V2,  V2,  dV2],  #  2
@@ -586,7 +586,7 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            Vs, Cs = Cs, Es = Es, Ns = [],
+            vs, Cs = Cs, Es = Es, Ns = [],
             colors = (Cols, cols),
             name = TITLE
         )

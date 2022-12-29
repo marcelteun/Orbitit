@@ -144,26 +144,26 @@ class doc:
         return str
 
     def addLineSegments(this,
-        Vs, Lines,
+        vs, Lines,
         scaling = 1,
         precision = 5
     ):
         """
         Adds to the current page a PS string of the faces in Lines using the x
-        and y coordinates from Vs.
+        and y coordinates from vs.
 
-        Vs: a list of coordinates
+        vs: a list of coordinates
         Lines: a list of lines, each face is a list of vertex nrs and it may
                consist of several connected line segments.
         """
         vStr = '/vertices [\n'
         # use copies, for the cleanup
-        Vs = [[c for c in v] for v in Vs]
+        vs = [[c for c in v] for v in vs]
         Lines = [[i for i in l] for l in Lines]
-        # sometimes the Vs contains many more vertices then needed: clean up:
-        glue.cleanUpVsFs(Vs, Lines)
-        for i in range(len(Vs)):
-            v = Vs[i]
+        # sometimes the vs contains many more vertices then needed: clean up:
+        glue.cleanUpVsFs(vs, Lines)
+        for i in range(len(vs)):
+            v = vs[i]
             vStr = '%s  [%s %s] %% %d\n' % (
                 vStr,
                 f2s(v[0], precision),
@@ -177,7 +177,7 @@ class doc:
         for partOfFace in Lines:
             oneFaceStr = ''
             for vNr in partOfFace:
-                v = Vs[vNr]
+                v = vs[vNr]
                 if v[0] < minX: minX = v[0]
                 if v[0] > maxX: maxX = v[0]
                 if v[1] < minY: minY = v[1]

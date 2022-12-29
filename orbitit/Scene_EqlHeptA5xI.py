@@ -91,7 +91,7 @@ class Shape(heptagons.EqlHeptagonShape):
         # standing on 1 face, 2 is a vertex, 1 and 3, centres of two edges
         # and 0 a face centre.
         #
-        Vs = [
+        vs = [
             vec(0.0, 0.0, this.height),  # 0
             vec(-tau2/2, -w, tau2),
             vec(2.0*St, 0.0, -tau2*St),
@@ -99,11 +99,11 @@ class Shape(heptagons.EqlHeptagonShape):
         ]
 
         # add heptagons
-        Ns = Vs
+        Ns = vs
         if this.alt_hept_pos:
-            heptN = heptagons.kite_to_hept(Vs[3], Vs[0], Vs[1], Vs[2])
+            heptN = heptagons.kite_to_hept(vs[3], vs[0], vs[1], vs[2])
             if heptN == None: return
-            Mr = Rot(angle = geomtypes.THIRD_TURN, axis = Vs[2])
+            Mr = Rot(angle = geomtypes.THIRD_TURN, axis = vs[2])
 
             v = Mr*heptN[0][4]
             if this.tri_alt:
@@ -126,7 +126,7 @@ class Shape(heptagons.EqlHeptagonShape):
                         vt
                     ]
         else:
-            heptN = heptagons.kite_to_hept(Vs[1], Vs[2], Vs[3], Vs[0])
+            heptN = heptagons.kite_to_hept(vs[1], vs[2], vs[3], vs[0])
             if heptN == None: return
             if this.tri_alt:
                 vt = heptN[0][1]
@@ -152,12 +152,12 @@ class Shape(heptagons.EqlHeptagonShape):
             return
         else:
             this.error_msg = ''
-        h = HalfTurn(axis=Vs[3])
+        h = HalfTurn(axis=vs[3])
         vt = h * vt
         IsoscelesTriangleV[2] = vt
-        Vs.extend(heptN[0]) # V4 - V10
-        Vs.extend(RegularTrianglePartV) # V11 - V13
-        Vs.extend(IsoscelesTriangleV) # V14 - V16
+        vs.extend(heptN[0]) # V4 - V10
+        vs.extend(RegularTrianglePartV) # V11 - V13
+        vs.extend(IsoscelesTriangleV) # V14 - V16
         Ns = [heptN[1] for i in range(11)]
         RegularTrianglePartN = RegularTrianglePartV[2]
         Ns.extend([RegularTrianglePartN for i in range(3)])
@@ -171,7 +171,7 @@ class Shape(heptagons.EqlHeptagonShape):
         if this.add_extra_edge:
             this.xtraEs = [xtraEdgeIndex, 16]
 
-        this.setBaseVertexProperties(Vs = Vs, Ns = Ns)
+        this.setBaseVertexProperties(vs = vs, Ns = Ns)
         Fs = []
         Es = []
         colIds = []
@@ -189,7 +189,7 @@ class Shape(heptagons.EqlHeptagonShape):
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es = Es)
         this.setBaseFaceProperties(Fs = Fs, colors = (this.face_col, colIds))
-        this.setVs(Vs)
+        this.setVs(vs)
 
     def to_postscript(this,
             face_indices=[],
@@ -230,7 +230,7 @@ class Shape(heptagons.EqlHeptagonShape):
             if this.update_vs:
                 this.set_vs()
             # reference vector, a side of the heptagon:
-            vs = this.Vs[0]
+            vs = this.vs[0]
             r0 = vs[4]
             r1 = vs[5]
             #r2 = vs[6]

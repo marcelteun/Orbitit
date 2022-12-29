@@ -29,7 +29,7 @@ TITLE = 'Tesseract'
 
 l = 2.0
 
-Vs = [
+vs = [
         [ l,  l,  l,  l],     #  0
         [-l,  l,  l,  l],     #  1
         [ l, -l,  l,  l],     #  2
@@ -149,7 +149,7 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            Vs, Cs = Cs, Es = Es, Ns = [],
+            vs, Cs = Cs, Es = Es, Ns = [],
             colors = (Cols, cols),
             name = TITLE
         )

@@ -1,6 +1,6 @@
 import orbitit
 shape = orbitit.geom_3d.SymmetricShape(
-    Vs=[
+    vs=[
         orbitit.geomtypes.Vec3([1, 1, 1]),
         orbitit.geomtypes.Vec3([-1, 1, 1]),
         orbitit.geomtypes.Vec3([-1, -1, 1]),

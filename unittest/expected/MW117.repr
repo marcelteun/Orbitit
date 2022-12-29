@@ -1,5 +1,5 @@
 orbitit.geom_3d.SimpleShape(
-    Vs=[
+    vs=[
         orbitit.geomtypes.Vec3([-0.749801916531, -0.281297375174, -0.83921144786]),
         orbitit.geomtypes.Vec3([0.839211447861, -0.749801916533, 0.281297375175]),
         orbitit.geomtypes.Vec3([-0.281297375172, 0.839211447857, 0.749801916532]),

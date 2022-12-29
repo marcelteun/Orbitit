@@ -365,7 +365,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
             col_sym='',
         ):
         """
-        base: the descriptive. A dictionary with 'Vs' and 'Fs'
+        base: the descriptive. A dictionary with 'vs' and 'Fs'
         final_sym: isometry object describing the final symmetry
         stab_sym: isometry object descibing the stabiliser symmetry as subgroup
                   of the final symmetry
@@ -386,7 +386,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         """
         geom_3d.OrbitShape.__init__(
             self,
-            base['Vs'],
+            base['vs'],
             base['Fs'],
             final_sym=final_sym,
             stab_sym=stab_sym,
@@ -430,7 +430,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
             # only have these:
             final_sym = self.orbit.final_sym_alt
             stab_sym = self.orbit.stab_sym_alt
-            verts = self.getBaseVertexProperties()['Vs']
+            verts = self.getBaseVertexProperties()['vs']
             faces = self.getBaseFaceProperties()['Fs']
             super().__init__(
                 verts,
@@ -463,7 +463,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         self.axis = None
         self.angle_domain = None
         # Save original
-        self.base_shape.org_Vs = self.base_shape.Vs
+        self.base_shape.org_Vs = self.base_shape.vs
 
     def transform_base(self, trans):
         """Rotate the position of the descriptive
@@ -471,7 +471,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         trans: a geomtypes.quat object (or matrix) for left multiplying all
                vertices.
         """
-        self.setVs([trans * v for v in self.base_shape.Vs])
+        self.setVs([trans * v for v in self.base_shape.vs])
 
     def set_rot_axis(self, axis, domain=None):
         """Set the rotation axis for rotating the descriptive.
@@ -505,8 +505,8 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         """Return javascript representation so it can be shown with the showoff library."""
         js = f"var {self.name} = new Object();\n"
         js += f"{self.name}.descr = new Object();\n"
-        js += f"{self.name}.descr.Vs = [\n"
-        for v in self.base_shape.Vs:
+        js += f"{self.name}.descr.vs = [\n"
+        for v in self.base_shape.vs:
             js += f"  {v},\n"
         js += '];'
         js += f"{self.name}.descr.Fs = {self.base_shape.Fs};"

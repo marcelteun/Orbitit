@@ -771,10 +771,10 @@ class MainPanel(wx.Panel):
         """
         old_shape = self.canvas.shape
         self.canvas.shape = shape
-        # Use all the vertex settings except for Vs, i.e. keep the view
+        # Use all the vertex settings except for vs, i.e. keep the view
         # vertex settings the same.
         old_v_settings = old_shape.getVertexProperties()
-        del old_v_settings['Vs']
+        del old_v_settings['vs']
         del old_v_settings['Ns']
         self.canvas.shape.set_vertex_props(old_v_settings)
         # Use all the edge settings except for Es

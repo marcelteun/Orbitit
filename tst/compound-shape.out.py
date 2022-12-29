@@ -4,7 +4,7 @@ import isometry
 shape = geom_3d.CompoundShape(
     shapes = [
         geom_3d.SimpleShape(
-            Vs = [
+            vs = [
                 geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
@@ -29,7 +29,7 @@ shape = geom_3d.CompoundShape(
             name = "SimpleShape"
         ),
         geom_3d.SimpleShape(
-            Vs = [
+            vs = [
                 geomtypes.Vec3([0.0, 0.0, 2.0]),
                 geomtypes.Vec3([2.0, 0.0, 0.0]),
                 geomtypes.Vec3([0.0, 2.0, 0.0]),

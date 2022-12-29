@@ -1,6 +1,6 @@
 from orbitit import geom_3d, geomtypes
 
-Vs = [
+vs = [
 	geomtypes.Vec3([ 1,  1,  1]),
 	geomtypes.Vec3([-1,  1,  1]),
 	geomtypes.Vec3([-1, -1,  1]),
@@ -23,4 +23,4 @@ Fs = [
 	[7, 6, 5, 4]
 ]
 
-shape = geom_3d.SimpleShape(Vs = Vs, Fs = Fs)
+shape = geom_3d.SimpleShape(vs=vs, Fs=Fs)

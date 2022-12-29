@@ -77,7 +77,7 @@ A5_O5 = {"axis": Vec3([1, 0, τ])}
 class Cuboctahedron_3_S4xI_D3C3(Shape):
     """The 8 triangles of the cuboctahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 0, 1]),
             Vec3([1, 1, 0]),
             Vec3([0, 1, 1]),
@@ -97,7 +97,7 @@ class Cuboctahedron_3_S4xI_D3C3(Shape):
 class Cuboctahedron_4_S4xI_D4C4(Shape):
     """The 6 squares of the cuboctahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 0, 1]),
             Vec3([0, 1, 1]),
             Vec3([-1, 0, 1]),
@@ -131,7 +131,7 @@ class Cuboctahedron(CompoundShape):
 class Icosidodecahedron_3_A5xI_D3C3(Shape):
     """The 20 triangles of the icosidodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, τ, τ + 1]),
             Vec3([τ + 1, 1, τ]),
             Vec3([τ, τ + 1, 1]),
@@ -151,7 +151,7 @@ class Icosidodecahedron_3_A5xI_D3C3(Shape):
 class Icosidodecahedron_5_A5xI_D5C5(Shape):
     """The 12 pentagons of the icosidodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([0, 0, 2 * τ]),
             Vec3([1, -τ, τ + 1]),
             Vec3([τ + 1, -1, τ]),
@@ -186,7 +186,7 @@ class Icosidodecahedron(CompoundShape):
 class Rhombicosidodecahedron_5_A5xI_D5C5(Shape):
     """The 12 pentagons of the rhombicosidodecahedron"""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, -1, τ**3]),
             Vec3([τ + 1, -τ, 2 * τ]),
             Vec3([τ + 2, 0, τ + 1]),
@@ -208,7 +208,7 @@ class Rhombicosidodecahedron_5_A5xI_D5C5(Shape):
 class Rhombicosidodecahedron_3_A5xI_D3C3(Shape):
     """The 20 triangles of the rhombicosidodecahedron"""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([τ + 1, τ, 2 * τ]),
             Vec3([2 * τ, τ + 1, τ]),
             Vec3([τ, 2 * τ, τ + 1]),
@@ -228,7 +228,7 @@ class Rhombicosidodecahedron_3_A5xI_D3C3(Shape):
 class Rhombicosidodecahedron_4_A5xI_D2C2(Shape):
     """The 30 squares of the rhombicosidodecahedron"""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, τ**3]),
             Vec3([-1, 1, τ**3]),
             Vec3([-1, -1, τ**3]),
@@ -263,7 +263,7 @@ class Rhombicosidodecahedron(CompoundShape):
 class Rhombicuboctahedron_3_S4xI_D3C3(Shape):
     """The 8 triangles of the rhombicuboctahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, ω]),
             Vec3([ω, 1, 1]),
             Vec3([1, ω, 1]),
@@ -283,7 +283,7 @@ class Rhombicuboctahedron_3_S4xI_D3C3(Shape):
 class Rhombicuboctahedron_4_S4xI_D2C2(Shape):
     """The 12 squares of the rhombicuboctahedron sharing a 2-fold axis."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, ω]),
             Vec3([1, ω, 1]),
             Vec3([-1, ω, 1]),
@@ -304,7 +304,7 @@ class Rhombicuboctahedron_4_S4xI_D2C2(Shape):
 class Rhombicuboctahedron_4_S4xI_D4C4(Shape):
     """The 6 squares of the rhombicuboctahedron sharing a 4-fold axis."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, ω]),
             Vec3([-1, 1, ω]),
             Vec3([-1, -1, ω]),
@@ -339,7 +339,7 @@ class Rhombicuboctahedron(CompoundShape):
 class SnubCube_3_S4_C3(Shape):
     """The 8 triangles of the snub cube sharing a 3-fold axis."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1 / t, t]),
             Vec3([t, 1, 1 / t]),
             Vec3([1 / t, t, 1]),
@@ -359,7 +359,7 @@ class SnubCube_3_S4_C3(Shape):
 class SnubCube_3_S4_E(Shape):
     """The 24 triangles of the snub cube not sharing a symmetry."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([-1 / t, 1, t]),
             Vec3([1, 1 / t, t]),
             Vec3([1 / t, t, 1]),
@@ -379,7 +379,7 @@ class SnubCube_3_S4_E(Shape):
 class SnubCube_4_S4_C4(Shape):
     """The 6 squares of the snub cube."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1 / t, t]),
             Vec3([-1 / t, 1, t]),
             Vec3([-1, -1 / t, t]),
@@ -414,7 +414,7 @@ class SnubCube(CompoundShape):
 class SnubDodecahedron_3_A5_E(Shape):
     """The 60 triangles of the snub dodecahedron not sharing a symmetry."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([2 * α, -2, 2 * β]),
             Vec3([α + β / τ - τ, -α * τ + β - 1 / τ, α / τ + β * τ + 1]),
             Vec3([-2 * α, 2, 2 * β]),
@@ -434,7 +434,7 @@ class SnubDodecahedron_3_A5_E(Shape):
 class SnubDodecahedron_3_A5_C3(Shape):
     """The 20 triangles of the snub dodecahedron sharing a 3-fold axis."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([-α / τ + β * τ - 1, -α + β / τ + τ, α * τ + β + 1 / τ]),
             Vec3([α * τ + β + 1 / τ, -α / τ + β * τ - 1, -α + β / τ + τ]),
             Vec3([-α + β / τ + τ, α * τ + β + 1 / τ, -α / τ + β * τ - 1]),
@@ -454,7 +454,7 @@ class SnubDodecahedron_3_A5_C3(Shape):
 class SnubDodecahedron_5_A5_C5(Shape):
     """The 12 pentagons of the snub dodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([α + β / τ - τ, -α * τ + β - 1 / τ, α / τ + β * τ + 1]),
             Vec3([2 * α, -2, 2 * β]),
             Vec3([α + β / τ + τ, α * τ - β - 1 / τ, α / τ + β * τ - 1]),
@@ -490,7 +490,7 @@ class SnubDodecahedron(CompoundShape):
 class TruncatedCube_3_S4xI_D3C3(Shape):
     """The 8 triangles of the truncated cube."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, γ, 1]),
             Vec3([1, 1, γ]),
             Vec3([γ, 1, 1]),
@@ -510,7 +510,7 @@ class TruncatedCube_3_S4xI_D3C3(Shape):
 class TruncatedCube_8_S4xI_D4C4(Shape):
     """The 8 octagons of the truncated cube."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, γ, 1]),
             Vec3([γ, 1, 1]),
             Vec3([-γ, 1, 1]),
@@ -548,7 +548,7 @@ class TruncatedCube(CompoundShape):
 class TruncatedCuboctahedron_6_S4xI_D3C3(Shape):
     """The 8 hexagons of the truncated cuboctahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([ω, 1, ψ]),
             Vec3([ψ, 1, ω]),
             Vec3([ψ, ω, 1]),
@@ -571,7 +571,7 @@ class TruncatedCuboctahedron_6_S4xI_D3C3(Shape):
 class TruncatedCuboctahedron_8_S4xI_D4C4(Shape):
     """The 6 octagons of the truncated cuboctahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([ω, 1, ψ]),
             Vec3([1, ω, ψ]),
             Vec3([-1, ω, ψ]),
@@ -596,7 +596,7 @@ class TruncatedCuboctahedron_8_S4xI_D4C4(Shape):
 class TruncatedCuboctahedron_4_S4xI_D2C2(Shape):
     """The 12 squares of the truncated cuboctahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, ω, ψ]),
             Vec3([1, ψ, ω]),
             Vec3([-1, ψ, ω]),
@@ -631,7 +631,7 @@ class TruncatedCuboctahedron(CompoundShape):
 class TruncatedDodecahedron_3_A5xI_D3C3(Shape):
     """The 20 triangles of the truncated dodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([τ, 2, τ + 1]),
             Vec3([τ + 1, τ, 2]),
             Vec3([2, τ + 1, τ]),
@@ -651,7 +651,7 @@ class TruncatedDodecahedron_3_A5xI_D3C3(Shape):
 class TruncatedDodecahedron_10_A5xI_D5C5(Shape):
     """The 12 decagons of the truncated dodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([0, -τ + 1, τ + 2]),
             Vec3([τ - 1, -τ, 2 * τ]),
             Vec3([τ, -2, τ + 1]),
@@ -692,7 +692,7 @@ class TruncatedDodecahedron(CompoundShape):
 class TruncatedIcosahedron_5_A5xI_D5C5(Shape):
     """The 12 pentagons of the truncated icosahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 0, 3 * τ]),
             Vec3([2, -τ, 2 * τ + 1]),
             Vec3([τ + 2, -1, 2 * τ]),
@@ -714,7 +714,7 @@ class TruncatedIcosahedron_5_A5xI_D5C5(Shape):
 class TruncatedIcosahedron_6_A5xI_D3C3(Shape):
     """The 20 hexagons of the truncated icosahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([2, τ, 2 * τ + 1]),
             Vec3([τ + 2, 1, 2 * τ]),
             Vec3([2 * τ + 1, 2, τ]),
@@ -750,7 +750,7 @@ class TruncatedIcosahedron(CompoundShape):
 class TruncatedIcosidodecahedron_10_A5xI_D5C5(Shape):
     """The 12 decagons of the truncated icosidodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([τ - 1, 1 - τ, τ + 3]),
             Vec3([2 / τ, -τ, 2 * τ + 1]),
             Vec3([2 * τ - 1, -2, τ + 2]),
@@ -777,7 +777,7 @@ class TruncatedIcosidodecahedron_10_A5xI_D5C5(Shape):
 class TruncatedIcosidodecahedron_6_A5xI_D3C3(Shape):
     """The 20 hexagons of the truncated icosidodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([2 * τ - 1, 2, τ + 2]),
             Vec3([2 * τ, τ, 3]),
             Vec3([τ + 2, 2 * τ - 1, 2]),
@@ -800,7 +800,7 @@ class TruncatedIcosidodecahedron_6_A5xI_D3C3(Shape):
 class TruncatedIcosidodecahedron_4_A5xI_D2C2(Shape):
     """The 30 squares of the truncated icosidodecahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([τ - 1, τ - 1, τ + 3]),
             Vec3([1 - τ, τ - 1, τ + 3]),
             Vec3([1 - τ, 1 - τ, τ + 3]),
@@ -835,7 +835,7 @@ class TruncatedIcosidodecahedron(CompoundShape):
 class TruncatedOctahedron_6_S4xI_D3C3(Shape):
     """The 8 hexagons of the truncated cube."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 0, 2]),
             Vec3([2, 0, 1]),
             Vec3([2, 1, 0]),
@@ -858,7 +858,7 @@ class TruncatedOctahedron_6_S4xI_D3C3(Shape):
 class TruncatedOctahedron_4_S4xI_D4C4(Shape):
     """The 8 octagons of the truncated cube."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 0, 2]),
             Vec3([0, 1, 2]),
             Vec3([-1, 0, 2]),
@@ -892,7 +892,7 @@ class TruncatedOctahedron(CompoundShape):
 class TruncatedTetrahedron_3_S4A4_D3C3(Shape):
     """The 4 triangles of the truncated tetrahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, 3]),
             Vec3([3, 1, 1]),
             Vec3([1, 3, 1]),
@@ -912,7 +912,7 @@ class TruncatedTetrahedron_3_S4A4_D3C3(Shape):
 class TruncatedTetrahedron_6_S4A4_D3C3(Shape):
     """The 6 hexagons of the truncated tetrahedron."""
     base = {
-        "Vs": [
+        "vs": [
             Vec3([1, 1, 3]),
             Vec3([1, 3, 1]),
             Vec3([-1, 3, -1]),

@@ -1,7 +1,7 @@
 orbitit.geom_3d.CompoundShape(
     shapes=[
         orbitit.geom_3d.SimpleShape(
-            Vs=[
+            vs=[
                 orbitit.geomtypes.Vec3([1, 1, 1]),
                 orbitit.geomtypes.Vec3([-1, 1, 1]),
                 orbitit.geomtypes.Vec3([-1, -1, 1]),
@@ -26,7 +26,7 @@ orbitit.geom_3d.CompoundShape(
             name="SimpleShape"
         ),
         orbitit.geom_3d.SimpleShape(
-            Vs=[
+            vs=[
                 orbitit.geomtypes.Vec3([0, 0, 2]),
                 orbitit.geomtypes.Vec3([2, 0, 0]),
                 orbitit.geomtypes.Vec3([0, 2, 0]),

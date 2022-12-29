@@ -168,13 +168,13 @@ isomsO3 = isometry.D2()
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = geom_3d.SymmetricShape(
-            Vs=[], Fs=[], isometries=isometry.A4(), name="FoldedHeptagonsA4"
+            vs=[], Fs=[], isometries=isometry.A4(), name="FoldedHeptagonsA4"
         )
         xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
-            Vs=[], Fs=[], isometries=isometry.A4(), name="xtraTrisA4"
+            vs=[], Fs=[], isometries=isometry.A4(), name="xtraTrisA4"
         )
         trisO3Shape = geom_3d.SymmetricShape(
-            Vs=[], Fs=[], isometries=isomsO3, colors=[rgb.cyan[:]], name="o3TrisA4"
+            vs=[], Fs=[], isometries=isomsO3, colors=[rgb.cyan[:]], name="o3TrisA4"
         )
         heptagons.FldHeptagonShape.__init__(
             this, [heptagonsShape, xtraTrisShape, trisO3Shape], name="FoldedRegHeptA4"
@@ -192,13 +192,13 @@ class Shape(heptagons.FldHeptagonShape):
     def get_status_str(this):
         if this.update_shape:
             this.set_vertices()
-        Vs = this.baseVs
+        vs = this.baseVs
         Es = this.triEs[this.edge_alt]
-        a_len = f"{Vlen(Vs[Es[0]], Vs[Es[1]]):.2f}"
-        b_len = f"{Vlen(Vs[Es[2]], Vs[Es[3]]):.2f}"
-        c_len = f"{Vlen(Vs[Es[4]], Vs[Es[5]]):.2f}"
+        a_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
+        b_len = f"{Vlen(vs[Es[2]], vs[Es[3]]):.2f}"
+        c_len = f"{Vlen(vs[Es[4]], vs[Es[5]]):.2f}"
         Es = this.o3triEs[this.edge_alt]
-        d_len = f"{Vlen(Vs[Es[0]], Vs[Es[1]]):.2f}"
+        d_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
         if this.has_reflections:
             s = f"T = {this.height:.2f}; |a|: {a_len}, |b|: {b_len}, |c|: {c_len}, |d|: {d_len}"
         else:
@@ -206,11 +206,11 @@ class Shape(heptagons.FldHeptagonShape):
                 Es = this.oppTriEs[this.opposite_edge_alt][this.has_reflections]
             else:
                 Es = this.oppTriEs[this.opposite_edge_alt]
-            opp_b_len = f"{Vlen(Vs[Es[0]], Vs[Es[1]]):.2f}"
-            opp_c_len = f"{Vlen(Vs[Es[2]], Vs[Es[3]]):.2f}"
+            opp_b_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
+            opp_c_len = f"{Vlen(vs[Es[2]], vs[Es[3]]):.2f}"
             Es = this.oppO3triEs[this.opposite_edge_alt]
             if this.opposite_edge_alt != trisAlt.twist_strip_I:
-                opp_d_len = f"{Vlen(Vs[Es[0]], Vs[Es[1]]):.2f}"
+                opp_d_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
             else:
                 opp_d_len = "-"
             s = "T = {:.2f}; |a|: {}, |b|: {} ({}), |c|: {} ({}), |d|: {} ({})".format(
@@ -227,7 +227,7 @@ class Shape(heptagons.FldHeptagonShape):
 
     def set_vertices(this):
         this.position_heptagon()
-        Vs = this.heptagon.Vs[:]
+        vs = this.heptagon.vs[:]
 
         #            5" = 18                 12 = 2"
         #    6" = 16                                 10 = 1"
@@ -247,30 +247,30 @@ class Shape(heptagons.FldHeptagonShape):
 
         Rr = Rot(axis=Vec([1, 1, 1]), angle=geomtypes.THIRD_TURN)
         Rl = Rot(axis=Vec([-1, 1, 1]), angle=-geomtypes.THIRD_TURN)
-        Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))  # Vs[7]
-        Vs.append(Rr * Vs[0])  # Vs[8]
-        Vs.append(Rr * Vs[1])  # Vs[9]
-        Vs.append(Rr * Vs[9])  # Vs[10]
-        Vs.append(Rr * Vs[2])  # Vs[11]
-        Vs.append(Rr * Vs[11])  # Vs[12]
-        Vs.append(Vec([-Vs[2][0], -Vs[2][1], Vs[2][2]]))  # Vs[13]
-        Vs.append(Rl * Vs[0])  # Vs[14]
-        Vs.append(Rl * Vs[6])  # Vs[15]
-        Vs.append(Rl * Vs[-1])  # Vs[16]
-        Vs.append(Rl * Vs[5])  # Vs[17]
-        Vs.append(Rl * Vs[-1])  # Vs[18]
-        Vs.append(Rr * Vs[8])  # Vs[19] = V0"
-        Vs.append(Rr * Vs[6])  # Vs[20] = V6'"
-        Vs.append(Rr * Vs[5])  # Vs[21] = V5'"
+        vs.append(Vec([-vs[5][0], -vs[5][1], vs[5][2]]))  # vs[7]
+        vs.append(Rr * vs[0])  # vs[8]
+        vs.append(Rr * vs[1])  # vs[9]
+        vs.append(Rr * vs[9])  # vs[10]
+        vs.append(Rr * vs[2])  # vs[11]
+        vs.append(Rr * vs[11])  # vs[12]
+        vs.append(Vec([-vs[2][0], -vs[2][1], vs[2][2]]))  # vs[13]
+        vs.append(Rl * vs[0])  # vs[14]
+        vs.append(Rl * vs[6])  # vs[15]
+        vs.append(Rl * vs[-1])  # vs[16]
+        vs.append(Rl * vs[5])  # vs[17]
+        vs.append(Rl * vs[-1])  # vs[18]
+        vs.append(Rr * vs[8])  # vs[19] = V0"
+        vs.append(Rr * vs[6])  # vs[20] = V6'"
+        vs.append(Rr * vs[5])  # vs[21] = V5'"
 
-        Vs.append(Rl * Vs[13])  # Vs[22] = V13'
-        Vs.append(Rl * Vs[-1])  # Vs[23] = V13"
-        this.baseVs = Vs
+        vs.append(Rl * vs[13])  # vs[22] = V13'
+        vs.append(Rl * vs[-1])  # vs[23] = V13"
+        this.baseVs = vs
         Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs)  # use extend to copy the list to Fs
         Es.extend(this.heptagon.Es)  # use extend to copy the list to Fs
-        this.heptagonsShape.setBaseVertexProperties(Vs=Vs)
+        this.heptagonsShape.setBaseVertexProperties(vs=vs)
         this.heptagonsShape.setBaseEdgeProperties(Es=Es)
         # comment out this and nvidia driver crashes:...
         this.heptagonsShape.setBaseFaceProperties(Fs=Fs)
@@ -281,7 +281,7 @@ class Shape(heptagons.FldHeptagonShape):
             Fs = this.o3triFs[this.edge_alt][:]
             Es.extend(this.oppO3triEs[this.opposite_edge_alt])
             Fs.extend(this.oppO3triFs[this.opposite_edge_alt])
-            this.trisO3Shape.setBaseVertexProperties(Vs=Vs)
+            this.trisO3Shape.setBaseVertexProperties(vs=vs)
             this.trisO3Shape.setBaseEdgeProperties(Es=Es)
             this.trisO3Shape.setBaseFaceProperties(Fs=Fs)
             theShapes.append(this.trisO3Shape)
@@ -311,7 +311,7 @@ class Shape(heptagons.FldHeptagonShape):
                     Fs.extend(this.oppTriFs[this.opposite_edge_alt])
                     Es.extend(this.oppTriEs[this.opposite_edge_alt])
                     colIds = this.triColIds[eAlt]
-                this.xtraTrisShape.setBaseVertexProperties(Vs=Vs)
+                this.xtraTrisShape.setBaseVertexProperties(vs=vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es=Es)
                 this.xtraTrisShape.setBaseFaceProperties(
                     Fs=Fs,
@@ -611,15 +611,15 @@ class Shape(heptagons.FldHeptagonShape):
         d = 1
         for i in range(2):
             norm0 = geom_3d.Triangle(
-                this.base_shape.Vs[tris[i][0]],
-                this.base_shape.Vs[tris[i][1]],
-                this.base_shape.Vs[tris[i][2]],
+                this.base_shape.vs[tris[i][0]],
+                this.base_shape.vs[tris[i][1]],
+                this.base_shape.vs[tris[i][2]],
             ).normal(True)
             logging.info("norm0: {norm0}")
             norm1 = geom_3d.Triangle(
-                this.base_shape.Vs[tris[i + d][0]],
-                this.base_shape.Vs[tris[i + d][1]],
-                this.base_shape.Vs[tris[i + d][2]],
+                this.base_shape.vs[tris[i + d][0]],
+                this.base_shape.vs[tris[i + d][1]],
+                this.base_shape.vs[tris[i + d][2]],
             ).normal(True)
             logging.info("norm1: {norm1}")
             inprod = norm0 * norm1

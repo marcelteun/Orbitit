@@ -13,7 +13,7 @@ V2 = math.sqrt(2)
 V5 = math.sqrt(5)
 
 tetrahedron = {
-        'Vs': [
+        'vs': [
             geomtypes.Vec3([1, 1, 1]),
             geomtypes.Vec3([-1, -1, 1]),
             geomtypes.Vec3([1, -1, -1]),

@@ -1,5 +1,5 @@
 orbitit.geom_3d.OrbitShape(
-    Vs=[
+    vs=[
         orbitit.geomtypes.Vec3([1, 1, 1]),
         orbitit.geomtypes.Vec3([-1, 1, 1]),
         orbitit.geomtypes.Vec3([-1, -1, 1]),

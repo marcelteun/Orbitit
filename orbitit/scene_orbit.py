@@ -503,7 +503,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             if self.fs_orbit_org:
                 final_sym = self.orbit.final_sym_alt
                 stab_sym = self.orbit.stab_sym_alt
-                verts = self.shape.getBaseVertexProperties()['Vs']
+                verts = self.shape.getBaseVertexProperties()['vs']
                 faces = self.shape.getBaseFaceProperties()['Fs']
                 self.shape = geom_3d.OrbitShape(
                     verts,
@@ -678,9 +678,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             else:
                 with  open(filepath) as fd:
                     shape = geom_3d.read_off_file(fd, regen_edges=False)
-            verts = shape.Vs
+            verts = shape.vs
             faces = shape.Fs
-            logging.info("read %d Vs and %d Fs.", len(verts), len(faces))
+            logging.info("read %d vs and %d Fs.", len(verts), len(faces))
             self.show_gui[self._vs_gui_idx].set(verts)
             self.show_gui[self._fs_gui_idx].set(faces)
             self.name = filename

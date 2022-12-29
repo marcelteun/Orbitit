@@ -160,7 +160,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
-        self.org_vs = self.canvas.shape.getVertexProperties()['Vs']
+        self.org_vs = self.canvas.shape.getVertexProperties()['vs']
         self.org_org_vs = self.org_vs # for cancel
         self.set_status_text("")
 
@@ -240,20 +240,20 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         new_vs = [
             [geomtypes.Vec3(v) + self.translation.get_vertex()
              for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.set_vertex_props(Vs=new_vs)
+        self.canvas.shape.set_vertex_props(vs=new_vs)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_apply(self, _=None):
         """Handle event '_' to confirm transform and prepare for a next one"""
-        self.org_vs = self.canvas.shape.getVertexProperties()['Vs']
+        self.org_vs = self.canvas.shape.getVertexProperties()['vs']
         # reset the angle
         self.rot_sizer.set_angle(0)
         self.set_status_text("applied, now you can define another axis")
 
     def on_reset(self, _=None):
         """Handle event '_' to undo all transforms"""
-        self.canvas.shape.set_vertex_props(Vs=self.org_org_vs)
+        self.canvas.shape.set_vertex_props(vs=self.org_org_vs)
         self.canvas.paint()
         self.org_vs = self.org_org_vs
 

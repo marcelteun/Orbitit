@@ -480,7 +480,7 @@ class RegularHeptagon:
             Vec([-HEPT_SIGMA / 2, -(1 + HEPT_SIGMA) * HEPT_DENOM, 0.0]),
             Vec([-HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
         ]
-        self.Vs = self.vs_org.copy() # pylint: disable=C0103
+        self.vs = self.vs_org.copy() # pylint: disable=C0103
         self.Fs = [[6, 5, 4, 3, 2, 1, 0]]  # pylint: disable=C0103
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]  # pylint: disable=C0103
 
@@ -588,7 +588,7 @@ class RegularHeptagon:
                     v2[2] + cosb * d_v3[1] + sinb * d_v3[0],
                 ]
             )
-            self.Vs = [
+            self.vs = [
                 self.vs_org[0],
                 self.vs_org[1],
                 v2,
@@ -629,7 +629,7 @@ class RegularHeptagon:
                     v1[2] + cosb * d_v0[1] + sinb * d_v0[0],
                 ]
             )
-            self.Vs = [
+            self.vs = [
                 v0,
                 v1,
                 self.vs_org[2],
@@ -678,7 +678,7 @@ class RegularHeptagon:
             v0v2_axis = Vec(v2 - v0)
             rot_b = Rot(axis=v0v2_axis, angle=b)
             v1 = v0v2 + rot_b * (v1_tmp - v0v2)
-            self.Vs = [
+            self.vs = [
                 v0,
                 v1,
                 v2,
@@ -753,7 +753,7 @@ class RegularHeptagon:
                 r = Rot(axis=v4v6_axis, angle=b1)
                 v5_tmp = Vec([-v2_tmp[0], v2_tmp[1], v2_tmp[2]])
                 v5 = v4v6 + r * (v5_tmp - v4v6)
-            self.Vs = [self.vs_org[0], self.vs_org[1], v2, v3, v4, v5, self.vs_org[6]]
+            self.vs = [self.vs_org[0], self.vs_org[1], v2, v3, v4, v5, self.vs_org[6]]
         else:
             d_v0 = [
                 self.vs_org[0][1] - self.vs_org[1][1],
@@ -777,7 +777,7 @@ class RegularHeptagon:
                 v4v6_axis = Vec(self.vs_org[6] - self.vs_org[4])
                 r = Rot(axis=v4v6_axis, angle=b1)
                 v5 = v4v6 + r * (self.vs_org[5] - v4v6)
-            self.Vs = [
+            self.vs = [
                 v0,
                 self.vs_org[1],
                 v2,
@@ -822,7 +822,7 @@ class RegularHeptagon:
         if keep_v0:
             rot5_2 = Rot(axis=self.vs_org[5] - self.vs_org[2], angle=a)
             v3 = rot5_2 * (self.vs_org[3] - v2) + v2
-            self.Vs = [
+            self.vs = [
                 self.vs_org[0],
                 v1,
                 self.vs_org[2],
@@ -836,7 +836,7 @@ class RegularHeptagon:
             v0 = rot2_5 * (self.vs_org[0] - v2) + v2
             v1 = rot2_5 * (v1 - v2) + v2
             v6 = rot2_5 * (v6 - v2) + v2
-            self.Vs = [
+            self.vs = [
                 v0,
                 v1,
                 self.vs_org[2],
@@ -983,7 +983,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v0v5_axis, angle=b1)
             v[6] = v0v5 + rot_b1 * (v[6] - v0v5)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_shell_1(self, a0, b0, a1, b1, keep_v0=True):
         """Set vertices, edges and faces for a shell-fold in position 1.
@@ -1054,7 +1054,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v1v6_axis, angle=b1)
             v[0] = v1v6 + rot_b1 * (v[0] - v1v6)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_shell_2(self, a0, b0, a1, b1, keep_v0=True):
         """Set vertices, edges and faces for a shell-fold in position 2.
@@ -1133,7 +1133,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v2v0_axis, angle=b1)
             v[1] = v2v0 + rot_b1 * (v[1] - v2v0)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_shell_3(self, a0, b0, a1, b1, keep_v0=True):
         """Set vertices, edges and faces for a shell-fold in position 3.
@@ -1212,7 +1212,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v3v1_axis, angle=b1)
             v[2] = v3v1 + rot_b1 * (v[2] - v3v1)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_shell_4(self, a0, b0, a1, b1, keep_v0=True):
         """Set vertices, edges and faces for a shell-fold in position 4.
@@ -1291,7 +1291,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v4v6_axis, angle=-b0)
             v[5] = v4v6 + rot_b0 * (v[5] - v4v6)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_shell_5(self, a0, b0, a1, b1, keep_v0=True):
         """Set vertices, edges and faces for a shell-fold in position 5.
@@ -1370,7 +1370,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v5v0_axis, angle=-b0)
             v[6] = v5v0 + rot_b0 * (v[6] - v5v0)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_shell_6(self, a0, b0, a1, b1, keep_v0=True):
         """Set vertices for a shell-fold in position 6.
@@ -1412,14 +1412,14 @@ class RegularHeptagon:
                 self.vs_org[1],
             ],
         )
-        self.Vs = [
-            self.Vs[0],
-            self.Vs[6],
-            self.Vs[5],
-            self.Vs[4],
-            self.Vs[3],
-            self.Vs[2],
-            self.Vs[1],
+        self.vs = [
+            self.vs[0],
+            self.vs[6],
+            self.vs[5],
+            self.vs[4],
+            self.vs[3],
+            self.vs[2],
+            self.vs[1],
         ]
 
     def fold_w(self, a0, b0, a1, b1, keep_v0=True, rotate=0):
@@ -1527,7 +1527,7 @@ class RegularHeptagon:
             v5 = rot4_0 * self.vs_org[5]
             rot4_6 = Rot(axis=v6 - self.vs_org[4], angle=b1)
             v5 = rot4_6 * (v5 - v6) + v6
-        self.Vs = [
+        self.vs = [
             self.vs_org[0],
             v1,
             v2,
@@ -1598,7 +1598,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v0v5_axis, angle=b1)
             v[6] = v0v5 + rot_b1 * (v6_tmp - v0v5)
 
-            self.Vs = v
+            self.vs = v
 
     def fold_w2_help(self, a0, b0, a1, b1, keep_v0, verts):
         """Set heptagon vertices for W-fold in position 2.
@@ -1660,7 +1660,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v1v6_axis, angle=b1)
             v[0] = v1v6 + rot_b1 * (v0_tmp - v1v6)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_w3_help(self, a0, b0, a1, b1, keep_v0, verts):
         """Set heptagon vertices for W-fold in position 3.
@@ -1714,7 +1714,7 @@ class RegularHeptagon:
             v6v4_axis = Vec(v[6] - v[4])
             rot_b0 = Rot(axis=v6v4_axis, angle=b0)
             v[5] = v6v4 + rot_b0 * (v[5] - v6v4)
-            self.Vs = v
+            self.vs = v
 
     def fold_w4_help(self, a0, b0, a1, b1, keep_v0, verts):
         """Set heptagon vertices for W-fold in position 4.
@@ -1769,7 +1769,7 @@ class RegularHeptagon:
             v1v3_axis = Vec(v[1] - v[3])
             rot_b1 = Rot(axis=v1v3_axis, angle=-b1)
             v[2] = v1v3 + rot_b1 * (v[2] - v1v3)
-            self.Vs = v
+            self.vs = v
 
     def fold_w5_help(self, a0, b0, a1, b1, keep_v0, verts):
         """Set heptagon vertices for W-fold in position 5."""
@@ -1793,8 +1793,8 @@ class RegularHeptagon:
             keep_v0,
             [verts[0], verts[6], verts[5], verts[4], verts[3], verts[2], verts[1]],
         )
-        v = self.Vs
-        self.Vs = [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
+        v = self.vs
+        self.vs = [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
 
     def fold_w6_help(self, a0, b0, a1, b1, keep_v0, verts):
         """Set heptagon vertices for W-fold in position 6."""
@@ -1818,8 +1818,8 @@ class RegularHeptagon:
             keep_v0,
             [verts[0], verts[6], verts[5], verts[4], verts[3], verts[2], verts[1]],
         )
-        v = self.Vs
-        self.Vs = [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
+        v = self.vs
+        self.vs = [v[0], v[6], v[5], v[4], v[3], v[2], v[1]]
 
     def fold_w1(self, a0, b0, a1, b1, keep_v0=True):
         """
@@ -2051,7 +2051,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v6v4_axis, angle=b1)
             v[5] = v6v4 + rot_b1 * (v[5] - v6v4)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_mixed_1(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a mixed-fold position 1.
@@ -2121,7 +2121,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v0v5_axis, angle=b1)
             v[6] = v0v5 + rot_b1 * (v[6] - v0v5)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_mixed_2(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a mixed-fold position 2.
@@ -2201,7 +2201,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v1v6_axis, angle=b1)
             v[0] = v1v6 + rot_b1 * (v[0] - v1v6)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_mixed_3(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a mixed-fold position 3.
@@ -2279,7 +2279,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v2v0_axis, angle=b1)
             v[1] = v2v0 + rot_b1 * (v[1] - v2v0)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_mixed_4(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a mixed-fold position 4.
@@ -2352,7 +2352,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v3v1_axis, angle=b1)
             v[2] = v3v1 + rot_b1 * (v[2] - v3v1)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_mixed_5(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a mixed-fold position 5.
@@ -2434,7 +2434,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v5v0_axis, angle=-b0)
             v[6] = v5v0 + rot_b0 * (v[6] - v5v0)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_mixed_6(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a mixed-fold position 6.
@@ -2516,7 +2516,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v6v1_axis, angle=-b0)
             v[0] = v6v1 + rot_b0 * (v[0] - v6v1)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g(self, a0, b0, a1, b1, keep_v0=True, rotate=0):
         """
@@ -2665,7 +2665,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v0v2_axis, angle=-b1)
             v[1] = v0v2 + rot_b1 * (v[1] - v0v2)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g_1(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a G-fold position 1."""
@@ -2730,7 +2730,7 @@ class RegularHeptagon:
             rot_b1 = Rot(axis=v1v3_axis, angle=-b1)
             v[2] = v1v3 + rot_b1 * (v[2] - v1v3)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g_2(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a G-fold position 2."""
@@ -2794,7 +2794,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v4v6_axis, angle=-b0)
             v[5] = v4v6 + rot_b0 * (v[5] - v4v6)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g_3(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a G-fold position 3."""
@@ -2858,7 +2858,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v5v0_axis, angle=-b0)
             v[6] = v5v0 + rot_b0 * (v[6] - v5v0)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g_4(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a G-fold position 4."""
@@ -2922,7 +2922,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v6v1_axis, angle=-b0)
             v[0] = v6v1 + rot_b0 * (v[0] - v6v1)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g_5(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a G-fold position 5."""
@@ -2987,7 +2987,7 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v0v2_axis, angle=b0)
             v[1] = v0v2 + rot_b0 * (v[1] - v0v2)
 
-        self.Vs = v
+        self.vs = v
 
     def fold_g_6(self, a0, b0, a1, b1, keep_v0=True):
         """Define the vertices, edges and faces for a G-fold position 6."""
@@ -3044,12 +3044,12 @@ class RegularHeptagon:
             rot_b0 = Rot(axis=v1v3_axis, angle=-b0)
             v[2] = v1v3 + rot_b0 * (v[2] - v1v3)
 
-        self.Vs = v
+        self.vs = v
 
     def translate(self, t):
         """Translate the heptagon by t (geomtypes.Vec3)."""
-        for i, vs in enumerate(self.Vs):
-            self.Vs[i] = t + vs
+        for i, vs in enumerate(self.vs):
+            self.vs[i] = t + vs
 
     def rotate(self, axis, angle):
         """Rotate the heptagon by the specified angle (radians) around the specified axis."""
@@ -3057,8 +3057,8 @@ class RegularHeptagon:
 
     def transform(self, t):
         """Transform the heptagon by t (geomtypes.Transform3)."""
-        for i, vs in enumerate(self.Vs):
-            self.Vs[i] = t * vs
+        for i, vs in enumerate(self.vs):
+            self.vs[i] = t * vs
 
 
 def kite_to_hept(left, top, right, bottom, alt_hept_pos=False):
@@ -4781,7 +4781,7 @@ class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
             for i in base_isometries:
                 isometries.append(extra_isometry * i)
 
-        super().__init__(Vs=[], Fs=[], isometries=isometries, name=name)
+        super().__init__(vs=[], Fs=[], isometries=isometries, name=name)
         self.show_kite = True
         self.show_hepta = False
         self.alt_hept_pos = False

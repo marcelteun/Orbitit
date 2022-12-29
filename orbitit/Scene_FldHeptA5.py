@@ -144,21 +144,21 @@ for isom in isomA5:
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = geom_3d.SymmetricShape(
-            Vs=[],
+            vs=[],
             Fs=[],
             isometries=isomA5,
             name='FoldedHeptagonsA5',
             regen_edges=False
         )
         xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
-            Vs=[],
+            vs=[],
             Fs=[],
             isometries=isomA5,
             name='xtraTrisA5',
             regen_edges=False
         )
         trisO3Shape = geom_3d.OrbitShape(
-            Vs=[],
+            vs=[],
             Fs=[],
             final_sym=isomA5,
             stab_sym=isomO3,
@@ -167,7 +167,7 @@ class Shape(heptagons.FldHeptagonShape):
             regen_edges=False
         )
         trisO5Shape = geom_3d.OrbitShape(
-            Vs=[],
+            vs=[],
             Fs=[],
             final_sym=isomA5,
             stab_sym=isomO5,
@@ -196,20 +196,20 @@ class Shape(heptagons.FldHeptagonShape):
         s = heptagons.FldHeptagonShape.get_status_str(this)
         if this.update_shape:
             this.set_vertices()
-        Vs = this.baseVs
+        vs = this.baseVs
         if this.has_reflections:
             Es = this.triEs[this.edge_alt]
-            aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
-            bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
-            cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
-            dLen = '%2.2f' % Vlen(Vs[Es[6]], Vs[Es[7]])
+            aLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
+            bLen = '%2.2f' % Vlen(vs[Es[2]], vs[Es[3]])
+            cLen = '%2.2f' % Vlen(vs[Es[4]], vs[Es[5]])
+            dLen = '%2.2f' % Vlen(vs[Es[6]], vs[Es[7]])
         else:
             Es = this.triEs[this.edge_alt]
-            aLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
-            bLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
-            cLen = '%2.2f' % Vlen(Vs[Es[4]], Vs[Es[5]])
+            aLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
+            bLen = '%2.2f' % Vlen(vs[Es[2]], vs[Es[3]])
+            cLen = '%2.2f' % Vlen(vs[Es[4]], vs[Es[5]])
             Es = this.o5triEs[this.edge_alt]
-            dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
+            dLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
 
         if this.has_reflections:
             s = 'T = %02.2f; |a|: %s, |b|: %s, |c|: %s, |d|: %s' % (
@@ -217,11 +217,11 @@ class Shape(heptagons.FldHeptagonShape):
                 )
         else:
             Es = this.oppTriEs[this.opposite_edge_alt]
-            opp_bLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
-            opp_cLen = '%2.2f' % Vlen(Vs[Es[2]], Vs[Es[3]])
+            opp_bLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
+            opp_cLen = '%2.2f' % Vlen(vs[Es[2]], vs[Es[3]])
             Es = this.o3triEs[this.opposite_edge_alt]
             if this.opposite_edge_alt != trisAlt.refl_1:
-                opp_dLen = '%2.2f' % Vlen(Vs[Es[0]], Vs[Es[1]])
+                opp_dLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
             else:
                 opp_dLen = '-'
             s = 'T = %02.2f; |a|: %s, |b|: %s (%s), |c|: %s (%s), |d|: %s (%s)' % (
@@ -283,52 +283,52 @@ class Shape(heptagons.FldHeptagonShape):
         #         2' = 8                7 = 5'
 
         this.position_heptagon()
-        Vs = this.heptagon.Vs[:]
-        Vs.append(Vec([-Vs[5][0], -Vs[5][1], Vs[5][2]]))        # Vs[7]
-        Vs.append(Vec([-Vs[2][0], -Vs[2][1], Vs[2][2]]))        # Vs[8]
-        Vs.append(o3fld * Vs[0])                                # Vs[9]
-        Vs.append(o3fld * Vs[-1])                               # Vs[10]
-        Vs.append(o5fld * Vs[0])                                # Vs[11]
-        Vs.append(o5fld * Vs[-1])                               # Vs[12]
-        Vs.append(o5fld * Vs[-1])                               # Vs[13]
-        Vs.append(o5fld * Vs[-1])                               # Vs[14]
-        Vs.append(Vec([-Vs[11][0], -Vs[11][1], Vs[11][2]]))     # Vs[15]
-        Vs.append(o3fld * Vs[6])                                # Vs[16]
-        Vs.append(o3fld * Vs[-1])                               # Vs[17]
-        Vs.append(o5fld * Vs[1])                                # Vs[18]
-        Vs.append(o5fld * Vs[-1])                               # Vs[19]
-        Vs.append(o5fld * Vs[-1])                               # Vs[20]
-        Vs.append(o5fld * Vs[-1])                               # Vs[21]
-        Vs.append(o3fld * Vs[5])                                # Vs[22]
-        Vs.append(o3fld * Vs[-1])                               # Vs[23]
-        Vs.append(o5fld * Vs[2])                                # Vs[24]
-        Vs.append(o5fld * Vs[-1])                               # Vs[25]
-        Vs.append(o5fld * Vs[-1])                               # Vs[26]
-        Vs.append(o5fld * Vs[-1])                               # Vs[27]
-        Vs.append(o3fld * Vs[4])                                # Vs[28]
-        Vs.append(o3fld * Vs[-1])                               # Vs[29]
-        Vs.append(o5fld * Vs[3])                                # Vs[30]
-        Vs.append(o5fld * Vs[-1])                               # Vs[31]
-        Vs.append(o5fld * Vs[-1])                               # Vs[32]
-        Vs.append(o5fld * Vs[-1])                               # Vs[33]
-        Vs.append(o3fld * Vs[8])                                # Vs[34]
-        Vs.append(o3fld * Vs[-1])                               # Vs[35]
-        Vs.append(o5fld * Vs[7])                                # Vs[36]
-        Vs.append(o5fld * Vs[-1])                               # Vs[37]
-        Vs.append(o5fld * Vs[-1])                               # Vs[38]
-        Vs.append(o5fld * Vs[-1])                               # Vs[39]
-        Vs.append(o5fld * Vs[6])                                # Vs[40]
-        Vs.append(o5fld * Vs[-1])                               # Vs[41]
-        Vs.append(o5fld * Vs[-1])                               # Vs[42]
-        Vs.append(o5fld * Vs[-1])                               # Vs[43]
-        Vs.append((Vs[0] + Vs[11] + Vs[12] + Vs[13] + Vs[14])/5)# Vs[44]
-        # TODO: if adding more Vs, rm above if or use predefined indices
-        this.baseVs = Vs
+        vs = this.heptagon.vs[:]
+        vs.append(Vec([-vs[5][0], -vs[5][1], vs[5][2]]))        # vs[7]
+        vs.append(Vec([-vs[2][0], -vs[2][1], vs[2][2]]))        # vs[8]
+        vs.append(o3fld * vs[0])                                # vs[9]
+        vs.append(o3fld * vs[-1])                               # vs[10]
+        vs.append(o5fld * vs[0])                                # vs[11]
+        vs.append(o5fld * vs[-1])                               # vs[12]
+        vs.append(o5fld * vs[-1])                               # vs[13]
+        vs.append(o5fld * vs[-1])                               # vs[14]
+        vs.append(Vec([-vs[11][0], -vs[11][1], vs[11][2]]))     # vs[15]
+        vs.append(o3fld * vs[6])                                # vs[16]
+        vs.append(o3fld * vs[-1])                               # vs[17]
+        vs.append(o5fld * vs[1])                                # vs[18]
+        vs.append(o5fld * vs[-1])                               # vs[19]
+        vs.append(o5fld * vs[-1])                               # vs[20]
+        vs.append(o5fld * vs[-1])                               # vs[21]
+        vs.append(o3fld * vs[5])                                # vs[22]
+        vs.append(o3fld * vs[-1])                               # vs[23]
+        vs.append(o5fld * vs[2])                                # vs[24]
+        vs.append(o5fld * vs[-1])                               # vs[25]
+        vs.append(o5fld * vs[-1])                               # vs[26]
+        vs.append(o5fld * vs[-1])                               # vs[27]
+        vs.append(o3fld * vs[4])                                # vs[28]
+        vs.append(o3fld * vs[-1])                               # vs[29]
+        vs.append(o5fld * vs[3])                                # vs[30]
+        vs.append(o5fld * vs[-1])                               # vs[31]
+        vs.append(o5fld * vs[-1])                               # vs[32]
+        vs.append(o5fld * vs[-1])                               # vs[33]
+        vs.append(o3fld * vs[8])                                # vs[34]
+        vs.append(o3fld * vs[-1])                               # vs[35]
+        vs.append(o5fld * vs[7])                                # vs[36]
+        vs.append(o5fld * vs[-1])                               # vs[37]
+        vs.append(o5fld * vs[-1])                               # vs[38]
+        vs.append(o5fld * vs[-1])                               # vs[39]
+        vs.append(o5fld * vs[6])                                # vs[40]
+        vs.append(o5fld * vs[-1])                               # vs[41]
+        vs.append(o5fld * vs[-1])                               # vs[42]
+        vs.append(o5fld * vs[-1])                               # vs[43]
+        vs.append((vs[0] + vs[11] + vs[12] + vs[13] + vs[14])/5)# vs[44]
+        # TODO: if adding more vs, rm above if or use predefined indices
+        this.baseVs = vs
         Es = []
         Fs = []
         Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
         Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
-        this.heptagonsShape.setBaseVertexProperties(Vs = Vs)
+        this.heptagonsShape.setBaseVertexProperties(vs = vs)
         this.heptagonsShape.setBaseEdgeProperties(Es = Es)
         # TODO CHk: comment out this and nvidia driver crashes:...
         this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
@@ -339,13 +339,13 @@ class Shape(heptagons.FldHeptagonShape):
                 "this triangle fill isn't implemented for A5"
             Fs = this.o5triFs[this.edge_alt][:]
             Es = this.o5triEs[this.edge_alt][:]
-            this.trisO5Shape.setBaseVertexProperties(Vs = Vs)
+            this.trisO5Shape.setBaseVertexProperties(vs = vs)
             this.trisO5Shape.setBaseEdgeProperties(Es = Es)
             this.trisO5Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO5Shape)
             Es = this.o3triEs[this.opposite_edge_alt][:]
             Fs = this.o3triFs[this.opposite_edge_alt][:]
-            this.trisO3Shape.setBaseVertexProperties(Vs = Vs)
+            this.trisO3Shape.setBaseVertexProperties(vs = vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
             this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
             theShapes.append(this.trisO3Shape)
@@ -365,7 +365,7 @@ class Shape(heptagons.FldHeptagonShape):
                 Fs.extend(this.oppTriFs[this.opposite_edge_alt])
                 Es = this.triEs[this.edge_alt][:]
                 Es.extend(this.oppTriEs[this.opposite_edge_alt])
-                this.xtraTrisShape.setBaseVertexProperties(Vs = Vs)
+                this.xtraTrisShape.setBaseVertexProperties(vs = vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
                 this.xtraTrisShape.setBaseFaceProperties(
                     Fs = Fs,

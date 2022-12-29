@@ -29,7 +29,7 @@ TITLE = '24-Cell'
 
 l = 2.3
 
-Vs = [
+vs = [
 
         [ 0,  0,  l,  l],  #  0
         [ 0,  0, -l,  l],  #  1
@@ -258,7 +258,7 @@ Es.extend(
 class Shape(Geom4D.SimpleShape):
     def __init__(this):
         Geom4D.SimpleShape.__init__(this,
-            Vs, Cs = [], Es = Es, Ns = [],
+            vs, Cs = [], Es = Es, Ns = [],
             colors = (Cols, ColIdsOpaq),
             name = TITLE
         )

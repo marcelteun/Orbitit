@@ -84,7 +84,7 @@ class Shape(heptagons.EqlHeptagonShape):
             # For tetrahedral position: 1, 3, and 5 are on the vertices of a
             # cube and 2, 4, 6, are on the face centres of that cube
             #
-            Vs = [
+            vs = [
                 vec( St, St, -St),  # 0
                 vec( 0.0, 1.0, 0.0),
                 vec( this.height, this.height,  this.height),
@@ -130,7 +130,7 @@ class Shape(heptagons.EqlHeptagonShape):
             # For tetrahedral position: 1, 3, and 5 are on the vertices of a
             # cube and 2, 4, 6, are on the face centres of that cube
             #
-            Vs = [
+            vs = [
                 vec(this.height, this.height, this.height),  # 0
                 vec(1.0, 0.0, 0.0),
                 vec(St, St, -St),
@@ -148,70 +148,70 @@ class Shape(heptagons.EqlHeptagonShape):
             ]
 
         # add heptagons
-        heptN = heptagons.kite_to_hept(Vs[3], Vs[2], Vs[1], Vs[0])
+        heptN = heptagons.kite_to_hept(vs[3], vs[2], vs[1], vs[0])
         if heptN == None:
           this.error_msg = 'No valid equilateral heptagon for this position'
           return
         else:
           this.error_msg = ''
-        Vs.extend(heptN[0]) # V12 - V18
+        vs.extend(heptN[0]) # V12 - V18
         Ns = list(range(33))
         for i in range(4):
             Ns[i] = heptN[1]
         for i in range(12, 19):
             Ns[i] = heptN[1]
-        heptN = heptagons.kite_to_hept(Vs[7], Vs[6], Vs[5], Vs[4])
-        Vs.extend(heptN[0]) # V19 - V25
+        heptN = heptagons.kite_to_hept(vs[7], vs[6], vs[5], vs[4])
+        vs.extend(heptN[0]) # V19 - V25
         for i in range(4, 8):
             Ns[i] = heptN[1]
         for i in range(19, 26):
             Ns[i] = heptN[1]
-        heptN = heptagons.kite_to_hept(Vs[11], Vs[10], Vs[9], Vs[8])
-        Vs.extend(heptN[0]) # V26 - V32
+        heptN = heptagons.kite_to_hept(vs[11], vs[10], vs[9], vs[8])
+        vs.extend(heptN[0]) # V26 - V32
         for i in range(8, 12):
             Ns[i] = heptN[1]
         for i in range(26, 33):
             Ns[i] = heptN[1]
 
         # add equilateral triangles:
-        Vs.extend([Vs[15], Vs[22], Vs[29]])         # V33 - V35
+        vs.extend([vs[15], vs[22], vs[29]])         # V33 - V35
         # add isosceles triangles:
         this.xtraEs = []
         if this.tri_alt:
-            Vs.extend([Vs[13], Vs[14], Vs[32]]) # V36 - V38
-            Vs.extend([Vs[20], Vs[21], Vs[18]]) # V39 - V41
-            Vs.extend([Vs[27], Vs[28], Vs[25]]) # V42 - V44
+            vs.extend([vs[13], vs[14], vs[32]]) # V36 - V38
+            vs.extend([vs[20], vs[21], vs[18]]) # V39 - V41
+            vs.extend([vs[27], vs[28], vs[25]]) # V42 - V44
             if this.add_extra_edge:
                 this.xtraEs = [36, 38, 39, 41, 42, 44]
         else:
-            Vs.extend([Vs[13], Vs[14], Vs[14]]) # V36 - V38
-            Vs.extend([Vs[20], Vs[21], Vs[21]]) # V39 - V41
-            Vs.extend([Vs[27], Vs[28], Vs[28]]) # V42 - V44
+            vs.extend([vs[13], vs[14], vs[14]]) # V36 - V38
+            vs.extend([vs[20], vs[21], vs[21]]) # V39 - V41
+            vs.extend([vs[27], vs[28], vs[28]]) # V42 - V44
             if this.alt_hept_pos:
-                v = Vs[38]
-                Vs[38] = vec(-v[0],  v[1], -v[2])    # HY * V9
-                v = Vs[41]
-                Vs[41] = vec( v[0], -v[1], -v[2])    # HX * V23
+                v = vs[38]
+                vs[38] = vec(-v[0],  v[1], -v[2])    # HY * V9
+                v = vs[41]
+                vs[41] = vec( v[0], -v[1], -v[2])    # HX * V23
             else:
-                v = Vs[38]
-                Vs[38] = vec( v[0], -v[1], -v[2])    # HX * V9
-                v = Vs[41]
-                Vs[41] = vec(-v[0],  v[1], -v[2])    # HY * V23
-            v = Vs[44]
-            Vs[44] = vec(-v[0], -v[1],  v[2])    # HZ * V16
+                v = vs[38]
+                vs[38] = vec( v[0], -v[1], -v[2])    # HX * V9
+                v = vs[41]
+                vs[41] = vec(-v[0],  v[1], -v[2])    # HY * V23
+            v = vs[44]
+            vs[44] = vec(-v[0], -v[1],  v[2])    # HZ * V16
             if this.add_extra_edge:
                 this.xtraEs = [37, 38, 40, 41, 43, 44]
 
         # normal of equilateral triangle
         for i in range(3):
-            Ns.append(Vs[0])
+            Ns.append(vs[0])
         # normal of isosceles triangles
         for i in range(3):
             o = 36 + 3*i
             IsoscelesTriangleN = geom_3d.Triangle(
-                Vs[o],
-                Vs[o+1],
-                Vs[o+2]
+                vs[o],
+                vs[o+1],
+                vs[o+2]
             ).normal()
             Ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
@@ -222,7 +222,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 [42, 43, 44]
             ]
 
-        this.setBaseVertexProperties(Vs = Vs, Ns = Ns)
+        this.setBaseVertexProperties(vs = vs, Ns = Ns)
         Fs = []
         Es = []
         colIds = []

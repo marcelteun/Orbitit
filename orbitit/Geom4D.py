@@ -45,7 +45,7 @@ class Plane:
 
 class SimpleShape:
     className = "Geom4D.SimpleShape"
-    def __init__(this, Vs, Cs, Es = [], Ns = [], colors = ([], []), name = "4DSimpleShape"):
+    def __init__(this, vs, Cs, Es = [], Ns = [], colors = ([], []), name = "4DSimpleShape"):
         """
         Cs: and array of cells, consisting of an array of Fs.
         """
@@ -67,7 +67,7 @@ class SimpleShape:
         # if useTransparency = False opaque colours are used, even if they
         # specifically set to transparent colours.
         this.useTransparency(True)
-        this.set_vertex_props(Vs = Vs, Ns = Ns, radius = -1., color = [1. , 1. , .8 ])
+        this.set_vertex_props(vs = vs, Ns = Ns, radius = -1., color = [1. , 1. , .8 ])
         this.set_face_props(
             colors = colors, drawFaces = True
         )
@@ -92,7 +92,7 @@ class SimpleShape:
         Set the vertices and how/whether vertices are drawn in OpenGL.
 
         Accepted are the optional (keyword) parameters:
-        - Vs,
+        - vs,
         - radius,
         - color.
         - Ns.
@@ -109,11 +109,11 @@ class SimpleShape:
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Vs' in dict and dict['Vs'] != None:
-                this.Vs  = [ geomtypes.Vec4(v) for v in dict['Vs'] ]
+            if 'vs' in dict and dict['vs'] != None:
+                this.vs  = [ geomtypes.Vec4(v) for v in dict['vs'] ]
             if 'Ns' in dict and dict['Ns'] != None:
                 this.Ns  = [ geomtypes.Vec4(n) for n in dict['Ns'] ]
-                #assert len(this.Ns) == len(this.Vs)
+                #assert len(this.Ns) == len(this.vs)
             if 'radius' in dict and dict['radius'] != None:
                 this.v.radius = dict['radius']
             if 'color' in dict and dict['color'] != None:
@@ -124,8 +124,8 @@ class SimpleShape:
         """
         Return the current vertex properties as can be set by set_vertex_props.
 
-        Returned is a dictionary with the keywords Vs, radius, color.
-        Vs: an array of vertices.
+        Returned is a dictionary with the keywords vs, radius, color.
+        vs: an array of vertices.
         radius: If > 0.0 draw vertices as spheres with the specified colour. If
                 no spheres are required (for preformance reasons) set the radius
                 to a value <= 0.0.
@@ -134,7 +134,7 @@ class SimpleShape:
             value is not set. If the value is set it is used by gl_draw
         """
         return {
-            'Vs': this.Vs,
+            'vs': this.vs,
             'radius': this.v.radius,
             'color': this.v.col,
             'Ns': this.Ns
@@ -180,7 +180,7 @@ class SimpleShape:
                 if currentSetting != dict['drawEdges']:
                     this.projectedTo3D = this.projectedTo3D and not (
                             # if all the below are true, then the edges need
-                            # extra Vs, which means we need to reproject.
+                            # extra vs, which means we need to reproject.
                             this.c.scale < 1.0
                             and
                             # .. and if the CURRENT settings is show unscaled
@@ -201,8 +201,8 @@ class SimpleShape:
             if 'showUnscaled' in dict and dict['showUnscaled'] != None:
                 this.projectedTo3D = this.projectedTo3D and not (
                         # if all the below are true, then a change in unscaled
-                        # edges means a changes in Vs, since the extra edges
-                        # have different Vs. This means we need to reproject.
+                        # edges means a changes in vs, since the extra edges
+                        # have different vs. This means we need to reproject.
                         this.e.draw
                         and
                         this.c.scale < 1.0
@@ -217,7 +217,7 @@ class SimpleShape:
 
         Returned is a dictionary with the keywords Es, radius, color, drawEdges
         Es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
-            indices in Vs.
+            indices in vs.
         radius: If > 0.0 draw vertices as cylinders with the specified colour.
                 If no cylinders are required (for preformance reasons) set the
                 radius to a value <= 0.0 and the edges will be drawn as lines,
@@ -504,12 +504,12 @@ class SimpleShape:
                 pass
             Ns3D = []
             if this.rot4 != None:
-                Vs4D = [this.rot4*v for v in this.Vs]
+                Vs4D = [this.rot4*v for v in this.vs]
             # TODO fix Ns.. if needed..
             #    if this.Ns != []:cleanUp
             #        Ns4D = [this.rot4*n for n in this.Ns]
             else:
-                Vs4D = [v for v in this.Vs]
+                Vs4D = [v for v in this.vs]
             Vs3D = this.projectVsTo3D(Vs4D)
             #for i in range(0, len(this.Es), 2):
             #    v0 = Vs4D[this.Es[i]]
@@ -551,7 +551,7 @@ class SimpleShape:
                 # unecessary.
                 cellVs = Vs3D[:]
                 nrUsed = glue.cleanUpVsFs(cellVs, cellFs)
-                # Now attaching to current Vs, will change index:
+                # Now attaching to current vs, will change index:
                 offset = len(shapeVs)
                 cellFs = [[vIndex + offset for vIndex in f] for f in cellFs]
                 # Now scale from gravitation centre:
@@ -570,7 +570,7 @@ class SimpleShape:
                 shapeFs.extend(cellFs)
                 # for shapeColIndices.extend() see above
             this.cell = geom_3d.SimpleShape(
-                    shapeVs, shapeFs, shapeEs, [], # Vs , Fs, Es, Ns
+                    shapeVs, shapeFs, shapeEs, [], # vs , Fs, Es, Ns
                     (shapeCols, shapeColIndices),
                     name = '%s_projection' % (this.name)
                 )
@@ -615,12 +615,12 @@ class SimpleShape:
                 pass
             Ns3D = []
             if this.rot4 != None:
-                Vs4D = [this.rot4*v for v in this.Vs]
+                Vs4D = [this.rot4*v for v in this.vs]
             # TODO fix Ns.. if needed..
             #    if this.Ns != []:
             #        Ns4D = [this.rot4*n for n in this.Ns]
             else:
-                Vs4D = [v for v in this.Vs]
+                Vs4D = [v for v in this.vs]
             Vs3D = this.projectVsTo3D(Vs4D)
             #if this.Ns != []:
             #    Ns3D = this.projectVsTo3D(Ns4D)
@@ -628,7 +628,7 @@ class SimpleShape:
             # Add a cell for just the edges:
             if this.e.draw:
                 cell = geom_3d.SimpleShape(
-                        Vs3D, [], this.Es, [], # Vs , Fs, Es, Ns
+                        Vs3D, [], this.Es, [], # vs , Fs, Es, Ns
                         name = '%s_Es' % (this.name)
                     )
                 cell.set_vertex_props(radius = this.v.radius, color = this.v.col)
@@ -643,7 +643,7 @@ class SimpleShape:
                 else:
                     colors = (this.f.col[0], this.f.col[1][i])
                 cell = geom_3d.SimpleShape(
-                        Vs3D, this.Cs[i], [], [], # Vs , Fs, Es, Ns
+                        Vs3D, this.Cs[i], [], [], # vs , Fs, Es, Ns
                         colors,
                         name = '%s_%d' % (this.name, i)
                     )

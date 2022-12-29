@@ -92,7 +92,7 @@ class Shape(heptagons.EqlHeptagonShape):
             #    |            |,'
             #    '------------'
             #
-            Vs = [
+            vs = [
                 vec(St, St, St),  # 0
                 vec(0.0, 1.0, 1.0),
                 vec(0.0, 0.0, this.height),
@@ -129,7 +129,7 @@ class Shape(heptagons.EqlHeptagonShape):
             #    |            |,'
             #    '------------'
             #
-            Vs = [
+            vs = [
                 vec(0.0, 0.0, this.height),  # 0
                 vec(1.0, 0.0, 1.0),
                 vec(St, St, St),
@@ -147,26 +147,26 @@ class Shape(heptagons.EqlHeptagonShape):
             ]
 
         # add heptagons
-        heptN = heptagons.kite_to_hept(Vs[3], Vs[2], Vs[1], Vs[0])
+        heptN = heptagons.kite_to_hept(vs[3], vs[2], vs[1], vs[0])
         if heptN == None:
           this.error_msg = 'No valid equilateral heptagon for this position'
           return
         else:
           this.error_msg = ''
-        Vs.extend(heptN[0]) # V12 - V18
+        vs.extend(heptN[0]) # V12 - V18
         Ns = list(range(33))
         for i in range(4):
             Ns[i] = heptN[1]
         for i in range(12, 19):
             Ns[i] = heptN[1]
-        heptN = heptagons.kite_to_hept(Vs[7], Vs[6], Vs[5], Vs[4])
-        Vs.extend(heptN[0]) # V19 - V25
+        heptN = heptagons.kite_to_hept(vs[7], vs[6], vs[5], vs[4])
+        vs.extend(heptN[0]) # V19 - V25
         for i in range(4, 8):
             Ns[i] = heptN[1]
         for i in range(19, 26):
             Ns[i] = heptN[1]
-        heptN = heptagons.kite_to_hept(Vs[11], Vs[10], Vs[9], Vs[8])
-        Vs.extend(heptN[0]) # V26 - V32
+        heptN = heptagons.kite_to_hept(vs[11], vs[10], vs[9], vs[8])
+        vs.extend(heptN[0]) # V26 - V32
         for i in range(8, 12):
             Ns[i] = heptN[1]
         for i in range(26, 33):
@@ -176,30 +176,30 @@ class Shape(heptagons.EqlHeptagonShape):
         # add extra faces:
         if this.alt_hept_pos:
             # Eql triangle
-            Vs.extend([Vs[15], Vs[22], Vs[29]])         # V33 - V35
+            vs.extend([vs[15], vs[22], vs[29]])         # V33 - V35
             # Isosceles triangles
             if this.tri_alt:
-                Vs.extend([Vs[13], Vs[14], Vs[32]]) # V36 - V38
-                Vs.extend([Vs[20], Vs[21], Vs[18]]) # V39 - V41
-                Vs.extend([Vs[27], Vs[28], Vs[25]]) # V42 - V44
+                vs.extend([vs[13], vs[14], vs[32]]) # V36 - V38
+                vs.extend([vs[20], vs[21], vs[18]]) # V39 - V41
+                vs.extend([vs[27], vs[28], vs[25]]) # V42 - V44
             else:
-                v = Vs[14]
-                Vs.extend([Vs[13], Vs[14], vec(-v[0],  v[1],  v[2])]) # V36 - V38
-                v = Vs[21]
-                Vs.extend([Vs[20], Vs[21], vec( v[0], -v[1],  v[2])]) # V39 - V41
-                v = Vs[28]
-                Vs.extend([Vs[27], Vs[28], vec( v[0],  v[1], -v[2])]) # V42 - V44
+                v = vs[14]
+                vs.extend([vs[13], vs[14], vec(-v[0],  v[1],  v[2])]) # V36 - V38
+                v = vs[21]
+                vs.extend([vs[20], vs[21], vec( v[0], -v[1],  v[2])]) # V39 - V41
+                v = vs[28]
+                vs.extend([vs[27], vs[28], vec( v[0],  v[1], -v[2])]) # V42 - V44
 
             for i in range(3):
-                Ns.append(Vs[0]) # N33 - N35
+                Ns.append(vs[0]) # N33 - N35
             # normals for the isosceles triangles:
             # N36 - N38, N39 - N41 and N42 - N44
             for i in range(3):
                 o = 36 + 3*i
                 IsoscelesTriangleN = geom_3d.Triangle(
-                    Vs[o],
-                    Vs[o+1],
-                    Vs[o+2]
+                    vs[o],
+                    vs[o+1],
+                    vs[o+2]
                 ).normal()
                 Ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
@@ -220,37 +220,37 @@ class Shape(heptagons.EqlHeptagonShape):
         else:
             # The Squares, divided into rectangular isosceles triangles,
             # because of the sym-op
-            Vs.extend([Vs[15], Vs[16], vec(0, 0, Vs[15][2])]) # V33 - V35
-            Vs.extend([Vs[22], Vs[23], vec(Vs[22][0], 0, 0)]) # V36 - V38
-            Vs.extend([Vs[29], Vs[30], vec(0, Vs[29][1], 0)]) # V39 - V41
+            vs.extend([vs[15], vs[16], vec(0, 0, vs[15][2])]) # V33 - V35
+            vs.extend([vs[22], vs[23], vec(vs[22][0], 0, 0)]) # V36 - V38
+            vs.extend([vs[29], vs[30], vec(0, vs[29][1], 0)]) # V39 - V41
             # add isosceles triangles:
             if this.tri_alt:
-                v = Vs[13]
-                Vs.extend([Vs[13], Vs[14], vec(v[0], -v[1], v[2])]) # V42 - V44
-                v = Vs[20]
-                Vs.extend([Vs[20], Vs[21], vec(v[0], v[1], -v[2])]) # V45 - V47
-                v = Vs[27]
-                Vs.extend([Vs[27], Vs[28], vec(-v[0], v[1], v[2])]) # V48 - V50
+                v = vs[13]
+                vs.extend([vs[13], vs[14], vec(v[0], -v[1], v[2])]) # V42 - V44
+                v = vs[20]
+                vs.extend([vs[20], vs[21], vec(v[0], v[1], -v[2])]) # V45 - V47
+                v = vs[27]
+                vs.extend([vs[27], vs[28], vec(-v[0], v[1], v[2])]) # V48 - V50
             else:
-                Vs.extend([Vs[13], Vs[14], Vs[24]]) # V42 - V44
-                Vs.extend([Vs[20], Vs[21], Vs[31]]) # V45 - V47
-                Vs.extend([Vs[27], Vs[28], Vs[17]]) # V48 - V50
+                vs.extend([vs[13], vs[14], vs[24]]) # V42 - V44
+                vs.extend([vs[20], vs[21], vs[31]]) # V45 - V47
+                vs.extend([vs[27], vs[28], vs[17]]) # V48 - V50
 
             # normals for the equilateral triangles:
             for i in range(3):
-                Ns.append(Vs[0])  # N33 - N35
+                Ns.append(vs[0])  # N33 - N35
             for i in range(3):
-                Ns.append(Vs[4])  # N36 - N38
+                Ns.append(vs[4])  # N36 - N38
             for i in range(3):
-                Ns.append(Vs[8]) # N39 - N41
+                Ns.append(vs[8]) # N39 - N41
             # normals for the isosceles triangles:
             # N42 - N44, N45 - N47 and N48 - N50
             for i in range(3):
                 o = 42 + 3*i
                 IsoscelesTriangleN = geom_3d.Triangle(
-                    Vs[o],
-                    Vs[o+1],
-                    Vs[o+2]
+                    vs[o],
+                    vs[o+1],
+                    vs[o+2]
                 ).normal()
                 Ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
@@ -271,7 +271,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 else:
                     xtraEs = [43, 44, 46, 47, 49, 50]
 
-        this.setBaseVertexProperties(Vs = Vs, Ns = Ns)
+        this.setBaseVertexProperties(vs = vs, Ns = Ns)
         Fs = []
         Es = []
         colIds = []
