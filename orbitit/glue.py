@@ -42,22 +42,22 @@ def getVUsageIn1D(vs, Es, vUsage = None):
         vUsage[vIndex] = vUsage[vIndex] + 1
     return vUsage
 
-def getVUsageIn2D(vs, Fs, vUsage = None):
+def getVUsageIn2D(vs, fs, vUsage = None):
     """
-    Check how often the vertices in vs are referred through the 2D array Fs
+    Check how often the vertices in vs are referred through the 2D array fs
 
     Returns an array of lenth vs with the amount.
     vUsage (of length vs) can be used as initialisation value for this array.
     """
     if vUsage == None:
         vUsage = [0 for v in vs]
-    for f in Fs:
+    for f in fs:
         for vIndex in f:
             vUsage[vIndex] = vUsage[vIndex] + 1
     return vUsage
 
-def cleanUpVsFs(vs, Fs):
-    """cleanup vs and update Fs by removing unused vertices.
+def cleanUpVsFs(vs, fs):
+    """cleanup vs and update fs by removing unused vertices.
 
     Note that the arrays themselves are updated. If this is not wanted, send in
     copies.
@@ -67,13 +67,13 @@ def cleanUpVsFs(vs, Fs):
     # The clean up is done as follows:
     # first construct an array of unused vertex indices
     # remove all unused indices from vs and subtract the approproate amount
-    # from the indices in Fs that are bigger
+    # from the indices in fs that are bigger
     # vUsage contains for each vertex a tuple that expresses:
     # - how ofter the vertex is used:
     # After the unused vertices are deleted, vReoved will contain:
     # - how many vertices that come before this (vertex) index are deleted.
     #
-    vUsage = getVUsageIn2D(vs, Fs)
+    vUsage = getVUsageIn2D(vs, fs)
     vRemoved = [0 for x in vUsage]
     notUsed = 0 # counts the amount of vertices that are not used until vertex i
     for i in range(len(vUsage)):
@@ -85,16 +85,16 @@ def cleanUpVsFs(vs, Fs):
         # change the value of vUsage to the amount of vertices that are (not
         # used and from now on) deleted until vertex i
         vRemoved[i] = notUsed
-    for f in Fs:
+    for f in fs:
         for faceIndex in range(len(f)):
             f[faceIndex] = f[faceIndex] - vRemoved[f[faceIndex]]
     return vUsage
 
-def mergeVs(vs, Fs, precision=12):
+def mergeVs(vs, fs, precision=12):
     """
     Merges vertices that are equal into one vertex.
 
-    Note that this might change the content of Fs and Es.
+    Note that this might change the content of fs and Es.
     Note that vs is not cleaned up. This means that some vertices might not be
     used. The return value indicates if some vertices are unused now.
     """
@@ -120,9 +120,9 @@ def mergeVs(vs, Fs, precision=12):
     # re-indexing
     log_handler.terminator = end_bac
     logging.info("")
-    logging.info("Clean up Fs")
-    for f_i in range(len(Fs) - 1, -1, -1):
-        f = Fs[f_i]
+    logging.info("Clean up fs")
+    for f_i in range(len(fs) - 1, -1, -1):
+        f = fs[f_i]
         face_vertices = []  # array holding unique face vertices
         for i in range(len(f)):
             if replace_by[f[i]] > -1:
@@ -131,7 +131,7 @@ def mergeVs(vs, Fs, precision=12):
                 face_vertices.append(f[i])
         # remove any faces with only 2 (or less) unique vertices
         if len(face_vertices) < 3:
-            del(Fs[f_i])
+            del(fs[f_i])
 #    for i in range(len(Es)):
 #       if replace_by[Es[i]] > -1:
 #           Es[i] = replace_by[Es[i]]

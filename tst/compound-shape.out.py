@@ -16,7 +16,7 @@ shape = geom_3d.CompoundShape(
                 geomtypes.Vec3([1.0, 1.0, -2.0]),
                 geomtypes.Vec3([0.5, 1.0, 1.0])
             ],
-            Fs = [
+            fs = [
                 [0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
@@ -37,7 +37,7 @@ shape = geom_3d.CompoundShape(
                 geomtypes.Vec3([0.0, -2.0, 0.0]),
                 geomtypes.Vec3([0.0, 0.0, 2.0])
             ],
-            Fs = [
+            fs = [
                 [0, 1, 2],
                 [0, 2, 3],
                 [0, 3, 4],

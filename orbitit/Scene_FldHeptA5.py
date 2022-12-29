@@ -145,21 +145,21 @@ class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = geom_3d.SymmetricShape(
             vs=[],
-            Fs=[],
+            fs=[],
             isometries=isomA5,
             name='FoldedHeptagonsA5',
             regen_edges=False
         )
         xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
             vs=[],
-            Fs=[],
+            fs=[],
             isometries=isomA5,
             name='xtraTrisA5',
             regen_edges=False
         )
         trisO3Shape = geom_3d.OrbitShape(
             vs=[],
-            Fs=[],
+            fs=[],
             final_sym=isomA5,
             stab_sym=isomO3,
             colors=[rgb.cyan[:]],
@@ -168,7 +168,7 @@ class Shape(heptagons.FldHeptagonShape):
         )
         trisO5Shape = geom_3d.OrbitShape(
             vs=[],
-            Fs=[],
+            fs=[],
             final_sym=isomA5,
             stab_sym=isomO5,
             colors=[rgb.cyan[:]],
@@ -325,29 +325,29 @@ class Shape(heptagons.FldHeptagonShape):
         # TODO: if adding more vs, rm above if or use predefined indices
         this.baseVs = vs
         Es = []
-        Fs = []
-        Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
-        Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
+        fs = []
+        fs.extend(this.heptagon.fs) # use extend to copy the list to fs
+        Es.extend(this.heptagon.Es) # use extend to copy the list to fs
         this.heptagonsShape.setBaseVertexProperties(vs = vs)
         this.heptagonsShape.setBaseEdgeProperties(Es = Es)
         # TODO CHk: comment out this and nvidia driver crashes:...
-        this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
+        this.heptagonsShape.setBaseFaceProperties(fs = fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.add_extra_faces:
             assert this.edge_alt in this.o5triFs, \
                 "this triangle fill isn't implemented for A5"
-            Fs = this.o5triFs[this.edge_alt][:]
+            fs = this.o5triFs[this.edge_alt][:]
             Es = this.o5triEs[this.edge_alt][:]
             this.trisO5Shape.setBaseVertexProperties(vs = vs)
             this.trisO5Shape.setBaseEdgeProperties(Es = Es)
-            this.trisO5Shape.setBaseFaceProperties(Fs = Fs)
+            this.trisO5Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO5Shape)
             Es = this.o3triEs[this.opposite_edge_alt][:]
-            Fs = this.o3triFs[this.opposite_edge_alt][:]
+            fs = this.o3triFs[this.opposite_edge_alt][:]
             this.trisO3Shape.setBaseVertexProperties(vs = vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
-            this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
+            this.trisO3Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO3Shape)
             if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
@@ -361,14 +361,14 @@ class Shape(heptagons.FldHeptagonShape):
                 else:
                     colIds = this.triColIds[this.edge_alt][:3]
                     colIds.extend(this.triColIds[this.opposite_edge_alt][3:])
-                Fs = this.triFs[this.edge_alt][:]
-                Fs.extend(this.oppTriFs[this.opposite_edge_alt])
+                fs = this.triFs[this.edge_alt][:]
+                fs.extend(this.oppTriFs[this.opposite_edge_alt])
                 Es = this.triEs[this.edge_alt][:]
                 Es.extend(this.oppTriEs[this.opposite_edge_alt])
                 this.xtraTrisShape.setBaseVertexProperties(vs = vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
                 this.xtraTrisShape.setBaseFaceProperties(
-                    Fs = Fs,
+                    fs = fs,
                     colors = ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]],
                         colIds
                     )

@@ -404,7 +404,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
         if (
-                len(shape.getFaceProperties()['Fs']) == 0
+                len(shape.getFaceProperties()['fs']) == 0
                 and
                 self.panel.shape.getVertexProperties()['radius'] <= 0
         ):

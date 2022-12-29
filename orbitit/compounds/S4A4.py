@@ -18,7 +18,7 @@ tetrahedron = {
             geomtypes.Vec3([-1, -1, 1]),
             geomtypes.Vec3([1, -1, -1]),
             geomtypes.Vec3([-1, 1, -1])],
-        'Fs': [
+        'fs': [
             [0, 1, 2],
             [0, 2, 3],
             [0, 3, 1],

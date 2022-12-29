@@ -82,7 +82,7 @@ class Cuboctahedron_3_S4xI_D3C3(Shape):
             Vec3([1, 1, 0]),
             Vec3([0, 1, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -103,7 +103,7 @@ class Cuboctahedron_4_S4xI_D4C4(Shape):
             Vec3([-1, 0, 1]),
             Vec3([0, -1, 1]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -136,7 +136,7 @@ class Icosidodecahedron_3_A5xI_D3C3(Shape):
             Vec3([τ + 1, 1, τ]),
             Vec3([τ, τ + 1, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -158,7 +158,7 @@ class Icosidodecahedron_5_A5xI_D5C5(Shape):
             Vec3([τ + 1, 1, τ]),
             Vec3([1, τ, τ + 1]),
         ],
-        "Fs": [[0, 1, 2, 3, 4]],
+        "fs": [[0, 1, 2, 3, 4]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -193,7 +193,7 @@ class Rhombicosidodecahedron_5_A5xI_D5C5(Shape):
             Vec3([τ + 1, τ, 2 * τ]),
             Vec3([1, 1, τ**3]),
         ],
-        "Fs": [[0, 1, 2, 3, 4]],
+        "fs": [[0, 1, 2, 3, 4]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -213,7 +213,7 @@ class Rhombicosidodecahedron_3_A5xI_D3C3(Shape):
             Vec3([2 * τ, τ + 1, τ]),
             Vec3([τ, 2 * τ, τ + 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -234,7 +234,7 @@ class Rhombicosidodecahedron_4_A5xI_D2C2(Shape):
             Vec3([-1, -1, τ**3]),
             Vec3([1, -1, τ**3]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -268,7 +268,7 @@ class Rhombicuboctahedron_3_S4xI_D3C3(Shape):
             Vec3([ω, 1, 1]),
             Vec3([1, ω, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -289,7 +289,7 @@ class Rhombicuboctahedron_4_S4xI_D2C2(Shape):
             Vec3([-1, ω, 1]),
             Vec3([-1, 1, ω]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -310,7 +310,7 @@ class Rhombicuboctahedron_4_S4xI_D4C4(Shape):
             Vec3([-1, -1, ω]),
             Vec3([1, -1, ω]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -344,7 +344,7 @@ class SnubCube_3_S4_C3(Shape):
             Vec3([t, 1, 1 / t]),
             Vec3([1 / t, t, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -364,7 +364,7 @@ class SnubCube_3_S4_E(Shape):
             Vec3([1, 1 / t, t]),
             Vec3([1 / t, t, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -385,7 +385,7 @@ class SnubCube_4_S4_C4(Shape):
             Vec3([-1, -1 / t, t]),
             Vec3([1 / t, -1, t]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -419,7 +419,7 @@ class SnubDodecahedron_3_A5_E(Shape):
             Vec3([α + β / τ - τ, -α * τ + β - 1 / τ, α / τ + β * τ + 1]),
             Vec3([-2 * α, 2, 2 * β]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -439,7 +439,7 @@ class SnubDodecahedron_3_A5_C3(Shape):
             Vec3([α * τ + β + 1 / τ, -α / τ + β * τ - 1, -α + β / τ + τ]),
             Vec3([-α + β / τ + τ, α * τ + β + 1 / τ, -α / τ + β * τ - 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -461,7 +461,7 @@ class SnubDodecahedron_5_A5_C5(Shape):
             Vec3([-α / τ + β * τ + 1, + α - β / τ + τ, α * τ + β - 1 / τ]),
             Vec3([-α / τ + β * τ - 1, -α + β / τ + τ, α * τ + β + 1 / τ]),
         ],
-        "Fs": [[0, 1, 2, 3, 4]],
+        "fs": [[0, 1, 2, 3, 4]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -495,7 +495,7 @@ class TruncatedCube_3_S4xI_D3C3(Shape):
             Vec3([1, 1, γ]),
             Vec3([γ, 1, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -520,7 +520,7 @@ class TruncatedCube_8_S4xI_D4C4(Shape):
             Vec3([γ, -1, 1]),
             Vec3([1, -γ, 1]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5, 6, 7]],
+        "fs": [[0, 1, 2, 3, 4, 5, 6, 7]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -556,7 +556,7 @@ class TruncatedCuboctahedron_6_S4xI_D3C3(Shape):
             Vec3([1, ψ, ω]),
             Vec3([1, ω, ψ]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5]],
+        "fs": [[0, 1, 2, 3, 4, 5]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -581,7 +581,7 @@ class TruncatedCuboctahedron_8_S4xI_D4C4(Shape):
             Vec3([1, -ω, ψ]),
             Vec3([ω, -1, ψ]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5, 6, 7]],
+        "fs": [[0, 1, 2, 3, 4, 5, 6, 7]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -602,7 +602,7 @@ class TruncatedCuboctahedron_4_S4xI_D2C2(Shape):
             Vec3([-1, ψ, ω]),
             Vec3([-1, ω, ψ]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -636,7 +636,7 @@ class TruncatedDodecahedron_3_A5xI_D3C3(Shape):
             Vec3([τ + 1, τ, 2]),
             Vec3([2, τ + 1, τ]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -664,7 +664,7 @@ class TruncatedDodecahedron_10_A5xI_D5C5(Shape):
             Vec3([0, τ - 1, τ + 2]),
 
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
+        "fs": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -699,7 +699,7 @@ class TruncatedIcosahedron_5_A5xI_D5C5(Shape):
             Vec3([τ + 2, 1, 2 * τ]),
             Vec3([2, τ, 2 * τ + 1]),
         ],
-        "Fs": [[0, 1, 2, 3, 4]],
+        "fs": [[0, 1, 2, 3, 4]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -722,7 +722,7 @@ class TruncatedIcosahedron_6_A5xI_D3C3(Shape):
             Vec3([τ, 2 * τ + 1, 2]),
             Vec3([1, 2 * τ, τ + 2]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5]],
+        "fs": [[0, 1, 2, 3, 4, 5]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -762,7 +762,7 @@ class TruncatedIcosidodecahedron_10_A5xI_D5C5(Shape):
             Vec3([2 / τ, τ, 2 * τ + 1]),
             Vec3([τ - 1, τ - 1, τ + 3]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
+        "fs": [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -785,7 +785,7 @@ class TruncatedIcosidodecahedron_6_A5xI_D3C3(Shape):
             Vec3([2, τ + 2, 2 * τ - 1]),
             Vec3([τ, 3, 2 * τ]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5]],
+        "fs": [[0, 1, 2, 3, 4, 5]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -806,7 +806,7 @@ class TruncatedIcosidodecahedron_4_A5xI_D2C2(Shape):
             Vec3([1 - τ, 1 - τ, τ + 3]),
             Vec3([τ - 1, 1 - τ, τ + 3]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -843,7 +843,7 @@ class TruncatedOctahedron_6_S4xI_D3C3(Shape):
             Vec3([0, 2, 1]),
             Vec3([0, 1, 2]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5]],
+        "fs": [[0, 1, 2, 3, 4, 5]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -864,7 +864,7 @@ class TruncatedOctahedron_4_S4xI_D4C4(Shape):
             Vec3([-1, 0, 2]),
             Vec3([0, -1, 2]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -897,7 +897,7 @@ class TruncatedTetrahedron_3_S4A4_D3C3(Shape):
             Vec3([3, 1, 1]),
             Vec3([1, 3, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(
@@ -920,7 +920,7 @@ class TruncatedTetrahedron_6_S4A4_D3C3(Shape):
             Vec3([-3, -1, 1]),
             Vec3([-1, -1, 3]),
         ],
-        "Fs": [[0, 1, 2, 3, 4, 5]],
+        "fs": [[0, 1, 2, 3, 4, 5]],
     }
     def __init__(self, no_of_cols=1, **kwargs):
         super().__init__(

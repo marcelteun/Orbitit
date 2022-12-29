@@ -168,13 +168,13 @@ isomsO3 = isometry.D2()
 class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = geom_3d.SymmetricShape(
-            vs=[], Fs=[], isometries=isometry.A4(), name="FoldedHeptagonsA4"
+            vs=[], fs=[], isometries=isometry.A4(), name="FoldedHeptagonsA4"
         )
         xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
-            vs=[], Fs=[], isometries=isometry.A4(), name="xtraTrisA4"
+            vs=[], fs=[], isometries=isometry.A4(), name="xtraTrisA4"
         )
         trisO3Shape = geom_3d.SymmetricShape(
-            vs=[], Fs=[], isometries=isomsO3, colors=[rgb.cyan[:]], name="o3TrisA4"
+            vs=[], fs=[], isometries=isomsO3, colors=[rgb.cyan[:]], name="o3TrisA4"
         )
         heptagons.FldHeptagonShape.__init__(
             this, [heptagonsShape, xtraTrisShape, trisO3Shape], name="FoldedRegHeptA4"
@@ -267,23 +267,23 @@ class Shape(heptagons.FldHeptagonShape):
         vs.append(Rl * vs[-1])  # vs[23] = V13"
         this.baseVs = vs
         Es = []
-        Fs = []
-        Fs.extend(this.heptagon.Fs)  # use extend to copy the list to Fs
-        Es.extend(this.heptagon.Es)  # use extend to copy the list to Fs
+        fs = []
+        fs.extend(this.heptagon.fs)  # use extend to copy the list to fs
+        Es.extend(this.heptagon.Es)  # use extend to copy the list to fs
         this.heptagonsShape.setBaseVertexProperties(vs=vs)
         this.heptagonsShape.setBaseEdgeProperties(Es=Es)
         # comment out this and nvidia driver crashes:...
-        this.heptagonsShape.setBaseFaceProperties(Fs=Fs)
+        this.heptagonsShape.setBaseFaceProperties(fs=fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.add_extra_faces:
             Es = this.o3triEs[this.edge_alt][:]
-            Fs = this.o3triFs[this.edge_alt][:]
+            fs = this.o3triFs[this.edge_alt][:]
             Es.extend(this.oppO3triEs[this.opposite_edge_alt])
-            Fs.extend(this.oppO3triFs[this.opposite_edge_alt])
+            fs.extend(this.oppO3triFs[this.opposite_edge_alt])
             this.trisO3Shape.setBaseVertexProperties(vs=vs)
             this.trisO3Shape.setBaseEdgeProperties(Es=Es)
-            this.trisO3Shape.setBaseFaceProperties(Fs=Fs)
+            this.trisO3Shape.setBaseFaceProperties(fs=fs)
             theShapes.append(this.trisO3Shape)
             if not this.all_regular_faces:
                 # when you use the rot alternative the rot is leading for
@@ -294,8 +294,8 @@ class Shape(heptagons.FldHeptagonShape):
                     eAlt = this.edge_alt
                 Es = this.triEs[this.edge_alt][:]
                 if this.edge_alt == trisAlt.twist_strip_I:
-                    Fs = this.triFs[this.edge_alt][this.has_reflections][:]
-                    Fs.extend(
+                    fs = this.triFs[this.edge_alt][this.has_reflections][:]
+                    fs.extend(
                         this.oppTriFs[this.opposite_edge_alt][this.has_reflections]
                     )
                     Es.extend(
@@ -307,14 +307,14 @@ class Shape(heptagons.FldHeptagonShape):
                         Es.extend(this.twistedEs_A4)
                     colIds = this.triColIds[eAlt][this.has_reflections]
                 else:
-                    Fs = this.triFs[this.edge_alt][:]
-                    Fs.extend(this.oppTriFs[this.opposite_edge_alt])
+                    fs = this.triFs[this.edge_alt][:]
+                    fs.extend(this.oppTriFs[this.opposite_edge_alt])
                     Es.extend(this.oppTriEs[this.opposite_edge_alt])
                     colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.setBaseVertexProperties(vs=vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es=Es)
                 this.xtraTrisShape.setBaseFaceProperties(
-                    Fs=Fs,
+                    fs=fs,
                     colors=([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]], colIds),
                 )
                 theShapes.append(this.xtraTrisShape)

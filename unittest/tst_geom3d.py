@@ -51,13 +51,13 @@ def get_cube():
           geomtypes.Vec3([ 1, -1, -1]),
           geomtypes.Vec3([ 1,  1, -2]),
           geomtypes.Vec3([.5,  1,  1])]
-    Fs = [[0, 1, 2, 3],
+    fs = [[0, 1, 2, 3],
           [0, 3, 7, 4],
           [1, 0, 4, 5],
           [2, 1, 5, 6],
           [3, 2, 6, 7],
           [7, 6, 5, 4]]
-    return geom_3d.SimpleShape(vs=vs, Fs=Fs,
+    return geom_3d.SimpleShape(vs=vs, fs=fs,
                               colors=([red, yellow, blue], [0, 1, 2, 1, 2, 0]))
 
 
@@ -69,7 +69,7 @@ def get_octahedron():
           geomtypes.Vec3([-2,  0,  0]),
           geomtypes.Vec3([ 0, -2,  0]),
           geomtypes.Vec3([ 0,  0, -2])]
-    Fs = [[0, 1, 2],
+    fs = [[0, 1, 2],
           [0, 2, 3],
           [0, 3, 4],
           [0, 4, 1],
@@ -77,7 +77,7 @@ def get_octahedron():
           [5, 3, 2],
           [5, 4, 3],
           [5, 1, 4]]
-    return geom_3d.SimpleShape(vs=vs, Fs=Fs,
+    return geom_3d.SimpleShape(vs=vs, fs=fs,
                               colors=([yellow], []))
 
 
@@ -205,7 +205,7 @@ class TestSymmetricShape(TestSimpleShapeExtended):
                 geomtypes.Vec3([-1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
                 geomtypes.Vec3([1.0, -1.0, -1.0])],
-            Fs=[[0, 1, 2, 3],
+            fs=[[0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
                 [2, 1, 5, 6],
@@ -290,7 +290,7 @@ class TestSymmetricShape1(TestSimpleShapeExtended):
                 geomtypes.Vec3([-1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
                 geomtypes.Vec3([1.0, -1.0, -1.0])],
-            Fs=[[0, 1, 2, 3],
+            fs=[[0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
                 [2, 1, 5, 6],
@@ -344,7 +344,7 @@ class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
                 geomtypes.Vec3([1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
             ],
-            Fs=[
+            fs=[
                 [0, 2, 1],
                 [0, 1, 3],
                 [0, 3, 2],
@@ -406,7 +406,7 @@ class TestOrbitShape(TestSimpleShapeExtended):
                 geomtypes.Vec3([-1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
                 geomtypes.Vec3([1.0, -1.0, -1.0])],
-            Fs=[[0, 1, 2, 3],
+            fs=[[0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
                 [2, 1, 5, 6],

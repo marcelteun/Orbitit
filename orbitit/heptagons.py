@@ -481,7 +481,7 @@ class RegularHeptagon:
             Vec([-HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
         ]
         self.vs = self.vs_org.copy() # pylint: disable=C0103
-        self.Fs = [[6, 5, 4, 3, 2, 1, 0]]  # pylint: disable=C0103
+        self.fs = [[6, 5, 4, 3, 2, 1, 0]]  # pylint: disable=C0103
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]  # pylint: disable=C0103
 
     def fold(
@@ -540,7 +540,7 @@ class RegularHeptagon:
         #         4       3
         #
         #
-        self.Fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
+        self.fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 1, 6, 2, 5]
         cosa = math.cos(a)
         sina = math.sin(a)
@@ -661,7 +661,7 @@ class RegularHeptagon:
         #
         #         5       4
         #
-        self.Fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
+        self.fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 2, 0, 3, 6]
         if keep_v0:
             assert False, "TODO"
@@ -712,7 +712,7 @@ class RegularHeptagon:
         #
         #
         _ = rotate  # TODO: implement
-        self.Fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
+        self.fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 4, 6, 6, 1, 1, 3]
         cosa = math.cos(a)
         sina = math.sin(a)
@@ -809,7 +809,7 @@ class RegularHeptagon:
         #            4       3
         #
         _ = rotate  # TODO: implement
-        self.Fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
+        self.fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
         self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
         rot0_2 = Rot(axis=self.vs_org[2] - self.vs_org[0], angle=b0)
         v1 = rot0_2 * self.vs_org[1]
@@ -886,7 +886,7 @@ class RegularHeptagon:
         no: number to shift up
         """
         i = [(i + no) % 7 for i in range(7)]
-        self.Fs = [
+        self.fs = [
             [i[0], i[2], i[1]],
             [i[0], i[3], i[2]],
             [i[0], i[4], i[3]],
@@ -1452,7 +1452,7 @@ class RegularHeptagon:
         #          "         "
         #          4         3
         i = [(i + no) % 7 for i in range(7)]
-        self.Fs = [
+        self.fs = [
             [i[1], i[3], i[2]],
             [i[1], i[0], i[3]],
             [i[0], i[4], i[3]],
@@ -1947,7 +1947,7 @@ class RegularHeptagon:
         no: number to shift up
         """
         i = [(i + no) % 7 for i in range(7)]
-        self.Fs = [
+        self.fs = [
             [i[0], i[2], i[1]],
             [i[0], i[3], i[2]],
             [i[0], i[4], i[3]],
@@ -2558,7 +2558,7 @@ class RegularHeptagon:
         no: number to shift up
         """
         i = [(i + no) % 7 for i in range(7)]
-        self.Fs = [
+        self.fs = [
             [i[0], i[2], i[1]],
             [i[0], i[5], i[2]],
             [i[0], i[6], i[5]],
@@ -4781,7 +4781,7 @@ class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
             for i in base_isometries:
                 isometries.append(extra_isometry * i)
 
-        super().__init__(vs=[], Fs=[], isometries=isometries, name=name)
+        super().__init__(vs=[], fs=[], isometries=isometries, name=name)
         self.show_kite = True
         self.show_hepta = False
         self.alt_hept_pos = False

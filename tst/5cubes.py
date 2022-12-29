@@ -10,7 +10,7 @@ shape = geom_3d.SymmetricShape(
     geomtypes.Vec3([-1.0, -1.0, -1.0]),
     geomtypes.Vec3([1.0, -1.0, -1.0]),
   ],
-  Fs = [
+  fs = [
     [0, 1, 2, 3],
     [0, 3, 7, 4],
     [1, 0, 4, 5],

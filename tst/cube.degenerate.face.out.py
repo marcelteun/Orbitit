@@ -12,7 +12,7 @@ shape = orbitit.geom_3d.SimpleShape(
         orbitit.geomtypes.Vec3([1, 1, -2]),
         orbitit.geomtypes.Vec3([0.5, 1, 1])
     ],
-    Fs=[
+    fs=[
         [0, 4, 8],
         [0, 9, 1, 2, 3],
         [0, 3, 7, 4],

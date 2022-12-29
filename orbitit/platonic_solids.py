@@ -58,7 +58,7 @@ class Tetrahedron(OrbitShape):
             Vec3([1, 1, -1]),
             Vec3([-1, 1, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=4, **kwargs):
         super().__init__(
@@ -88,7 +88,7 @@ class Cube(OrbitShape):
             Vec3([-1, -1, 1]),
             Vec3([1, -1, 1]),
         ],
-        "Fs": [[0, 1, 2, 3]],
+        "fs": [[0, 1, 2, 3]],
     }
     def __init__(self, no_of_cols=3, **kwargs):
         super().__init__(
@@ -124,7 +124,7 @@ class Octahedron(OrbitShape):
             Vec3([1, 0, 0]),
             Vec3([0, 1, 0]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=2, **kwargs):
         super().__init__(
@@ -162,7 +162,7 @@ class Dodecahedron(OrbitShape):
             Vec3([TAU, TAU, TAU]),
             Vec3([0, 1, TAU + 1]),
         ],
-        "Fs": [[0, 1, 2, 3, 4]],
+        "fs": [[0, 1, 2, 3, 4]],
     }
     def __init__(self, no_of_cols=6, **kwargs):
         super().__init__(
@@ -198,7 +198,7 @@ class Icosahedron(OrbitShape):
             Vec3([TAU, 1, 0]),
             Vec3([0, TAU, 1]),
         ],
-        "Fs": [[0, 1, 2]],
+        "fs": [[0, 1, 2]],
     }
     def __init__(self, no_of_cols=5, **kwargs):
         super().__init__(

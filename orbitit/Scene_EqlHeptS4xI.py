@@ -272,23 +272,23 @@ class Shape(heptagons.EqlHeptagonShape):
                     xtraEs = [43, 44, 46, 47, 49, 50]
 
         this.setBaseVertexProperties(vs = vs, Ns = Ns)
-        Fs = []
+        fs = []
         Es = []
         colIds = []
         if this.show_kite:
-            Fs.extend(this.kiteFs)
+            fs.extend(this.kiteFs)
             Es.extend(this.kiteEs)
             colIds.extend(this.kiteColIds)
         if this.show_hepta:
-            Fs.extend(this.heptFs)
+            fs.extend(this.heptFs)
             Es.extend(this.heptEs)
             colIds.extend(this.heptColIds)
         if this.show_extra:
-            Fs.extend(xtraFs)
+            fs.extend(xtraFs)
             Es.extend(xtraEs)
             colIds.extend(this.xtraColIds)
         this.setBaseEdgeProperties(Es=Es)
-        this.setBaseFaceProperties(Fs=Fs, colors=(this.face_col, colIds))
+        this.setBaseFaceProperties(fs=fs, colors=(this.face_col, colIds))
 
     def to_postscript(this,
             face_indices=[],

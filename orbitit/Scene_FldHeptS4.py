@@ -151,21 +151,21 @@ class Shape(heptagons.FldHeptagonShape):
     def __init__(this, *args, **kwargs):
         heptagonsShape = geom_3d.SymmetricShape(
             vs=[],
-            Fs=[],
+            fs=[],
             isometries=isomS4,
             name='FoldedHeptagonsS4',
             regen_edges=False
         )
         xtraTrisShape = geom_3d.SymmetricShapeSplitCols(
             vs=[],
-            Fs=[],
+            fs=[],
             isometries=isomS4,
             name='xtraTrisS4',
             regen_edges=False
         )
         trisO3Shape = geom_3d.OrbitShape(
             vs=[],
-            Fs=[],
+            fs=[],
             final_sym=isomS4,
             stab_sym=isomO3,
             colors=[rgb.cyan[:]],
@@ -174,7 +174,7 @@ class Shape(heptagons.FldHeptagonShape):
         )
         trisO4Shape = geom_3d.OrbitShape(
             vs=[],
-            Fs=[],
+            fs=[],
             final_sym=isomS4,
             stab_sym=isomO4,
             colors=[rgb.cyan[:]],
@@ -306,28 +306,28 @@ class Shape(heptagons.FldHeptagonShape):
         # TODO: if adding more vs, rm above if or use predefined indices
         this.baseVs = vs
         Es = []
-        Fs = []
-        Fs.extend(this.heptagon.Fs) # use extend to copy the list to Fs
-        Es.extend(this.heptagon.Es) # use extend to copy the list to Fs
+        fs = []
+        fs.extend(this.heptagon.fs) # use extend to copy the list to fs
+        Es.extend(this.heptagon.Es) # use extend to copy the list to fs
         this.heptagonsShape.setBaseVertexProperties(vs = vs)
         this.heptagonsShape.setBaseEdgeProperties(Es = Es)
         # TODO CHk: comment out this and nvidia driver crashes:...
-        this.heptagonsShape.setBaseFaceProperties(Fs = Fs)
+        this.heptagonsShape.setBaseFaceProperties(fs = fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         # TODO rm:
         if this.add_extra_faces:
-            Fs = this.o3triFs[this.edge_alt][:]
+            fs = this.o3triFs[this.edge_alt][:]
             Es = this.o3triEs[this.edge_alt][:]
             this.trisO3Shape.setBaseVertexProperties(vs = vs)
             this.trisO3Shape.setBaseEdgeProperties(Es = Es)
-            this.trisO3Shape.setBaseFaceProperties(Fs = Fs)
+            this.trisO3Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO3Shape)
             Es = this.o4triEs[this.opposite_edge_alt][:]
-            Fs = this.o4triFs[this.opposite_edge_alt][:]
+            fs = this.o4triFs[this.opposite_edge_alt][:]
             this.trisO4Shape.setBaseVertexProperties(vs = vs)
             this.trisO4Shape.setBaseEdgeProperties(Es = Es)
-            this.trisO4Shape.setBaseFaceProperties(Fs = Fs)
+            this.trisO4Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO4Shape)
             if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
@@ -336,15 +336,15 @@ class Shape(heptagons.FldHeptagonShape):
                     eAlt = this.opposite_edge_alt
                 else:
                     eAlt = this.edge_alt
-                Fs = this.triFs[this.edge_alt][:]
-                Fs.extend(this.oppTriFs[this.opposite_edge_alt])
+                fs = this.triFs[this.edge_alt][:]
+                fs.extend(this.oppTriFs[this.opposite_edge_alt])
                 Es = this.triEs[this.edge_alt][:]
                 Es.extend(this.oppTriEs[this.opposite_edge_alt])
                 colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.setBaseVertexProperties(vs = vs)
                 this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
                 this.xtraTrisShape.setBaseFaceProperties(
-                    Fs = Fs,
+                    fs = fs,
                     colors = ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]],
                               colIds))
                 theShapes.append(this.xtraTrisShape)

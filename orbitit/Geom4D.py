@@ -47,7 +47,7 @@ class SimpleShape:
     className = "Geom4D.SimpleShape"
     def __init__(this, vs, Cs, Es = [], Ns = [], colors = ([], []), name = "4DSimpleShape"):
         """
-        Cs: and array of cells, consisting of an array of Fs.
+        Cs: and array of cells, consisting of an array of fs.
         """
         this.dimension = 4
         this.generateNormals = False
@@ -263,7 +263,7 @@ class SimpleShape:
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Fs' in dict and dict['Fs'] != None:
+            if 'fs' in dict and dict['fs'] != None:
                 logging.info("FS not supported, use Cs instead")
             if 'colors' in dict and dict['colors'] != None:
                 this.f.col = (dict['colors'])
@@ -284,11 +284,11 @@ class SimpleShape:
                    array containing the rgb value between 0 and 1.
                 1. colour index per face:
                    An array of colour indices. It specifies for each face with
-                   index 'i' in Fs which colour index from the parameter color
+                   index 'i' in fs which colour index from the parameter color
                    is used for this face. If empty then colors[0][0] shall be
                    used for each face.
-                   It should have the same length as Fs (or the current faces if
-                   Fs not specified) otherwise the parameter is ignored and the
+                   It should have the same length as fs (or the current faces if
+                   fs not specified) otherwise the parameter is ignored and the
                    face colors are set by some default algorithm.
         drawFaces: settings that expresses whether the faces should be drawn.
         NOTE: these settings can be overwritten by setCellProperties, see
@@ -570,7 +570,7 @@ class SimpleShape:
                 shapeFs.extend(cellFs)
                 # for shapeColIndices.extend() see above
             this.cell = geom_3d.SimpleShape(
-                    shapeVs, shapeFs, shapeEs, [], # vs , Fs, Es, Ns
+                    shapeVs, shapeFs, shapeEs, [], # vs , fs, Es, Ns
                     (shapeCols, shapeColIndices),
                     name = '%s_projection' % (this.name)
                 )
@@ -628,7 +628,7 @@ class SimpleShape:
             # Add a cell for just the edges:
             if this.e.draw:
                 cell = geom_3d.SimpleShape(
-                        Vs3D, [], this.Es, [], # vs , Fs, Es, Ns
+                        Vs3D, [], this.Es, [], # vs , fs, Es, Ns
                         name = '%s_Es' % (this.name)
                     )
                 cell.set_vertex_props(radius = this.v.radius, color = this.v.col)
@@ -643,7 +643,7 @@ class SimpleShape:
                 else:
                     colors = (this.f.col[0], this.f.col[1][i])
                 cell = geom_3d.SimpleShape(
-                        Vs3D, this.Cs[i], [], [], # vs , Fs, Es, Ns
+                        Vs3D, this.Cs[i], [], [], # vs , fs, Es, Ns
                         colors,
                         name = '%s_%d' % (this.name, i)
                     )

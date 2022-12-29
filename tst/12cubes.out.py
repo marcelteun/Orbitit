@@ -10,7 +10,7 @@ shape = orbitit.geom_3d.SymmetricShape(
         orbitit.geomtypes.Vec3([-1, -1, -1]),
         orbitit.geomtypes.Vec3([1, -1, -1])
     ],
-    Fs=[
+    fs=[
         [0, 1, 2, 3],
         [0, 3, 7, 4],
         [1, 0, 4, 5],

@@ -365,7 +365,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
             col_sym='',
         ):
         """
-        base: the descriptive. A dictionary with 'vs' and 'Fs'
+        base: the descriptive. A dictionary with 'vs' and 'fs'
         final_sym: isometry object describing the final symmetry
         stab_sym: isometry object descibing the stabiliser symmetry as subgroup
                   of the final symmetry
@@ -387,7 +387,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         geom_3d.OrbitShape.__init__(
             self,
             base['vs'],
-            base['Fs'],
+            base['fs'],
             final_sym=final_sym,
             stab_sym=stab_sym,
             name=name,
@@ -431,7 +431,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
             final_sym = self.orbit.final_sym_alt
             stab_sym = self.orbit.stab_sym_alt
             verts = self.getBaseVertexProperties()['vs']
-            faces = self.getBaseFaceProperties()['Fs']
+            faces = self.getBaseFaceProperties()['fs']
             super().__init__(
                 verts,
                 faces,
@@ -509,7 +509,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         for v in self.base_shape.vs:
             js += f"  {v},\n"
         js += '];'
-        js += f"{self.name}.descr.Fs = {self.base_shape.Fs};"
+        js += f"{self.name}.descr.fs = {self.base_shape.fs};"
         eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         js += f"{self.name}.descr.transform = {eye};\n"
         js += f"{self.name}.isoms = [\n"
