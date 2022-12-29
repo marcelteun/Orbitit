@@ -268,7 +268,7 @@ class Shape(Geom4D.SimpleShape):
         this.set_face_props(colors = (Cols, colIds))
 
     def gl_init(self):
-        super().glInit()
+        super().gl_init()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glEnable(GL_BLEND)
 
