@@ -42,7 +42,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.col_width = width
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
-        self.cols = self.canvas.shape.getFaceProperties()['colors']
+        self.cols = self.canvas.shape.face_props['colors']
         # take a copy for reset
         self.org_cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.cols]
         self.add_content()

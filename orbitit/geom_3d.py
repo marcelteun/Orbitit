@@ -947,7 +947,7 @@ class SimpleShape(base.Orbitit):
         keep_one: of the faces with duplicates keep at least one.
         """
         v_props = self.vertex_props
-        f_props = self.getFaceProperties()
+        f_props = self.face_props
         fs = f_props["fs"]
         org_cols = f_props["colors"]
         d = dict()
@@ -987,7 +987,7 @@ class SimpleShape(base.Orbitit):
             are equal.
         """
         vProps = self.vertex_props
-        fProps = self.getFaceProperties()
+        fProps = self.face_props
         cpVs = copy.deepcopy(vProps["vs"])
         cpFs = copy.deepcopy(fProps["fs"])
         glue.mergeVs(cpVs, cpFs, precision)
@@ -1147,17 +1147,11 @@ class SimpleShape(base.Orbitit):
         """
         Define the properties of the faces.
 
-        Accepted are the optional (keyword) parameters:
+        Send in an dictionary with the following keys:
           - fs,
           - colors,
           - drawFaces.
-        Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
-        If they are not specified (or equal to None) they are not changed.
-        See getFaceProperties for the explanation of the keywords.
-        The output of getFaceProperties can be used as the dictPar parameter.
-        This can be used to copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
+        See getter for the explanation of the keys.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -1165,16 +1159,17 @@ class SimpleShape(base.Orbitit):
             else:
                 face_dict = kwargs
             if "fs" in face_dict and face_dict["fs"] is not None:
-                self.__setFs(face_dict["fs"])
+                self._set_faces(face_dict["fs"])
             if "colors" in face_dict and face_dict["colors"] is not None:
                 self.setFaceColors(face_dict["colors"])
             self.divideColorWrapper()
             if "drawFaces" in face_dict and face_dict["drawFaces"] is not None:
                 self.setEnableDrawFaces(face_dict["drawFaces"])
 
-    def getFaceProperties(self):
+    @property
+    def face_props(self):
         """
-        Return the current face properties as can be set by set_face_props.
+        Return the current face properties.
 
         Returned is a dictionary with the keywords fs, colors, and drawFaces.
         fs: Optional array of faces, that do not need to be triangular. It is a
@@ -1211,11 +1206,11 @@ class SimpleShape(base.Orbitit):
             ts.append(triF)
         return ts
 
-    def __setFs(self, fs):
+    def _set_faces(self, fs):
         """
         Define the shape faces
 
-        fs: see getFaceProperties.
+        fs: same as in face_props.
         """
         for f in fs:
             assert len(f) > 2, "A face should have at least 3 vertices"
@@ -1232,7 +1227,7 @@ class SimpleShape(base.Orbitit):
         """
         Define the colours of the faces.
 
-        colors: see getFaceProperties.
+        fs: same as in face_props.
         """
         if colors[0] is not None:
             colorDefs = colors[0]
@@ -1248,12 +1243,7 @@ class SimpleShape(base.Orbitit):
         assert self.nrOfColors > 0, "Empty colorDefs: %s" % colorDefs
 
     def getFaceColors(self):
-        """
-        Get the colours of the faces.
-
-        Same as getFaceProperties()['colors'] but provided since setFaceColors
-        exists.
-        """
+        """Get the colours of the faces."""
         return self.colorData
 
     def setEnableDrawFaces(self, draw=True):
@@ -2336,7 +2326,7 @@ class SimpleShape(base.Orbitit):
         # check if level is in supported domain
         if level < 1 or level > 2:
             return shape
-        fprop = self.getFaceProperties()
+        fprop = self.face_props
         cols = fprop["colors"]
         vs = self.vs[:]
         nrOrgVs = len(self.vs)
@@ -2712,12 +2702,13 @@ class CompoundShape(base.Orbitit):
             )
         self.merge_needed = True
 
-    def getFaceProperties(self):
+    @property
+    def face_props(self):
         """Return a dictionary of the face properties of the compound
 
         See set_face_props what to expect.
         """
-        d = self._shapes[0].getFaceProperties()
+        d = self._shapes[0].face_props
         return {"fs": self.fs, "colors": self.colorData, "drawFaces": d["drawFaces"]}
 
     def transform(self, trans):
@@ -3073,9 +3064,8 @@ class SymmetricShape(CompoundShape):
         """
         Get the face properties of the base element.
 
-        See SimpleShape.getFaceProperties for more.
         """
-        return self.base_shape.getFaceProperties()
+        return self.base_shape.face_props
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""

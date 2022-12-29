@@ -404,7 +404,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
         if (
-                len(shape.getFaceProperties()['fs']) == 0
+                len(shape.face_props['fs']) == 0
                 and
                 self.panel.shape.vertex_props['radius'] <= 0
         ):
@@ -782,7 +782,7 @@ class MainPanel(wx.Panel):
         del old_e_settings['es']
         self.canvas.shape.edge_props = old_e_settings
         # Use only the 'drawFaces' setting:
-        old_f_settings = {'drawFaces': old_shape.getFaceProperties()['drawFaces']}
+        old_f_settings = {'drawFaces': old_shape.face_props['drawFaces']}
         self.canvas.shape.set_face_props(old_f_settings)
         # if the shape generates the normals itself:
         # TODO: handle that this.ns is set correctly, i.e. normalised

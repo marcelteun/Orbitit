@@ -237,31 +237,24 @@ class SimpleShape:
         """
         Define the properties of the faces.
 
-        Accepted are the optional (keyword) parameters:
+        Accepted is a dictionary with the following keys:
           - colors,
           - drawFaces.
-        Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
-        If they are not specified (or equal to None) they are not changed.
-        See getFaceProperties for the explanation of the keywords.
-        The output of getFaceProperties can be used as the dictPar parameter.
-        This can be used to copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
+        See setter for more explanation of these.
         """
         if dictPar != None or kwargs != {}:
             if dictPar != None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'fs' in dict and dict['fs'] != None:
-                logging.info("FS not supported, use Cs instead")
             if 'colors' in dict and dict['colors'] != None:
                 this.f.col = (dict['colors'])
             if 'drawFaces' in dict and dict['drawFaces'] != None:
                 this.f.draw = dict['drawFaces']
             this.projectedTo3D = False
 
-    def getFaceProperties(this):
+    @property
+    def face_props(self):
         """
         Return the current face properties as can be set by set_face_props.
 
@@ -285,9 +278,9 @@ class SimpleShape:
         setCellProperties (or getCellProperties).
         """
         return {
-                'colors': this.f.col,
-                'drawFaces': this.f.draw
-            }
+            'colors': self.f.col,
+            'drawFaces': self.f.draw
+        }
 
     def setCellProperties(this, dictPar = None, **kwargs):
         """
@@ -589,7 +582,7 @@ class SimpleShape:
                     cellEs.extend(this.es)
                 this.cell.es = cellEs
         if this.updateTransparency:
-            cellCols = this.cell.getFaceProperties()['colors']
+            cellCols = this.cell.face_props['colors']
             if this.removeTransparency:
                 shapeCols = [ c[0:3] for c in cellCols[0] ]
             else:
