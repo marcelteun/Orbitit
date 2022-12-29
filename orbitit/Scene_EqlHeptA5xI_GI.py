@@ -191,7 +191,7 @@ class Shape(heptagons.EqlHeptagonShape):
         if this.add_extra_edge:
             this.xtraEs = [xtraEdgeIndex, 16]
 
-        this.setBaseVertexProperties(vs=vs, ns=ns)
+        this.base_shape.vertex_props = {'vs': vs, 'ns': ns}
         fs = []
         es = []
         colIds = []

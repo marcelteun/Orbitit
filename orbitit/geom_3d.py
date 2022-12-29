@@ -3057,51 +3057,6 @@ class SymmetricShape(CompoundShape):
         self.base_shape.orientation = orientation
         self.needs_apply_isoms = True
 
-    def setBaseVertexProperties(self, dictPar=None, **kwargs):
-        """
-        Set the vertices and how/whether vertices are drawn in OpenGL for the
-        base element.
-
-        Accepted are the optional (keyword) parameters:
-        - vs,
-        - radius,
-        - color.
-        - ns.
-        Check SimpleShape.vertex_props for more details.
-        """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                vertex_dict = dictPar
-            else:
-                vertex_dict = kwargs
-            vs = None
-            try:
-                vs = vertex_dict["vs"]
-            except KeyError:
-                pass
-            ns = None
-            try:
-                ns = vertex_dict["ns"]
-            except KeyError:
-                pass
-            if not (vs is None and ns is None):
-                self.base_shape.vertex_props = {'vs': vs, 'ns': ns}
-                self.needs_apply_isoms = True
-            radius = None
-            try:
-                radius = vertex_dict["radius"]
-            except KeyError:
-                pass
-            color = None
-            try:
-                color = vertex_dict["color"]
-            except KeyError:
-                pass
-            if not (radius is None and color is None):
-                self.vertex_props = {'radius': radius, 'color': color}
-        else:
-            logging.warning("No parameters specified: ignoring method call")
-
     def setBaseEdgeProperties(self, dictPar=None, **kwargs):
         """
         Specify the edges and set how they are drawn in OpenGL.

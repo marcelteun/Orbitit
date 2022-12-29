@@ -328,7 +328,7 @@ class Shape(heptagons.FldHeptagonShape):
         fs = []
         fs.extend(this.heptagon.fs) # use extend to copy the list to fs
         es.extend(this.heptagon.es) # use extend to copy the list to fs
-        this.heptagonsShape.setBaseVertexProperties(vs = vs)
+        this.heptagonsShape.base_shape.vertex_props = {'vs': vs}
         this.heptagonsShape.setBaseEdgeProperties(es = es)
         # TODO CHk: comment out this and nvidia driver crashes:...
         this.heptagonsShape.setBaseFaceProperties(fs = fs)
@@ -339,13 +339,13 @@ class Shape(heptagons.FldHeptagonShape):
                 "this triangle fill isn't implemented for A5"
             fs = this.o5triFs[this.edge_alt][:]
             es = this.o5triEs[this.edge_alt][:]
-            this.trisO5Shape.setBaseVertexProperties(vs = vs)
+            this.trisO5Shape.base_shape.vertex_props = {'vs': vs}
             this.trisO5Shape.setBaseEdgeProperties(es = es)
             this.trisO5Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO5Shape)
             es = this.o3triEs[this.opposite_edge_alt][:]
             fs = this.o3triFs[this.opposite_edge_alt][:]
-            this.trisO3Shape.setBaseVertexProperties(vs = vs)
+            this.trisO3Shape.base_shape.vertex_props = {'vs': vs}
             this.trisO3Shape.setBaseEdgeProperties(es = es)
             this.trisO3Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO3Shape)
@@ -365,7 +365,7 @@ class Shape(heptagons.FldHeptagonShape):
                 fs.extend(this.oppTriFs[this.opposite_edge_alt])
                 es = this.triEs[this.edge_alt][:]
                 es.extend(this.oppTriEs[this.opposite_edge_alt])
-                this.xtraTrisShape.setBaseVertexProperties(vs=vs)
+                this.xtraTrisShape.base_shape.vertex_props = {'vs': vs}
                 this.xtraTrisShape.setBaseEdgeProperties(es=es)
                 this.xtraTrisShape.setBaseFaceProperties(
                     fs = fs,

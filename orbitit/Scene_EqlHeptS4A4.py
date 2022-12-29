@@ -222,7 +222,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 [42, 43, 44]
             ]
 
-        this.setBaseVertexProperties(vs=vs, ns=ns)
+        this.base_shape.vertex_props = {'vs': vs, 'ns': ns}
         fs = []
         es = []
         colIds = []

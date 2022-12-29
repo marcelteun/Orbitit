@@ -271,7 +271,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 else:
                     xtraEs = [43, 44, 46, 47, 49, 50]
 
-        this.setBaseVertexProperties(vs=vs, ns=ns)
+        this.base_shape.vertex_props = {'vs': vs, 'ns': ns}
         fs = []
         es = []
         colIds = []
