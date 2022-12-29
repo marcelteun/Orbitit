@@ -141,7 +141,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def update_shape_cols(self):
         """Update the face colours of the current shape"""
-        self.canvas.shape.set_face_props(colors=self.cols)
+        self.canvas.shape.face_props = {'colors': self.cols}
         self.canvas.paint()
 
     def close(self):
@@ -806,13 +806,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
-        self.canvas.shape.set_face_props(drawFaces=True)
+        self.canvas.shape.face_props = {'drawFaces': True}
         if sel == self.cull_show_both:
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_none:
             # don't use culling here: doesn't work with edge radius and vertext
             # radius > 0
-            self.canvas.shape.set_face_props(drawFaces=False)
+            self.canvas.shape.face_props = {'drawFaces': False}
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_front:
             GL.glCullFace(GL.GL_FRONT)
