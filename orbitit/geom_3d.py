@@ -813,7 +813,7 @@ class SimpleShape(base.Orbitit):
     """
 
     def __init__(
-        self, vs, fs, es=None, Ns=None, colors=None, name="SimpleShape", orientation=None
+        self, vs, fs, es=None, ns=None, colors=None, name="SimpleShape", orientation=None
     ):
         """
         vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -822,7 +822,7 @@ class SimpleShape(base.Orbitit):
             order in which the vertices appear in the face.
         es: optional parameter edges. An array of edges. Each edges is 2
             dimensional array that contain the vertex indices of the edge.
-        Ns: optional array of normals (per vertex) This value might be [] in
+        ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
             is used by gl_draw
         colors: A tuple that defines the colour of the faces. The tuple consists
@@ -842,8 +842,8 @@ class SimpleShape(base.Orbitit):
         """
         if not es:
             es = []
-        if not Ns:
-            Ns = []
+        if not ns:
+            ns = []
         self.dimension = 3
         self.face_normals = []
         self.generateNormals = True
@@ -860,7 +860,7 @@ class SimpleShape(base.Orbitit):
         if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
         self.zoom_factor = 1.0
-        self.set_vertex_props(vs=vs, Ns=Ns, radius=-1.0, color=[1.0, 1.0, 0.8])
+        self.set_vertex_props(vs=vs, ns=ns, radius=-1.0, color=[1.0, 1.0, 0.8])
         self.set_edge_props(
             es=es, radius=-1.0, color=[0.1, 0.1, 0.1], drawEdges=True
         )
@@ -1015,7 +1015,7 @@ class SimpleShape(base.Orbitit):
         - vs,
         - radius,
         - color.
-        - Ns.
+        - ns.
         Either these parameters are specified as part of kwargs or as key value
         pairs in the dictionary dict_par.
         If they are not specified (or equal to None) they are not changed.
@@ -1034,8 +1034,8 @@ class SimpleShape(base.Orbitit):
                 self.VsRange = range(len(self.vs))
                 self.gl.updateVs = True
                 self.face_normals_up_to_date = False
-            if "Ns" in the_dict and the_dict["Ns"] is not None:
-                self.Ns = the_dict["Ns"]
+            if "ns" in the_dict and the_dict["ns"] is not None:
+                self.ns = the_dict["ns"]
             if "radius" in the_dict and the_dict["radius"] is not None:
                 self.gl.vRadius = the_dict["radius"]
                 self.gl.addSphereVs = the_dict["radius"] > 0.0
@@ -1056,14 +1056,14 @@ class SimpleShape(base.Orbitit):
                 no spheres are required (for preformance reasons) set the radius
                 to a value <= 0.0.
         color: optianl array with 3 rgb values between 0 and 1.
-        Ns: an array of normals (per vertex) This value might be None if the
+        ns: an array of normals (per vertex) This value might be None if the
             value is not set. If the value is set it is used by gl_draw
         """
         return {
             "vs": self.vs,
             "radius": self.gl.vRadius,
             "color": self.gl.vCol,
-            "Ns": self.Ns,
+            "ns": self.ns,
         }
 
     def gl_alwaysSetVertices(self, do):
@@ -1607,13 +1607,13 @@ class SimpleShape(base.Orbitit):
                 try:
                     if not GL.glVertexPointerf(vs):
                         return
-                    normals = self.Ns
+                    normals = self.ns
                 except TypeError:
                     vs = [[v[0], v[1], v[2]] for v in vs]
-                    logging.info("gl_draw: converting vs(Ns); vec3 type not accepted")
+                    logging.info("gl_draw: converting vs(ns); vec3 type not accepted")
                     if not GL.glVertexPointerf(vs):
                         return
-                    normals = [[v[0], v[1], v[2]] for v in self.Ns]
+                    normals = [[v[0], v[1], v[2]] for v in self.ns]
                 if normals != []:
                     assert len(normals) == len(
                         vs
@@ -1623,17 +1623,17 @@ class SimpleShape(base.Orbitit):
                 else:
                     GL.glNormalPointerf(vs)
                     self.NsSaved = vs
-            elif self.Ns != [] and len(self.Ns) == len(vs):
+            elif self.ns != [] and len(self.ns) == len(vs):
                 try:
                     if not GL.glVertexPointerf(vs):
                         return
-                    normals = self.Ns
+                    normals = self.ns
                 except TypeError:
                     vs = [[v[0], v[1], v[2]] for v in vs]
-                    logging.info("gl_draw: converting vs(Ns); vec3 type not accepted")
+                    logging.info("gl_draw: converting vs(ns); vec3 type not accepted")
                     if not GL.glVertexPointerf(vs):
                         return
-                    normals = [[n[0], n[1], n[2]] for n in self.Ns]
+                    normals = [[n[0], n[1], n[2]] for n in self.ns]
                 GL.glNormalPointerf(normals)
                 self.NsSaved = normals
             else:
@@ -1658,7 +1658,7 @@ class SimpleShape(base.Orbitit):
                 self.gl.sphere.draw(self.vs[i])
         # EDGES
         if self.gl.drawEdges:
-            if self.generateNormals and (self.Ns == [] or len(self.Ns) != len(self.vs)):
+            if self.generateNormals and (self.ns == [] or len(self.ns) != len(self.vs)):
                 es = self.nEs
                 vs = self.nVs
             else:
@@ -2544,7 +2544,7 @@ class CompoundShape(base.Orbitit):
         vs = []
         fs = []
         es = []
-        Ns = []
+        ns = []
         colorDefs = []
         colorIndices = []
         for s in self._shapes:
@@ -2555,15 +2555,15 @@ class CompoundShape(base.Orbitit):
             # for the various shapes
             for v in s.vs:
                 vs.append(s.orientation * v)
-            for v in s.Ns:
-                Ns.append(s.orientation * v)
+            for v in s.ns:
+                ns.append(s.orientation * v)
             # offset all faces:
             fs.extend([[i + VsOffset for i in f] for f in s.fs])
             es.extend([i + VsOffset for i in s.es])
             colorDefs.extend(s.colorData[0])
             colorIndices.extend([i + colOffset for i in s.colorData[1]])
         self.merged_shape = SimpleShape(
-            vs=vs, fs=fs, es=es, Ns=Ns, colors=(colorDefs, colorIndices)
+            vs=vs, fs=fs, es=es, ns=ns, colors=(colorDefs, colorIndices)
         )
         self.merge_needed = False
 
@@ -2601,7 +2601,7 @@ class CompoundShape(base.Orbitit):
         """Set the vertex properties for a whole compound shape at once
 
         vs: This is an array of vs. One vs array for each shape element
-        Ns: This is an array of Ns. One Ns array for each shape element
+        ns: This is an array of ns. One ns array for each shape element
         radius: one radius that is valid for all shape elements
         color: one vertex color that is valid for all shape elements
 
@@ -2616,10 +2616,10 @@ class CompoundShape(base.Orbitit):
                 vs = vertex_dict["vs"]
             else:
                 vs = [None for shape in self._shapes]
-            if "Ns" in vertex_dict and vertex_dict["Ns"] is not None:
-                Ns = vertex_dict["Ns"]
+            if "ns" in vertex_dict and vertex_dict["ns"] is not None:
+                ns = vertex_dict["ns"]
             else:
-                Ns = [None for shape in self._shapes]
+                ns = [None for shape in self._shapes]
             if "radius" in vertex_dict:
                 radius = vertex_dict["radius"]
             else:
@@ -2629,10 +2629,10 @@ class CompoundShape(base.Orbitit):
             else:
                 color = None
         assert len(vs) == len(self._shapes)
-        assert len(Ns) == len(self._shapes)
+        assert len(ns) == len(self._shapes)
         for i in range(len(self._shapes)):
             self._shapes[i].set_vertex_props(
-                vs=vs[i], Ns=Ns[i], radius=radius, color=color
+                vs=vs[i], ns=ns[i], radius=radius, color=color
             )
         self.merge_needed = True
 
@@ -2647,7 +2647,7 @@ class CompoundShape(base.Orbitit):
             "vs": self.vs,
             "radius": d["radius"],
             "color": d["color"],
-            "Ns": self.Ns,
+            "ns": self.ns,
         }
 
     def set_edge_props(self, dictPar=None, **kwargs):
@@ -2761,8 +2761,8 @@ class CompoundShape(base.Orbitit):
         return [shape.vs for shape in self._shapes]
 
     @property
-    def Ns(self):
-        return [shape.Ns for shape in self._shapes]
+    def ns(self):
+        return [shape.ns for shape in self._shapes]
 
     @property
     def es(self):
@@ -2820,7 +2820,7 @@ class SymmetricShape(CompoundShape):
         vs,
         fs,
         es=None,
-        Ns=None,
+        ns=None,
         colors=None,
         isometries=None,
         regen_edges=True,
@@ -2834,7 +2834,7 @@ class SymmetricShape(CompoundShape):
             order in which the vertices appear in the face.
         es: optional parameter edges. An array of edges. Each edges is 2
             dimensional array that contain the vertex indices of the edge.
-        Ns: optional array of normals (per vertex) This value might be [] in
+        ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
             is used by gl_draw
         colors: optional array parameter describing the colours. Each element consists of RGB
@@ -2854,7 +2854,7 @@ class SymmetricShape(CompoundShape):
             vs,
             fs,
             es,
-            Ns=Ns,
+            ns=ns,
             colors=([colors[0]], []) if colors else None,
             orientation=orientation,
         )
@@ -2895,12 +2895,12 @@ class SymmetricShape(CompoundShape):
         s = s.add_decr_line("],")
         if self.base_shape.es != []:
             s = s.add_line("es=%s," % repr(self.base_shape.es))
-        if self.base_shape.Ns != []:
-            s = s.add_incr_line("Ns=[")
+        if self.base_shape.ns != []:
+            s = s.add_incr_line("ns=[")
             s.incr()
             try:
                 s = s.glue_line(
-                    ",\n".join(repr(n).reindent(s.indent) for n in self.base_shape.Ns)
+                    ",\n".join(repr(n).reindent(s.indent) for n in self.base_shape.ns)
                 )
             except AttributeError:
                 logging.error(
@@ -3038,7 +3038,7 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.vs,
                 self.base_shape.fs,
                 self.base_shape.es,
-                Ns=self.base_shape.Ns,
+                ns=self.base_shape.ns,
                 colors=([self.shape_colors[i]], []),
                 orientation=isom * self.base_shape.orientation,
             )
@@ -3073,7 +3073,7 @@ class SymmetricShape(CompoundShape):
         - vs,
         - radius,
         - color.
-        - Ns.
+        - ns.
         Check SimpleShape.set_vertex_props for more details.
         """
         if dictPar is not None or kwargs != {}:
@@ -3086,13 +3086,13 @@ class SymmetricShape(CompoundShape):
                 vs = vertex_dict["vs"]
             except KeyError:
                 pass
-            Ns = None
+            ns = None
             try:
-                Ns = vertex_dict["Ns"]
+                ns = vertex_dict["ns"]
             except KeyError:
                 pass
-            if not (vs is None and Ns is None):
-                self.base_shape.set_vertex_props(vs=vs, Ns=Ns)
+            if not (vs is None and ns is None):
+                self.base_shape.set_vertex_props(vs=vs, ns=ns)
                 self.needs_apply_isoms = True
             radius = None
             try:
@@ -3279,7 +3279,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
                 self.base_shape.vs,
                 self.base_shape.fs,
                 self.base_shape.es,
-                Ns=self.base_shape.Ns,
+                ns=self.base_shape.ns,
                 colors=self.shape_colors[i],
                 orientation=isom * self.base_shape.orientation,
             )
@@ -3306,7 +3306,7 @@ class OrbitShape(SymmetricShape):
         vs,
         fs,
         es=None,
-        Ns=None,
+        ns=None,
         final_sym=isometry.E,
         stab_sym=isometry.E,
         colors=None,
@@ -3321,7 +3321,7 @@ class OrbitShape(SymmetricShape):
             order in which the vertices appear in the face.
         es: optional parameter edges. An array of edges. Each edges is 2
             dimensional array that contain the vertex indices of the edge.
-        Ns: optional array of normals (per vertex) This value might be [] in
+        ns: optional array of normals (per vertex) This value might be [] in
             which case the normalised vertices are used. If the value is set it
             is used by gl_draw
         final_sym: the resulting symmetry of the shape.
@@ -3360,7 +3360,7 @@ class OrbitShape(SymmetricShape):
         if not quiet:
             logging.info("Applying an orbit of order %d", len(fs_orbit))
         super().__init__(
-            vs, fs, es, Ns, isometries=fs_orbit, name=name, regen_edges=regen_edges
+            vs, fs, es, ns, isometries=fs_orbit, name=name, regen_edges=regen_edges
         )
         # This is save so heirs can still use repr_dict from this class
         self.json_class = OrbitShape
@@ -3424,12 +3424,12 @@ class OrbitShape(SymmetricShape):
         s = s.add_decr_line("],")
         if self.base_shape.es != []:
             s = s.add_line("es=%s," % repr(self.base_shape.es))
-        if self.base_shape.Ns != []:
-            s = s.add_incr_line("Ns=[")
+        if self.base_shape.ns != []:
+            s = s.add_incr_line("ns=[")
             s.incr()
             try:
                 s = s.glue_line(
-                    ",\n".join(repr(n).reindent(s.indent) for n in self.base_shape.Ns)
+                    ",\n".join(repr(n).reindent(s.indent) for n in self.base_shape.ns)
                 )
             except AttributeError:
                 logging.error(

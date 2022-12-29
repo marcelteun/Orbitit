@@ -154,23 +154,23 @@ class Shape(heptagons.EqlHeptagonShape):
         else:
           this.error_msg = ''
         vs.extend(heptN[0]) # V12 - V18
-        Ns = list(range(33))
+        ns = list(range(33))
         for i in range(4):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         for i in range(12, 19):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         heptN = heptagons.kite_to_hept(vs[7], vs[6], vs[5], vs[4])
         vs.extend(heptN[0]) # V19 - V25
         for i in range(4, 8):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         for i in range(19, 26):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         heptN = heptagons.kite_to_hept(vs[11], vs[10], vs[9], vs[8])
         vs.extend(heptN[0]) # V26 - V32
         for i in range(8, 12):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         for i in range(26, 33):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
 
         xtraEs = []
         # add extra faces:
@@ -191,7 +191,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 vs.extend([vs[27], vs[28], vec( v[0],  v[1], -v[2])]) # V42 - V44
 
             for i in range(3):
-                Ns.append(vs[0]) # N33 - N35
+                ns.append(vs[0]) # N33 - N35
             # normals for the isosceles triangles:
             # N36 - N38, N39 - N41 and N42 - N44
             for i in range(3):
@@ -201,7 +201,7 @@ class Shape(heptagons.EqlHeptagonShape):
                     vs[o+1],
                     vs[o+2]
                 ).normal()
-                Ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
+                ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
             xtraFs = [
                     # Eql triangle
@@ -238,11 +238,11 @@ class Shape(heptagons.EqlHeptagonShape):
 
             # normals for the equilateral triangles:
             for i in range(3):
-                Ns.append(vs[0])  # N33 - N35
+                ns.append(vs[0])  # N33 - N35
             for i in range(3):
-                Ns.append(vs[4])  # N36 - N38
+                ns.append(vs[4])  # N36 - N38
             for i in range(3):
-                Ns.append(vs[8]) # N39 - N41
+                ns.append(vs[8]) # N39 - N41
             # normals for the isosceles triangles:
             # N42 - N44, N45 - N47 and N48 - N50
             for i in range(3):
@@ -252,7 +252,7 @@ class Shape(heptagons.EqlHeptagonShape):
                     vs[o+1],
                     vs[o+2]
                 ).normal()
-                Ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
+                ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
             xtraFs = [
                     # square parts:
@@ -271,7 +271,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 else:
                     xtraEs = [43, 44, 46, 47, 49, 50]
 
-        this.setBaseVertexProperties(vs = vs, Ns = Ns)
+        this.setBaseVertexProperties(vs=vs, ns=ns)
         fs = []
         es = []
         colIds = []

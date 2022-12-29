@@ -99,7 +99,7 @@ class Shape(heptagons.EqlHeptagonShape):
         ]
 
         # add heptagons
-        Ns = vs
+        ns = vs
         if this.alt_hept_pos:
             heptN = heptagons.kite_to_hept(vs[3], vs[0], vs[1], vs[2])
             if heptN == None: return
@@ -158,20 +158,20 @@ class Shape(heptagons.EqlHeptagonShape):
         vs.extend(heptN[0]) # V4 - V10
         vs.extend(RegularTrianglePartV) # V11 - V13
         vs.extend(IsoscelesTriangleV) # V14 - V16
-        Ns = [heptN[1] for i in range(11)]
+        ns = [heptN[1] for i in range(11)]
         RegularTrianglePartN = RegularTrianglePartV[2]
-        Ns.extend([RegularTrianglePartN for i in range(3)])
+        ns.extend([RegularTrianglePartN for i in range(3)])
         IsoscelesTriangleN = geom_3d.Triangle(
                 IsoscelesTriangleV[0],
                 IsoscelesTriangleV[1],
                 IsoscelesTriangleV[2]
             ).normal()
-        Ns.extend([IsoscelesTriangleN for i in range(3)])
+        ns.extend([IsoscelesTriangleN for i in range(3)])
         this.xtraEs = []
         if this.add_extra_edge:
             this.xtraEs = [xtraEdgeIndex, 16]
 
-        this.setBaseVertexProperties(vs=vs, Ns=Ns)
+        this.setBaseVertexProperties(vs=vs, ns=ns)
         fs = []
         es = []
         colIds = []

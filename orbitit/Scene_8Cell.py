@@ -149,7 +149,7 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            VS, Cs=Cs, es=ES, Ns=[],
+            VS, Cs=Cs, es=ES, ns=[],
             colors=(Cols, cols),
             name=TITLE
         )

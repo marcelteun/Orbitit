@@ -101,7 +101,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 vec( 0.0, 1.0, 0.0)  # 11
             ]
             # Normals are set below, after calculating the heptagons
-            #this.Ns = this.NsAlt
+            #this.ns = this.NsAlt
         else:
             #
             #    z
@@ -155,23 +155,23 @@ class Shape(heptagons.EqlHeptagonShape):
         else:
           this.error_msg = ''
         vs.extend(heptN[0]) # V12 - V18
-        Ns = list(range(33))
+        ns = list(range(33))
         for i in range(4):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         for i in range(12, 19):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         heptN = heptagons.kite_to_hept(vs[7], vs[6], vs[5], vs[4])
         vs.extend(heptN[0]) # V19 - V25
         for i in range(4, 8):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         for i in range(19, 26):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         heptN = heptagons.kite_to_hept(vs[11], vs[10], vs[9], vs[8])
         vs.extend(heptN[0]) # V26 - V32
         for i in range(8, 12):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
         for i in range(26, 33):
-            Ns[i] = heptN[1]
+            ns[i] = heptN[1]
 
         # add equilateral triangles:
         vs.extend([vs[15], vs[22], vs[29]])         # V33 - V35
@@ -204,7 +204,7 @@ class Shape(heptagons.EqlHeptagonShape):
 
         # normal of equilateral triangle
         for i in range(3):
-            Ns.append(vs[0])
+            ns.append(vs[0])
         # normal of isosceles triangles
         for i in range(3):
             o = 36 + 3*i
@@ -213,7 +213,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 vs[o+1],
                 vs[o+2]
             ).normal()
-            Ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
+            ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
         this.xtraFs = [
                 [33, 34, 35],
@@ -222,7 +222,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 [42, 43, 44]
             ]
 
-        this.setBaseVertexProperties(vs=vs, Ns=Ns)
+        this.setBaseVertexProperties(vs=vs, ns=ns)
         fs = []
         es = []
         colIds = []

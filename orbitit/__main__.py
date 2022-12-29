@@ -775,7 +775,7 @@ class MainPanel(wx.Panel):
         # vertex settings the same.
         old_v_settings = old_shape.getVertexProperties()
         del old_v_settings['vs']
-        del old_v_settings['Ns']
+        del old_v_settings['ns']
         self.canvas.shape.set_vertex_props(old_v_settings)
         # Use all the edge settings except for es
         old_e_settings = old_shape.getEdgeProperties()
@@ -785,7 +785,7 @@ class MainPanel(wx.Panel):
         old_f_settings = {'drawFaces': old_shape.getFaceProperties()['drawFaces']}
         self.canvas.shape.set_face_props(old_f_settings)
         # if the shape generates the normals itself:
-        # TODO: handle that this.Ns is set correctly, i.e. normalised
+        # TODO: handle that this.ns is set correctly, i.e. normalised
         if shape.generateNormals:
             GL.glDisable(GL.GL_NORMALIZE)
         else:

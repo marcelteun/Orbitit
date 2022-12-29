@@ -258,7 +258,7 @@ ES.extend(
 class Shape(Geom4D.SimpleShape):
     def __init__(this):
         Geom4D.SimpleShape.__init__(this,
-            vs, Cs=[], es=ES, Ns=[],
+            vs, Cs=[], es=ES, ns=[],
             colors=(Cols, ColIdsOpaq),
             name=TITLE
         )
