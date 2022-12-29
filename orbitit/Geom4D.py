@@ -67,7 +67,7 @@ class SimpleShape:
         # if useTransparency = False opaque colours are used, even if they
         # specifically set to transparent colours.
         this.useTransparency(True)
-        this.set_vertex_props(vs=vs, ns=ns, radius=-1., color=[1. , 1. , .8])
+        this.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1., 'color': [1. , 1. , .8]}
         this.set_face_props(
             colors = colors, drawFaces = True
         )
@@ -87,42 +87,10 @@ class SimpleShape:
         this.rot4 = None
         this.projectedTo3D = False
 
-    def set_vertex_props(this, dictPar = None, **kwargs):
+    @property
+    def vertex_props(self):
         """
-        Set the vertices and how/whether vertices are drawn in OpenGL.
-
-        Accepted are the optional (keyword) parameters:
-        - vs,
-        - radius,
-        - color.
-        - ns.
-        Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
-        If they are not specified (or equal to None) they are not changed.
-        See getVertexProperties for the explanation of the keywords.
-        The output of getVertexProperties can be used as the dictPar parameter.
-        This can be used to copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
-        """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
-                dict = dictPar
-            else:
-                dict = kwargs
-            if 'vs' in dict and dict['vs'] != None:
-                this.vs  = [ geomtypes.Vec4(v) for v in dict['vs'] ]
-            if 'ns' in dict and dict['ns'] != None:
-                this.ns  = [ geomtypes.Vec4(n) for n in dict['ns'] ]
-                #assert len(this.ns) == len(this.vs)
-            if 'radius' in dict and dict['radius'] != None:
-                this.v.radius = dict['radius']
-            if 'color' in dict and dict['color'] != None:
-                this.v.col = dict['color']
-            this.projectedTo3D = False
-
-    def getVertexProperties(this):
-        """
-        Return the current vertex properties as can be set by set_vertex_props.
+        Return the current vertex properties
 
         Returned is a dictionary with the keywords vs, radius, color.
         vs: an array of vertices.
@@ -134,12 +102,35 @@ class SimpleShape:
             value is not set. If the value is set it is used by gl_draw
         """
         return {
-            'vs': this.vs,
-            'radius': this.v.radius,
-            'color': this.v.col,
-            'ns': this.ns
+            'vs': self.vs,
+            'radius': self.v.radius,
+            'color': self.v.col,
+            'ns': self.ns
         }
 
+    @vertex_props.setter
+    def vertex_props(self, props):
+        """
+        Set the vertices and how/whether vertices are drawn in OpenGL.
+
+        Accepted are the optional (keys) parameters:
+        - vs,
+        - radius,
+        - color.
+        - ns.
+        See setter for the explanation of the keys.
+        """
+        if props:
+            if 'vs' in props and props['vs'] != None:
+                self.vs  = [ geomtypes.Vec4(v) for v in props['vs'] ]
+            if 'ns' in props and props['ns'] != None:
+                self.ns  = [ geomtypes.Vec4(n) for n in props['ns'] ]
+                #assert len(self.ns) == len(self.vs)
+            if 'radius' in props and props['radius'] != None:
+                self.v.radius = props['radius']
+            if 'color' in props and props['color'] != None:
+                self.v.col = props['color']
+            self.projectedTo3D = False
 
     def set_edge_props(this, dictPar = None, **kwargs):
         """
@@ -574,7 +565,7 @@ class SimpleShape:
                     (shapeCols, shapeColIndices),
                     name = '%s_projection' % (this.name)
                 )
-            this.cell.set_vertex_props(radius = this.v.radius, color = this.v.col)
+            this.cell.vertex_props = {'radius': this.v.radius, 'color': this.v.col}
             this.cell.set_edge_props(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
             this.cell.set_face_props(drawFaces = this.f.draw)
             this.cell.gl_initialised = True # done as first step in this func
@@ -631,7 +622,7 @@ class SimpleShape:
                         Vs3D, [], this.es, [], # vs , fs, es, ns
                         name = '%s_Es' % (this.name)
                     )
-                cell.set_vertex_props(radius = this.v.radius, color = this.v.col)
+                cell.vertex_props = {'radius': this.v.radius, 'color': this.v.col}
                 cell.set_edge_props(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
                 cell.set_face_props(drawFaces = False)
                 cell.gl_initialised = True
@@ -648,7 +639,7 @@ class SimpleShape:
                         name = '%s_%d' % (this.name, i)
                     )
                 # The edges and vertices are drawn through a separate shape below.
-                cell.set_vertex_props(radius = -1)
+                cell.vertex_props = {'radius': -1}
                 cell.set_edge_props(drawEdges = False)
                 cell.set_face_props(drawFace = this.f.draw)
                 cell.zoom(this.c.scale)

@@ -406,9 +406,9 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         if (
                 len(shape.getFaceProperties()['fs']) == 0
                 and
-                self.panel.shape.getVertexProperties()['radius'] <= 0
+                self.panel.shape.vertex_props['radius'] <= 0
         ):
-            self.panel.shape.set_vertex_props(radius=0.05)
+            self.panel.shape.vertex_props = {'radius': 0.05}
         self.SetTitle(os.path.basename(filename))
         # Save for reload:
         self.current_file = filename
@@ -773,10 +773,10 @@ class MainPanel(wx.Panel):
         self.canvas.shape = shape
         # Use all the vertex settings except for vs, i.e. keep the view
         # vertex settings the same.
-        old_v_settings = old_shape.getVertexProperties()
+        old_v_settings = old_shape.vertex_props
         del old_v_settings['vs']
         del old_v_settings['ns']
-        self.canvas.shape.set_vertex_props(old_v_settings)
+        self.canvas.shape.vertex_props = old_v_settings
         # Use all the edge settings except for es
         old_e_settings = old_shape.getEdgeProperties()
         del old_e_settings['es']

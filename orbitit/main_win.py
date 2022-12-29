@@ -160,7 +160,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
-        self.org_vs = self.canvas.shape.getVertexProperties()['vs']
+        self.org_vs = self.canvas.shape.vertex_props['vs']
         self.org_org_vs = self.org_vs # for cancel
         self.set_status_text("")
 
@@ -238,22 +238,26 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         """Handle event '_' to translate shape"""
         # Assume compound shape
         new_vs = [
-            [geomtypes.Vec3(v) + self.translation.get_vertex()
-             for v in shape_vs] for shape_vs in self.org_vs]
-        self.canvas.shape.set_vertex_props(vs=new_vs)
+            [
+                geomtypes.Vec3(v) + self.translation.get_vertex()
+                for v in shape_vs
+            ]
+            for shape_vs in self.org_vs
+        ]
+        self.canvas.shape.vertex_props = {'vs': new_vs}
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_apply(self, _=None):
         """Handle event '_' to confirm transform and prepare for a next one"""
-        self.org_vs = self.canvas.shape.getVertexProperties()['vs']
+        self.org_vs = self.canvas.shape.vertex_props['vs']
         # reset the angle
         self.rot_sizer.set_angle(0)
         self.set_status_text("applied, now you can define another axis")
 
     def on_reset(self, _=None):
         """Handle event '_' to undo all transforms"""
-        self.canvas.shape.set_vertex_props(vs=self.org_org_vs)
+        self.canvas.shape.vertex_props = {'vs': self.org_org_vs}
         self.canvas.paint()
         self.org_vs = self.org_org_vs
 
@@ -343,8 +347,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.parent_win = parent_win
         self.parent_panel = parent_panel
         # Show / Hide vertices
-        v_props = canvas.shape.getVertexProperties()
-        self.v_r = v_props['radius']
+        self.v_r = canvas.shape.vertex_props['radius']
         self.v_opts_lst = ['hide', 'show']
         if self.v_r > 0:
             default = 1  # key(1) = 'show'
@@ -740,16 +743,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.v_opts_lst[sel]
         if sel_str == 'show':
             self.v_r_gui.Enable()
-            self.canvas.shape.set_vertex_props(radius=self.v_r)
+            self.canvas.shape.vertex_props = {'radius': self.v_r}
         elif sel_str == 'hide':
             self.v_r_gui.Disable()
-            self.canvas.shape.set_vertex_props(radius=-1.0)
+            self.canvas.shape.vertex_props = {'radius': -1.0}
         self.canvas.paint()
 
     def on_v_radius(self, _):
         """Handle event '_' to set vertex radius as according to settings"""
         self.v_r = (float(self.v_r_gui.GetValue()) / self.v_r_scale)
-        self.canvas.shape.set_vertex_props(radius=self.v_r)
+        self.canvas.shape.vertex_props = {'radius': self.v_r}
         self.canvas.paint()
         self.set_status_text()
 
@@ -760,7 +763,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.set_vertex_props(color=[float(i)/255 for i in rgb])
+            self.canvas.shape.vertex_props = {'color': [float(i)/255 for i in rgb]}
             self.canvas.paint()
         dlg.Destroy()
 

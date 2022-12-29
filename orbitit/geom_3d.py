@@ -279,7 +279,7 @@ def read_off_file(fd, regen_edges=True, name=""):
     shape = SimpleShape(vs, fs, es, colors=(cols, fColors))
     # Note that Orbitit's panel.setShape will ignore these anyway...
     if vRadius != 0:
-        shape.set_vertex_props(radius=vRadius)
+        shape.vertex_props = {'radius': vRadius}
     if eRadius != 0:
         shape.set_edge_props(radius=eRadius)
     if name != "":
@@ -860,7 +860,7 @@ class SimpleShape(base.Orbitit):
         if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
         self.zoom_factor = 1.0
-        self.set_vertex_props(vs=vs, ns=ns, radius=-1.0, color=[1.0, 1.0, 0.8])
+        self.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1.0, 'color': [1.0, 1.0, 0.8]}
         self.set_edge_props(
             es=es, radius=-1.0, color=[0.1, 0.1, 0.1], drawEdges=True
         )
@@ -948,7 +948,7 @@ class SimpleShape(base.Orbitit):
 
         keep_one: of the faces with duplicates keep at least one.
         """
-        v_props = self.getVertexProperties()
+        v_props = self.vertex_props
         f_props = self.getFaceProperties()
         fs = f_props["fs"]
         org_cols = f_props["colors"]
@@ -974,7 +974,7 @@ class SimpleShape(base.Orbitit):
                     col_idx.append(org_cols[1][i[0]])
         new_cols = (copy.deepcopy(org_cols[0]), col_idx)
         shape = SimpleShape([], [], [])
-        shape.set_vertex_props(v_props)
+        shape.vertex_props = v_props
         f_props["fs"] = new_fs
         f_props["colors"] = new_cols
         shape.set_face_props(f_props)
@@ -988,7 +988,7 @@ class SimpleShape(base.Orbitit):
         precision: number of decimals to consider when deciding whether two floating point numbers
             are equal.
         """
-        vProps = self.getVertexProperties()
+        vProps = self.vertex_props
         fProps = self.getFaceProperties()
         cpVs = copy.deepcopy(vProps["vs"])
         cpFs = copy.deepcopy(fProps["fs"])
@@ -1000,57 +1000,19 @@ class SimpleShape(base.Orbitit):
         vProps["vs"] = cpVs
         fProps["fs"] = cpFs
         shape = SimpleShape([], [], [])
-        shape.set_vertex_props(vProps)
+        shape.vertex_props = vProps
         shape.set_face_props(fProps)
         return shape
 
     def setVs(self, vs):
-        self.set_vertex_props(vs=vs)
+        self.vertex_props = {'vs': vs}
 
-    def set_vertex_props(self, dict_par=None, **kwargs):
+    @property
+    def vertex_props(self):
         """
-        Set the vertices and how/whether vertices are drawn in OpenGL.
+        Return the current vertex properties
 
-        Accepted are the optional (keyword) parameters:
-        - vs,
-        - radius,
-        - color.
-        - ns.
-        Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dict_par.
-        If they are not specified (or equal to None) they are not changed.
-        See getVertexProperties for the explanation of the keywords.
-        The output of getVertexProperties can be used as the dict_par parameter.
-        This can be used to copy settings from one shape to another.
-        If dict_par is used and kwargs, then only the dict_par will be used.
-        """
-        if dict_par is not None or kwargs != {}:
-            if dict_par is not None:
-                the_dict = dict_par
-            else:
-                the_dict = kwargs
-            if "vs" in the_dict and the_dict["vs"] is not None:
-                self.vs = [geomtypes.Vec3(v) for v in the_dict["vs"]]
-                self.VsRange = range(len(self.vs))
-                self.gl.updateVs = True
-                self.face_normals_up_to_date = False
-            if "ns" in the_dict and the_dict["ns"] is not None:
-                self.ns = the_dict["ns"]
-            if "radius" in the_dict and the_dict["radius"] is not None:
-                self.gl.vRadius = the_dict["radius"]
-                self.gl.addSphereVs = the_dict["radius"] > 0.0
-                if self.gl.addSphereVs:
-                    if self.gl.sphere is not None:
-                        del self.gl.sphere
-                    self.gl.sphere = Scenes3D.VSphere(radius=the_dict["radius"])
-            if "color" in the_dict and the_dict["color"] is not None:
-                self.gl.vCol = the_dict["color"]
-
-    def getVertexProperties(self):
-        """
-        Return the current vertex properties as can be set by set_vertex_props.
-
-        Returned is a dictionary with the keywords vs, radius, color.
+        Returned is a dictionary with the keywords vs, radius, color and ns.
         vs: an array of vertices.
         radius: If > 0.0 draw vertices as spheres with the specified colour. If
                 no spheres are required (for preformance reasons) set the radius
@@ -1065,6 +1027,36 @@ class SimpleShape(base.Orbitit):
             "color": self.gl.vCol,
             "ns": self.ns,
         }
+
+    @vertex_props.setter
+    def vertex_props(self, props):
+        """
+        Set the vertices and how/whether vertices are drawn in OpenGL.
+
+        Accepted are the optional (keys) parameters:
+        - vs,
+        - radius,
+        - color.
+        - ns.
+        See getter for the explanation of the keys.
+        """
+        if props:
+            if "vs" in props and props["vs"] is not None:
+                self.vs = [geomtypes.Vec3(v) for v in props["vs"]]
+                self.VsRange = range(len(self.vs))
+                self.gl.updateVs = True
+                self.face_normals_up_to_date = False
+            if "ns" in props and props["ns"] is not None:
+                self.ns = props["ns"]
+            if "radius" in props and props["radius"] is not None:
+                self.gl.vRadius = props["radius"]
+                self.gl.addSphereVs = props["radius"] > 0.0
+                if self.gl.addSphereVs:
+                    if self.gl.sphere is not None:
+                        del self.gl.sphere
+                    self.gl.sphere = Scenes3D.VSphere(radius=props["radius"])
+            if "color" in props and props["color"] is not None:
+                self.gl.vCol = props["color"]
 
     def gl_alwaysSetVertices(self, do):
         self.gl.alwaysSetVertices = do
@@ -1579,9 +1571,8 @@ class SimpleShape(base.Orbitit):
         Draw the base element according to the definition of the vs, es, fs and
         colour settings.
 
-        Use self.set_vertex_props(), and set_edge_props and
-        set_face_props to specify how and whether to draw the vertices, edges
-        and faces respectively.
+        Set self.vertex_props, and edge_props and face_props to specify how and whether to draw
+        the vertices, edges and faces respectively.
         """
         GL.glMultMatrixd(self.orientation.glMatrix())
         if self.gl.updateVs:
@@ -2597,9 +2588,26 @@ class CompoundShape(base.Orbitit):
             shape.regen_edges()
         self.merge_needed = True
 
-    def set_vertex_props(self, dictPar=None, **kwargs):
+    @property
+    def vertex_props(self):
+        """Return a dictionary of the vertex properties of the compound
+
+        See setter what to expect.
+        """
+        # Note: cannot use the megedShape, since the vs is not an array of vs
+        d = self._shapes[0].vertex_props
+        return {
+            "vs": self.vs,
+            "radius": d["radius"],
+            "color": d["color"],
+            "ns": self.ns,
+        }
+
+    @vertex_props.setter
+    def vertex_props(self, props):
         """Set the vertex properties for a whole compound shape at once
 
+        The properties can be specified as a dictionary with the following keys:
         vs: This is an array of vs. One vs array for each shape element
         ns: This is an array of ns. One ns array for each shape element
         radius: one radius that is valid for all shape elements
@@ -2607,48 +2615,33 @@ class CompoundShape(base.Orbitit):
 
         See the same function in SimpleShape.
         """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                vertex_dict = dictPar
-            else:
-                vertex_dict = kwargs
-            if "vs" in vertex_dict and vertex_dict["vs"] is not None:
-                vs = vertex_dict["vs"]
+        if props:
+            if "vs" in props and props["vs"] is not None:
+                vs = props["vs"]
             else:
                 vs = [None for shape in self._shapes]
-            if "ns" in vertex_dict and vertex_dict["ns"] is not None:
-                ns = vertex_dict["ns"]
+            if "ns" in props and props["ns"] is not None:
+                ns = props["ns"]
             else:
                 ns = [None for shape in self._shapes]
-            if "radius" in vertex_dict:
-                radius = vertex_dict["radius"]
+            if "radius" in props:
+                radius = props["radius"]
             else:
                 radius = None
-            if "color" in vertex_dict:
-                color = vertex_dict["color"]
+            if "color" in props:
+                color = props["color"]
             else:
                 color = None
         assert len(vs) == len(self._shapes)
         assert len(ns) == len(self._shapes)
         for i in range(len(self._shapes)):
-            self._shapes[i].set_vertex_props(
-                vs=vs[i], ns=ns[i], radius=radius, color=color
-            )
+            self._shapes[i].vertex_props = {
+                'vs': vs[i],
+                'ns': ns[i],
+                'radius': radius,
+                'color': color,
+            }
         self.merge_needed = True
-
-    def getVertexProperties(self):
-        """Return a dictionary of the vertex properties of the compound
-
-        See set_vertex_props what to expect.
-        """
-        # Note: cannot use the megedShape, since the vs is not an array of vs
-        d = self._shapes[0].getVertexProperties()
-        return {
-            "vs": self.vs,
-            "radius": d["radius"],
-            "color": d["color"],
-            "ns": self.ns,
-        }
 
     def set_edge_props(self, dictPar=None, **kwargs):
         """Set the edge properties for a whole compound shape at once
@@ -3049,7 +3042,7 @@ class SymmetricShape(CompoundShape):
 
     def setVs(self, vs):
         assert len(vs) == len(self.base_shape.vs)
-        self.base_shape.set_vertex_props(vs=vs)
+        self.base_shape.vertex_props = {'vs': vs}
         self.merge_needed = True
         self.needs_apply_isoms = True
 
@@ -3074,7 +3067,7 @@ class SymmetricShape(CompoundShape):
         - radius,
         - color.
         - ns.
-        Check SimpleShape.set_vertex_props for more details.
+        Check SimpleShape.vertex_props for more details.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -3092,7 +3085,7 @@ class SymmetricShape(CompoundShape):
             except KeyError:
                 pass
             if not (vs is None and ns is None):
-                self.base_shape.set_vertex_props(vs=vs, ns=ns)
+                self.base_shape.vertex_props = {'vs': vs, 'ns': ns}
                 self.needs_apply_isoms = True
             radius = None
             try:
@@ -3105,17 +3098,9 @@ class SymmetricShape(CompoundShape):
             except KeyError:
                 pass
             if not (radius is None and color is None):
-                self.set_vertex_props(radius=radius, color=color)
+                self.vertex_props = {'radius': radius, 'color': color}
         else:
             logging.warning("No parameters specified: ignoring method call")
-
-    def getBaseVertexProperties(self):
-        """
-        Get the vertex properties of the base element.
-
-        See SimpleShape.getVertexProperties for more.
-        """
-        return self.base_shape.getVertexProperties()
 
     def setBaseEdgeProperties(self, dictPar=None, **kwargs):
         """
