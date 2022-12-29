@@ -388,7 +388,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.guis.append(self.v_col_gui)
         self.parent_panel.Bind(wx.EVT_BUTTON, self.on_v_col, id=self.v_col_gui.GetId())
         # Show / hide edges
-        e_props = canvas.shape.getEdgeProperties()
+        e_props = canvas.shape.edge_props
         self.e_r = e_props['radius']
         self.e_opts_lst = ['hide', 'as cylinders', 'as lines']
         if e_props['drawEdges']:

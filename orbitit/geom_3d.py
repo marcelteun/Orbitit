@@ -1061,6 +1061,29 @@ class SimpleShape(base.Orbitit):
     def gl_alwaysSetVertices(self, do):
         self.gl.alwaysSetVertices = do
 
+    @property
+    def edge_props(self):
+        """
+        Return the current edge properties
+
+        Returned is a dictionary with the keywords es, radius, color, drawEdges
+        es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
+            indices in vs.
+        radius: If > 0.0 draw vertices as cylinders with the specified colour.
+                If no cylinders are required (for preformance reasons) set the
+                radius to a value <= 0.0 and the edges will be drawn as lines,
+                using glPolygonOffset.
+        color: array with 3 rgb values between 0 and 1.
+        drawEdges: settings that expresses whether the edges should be drawn at
+                   all.
+        """
+        return {
+            "es": self.es,
+            "radius": self.gl.eRadius,
+            "color": self.gl.eCol,
+            "drawEdges": self.gl.drawEdges,
+        }
+
     def set_edge_props(self, dictPar=None, **kwargs):
         """
         Specify the edges and set how they are drawn in OpenGL.
@@ -1073,10 +1096,7 @@ class SimpleShape(base.Orbitit):
         Either these parameters are specified as part of kwargs or as key value
         pairs in the dictionary dictPar.
         If they are not specified (or equel to None) they are not changed.
-        See getEdgeProperties for the explanation of the keywords.
-        The output of getEdgeProperties can be used as the dictPar parameter.
-        This can be used drawFacesto copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
+        See setter for the explanation of the keys.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -1097,28 +1117,6 @@ class SimpleShape(base.Orbitit):
                 self.gl.eCol = edge_dict["color"]
             if "drawEdges" in edge_dict and edge_dict["drawEdges"] is not None:
                 self.gl.drawEdges = edge_dict["drawEdges"]
-
-    def getEdgeProperties(self):
-        """
-        Return the current edge properties as can be set by set_edge_props.
-
-        Returned is a dictionary with the keywords es, radius, color, drawEdges
-        es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
-            indices in vs.
-        radius: If > 0.0 draw vertices as cylinders with the specified colour.
-                If no cylinders are required (for preformance reasons) set the
-                radius to a value <= 0.0 and the edges will be drawn as lines,
-                using glPolygonOffset.
-        color: array with 3 rgb values between 0 and 1.
-        drawEdges: settings that expresses whether the edges should be drawn at
-                   all.
-        """
-        return {
-            "es": self.es,
-            "radius": self.gl.eRadius,
-            "color": self.gl.eCol,
-            "drawEdges": self.gl.drawEdges,
-        }
 
     def regen_edges(self):
         """
@@ -2679,12 +2677,13 @@ class CompoundShape(base.Orbitit):
             )
         self.merge_needed = True
 
-    def getEdgeProperties(self):
+    @property
+    def edge_props(self):
         """Return a dictionary of the edge properties of the compound
 
-        See set_edge_props what to expect.
+        See setter what to expect.
         """
-        d = self._shapes[0].getEdgeProperties()
+        d = self._shapes[0].edge_props
         return {
             "es": self.es,
             "radius": d["radius"],
@@ -3100,12 +3099,8 @@ class SymmetricShape(CompoundShape):
                 self.merge_needed = True
 
     def getBaseEdgeProperties(self):
-        """
-        Get the edge properties of the base element.
-
-        See SimpleShape.getEdgeProperties for more.
-        """
-        return self.base_shape.getEdgeProperties()
+        """Get the edge properties of the base element."""
+        return self.base_shape.edge_props
 
     def setBaseFaceProperties(self, dictPar=None, **kwargs):
         """

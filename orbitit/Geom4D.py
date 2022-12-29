@@ -144,10 +144,7 @@ class SimpleShape:
         Either these parameters are specified as part of kwargs or as key value
         pairs in the dictionary dictPar.
         If they are not specified (or equel to None) they are not changed.
-        See getEdgeProperties for the explanation of the keywords.
-        The output of getEdgeProperties can be used as the dictPar parameter.
-        This can be used drawFacesto copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
+        See setter for the explanation of the keys.
         """
         if dictPar != None or kwargs != {}:
             if dictPar != None:
@@ -202,9 +199,10 @@ class SimpleShape:
                     )
                 this.e.showUnscaled = dict['showUnscaled']
 
-    def getEdgeProperties(this):
+    @property
+    def edge_props(this):
         """
-        Return the current edge properties as can be set by set_edge_props.
+        Return the current edge properties.
 
         Returned is a dictionary with the keywords es, radius, color, drawEdges
         es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
@@ -217,11 +215,12 @@ class SimpleShape:
         drawEdges: settings that expresses whether the edges should be drawn at
                    all.
         """
-        return {'es': this.es,
-                'radius': this.e.radius,
-                'color': this.e.col,
-                'drawEdges': this.e.draw
-            }
+        return {
+            'es': this.es,
+            'radius': this.e.radius,
+            'color': this.e.col,
+            'drawEdges': this.e.draw
+        }
 
     def regen_edges(this):
         """
@@ -574,12 +573,12 @@ class SimpleShape:
             if this.e.draw and isScaledDown:
                 this.cell.regen_edges()
                 # Don't use, out of performance issues:
-                # cellEs = this.cell.getEdgeProperties()['es']
+                # cellEs = this.cell.edges_props['es']
                 # --------------------------
                 # Bad performance during scaling:
-                # cellEs = this.cell.getEdgeProperties()['es']
+                # cellEs = this.cell.edges_props['es']
                 # this.cell.regen_edges()
-                # cellEs.extend(this.cell.getEdgeProperties()['es'])
+                # cellEs.extend(this.cell.edges_props['es'])
                 # -------end bad perf---------
                 cellEs = this.cell.es
                 if this.e.showUnscaled:
