@@ -179,7 +179,7 @@ class Shape(geom_3d.SimpleShape):
                     vs.extend(self.heptaVs)
                     ColsI.extend(self.heptaColors)
             self.vertex_props = {'vs': vs}
-            self.set_edge_props(es=es)
+            self.es = es
             self.set_face_props(fs=fs, colors=[self.colors[:], ColsI[:]])
             # save for set_vs:
             self.show_kite  = show_kite

@@ -77,11 +77,14 @@ class SimpleShape:
             Cs = Cs, colors = colors, drawCells = False, scale = 1.0
         )
         # For initialisation setCellProperties needs to be called before
-        # set_edge_props, since the latter will check the scale value
-        this.set_edge_props(
-            es = es, radius = -1., color = [0.1, 0.1, 0.1],
-            drawEdges = True, showUnscaled = True
-        )
+        # edge_props, since the latter will check the scale value
+        this.edge_props = {
+            'es': es,
+            'radius': -1.,
+            'color': [0.1, 0.1, 0.1],
+            'drawEdges': True,
+            'showUnscaled': True,
+        }
         this.setProjectionProperties(11.0, 10.0)
         # expresses whether the 4D coordinates need to be updated:
         this.rot4 = None
@@ -132,73 +135,6 @@ class SimpleShape:
                 self.v.col = props['color']
             self.projectedTo3D = False
 
-    def set_edge_props(this, dictPar = None, **kwargs):
-        """
-        Specify the edges and set how they are drawn in OpenGL.
-
-        Accepted are the optional (keyword) parameters:
-          - es,
-          - radius,
-          - color,
-          - drawEdges.
-        Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
-        If they are not specified (or equel to None) they are not changed.
-        See setter for the explanation of the keys.
-        """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
-                dict = dictPar
-            else:
-                dict = kwargs
-            if 'es' in dict and dict['es'] != None:
-                this.es = dict['es']
-                this.projectedTo3D = False
-            if 'radius' in dict and dict['radius'] != None:
-                this.e.radius = dict['radius']
-                this.projectedTo3D = False
-            if 'color' in dict and dict['color'] != None:
-                this.e.col = dict['color']
-                this.projectedTo3D = False
-            if 'drawEdges' in dict and dict['drawEdges'] != None:
-                try:
-                    currentSetting = this.e.draw
-                except AttributeError:
-                    currentSetting = None
-                if currentSetting != dict['drawEdges']:
-                    this.projectedTo3D = this.projectedTo3D and not (
-                            # if all the below are true, then the edges need
-                            # extra vs, which means we need to reproject.
-                            this.c.scale < 1.0
-                            and
-                            # .. and if the CURRENT settings is show unscaled
-                            # (Though changes in this setting might mean that
-                            # new projection was not needed)
-                            this.e.showUnscaled
-                        )
-                    if this.projectedTo3D:
-                        # Try is needed,
-                        # not for the first time, since then this.projectedTo3D
-                        # will be False
-                        # but because of the this.mapToSingeShape setting.
-                        try:
-                            this.cell.set_edge_props(drawEdges = dict['drawEdges'])
-                        except AttributeError:
-                            pass
-                this.e.draw = dict['drawEdges']
-            if 'showUnscaled' in dict and dict['showUnscaled'] != None:
-                this.projectedTo3D = this.projectedTo3D and not (
-                        # if all the below are true, then a change in unscaled
-                        # edges means a changes in vs, since the extra edges
-                        # have different vs. This means we need to reproject.
-                        this.e.draw
-                        and
-                        this.c.scale < 1.0
-                        and
-                        this.e.showUnscaled != dict['showUnscaled']
-                    )
-                this.e.showUnscaled = dict['showUnscaled']
-
     @property
     def edge_props(this):
         """
@@ -221,6 +157,70 @@ class SimpleShape:
             'color': this.e.col,
             'drawEdges': this.e.draw
         }
+
+    @edge_props.setter
+    def edge_props(self, props):
+        """
+        Specify the edges and set how they are drawn in OpenGL.
+
+        Accepted are the optional (keyword) parameters:
+          - es,
+          - radius,
+          - color,
+          - drawEdges.
+        Either these parameters are specified as part of kwargs or as key value
+        pairs in the dictionary dictPar.
+        If they are not specified (or equel to None) they are not changed.
+        See setter for the explanation of the keys.
+        """
+        if props:
+            if 'es' in props and props['es'] != None:
+                self.es = props['es']
+                self.projectedTo3D = False
+            if 'radius' in props and props['radius'] != None:
+                self.e.radius = props['radius']
+                self.projectedTo3D = False
+            if 'color' in props and props['color'] != None:
+                self.e.col = props['color']
+                self.projectedTo3D = False
+            if 'drawEdges' in props and props['drawEdges'] != None:
+                try:
+                    currentSetting = self.e.draw
+                except AttributeError:
+                    currentSetting = None
+                if currentSetting != props['drawEdges']:
+                    self.projectedTo3D = self.projectedTo3D and not (
+                            # if all the below are true, then the edges need
+                            # extra vs, which means we need to reproject.
+                            self.c.scale < 1.0
+                            and
+                            # .. and if the CURRENT settings is show unscaled
+                            # (Though changes in this setting might mean that
+                            # new projection was not needed)
+                            self.e.showUnscaled
+                        )
+                    if self.projectedTo3D:
+                        # Try is needed,
+                        # not for the first time, since then self.projectedTo3D
+                        # will be False
+                        # but because of the self.mapToSingeShape setting.
+                        try:
+                            self.cell.edge_props = {'drawEdges': props['drawEdges']}
+                        except AttributeError:
+                            pass
+                self.e.draw = props['drawEdges']
+            if 'showUnscaled' in props and props['showUnscaled'] != None:
+                self.projectedTo3D = self.projectedTo3D and not (
+                        # if all the below are true, then a change in unscaled
+                        # edges means a changes in vs, since the extra edges
+                        # have different vs. This means we need to reproject.
+                        self.e.draw
+                        and
+                        self.c.scale < 1.0
+                        and
+                        self.e.showUnscaled != props['showUnscaled']
+                    )
+                self.e.showUnscaled = props['showUnscaled']
 
     def regen_edges(this):
         """
@@ -565,7 +565,11 @@ class SimpleShape:
                     name = '%s_projection' % (this.name)
                 )
             this.cell.vertex_props = {'radius': this.v.radius, 'color': this.v.col}
-            this.cell.set_edge_props(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
+            this.cell.edge_props = {
+                'radius': this.e.radius,
+                'color': this.e.col,
+                'drawEdges': this.e.draw,
+            }
             this.cell.set_face_props(drawFaces = this.f.draw)
             this.cell.gl_initialised = True # done as first step in this func
             this.projectedTo3D = True
@@ -583,7 +587,7 @@ class SimpleShape:
                 cellEs = this.cell.es
                 if this.e.showUnscaled:
                     cellEs.extend(this.es)
-                this.cell.set_edge_props(es = cellEs)
+                this.cell.es = cellEs
         if this.updateTransparency:
             cellCols = this.cell.getFaceProperties()['colors']
             if this.removeTransparency:
@@ -622,7 +626,11 @@ class SimpleShape:
                         name = '%s_Es' % (this.name)
                     )
                 cell.vertex_props = {'radius': this.v.radius, 'color': this.v.col}
-                cell.set_edge_props(radius = this.e.radius, color = this.e.col, drawEdges = this.e.draw)
+                cell.edge_props = {
+                    'radius': this.e.radius,
+                    'color': this.e.col,
+                    'drawEdges': this.e.draw,
+                }
                 cell.set_face_props(drawFaces = False)
                 cell.gl_initialised = True
                 this.cells.append(cell)
@@ -639,7 +647,7 @@ class SimpleShape:
                     )
                 # The edges and vertices are drawn through a separate shape below.
                 cell.vertex_props = {'radius': -1}
-                cell.set_edge_props(drawEdges = False)
+                cell.edge_props = {'drawEdges': False}
                 cell.set_face_props(drawFace = this.f.draw)
                 cell.zoom(this.c.scale)
                 cell.gl_initialised = True

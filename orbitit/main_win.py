@@ -773,21 +773,19 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.e_opts_lst[sel]
         if sel_str == 'hide':
             self.e_r_gui.Disable()
-            self.canvas.shape.set_edge_props(drawEdges=False)
+            self.canvas.shape.edge_props = {'drawEdges': False}
         elif sel_str == 'as cylinders':
             self.e_r_gui.Enable()
-            self.canvas.shape.set_edge_props(drawEdges=True)
-            self.canvas.shape.set_edge_props(radius=self.e_r)
+            self.canvas.shape.edge_props = {'drawEdges': True, 'radius': self.e_r}
         elif sel_str == 'as lines':
             self.e_r_gui.Disable()
-            self.canvas.shape.set_edge_props(drawEdges=True)
-            self.canvas.shape.set_edge_props(radius=0)
+            self.canvas.shape.edge_props = {'drawEdges': True, 'radius': 0}
         self.canvas.paint()
 
     def on_e_radius(self, _):
         """Handle event '_' to set edge radius as according to settings"""
         self.e_r = (float(self.e_r_gui.GetValue()) / self.e_r_scale)
-        self.canvas.shape.set_edge_props(radius=self.e_r)
+        self.canvas.shape.edge_props = {'radius': self.e_r}
         self.canvas.paint()
         self.set_status_text()
 
@@ -798,7 +796,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.set_edge_props(color=[float(i)/255 for i in rgb])
+            self.canvas.shape.edge_props = {'color': [float(i)/255 for i in rgb]}
             self.canvas.paint()
         dlg.Destroy()
 
@@ -842,9 +840,9 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_show_unscaled_es(self, _):
         """Handle event '_' to show or hide unscaled edges of polychoron"""
-        self.canvas.shape.set_edge_props(
-            showUnscaled=(self.show_es_unscaled_gui.GetSelection() == 0),
-        )
+        self.canvas.shape.edge_props = {
+            'showUnscaled': (self.show_es_unscaled_gui.GetSelection() == 0),
+        }
         self.canvas.paint()
 
     @staticmethod

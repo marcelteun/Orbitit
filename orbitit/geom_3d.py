@@ -281,7 +281,7 @@ def read_off_file(fd, regen_edges=True, name=""):
     if vRadius != 0:
         shape.vertex_props = {'radius': vRadius}
     if eRadius != 0:
-        shape.set_edge_props(radius=eRadius)
+        shape.edge_props = {'radius': eRadius}
     if name != "":
         shape.name = name
     # If the file defines edges (faces of length 2) then don't recreate any
@@ -861,9 +861,7 @@ class SimpleShape(base.Orbitit):
             colors = ([rgb.gray95[:]], [])
         self.zoom_factor = 1.0
         self.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1.0, 'color': [1.0, 1.0, 0.8]}
-        self.set_edge_props(
-            es=es, radius=-1.0, color=[0.1, 0.1, 0.1], drawEdges=True
-        )
+        self.edge_props = {'es': es, 'radius': -1.0, 'color': [0.1, 0.1, 0.1], 'drawEdges': True}
         self.set_face_props(fs=fs, colors=colors, drawFaces=True)
         self.defaultColor = rgb.yellow
         if orientation:
@@ -1084,39 +1082,31 @@ class SimpleShape(base.Orbitit):
             "drawEdges": self.gl.drawEdges,
         }
 
-    def set_edge_props(self, dictPar=None, **kwargs):
+    @edge_props.setter
+    def edge_props(self, props):
         """
         Specify the edges and set how they are drawn in OpenGL.
 
-        Accepted are the optional (keyword) parameters:
+        Accepted is a dictionary with the following optional keys:
           - es,
           - radius,
           - color,
           - drawEdges.
-        Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
-        If they are not specified (or equel to None) they are not changed.
-        See setter for the explanation of the keys.
         """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                edge_dict = dictPar
-            else:
-                edge_dict = kwargs
-            if "es" in edge_dict and edge_dict["es"] is not None:
-                self.es = edge_dict["es"]
-                self.EsRange = range(0, len(self.es), 2)
-            if "radius" in edge_dict and edge_dict["radius"] is not None:
-                self.gl.eRadius = edge_dict["radius"]
-                self.gl.useCylinderEs = edge_dict["radius"] > 0.0
+        if props:
+            if "es" in props and props["es"] is not None:
+                self.es = props["es"]
+            if "radius" in props and props["radius"] is not None:
+                self.gl.eRadius = props["radius"]
+                self.gl.useCylinderEs = props["radius"] > 0.0
                 if self.gl.useCylinderEs:
                     if self.gl.cyl is not None:
                         del self.gl.cyl
-                    self.gl.cyl = Scenes3D.P2PCylinder(radius=edge_dict["radius"])
-            if "color" in edge_dict and edge_dict["color"] is not None:
-                self.gl.eCol = edge_dict["color"]
-            if "drawEdges" in edge_dict and edge_dict["drawEdges"] is not None:
-                self.gl.drawEdges = edge_dict["drawEdges"]
+                    self.gl.cyl = Scenes3D.P2PCylinder(radius=props["radius"])
+            if "color" in props and props["color"] is not None:
+                self.gl.eCol = props["color"]
+            if "drawEdges" in props and props["drawEdges"] is not None:
+                self.gl.drawEdges = props["drawEdges"]
 
     def regen_edges(self):
         """
@@ -1148,7 +1138,7 @@ class SimpleShape(base.Orbitit):
             # handle the edge from the last vertex to the first vertex separately
             # (instead of using % for every index)
             addEdge(face[lastIndex], face[0])
-        self.set_edge_props(es=es)
+        self.es = es
 
     def setFs(self, fs):
         self.set_face_props(fs=fs)
@@ -1346,7 +1336,7 @@ class SimpleShape(base.Orbitit):
     def create_edge_lengths(self, precision=12):
         e2l = {}
         l2e = {}
-        for ei in self.EsRange:
+        for ei in len(self.es):
             vi0 = self.es[ei]
             vi1 = self.es[ei + 1]
             if vi0 < vi1:
@@ -1501,7 +1491,7 @@ class SimpleShape(base.Orbitit):
             s[r] = cnt + 1
         self.spheresRadii.circumscribed = s
         s = {}
-        for i in self.EsRange:
+        for i in len(self.es):
             v = (self.vs[self.es[i]] + self.vs[self.es[i + 1]]) / 2
             r = round(v.norm(), precision)
             try:
@@ -1656,8 +1646,7 @@ class SimpleShape(base.Orbitit):
             GL.glColor(self.gl.eCol[0], self.gl.eCol[1], self.gl.eCol[2])
             if self.gl.useCylinderEs:
                 # draw edges as cylinders
-                # for i in range(0, len(self.es), 2):
-                for i in self.EsRange:
+                for i in range(0, len(self.es), 2):
                     self.gl.cyl.draw(v0=vs[es[i]], v1=vs[es[i + 1]])
             else:
                 # draw edges as lines
@@ -2641,42 +2630,6 @@ class CompoundShape(base.Orbitit):
             }
         self.merge_needed = True
 
-    def set_edge_props(self, dictPar=None, **kwargs):
-        """Set the edge properties for a whole compound shape at once
-
-        es: This is an array of es. One es array for each shape element
-        radius: one radius that is valid for all shape elements
-        color: one vertex color that is valid for all shape elements
-
-        See the same function in SimpleShape.
-        """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                edge_dict = dictPar
-            else:
-                edge_dict = kwargs
-            if "es" in edge_dict and edge_dict["es"] is not None:
-                es = edge_dict["es"]
-            else:
-                es = [None for shape in self._shapes]
-            if "radius" in edge_dict:
-                radius = edge_dict["radius"]
-            else:
-                radius = None
-            if "color" in edge_dict:
-                color = edge_dict["color"]
-            else:
-                color = None
-            if "drawEdges" in edge_dict:
-                drawEdges = edge_dict["drawEdges"]
-            else:
-                drawEdges = None
-        for i in range(len(self._shapes)):
-            self._shapes[i].set_edge_props(
-                es=es[i], radius=radius, color=color, drawEdges=drawEdges
-            )
-        self.merge_needed = True
-
     @property
     def edge_props(self):
         """Return a dictionary of the edge properties of the compound
@@ -2690,6 +2643,41 @@ class CompoundShape(base.Orbitit):
             "color": d["color"],
             "drawEdges": d["drawEdges"],
         }
+
+    @edge_props.setter
+    def edge_props(self, props):
+        """Set the edge properties for a whole compound shape at once
+
+        Accepted is a dictionary with the following optional keys:
+            es: This is an array of es. One es array for each shape element
+            radius: one radius that is valid for all shape elements
+            color: one vertex color that is valid for all shape elements
+            drawEdges: whether to draw the edges at all
+
+        See the same function in SimpleShape.
+        """
+        if props:
+            if "es" in props and props["es"] is not None:
+                es = props["es"]
+            else:
+                es = [None for shape in self._shapes]
+            if "radius" in props:
+                radius = props["radius"]
+            else:
+                radius = None
+            if "color" in props:
+                color = props["color"]
+            else:
+                color = None
+            if "drawEdges" in props:
+                drawEdges = props["drawEdges"]
+            else:
+                drawEdges = None
+        for i in range(len(self._shapes)):
+            self._shapes[i].edge_props = {
+                'es': es[i], 'radius': radius, 'color': color, 'drawEdges': drawEdges
+            }
+        self.merge_needed = True
 
     def set_face_props(self, dictPar=None, **kwargs):
         """Set the face properties for a whole compound shape at once
@@ -3065,7 +3053,7 @@ class SymmetricShape(CompoundShape):
           - radius,
           - color,
           - drawEdges.
-        Check SimpleShape.set_edge_props for more details.
+        Check SimpleShape.edge_props for more details.
         """
         if dictPar is not None or kwargs != {}:
             if dictPar is not None:
@@ -3073,7 +3061,7 @@ class SymmetricShape(CompoundShape):
             else:
                 edge_dict = kwargs
             if "es" in edge_dict and edge_dict["es"] is not None:
-                self.base_shape.set_edge_props(es=edge_dict["es"])
+                self.base_shape.es = edge_dict["es"]
                 self.needs_apply_isoms = True
             radius = None
             try:
@@ -3091,10 +3079,7 @@ class SymmetricShape(CompoundShape):
             except KeyError:
                 pass
             if not (radius is None and color is None and drawEdges is None):
-                self.set_edge_props(radius=radius, color=color, drawEdges=drawEdges)
-                CompoundShape.set_edge_props(
-                    self, radius=radius, color=color, drawEdges=drawEdges
-                )
+                self.edge_props = {'radius': radius, 'color': color, 'drawEdges': drawEdges}
                 logging.info("radius %f", radius)
                 self.merge_needed = True
 
