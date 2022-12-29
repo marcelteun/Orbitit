@@ -595,9 +595,10 @@ class Line2D(Line):
         pOnLineAtEdges.sort()
 
         logging.debug("pOnLineAtEdges %s after clean up", pOnLineAtEdges)
-        assert (
-            len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections
-        ), "The nr of intersections should be even, are all edges unique and do they form one closed face?"
+        assert len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections, (
+            "The nr of intersections should be even, "
+            "are all edges unique and do they form one closed face?"
+        )
         return pOnLineAtEdges
 
 
@@ -1929,8 +1930,8 @@ class SimpleShape(base.Orbitit):
                         logging.debug("intersectingPlane %s", intersectingPlane)
                         logging.debug("Loi3D %s", Loi3D)
                         assert eq(Loi3D.v[2], 0, 100 * margin), (
-                            "all intersection lines should be paralell to z = 0, but z varies with %f"
-                            % (Loi3D.v[2])
+                            "all intersection lines should be paralell to z = 0, "
+                            "but z varies with %f" % (Loi3D.v[2])
                         )
                         assert eq(Loi3D.p[2], zBaseFace, 100 * margin), (
                             "all intersection lines should ly on z==%f, but z differs %f"
@@ -2086,7 +2087,8 @@ class SimpleShape(base.Orbitit):
         # outside an existing face, since that one can endup inside, if a
         # coplanar face is added in the end).
         # This is a lot so before you begin with that look at std methods, e.g.
-        # S Fortune - Proceedings of the third ACM symposium on Solid modeling and, 1995 - portal.acm.org Polyhedral modelling with exact arithmetic
+        # S Fortune - Proceedings of the third ACM symposium on Solid modeling and, 1995 -
+        # portal.acm.org Polyhedral modelling with exact arithmetic
         #
 
         if not face_indices:
@@ -2189,8 +2191,8 @@ class SimpleShape(base.Orbitit):
                         logging.debug("intersectingPlane %s", intersectingPlane)
                         logging.debug("Loi3D %s", Loi3D)
                         assert eq(Loi3D.v[2], 0, margin), (
-                            "all intersection lines should be paralell to z = 0, but z varies with %f"
-                            % (Loi3D.v[2])
+                            "all intersection lines should be paralell to z = 0, "
+                            "but z varies with %f" % (Loi3D.v[2])
                         )
                         assert eq(Loi3D.p[2], zBaseFace, margin), (
                             "all intersection lines should ly on z==%f, but z differs %f"
