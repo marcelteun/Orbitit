@@ -339,7 +339,9 @@ class Line:
         self.p = p
         self.v = v
 
-    def factorInSegment(self, t, margin):
+    @staticmethod
+    def _factor_in_segment(t, margin):
+        """Check whether t is in [0, 1] with a specified margin."""
         return (
             t is not None and (t >= 0 or eq(t, 0, margin)) and (t <= 1 or eq(t, 1, margin))
         )
@@ -655,13 +657,13 @@ class Line3D(Line):
         dy = (self.p - L.p) * L.v
         vpvq = self.v * L.v
         s = ((L.v * L.v) * dx + vpvq * dy) / D
-        if self.isSegment and not self.factorInSegment(s, margin):
+        if self.isSegment and not self._factor_in_segment(s, margin):
             result = None
         else:
             result = self.getPoint(s)
             if check:
                 t = (vpvq * dx + (self.v * self.v) * dy) / D
-                if L.isSegment and not L.factorInSegment(t, margin):
+                if L.isSegment and not L._factor_in_segment(t, margin):
                     result = None
                 else:
                     checkWith = L.getPoint(t)
@@ -724,8 +726,9 @@ class Plane:
         self.N = self.norm(P0, P1, P2)
         self.D = -self.N * geomtypes.Vec3(P0)
 
-    def norm(self, P0, P1, P2):
-        """calculate the norm for the plane"""
+    @staticmethod
+    def norm(P0, P1, P2):
+        """calculate the normalised plane normal"""
         v1 = geomtypes.Vec3(P0) - geomtypes.Vec3(P1)
         v2 = geomtypes.Vec3(P0) - geomtypes.Vec3(P2)
         cross = v1.cross(v2)
@@ -1189,15 +1192,21 @@ class SimpleShape(base.Orbitit):
             if "drawFaces" in props and props["drawFaces"] is not None:
                 self.setEnableDrawFaces(props["drawFaces"])
 
-    def triangulate(self, fs):
-        ts = []
-        for f in fs:
-            triF = []
-            for i in range(1, len(f) - 1):
-                # i+1 before i, to keep clock-wise direction
-                triF.extend([f[0], f[i + 1], f[i]])
-            ts.append(triF)
-        return ts
+    @staticmethod
+    def triangulate(faces):
+        """Divide faces into triangles
+
+        The faces aren't triangulated so that the triangles cover the same area. This is mainly done
+        to use the stencil buffer for concave polygons.
+
+        return: a new list with faces, but each face is replaced with one list with vertex indices,
+        which would form triangles if they are grouped by three.
+        """
+        return [
+            # i+1 before i, to keep clock-wise direction
+            [t for i in range(1, len(f) - 1) for t in (f[0], f[i + 1], f[i])]
+            for f in faces
+        ]
 
     def _set_faces(self, fs):
         """
@@ -2939,7 +2948,8 @@ class SymmetricShape(CompoundShape):
 
         super().merge_shapes()
 
-    def _chk_face_colors_par(self, colors):
+    @staticmethod
+    def _chk_face_colors_par(colors):
         """Check whether the colors parameters is valid.
 
         If not raise an assert.
@@ -3103,7 +3113,8 @@ class SymmetricShapeSplitCols(SymmetricShape):
     Same as a symmetric shape except that on can define a colour for each individual face.
     """
 
-    def _chk_face_colors_par(self, colors):
+    @staticmethod
+    def _chk_face_colors_par(colors):
         """Check whether the colors parameters is valid.
 
         If not raise an assert.
