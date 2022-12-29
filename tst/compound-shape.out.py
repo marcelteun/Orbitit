@@ -24,7 +24,7 @@ shape = geom_3d.CompoundShape(
                 [3, 2, 6, 7],
                 [7, 6, 5, 4]
             ],
-            Es = [],
+            es = [],
             colors = ([[0.99609400000000003, 0.0, 0.0]], [0, 0, 0, 0, 0, 0]),
             name = "SimpleShape"
         ),
@@ -47,7 +47,7 @@ shape = geom_3d.CompoundShape(
                 [5, 4, 3],
                 [5, 1, 4]
             ],
-            Es = [],
+            es = [],
             colors = ([[0.99609400000000003, 0.0, 0.0]], [0, 0, 0, 0, 0, 0, 0, 0]),
             name = "SimpleShape"
         )

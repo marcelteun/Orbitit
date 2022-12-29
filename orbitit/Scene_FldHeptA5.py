@@ -198,30 +198,30 @@ class Shape(heptagons.FldHeptagonShape):
             this.set_vertices()
         vs = this.baseVs
         if this.has_reflections:
-            Es = this.triEs[this.edge_alt]
-            aLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
-            bLen = '%2.2f' % Vlen(vs[Es[2]], vs[Es[3]])
-            cLen = '%2.2f' % Vlen(vs[Es[4]], vs[Es[5]])
-            dLen = '%2.2f' % Vlen(vs[Es[6]], vs[Es[7]])
+            es = this.triEs[this.edge_alt]
+            aLen = '%2.2f' % Vlen(vs[es[0]], vs[es[1]])
+            bLen = '%2.2f' % Vlen(vs[es[2]], vs[es[3]])
+            cLen = '%2.2f' % Vlen(vs[es[4]], vs[es[5]])
+            dLen = '%2.2f' % Vlen(vs[es[6]], vs[es[7]])
         else:
-            Es = this.triEs[this.edge_alt]
-            aLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
-            bLen = '%2.2f' % Vlen(vs[Es[2]], vs[Es[3]])
-            cLen = '%2.2f' % Vlen(vs[Es[4]], vs[Es[5]])
-            Es = this.o5triEs[this.edge_alt]
-            dLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
+            es = this.triEs[this.edge_alt]
+            aLen = '%2.2f' % Vlen(vs[es[0]], vs[es[1]])
+            bLen = '%2.2f' % Vlen(vs[es[2]], vs[es[3]])
+            cLen = '%2.2f' % Vlen(vs[es[4]], vs[es[5]])
+            es = this.o5triEs[this.edge_alt]
+            dLen = '%2.2f' % Vlen(vs[es[0]], vs[es[1]])
 
         if this.has_reflections:
             s = 'T = %02.2f; |a|: %s, |b|: %s, |c|: %s, |d|: %s' % (
                     this.height, aLen, bLen, cLen, dLen
                 )
         else:
-            Es = this.oppTriEs[this.opposite_edge_alt]
-            opp_bLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
-            opp_cLen = '%2.2f' % Vlen(vs[Es[2]], vs[Es[3]])
-            Es = this.o3triEs[this.opposite_edge_alt]
+            es = this.oppTriEs[this.opposite_edge_alt]
+            opp_bLen = '%2.2f' % Vlen(vs[es[0]], vs[es[1]])
+            opp_cLen = '%2.2f' % Vlen(vs[es[2]], vs[es[3]])
+            es = this.o3triEs[this.opposite_edge_alt]
             if this.opposite_edge_alt != trisAlt.refl_1:
-                opp_dLen = '%2.2f' % Vlen(vs[Es[0]], vs[Es[1]])
+                opp_dLen = '%2.2f' % Vlen(vs[es[0]], vs[es[1]])
             else:
                 opp_dLen = '-'
             s = 'T = %02.2f; |a|: %s, |b|: %s (%s), |c|: %s (%s), |d|: %s (%s)' % (
@@ -324,12 +324,12 @@ class Shape(heptagons.FldHeptagonShape):
         vs.append((vs[0] + vs[11] + vs[12] + vs[13] + vs[14])/5)# vs[44]
         # TODO: if adding more vs, rm above if or use predefined indices
         this.baseVs = vs
-        Es = []
+        es = []
         fs = []
         fs.extend(this.heptagon.fs) # use extend to copy the list to fs
-        Es.extend(this.heptagon.Es) # use extend to copy the list to fs
+        es.extend(this.heptagon.es) # use extend to copy the list to fs
         this.heptagonsShape.setBaseVertexProperties(vs = vs)
-        this.heptagonsShape.setBaseEdgeProperties(Es = Es)
+        this.heptagonsShape.setBaseEdgeProperties(es = es)
         # TODO CHk: comment out this and nvidia driver crashes:...
         this.heptagonsShape.setBaseFaceProperties(fs = fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
@@ -338,15 +338,15 @@ class Shape(heptagons.FldHeptagonShape):
             assert this.edge_alt in this.o5triFs, \
                 "this triangle fill isn't implemented for A5"
             fs = this.o5triFs[this.edge_alt][:]
-            Es = this.o5triEs[this.edge_alt][:]
+            es = this.o5triEs[this.edge_alt][:]
             this.trisO5Shape.setBaseVertexProperties(vs = vs)
-            this.trisO5Shape.setBaseEdgeProperties(Es = Es)
+            this.trisO5Shape.setBaseEdgeProperties(es = es)
             this.trisO5Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO5Shape)
-            Es = this.o3triEs[this.opposite_edge_alt][:]
+            es = this.o3triEs[this.opposite_edge_alt][:]
             fs = this.o3triFs[this.opposite_edge_alt][:]
             this.trisO3Shape.setBaseVertexProperties(vs = vs)
-            this.trisO3Shape.setBaseEdgeProperties(Es = Es)
+            this.trisO3Shape.setBaseEdgeProperties(es = es)
             this.trisO3Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO3Shape)
             if (not this.all_regular_faces):
@@ -363,10 +363,10 @@ class Shape(heptagons.FldHeptagonShape):
                     colIds.extend(this.triColIds[this.opposite_edge_alt][3:])
                 fs = this.triFs[this.edge_alt][:]
                 fs.extend(this.oppTriFs[this.opposite_edge_alt])
-                Es = this.triEs[this.edge_alt][:]
-                Es.extend(this.oppTriEs[this.opposite_edge_alt])
-                this.xtraTrisShape.setBaseVertexProperties(vs = vs)
-                this.xtraTrisShape.setBaseEdgeProperties(Es = Es)
+                es = this.triEs[this.edge_alt][:]
+                es.extend(this.oppTriEs[this.opposite_edge_alt])
+                this.xtraTrisShape.setBaseVertexProperties(vs=vs)
+                this.xtraTrisShape.setBaseEdgeProperties(es=es)
                 this.xtraTrisShape.setBaseFaceProperties(
                     fs = fs,
                     colors = ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]],

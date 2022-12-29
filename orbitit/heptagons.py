@@ -482,7 +482,7 @@ class RegularHeptagon:
         ]
         self.vs = self.vs_org.copy() # pylint: disable=C0103
         self.fs = [[6, 5, 4, 3, 2, 1, 0]]  # pylint: disable=C0103
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]  # pylint: disable=C0103
+        self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]  # pylint: disable=C0103
 
     def fold(
             self,
@@ -541,7 +541,7 @@ class RegularHeptagon:
         #
         #
         self.fs = [[0, 6, 1], [1, 6, 5, 2], [2, 5, 4, 3]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 1, 6, 2, 5]
+        self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 1, 6, 2, 5]
         cosa = math.cos(a)
         sina = math.sin(a)
         cosb = math.cos(b)
@@ -662,7 +662,7 @@ class RegularHeptagon:
         #         5       4
         #
         self.fs = [[1, 0, 2], [2, 0, 6, 3], [3, 6, 5, 4]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 2, 0, 3, 6]
+        self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 2, 0, 3, 6]
         if keep_v0:
             assert False, "TODO"
         else:
@@ -713,7 +713,7 @@ class RegularHeptagon:
         #
         _ = rotate  # TODO: implement
         self.fs = [[0, 6, 1], [1, 3, 2], [1, 6, 4, 3], [4, 6, 5]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 4, 6, 6, 1, 1, 3]
+        self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 4, 6, 6, 1, 1, 3]
         cosa = math.cos(a)
         sina = math.sin(a)
         if keep_v0:
@@ -810,7 +810,7 @@ class RegularHeptagon:
         #
         _ = rotate  # TODO: implement
         self.fs = [[0, 2, 1], [0, 5, 2], [0, 6, 5], [2, 5, 4, 3]]
-        self.Es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
+        self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
         rot0_2 = Rot(axis=self.vs_org[2] - self.vs_org[0], angle=b0)
         v1 = rot0_2 * self.vs_org[1]
         if geom_3d.eq(b0, b1):
@@ -881,7 +881,7 @@ class RegularHeptagon:
 
     def fold_shell_es_fs(self, no):
         """
-        Set self.Es and self.FS for shell-fold and specified position.
+        Set self.es and self.FS for shell-fold and specified position.
 
         no: number to shift up
         """
@@ -893,7 +893,7 @@ class RegularHeptagon:
             [i[0], i[5], i[4]],
             [i[0], i[6], i[5]],
         ]
-        self.Es = [
+        self.es = [
             i[0],
             i[1],
             i[1],
@@ -1437,7 +1437,7 @@ class RegularHeptagon:
 
     def fold_w_es_fs(self, no):
         """
-        Set self.Es and self.FS for W-fold and specified position.
+        Set self.es and self.FS for W-fold and specified position.
 
         no: number to shift up
         """
@@ -1459,7 +1459,7 @@ class RegularHeptagon:
             [i[0], i[6], i[4]],
             [i[6], i[5], i[4]],
         ]
-        self.Es = [
+        self.es = [
             i[0],
             i[1],
             i[1],
@@ -1942,7 +1942,7 @@ class RegularHeptagon:
 
     def fold_mixed_es_fs(self, no):
         """
-        Set self.Es and self.FS for shell fold and specified position.
+        Set self.es and self.FS for shell fold and specified position.
 
         no: number to shift up
         """
@@ -1954,7 +1954,7 @@ class RegularHeptagon:
             [i[0], i[6], i[4]],
             [i[6], i[5], i[4]],
         ]
-        self.Es = [
+        self.es = [
             i[0],
             i[1],
             i[1],
@@ -2553,7 +2553,7 @@ class RegularHeptagon:
 
     def fold_g_es_fs(self, no):
         """
-        Set self.Es and self.FS for shell fold and specified position.
+        Set self.es and self.FS for shell fold and specified position.
 
         no: number to shift up
         """
@@ -2565,7 +2565,7 @@ class RegularHeptagon:
             [i[2], i[5], i[4]],
             [i[2], i[4], i[3]],
         ]
-        self.Es = [
+        self.es = [
             i[0],
             i[1],
             i[1],

@@ -235,10 +235,10 @@ Es_0 = [
         1, 2, 1, 3, 1, 4, 1, 5,
     ]
 offsetIndexWith = lambda i: lambda x: x+i
-Es = []
-Es.extend(list(map(offsetIndexWith(0), Es_0)))
-Es.extend(list(map(offsetIndexWith(6), Es_0)))
-Es.extend(
+ES = []
+ES.extend(list(map(offsetIndexWith(0), Es_0)))
+ES.extend(list(map(offsetIndexWith(6), Es_0)))
+ES.extend(
     [
         6, 12, 6, 16, 8, 12, 8, 13, 10, 13, 10, 16, 12, 16, 16, 13, 13, 12,
         11, 19, 19, 6, 6, 20, 20, 9, 9, 23, 23, 11, 19, 23, 23, 20, 20, 19,
@@ -258,9 +258,9 @@ Es.extend(
 class Shape(Geom4D.SimpleShape):
     def __init__(this):
         Geom4D.SimpleShape.__init__(this,
-            vs, Cs = [], Es = Es, Ns = [],
-            colors = (Cols, ColIdsOpaq),
-            name = TITLE
+            vs, Cs=[], es=ES, Ns=[],
+            colors=(Cols, ColIdsOpaq),
+            name=TITLE
         )
         this.showSolids = True
         this.showTranspI = True

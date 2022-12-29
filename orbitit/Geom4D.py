@@ -45,7 +45,7 @@ class Plane:
 
 class SimpleShape:
     className = "Geom4D.SimpleShape"
-    def __init__(this, vs, Cs, Es = [], Ns = [], colors = ([], []), name = "4DSimpleShape"):
+    def __init__(this, vs, Cs, es = [], Ns = [], colors = ([], []), name = "4DSimpleShape"):
         """
         Cs: and array of cells, consisting of an array of fs.
         """
@@ -79,7 +79,7 @@ class SimpleShape:
         # For initialisation setCellProperties needs to be called before
         # set_edge_props, since the latter will check the scale value
         this.set_edge_props(
-            Es = Es, radius = -1., color = [0.1, 0.1, 0.1],
+            es = es, radius = -1., color = [0.1, 0.1, 0.1],
             drawEdges = True, showUnscaled = True
         )
         this.setProjectionProperties(11.0, 10.0)
@@ -146,7 +146,7 @@ class SimpleShape:
         Specify the edges and set how they are drawn in OpenGL.
 
         Accepted are the optional (keyword) parameters:
-          - Es,
+          - es,
           - radius,
           - color,
           - drawEdges.
@@ -163,8 +163,8 @@ class SimpleShape:
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Es' in dict and dict['Es'] != None:
-                this.Es = dict['Es']
+            if 'es' in dict and dict['es'] != None:
+                this.es = dict['es']
                 this.projectedTo3D = False
             if 'radius' in dict and dict['radius'] != None:
                 this.e.radius = dict['radius']
@@ -215,8 +215,8 @@ class SimpleShape:
         """
         Return the current edge properties as can be set by set_edge_props.
 
-        Returned is a dictionary with the keywords Es, radius, color, drawEdges
-        Es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
+        Returned is a dictionary with the keywords es, radius, color, drawEdges
+        es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
             indices in vs.
         radius: If > 0.0 draw vertices as cylinders with the specified colour.
                 If no cylinders are required (for preformance reasons) set the
@@ -226,7 +226,7 @@ class SimpleShape:
         drawEdges: settings that expresses whether the edges should be drawn at
                    all.
         """
-        return {'Es': this.Es,
+        return {'es': this.es,
                 'radius': this.e.radius,
                 'color': this.e.col,
                 'drawEdges': this.e.draw
@@ -511,9 +511,9 @@ class SimpleShape:
             else:
                 Vs4D = [v for v in this.vs]
             Vs3D = this.projectVsTo3D(Vs4D)
-            #for i in range(0, len(this.Es), 2):
-            #    v0 = Vs4D[this.Es[i]]
-            #    v1 = Vs4D[this.Es[i+1]]
+            #for i in range(0, len(this.es), 2):
+            #    v0 = Vs4D[this.es[i]]
+            #    v1 = Vs4D[this.es[i+1]]
             #if this.Ns != []:
             #    Ns3D = this.projectVsTo3D(Ns4D)
             # Now project all to one 3D shape. 1 3D shape is chosen, instean of
@@ -535,7 +535,7 @@ class SimpleShape:
                 shapeCols = [ c[0:3] for c in shapeCols ]
             if this.e.draw and (not isScaledDown or this.e.showUnscaled):
                 shapeVs = Vs3D
-                shapeEs = this.Es
+                shapeEs = this.es
             # Add a shape with faces for each cell
             for i in range(len(this.Cs)):
                 # use a copy, since we will filter (v indices will change):
@@ -570,7 +570,7 @@ class SimpleShape:
                 shapeFs.extend(cellFs)
                 # for shapeColIndices.extend() see above
             this.cell = geom_3d.SimpleShape(
-                    shapeVs, shapeFs, shapeEs, [], # vs , fs, Es, Ns
+                    shapeVs, shapeFs, shapeEs, [], # vs , fs, es, Ns
                     (shapeCols, shapeColIndices),
                     name = '%s_projection' % (this.name)
                 )
@@ -583,17 +583,17 @@ class SimpleShape:
             if this.e.draw and isScaledDown:
                 this.cell.regen_edges()
                 # Don't use, out of performance issues:
-                # cellEs = this.cell.getEdgeProperties()['Es']
+                # cellEs = this.cell.getEdgeProperties()['es']
                 # --------------------------
                 # Bad performance during scaling:
-                # cellEs = this.cell.getEdgeProperties()['Es']
+                # cellEs = this.cell.getEdgeProperties()['es']
                 # this.cell.regen_edges()
-                # cellEs.extend(this.cell.getEdgeProperties()['Es'])
+                # cellEs.extend(this.cell.getEdgeProperties()['es'])
                 # -------end bad perf---------
-                cellEs = this.cell.Es
+                cellEs = this.cell.es
                 if this.e.showUnscaled:
-                    cellEs.extend(this.Es)
-                this.cell.set_edge_props(Es = cellEs)
+                    cellEs.extend(this.es)
+                this.cell.set_edge_props(es = cellEs)
         if this.updateTransparency:
             cellCols = this.cell.getFaceProperties()['colors']
             if this.removeTransparency:
@@ -628,7 +628,7 @@ class SimpleShape:
             # Add a cell for just the edges:
             if this.e.draw:
                 cell = geom_3d.SimpleShape(
-                        Vs3D, [], this.Es, [], # vs , fs, Es, Ns
+                        Vs3D, [], this.es, [], # vs , fs, es, Ns
                         name = '%s_Es' % (this.name)
                     )
                 cell.set_vertex_props(radius = this.v.radius, color = this.v.col)
@@ -643,7 +643,7 @@ class SimpleShape:
                 else:
                     colors = (this.f.col[0], this.f.col[1][i])
                 cell = geom_3d.SimpleShape(
-                        Vs3D, this.Cs[i], [], [], # vs , fs, Es, Ns
+                        Vs3D, this.Cs[i], [], [], # vs , fs, es, Ns
                         colors,
                         name = '%s_%d' % (this.name, i)
                     )

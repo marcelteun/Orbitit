@@ -777,9 +777,9 @@ class MainPanel(wx.Panel):
         del old_v_settings['vs']
         del old_v_settings['Ns']
         self.canvas.shape.set_vertex_props(old_v_settings)
-        # Use all the edge settings except for Es
+        # Use all the edge settings except for es
         old_e_settings = old_shape.getEdgeProperties()
-        del old_e_settings['Es']
+        del old_e_settings['es']
         self.canvas.shape.set_edge_props(old_e_settings)
         # Use only the 'drawFaces' setting:
         old_f_settings = {'drawFaces': old_shape.getFaceProperties()['drawFaces']}

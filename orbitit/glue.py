@@ -29,16 +29,16 @@ import math
 
 from orbitit import geomtypes
 
-def getVUsageIn1D(vs, Es, vUsage = None):
+def getVUsageIn1D(vs, es, vUsage = None):
     """
-    Check how often the vertices in vs are referred through the 1D array Es
+    Check how often the vertices in vs are referred through the 1D array es
 
     Returns an array of lenth vs with the amount.
     vUsage (of length vs) can be used as initialisation value for this array.
     """
     if vUsage == None:
         vUsage = [0 for v in vs]
-    for vIndex in Es:
+    for vIndex in es:
         vUsage[vIndex] = vUsage[vIndex] + 1
     return vUsage
 
@@ -94,7 +94,7 @@ def mergeVs(vs, fs, precision=12):
     """
     Merges vertices that are equal into one vertex.
 
-    Note that this might change the content of fs and Es.
+    Note that this might change the content of fs and es.
     Note that vs is not cleaned up. This means that some vertices might not be
     used. The return value indicates if some vertices are unused now.
     """
@@ -132,7 +132,7 @@ def mergeVs(vs, fs, precision=12):
         # remove any faces with only 2 (or less) unique vertices
         if len(face_vertices) < 3:
             del(fs[f_i])
-#    for i in range(len(Es)):
-#       if replace_by[Es[i]] > -1:
-#           Es[i] = replace_by[Es[i]]
+#    for i in range(len(es)):
+#       if replace_by[es[i]] > -1:
+#           es[i] = replace_by[es[i]]
     return replaced

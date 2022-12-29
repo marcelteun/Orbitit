@@ -193,24 +193,24 @@ class Shape(heptagons.FldHeptagonShape):
         if this.update_shape:
             this.set_vertices()
         vs = this.baseVs
-        Es = this.triEs[this.edge_alt]
-        a_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
-        b_len = f"{Vlen(vs[Es[2]], vs[Es[3]]):.2f}"
-        c_len = f"{Vlen(vs[Es[4]], vs[Es[5]]):.2f}"
-        Es = this.o3triEs[this.edge_alt]
-        d_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
+        es = this.triEs[this.edge_alt]
+        a_len = f"{Vlen(vs[es[0]], vs[es[1]]):.2f}"
+        b_len = f"{Vlen(vs[es[2]], vs[es[3]]):.2f}"
+        c_len = f"{Vlen(vs[es[4]], vs[es[5]]):.2f}"
+        es = this.o3triEs[this.edge_alt]
+        d_len = f"{Vlen(vs[es[0]], vs[es[1]]):.2f}"
         if this.has_reflections:
             s = f"T = {this.height:.2f}; |a|: {a_len}, |b|: {b_len}, |c|: {c_len}, |d|: {d_len}"
         else:
             if this.edge_alt == trisAlt.twist_strip_I:
-                Es = this.oppTriEs[this.opposite_edge_alt][this.has_reflections]
+                es = this.oppTriEs[this.opposite_edge_alt][this.has_reflections]
             else:
-                Es = this.oppTriEs[this.opposite_edge_alt]
-            opp_b_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
-            opp_c_len = f"{Vlen(vs[Es[2]], vs[Es[3]]):.2f}"
-            Es = this.oppO3triEs[this.opposite_edge_alt]
+                es = this.oppTriEs[this.opposite_edge_alt]
+            opp_b_len = f"{Vlen(vs[es[0]], vs[es[1]]):.2f}"
+            opp_c_len = f"{Vlen(vs[es[2]], vs[es[3]]):.2f}"
+            es = this.oppO3triEs[this.opposite_edge_alt]
             if this.opposite_edge_alt != trisAlt.twist_strip_I:
-                opp_d_len = f"{Vlen(vs[Es[0]], vs[Es[1]]):.2f}"
+                opp_d_len = f"{Vlen(vs[es[0]], vs[es[1]]):.2f}"
             else:
                 opp_d_len = "-"
             s = "T = {:.2f}; |a|: {}, |b|: {} ({}), |c|: {} ({}), |d|: {} ({})".format(
@@ -266,23 +266,23 @@ class Shape(heptagons.FldHeptagonShape):
         vs.append(Rl * vs[13])  # vs[22] = V13'
         vs.append(Rl * vs[-1])  # vs[23] = V13"
         this.baseVs = vs
-        Es = []
+        es = []
         fs = []
         fs.extend(this.heptagon.fs)  # use extend to copy the list to fs
-        Es.extend(this.heptagon.Es)  # use extend to copy the list to fs
+        es.extend(this.heptagon.es)  # use extend to copy the list to fs
         this.heptagonsShape.setBaseVertexProperties(vs=vs)
-        this.heptagonsShape.setBaseEdgeProperties(Es=Es)
+        this.heptagonsShape.setBaseEdgeProperties(es=es)
         # comment out this and nvidia driver crashes:...
         this.heptagonsShape.setBaseFaceProperties(fs=fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.add_extra_faces:
-            Es = this.o3triEs[this.edge_alt][:]
+            es = this.o3triEs[this.edge_alt][:]
             fs = this.o3triFs[this.edge_alt][:]
-            Es.extend(this.oppO3triEs[this.opposite_edge_alt])
+            es.extend(this.oppO3triEs[this.opposite_edge_alt])
             fs.extend(this.oppO3triFs[this.opposite_edge_alt])
             this.trisO3Shape.setBaseVertexProperties(vs=vs)
-            this.trisO3Shape.setBaseEdgeProperties(Es=Es)
+            this.trisO3Shape.setBaseEdgeProperties(es=es)
             this.trisO3Shape.setBaseFaceProperties(fs=fs)
             theShapes.append(this.trisO3Shape)
             if not this.all_regular_faces:
@@ -292,27 +292,27 @@ class Shape(heptagons.FldHeptagonShape):
                     eAlt = this.opposite_edge_alt
                 else:
                     eAlt = this.edge_alt
-                Es = this.triEs[this.edge_alt][:]
+                es = this.triEs[this.edge_alt][:]
                 if this.edge_alt == trisAlt.twist_strip_I:
                     fs = this.triFs[this.edge_alt][this.has_reflections][:]
                     fs.extend(
                         this.oppTriFs[this.opposite_edge_alt][this.has_reflections]
                     )
-                    Es.extend(
+                    es.extend(
                         this.oppTriEs[this.opposite_edge_alt][this.has_reflections]
                     )
                     # only draw the folds of the hexagon for the twisted variant
                     # if the hexagon isn't flat.
                     if not geom_3d.eq(abs(this.pos_angle) % (math.pi / 2), math.pi / 4):
-                        Es.extend(this.twistedEs_A4)
+                        es.extend(this.twistedEs_A4)
                     colIds = this.triColIds[eAlt][this.has_reflections]
                 else:
                     fs = this.triFs[this.edge_alt][:]
                     fs.extend(this.oppTriFs[this.opposite_edge_alt])
-                    Es.extend(this.oppTriEs[this.opposite_edge_alt])
+                    es.extend(this.oppTriEs[this.opposite_edge_alt])
                     colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.setBaseVertexProperties(vs=vs)
-                this.xtraTrisShape.setBaseEdgeProperties(Es=Es)
+                this.xtraTrisShape.setBaseEdgeProperties(es=es)
                 this.xtraTrisShape.setBaseFaceProperties(
                     fs=fs,
                     colors=([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]], colIds),

@@ -89,7 +89,7 @@ Col1.append(0.4)
 
 Cols     = [Col0, Col1, Col2]
 
-Es = [
+ES = [
         0, 1, 0, 2, 0, 3, 0, 4,
         1, 2, 1, 3, 1, 4,
         2, 3, 2, 4,
@@ -109,9 +109,9 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            vs, Cs = Cs, Es = Es, Ns = [],
-            colors = (Cols, cols),
-            name = TITLE
+            vs, Cs=Cs, es=ES, Ns=[],
+            colors=(Cols, cols),
+            name=TITLE
         )
         this.showGroup = [True for i in range(len(Cells))]
         this.showWhichCells = []

@@ -157,29 +157,29 @@ class Shape(geom_3d.SimpleShape):
     def update_view_opt(self, show_kite=None, show_hepta=None):
         if show_kite != None or show_hepta != None:
             fs = []
-            Es = []
+            es = []
             vs = []
             ColsI = []
             if show_kite:
                 vs.extend(self.kiteVs)
                 fs.extend(self.kiteFs)
-                Es.extend(self.kiteEs)
+                es.extend(self.kiteEs)
                 ColsI.extend(self.kiteColors)
             if show_hepta:
                 if vs != []:
                     lVs = len(vs)
                     for face in self.heptaFs:
                         fs.append([i + lVs for i in face])
-                    Es.extend([i + lVs for i in self.heptaEs])
+                    es.extend([i + lVs for i in self.heptaEs])
                     vs.extend(self.heptaVs)
                     ColsI.extend(self.heptaColors)
                 else:
                     fs.extend(self.heptaFs)
-                    Es.extend(self.heptaEs)
+                    es.extend(self.heptaEs)
                     vs.extend(self.heptaVs)
                     ColsI.extend(self.heptaColors)
             self.set_vertex_props(vs=vs)
-            self.set_edge_props(Es=Es)
+            self.set_edge_props(es=es)
             self.set_face_props(fs=fs, colors=[self.colors[:], ColsI[:]])
             # save for set_vs:
             self.show_kite  = show_kite

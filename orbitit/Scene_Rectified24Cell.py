@@ -529,16 +529,16 @@ Es_0 = [
         0, 4, 4, 8, 8, 7, 7, 0, 2, 6, 6, 10, 10, 5, 5, 2,
     ]
 offsetIndexWith = lambda i: lambda x: x+i
-Es = []
-Es.extend(list(map(offsetIndexWith(0), Es_0)))
-Es.extend(list(map(offsetIndexWith(12), Es_0)))
-Es.extend(list(map(offsetIndexWith(24), Es_0)))
-Es.extend(list(map(offsetIndexWith(36), Es_0)))
-Es.extend(list(map(offsetIndexWith(48), Es_0)))
-Es.extend(list(map(offsetIndexWith(60), Es_0)))
-Es.extend(list(map(offsetIndexWith(72), Es_0)))
-Es.extend(list(map(offsetIndexWith(84), Es_0)))
-Es.extend(
+ES = []
+ES.extend(list(map(offsetIndexWith(0), Es_0)))
+ES.extend(list(map(offsetIndexWith(12), Es_0)))
+ES.extend(list(map(offsetIndexWith(24), Es_0)))
+ES.extend(list(map(offsetIndexWith(36), Es_0)))
+ES.extend(list(map(offsetIndexWith(48), Es_0)))
+ES.extend(list(map(offsetIndexWith(60), Es_0)))
+ES.extend(list(map(offsetIndexWith(72), Es_0)))
+ES.extend(list(map(offsetIndexWith(84), Es_0)))
+ES.extend(
     [
         # triangle edges from shell of cubes inside outer shell:
         0, 24, 24, 48, 48, 0,
@@ -586,9 +586,9 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            vs, Cs = Cs, Es = Es, Ns = [],
-            colors = (Cols, cols),
-            name = TITLE
+            vs, Cs=Cs, es=ES, Ns=[],
+            colors=(Cols, cols),
+            name=TITLE,
         )
         this.showGroup = [True for i in range(len(Cells))]
         this.showWhichCells = []

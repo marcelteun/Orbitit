@@ -67,7 +67,7 @@ vs = [
         [0, -l, -l, -l],  # 31
     ]
 
-Es = [
+ES = [
         24, 16, 16,  8,  8, 24,
         24,  0, 16,  0,  8,  0,
         24, 12, 12, 20, 20, 24,
@@ -230,9 +230,9 @@ class Shape(Geom4D.SimpleShape):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
         Geom4D.SimpleShape.__init__(this,
-            vs, Cs = Cs, Es = Es, Ns = [],
-            colors = (Cols, cols),
-            name = TITLE
+            vs, Cs=Cs, es=ES, Ns=[],
+            colors=(Cols, cols),
+            name=TITLE,
         )
         this.showGroup = [True for i in range(len(Cells))]
         this.showWhichCells = []
