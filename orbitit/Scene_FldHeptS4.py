@@ -310,7 +310,7 @@ class Shape(heptagons.FldHeptagonShape):
         fs.extend(this.heptagon.fs) # use extend to copy the list to fs
         es.extend(this.heptagon.es) # use extend to copy the list to fs
         this.heptagonsShape.base_shape.vertex_props = {'vs': vs}
-        this.heptagonsShape.setBaseEdgeProperties(es = es)
+        this.heptagonsShape.base_shape.es = es
         # TODO CHk: comment out this and nvidia driver crashes:...
         this.heptagonsShape.setBaseFaceProperties(fs = fs)
         this.heptagonsShape.setFaceColors(heptColPerIsom)
@@ -320,13 +320,13 @@ class Shape(heptagons.FldHeptagonShape):
             fs = this.o3triFs[this.edge_alt][:]
             es = this.o3triEs[this.edge_alt][:]
             this.trisO3Shape.base_shape.vertex_props = {'vs': vs}
-            this.trisO3Shape.setBaseEdgeProperties(es = es)
+            this.trisO3Shape.base_shape.es = es
             this.trisO3Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO3Shape)
             es = this.o4triEs[this.opposite_edge_alt][:]
             fs = this.o4triFs[this.opposite_edge_alt][:]
             this.trisO4Shape.base_shape.vertex_props = {'vs': vs}
-            this.trisO4Shape.setBaseEdgeProperties(es = es)
+            this.trisO4Shape.base_shape.es = es
             this.trisO4Shape.setBaseFaceProperties(fs = fs)
             theShapes.append(this.trisO4Shape)
             if (not this.all_regular_faces):
@@ -342,7 +342,7 @@ class Shape(heptagons.FldHeptagonShape):
                 es.extend(this.oppTriEs[this.opposite_edge_alt])
                 colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.base_shape.vertex_props = {'vs': vs}
-                this.xtraTrisShape.setBaseEdgeProperties(es=es)
+                this.xtraTrisShape.base_shape.es = es
                 this.xtraTrisShape.setBaseFaceProperties(
                     fs = fs,
                     colors = ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]],

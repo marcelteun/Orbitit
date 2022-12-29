@@ -3044,49 +3044,6 @@ class SymmetricShape(CompoundShape):
         self.base_shape.orientation = orientation
         self.needs_apply_isoms = True
 
-    def setBaseEdgeProperties(self, dictPar=None, **kwargs):
-        """
-        Specify the edges and set how they are drawn in OpenGL.
-
-        Accepted are the optional (keyword) parameters:
-          - es,
-          - radius,
-          - color,
-          - drawEdges.
-        Check SimpleShape.edge_props for more details.
-        """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                edge_dict = dictPar
-            else:
-                edge_dict = kwargs
-            if "es" in edge_dict and edge_dict["es"] is not None:
-                self.base_shape.es = edge_dict["es"]
-                self.needs_apply_isoms = True
-            radius = None
-            try:
-                radius = edge_dict["radius"]
-            except KeyError:
-                pass
-            color = None
-            try:
-                color = edge_dict["color"]
-            except KeyError:
-                pass
-            drawEdges = None
-            try:
-                drawEdges = edge_dict["drawEdges"]
-            except KeyError:
-                pass
-            if not (radius is None and color is None and drawEdges is None):
-                self.edge_props = {'radius': radius, 'color': color, 'drawEdges': drawEdges}
-                logging.info("radius %f", radius)
-                self.merge_needed = True
-
-    def getBaseEdgeProperties(self):
-        """Get the edge properties of the base element."""
-        return self.base_shape.edge_props
-
     def setBaseFaceProperties(self, dictPar=None, **kwargs):
         """
         Define the properties of the faces for the base element.
