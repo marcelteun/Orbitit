@@ -3050,13 +3050,6 @@ class SymmetricShape(CompoundShape):
             if "drawFaces" in face_dict and face_dict["drawFaces"] is not None:
                 self.setEnableDrawFaces(face_dict["drawFaces"])
 
-    def getBaseFaceProperties(self):
-        """
-        Get the face properties of the base element.
-
-        """
-        return self.base_shape.face_props
-
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
         def adjust_transform(isom):

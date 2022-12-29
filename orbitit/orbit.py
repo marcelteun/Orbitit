@@ -431,7 +431,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
             final_sym = self.orbit.final_sym_alt
             stab_sym = self.orbit.stab_sym_alt
             verts = self.base_shape.vs
-            faces = self.getBaseFaceProperties()['fs']
+            faces = self.base_shape.face_props['fs']
             super().__init__(
                 verts,
                 faces,
