@@ -27,6 +27,7 @@
 # pylint: disable=invalid-name,too-many-lines
 from math import sqrt as V
 
+from orbitit.base import add_std_arguments_for_generating_models
 from orbitit.geom_3d import CompoundShape
 from orbitit.geomtypes import Vec3
 from orbitit import isometry as sym
