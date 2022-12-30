@@ -2986,7 +2986,6 @@ class SymmetricShape(CompoundShape):
         """
         colors = self._chk_face_colors_par(colors)
         self.shape_colors = colors
-        self.nrOfShapeColorDefs = len(colors)
         self.merge_needed = True
         self.needs_apply_isoms = True
 
@@ -2994,24 +2993,23 @@ class SymmetricShape(CompoundShape):
         """
         Divide the shape colors over the isometries and re-assign class field.
         """
-        if self.nrOfShapeColorDefs != self.order:
-            if self.nrOfShapeColorDefs == 1:
-                colorDataPerShape = [self.shape_colors[0] for i in range(self.order)]
-            elif self.nrOfShapeColorDefs < self.order:
-                div = self.order // self.nrOfShapeColorDefs
-                mod = self.order % self.nrOfShapeColorDefs
-                colorDataPerShape = []
+        no_of_cols = len(self.shape_colors)
+        if no_of_cols != self.order:
+            if no_of_cols == 1:
+                col_data_per_shape = [self.shape_colors[0] for i in range(self.order)]
+            elif no_of_cols < self.order:
+                div = self.order // no_of_cols
+                mod = self.order % no_of_cols
+                col_data_per_shape = []
                 for _ in range(div):
-                    colorDataPerShape.extend(self.shape_colors)
-                colorDataPerShape.extend(self.shape_colors[:mod])
+                    col_data_per_shape.extend(self.shape_colors)
+                col_data_per_shape.extend(self.shape_colors[:mod])
             else:
-                colorDataPerShape = (self.shape_colors[: self.order],)
-            self.shape_colors = colorDataPerShape
-        self.nrOfShapeColorDefs = len(self.shape_colors)
-        assert self.nrOfShapeColorDefs == self.order, "%d != %d" % (
-            self.nrOfShapeColorDefs,
-            self.order,
-        )
+                col_data_per_shape = (self.shape_colors[: self.order],)
+            self.shape_colors = col_data_per_shape
+            no_of_cols = len(self.shape_colors)
+        # else: nothing to update
+        assert no_of_cols == self.order, f"{no_of_cols} != {self.order}"
 
     def apply_isoms(self):
         """
