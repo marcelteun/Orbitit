@@ -430,7 +430,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
             # only have these:
             final_sym = self.orbit.final_sym_alt
             stab_sym = self.orbit.stab_sym_alt
-            verts = self.base_shape.vs
+            verts = self.base_vs
             faces = self.base_shape.face_props['fs']
             super().__init__(
                 verts,
@@ -463,7 +463,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         self.axis = None
         self.angle_domain = None
         # Save original
-        self.base_shape.org_Vs = self.base_shape.vs
+        self._org_base_vs = self.base_vs
 
     def transform_base(self, trans):
         """Rotate the position of the descriptive
@@ -471,7 +471,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         trans: a geomtypes.quat object (or matrix) for left multiplying all
                vertices.
         """
-        self.setVs([trans * v for v in self.base_shape.vs])
+        self.base_vs = [trans * v for v in self.base_vs]
 
     def set_rot_axis(self, axis, domain=None):
         """Set the rotation axis for rotating the descriptive.
@@ -492,7 +492,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
 
     def reset_rotation(self):
         """Undo any rotation."""
-        self.setVs(self.base_shape.org_Vs)
+        self.base_vs = self._org_base_vs
 
     def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=True):
         """Return to off-format representation."""
@@ -506,7 +506,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         js = f"var {self.name} = new Object();\n"
         js += f"{self.name}.descr = new Object();\n"
         js += f"{self.name}.descr.vs = [\n"
-        for v in self.base_shape.vs:
+        for v in self.base_vs:
             js += f"  {v},\n"
         js += '];'
         js += f"{self.name}.descr.fs = {self.base_shape.fs};"

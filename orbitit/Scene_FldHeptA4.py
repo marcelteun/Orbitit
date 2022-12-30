@@ -611,15 +611,15 @@ class Shape(heptagons.FldHeptagonShape):
         d = 1
         for i in range(2):
             norm0 = geom_3d.Triangle(
-                this.base_shape.vs[tris[i][0]],
-                this.base_shape.vs[tris[i][1]],
-                this.base_shape.vs[tris[i][2]],
+                this.base_vs[tris[i][0]],
+                this.base_vs[tris[i][1]],
+                this.base_vs[tris[i][2]],
             ).normal(True)
             logging.info("norm0: {norm0}")
             norm1 = geom_3d.Triangle(
-                this.base_shape.vs[tris[i + d][0]],
-                this.base_shape.vs[tris[i + d][1]],
-                this.base_shape.vs[tris[i + d][2]],
+                this.base_vs[tris[i + d][0]],
+                this.base_vs[tris[i + d][1]],
+                this.base_vs[tris[i + d][2]],
             ).normal(True)
             logging.info("norm1: {norm1}")
             inprod = norm0 * norm1

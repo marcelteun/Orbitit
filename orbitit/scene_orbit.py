@@ -503,7 +503,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             if self.fs_orbit_org:
                 final_sym = self.orbit.final_sym_alt
                 stab_sym = self.orbit.stab_sym_alt
-                verts = self.shape.base_shape.vs
+                verts = self.shape.base_vs
                 faces = self.shape.base_shape.face_props['fs']
                 self.shape = geom_3d.OrbitShape(
                     verts,

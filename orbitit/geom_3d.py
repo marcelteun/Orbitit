@@ -1004,9 +1004,6 @@ class SimpleShape(base.Orbitit):
         shape.face_props = fProps
         return shape
 
-    def setVs(self, vs):
-        self.vertex_props = {'vs': vs}
-
     @property
     def vertex_props(self):
         """
@@ -3020,7 +3017,17 @@ class SymmetricShape(CompoundShape):
         self.setShapes(shapes)
         self.needs_apply_isoms = False
 
-    def setVs(self, vs):
+    @property
+    def base_vs(self):
+        """Get the vertices of the base shape."""
+        return self.base_shape.vs
+
+    @base_vs.setter
+    def base_vs(self, vs):
+        """Set the vertices of the base shape.
+
+        This will make sure that the necessary updates are made when needed.
+        """
         assert len(vs) == len(self.base_shape.vs)
         self.base_shape.vertex_props = {'vs': vs}
         self.merge_needed = True
