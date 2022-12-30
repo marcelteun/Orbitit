@@ -817,6 +817,9 @@ class SimpleShape(base.Orbitit):
 
     """
     This class decribes a simple 3D object consisting of faces and edges.
+
+    Attributes:
+    color_data: same as the colors parameter in __init__, see that method.
     """
 
     def __init__(
@@ -853,7 +856,7 @@ class SimpleShape(base.Orbitit):
             ns = []
         self.dimension = 3
         self.face_normals = []
-        self.generateNormals = True
+        self.generate_normals = True
         self.name = name
         self.gl_initialised = False
         self.gl = Fields()
@@ -898,7 +901,7 @@ class SimpleShape(base.Orbitit):
         )
         s = s.add_decr_line("],")
         s = s.add_line("es=%s," % repr(self.es))
-        s = s.add_line("colors=%s," % repr(self.colorData))
+        s = s.add_line("colors=%s," % repr(self.color_data))
         s = s.add_line('name="%s"' % self.name)
         s = s.add_decr_line(")")
         if __name__ != "__main__":
@@ -917,8 +920,8 @@ class SimpleShape(base.Orbitit):
                 "name": self.name,
                 "vs": self.vs,
                 "fs": self.fs,
-                "cols": self.colorData[0],
-                "face_cols": self.colorData[1],
+                "cols": self.color_data[0],
+                "face_cols": self.color_data[1],
             },
         }
 
@@ -1172,7 +1175,7 @@ class SimpleShape(base.Orbitit):
                    face colors are set by some default algorithm.
         drawFaces: settings that expresses whether the faces should be drawn.
         """
-        return {"fs": self.fs, "colors": self.colorData, "drawFaces": self.gl.drawFaces}
+        return {"fs": self.fs, "colors": self.color_data, "drawFaces": self.gl.drawFaces}
 
     @face_props.setter
     def face_props(self, props):
@@ -1225,7 +1228,7 @@ class SimpleShape(base.Orbitit):
         self.face_normals_up_to_date = False
         # if you autogenerate the vertex normal, using the faces, you need to
         # regenerate by setting self.gl.updateVs
-        self.gl.updateVs = self.generateNormals
+        self.gl.updateVs = self.generate_normals
 
     def setFaceColors(self, colors):
         """
@@ -1236,12 +1239,12 @@ class SimpleShape(base.Orbitit):
         if colors[0] is not None:
             colorDefs = colors[0]
         else:
-            colorDefs = self.colorData[0]
+            colorDefs = self.color_data[0]
         if colors[1] is not None:
             fColors = colors[1]
         else:
-            fColors = self.colorData[1]
-        self.colorData = (colorDefs, fColors)
+            fColors = self.color_data[1]
+        self.color_data = (colorDefs, fColors)
         self.nrOfColors = len(colorDefs)
         self.colRange = range(self.nrOfColors)
         assert self.nrOfColors > 0, "Empty colorDefs: %s" % colorDefs
@@ -1411,18 +1414,18 @@ class SimpleShape(base.Orbitit):
         colours than faces. These trivial cases do not need to be implemented by
         every descendent.
         """
-        if len(self.colorData[1]) != self.FsLen:
+        if len(self.color_data[1]) != self.FsLen:
             if self.nrOfColors == 1:
-                self.colorData = (self.colorData[0], [0 for i in self.FsRange])
+                self.color_data = (self.color_data[0], [0 for i in self.FsRange])
             elif self.nrOfColors < self.FsLen:
                 self.divideColor()
             else:
-                self.colorData = (self.colorData[0], list(range(self.FsLen)))
-            assert len(self.colorData[1]) == self.FsLen
+                self.color_data = (self.color_data[0], list(range(self.FsLen)))
+            assert len(self.color_data[1]) == self.FsLen
         # generate an array with Equal coloured faces:
         self.EqColFs = [[] for col in range(self.nrOfColors)]
         for i in self.FsRange:
-            self.EqColFs[self.colorData[1][i]].append(i)
+            self.EqColFs[self.color_data[1][i]].append(i)
 
     def divideColor(self):
         """
@@ -1440,7 +1443,7 @@ class SimpleShape(base.Orbitit):
         for i in range(div):
             face_cols.extend(colorIRange)
         face_cols.extend(list(range(mod)))
-        self.colorData = (self.colorData[0], face_cols)
+        self.color_data = (self.color_data[0], face_cols)
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
@@ -1572,7 +1575,7 @@ class SimpleShape(base.Orbitit):
 
             # At least on Ubuntu 8.04 conversion is not needed
             # On windows and Ubuntu 9.10 the vs cannot be an array of vec3...
-            if not self.generateNormals:
+            if not self.generate_normals:
                 try:
                     if not GL.glVertexPointerf(vs):
                         return
@@ -1627,7 +1630,7 @@ class SimpleShape(base.Orbitit):
                 self.gl.sphere.draw(self.vs[i])
         # EDGES
         if self.gl.drawEdges:
-            if self.generateNormals and (self.ns == [] or len(self.ns) != len(self.vs)):
+            if self.generate_normals and (self.ns == [] or len(self.ns) != len(self.vs)):
                 es = self.nEs
                 vs = self.nVs
             else:
@@ -1648,7 +1651,7 @@ class SimpleShape(base.Orbitit):
         # FACES
         if self.gl.drawFaces:
             for col_idx in self.colRange:
-                c = self.colorData[0][col_idx]
+                c = self.color_data[0][col_idx]
                 if len(c) == 3:
                     GL.glColor(c[0], c[1], c[2])
                 else:
@@ -1701,9 +1704,7 @@ class SimpleShape(base.Orbitit):
     def to_off(
         self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
     ):
-        """
-        Converts this SimpleShape to a string in the 3D 'off' format and returns
-        the result.
+        """Return a representation of the object in the 3D 'OFF' file format.
 
         precision: the precision that will be used for printing the coordinates
                    of the vertices.
@@ -1752,16 +1753,16 @@ class SimpleShape(base.Orbitit):
                 )
             )
         s = w("# Sides and colours")
-        # self.colorData[1] = [] : use self.colorData[0][0]
-        # self.colorData[1] = [c0, c1, .. cn] where ci is an index i
-        #                     self.colorData[0]
+        # self.color_data[1] = [] : use self.color_data[0][0]
+        # self.color_data[1] = [c0, c1, .. cn] where ci is an index i
+        #                     self.color_data[0]
         #                     There should be as many colours as faces.
-        if len(self.colorData[0]) == 1:
+        if len(self.color_data[0]) == 1:
             oneColor = True
-            color = self.colorData[0][0]
+            color = self.color_data[0][0]
         else:
             oneColor = False
-            assert len(self.colorData[1]) == len(self.colorData[1])
+            assert len(self.color_data[1]) == len(self.color_data[1])
 
         def face_str(face):
             """convert face to string in off-format."""
@@ -1786,7 +1787,7 @@ class SimpleShape(base.Orbitit):
             self.create_face_normals(normalise=True)
             for i in range(no_of_faces):
                 face = self.fs[i]
-                color = self.colorData[0][self.colorData[1][i]]
+                color = self.color_data[0][self.color_data[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s = "%s%s\n" % (s, face_str(face))
                 fnStr = "%s %s %s" % (
@@ -2488,9 +2489,7 @@ class CompoundShape(base.Orbitit):
         shape.gl.alwaysSetVertices = True
         self._shapes.append(shape)
         if len(self._shapes) > 1:
-            self._shapes[-1].generateNormals = self._shapes[
-                0
-            ].generateNormals
+            self._shapes[-1].generate_normals = self._shapes[0].generate_normals
         self.merge_needed = True
 
     @property
@@ -2505,7 +2504,7 @@ class CompoundShape(base.Orbitit):
         """
         Set the shapes all at once.
 
-        Note: you need to make sure yourself to have the generateNormals set
+        Note: you need to make sure yourself to have the generate_normals set
         consistently for all shapes.
         """
         self._shapes = shapes
@@ -2538,8 +2537,8 @@ class CompoundShape(base.Orbitit):
             # offset all faces:
             fs.extend([[i + VsOffset for i in f] for f in s.fs])
             es.extend([i + VsOffset for i in s.es])
-            colorDefs.extend(s.colorData[0])
-            colorIndices.extend([i + colOffset for i in s.colorData[1]])
+            colorDefs.extend(s.color_data[0])
+            colorIndices.extend([i + colOffset for i in s.color_data[1]])
         self.merged_shape = SimpleShape(
             vs=vs, fs=fs, es=es, ns=ns, colors=(colorDefs, colorIndices)
         )
@@ -2686,7 +2685,7 @@ class CompoundShape(base.Orbitit):
         See face_props.setter what to expect.
         """
         d = self._shapes[0].face_props
-        return {"fs": self.fs, "colors": self.colorData, "drawFaces": d["drawFaces"]}
+        return {"fs": self.fs, "colors": self.color_data, "drawFaces": d["drawFaces"]}
 
     @face_props.setter
     def face_props(self, props):
@@ -2752,16 +2751,20 @@ class CompoundShape(base.Orbitit):
         return [shape.fs for shape in self._shapes]
 
     @property
-    def colorData(self):
-        return [shape.colorData for shape in self._shapes]
+    def color_data(self):
+        """Get the color settings for all shapes."""
+        return [shape.color_data for shape in self._shapes]
 
     @property
-    def generateNormals(self):
-        return self._shapes[0].generateNormals
+    def generate_normals(self):
+        """Boolean stating whether vertex normals need to be (re)generated."""
+        return self._shapes[0].generate_normals
 
-    def to_off(
-        self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
-    ):
+    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
+        """Return a representation of the object in the 3D 'OFF' file format.
+
+        See SimpleShape.to_off
+        """
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.to_off(precision, info, color_floats)

@@ -786,7 +786,7 @@ class MainPanel(wx.Panel):
         self.canvas.shape.face_props = old_f_settings
         # if the shape generates the normals itself:
         # TODO: handle that this.ns is set correctly, i.e. normalised
-        if shape.generateNormals:
+        if shape.generate_normals:
             GL.glDisable(GL.GL_NORMALIZE)
         else:
             GL.glEnable(GL.GL_NORMALIZE)

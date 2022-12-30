@@ -50,7 +50,7 @@ class SimpleShape:
         Cs: and array of cells, consisting of an array of fs.
         """
         this.dimension = 4
-        this.generateNormals = False
+        this.generate_normals = False
         this.v = geom_3d.Fields()
         this.e = geom_3d.Fields()
         this.f = geom_3d.Fields()
@@ -465,12 +465,12 @@ class SimpleShape:
             this.gl_init()
         if this.mapToSingeShape:
             this.glDrawSingleRemoveUnscaledEdges()
-            this.cell.generateNormals = this.generateNormals
+            this.cell.generate_normals = this.generate_normals
             this.cell.gl_draw()
         else:
             this.glDrawSplit()
             for cell in this.cells:
-                cell.generateNormals = this.generateNormals
+                cell.generate_normals = this.generate_normals
                 cell.gl_draw()
 
     def glDrawSingleRemoveUnscaledEdges(this):
