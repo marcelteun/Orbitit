@@ -313,7 +313,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.base_shape.es = es
         # TODO CHk: comment out this and nvidia driver crashes:...
         this.heptagonsShape.base_fs_props = {'fs': fs}
-        this.heptagonsShape.setFaceColors(heptColPerIsom)
+        this.heptagonsShape.shape_colors = heptColPerIsom
         theShapes = [this.heptagonsShape]
         # TODO rm:
         if this.add_extra_faces:

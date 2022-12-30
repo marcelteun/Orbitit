@@ -455,7 +455,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
                     self.col_per_isom.append(self.cols[i])
                     break
         # update with correct format
-        self.setFaceColors(self.col_per_isom.copy())
+        self.shape_colors = self.col_per_isom.copy()
 
         # Compound index n means compound of n elements
         self.index = len(fs_orbit)

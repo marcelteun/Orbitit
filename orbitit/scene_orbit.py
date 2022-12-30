@@ -573,7 +573,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             [float(colCh)/255 for colCh in col]
             for col in col_per_isom
         ]
-        self.shape.setFaceColors(cols)
+        self.shape.shape_colors = cols
         self.status_text(
             f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
             logging.INFO)

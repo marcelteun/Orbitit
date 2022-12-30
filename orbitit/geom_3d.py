@@ -25,7 +25,7 @@
 # pylint: disable=too-many-locals,too-many-statements,too-many-ancestors
 # pylint: disable=too-many-instance-attributes,too-many-arguments
 # pylint: disable=too-many-branches,too-many-nested-blocks
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,too-many-public-methods
 
 
 from abc import ABC
@@ -210,7 +210,7 @@ def read_off_file(fd, regen_edges=True, name=""):
                     state = states["readFs"]
                     fs = []
                     cols = []
-                    fColors = [i for i in range(no_of_fs)]
+                    face_cols = [i for i in range(no_of_fs)]
                     i = 0
                     if no_of_fs == 0:
                         state = states["readOk"]
@@ -274,7 +274,7 @@ def read_off_file(fd, regen_edges=True, name=""):
         statesRev[state],
         i,
     )
-    shape = SimpleShape(vs, fs, es, colors=(cols, fColors))
+    shape = SimpleShape(vs, fs, es, colors=(cols, face_cols))
     # Note that Orbitit's panel.setShape will ignore these anyway...
     if vRadius != 0:
         shape.vertex_props = {'radius': vRadius}
@@ -819,7 +819,7 @@ class SimpleShape(base.Orbitit):
     This class decribes a simple 3D object consisting of faces and edges.
 
     Attributes:
-    color_data: same as the colors parameter in __init__, see that method.
+    shape_colors: same as the colors parameter in __init__, see that method.
     """
 
     def __init__(
@@ -901,7 +901,7 @@ class SimpleShape(base.Orbitit):
         )
         s = s.add_decr_line("],")
         s = s.add_line("es=%s," % repr(self.es))
-        s = s.add_line("colors=%s," % repr(self.color_data))
+        s = s.add_line("colors=%s," % repr(self._shape_colors))
         s = s.add_line('name="%s"' % self.name)
         s = s.add_decr_line(")")
         if __name__ != "__main__":
@@ -920,8 +920,8 @@ class SimpleShape(base.Orbitit):
                 "name": self.name,
                 "vs": self.vs,
                 "fs": self.fs,
-                "cols": self.color_data[0],
-                "face_cols": self.color_data[1],
+                "cols": self._shape_colors[0],
+                "face_cols": self._shape_colors[1],
             },
         }
 
@@ -1175,7 +1175,7 @@ class SimpleShape(base.Orbitit):
                    face colors are set by some default algorithm.
         drawFaces: settings that expresses whether the faces should be drawn.
         """
-        return {"fs": self.fs, "colors": self.color_data, "drawFaces": self.gl.drawFaces}
+        return {"fs": self.fs, "colors": self._shape_colors, "drawFaces": self.gl.drawFaces}
 
     @face_props.setter
     def face_props(self, props):
@@ -1192,7 +1192,7 @@ class SimpleShape(base.Orbitit):
             if "fs" in props and props["fs"] is not None:
                 self._set_faces(props["fs"])
             if "colors" in props and props["colors"] is not None:
-                self.setFaceColors(props["colors"])
+                self.shape_colors = props["colors"]
             self.divideColorWrapper()
             if "drawFaces" in props and props["drawFaces"] is not None:
                 self.setEnableDrawFaces(props["drawFaces"])
@@ -1230,24 +1230,29 @@ class SimpleShape(base.Orbitit):
         # regenerate by setting self.gl.updateVs
         self.gl.updateVs = self.generate_normals
 
-    def setFaceColors(self, colors):
-        """
-        Define the colours of the faces.
+    @property
+    def shape_colors(self):
+        """Get the color data for this shape (see colors @ __init__)."""
+        return self._shape_colors
 
-        fs: same as in face_props.
+    @shape_colors.setter
+    def shape_colors(self, colors):
+        """Set the face colours.
+
+        colors: same as in __init__
         """
         if colors[0] is not None:
-            colorDefs = colors[0]
+            col_defs = colors[0]
         else:
-            colorDefs = self.color_data[0]
+            col_defs = self._shape_colors[0]
         if colors[1] is not None:
-            fColors = colors[1]
+            face_cols = colors[1]
         else:
-            fColors = self.color_data[1]
-        self.color_data = (colorDefs, fColors)
-        self.nrOfColors = len(colorDefs)
+            face_cols = self._shape_colors[1]
+        self._shape_colors = (col_defs, face_cols)
+        self.nrOfColors = len(col_defs)
         self.colRange = range(self.nrOfColors)
-        assert self.nrOfColors > 0, "Empty colorDefs: %s" % colorDefs
+        assert self.nrOfColors > 0, "Empty col_defs: %s" % col_defs
 
     def setEnableDrawFaces(self, draw=True):
         """
@@ -1414,18 +1419,18 @@ class SimpleShape(base.Orbitit):
         colours than faces. These trivial cases do not need to be implemented by
         every descendent.
         """
-        if len(self.color_data[1]) != self.FsLen:
+        if len(self._shape_colors[1]) != self.FsLen:
             if self.nrOfColors == 1:
-                self.color_data = (self.color_data[0], [0 for i in self.FsRange])
+                self._shape_colors = (self._shape_colors[0], [0 for i in self.FsRange])
             elif self.nrOfColors < self.FsLen:
                 self.divideColor()
             else:
-                self.color_data = (self.color_data[0], list(range(self.FsLen)))
-            assert len(self.color_data[1]) == self.FsLen
+                self._shape_colors = (self._shape_colors[0], list(range(self.FsLen)))
+            assert len(self._shape_colors[1]) == self.FsLen
         # generate an array with Equal coloured faces:
         self.EqColFs = [[] for col in range(self.nrOfColors)]
         for i in self.FsRange:
-            self.EqColFs[self.color_data[1][i]].append(i)
+            self.EqColFs[self._shape_colors[1][i]].append(i)
 
     def divideColor(self):
         """
@@ -1443,7 +1448,7 @@ class SimpleShape(base.Orbitit):
         for i in range(div):
             face_cols.extend(colorIRange)
         face_cols.extend(list(range(mod)))
-        self.color_data = (self.color_data[0], face_cols)
+        self._shape_colors = (self._shape_colors[0], face_cols)
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
@@ -1651,7 +1656,7 @@ class SimpleShape(base.Orbitit):
         # FACES
         if self.gl.drawFaces:
             for col_idx in self.colRange:
-                c = self.color_data[0][col_idx]
+                c = self._shape_colors[0][col_idx]
                 if len(c) == 3:
                     GL.glColor(c[0], c[1], c[2])
                 else:
@@ -1753,16 +1758,16 @@ class SimpleShape(base.Orbitit):
                 )
             )
         s = w("# Sides and colours")
-        # self.color_data[1] = [] : use self.color_data[0][0]
-        # self.color_data[1] = [c0, c1, .. cn] where ci is an index i
-        #                     self.color_data[0]
+        # self._shape_colors[1] = [] : use self._shape_colors[0][0]
+        # self._shape_colors[1] = [c0, c1, .. cn] where ci is an index i
+        #                     self._shape_colors[0]
         #                     There should be as many colours as faces.
-        if len(self.color_data[0]) == 1:
+        if len(self._shape_colors[0]) == 1:
             oneColor = True
-            color = self.color_data[0][0]
+            color = self._shape_colors[0][0]
         else:
             oneColor = False
-            assert len(self.color_data[1]) == len(self.color_data[1])
+            assert len(self._shape_colors[1]) == len(self.fs)
 
         def face_str(face):
             """convert face to string in off-format."""
@@ -1787,7 +1792,7 @@ class SimpleShape(base.Orbitit):
             self.create_face_normals(normalise=True)
             for i in range(no_of_faces):
                 face = self.fs[i]
-                color = self.color_data[0][self.color_data[1][i]]
+                color = self._shape_colors[0][self._shape_colors[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s = "%s%s\n" % (s, face_str(face))
                 fnStr = "%s %s %s" % (
@@ -1809,7 +1814,7 @@ class SimpleShape(base.Orbitit):
         scaling=1,
         precision=7,
         margin=1.0e5 * default_float_margin,
-        pageSize=PS.PageSizeA4,
+        page_size=PS.PageSizeA4,
     ):
         """Print in PS For each face where the other faces meet that face.
 
@@ -1830,7 +1835,7 @@ class SimpleShape(base.Orbitit):
         """
         if not face_indices:
             face_indices = list(range(len(self.fs)))
-        ps_doc = PS.doc(title=self.name, pageSize=pageSize)
+        ps_doc = PS.doc(title=self.name, pageSize=page_size)
         if logging.root.level < logging.DEBUG:
             for i in range(len(self.vs)):
                 logging.debug("V[%d] = %s", i, self.vs[i])
@@ -2522,11 +2527,11 @@ class CompoundShape(base.Orbitit):
         fs = []
         es = []
         ns = []
-        colorDefs = []
+        col_defs = []
         colorIndices = []
         for s in self._shapes:
             VsOffset = len(vs)
-            colOffset = len(colorDefs)
+            colOffset = len(col_defs)
             s = s.simple_shape
             # Apply shape orientation here, needed, since the can be different
             # for the various shapes
@@ -2537,10 +2542,10 @@ class CompoundShape(base.Orbitit):
             # offset all faces:
             fs.extend([[i + VsOffset for i in f] for f in s.fs])
             es.extend([i + VsOffset for i in s.es])
-            colorDefs.extend(s.color_data[0])
-            colorIndices.extend([i + colOffset for i in s.color_data[1]])
+            col_defs.extend(s._shape_colors[0])
+            colorIndices.extend([i + colOffset for i in s._shape_colors[1]])
         self.merged_shape = SimpleShape(
-            vs=vs, fs=fs, es=es, ns=ns, colors=(colorDefs, colorIndices)
+            vs=vs, fs=fs, es=es, ns=ns, colors=(col_defs, colorIndices)
         )
         self.merge_needed = False
 
@@ -2650,7 +2655,8 @@ class CompoundShape(base.Orbitit):
         Accepted is a dictionary with the following optional keys:
             es: This is an array of es. One es array for each shape element
             radius: one radius that is valid for all shape elements
-            color: one vertex color that is valid for all shape elements
+            color: a list of colors (see SimpleShape.__init__). This list should contain an element
+                for each shape.
             drawEdges: whether to draw the edges at all
 
         See the same function in SimpleShape.
@@ -2685,7 +2691,7 @@ class CompoundShape(base.Orbitit):
         See face_props.setter what to expect.
         """
         d = self._shapes[0].face_props
-        return {"fs": self.fs, "colors": self.color_data, "drawFaces": d["drawFaces"]}
+        return {"fs": self.fs, "colors": self.shape_colors, "drawFaces": d["drawFaces"]}
 
     @face_props.setter
     def face_props(self, props):
@@ -2751,9 +2757,9 @@ class CompoundShape(base.Orbitit):
         return [shape.fs for shape in self._shapes]
 
     @property
-    def color_data(self):
+    def shape_colors(self):
         """Get the color settings for all shapes."""
-        return [shape.color_data for shape in self._shapes]
+        return [shape.shape_colors for shape in self._shapes]
 
     @property
     def generate_normals(self):
@@ -2775,7 +2781,7 @@ class CompoundShape(base.Orbitit):
         scaling=1,
         precision=7,
         margin=1.0e5 * default_float_margin,
-        pageSize=PS.PageSizeA4,
+        page_size=PS.PageSizeA4,
     ):
         """Print in PS For each face where the other faces meet that face.
 
@@ -2784,7 +2790,7 @@ class CompoundShape(base.Orbitit):
         """
         if self.merge_needed:
             self.merge_shapes()
-        return self.merged_shape.to_postscript(face_indices, scaling, precision, margin, pageSize)
+        return self.merged_shape.to_postscript(face_indices, scaling, precision, margin, page_size)
 
     def get_dome(self, level=2):
         """Change the shape towards into a dome shaped model
@@ -2854,7 +2860,7 @@ class SymmetricShape(CompoundShape):
         super().__init__([self.base_shape], name=name)
         # This is save so heirs can still use repr_dict from this class
         self.json_class = SymmetricShape
-        self.setFaceColors(colors)
+        self.shape_colors = colors
         self.isometries = isometries if isometries else [E]
         self.order = len(isometries)
         self.needs_apply_isoms = True
@@ -2901,7 +2907,7 @@ class SymmetricShape(CompoundShape):
             s = s.add_decr_line("],")
         s = s.add_line("colors=[")
         s.incr()
-        cols = self.shape_colors
+        cols = self._shape_colors
         s = s.glue_line(
             ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
@@ -2936,7 +2942,7 @@ class SymmetricShape(CompoundShape):
                 "name": self.name,
                 "vs": self.base_shape.vs,
                 "fs": self.base_shape.fs,
-                "cols": self.shape_colors,
+                "cols": self._shape_colors,
                 "orientation": self.base_shape.orientation.repr_dict,
                 "isometries": [i.repr_dict for i in self.isometries],
             },
@@ -2977,15 +2983,30 @@ class SymmetricShape(CompoundShape):
         """
         if not colors:
             colors = [rgb.gray95[:]]
-        assert len(colors) > 0, "colors should have at least one element"
+        else:
+            assert len(colors) > 0, "colors should have at least one element"
+            col0 = colors[0]
+            if isinstance(col0, float) or isinstance(col0, int):
+                # one colour specified for all
+                assert len(colors) == 3 or len(colors) == 4, f"Expected RGB(A), got {colors}"
+                colors = [colors]
+            else:
+                # several colours specified
+                assert isinstance(col0, list) or isinstance(col0, tuple), (
+                    f"expected first colour to be an RGB(A) value, got {col0}"
+                )
         return colors
 
-    def setFaceColors(self, colors):
-        """
-        Check and set the face colours and and save their properties.
-        """
+    @property
+    def shape_colors(self):
+        """Get the color data for this shape (see colors @ __init__)."""
+        return self._shape_colors
+
+    @shape_colors.setter
+    def shape_colors(self, colors):
+        """Check and set the face colours and and save their properties."""
         colors = self._chk_face_colors_par(colors)
-        self.shape_colors = colors
+        self._shape_colors = colors
         self.merge_needed = True
         self.needs_apply_isoms = True
 
@@ -2993,21 +3014,21 @@ class SymmetricShape(CompoundShape):
         """
         Divide the shape colors over the isometries and re-assign class field.
         """
-        no_of_cols = len(self.shape_colors)
+        no_of_cols = len(self._shape_colors)
         if no_of_cols != self.order:
             if no_of_cols == 1:
-                col_data_per_shape = [self.shape_colors[0] for i in range(self.order)]
+                col_data_per_shape = [self._shape_colors[0] for i in range(self.order)]
             elif no_of_cols < self.order:
                 div = self.order // no_of_cols
                 mod = self.order % no_of_cols
                 col_data_per_shape = []
                 for _ in range(div):
-                    col_data_per_shape.extend(self.shape_colors)
-                col_data_per_shape.extend(self.shape_colors[:mod])
+                    col_data_per_shape.extend(self._shape_colors)
+                col_data_per_shape.extend(self._shape_colors[:mod])
             else:
-                col_data_per_shape = (self.shape_colors[: self.order],)
-            self.shape_colors = col_data_per_shape
-            no_of_cols = len(self.shape_colors)
+                col_data_per_shape = (self._shape_colors[: self.order],)
+            self._shape_colors = col_data_per_shape
+            no_of_cols = len(self._shape_colors)
         # else: nothing to update
         assert no_of_cols == self.order, f"{no_of_cols} != {self.order}"
 
@@ -3018,7 +3039,7 @@ class SymmetricShape(CompoundShape):
 
         This will create all the individual shapes.
         """
-        if len(self.shape_colors) != self.order:
+        if len(self._shape_colors) != self.order:
             self.apply_colors()
         shapes = [
             SimpleShape(
@@ -3026,7 +3047,7 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.fs,
                 self.base_shape.es,
                 ns=self.base_shape.ns,
-                colors=([self.shape_colors[i]], []),
+                colors=([self._shape_colors[i]], []),
                 orientation=isom * self.base_shape.orientation,
             )
             for i, isom in enumerate(self.isometries)
@@ -3067,7 +3088,7 @@ class SymmetricShape(CompoundShape):
         props = self.base_shape.face_props
         return {
             "fs": props["fs"],
-            "colors": self.shape_colors[0],
+            "colors": self._shape_colors[0],
             "drawFaces": self.props["drawFaces"],
         }
 
@@ -3078,7 +3099,8 @@ class SymmetricShape(CompoundShape):
 
         Accepted are the optional (keyword) parameters:
           - fs,
-          - colors,
+          - colors: see setter of shape_colors
+          - colors: one RGB value (tuple / list) or a list of RGB values.
           - drawFaces.
         Check SimpleShape.face_props for more details.
         """
@@ -3087,7 +3109,7 @@ class SymmetricShape(CompoundShape):
                 self.base_shape.face_props = {'fs': props["fs"]}
                 self.needs_apply_isoms = True
             if "colors" in props and props["colors"] is not None:
-                self.setFaceColors([props["colors"]])
+                self.shape_colors = props["colors"]
                 self.merge_needed = True
             if "drawFaces" in props and props["drawFaces"] is not None:
                 self.base_shape.setEnableDrawFaces(props["drawFaces"])
@@ -3126,7 +3148,7 @@ class SymmetricShape(CompoundShape):
         scaling=1,
         precision=7,
         margin=1.0e5 * default_float_margin,
-        pageSize=PS.PageSizeA4,
+        page_size=PS.PageSizeA4,
     ):
         """Print in PS For each face where the other faces meet that face.
 
@@ -3139,13 +3161,17 @@ class SymmetricShape(CompoundShape):
             # no need to print all faces in orbited, because of symmetry
             face_indices = list(range(len(self.base_shape.fs)))
         return self.simple_shape.to_postscript(
-            face_indices, scaling, precision, margin, pageSize
+            face_indices, scaling, precision, margin, page_size
         )
 
 
 class SymmetricShapeSplitCols(SymmetricShape):
     """
-    Same as a symmetric shape except that on can define a colour for each individual face.
+    Same as a symmetric shape except that one can define a colour for each individual face.
+
+    For this one shape_colors should be a color argument as in SimpleShape.__init__. which will be
+    divided regularly over the symmetries. Optionally send in a list of these, where each element
+    should be valid for each symmetry.
     """
 
     @staticmethod
@@ -3157,6 +3183,8 @@ class SymmetricShapeSplitCols(SymmetricShape):
         if not colors:
             colors = [([rgb.gray95[:]], [])]
         assert len(colors) > 0, "colors should have at least one element"
+        if isinstance(colors, tuple) or len(colors) == 2:
+            colors = [colors]
         for c in colors:
             assert (
                 len(c) == 2
@@ -3170,7 +3198,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
 
         This will create all the individual shapes.
         """
-        if len(self.shape_colors) != self.order:
+        if len(self._shape_colors) != self.order:
             self.apply_colors()
         shapes = [
             SimpleShape(
@@ -3178,7 +3206,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
                 self.base_shape.fs,
                 self.base_shape.es,
                 ns=self.base_shape.ns,
-                colors=self.shape_colors[i],
+                colors=self._shape_colors[i],
                 orientation=isom * self.base_shape.orientation,
             )
             for i, isom in enumerate(self.isometries)
@@ -3265,7 +3293,7 @@ class OrbitShape(SymmetricShape):
         self.final_sym = final_sym
         self.stab_sym = stab_sym
         if colors != []:
-            self.setFaceColors(colors)
+            self.shape_colors = colors
 
     @property
     def repr_dict(self):
@@ -3276,7 +3304,7 @@ class OrbitShape(SymmetricShape):
                 "name": self.name,
                 "vs": self.base_shape.vs,
                 "fs": self.base_shape.fs,
-                "cols": self.shape_colors,
+                "cols": self._shape_colors,
                 "final_sym": self.final_sym.repr_dict,
                 "stab_sym": self.stab_sym.repr_dict,
             },
@@ -3337,7 +3365,7 @@ class OrbitShape(SymmetricShape):
             s = s.add_decr_line("],")
         s = s.add_line("colors=[")
         s.incr()
-        cols = self.shape_colors
+        cols = self._shape_colors
         s = s.glue_line(
             ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )

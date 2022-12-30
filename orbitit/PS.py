@@ -33,11 +33,14 @@ PageSizeA4 = (559, 774)
 class doc:
     name  = "PS.doc"
     def __init__(this,
-        originX = 0, originY = 0, width = 595, height = 842,
-        title = 'Generated from Python',
-        creator = 'PS.py written by marcelteun',
-        pageSize = PageSizeA4,
-        eps = False
+        originX=0,
+        originY=0,
+        width=595,
+        height=842,
+        title='Generated from Python',
+        creator='PS.py written by marcelteun',
+        pageSize=PageSizeA4,
+        eps=False
     ):
         this.headerStr = '%%!PS-Adobe-2.0\n%%%%Title: %s\n%%%%Creator: %s' % (
                 title, creator
