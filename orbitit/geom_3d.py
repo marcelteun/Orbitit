@@ -1241,10 +1241,6 @@ class SimpleShape(base.Orbitit):
         self.colRange = range(self.nrOfColors)
         assert self.nrOfColors > 0, "Empty colorDefs: %s" % colorDefs
 
-    def getFaceColors(self):
-        """Get the colours of the faces."""
-        return self.colorData
-
     def setEnableDrawFaces(self, draw=True):
         """
         Set whether the faces need to be drawn in gl_draw (or not).
@@ -2879,7 +2875,7 @@ class SymmetricShape(CompoundShape):
             s = s.add_decr_line("],")
         s = s.add_line("colors=[")
         s.incr()
-        cols = self.getFaceColors()
+        cols = self.shape_colors
         s = s.glue_line(
             ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
@@ -2967,9 +2963,6 @@ class SymmetricShape(CompoundShape):
         self.nrOfShapeColorDefs = len(colors)
         self.merge_needed = True
         self.needs_apply_isoms = True
-
-    def getFaceColors(self):
-        return self.shape_colors
 
     def apply_colors(self):
         """
@@ -3309,7 +3302,7 @@ class OrbitShape(SymmetricShape):
             s = s.add_decr_line("],")
         s = s.add_line("colors=[")
         s.incr()
-        cols = self.getFaceColors()
+        cols = self.shape_colors
         s = s.glue_line(
             ",\n".join(indent.Str(repr(c)).reindent(s.indent) for c in cols)
         )
