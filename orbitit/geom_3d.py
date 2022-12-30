@@ -2986,13 +2986,13 @@ class SymmetricShape(CompoundShape):
         else:
             assert len(colors) > 0, "colors should have at least one element"
             col0 = colors[0]
-            if isinstance(col0, float) or isinstance(col0, int):
+            if isinstance(col0, (float, int)):
                 # one colour specified for all
                 assert len(colors) == 3 or len(colors) == 4, f"Expected RGB(A), got {colors}"
                 colors = [colors]
             else:
                 # several colours specified
-                assert isinstance(col0, list) or isinstance(col0, tuple), (
+                assert isinstance(col0, (list, tuple)), (
                     f"expected first colour to be an RGB(A) value, got {col0}"
                 )
         return colors
