@@ -630,7 +630,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             level = 1
         else:
             level = 2
-        shape = self.panel.shape.getDome(level)
+        shape = self.panel.shape.get_dome(level)
         if shape is not None:
             self.panel.shape = shape
             self.SetTitle(f"Dome({self.GetTitle()})")

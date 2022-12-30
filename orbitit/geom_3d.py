@@ -605,6 +605,8 @@ class Line2D(Line):
 
 
 class Line3D(Line):
+    str_precision = 2
+
     def __init__(self, p0, p1=None, v=None, isSegment=False):
         """
         Define a line in 3D space.
@@ -674,12 +676,13 @@ class Line3D(Line):
                         result = (result + checkWith) / 2
         return result
 
-    def toStr(self, precision=2):
-        formatStr = (
+    def __str__(self):
+        precision = self.str_precision
+        format_str = (
             "(x, y, z) = (%%0.%df, %%0.%df, %%0.%df) + t * (%%0.%df, %%0.%df, %%0.%df)"
             % (precision, precision, precision, precision, precision, precision)
         )
-        return formatStr % (
+        return format_str % (
             self.p[0],
             self.p[1],
             self.p[2],
@@ -718,6 +721,7 @@ class Plane:
     and a 'D' such that for a point P in the plane 'D' = -N.P, i.e. Nx x + Ny y
     + Nz z + D = 0 is the equation of the plane.
     """
+    str_precision = 2
 
     def __init__(self, P0, P1, P2):
         assert not P0 == P1, "\n  P0 = %s,\n  P1 = %s" % (str(P0), str(P1))
@@ -763,14 +767,15 @@ class Plane:
             Q = M.solve(geomtypes.Vec([-self.D, -plane.D, 0]))
         return Line3D(Q, v=V)
 
-    def toStr(self, precision=2):
-        formatStr = "%%0.%df*x + %%0.%df*y + %%0.%df*z + %%0.%df = 0)" % (
+    def __str__(self):
+        precision = self.str_precision
+        format_str = "%%0.%df*x + %%0.%df*y + %%0.%df*z + %%0.%df = 0)" % (
             precision,
             precision,
             precision,
             precision,
         )
-        return formatStr % (self.N[0], self.N[1], self.N[2], self.D)
+        return format_str % (self.N[0], self.N[1], self.N[2], self.D)
 
 
 def facePlane(vs, face):
@@ -1805,7 +1810,8 @@ class SimpleShape(base.Orbitit):
         margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
-        """
+        """Print in PS For each face where the other faces meet that face.
+
         Returns a string in PS format that shows the pieces of faces that can
         be used for constructing a physical model of the object.
 
@@ -1823,7 +1829,7 @@ class SimpleShape(base.Orbitit):
         """
         if not face_indices:
             face_indices = list(range(len(self.fs)))
-        PsDoc = PS.doc(title=self.name, pageSize=pageSize)
+        ps_doc = PS.doc(title=self.name, pageSize=pageSize)
         if logging.root.level < logging.DEBUG:
             for i in range(len(self.vs)):
                 logging.debug("V[%d] = %s", i, self.vs[i])
@@ -2022,7 +2028,7 @@ class SimpleShape(base.Orbitit):
                                 baseSegmentNr += 1
                             if nextFacetSeg:
                                 facetSegmentNr += 1
-                PsDoc.addLineSegments(pointsIn2D, es, scaling, precision)
+                ps_doc.addLineSegments(pointsIn2D, es, scaling, precision)
         except AssertionError:
             # catching assertion errors, to be able to set back margin
             geomtypes.set_eq_float_margin(margin)
@@ -2031,7 +2037,7 @@ class SimpleShape(base.Orbitit):
         # restore margin
         geomtypes.reset_eq_float_margin()
 
-        return PsDoc.toStr()
+        return ps_doc.toStr()
 
     def intersectFacets(
         self,
@@ -2317,7 +2323,15 @@ class SimpleShape(base.Orbitit):
         # restore margin
         geomtypes.eq_float_margin = margin
 
-    def getDome(self, level=2):
+    def get_dome(self, level=2):
+        """Change the shape towards into a dome shaped model
+
+        This is done by calculating the outer sphere (through the vertices) and projecting parts of
+        the shape from the middle onto this sphere.
+
+        level: for level 1 the gravitation centre of each is projected on to the sphere; for level 2
+        edge centres are mapped onto the sphere.
+        """
         shape = None
         # check if level is in supported domain
         if level < 1 or level > 2:
@@ -2760,15 +2774,23 @@ class CompoundShape(base.Orbitit):
         margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
-        """Print in PS For each face where the other faces meet that face."""
+        """Print in PS For each face where the other faces meet that face.
+
+        Returns a string in PS format that shows the pieces of faces that can
+        be used for constructing a physical model of the object.
+        """
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.to_postscript(face_indices, scaling, precision, margin, pageSize)
 
-    def getDome(self, level=2):
+    def get_dome(self, level=2):
+        """Change the shape towards into a dome shaped model
+
+        see SimpleShape.get_dome
+        """
         if self.merge_needed:
             self.merge_shapes()
-        return self.merged_shape.getDome(level)
+        return self.merged_shape.get_dome(level)
 
 
 class SymmetricShape(CompoundShape):
@@ -3099,6 +3121,11 @@ class SymmetricShape(CompoundShape):
         margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
+        """Print in PS For each face where the other faces meet that face.
+
+        Returns a string in PS format that shows the pieces of faces that can
+        be used for constructing a physical model of the object.
+        """
         if self.merge_needed:
             self.merge_shapes()
         if not face_indices:
