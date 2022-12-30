@@ -1476,7 +1476,7 @@ class SimpleShape(base.Orbitit):
             s[r] = cnt + 1
         self.spheresRadii.circumscribed = s
         s = {}
-        for i in len(self.es):
+        for i in range(0, len(self.es), 2):
             v = (self.vs[self.es[i]] + self.vs[self.es[i + 1]]) / 2
             r = round(v.norm(), precision)
             try:
@@ -2760,6 +2760,7 @@ class CompoundShape(base.Orbitit):
         margin=1.0e5 * default_float_margin,
         pageSize=PS.PageSizeA4,
     ):
+        """Print in PS For each face where the other faces meet that face."""
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.to_postscript(face_indices, scaling, precision, margin, pageSize)
