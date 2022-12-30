@@ -732,7 +732,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         """Set status text of view settings window"""
         try:
             self.parent_win.set_status_text(
-                f"V-Radius: {self.v_r:0.5}; E-Radius: {self.e_r:0.5}"
+                f"V-Radius: {self.v_r:0.5f}; E-Radius: {self.e_r:0.5f}"
             )
         except AttributeError:
             logging.warning("parent_win.set_status_text function undefined")
