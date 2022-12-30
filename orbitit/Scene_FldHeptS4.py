@@ -312,7 +312,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.base_shape.vertex_props = {'vs': vs}
         this.heptagonsShape.base_shape.es = es
         # TODO CHk: comment out this and nvidia driver crashes:...
-        this.heptagonsShape.setBaseFaceProperties(fs = fs)
+        this.heptagonsShape.base_fs_props = {'fs': fs}
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         # TODO rm:
@@ -321,13 +321,13 @@ class Shape(heptagons.FldHeptagonShape):
             es = this.o3triEs[this.edge_alt][:]
             this.trisO3Shape.base_shape.vertex_props = {'vs': vs}
             this.trisO3Shape.base_shape.es = es
-            this.trisO3Shape.setBaseFaceProperties(fs = fs)
+            this.trisO3Shape.base_fs_props = {'fs': fs}
             theShapes.append(this.trisO3Shape)
             es = this.o4triEs[this.opposite_edge_alt][:]
             fs = this.o4triFs[this.opposite_edge_alt][:]
             this.trisO4Shape.base_shape.vertex_props = {'vs': vs}
             this.trisO4Shape.base_shape.es = es
-            this.trisO4Shape.setBaseFaceProperties(fs = fs)
+            this.trisO4Shape.base_fs_props = {'fs': fs}
             theShapes.append(this.trisO4Shape)
             if (not this.all_regular_faces):
                 # when you use the rot alternative the rot is leading for
@@ -343,10 +343,10 @@ class Shape(heptagons.FldHeptagonShape):
                 colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.base_shape.vertex_props = {'vs': vs}
                 this.xtraTrisShape.base_shape.es = es
-                this.xtraTrisShape.setBaseFaceProperties(
-                    fs = fs,
-                    colors = ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]],
-                              colIds))
+                this.xtraTrisShape.base_fs_props = {
+                    'fs': fs,
+                    'colors': ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]], colIds),
+                }
                 theShapes.append(this.xtraTrisShape)
         for isom_shape in theShapes:
             isom_shape.show_base_only = not this.apply_symmetries

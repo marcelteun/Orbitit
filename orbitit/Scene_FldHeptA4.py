@@ -273,7 +273,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.heptagonsShape.base_shape.vertex_props = {'vs': vs}
         this.heptagonsShape.base_shape.es = es
         # comment out this and nvidia driver crashes:...
-        this.heptagonsShape.setBaseFaceProperties(fs=fs)
+        this.heptagonsShape.base_fs_props = {'fs': fs}
         this.heptagonsShape.setFaceColors(heptColPerIsom)
         theShapes = [this.heptagonsShape]
         if this.add_extra_faces:
@@ -283,7 +283,7 @@ class Shape(heptagons.FldHeptagonShape):
             fs.extend(this.oppO3triFs[this.opposite_edge_alt])
             this.trisO3Shape.base_shape.vertex_props = {'vs': vs}
             this.trisO3Shape.base_shape.es = es
-            this.trisO3Shape.setBaseFaceProperties(fs=fs)
+            this.trisO3Shape.base_fs_props = {'fs': fs}
             theShapes.append(this.trisO3Shape)
             if not this.all_regular_faces:
                 # when you use the rot alternative the rot is leading for
@@ -313,10 +313,10 @@ class Shape(heptagons.FldHeptagonShape):
                     colIds = this.triColIds[eAlt]
                 this.xtraTrisShape.base_shape.vertex_props = {'vs': vs}
                 this.xtraTrisShape.base_shape.es = es
-                this.xtraTrisShape.setBaseFaceProperties(
-                    fs=fs,
-                    colors=([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]], colIds),
-                )
+                this.xtraTrisShape.base_fs_props = {
+                    'fs': fs,
+                    'colors': ([rgb.darkRed[:], rgb.yellow[:], rgb.magenta[:]], colIds),
+                }
                 theShapes.append(this.xtraTrisShape)
         for isom_shape in theShapes:
             isom_shape.show_base_only = not this.apply_symmetries

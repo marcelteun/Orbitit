@@ -3061,7 +3061,18 @@ class SymmetricShape(CompoundShape):
         self.base_shape.orientation = orientation
         self.needs_apply_isoms = True
 
-    def setBaseFaceProperties(self, dictPar=None, **kwargs):
+    @property
+    def base_fs_props(self):
+        """Get the face properties for the base_shape."""
+        props = self.base_shape.face_props
+        return {
+            "fs": props["fs"],
+            "colors": self.shape_colors[0],
+            "drawFaces": self.props["drawFaces"],
+        }
+
+    @base_fs_props.setter
+    def base_fs_props(self, props):
         """
         Define the properties of the faces for the base element.
 
@@ -3071,20 +3082,15 @@ class SymmetricShape(CompoundShape):
           - drawFaces.
         Check SimpleShape.face_props for more details.
         """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                face_dict = dictPar
-            else:
-                face_dict = kwargs
-            if "fs" in face_dict and face_dict["fs"] is not None:
-                self.base_shape.face_props = {'fs': face_dict["fs"]}
+        if props:
+            if "fs" in props and props["fs"] is not None:
+                self.base_shape.face_props = {'fs': props["fs"]}
                 self.needs_apply_isoms = True
-            if "colors" in face_dict and face_dict["colors"] is not None:
-                self.setFaceColors([face_dict["colors"]])
-                # taken care of by the function above:
+            if "colors" in props and props["colors"] is not None:
+                self.setFaceColors([props["colors"]])
                 self.merge_needed = True
-            if "drawFaces" in face_dict and face_dict["drawFaces"] is not None:
-                self.setEnableDrawFaces(face_dict["drawFaces"])
+            if "drawFaces" in props and props["drawFaces"] is not None:
+                self.base_shape.setEnableDrawFaces(props["drawFaces"])
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""

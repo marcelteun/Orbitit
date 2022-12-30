@@ -239,7 +239,7 @@ class Shape(heptagons.EqlHeptagonShape):
             es.extend(this.xtraEs)
             colIds.extend(this.xtraColIds)
         this.base_shape.es = es
-        this.setBaseFaceProperties(fs=fs, colors=(this.face_col, colIds))
+        this.base_fs_props = {'fs': fs, 'colors': (this.face_col, colIds)}
 
     def to_postscript(this,
             face_indices=[],
