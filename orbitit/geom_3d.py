@@ -1222,8 +1222,7 @@ class SimpleShape(base.Orbitit):
             assert len(f) > 2, "A face should have at least 3 vertices"
         self.fs = fs
         self.TriangulatedFs = self.triangulate(fs)
-        self.FsLen = len(self.fs)
-        self.FsRange = range(self.FsLen)
+        self.no_of_fs = len(self.fs)
         self.face_normals_up_to_date = False
         # if you autogenerate the vertex normal, using the faces, you need to
         # regenerate by setting self.gl.updateVs
@@ -1249,9 +1248,9 @@ class SimpleShape(base.Orbitit):
         else:
             face_cols = self._shape_colors[1]
         self._shape_colors = (col_defs, face_cols)
-        self.nrOfColors = len(col_defs)
-        self.colRange = range(self.nrOfColors)
-        assert self.nrOfColors > 0, "Empty col_defs: %s" % col_defs
+        self.no_of_cols = len(col_defs)
+        self.colRange = range(self.no_of_cols)
+        assert self.no_of_cols > 0, "Empty col_defs: %s" % col_defs
 
     def setEnableDrawFaces(self, draw=True):
         """
@@ -1418,17 +1417,17 @@ class SimpleShape(base.Orbitit):
         colours than faces. These trivial cases do not need to be implemented by
         every descendent.
         """
-        if len(self._shape_colors[1]) != self.FsLen:
-            if self.nrOfColors == 1:
-                self._shape_colors = (self._shape_colors[0], [0 for i in self.FsRange])
-            elif self.nrOfColors < self.FsLen:
+        if len(self._shape_colors[1]) != self.no_of_fs:
+            if self.no_of_cols == 1:
+                self._shape_colors = (self._shape_colors[0], [0 for i in range(self.no_of_fs)])
+            elif self.no_of_cols < self.no_of_fs:
                 self.divideColor()
             else:
-                self._shape_colors = (self._shape_colors[0], list(range(self.FsLen)))
-            assert len(self._shape_colors[1]) == self.FsLen
+                self._shape_colors = (self._shape_colors[0], list(range(self.no_of_fs)))
+            assert len(self._shape_colors[1]) == self.no_of_fs
         # generate an array with Equal coloured faces:
-        self.EqColFs = [[] for col in range(self.nrOfColors)]
-        for i in self.FsRange:
+        self.EqColFs = [[] for col in range(self.no_of_cols)]
+        for i in range(self.no_of_fs):
             self.EqColFs[self._shape_colors[1][i]].append(i)
 
     def divideColor(self):
@@ -1440,10 +1439,10 @@ class SimpleShape(base.Orbitit):
         just repeats the colours until the length is long enough.
         The amount of colours should be less than the nr of isomentries.
         """
-        div = self.FsLen // self.nrOfColors
-        mod = self.FsLen % self.nrOfColors
+        div = self.no_of_fs // self.no_of_cols
+        mod = self.no_of_fs % self.no_of_cols
         face_cols = []
-        colorIRange = list(range(self.nrOfColors))
+        colorIRange = list(range(self.no_of_cols))
         for i in range(div):
             face_cols.extend(colorIRange)
         face_cols.extend(list(range(mod)))
@@ -2341,72 +2340,72 @@ class SimpleShape(base.Orbitit):
         # check if level is in supported domain
         if level < 1 or level > 2:
             return shape
-        fprop = self.face_props
-        cols = fprop["colors"]
+        cols = self.face_props["colors"]
         vs = self.vs[:]
-        nrOrgVs = len(self.vs)
+        no_of_vs_org = len(self.vs)
         try:
             self.fGs
         except AttributeError:
             self.calculateFacesG()
         try:
-            outSphere = self.spheresRadii.circumscribed
+            outer_radii = self.spheresRadii.circumscribed
         except AttributeError:
             self.calculateSphereRadii()
-            outSphere = self.spheresRadii.circumscribed
-        R = reduce(max, iter(outSphere.keys()))
+            outer_radii = self.spheresRadii.circumscribed
+        radius = reduce(max, iter(outer_radii.keys()))
         fs = []
-        colIndices = []
+        col_indices = []
 
-        def addPrjVs(xVs):
-            # func global vs, R
-            vs.extend([R * x.normalize() for x in xVs])
+        def add_projected_vs(extra_vs):
+            """Add extra vertices to the vertex array."""
+            # func global vs, radius
+            vs.extend([radius * x.normalize() for x in extra_vs])
 
-        def domiseLevel1(f, i):
-            # return xFs
-            # func global nrOrgVs, cols
+        def dome_level_1(f, i):
+            # return extra_fs
+            # func global no_of_vs_org, cols
             # assumes that the gravity centres will be added to vs in face order
             # independently.
             l = len(f)
-            return [[i + nrOrgVs, f[j], f[(j + 1) % l]] for j in range(l)]
+            return [[i + no_of_vs_org, f[j], f[(j + 1) % l]] for j in range(l)]
 
-        def domiseLevel2(f):
+        def dome_level_2(f):
             # f can only be a triangle: no check
-            # return (xVs, xFs) tuple
+            # return (extra_vs, extra_fs) tuple
             # func global: vs
-            xVs = []
-            xVs = [(vs[f[i]] + vs[f[(i + 1) % 3]]) / 2 for i in range(3)]
-            vOffset = len(vs)
-            xFs = [
-                [vOffset, vOffset + 1, vOffset + 2],
-                [f[0], vOffset, vOffset + 2],
-                [f[1], vOffset + 1, vOffset],
-                [f[2], vOffset + 2, vOffset + 1],
+            extra_vs = []
+            extra_vs = [(vs[f[i]] + vs[f[(i + 1) % 3]]) / 2 for i in range(3)]
+            v_idx_offset = len(vs)
+            extra_fs = [
+                [v_idx_offset, v_idx_offset + 1, v_idx_offset + 2],
+                [f[0], v_idx_offset, v_idx_offset + 2],
+                [f[1], v_idx_offset + 1, v_idx_offset],
+                [f[2], v_idx_offset + 2, v_idx_offset + 1],
             ]
-            return (xVs, xFs)
+            return (extra_vs, extra_fs)
 
-        for f, i in zip(self.fs, self.FsRange):
+        for i, f in enumerate(self.fs):
             if level == 1:
-                xFs = domiseLevel1(f, i)
-                # add the gravity centres as assumed by domiseLevel1:
-                addPrjVs(self.fGs)
+                extra_fs = dome_level_1(f, i)
+                # add the gravity centres as assumed by dome_level_1:
+                add_projected_vs(self.fGs)
             else:
                 l = len(f)
                 if l == 3:
-                    xVs, xFs = domiseLevel2(f)
-                    addPrjVs(xVs)
+                    extra_vs, extra_fs = dome_level_2(f)
+                    add_projected_vs(extra_vs)
                 elif l > 3:
-                    tmpFs = domiseLevel1(f, i)
-                    # add the gravity centres as assumed by domiseLevel1:
-                    addPrjVs(self.fGs)
-                    xFs = []
-                    for sf in tmpFs:
-                        xVs, sxFs = domiseLevel2(sf)
-                        addPrjVs(xVs)
-                        xFs.extend(sxFs)
-            fs.extend(xFs)
-            colIndices.extend([cols[1][i] for j in range(len(xFs))])
-        shape = SimpleShape(vs, fs, [], colors=(cols[0], colIndices))
+                    tmp_fs = dome_level_1(f, i)
+                    # add the gravity centres as assumed by dome_level_1:
+                    add_projected_vs(self.fGs)
+                    extra_fs = []
+                    for sf in tmp_fs:
+                        extra_vs, sxFs = dome_level_2(sf)
+                        add_projected_vs(extra_vs)
+                        extra_fs.extend(sxFs)
+            fs.extend(extra_fs)
+            col_indices.extend([cols[1][i] for j in range(len(extra_fs))])
+        shape = SimpleShape(vs, fs, [], colors=(cols[0], col_indices))
         shape.regen_edges()
         return shape
 
