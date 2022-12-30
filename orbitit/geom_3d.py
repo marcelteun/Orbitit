@@ -871,8 +871,8 @@ class SimpleShape(base.Orbitit):
             colors = ([rgb.gray95[:]], [])
         self.zoom_factor = 1.0
         self.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1.0, 'color': [1.0, 1.0, 0.8]}
-        self.edge_props = {'es': es, 'radius': -1.0, 'color': [0.1, 0.1, 0.1], 'drawEdges': True}
-        self.face_props = {'fs': fs, 'colors': colors, 'drawFaces': True}
+        self.edge_props = {'es': es, 'radius': -1.0, 'color': [0.1, 0.1, 0.1], 'draw_edges': True}
+        self.face_props = {'fs': fs, 'colors': colors, 'draw_faces': True}
         self.defaultColor = rgb.yellow
         if orientation:
             self.orientation = orientation
@@ -1071,7 +1071,7 @@ class SimpleShape(base.Orbitit):
         """
         Return the current edge properties
 
-        Returned is a dictionary with the keywords es, radius, color, drawEdges
+        Returned is a dictionary with the keywords es, radius, color, draw_edges
         es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
             indices in vs.
         radius: If > 0.0 draw vertices as cylinders with the specified colour.
@@ -1079,14 +1079,13 @@ class SimpleShape(base.Orbitit):
                 radius to a value <= 0.0 and the edges will be drawn as lines,
                 using glPolygonOffset.
         color: array with 3 rgb values between 0 and 1.
-        drawEdges: settings that expresses whether the edges should be drawn at
-                   all.
+        draw_edges: settings that expresses whether the edges should be drawn at all.
         """
         return {
             "es": self.es,
             "radius": self.gl.eRadius,
             "color": self.gl.eCol,
-            "drawEdges": self.gl.drawEdges,
+            "draw_edges": self.gl.draw_edges,
         }
 
     @edge_props.setter
@@ -1098,7 +1097,7 @@ class SimpleShape(base.Orbitit):
           - es,
           - radius,
           - color,
-          - drawEdges.
+          - draw_edges.
         """
         if props:
             if "es" in props and props["es"] is not None:
@@ -1112,8 +1111,8 @@ class SimpleShape(base.Orbitit):
                     self.gl.cyl = Scenes3D.P2PCylinder(radius=props["radius"])
             if "color" in props and props["color"] is not None:
                 self.gl.eCol = props["color"]
-            if "drawEdges" in props and props["drawEdges"] is not None:
-                self.gl.drawEdges = props["drawEdges"]
+            if "draw_edges" in props and props["draw_edges"] is not None:
+                self.gl.draw_edges = props["draw_edges"]
 
     def regen_edges(self):
         """
@@ -1152,7 +1151,7 @@ class SimpleShape(base.Orbitit):
         """
         Return the current face properties.
 
-        Returned is a dictionary with the keywords fs, colors, and drawFaces.
+        Returned is a dictionary with the keywords fs, colors, and draw_faces.
         fs: Optional array of faces, that do not need to be triangular. It is a
             hierarchical array, ie it consists of sub-array, where each
             sub-array describes one face. Each n-sided face is desribed by n
@@ -1173,9 +1172,9 @@ class SimpleShape(base.Orbitit):
                    It should have the same length as fs (or the current faces if
                    fs not specified) otherwise the parameter is ignored and the
                    face colors are set by some default algorithm.
-        drawFaces: settings that expresses whether the faces should be drawn.
+        draw_faces: settings that expresses whether the faces should be drawn.
         """
-        return {"fs": self.fs, "colors": self._shape_colors, "drawFaces": self.gl.drawFaces}
+        return {"fs": self.fs, "colors": self._shape_colors, "draw_faces": self.gl.draw_faces}
 
     @face_props.setter
     def face_props(self, props):
@@ -1185,7 +1184,7 @@ class SimpleShape(base.Orbitit):
         Send in an dictionary with the following keys:
           - fs,
           - colors,
-          - drawFaces.
+          - draw_faces.
         See getter for the explanation of the keys.
         """
         if props:
@@ -1194,8 +1193,8 @@ class SimpleShape(base.Orbitit):
             if "colors" in props and props["colors"] is not None:
                 self.shape_colors = props["colors"]
             self.divideColorWrapper()
-            if "drawFaces" in props and props["drawFaces"] is not None:
-                self.setEnableDrawFaces(props["drawFaces"])
+            if "draw_faces" in props and props["draw_faces"] is not None:
+                self.setEnableDrawFaces(props["draw_faces"])
 
     @staticmethod
     def triangulate(faces):
@@ -1261,7 +1260,7 @@ class SimpleShape(base.Orbitit):
         draw: optional argument that is True by default. Set to False to
               disable drawing of the faces.
         """
-        self.gl.drawFaces = draw
+        self.gl.draw_faces = draw
 
     def generate_face_normal(self, f, normalise):
         l = len(f)
@@ -1634,7 +1633,7 @@ class SimpleShape(base.Orbitit):
             for i in self.VsRange:
                 self.gl.sphere.draw(self.vs[i])
         # EDGES
-        if self.gl.drawEdges:
+        if self.gl.draw_edges:
             if self.generate_normals and (self.ns == [] or len(self.ns) != len(self.vs)):
                 es = self.nEs
                 vs = self.nVs
@@ -1654,7 +1653,7 @@ class SimpleShape(base.Orbitit):
                 GL.glEnable(GL.GL_POLYGON_OFFSET_FILL)
 
         # FACES
-        if self.gl.drawFaces:
+        if self.gl.draw_faces:
             for col_idx in self.colRange:
                 c = self._shape_colors[0][col_idx]
                 if len(c) == 3:
@@ -2645,7 +2644,7 @@ class CompoundShape(base.Orbitit):
             "es": self.es,
             "radius": d["radius"],
             "color": d["color"],
-            "drawEdges": d["drawEdges"],
+            "draw_edges": d["draw_edges"],
         }
 
     @edge_props.setter
@@ -2657,7 +2656,7 @@ class CompoundShape(base.Orbitit):
             radius: one radius that is valid for all shape elements
             color: a list of colors (see SimpleShape.__init__). This list should contain an element
                 for each shape.
-            drawEdges: whether to draw the edges at all
+            draw_edges: whether to draw the edges at all
 
         See the same function in SimpleShape.
         """
@@ -2674,13 +2673,13 @@ class CompoundShape(base.Orbitit):
                 color = props["color"]
             else:
                 color = None
-            if "drawEdges" in props:
-                drawEdges = props["drawEdges"]
+            if "draw_edges" in props:
+                draw_edges = props["draw_edges"]
             else:
-                drawEdges = None
+                draw_edges = None
         for i in range(len(self._shapes)):
             self._shapes[i].edge_props = {
-                'es': es[i], 'radius': radius, 'color': color, 'drawEdges': drawEdges
+                'es': es[i], 'radius': radius, 'color': color, 'draw_edges': draw_edges
             }
         self.merge_needed = True
 
@@ -2691,7 +2690,7 @@ class CompoundShape(base.Orbitit):
         See face_props.setter what to expect.
         """
         d = self._shapes[0].face_props
-        return {"fs": self.fs, "colors": self.shape_colors, "drawFaces": d["drawFaces"]}
+        return {"fs": self.fs, "colors": self.shape_colors, "draw_faces": d["draw_faces"]}
 
     @face_props.setter
     def face_props(self, props):
@@ -2701,7 +2700,7 @@ class CompoundShape(base.Orbitit):
         fs: This is an array of es. One es array for each shape element
         colors: This is an array of colors. One colors set for each shape
                 element.
-        drawFaces: one drawFaces setting that is valid for all shape elements
+        draw_faces: one draw_faces setting that is valid for all shape elements
 
         See the same function in SimpleShape.
         """
@@ -2714,13 +2713,13 @@ class CompoundShape(base.Orbitit):
                 colors = props["colors"]
             else:
                 colors = [None for shape in self._shapes]
-            if "drawFaces" in props:
-                drawFaces = props["drawFaces"]
+            if "draw_faces" in props:
+                draw_faces = props["draw_faces"]
             else:
-                drawFaces = None
+                draw_faces = None
         for i, shape in enumerate(self._shapes):
             shape.face_props = {
-                'fs': fs[i], 'colors': colors[i], 'drawFaces': drawFaces
+                'fs': fs[i], 'colors': colors[i], 'draw_faces': draw_faces
             }
         self.merge_needed = True
 
@@ -2738,22 +2737,27 @@ class CompoundShape(base.Orbitit):
 
     @property
     def dimension(self):
+        """The shapes dimension, normally 3."""
         return self._shapes[0].dimension
 
     @property
     def vs(self):
+        """Return an array of shape vertices."""
         return [shape.vs for shape in self._shapes]
 
     @property
     def ns(self):
+        """Return an array of shape (vertex) normals."""
         return [shape.ns for shape in self._shapes]
 
     @property
     def es(self):
+        """Return an array of shape edges."""
         return [shape.es for shape in self._shapes]
 
     @property
     def fs(self):
+        """Return an array of shape faces."""
         return [shape.fs for shape in self._shapes]
 
     @property
@@ -3089,7 +3093,7 @@ class SymmetricShape(CompoundShape):
         return {
             "fs": props["fs"],
             "colors": self._shape_colors[0],
-            "drawFaces": self.props["drawFaces"],
+            "draw_faces": self.props["draw_faces"],
         }
 
     @base_fs_props.setter
@@ -3101,7 +3105,7 @@ class SymmetricShape(CompoundShape):
           - fs,
           - colors: see setter of shape_colors
           - colors: one RGB value (tuple / list) or a list of RGB values.
-          - drawFaces.
+          - draw_faces.
         Check SimpleShape.face_props for more details.
         """
         if props:
@@ -3111,8 +3115,8 @@ class SymmetricShape(CompoundShape):
             if "colors" in props and props["colors"] is not None:
                 self.shape_colors = props["colors"]
                 self.merge_needed = True
-            if "drawFaces" in props and props["drawFaces"] is not None:
-                self.base_shape.setEnableDrawFaces(props["drawFaces"])
+            if "draw_faces" in props and props["draw_faces"] is not None:
+                self.base_shape.setEnableDrawFaces(props["draw_faces"])
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""

@@ -68,7 +68,7 @@ class SimpleShape:
         # specifically set to transparent colours.
         this.useTransparency(True)
         this.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1., 'color': [1. , 1. , .8]}
-        this.face_props = {'colors': colors, 'drawFaces': True}
+        this.face_props = {'colors': colors, 'draw_faces': True}
         this.gl_initialised = False
         # SETTINGS 4D specific:
         this.setCellProperties(
@@ -80,7 +80,7 @@ class SimpleShape:
             'es': es,
             'radius': -1.,
             'color': [0.1, 0.1, 0.1],
-            'drawEdges': True,
+            'draw_edges': True,
             'showUnscaled': True,
         }
         this.setProjectionProperties(11.0, 10.0)
@@ -138,7 +138,7 @@ class SimpleShape:
         """
         Return the current edge properties.
 
-        Returned is a dictionary with the keywords es, radius, color, drawEdges
+        Returned is a dictionary with the keywords es, radius, color, draw_edges
         es: a qD array of edges, where i and j in edge [ .., i, j,.. ] are
             indices in vs.
         radius: If > 0.0 draw vertices as cylinders with the specified colour.
@@ -146,14 +146,14 @@ class SimpleShape:
                 radius to a value <= 0.0 and the edges will be drawn as lines,
                 using glPolygonOffset.
         color: array with 3 rgb values between 0 and 1.
-        drawEdges: settings that expresses whether the edges should be drawn at
+        draw_edges: settings that expresses whether the edges should be drawn at
                    all.
         """
         return {
             'es': this.es,
             'radius': this.e.radius,
             'color': this.e.col,
-            'drawEdges': this.e.draw
+            'draw_edges': this.e.draw
         }
 
     @edge_props.setter
@@ -165,7 +165,7 @@ class SimpleShape:
           - es,
           - radius,
           - color,
-          - drawEdges.
+          - draw_edges.
         Either these parameters are specified as part of kwargs or as key value
         pairs in the dictionary dictPar.
         If they are not specified (or equel to None) they are not changed.
@@ -181,12 +181,12 @@ class SimpleShape:
             if 'color' in props and props['color'] != None:
                 self.e.col = props['color']
                 self.projectedTo3D = False
-            if 'drawEdges' in props and props['drawEdges'] != None:
+            if 'draw_edges' in props and props['draw_edges'] != None:
                 try:
                     currentSetting = self.e.draw
                 except AttributeError:
                     currentSetting = None
-                if currentSetting != props['drawEdges']:
+                if currentSetting != props['draw_edges']:
                     self.projectedTo3D = self.projectedTo3D and not (
                             # if all the below are true, then the edges need
                             # extra vs, which means we need to reproject.
@@ -203,10 +203,10 @@ class SimpleShape:
                         # will be False
                         # but because of the self.mapToSingeShape setting.
                         try:
-                            self.cell.edge_props = {'drawEdges': props['drawEdges']}
+                            self.cell.edge_props = {'draw_edges': props['draw_edges']}
                         except AttributeError:
                             pass
-                self.e.draw = props['drawEdges']
+                self.e.draw = props['draw_edges']
             if 'showUnscaled' in props and props['showUnscaled'] != None:
                 self.projectedTo3D = self.projectedTo3D and not (
                         # if all the below are true, then a change in unscaled
@@ -236,7 +236,7 @@ class SimpleShape:
         """
         Return the current face properties.
 
-        Returned is a dictionary with the keywords colors, and drawFaces.
+        Returned is a dictionary with the keywords colors, and draw_faces.
         colors: A tuple that defines the colour of the faces. The tuple consists
                 of the following two items:
                 0. colour definitions:
@@ -251,13 +251,13 @@ class SimpleShape:
                    It should have the same length as fs (or the current faces if
                    fs not specified) otherwise the parameter is ignored and the
                    face colors are set by some default algorithm.
-        drawFaces: settings that expresses whether the faces should be drawn.
+        draw_faces: settings that expresses whether the faces should be drawn.
         NOTE: these settings can be overwritten by setCellProperties, see
         setCellProperties (or getCellProperties).
         """
         return {
             'colors': self.f.col,
-            'drawFaces': self.f.draw
+            'draw_faces': self.f.draw
         }
 
     @face_props.setter
@@ -267,14 +267,14 @@ class SimpleShape:
 
         Accepted is a dictionary with the following keys:
           - colors,
-          - drawFaces.
+          - draw_faces.
         See setter for more explanation of these.
         """
         if props:
             if 'colors' in props and props['colors'] != None:
                 self.f.col = (props['colors'])
-            if 'drawFaces' in props and props['drawFaces'] != None:
-                self.f.draw = props['drawFaces']
+            if 'draw_faces' in props and props['draw_faces'] != None:
+                self.f.draw = props['draw_faces']
             self.projectedTo3D = False
 
     def setCellProperties(this, dictPar = None, **kwargs):
@@ -556,9 +556,9 @@ class SimpleShape:
             this.cell.edge_props = {
                 'radius': this.e.radius,
                 'color': this.e.col,
-                'drawEdges': this.e.draw,
+                'draw_edges': this.e.draw,
             }
-            this.cell.face_props = {'drawFaces': this.f.draw}
+            this.cell.face_props = {'draw_faces': this.f.draw}
             this.cell.gl_initialised = True # done as first step in this func
             this.projectedTo3D = True
             this.updateTransparency = False
@@ -617,9 +617,9 @@ class SimpleShape:
                 cell.edge_props = {
                     'radius': this.e.radius,
                     'color': this.e.col,
-                    'drawEdges': this.e.draw,
+                    'draw_edges': this.e.draw,
                 }
-                cell.face_props = {'drawFaces': False}
+                cell.face_props = {'draw_faces': False}
                 cell.gl_initialised = True
                 this.cells.append(cell)
             # Add a shape with faces for each cell
@@ -635,8 +635,8 @@ class SimpleShape:
                     )
                 # The edges and vertices are drawn through a separate shape below.
                 cell.vertex_props = {'radius': -1}
-                cell.edge_props = {'drawEdges': False}
-                cell.face_props = {'drawFace': this.f.draw}
+                cell.edge_props = {'draw_edges': False}
+                cell.face_props = {'draw_faces': this.f.draw}
                 cell.zoom(this.c.scale)
                 cell.gl_initialised = True
                 this.cells.append(cell)

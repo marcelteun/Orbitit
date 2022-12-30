@@ -781,8 +781,8 @@ class MainPanel(wx.Panel):
         old_e_settings = old_shape.edge_props
         del old_e_settings['es']
         self.canvas.shape.edge_props = old_e_settings
-        # Use only the 'drawFaces' setting:
-        old_f_settings = {'drawFaces': old_shape.face_props['drawFaces']}
+        # Use only the 'draw_faces' setting:
+        old_f_settings = {'draw_faces': old_shape.face_props['draw_faces']}
         self.canvas.shape.face_props = old_f_settings
         # if the shape generates the normals itself:
         # TODO: handle that this.ns is set correctly, i.e. normalised

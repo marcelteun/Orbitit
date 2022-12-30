@@ -391,7 +391,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         e_props = canvas.shape.edge_props
         self.e_r = e_props['radius']
         self.e_opts_lst = ['hide', 'as cylinders', 'as lines']
-        if e_props['drawEdges']:
+        if e_props['draw_edges']:
             if self.v_r > 0:
                 default = 1 # key(1) = 'as cylinders'
             else:
@@ -773,13 +773,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel_str = self.e_opts_lst[sel]
         if sel_str == 'hide':
             self.e_r_gui.Disable()
-            self.canvas.shape.edge_props = {'drawEdges': False}
+            self.canvas.shape.edge_props = {'draw_edges': False}
         elif sel_str == 'as cylinders':
             self.e_r_gui.Enable()
-            self.canvas.shape.edge_props = {'drawEdges': True, 'radius': self.e_r}
+            self.canvas.shape.edge_props = {'draw_edges': True, 'radius': self.e_r}
         elif sel_str == 'as lines':
             self.e_r_gui.Disable()
-            self.canvas.shape.edge_props = {'drawEdges': True, 'radius': 0}
+            self.canvas.shape.edge_props = {'draw_edges': True, 'radius': 0}
         self.canvas.paint()
 
     def on_e_radius(self, _):
@@ -806,13 +806,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
-        self.canvas.shape.face_props = {'drawFaces': True}
+        self.canvas.shape.face_props = {'draw_faces': True}
         if sel == self.cull_show_both:
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_none:
             # don't use culling here: doesn't work with edge radius and vertext
             # radius > 0
-            self.canvas.shape.face_props = {'drawFaces': False}
+            self.canvas.shape.face_props = {'draw_faces': False}
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_front:
             GL.glCullFace(GL.GL_FRONT)
