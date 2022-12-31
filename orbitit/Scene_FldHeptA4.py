@@ -303,7 +303,11 @@ class Shape(heptagons.FldHeptagonShape):
                     )
                     # only draw the folds of the hexagon for the twisted variant
                     # if the hexagon isn't flat.
-                    if not geom_3d.eq(abs(this.pos_angle) % (math.pi / 2), math.pi / 4):
+                    print(abs(this.pos_angle) % (math.pi / 2) * 180 / math.pi)
+                    if geomtypes.FloatHandler.ne(
+                        abs(this.pos_angle) % (math.pi / 2),
+                        math.pi / 4
+                    ):
                         es.extend(this.twistedEs_A4)
                     colIds = this.triColIds[eAlt][this.has_reflections]
                 else:

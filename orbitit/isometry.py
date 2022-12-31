@@ -124,7 +124,7 @@ def a5_sub_a4_setup(rot_axes):
     look_for_no = 0
     for n, axis1 in enumerate(rot_axes[2]):
         for axis2 in rot_axes[2][n + 1:]:
-            if geomtypes.eq(axis1 * axis2, 0):
+            if geomtypes.FloatHandler.eq(axis1 * axis2, 0):
                 setup.append({'o2axis0': axis1, 'o2axis1': axis2})
                 look_for_no += 1
                 break
@@ -138,7 +138,7 @@ def a5_sub_d5_setup(rot_axes):
     setup = []
     for _, axis1 in enumerate(rot_axes[5]):
         for axis2 in rot_axes[2]:
-            if geomtypes.eq(axis1 * axis2, 0):
+            if geomtypes.FloatHandler.eq(axis1 * axis2, 0):
                 setup.append({'axis_n': axis1, 'axis_2': axis2})
                 break
     return setup
@@ -149,7 +149,7 @@ def a5_sub_d3_setup(rot_axes):
     setup = []
     for _, axis1 in enumerate(rot_axes[3]):
         for axis2 in rot_axes[2]:
-            if geomtypes.eq(axis1 * axis2, 0):
+            if geomtypes.FloatHandler.eq(axis1 * axis2, 0):
                 setup.append({'axis_n': axis1, 'axis_2': axis2})
                 break
     return setup
@@ -217,7 +217,7 @@ def get_axes(transforms, n=0):
     res = []
     for t in transforms:
         if t.is_rot():
-            if n == 0 or geomtypes.eq(t.angle(), 2 * math.pi / n):
+            if n == 0 or geomtypes.FloatHandler.eq(t.angle(), 2 * math.pi / n):
                 axis = t.axis()
                 if axis not in res and -axis not in res:
                     res.append(axis)
@@ -669,15 +669,14 @@ class Cn(Set, metaclass=MetaCn):
             for t in isometries:
                 assert t.is_rot, f'Cn cannot contain any {t}'
                 a = t.angle()
-                if geomtypes.eq(a, 0):
+                if geomtypes.FloatHandler.eq(a, 0):
                     continue
                 min_angle = min(a, min_angle)
                 if axis is None:
                     axis = t.axis()
                 else:
                     ax = t.axis()
-                    assert axis == ax or axis == -ax or geomtypes.eq(
-                        t.angle(), 0),\
+                    assert axis == ax or axis == -ax or geomtypes.FloatHandler.eq(t.angle(), 0),\
                         f'Cn can only have one unique axis ({axis} != {ax})'
                     axis = ax
             if axis is None:
@@ -1839,7 +1838,7 @@ class S4A4(Set):
             isoms = []
             for o3 in self.rot_axes[3]:
                 for rn in self.refl_normals:
-                    if geomtypes.eq(rn*o3, 0):
+                    if geomtypes.FloatHandler.eq(rn*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
@@ -1925,7 +1924,7 @@ class A4xI(Set):
             isoms = []
             for o2 in self.rot_axes[2]:
                 for rn in self.rot_axes[2]:
-                    if geomtypes.eq(rn*o2, 0):
+                    if geomtypes.FloatHandler.eq(rn*o2, 0):
                         isoms.append(sg(setup={'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 3, f'len(isoms) == {len(isoms)} != 3'
@@ -2062,7 +2061,7 @@ class S4(Set):
             isoms = []
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
-                    if geomtypes.eq(o2*o3, 0):
+                    if geomtypes.FloatHandler.eq(o2*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
@@ -2076,7 +2075,7 @@ class S4(Set):
             isoms = [sg(setup={'axis_n': o4a[0], 'axis_2': o4a[1]})]
             for o4 in self.rot_axes[4]:
                 for o2 in self.rot_axes[2]:
-                    if geomtypes.eq(o2*o4, 0):
+                    if geomtypes.FloatHandler.eq(o2*o4, 0):
                         isoms.append(sg(setup={'axis_n': o4, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
@@ -2171,7 +2170,7 @@ class S4xI(Set):
             isoms = []
             for o3 in self.rot_axes[3]:
                 for o2 in self.rot_axes[2]:
-                    if geomtypes.eq(o2*o3, 0):
+                    if geomtypes.FloatHandler.eq(o2*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'axis_2': o2}))
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
@@ -2180,7 +2179,7 @@ class S4xI(Set):
             isoms = []
             for a4 in self.rot_axes[4]:
                 for rn in self.rot_axes[2]:
-                    if geomtypes.eq(rn*a4, 0):
+                    if geomtypes.FloatHandler.eq(rn*a4, 0):
                         isoms.append(sg(setup={'axis_n': a4, 'normal_r': rn}))
                         break
             return isoms
@@ -2193,7 +2192,7 @@ class S4xI(Set):
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
-                    if geomtypes.eq(a2*a4, 0):
+                    if geomtypes.FloatHandler.eq(a2*a4, 0):
                         isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
             return isoms
@@ -2203,7 +2202,7 @@ class S4xI(Set):
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
-                    if geomtypes.eq(a2*a4, 0):
+                    if geomtypes.FloatHandler.eq(a2*a4, 0):
                         isoms.append(sg(setup={'axis_n': a4, 'axis_2': a2}))
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
@@ -2212,7 +2211,7 @@ class S4xI(Set):
             isoms = []
             for o3 in self.rot_axes[3]:
                 for rn in self.rot_axes[2]:
-                    if geomtypes.eq(rn*o3, 0):
+                    if geomtypes.FloatHandler.eq(rn*o3, 0):
                         isoms.append(sg(setup={'axis_n': o3, 'normal_r': rn}))
                         break
             assert len(isoms) == 4, f'len(isoms) == {len(isoms)} != 4'
@@ -2229,12 +2228,12 @@ class S4xI(Set):
             o2a = self.rot_axes[2]
             for a4 in o4a:
                 for a2 in o2a:
-                    if geomtypes.eq(a2*a4, 0):
+                    if geomtypes.FloatHandler.eq(a2*a4, 0):
                         isoms.append(sg(setup={'axis_n': a4, 'normal_r': a2}))
                         break
             for o2 in self.rot_axes[2]:
                 for rn in self.rot_axes[4]:
-                    if geomtypes.eq(rn*o2, 0):
+                    if geomtypes.FloatHandler.eq(rn*o2, 0):
                         isoms.append(sg(setup={'axis_n': o2, 'normal_r': rn}))
                         break
             assert len(isoms) == 12, f'len(isoms) == {len(isoms)} != 12'
@@ -2265,8 +2264,8 @@ def _gen_d2(o2axis0, o2axis1):
     if isinstance(o2axis1, geomtypes.Transform3):
         o2axis1 = o2axis1.axis()
 
-    assert geomtypes.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1),
-                        0), "Error: axes not orthogonal"
+    assert geomtypes.FloatHandler.eq(geomtypes.Vec3(o2axis0) * geomtypes.Vec3(o2axis1), 0),\
+        "Error: axes not orthogonal"
     h0 = geomtypes.HalfTurn3(axis=o2axis0)
     h1 = geomtypes.Rot3(axis=o2axis1, angle=HALFTURN)
     return (h0, h1, h1 * h0)

@@ -35,6 +35,147 @@ from orbitit import geomtypes
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
+class Rounding(unittest.TestCase):
+    """Test rounding of floats"""
+
+    def test_float_handler(self):
+        """Test some basic stuff"""
+        a = 0.12345678
+        b = 0.12345673
+
+        self.assertFalse(a == b)
+        self.assertEqual(geomtypes.FloatHandler.to_str(a), "0.12345678")
+        self.assertEqual(geomtypes.FloatHandler.to_str(b), "0.12345673")
+
+        with geomtypes.FloatHandler(8) as fh:
+            self.assertFalse(fh.eq(a, b))
+            str_a = fh.to_str(a)
+            str_b = fh.to_str(b)
+        self.assertEqual(str_a, "0.12345678")
+        self.assertEqual(str_b, "0.12345673")
+
+        with geomtypes.FloatHandler(7):
+            self.assertTrue(fh.eq(a, b))
+            str_a = fh.to_str(a)
+            str_b = fh.to_str(b)
+        self.assertEqual(str_a, "0.1234568")
+        self.assertEqual(str_b, "0.1234567")
+
+    def test_rounded_float(self):
+        a = geomtypes.RoundedFloat(0.12345678)
+        b = geomtypes.RoundedFloat(0.12345673)
+
+        self.assertFalse(a == b)
+        self.assertEqual(str(a), "0.12345678")
+        self.assertEqual(repr(a), "0.12345678")
+        self.assertEqual(str(b), "0.12345673")
+        self.assertEqual(repr(b), "0.12345673")
+
+        with geomtypes.FloatHandler(8):
+            self.assertFalse(a == b)
+            self.assertEqual(str(a), "0.12345678")
+            self.assertEqual(repr(a), "0.12345678")
+            self.assertEqual(str(b), "0.12345673")
+            self.assertEqual(repr(b), "0.12345673")
+
+        with geomtypes.FloatHandler(7):
+            self.assertTrue(a == b)
+            self.assertEqual(str(a), "0.1234568")
+            self.assertEqual(repr(a), "0.1234568")
+            self.assertEqual(str(b), "0.1234567")
+            self.assertEqual(repr(b), "0.1234567")
+
+    def test_all_cmp(self):
+        """Test all comparison functions."""
+        a = geomtypes.RoundedFloat(0.12345678)
+        b = geomtypes.RoundedFloat(0.12345673)
+
+        self.assertFalse(a == b)
+        self.assertFalse(a <= b)
+        self.assertFalse(a < b)
+        self.assertTrue(a >= b)
+        self.assertTrue(a > b)
+        self.assertTrue(a != b)
+
+        with geomtypes.FloatHandler(7):
+            self.assertFalse(a != b)
+            self.assertFalse(a < b)
+            self.assertFalse(a > b)
+            self.assertTrue(a <= b)
+            self.assertTrue(a >= b)
+            self.assertTrue(a == b)
+            self.assertFalse(b != a)
+            self.assertFalse(b < a)
+            self.assertFalse(b > a)
+            self.assertTrue(b <= a)
+            self.assertTrue(b >= a)
+            self.assertTrue(b == a)
+
+    def test_keep_type(self):
+        a = geomtypes.RoundedFloat(1.)
+        b = geomtypes.RoundedFloat(2.)
+
+        result = -a
+        self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+        self.assertEqual(result, -1)
+
+        result = +a
+        self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+        self.assertEqual(result, a)
+
+        result = b ** 4
+        self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+        self.assertEqual(result, 16)
+
+        def chk(a, b):
+            """Test binary operators where __r<op>__ exists."""
+            result = a + b
+            self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+            self.assertEqual(result, 3)
+
+            result = a - b
+            self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+            self.assertEqual(result, -1)
+
+            result = a * b
+            self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+            self.assertEqual(result, 2)
+
+            result = a / b
+            self.assertTrue(isinstance(result, geomtypes.RoundedFloat))
+            self.assertEqual(result, 0.5)
+
+        chk(a, b)
+        chk(float(a), b)
+        chk(a, float(b))
+
+    def test_mix(self):
+        """Test mixing RoundedFloat and float."""
+        a = geomtypes.RoundedFloat(0.12345678)
+        b = 0.12345673
+
+        self.assertFalse(a == b)
+        self.assertFalse(a <= b)
+        self.assertFalse(a < b)
+        self.assertTrue(a >= b)
+        self.assertTrue(a > b)
+        self.assertTrue(a != b)
+
+        with geomtypes.FloatHandler(7):
+            self.assertFalse(a != b)
+            self.assertFalse(a < b)
+            self.assertFalse(a > b)
+            self.assertTrue(a <= b)
+            self.assertTrue(a >= b)
+            self.assertTrue(a == b)
+            self.assertFalse(b != a)
+            self.assertFalse(b < a)
+            self.assertFalse(b > a)
+            self.assertTrue(b <= a)
+            self.assertTrue(b >= a)
+            self.assertTrue(b == a)
+
+
 class TestVec(unittest.TestCase):
     """Unit tests for geomtypes.Vec and derivatives"""
 
@@ -248,10 +389,9 @@ class TestVec(unittest.TestCase):
             ([4/7, -1/2, 1/3, -math.sqrt(3)], geomtypes.Quat),
         ]
         # NOTE that for floats assertEqual will use the Vec.__eq__,
-        # This will used geomtypes._eq_float_margin
-        # When saving floats in JSON, geomtypes.RoundingFloat is used,
-        # which uses geomtypes geomtypes.FLOAT_PRECISION
-        # Both are using 10 decimals per default
+        # Which uses the geomtypes.FloatHandler
+        # When saving floats in JSON, geomtypes.RoundedFloat is used,
+        # which uses the same geomtypes.FloatHandler (Singleton)
         filename = os.path.join(DIR_PATH, "output", "test_vec.json")
         for v, cls in test_matrix:
             cls(v).write_json_file(filename)
@@ -936,15 +1076,16 @@ class TestTransform(unittest.TestCase):
             geomtypes.Vec([0, 1, 1]),
             geomtypes.Vec([1, 1, 1]),
         ]
-        # Increase float_precision which is used to save floats
-        geomtypes.FLOAT_PRECISION = 12
         for trfm_org in test_matrix:
             filename = os.path.join(DIR_PATH, "output", "test_transform.json")
             trfm_org.write_json_file(filename)
-            trfm_new = geomtypes.Transform3.from_json_file(filename)
-            self.assertEqual(trfm_org, trfm_new)
-            for v in test_vec:
-                self.assertEqual(trfm_new * v, trfm_org * v)
+            # Increase float_precision which is used to save floats
+            with geomtypes.FloatHandler(12):
+                trfm_new = geomtypes.Transform3.from_json_file(filename)
+            with geomtypes.FloatHandler(9):
+                self.assertEqual(trfm_org, trfm_new)
+                for v in test_vec:
+                    self.assertEqual(trfm_new * v, trfm_org * v)
 
 
 class TestRotInv3(unittest.TestCase):
@@ -988,8 +1129,8 @@ class TestRot4(unittest.TestCase):
         v = geomtypes.Vec4([10, 2, 0, 6])
         r = r0 * v
         x = geomtypes.Quat([v[0], 1, -math.sqrt(3), v[3]])
-        geomtypes.set_eq_float_margin(1.0e-14)
-        self.assertEqual(r, x)
+        with geomtypes.FloatHandler(14):
+            self.assertEqual(r, x)
 
         random.seed(700114)  # constant seed to be able to catch errors
         for _ in range(100):
@@ -1033,20 +1174,18 @@ class TestRot4(unittest.TestCase):
             # self.assertEqual(r * r.inverse(), geomtypes.E
             for n in range(1, 12):
                 if n > 98:
-                    margin = 1.0e-12
+                    precision = 12
                 else:
-                    margin = geomtypes.DEFAULT_EQ_FLOAT_MARGIN
+                    precision = geomtypes.FLOAT_PRECISION
                 r0 = geomtypes.Rot4(axialPlane=(x0, x1), angle=2 * math.pi / n)
                 r = r0
-                for j in range(1, n):
-                    a = r.angle()
-                    self.assertTrue(geomtypes.eq(j * 2 * math.pi / n,
-                                                 a,
-                                                 margin))
-                    r = r0 * r
-                ra = r.angle()
-                self.assertTrue(geomtypes.eq(ra, 0, margin)
-                                or geomtypes.eq(ra, 2*math.pi, margin))
+                with geomtypes.FloatHandler(precision):
+                    for j in range(1, n):
+                        a = geomtypes.RoundedFloat(r.angle())
+                        self.assertTrue(a == j * 2 * math.pi / n)
+                        r = r0 * r
+                    ra = geomtypes.RoundedFloat(r.angle())
+                    self.assertTrue(ra == 0 or ra == 2*math.pi)
 
     def test_vectors_in_axis(self):
         """test if vectors in axial plane are not changed."""
@@ -1054,15 +1193,14 @@ class TestRot4(unittest.TestCase):
         v1 = geomtypes.Vec4([0, 0, 1, 1])
         v1 = v1.make_orthogonal_to(v0)
         r0 = geomtypes.Rot4(axialPlane=(v1, v0), angle=math.pi/5)
-        geomtypes.set_eq_float_margin(1.0e-14)
-        for k in range(5):
-            v = v0 + k * v1
-            r = r0 * v
-            self.assertEqual(v, r)
-            v = k * v0 + v1
-            r = r0 * v
-            self.assertEqual(v, r)
-        geomtypes.reset_eq_float_margin()
+        with geomtypes.FloatHandler(14) as fh:
+            for k in range(5):
+                v = v0 + k * v1
+                r = r0 * v
+                self.assertEqual(v, r)
+                v = k * v0 + v1
+                r = r0 * v
+                self.assertEqual(v, r)
 
 
 class TestDoubleRot4(unittest.TestCase):
@@ -1070,51 +1208,46 @@ class TestDoubleRot4(unittest.TestCase):
 
     def test_basic(self):
         """Some basic tests of geomtypes.DoubleRot4"""
-        r0 = geomtypes.DoubleRot4(axialPlane=(geomtypes.Vec4([1, 0, 0, 0]),
-                                              geomtypes.Vec4([0, 0, 0, 1])),
-                                  # 1/6 th and 1/8 th turn
-                                  angle=(math.pi/3, math.pi/4))
-        v = geomtypes.Vec4([6, 2, 0, 6])
-        r = r0 * v
-        x = geomtypes.Quat([0, 1, -math.sqrt(3), math.sqrt(72)])
-        margin = 1.0e-14
-        self.assertTrue(r0.is_rot())
-        self.assertEqual(r, x)
-        r = geomtypes.E
-        for _ in range(23):
+        with geomtypes.FloatHandler(14):
+            r0 = geomtypes.DoubleRot4(axialPlane=(geomtypes.Vec4([1, 0, 0, 0]),
+                                                  geomtypes.Vec4([0, 0, 0, 1])),
+                                      # 1/6 th and 1/8 th turn
+                                      angle=(math.pi/3, math.pi/4))
+            v = geomtypes.Vec4([6, 2, 0, 6])
+            r = r0 * v
+            x = geomtypes.Quat([0, 1, -math.sqrt(3), math.sqrt(72)])
+            self.assertTrue(r0.is_rot())
+            self.assertEqual(r, x)
+            r = geomtypes.E
+            for _ in range(23):
+                r = r0 * r
+                self.assertTrue(r.is_rot())
+                ra = geomtypes.RoundedFloat(r.angle())
+                self.assertFalse(ra == 0 or ra == 2 * math.pi)
             r = r0 * r
             self.assertTrue(r.is_rot())
-            ra = r.angle()
-            self.assertFalse(geomtypes.eq(ra, 0, margin)
-                             or geomtypes.eq(ra, 2*math.pi, margin))
-        r = r0 * r
-        self.assertTrue(r.is_rot())
-        ra = r.angle()
-        self.assertTrue(geomtypes.eq(ra, 0, margin)
-                        or geomtypes.eq(ra, 2*math.pi, margin))
+            ra = geomtypes.RoundedFloat(r.angle())
+            self.assertTrue(ra == 0 or ra == 2 * math.pi)
 
-        r0 = geomtypes.DoubleRot4(axialPlane=(geomtypes.Vec4([1, 0, 0, 0]),
-                                              geomtypes.Vec4([0, 0, 0, 1])),
-                                  # 1/6 th and 1/8 th turn:
-                                  angle=(math.pi/4, math.pi/3))
-        v = geomtypes.Vec4([6, 2, 2, 0])
-        r = r0 * v
-        x = geomtypes.Quat([3, math.sqrt(8), 0, 3*math.sqrt(3)])
-        margin = 1.0e-14
-        self.assertTrue(r0.is_rot())
-        self.assertEqual(r, x)
-        r = geomtypes.E
-        for _ in range(23):
+            r0 = geomtypes.DoubleRot4(axialPlane=(geomtypes.Vec4([1, 0, 0, 0]),
+                                                  geomtypes.Vec4([0, 0, 0, 1])),
+                                      # 1/6 th and 1/8 th turn:
+                                      angle=(math.pi/4, math.pi/3))
+            v = geomtypes.Vec4([6, 2, 2, 0])
+            r = r0 * v
+            x = geomtypes.Quat([3, math.sqrt(8), 0, 3*math.sqrt(3)])
+            self.assertTrue(r0.is_rot())
+            self.assertEqual(r, x)
+            r = geomtypes.E
+            for _ in range(23):
+                r = r0 * r
+                self.assertTrue(r.is_rot())
+                ra = geomtypes.RoundedFloat(r.angle())
+                self.assertFalse(ra == 0 or ra == 2 * math.pi)
             r = r0 * r
             self.assertTrue(r.is_rot())
-            ra = r.angle()
-            self.assertFalse(geomtypes.eq(ra, 0, margin)
-                             or geomtypes.eq(ra, 2*math.pi, margin))
-        r = r0 * r
-        self.assertTrue(r.is_rot())
-        ra = r.angle()
-        self.assertTrue(geomtypes.eq(ra, 0, margin)
-                        or geomtypes.eq(ra, 2*math.pi, margin))
+            ra = geomtypes.RoundedFloat(r.angle())
+            self.assertTrue(ra == 0 or ra == 2 * math.pi)
 
 
 class TestMat(unittest.TestCase):

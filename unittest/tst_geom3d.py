@@ -104,8 +104,97 @@ def chk_with_org(filename, chk_str):
     return (True, "")
 
 
+class TestLine(unittest.TestCase):
+    """Unit tests for geom_3d.Line"""
+
+    def test_get_factor_at_std(self):
+        """Test getFactorAt with some exact (integer) solutions"""
+        test_matrix = {  # test_case: (point, vector, value, i, expected t)
+            "2D line x int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 0, -1),
+            "2D line y int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 1, -2),
+            "3D line x int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 0, -1),
+            "3D line y int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 1, -2),
+            "3D line z int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 2, -3),
+            "3D line z None": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 0]), 0, 2, None),
+        }
+        for case, (p0, v, c, i, expect) in test_matrix.items():
+            line = geom_3d.Line(p0, v=v)
+            result = line.getFactorAt(c, i)
+            d = ", delta = {result - expect}" if result is not None and expect is not None else ""
+            self.assertTrue(
+                result == expect,
+                f"Error for '{case}': {result} != {expect} (expected)" + d
+            )
+
+    def test_get_factor_at_margins(self):
+        """Test getFactorAt with solutions where rounding is involved"""
+        test_matrix = {  # test_case: (point, vector, value, i, expected t)
+            "2D line x int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 0, -1.00009),
+            "3D line x int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 0, -1.00009),
+        }
+        for case, (p0, v, c, i, expect) in test_matrix.items():
+            line = geom_3d.Line(p0, v=v)
+            result = line.getFactorAt(c, i)
+            precision = 4
+            with geomtypes.FloatHandler(precision):
+                self.assertTrue(
+                    result == expect,
+                    f"Error for '{case}': delta: {result - expect} > 1 * 10^-{precision}"
+                )
+            precision = 5
+            with geomtypes.FloatHandler(precision):
+                self.assertFalse(
+                    result == expect,
+                    f"Error for '{case}': delta: {result - expect} < 1 * 10^-{precision}"
+                )
+
+    def test_intersect_2D_line_with_other_line(self):
+        """Test intersectLine and thus intersectLineGetFactor"""
+        test_matrix = {  # test_case: (p0, v0, p1, p2, expected point)
+            "line 0": (
+                geomtypes.Vec([1, 2]),
+                geomtypes.Vec([1, 1]),
+                geomtypes.Vec([1, 0.3]),
+                geomtypes.Vec([2, 3]),
+                geomtypes.Vec([2, 3]),
+            ),
+        }
+        for case, (p, v, p0, p1, expect) in test_matrix.items():
+            l0 = geom_3d.Line2D(p, v=v)
+            l1 = geom_3d.Line2D(p0, p1=p1)
+            result = l0.intersectLine(l1)
+            self.assertTrue(
+                result == expect,
+                f"Error for '{case}': {result} != {expect} (expected)"
+            )
+        precision = 5
+        # check precision ok
+        margin_ok = 0.9 * 10**-precision
+        for case, (p, v, p0, p1, expect) in test_matrix.items():
+            l0 = geom_3d.Line2D(p, v=v)
+            d = margin_ok
+            l1 = geom_3d.Line2D(p0, p1=geomtypes.Vec([p1[0] + d, p1[1] + d]))
+            result = l0.intersectLine(l1)
+            with geomtypes.FloatHandler(precision):
+                self.assertTrue(
+                    result == expect,
+                    f"Error for '{case}': {result} != {expect} (expected)"
+                )
+        margin_nok = 1.1 * 10**-precision
+        for case, (p, v, p0, p1, expect) in test_matrix.items():
+            l0 = geom_3d.Line2D(p, v=v)
+            d = margin_nok
+            l1 = geom_3d.Line2D(p0, p1=geomtypes.Vec([p1[0] + d, p1[1] + d]))
+            result = l0.intersectLine(l1)
+            with geomtypes.FloatHandler(precision):
+                self.assertFalse(
+                    result == expect,
+                    f"Error for '{case}': delta |{result - expect}| < 1*10^-{precision}"
+                )
+
+
 class TestSimpleShape(unittest.TestCase):
-    """Unit tests for geom_3d.CompoundShape"""
+    """Unit tests for geom_3d.SimpleShape"""
     shape = None
     name = "simple_shape"
     ps_margin = 10
@@ -124,11 +213,11 @@ class TestSimpleShape(unittest.TestCase):
     def test_export_to_ps(self):
         """Test export to PostScript function"""
         self.ensure_shape()
-        tst_str = self.shape.to_postscript(
-            scaling=self.scale,
-            precision=self.ps_precision,
-            margin=math.pow(10, -self.ps_margin),
-        )
+        with geomtypes.FloatHandler(self.ps_margin):
+            tst_str = self.shape.to_postscript(
+                scaling=self.scale,
+                precision=self.ps_precision,
+            )
         result, msg = chk_with_org(self.name + ".ps", tst_str)
         self.assertTrue(result, msg)
 
@@ -141,7 +230,8 @@ class TestSimpleShape(unittest.TestCase):
 
     def test_export_to_json(self):
         self.ensure_shape()
-        tst_str = self.shape.json_str
+        with geomtypes.FloatHandler(12):
+            tst_str = self.shape.json_str
         result, msg = chk_with_org(self.name + ".json", tst_str)
         self.assertTrue(result, msg)
 
@@ -154,7 +244,7 @@ class TestSimpleShape(unittest.TestCase):
 
 
 class TestSimpleShapeExtended(TestSimpleShape):
-    """Unit tests for geom_3d.CompoundShape"""
+    """Unit tests for geom_3d.SimpleShape"""
 
     def test_scale(self):
         """Test scale and export to off-format"""
@@ -177,6 +267,7 @@ class TestSimpleShapeExtended(TestSimpleShape):
 
 class TestCompoundShape(TestSimpleShapeExtended):
     """Unit tests for geom_3d.CompoundShape"""
+    ps_margin = 6
     name = "compound_shape"
 
     def def_shape(self):

@@ -220,7 +220,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def on_rot(self, angle, axis):
         """Rotate shape"""
-        if geom_3d.eq(axis.norm(), 0):
+        if geomtypes.FloatHandler.eq(axis.norm(), 0):
             self.set_status_text("Please define a proper axis")
             return
         self.canvas.shape.transform(geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis))
@@ -911,13 +911,15 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.angle_scale_offset,
             self.angle_scale_gui.GetValue(),
         )
-        if geomtypes.eq(angle, 0):
+        angle = geomtypes.RoundedFloat(angle)
+        if angle == 0:
             return
+        scale = geomtypes.RoundedFloat(scale)
         try:
             v1 = v1.make_orthogonal_to(v0)
             # if vectors are exchange, you actually specify the axial plane
             if self.switch_planes_gui.IsChecked():
-                if geomtypes.eq(scale, 0):
+                if scale == 0:
                     r = geomtypes.Rot4(axialPlane=(v1, v0), angle=angle)
                 else:
                     r = geomtypes.DoubleRot4(axialPlane=(v1, v0), angle=(angle, scale*angle))

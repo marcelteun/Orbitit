@@ -32,6 +32,7 @@ import logging
 import math
 
 from orbitit import base, indent
+from orbitit.base import Singleton # to prevent pylint (2.4.4): Undefined variable 'base.Singleton'
 
 
 def turn(r):
@@ -54,53 +55,12 @@ HALF_TURN = turn(0.5)
 QUARTER_TURN = turn(0.25)
 THIRD_TURN = turn(1.0/3)
 
-FLOAT_PRECISION = 10
-DEFAULT_EQ_FLOAT_MARGIN = 1.0*10**-FLOAT_PRECISION
+DEFAULT_FLOAT_PRECISION = 10
+FLOAT_PRECISION = DEFAULT_FLOAT_PRECISION
 
 # Used for output: use a bit more than when comparing, to not loose when rounding.
-FLOAT_OUT_PRECISION = 12
-float_out_precision = FLOAT_OUT_PRECISION  # pylint: disable=invalid-name
-
-# Disable pylint warning: Constant name "_eq_float_margin" doesn't conform to
-# UPPER_CASE naming style (invalid-name)
-# Below isn't a constant, it is a variable that can be changed by a function
-_eq_float_margin = DEFAULT_EQ_FLOAT_MARGIN  # pylint: disable=C0103
-
-
-def set_eq_float_margin(margin):
-    """Set the margin to be used for floats to be considered equal
-
-    The value can be set back to its default by reset_eq_float_margin"""
-    # Note sure how to do this in a better and simple way (without introducing
-    # a class) without pylint warning about it.
-    global _eq_float_margin  # pylint: disable=W0603,C0103
-    _eq_float_margin = margin
-
-
-def reset_eq_float_margin():
-    """Reset the margin to be used for floats to be considered equal
-
-    This function can be used after calling set_eq_float_margin
-    It is set back to the default: DEFAULT_EQ_FLOAT_MARGIN
-    """
-    set_eq_float_margin(DEFAULT_EQ_FLOAT_MARGIN)
-
-
-def eq(a, b, margin=None):
-    """
-    Check if 2 floats 'a' and 'b' are close enough to be called equal.
-
-    a: a floating point number.
-    b: a floating point number.
-    margin: if |a - b| < margin then the floats will be considered equal and
-            True is returned. Optional parameter. If not set, then a standard
-            value is used. That standard value can be set with
-            set_eq_float_margin.
-    """
-    if margin is None:
-        margin = _eq_float_margin
-    return abs(a - b) < margin
-
+DEFAULT_FLOAT_OUT_PRECISION = 12
+FLOAT_OUT_PRECISION = DEFAULT_FLOAT_OUT_PRECISION
 
 def f2s(f, precision=None):
     """Get string representation of a float or int with certain precision
@@ -112,7 +72,7 @@ def f2s(f, precision=None):
     precision: maximum amount of decimal places used for writing out the floating point number.
     """
     if not precision:
-        precision = float_out_precision
+        precision = DEFAULT_FLOAT_OUT_PRECISION
     fmt = f"{{:0.{precision}f}}"
     s = fmt.format(f)
     s = s.rstrip('0').rstrip('.')
@@ -121,15 +81,220 @@ def f2s(f, precision=None):
     return '0'
 
 
-class RoundingFloat(float):
-    """Work-around to save the floats in JSON as I want.
+# TODO: move this to own module?
 
-    see https://stackoverflow.com/questions/54370322
+class StdFloatHandler(metaclass=Singleton):
+    """A singleto that can be used to compare and print float with a certain precision.
+
+    This can be used as follows:
+        with StdFloatHandler()(precision=7) as fh:
+            fh.eq(0.12345, 0.12346)
+            print(0.12345678)
+    Which will evaluate to True and print "0.1234568"
+
+    The precision is the amount of decimals that should be looked at
     """
-    __repr__ = staticmethod(lambda x: f2s(x))  # pylint: disable=unnecessary-lambda
 
+    def __init__(self):
+        self.next_precision = FLOAT_PRECISION
+        self.precisions = [FLOAT_PRECISION]
+        self.margin = self.get_margin()
+
+    @property
+    def precision(self):
+        """Get the current precision."""
+        return self.precisions[-1]
+
+    def get_margin(self):
+        """Return the margin from the amount of digits."""
+        return 1.0*10**-self.precision
+
+    def __call__(self, precision=FLOAT_PRECISION):
+        """Call the object to set the next precision to be used with the "with" statement"""
+        self.next_precision = precision
+        return self
+
+    def __enter__(self):
+        """Set precision to be used and calculate the margin."""
+        self.precisions.append(self.next_precision)
+        self.margin = self.get_margin()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """go back using the previous precision and margin."""
+        self.precisions.pop()
+        self.margin = self.get_margin()
+
+    def eq(self, f0, f1):  # pylint: disable=C0103
+        """Check wether f0 == f1 within a margin."""
+        # Note: must be float compare
+        return float(abs(f0 - f1)) < self.margin
+
+    def ne(self, f0, f1):  # pylint: disable=C0103
+        """Check wether f0 == f1 within a margin."""
+        return not self.eq(f0, f1)
+
+    def lt(self, f0, f1):  # pylint: disable=C0103
+        """Check wether f0 < f1 within a margin."""
+        # to prevent recursion (through RoundedFloat):
+        return float(f1) - float(f0) > self.margin
+
+    def le(self, f0, f1):  # pylint: disable=C0103
+        """Check wether f0 <= f1 within a margin."""
+        # Note: must be float compare
+        return float(f0 - f1) < self.margin
+
+    def gt(self, f0, f1):  # pylint: disable=C0103
+        """Check wether f0 > f1 within a margin."""
+        # to prevent recursion (through RoundedFloat):
+        return float(f0) - float(f1) > self.margin
+
+    def ge(self, f0, f1):  # pylint: disable=C0103
+        """Check wether f0 >= f1 within a margin."""
+        # Note: must be float compare
+        return float(f1 - f0) < self.margin
+
+    def to_str(self, f):
+        """Convert the supplied floating point to a string."""
+        return f2s(f, self.precision)
+
+
+# The variable below is the singleton object that can be used instead of StdFloatHandler()
+# Use the following construction:
+#     with FloatHandler(precision=7) as fh:
+#         fh.eq(0.12345, 0.12346)
+#         print(0.12345678)
+# Which will evaluate to True and print "0.1234568"
+# Or if you want to use the current precision:
+#     if FloatHandler.eq(0, 0.00000000000001):
+#         print("equal")
+FloatHandler = StdFloatHandler()  # pylint: disable=C0103
+
+
+# Considered using the standard Python decimal for this, but it seems that decimals are lost:
+# decimal.getcontext().prec = 7
+#     a = decimal.Decimal(1) / decimal.Decimal(3)
+#     a
+#     -> Decimal('0.3333333')
+#     decimal.getcontext().prec = 10
+#     a
+#     -> Decimal('0.3333333')
+#     float(a)
+#     -> 0.3333333
+# That isn't what I want. I want to keep all decimals, but the number should be represented with the
+# amount of precision specified (and also compared as if..)
+# Besides that:
+#     decimal.getcontext().prec = 7
+#     decimal.Decimal(1/3)
+#     --> Decimal('0.333333333333333314829616256247390992939472198486328125')
+# This would mean I have to update alld code to use decimals everywhere. I would like to be able to
+# use normal floats, but treat them as with a certain amount of decimals being significant.
+
+class RoundedFloat(float):
+    """Use this class for floats to simplify the notation from FloatHandler
+
+    This will keep all decimals for a floating point number, but only represent it as if a certain
+    amount of decimals are significant.
+
+    Example usage:
+        a = RoundedFloat(0.12345678)
+        b = RoundedFloat(0.12345679)
+        with FloatHandler(precision=7):
+            a == b
+            print(a)
+    Which will evaluate to True and print "0.1234568"
+    """
+    def __eq__(self, f):
+        """Check wether self == f within a margin."""
+        return FloatHandler().eq(self, f)
+
+    def __ne__(self, f):
+        """Check wether self != f within a margin."""
+        return not FloatHandler().eq(self, f)
+
+    def __lt__(self, f):
+        """Check wether self < f within a margin."""
+        return FloatHandler().lt(self, f)
+
+    def __le__(self, f):
+        """Check wether self <= f within a margin."""
+        return FloatHandler().le(self, f)
+
+    def __gt__(self, f):
+        """Check wether self > f within a margin."""
+        return FloatHandler().gt(self, f)
+
+    def __ge__(self, f):
+        """Check wether self >= f within a margin."""
+        return FloatHandler().ge(self, f)
+
+    def __add__(self, f):
+        """Make sure to keep type if possible."""
+        result = float(self) + f
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __truediv__(self, f):
+        """Make sure to keep type if possible."""
+        result = float(self) / f
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __mul__(self, f):
+        """Make sure to keep type if possible."""
+        result = float(self) * f
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __neg__(self):
+        """Make sure to keep type."""
+        return self.__class__(super().__neg__())
+
+    def __pos__(self):
+        """Make sure to keep type."""
+        return self.__class__(super().__pos__())
+
+    def __pow__(self, f):
+        """Make sure to keep type if possible."""
+        result = float(self) ** f
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __sub__(self, f):
+        """Make sure to keep type if possible."""
+        result = float(self) - f
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __rtruediv__(self, f):
+        """Make sure to keep type if possible."""
+        result = f / float(self)
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __rsub__(self, f):
+        """Make sure to keep type if possible."""
+        result = f - float(self)
+        if isinstance(result, float):
+            return self.__class__(result)
+        return result
+
+    def __repr__(self):
+        """String representation (also used for __str__)."""
+        return FloatHandler().to_str(self)
+
+    __radd__ = __add__
+    __rmul__ = __mul__
+
+# To save the floats in JSON as I want (ref https://stackoverflow.com/questions/54370322)
 json.encoder.c_make_encoder = None
-json.encoder.float = RoundingFloat
+json.encoder.float = RoundedFloat
 
 def _get_mat_rot(w, x, y, z, sign=1):
     """Return matrix for a quarternion that is supposed to represent a rotation
@@ -212,7 +377,7 @@ class Vec(tuple, base.Orbitit):
         for a, b in zip(self, w):
             if not r:
                 break
-            r = r and eq(a, b)
+            r = r and FloatHandler.eq(a, b)
         return r
 
     def __ne__(self, w):
@@ -319,35 +484,35 @@ class Vec4(Vec):
         try:
             q0 = self[0]/v[0]
         except ZeroDivisionError:
-            z0 = eq(self[0], 0.0)
+            z0 = FloatHandler.eq(self[0], 0.0)
         try:
             q1 = self[1]/v[1]
         except ZeroDivisionError:
-            z1 = eq(self[1], 0.0)
+            z1 = FloatHandler.eq(self[1], 0.0)
         try:
             q2 = self[2]/v[2]
         except ZeroDivisionError:
-            z2 = eq(self[2], 0.0)
+            z2 = FloatHandler.eq(self[2], 0.0)
         try:
             q3 = self[3]/v[3]
         except ZeroDivisionError:
-            z3 = eq(self[3], 0.0)
+            z3 = FloatHandler.eq(self[3], 0.0)
         if not z0:
-            return (z1 or eq(q0, q1)) and \
-                    (z2 or eq(q0, q2)) and \
-                    (z3 or eq(q0, q3))
+            return (z1 or FloatHandler.eq(q0, q1)) and \
+                    (z2 or FloatHandler.eq(q0, q2)) and \
+                    (z3 or FloatHandler.eq(q0, q3))
         if not z1:
-            return (z0 or eq(q1, q0)) and \
-                (z2 or eq(q1, q2)) and \
-                (z3 or eq(q1, q3))
+            return (z0 or FloatHandler.eq(q1, q0)) and \
+                (z2 or FloatHandler.eq(q1, q2)) and \
+                (z3 or FloatHandler.eq(q1, q3))
         if not z2:
-            return (z0 or eq(q2, q0)) and \
-                (z1 or eq(q2, q1)) and \
-                (z3 or eq(q2, q3))
+            return (z0 or FloatHandler.eq(q2, q0)) and \
+                (z1 or FloatHandler.eq(q2, q1)) and \
+                (z3 or FloatHandler.eq(q2, q3))
         if not z3:
-            return (z0 or eq(q3, q0)) and \
-                (z1 or eq(q3, q1)) and \
-                (z2 or eq(q3, q2))
+            return (z0 or FloatHandler.eq(q3, q0)) and \
+                (z1 or FloatHandler.eq(q3, q1)) and \
+                (z2 or FloatHandler.eq(q3, q2))
         # else z0 and z1 and z2 and z3, i.e self == v == (0, 0, 0, 0)
         return True
 
@@ -493,7 +658,6 @@ def _is_quat_pair(q):
 class Transform3(tuple, base.Orbitit):
     """Define a 3D tranformation using quarternions"""
     debug = False
-    eq_float_margin = _eq_float_margin
 
     def __new__(cls, quat_pair):
         """Create a new Transform object.
@@ -707,17 +871,17 @@ class Transform3(tuple, base.Orbitit):
     # *** ROTATION specific functions:
     def is_rot(self):
         """Return whether this tranform is a rotation."""
-        d = 1 - self.eq_float_margin
-        _margin = 1 - d * d
-        eq_square_norm = eq(self[1].squared_norm(), 1, margin=_margin)
+        d = 1 - FloatHandler.margin
+        with FloatHandler(1 - d * d) as fh:
+            eq_square_norm = fh.eq(self[1].squared_norm(), 1)
         return (
             self[1].conjugate() == self[0]
             and
             eq_square_norm
             and
-            (self[1].S() < 1 or eq(self[1].S(), 1))
+            (self[1].S() < 1 or FloatHandler.eq(self[1].S(), 1))
             and
-            (self[1].S() > -1 or eq(self[1].S(), -1))
+            (self[1].S() > -1 or FloatHandler.eq(self[1].S(), -1))
         )
 
     def __eq_rot(self, u):
@@ -730,7 +894,7 @@ class Transform3(tuple, base.Orbitit):
             (self[0] == -u[0] and self[1] == -u[1])
             or
             # half turn (equal angle) around opposite axes
-            (eq(self[0][0], 0) and self[0] == u[1])
+            (FloatHandler.eq(self[0][0], 0) and self[0] == u[1])
         )
 
     def __hash_rot(self):
@@ -786,24 +950,24 @@ class Transform3(tuple, base.Orbitit):
 
         # make unique: -pi < angle < pi
         if not (self._cache['angleRot'] < math.pi
-                or eq(self._cache['angleRot'], math.pi)):
+                or FloatHandler.eq(self._cache['angleRot'], math.pi)):
             self._cache['angleRot'] = self._cache['angleRot'] - \
                 2 * math.pi
         if not (self._cache['angleRot'] > -math.pi
-                or eq(self._cache['angleRot'], -math.pi)):
+                or FloatHandler.eq(self._cache['angleRot'], -math.pi)):
             self._cache['angleRot'] = self._cache['angleRot'] + \
                 2 * math.pi
 
         # make unique: 0 < angle < pi
-        if eq(self._cache['angleRot'], 0):
+        if FloatHandler.eq(self._cache['angleRot'], 0):
             self._cache['angleRot'] = 0.0
         if self._cache['angleRot'] < 0:
             self._cache['angleRot'] = -self._cache['angleRot']
             self._cache['axisRot'] = -self._cache['axisRot']
-        if eq(self._cache['angleRot'], math.pi):
+        if FloatHandler.eq(self._cache['angleRot'], math.pi):
             # if halfturn, make axis unique: make the first non-zero element
             # positive:
-            if eq(self._cache['axisRot'][0], 0):
+            if FloatHandler.eq(self._cache['axisRot'][0], 0):
                 self._cache['axisRot'] = Vec3(
                     [0.0,
                      self._cache['axisRot'][1],
@@ -811,16 +975,16 @@ class Transform3(tuple, base.Orbitit):
             if self._cache['axisRot'][0] < 0:
                 self._cache['axisRot'] = -self._cache['axisRot']
             elif self._cache['axisRot'][0] == 0:
-                if eq(self._cache['axisRot'][1], 0):
+                if FloatHandler.eq(self._cache['axisRot'][1], 0):
                     self._cache['axisRot'] = Vec3(
                         [0.0, 0.0, self._cache['axisRot'][2]])
                 if self._cache['axisRot'][1] < 0:
                     self._cache['axisRot'] = -self._cache['axisRot']
                 elif self._cache['axisRot'][1] == 0:
-                    # not valid axis: if eq(self._cache['axisRot'][2], 0):
+                    # not valid axis: if FloatHandler.eq(self._cache['axisRot'][2], 0):
                     if self._cache['axisRot'][2] < 0:
                         self._cache['axisRot'] = -self._cache['axisRot']
-        elif eq(self._cache['angleRot'], 0):
+        elif FloatHandler.eq(self._cache['angleRot'], 0):
             self._cache['angleRot'] = 0.0
             self._cache['axisRot'] = Vec3([1.0, 0.0, 0.0])
 
@@ -842,9 +1006,9 @@ class Transform3(tuple, base.Orbitit):
         return (
             self[1] == self[0]
             and
-            eq(self[1].squared_norm(), 1)
+            FloatHandler.eq(self[1].squared_norm(), 1)
             and
-            eq(self[1].S(), 0)
+            FloatHandler.eq(self[1].S(), 0)
         )
 
     def __eq_refl(self, u):
@@ -882,7 +1046,7 @@ class Transform3(tuple, base.Orbitit):
         if 'plane_normal' not in self._cache:
             self._cache['plane_normal'] = self[0].V()
             # make normal unique: make the first non-zero element positive:
-            if eq(self._cache['plane_normal'][0], 0):
+            if FloatHandler.eq(self._cache['plane_normal'][0], 0):
                 self._cache['plane_normal'] = Vec3(
                     [0.0,
                      self._cache['plane_normal'][1],
@@ -891,7 +1055,7 @@ class Transform3(tuple, base.Orbitit):
                 self._cache['plane_normal'] = -self._cache[
                     'plane_normal']
             elif self._cache['plane_normal'][0] == 0:
-                if eq(self._cache['plane_normal'][1], 0):
+                if FloatHandler.eq(self._cache['plane_normal'][1], 0):
                     self._cache['plane_normal'] = Vec3(
                         [0.0, 0.0, self._cache['plane_normal'][2]])
                 if self._cache['plane_normal'][1] < 0:
@@ -899,7 +1063,7 @@ class Transform3(tuple, base.Orbitit):
                         'plane_normal']
                 elif self._cache['plane_normal'][1] == 0:
                     # not needed (since not valid axis):
-                    # if eq(self._cache['plane_normal'][2], 0):
+                    # if FloatHandler.eq(self._cache['plane_normal'][2], 0):
                     if self._cache['plane_normal'][2] < 0:
                         self._cache['plane_normal'] = -self._cache[
                             'plane_normal']
@@ -1194,7 +1358,10 @@ class Transform4(tuple):
 
     def is_rot(self):
         """Whether self represents a rotation"""
-        return eq(self[0].squared_norm(), 1) and eq(self[1].squared_norm(), 1)
+        return (
+            FloatHandler.eq(self[0].squared_norm(), 1)
+            and FloatHandler.eq(self[1].squared_norm(), 1)
+        )
 
     def __angle_rot(self):
         """Assuming the object represents a rotation, return the angle"""
@@ -1223,8 +1390,7 @@ class Rot4(Transform4):
         """
         assert_str = "A 4D rotation is represented by 2 orthogonal axis: "
         assert len(axialPlane) == 2, assert_str + str(axialPlane)
-        assert eq(axialPlane[0] * axialPlane[1], 0), \
-            assert_str + str(axialPlane)
+        assert FloatHandler.eq(axialPlane[0] * axialPlane[1], 0), assert_str + str(axialPlane)
         # Do not require Quats for the axial plane: this is a implementation
         # choice, which should be abstracted from.
         axialPlane = (Quat(axialPlane[0]), Quat(axialPlane[1]))
@@ -1240,8 +1406,8 @@ class Rot4(Transform4):
         z = axialPlane[1].normalise()
         _q0 = y * z.conjugate()
         _q1 = y.conjugate() * z
-        assert eq(_q0.scalar(), 0), assert_str + str(_q0.scalar())
-        assert eq(_q1.scalar(), 0), assert_str + str(_q1.scalar())
+        assert FloatHandler.eq(_q0.scalar(), 0), assert_str + str(_q0.scalar())
+        assert FloatHandler.eq(_q1.scalar(), 0), assert_str + str(_q1.scalar())
         alpha = angle / 2
         sina = math.sin(alpha)
         cosa = math.cos(alpha)
@@ -1285,7 +1451,7 @@ def find_orthogonal_plane(plane):
         """
         zero_index = -1
         for i in range(s, 4):
-            if eq(v[i], 0):
+            if FloatHandler.eq(v[i], 0):
                 zero_index = i
                 break
         return zero_index
@@ -1514,7 +1680,7 @@ class Mat(list):
         r = 0
         sign = 1
         for i in range(self.cols):
-            if not eq(self[0][i], 0):
+            if not FloatHandler.eq(self[0][i], 0):
                 r += sign * self[0][i] * self.minor(0, i)
             sign = -sign
         return r

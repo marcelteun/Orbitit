@@ -423,7 +423,7 @@ class SimpleShape:
         Vs3D = []
         for v in Vs4D:
             wV = v[3]
-            if not geom_3d.eq(this.wCamera, wV):
+            if not geomtypes.FloatHandler.eq(this.wCamera, wV):
                 scale = this.wCameraDistance / (this.wCamera - wV)
                 Vs3D.append([scale * v[0], scale * v[1], scale * v[2]])
             else:
@@ -474,7 +474,8 @@ class SimpleShape:
                 cell.gl_draw()
 
     def glDrawSingleRemoveUnscaledEdges(this):
-        isScaledDown = not geom_3d.eq(this.c.scale, 1.0, margin = 0.001)
+        with geomtypes.FloatHandler(3) as fh:
+            isScaledDown = not fh.eq(this.c.scale, 1.0)
         if not this.projectedTo3D:
             try:
                 del this.cell
@@ -646,10 +647,9 @@ class SimpleShape:
             face_indices=[],
             scaling=1,
             precision=7,
-            margin=1.0e5*geom_3d.default_float_margin,
             pageSize=PS.PageSizeA4,
         ):
         if this.mapToSingeShape:
-            return this.cell.to_postscript(face_indices, scaling, precision, margin, pageSize)
+            return this.cell.to_postscript(face_indices, scaling, precision, pageSize)
         else:
             assert False, 'to_postscript not supported for mapping to split draw'

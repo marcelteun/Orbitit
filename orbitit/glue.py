@@ -102,7 +102,6 @@ def mergeVs(vs, fs, precision=12):
     replace_by = [-1 for v in vs]
     # first build up an array that expresses for each vertex by which vertex it
     # can be replaced.
-    geomtypes.set_eq_float_margin(math.pow(10, -precision))
     logging.info("Find multiple occurences of vertices")
     log_handler = logging.getLogger().handlers[0]
     end_bac, log_handler.terminator = log_handler.terminator, '\r'
@@ -115,7 +114,6 @@ def mergeVs(vs, fs, precision=12):
                 replaced = True
                 replace_by[i] = j
                 break
-    geomtypes.reset_eq_float_margin()
     # Apply the changes now. Don't delete the vertices, since that means
     # re-indexing
     log_handler.terminator = end_bac

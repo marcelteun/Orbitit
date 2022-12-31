@@ -248,10 +248,9 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
                 ) * this.modelRepos
             glLoadMatrixd(this.Moriginal)
             glScalef(this.currentScale, this.currentScale, this.currentScale)
-            geomtypes.set_eq_float_margin(1.0e-14)
-            angle = geom_3d.Rad2Deg*this.movingRepos.angle()
-            axis  = this.movingRepos.axis()
-            geomtypes.reset_eq_float_margin()
+            with geomtypes.FloatHandler(14):
+                angle = geom_3d.Rad2Deg * this.movingRepos.angle()
+                axis  = this.movingRepos.axis()
             glRotatef(angle, axis[0], axis[1], axis[2])
 
         if this.z != this.zBac:

@@ -504,7 +504,14 @@ class RegularHeptagon:
             FoldMethod.MIXED: self.fold_mixed,
             FoldMethod.G: self.fold_g,
         }
-        method[fold](a0, b0, a1, b1, keep_v0, rotate)
+        method[fold](
+            geomtypes.RoundedFloat(a0),
+            geomtypes.RoundedFloat(b0),
+            geomtypes.RoundedFloat(a1),
+            geomtypes.RoundedFloat(b1),
+            keep_v0,
+            rotate,
+        )
 
     def fold_parallel(self, a, b, _=None, __=None, keep_v0=True, rotate=0):  # pylint: disable=C0103
         """Fold around the 2 parallel diagonals, two options
@@ -745,7 +752,7 @@ class RegularHeptagon:
             v1v3_axis = Vec(v3 - self.vs_org[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             v2 = v1v3 + r * (v2_tmp - v1v3)
-            if not geom_3d.eq(b0, b1):
+            if b0 != b1:
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v4v6 = (v4 + self.vs_org[6]) / 2
@@ -770,7 +777,7 @@ class RegularHeptagon:
             v1v3_axis = Vec(self.vs_org[3] - self.vs_org[1])
             r = Rot(axis=v1v3_axis, angle=b0)
             v2 = v1v3 + r * (self.vs_org[2] - v1v3)
-            if geom_3d.eq(b0, b1):
+            if b0 == b1:
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v4v6 = (self.vs_org[4] + self.vs_org[6]) / 2
@@ -813,7 +820,7 @@ class RegularHeptagon:
         self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0, 0, 2, 2, 5, 5, 0]
         rot0_2 = Rot(axis=self.vs_org[2] - self.vs_org[0], angle=b0)
         v1 = rot0_2 * self.vs_org[1]
-        if geom_3d.eq(b0, b1):
+        if b0 == b1:
             v6 = Vec([-v1[0], v1[1], v1[2]])
         else:
             rot5_0 = Rot(axis=self.vs_org[0] - self.vs_org[5], angle=b1)
@@ -1513,9 +1520,9 @@ class RegularHeptagon:
         v2_tmp = rot0_3 * self.vs_org[2]
         rot1_3 = Rot(axis=self.vs_org[3] - v1, angle=b0)
         v2 = rot1_3 * (v2_tmp - v1) + v1
-        if geom_3d.eq(a0, a1):
+        if a0 == a1:
             v6 = Vec([-v1[0], v1[1], v1[2]])
-            if geom_3d.eq(b0, b1):
+            if b0 == b1:
                 v5 = Vec([-v2[0], v2[1], v2[2]])
             else:
                 v5 = Vec([-v2_tmp[0], v2_tmp[1], v2_tmp[2]])

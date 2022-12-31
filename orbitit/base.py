@@ -4,11 +4,11 @@ from abc import ABC, abstractclassmethod, abstractproperty
 import json
 
 # Any class support from_json should update this: mapping a string to a class
-json_to_class = {
+json_to_class = {  # pylint: disable=C0103
 }
 
 # Any class support to_json should update this: mapping a class to a string representation
-class_to_json = {
+class_to_json = {  # pylint: disable=C0103
 }
 
 class Orbitit(ABC):
@@ -53,6 +53,15 @@ class Orbitit(ABC):
         raise NotImplementedError
 
 
+class Singleton(type):
+    """Way of defining singleton classes."""
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 def find_module_class_name(c, m):
     """ find the class from this module providing this function
 
@@ -67,11 +76,10 @@ def find_module_class_name(c, m):
         """A recursive function that will return the class name."""
         if c.__module__ == m:
             return c.__name__
-        else:
-            for b in c.__bases__:
-                n = rec(b)
-                if n != None:
-                    return n
+        for b in c.__bases__:
+            n = rec(b)
+            if n is not None:
+                return n
         return None
 
     return rec(c)
@@ -109,12 +117,13 @@ def add_std_arguments_for_generating_models(parser, models_list, add_separate=Tr
         type=int,
         help="Specify number of decimals to use when saving files. Negative numbers are ignored",
     )
-    parser.add_argument(
-        "--seperate-orbits", "-s",
-        action='store_true',
-        help="Also save the seperate parts consisting of one kind of polygon described by one "
-        "orbit. This is always saved in JSON.",
-    )
+    if add_separate:
+        parser.add_argument(
+            "--seperate-orbits", "-s",
+            action='store_true',
+            help="Also save the seperate parts consisting of one kind of polygon described by one "
+            "orbit. This is always saved in JSON.",
+        )
     parser.add_argument(
         "--json", "-j",
         action='store_true',
