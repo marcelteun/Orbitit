@@ -339,13 +339,6 @@ class Line:
         self.p = p
         self.v = v
 
-    @staticmethod
-    def _factor_in_segment(t, margin):
-        """Check whether t is in [0, 1] with a specified margin."""
-        return (
-            t is not None and (t >= 0 or eq(t, 0, margin)) and (t <= 1 or eq(t, 1, margin))
-        )
-
     def getPoint(self, t):
         """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)"""
         if t is not None:
@@ -650,31 +643,6 @@ class Line3D(Line):
     def isParallel2Line(self, L):
         # p82 of E.Lengyel
         return self.Discriminant2Line(L) == 0
-
-    def intersectWithLine(self, L, check=True, margin=default_float_margin):
-        D = self.Discriminant2Line(L)
-        if D == 0:
-            return None
-        dx = (L.p - self.p) * self.v
-        dy = (self.p - L.p) * L.v
-        vpvq = self.v * L.v
-        s = ((L.v * L.v) * dx + vpvq * dy) / D
-        if self.isSegment and not self._factor_in_segment(s, margin):
-            result = None
-        else:
-            result = self.getPoint(s)
-            if check:
-                t = (vpvq * dx + (self.v * self.v) * dy) / D
-                if L.isSegment and not L._factor_in_segment(t, margin):
-                    result = None
-                else:
-                    checkWith = L.getPoint(t)
-                    if not vec_eq(result, checkWith, margin=margin):
-                        result = None
-                    else:
-                        # for a better precision:
-                        result = (result + checkWith) / 2
-        return result
 
     def __str__(self):
         precision = self.str_precision
