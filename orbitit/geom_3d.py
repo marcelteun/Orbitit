@@ -1814,14 +1814,14 @@ class SimpleShape(base.Orbitit):
                 es = []
                 face = self.fs[i]
                 # find out norm
-                logging.debug("face idx: %d", face)
+                logging.debug("face idx: %s", face)
                 face_pl = facePlane(self.vs, face)
                 if face_pl is None:
                     continue  # not a face
                 norm = face_pl.N
                 if norm is None:
                     continue  # not a face.
-                logging.debug("norm before %f", norm)
+                logging.debug("norm before %s", norm)
                 # Find out how to rotate the faces such that the norm of the base face
                 # is parallel to the z-axis to work with a 2D situation:
                 # Rotate around the cross product of z-axis and norm
@@ -1839,7 +1839,7 @@ class SimpleShape(base.Orbitit):
                 if not to2DAngle == 0:
                     logging.debug("to2DAngle: %f", to2DAngle)
                     to2Daxis = norm.cross(zAxis)
-                    logging.debug("to2Daxis: %f", to2Daxis)
+                    logging.debug("to2Daxis: %s", to2Daxis)
                     Mrot = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
                     # add vertices to vertex array
                     for v in self.vs:
