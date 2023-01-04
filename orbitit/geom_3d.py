@@ -729,34 +729,6 @@ class Plane:
         )
 
 
-def get_face_plane(vs, face):
-    """
-    Define a Plane object from a face
-
-    vs: the 3D vertex coordinates
-    face: the indices in vs that form the face.
-    Returns None if the vertices do not define a plane.
-    """
-    assert len(face) > 2, "a face should at least be a triangle"
-    plane = None
-    planeFound = False
-    fi_0 = 1
-    fi_1 = 2
-    while not planeFound:
-        try:
-            plane = Plane(vs[face[0]], vs[face[fi_0]], vs[face[fi_1]])
-            planeFound = True
-        except ValueError or AssertionError:
-            fi_1 += 1
-            if fi_1 >= len(face):
-                fi_0 += 1
-                fi_1 = fi_0 + 1
-                if fi_1 >= len(face):
-                    logging.info("Ignoring degenerate face (line or point?)")
-                    break
-    return plane
-
-
 TRI_CW = 1  # clockwise triangle vertices to get outer normal
 TRI_CCW = 2  # counter-clockwise triangle vertices to get outer normal
 TRI_OUT = 3  # the normal pointing away from the origin is the normal
@@ -1758,6 +1730,34 @@ class SimpleShape(base.Orbitit):
         s = w("# END")
         return s
 
+    @staticmethod
+    def _get_face_plane(vs, face):
+        """
+        Define a Plane object from a face
+
+        vs: the 3D vertex coordinates
+        face: the indices in vs that form the face.
+        Returns None if the vertices do not define a plane.
+        """
+        assert len(face) > 2, "a face should at least be a triangle"
+        plane = None
+        plane_found = False
+        fi_0 = 1
+        fi_1 = 2
+        while not plane_found:
+            try:
+                plane = Plane(vs[face[0]], vs[face[fi_0]], vs[face[fi_1]])
+                plane_found = True
+            except ValueError or AssertionError:
+                fi_1 += 1
+                if fi_1 >= len(face):
+                    fi_0 += 1
+                    fi_1 = fi_0 + 1
+                    if fi_1 >= len(face):
+                        logging.info("Ignoring degenerate face (line or point?)")
+                        break
+        return plane
+
     def _merge_faces_sharing_plane(self, faces):
         """Merge face lying in one plane to one compound of faces.
 
@@ -1825,7 +1825,7 @@ class SimpleShape(base.Orbitit):
         faces = []
         for i in face_indices:
             face = self.fs[i]
-            face_plane = get_face_plane(self.vs, face)
+            face_plane = self._get_face_plane(self.vs, face)
             if face_plane is None:
                 continue  # not a face
             if face_plane.N is None:
@@ -1837,7 +1837,7 @@ class SimpleShape(base.Orbitit):
         for i, (compound_face, face_plane) in enumerate(compound_faces):
             logging.debug("checking face %d (of %d)", i + 1, len(compound_faces))
             vs = []
-            pointsIn2D = []
+            points_2d = []
             es = []
             face = self.fs[i]
             logging.debug(
@@ -1850,83 +1850,83 @@ class SimpleShape(base.Orbitit):
             # is parallel to the z-axis to work with a 2D situation:
             # Rotate around the cross product of z-axis and norm
             # with an angle equal to the dot product of the normalised vectors.
-            zAxis = VEC(0, 0, 1)
-            to2DAngle = geomtypes.RoundedFloat(math.acos(zAxis * face_plane.N))
+            z_axis = VEC(0, 0, 1)
+            to_2d_angle = geomtypes.RoundedFloat(math.acos(z_axis * face_plane.N))
             if (
-                to2DAngle == 2 * math.pi
-                or to2DAngle == -2 * math.pi
-                or to2DAngle == math.pi
-                or to2DAngle == -math.pi
+                to_2d_angle == 2 * math.pi
+                or to_2d_angle == -2 * math.pi
+                or to_2d_angle == math.pi
+                or to_2d_angle == -math.pi
             ):
-                to2DAngle = geomtypes.RoundedFloat(0.0)
-            if to2DAngle != 0:
-                logging.debug("to2DAngle: %f", to2DAngle)
-                to2Daxis = face_plane.N.cross(zAxis)
-                logging.debug("to2Daxis: %s", to2Daxis)
-                rot_mat = geomtypes.Rot3(angle=to2DAngle, axis=to2Daxis)
+                to_2d_angle = geomtypes.RoundedFloat(0.0)
+            if to_2d_angle != 0:
+                logging.debug("to_2d_angle: %f", to_2d_angle)
+                to_2d_axis = face_plane.N.cross(z_axis)
+                logging.debug("to_2d_axis: %s", to_2d_axis)
+                rot_mat = geomtypes.Rot3(angle=to_2d_angle, axis=to_2d_axis)
                 # add vertices to vertex array
                 for v in self.vs:
                     vs.append(rot_mat * v)
-                    pointsIn2D.append([vs[-1][0], vs[-1][1]])
+                    points_2d.append([vs[-1][0], vs[-1][1]])
             else:
                 vs = self.vs[:]
-                pointsIn2D = [[v[0], v[1]] for v in self.vs]
+                points_2d = [[v[0], v[1]] for v in self.vs]
             # set z-value for the z-plane, ie plane of intersection
             # TODO: better would be to take the average of all z coords
-            zBaseFace = vs[compound_face[0][0]][2]
-            logging.debug("zBaseFace = %s", zBaseFace)
+            z_base_face = vs[compound_face[0][0]][2]
+            logging.debug("z_base_face = %s", z_base_face)
             # get new face plane after rotating
-            basePlane = get_face_plane(vs, compound_face[0])
-            logging.debug("basePlane %s", basePlane)
+            base_plane = self._get_face_plane(vs, compound_face[0])
+            logging.debug("base_plane %s", base_plane)
             # split faces into
-            # 1. facets that ly in the plane: baseFacets, the other facets
+            # 1. facets that ly in the plane: base_facets, the other facets
             #    will be intersected with these.
             # and
             # 2. facets that share one line (segment) with this plane: intersectingFacets
             #    Only save the line segment data of these.
-            baseFacets = []
-            Lois = []
-            for intersectingFacet in self.fs:
+            base_facets = []
+            intersection_lines = []
+            for intersecting_facet in self.fs:
                 logging.debug(
                     "Intersecting face[%d] = %s with the compound face",
-                    self.fs.index(intersectingFacet),
-                    intersectingFacet,
+                    self.fs.index(intersecting_facet),
+                    intersecting_facet,
                 )
-                intersectingPlane = get_face_plane(vs, intersectingFacet)
-                facesShareAnEdge = False
+                intersecting_plane = self._get_face_plane(vs, intersecting_facet)
+                face_share_an_edge = False
                 # draw whole face if they are in the same plane
-                if intersectingPlane == basePlane:
-                    baseFacets.append(intersectingFacet)
-                    es.append(intersectingFacet)
+                if intersecting_plane == base_plane:
+                    base_facets.append(intersecting_facet)
+                    es.append(intersecting_facet)
                     logging.debug("Intersecting face shares the plane")
-                    facesShareAnEdge = True
+                    face_share_an_edge = True
                 else:
                     # Check whether they share an edge
-                    l = len(intersectingFacet)
+                    l = len(intersecting_facet)
                     for p in range(l):
                         for face in compound_face:
-                            if intersectingFacet[p] in face:
+                            if intersecting_facet[p] in face:
                                 q = p + 1
                                 if q == l:
                                     q = 0
-                                if intersectingFacet[q] in face:
-                                    pIndex = face.index(intersectingFacet[p])
-                                    qIndex = face.index(intersectingFacet[q])
+                                if intersecting_facet[q] in face:
+                                    pIndex = face.index(intersecting_facet[p])
+                                    qIndex = face.index(intersecting_facet[q])
                                     delta = abs(pIndex - qIndex)
                                     if (delta == 1) or (delta == len(face) - 1):
-                                        facesShareAnEdge = True
+                                        face_share_an_edge = True
                                         break
 
                 # line of intersection:
-                if not facesShareAnEdge:
-                    Loi3D = basePlane.intersectWithPlane(intersectingPlane)
-                if facesShareAnEdge:
+                if not face_share_an_edge:
+                    Loi3D = base_plane.intersectWithPlane(intersecting_plane)
+                if face_share_an_edge:
                     logging.debug("Intersecting face shares an edge")
                     pass
                 elif Loi3D is None:
                     logging.debug("No intersection for face")
                 else:  # Loi3D is not None:
-                    logging.debug("intersectingPlane %s", intersectingPlane)
+                    logging.debug("intersecting_plane %s", intersecting_plane)
                     logging.debug("Loi3D %s", Loi3D)
                     # TODO: Why is the margin increased here? Cannot we go back?
                     with geomtypes.FloatHandler(min(1, geomtypes.FloatHandler().precision + 2)):
@@ -1934,32 +1934,31 @@ class SimpleShape(base.Orbitit):
                             "all intersection lines should be paralell to z = 0, "
                             f"but z varies with {Loi3D.v[2]} (margin: {FloatHandler.margin})"
                         )
-                        assert geomtypes.RoundedFloat(Loi3D.p[2]) == zBaseFace, (
-                            f"all intersection lines should ly on z=={zBaseFace}, "
-                            f"but z differs {zBaseFace - Loi3D.p[2]} "
+                        assert geomtypes.RoundedFloat(Loi3D.p[2]) == z_base_face, (
+                            f"all intersection lines should ly on z=={z_base_face}, "
+                            f"but z differs {z_base_face - Loi3D.p[2]} "
                             f"(margin: {FloatHandler.margin})"
                         )
                     # loi2D = lineofintersection
                     loi2D = Line2D(
                         [Loi3D.p[0], Loi3D.p[1]], v=[Loi3D.v[0], Loi3D.v[1]]
                     )
-                    # now find the segment of loi2D within the intersectingFacet.
+                    # now find the segment of loi2D within the intersecting_facet.
                     # TODO The next call is strange. It is a call to a Line2D
                     # intersecting a 3D facet. It should be a mode dedicated
                     # call. The line is in the plane of the facet and we want to
                     # know where it shares edges.
-                    pInLoiFacet = loi2D.intersectWithFacet(vs, intersectingFacet, Loi3D.p[2])
+                    pInLoiFacet = loi2D.intersectWithFacet(vs, intersecting_facet, Loi3D.p[2])
                     logging.debug("pInLoiFacet %s", pInLoiFacet)
                     if pInLoiFacet != []:
-                        Lois.append([loi2D, pInLoiFacet, Loi3D.p[2]])
-                        # if debug: Lois[-1].append(self.fs.index(intersectingFacet))
+                        intersection_lines.append([loi2D, pInLoiFacet, Loi3D.p[2]])
             # for each intersecting line segment:
-            for loiData in Lois:
+            for loiData in intersection_lines:
                 loi2D = loiData[0]
                 pInLoiFacet = loiData[1]
                 logging.debug("phase 2: check iFacet nr: %d", loiData[-1])
-                # Now Intersect loi with the baseFacets.
-                for baseFacet in baseFacets:
+                # Now Intersect loi with the base_facets.
+                for baseFacet in base_facets:
                     pInLoiBase = loi2D.intersectWithFacet(vs, baseFacet, loiData[2])
                     logging.debug("pInLoiBase %s", pInLoiBase)
                     # Now combine the results of pInLoiFacet and pInLoiBase:
@@ -1969,11 +1968,11 @@ class SimpleShape(base.Orbitit):
                     baseSegmentNr = 0
                     nextBaseSeg = True
                     nextFacetSeg = True
-                    no_of_vs = len(pointsIn2D)
+                    no_of_vs = len(points_2d)
 
                     def addPsLine(t0, t1, loi2D, no_of_vs):
-                        pointsIn2D.append(loi2D.getPoint(t0))
-                        pointsIn2D.append(loi2D.getPoint(t1))
+                        points_2d.append(loi2D.getPoint(t0))
+                        points_2d.append(loi2D.getPoint(t1))
                         es.append([no_of_vs, no_of_vs + 1])
                         return no_of_vs + 2
 
@@ -2018,7 +2017,7 @@ class SimpleShape(base.Orbitit):
                             baseSegmentNr += 1
                         if nextFacetSeg:
                             facetSegmentNr += 1
-            ps_doc.addLineSegments(pointsIn2D, es, scaling, precision)
+            ps_doc.addLineSegments(points_2d, es, scaling, precision)
 
         return ps_doc.toStr()
 
