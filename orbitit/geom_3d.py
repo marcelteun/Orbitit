@@ -406,7 +406,7 @@ class Line2D(Line):
         return self.getPoint(self.intersectLineGetFactor(l))
 
     # FIXME: this is a weird method to have here.
-    def intersectWithFacet(
+    def intersect_with_face(
         self,
         FacetVs,
         iFacet,
@@ -1878,7 +1878,7 @@ class SimpleShape(base.Orbitit):
             # intersecting a 3D facet. It should be a mode dedicated
             # call. The line is in the plane of the facet and we want to
             # know where it shares edges.
-            line_factors = line_2d.intersectWithFacet(vs, face, z)
+            line_factors = line_2d.intersect_with_face(vs, face, z)
             logging.debug("line factors %s", line_factors)
             if line_factors != []:
                 return (line_2d, line_factors)
@@ -1902,14 +1902,13 @@ class SimpleShape(base.Orbitit):
         logging.debug("hor_plane %s", hor_plane)
 
         # split faces into
-        # 1. facets that ly in the plane: base_facets, the other facets
-        #    will be intersected with these.
-        # and
-        # 2. facets that share one line (segment) with this plane: intersectingFacets
-        #    Only save the line segment data of these.
+        # 1. faces that ly in the plane: faces_to_intersect_with, i.e. the other faces will be
+        #    intersected with these.
+        # 2. faces that share line segment(s) with this plane: intersection faces. Only save the
+        #    line segments data of these.
         points = [[v[0], v[1]] for v in vs]
         polygons = []
-        base_facets = []
+        faces_to_intersect_with = []
         intersection_lines = []
         for intersecting_face in self.fs:
             logging.debug(
@@ -1922,7 +1921,7 @@ class SimpleShape(base.Orbitit):
             calc_intersection = True
             # check whether the intersection face is in the plane
             if intersecting_plane == hor_plane:
-                base_facets.append(intersecting_face)
+                faces_to_intersect_with.append(intersecting_face)
                 polygons.append(intersecting_face)
                 logging.debug("Intersecting face shares the plane")
                 calc_intersection = False
@@ -1954,39 +1953,39 @@ class SimpleShape(base.Orbitit):
                     intersection_lines.append(intersection_line)
 
         # for each intersecting line segment:
-        for loiData in intersection_lines:
-            loi2D = loiData[0]
-            pInLoiFacet = loiData[1]
-            logging.debug("phase 2: check iFacet nr: %d", loiData[-1])
-            # Now Intersect loi with the base_facets.
-            for baseFacet in base_facets:
-                pInLoiBase = loi2D.intersectWithFacet(vs, baseFacet, z)
-                logging.debug("pInLoiBase %s", pInLoiBase)
-                # Now combine the results of pInLoiFacet and pInLoiBase:
+        for i, (line_2d, line_factors_0) in enumerate(intersection_lines):
+            logging.debug("phase 2: check intersection %d", i)
+            # line_2d: the line object representing the line of intersection
+            # line_factors_0: the line segments (factors) valid for the intersecting face
+            # line_factors_1: the line segments (factors) valid for the face to intersect with
+            for face_to_intersect_with in faces_to_intersect_with:
+                line_factors_1 = line_2d.intersect_with_face(vs, face_to_intersect_with, z)
+                logging.debug("line_factors_1 %s", line_factors_1)
+                # Now combine the results of line_factors_0 and line_factors_1:
                 # Only keep intersections that fall within 2 segments for
-                # both pInLoiFacet and pInLoiBase.
+                # both line_factors_0 and line_factors_1.
                 facetSegmentNr = 0
                 baseSegmentNr = 0
                 nextBaseSeg = True
                 nextFacetSeg = True
                 no_of_points = len(points)
 
-                def addPsLine(t0, t1, loi2D, no_of_points):
-                    points.append(loi2D.getPoint(t0))
-                    points.append(loi2D.getPoint(t1))
+                def addPsLine(t0, t1, line_2d, no_of_points):
+                    points.append(line_2d.getPoint(t0))
+                    points.append(line_2d.getPoint(t1))
                     polygons.append([no_of_points, no_of_points + 1])
                     return no_of_points + 2
 
-                while (baseSegmentNr < len(pInLoiBase) // 2) and (
-                    facetSegmentNr < len(pInLoiFacet) // 2
+                while (baseSegmentNr < len(line_factors_1) // 2) and (
+                    facetSegmentNr < len(line_factors_0) // 2
                 ):
                     if nextBaseSeg:
-                        b0 = geomtypes.RoundedFloat(pInLoiBase[2 * baseSegmentNr])
-                        b1 = geomtypes.RoundedFloat(pInLoiBase[2 * baseSegmentNr + 1])
+                        b0 = geomtypes.RoundedFloat(line_factors_1[2 * baseSegmentNr])
+                        b1 = geomtypes.RoundedFloat(line_factors_1[2 * baseSegmentNr + 1])
                         nextBaseSeg = False
                     if nextFacetSeg:
-                        f0 = geomtypes.RoundedFloat(pInLoiFacet[2 * facetSegmentNr])
-                        f1 = geomtypes.RoundedFloat(pInLoiFacet[2 * facetSegmentNr + 1])
+                        f0 = geomtypes.RoundedFloat(line_factors_0[2 * facetSegmentNr])
+                        f1 = geomtypes.RoundedFloat(line_factors_0[2 * facetSegmentNr + 1])
                         nextFacetSeg = False
                     # Note that always holds f0 < f1 and b0 < b1
                     if f1 <= b0:
@@ -1999,21 +1998,21 @@ class SimpleShape(base.Orbitit):
                         if f1 <= b1:
                             # f0  b0 - f1  b1
                             nextFacetSeg = True
-                            no_of_points = addPsLine(b0, f1, loi2D, no_of_points)
+                            no_of_points = addPsLine(b0, f1, line_2d, no_of_points)
                         else:
                             # f0  b0 - b1  f1
                             nextBaseSeg = True
-                            no_of_points = addPsLine(b0, b1, loi2D, no_of_points)
+                            no_of_points = addPsLine(b0, b1, line_2d, no_of_points)
                     else:
                         # b0<f0<b1 (and b0<f1)
                         if f1 <= b1:
                             # b0  f0 - f1  b1
                             nextFacetSeg = True
-                            no_of_points = addPsLine(f0, f1, loi2D, no_of_points)
+                            no_of_points = addPsLine(f0, f1, line_2d, no_of_points)
                         else:
                             # b0  f0 - b1  f1
                             nextBaseSeg = True
-                            no_of_points = addPsLine(f0, b1, loi2D, no_of_points)
+                            no_of_points = addPsLine(f0, b1, line_2d, no_of_points)
                     if nextBaseSeg:
                         baseSegmentNr += 1
                     if nextFacetSeg:
