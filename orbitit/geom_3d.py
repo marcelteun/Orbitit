@@ -1763,7 +1763,7 @@ class SimpleShape(base.Orbitit):
             try:
                 plane = Plane(vs[face[0]], vs[face[fi_0]], vs[face[fi_1]])
                 plane_found = True
-            except ValueError or AssertionError:
+            except (ValueError, AssertionError):
                 fi_1 += 1
                 if fi_1 >= len(face):
                     fi_0 += 1
@@ -1826,12 +1826,7 @@ class SimpleShape(base.Orbitit):
         # with an angle equal to the dot product of the normalised vectors.
         z_axis = VEC(0, 0, 1)
         to_2d_angle = geomtypes.RoundedFloat(math.acos(z_axis * face_plane.N))
-        if (
-            to_2d_angle == 2 * math.pi
-            or to_2d_angle == -2 * math.pi
-            or to_2d_angle == math.pi
-            or to_2d_angle == -math.pi
-        ):
+        if (to_2d_angle in (2 * math.pi, -2 * math.pi, math.pi, -math.pi)):
             to_2d_angle = geomtypes.RoundedFloat(0.0)
         if to_2d_angle != 0:
             logging.debug("to_2d_angle: %f", to_2d_angle)
@@ -1845,7 +1840,8 @@ class SimpleShape(base.Orbitit):
         return vs
 
     # TODO: Instead of face, vs perhaps you should just have a list of vertices for face
-    def _calc_intersection(self, face, face_plane, hor_plane, z, vs):
+    @staticmethod
+    def _calc_intersection(face, face_plane, hor_plane, z, vs):
         """Calculate the intersections for a face with a horizontal plane
 
         The result will consist of line segments that are part of the face. For a convex face there
@@ -1868,12 +1864,12 @@ class SimpleShape(base.Orbitit):
             logging.debug("intersecting horizontal plane %s with %s", face_plane, line_3d)
             assert geomtypes.RoundedFloat(line_3d.v[2]) == 0, (
                 "all intersection lines should be paralell to z = 0, "
-                f"but z varies with {line_3d.v[2]} (margin: {FloatHandler.margin})"
+                f"but z varies with {line_3d.v[2]} (margin: {geomtypes.FloatHandler.margin})"
             )
             assert geomtypes.RoundedFloat(line_3d.p[2]) == z, (
                 f"all intersection lines should ly on z=={z}, "
                 f"but z differs {z - line_3d.p[2]} "
-                f"(margin: {FloatHandler.margin})"
+                f"(margin: {geomtypes.FloatHandler.margin})"
             )
 
             line_2d = Line2D([line_3d.p[0], line_3d.p[1]], v=[line_3d.v[0], line_3d.v[1]])
@@ -1888,7 +1884,8 @@ class SimpleShape(base.Orbitit):
                 return (line_2d, line_factors)
         return ()
 
-    def _combine_intersections_to_faces(self, intersection_lines, faces_to_intersect_with, z, vs):
+    @staticmethod
+    def _combine_intersections_to_faces(intersection_lines, faces_to_intersect_with, z, vs):
         """Combine intersection segments with faces to intersect with.
 
         With the line segments that are valid segments for for the face(s) that are intersecting the
@@ -1979,9 +1976,9 @@ class SimpleShape(base.Orbitit):
             ly in the horizontal plane (with the orientatoin specified by vs)
         z: the z-value of the horizontal plane to intersect with.
 
-        return: a tuple of a points list and a polygons list. Each point consists of an X, Y coordinate in the
-            plane, while a polygon is a list of indinces in the points list. A polygon might also
-            just be an egde.
+        return: a tuple of a points list and a polygons list. Each point consists of an X, Y
+            coordinate in the plane, while a polygon is a list of indinces in the points list. A
+            polygon might also just be an egde.
         """
         hor_plane = PlaneFromNormal(VEC(0, 0, 1), VEC(0, 0, z))
         logging.debug("hor_plane %s", hor_plane)
@@ -2020,10 +2017,10 @@ class SimpleShape(base.Orbitit):
                             if q == l:
                                 q = 0
                             if intersecting_face[q] in face:
-                                pIndex = face.index(intersecting_face[p])
-                                qIndex = face.index(intersecting_face[q])
-                                delta = abs(pIndex - qIndex)
-                                if (delta == 1) or (delta == len(face) - 1):
+                                p_idx = face.index(intersecting_face[p])
+                                q_idx = face.index(intersecting_face[q])
+                                delta = abs(p_idx - q_idx)
+                                if delta in (1, len(face) - 1):
                                     calc_intersection = False
                                     logging.debug("Intersecting face shares an edge")
                                     break
@@ -2070,7 +2067,7 @@ class SimpleShape(base.Orbitit):
         To get correct results and to prevent asserts it is wise to wrap this method in a
         FloatHandler statement as shown below. It shows an example of using 8 digits when comparing
         floats. Note this is independent of the precision parameter.
-            with FloatHandler(precision=8):
+            with geomtypes.FloatHandler(precision=8):
                 object.to_postscript(..)
 
         face_indices: an array of faces for which the pieces should be printed. Since many objects
