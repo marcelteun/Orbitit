@@ -108,7 +108,7 @@ class TestLine(unittest.TestCase):
     """Unit tests for geom_3d.Line"""
 
     def test_get_factor_at_std(self):
-        """Test getFactorAt with some exact (integer) solutions"""
+        """Test get_factor_at with some exact (integer) solutions"""
         test_matrix = {  # test_case: (point, vector, value, i, expected t)
             "2D line x int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 0, -1),
             "2D line y int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 1, -2),
@@ -119,7 +119,7 @@ class TestLine(unittest.TestCase):
         }
         for case, (p0, v, c, i, expect) in test_matrix.items():
             line = geom_3d.Line(p0, v=v)
-            result = line.getFactorAt(c, i)
+            result = line.get_factor_at(c, i)
             d = ", delta = {result - expect}" if result is not None and expect is not None else ""
             self.assertTrue(
                 result == expect,
@@ -127,14 +127,14 @@ class TestLine(unittest.TestCase):
             )
 
     def test_get_factor_at_margins(self):
-        """Test getFactorAt with solutions where rounding is involved"""
+        """Test get_factor_at with solutions where rounding is involved"""
         test_matrix = {  # test_case: (point, vector, value, i, expected t)
             "2D line x int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 0, -1.00009),
             "3D line x int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 0, -1.00009),
         }
         for case, (p0, v, c, i, expect) in test_matrix.items():
             line = geom_3d.Line(p0, v=v)
-            result = line.getFactorAt(c, i)
+            result = line.get_factor_at(c, i)
             precision = 4
             with geomtypes.FloatHandler(precision):
                 self.assertTrue(
@@ -149,7 +149,7 @@ class TestLine(unittest.TestCase):
                 )
 
     def test_intersect_2D_line_with_other_line(self):
-        """Test intersectLine and thus intersectLineGetFactor"""
+        """Test intersect and thus intersect_get_factor"""
         test_matrix = {  # test_case: (p0, v0, p1, p2, expected point)
             "line 0": (
                 geomtypes.Vec([1, 2]),
@@ -162,7 +162,7 @@ class TestLine(unittest.TestCase):
         for case, (p, v, p0, p1, expect) in test_matrix.items():
             l0 = geom_3d.Line2D(p, v=v)
             l1 = geom_3d.Line2D(p0, p1=p1)
-            result = l0.intersectLine(l1)
+            result = l0.intersect(l1)
             self.assertTrue(
                 result == expect,
                 f"Error for '{case}': {result} != {expect} (expected)"
@@ -174,7 +174,7 @@ class TestLine(unittest.TestCase):
             l0 = geom_3d.Line2D(p, v=v)
             d = margin_ok
             l1 = geom_3d.Line2D(p0, p1=geomtypes.Vec([p1[0] + d, p1[1] + d]))
-            result = l0.intersectLine(l1)
+            result = l0.intersect(l1)
             with geomtypes.FloatHandler(precision):
                 self.assertTrue(
                     result == expect,
@@ -185,7 +185,7 @@ class TestLine(unittest.TestCase):
             l0 = geom_3d.Line2D(p, v=v)
             d = margin_nok
             l1 = geom_3d.Line2D(p0, p1=geomtypes.Vec([p1[0] + d, p1[1] + d]))
-            result = l0.intersectLine(l1)
+            result = l0.intersect(l1)
             with geomtypes.FloatHandler(precision):
                 self.assertFalse(
                     result == expect,

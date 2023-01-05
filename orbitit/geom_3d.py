@@ -276,7 +276,7 @@ class Fields:
 
 
 class Line:
-    def __init__(self, p0, p1=None, v=None, d=3, isSegment=False):
+    def __init__(self, p0, p1=None, v=None, d=3, is_segment=False):
         """
         Define a line in a d dimensional space.
 
@@ -288,21 +288,23 @@ class Line:
             p1 is None or v is None
         ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
         self.dimension = len(p0)
-        self.isSegment = isSegment
+        self.is_segment = is_segment
         if p1 is not None:
-            self.setPoints(p0, p1)
+            self._set_points(p0, p1)
         elif v is not None:
-            self.setBaseDir(p0, v)
+            self._define_line(p0, v)
 
-    def setPoints(self, p0, p1):
+    def _set_points(self, p0, p1):
+        """From two points 'p0' and 'p1' define the line."""
         d = [p1[i] - p0[i] for i in range(self.dimension)]
-        self.setBaseDir(p0, d)
+        self._define_line(p0, d)
 
-    def setBaseDir(self, p, v):
+    def _define_line(self, p, v):
+        """From a point 'p' and a direction vector 'v' define the line."""
         self.p = p
         self.v = v
 
-    def getPoint(self, t):
+    def get_point(self, t):
         """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)
 
         return: the point is an instance of geomtypes.Vec
@@ -311,7 +313,7 @@ class Line:
             return geomtypes.Vec([self.p[i] + t * (self.v[i]) for i in range(self.dimension)])
         return geomtypes.Vec([])
 
-    def getFactorAt(self, c, i):
+    def get_factor_at(self, c, i):
         """
         For an n-dimensional line l = p + t.v it get the factor t for which p[i] + t.v[i] = c
 
@@ -326,19 +328,23 @@ class Line:
             return geomtypes.RoundedFloat((c - self.p[i]) / self.v[i])
         return None
 
-    def vOnLine(self, v):
+    def v_is_on_line(self, v):
         """
         Return True is V is on the line, False otherwise
 
         v: a point which should be an instance of geomtypes.Vec with the same dimension of the line.
         """
-        t = self.getFactorAt(v[0], 0)
-        if t is None:
-            t = self.getFactorAt(v[1], 1)
+        t = None
+        for i, v_i in enumerate(v):
+            t = self.get_factor_at(v_i, i)
+            if t is not None:
+                break
+            # else either 0 or an infinite amount of solutions (e.g. line x == 1 while looking for
+            # specific x coordinate)
         assert t is not None
-        return self.getPoint(t) == v
+        return self.get_point(t) == v
 
-    def getFactor(self, p, check=True):
+    def get_factor(self, p, check=True):
         """Assuming the point p lies on the line, the factor is returned.
 
         If the line is a segment. i.e. if the line isn't infinite a ValueError is raised if it
@@ -350,23 +356,22 @@ class Line:
 
         """
         for i in range(self.dimension):
-            t = self.getFactorAt(p[i], i)
+            t = self.get_factor_at(p[i], i)
             if not t is None:
                 break
         assert t is not None
         if check:
-            c = self.getPoint(t)
+            c = self.get_point(t)
             if not c == p[:self.dimension]:
                 logging.warning(
                     "The point is not on the line; yDiff = %f", c[i] - p[i]
                 )
                 raise ValueError("The point is not on the line according to the current precision")
-        if self.isSegment:
+        if self.is_segment:
             if not (0 <= t <= 1):
                 logging.warning("The point is not on the line segment; t = %f not in [0, 1]", t)
                 raise ValueError("The point is not on the line segment (with current precisio)")
         return geomtypes.RoundedFloat(t)
-
 
     def __repr__(self):
         """Get a string representation of the line."""
@@ -374,7 +379,7 @@ class Line:
 
 
 class Line2D(Line):
-    def __init__(self, p0, p1=None, v=None, isSegment=False):
+    def __init__(self, p0, p1=None, v=None, is_segment=False):
         """
         Define a line in a 2D plane.
 
@@ -382,24 +387,30 @@ class Line2D(Line):
         a base point p0 and directional vector v. Points p0 and p1 should have
         accessable [0] and [1] indices.
         """
-        Line.__init__(self, p0, p1, v, d=2, isSegment=isSegment)
+        Line.__init__(self, p0, p1, v, d=2, is_segment=is_segment)
 
-    def intersectLineGetFactor(self, l):
-        """Gets the factor for the vertex for which the line l intersects this line
+    def intersect_get_factor(self, l):
+        """Gets the factor for the vertex for which the l intersects this line
 
-        i.e. the point of intersection is specified by self.p + restult * self.v
+        I.e. the point of intersection is specified by self.p + result * self.v
+        l: the object to intersect with. Currently only a 2D line is supported.
 
-        return: the factor as a geomtypes.RoundedFloat number or None if the lines are parallel.
+        return: the factor as a geomtypes.RoundedFloat number or None if the object don't share one
+        point (e.g.lines are parallel).
         """
+        assert isinstance(l, Line2D), f"Only 2D lines are supported when intersecting, got {l}"
         nom = geomtypes.RoundedFloat(l.v[0] * self.v[1] - l.v[1] * self.v[0])
         if not nom == 0:
             denom = l.v[0] * (l.p[1] - self.p[1]) + l.v[1] * (self.p[0] - l.p[0])
             return geomtypes.RoundedFloat(denom / nom)
         return None
 
-    def intersectLine(self, l):
-        """returns the point of intersection with line l or None if the line is parallel."""
-        return self.getPoint(self.intersectLineGetFactor(l))
+    def intersect(self, l):
+        """returns the point of intersection with line l or None if no one solution.
+
+        See intersect_get_factor
+        """
+        return self.get_point(self.intersect_get_factor(l))
 
     # FIXME: this is a weird method to have here.
     # TODO: rewrite and clean up this mess
@@ -456,7 +467,7 @@ class Line2D(Line):
 
             # PART 1.
             edge_3d = Line3D(v0, v=v1 - v0)
-            edge_factor = edge_3d.getFactorAt(z0, 2)
+            edge_factor = edge_3d.get_factor_at(z0, 2)
             line_factor = None
             if edge_factor is not None:
                 if 0 <= edge_factor <= 1:
@@ -466,7 +477,7 @@ class Line2D(Line):
                         edge_factor,
                     )
                     try:
-                        line_factor = self.getFactor(edge_3d.getPoint(edge_factor))
+                        line_factor = self.get_factor(edge_3d.get_point(edge_factor))
                     except ValueError:
                         line_factor = None
                 else:
@@ -481,20 +492,20 @@ class Line2D(Line):
                 if z0 == v0[2]:
                     logging.debug("edge lies in plane z = %f", z0)
                     edgePV2D = Line2D(v0, v=v1 - v0)
-                    edge_factor = edgePV2D.intersectLineGetFactor(self)
+                    edge_factor = edgePV2D.intersect_get_factor(self)
                     if edge_factor is not None:
                         if 0 <= edge_factor <= 1:
-                            line_factor = self.intersectLineGetFactor(edgePV2D)
+                            line_factor = self.intersect_get_factor(edgePV2D)
                         else:
                             logging.debug(
                                 "edge intersects line but only if extended (edge_factor = %f)",
                                 edge_factor,
                             )
                     else:
-                        # fix getFactor so that just getFactor is needed.
-                        if self.vOnLine(v0):
+                        # fix get_factor so that just get_factor is needed.
+                        if self.v_is_on_line(v0):
                             edge_factor = 0
-                            line_factor = self.getFactor(v0)
+                            line_factor = self.get_factor(v0)
                             logging.debug("edge is on the line")
                         else:
                             logging.debug("edge is parallel to the line")
@@ -504,7 +515,7 @@ class Line2D(Line):
                 logging.debug(
                     "FOUND line_factor = %s with v = %s",
                     line_factor,
-                    self.getPoint(line_factor),
+                    self.get_point(line_factor),
                 )
                 # only add vertex intersections once (otherwise you add the
                 # intersection for edge_i and edge_i+1
@@ -599,7 +610,7 @@ class Line2D(Line):
 class Line3D(Line):
     str_precision = 2
 
-    def __init__(self, p0, p1=None, v=None, isSegment=False):
+    def __init__(self, p0, p1=None, v=None, is_segment=False):
         """
         Define a line in 3D space.
 
@@ -612,17 +623,18 @@ class Line3D(Line):
         if p1 is None:
             assert v is not None
             v = geomtypes.Vec3(v)
-            Line.__init__(self, p0, v=v, d=3, isSegment=isSegment)
+            Line.__init__(self, p0, v=v, d=3, is_segment=is_segment)
         else:
             assert v is None
             p1 = geomtypes.Vec3(p1)
-            Line.__init__(self, p0, p1, d=3, isSegment=isSegment)
+            Line.__init__(self, p0, p1, d=3, is_segment=is_segment)
 
     # redefine to get vec3 types:
-    def setPoints(self, p0, p1):
-        self.setBaseDir(p0, p1 - p0)
+    def _set_points(self, p0, p1):
+        """From two points p0 and p1 define the line."""
+        self._define_line(p0, p1 - p0)
 
-    def getPoint(self, t):
+    def get_point(self, t):
         if t is not None:
             return self.p + t * self.v
         return []
@@ -2056,8 +2068,8 @@ class SimpleShape(base.Orbitit):
         last_point = len(points) - 1
         for line_2d, line_factors in intersection_lines:
             for t0, t1 in line_factors:
-                points.append(line_2d.getPoint(t0))
-                points.append(line_2d.getPoint(t1))
+                points.append(line_2d.get_point(t0))
+                points.append(line_2d.get_point(t1))
                 last_point += 2
                 polygons.append([last_point - 1, last_point])
 
