@@ -2303,10 +2303,10 @@ class CompoundShape(base.Orbitit):
         es = []
         ns = []
         col_defs = []
-        colorIndices = []
+        col_idx = []
         for s in self._shapes:
-            VsOffset = len(vs)
-            colOffset = len(col_defs)
+            vs_offset = len(vs)
+            col_offset = len(col_defs)
             s = s.simple_shape
             # Apply shape orientation here, needed, since the can be different
             # for the various shapes
@@ -2315,12 +2315,12 @@ class CompoundShape(base.Orbitit):
             for v in s.ns:
                 ns.append(s.orientation * v)
             # offset all faces:
-            fs.extend([[i + VsOffset for i in f] for f in s.fs])
-            es.extend([i + VsOffset for i in s.es])
+            fs.extend([[i + vs_offset for i in f] for f in s.fs])
+            es.extend([i + vs_offset for i in s.es])
             col_defs.extend(s.shape_colors[0])
-            colorIndices.extend([i + colOffset for i in s.shape_colors[1]])
+            col_idx.extend([i + col_offset for i in s.shape_colors[1]])
         self.merged_shape = SimpleShape(
-            vs=vs, fs=fs, es=es, ns=ns, colors=(col_defs, colorIndices)
+            vs=vs, fs=fs, es=es, ns=ns, colors=(col_defs, col_idx)
         )
         self.merge_needed = False
 
@@ -2350,6 +2350,7 @@ class CompoundShape(base.Orbitit):
             shape.gl_draw()
 
     def regen_edges(self):
+        """Regenerate the edges of the shape."""
         for shape in self._shapes:
             shape.regen_edges()
         self.merge_needed = True
