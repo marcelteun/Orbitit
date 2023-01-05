@@ -369,7 +369,7 @@ class Line:
             if not (0 <= t <= 1):
                 logging.warning("The point is not on the line segment; t = %f not in [0, 1]", t)
                 raise ValueError("The point is not on the line segment (with current precisio)")
-        return t
+        return geomtypes.RoundedFloat(t)
 
 
     def __repr__(self):
@@ -406,6 +406,7 @@ class Line2D(Line):
         return self.getPoint(self.intersectLineGetFactor(l))
 
     # FIXME: this is a weird method to have here.
+    # TODO: rewrite and clean up this mess
     def intersect_with_face(
         self,
         FacetVs,
@@ -425,7 +426,8 @@ class Line2D(Line):
         z0    : defines the plane in which the 2D line is lying
 
         return:
-        A list with the factors of the line where it intersects the edges.
+        A list of line segments, where each segment is a two-uple with the factors of the line where
+            it intersects the edges. If no intersections are found an empty list is returned.
         """
         # Algorithm:
         # PART 1.
@@ -575,7 +577,9 @@ class Line2D(Line):
             "The nr of intersections should be even, "
             "are all edges unique and do they form one closed face?"
         )
-        return pOnLineAtEdges
+        return [
+            (pOnLineAtEdges[i], pOnLineAtEdges[i + 1]) for i in range(0, len(pOnLineAtEdges), 2)
+        ]
 
 
 class Line3D(Line):
@@ -1853,9 +1857,9 @@ class SimpleShape(base.Orbitit):
         z: the z-coordinate for the horizontal plane.
         vs: the vertex indices as used for the face.
 
-        return: a tuple with a Line2D object and a flat list of line factors that form line segments
-            of where the face intersects the horizontal plane. Each segment is represen:ed by one
-            pair of factors.
+        return: a tuple with a Line2D object and a list of line factors that form line segments of
+            where the face intersects the horizontal plane. Each segment is represented by one pair
+            of factors (2-tuple).
         """
         line_3d = hor_plane.intersect_with_plane(face_plane)
         if line_3d is None:
@@ -1883,6 +1887,87 @@ class SimpleShape(base.Orbitit):
             if line_factors != []:
                 return (line_2d, line_factors)
         return ()
+
+    def _combine_intersections_to_faces(self, intersection_lines, faces_to_intersect_with, z, vs):
+        """Combine intersection segments with faces to intersect with.
+
+        With the line segments that are valid segments for for the face(s) that are intersecting the
+        horizontal plane, check how much of these segments are valid segments in the face(s) we are
+        intersecting with, i.e. the face(s) in that horizontal plane.
+
+        intersection_lines: an list of tuples consisting of a Line2D object and a list of line factors
+            that are valid factors for the faces that intersect the specified faces
+        faces_to_intersect_with: the faces that are intersected with the intersection_lines.
+        z: the z-coordinate for the horizontal plane.
+        vs: the vertex indices as used for the face.
+
+        return: An updated list of tuples consisting of a Line2D object and a list of line factors.
+        """
+        # for each intersecting line segment:
+        resulting_intersections = []
+        for i, (line_2d, line_factors_0) in enumerate(intersection_lines):
+            logging.debug("phase 2: check intersection %d", i)
+            # line_2d: the line object representing the line of intersection
+            # line_factors_0: the line segments (factors) valid for the intersecting face
+            # line_factors_1: the line segments (factors) valid for the face to intersect with
+            # updated_factors: the valid factors resulting in combining the above.
+            new_factors = []
+            for face_to_intersect_with in faces_to_intersect_with:
+                line_factors_1 = line_2d.intersect_with_face(vs, face_to_intersect_with, z)
+                logging.debug("line_factors_1 %s", line_factors_1)
+                # Now combine the results of line_factors_0 and line_factors_1:
+                # Only keep intersections that fall within 2 segments for
+                # both line_factors_0 and line_factors_1.
+                i_segment_0 = 0  # segment number in line_factors_0
+                i_segment_1 = 0  # segment number in line_factors_1
+                select_segment_0 = True
+                select_segment_1 = True
+
+                while (
+                    i_segment_0 < len(line_factors_0)
+                and
+                    i_segment_1 < len(line_factors_1)
+                ):
+                    if select_segment_0:
+                        f0 = line_factors_0[i_segment_0][0]
+                        f1 = line_factors_0[i_segment_0][1]
+                        select_segment_0 = False
+                    if select_segment_1:
+                        g0 = line_factors_1[i_segment_1][0]
+                        g1 = line_factors_1[i_segment_1][1]
+                        select_segment_1 = False
+                    # Note that always holds f0 < f1 and g0 < g1
+                    if f1 <= g0:
+                        # f0 - f1  g0 - g1
+                        select_segment_0 = True
+                    elif g1 <= f0:
+                        # g0 - g1  f0 - f1
+                        select_segment_1 = True
+                    elif f0 <= g0:
+                        if f1 <= g1:
+                            # f0  g0 - f1  g1
+                            new_factors.append((g0, f1))
+                            select_segment_0 = True
+                        else:
+                            # f0  g0 - g1  f1
+                            new_factors.append((g0, g1))
+                            select_segment_1 = True
+                    else:
+                        # g0<f0<g1 (and g0<f1)
+                        if f1 <= g1:
+                            # g0  f0 - f1  g1
+                            new_factors.append((f0, f1))
+                            select_segment_0 = True
+                        else:
+                            # g0  f0 - g1  f1
+                            new_factors.append((f0, g1))
+                            select_segment_1 = True
+                    if select_segment_0:
+                        i_segment_0 += 1
+                    if select_segment_1:
+                        i_segment_1 += 1
+            resulting_intersections.append((line_2d, new_factors))
+        return resulting_intersections
 
     def _intersect_with_face_in_hor_plane(self, vs, compound_face, z):
         """
@@ -1952,71 +2037,17 @@ class SimpleShape(base.Orbitit):
                 if intersection_line:
                     intersection_lines.append(intersection_line)
 
-        # for each intersecting line segment:
-        for i, (line_2d, line_factors_0) in enumerate(intersection_lines):
-            logging.debug("phase 2: check intersection %d", i)
-            # line_2d: the line object representing the line of intersection
-            # line_factors_0: the line segments (factors) valid for the intersecting face
-            # line_factors_1: the line segments (factors) valid for the face to intersect with
-            for face_to_intersect_with in faces_to_intersect_with:
-                line_factors_1 = line_2d.intersect_with_face(vs, face_to_intersect_with, z)
-                logging.debug("line_factors_1 %s", line_factors_1)
-                # Now combine the results of line_factors_0 and line_factors_1:
-                # Only keep intersections that fall within 2 segments for
-                # both line_factors_0 and line_factors_1.
-                facetSegmentNr = 0
-                baseSegmentNr = 0
-                nextBaseSeg = True
-                nextFacetSeg = True
-                no_of_points = len(points)
+        intersection_lines = self._combine_intersections_to_faces(
+            intersection_lines, faces_to_intersect_with, z, vs
+        )
 
-                def addPsLine(t0, t1, line_2d, no_of_points):
-                    points.append(line_2d.getPoint(t0))
-                    points.append(line_2d.getPoint(t1))
-                    polygons.append([no_of_points, no_of_points + 1])
-                    return no_of_points + 2
-
-                while (baseSegmentNr < len(line_factors_1) // 2) and (
-                    facetSegmentNr < len(line_factors_0) // 2
-                ):
-                    if nextBaseSeg:
-                        b0 = geomtypes.RoundedFloat(line_factors_1[2 * baseSegmentNr])
-                        b1 = geomtypes.RoundedFloat(line_factors_1[2 * baseSegmentNr + 1])
-                        nextBaseSeg = False
-                    if nextFacetSeg:
-                        f0 = geomtypes.RoundedFloat(line_factors_0[2 * facetSegmentNr])
-                        f1 = geomtypes.RoundedFloat(line_factors_0[2 * facetSegmentNr + 1])
-                        nextFacetSeg = False
-                    # Note that always holds f0 < f1 and b0 < b1
-                    if f1 <= b0:
-                        # f0 - f1  b0 - b1
-                        nextFacetSeg = True
-                    elif b1 <= f0:
-                        # b0 - b1  f0 - f1
-                        nextBaseSeg = True
-                    elif f0 <= b0:
-                        if f1 <= b1:
-                            # f0  b0 - f1  b1
-                            nextFacetSeg = True
-                            no_of_points = addPsLine(b0, f1, line_2d, no_of_points)
-                        else:
-                            # f0  b0 - b1  f1
-                            nextBaseSeg = True
-                            no_of_points = addPsLine(b0, b1, line_2d, no_of_points)
-                    else:
-                        # b0<f0<b1 (and b0<f1)
-                        if f1 <= b1:
-                            # b0  f0 - f1  b1
-                            nextFacetSeg = True
-                            no_of_points = addPsLine(f0, f1, line_2d, no_of_points)
-                        else:
-                            # b0  f0 - b1  f1
-                            nextBaseSeg = True
-                            no_of_points = addPsLine(f0, b1, line_2d, no_of_points)
-                    if nextBaseSeg:
-                        baseSegmentNr += 1
-                    if nextFacetSeg:
-                        facetSegmentNr += 1
+        last_point = len(points) - 1
+        for line_2d, line_factors in intersection_lines:
+            for t0, t1 in line_factors:
+                points.append(line_2d.getPoint(t0))
+                points.append(line_2d.getPoint(t1))
+                last_point += 2
+                polygons.append([last_point - 1, last_point])
 
         return points, polygons
 
