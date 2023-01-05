@@ -405,8 +405,8 @@ class Line2D(Line):
     # TODO: rewrite and clean up this mess
     def intersect_with_face(
         self,
-        FacetVs,
-        iFacet,
+        vs,
+        face,
         z0=0.0,
     ):
         """
@@ -417,8 +417,8 @@ class Line2D(Line):
         that just touch the a vertex without entering or exiting the facet are
         removed.
 
-        FacetVs: the (possible 3 dimensional) vertices
-        iFacet: the indices that form this facet. The indices refer to FacetVs
+        vs: the (possible 3 dimensional) vertices
+        face: the indices that form this facet. The indices refer to vs
         z0    : defines the plane in which the 2D line is lying
 
         return:
@@ -434,21 +434,21 @@ class Line2D(Line):
         # calculated.
         # Otherwise the edges is parallel to the plane z = z0: no intersection.
         #
-        # pOnLineAtEdges contains the factors in a line for the points where
-        # the line intersects the sides of iFacet.
+        # line_segments contains the factors in a line for the points where
+        # the line intersects the sides of face.
         z0 = geomtypes.RoundedFloat(z0)
-        pOnLineAtEdges = []
-        no_of_vs = len(iFacet)
-        logging.debug("facet indices: %s", iFacet)
-        vertexIntersections = []
-        for vertexNr in range(no_of_vs):
-            v0 = FacetVs[iFacet[vertexNr]]
-            v1 = FacetVs[iFacet[(vertexNr + 1) % no_of_vs]]
+        line_segments = []
+        no_of_vs = len(face)
+        logging.debug("facet indices: %s", face)
+        vertex_intersections = []
+        for vertex_idx, v0_idx in enumerate(face):
+            v0 = vs[v0_idx]
+            v1 = vs[face[(vertex_idx + 1) % no_of_vs]]
             v0 = geomtypes.Vec(v0)
             v1 = geomtypes.Vec(v1)
             logging.debug(
                 "==> intersect line with edge nr %d = %s -> %s",
-                vertexNr,
+                vertex_idx,
                 v0,
                 v1,
             )
@@ -500,56 +500,56 @@ class Line2D(Line):
                 if t != 1:
                     # each item is an array that holds
                     # 0. the vertex nr
-                    # 1. the index of s in pOnLineAtEdges
+                    # 1. the index of s in line_segments
                     if t == 0:
-                        vertexIntersections.append([vertexNr, len(pOnLineAtEdges)])
+                        vertex_intersections.append([vertex_idx, len(line_segments)])
                         logging.debug("vertex intersection at v0")
-                    pOnLineAtEdges.append(s)
+                    line_segments.append(s)
                     logging.debug("added s = %s", s)
                 else:
                     logging.debug("vertex intersection at v1, ignored")
 
-        logging.debug("line intersects edges (vertices) at s = %s", pOnLineAtEdges)
-        logging.debug("vertex intersections: %s", vertexIntersections)
-        nrOfIntersectionsWithVertices = len(vertexIntersections)
-        allowOddNrOfIntersections = False
-        if nrOfIntersectionsWithVertices == 0:
+        logging.debug("line intersects edges (vertices) at s = %s", line_segments)
+        logging.debug("vertex intersections: %s", vertex_intersections)
+        no_of_intersections_with_vs = len(vertex_intersections)
+        allow_odd_no_of_intersections = False
+        if no_of_intersections_with_vs == 0:
             pass
-        elif nrOfIntersectionsWithVertices == 1:
+        elif no_of_intersections_with_vs == 1:
             # remove if nr of intersections is odd:
-            if len(pOnLineAtEdges) % 2 == 0:
+            if len(line_segments) % 2 == 0:
                 # e.g. and intersection through a vertex and an edge:
                 pass
             else:
                 # e.g. the line touches a vertex
                 # remove:
-                del pOnLineAtEdges[vertexIntersections[0][1]]
-        elif nrOfIntersectionsWithVertices == 2:
+                del line_segments[vertex_intersections[0][1]]
+        elif no_of_intersections_with_vs == 2:
             # if these 2 vertices form an edge:
-            vertexIndexDelta = vertexIntersections[1][0] - vertexIntersections[0][0]
-            if vertexIndexDelta == 1 or vertexIndexDelta == no_of_vs - 1:
+            v_index_delta = vertex_intersections[1][0] - vertex_intersections[0][0]
+            if v_index_delta == 1 or v_index_delta == no_of_vs - 1:
                 # (part of) the line of intersection is an edge
                 # keep it (note that the edge might continue in a line of
                 # intersection for a concave facet, which might lead to an odd
                 # nr of intersections.
-                allowOddNrOfIntersections = True
+                allow_odd_no_of_intersections = True
         else:
             # check if all vertices are lying on one line:
-            allOnOneEdge = True
-            for vdI in range(nrOfIntersectionsWithVertices - 1):
-                vertexIndexDelta = vertexIntersections[1][0] - vertexIntersections[0][0]
+            all_on_one_edge = True
+            for vdI in range(no_of_intersections_with_vs - 1):
+                v_index_delta = vertex_intersections[1][0] - vertex_intersections[0][0]
                 # e.g. a heptagon that is really a pentagon, since it happens
                 # twice that 3 vertices ly on one line: v0, v1, v2 and  v0, v5,
                 # v6. So either a difference of 1 or at least 5 is allowed.
                 if not (
-                    vertexIndexDelta == 1
-                    or vertexIndexDelta
-                    >= no_of_vs - (nrOfIntersectionsWithVertices - 1)
+                    v_index_delta == 1
+                    or v_index_delta
+                    >= no_of_vs - (no_of_intersections_with_vs - 1)
                 ):
-                    allOnOneEdge = False
-            if allOnOneEdge:
-                # see remark above for nrOfIntersectionsWithVertices == 2
-                allowOddNrOfIntersections = True
+                    all_on_one_edge = False
+            if all_on_one_edge:
+                # see remark above for no_of_intersections_with_vs == 2
+                allow_odd_no_of_intersections = True
             else:
                 # more than 2: complex cases.
                 logging.debug(
@@ -557,24 +557,25 @@ class Line2D(Line):
                     "\tvertexIntersections: %s\n"
                     "\tpOnLineAtEdges: %s\n"
                     "\twill draw one long line, instead of segments",
-                    vertexIntersections,
-                    pOnLineAtEdges
+                    vertex_intersections,
+                    line_segments
                 )
                 # assert False, 'ToDo'
                 # if an assert is not wanted, choose pass.
-                # allowOddNrOfIntersections = True
-                pOnLineAtEdges.sort()
-                pOnLineAtEdges = [pOnLineAtEdges[0], pOnLineAtEdges[-1]]
-                logging.debug("\tusing pOnLineAtEdges %s", pOnLineAtEdges)
-        pOnLineAtEdges.sort()
+                # allow_odd_no_of_intersections = True
+                line_segments.sort()
+                line_segments = [line_segments[0], line_segments[-1]]
+                logging.debug("\tusing line_segments %s", line_segments)
+        line_segments.sort()
 
-        logging.debug("pOnLineAtEdges %s after clean up", pOnLineAtEdges)
-        assert len(pOnLineAtEdges) % 2 == 0 or allowOddNrOfIntersections, (
+        logging.debug("line_segments %s after clean up", line_segments)
+        assert len(line_segments) % 2 == 0 or allow_odd_no_of_intersections, (
             "The nr of intersections should be even, "
             "are all edges unique and do they form one closed face?"
         )
+        # FIXME: Must handle allow_odd_no_of_intersections first
         return [
-            (pOnLineAtEdges[i], pOnLineAtEdges[i + 1]) for i in range(0, len(pOnLineAtEdges), 2)
+            (line_segments[i], line_segments[i + 1]) for i in range(0, len(line_segments), 2)
         ]
 
 
@@ -609,12 +610,12 @@ class Line3D(Line):
             return self.p + t * self.v
         return []
 
-    def squareDistance2Point(self, P):
+    def squareDistance2Point(self, p):
         # p81 of E.Lengyel
-        q = geomtypes.Vec3(P)
+        q = geomtypes.Vec3(p)
         hyp = q - self.p
-        prjQ = hyp * self.v
-        return (hyp * hyp) - ((prjQ * prjQ) / (self.v * self.v))
+        prj_q = hyp * self.v
+        return (hyp * hyp) - ((prj_q * prj_q) / (self.v * self.v))
 
     def Discriminant2Line(self, L):
         # p82 of E.Lengyel
@@ -685,20 +686,20 @@ class PlaneFromNormal:
         n1 = plane.N
         if n0 == n1 or n0 == -n1:
             return None
-        V = n0.cross(n1)
-        # V = V.normalise()
+        v = n0.cross(n1)
+        # v = v.normalise()
         # for to_postscript self.N == [0, 0, 1]; handle more efficiently.
         if n0 == geomtypes.Vec([0, 0, 1]):
             # simplified situation from below:
             z = -self.D
-            M = geomtypes.Mat([geomtypes.Vec(n1[0:2]), geomtypes.Vec(V[0:2])])
-            Q = M.solve(geomtypes.Vec([-plane.D - n1[2] * z, -V[2] * z]))
-            Q = geomtypes.Vec([Q[0], Q[1], z])
+            mat = geomtypes.Mat([geomtypes.Vec(n1[0:2]), geomtypes.Vec(v[0:2])])
+            q = mat.solve(geomtypes.Vec([-plane.D - n1[2] * z, -v[2] * z]))
+            q = geomtypes.Vec([q[0], q[1], z])
         else:
             # See bottom of page 86 of Maths for 3D Game Programming.
-            M = geomtypes.Mat([n0, n1, V])
-            Q = M.solve(geomtypes.Vec([-self.D, -plane.D, 0]))
-        return Line3D(Q, v=V)
+            mat = geomtypes.Mat([n0, n1, v])
+            q = mat.solve(geomtypes.Vec([-self.D, -plane.D, 0]))
+        return Line3D(q, v=v)
 
     def __eq__(self, plane):
         """Return True if the planes define the same one."""
@@ -930,21 +931,21 @@ class SimpleShape(base.Orbitit):
         precision: number of decimals to consider when deciding whether two floating point numbers
             are equal.
         """
-        vProps = self.vertex_props
-        fProps = self.face_props
-        cpVs = copy.deepcopy(vProps["vs"])
-        cpFs = copy.deepcopy(fProps["fs"])
+        v_props = self.vertex_props
+        f_props = self.face_props
+        vs_copied = copy.deepcopy(v_props["vs"])
+        fs_copied = copy.deepcopy(f_props["fs"])
         with geomtypes.FloatHandler(precision):
-            glue.mergeVs(cpVs, cpFs, precision)
+            glue.mergeVs(vs_copied, fs_copied, precision)
         # this may result on less faces, which breaks the colours!
         # TODO either update the colors immediately or return an array with
         # deleted face indices.
-        glue.cleanUpVsFs(cpVs, cpFs)
-        vProps["vs"] = cpVs
-        fProps["fs"] = cpFs
+        glue.cleanUpVsFs(vs_copied, fs_copied)
+        v_props["vs"] = vs_copied
+        f_props["fs"] = fs_copied
         shape = SimpleShape([], [], [])
-        shape.vertex_props = vProps
-        shape.face_props = fProps
+        shape.vertex_props = v_props
+        shape.face_props = f_props
         return shape
 
     @property
@@ -1058,7 +1059,7 @@ class SimpleShape(base.Orbitit):
         i.e. edges that have the same vertex index, only appear once.
         The creation of edges is not optimised and can take a long time.
         """
-        Es2D = []
+        added_edges = []
         es = []
 
         def addEdge(i, j):
@@ -1068,17 +1069,17 @@ class SimpleShape(base.Orbitit):
                 edge = [j, i]
             else:
                 return
-            if not edge in Es2D:
-                Es2D.append(edge)
+            if not edge in added_edges:
+                added_edges.append(edge)
                 es.extend(edge)
 
         for face in self.fs:
-            lastIndex = len(face) - 1
-            for i in range(lastIndex):
+            last_idx = len(face) - 1
+            for i in range(last_idx):
                 addEdge(face[i], face[i + 1])
             # handle the edge from the last vertex to the first vertex separately
             # (instead of using % for every index)
-            addEdge(face[lastIndex], face[0])
+            addEdge(face[last_idx], face[0])
         self.es = es
 
     @property
@@ -1254,7 +1255,7 @@ class SimpleShape(base.Orbitit):
         self.TriangulatedFs = self.triangulate(self.nFs)
         # Now for the edge vertices. Note that edge vertices aren't necessarily
         # part of the face vertices.
-        edgeIndexOffset = len(self.nVs)
+        edge_idx_offset = len(self.nVs)
         self.nVs.extend(vs)
         if normalise:
             for v in vs:
@@ -1262,7 +1263,7 @@ class SimpleShape(base.Orbitit):
         else:
             for v in vs:
                 self.vNs.append(v)
-        self.nEs = [oldVi + edgeIndexOffset for oldVi in self.es]
+        self.nEs = [oldVi + edge_idx_offset for oldVi in self.es]
 
     def create_edge_lengths(self, precision=12):
         e2l = {}
@@ -1377,9 +1378,9 @@ class SimpleShape(base.Orbitit):
         div = self.no_of_fs // self.no_of_cols
         mod = self.no_of_fs % self.no_of_cols
         face_cols = []
-        colorIRange = list(range(self.no_of_cols))
+        all_color_idx = list(range(self.no_of_cols))
         for i in range(div):
-            face_cols.extend(colorIRange)
+            face_cols.extend(all_color_idx)
         face_cols.extend(list(range(mod)))
         self._shape_colors = (self._shape_colors[0], face_cols)
 
@@ -1682,12 +1683,12 @@ class SimpleShape(base.Orbitit):
         no_of_edges = len(self.es) // 2
         s = w(f"{len(self.vs)} {no_of_faces} {no_of_edges}")
         s = w("# Vertices")
-        for V in self.vs:
+        for v in self.vs:
             s = w(
                 "{} {} {}".format(
-                    geomtypes.f2s(V[0], precision),
-                    geomtypes.f2s(V[1], precision),
-                    geomtypes.f2s(V[2], precision),
+                    geomtypes.f2s(v[0], precision),
+                    geomtypes.f2s(v[1], precision),
+                    geomtypes.f2s(v[2], precision),
                 )
             )
         s = w("# Sides and colours")
@@ -1696,10 +1697,10 @@ class SimpleShape(base.Orbitit):
         #                     self._shape_colors[0]
         #                     There should be as many colours as faces.
         if len(self._shape_colors[0]) == 1:
-            oneColor = True
+            one_col = True
             color = self._shape_colors[0][0]
         else:
-            oneColor = False
+            one_col = False
             assert len(self._shape_colors[1]) == len(self.fs)
 
         def face_str(face):
@@ -1717,7 +1718,7 @@ class SimpleShape(base.Orbitit):
                 )
             return s
 
-        if oneColor:
+        if one_col:
             for face in self.fs:
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s += f"{face_str(face)}\n"
@@ -1728,13 +1729,13 @@ class SimpleShape(base.Orbitit):
                 color = self._shape_colors[0][self._shape_colors[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s = "%s%s\n" % (s, face_str(face))
-                fnStr = "%s %s %s" % (
+                face_idx_str = "%s %s %s" % (
                     geomtypes.f2s(self.face_normals[i][0], precision),
                     geomtypes.f2s(self.face_normals[i][1], precision),
                     geomtypes.f2s(self.face_normals[i][2], precision),
                 )
                 if info:
-                    s = w(f"# face normal: {fnStr}")
+                    s = w(f"# face normal: {face_idx_str}")
         if info:
             for i in range(no_of_edges):
                 s = w("# edge: {:d} {:d}".format(self.es[2 * i], self.es[2 * i + 1]))
@@ -2173,9 +2174,9 @@ class SimpleShape(base.Orbitit):
                     add_projected_vs(self.fGs)
                     extra_fs = []
                     for sf in tmp_fs:
-                        extra_vs, sxFs = dome_level_2(sf)
+                        extra_vs, sx_fs = dome_level_2(sf)
                         add_projected_vs(extra_vs)
-                        extra_fs.extend(sxFs)
+                        extra_fs.extend(sx_fs)
             fs.extend(extra_fs)
             col_indices.extend([cols[1][i] for j in range(len(extra_fs))])
         shape = SimpleShape(vs, fs, [], colors=(cols[0], col_indices))
