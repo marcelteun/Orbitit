@@ -568,15 +568,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     shape = shape.clean_shape(margin)
                     with open(filepath, 'w') as fd:
                         try:
-                            fd.write(
-                                shape.to_postscript(
-                                    scaling=scale_factor,
-                                    precision=precision,
-                                    margin=math.pow(10, -margin)
+                            with geomtypes.FloatHandler(margin):
+                                fd.write(
+                                    shape.to_postscript(scaling=scale_factor, precision=precision)
                                 )
-                            )
-                            self.set_status_text("PS file written")
-                        except geom_3d.PrecisionError:
+                                self.set_status_text("PS file written")
+                        except ValueError:
                             self.set_status_text(
                                 "Precision error, try to decrease float margin")
                 else:

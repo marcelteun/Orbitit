@@ -275,10 +275,6 @@ class Fields:
     pass
 
 
-class PrecisionError(ValueError):
-    "Possible error caused bby floats not being equals exactly"
-
-
 class Line:
     def __init__(self, p0, p1=None, v=None, d=3, isSegment=False):
         """
