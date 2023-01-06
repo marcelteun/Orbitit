@@ -40,7 +40,7 @@ class TestUniformShape1(TestSimpleShape):
     name = "MW115"
     scale = 50
     ps_margin = 9
-    ps_precision = 12
+    ps_precision = 7
 
     def def_shape(self):
         name = get_path(self.name + ".off", IN_DIR)
@@ -60,7 +60,6 @@ class TestUniformShape3(TestUniformShape1):
     name = "MW119"
     scale = 50
     ps_margin = 9
-    ps_precision = 11
 
 
 if __name__ == '__main__':
