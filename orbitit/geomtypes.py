@@ -377,7 +377,10 @@ class Vec(tuple, base.Orbitit):
         for a, b in zip(self, w):
             if not r:
                 break
-            r = r and FloatHandler.eq(a, b)
+            try:
+                r = r and FloatHandler.eq(a, b)
+            except TypeError:
+                return False
         return r
 
     def __ne__(self, w):

@@ -147,12 +147,141 @@ class TestPolygon(unittest.TestCase):
             "empty": ([], [], ()),
             "coords but empty": ([[0, 1], [1, 2]], [], ()),
             "triangle": ([[0, 1], [1, 2], [-2, -2]], [0, 1, 2], ((0, 1), (1, 2), (2, 0))),
+            "triangle reorder": ([[0, 1], [1, 2], [-2, -2]], [0, 2, 1], ((0, 1), (1, 2), (2, 0))),
         }
         for test_case, (coords, vs, es) in test_matrix.items():
             p = geom_2d.Polygon(coords, vs)
             self.assertEqual(p.vs, tuple(vs), f"Test case {test_case} failed on vs")
             self.assertEqual(p.coords, tuple(coords), f"Test case {test_case} failed on coords")
             self.assertEqual(p.es, es, f"Test case {test_case} failed on edges")
+
+    def test_intersect_polygon(self):
+        """Test intersecting a line with a polygon."""
+        mountain_coords = [[0, 0], [1, 2], [4, 0], [2, -2], [2, 0], [3, 2]]
+        mountain_vs = [0, 1, 4, 5, 2, 3]
+        test_matrix = {  # test case: line p0, line p1, polygon coords, polygon vs, expected
+            "no intersection, no polygon": (
+                (0, 0),
+                (1, 1),
+                [],
+                [],
+                [],
+            ),
+            "no intersection, cube": (
+                (3, 0),
+                (3, -1),
+                [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+                [0, 1, 2, 3],
+                [],
+            ),
+            "intersection, cube": (
+                (4, 0),
+                (0, -1),
+                [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+                [0, 1, 2, 3],
+                [([1, -0.75], [0, -1])],
+            ),
+            "intersection, cube, random vertex order": (
+                (4, 0),
+                (0, -1),
+                [[1, 1], [-1, -1], [-1, 1], [1, -1]],
+                [0, 2, 1, 3],
+                [([1, -0.75], [0, -1])],
+            ),
+            "vertex 'intersection', cube": (
+                (2, 0),
+                (0, -2),
+                [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+                [0, 1, 2, 3],
+                [],
+            ),
+            # The tests below all use this shape:
+            #    1   5
+            #    .   .
+            #   / \ / \
+            # 0/   V   \ 2
+            #  '-_ 4 _-'
+            #     '-'
+            #      3
+            "intersect mountain top at 1": (
+                (0, 1),
+                (2, 3),
+                mountain_coords,
+                mountain_vs,
+                [],
+            ),
+            "intersect mountain top at 1 and 5": (
+                (0, 2),
+                (-1, 2),
+                mountain_coords,
+                mountain_vs,
+                [],
+            ),
+            "intersect mountain top at 1 and 2": (
+                (1, 2),
+                (4, 0),
+                mountain_coords,
+                mountain_vs,
+                [([2.5, 1], [4, 0])],
+            ),
+            "intersect mountain top at 0, 4 and 2": (
+                (0, 0),
+                (2, 0),
+                mountain_coords,
+                mountain_vs,
+                [([0, 0], [4, 0])],
+            ),
+            "intersect mountain top through 4": (
+                (0.5, 1),
+                (2, 0),
+                mountain_coords,
+                mountain_vs,
+                [([0.5, 1], [3.2, -0.8])],
+            ),
+            "intersect mountain top double intersect": (
+                (0, 1),
+                (1, 1),
+                mountain_coords,
+                mountain_vs,
+                [([0.5, 1], [1.5, 1]), ([2.5, 1], [3.5, 1])],
+            ),
+            "intersect mountain top double intersect reverse order": (
+                (0, 1),
+                (-1, 1),
+                mountain_coords,
+                mountain_vs,
+                [([3.5, 1], [2.5, 1]), ([1.5, 1], [0.5, 1])],
+            ),
+            "intersect mountain top through edge": (
+                (0, 0),
+                (1, 2),
+                mountain_coords,
+                mountain_vs,
+                [([0, 0], [1, 2])],
+            ),
+        }
+        for test_case, (p0, p1, coords, vs, expected) in test_matrix.items():
+            line = geom_2d.Line(p0, p1)
+            polygon = geom_2d.Polygon(coords, vs)
+            result = line.intersect_polygon(polygon, add_edges=True)
+            expected = [(geomtypes.Vec(c0), geomtypes.Vec(c1)) for c0, c1 in expected]
+            self.assertEqual(result, expected, f"Test case {test_case} failed")
+
+        test_matrix = {  # test case: line p0, line p1, polygon coords, polygon vs, expected
+            "intersect mountain top through edge": (
+                (0, 0),
+                (1, 2),
+                mountain_coords,
+                mountain_vs,
+                [],
+            ),
+        }
+        for test_case, (p0, p1, coords, vs, expected) in test_matrix.items():
+            line = geom_2d.Line(p0, p1)
+            polygon = geom_2d.Polygon(coords, vs)
+            result = line.intersect_polygon(polygon, add_edges=False)
+            expected = [(geomtypes.Vec(c0), geomtypes.Vec(c1)) for c0, c1 in expected]
+            self.assertEqual(result, expected, f"Test case {test_case} failed")
 
 
 if __name__ == '__main__':

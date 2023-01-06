@@ -25,6 +25,7 @@ import math
 
 from orbitit import geomtypes
 
+
 class Line(geomtypes.Line):
     """Model a line in 2D"""
 
@@ -47,7 +48,9 @@ class Line(geomtypes.Line):
         return: the factor as a geomtypes.RoundedFloat number or None if the object don't share one
         point (e.g.lines are parallel).
         """
-        assert isinstance(l, Line), f"Only 2D lines are supported when intersecting, got {l}"
+        assert isinstance(
+            l, Line
+        ), f"Only 2D lines are supported when intersecting, got {l}"
         nom = geomtypes.RoundedFloat(l.v[0] * self.v[1] - l.v[1] * self.v[0])
         if not nom == 0:
             denom = l.v[0] * (l.p[1] - self.p[1]) + l.v[1] * (self.p[0] - l.p[0])
@@ -55,11 +58,61 @@ class Line(geomtypes.Line):
         return None
 
     def intersect(self, l):
-        """returns the point of intersection with line l or None if no one solution.
+        """returns the point of intersection with line l or None if not exactly one solution.
 
         See intersect_get_factor
         """
         return self.get_point(self.intersect_get_factor(l))
+
+    def intersect_polygon_get_factor(self, p, add_edges=False):
+        """returns a list of factors where the line inters the polygon p.
+
+        p: an object of Polygon
+        add_edges: if set to True if an edge is shared with the line, it is added as intersection
+
+        return a list of two tuples with are the factor of the line. Eacho tuple consist of a factor
+            where the line enters the polygon and where it exits.
+        """
+        factors = []
+        for e_index, edge in enumerate(p.es):
+            edge_line = Line(p[edge[0]], p[edge[1]])
+            factor = edge_line.intersect_get_factor(self)
+            if factor is not None:
+                if 0 < factor < 1:
+                    factors.append(self.intersect_get_factor(edge_line))
+                elif factor in (0, 1):
+                    # Touching a vertex can eiter mean enter/exit or not. This depends on whether
+                    # the previous and next vertex are on different sides (enter / exit) or on the
+                    # the same side (no intersection)
+                    if factor == 0:
+                        v_index = e_index
+                        v_prev = v_index - 1
+                        v_next = v_index + 1
+                        if (
+                            self.at_side_of(p[v_prev]) != self.at_side_of(p[v_next])
+                            # if also on previous vertex, then this line was on previous edge
+                            and not self.at_side_of(p[v_prev]) == 0
+                        ):
+                            factors.append(self.intersect_get_factor(edge_line))
+                    # else factor == 1 is taken care of at neighbouring edge for which factor == 0
+            else:
+                # the line could be on the edge:
+                if add_edges and edge_line.v == self.v and self.is_on_line(edge_line.p):
+                    factors.append(self.get_factor(edge_line.get_point(0)))
+                    factors.append(self.get_factor(edge_line.get_point(1)))
+        assert len(factors) % 2 == 0, "There should be an even amount of factors"
+        factors.sort()
+        return [(factors[i], factors[i + 1]) for i in range(0, len(factors), 2)]
+
+    def intersect_polygon(self, p, add_edges=False):
+        """returns a list of segments where the line inters the polygon p.
+
+        See intersect_get_factor
+        """
+        return [
+            (self.get_point(f0), self.get_point(f1))
+            for f0, f1 in self.intersect_polygon_get_factor(p, add_edges)
+        ]
 
     def at_side_of(self, v):
         """Return on which side of the line the vertex is (with respect to the direction v)
@@ -85,6 +138,7 @@ class Line(geomtypes.Line):
             return 1
         return -1
 
+
 class Polygon:
     """Represent a polygon (convex or concave) in 2D.
 
@@ -105,7 +159,7 @@ class Polygon:
         self._coords = tuple(coords)
         self._vs = tuple(vs)
         n = len(self._vs)
-        self._es = tuple([(self._vs[i], self.vs[(i + 1) % n]) for i in range(n)])
+        self._es = tuple([(i, (i + 1) % n) for i in range(n)])
 
     @property
     def coords(self):
@@ -121,7 +175,8 @@ class Polygon:
     def es(self):
         """Get the tuple of all edges.
 
-        Each edge is a 2-tuple consisting of indices in self.vs
+        Each edge is a 2-tuple consisting of indices in self.vs. Note these aren't indices in
+            self.coords, i.e. use these in self[..]
         """
         return self._es
 
@@ -150,6 +205,9 @@ class Polygon:
                 if start == stop:
                     start -= n
                 start_0 = step - (start - n) % step - 1
-                idx = self._vs[slice(start, n, step)] + self._vs[slice(start_0, stop, step)]
+                idx = (
+                    self._vs[slice(start, n, step)]
+                    + self._vs[slice(start_0, stop, step)]
+                )
             return [self.coords[i] for i in idx]
         return self.coords[self._vs[key % n]]
