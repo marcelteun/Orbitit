@@ -1924,7 +1924,7 @@ class CompoundShape(base.Orbitit):
         self.merge_needed = False
         # This is save so heirs can still use repr_dict from this class
         self.json_class = CompoundShape
-        self.setShapes(shapes)
+        self.set_shapes(shapes)
         if regen_edges:
             self.regen_edges()
 
@@ -1997,7 +1997,7 @@ class CompoundShape(base.Orbitit):
         for shape in self._shapes:
             shape.gl_alwaysSetVertices(do)
 
-    def setShapes(self, shapes):
+    def set_shapes(self, shapes):
         """
         Set the shapes all at once.
 
@@ -2549,7 +2549,7 @@ class SymmetricShape(CompoundShape):
             )
             for i, isom in enumerate(self.isometries)
         ]
-        self.setShapes(shapes)
+        self.set_shapes(shapes)
         self.needs_apply_isoms = False
 
     @property
@@ -2707,7 +2707,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
             )
             for i, isom in enumerate(self.isometries)
         ]
-        self.setShapes(shapes)
+        self.set_shapes(shapes)
         self.needs_apply_isoms = False
 
 

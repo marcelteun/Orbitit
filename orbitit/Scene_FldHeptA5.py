@@ -374,7 +374,7 @@ class Shape(heptagons.FldHeptagonShape):
                 theShapes.append(this.xtraTrisShape)
         for isom_shape in theShapes:
             isom_shape.show_base_only = not this.apply_symmetries
-        this.setShapes(theShapes)
+        this.set_shapes(theShapes)
         #rad = this.getRadii()
         this.update_shape = False
 

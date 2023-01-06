@@ -125,7 +125,7 @@ Scene_Orbit:
 		TODO fix the following orbit test: apply, rotate, then colour:
 			no rotation
 		TODO cannot handle compound of isometric shapes:
-			in CompoundShape.setShapes:
+			in CompoundShape.set_shapes:
 				shape.gl.alwaysSetVertices = True
 
 	2012-02-26
