@@ -1765,7 +1765,7 @@ class SimpleShape(base.Orbitit):
                 f"(margin: {geomtypes.FloatHandler.margin})"
             )
 
-            line_2d = Line2D([line_3d.p[0], line_3d.p[1]], v=[line_3d.v[0], line_3d.v[1]])
+            line_2d = Line2D(line_3d.p[:2], v=line_3d.v[:2])
             # now find the segment of line_2d within the face.
             # TODO The next call is strange. It is a call to a Line2D
             # intersecting a 3D face. It should be a mode dedicated
