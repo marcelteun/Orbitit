@@ -1823,7 +1823,8 @@ class SimpleShape(base.Orbitit):
             # updated_factors: the valid factors resulting in combining the above.
             new_factors = []
             for face_to_intersect_with in faces_to_intersect_with:
-                line_factors_1 = line_2d.intersect_with_face(vs, face_to_intersect_with, z)
+                polygon_2d = geom_2d.Polygon([v[:2] for v in vs], face_to_intersect_with)
+                line_factors_1 = line_2d.intersect_polygon_get_factors(polygon_2d)
                 logging.debug("line_factors_1 %s", line_factors_1)
                 # Now combine the results of line_factors_0 and line_factors_1:
                 # Only keep intersections that fall within 2 segments for
