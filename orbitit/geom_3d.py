@@ -275,204 +275,6 @@ class Fields:
     pass
 
 
-# FIXME: should be removed here
-class Line2D(geom_2d.Line):
-    """Continuation of geom_2d.Line2D."""
-
-    # FIXME: this is a weird method to have here.
-    # TODO: rewrite and clean up this mess
-    def intersect_with_face(
-        self,
-        vs,
-        face,
-        z0=0.0,
-    ):
-        """
-        Intersect the 2D line object in plane z = Z0 with a face in 3D
-
-        The 2D line object is lying in plane z = z0.
-        The result is cleaned up in such a way that intersections with vertices
-        that just touch the a vertex without entering or exiting the face are
-        removed.
-
-        vs: the (possible 3 dimensional) vertices
-        face: the indices that form this face. The indices refer to vs
-        z0    : defines the plane in which the 2D line is lying
-
-        return:
-        A list of line segments, where each segment is a two-uple with the factors of the line where
-            it intersects the edges. If no intersections are found an empty list is returned.
-        """
-        # Algorithm:
-        # PART 1.
-        # For each edge is checked if it intersects plane z = z0 in a point.
-        # If so the algorithm calculates the intersection point and checks if it
-        # lies on the line.
-        # If the edge lies in the plane the intersection of the 2 lines 2D are
-        # calculated.
-        # Otherwise the edges is parallel to the plane z = z0: no intersection.
-        #
-        # line_segments contains the factors in a line for the points where
-        # the line intersects the sides of face.
-        z0 = geomtypes.RoundedFloat(z0)
-        line_segments = []
-        no_of_vs = len(face)
-        logging.debug("face indices: %s", face)
-        vertex_intersections = []
-        for vertex_idx, v0_idx in enumerate(face):
-            v0 = vs[v0_idx]
-            v1 = vs[face[(vertex_idx + 1) % no_of_vs]]
-            v0 = geomtypes.Vec(v0)
-            v1 = geomtypes.Vec(v1)
-            logging.debug(
-                "==> intersect line with edge nr %d = %s -> %s",
-                vertex_idx,
-                v0,
-                v1,
-            )
-            logging.debug("(with this current line object: %s + t*%s)", self.p, self.v)
-
-            # PART 1.
-            edge_3d = Line3D(v0, v=v1 - v0)
-            edge_factor = edge_3d.get_factor_at(z0, 2)
-            line_factor = None
-            if edge_factor is not None:
-                if 0 <= edge_factor <= 1:
-                    logging.debug(
-                        "edge intersects plane z = %f, in a point (edge_factor = %f)",
-                        z0,
-                        edge_factor,
-                    )
-                    try:
-                        line_factor = self.get_factor(edge_3d.get_point(edge_factor))
-                    except ValueError:
-                        line_factor = None
-                else:
-                    logging.debug(
-                        "edge intersects plane z = %f but only if extended (edge_factor = %f)",
-                        z0,
-                        edge_factor,
-                    )
-            else:
-                # Either the edge lies in the plane z = z0
-                # or it is parallel with this plane
-                if z0 == v0[2]:
-                    logging.debug("edge lies in plane z = %f", z0)
-                    edgePV2D = Line2D(v0[:2], v=(v1 - v0)[:2])
-                    edge_factor = edgePV2D.intersect_get_factor(self)
-                    if edge_factor is not None:
-                        if 0 <= edge_factor <= 1:
-                            line_factor = self.intersect_get_factor(edgePV2D)
-                        else:
-                            logging.debug(
-                                "edge intersects line but only if extended (edge_factor = %f)",
-                                edge_factor,
-                            )
-                    else:
-                        # fix get_factor so that just get_factor is needed.
-                        if self.is_on_line(v0):
-                            edge_factor = 0
-                            line_factor = self.get_factor(v0)
-                            logging.debug("edge is on the line")
-                        else:
-                            logging.debug("edge is parallel to the line")
-                else:
-                    logging.debug("edge parallel to plane z = %f (no point of intersection)", z0)
-            if line_factor is not None:
-                logging.debug(
-                    "FOUND line_factor = %s with v = %s",
-                    line_factor,
-                    self.get_point(line_factor),
-                )
-                # only add vertex intersections once (otherwise you add the
-                # intersection for edge_i and edge_i+1
-                # TODO: When you cut a vertex (only) then one should look whether next and previous
-                # are one different sides of the line (add, since enter or exit) or on the same side
-                # (do not add, since no enter or exit)
-                # This would assume the face in in the plane (otherwise the norm must be used (above
-                # or under plane). This would mean splitting the function. It is probably better to
-                # translate to z=0 and rotate all vertices to so the face is in the plane z=0
-                if edge_factor != 1:
-                    # each item is an array that holds
-                    # 0. the vertex nr
-                    # 1. the index of s in line_segments
-                    if edge_factor == 0:
-                        vertex_intersections.append([vertex_idx, len(line_segments)])
-                        logging.debug("vertex intersection at v0")
-                    line_segments.append(line_factor)
-                    logging.debug("added line_factor = %s", line_factor)
-                else:
-                    logging.debug("vertex intersection at v1, ignored")
-
-        logging.debug("line intersects edges (vertices) at s = %s", line_segments)
-        logging.debug("vertex intersections: %s", vertex_intersections)
-        no_of_intersections_with_vs = len(vertex_intersections)
-        allow_odd_no_of_intersections = False
-        if no_of_intersections_with_vs == 0:
-            pass
-        elif no_of_intersections_with_vs == 1:
-            # remove if nr of intersections is odd:
-            if len(line_segments) % 2 == 0:
-                # e.g. and intersection through a vertex and an edge:
-                pass
-            else:
-                # e.g. the line touches a vertex
-                # remove:
-                del line_segments[vertex_intersections[0][1]]
-        elif no_of_intersections_with_vs == 2:
-            # if these 2 vertices form an edge:
-            v_index_delta = vertex_intersections[1][0] - vertex_intersections[0][0]
-            if v_index_delta == 1 or v_index_delta == no_of_vs - 1:
-                # (part of) the line of intersection is an edge
-                # keep it (note that the edge might continue in a line of
-                # intersection for a concave face, which might lead to an odd
-                # nr of intersections.
-                allow_odd_no_of_intersections = True
-        else:
-            # check if all vertices are lying on one line:
-            all_on_one_edge = True
-            for vdI in range(no_of_intersections_with_vs - 1):
-                v_index_delta = vertex_intersections[1][0] - vertex_intersections[0][0]
-                # e.g. a heptagon that is really a pentagon, since it happens
-                # twice that 3 vertices ly on one line: v0, v1, v2 and  v0, v5,
-                # v6. So either a difference of 1 or at least 5 is allowed.
-                if not (
-                    v_index_delta == 1
-                    or v_index_delta
-                    >= no_of_vs - (no_of_intersections_with_vs - 1)
-                ):
-                    all_on_one_edge = False
-            if all_on_one_edge:
-                # see remark above for no_of_intersections_with_vs == 2
-                allow_odd_no_of_intersections = True
-            else:
-                # more than 2: complex cases.
-                logging.debug(
-                    "Intersections through more than 2 vertices (not on one edge)\n"
-                    "\tvertexIntersections: %s\n"
-                    "\tpOnLineAtEdges: %s\n"
-                    "\twill draw one long line, instead of segments",
-                    vertex_intersections,
-                    line_segments
-                )
-                # assert False, 'ToDo'
-                # if an assert is not wanted, choose pass.
-                # allow_odd_no_of_intersections = True
-                line_segments.sort()
-                line_segments = [line_segments[0], line_segments[-1]]
-                logging.debug("\tusing line_segments %s", line_segments)
-        line_segments.sort()
-
-        logging.debug("line_segments %s after clean up", line_segments)
-        assert len(line_segments) % 2 == 0 or allow_odd_no_of_intersections, (
-            "The nr of intersections should be even, "
-            "are all edges unique and do they form one closed face?"
-        )
-        # FIXME: Must handle allow_odd_no_of_intersections first
-        return [
-            (line_segments[i], line_segments[i + 1]) for i in range(0, len(line_segments), 2)
-        ]
-
 class Line3D(geomtypes.Line):
     str_precision = 2
 
@@ -1746,9 +1548,9 @@ class SimpleShape(base.Orbitit):
         z: the z-coordinate for the horizontal plane.
         vs: the vertex indices as used for the face.
 
-        return: a tuple with a Line2D object and a list of line factors that form line segments of
-            where the face intersects the horizontal plane. Each segment is represented by one pair
-            of factors (2-tuple).
+        return: a tuple with a geom_2d.Line object and a list of line factors that form line
+            segments of where the face intersects the horizontal plane. Each segment is represented
+            by one pair of factors (2-tuple).
         """
         line_3d = hor_plane.intersect_with_plane(face_plane)
         if line_3d is None:
@@ -1765,7 +1567,7 @@ class SimpleShape(base.Orbitit):
                 f"(margin: {geomtypes.FloatHandler.margin})"
             )
 
-            line_2d = Line2D(line_3d.p[:2], v=line_3d.v[:2])
+            line_2d = geom_2d.Line(line_3d.p[:2], v=line_3d.v[:2])
             # Get the line_2d elements where it intersects the face. One can do this as follows
             #  - translate face plane to XOY (T1)
             #  - translate to rotate around the line (put a point of line in origin) (T2)
@@ -1805,13 +1607,14 @@ class SimpleShape(base.Orbitit):
         horizontal plane, check how much of these segments are valid segments in the face(s) we are
         intersecting with, i.e. the face(s) in that horizontal plane.
 
-        intersection_lines: an list of tuples consisting of a Line2D object and a list of line factors
-            that are valid factors for the faces that intersect the specified faces
+        intersection_lines: an list of tuples consisting of a geom_2d.Line object and a list of line
+            factors that are valid factors for the faces that intersect the specified faces
         faces_to_intersect_with: the faces that are intersected with the intersection_lines.
         z: the z-coordinate for the horizontal plane.
         vs: the vertex indices as used for the face.
 
-        return: An updated list of tuples consisting of a Line2D object and a list of line factors.
+        return: An updated list of tuples consisting of a geom_2d.Line object and a list of line
+            factors.
         """
         # for each intersecting line segment:
         resulting_intersections = []
