@@ -64,7 +64,7 @@ class Line(geomtypes.Line):
         """
         return self.get_point(self.intersect_get_factor(l))
 
-    def intersect_polygon_get_factor(self, p, add_edges=False):
+    def intersect_polygon_get_factors(self, p, add_edges=False):
         """returns a list of factors where the line inters the polygon p.
 
         p: an object of Polygon
@@ -111,7 +111,7 @@ class Line(geomtypes.Line):
         """
         return [
             (self.get_point(f0), self.get_point(f1))
-            for f0, f1 in self.intersect_polygon_get_factor(p, add_edges)
+            for f0, f1 in self.intersect_polygon_get_factors(p, add_edges)
         ]
 
     def at_side_of(self, v):

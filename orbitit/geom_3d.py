@@ -1766,12 +1766,32 @@ class SimpleShape(base.Orbitit):
             )
 
             line_2d = Line2D(line_3d.p[:2], v=line_3d.v[:2])
-            # now find the segment of line_2d within the face.
-            # TODO The next call is strange. It is a call to a Line2D
-            # intersecting a 3D face. It should be a mode dedicated
-            # call. The line is in the plane of the face and we want to
-            # know where it shares edges.
-            line_factors = line_2d.intersect_with_face(vs, intersecting_face, z)
+            # Get the line_2d elements where it intersects the face. One can do this as follows
+            #  - translate face plane to XOY (T1)
+            #  - translate to rotate around the line (put a point of line in origin) (T2)
+            #  - rotate around line so the the plane normal is parallel to the z-axis
+            #  - translate the face back within the XoY plane (-T2)
+            #  - intersect in 2D
+            # However this makes the algorithm very slow. Is is quicker just to project the whole
+            # face orthogonally to the XoY plane. The same line factors will be obtained, unless the
+            # face is orthogonal, or almost for precision reasons, to the XoY plane.
+            z_axis = VEC(0, 0, 1)
+            with geomtypes.FloatHandler(1):
+                simplify = face_plane.N != z_axis
+            if simplify:
+                vs_2d = [v[:2] for v in vs]
+            else:
+                t1_and_2 = -line_3d.p
+                # translate with T1 and T2:
+                vs = [c - line_3d.p for c in vs]
+                # rotate to make plane horizontal and translate back (-T2)
+                to_hor_angle = geomtypes.RoundedFloat(math.acos(z_axis * face_plane.N))
+                rot_mat = geomtypes.Rot3(angle=to_hor_angle, axis=line_3d.v)
+                t_back = line_3d.p[:]
+                vs_2d = [geomtypes.Vec((rot_mat * v)[:2]) + t_back for v in vs]
+
+            polygon_2d = geom_2d.Polygon(vs_2d, intersecting_face)
+            line_factors = line_2d.intersect_polygon_get_factors(polygon_2d)
             logging.debug("line factors %s", line_factors)
             if line_factors != []:
                 return (line_2d, line_factors)
