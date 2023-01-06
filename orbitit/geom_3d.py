@@ -37,7 +37,7 @@ import wx
 
 from OpenGL import GL
 
-from orbitit import base, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D
+from orbitit import base, geom_2d, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D
 
 # TODO:
 # - Test the gl stuf of SimpleShape: create an Interactive3DCanvas
@@ -275,181 +275,9 @@ class Fields:
     pass
 
 
-class Line:
-    def __init__(self, p0, p1=None, v=None, d=None, is_segment=False):
-        """
-        Define a line in a d dimensional space.
-
-        Either specify two distinctive points p0 and p1 on the d dimensional
-        line or specify a base point p0 and directional vector v. Points p0 and
-        p1 should have accessable [0] .. [d-1] indices.
-        """
-        assert (
-            p1 is None or v is None
-        ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
-        self.is_segment = is_segment
-        if d:
-            self.dimension = d
-            assert len(p0) >= d
-        else:
-            self.dimension = len(p0)
-        p0 = self._chk_point(p0)
-        if p1 is not None:
-            self._set_points(p0, self._chk_point(p1))
-        elif v is not None:
-            self._define_line(p0, self._chk_point(v))
-
-    def _chk_point(self, v):
-        """Check dimension and ensure vector type."""
-        assert len(v) == self.dimension, (
-            f"Wrong dimension vector, got {v}, expected {self.dimension}"
-        )
-        #if len(v) > self.dimension:
-        #    v = v[:self.dimension]
-        if not isinstance(v, geomtypes.Vec):
-            v = geomtypes.Vec(v)
-        return v
-
-    def _set_points(self, p0, p1):
-        """From two points 'p0' and 'p1' define the line."""
-        self._define_line(p0, p1 - p0)
-
-    def _define_line(self, p, v):
-        """From a point 'p' and a direction vector 'v' define the line."""
-        self.p = p
-        self.v = v
-
-    def get_point(self, t):
-        """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)
-
-        return: the point is an instance of geomtypes.Vec
-        """
-        if t is not None:
-            return geomtypes.Vec([self.p[i] + t * (self.v[i]) for i in range(self.dimension)])
-        return geomtypes.Vec([])
-
-    def get_factor_at(self, c, i):
-        """
-        For an n-dimensional line l = p + t.v it get the factor t for which p[i] + t.v[i] = c
-
-        c: the constant
-        i: index of element that should equal to c
-
-        return: a RoundedFloat number or None if:
-           1. the line lies in the (n-1) (hyper)plane x_i == c
-           2. or the line never intersects the (n-1) (hyper)plane x_i == c.
-        """
-        if not geomtypes.FloatHandler.eq(self.v[i], 0.0):
-            return geomtypes.RoundedFloat((c - self.p[i]) / self.v[i])
-        return None
-
-    def is_on_line(self, v):
-        """
-        Return True if vertex 'v' is on the line, False otherwise
-
-        v: a point which should be an instance of geomtypes.Vec with the same dimension of the line.
-        """
-        t = None
-        for i, v_i in enumerate(v):
-            t = self.get_factor_at(v_i, i)
-            if t is not None:
-                break
-            # else either 0 or an infinite amount of solutions (e.g. line x == 1 while looking for
-            # specific x coordinate)
-        assert t is not None
-        return self.get_point(t) == v
-
-    def get_factor(self, p, check=True):
-        """Assuming the point p lies on the line, the factor is returned.
-
-        If the line is a segment. i.e. if the line isn't infinite a ValueError is raised if it
-        isn't on the segment.
-
-        p: a point which should be an instance of geomtypes.Vec
-        check: if set, then the method will check whether the point is on the line using the current
-        precision of geomtypes.FloatHandler. If not a ValueError is raised.
-
-        """
-        for i in range(self.dimension):
-            t = self.get_factor_at(p[i], i)
-            if not t is None:
-                break
-        assert t is not None
-        if check:
-            c = self.get_point(t)
-            if not c == p[:self.dimension]:
-                logging.warning(
-                    "The point is not on the line; yDiff = %f", c[i] - p[i]
-                )
-                raise ValueError("The point is not on the line according to the current precision")
-        if self.is_segment:
-            if not (0 <= t <= 1):
-                logging.warning("The point is not on the line segment; t = %f not in [0, 1]", t)
-                raise ValueError("The point is not on the line segment (with current precisio)")
-        return geomtypes.RoundedFloat(t)
-
-    def __repr__(self):
-        """Get a string representation of the line."""
-        return f"{self.p} + t.{self.v}"
-
-
-class Line2D(Line):
-    def __init__(self, p0, p1=None, v=None, is_segment=False):
-        """
-        Define a line in a 2D plane.
-
-        Either specify two distinctive points p0 and p1 on the line or specify
-        a base point p0 and directional vector v. Points p0 and p1 should have
-        accessable [0] and [1] indices.
-        """
-        Line.__init__(self, p0, p1, v, d=2, is_segment=is_segment)
-
-    def intersect_get_factor(self, l):
-        """Gets the factor for the vertex for which the l intersects this line
-
-        I.e. the point of intersection is specified by self.p + result * self.v
-        l: the object to intersect with. Currently only a 2D line is supported.
-
-        return: the factor as a geomtypes.RoundedFloat number or None if the object don't share one
-        point (e.g.lines are parallel).
-        """
-        assert isinstance(l, Line2D), f"Only 2D lines are supported when intersecting, got {l}"
-        nom = geomtypes.RoundedFloat(l.v[0] * self.v[1] - l.v[1] * self.v[0])
-        if not nom == 0:
-            denom = l.v[0] * (l.p[1] - self.p[1]) + l.v[1] * (self.p[0] - l.p[0])
-            return geomtypes.RoundedFloat(denom / nom)
-        return None
-
-    def intersect(self, l):
-        """returns the point of intersection with line l or None if no one solution.
-
-        See intersect_get_factor
-        """
-        return self.get_point(self.intersect_get_factor(l))
-
-    def at_side_of(self, v):
-        """Return on which side of the line the vertex is (with respect to the direction v)
-
-        v: a point which should be an instance of geomtypes.Vec with the same dimension of the line.
-
-        return one of the following:
-            -1 if the vertex is left of the line
-            0 if the vertex is on the line
-            1 if the vertex is right of the line
-        """
-        if self.is_on_line(v):
-            return 0
-        p0_to_v = v - self.p
-        p0_angle = math.atan2(p0_to_v[1], p0_to_v[0])
-        line_angle = math.atan2(self.v[1], self.v[0])
-        delta = p0_angle - line_angle
-        if delta > math.pi:
-            delta -= 2 * math.pi
-        if delta < -math.pi:
-            delta += 2 * math.pi
-        if delta < 0:
-            return 1
-        return -1
+# FIXME: should be removed here
+class Line2D(geom_2d.Line):
+    """Continuation of geom_2d.Line2D."""
 
     # FIXME: this is a weird method to have here.
     # TODO: rewrite and clean up this mess
@@ -645,8 +473,7 @@ class Line2D(Line):
             (line_segments[i], line_segments[i + 1]) for i in range(0, len(line_segments), 2)
         ]
 
-
-class Line3D(Line):
+class Line3D(geomtypes.Line):
     str_precision = 2
 
     def __init__(self, p0, p1=None, v=None, is_segment=False):
@@ -662,11 +489,11 @@ class Line3D(Line):
         if p1 is None:
             assert v is not None
             v = geomtypes.Vec3(v)
-            Line.__init__(self, p0, v=v, d=3, is_segment=is_segment)
+            geomtypes.Line.__init__(self, p0, v=v, d=3, is_segment=is_segment)
         else:
             assert v is None
             p1 = geomtypes.Vec3(p1)
-            Line.__init__(self, p0, p1, d=3, is_segment=is_segment)
+            geomtypes.Line.__init__(self, p0, p1, d=3, is_segment=is_segment)
 
     # redefine to get vec3 types:
     def _set_points(self, p0, p1):

@@ -27,7 +27,7 @@
 import unittest
 
 from orbitit import geom_3d
-from tst_geom3d import get_path, IN_DIR, OUT_DIR, TestSimpleShape
+from test_geom_3d import get_path, IN_DIR, OUT_DIR, TestSimpleShape
 
 red = (.8, .1, .1)
 yellow = (.8, .8, .3)

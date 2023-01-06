@@ -24,7 +24,7 @@ Module with geometrical types.
 #
 # ------------------------------------------------------------------
 # Old sins:
-# pylint: disable=too-many-lines,too-many-branches
+# pylint: disable=too-many-lines,too-many-branches,too-many-arguments
 
 
 import json
@@ -1726,6 +1726,126 @@ class Mat(list):
             raise ValueError(f"No solution for {self}")
         return Vec(
             [self.replace_col(i, v).det() / det for i in range(self.cols)])
+
+
+class Line:
+    """A base class for representing a line in any dimension."""
+
+    def __init__(self, p0, p1=None, v=None, d=None, is_segment=False):
+        """
+        Define a line in a d dimensional space.
+
+        Either specify two distinctive points p0 and p1 on the d dimensional
+        line or specify a base point p0 and directional vector v. Points p0 and
+        p1 should have accessable [0] .. [d-1] indices.
+        """
+        assert (
+            p1 is None or v is None
+        ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
+        self.is_segment = is_segment
+        if d:
+            self.dimension = d
+            assert len(p0) >= d
+        else:
+            self.dimension = len(p0)
+        p0 = self._chk_point(p0)
+        if p1 is not None:
+            self._set_points(p0, self._chk_point(p1))
+        elif v is not None:
+            self._define_line(p0, self._chk_point(v))
+
+    def _chk_point(self, v):
+        """Check dimension and ensure vector type."""
+        assert len(v) == self.dimension, (
+            f"Wrong dimension vector, got {v}, expected {self.dimension}"
+        )
+        #if len(v) > self.dimension:
+        #    v = v[:self.dimension]
+        if not isinstance(v, Vec):
+            v = Vec(v)
+        return v
+
+    def _set_points(self, p0, p1):
+        """From two points 'p0' and 'p1' define the line."""
+        self._define_line(p0, p1 - p0)
+
+    def _define_line(self, p, v):
+        """From a point 'p' and a direction vector 'v' define the line."""
+        self.p = p
+        self.v = v
+
+    def get_point(self, t):
+        """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)
+
+        return: the point is an instance of Vec
+        """
+        if t is not None:
+            return Vec([self.p[i] + t * (self.v[i]) for i in range(self.dimension)])
+        return Vec([])
+
+    def get_factor_at(self, c, i):
+        """
+        For an n-dimensional line l = p + t.v it get the factor t for which p[i] + t.v[i] = c
+
+        c: the constant
+        i: index of element that should equal to c
+
+        return: a RoundedFloat number or None if:
+           1. the line lies in the (n-1) (hyper)plane x_i == c
+           2. or the line never intersects the (n-1) (hyper)plane x_i == c.
+        """
+        if not FloatHandler.eq(self.v[i], 0.0):
+            return RoundedFloat((c - self.p[i]) / self.v[i])
+        return None
+
+    def is_on_line(self, v):
+        """
+        Return True if vertex 'v' is on the line, False otherwise
+
+        v: a point which should be an instance of Vec with the same dimension of the line.
+        """
+        t = None
+        for i, v_i in enumerate(v):
+            t = self.get_factor_at(v_i, i)
+            if t is not None:
+                break
+            # else either 0 or an infinite amount of solutions (e.g. line x == 1 while looking for
+            # specific x coordinate)
+        assert t is not None
+        return self.get_point(t) == v
+
+    def get_factor(self, p, check=True):
+        """Assuming the point p lies on the line, the factor is returned.
+
+        If the line is a segment. i.e. if the line isn't infinite a ValueError is raised if it
+        isn't on the segment.
+
+        p: a point which should be an instance of geomtypes.Vec
+        check: if set, then the method will check whether the point is on the line using the current
+        precision of geomtypes.FloatHandler. If not a ValueError is raised.
+
+        """
+        for i in range(self.dimension):
+            t = self.get_factor_at(p[i], i)
+            if not t is None:
+                break
+        assert t is not None
+        if check:
+            c = self.get_point(t)
+            if not c == p[:self.dimension]:
+                logging.warning(
+                    "The point is not on the line; yDiff = %f", c[i] - p[i]
+                )
+                raise ValueError("The point is not on the line according to the current precision")
+        if self.is_segment:
+            if not 0 <= t <= 1:
+                logging.warning("The point is not on the line segment; t = %f not in [0, 1]", t)
+                raise ValueError("The point is not on the line segment (with current precisio)")
+        return RoundedFloat(t)
+
+    def __repr__(self):
+        """Get a string representation of the line."""
+        return f"{self.p} + t.{self.v}"
 
 
 # Classes that support conversion from and to JSON:

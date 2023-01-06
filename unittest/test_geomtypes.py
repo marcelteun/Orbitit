@@ -1295,5 +1295,50 @@ class TestMat(unittest.TestCase):
         self.assertEqual(m.solve(b), m_i * b)
 
 
+class TestLine(unittest.TestCase):
+    """Unit tests for geomtypes.Line"""
+
+    def test_get_factor_at_std(self):
+        """Test get_factor_at with some exact (integer) solutions"""
+        test_matrix = {  # test_case: (point, vector, value, i, expected t)
+            "2D line x int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 0, -1),
+            "2D line y int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 1, -2),
+            "3D line x int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 0, -1),
+            "3D line y int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 1, -2),
+            "3D line z int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 2, -3),
+            "3D line z None": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 0]), 0, 2, None),
+        }
+        for case, (p0, v, c, i, expect) in test_matrix.items():
+            line = geomtypes.Line(p0, v=v)
+            result = line.get_factor_at(c, i)
+            d = ", delta = {result - expect}" if result is not None and expect is not None else ""
+            self.assertTrue(
+                result == expect,
+                f"Error for '{case}': {result} != {expect} (expected)" + d
+            )
+
+    def test_get_factor_at_margins(self):
+        """Test get_factor_at with solutions where rounding is involved"""
+        test_matrix = {  # test_case: (point, vector, value, i, expected t)
+            "2D line x int": (geomtypes.Vec([1, 2]), geomtypes.Vec([1, 1]), 0, 0, -1.00009),
+            "3D line x int": (geomtypes.Vec([1, 2, 3]), geomtypes.Vec([1, 1, 1]), 0, 0, -1.00009),
+        }
+        for case, (p0, v, c, i, expect) in test_matrix.items():
+            line = geomtypes.Line(p0, v=v)
+            result = line.get_factor_at(c, i)
+            precision = 4
+            with geomtypes.FloatHandler(precision):
+                self.assertTrue(
+                    result == expect,
+                    f"Error for '{case}': delta: {result - expect} > 1 * 10^-{precision}"
+                )
+            precision = 5
+            with geomtypes.FloatHandler(precision):
+                self.assertFalse(
+                    result == expect,
+                    f"Error for '{case}': delta: {result - expect} < 1 * 10^-{precision}"
+                )
+
+
 if __name__ == '__main__':
     unittest.main()
