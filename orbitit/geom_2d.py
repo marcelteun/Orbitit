@@ -102,12 +102,14 @@ class Polygon:
         vs: a list of indices expressing which vertices to connect. The last and the first are
             connected implicitely.
         """
-        self._coords = coords
-        self._vs = vs
+        self._coords = tuple(coords)
+        self._vs = tuple(vs)
+        n = len(self._vs)
+        self._es = tuple([(self._vs[i], self.vs[(i + 1) % n]) for i in range(n)])
 
     @property
     def coords(self):
-        """Get the list of coordinates."""
+        """Get the tuple of coordinates."""
         return self._coords
 
     @property
@@ -117,8 +119,11 @@ class Polygon:
 
     @property
     def es(self):
-        """Get the list edge indices."""
-        return self._vs
+        """Get the tuple of all edges.
+
+        Each edge is a 2-tuple consisting of indices in self.vs
+        """
+        return self._es
 
     def __getitem__(self, key):
         """Return the coordinate of specified slice modulo the amount of vertices.

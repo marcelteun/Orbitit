@@ -139,8 +139,20 @@ class TestPolygon(unittest.TestCase):
         }
         for test_case, (c, vs, idx, expected) in test_matrix.items():
             p = geom_2d.Polygon(c, vs)
-            v = p[idx]
-            self.assertEqual(v, expected, f"Test case {test_case} failed")
+            self.assertEqual(p[idx], expected, f"Test case {test_case} failed")
+
+    def test_props(self):
+        """Test properties, coords, vs and es."""
+        test_matrix = {  # test case: coords, vs, expected edges
+            "empty": ([], [], ()),
+            "coords but empty": ([[0, 1], [1, 2]], [], ()),
+            "triangle": ([[0, 1], [1, 2], [-2, -2]], [0, 1, 2], ((0, 1), (1, 2), (2, 0))),
+        }
+        for test_case, (coords, vs, es) in test_matrix.items():
+            p = geom_2d.Polygon(coords, vs)
+            self.assertEqual(p.vs, tuple(vs), f"Test case {test_case} failed on vs")
+            self.assertEqual(p.coords, tuple(coords), f"Test case {test_case} failed on coords")
+            self.assertEqual(p.es, es, f"Test case {test_case} failed on edges")
 
 
 if __name__ == '__main__':
