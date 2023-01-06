@@ -84,3 +84,67 @@ class Line(geomtypes.Line):
         if delta < 0:
             return 1
         return -1
+
+class Polygon:
+    """Represent a polygon (convex or concave) in 2D.
+
+    The polygon consists of one set of connected edges, i.e. the polygon cannot have a hole
+    consisting of unconnected edges.
+
+    The direction of the connected edges are irrelevant.
+    """
+
+    def __init__(self, coords, vs):
+        """Initialize the polygon
+
+        coords: a list two dimension vertices. There may be any doublets in the list. There might be
+            coordinates in the list that aren't used.
+        vs: a list of indices expressing which vertices to connect. The last and the first are
+            connected implicitely.
+        """
+        self._coords = coords
+        self._vs = vs
+
+    @property
+    def coords(self):
+        """Get the list of coordinates."""
+        return self._coords
+
+    @property
+    def vs(self):
+        """Get the vertices."""
+        return self._vs
+
+    @property
+    def es(self):
+        """Get the list edge indices."""
+        return self._vs
+
+    def __getitem__(self, key):
+        """Return the coordinate of specified slice modulo the amount of vertices.
+
+        The slice will always result in maximum of one whole polygon.
+        """
+        n = len(self._vs)
+        if isinstance(key, slice):
+            start, stop, step = key.start, key.stop, key.step
+            if stop <= start:
+                # TODO: in this case you should itemize in the opposite direction
+                return []
+            start = start % n
+            if stop % n == 0:
+                stop = n
+            else:
+                stop = stop % n
+            if step is None:
+                step = 1
+            if start < stop:
+                idx = self._vs[slice(start, stop, step)]
+            else:
+                # wrap around
+                if start == stop:
+                    start -= n
+                start_0 = step - (start - n) % step - 1
+                idx = self._vs[slice(start, n, step)] + self._vs[slice(start_0, stop, step)]
+            return [self.coords[i] for i in idx]
+        return self.coords[self._vs[key % n]]

@@ -73,7 +73,7 @@ class TestLine(unittest.TestCase):
                 )
 
     def test_2d_line_left_or_right_side(self):
-        """Test function tat states on what side a point is."""
+        """Test function that states on what side a point is."""
         test_matrix = {  # test case: line, point, expected result
             "orig, orig": (geom_2d.Line([0, 0], [1, 1]), [0, 0], 0),
             "through orig, orig": (geom_2d.Line([-1, -1], [1, 1]), [0, 0], 0),
@@ -101,3 +101,47 @@ class TestLine(unittest.TestCase):
                 expected,
                 f"Test case {test_case} failed"
             )
+
+class TestPolygon(unittest.TestCase):
+    """Unit tests for geom_2d.Polygon"""
+
+    def test_slice(self):
+        """Test slice method."""
+        test_matrix = {  # test case: coords, vs, slice, expected result
+            "index 0": ([[0, 0], [1, 1], [2, 2]], [0, 1, 2], 0, [0, 0]),
+            "index -1": ([[0, 0], [1, 1], [2, 2]], [0, 1, 2], -1, [2, 2]),
+            "index high": ([[0, 0], [1, 1], [2, 2]], [0, 1, 2], 4, [1, 1]),
+            "start, stop inside": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(0, 2, None), [[0, 0], [1, 1]]
+            ),
+            "start, stop wrap once": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(-1, 1, None), [[2, 2], [0, 0]]
+            ),
+            "start, stop high wrap once": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(5, 7, None), [[2, 2], [0, 0]]
+            ),
+            "start, stop wrap multi": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(-1, 4, None), [[2, 2], [0, 0]]
+            ),
+            "start, stop, step inside": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(0, 3, 2), [[0, 0], [2, 2]]
+            ),
+            "start, stop, step wrap just": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(0, 3, 2), [[0, 0], [2, 2]]
+            ),
+            "start, stop, step wrap once": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(-1, 2, 2), [[2, 2], [1, 1]]
+            ),
+            # for now this doesn't work, #TODO implement opposite direction
+            "start, stop high opposite": (
+                [[0, 0], [1, 1], [2, 2]], [0, 1, 2], slice(5, 4, None), []
+            ),
+        }
+        for test_case, (c, vs, idx, expected) in test_matrix.items():
+            p = geom_2d.Polygon(c, vs)
+            v = p[idx]
+            self.assertEqual(v, expected, f"Test case {test_case} failed")
+
+
+if __name__ == '__main__':
+    unittest.main()
