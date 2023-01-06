@@ -192,6 +192,32 @@ class TestLine(unittest.TestCase):
                     f"Error for '{case}': delta |{result - expect}| < 1*10^-{precision}"
                 )
 
+    def test_2d_line_left_or_right_side(self):
+        """Test function tat states on what side a point is."""
+        test_matrix = {  # test case: line, point, expected result
+            "orig, orig": (geom_3d.Line2D([0, 0], [1, 1]), [0, 0], 0),
+            "through orig, orig": (geom_3d.Line2D([-1, -1], [1, 1]), [0, 0], 0),
+            "orig 45, left 1": (geom_3d.Line2D([-1, -1], [1, 1]), [0, 1], -1),
+            "orig 45, right 1": (geom_3d.Line2D([-1, -1], [1, 1]), [0, -1], 1),
+            "orig hor, on 1": (geom_3d.Line2D([0, 0], v=[1, 0]), [4, 0], 0),
+            "orig hor, left 1": (geom_3d.Line2D([0, 0], v=[1, 0]), [1, 2], -1),
+            "orig hor, left 2": (geom_3d.Line2D([0, 0], v=[-1, 0]), [-1, -2], -1),
+            "orig hor, right 1": (geom_3d.Line2D([0, 0], v=[1, 0]), [-1, -2], 1),
+            "orig hor, right 2": (geom_3d.Line2D([0, 0], v=[-1, 0]), [1, 2], 1),
+            "orig vert, on 1": (geom_3d.Line2D([0, 0], v=[0, 1]), [0, -2], 0),
+            "orig vert, left 1": (geom_3d.Line2D([0, 0], v=[0, 1]), [-3, 1], -1),
+            "orig vert, left 1": (geom_3d.Line2D([0, 0], v=[0, -1]), [3, -1], -1),
+            "orig vert, right 1": (geom_3d.Line2D([0, 0], v=[0, 1]), [3, -1], 1),
+            "orig vert, left 2": (geom_3d.Line2D([0, 0], v=[0, -1]), [-3, 1], 1),
+            "gen, on 1": (geom_3d.Line2D([-1, 1], v=[2, 1]), [3, 3], 0),
+            "gen, left 1": (geom_3d.Line2D([-1, 1], v=[2, 1]), [3, 5], -1),
+            "gen, left 2": (geom_3d.Line2D([-1, 1], v=[-2, -1]), [3, 0], -1),
+            "gen, right 1": (geom_3d.Line2D([-1, 1], v=[2, 1]), [3, 0], 1),
+            "gen, right 2": (geom_3d.Line2D([-1, 1], v=[-2, -1]), [3, 5], 1),
+        }
+        for test_case, (line, point, expected) in test_matrix.items():
+            self.assertEqual(line.at_side_of(point), expected, f"Test case {test_case} failed")
+
 
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape"""

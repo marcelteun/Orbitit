@@ -276,7 +276,7 @@ class Fields:
 
 
 class Line:
-    def __init__(self, p0, p1=None, v=None, d=3, is_segment=False):
+    def __init__(self, p0, p1=None, v=None, d=None, is_segment=False):
         """
         Define a line in a d dimensional space.
 
@@ -287,17 +287,32 @@ class Line:
         assert (
             p1 is None or v is None
         ), "Specify either 2 points p0 and p1 or a base point p0 and a direction v!"
-        self.dimension = len(p0)
         self.is_segment = is_segment
+        if d:
+            self.dimension = d
+            assert len(p0) >= d
+        else:
+            self.dimension = len(p0)
+        p0 = self._chk_point(p0)
         if p1 is not None:
-            self._set_points(p0, p1)
+            self._set_points(p0, self._chk_point(p1))
         elif v is not None:
-            self._define_line(p0, v)
+            self._define_line(p0, self._chk_point(v))
+
+    def _chk_point(self, v):
+        """Check dimension and ensure vector type."""
+        assert len(v) == self.dimension, (
+            f"Wrong dimension vector, got {v}, expected {self.dimension}"
+        )
+        #if len(v) > self.dimension:
+        #    v = v[:self.dimension]
+        if not isinstance(v, geomtypes.Vec):
+            v = geomtypes.Vec(v)
+        return v
 
     def _set_points(self, p0, p1):
         """From two points 'p0' and 'p1' define the line."""
-        d = [p1[i] - p0[i] for i in range(self.dimension)]
-        self._define_line(p0, d)
+        self._define_line(p0, p1 - p0)
 
     def _define_line(self, p, v):
         """From a point 'p' and a direction vector 'v' define the line."""
@@ -328,9 +343,9 @@ class Line:
             return geomtypes.RoundedFloat((c - self.p[i]) / self.v[i])
         return None
 
-    def v_is_on_line(self, v):
+    def is_on_line(self, v):
         """
-        Return True is V is on the line, False otherwise
+        Return True if vertex 'v' is on the line, False otherwise
 
         v: a point which should be an instance of geomtypes.Vec with the same dimension of the line.
         """
@@ -412,6 +427,30 @@ class Line2D(Line):
         """
         return self.get_point(self.intersect_get_factor(l))
 
+    def at_side_of(self, v):
+        """Return on which side of the line the vertex is (with respect to the direction v)
+
+        v: a point which should be an instance of geomtypes.Vec with the same dimension of the line.
+
+        return one of the following:
+            -1 if the vertex is left of the line
+            0 if the vertex is on the line
+            1 if the vertex is right of the line
+        """
+        if self.is_on_line(v):
+            return 0
+        p0_to_v = v - self.p
+        p0_angle = math.atan2(p0_to_v[1], p0_to_v[0])
+        line_angle = math.atan2(self.v[1], self.v[0])
+        delta = p0_angle - line_angle
+        if delta > math.pi:
+            delta -= 2 * math.pi
+        if delta < -math.pi:
+            delta += 2 * math.pi
+        if delta < 0:
+            return 1
+        return -1
+
     # FIXME: this is a weird method to have here.
     # TODO: rewrite and clean up this mess
     def intersect_with_face(
@@ -491,7 +530,7 @@ class Line2D(Line):
                 # or it is parallel with this plane
                 if z0 == v0[2]:
                     logging.debug("edge lies in plane z = %f", z0)
-                    edgePV2D = Line2D(v0, v=v1 - v0)
+                    edgePV2D = Line2D(v0[:2], v=(v1 - v0)[:2])
                     edge_factor = edgePV2D.intersect_get_factor(self)
                     if edge_factor is not None:
                         if 0 <= edge_factor <= 1:
@@ -503,7 +542,7 @@ class Line2D(Line):
                             )
                     else:
                         # fix get_factor so that just get_factor is needed.
-                        if self.v_is_on_line(v0):
+                        if self.is_on_line(v0):
                             edge_factor = 0
                             line_factor = self.get_factor(v0)
                             logging.debug("edge is on the line")
