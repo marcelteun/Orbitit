@@ -256,7 +256,7 @@ def read_off_file(fd, regen_edges=True, name=""):
     return shape
 
 
-def saveFile(fd, shape):
+def save_file(fd, shape):
     """
     Save a shape in a file descriptor
 
@@ -500,6 +500,8 @@ class SimpleShape(base.Orbitit):
         self.gl.sphere = None
         self.gl.cyl = None
         self.gl.force_set_vs = False
+        self.saved_ns = None
+        self.saved_vs = None
         # This is save so heirs can still use repr_dict from this class
         self.json_class = SimpleShape
         self.gl.force_set_vs = (
@@ -573,13 +575,13 @@ class SimpleShape(base.Orbitit):
             name=data["name"],
         )
 
-    def saveFile(self, fd):
+    def save_file(self, fd):
         """
         Save a shape in a file descriptor
 
         The caller still need to close the filde descriptor afterwards
         """
-        saveFile(fd, self)
+        save_file(fd, self)
 
     @property
     def simple_shape(self):
@@ -1260,10 +1262,10 @@ class SimpleShape(base.Orbitit):
                         vs
                     ), "the normal vector array 'normals' should have as many normals as vertices."
                     GL.glNormalPointerf(normals)
-                    self.NsSaved = normals
+                    self.saved_ns = normals
                 else:
                     GL.glNormalPointerf(vs)
-                    self.NsSaved = vs
+                    self.saved_ns = vs
             elif self.ns != [] and len(self.ns) == len(vs):
                 try:
                     if not GL.glVertexPointerf(vs):
@@ -1276,22 +1278,22 @@ class SimpleShape(base.Orbitit):
                         return
                     normals = [[n[0], n[1], n[2]] for n in self.ns]
                 GL.glNormalPointerf(normals)
-                self.NsSaved = normals
+                self.saved_ns = normals
             else:
                 self.create_vertex_normals(True, vs)
                 if self.nVs != []:
                     if not GL.glVertexPointerf(self.nVs):
                         return
                 GL.glNormalPointerf(self.vNs)
-                self.NsSaved = self.vNs
+                self.saved_ns = self.vNs
                 vs = self.nVs
             self.gl.updateVs = False
-            self.VsSaved = vs
+            self.saved_vs = vs
         else:
             if self.gl.force_set_vs:
-                if not GL.glVertexPointerf(self.VsSaved):
+                if not GL.glVertexPointerf(self.saved_vs):
                     return
-                GL.glNormalPointerf(self.NsSaved)
+                GL.glNormalPointerf(self.saved_ns)
         # VERTICES
         if self.gl.addSphereVs:
             GL.glColor(self.gl.vCol[0], self.gl.vCol[1], self.gl.vCol[2])
@@ -2006,13 +2008,13 @@ class CompoundShape(base.Orbitit):
             name=data["name"],
         )
 
-    def saveFile(self, fd):
+    def save_file(self, fd):
         """
         Save a shape in a file descriptor
 
         The caller still need to close the filde descriptor afterwards
         """
-        saveFile(fd, self)
+        save_file(fd, self)
 
     def add_shape(self, shape):
         """

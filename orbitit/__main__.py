@@ -907,7 +907,7 @@ if __name__ == "__main__":
         elif PROG_ARGS.py:
             START_GUI = False
             with open(PROG_ARGS.py, 'w') as o_fd:
-                IN_SHAPE.saveFile(o_fd)
+                IN_SHAPE.save_file(o_fd)
         elif PROG_ARGS.ps:
             START_GUI = False
             with open(PROG_ARGS.ps, 'w') as o_fd:
