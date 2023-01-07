@@ -843,7 +843,7 @@ class SimpleShape(base.Orbitit):
                 self._set_faces(props["fs"])
             if "colors" in props and props["colors"] is not None:
                 self.shape_colors = props["colors"]
-            self.divideColorWrapper()
+            self._divide_col()
             if "draw_faces" in props and props["draw_faces"] is not None:
                 self.setEnableDrawFaces(props["draw_faces"])
 
@@ -1072,11 +1072,11 @@ class SimpleShape(base.Orbitit):
                         add_dihedral_angle(face_idx, chk_face, next_face_idx, edge, i)
         return dihedral_to_edge
 
-    def divideColorWrapper(self):
+    def _divide_col(self):
         """
         Divide the specified colours over the faces.
 
-        This function wraps the divideColor function and handles the trivial
+        This function wraps the divide_col function and handles the trivial
         cases for which there is only one colour of for which there are more
         colours than faces. These trivial cases do not need to be implemented by
         every descendent.
@@ -1085,7 +1085,7 @@ class SimpleShape(base.Orbitit):
             if self.no_of_cols == 1:
                 self._shape_colors = (self._shape_colors[0], [0 for i in range(self.no_of_fs)])
             elif self.no_of_cols < self.no_of_fs:
-                self.divideColor()
+                self.divide_col()
             else:
                 self._shape_colors = (self._shape_colors[0], list(range(self.no_of_fs)))
             assert len(self._shape_colors[1]) == self.no_of_fs
@@ -1094,7 +1094,7 @@ class SimpleShape(base.Orbitit):
         for i in range(self.no_of_fs):
             self.equal_colored_fs[self._shape_colors[1][i]].append(i)
 
-    def divideColor(self):
+    def divide_col(self):
         """
         Divide the specified colours over the isometries.
 
