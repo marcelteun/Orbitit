@@ -616,7 +616,7 @@ class SimpleShape(base.Orbitit):
         new_fs = []
         col_idx = []
         if keep_one:
-            for f in d:
+            for _ in d:
                 new_fs.append(fs[i[0]])
                 col_idx.append(org_cols[1][i[0]])
         else:
@@ -1107,7 +1107,7 @@ class SimpleShape(base.Orbitit):
         mod = self.no_of_fs % self.no_of_cols
         face_cols = []
         all_color_idx = list(range(self.no_of_cols))
-        for i in range(div):
+        for _ in range(div):
             face_cols.extend(all_color_idx)
         face_cols.extend(list(range(mod)))
         self._shape_colors = (self._shape_colors[0], face_cols)
@@ -1617,7 +1617,6 @@ class SimpleShape(base.Orbitit):
             if simplify:
                 vs_2d = [v[:2] for v in vs]
             else:
-                t1_and_2 = -line_3d.p
                 # translate with T1 and T2:
                 vs = [c - line_3d.p for c in vs]
                 # rotate to make plane horizontal and translate back (-T2)
@@ -1634,7 +1633,7 @@ class SimpleShape(base.Orbitit):
         return ()
 
     @staticmethod
-    def _combine_intersections_to_faces(intersection_lines, faces_to_intersect_with, z, vs):
+    def _combine_intersections_to_faces(intersection_lines, faces_to_intersect_with, vs):
         """Combine intersection segments with faces to intersect with.
 
         With the line segments that are valid segments for for the face(s) that are intersecting the
@@ -1644,7 +1643,6 @@ class SimpleShape(base.Orbitit):
         intersection_lines: an list of tuples consisting of a geom_2d.Line object and a list of line
             factors that are valid factors for the faces that intersect the specified faces
         faces_to_intersect_with: the faces that are intersected with the intersection_lines.
-        z: the z-coordinate for the horizontal plane.
         vs: the vertex indices as used for the face.
 
         return: An updated list of tuples consisting of a geom_2d.Line object and a list of line
@@ -1786,7 +1784,7 @@ class SimpleShape(base.Orbitit):
                     intersection_lines.append(intersection_line)
 
         intersection_lines = self._combine_intersections_to_faces(
-            intersection_lines, faces_to_intersect_with, z, vs
+            intersection_lines, faces_to_intersect_with, vs
         )
 
         last_point = len(points) - 1
