@@ -502,6 +502,9 @@ class SimpleShape(base.Orbitit):
         self.gl.force_set_vs = False
         self.saved_ns = None
         self.saved_vs = None
+        self.spheres_radii = Fields()
+        self.len_to_edge = {}
+        self.fs_gravity = []
         # This is save so heirs can still use repr_dict from this class
         self.json_class = SimpleShape
         self.gl.force_set_vs = (
@@ -990,12 +993,11 @@ class SimpleShape(base.Orbitit):
     def create_edge_lengths(self, precision=12):
         """For each edge calculate the edge length.
 
-        The edge lengths are save in a dictionary self.l2e and self.e2l, The former is returned and
-        maps different lengths (keys) onto edges; two-tuples consisting of two ordered vertex
-        indices (values). The latter is the reverse mapping. The former is also returned.
+        The edge lengths are save in a dictionary which is returned and also saved in
+        self.len_to_edge. The dictionary maps different lengths (keys) onto edges; two-tuples
+        consisting of two ordered vertex indices (values). returned.
         """
-        e2l = {}
-        l2e = {}
+        len_to_edge = {}
         for ei in len(self.es):
             vi0 = self.es[ei]
             vi1 = self.es[ei + 1]
@@ -1004,15 +1006,13 @@ class SimpleShape(base.Orbitit):
             else:
                 t = (vi1, vi0)
             l = (geomtypes.Vec3(self.vs[vi1]) - geomtypes.Vec3(self.vs[vi0])).norm()
-            e2l[t] = l
             l = round(l, precision)
             try:
-                l2e[l].append(t)
+                len_to_edge[l].append(t)
             except KeyError:
-                l2e[l] = [t]
-        self.e2l = e2l
-        self.l2e = l2e
-        return l2e
+                len_to_edge[l] = [t]
+        self.len_to_edge = len_to_edge
+        return len_to_edge
 
     def _get_dihedral_angles(self, precision=12):
         """Get all different dihedral angles.
@@ -1090,9 +1090,9 @@ class SimpleShape(base.Orbitit):
                 self._shape_colors = (self._shape_colors[0], list(range(self.no_of_fs)))
             assert len(self._shape_colors[1]) == self.no_of_fs
         # generate an array with Equal coloured faces:
-        self.EqColFs = [[] for col in range(self.no_of_cols)]
+        self.equal_colored_fs = [[] for col in range(self.no_of_cols)]
         for i in range(self.no_of_fs):
-            self.EqColFs[self._shape_colors[1][i]].append(i)
+            self.equal_colored_fs[self._shape_colors[1][i]].append(i)
 
     def divideColor(self):
         """
@@ -1130,21 +1130,20 @@ class SimpleShape(base.Orbitit):
         self.zoom_factor = factor
         self.gl.updateVs = True
 
-    def calculateFacesG(self):
+    def calc_fs_gravity(self):
         """For each face calculate the gravity point
 
-        The gravity point is saved in self.fGs
+        The gravity point is saved in self.fs_gravity
         """
-        self.fGs = [
+        self.fs_gravity = [
             reduce(lambda t, i: t + self.vs[i], f, VEC(0, 0, 0)) / len(f)
             for f in self.fs
         ]
 
-    def calculateSphereRadii(self, precision=12):
+    def calc_sphere_radii(self, precision=12):
         """Calculate the radii for the circumscribed, inscribed and mid sphere(s)"""
         # calculate the circumscribed spheres:
-        self.spheresRadii = Fields()
-        self.spheresRadii.precision = precision
+        self.spheres_radii.precision = precision
         s = {}
         for v in self.vs:
             r = round(v.norm(), precision)
@@ -1153,7 +1152,7 @@ class SimpleShape(base.Orbitit):
             except KeyError:
                 cnt = 0
             s[r] = cnt + 1
-        self.spheresRadii.circumscribed = s
+        self.spheres_radii.circumscribed = s
         s = {}
         for i in range(0, len(self.es), 2):
             v = (self.vs[self.es[i]] + self.vs[self.es[i + 1]]) / 2
@@ -1163,20 +1162,20 @@ class SimpleShape(base.Orbitit):
             except KeyError:
                 cnt = 0
             s[r] = cnt + 1
-        self.spheresRadii.mid = s
+        self.spheres_radii.mid = s
         s = {}
         try:
-            self.fGs
+            self.fs_gravity
         except AttributeError:
-            self.calculateFacesG()
-        for g in self.fGs:
+            self.calc_fs_gravity()
+        for g in self.fs_gravity:
             r = round(g.norm(), precision)
             try:
                 cnt = s[r]
             except KeyError:
                 cnt = 0
             s[r] = cnt + 1
-        self.spheresRadii.inscribed = s
+        self.spheres_radii.inscribed = s
 
     def gl_init(self):
         """
@@ -1329,7 +1328,7 @@ class SimpleShape(base.Orbitit):
                     a = max(c[3], 0)
                     a = min(a, 1)
                     GL.glColor(c[0], c[1], c[2], a)
-                for face_idx in self.EqColFs[col_idx]:
+                for face_idx in self.equal_colored_fs[col_idx]:
                     triangles = self.TriangulatedFs[face_idx]
                     # Note triangles is a flat (ie 1D) array
                     if len(triangles) == 3:
@@ -1390,10 +1389,10 @@ class SimpleShape(base.Orbitit):
         s = w("#")
         s = w("# file generated with python script by Marcel Tunnissen")
         if info:
-            self.calculateSphereRadii()
-            s = w(f"# inscribed sphere(s)    : {self.spheresRadii.inscribed}")
-            s = w(f"# mid sphere(s)          : {self.spheresRadii.mid}")
-            s = w(f"# circumscribed sphere(s): {self.spheresRadii.circumscribed}")
+            self.calc_sphere_radii()
+            s = w(f"# inscribed sphere(s)    : {self.spheres_radii.inscribed}")
+            s = w(f"# mid sphere(s)          : {self.spheres_radii.mid}")
+            s = w(f"# circumscribed sphere(s): {self.spheres_radii.circumscribed}")
             dihedral_to_angle = self._get_dihedral_angles()
             for a, es in dihedral_to_angle.items():
                 s = w(
@@ -1405,8 +1404,8 @@ class SimpleShape(base.Orbitit):
                 )
                 if len(es) > 2:
                     s = w(f"#                 E.g. {es[0]}, {es[1]}, {es[2]} etc")
-            l2e = self.create_edge_lengths()
-            for l, es in l2e.items():
+            len_to_edge = self.create_edge_lengths()
+            for l, es in len_to_edge.items():
                 s = w(f"# Length: {geomtypes.f2s(l, precision)} for {len(es)} edges")
                 if len(es) > 2:
                     s = w(f"#         E.g. {es[0]}, {es[1]}, {es[2]}, etc")
@@ -1873,14 +1872,14 @@ class SimpleShape(base.Orbitit):
         vs = self.vs[:]
         no_of_vs_org = len(self.vs)
         try:
-            self.fGs
+            self.fs_gravity
         except AttributeError:
-            self.calculateFacesG()
+            self.calc_fs_gravity()
         try:
-            outer_radii = self.spheresRadii.circumscribed
+            outer_radii = self.spheres_radii.circumscribed
         except AttributeError:
-            self.calculateSphereRadii()
-            outer_radii = self.spheresRadii.circumscribed
+            self.calc_sphere_radii()
+            outer_radii = self.spheres_radii.circumscribed
         radius = reduce(max, iter(outer_radii.keys()))
         fs = []
         col_indices = []
@@ -1917,7 +1916,7 @@ class SimpleShape(base.Orbitit):
             if level == 1:
                 extra_fs = dome_level_1(f, i)
                 # add the gravity centres as assumed by dome_level_1:
-                add_projected_vs(self.fGs)
+                add_projected_vs(self.fs_gravity)
             else:
                 l = len(f)
                 if l == 3:
@@ -1926,7 +1925,7 @@ class SimpleShape(base.Orbitit):
                 elif l > 3:
                     tmp_fs = dome_level_1(f, i)
                     # add the gravity centres as assumed by dome_level_1:
-                    add_projected_vs(self.fGs)
+                    add_projected_vs(self.fs_gravity)
                     extra_fs = []
                     for sf in tmp_fs:
                         extra_vs, sx_fs = dome_level_2(sf)
