@@ -126,7 +126,7 @@ Scene_Orbit:
 			no rotation
 		TODO cannot handle compound of isometric shapes:
 			in CompoundShape.set_shapes:
-				shape.gl.alwaysSetVertices = True
+				shape.gl.force_set_vs = True
 
 	2012-02-26
 	Create a rotate arount axis widget, which can be used by the orbit scene

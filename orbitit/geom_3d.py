@@ -494,9 +494,10 @@ class SimpleShape(base.Orbitit):
         self.gl = Fields()
         self.gl.sphere = None
         self.gl.cyl = None
+        self.gl.force_set_vs = False
         # This is save so heirs can still use repr_dict from this class
         self.json_class = SimpleShape
-        self.gl.alwaysSetVertices = (
+        self.gl.force_set_vs = (
             False  # set to true if a scene contains more than 1 shape
         )
         if not colors or not colors[0]:
@@ -696,8 +697,14 @@ class SimpleShape(base.Orbitit):
             if "color" in props and props["color"] is not None:
                 self.gl.vCol = props["color"]
 
-    def gl_alwaysSetVertices(self, do):
-        self.gl.alwaysSetVertices = do
+    def gl_force_set_vs(self, do):
+        """
+        Force to set the vertices in OpenGL, independently on the updated vertices flag.
+
+        Normally the vertices in OpenGL are only reprogrammed if the vertices were updated, but
+        setting this flag will always reprogram the vertices.
+        """
+        self.gl.force_set_vs = do
 
     @property
     def edge_props(self):
@@ -1255,7 +1262,7 @@ class SimpleShape(base.Orbitit):
             self.gl.updateVs = False
             self.VsSaved = vs
         else:
-            if self.gl.alwaysSetVertices:
+            if self.gl.force_set_vs:
                 if not GL.glVertexPointerf(self.VsSaved):
                     return
                 GL.glNormalPointerf(self.NsSaved)
@@ -1925,6 +1932,7 @@ class CompoundShape(base.Orbitit):
         # This is save so heirs can still use repr_dict from this class
         self.json_class = CompoundShape
         self.set_shapes(shapes)
+        self.merged_shape = None
         if regen_edges:
             self.regen_edges()
 
@@ -1983,7 +1991,7 @@ class CompoundShape(base.Orbitit):
         """
         Add shape 'shape' to the current compound.
         """
-        shape.gl.alwaysSetVertices = True
+        shape.gl.force_set_vs = True
         self._shapes.append(shape)
         if len(self._shapes) > 1:
             self._shapes[-1].generate_normals = self._shapes[0].generate_normals
@@ -1993,10 +2001,6 @@ class CompoundShape(base.Orbitit):
     def shapes(self):
         return self._shapes
 
-    def gl_alwaysSetVertices(self, do):
-        for shape in self._shapes:
-            shape.gl_alwaysSetVertices(do)
-
     def set_shapes(self, shapes):
         """
         Set the shapes all at once.
@@ -2005,7 +2009,8 @@ class CompoundShape(base.Orbitit):
         consistently for all shapes.
         """
         self._shapes = shapes
-        self.gl_alwaysSetVertices(True)
+        for shape in self._shapes:
+            shape.gl_force_set_vs(True)
         self.merge_needed = True
 
     def merge_shapes(self):
@@ -2352,6 +2357,7 @@ class SymmetricShape(CompoundShape):
             colors=([colors[0]], []) if colors else None,
             orientation=orientation,
         )
+        self.merged_shape = None
         if regen_edges:
             self.base_shape.regen_edges()
         super().__init__([self.base_shape], name=name)
