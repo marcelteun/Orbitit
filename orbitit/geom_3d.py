@@ -303,23 +303,26 @@ class Line3D(geomtypes.Line):
         self._define_line(p0, p1 - p0)
 
     def get_point(self, t):
+        """Return the point on the line that equals to self.b + t*self.v (or [] when t is None)"""
         if t is not None:
             return self.p + t * self.v
         return []
 
     def squareDistance2Point(self, p):
-        # p81 of E.Lengyel
+        """Return the square distance to a point."""
+        # see p81 of E.Lengyel
         q = geomtypes.Vec3(p)
         hyp = q - self.p
         prj_q = hyp * self.v
         return (hyp * hyp) - ((prj_q * prj_q) / (self.v * self.v))
 
     def Discriminant2Line(self, L):
-        # p82 of E.Lengyel
+        """Return the discriminant as according to p82 of E.Lengyel."""
         dot = self.v * L.v
         return (self.v * self.v) * (L.v * L.v) - dot * dot
 
     def isParallel2Line(self, L):
+        """Return whether the current line is parallel with the specified line."""
         # p82 of E.Lengyel
         return self.Discriminant2Line(L) == 0
 
@@ -348,7 +351,9 @@ class Triangle:
         ]
         self.N = None
 
+    # TODO: make this a property
     def normal(self, normalise=False):
+        """Return the normal of the triangle."""
         if self.N is None:
             self.N = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
             if normalise:
@@ -560,6 +565,7 @@ class SimpleShape(base.Orbitit):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from a dictionary created by repr_dict."""
         return cls(
             [geomtypes.Vec3(v) for v in data["vs"]],
             data["fs"],
@@ -902,6 +908,16 @@ class SimpleShape(base.Orbitit):
         self.gl.draw_faces = draw
 
     def generate_face_normal(self, f, normalise):
+        """For the specified face return a face normal.
+
+        f: the face (a list of vertex indices). Must at least contain 3 vertices.
+        normalise: boolean stating whether to mormalise the normal
+
+        The normal with point inwards of outwards depending on whether self.normal_direction is set
+        to TRI_IN or TRI_OUT
+
+        return: the normal
+        """
         l = len(f)
         assert l > 2, "An face should at least have 2 vertices"
         if l < 3:
@@ -970,6 +986,12 @@ class SimpleShape(base.Orbitit):
         self.nEs = [oldVi + edge_idx_offset for oldVi in self.es]
 
     def create_edge_lengths(self, precision=12):
+        """For each edge calculate the edge length.
+
+        The edge lengths are save in a dictionary self.l2e and self.e2l, The former is returned and
+        maps different lengths (keys) onto edges; two-tuples consisting of two ordered vertex
+        indices (values). The latter is the reverse mapping. The former is also returned.
+        """
         e2l = {}
         l2e = {}
         for ei in len(self.es):
@@ -1107,6 +1129,10 @@ class SimpleShape(base.Orbitit):
         self.gl.updateVs = True
 
     def calculateFacesG(self):
+        """For each face calculate the gravity point
+
+        The gravity point is saved in self.fGs
+        """
         self.fGs = [
             reduce(lambda t, i: t + self.vs[i], f, VEC(0, 0, 0)) / len(f)
             for f in self.fs
@@ -1972,6 +1998,7 @@ class CompoundShape(base.Orbitit):
 
     @classmethod
     def from_dict_data(cls, data):
+        """Create object from a dictionary created by repr_dict."""
         return cls(
             shapes=[
                 base.json_to_class[s["class"]].from_json_dict(s) for s in data["shapes"]
@@ -1999,6 +2026,7 @@ class CompoundShape(base.Orbitit):
 
     @property
     def shapes(self):
+        """Return all shapes of this compound shape"""
         return self._shapes
 
     def set_shapes(self, shapes):

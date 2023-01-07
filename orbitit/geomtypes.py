@@ -1778,7 +1778,7 @@ class Line:
         self.v = v
 
     def get_point(self, t):
-        """Returns the point on the line that equals to self.b + t*self.v (or [] when t is None)
+        """Return the point on the line that equals to self.b + t*self.v (or [] when t is None)
 
         return: the point is an instance of Vec
         """
