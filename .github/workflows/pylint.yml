@@ -25,10 +25,8 @@ jobs:
         pip install pylint
         pip install attrdict3
         pip install pyopengl wxpython
-    - name: Initialize environment
+    - name: Analysing the code with pylint (in correct environment)
       run: |
         . init_env
-    - name: Analysing the code with pylint
-      run: |
         ./run_pylint.sh
         # pylint $(git ls-files '*.py')
