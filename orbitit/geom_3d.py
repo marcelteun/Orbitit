@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Geometry types specifically related to 3D
+"""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -491,6 +494,9 @@ class SimpleShape(base.Orbitit):
             es = []
         if not ns:
             ns = []
+        self.fs = []
+        self.vs = []
+        self.es = []
         self.dimension = 3
         self.face_normals = []
         self.generate_normals = True
@@ -506,6 +512,7 @@ class SimpleShape(base.Orbitit):
         self.len_to_edge = {}
         self.fs_gravity = []
         self.equal_colored_fs = []
+        self.no_of_fs = 0
         # This is save so heirs can still use repr_dict from this class
         self.json_class = SimpleShape
         self.gl.force_set_vs = (
