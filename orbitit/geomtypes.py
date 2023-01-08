@@ -349,11 +349,10 @@ class Vec(tuple, base.Orbitit):
 
     def __str__(self):
         try:
-            return "[{}]".format(
-                ", ".join([f2s(i) for i in self])
-            )
+            elements = ", ".join([f2s(i) for i in self])
         except IndexError:
-            return '[]'
+            elements = ""
+        return f"[{elements}]"
 
     def __add__(self, w):
         return self.__class__([a + b for a, b in zip(self, w)])
@@ -552,7 +551,7 @@ class Vec4(Vec):
         q = v * v       # dot product
         assert not w.is_parallel(v), \
             'null vector used or vectors are (too) parallel; self = ' + \
-            w.__repr__() + '; v = ' + v.__repr__()
+            repr(w) + '; v = ' + repr(v)
         # TODO: is there a better way to set,...
         return Vec4(p * v + q * w)
 
@@ -1270,7 +1269,7 @@ class Refl3(Transform3):
         """
         result = None
         if _is_quat_pair(quat):
-            result = super().__new__(quat)
+            result = super().__new__(cls, quat)
             assert result.is_refl(), f"{quat} doesn't represent a reflection"
         elif isinstance(quat, Quat):
             try:

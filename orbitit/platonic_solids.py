@@ -20,6 +20,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 # ------------------------------------------------------------------
+# pylint: too-few-public-methods
 from math import sqrt as V
 
 from orbitit.base import add_std_arguments_for_generating_models
@@ -273,20 +274,20 @@ if __name__ == "__main__":
     for model in MODELS:
         if ARGS.seperate_orbits:
             for model_shape in model.shapes:
-                filename = OUT_DIR / shape_to_filename(model_shape)
+                FILENAME = out_dir / shape_to_filename(model_shape)
                 if ARGS.indent:
                     model_shape.json_indent = ARGS.indent
-                model_shape.write_json_file(filename)
-                print(f"written {filename}")
-        filename = model.name.lower().replace(" ", "_")
+                model_shape.write_json_file(FILENAME)
+                print(f"written {FILENAME}")
+        FILENAME = model.name.lower().replace(" ", "_")
         if ARGS.json:
-            filename = OUT_DIR / Path(filename + ".json")
+            FILENAME = OUT_DIR / Path(FILENAME + ".json")
             if ARGS.indent:
                 model.json_indent = ARGS.indent
-            model.write_json_file(filename)
+            model.write_json_file(FILENAME)
         else:
-            filename = OUT_DIR / Path(filename + ".off")
-            with open(filename, "w") as fd:
+            FILENAME = OUT_DIR / Path(FILENAME + ".off")
+            with open(FILENAME, "w") as fd:
                 model.clean_shape(geomtypes.FLOAT_PRECISION)
                 fd.write(model.to_off(precision=geomtypes.float_out_precision))
         print(f"written {filename}")

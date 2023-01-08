@@ -209,7 +209,7 @@ class TrisAltBase():
         if triangle_id is None:
             triangle_id = self.key[triangle_str]
         if not isinstance(triangle_id, int):
-            triangle_str = "{}-opp_{}".format(
+            triangle_str = "{}-opp_{}".format(  # pylint: disable=consider-using-f-string
                 self.stringify[triangle_id[0]],
                 self.stringify[triangle_id[1]],
             )
@@ -260,7 +260,7 @@ def to_triangle_python_name(triangle_id=None, triangle_str=None):
                 f"{TrisAltBase.stringify[triangle_id[1] & ~LOOSE_BIT]}"
             )
         elif triangle_id[0] & LOOSE_BIT:
-            triangle_str = "{}__{}".format(
+            triangle_str = "{}__{}".format(  # pylint: disable=consider-using-f-string
                 TrisAltBase.stringify[triangle_id[0]],
                 TrisAltBase.stringify[triangle_id[1]],
             )
@@ -271,7 +271,7 @@ def to_triangle_python_name(triangle_id=None, triangle_str=None):
         ):
             triangle_str = "twist_strip_I_strip_I"
         else:
-            triangle_str = "{}_{}".format(
+            triangle_str = "{}_{}".format(  # pylint: disable=consider-using-f-string
                 TrisAltBase.stringify[triangle_id[0]],
                 TrisAltBase.stringify[triangle_id[1]],
             )
@@ -3210,6 +3210,7 @@ class FldHeptagonShape(geom_3d.CompoundShape):
         return s
 
     def gl_draw(self):
+        """Draw the shape on the 3D canvas."""
         if self.update_shape:
             self.set_vertices()
         geom_3d.CompoundShape.gl_draw(self)

@@ -22,9 +22,10 @@
 # ------------------------------------------------------------------
 #
 # The following is because of the class names. I keep the naming because the capitals are used in
-# mathematics and theay are nest separated by _
+# mathematics and they are best separated by _
 # I also would like to keep the Greek variable names without using capitals.
-# pylint: disable=invalid-name,too-many-lines
+# pylint: disable=invalid-name,too-many-lines,non-ascii-name
+# pylint: too-few-public-methods
 from math import sqrt as V
 
 from orbitit.base import add_std_arguments_for_generating_models

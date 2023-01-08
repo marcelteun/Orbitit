@@ -159,7 +159,7 @@ class Polygon:
         self._coords = tuple(coords)
         self._vs = tuple(vs)
         n = len(self._vs)
-        self._es = tuple([(i, (i + 1) % n) for i in range(n)])
+        self._es = tuple((i, (i + 1) % n) for i in range(n))
 
     @property
     def coords(self):
