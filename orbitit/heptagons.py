@@ -28,6 +28,8 @@ E.g. equilateral heptagons derived from kites or folded regular heptagons.
 # pylint: disable=too-many-lines,too-many-arguments,too-many-locals
 # pylint: disable=too-many-instance-attributes,too-many-branches
 # pylint: disable=too-many-statements,too-many-public-methods
+# To be able to run pylint for different versions:
+# pylint: disable=useless-option-value
 
 from enum import Enum
 import json

@@ -31,6 +31,8 @@ Like vertices, faecs, symmetries, etc.
 # pylint: disable=too-many-instance-attributes,too-many-arguments
 # pylint: disable=too-many-branches,too-many-nested-blocks
 # pylint: disable=protected-access
+# To be able to run pylint for different versions:
+# pylint: disable=useless-option-value
 
 
 import logging

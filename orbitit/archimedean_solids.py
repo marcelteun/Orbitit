@@ -25,7 +25,9 @@
 # mathematics and they are best separated by _
 # I also would like to keep the Greek variable names without using capitals.
 # pylint: disable=invalid-name,too-many-lines,non-ascii-name
-# pylint: too-few-public-methods
+# pylint: disable=too-few-public-methods
+# Ignore duplicate code with platonic_solids
+# pylint: disable=duplicate-code
 from math import sqrt as V
 
 from orbitit.base import add_std_arguments_for_generating_models

@@ -20,7 +20,9 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 # ------------------------------------------------------------------
-# pylint: too-few-public-methods
+# pylint: disable=too-few-public-methods
+# Ignore duplicate code with archimedean_solids
+# pylint: disable=duplicate-code
 from math import sqrt as V
 
 from orbitit.base import add_std_arguments_for_generating_models
@@ -274,7 +276,7 @@ if __name__ == "__main__":
     for model in MODELS:
         if ARGS.seperate_orbits:
             for model_shape in model.shapes:
-                FILENAME = out_dir / shape_to_filename(model_shape)
+                FILENAME = ARGS.out_dir / shape_to_filename(model_shape)
                 if ARGS.indent:
                     model_shape.json_indent = ARGS.indent
                 model_shape.write_json_file(FILENAME)
@@ -290,4 +292,4 @@ if __name__ == "__main__":
             with open(FILENAME, "w") as fd:
                 model.clean_shape(geomtypes.FLOAT_PRECISION)
                 fd.write(model.to_off(precision=geomtypes.float_out_precision))
-        print(f"written {filename}")
+        print(f"written {FILENAME}")

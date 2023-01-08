@@ -505,6 +505,7 @@ class SimpleShape(base.Orbitit):
         self.spheres_radii = Fields()
         self.len_to_edge = {}
         self.fs_gravity = []
+        self.equal_colored_fs = []
         # This is save so heirs can still use repr_dict from this class
         self.json_class = SimpleShape
         self.gl.force_set_vs = (
@@ -965,30 +966,31 @@ class SimpleShape(base.Orbitit):
             vs = self.vs
         self.create_face_normals(normalise)
         # only use a vertex once, since the normal can be different
-        self.nVs = []
-        self.vNs = []
+        self.vertex_per_normal = []
+        self.normal_per_vertex = []
         for face, normal in zip(self.fs, self.face_normals):
-            self.vNs.extend([normal for vi in face])
-            self.nVs.extend([[vs[vi][0], vs[vi][1], vs[vi][2]] for vi in face])
-        self.createVertexNormals_vi = -1
+            self.normal_per_vertex.extend([normal for vi in face])
+            self.vertex_per_normal.extend([vs[vi][0:3] for vi in face])
+        counter = -1
 
         def inc():
-            self.createVertexNormals_vi += 1
-            return self.createVertexNormals_vi
+            nonlocal counter
+            counter += 1
+            return counter
 
         self.nFs = [[inc() for i in face] for face in self.fs]
         self.TriangulatedFs = self.triangulate(self.nFs)
         # Now for the edge vertices. Note that edge vertices aren't necessarily
         # part of the face vertices.
-        edge_idx_offset = len(self.nVs)
-        self.nVs.extend(vs)
+        edge_idx_offset = len(self.vertex_per_normal)
+        self.vertex_per_normal.extend(vs)
         if normalise:
             for v in vs:
-                self.vNs.append(v.normalize())
+                self.normal_per_vertex.append(v.normalize())
         else:
             for v in vs:
-                self.vNs.append(v)
-        self.nEs = [oldVi + edge_idx_offset for oldVi in self.es]
+                self.normal_per_vertex.append(v)
+        self.nEs = [old_v_idx + edge_idx_offset for old_v_idx in self.es]
 
     def create_edge_lengths(self, precision=12):
         """For each edge calculate the edge length.
@@ -1280,12 +1282,12 @@ class SimpleShape(base.Orbitit):
                 self.saved_ns = normals
             else:
                 self.create_vertex_normals(True, vs)
-                if self.nVs != []:
-                    if not GL.glVertexPointerf(self.nVs):
+                if self.vertex_per_normal != []:
+                    if not GL.glVertexPointerf(self.vertex_per_normal):
                         return
-                GL.glNormalPointerf(self.vNs)
-                self.saved_ns = self.vNs
-                vs = self.nVs
+                GL.glNormalPointerf(self.normal_per_vertex)
+                self.saved_ns = self.normal_per_vertex
+                vs = self.vertex_per_normal
             self.gl.updateVs = False
             self.saved_vs = vs
         else:
@@ -1302,7 +1304,7 @@ class SimpleShape(base.Orbitit):
         if self.gl.draw_edges:
             if self.generate_normals and (self.ns == [] or len(self.ns) != len(self.vs)):
                 es = self.nEs
-                vs = self.nVs
+                vs = self.vertex_per_normal
             else:
                 es = self.es
                 vs = self.vs
