@@ -180,7 +180,7 @@ def read_off_file(fd, regen_edges=True, name=""):
                     state = states["readFs"]
                     fs = []
                     cols = []
-                    face_cols = [i for i in range(no_of_fs)]
+                    face_cols = list(range(no_of_fs))
                     i = 0
                     if no_of_fs == 0:
                         state = states["readOk"]
