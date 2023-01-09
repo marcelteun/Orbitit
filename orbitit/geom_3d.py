@@ -1055,7 +1055,7 @@ class SimpleShape(base.Orbitit):
             if i_next >= len(chk_face):
                 i_next = 0
             # if the vertex v0_idx - v1_idx is part of chk_face
-            if chk_face[i_prev] == v1_idx or chk_face[i_next] == v1_idx:
+            if v1_idx in (chk_face[i_prev], chk_face[i_next]):
                 # found: add the angle and edge to dihedral_to_edge
                 if v0_idx < v1_idx:
                     t = (v0_idx, v1_idx)
