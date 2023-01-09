@@ -100,7 +100,10 @@ class Line(geomtypes.Line):
                 if add_edges and edge_line.v == self.v and self.is_on_line(edge_line.p):
                     factors.append(self.get_factor(edge_line.get_point(0)))
                     factors.append(self.get_factor(edge_line.get_point(1)))
-        assert len(factors) % 2 == 0, "There should be an even amount of factors"
+        assert len(factors) % 2 == 0, (
+            "There should be an even amount of factors (decrease precision?)"
+            f"got the following factors\n\t{factors}\nwith margin {geomtypes.FloatHandler.margin}"
+        )
         factors.sort()
         return [(factors[i], factors[i + 1]) for i in range(0, len(factors), 2)]
 
