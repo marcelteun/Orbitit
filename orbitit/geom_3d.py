@@ -279,6 +279,10 @@ class Fields:
 
 
 class Line3D(geomtypes.Line):
+    """Model a line in 3D
+
+    This can either be infinite lines or line segments.
+    """
     str_precision = 2
 
     def __init__(self, p0, p1=None, v=None, is_segment=False):
@@ -346,6 +350,7 @@ class Line3D(geomtypes.Line):
 
 
 class Triangle:
+    """Model a triangle in 3D space."""
     def __init__(self, v0, v1, v2):
         self.v = [
             VEC(v0[0], v0[1], v0[2]),
