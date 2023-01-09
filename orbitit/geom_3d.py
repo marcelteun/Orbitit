@@ -95,7 +95,9 @@ TAU = (V5 + 1) / 2
 # rotation needed from standard isometries.A4 where the z-axis is shared with a 2-fold axis to a
 # position where the z-axis is shared with a 3-fold axis.
 A4_Z_O2_TO_O3 = geomtypes.Rot3(angle=math.atan(V2), axis=geomtypes.Vec3([1, 1, 0]))
-A4_Z_O2_TO_O3 = geomtypes.Rot3(angle=math.pi / 4, axis=geomtypes.Vec3([0, 0, 1])) * A4_Z_O2_TO_O3
+A4_Z_O2_TO_O3 = (
+    geomtypes.Rot3(angle=math.pi / 4, axis=geomtypes.Vec3([0, 0, 1])) * A4_Z_O2_TO_O3
+)
 
 S4_Z_O4_TO_O3 = A4_Z_O2_TO_O3
 S4_Z_O4_TO_O2 = geomtypes.Rot3(angle=math.pi / 4, axis=geomtypes.Vec3([0, 1, 0]))
@@ -224,7 +226,9 @@ def read_off_file(fd, regen_edges=True, name=""):
                         else:
                             # since vertices are defined explicitely, show them
                             vertex_radius = 0.05
-                            logging.info("ignoring face %d with only %d vertices", i, len_f)
+                            logging.info(
+                                "ignoring face %d with only %d vertices", i, len_f
+                            )
                     i = i + 1
                     if i == no_of_fs:
                         state = states["readOk"]
@@ -245,9 +249,9 @@ def read_off_file(fd, regen_edges=True, name=""):
     shape = SimpleShape(vs, fs, es, colors=(cols, face_cols))
     # Note that Orbitit's panel.setShape will ignore these anyway...
     if vertex_radius != 0:
-        shape.vertex_props = {'radius': vertex_radius}
+        shape.vertex_props = {"radius": vertex_radius}
     if edge_radius != 0:
-        shape.edge_props = {'radius': edge_radius}
+        shape.edge_props = {"radius": edge_radius}
     if name != "":
         shape.name = name
     # If the file defines edges (faces of length 2) then don't recreate any
@@ -371,6 +375,7 @@ class PlaneFromNormal:
     and a 'D' such that for a point P in the plane 'D' = -normal.P, i.e.
     normal_x x + normal_y y + normal_z z + D = 0 is the equation of the plane.
     """
+
     def __init__(self, normal, point):
         self.normal = normal
         self.D = geomtypes.RoundedFloat(-self.normal * geomtypes.Vec3(point))
@@ -404,9 +409,7 @@ class PlaneFromNormal:
 
     def __eq__(self, plane):
         """Return True if the planes define the same one."""
-        return (
-            self.normal == plane.normal and self.D == plane.D
-        ) or (
+        return (self.normal == plane.normal and self.D == plane.D) or (
             self.normal == -plane.normal and self.D == -plane.D
         )
 
@@ -415,14 +418,16 @@ class PlaneFromNormal:
             geomtypes.RoundedFloat(self.normal[0]),
             geomtypes.RoundedFloat(self.normal[1]),
             geomtypes.RoundedFloat(self.normal[2]),
-            self.D
+            self.D,
         )
+
 
 class Plane(PlaneFromNormal):
     """Create a plane from 3 points in the plane.
 
     The points should be unique.
     """
+
     def __init__(self, p0, p1, p2):
         assert not p0 == p1, "\n  p0 = %s,\n  p1 = %s" % (str(p0), str(p1))
         assert not p0 == p2, "\n  p0 = %s,\n  p2 = %s" % (str(p0), str(p2))
@@ -455,10 +460,18 @@ class SimpleShape(base.Orbitit):
     Attributes:
     shape_colors: same as the colors parameter in __init__, see that method.
     """
+
     normal_direction = TRI_OUT
 
     def __init__(
-        self, vs, fs, es=None, ns=None, colors=None, name="SimpleShape", orientation=None
+        self,
+        vs,
+        fs,
+        es=None,
+        ns=None,
+        colors=None,
+        name="SimpleShape",
+        orientation=None,
     ):
         """
         vs: the vertices in the 3D object: an array of 3 dimension arrays, which
@@ -524,9 +537,9 @@ class SimpleShape(base.Orbitit):
         if not colors or not colors[0]:
             colors = ([rgb.gray95[:]], [])
         self.zoom_factor = 1.0
-        self.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1.0}
-        self.edge_props = {'es': es, 'draw_edges': True}
-        self.face_props = {'fs': fs, 'colors': colors}
+        self.vertex_props = {"vs": vs, "ns": ns, "radius": -1.0}
+        self.edge_props = {"es": es, "draw_edges": True}
+        self.face_props = {"fs": fs, "colors": colors}
         if orientation:
             self.orientation = orientation
             if not orientation.is_rot():
@@ -835,7 +848,11 @@ class SimpleShape(base.Orbitit):
                    face colors are set by some default algorithm.
         draw_faces: settings that expresses whether the faces should be drawn.
         """
-        return {"fs": self.fs, "colors": self._shape_colors, "draw_faces": self.draw_faces}
+        return {
+            "fs": self.fs,
+            "colors": self._shape_colors,
+            "draw_faces": self.draw_faces,
+        }
 
     @face_props.setter
     def face_props(self, props):
@@ -965,7 +982,9 @@ class SimpleShape(base.Orbitit):
         # if already normalised, you never need to recalc
         # if not yet normalised, but required, just normalise.
         if not self.face_normals_up_to_date or self.face_normals_len_1 != normalise:
-            self.face_normals = [self.generate_face_normal(f, normalise) for f in self.fs]
+            self.face_normals = [
+                self.generate_face_normal(f, normalise) for f in self.fs
+            ]
             self.face_normals_up_to_date = True
             self.face_normals_len_1 = normalise
 
@@ -1069,7 +1088,9 @@ class SimpleShape(base.Orbitit):
                     t = (v0_idx, v1_idx)
                 else:
                     t = (v1_idx, v0_idx)
-                angle = math.pi - self.face_normals[face_idx].angle(self.face_normals[cfi])
+                angle = math.pi - self.face_normals[face_idx].angle(
+                    self.face_normals[cfi]
+                )
                 angle = round(angle, precision)
                 try:
                     dihedral_to_edge[angle].append(t)
@@ -1078,7 +1099,9 @@ class SimpleShape(base.Orbitit):
 
         for face_idx, face in enumerate(self.fs):
             no_of_indices = len(face)
-            for edge in [(v_idx, face[(i + 1) % no_of_indices]) for i, v_idx in enumerate(face)]:
+            for edge in [
+                (v_idx, face[(i + 1) % no_of_indices]) for i, v_idx in enumerate(face)
+            ]:
                 for next_face_idx in range(face_idx + 1, no_of_faces):
                     chk_face = self.fs[next_face_idx]
                     try:
@@ -1100,7 +1123,10 @@ class SimpleShape(base.Orbitit):
         """
         if len(self._shape_colors[1]) != self.no_of_fs:
             if self.no_of_cols == 1:
-                self._shape_colors = (self._shape_colors[0], [0 for i in range(self.no_of_fs)])
+                self._shape_colors = (
+                    self._shape_colors[0],
+                    [0 for i in range(self.no_of_fs)],
+                )
             elif self.no_of_cols < self.no_of_fs:
                 self.divide_col()
             else:
@@ -1312,12 +1338,16 @@ class SimpleShape(base.Orbitit):
                 GL.glNormalPointerf(self.saved_ns)
         # VERTICES
         if self.gl.sphere_vertices:
-            GL.glColor(self.gl.vertex_col[0], self.gl.vertex_col[1], self.gl.vertex_col[2])
+            GL.glColor(
+                self.gl.vertex_col[0], self.gl.vertex_col[1], self.gl.vertex_col[2]
+            )
             for i in self.vertex_range:
                 self.gl.sphere.draw(self.vs[i])
         # EDGES
         if self.gl.draw_edges:
-            if self.generate_normals and (self.ns == [] or len(self.ns) != len(self.vs)):
+            if self.generate_normals and (
+                self.ns == [] or len(self.ns) != len(self.vs)
+            ):
                 es = self.nEs
                 vs = self.vertex_per_normal
             else:
@@ -1544,7 +1574,9 @@ class SimpleShape(base.Orbitit):
 
         for face, plane in faces:
             found = False
-            logging.debug("checking plane %s for face %s of len %d", plane, face, len(face))
+            logging.debug(
+                "checking plane %s for face %s of len %d", plane, face, len(face)
+            )
             for existing_face_compound, existing_plane in result:
                 if plane == existing_plane:
                     existing_face_compound.append(face)
@@ -1571,7 +1603,7 @@ class SimpleShape(base.Orbitit):
         # with an angle equal to the dot product of the normalised vectors.
         z_axis = VEC(0, 0, 1)
         to_2d_angle = geomtypes.RoundedFloat(math.acos(z_axis * face_plane.normal))
-        if (to_2d_angle in (2 * math.pi, -2 * math.pi, math.pi, -math.pi)):
+        if to_2d_angle in (2 * math.pi, -2 * math.pi, math.pi, -math.pi):
             to_2d_angle = geomtypes.RoundedFloat(0.0)
         if to_2d_angle != 0:
             logging.debug("to_2d_angle: %f", to_2d_angle)
@@ -1607,7 +1639,9 @@ class SimpleShape(base.Orbitit):
         if line_3d is None:
             logging.debug("No intersection for face")
         else:
-            logging.debug("intersecting horizontal plane %s with %s", face_plane, line_3d)
+            logging.debug(
+                "intersecting horizontal plane %s with %s", face_plane, line_3d
+            )
             assert geomtypes.RoundedFloat(line_3d.v[2]) == 0, (
                 "all intersection lines should be paralell to z = 0, "
                 f"but z varies with {line_3d.v[2]} (margin: {geomtypes.FloatHandler.margin})"
@@ -1637,7 +1671,9 @@ class SimpleShape(base.Orbitit):
                 # translate with T1 and T2:
                 vs = [c - line_3d.p for c in vs]
                 # rotate to make plane horizontal and translate back (-T2)
-                to_hor_angle = geomtypes.RoundedFloat(math.acos(z_axis * face_plane.normal))
+                to_hor_angle = geomtypes.RoundedFloat(
+                    math.acos(z_axis * face_plane.normal)
+                )
                 rot_mat = geomtypes.Rot3(angle=to_hor_angle, axis=line_3d.v)
                 t_back = line_3d.p[:]
                 vs_2d = [geomtypes.Vec((rot_mat * v)[:2]) + t_back for v in vs]
@@ -1650,7 +1686,9 @@ class SimpleShape(base.Orbitit):
         return ()
 
     @staticmethod
-    def _combine_intersections_to_faces(intersection_lines, faces_to_intersect_with, vs):
+    def _combine_intersections_to_faces(
+        intersection_lines, faces_to_intersect_with, vs
+    ):
         """Combine intersection segments with faces to intersect with.
 
         With the line segments that are valid segments for for the face(s) that are intersecting the
@@ -1675,7 +1713,9 @@ class SimpleShape(base.Orbitit):
             # updated_factors: the valid factors resulting in combining the above.
             new_factors = []
             for face_to_intersect_with in faces_to_intersect_with:
-                polygon_2d = geom_2d.Polygon([v[:2] for v in vs], face_to_intersect_with)
+                polygon_2d = geom_2d.Polygon(
+                    [v[:2] for v in vs], face_to_intersect_with
+                )
                 line_factors_1 = line_2d.intersect_polygon_get_factors(polygon_2d)
                 logging.debug("line_factors_1 %s", line_factors_1)
                 # Now combine the results of line_factors_0 and line_factors_1:
@@ -1686,10 +1726,8 @@ class SimpleShape(base.Orbitit):
                 select_segment_0 = True
                 select_segment_1 = True
 
-                while (
-                    i_segment_0 < len(line_factors_0)
-                and
-                    i_segment_1 < len(line_factors_1)
+                while i_segment_0 < len(line_factors_0) and i_segment_1 < len(
+                    line_factors_1
                 ):
                     if select_segment_0:
                         f0 = line_factors_0[i_segment_0][0]
@@ -1984,15 +2022,11 @@ class CompoundShape(base.Orbitit):
         """
         if len(self._shapes) == 1:
             return repr(self._shapes[0])
-        s = indent.Str(
-            "%s(\n" % base.find_module_class_name(self.__class__, __name__)
-        )
+        s = indent.Str("%s(\n" % base.find_module_class_name(self.__class__, __name__))
         s = s.add_incr_line("shapes=[")
         s.incr()
         s = s.glue_line(
-            ",\n".join(
-                repr(shape).reindent(s.indent) for shape in self._shapes
-            )
+            ",\n".join(repr(shape).reindent(s.indent) for shape in self._shapes)
         )
         s = s.add_decr_line("],")
         s = s.add_line('name="%s"' % self.name)
@@ -2169,10 +2203,10 @@ class CompoundShape(base.Orbitit):
         assert len(ns) == len(self._shapes)
         for i in range(len(self._shapes)):
             self._shapes[i].vertex_props = {
-                'vs': vs[i],
-                'ns': ns[i],
-                'radius': radius,
-                'color': color,
+                "vs": vs[i],
+                "ns": ns[i],
+                "radius": radius,
+                "color": color,
             }
         self.merge_needed = True
 
@@ -2222,7 +2256,10 @@ class CompoundShape(base.Orbitit):
                 draw_edges = None
         for i in range(len(self._shapes)):
             self._shapes[i].edge_props = {
-                'es': es[i], 'radius': radius, 'color': color, 'draw_edges': draw_edges
+                "es": es[i],
+                "radius": radius,
+                "color": color,
+                "draw_edges": draw_edges,
             }
         self.merge_needed = True
 
@@ -2233,7 +2270,11 @@ class CompoundShape(base.Orbitit):
         See face_props.setter what to expect.
         """
         d = self._shapes[0].face_props
-        return {"fs": self.fs, "colors": self.shape_colors, "draw_faces": d["draw_faces"]}
+        return {
+            "fs": self.fs,
+            "colors": self.shape_colors,
+            "draw_faces": d["draw_faces"],
+        }
 
     @face_props.setter
     def face_props(self, props):
@@ -2262,7 +2303,9 @@ class CompoundShape(base.Orbitit):
                 draw_faces = None
         for i, shape in enumerate(self._shapes):
             shape.face_props = {
-                'fs': fs[i], 'colors': colors[i], 'draw_faces': draw_faces
+                "fs": fs[i],
+                "colors": colors[i],
+                "draw_faces": draw_faces,
             }
         self.merge_needed = True
 
@@ -2313,7 +2356,9 @@ class CompoundShape(base.Orbitit):
         """Boolean stating whether vertex normals need to be (re)generated."""
         return self._shapes[0].generate_normals
 
-    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
+    def to_off(
+        self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
+    ):
         """Return a representation of the object in the 3D 'OFF' file format.
 
         See SimpleShape.to_off
@@ -2336,7 +2381,9 @@ class CompoundShape(base.Orbitit):
         """
         if self.merge_needed:
             self.merge_shapes()
-        return self.merged_shape.to_postscript(face_indices, scaling, precision, page_size)
+        return self.merged_shape.to_postscript(
+            face_indices, scaling, precision, page_size
+        )
 
     def get_dome(self, level=2):
         """Change the shape towards into a dome shaped model
@@ -2535,13 +2582,15 @@ class SymmetricShape(CompoundShape):
             col0 = colors[0]
             if isinstance(col0, (float, int)):
                 # one colour specified for all
-                assert len(colors) == 3 or len(colors) == 4, f"Expected RGB(A), got {colors}"
+                assert (
+                    len(colors) == 3 or len(colors) == 4
+                ), f"Expected RGB(A), got {colors}"
                 colors = [colors]
             else:
                 # several colours specified
-                assert isinstance(col0, (list, tuple)), (
-                    f"expected first colour to be an RGB(A) value, got {col0}"
-                )
+                assert isinstance(
+                    col0, (list, tuple)
+                ), f"expected first colour to be an RGB(A) value, got {col0}"
         return colors
 
     @property
@@ -2614,7 +2663,7 @@ class SymmetricShape(CompoundShape):
         This will make sure that the necessary updates are made when needed.
         """
         assert len(vs) == len(self.base_shape.vs)
-        self.base_shape.vertex_props = {'vs': vs}
+        self.base_shape.vertex_props = {"vs": vs}
         self.merge_needed = True
         self.needs_apply_isoms = True
 
@@ -2653,7 +2702,7 @@ class SymmetricShape(CompoundShape):
         """
         if props:
             if "fs" in props and props["fs"] is not None:
-                self.base_shape.face_props = {'fs': props["fs"]}
+                self.base_shape.face_props = {"fs": props["fs"]}
                 self.needs_apply_isoms = True
             if "colors" in props and props["colors"] is not None:
                 self.shape_colors = props["colors"]
@@ -2663,6 +2712,7 @@ class SymmetricShape(CompoundShape):
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
+
         def adjust_transform(isom):
             """Adjust the transform to global trans so the same result is obtained"""
             if isom.is_rot():
