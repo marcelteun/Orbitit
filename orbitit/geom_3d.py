@@ -273,8 +273,6 @@ class Fields:
     in C.
     """
 
-    pass
-
 
 class Line3D(geomtypes.Line):
     str_precision = 2
