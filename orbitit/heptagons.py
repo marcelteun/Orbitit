@@ -3862,7 +3862,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         """
         # The 'try' is necessary, since the boxes are destroyed in some OS,
         # while this is necessary for Ubuntu Hardy Heron.
-        for box in self.boxes:
+        for box in self.boxes:  # pylint: disable=duplicate-code
             try:
                 box.Destroy()
             except RuntimeError:

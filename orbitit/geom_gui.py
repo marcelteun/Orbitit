@@ -407,7 +407,7 @@ class LabeledIntInput(wx.BoxSizer):
 
     def Destroy(self, *_, **__):
         """Destroy labeled int input and release memory."""
-        for box in self.boxes:
+        for box in self.boxes:  # pylint: disable=duplicate-code
             try:
                 box.Destroy()
             except RuntimeError:
