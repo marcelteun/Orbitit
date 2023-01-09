@@ -395,7 +395,7 @@ class PlaneFromNormal:
             return None
         n0 = self.normal
         n1 = plane.normal
-        if n0 == n1 or n0 == -n1:
+        if n0 in (n1, -n1):
             return None
         v = n0.cross(n1)
         # v = v.normalise()
