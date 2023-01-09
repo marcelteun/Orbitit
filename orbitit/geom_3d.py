@@ -449,14 +449,13 @@ TRI_IN = 4  # the normal pointing towards from the origin is the normal
 
 
 class SimpleShape(base.Orbitit):
-    normal_direction = TRI_OUT
-
     """
     This class decribes a simple 3D object consisting of faces and edges.
 
     Attributes:
     shape_colors: same as the colors parameter in __init__, see that method.
     """
+    normal_direction = TRI_OUT
 
     def __init__(
         self, vs, fs, es=None, ns=None, colors=None, name="SimpleShape", orientation=None
@@ -916,6 +915,7 @@ class SimpleShape(base.Orbitit):
 
     @property
     def draw_faces(self):
+        """Return whether the shape faces are drawn by OpenGL."""
         return self.gl.draw_faces
 
     @draw_faces.setter
