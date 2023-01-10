@@ -3,6 +3,7 @@ chk_files="
 	orbitit/__main__.py
 	orbitit/archimedean_solids.py
 	orbitit/geom_2d.py
+	orbitit/geom_3d.py
 	orbitit/geom_gui.py
 	orbitit/geomtypes.py
 	orbitit/gen_59_icosahedra.py
