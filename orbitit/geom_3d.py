@@ -496,6 +496,11 @@ class SimpleShape(base.Orbitit):
         self.face_normals = []
         self.generate_normals = True
         self.name = name
+        # For four below, see create_vertex_normals
+        self.normal_per_vertex = []
+        self.vertex_per_normal = []
+        self.triangulated_faces_n_index = []
+        self.edges_n_index = []
         self.gl_initialised = False
         self.gl = Fields()
         self.gl.sphere = None
@@ -890,7 +895,7 @@ class SimpleShape(base.Orbitit):
         for f in fs:
             assert len(f) > 2, "A face should have at least 3 vertices"
         self.fs = fs
-        self.triangulated_faces = self.triangulate(fs)
+        self.triangulated_faces_n_index = self.triangulate(fs)
         self.no_of_fs = len(self.fs)
         self.face_normals_up_to_date = False
         # if you autogenerate the vertex normal, using the faces, you need to
@@ -983,7 +988,20 @@ class SimpleShape(base.Orbitit):
         """Create vertex normals and save in self.
 
         vs: and array with vertices to create normals for. Is not set, then self.vs is used.
-        normalise: boolean stating whether to normalise the normals.
+        normalise: boolean stating whether to normalise the normals (refers mainly to edges).
+
+        It will create the following attributes:
+        normal_per_vertex: contains the normal per each vertex per face and vertex. The vertex
+            normal for a face is the same as the face normal. The vertex normal for an edge is the
+            vertex pointer. It relates to vertex_per_normal by using the same index.
+        vertex_per_normal: contains the vertices per face and edge. It relates to normal_per_vertex
+            by using the same index
+        triangulated_faces_n_index: The faces triangulated. Each face is a list of triplets, one for
+            each triangle. These triangles are supposed to be used with the stencil buffer. The
+            indices of these faces refer to vertex_per_normal / normal_per_vertex and not to vs. The
+            former contains one vertex for each face and one for the edges.
+        edges_n_index: contains the edge indices where the indices aren't referring to self.es, but
+            to vertex_per_normal / normal_per_vertex
 
         return: none
         """
@@ -1003,8 +1021,8 @@ class SimpleShape(base.Orbitit):
             counter += 1
             return counter
 
-        self.nFs = [[inc() for i in face] for face in self.fs]
-        self.triangulated_faces = self.triangulate(self.nFs)
+        face_per_normal_idx = [[inc() for i in face] for face in self.fs]
+        self.triangulated_faces_n_index = self.triangulate(face_per_normal_idx)
         # Now for the edge vertices. Note that edge vertices aren't necessarily
         # part of the face vertices.
         edge_idx_offset = len(self.vertex_per_normal)
@@ -1015,7 +1033,7 @@ class SimpleShape(base.Orbitit):
         else:
             for v in vs:
                 self.normal_per_vertex.append(v)
-        self.nEs = [old_v_idx + edge_idx_offset for old_v_idx in self.es]
+        self.edges_n_index = [old_v_idx + edge_idx_offset for old_v_idx in self.es]
 
     def create_edge_lengths(self, precision=12):
         """For each edge calculate the edge length.
@@ -1339,7 +1357,7 @@ class SimpleShape(base.Orbitit):
             if self.generate_normals and (
                 self.ns == [] or len(self.ns) != len(self.vs)
             ):
-                es = self.nEs
+                es = self.edges_n_index
                 vs = self.vertex_per_normal
             else:
                 es = self.es
@@ -1367,7 +1385,7 @@ class SimpleShape(base.Orbitit):
                     a = min(a, 1)
                     GL.glColor(c[0], c[1], c[2], a)
                 for face_idx in self.equal_colored_fs[col_idx]:
-                    triangles = self.triangulated_faces[face_idx]
+                    triangles = self.triangulated_faces_n_index[face_idx]
                     # Note triangles is a flat (ie 1D) array
                     if len(triangles) == 3:
                         GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
