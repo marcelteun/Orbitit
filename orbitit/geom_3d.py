@@ -501,6 +501,8 @@ class SimpleShape(base.Orbitit):
         self.vertex_per_normal = []
         self.triangulated_faces_n_index = []
         self.edges_n_index = []
+        self.face_normals_up_to_date = False
+        self.face_normals_normalised = None
         self.gl_initialised = False
         self.gl = Fields()
         self.gl.sphere = None
@@ -974,15 +976,12 @@ class SimpleShape(base.Orbitit):
 
         return: none
         """
-        # TODO use smarter sol than self.face_normals_len_1 != normalise:
-        # if already normalised, you never need to recalc
-        # if not yet normalised, but required, just normalise.
-        if not self.face_normals_up_to_date or self.face_normals_len_1 != normalise:
+        if not self.face_normals_up_to_date or self.face_normals_normalised != normalise:
             self.face_normals = [
                 self.generate_face_normal(f, normalise) for f in self.fs
             ]
             self.face_normals_up_to_date = True
-            self.face_normals_len_1 = normalise
+            self.face_normals_normalised = normalise
 
     def create_vertex_normals(self, normalise, vs=None):
         """Create vertex normals and save in self.
