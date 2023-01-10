@@ -66,6 +66,7 @@ from orbitit import base, geom_2d, geomtypes, glue, indent, isometry, PS, rgb, S
 # - edges after reading off file
 
 def vec(x, y, z):
+    """Return 3D vector type."""
     return geomtypes.Vec3([x, y, z])
 
 E = geomtypes.E  # Identity
