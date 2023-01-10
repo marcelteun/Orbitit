@@ -437,7 +437,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         else:
             rot = geomtypes.Rot3(
                 axis=axis,
-                angle=geom_3d.Deg2Rad * angle
+                angle=geom_3d.DEG2RAD * angle
             )
         try:
             self.shape.orientation = rot

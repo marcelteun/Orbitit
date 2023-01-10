@@ -186,7 +186,7 @@ class Shape(heptagons.FldHeptagonShape):
         this.pos_angle_min = -math.pi/2
         this.pos_angle_max = math.pi/2
         this.height = 2.7
-        this.dihedral_angle = geom_3d.Deg2Rad * 119
+        this.dihedral_angle = geom_3d.DEG2RAD * 119
         this.initArrs()
         this.set_tri_fill_pos(0)
         this.set_edge_alt(trisAlt.strip_II, trisAlt.strip_II)
