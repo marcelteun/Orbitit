@@ -353,7 +353,7 @@ class Triangle:
             vec(v1[0], v1[1], v1[2]),
             vec(v2[0], v2[1], v2[2]),
         ]
-        self._normal = None
+        self._normal = vec(0, 0, 0)
 
     # since there is an extra parameter this isn't a property
     def normal(self, normalise=False):
