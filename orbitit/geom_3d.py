@@ -69,6 +69,18 @@ def vec(x, y, z):
     """Return 3D vector type."""
     return geomtypes.Vec3([x, y, z])
 
+def gl_vertex_pointer(v):
+    """Wrapper of GL.glVertexPointerf to disable pylint no-member issue."""
+    return GL.glVertexPointerf(v)  # pylint: disable=no-member
+
+def gl_normal_pointer(v):
+    """Wrapper of GL.glNormalPointerf to disable pylint no-member issue."""
+    return GL.glNormalPointerf(v)  # pylint: disable=no-member
+
+def gl_draw_elements(s, e):
+    """Wrapper of GL.glDrawElementsui to disable pylint no-member issue."""
+    return GL.glDrawElementsui(s, e)  # pylint: disable=no-member
+
 E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
 
@@ -1012,7 +1024,7 @@ class SimpleShape(base.Orbitit):
         self.normal_per_vertex = []
         for face, normal in zip(self.fs, self.face_normals):
             self.normal_per_vertex.extend([normal for vi in face])
-            self.vertex_per_normal.extend([vs[vi][0:3] for vi in face])
+            self.vertex_per_normal.extend([geomtypes.Vec3(vs[vi][0:3]) for vi in face])
         counter = -1
 
         def inc():
@@ -1298,52 +1310,52 @@ class SimpleShape(base.Orbitit):
             # On windows and Ubuntu 9.10 the vs cannot be an array of vec3...
             if not self.generate_normals:
                 try:
-                    if not GL.glVertexPointerf(vs):
+                    if not gl_vertex_pointer(vs):
                         return
                     normals = self.ns
                 except TypeError:
                     vs = [[v[0], v[1], v[2]] for v in vs]
                     logging.info("gl_draw: converting vs(ns); vec3 type not accepted")
-                    if not GL.glVertexPointerf(vs):
+                    if not gl_vertex_pointer(vs):
                         return
                     normals = [[v[0], v[1], v[2]] for v in self.ns]
                 if normals != []:
                     assert len(normals) == len(
                         vs
                     ), "the normal vector array 'normals' should have as many normals as vertices."
-                    GL.glNormalPointerf(normals)
+                    gl_normal_pointer(normals)
                     self.saved_ns = normals
                 else:
-                    GL.glNormalPointerf(vs)
+                    gl_normal_pointer(vs)
                     self.saved_ns = vs
             elif self.ns != [] and len(self.ns) == len(vs):
                 try:
-                    if not GL.glVertexPointerf(vs):
+                    if not gl_vertex_pointer(vs):
                         return
                     normals = self.ns
                 except TypeError:
                     vs = [[v[0], v[1], v[2]] for v in vs]
                     logging.info("gl_draw: converting vs(ns); vec3 type not accepted")
-                    if not GL.glVertexPointerf(vs):
+                    if not gl_vertex_pointer(vs):
                         return
                     normals = [[n[0], n[1], n[2]] for n in self.ns]
-                GL.glNormalPointerf(normals)
+                gl_normal_pointer(normals)
                 self.saved_ns = normals
             else:
                 self.create_vertex_normals(True, vs)
                 if self.vertex_per_normal:
-                    if not GL.glVertexPointerf(self.vertex_per_normal):
+                    if not gl_vertex_pointer(self.vertex_per_normal):
                         return
-                GL.glNormalPointerf(self.normal_per_vertex)
+                gl_normal_pointer(self.normal_per_vertex)
                 self.saved_ns = self.normal_per_vertex
                 vs = self.vertex_per_normal
             self.gl.update_vertices = False
             self.saved_vs = vs
         else:
             if self.gl.force_set_vs:
-                if not GL.glVertexPointerf(self.saved_vs):
+                if not gl_vertex_pointer(self.saved_vs):
                     return
-                GL.glNormalPointerf(self.saved_ns)
+                gl_normal_pointer(self.saved_ns)
         # VERTICES
         if self.gl.sphere_vertices:
             GL.glColor(
@@ -1370,7 +1382,7 @@ class SimpleShape(base.Orbitit):
                 # draw edges as lines
                 GL.glPolygonOffset(1.0, 3.0)
                 GL.glDisable(GL.GL_POLYGON_OFFSET_FILL)
-                GL.glDrawElementsui(GL.GL_LINES, es)
+                gl_draw_elements(GL.GL_LINES, es)
                 GL.glEnable(GL.GL_POLYGON_OFFSET_FILL)
 
         # FACES
@@ -1387,7 +1399,7 @@ class SimpleShape(base.Orbitit):
                     triangles = self.triangulated_faces_n_index[face_idx]
                     # Note triangles is a flat (ie 1D) array
                     if len(triangles) == 3:
-                        GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
+                        gl_draw_elements(GL.GL_TRIANGLES, triangles)
                     else:
                         # TODO: This part belongs to a GLinit:
                         GL.glClearStencil(0)
@@ -1411,7 +1423,7 @@ class SimpleShape(base.Orbitit):
                         # both pass: invert stencil values
                         GL.glStencilOp(GL.GL_KEEP, GL.GL_ZERO, GL.GL_INVERT)
                         # Create triangulated stencil:
-                        GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
+                        gl_draw_elements(GL.GL_TRIANGLES, triangles)
                         # Reset colour mask and depth settings.
                         GL.glDepthMask(GL.GL_TRUE)
                         GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
@@ -1422,7 +1434,7 @@ class SimpleShape(base.Orbitit):
                         # make stencil read only:
                         GL.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP)
                         # Now, write according to stencil
-                        GL.glDrawElementsui(GL.GL_TRIANGLES, triangles)
+                        gl_draw_elements(GL.GL_TRIANGLES, triangles)
                         # ready, disable stencil
                         GL.glDisable(GL.GL_STENCIL_TEST)
 
