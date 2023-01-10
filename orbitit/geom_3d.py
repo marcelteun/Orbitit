@@ -188,9 +188,7 @@ def read_off_file(fd, regen_edges=True, name=""):
                         vertex_radius = 0.05
             elif state == states["readFs"]:
                 # the function assumes: no comments in beween "q i0 .. iq-1 r g b"
-                assert words[0].isdigit(), "error interpreting line as face {}".format(
-                    words
-                )
+                assert words[0].isdigit(), f"error interpreting line as face {words}"
                 len_f = int(words[0])
                 if len_f > 0:
                     assert len(words) >= len_f + 4 or len(words) == len_f + 1
@@ -237,14 +235,10 @@ def read_off_file(fd, regen_edges=True, name=""):
                 break
     assert (
         state == states["readOk"]
-    ), """
-        EOF occurred while not done reading:
-            Would read %d vs and %d fs;
-            current state %s with %d items read""" % (
-        no_of_vs,
-        no_of_fs,
-        states_to_name[state],
-        i,
+    ), (
+        f"EOF occurred while not done reading:\n"
+        f"\tWould read {no_of_vs} vertices and {no_of_fs} faces;\n"
+        f"\tcurrent state {states_to_name[state]} with {i} items read"
     )
     shape = SimpleShape(vs, fs, es, colors=(cols, face_cols))
     # Note that Orbitit's panel.setShape will ignore these anyway...
@@ -268,7 +262,7 @@ def save_file(fd, shape):
     The caller still need to close the filde descriptor afterwards
     """
     fd.write("import orbitit\n")
-    fd.write("shape = %s" % repr(shape))
+    fd.write(f"shape = {repr(shape)}")
 
 
 class Fields:
@@ -334,19 +328,7 @@ class Line3D(geomtypes.Line):
         return self.discriminant_with_line(line) == 0
 
     def __str__(self):
-        precision = self.str_precision
-        format_str = (
-            "(x, y, z) = (%%0.%df, %%0.%df, %%0.%df) + t * (%%0.%df, %%0.%df, %%0.%df)"
-            % (precision, precision, precision, precision, precision, precision)
-        )
-        return format_str % (
-            self.p[0],
-            self.p[1],
-            self.p[2],
-            self.v[0],
-            self.v[1],
-            self.v[2],
-        )
+        return f"(x, y, z) = {self.p} + t * {self.v}"
 
 
 class Triangle:
@@ -369,7 +351,6 @@ class Triangle:
                     self._normal = self._normal.normalize()
                 except ZeroDivisionError:
                     pass
-            return self._normal
         return self._normal
 
 
@@ -419,7 +400,7 @@ class PlaneFromNormal:
         )
 
     def __repr__(self):
-        return "{} x + {} y + {} z + {} = 0".format(
+        return "{} x + {} y + {} z + {} = 0".format(  # pylint: disable=consider-using-f-string
             geomtypes.RoundedFloat(self.normal[0]),
             geomtypes.RoundedFloat(self.normal[1]),
             geomtypes.RoundedFloat(self.normal[2]),
@@ -434,9 +415,9 @@ class Plane(PlaneFromNormal):
     """
 
     def __init__(self, p0, p1, p2):
-        assert not p0 == p1, "\n  p0 = %s,\n  p1 = %s" % (str(p0), str(p1))
-        assert not p0 == p2, "\n  p0 = %s,\n  p2 = %s" % (str(p0), str(p2))
-        assert not p1 == p2, "\n  p1 = %s,\n  p2 = %s" % (str(p1), str(p2))
+        assert not p0 == p1, f"\n  p0 = {p0},\n  p1 = {p1}"
+        assert not p0 == p2, f"\n  p0 = {p0},\n  p2 = {p2}"
+        assert not p1 == p2, f"\n  p1 = {p1},\n  p2 = {p2}"
         self.normal = self._norm(p0, p1, p2)
         self.D = geomtypes.RoundedFloat(-self.normal * geomtypes.Vec3(p0))
 
@@ -571,12 +552,12 @@ class SimpleShape(base.Orbitit):
             ",\n".join(indent.Str(repr(f)).reindent(s.indent) for f in self.fs)
         )
         s = s.add_decr_line("],")
-        s = s.add_line("es=%s," % repr(self.es))
-        s = s.add_line("colors=%s," % repr(self._shape_colors))
-        s = s.add_line('name="%s"' % self.name)
+        s = s.add_line(f"es={self.es},")
+        s = s.add_line(f"colors={self._shape_colors},")
+        s = s.add_line(f'name="{self.name}"')
         s = s.add_decr_line(")")
         if __name__ != "__main__":
-            s = s.insert("%s." % __name__)
+            s = s.insert(f"{__name__}.")
         return s
 
     @property
@@ -933,7 +914,7 @@ class SimpleShape(base.Orbitit):
         self._shape_colors = (col_defs, face_cols)
         self.no_of_cols = len(col_defs)
         self.col_range = range(self.no_of_cols)
-        assert self.no_of_cols > 0, "Empty col_defs: %s" % col_defs
+        assert self.no_of_cols > 0, f"Empty col_defs: {col_defs}"
 
     @property
     def draw_faces(self):
@@ -1328,7 +1309,7 @@ class SimpleShape(base.Orbitit):
                 self.saved_ns = normals
             else:
                 self.create_vertex_normals(True, vs)
-                if self.vertex_per_normal != []:
+                if self.vertex_per_normal:
                     if not GL.glVertexPointerf(self.vertex_per_normal):
                         return
                 GL.glNormalPointerf(self.normal_per_vertex)
@@ -1433,7 +1414,7 @@ class SimpleShape(base.Orbitit):
         color_floats: whether to export the colours as floating point numbers
                       between 0 and 1. If False an integer 0 to 255 is used.
         """
-        w = lambda a: "{}{}\n".format(s, a)
+        w = lambda a: f"{s}{a}\n"
         s = ""
         s = w("OFF")
         s = w("#")
@@ -1448,11 +1429,8 @@ class SimpleShape(base.Orbitit):
             dihedral_to_angle = self._get_dihedral_angles()
             for a, es in dihedral_to_angle.items():
                 s = w(
-                    "# Dihedral angle: {} rad ({} degrees) for {} edges".format(
-                        geomtypes.f2s(a, precision),
-                        geomtypes.f2s(a * Rad2Deg, precision),
-                        len(es),
-                    )
+                    f"# Dihedral angle: {geomtypes.f2s(a, precision)} rad "
+                    f"({geomtypes.f2s(a * Rad2Deg, precision)} degrees) for {len(es)} edges"
                 )
                 if len(es) > 2:
                     s = w(f"#                 E.g. {es[0]}, {es[1]}, {es[2]} etc")
@@ -1467,13 +1445,12 @@ class SimpleShape(base.Orbitit):
         s = w(f"{len(self.vs)} {no_of_faces} {no_of_edges}")
         s = w("# Vertices")
         for v in self.vs:
-            s = w(
-                "{} {} {}".format(
-                    geomtypes.f2s(v[0], precision),
-                    geomtypes.f2s(v[1], precision),
-                    geomtypes.f2s(v[2], precision),
+            with geomtypes.FloatHandler(precision):
+                s = w(
+                    f"{geomtypes.RoundedFloat(v[0])} "
+                    f"{geomtypes.RoundedFloat(v[1])} "
+                    f"{geomtypes.RoundedFloat(v[2])}"
                 )
-            )
         s = w("# Sides and colours")
         # self._shape_colors[1] = [] : use self._shape_colors[0][0]
         # self._shape_colors[1] = [c0, c1, .. cn] where ci is an index i
@@ -1492,13 +1469,9 @@ class SimpleShape(base.Orbitit):
             for fi in face:
                 s += f" {fi}"
             if color_floats:
-                s += "  {:g} {:g} {:g}".format(color[0], color[1], color[2])
+                s += f"  {color[0]:g} {color[1]:g} {color[2]:g}"
             else:
-                s += "  {:d} {:d} {:d}".format(
-                    int(color[0] * 255),
-                    int(color[1] * 255),
-                    int(color[2] * 255),
-                )
+                s += f"  {int(color[0] * 255)} {int(color[1] * 255)} {int(color[2] * 255)}"
             return s
 
         if one_col:
@@ -1511,17 +1484,17 @@ class SimpleShape(base.Orbitit):
                 face = self.fs[i]
                 color = self._shape_colors[0][self._shape_colors[1][i]]
                 # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
-                s = "%s%s\n" % (s, face_str(face))
-                face_idx_str = "%s %s %s" % (
-                    geomtypes.f2s(self.face_normals[i][0], precision),
-                    geomtypes.f2s(self.face_normals[i][1], precision),
-                    geomtypes.f2s(self.face_normals[i][2], precision),
+                s = f"{s}{face_str(face)}\n"
+                face_idx_str = (
+                    f"{geomtypes.f2s(self.face_normals[i][0], precision)} "
+                    f"{geomtypes.f2s(self.face_normals[i][1], precision)} "
+                    f"{geomtypes.f2s(self.face_normals[i][2], precision)}"
                 )
                 if info:
                     s = w(f"# face normal: {face_idx_str}")
         if info:
             for i in range(no_of_edges):
-                s = w("# edge: {:d} {:d}".format(self.es[2 * i], self.es[2 * i + 1]))
+                s = w(f"# edge: {self.es[2 * i]} {self.es[2 * i + 1]}")
         s = w("# END")
         return s
 
@@ -1890,8 +1863,8 @@ class SimpleShape(base.Orbitit):
             face_indices = list(range(len(self.fs)))
         ps_doc = PS.doc(title=self.name, pageSize=page_size)
         if logging.root.level < logging.DEBUG:
-            for i in range(len(self.vs)):
-                logging.debug("V[%d] = %s", i, self.vs[i])
+            for i, vertex in enumerate(self.vs):
+                logging.debug("V[%d] = %s", i, vertex)
 
         compound_faces = self._merge_faces_sharing_plane(face_indices)
 
@@ -2027,17 +2000,18 @@ class CompoundShape(base.Orbitit):
         """
         if len(self._shapes) == 1:
             return repr(self._shapes[0])
-        s = indent.Str("%s(\n" % base.find_module_class_name(self.__class__, __name__))
+        class_name = base.find_module_class_name(self.__class__, __name__)
+        s = indent.Str(f"{class_name}(\n")
         s = s.add_incr_line("shapes=[")
         s.incr()
         s = s.glue_line(
             ",\n".join(repr(shape).reindent(s.indent) for shape in self._shapes)
         )
         s = s.add_decr_line("],")
-        s = s.add_line('name="%s"' % self.name)
+        s = s.add_line(f'name="{self.name}"')
         s = s.add_decr_line(")")
         if __name__ != "__main__":
-            s = s.insert("%s." % __name__)
+            s = s.insert(f"{__name__}.")
         return s
 
     @property
@@ -2206,8 +2180,8 @@ class CompoundShape(base.Orbitit):
                 color = None
         assert len(vs) == len(self._shapes)
         assert len(ns) == len(self._shapes)
-        for i in range(len(self._shapes)):
-            self._shapes[i].vertex_props = {
+        for i, shape in enumerate(self._shapes):
+            shape.vertex_props = {
                 "vs": vs[i],
                 "ns": ns[i],
                 "radius": radius,
@@ -2259,8 +2233,8 @@ class CompoundShape(base.Orbitit):
                 draw_edges = props["draw_edges"]
             else:
                 draw_edges = None
-        for i in range(len(self._shapes)):
-            self._shapes[i].edge_props = {
+        for i, shape in enumerate(self._shapes):
+            shape.edge_props = {
                 "es": es[i],
                 "radius": radius,
                 "color": color,
@@ -2490,7 +2464,7 @@ class SymmetricShape(CompoundShape):
         )
         s = s.add_decr_line("],")
         if self.base_shape.es != []:
-            s = s.add_line("es=%s," % repr(self.base_shape.es))
+            s = s.add_line(f"es={self.base_shape.es},")
         if self.base_shape.ns != []:
             s = s.add_incr_line("ns=[")
             s.incr()
@@ -2520,15 +2494,15 @@ class SymmetricShape(CompoundShape):
                 )
             )
             s = s.add_decr_line("],")
-        s = s.add_line("name='%s'," % self.name)
+        s = s.add_line(f"name='{self.name}',")
         s = s.glue_line(
-            indent.Str("orientation=%s" % repr(self.base_shape.orientation)).reindent(
+            indent.Str(f"orientation={repr(self.base_shape.orientation)}").reindent(
                 s.indent
             )
         )
         s = s.add_decr_line(")")
         if __name__ != "__main__":
-            s = s.insert("%s." % __name__)
+            s = s.insert(f"{__name__}.")
         return s
 
     @property
@@ -2879,10 +2853,7 @@ class OrbitShape(SymmetricShape):
             raise
         len_f = len(final_sym)
         len_s = len(stab_sym)
-        len_q = len(fs_quotient_set)
         assert len_f % len_s == 0, f"Expected divisable group length {len_f} / {len_s}"
-        # assert len_q == len_f // len_s,\
-        #    f"Wrong length ({len_q} != {len_f // len_s}) of quotient set (increase precisio?)"
         fs_orbit = [coset.get_one() for coset in fs_quotient_set]
         if not quiet:
             logging.info("Applying an orbit of order %d", len(fs_orbit))
@@ -2950,7 +2921,7 @@ class OrbitShape(SymmetricShape):
         )
         s = s.add_decr_line("],")
         if self.base_shape.es != []:
-            s = s.add_line("es=%s," % repr(self.base_shape.es))
+            s = s.add_line(f"es={self.base_shape.es},")
         if self.base_shape.ns != []:
             s = s.add_incr_line("ns=[")
             s.incr()
@@ -2979,10 +2950,10 @@ class OrbitShape(SymmetricShape):
         s.incr()
         s = s.glue_line((repr(self.stab_sym) + ",").reindent(s.indent))
         s.decr()
-        s = s.add_line("name='%s'," % self.name)
+        s = s.add_line(f"name='{self.name}',")
         s = s.add_decr_line(")")
         if __name__ != "__main__":
-            s = s.insert("%s." % __name__)
+            s = s.insert(f"{__name__}.")
         return s
 
     def set_cols(self, colours, stab_sym):
@@ -3018,18 +2989,18 @@ class Scene(ABC):
        step 2.
     """
 
-    def __init__(self, ShapeClass, CtrlWinClass, parent, canvas):
+    def __init__(self, shape_class, ctrl_win_class, parent, canvas):
         """Create an object of the Scene class
 
-        ShapeClass: a class derived from geom_3d.SimpleShape
-        CtrlWineClass: a class derived from wx.Frame implementing controls to
-                       change the properties of the shape dynamically.
+        shape_class: a class derived from geom_3d.SimpleShape
+        ctrl_win_class: a class derived from wx.Frame implementing controls to change the properties
+            of the shape dynamically.
         parent: the main window of the application.
         canvas: the canvas on which the shape is supposed to be drawn with
                 OpenGL.
         """
-        self.shape = ShapeClass()
-        self.ctrl_win = CtrlWinClass(self.shape, canvas, parent, wx.ID_ANY)
+        self.shape = shape_class()
+        self.ctrl_win = ctrl_win_class(self.shape, canvas, parent, wx.ID_ANY)
 
     def close(self):
         """Close the current scene and destroy all its widgets"""

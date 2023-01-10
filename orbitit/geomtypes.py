@@ -349,7 +349,7 @@ class Vec(tuple, base.Orbitit):
 
     def __str__(self):
         try:
-            elements = ", ".join([f2s(i) for i in self])
+            elements = ", ".join([f2s(i, FloatHandler.precision) for i in self])
         except IndexError:
             elements = ""
         return f"[{elements}]"

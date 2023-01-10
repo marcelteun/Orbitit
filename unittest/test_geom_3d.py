@@ -153,7 +153,8 @@ class TestSimpleShape(unittest.TestCase):
     def test_repr(self):
         """Test repr-format function"""
         self.ensure_shape()
-        tst_str = repr(self.shape)
+        with geomtypes.FloatHandler(12):
+            tst_str = repr(self.shape)
         result, msg = chk_with_org(self.name + ".repr", tst_str)
         self.assertTrue(result, msg)
 
