@@ -65,7 +65,8 @@ from orbitit import base, geom_2d, geomtypes, glue, indent, isometry, PS, rgb, S
 # Done
 # - edges after reading off file
 
-VEC = lambda x, y, z: geomtypes.Vec3([x, y, z])
+def vec(x, y, z):
+    return geomtypes.Vec3([x, y, z])
 
 E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
@@ -335,9 +336,9 @@ class Triangle:
     """Model a triangle in 3D space."""
     def __init__(self, v0, v1, v2):
         self.v = [
-            VEC(v0[0], v0[1], v0[2]),
-            VEC(v1[0], v1[1], v1[2]),
-            VEC(v2[0], v2[1], v2[2]),
+            vec(v0[0], v0[1], v0[2]),
+            vec(v1[0], v1[1], v1[2]),
+            vec(v2[0], v2[1], v2[2]),
         ]
         self._normal = None
 
@@ -418,8 +419,7 @@ class Plane(PlaneFromNormal):
         assert not p0 == p1, f"\n  p0 = {p0},\n  p1 = {p1}"
         assert not p0 == p2, f"\n  p0 = {p0},\n  p2 = {p2}"
         assert not p1 == p2, f"\n  p1 = {p1},\n  p2 = {p2}"
-        self.normal = self._norm(p0, p1, p2)
-        self.D = geomtypes.RoundedFloat(-self.normal * geomtypes.Vec3(p0))
+        super().__init__(self._norm(p0, p1, p2), p0)
 
     @staticmethod
     def _norm(p0, p1, p2):
@@ -511,6 +511,10 @@ class SimpleShape(base.Orbitit):
         self.saved_ns = None
         self.saved_vs = None
         self.spheres_radii = Fields()
+        self.spheres_radii.precision = 12
+        self.spheres_radii.circumscribed = 0
+        self.spheres_radii.mid = 0
+        self.spheres_radii.inscribed = 0
         self.len_to_edge = {}
         self.fs_gravity = []
         self.equal_colored_fs = []
@@ -613,7 +617,7 @@ class SimpleShape(base.Orbitit):
         f_props = self.face_props
         fs = f_props["fs"]
         org_cols = f_props["colors"]
-        d = dict()
+        d = {}
         for i, face in enumerate(fs):
             face_cp = face[:]
             face_cp.sort()
@@ -625,11 +629,11 @@ class SimpleShape(base.Orbitit):
         new_fs = []
         col_idx = []
         if keep_one:
-            for _ in d:
+            for i in d.values():
                 new_fs.append(fs[i[0]])
                 col_idx.append(org_cols[1][i[0]])
         else:
-            for f, i in d.items():
+            for i in d.values():
                 if len(i) == 1:
                     new_fs.append(fs[i[0]])
                     col_idx.append(org_cols[1][i[0]])
@@ -948,7 +952,7 @@ class SimpleShape(base.Orbitit):
             assert False, "Normal for digons not implemented"
             # TODO: what to do here?
         normal = Triangle(self.vs[f[0]], self.vs[f[1]], self.vs[f[2]]).normal(normalise)
-        if self.normal_direction == TRI_OUT or self.normal_direction == TRI_IN:
+        if self.normal_direction in (TRI_OUT, TRI_IN):
             v0 = geomtypes.Vec3(self.vs[f[0]])
             outwards = v0.norm() < (v0 + normal).norm()
             if (outwards and self.normal_direction == TRI_IN) or (
@@ -1165,7 +1169,7 @@ class SimpleShape(base.Orbitit):
         The gravity point is saved in self.fs_gravity
         """
         self.fs_gravity = [
-            reduce(lambda t, i: t + self.vs[i], f, VEC(0, 0, 0)) / len(f)
+            reduce(lambda t, i: t + self.vs[i], f, vec(0, 0, 0)) / len(f)
             for f in self.fs
         ]
 
@@ -1263,7 +1267,7 @@ class SimpleShape(base.Orbitit):
             else:
                 v_usage = glue.getVUsageIn1D(self.vs, self.es)
                 v_usage = glue.getVUsageIn2D(self.vs, self.fs, v_usage)
-                g = VEC(0, 0, 0)
+                g = vec(0, 0, 0)
                 total = 0
                 for v_idx in self.vertex_range:
                     g = g + v_usage[v_idx] * geomtypes.Vec3(self.vs[v_idx])
@@ -1414,7 +1418,10 @@ class SimpleShape(base.Orbitit):
         color_floats: whether to export the colours as floating point numbers
                       between 0 and 1. If False an integer 0 to 255 is used.
         """
-        w = lambda a: f"{s}{a}\n"
+        def w(s1):
+            nonlocal s
+            return f"{s}{s1}\n"
+
         s = ""
         s = w("OFF")
         s = w("#")
@@ -1579,7 +1586,7 @@ class SimpleShape(base.Orbitit):
         # is parallel to the z-axis to work with a 2D situation:
         # Rotate around the cross product of z-axis and norm
         # with an angle equal to the dot product of the normalised vectors.
-        z_axis = VEC(0, 0, 1)
+        z_axis = vec(0, 0, 1)
         to_2d_angle = geomtypes.RoundedFloat(math.acos(z_axis * face_plane.normal))
         if to_2d_angle in (2 * math.pi, -2 * math.pi, math.pi, -math.pi):
             to_2d_angle = geomtypes.RoundedFloat(0.0)
@@ -1640,7 +1647,7 @@ class SimpleShape(base.Orbitit):
             # However this makes the algorithm very slow. Is is quicker just to project the whole
             # face orthogonally to the XoY plane. The same line factors will be obtained, unless the
             # face is orthogonal, or almost for precision reasons, to the XoY plane.
-            z_axis = VEC(0, 0, 1)
+            z_axis = vec(0, 0, 1)
             with geomtypes.FloatHandler(1):
                 simplify = face_plane.normal != z_axis
             if simplify:
@@ -1762,7 +1769,7 @@ class SimpleShape(base.Orbitit):
             coordinate in the plane, while a polygon is a list of indinces in the points list. A
             polygon might also just be an egde.
         """
-        hor_plane = PlaneFromNormal(VEC(0, 0, 1), VEC(0, 0, z))
+        hor_plane = PlaneFromNormal(vec(0, 0, 1), vec(0, 0, z))
         logging.debug("hor_plane %s", hor_plane)
 
         # split faces into
