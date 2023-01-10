@@ -48,11 +48,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = 1.0
 
     def set_height(self, h):
-        self._angle = geom_3d.Rad2Deg * math.atan2(V2 * (1 - h), 4*h - 1)
+        self._angle = geom_3d.RAD2DEG * math.atan2(V2 * (1 - h), 4*h - 1)
         super().set_height(h)
 
     def set_angle(self, a):
-        tanA = math.tan(a*geom_3d.Deg2Rad)
+        tanA = math.tan(a*geom_3d.DEG2RAD)
         self._height = (V2 + tanA) / (V2 + 4*tanA)
         super().set_angle(a)
 

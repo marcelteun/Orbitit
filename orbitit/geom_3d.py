@@ -73,8 +73,8 @@ E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
 
 # constant that have deal with angles
-Rad2Deg = 180.0 / math.pi
-Deg2Rad = math.pi / 180
+RAD2DEG = 180.0 / math.pi
+DEG2RAD = math.pi / 180
 R1_2 = math.pi  # 1/2 of a circle
 
 R1_3 = 2 * math.pi / 3  # 1/3 of a circle
@@ -1438,7 +1438,7 @@ class SimpleShape(base.Orbitit):
             for a, es in dihedral_to_angle.items():
                 s = w(
                     f"# Dihedral angle: {geomtypes.f2s(a, precision)} rad "
-                    f"({geomtypes.f2s(a * Rad2Deg, precision)} degrees) for {len(es)} edges"
+                    f"({geomtypes.f2s(a * RAD2DEG, precision)} degrees) for {len(es)} edges"
                 )
                 if len(es) > 2:
                     s = w(f"#                 E.g. {es[0]}, {es[1]}, {es[2]} etc")

@@ -628,7 +628,7 @@ class Shape(heptagons.FldHeptagonShape):
             logging.info("norm1: {norm1}")
             inprod = norm0 * norm1
             logging.info(
-                f"Tris angle {i}: {math.acos(inprod) * geom_3d.Rad2Deg:.6f} degrees"
+                f"Tris angle {i}: {math.acos(inprod) * geom_3d.RAD2DEG:.6f} degrees"
             )
         logging.info("------------")
 

@@ -41,7 +41,7 @@ H0   = math.sqrt(50 - 10*V5)/10
 Ch   = math.sqrt(25 + 10*V5)/10
 Rl   = vec(-w, Ch, H0)
 
-atanH0d2 = geom_3d.Rad2Deg * math.atan(tau2/2)
+atanH0d2 = geom_3d.RAD2DEG * math.atan(tau2/2)
 
 class Shape(heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
@@ -67,11 +67,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = H0
 
     def set_height(this, h):
-        this._angle = geom_3d.Rad2Deg * math.atan((h - H0) / Ch) #+ atanH0d2
+        this._angle = geom_3d.RAD2DEG * math.atan((h - H0) / Ch) #+ atanH0d2
         super().set_height(h)
 
     def set_angle(self, a):
-        self._height = Ch * math.tan(a*geom_3d.Deg2Rad) + H0
+        self._height = Ch * math.tan(a*geom_3d.DEG2RAD) + H0
         super().set_angle(a)
 
     def set_vs(this):

@@ -106,7 +106,7 @@ class P2PCylinder:
         #      = [-e[1], e[0], 0]
         glPushMatrix();
         glTranslatef(v0[0], v0[1], v0[2]);
-        glRotatef(math.acos(e[2]/eLen) * geom_3d.Rad2Deg, -e[1], e[0], 0.);
+        glRotatef(math.acos(e[2]/eLen) * geom_3d.RAD2DEG, -e[1], e[0], 0.);
         gluCylinder(this.quad, this.radius, this.radius, eLen, this.slices, this.stacks)
         glPopMatrix();
 
@@ -249,7 +249,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             glLoadMatrixd(this.Moriginal)
             glScalef(this.currentScale, this.currentScale, this.currentScale)
             with geomtypes.FloatHandler(14):
-                angle = geom_3d.Rad2Deg * this.movingRepos.angle()
+                angle = geom_3d.RAD2DEG * this.movingRepos.angle()
                 axis  = this.movingRepos.axis()
             glRotatef(angle, axis[0], axis[1], axis[2])
 

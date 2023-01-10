@@ -36,7 +36,7 @@ tau  = (1.0 + V5)/2
 tau2 = tau + 1.0
 w    = math.sqrt(tau2 + 1.0)/2
 
-atanH0d2 = geom_3d.Rad2Deg * math.atan(tau2/2)
+atanH0d2 = geom_3d.RAD2DEG * math.atan(tau2/2)
 halfTurn = HalfTurn(axis=geomtypes.UY)
 
 class Shape(heptagons.EqlHeptagonShape):
@@ -63,11 +63,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = 2.618
 
     def set_height(this, h):
-        this._angle = geom_3d.Rad2Deg * math.atan((h - tau2)/w) #+ atanH0d2
+        this._angle = geom_3d.RAD2DEG * math.atan((h - tau2)/w) #+ atanH0d2
         super().set_height(h)
 
     def set_angle(self, a):
-        self._height = w * math.tan(a*geom_3d.Deg2Rad) + tau2
+        self._height = w * math.tan(a*geom_3d.DEG2RAD) + tau2
         super().set_angle(a)
 
     def set_vs(this):

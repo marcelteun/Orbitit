@@ -32,8 +32,6 @@ from OpenGL import GL
 
 from orbitit import geom_3d, geom_gui, geomtypes, Scenes3D
 
-DEG2RAD = geom_3d.Deg2Rad
-
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape"""
     def __init__(self, canvas, width, *args, **kwargs):
@@ -223,7 +221,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         if geomtypes.FloatHandler.eq(axis.norm(), 0):
             self.set_status_text("Please define a proper axis")
             return
-        self.canvas.shape.transform(geomtypes.Rot3(angle=DEG2RAD*angle, axis=axis))
+        self.canvas.shape.transform(geomtypes.Rot3(angle=geom_3d.DEG2RAD*angle, axis=axis))
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -927,7 +925,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 r = geomtypes.DoubleRot4(axialPlane=(v1, v0), angle=(scale*angle, angle))
             self.canvas.shape.rotate(r)
             self.canvas.paint()
-            deg = geom_3d.Rad2Deg * angle
+            deg = geom_3d.RAD2DEG * angle
             self.parent_win.set_status_text(
                 f"Rotation angle: {deg} degrees (and angle scale {scale:0.2})"
             )

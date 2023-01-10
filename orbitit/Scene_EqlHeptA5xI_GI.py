@@ -69,11 +69,11 @@ class Shape(heptagons.EqlHeptagonShape):
         this.height = H0
 
     def set_height(this, h):
-        this._angle = geom_3d.Rad2Deg * math.atan((h - H0)/Ca)
+        this._angle = geom_3d.RAD2DEG * math.atan((h - H0)/Ca)
         super().set_height(h)
 
     def set_angle(this, a):
-        this._height = Ca * math.tan(a*geom_3d.Deg2Rad) + H0
+        this._height = Ca * math.tan(a*geom_3d.DEG2RAD) + H0
         super().set_angle(a)
 
     def set_vs(this):

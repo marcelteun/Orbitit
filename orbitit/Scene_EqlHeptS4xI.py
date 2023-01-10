@@ -39,7 +39,7 @@ halfTurn = HalfTurn(axis=geomtypes.UX)
 
 class Shape(heptagons.EqlHeptagonShape):
     def __init__(this, *args, **kwargs):
-        this.atanHV2 = geom_3d.Rad2Deg * math.atan(1/V2)
+        this.atanHV2 = geom_3d.RAD2DEG * math.atan(1/V2)
         super().__init__(
             base_isometries=[
                     geomtypes.E,
@@ -58,7 +58,7 @@ class Shape(heptagons.EqlHeptagonShape):
         # TODO: use consistent angles, Dodecahedron uses without const atanHV2
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
-        this._angle = geom_3d.Rad2Deg * math.atan(V2 * (h - 1.0)) + this.atanHV2
+        this._angle = geom_3d.RAD2DEG * math.atan(V2 * (h - 1.0)) + this.atanHV2
         super().set_height(h)
 
     def set_angle(self, a):
@@ -66,7 +66,7 @@ class Shape(heptagons.EqlHeptagonShape):
         # such that dodecahedron angle == 0
         # check this with tetrahedron angle....
         alpha = a - self.atanHV2
-        self._height = hV2 * math.tan(alpha*geom_3d.Deg2Rad) + 1.0
+        self._height = hV2 * math.tan(alpha*geom_3d.DEG2RAD) + 1.0
         super().set_angle(alpha)
 
     def set_vs(this):
