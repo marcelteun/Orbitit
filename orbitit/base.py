@@ -25,7 +25,7 @@ class Orbitit(ABC):
         with open(filename, "w") as fd:
             fd.write(self.json_str)
 
-    @abstractproperty
+    @abstractproperty  # pylint: disable=deprecated-decorator
     def repr_dict(self):
         """Return a short representation of the object."""
 
@@ -47,7 +47,7 @@ class Orbitit(ABC):
         cls_to_use = json_to_class[repr_dict["class"]]
         return cls_to_use.from_dict_data(repr_dict["data"])
 
-    @abstractclassmethod
+    @abstractclassmethod  # pylint: disable=deprecated-decorator
     def from_dict_data(cls, data):
         """Recreate object from the data field of the dict representation."""
         raise NotImplementedError
