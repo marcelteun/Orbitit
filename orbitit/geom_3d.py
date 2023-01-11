@@ -358,7 +358,7 @@ class Triangle:
     # since there is an extra parameter this isn't a property
     def normal(self, normalise=False):
         """Return the normal of the triangle."""
-        if self._normal is None:
+        if self._normal.norm() == 0:
             self._normal = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
             if normalise:
                 try:
