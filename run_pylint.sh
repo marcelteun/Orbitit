@@ -15,6 +15,7 @@ chk_files="
 	orbitit/main_win.py
 	orbitit/orbit.py
 	orbitit/platonic_solids.py
+	orbitit/pre_pyopengl.py
 	orbitit/rgb.py
 	orbitit/scene_orbit.py
 	unittest/test_geom_2d.py

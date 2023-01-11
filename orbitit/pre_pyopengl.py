@@ -1,5 +1,5 @@
 # 2021-12-19:
-# work-around for PyOpenGL bug (see commit message)
+"""work-around for PyOpenGL bug (see commit message)"""
 import logging
 import os
 if not os.environ.get("PYOPENGL_PLATFORM", ""):
