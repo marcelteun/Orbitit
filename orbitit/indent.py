@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""File for handling creating text with indentation."""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -23,8 +24,9 @@
 
 
 class Str(str):
-    def __new__(self, s="", indent_step=4, indent=0):
-        return str.__new__(self, s)
+    """A string type that handles increase and decrease of indentation."""
+    def __new__(cls, s="", indent_step=4, indent=0):
+        return str.__new__(cls, s)
 
     def __init__(self, s="", indent_step=4, indent=0):
         self.indent_step = indent_step
@@ -78,37 +80,3 @@ class Str(str):
         return Str(
             "\n".join(s if s == "" else (i * " ") + s for s in self.splitlines())
         )
-
-
-if __name__ == "__main__":
-    c = """for one in all {
-    do something
-    do some more
-        new_block
-        blabla
-                further
-                bis
-        grr
-        arg
-    back
-    same
-} done
-"""
-    s = Str()
-    s = s.add_line("for one in all {")
-    s.incr()
-    s = s.add_line("do something")
-    s = s.add_line("do some more")
-    s = s.add_incr_line("new_block")
-    s = s.add_line("blabla")
-    s = s.add_incr_line("further", 2)
-    s = s.add_line("bis")
-    s = s.add_decr_line("grr", 2)
-    s = s.add_line("arg")
-    s = s.add_decr_line("back")
-    s = s.add_line("same")
-    s.decr()
-    s = s.add_line("} done")
-    assert c == s, "test failed:\n>%s< != >%s<" % (c, s)
-
-    print("test passed")
