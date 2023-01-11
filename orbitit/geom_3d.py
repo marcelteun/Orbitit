@@ -2090,6 +2090,16 @@ class CompoundShape(base.Orbitit):
             self._shapes[-1].generate_normals = self._shapes[0].generate_normals
         self.merge_needed = True
 
+    def gl_force_set_vs(self, do):
+        """
+        Force to set the vertices in OpenGL, independently on the updated vertices flag.
+
+        Normally the vertices in OpenGL are only reprogrammed if the vertices were updated, but
+        setting this flag will always reprogram the vertices.
+        """
+        for shape in self._shapes:
+            shape.gl_force_set_vs(do)
+
     @property
     def shapes(self):
         """Return all shapes of this compound shape"""
@@ -2103,8 +2113,7 @@ class CompoundShape(base.Orbitit):
         consistently for all shapes.
         """
         self._shapes = shapes
-        for shape in self._shapes:
-            shape.gl_force_set_vs(True)
+        self.gl_force_set_vs(True)
         self.merge_needed = True
 
     def merge_shapes(self):
