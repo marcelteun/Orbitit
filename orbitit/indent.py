@@ -19,13 +19,14 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
+
 
 class Str(str):
-    def __new__(self, s='', indent_step=4, indent=0):
+    def __new__(self, s="", indent_step=4, indent=0):
         return str.__new__(self, s)
 
-    def __init__(self, s='', indent_step=4, indent=0):
+    def __init__(self, s="", indent_step=4, indent=0):
         self.indent_step = indent_step
         self.indent = indent
         if self.indent < 0:
@@ -74,13 +75,12 @@ class Str(str):
         Currently only i >= 0 is supported
         Note: newlines will not get an indentation.
         """
-        return Str('\n'.join(
-                s if s == '' else (i * ' ') + s for s in self.splitlines()
-            )
+        return Str(
+            "\n".join(s if s == "" else (i * " ") + s for s in self.splitlines())
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     c = """for one in all {
     do something
     do some more
@@ -95,20 +95,20 @@ if __name__ == '__main__':
 } done
 """
     s = Str()
-    s = s.add_line('for one in all {')
+    s = s.add_line("for one in all {")
     s.incr()
-    s = s.add_line('do something')
-    s = s.add_line('do some more')
-    s = s.add_incr_line('new_block')
-    s = s.add_line('blabla')
-    s = s.add_incr_line('further', 2)
-    s = s.add_line('bis')
-    s = s.add_decr_line('grr', 2)
-    s = s.add_line('arg')
-    s = s.add_decr_line('back')
-    s = s.add_line('same')
+    s = s.add_line("do something")
+    s = s.add_line("do some more")
+    s = s.add_incr_line("new_block")
+    s = s.add_line("blabla")
+    s = s.add_incr_line("further", 2)
+    s = s.add_line("bis")
+    s = s.add_decr_line("grr", 2)
+    s = s.add_line("arg")
+    s = s.add_decr_line("back")
+    s = s.add_line("same")
     s.decr()
-    s = s.add_line('} done')
-    assert(c == s), 'test failed:\n>%s< != >%s<' % (c, s)
+    s = s.add_line("} done")
+    assert c == s, "test failed:\n>%s< != >%s<" % (c, s)
 
-    print('test passed')
+    print("test passed")
