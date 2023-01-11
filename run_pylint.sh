@@ -9,6 +9,7 @@ chk_files="
 	orbitit/geom_gui.py
 	orbitit/geomtypes.py
 	orbitit/heptagons.py
+	orbitit/indent.py
 	orbitit/isometry.py
 	orbitit/main_dlg.py
 	orbitit/main_win.py
@@ -17,5 +18,6 @@ chk_files="
 	orbitit/rgb.py
 	orbitit/scene_orbit.py
 	unittest/test_geom_2d.py
+	unittest/test_indent.py
 "
 pylint --extension-pkg-whitelist=wx $chk_files

@@ -44,7 +44,7 @@ class TestStr(unittest.TestCase):
 
     def test_indent(self):
         """Test increase and decrease of some text"""
-        text = indent.Str()
+        text = indent.Str("")
         text = text.add_line("for one in all {")
         text.incr()
         text = text.add_line("do something")

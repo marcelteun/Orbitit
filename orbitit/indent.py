@@ -25,47 +25,72 @@
 
 class Str(str):
     """A string type that handles increase and decrease of indentation."""
-    def __new__(cls, s="", indent_step=4, indent=0):
-        return str.__new__(cls, s)
+    def __new__(cls, s, *_, **__):
+        return super().__new__(cls, s)
 
-    def __init__(self, s="", indent_step=4, indent=0):
+    def __init__(self, _, indent_step=4, indent=0):
+        super().__init__()
+        assert indent_step >= 0, f"indent_step must be bigger than 0, got {indent_step}"
         self.indent_step = indent_step
         self.indent = indent
         if self.indent < 0:
             self.indent = 0
 
-    def _chk_indent(self):
-        if self.indent < 0:
-            self.indent = 0
-
-    def cp_props(self, s):
-        s.indent = self.indent
-        s.indent_step = self.indent_step
-
     def glue_line(self, s):
-        """add a line that already has indentation, i.e. don't indent"""
+        """Add a line that already has indentation, i.e. don't indent.
+
+        s: the text string to be added. A new line is added at the end of the provided text.
+        """
         return Str(f"{self}{s}\n", self.indent_step, self.indent)
 
     def add_line(self, s):
+        """Add a line with the current indentation.
+
+        s: the text string to be indented and added. A new line is added at the end of the provided
+            text.
+        """
         return Str(f"{self}{' ' * self.indent}{s}\n", self.indent_step, self.indent)
 
     def add_incr_line(self, s, i=1):
+        """Add a line with an increased indentation.
+
+        s: the text string to be indented and added. A new line is added at the end of the provided
+            text.
+        i: express with how many steps the indentation needs to be increased. Default 1.
+        """
         self.incr(i)
         return self.add_line(s)
 
     def add_decr_line(self, s, i=1):
+        """Add a line with an decreased indentation.
+
+        s: the text string to be indented and added. A new line is added at the end of the provided
+            text.
+        i: express with how many steps the indentation needs to be decreased. Default 1.
+        """
         self.decr(i)
         return self.add_line(s)
 
     def incr(self, i=1):
+        """
+        Increase the indentation with the specified amount of steps
+
+        i: express with how many steps the indentation needs to be increased. Default 1.
+        """
         self.indent = self.indent + i * self.indent_step
 
     def decr(self, i=1):
+        """
+        Decrease the indentation with the specified amount of steps
+
+        i: express with how many steps the indentation needs to be decreased. Default 1.
+        """
         self.indent = self.indent - i * self.indent_step
         if self.indent < 0:
             self.indent = 0
 
     def insert(self, s):
+        """Prepend the current text with the specified text (no indentation is added)"""
         return Str(f"{s}{self}", self.indent_step, self.indent)
 
     def __add__(self, s):
