@@ -22,22 +22,20 @@
 
 import logging
 import math
-import os
 import wx
 from wx import glcanvas
 
-from orbitit import geom_3d, geomtypes
+from OpenGL import GLU
+from OpenGL import GL
 
-# work-around for PyOpenGL bug (see commit message)
-from OpenGL.GLU import *
-from OpenGL.GL import *
+from orbitit import geom_3d, geomtypes
 
 def on_switch_front_and_back(canvas):
     """In OpenGL switch definition of what is front and back of a face"""
-    if glGetIntegerv(GL_FRONT_FACE) == GL_CCW:
-        glFrontFace(GL_CW)
+    if GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CCW:
+        GL.glFrontFace(GL.GL_CW)
     else:
-        glFrontFace(GL_CCW)
+        GL.glFrontFace(GL.GL_CCW)
     canvas.paint()
 
 def getAxis2AxisRotation(a0, a1):
@@ -84,12 +82,12 @@ class Triangle:
 
 class P2PCylinder:
     def __init__(this, radius = 0.15, slices = 12, stacks = 1):
-        this.quad = gluNewQuadric()
+        this.quad = GLU.gluNewQuadric()
         this.radius = radius
         this.slices = slices
         this.stacks = stacks
-        gluQuadricNormals(this.quad, GLU_SMOOTH)
-        #gluQuadricTexture(this.quad, GL_TRUE)
+        GLU.gluQuadricNormals(this.quad, GLU.GLU_SMOOTH)
+        #GLU.gluQuadricTexture(this.quad, GL.GL_TRUE)
 
     def draw(this, v0 = [0, 0, 0], v1 = [0, 0, 1]):
         e = [v1[0]-v0[0], v1[1]-v0[1], v1[2]-v0[2]]
@@ -104,26 +102,26 @@ class P2PCylinder:
         #       = acos( e[2]/eLen)
         # axis = (0,0,1) x e , with x the cross product
         #      = [-e[1], e[0], 0]
-        glPushMatrix();
-        glTranslatef(v0[0], v0[1], v0[2]);
-        glRotatef(math.acos(e[2]/eLen) * geom_3d.RAD2DEG, -e[1], e[0], 0.);
-        gluCylinder(this.quad, this.radius, this.radius, eLen, this.slices, this.stacks)
-        glPopMatrix();
+        GL.glPushMatrix();
+        GL.glTranslatef(v0[0], v0[1], v0[2]);
+        GL.glRotatef(math.acos(e[2]/eLen) * geom_3d.RAD2DEG, -e[1], e[0], 0.);
+        GLU.gluCylinder(this.quad, this.radius, this.radius, eLen, this.slices, this.stacks)
+        GL.glPopMatrix();
 
 class VSphere:
     def __init__(this, radius = 0.2, slices = 12, stacks = 12):
-        this.quad = gluNewQuadric()
+        this.quad = GLU.gluNewQuadric()
         this.radius = radius
         this.slices = slices
         this.stacks = stacks
-        gluQuadricNormals(this.quad, GLU_SMOOTH)
-        #gluQuadricTexture(this.quad, GL_TRUE)
+        GLU.gluQuadricNormals(this.quad, GLU.GLU_SMOOTH)
+        #GLU.gluQuadricTexture(this.quad, GL.GL_TRUE)
 
     def draw(this, v = [0, 0, 0]):
-        glPushMatrix();
-        glTranslatef(v[0], v[1], v[2]);
-        gluSphere(this.quad, this.radius, this.slices, this.stacks)
-        glPopMatrix();
+        GL.glPushMatrix();
+        GL.glTranslatef(v[0], v[1], v[2]);
+        GLU.gluSphere(this.quad, this.radius, this.slices, this.stacks)
+        GL.glPopMatrix();
 
 class Interactive3DCanvas(glcanvas.GLCanvas):
     def __init__(this, parent, size = None):
@@ -186,11 +184,11 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
 
     def init_gl(this):
         logging.info("Interactive3DCanvas.init_gl(this,..)")
-        glMatrixMode(GL_PROJECTION)
-        gluPerspective(45., 1.0, 1., 300.)
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GLU.gluPerspective(45., 1.0, 1., 300.)
 
-        glTranslatef(0.0, 0.0, -this.cameraDistance)
-        glMatrixMode(GL_MODELVIEW)
+        GL.glTranslatef(0.0, 0.0, -this.cameraDistance)
+        GL.glMatrixMode(GL.GL_MODELVIEW)
 
     def onEraseBackground(this, event):
         pass # Do nothing, to avoid flashing on MSW.
@@ -208,8 +206,8 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             this.SetCurrent(this.context)
         except wx._core.PyAssertionError:
             pass
-        glViewport(0, 0, this.size.width, this.size.height)
-        #glViewport(0, 0, wOrH, wOrH)
+        GL.glViewport(0, 0, this.size.width, this.size.height)
+        #GL.glViewport(0, 0, wOrH, wOrH)
         event.Skip()
 
     def OnPaint(this, event):
@@ -229,13 +227,13 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         if not this.init:
             this.init_gl()
             this.init = True
-            this.Moriginal = glGetDoublev(GL_MODELVIEW_MATRIX)
-        glPushMatrix()
+            this.Moriginal = GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX)
+        GL.glPushMatrix()
         this.on_paint()
-        glPopMatrix()
+        GL.glPopMatrix()
 
         if this.xOrg != 0 or this.yOrg != 0:
-            viewPort = glGetIntegerv(GL_VIEWPORT)
+            viewPort = GL.glGetIntegerv(GL.GL_VIEWPORT)
             height = viewPort[3] - viewPort[1]
             width  = viewPort[2] - viewPort[0]
             D = min(width, height)
@@ -246,12 +244,12 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             ax, an = getAxis2AxisRotation(orgSphere, newSpherePos)
             this.movingRepos = geomtypes.Rot3(axis = ax, angle = an
                 ) * this.modelRepos
-            glLoadMatrixd(this.Moriginal)
-            glScalef(this.currentScale, this.currentScale, this.currentScale)
+            GL.glLoadMatrixd(this.Moriginal)
+            GL.glScalef(this.currentScale, this.currentScale, this.currentScale)
             with geomtypes.FloatHandler(14):
                 angle = geom_3d.RAD2DEG * this.movingRepos.angle()
                 axis  = this.movingRepos.axis()
-            glRotatef(angle, axis[0], axis[1], axis[2])
+            GL.glRotatef(angle, axis[0], axis[1], axis[2])
 
         if this.z != this.zBac:
             dZ = this.z - this.zBac
@@ -260,14 +258,14 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             #pStr = '%f ->' % dZ
             dZ = dZ*this.zScaleFactor + 1.0
             this.currentScale = dZ * this.currentScale
-            glScalef(dZ, dZ, dZ)
+            GL.glScalef(dZ, dZ, dZ)
 
-        glFlush()
+        GL.glFlush()
         this.SwapBuffers()
 
     def resetOrientation(this):
         try: # this.Moriginal might not exist at an early stage (e.g. on Windows)...
-            glLoadMatrixd(this.Moriginal)
+            GL.glLoadMatrixd(this.Moriginal)
         except AttributeError:
             pass
         this.modelRepos = geomtypes.E
