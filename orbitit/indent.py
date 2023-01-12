@@ -32,9 +32,7 @@ class Str(str):
         super().__init__()
         assert indent_step >= 0, f"indent_step must be bigger than 0, got {indent_step}"
         self.indent_step = indent_step
-        self.indent = indent
-        if self.indent < 0:
-            self.indent = 0
+        self.indent = max(indent, 0)
 
     def glue_line(self, s):
         """Add a line that already has indentation, i.e. don't indent.
@@ -85,9 +83,7 @@ class Str(str):
 
         i: express with how many steps the indentation needs to be decreased. Default 1.
         """
-        self.indent = self.indent - i * self.indent_step
-        if self.indent < 0:
-            self.indent = 0
+        self.indent = max(self.indent - i * self.indent_step, 0)
 
     def insert(self, s):
         """Prepend the current text with the specified text (no indentation is added)"""
