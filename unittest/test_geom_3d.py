@@ -30,9 +30,9 @@ import unittest
 
 from orbitit import geom_3d, geomtypes, isometry
 
-red = (.8, .1, .1)
-yellow = (.8, .8, .3)
-blue = (.3, .3, .8)
+RED = (.8, .1, .1)
+YELLOW = (.8, .8, .3)
+BLUE = (.3, .3, .8)
 
 DIR_PATH = path.dirname(path.realpath(__file__))
 OUT_DIR = "output"
@@ -58,7 +58,7 @@ def get_cube():
           [3, 2, 6, 7],
           [7, 6, 5, 4]]
     return geom_3d.SimpleShape(vs=vs, fs=fs,
-                              colors=([red, yellow, blue], [0, 1, 2, 1, 2, 0]))
+                              colors=([RED, YELLOW, BLUE], [0, 1, 2, 1, 2, 0]))
 
 
 def get_octahedron():
@@ -78,7 +78,7 @@ def get_octahedron():
           [5, 4, 3],
           [5, 1, 4]]
     return geom_3d.SimpleShape(vs=vs, fs=fs,
-                              colors=([yellow], []))
+                              colors=([YELLOW], []))
 
 
 def get_path(filename, sub_dir):
@@ -96,11 +96,11 @@ def chk_with_org(filename, chk_str):
     except IOError:
         with open(chk_name, 'w') as fd:
             fd.write(chk_str)
-        return (False, 'Missing file, check {}'.format(org_name))
+        return (False, f"Missing file, check {org_name}")
     if chk_str != expect_str:
         with open(chk_name, 'w') as fd:
             fd.write(chk_str)
-        return (False, 'Unexpected content {} != {} (expected)'.format(chk_name, org_name))
+        return (False, f"Unexpected content {chk_name} != {org_name} (expected)")
     return (True, "")
 
 
@@ -144,6 +144,7 @@ class TestSimpleShape(unittest.TestCase):
         self.assertTrue(result, msg)
 
     def test_export_to_json(self):
+        """Test export to JSON file format."""
         self.ensure_shape()
         with geomtypes.FloatHandler(12):
             tst_str = self.shape.json_str

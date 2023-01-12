@@ -19,6 +19,8 @@ chk_files="
 	orbitit/rgb.py
 	orbitit/scene_orbit.py
 	unittest/test_geom_2d.py
+	unittest/test_geom_3d.py
+	unittest/test_geom_3d_long.py
 	unittest/test_indent.py
 "
 pylint --extension-pkg-whitelist=wx $chk_files
