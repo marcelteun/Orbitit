@@ -251,9 +251,11 @@ class CtrlWin(wx.Frame):
                 style = wx.SL_VERTICAL
             )
         self.panel.Bind(wx.EVT_SLIDER, self.onTailAdjust, id = self.kiteTailAdjust.GetId())
-        self.kiteTailBox = wx.StaticBox(self.panel, label = 'Kite Tail')
-        self.kiteTailSizer = wx.StaticBoxSizer(self.kiteTailBox, wx.VERTICAL)
-        self.kiteTailSizer.Add(self.kiteTailAdjust, 1, wx.EXPAND)
+        self.kite_tail_sizer = wx.StaticBoxSizer(
+            wx.StaticBox(self.panel, label = 'Kite Tail'),
+            wx.VERTICAL,
+        )
+        self.kite_tail_sizer.Add(self.kiteTailAdjust, 1, wx.EXPAND)
 
         # GUI for predefined positions
         self.prePosLst = [
@@ -289,7 +291,7 @@ class CtrlWin(wx.Frame):
 
         self.column_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.column_sizer.Add(self.kiteTopSizer, 1, wx.EXPAND)
-        self.column_sizer.Add(self.kiteTailSizer, 1, wx.EXPAND)
+        self.column_sizer.Add(self.kite_tail_sizer, 1, wx.EXPAND)
         self.column_sizer.Add(self.row_sizer, 2, wx.EXPAND)
 
         main_sizer.Add(self.kiteSideSizer, 2, wx.EXPAND)
