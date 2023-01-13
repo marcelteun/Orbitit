@@ -62,6 +62,7 @@ class Rounding(unittest.TestCase):
         self.assertEqual(str_b, "0.1234567")
 
     def test_rounded_float(self):
+        """Test comparison of RoundedFloat with different margins."""
         a = geomtypes.RoundedFloat(0.12345678)
         b = geomtypes.RoundedFloat(0.12345673)
 
@@ -112,6 +113,7 @@ class Rounding(unittest.TestCase):
             self.assertTrue(b == a)
 
     def test_keep_type(self):
+        """Test whether operations on RoundedFloat return RoundedFloat."""
         a = geomtypes.RoundedFloat(1.)
         b = geomtypes.RoundedFloat(2.)
 
@@ -947,7 +949,7 @@ class TestRefl3(unittest.TestCase):
             r = s0 * s1
             assert not s0.is_rot()
             assert s0.is_refl()
-            assert not s0.is_rot_inv(), "for i = %d: %s" % (k, str(s0))
+            assert not s0.is_rot_inv(), f"for i = {k}: {s0}"
             assert not s1.is_rot()
             assert s1.is_refl()
             assert not s1.is_rot_inv()
@@ -1185,7 +1187,7 @@ class TestRot4(unittest.TestCase):
                         self.assertTrue(a == j * 2 * math.pi / n)
                         r = r0 * r
                     ra = geomtypes.RoundedFloat(r.angle())
-                    self.assertTrue(ra == 0 or ra == 2*math.pi)
+                    self.assertTrue(ra in (0, 2 * math.pi))
 
     def test_vectors_in_axis(self):
         """test if vectors in axial plane are not changed."""
@@ -1193,7 +1195,7 @@ class TestRot4(unittest.TestCase):
         v1 = geomtypes.Vec4([0, 0, 1, 1])
         v1 = v1.make_orthogonal_to(v0)
         r0 = geomtypes.Rot4(axialPlane=(v1, v0), angle=math.pi/5)
-        with geomtypes.FloatHandler(14) as fh:
+        with geomtypes.FloatHandler(14):
             for k in range(5):
                 v = v0 + k * v1
                 r = r0 * v
@@ -1223,11 +1225,11 @@ class TestDoubleRot4(unittest.TestCase):
                 r = r0 * r
                 self.assertTrue(r.is_rot())
                 ra = geomtypes.RoundedFloat(r.angle())
-                self.assertFalse(ra == 0 or ra == 2 * math.pi)
+                self.assertFalse(ra in (0, 2 * math.pi))
             r = r0 * r
             self.assertTrue(r.is_rot())
             ra = geomtypes.RoundedFloat(r.angle())
-            self.assertTrue(ra == 0 or ra == 2 * math.pi)
+            self.assertTrue(ra in (0, 2 * math.pi))
 
             r0 = geomtypes.DoubleRot4(axialPlane=(geomtypes.Vec4([1, 0, 0, 0]),
                                                   geomtypes.Vec4([0, 0, 0, 1])),
@@ -1243,11 +1245,11 @@ class TestDoubleRot4(unittest.TestCase):
                 r = r0 * r
                 self.assertTrue(r.is_rot())
                 ra = geomtypes.RoundedFloat(r.angle())
-                self.assertFalse(ra == 0 or ra == 2 * math.pi)
+                self.assertFalse(ra in (0, 2 * math.pi))
             r = r0 * r
             self.assertTrue(r.is_rot())
             ra = geomtypes.RoundedFloat(r.angle())
-            self.assertTrue(ra == 0 or ra == 2 * math.pi)
+            self.assertTrue(ra in (0, 2 * math.pi))
 
 
 class TestMat(unittest.TestCase):
