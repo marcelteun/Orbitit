@@ -22,5 +22,6 @@ chk_files="
 	unittest/test_geom_3d.py
 	unittest/test_geom_3d_long.py
 	unittest/test_indent.py
+	unittest/test_isometry.py
 "
 pylint --extension-pkg-whitelist=wx $chk_files
