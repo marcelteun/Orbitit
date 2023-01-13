@@ -22,8 +22,6 @@
 
 import logging
 import wx
-from OpenGL.GLU import *
-from OpenGL.GL import *
 
 from orbitit import geom_3d, geomtypes, heptagons, rgb
 
@@ -48,21 +46,6 @@ class Shape(geom_3d.SimpleShape):
             show_kite=True,
             show_hepta=True,
         )
-
-    @staticmethod
-    def gl_init():
-        lightPosition = [-5., 5., 200., 0.]
-        lightAmbient  = [0.7, 0.7, 0.7, 1.]
-        #lightDiffuse  = [1., 1., 1., 1.]
-        #lightSpecular = [0., 0., 0., 1.]
-        #materialSpec  = [0., 0., 0., 0.]
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPosition)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient)
-        #glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse)
-        #glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular)
-        #glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, materialSpec)
-        glEnable(GL_LIGHT0)
-        #glDisable(GL_DEPTH_TEST)
 
     def initArrs(self):
         self.colors = [rgb.red, rgb.yellow]
@@ -101,11 +84,11 @@ class Shape(geom_3d.SimpleShape):
             ]
 
     def set_vs(self):
-        Vt = [0, self.top, 0]
-        Vb = [0, -self.tail, 0]
-        Vl = [-self.side, 0, 0]
-        Vr = [ self.side, 0, 0]
-        tuple = heptagons.kite_to_hept(Vl, Vt, Vr, Vb)
+        v_top = [0, self.top, 0]
+        v_bottom = [0, -self.tail, 0]
+        v_left = [-self.side, 0, 0]
+        v_right = [ self.side, 0, 0]
+        tuple = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
         if tuple == None: return
         h0, h1, h2, h3, h4, h5, h6 = tuple[0]
 
@@ -128,14 +111,14 @@ class Shape(geom_3d.SimpleShape):
                 #               1
                 #
         self.kiteVs = [
-                geomtypes.Vec3([Vr[0], Vr[1], Vr[2]]),
-                geomtypes.Vec3([Vb[0], Vb[1], Vb[2]]),
-                geomtypes.Vec3([Vl[0], Vl[1], Vl[2]]),
-                geomtypes.Vec3([Vt[0], Vt[1], Vt[2]])
+                geomtypes.Vec3([v_right[0], v_right[1], v_right[2]]),
+                geomtypes.Vec3([v_bottom[0], v_bottom[1], v_bottom[2]]),
+                geomtypes.Vec3([v_left[0], v_left[1], v_left[2]]),
+                geomtypes.Vec3([v_top[0], v_top[1], v_top[2]])
            ]
         d = 1e-4
         self.heptaVs = [
-                geomtypes.Vec3([Vt[0], Vt[1], Vt[2] + d]),
+                geomtypes.Vec3([v_top[0], v_top[1], v_top[2] + d]),
                 geomtypes.Vec3([h1[0], h1[1], h1[2] + d]),
                 geomtypes.Vec3([h2[0], h2[1], h2[2] + d]),
                 geomtypes.Vec3([h3[0], h3[1], h3[2] + d]),
@@ -159,28 +142,28 @@ class Shape(geom_3d.SimpleShape):
             fs = []
             es = []
             vs = []
-            ColsI = []
+            col_idx = []
             if show_kite:
                 vs.extend(self.kiteVs)
                 fs.extend(self.kiteFs)
                 es.extend(self.kiteEs)
-                ColsI.extend(self.kiteColors)
+                col_idx.extend(self.kiteColors)
             if show_hepta:
                 if vs != []:
-                    lVs = len(vs)
+                    no_of_vs = len(vs)
                     for face in self.heptaFs:
-                        fs.append([i + lVs for i in face])
-                    es.extend([i + lVs for i in self.heptaEs])
+                        fs.append([i + no_of_vs for i in face])
+                    es.extend([i + no_of_vs for i in self.heptaEs])
                     vs.extend(self.heptaVs)
-                    ColsI.extend(self.heptaColors)
+                    col_idx.extend(self.heptaColors)
                 else:
                     fs.extend(self.heptaFs)
                     es.extend(self.heptaEs)
                     vs.extend(self.heptaVs)
-                    ColsI.extend(self.heptaColors)
+                    col_idx.extend(self.heptaColors)
             self.vertex_props = {'vs': vs}
             self.es = es
-            self.face_props = {'fs': fs, 'colors': [self.colors[:], ColsI[:]]}
+            self.face_props = {'fs': fs, 'colors': [self.colors[:], col_idx[:]]}
             # save for set_vs:
             self.show_kite  = show_kite
             self.show_hepta = show_hepta
@@ -203,11 +186,8 @@ class Shape(geom_3d.SimpleShape):
         self.side = side
         self.set_vs()
 
-    def getStatusStr(self):
-        floatFmt = '%02.2f'
-        fmtStr   = 'Top = %s, Tail = %s, Side = %s' % (floatFmt, floatFmt, floatFmt)
-        str      = fmtStr % (self.top, self.tail, self.side)
-        return str
+    def get_status_text(self):
+        return f"Top = {self.top:02.2f}, Tail = {self.tail:02.2f}, Side = {self.side:02.2f}"
 
     # GUI PART
 
@@ -215,7 +195,8 @@ class CtrlWin(wx.Frame):
     def __init__(self, shape, canvas, *args, **kwargs):
         self.shape = shape
         self.canvas = canvas
-        wx.Frame.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(
@@ -325,7 +306,7 @@ class CtrlWin(wx.Frame):
         self.shape.setSide(float(self.kiteSideAdjust.GetValue()) / self.sideScale)
         self.canvas.paint()
         try:
-            self.status_bar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.get_status_text())
         except AttributeError: pass
         event.Skip()
 
@@ -334,7 +315,7 @@ class CtrlWin(wx.Frame):
         self.shape.setTop(float(self.topRange - self.kiteTopAdjust.GetValue()) / self.topScale)
         self.canvas.paint()
         try:
-            self.status_bar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.get_status_text())
         except AttributeError: pass
         event.Skip()
 
@@ -343,7 +324,7 @@ class CtrlWin(wx.Frame):
         self.shape.setTail(float(self.kiteTailAdjust.GetValue()) / self.tailScale)
         self.canvas.paint()
         try:
-            self.status_bar.SetStatusText(self.shape.getStatusStr())
+            self.status_bar.SetStatusText(self.shape.get_status_text())
         except AttributeError: pass
         event.Skip()
 
@@ -357,21 +338,21 @@ class CtrlWin(wx.Frame):
             self.pre_pos_selected = True
         # TODO: id user selects prepos and then starts sliding, then the
         # selection should become None again.
-        selStr = self.prePosLst[sel]
-        if selStr == 'None':
+        selection_str = self.prePosLst[sel]
+        if selection_str == 'None':
             top  = self.topSav
             tail = self.tailSav
             side = self.sideSav
             self.pre_pos_selected = False
-        elif selStr == 'Concave I':
+        elif selection_str == 'Concave I':
             top  =  0.25
             tail = 10.0
             side =  1.6
-        elif selStr == 'Concave II':
+        elif selection_str == 'Concave II':
             top  = 2.0
             tail = 0.6
             side = 1.6
-        elif selStr == 'Regular':
+        elif selection_str == 'Regular':
             top  = 2*heptagons.HEPT_RHO_NUM
             tail = top * (2 * heptagons.HEPT_RHO_NUM - 1)
             side = 1 + heptagons.HEPT_SIGMA
@@ -385,9 +366,7 @@ class CtrlWin(wx.Frame):
         self.kiteTopAdjust.SetValue(self.topRange - top * self.topScale)
         self.kiteTailAdjust.SetValue(tail * self.tailScale)
         self.kiteSideAdjust.SetValue(side * self.sideScale)
-        try:
-            self.status_bar.SetStatusText(self.shape.getStatusStr())
-        except AttributeError: pass
+        self.status_bar.SetStatusText(self.shape.get_status_text())
 
     def on_view_settings_chk(self, event):
         show_kite = self.view_kite_gui.IsChecked()
