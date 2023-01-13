@@ -44,7 +44,7 @@ from orbitit import (  # pylint: disable=ungrouped-imports
     Scene_EqlHeptA5xI,
     Scene_EqlHeptA5xI_GD,
     Scene_EqlHeptA5xI_GI,
-    Scene_EqlHeptFromKite,
+    scene_eql_hept_from_kite,
     Scene_EqlHeptS4A4,
     Scene_EqlHeptS4xI,
     Scene_FldHeptA4,
@@ -65,7 +65,7 @@ SCENES = {
     'eqlHeptA5xI': Scene_EqlHeptA5xI,
     'eqlHeptA5xI_GD': Scene_EqlHeptA5xI_GD,
     'eqlHeptA5xI_GI': Scene_EqlHeptA5xI_GI,
-    'eqlHeptFromKite': Scene_EqlHeptFromKite,
+    'eqlHeptFromKite': scene_eql_hept_from_kite,
     'eqlHeptS4A4': Scene_EqlHeptS4A4,
     'eqlHeptS4xI': Scene_EqlHeptS4xI,
     'fldHeptA4': Scene_FldHeptA4,
@@ -324,7 +324,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
         sub_menu = wx.Menu()
         scene_items = [  # menu_title, scene
-            ("One &Kite", Scene_EqlHeptFromKite),
+            ("One &Kite", scene_eql_hept_from_kite),
             ("&Dodecadron", Scene_EqlHeptA5xI),
             ("&Great Dodecahedron", Scene_EqlHeptA5xI_GD),
             ("Great &Icosahedron", Scene_EqlHeptA5xI_GI),
