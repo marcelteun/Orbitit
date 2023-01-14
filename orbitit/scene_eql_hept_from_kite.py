@@ -90,7 +90,7 @@ class Shape(geom_3d.SimpleShape):
         v_right = [ self.side, 0, 0]
         tuple = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
         if tuple == None: return
-        h0, h1, h2, h3, h4, h5, h6 = tuple[0]
+        _, h1, h2, h3, h4, h5, h6 = tuple[0]
 
                 #
                 #              3 0'
@@ -300,7 +300,7 @@ class CtrlWin(wx.Frame):
         return main_sizer
 
     def setNoPrePos(self):
-        sel = self.prePosSelect.SetSelection(0)
+        self.prePosSelect.SetSelection(0)
         self.pre_pos_selected = False
 
     def onSideAdjust(self, event):
