@@ -141,6 +141,15 @@ class Line(geomtypes.Line):
             return 1
         return -1
 
+    @property
+    def angle(self):
+        """Return angle with X-axis in radians."""
+        return math.atan2(self.v[1], self.v[0])
+
+    def angle_with(self, line):
+        """Return from this line to another line in radians."""
+        return line.angle - self.angle
+
 
 class Polygon:
     """Represent a polygon (convex or concave) in 2D.

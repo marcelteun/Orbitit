@@ -21,6 +21,7 @@
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+import math
 import unittest
 
 from orbitit import geom_2d, geomtypes
@@ -101,6 +102,47 @@ class TestLine(unittest.TestCase):
                 expected,
                 f"Test case {test_case} failed"
             )
+
+    def test_2d_line_angle(self):
+        """Test method that returns the angle with the X-axis."""
+        test_matrix = {  # test case: p0 of line, p1 of line, expected
+            "0 degrees A": ([0, 0], [10, 0], 0),
+            "0 degrees B": ([0, 4], [10, 4], 0),
+            "90 degrees A": ([0, 0], [0, 10], math.pi / 2),
+            "90 degrees B": ([-2, 0], [-2, 10], math.pi / 2),
+            "-90 degrees": ([0, 0], [0, -10], -math.pi / 2),
+            "180 degrees": ([0, 0], [-0.1, 0], math.pi),
+            "45 degrees": ([0, 0], [1, 1], math.pi / 4),
+            "-45 degrees": ([0, 0], [1, -1], -math.pi / 4),
+            "135 degrees": ([0, 0], [-1, 1], 3 * math.pi / 4),
+            "-135 degrees": ([0, 0], [-1, -1], -3 * math.pi / 4),
+        }
+        for test_case, (p0, p1, expected) in test_matrix.items():
+            line = geom_2d.Line(p0, p1)
+            with geomtypes.FloatHandler:
+                self.assertEqual(line.angle, expected, f"test case {test_case} failed")
+
+    def test_2d_line_angle_with(self):
+        """Test method that returns the angle with the another line."""
+        test_matrix = {  # case: p0 of line 1, p1 of line 1, p0 of line 2, p1 of line 2, expected
+            "0 degrees A": ([0, 0], [10, 0], [10, 0], [11, 0], 0),
+            "0 degrees B": ([0, 0], [10, 0], [11, 11], [12, 11], 0),
+            "90 degrees": ([0, 0], [1, 1], [1, 1], [0, 2], math.pi / 2),
+            "-90 degrees": ([0, 0], [1, 1], [1, 1], [2, 0], -math.pi / 2),
+            # Do not test 180 degrees: either -180 or 180 degrees is okay
+            "45 degrees": ([1, 1], [2, 2], [1, 2], [1, 20], math.pi / 4),
+            "-45 degrees A": ([1, 1], [2, 2], [0, 2], [1, 2], -math.pi / 4),
+            "-45 degrees B": ([1, 2], [1, 20], [1, 1], [2, 2], -math.pi / 4),
+        }
+        for test_case, (p0, p1, q0, q1, expected) in test_matrix.items():
+            line_1 = geom_2d.Line(p0, p1)
+            line_2 = geom_2d.Line(q0, q1)
+            with geomtypes.FloatHandler:
+                self.assertEqual(
+                    line_1.angle_with(line_2),
+                    expected,
+                    f"test case {test_case} failed",
+                )
 
 class TestPolygon(unittest.TestCase):
     """Unit tests for geom_2d.Polygon"""
