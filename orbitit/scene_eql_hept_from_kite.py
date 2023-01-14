@@ -155,15 +155,15 @@ class Shape(geom_3d.SimpleShape):
             self.show_kite  = show_kite
             self.show_hepta = show_hepta
 
-    def setTop(self, top):
+    def set_top(self, top):
         self.top  = top
         self.set_vs()
 
-    def setTail(self, tail):
+    def set_tail(self, tail):
         self.tail  = tail
         self.set_vs()
 
-    def setSide(self, side):
+    def set_side(self, side):
         self.side  = side
         self.set_vs()
 
@@ -183,6 +183,19 @@ class CtrlWin(wx.Frame):
         self.shape = shape
         self.canvas = canvas
         super().__init__(*args, **kwargs)
+        self.side_scale = 100
+        self.top_scale  = 100
+        self.tail_scale = 100
+        self.top_saved = self.shape.top
+        self.tail_saved = self.shape.tail
+        self.side_saved = self.shape.side
+        self.top_range = (self.shape.top_max - self.shape.top_min) * self.top_scale
+        self.predef_pos_list = [
+                'None',
+                'Concave I',
+                'Concave II',
+                'Regular'
+            ]
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -197,67 +210,61 @@ class CtrlWin(wx.Frame):
         self.panel.Layout()
 
     def create_control_sizer(self):
-        self.sideScale = 100
-        self.topScale  = 100
-        self.tailScale = 100
 
         self.shape.update_view_opt(show_hepta=False, show_kite=True)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
-        self.kiteSideAdjust = wx.Slider(
+        self.kite_side_adjust = wx.Slider(
                 self.panel,
-                value = self.shape.side * self.sideScale,
-                minValue = self.shape.side_min * self.sideScale,
-                maxValue = self.shape.side_max * self.sideScale,
+                value = self.shape.side * self.side_scale,
+                minValue = self.shape.side_min * self.side_scale,
+                maxValue = self.shape.side_max * self.side_scale,
                 style = wx.SL_HORIZONTAL
             )
-        self.panel.Bind(wx.EVT_SLIDER, self.onSideAdjust, id = self.kiteSideAdjust.GetId())
-        self.kiteSideBox = wx.StaticBox(self.panel, label = 'Kite Side')
-        self.kiteSideSizer = wx.StaticBoxSizer(self.kiteSideBox, wx.HORIZONTAL)
-        self.kiteSideSizer.Add(self.kiteSideAdjust, 1, wx.EXPAND)
+        self.panel.Bind(wx.EVT_SLIDER, self.on_side_adjust, id = self.kite_side_adjust.GetId())
+        self.kite_side_sizer = wx.StaticBoxSizer(
+            wx.StaticBox(self.panel, label = 'Kite Side'),
+            wx.HORIZONTAL,
+        )
+        self.kite_side_sizer.Add(self.kite_side_adjust, 1, wx.EXPAND)
 
-        self.kiteTopAdjust = wx.Slider(
+        self.kite_top_adjust = wx.Slider(
                 self.panel,
-                value = self.shape.top * self.sideScale,
-                maxValue = self.shape.top_max * self.topScale,
-                minValue = self.shape.top_min * self.topScale,
+                value = self.shape.top * self.side_scale,
+                maxValue = self.shape.top_max * self.top_scale,
+                minValue = self.shape.top_min * self.top_scale,
                 style = wx.SL_VERTICAL
             )
-        self.topRange = (self.shape.top_max - self.shape.top_min) * self.topScale
-        self.panel.Bind(wx.EVT_SLIDER, self.onTopAdjust, id = self.kiteTopAdjust.GetId())
-        self.kiteTopBox = wx.StaticBox(self.panel, label = 'Kite Top')
-        self.kiteTopSizer = wx.StaticBoxSizer(self.kiteTopBox, wx.VERTICAL)
-        self.kiteTopSizer.Add(self.kiteTopAdjust, 1, wx.EXPAND)
-        self.kiteTailAdjust = wx.Slider(
+        self.panel.Bind(wx.EVT_SLIDER, self.on_top_adjust, id = self.kite_top_adjust.GetId())
+        self.kite_top_sizer = wx.StaticBoxSizer(
+            wx.StaticBox(self.panel, label = 'Kite Top'),
+            wx.VERTICAL,
+        )
+        self.kite_top_sizer.Add(self.kite_top_adjust, 1, wx.EXPAND)
+        self.kite_tail_adjust = wx.Slider(
                 self.panel,
-                value = self.shape.tail * self.sideScale,
-                minValue = self.shape.tail_min * self.tailScale,
-                maxValue = self.shape.tail_max * self.tailScale,
+                value = self.shape.tail * self.side_scale,
+                minValue = self.shape.tail_min * self.tail_scale,
+                maxValue = self.shape.tail_max * self.tail_scale,
                 style = wx.SL_VERTICAL
             )
-        self.panel.Bind(wx.EVT_SLIDER, self.onTailAdjust, id = self.kiteTailAdjust.GetId())
+        self.panel.Bind(wx.EVT_SLIDER, self.on_tail_adjust, id = self.kite_tail_adjust.GetId())
         self.kite_tail_sizer = wx.StaticBoxSizer(
             wx.StaticBox(self.panel, label = 'Kite Tail'),
             wx.VERTICAL,
         )
-        self.kite_tail_sizer.Add(self.kiteTailAdjust, 1, wx.EXPAND)
+        self.kite_tail_sizer.Add(self.kite_tail_adjust, 1, wx.EXPAND)
 
         # GUI for predefined positions
-        self.prePosLst = [
-                'None',
-                'Concave I',
-                'Concave II',
-                'Regular'
-            ]
-        self.prePosSelect = wx.RadioBox(self.panel,
+        self.predef_pos_select = wx.RadioBox(self.panel,
                 label = 'Predefined Positions',
                 style = wx.RA_VERTICAL,
-                choices = self.prePosLst
+                choices = self.predef_pos_list
             )
-        self.setNoPrePos()
-        self.panel.Bind(wx.EVT_RADIOBOX, self.on_pre_pos) #, id = self.prePosSelect.GetId())
+        self.set_no_predef_pos_selected()
+        self.panel.Bind(wx.EVT_RADIOBOX, self.on_pre_pos)
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
@@ -273,44 +280,48 @@ class CtrlWin(wx.Frame):
         self.view_opt_sizer.Add(self.view_hept_gui, 1, wx.EXPAND)
 
         self.row_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.row_sizer.Add(self.prePosSelect, 1, wx.EXPAND)
+        self.row_sizer.Add(self.predef_pos_select, 1, wx.EXPAND)
         self.row_sizer.Add(self.view_opt_sizer, 1, wx.EXPAND)
 
         self.column_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.column_sizer.Add(self.kiteTopSizer, 1, wx.EXPAND)
+        self.column_sizer.Add(self.kite_top_sizer, 1, wx.EXPAND)
         self.column_sizer.Add(self.kite_tail_sizer, 1, wx.EXPAND)
         self.column_sizer.Add(self.row_sizer, 2, wx.EXPAND)
 
-        main_sizer.Add(self.kiteSideSizer, 2, wx.EXPAND)
+        main_sizer.Add(self.kite_side_sizer, 2, wx.EXPAND)
         main_sizer.Add(self.column_sizer, 10, wx.EXPAND)
 
         return main_sizer
 
-    def setNoPrePos(self):
-        self.prePosSelect.SetSelection(0)
+    def set_no_predef_pos_selected(self):
+        """In the UI drop-down list set that no predefined position is selected."""
+        self.predef_pos_select.SetSelection(0)
         self.pre_pos_selected = False
 
-    def onSideAdjust(self, event):
-        self.setNoPrePos()
-        self.shape.setSide(float(self.kiteSideAdjust.GetValue()) / self.sideScale)
+    def on_side_adjust(self, event):
+        """Handle a newly selected side length."""
+        self.set_no_predef_pos_selected()
+        self.shape.set_side(float(self.kite_side_adjust.GetValue()) / self.side_scale)
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
         except AttributeError: pass
         event.Skip()
 
-    def onTopAdjust(self, event):
-        self.setNoPrePos()
-        self.shape.setTop(float(self.topRange - self.kiteTopAdjust.GetValue()) / self.topScale)
+    def on_top_adjust(self, event):
+        """Handle a newly selected top length."""
+        self.set_no_predef_pos_selected()
+        self.shape.set_top(float(self.top_range - self.kite_top_adjust.GetValue()) / self.top_scale)
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
         except AttributeError: pass
         event.Skip()
 
-    def onTailAdjust(self, event):
-        self.setNoPrePos()
-        self.shape.setTail(float(self.kiteTailAdjust.GetValue()) / self.tailScale)
+    def on_tail_adjust(self, event):
+        """Handle a newly selected tail length."""
+        self.set_no_predef_pos_selected()
+        self.shape.set_tail(float(self.kite_tail_adjust.GetValue()) / self.tail_scale)
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
@@ -318,20 +329,20 @@ class CtrlWin(wx.Frame):
         event.Skip()
 
     def on_pre_pos(self, _=None):
-        sel = self.prePosSelect.GetSelection()
+        sel = self.predef_pos_select.GetSelection()
         # if switching from 'None' to a predefined position:
         if not self.pre_pos_selected and (sel != 0):
-            self.topSav = self.shape.top
-            self.tailSav = self.shape.tail
-            self.sideSav = self.shape.side
+            self.top_saved = self.shape.top
+            self.tail_saved = self.shape.tail
+            self.side_saved = self.shape.side
             self.pre_pos_selected = True
         # TODO: id user selects prepos and then starts sliding, then the
         # selection should become None again.
-        selection_str = self.prePosLst[sel]
+        selection_str = self.predef_pos_list[sel]
         if selection_str == 'None':
-            top  = self.topSav
-            tail = self.tailSav
-            side = self.sideSav
+            top  = self.top_saved
+            tail = self.tail_saved
+            side = self.side_saved
             self.pre_pos_selected = False
         elif selection_str == 'Concave I':
             top  =  0.25
@@ -352,9 +363,9 @@ class CtrlWin(wx.Frame):
             side = 0.1
         self.shape.set_kite(top, tail, side)
         self.canvas.paint()
-        self.kiteTopAdjust.SetValue(self.topRange - top * self.topScale)
-        self.kiteTailAdjust.SetValue(tail * self.tailScale)
-        self.kiteSideAdjust.SetValue(side * self.sideScale)
+        self.kite_top_adjust.SetValue(self.top_range - top * self.top_scale)
+        self.kite_tail_adjust.SetValue(tail * self.tail_scale)
+        self.kite_side_adjust.SetValue(side * self.side_scale)
         self.status_bar.SetStatusText(self.shape.get_status_text())
 
     def on_view_settings_chk(self, _):
