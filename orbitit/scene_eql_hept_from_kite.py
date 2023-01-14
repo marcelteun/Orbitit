@@ -75,9 +75,10 @@ class Shape(geom_3d.SimpleShape):
         v_left = [-self.side, 0, 0]
         v_right = [ self.side, 0, 0]
         tuple = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
-        if tuple is None:
+        if tuple:
+            _, h1, h2, h3, h4, h5, h6 = tuple[0]
+        else:
             return
-        _, h1, h2, h3, h4, h5, h6 = tuple[0]
 
                 #
                 #              3 0'
@@ -156,7 +157,11 @@ class Shape(geom_3d.SimpleShape):
             self.show_hepta = show_hepta
 
     def set_top(self, top):
-        self.top  = top
+        with geomtypes.FloatHandler:
+            if top == 0:
+                # since top == 0 will lead to many warnings
+                top = 0.001
+        self.top = top
         self.set_vs()
 
     def set_tail(self, tail):
