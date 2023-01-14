@@ -330,7 +330,7 @@ class CtrlWin(wx.Frame):
         except AttributeError: pass
         event.Skip()
 
-    def on_pre_pos(self, event = None):
+    def on_pre_pos(self, _=None):
         sel = self.prePosSelect.GetSelection()
         # if switching from 'None' to a predefined position:
         if not self.pre_pos_selected and (sel != 0):
@@ -370,7 +370,7 @@ class CtrlWin(wx.Frame):
         self.kiteSideAdjust.SetValue(side * self.sideScale)
         self.status_bar.SetStatusText(self.shape.get_status_text())
 
-    def on_view_settings_chk(self, event):
+    def on_view_settings_chk(self, _):
         show_kite = self.view_kite_gui.IsChecked()
         show_hepta = self.view_hept_gui.IsChecked()
         self.shape.update_view_opt(
