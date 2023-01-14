@@ -17,6 +17,7 @@ chk_files="
 	orbitit/platonic_solids.py
 	orbitit/pre_pyopengl.py
 	orbitit/rgb.py
+	orbitit/scene_eql_hept_from_kite.py
 	orbitit/scene_orbit.py
 	unittest/test_geom_2d.py
 	unittest/test_geom_3d.py
