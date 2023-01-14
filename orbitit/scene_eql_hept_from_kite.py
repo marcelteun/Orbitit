@@ -139,7 +139,7 @@ class Shape(geom_3d.SimpleShape):
                 es.extend(self.kite_es)
                 col_idx.extend(self.kite_cols)
             if show_hepta:
-                if vs != []:
+                if vs:
                     no_of_vs = len(vs)
                     for face in self.hepta_fs:
                         fs.append([i + no_of_vs for i in face])
