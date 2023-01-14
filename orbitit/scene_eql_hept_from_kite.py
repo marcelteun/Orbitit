@@ -141,7 +141,8 @@ class Shape(geom_3d.SimpleShape):
             if self.show_hepta:
                 vs.extend(self.hepta_vs)
             self.vertex_props = {'vs': vs}
-        except AttributeError: pass
+        except AttributeError:
+            pass
 
     def update_view_opt(self, show_kite=None, show_hepta=None):
         """Apply the new view options settings."""
@@ -336,7 +337,8 @@ class CtrlWin(wx.Frame):
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
-        except AttributeError: pass
+        except AttributeError:
+            pass
         event.Skip()
 
     def on_top_adjust(self, event):
@@ -346,7 +348,8 @@ class CtrlWin(wx.Frame):
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
-        except AttributeError: pass
+        except AttributeError:
+            pass
         event.Skip()
 
     def on_tail_adjust(self, event):
@@ -356,7 +359,8 @@ class CtrlWin(wx.Frame):
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
-        except AttributeError: pass
+        except AttributeError:
+            pass
         event.Skip()
 
     def on_pre_pos(self, _=None):
