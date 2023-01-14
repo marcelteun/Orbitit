@@ -92,9 +92,9 @@ class Shape(geom_3d.SimpleShape):
         v_bottom = [0, -self.tail, 0]
         v_left = [-self.side, 0, 0]
         v_right = [ self.side, 0, 0]
-        tuple = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
-        if tuple:
-            _, h1, h2, h3, h4, h5, h6 = tuple[0]
+        hepta_vs_and_ns = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
+        if hepta_vs_and_ns:
+            _, h1, h2, h3, h4, h5, h6 = hepta_vs_and_ns[0]
         else:
             return
 
