@@ -23,7 +23,7 @@ Implement a GUI scene to demonstrate how to make an equilateral heptagon from a 
 # or write to the Free Software Foundation,
 #--------------------------------------------------------------------
 # old sins
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,too-few-public-methods
 
 import logging
 import wx
