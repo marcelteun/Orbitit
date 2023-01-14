@@ -839,6 +839,11 @@ if __name__ == "__main__":
         "of this files.",
     )
     PARSER.add_argument(
+        "-d", "--debug",
+        action='store_true',
+        help="Enable logs for debugging.",
+    )
+    PARSER.add_argument(
         "-e", "--export-dir",
         metavar="path",
         help="Export to this directory when exporting files. If nothing is specified, then "
@@ -892,7 +897,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         format="%(levelname)s@<%(filename)s:%(lineno)d> %(message)s",
-        level=logging.INFO,
+        level=logging.DEBUG if PROG_ARGS.debug else logging.INFO,
     )
     START_GUI = True
     if PROG_ARGS.inputfile:
