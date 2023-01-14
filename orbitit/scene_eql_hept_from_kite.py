@@ -37,11 +37,13 @@ class Shape(geom_3d.SimpleShape):
         self.side_min = 0.1
         self.side_max = 6.0
         self._init_arrays()
-        self.set_kite(
-                self.top_max / 2,
-                self.tail_max / 2,
-                self.side_max / 2
-            )
+        self.top = self.top_max / 2
+        self.tail = self.tail_max / 2
+        self.side = self.side_max / 2
+        self.side = self.side_max / 2
+        self.kite_vs = []
+        self.hepta_vs = []
+        self.set_vs()
         self.update_view_opt(
             show_kite=True,
             show_hepta=True,
@@ -173,7 +175,7 @@ class Shape(geom_3d.SimpleShape):
         self.set_vs()
 
     def set_kite(self, top, tail, side):
-        self.top  = top
+        self.top = top
         self.tail = tail
         self.side = side
         self.set_vs()
@@ -201,6 +203,7 @@ class CtrlWin(wx.Frame):
                 'Concave II',
                 'Regular'
             ]
+        self.pre_pos_selected = False
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
