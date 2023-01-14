@@ -75,7 +75,8 @@ class Shape(geom_3d.SimpleShape):
         v_left = [-self.side, 0, 0]
         v_right = [ self.side, 0, 0]
         tuple = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
-        if tuple == None: return
+        if tuple is None:
+            return
         _, h1, h2, h3, h4, h5, h6 = tuple[0]
 
                 #
@@ -124,7 +125,7 @@ class Shape(geom_3d.SimpleShape):
         except AttributeError: pass
 
     def update_view_opt(self, show_kite=None, show_hepta=None):
-        if show_kite != None or show_hepta != None:
+        if show_kite is not None or show_hepta is not None:
             fs = []
             es = []
             vs = []
