@@ -30,57 +30,43 @@ TITLE = 'Equilateral Heptagons from Kite'
 class Shape(geom_3d.SimpleShape):
     def __init__(self):
         geom_3d.SimpleShape.__init__(self, [], [], name = "HeptaFromKite")
-        self.topMin  = 0.0
-        self.topMax  = 2.0
-        self.tailMin = 0.0
-        self.tailMax = 10.0
-        self.sideMin = 0.1
-        self.sideMax = 6.0
-        self.initArrs()
-        self.setKite(
-                self.topMax / 2,
-                self.tailMax / 2,
-                self.sideMax / 2
+        self.top_min  = 0.0
+        self.top_max  = 2.0
+        self.tail_min = 0.0
+        self.tail_max = 10.0
+        self.side_min = 0.1
+        self.side_max = 6.0
+        self._init_arrays()
+        self.set_kite(
+                self.top_max / 2,
+                self.tail_max / 2,
+                self.side_max / 2
             )
         self.update_view_opt(
             show_kite=True,
             show_hepta=True,
         )
 
-    def initArrs(self):
+    def _init_arrays(self):
+        """Initialise all kite related arrays."""
         self.colors = [rgb.red, rgb.yellow]
-        self.kiteFs = [
+        self.kite_fs = [
                 [0, 2, 1], [0, 3, 2]
             ]
-        self.kiteColors = [0, 0]
-        self.kiteEs = [
+        self.kite_cols = [0, 0]
+        self.kite_es = [
                 0, 1, 1, 2, 2, 3, 3, 0
             ]
-        self.kiteVsIndices = list(range(4))
-        self.heptaFs = [
+        self.hepta_fs = [
                 [0, 6, 1],
                 [1, 6, 5],
                 [1, 5, 2],
                 [2, 5, 4],
                 [2, 4, 3],
             ]
-        self.heptaColors = [1, 1, 1, 1, 1]
-        self.heptaEs  = [
+        self.hepta_cols = [1, 1, 1, 1, 1]
+        self.hepta_es  = [
                 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0
-            ]
-        self.heptaVsIndices = list(range(3, 10))
-        self.allNs = [
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
-                [0, 0, 1],
             ]
 
     def set_vs(self):
@@ -110,14 +96,14 @@ class Shape(geom_3d.SimpleShape):
                 #
                 #               1
                 #
-        self.kiteVs = [
+        self.kite_vs = [
                 geomtypes.Vec3([v_right[0], v_right[1], v_right[2]]),
                 geomtypes.Vec3([v_bottom[0], v_bottom[1], v_bottom[2]]),
                 geomtypes.Vec3([v_left[0], v_left[1], v_left[2]]),
                 geomtypes.Vec3([v_top[0], v_top[1], v_top[2]])
            ]
         d = 1e-4
-        self.heptaVs = [
+        self.hepta_vs = [
                 geomtypes.Vec3([v_top[0], v_top[1], v_top[2] + d]),
                 geomtypes.Vec3([h1[0], h1[1], h1[2] + d]),
                 geomtypes.Vec3([h2[0], h2[1], h2[2] + d]),
@@ -131,9 +117,9 @@ class Shape(geom_3d.SimpleShape):
         try:
             vs = []
             if self.show_kite:
-                vs.extend(self.kiteVs)
+                vs.extend(self.kite_vs)
             if self.show_hepta:
-                vs.extend(self.heptaVs)
+                vs.extend(self.hepta_vs)
             self.vertex_props = {'vs': vs}
         except AttributeError: pass
 
@@ -144,23 +130,23 @@ class Shape(geom_3d.SimpleShape):
             vs = []
             col_idx = []
             if show_kite:
-                vs.extend(self.kiteVs)
-                fs.extend(self.kiteFs)
-                es.extend(self.kiteEs)
-                col_idx.extend(self.kiteColors)
+                vs.extend(self.kite_vs)
+                fs.extend(self.kite_fs)
+                es.extend(self.kite_es)
+                col_idx.extend(self.kite_cols)
             if show_hepta:
                 if vs != []:
                     no_of_vs = len(vs)
-                    for face in self.heptaFs:
+                    for face in self.hepta_fs:
                         fs.append([i + no_of_vs for i in face])
-                    es.extend([i + no_of_vs for i in self.heptaEs])
-                    vs.extend(self.heptaVs)
-                    col_idx.extend(self.heptaColors)
+                    es.extend([i + no_of_vs for i in self.hepta_es])
+                    vs.extend(self.hepta_vs)
+                    col_idx.extend(self.hepta_cols)
                 else:
-                    fs.extend(self.heptaFs)
-                    es.extend(self.heptaEs)
-                    vs.extend(self.heptaVs)
-                    col_idx.extend(self.heptaColors)
+                    fs.extend(self.hepta_fs)
+                    es.extend(self.hepta_es)
+                    vs.extend(self.hepta_vs)
+                    col_idx.extend(self.hepta_cols)
             self.vertex_props = {'vs': vs}
             self.es = es
             self.face_props = {'fs': fs, 'colors': [self.colors[:], col_idx[:]]}
@@ -180,7 +166,7 @@ class Shape(geom_3d.SimpleShape):
         self.side  = side
         self.set_vs()
 
-    def setKite(self, top, tail, side):
+    def set_kite(self, top, tail, side):
         self.top  = top
         self.tail = tail
         self.side = side
@@ -222,8 +208,8 @@ class CtrlWin(wx.Frame):
         self.kiteSideAdjust = wx.Slider(
                 self.panel,
                 value = self.shape.side * self.sideScale,
-                minValue = self.shape.sideMin * self.sideScale,
-                maxValue = self.shape.sideMax * self.sideScale,
+                minValue = self.shape.side_min * self.sideScale,
+                maxValue = self.shape.side_max * self.sideScale,
                 style = wx.SL_HORIZONTAL
             )
         self.panel.Bind(wx.EVT_SLIDER, self.onSideAdjust, id = self.kiteSideAdjust.GetId())
@@ -234,11 +220,11 @@ class CtrlWin(wx.Frame):
         self.kiteTopAdjust = wx.Slider(
                 self.panel,
                 value = self.shape.top * self.sideScale,
-                maxValue = self.shape.topMax * self.topScale,
-                minValue = self.shape.topMin * self.topScale,
+                maxValue = self.shape.top_max * self.topScale,
+                minValue = self.shape.top_min * self.topScale,
                 style = wx.SL_VERTICAL
             )
-        self.topRange = (self.shape.topMax - self.shape.topMin) * self.topScale
+        self.topRange = (self.shape.top_max - self.shape.top_min) * self.topScale
         self.panel.Bind(wx.EVT_SLIDER, self.onTopAdjust, id = self.kiteTopAdjust.GetId())
         self.kiteTopBox = wx.StaticBox(self.panel, label = 'Kite Top')
         self.kiteTopSizer = wx.StaticBoxSizer(self.kiteTopBox, wx.VERTICAL)
@@ -246,8 +232,8 @@ class CtrlWin(wx.Frame):
         self.kiteTailAdjust = wx.Slider(
                 self.panel,
                 value = self.shape.tail * self.sideScale,
-                minValue = self.shape.tailMin * self.tailScale,
-                maxValue = self.shape.tailMax * self.tailScale,
+                minValue = self.shape.tail_min * self.tailScale,
+                maxValue = self.shape.tail_max * self.tailScale,
                 style = wx.SL_VERTICAL
             )
         self.panel.Bind(wx.EVT_SLIDER, self.onTailAdjust, id = self.kiteTailAdjust.GetId())
@@ -363,7 +349,7 @@ class CtrlWin(wx.Frame):
             top  = 0.1
             tail = 0.1
             side = 0.1
-        self.shape.setKite(top, tail, side)
+        self.shape.set_kite(top, tail, side)
         self.canvas.paint()
         self.kiteTopAdjust.SetValue(self.topRange - top * self.topScale)
         self.kiteTailAdjust.SetValue(tail * self.tailScale)
