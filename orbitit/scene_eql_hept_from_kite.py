@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Implement a GUI scene to demonstrate how to make an equilateral heptagon from a kite
+"""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -19,6 +22,8 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #--------------------------------------------------------------------
+# old sins
+# pylint: disable=too-many-instance-attributes
 
 import logging
 import wx
@@ -28,6 +33,13 @@ from orbitit import geom_3d, geomtypes, heptagons, rgb
 TITLE = 'Equilateral Heptagons from Kite'
 
 class Shape(geom_3d.SimpleShape):
+    """The shape consisting of a kite and an equilateral heptagon.
+
+    The kite is defined by two diagonals that meet in the centre
+    - the vertical diagonal of length top + bottom where top is the distance from the centre to the
+      top vertex and bottom is the distance from the centre to the bottom vertex
+    - the horizontal diagonal that is divided in two halves of the same length "side".
+    """
     def __init__(self):
         geom_3d.SimpleShape.__init__(self, [], [], name = "HeptaFromKite")
         self.top_min  = 0.0
@@ -36,18 +48,17 @@ class Shape(geom_3d.SimpleShape):
         self.tail_max = 10.0
         self.side_min = 0.1
         self.side_max = 6.0
-        self._init_arrays()
         self.top = self.top_max / 2
         self.tail = self.tail_max / 2
         self.side = self.side_max / 2
         self.side = self.side_max / 2
         self.kite_vs = []
         self.hepta_vs = []
+        self.show_kite = True
+        self.show_hepta = True
+        self._init_arrays()
         self.set_vs()
-        self.update_view_opt(
-            show_kite=True,
-            show_hepta=True,
-        )
+        self.update_view_opt(self.show_kite, self.show_hepta)
 
     def _init_arrays(self):
         """Initialise all kite related arrays."""
@@ -72,6 +83,11 @@ class Shape(geom_3d.SimpleShape):
             ]
 
     def set_vs(self):
+        """Define the heptagon and kite vertex arrays for the current diagonal settings
+
+        The heptagon vertices are saved in self.hepta_vs and the kite vertices are defined in
+        self.kite_vs.
+        """
         v_top = [0, self.top, 0]
         v_bottom = [0, -self.tail, 0]
         v_left = [-self.side, 0, 0]
@@ -128,6 +144,7 @@ class Shape(geom_3d.SimpleShape):
         except AttributeError: pass
 
     def update_view_opt(self, show_kite=None, show_hepta=None):
+        """Apply the new view options settings."""
         if show_kite is not None or show_hepta is not None:
             fs = []
             es = []
@@ -159,6 +176,7 @@ class Shape(geom_3d.SimpleShape):
             self.show_hepta = show_hepta
 
     def set_top(self, top):
+        """Update the distance of the top part of the vertical diagonal."""
         with geomtypes.FloatHandler:
             if top == 0:
                 # since top == 0 will lead to many warnings
@@ -167,25 +185,30 @@ class Shape(geom_3d.SimpleShape):
         self.set_vs()
 
     def set_tail(self, tail):
+        """Update the distance of the bottom part of the vertical diagonal."""
         self.tail  = tail
         self.set_vs()
 
     def set_side(self, side):
+        """Update the distance the side of the horizontal diagonal."""
         self.side  = side
         self.set_vs()
 
     def set_kite(self, top, tail, side):
+        """Define a new kite by setting top, bottom and side distances."""
         self.top = top
         self.tail = tail
         self.side = side
         self.set_vs()
 
     def get_status_text(self):
+        """Get a text that can be shown to the user in a status bar."""
         return f"Top = {self.top:02.2f}, Tail = {self.tail:02.2f}, Side = {self.side:02.2f}"
 
-    # GUI PART
-
+# GUI PART
 class CtrlWin(wx.Frame):
+    """The GUI part for controlling the shape  of a kite and an equilateral heptagon."""
+
     def __init__(self, shape, canvas, *args, **kwargs):
         self.shape = shape
         self.canvas = canvas
@@ -218,7 +241,7 @@ class CtrlWin(wx.Frame):
         self.panel.Layout()
 
     def create_control_sizer(self):
-
+        """Create the sizer object containing all controls for this scene."""
         self.shape.update_view_opt(show_hepta=False, show_kite=True)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -337,6 +360,7 @@ class CtrlWin(wx.Frame):
         event.Skip()
 
     def on_pre_pos(self, _=None):
+        """Apply the new pre-defined position to the shape."""
         sel = self.predef_pos_select.GetSelection()
         # if switching from 'None' to a predefined position:
         if not self.pre_pos_selected and (sel != 0):
@@ -377,6 +401,7 @@ class CtrlWin(wx.Frame):
         self.status_bar.SetStatusText(self.shape.get_status_text())
 
     def on_view_settings_chk(self, _):
+        """Apply new view settings, i.e. whether the kite and/or heptagon should be shown."""
         show_kite = self.view_kite_gui.IsChecked()
         show_hepta = self.view_hept_gui.IsChecked()
         self.shape.update_view_opt(
@@ -387,17 +412,21 @@ class CtrlWin(wx.Frame):
 
     # move to general class
     def set_default_size(self, size):
+        """Set default window size."""
         self.SetMinSize(size)
         # Needed for Dapper, not for Feisty:
         # (I believe it is needed for Windows as well)
         self.SetSize(size)
 
 class Scene():
+    """The complete scene (GUI and shape) for an equilateral heptagon from a general kite."""
+
     def __init__(self, parent, canvas):
         self.shape = Shape()
         self.ctrl_win = CtrlWin(self.shape, canvas, parent, wx.ID_ANY, TITLE)
 
     def close(self):
+        """Close the scene and destroy all related objects."""
         try:
             self.ctrl_win.Close(True)
         except RuntimeError:

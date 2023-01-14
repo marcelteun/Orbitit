@@ -3071,7 +3071,7 @@ class RegularHeptagon:
 
 
 def kite_to_hept(left, top, right, bottom, alt_hept_pos=False):
-    """Return the a tuple with vertices and the normal of an equilateral
+    """Return a tuple with vertices and the normal of an equilateral
     heptagon for a kite, v_left, v_top, v_right, v_bottom; the tuple has the following structure:
     ([h0, h1, h2, h3, h4, h5, h6], normal), with h0 = top.
 
