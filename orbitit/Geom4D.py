@@ -23,9 +23,9 @@
 
 import logging
 
-from orbitit import geom_3d, geomtypes, glue, PS, rgb
-
 from OpenGL import GL
+
+from orbitit import geom_3d, geomtypes, glue, PS, rgb
 
 
 class Axis:
