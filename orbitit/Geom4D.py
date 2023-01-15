@@ -25,8 +25,7 @@ import logging
 
 from orbitit import geom_3d, geomtypes, glue, PS, rgb
 
-from OpenGL.GLU import *
-from OpenGL.GL import *
+from OpenGL import GL
 
 class Axis:
     X  = 1
@@ -450,12 +449,12 @@ class SimpleShape:
         this shape. This function is called in gl_draw for the first time gl_draw
         is called.
         """
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_NORMALIZE)
-        glDisable(GL_CULL_FACE)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glEnable(GL.GL_NORMALIZE)
+        GL.glDisable(GL.GL_CULL_FACE)
 
         self.gl_initialised = True
 
