@@ -22,7 +22,6 @@
 #------------------------------------------------------------------
 
 import logging
-import math
 
 from orbitit import geom_3d, geomtypes, glue, PS, rgb
 
@@ -45,48 +44,48 @@ class Plane:
 
 class SimpleShape:
     className = "Geom4D.SimpleShape"
-    def __init__(this, vs, Cs, es=[], ns=[], colors=([], []), name="4DSimpleShape"):
+    def __init__(self, vs, Cs, es=[], ns=[], colors=([], []), name="4DSimpleShape"):
         """
         Cs: and array of cells, consisting of an array of fs.
         """
-        this.dimension = 4
-        this.generate_normals = False
-        this.v = geom_3d.Fields()
-        this.e = geom_3d.Fields()
-        this.f = geom_3d.Fields()
-        this.c = geom_3d.Fields()
+        self.dimension = 4
+        self.generate_normals = False
+        self.v = geom_3d.Fields()
+        self.e = geom_3d.Fields()
+        self.f = geom_3d.Fields()
+        self.c = geom_3d.Fields()
         # SETTINGS similar to geom_3d.SimpleShape:
-        this.name = name
+        self.name = name
         if colors[0] == []:
             colors = ([rgb.gray95[:]], [])
-        # if this.mapToSingeShape = False each cell is mapped to one 3D shape
+        # if self.mapToSingeShape = False each cell is mapped to one 3D shape
         # and the edges are mapped to one shape as well. The disadvantage is
         # that for each shape glVertexPointer is set, while if
-        # this.mapToSingeShape = True is set to True one vertex array is used.
-        this.mapToSingeShape = True
+        # self.mapToSingeShape = True is set to True one vertex array is used.
+        self.mapToSingeShape = True
         # if useTransparency = False opaque colours are used, even if they
         # specifically set to transparent colours.
-        this.useTransparency(True)
-        this.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1., 'color': [1. , 1. , .8]}
-        this.face_props = {'colors': colors, 'draw_faces': True}
-        this.gl_initialised = False
+        self.useTransparency(True)
+        self.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1., 'color': [1. , 1. , .8]}
+        self.face_props = {'colors': colors, 'draw_faces': True}
+        self.gl_initialised = False
         # SETTINGS 4D specific:
-        this.setCellProperties(
+        self.setCellProperties(
             Cs = Cs, colors = colors, drawCells = False, scale = 1.0
         )
         # For initialisation setCellProperties needs to be called before
         # edge_props, since the latter will check the scale value
-        this.edge_props = {
+        self.edge_props = {
             'es': es,
             'radius': -1.,
             'color': [0.1, 0.1, 0.1],
             'draw_edges': True,
             'showUnscaled': True,
         }
-        this.setProjectionProperties(11.0, 10.0)
+        self.setProjectionProperties(11.0, 10.0)
         # expresses whether the 4D coordinates need to be updated:
-        this.rot4 = None
-        this.projectedTo3D = False
+        self.rot4 = None
+        self.projectedTo3D = False
 
     @property
     def vertex_props(self):
@@ -134,7 +133,7 @@ class SimpleShape:
             self.projectedTo3D = False
 
     @property
-    def edge_props(this):
+    def edge_props(self):
         """
         Return the current edge properties.
 
@@ -150,10 +149,10 @@ class SimpleShape:
                    all.
         """
         return {
-            'es': this.es,
-            'radius': this.e.radius,
-            'color': this.e.col,
-            'draw_edges': this.e.draw
+            'es': self.es,
+            'radius': self.e.radius,
+            'color': self.e.col,
+            'draw_edges': self.e.draw
         }
 
     @edge_props.setter
@@ -220,7 +219,7 @@ class SimpleShape:
                     )
                 self.e.showUnscaled = props['showUnscaled']
 
-    def regen_edges(this):
+    def regen_edges(self):
         """
         Recreates the edges in the 3D object by using an adges for every side of
         a face, i.e. all faces will be surrounded by edges.
@@ -277,7 +276,7 @@ class SimpleShape:
                 self.f.draw = props['draw_faces']
             self.projectedTo3D = False
 
-    def setCellProperties(this, dictPar = None, **kwargs):
+    def setCellProperties(self, dictPar = None, **kwargs):
         """
         Define the properties of the cells.
 
@@ -301,16 +300,16 @@ class SimpleShape:
             else:
                 dict = kwargs
             if 'Cs' in dict and dict['Cs'] != None:
-                this.Cs = dict['Cs']
+                self.Cs = dict['Cs']
             if 'colors' in dict and dict['colors'] != None:
-                this.c.col = dict['colors']
+                self.c.col = dict['colors']
             if 'drawCells' in dict and dict['drawCells'] != None:
-                this.c.draw = dict['drawCells']
+                self.c.draw = dict['drawCells']
             if 'scale' in dict and dict['scale'] != None:
-                this.c.scale = dict['scale']
-            this.projectedTo3D = False
+                self.c.scale = dict['scale']
+            self.projectedTo3D = False
 
-    def getCellProperties(this, Cs = None, colors = None):
+    def getCellProperties(self, Cs = None, colors = None):
         """
         Return the current face properties as can be set by setCellProperties.
 
@@ -342,13 +341,13 @@ class SimpleShape:
                gravitational centre. This factor is typically <= 1.
         """
         return {
-                'Cs': this.Cs,
-                'colors': this.c.col,
-                'drawCells': this.c.draw,
-                'scale': this.c.scale
+                'Cs': self.Cs,
+                'colors': self.c.col,
+                'drawCells': self.c.draw,
+                'scale': self.c.scale
             }
 
-    def setProjectionProperties(this, wCameraDistance, w_prj_vol, dbg = False):
+    def setProjectionProperties(self, wCameraDistance, w_prj_vol, dbg = False):
         """
         wCameraDistance: should be > 0. distance in w coordinate between the
                          camera (for which x, y, z, are 0) and the projection
@@ -368,12 +367,12 @@ class SimpleShape:
         #
         assert (w_prj_vol > 0)
         assert (wCameraDistance > 0)
-        this.w_prj_vol = w_prj_vol
-        this.wCamera = w_prj_vol + wCameraDistance
-        this.wCameraDistance = wCameraDistance
-        this.projectedTo3D = False
+        self.w_prj_vol = w_prj_vol
+        self.wCamera = w_prj_vol + wCameraDistance
+        self.wCameraDistance = wCameraDistance
+        self.projectedTo3D = False
 
-    def rotate(this, rotation, successive = False):
+    def rotate(self, rotation, successive = False):
         """
         Rotate the polychoron by the specified rotation.
 
@@ -381,11 +380,11 @@ class SimpleShape:
         successive: specify if this is applied on any previous transform, i.e.
                     if this is not a new transforma.
         """
-        if not successive or this.rot4 == None: this.rot4 = rotation
-        else: this.rot4 = rotation * this.rot4
-        this.projectedTo3D = False
+        if not successive or self.rot4 == None: self.rot4 = rotation
+        else: self.rot4 = rotation * self.rot4
+        self.projectedTo3D = False
 
-    def rotateInStdPlane(this, plane, angle, successive = False):
+    def rotateInStdPlane(self, plane, angle, successive = False):
         """
         Rotate in a plane defined by 2 coordinate axes.
 
@@ -398,39 +397,39 @@ class SimpleShape:
                     if this is not a new transforma.
         """
         q0 = None
-        if Axis.X & plane: q0 = Vec4([1, 0, 0, 0])
+        if Axis.X & plane: q0 = geomtypes.Vec4([1, 0, 0, 0])
         if Axis.Y & plane:
             if q0 == None:
-                q0 = Vec4([0, 1, 0, 0])
+                q0 = geomtypes.Vec4([0, 1, 0, 0])
             else:
-                q1 = Vec4([0, 1, 0, 0])
+                q1 = geomtypes.Vec4([0, 1, 0, 0])
         if Axis.Z & plane:
             if q0 == None:
-                q0 = Vec4([0, 0, 1, 0])
+                q0 = geomtypes.Vec4([0, 0, 1, 0])
             else:
-                q1 = Vec4([0, 0, 1, 0])
+                q1 = geomtypes.Vec4([0, 0, 1, 0])
         if Axis.W & plane:
-            q1 = Vec4([0, 0, 0, 1])
+            q1 = geomtypes.Vec4([0, 0, 0, 1])
         r = geomtypes.Rot4(axialPlane = (q0, q1), angle = angle)
-        if not successive or this.rot4 == None: this.rot4 = r
-        else: this.rot4 = r * this.rot4
-        this.projectedTo3D = False
+        if not successive or self.rot4 == None: self.rot4 = r
+        else: self.rot4 = r * self.rot4
+        self.projectedTo3D = False
 
-    def projectVsTo3D(this, Vs4D):
+    def projectVsTo3D(self, Vs4D):
         """
         returns an array of 3D vertices.
         """
         Vs3D = []
         for v in Vs4D:
             wV = v[3]
-            if not geomtypes.FloatHandler.eq(this.wCamera, wV):
-                scale = this.wCameraDistance / (this.wCamera - wV)
+            if not geomtypes.FloatHandler.eq(self.wCamera, wV):
+                scale = self.wCameraDistance / (self.wCamera - wV)
                 Vs3D.append([scale * v[0], scale * v[1], scale * v[2]])
             else:
                 Vs3D.append([1e256, 1e256, 1e256])
         return Vs3D
 
-    def applyTransform(this):
+    def applyTransform(self):
         """
         Apply current transformation to the current vertices and returns the
         result.
@@ -439,9 +438,9 @@ class SimpleShape:
                     if this is not a new transforma.
         """
 
-    def useTransparency(this, use):
-        this.removeTransparency = not use
-        this.updateTransparency = True
+    def useTransparency(self, use):
+        self.removeTransparency = not use
+        self.updateTransparency = True
 
     def gl_init(self):
         """
@@ -460,41 +459,41 @@ class SimpleShape:
 
         self.gl_initialised = True
 
-    def gl_draw(this):
-        if not this.gl_initialised:
-            this.gl_init()
-        if this.mapToSingeShape:
-            this.glDrawSingleRemoveUnscaledEdges()
-            this.cell.generate_normals = this.generate_normals
-            this.cell.gl_draw()
+    def gl_draw(self):
+        if not self.gl_initialised:
+            self.gl_init()
+        if self.mapToSingeShape:
+            self.glDrawSingleRemoveUnscaledEdges()
+            self.cell.generate_normals = self.generate_normals
+            self.cell.gl_draw()
         else:
-            this.glDrawSplit()
-            for cell in this.cells:
-                cell.generate_normals = this.generate_normals
+            self.glDrawSplit()
+            for cell in self.cells:
+                cell.generate_normals = self.generate_normals
                 cell.gl_draw()
 
-    def glDrawSingleRemoveUnscaledEdges(this):
+    def glDrawSingleRemoveUnscaledEdges(self):
         with geomtypes.FloatHandler(3) as fh:
-            isScaledDown = not fh.eq(this.c.scale, 1.0)
-        if not this.projectedTo3D:
+            isScaledDown = not fh.eq(self.c.scale, 1.0)
+        if not self.projectedTo3D:
             try:
-                del this.cell
+                del self.cell
             except AttributeError:
                 pass
             Ns3D = []
-            if this.rot4 != None:
-                Vs4D = [this.rot4*v for v in this.vs]
+            if self.rot4 != None:
+                Vs4D = [self.rot4*v for v in self.vs]
             # TODO fix ns.. if needed..
-            #    if this.ns != []:cleanUp
-            #        Ns4D = [this.rot4*n for n in this.ns]
+            #    if self.ns != []:cleanUp
+            #        Ns4D = [self.rot4*n for n in self.ns]
             else:
-                Vs4D = [v for v in this.vs]
-            Vs3D = this.projectVsTo3D(Vs4D)
-            #for i in range(0, len(this.es), 2):
-            #    v0 = Vs4D[this.es[i]]
-            #    v1 = Vs4D[this.es[i+1]]
-            #if this.ns != []:
-            #    Ns3D = this.projectVsTo3D(Ns4D)
+                Vs4D = [v for v in self.vs]
+            Vs3D = self.projectVsTo3D(Vs4D)
+            #for i in range(0, len(self.es), 2):
+            #    v0 = Vs4D[self.es[i]]
+            #    v1 = Vs4D[self.es[i+1]]
+            #if self.ns != []:
+            #    Ns3D = self.projectVsTo3D(Ns4D)
             # Now project all to one 3D shape. 1 3D shape is chosen, instean of
             # projecting each cell to one shape because of different reasons:
             #  - when drawing transparent faces all the opaqe fae should be
@@ -506,26 +505,26 @@ class SimpleShape:
             shapeEs = []
             shapeFs = []
             shapeColIndices = []
-            if this.c.draw:
-                shapeCols = this.c.col[0]
+            if self.c.draw:
+                shapeCols = self.c.col[0]
             else:
-                shapeCols = this.f.col[0]
-            if this.removeTransparency:
+                shapeCols = self.f.col[0]
+            if self.removeTransparency:
                 shapeCols = [ c[0:3] for c in shapeCols ]
-            if this.e.draw and (not isScaledDown or this.e.showUnscaled):
+            if self.e.draw and (not isScaledDown or self.e.showUnscaled):
                 shapeVs = Vs3D
-                shapeEs = this.es
+                shapeEs = self.es
             # Add a shape with faces for each cell
-            for i in range(len(this.Cs)):
+            for i in range(len(self.Cs)):
                 # use a copy, since we will filter (v indices will change):
-                cellFs = [ f[:] for f in this.Cs[i]]
-                if this.c.draw:
-                    shapeColIndices.extend([this.c.col[1][i] for f in cellFs])
+                cellFs = [ f[:] for f in self.Cs[i]]
+                if self.c.draw:
+                    shapeColIndices.extend([self.c.col[1][i] for f in cellFs])
                 else:
-                    shapeColIndices.extend(this.f.col[1][i])
+                    shapeColIndices.extend(self.f.col[1][i])
                 # Now cleanup Vs3D
                 # TODO
-                # if this.e.draw and (not isScaledDown or this.e.showUnscaled):
+                # if self.e.draw and (not isScaledDown or self.e.showUnscaled):
                 # Then shapeVs = Vs3D already, and the code below is all
                 # unecessary.
                 cellVs = Vs3D[:]
@@ -542,114 +541,114 @@ class SimpleShape:
                         sum = sum + nrUsed[vIndex]
                     if sum != 0:
                         g = g / sum
-                    cellVs = [this.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs]
+                    cellVs = [self.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs]
 
 
                 shapeVs.extend(cellVs)
                 shapeFs.extend(cellFs)
                 # for shapeColIndices.extend() see above
-            this.cell = geom_3d.SimpleShape(
+            self.cell = geom_3d.SimpleShape(
                     shapeVs, shapeFs, shapeEs, [], # vs , fs, es, ns
                     (shapeCols, shapeColIndices),
-                    name = '%s_projection' % (this.name)
+                    name = '%s_projection' % (self.name)
                 )
-            this.cell.vertex_props = {'radius': this.v.radius, 'color': this.v.col}
-            this.cell.edge_props = {
-                'radius': this.e.radius,
-                'color': this.e.col,
-                'draw_edges': this.e.draw,
+            self.cell.vertex_props = {'radius': self.v.radius, 'color': self.v.col}
+            self.cell.edge_props = {
+                'radius': self.e.radius,
+                'color': self.e.col,
+                'draw_edges': self.e.draw,
             }
-            this.cell.face_props = {'draw_faces': this.f.draw}
-            this.cell.gl_initialised = True # done as first step in this func
-            this.projectedTo3D = True
-            this.updateTransparency = False
-            if this.e.draw and isScaledDown:
-                this.cell.regen_edges()
+            self.cell.face_props = {'draw_faces': self.f.draw}
+            self.cell.gl_initialised = True # done as first step in self func
+            self.projectedTo3D = True
+            self.updateTransparency = False
+            if self.e.draw and isScaledDown:
+                self.cell.regen_edges()
                 # Don't use, out of performance issues:
-                # cellEs = this.cell.edges_props['es']
+                # cellEs = self.cell.edges_props['es']
                 # --------------------------
                 # Bad performance during scaling:
-                # cellEs = this.cell.edges_props['es']
-                # this.cell.regen_edges()
-                # cellEs.extend(this.cell.edges_props['es'])
+                # cellEs = self.cell.edges_props['es']
+                # self.cell.regen_edges()
+                # cellEs.extend(self.cell.edges_props['es'])
                 # -------end bad perf---------
-                cellEs = this.cell.es
-                if this.e.showUnscaled:
-                    cellEs.extend(this.es)
-                this.cell.es = cellEs
-        if this.updateTransparency:
-            cellCols = this.cell.face_props['colors']
-            if this.removeTransparency:
+                cellEs = self.cell.es
+                if self.e.showUnscaled:
+                    cellEs.extend(self.es)
+                self.cell.es = cellEs
+        if self.updateTransparency:
+            cellCols = self.cell.face_props['colors']
+            if self.removeTransparency:
                 shapeCols = [ c[0:3] for c in cellCols[0] ]
             else:
-                if this.c.draw:
-                    shapeCols = this.c.col[0]
+                if self.c.draw:
+                    shapeCols = self.c.col[0]
                 else:
-                    shapeCols = this.f.col[0]
+                    shapeCols = self.f.col[0]
             cellCols = (shapeCols, cellCols[1])
-            this.cell.face_props = {'colors': cellCols}
-            this.updateTransparency = False
+            self.cell.face_props = {'colors': cellCols}
+            self.updateTransparency = False
 
-    def glDrawSplit(this):
-        if not this.projectedTo3D:
+    def glDrawSplit(self):
+        if not self.projectedTo3D:
             try:
-                del this.cells
+                del self.cells
             except AttributeError:
                 pass
             Ns3D = []
-            if this.rot4 != None:
-                Vs4D = [this.rot4*v for v in this.vs]
+            if self.rot4 != None:
+                Vs4D = [self.rot4*v for v in self.vs]
             # TODO fix ns.. if needed..
-            #    if this.ns != []:
-            #        Ns4D = [this.rot4*n for n in this.ns]
+            #    if self.ns != []:
+            #        Ns4D = [self.rot4*n for n in self.ns]
             else:
-                Vs4D = [v for v in this.vs]
-            Vs3D = this.projectVsTo3D(Vs4D)
-            #if this.ns != []:
-            #    Ns3D = this.projectVsTo3D(Ns4D)
-            this.cells = []
+                Vs4D = [v for v in self.vs]
+            Vs3D = self.projectVsTo3D(Vs4D)
+            #if self.ns != []:
+            #    Ns3D = self.projectVsTo3D(Ns4D)
+            self.cells = []
             # Add a cell for just the edges:
-            if this.e.draw:
+            if self.e.draw:
                 cell = geom_3d.SimpleShape(
-                        Vs3D, [], this.es, [], # vs , fs, es, ns
-                        name = '%s_Es' % (this.name)
+                        Vs3D, [], self.es, [], # vs , fs, es, ns
+                        name = '%s_Es' % (self.name)
                     )
-                cell.vertex_props = {'radius': this.v.radius, 'color': this.v.col}
+                cell.vertex_props = {'radius': self.v.radius, 'color': self.v.col}
                 cell.edge_props = {
-                    'radius': this.e.radius,
-                    'color': this.e.col,
-                    'draw_edges': this.e.draw,
+                    'radius': self.e.radius,
+                    'color': self.e.col,
+                    'draw_edges': self.e.draw,
                 }
                 cell.face_props = {'draw_faces': False}
                 cell.gl_initialised = True
-                this.cells.append(cell)
+                self.cells.append(cell)
             # Add a shape with faces for each cell
-            for i in range(len(this.Cs)):
-                if this.c.draw:
-                    colors = (this.c.col[0][this.c.col[1][i]], [])
+            for i in range(len(self.Cs)):
+                if self.c.draw:
+                    colors = (self.c.col[0][self.c.col[1][i]], [])
                 else:
-                    colors = (this.f.col[0], this.f.col[1][i])
+                    colors = (self.f.col[0], self.f.col[1][i])
                 cell = geom_3d.SimpleShape(
-                        Vs3D, this.Cs[i], [], [], # vs , fs, es, ns
+                        Vs3D, self.Cs[i], [], [], # vs , fs, es, ns
                         colors,
-                        name = '%s_%d' % (this.name, i)
+                        name = '%s_%d' % (self.name, i)
                     )
                 # The edges and vertices are drawn through a separate shape below.
                 cell.vertex_props = {'radius': -1}
                 cell.edge_props = {'draw_edges': False}
-                cell.face_props = {'draw_faces': this.f.draw}
-                cell.zoom(this.c.scale)
+                cell.face_props = {'draw_faces': self.f.draw}
+                cell.zoom(self.c.scale)
                 cell.gl_initialised = True
-                this.cells.append(cell)
-            this.projectedTo3D = True
+                self.cells.append(cell)
+            self.projectedTo3D = True
 
-    def to_postscript(this,
+    def to_postscript(self,
             face_indices=[],
             scaling=1,
             precision=7,
             pageSize=PS.PageSizeA4,
         ):
-        if this.mapToSingeShape:
-            return this.cell.to_postscript(face_indices, scaling, precision, pageSize)
+        if self.mapToSingeShape:
+            return self.cell.to_postscript(face_indices, scaling, precision, pageSize)
         else:
             assert False, 'to_postscript not supported for mapping to split draw'
