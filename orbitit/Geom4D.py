@@ -22,8 +22,6 @@
 # ------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
-import logging
-
 from OpenGL import GL
 
 from orbitit import geom_3d, geomtypes, glue, PS, rgb
@@ -311,7 +309,7 @@ class SimpleShape:
                 self.c.scale = dict["scale"]
             self.projectedTo3D = False
 
-    def getCellProperties(self, Cs=None, colors=None):
+    def getCellProperties(self):
         """
         Return the current face properties as can be set by setCellProperties.
 
@@ -349,7 +347,7 @@ class SimpleShape:
             "scale": self.c.scale,
         }
 
-    def setProjectionProperties(self, wCameraDistance, w_prj_vol, dbg=False):
+    def setProjectionProperties(self, wCameraDistance, w_prj_vol):
         """
         wCameraDistance: should be > 0. distance in w coordinate between the
                          camera (for which x, y, z, are 0) and the projection
@@ -487,7 +485,6 @@ class SimpleShape:
                 del self.cell
             except AttributeError:
                 pass
-            Ns3D = []
             if self.rot4 is not None:
                 Vs4D = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
@@ -499,8 +496,6 @@ class SimpleShape:
             # for i in range(0, len(self.es), 2):
             #    v0 = Vs4D[self.es[i]]
             #    v1 = Vs4D[self.es[i+1]]
-            # if self.ns != []:
-            #    Ns3D = self.projectVsTo3D(Ns4D)
             # Now project all to one 3D shape. 1 3D shape is chosen, instean of
             # projecting each cell to one shape because of different reasons:
             #  - when drawing transparent faces all the opaqe fae should be
@@ -606,7 +601,6 @@ class SimpleShape:
                 del self.cells
             except AttributeError:
                 pass
-            Ns3D = []
             if self.rot4 is not None:
                 Vs4D = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
@@ -615,8 +609,6 @@ class SimpleShape:
             else:
                 Vs4D = [v for v in self.vs]
             Vs3D = self.projectVsTo3D(Vs4D)
-            # if self.ns != []:
-            #    Ns3D = self.projectVsTo3D(Ns4D)
             self.cells = []
             # Add a cell for just the edges:
             if self.e.draw:
