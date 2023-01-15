@@ -20,6 +20,7 @@
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
+# pylint: disable=too-many-statements
 
 import logging
 
