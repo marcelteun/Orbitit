@@ -127,14 +127,14 @@ class SimpleShape:
         See setter for the explanation of the keys.
         """
         if props:
-            if "vs" in props and props["vs"] != None:
+            if "vs" in props and props["vs"] is not None:
                 self.vs = [geomtypes.Vec4(v) for v in props["vs"]]
-            if "ns" in props and props["ns"] != None:
+            if "ns" in props and props["ns"] is not None:
                 self.ns = [geomtypes.Vec4(n) for n in props["ns"]]
                 # assert len(self.ns) == len(self.vs)
-            if "radius" in props and props["radius"] != None:
+            if "radius" in props and props["radius"] is not None:
                 self.v.radius = props["radius"]
-            if "color" in props and props["color"] != None:
+            if "color" in props and props["color"] is not None:
                 self.v.col = props["color"]
             self.projectedTo3D = False
 
@@ -177,16 +177,16 @@ class SimpleShape:
         See setter for the explanation of the keys.
         """
         if props:
-            if "es" in props and props["es"] != None:
+            if "es" in props and props["es"] is not None:
                 self.es = props["es"]
                 self.projectedTo3D = False
-            if "radius" in props and props["radius"] != None:
+            if "radius" in props and props["radius"] is not None:
                 self.e.radius = props["radius"]
                 self.projectedTo3D = False
-            if "color" in props and props["color"] != None:
+            if "color" in props and props["color"] is not None:
                 self.e.col = props["color"]
                 self.projectedTo3D = False
-            if "draw_edges" in props and props["draw_edges"] != None:
+            if "draw_edges" in props and props["draw_edges"] is not None:
                 try:
                     currentSetting = self.e.draw
                 except AttributeError:
@@ -212,7 +212,7 @@ class SimpleShape:
                         except AttributeError:
                             pass
                 self.e.draw = props["draw_edges"]
-            if "showUnscaled" in props and props["showUnscaled"] != None:
+            if "showUnscaled" in props and props["showUnscaled"]:
                 self.projectedTo3D = self.projectedTo3D and not (
                     # if all the below are true, then a change in unscaled
                     # edges means a changes in vs, since the extra edges
@@ -271,9 +271,9 @@ class SimpleShape:
         See setter for more explanation of these.
         """
         if props:
-            if "colors" in props and props["colors"] != None:
+            if "colors" in props and props["colors"] is not None:
                 self.f.col = props["colors"]
-            if "draw_faces" in props and props["draw_faces"] != None:
+            if "draw_faces" in props and props["draw_faces"] is not None:
                 self.f.draw = props["draw_faces"]
             self.projectedTo3D = False
 
@@ -295,18 +295,18 @@ class SimpleShape:
         This can be used to copy settings from one shape to another.
         If dictPar is used and kwargs, then only the dictPar will be used.
         """
-        if dictPar != None or kwargs != {}:
-            if dictPar != None:
+        if dictPar is not None or kwargs != {}:
+            if dictPar is not None:
                 dict = dictPar
             else:
                 dict = kwargs
-            if "Cs" in dict and dict["Cs"] != None:
+            if "Cs" in dict and dict["Cs"] is not None:
                 self.Cs = dict["Cs"]
-            if "colors" in dict and dict["colors"] != None:
+            if "colors" in dict and dict["colors"] is not None:
                 self.c.col = dict["colors"]
-            if "drawCells" in dict and dict["drawCells"] != None:
+            if "drawCells" in dict and dict["drawCells"] is not None:
                 self.c.draw = dict["drawCells"]
-            if "scale" in dict and dict["scale"] != None:
+            if "scale" in dict and dict["scale"] is not None:
                 self.c.scale = dict["scale"]
             self.projectedTo3D = False
 
@@ -381,7 +381,7 @@ class SimpleShape:
         successive: specify if this is applied on any previous transform, i.e.
                     if this is not a new transforma.
         """
-        if not successive or self.rot4 == None:
+        if not successive or self.rot4 is None:
             self.rot4 = rotation
         else:
             self.rot4 = rotation * self.rot4
@@ -403,19 +403,19 @@ class SimpleShape:
         if Axis.X & plane:
             q0 = geomtypes.Vec4([1, 0, 0, 0])
         if Axis.Y & plane:
-            if q0 == None:
+            if q0 is None:
                 q0 = geomtypes.Vec4([0, 1, 0, 0])
             else:
                 q1 = geomtypes.Vec4([0, 1, 0, 0])
         if Axis.Z & plane:
-            if q0 == None:
+            if q0 is None:
                 q0 = geomtypes.Vec4([0, 0, 1, 0])
             else:
                 q1 = geomtypes.Vec4([0, 0, 1, 0])
         if Axis.W & plane:
             q1 = geomtypes.Vec4([0, 0, 0, 1])
         r = geomtypes.Rot4(axialPlane=(q0, q1), angle=angle)
-        if not successive or self.rot4 == None:
+        if not successive or self.rot4 is None:
             self.rot4 = r
         else:
             self.rot4 = r * self.rot4
@@ -487,7 +487,7 @@ class SimpleShape:
             except AttributeError:
                 pass
             Ns3D = []
-            if self.rot4 != None:
+            if self.rot4 is not None:
                 Vs4D = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
             #    if self.ns != []:cleanUp
@@ -606,7 +606,7 @@ class SimpleShape:
             except AttributeError:
                 pass
             Ns3D = []
-            if self.rot4 != None:
+            if self.rot4 is not None:
                 Vs4D = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
             #    if self.ns != []:
