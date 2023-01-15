@@ -21,16 +21,27 @@ Implement a GUI scene to demonstrate how to make an equilateral heptagon from a 
 # along with this program; if not,
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
-#--------------------------------------------------------------------
+# --------------------------------------------------------------------
 # old sins
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 
 import logging
 import wx
 
-from orbitit import geom_3d, geomtypes, heptagons, rgb
+from orbitit import geom_2d, geom_3d, geomtypes, heptagons, rgb
 
-TITLE = 'Equilateral Heptagons from Kite'
+TITLE = "Equilateral Heptagons from Kite"
+
+_total = 1 + heptagons.HEPT_RHO + heptagons.HEPT_SIGMA
+_delta = heptagons.HEPT_SIGMA - 1
+_t = heptagons.HEPT_RHO * _total - 1
+_t /= heptagons.HEPT_SIGMA - 1 + heptagons.HEPT_RHO * heptagons.HEPT_RHO
+REGULAR_WIDTH = 1 + _t * _delta
+REGULAR_TOP = (_total - _t * heptagons.HEPT_RHO) * 2 * heptagons.HEPT_DENOM
+REGULAR_BOTTOM = (
+    2 * heptagons.HEPT_DENOM * (_total + heptagons.HEPT_RHO / _delta) - REGULAR_TOP
+)
+
 
 class Shape(geom_3d.SimpleShape):
     """The shape consisting of a kite and an equilateral heptagon.
@@ -40,10 +51,11 @@ class Shape(geom_3d.SimpleShape):
       top vertex and bottom is the distance from the centre to the bottom vertex
     - the horizontal diagonal that is divided in two halves of the same length "side".
     """
+
     def __init__(self):
-        geom_3d.SimpleShape.__init__(self, [], [], name = "HeptaFromKite")
-        self.top_min  = 0.0
-        self.top_max  = 2.0
+        geom_3d.SimpleShape.__init__(self, [], [], name="HeptaFromKite")
+        self.top_min = 0.0
+        self.top_max = 2.0
         self.tail_min = 0.0
         self.tail_max = 10.0
         self.side_min = 0.1
@@ -63,24 +75,18 @@ class Shape(geom_3d.SimpleShape):
     def _init_arrays(self):
         """Initialise all kite related arrays."""
         self.colors = [rgb.red, rgb.yellow]
-        self.kite_fs = [
-                [0, 2, 1], [0, 3, 2]
-            ]
+        self.kite_fs = [[0, 2, 1], [0, 3, 2]]
         self.kite_cols = [0, 0]
-        self.kite_es = [
-                0, 1, 1, 2, 2, 3, 3, 0
-            ]
+        self.kite_es = [0, 1, 1, 2, 2, 3, 3, 0]
         self.hepta_fs = [
-                [0, 6, 1],
-                [1, 6, 5],
-                [1, 5, 2],
-                [2, 5, 4],
-                [2, 4, 3],
-            ]
+            [0, 6, 1],
+            [1, 6, 5],
+            [1, 5, 2],
+            [2, 5, 4],
+            [2, 4, 3],
+        ]
         self.hepta_cols = [1, 1, 1, 1, 1]
-        self.hepta_es  = [
-                0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0
-            ]
+        self.hepta_es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]
 
     def set_vs(self):
         """Define the heptagon and kite vertex arrays for the current diagonal settings
@@ -91,47 +97,78 @@ class Shape(geom_3d.SimpleShape):
         v_top = [0, self.top, 0]
         v_bottom = [0, -self.tail, 0]
         v_left = [-self.side, 0, 0]
-        v_right = [ self.side, 0, 0]
+        v_right = [self.side, 0, 0]
         hepta_vs_and_ns = heptagons.kite_to_hept(v_left, v_top, v_right, v_bottom)
         if hepta_vs_and_ns:
             _, h1, h2, h3, h4, h5, h6 = hepta_vs_and_ns[0]
         else:
             return
 
-                #
-                #              3 0'
-                #
-                #
-                #        6'            1'
-                #
-                #
-                #   2           +           0
-                #
-                #      5'                2'
-                #
-                #
-                #
-                #          4'        3'
-                #
-                #
-                #               1
-                #
+            #
+            #              3 0'
+            #
+            #
+            #        6'            1'
+            #
+            #
+            #   2           +           0
+            #
+            #      5'                2'
+            #
+            #
+            #
+            #          4'        3'
+            #
+            #
+            #               1
+            #
         self.kite_vs = [
-                geomtypes.Vec3([v_right[0], v_right[1], v_right[2]]),
-                geomtypes.Vec3([v_bottom[0], v_bottom[1], v_bottom[2]]),
-                geomtypes.Vec3([v_left[0], v_left[1], v_left[2]]),
-                geomtypes.Vec3([v_top[0], v_top[1], v_top[2]])
-           ]
+            geomtypes.Vec3([v_right[0], v_right[1], v_right[2]]),
+            geomtypes.Vec3([v_bottom[0], v_bottom[1], v_bottom[2]]),
+            geomtypes.Vec3([v_left[0], v_left[1], v_left[2]]),
+            geomtypes.Vec3([v_top[0], v_top[1], v_top[2]]),
+        ]
         d = 1e-4
         self.hepta_vs = [
-                geomtypes.Vec3([v_top[0], v_top[1], v_top[2] + d]),
-                geomtypes.Vec3([h1[0], h1[1], h1[2] + d]),
-                geomtypes.Vec3([h2[0], h2[1], h2[2] + d]),
-                geomtypes.Vec3([h3[0], h3[1], h3[2] + d]),
-                geomtypes.Vec3([h4[0], h4[1], h4[2] + d]),
-                geomtypes.Vec3([h5[0], h5[1], h5[2] + d]),
-                geomtypes.Vec3([h6[0], h6[1], h6[2] + d])
-            ]
+            geomtypes.Vec3([v_top[0], v_top[1], v_top[2] + d]),
+            geomtypes.Vec3([h1[0], h1[1], h1[2] + d]),
+            geomtypes.Vec3([h2[0], h2[1], h2[2] + d]),
+            geomtypes.Vec3([h3[0], h3[1], h3[2] + d]),
+            geomtypes.Vec3([h4[0], h4[1], h4[2] + d]),
+            geomtypes.Vec3([h5[0], h5[1], h5[2] + d]),
+            geomtypes.Vec3([h6[0], h6[1], h6[2] + d]),
+        ]
+        logging.debug(
+            "Heptagon edge length: %0.4f (%0.4f %0.4f, %0.4f)",
+            (v_top - h1).norm(),
+            (h1 - h2).norm(),
+            (h2 - h3).norm(),
+            (h3 - h4).norm(),
+        )
+        logging.debug(
+            "Heptagon angles (deg): %0.4f %0.4f %0.4f, %0.4f",
+            geom_2d.Line([v_top[0], v_top[1]], [h6[0], h6[1]]).angle_with(
+                geom_2d.Line([v_top[0], v_top[1]], [h1[0], h1[1]]),
+            )
+            * geom_3d.RAD2DEG
+            % 360,
+            geom_2d.Line([h1[0], h1[1]], [v_top[0], v_top[1]]).angle_with(
+                geom_2d.Line([h1[0], h1[1]], [h2[0], h2[1]]),
+            )
+            * geom_3d.RAD2DEG
+            % 360,
+            geom_2d.Line([h2[0], h2[1]], [h1[0], h1[1]]).angle_with(
+                geom_2d.Line([h2[0], h2[1]], [h3[0], h3[1]]),
+            )
+            * geom_3d.RAD2DEG
+            % 360,
+            geom_2d.Line([h3[0], h3[1]], [h2[0], h2[1]]).angle_with(
+                geom_2d.Line([h3[0], h3[1]], [h4[0], h4[1]]),
+            )
+            * geom_3d.RAD2DEG
+            % 360,
+        )
+
         # try to set the vertices array.
         # the failure occurs at init since show_kite and show_hepta don't exist
         try:
@@ -140,7 +177,7 @@ class Shape(geom_3d.SimpleShape):
                 vs.extend(self.kite_vs)
             if self.show_hepta:
                 vs.extend(self.hepta_vs)
-            self.vertex_props = {'vs': vs}
+            self.vertex_props = {"vs": vs}
         except AttributeError:
             pass
 
@@ -169,11 +206,11 @@ class Shape(geom_3d.SimpleShape):
                     es.extend(self.hepta_es)
                     vs.extend(self.hepta_vs)
                     col_idx.extend(self.hepta_cols)
-            self.vertex_props = {'vs': vs}
+            self.vertex_props = {"vs": vs}
             self.es = es
-            self.face_props = {'fs': fs, 'colors': [self.colors[:], col_idx[:]]}
+            self.face_props = {"fs": fs, "colors": [self.colors[:], col_idx[:]]}
             # save for set_vs:
-            self.show_kite  = show_kite
+            self.show_kite = show_kite
             self.show_hepta = show_hepta
 
     def set_top(self, top):
@@ -187,12 +224,12 @@ class Shape(geom_3d.SimpleShape):
 
     def set_tail(self, tail):
         """Update the distance of the bottom part of the vertical diagonal."""
-        self.tail  = tail
+        self.tail = tail
         self.set_vs()
 
     def set_side(self, side):
         """Update the distance the side of the horizontal diagonal."""
-        self.side  = side
+        self.side = side
         self.set_vs()
 
     def set_kite(self, top, tail, side):
@@ -206,6 +243,7 @@ class Shape(geom_3d.SimpleShape):
         """Get a text that can be shown to the user in a status bar."""
         return f"Top = {self.top:02.2f}, Tail = {self.tail:02.2f}, Side = {self.side:02.2f}"
 
+
 # GUI PART
 class CtrlWin(wx.Frame):
     """The GUI part for controlling the shape  of a kite and an equilateral heptagon."""
@@ -215,26 +253,20 @@ class CtrlWin(wx.Frame):
         self.canvas = canvas
         super().__init__(*args, **kwargs)
         self.side_scale = 100
-        self.top_scale  = 100
+        self.top_scale = 100
         self.tail_scale = 100
         self.top_saved = self.shape.top
         self.tail_saved = self.shape.tail
         self.side_saved = self.shape.side
         self.top_range = (self.shape.top_max - self.shape.top_min) * self.top_scale
-        self.predef_pos_list = [
-                'None',
-                'Concave I',
-                'Concave II',
-                'Regular'
-            ]
+        self.predef_pos_list = ["None", "Concave I", "Concave II", "Regular"]
         self.pre_pos_selected = False
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(
-                self.create_control_sizer(),
-                1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
-            )
+            self.create_control_sizer(), 1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT
+        )
         self.set_default_size((438, 312))
         self.panel.SetAutoLayout(True)
         self.panel.SetSizer(self.main_sizer)
@@ -249,63 +281,70 @@ class CtrlWin(wx.Frame):
 
         # GUI for dynamic adjustment
         self.kite_side_adjust = wx.Slider(
-                self.panel,
-                value = self.shape.side * self.side_scale,
-                minValue = self.shape.side_min * self.side_scale,
-                maxValue = self.shape.side_max * self.side_scale,
-                style = wx.SL_HORIZONTAL
-            )
-        self.panel.Bind(wx.EVT_SLIDER, self.on_side_adjust, id = self.kite_side_adjust.GetId())
+            self.panel,
+            value=self.shape.side * self.side_scale,
+            minValue=self.shape.side_min * self.side_scale,
+            maxValue=self.shape.side_max * self.side_scale,
+            style=wx.SL_HORIZONTAL,
+        )
+        self.panel.Bind(
+            wx.EVT_SLIDER, self.on_side_adjust, id=self.kite_side_adjust.GetId()
+        )
         self.kite_side_sizer = wx.StaticBoxSizer(
-            wx.StaticBox(self.panel, label = 'Kite Side'),
+            wx.StaticBox(self.panel, label="Kite Side"),
             wx.HORIZONTAL,
         )
         self.kite_side_sizer.Add(self.kite_side_adjust, 1, wx.EXPAND)
 
         self.kite_top_adjust = wx.Slider(
-                self.panel,
-                value = self.shape.top * self.side_scale,
-                maxValue = self.shape.top_max * self.top_scale,
-                minValue = self.shape.top_min * self.top_scale,
-                style = wx.SL_VERTICAL
-            )
-        self.panel.Bind(wx.EVT_SLIDER, self.on_top_adjust, id = self.kite_top_adjust.GetId())
+            self.panel,
+            value=self.shape.top * self.side_scale,
+            maxValue=self.shape.top_max * self.top_scale,
+            minValue=self.shape.top_min * self.top_scale,
+            style=wx.SL_VERTICAL,
+        )
+        self.panel.Bind(
+            wx.EVT_SLIDER, self.on_top_adjust, id=self.kite_top_adjust.GetId()
+        )
         self.kite_top_sizer = wx.StaticBoxSizer(
-            wx.StaticBox(self.panel, label = 'Kite Top'),
+            wx.StaticBox(self.panel, label="Kite Top"),
             wx.VERTICAL,
         )
         self.kite_top_sizer.Add(self.kite_top_adjust, 1, wx.EXPAND)
         self.kite_tail_adjust = wx.Slider(
-                self.panel,
-                value = self.shape.tail * self.side_scale,
-                minValue = self.shape.tail_min * self.tail_scale,
-                maxValue = self.shape.tail_max * self.tail_scale,
-                style = wx.SL_VERTICAL
-            )
-        self.panel.Bind(wx.EVT_SLIDER, self.on_tail_adjust, id = self.kite_tail_adjust.GetId())
+            self.panel,
+            value=self.shape.tail * self.side_scale,
+            minValue=self.shape.tail_min * self.tail_scale,
+            maxValue=self.shape.tail_max * self.tail_scale,
+            style=wx.SL_VERTICAL,
+        )
+        self.panel.Bind(
+            wx.EVT_SLIDER, self.on_tail_adjust, id=self.kite_tail_adjust.GetId()
+        )
         self.kite_tail_sizer = wx.StaticBoxSizer(
-            wx.StaticBox(self.panel, label = 'Kite Tail'),
+            wx.StaticBox(self.panel, label="Kite Tail"),
             wx.VERTICAL,
         )
         self.kite_tail_sizer.Add(self.kite_tail_adjust, 1, wx.EXPAND)
 
         # GUI for predefined positions
-        self.predef_pos_select = wx.RadioBox(self.panel,
-                label = 'Predefined Positions',
-                style = wx.RA_VERTICAL,
-                choices = self.predef_pos_list
-            )
+        self.predef_pos_select = wx.RadioBox(
+            self.panel,
+            label="Predefined Positions",
+            style=wx.RA_VERTICAL,
+            choices=self.predef_pos_list,
+        )
         self.set_no_predef_pos_selected()
         self.panel.Bind(wx.EVT_RADIOBOX, self.on_pre_pos)
 
         # GUI for general view settings
         # I think it is clearer with CheckBox-es than with ToggleButton-s
-        self.view_kite_gui = wx.CheckBox(self.panel, label = 'Show Kite')
+        self.view_kite_gui = wx.CheckBox(self.panel, label="Show Kite")
         self.view_kite_gui.SetValue(self.shape.show_kite)
-        self.view_hept_gui = wx.CheckBox(self.panel, label = 'Show Heptagon')
+        self.view_hept_gui = wx.CheckBox(self.panel, label="Show Heptagon")
         self.view_hept_gui.SetValue(self.shape.show_hepta)
         self.panel.Bind(wx.EVT_CHECKBOX, self.on_view_settings_chk)
-        self.view_opt_box = wx.StaticBox(self.panel, label = 'View Settings')
+        self.view_opt_box = wx.StaticBox(self.panel, label="View Settings")
         self.view_opt_sizer = wx.StaticBoxSizer(self.view_opt_box, wx.VERTICAL)
 
         self.view_opt_sizer.Add(self.view_kite_gui, 1, wx.EXPAND)
@@ -344,7 +383,9 @@ class CtrlWin(wx.Frame):
     def on_top_adjust(self, event):
         """Handle a newly selected top length."""
         self.set_no_predef_pos_selected()
-        self.shape.set_top(float(self.top_range - self.kite_top_adjust.GetValue()) / self.top_scale)
+        self.shape.set_top(
+            float(self.top_range - self.kite_top_adjust.GetValue()) / self.top_scale
+        )
         self.canvas.paint()
         try:
             self.status_bar.SetStatusText(self.shape.get_status_text())
@@ -375,26 +416,26 @@ class CtrlWin(wx.Frame):
         # TODO: id user selects prepos and then starts sliding, then the
         # selection should become None again.
         selection_str = self.predef_pos_list[sel]
-        if selection_str == 'None':
-            top  = self.top_saved
+        if selection_str == "None":
+            top = self.top_saved
             tail = self.tail_saved
             side = self.side_saved
             self.pre_pos_selected = False
-        elif selection_str == 'Concave I':
-            top  =  0.25
+        elif selection_str == "Concave I":
+            top = 0.25
             tail = 10.0
-            side =  1.6
-        elif selection_str == 'Concave II':
-            top  = 2.0
+            side = 1.6
+        elif selection_str == "Concave II":
+            top = 2.0
             tail = 0.6
             side = 1.6
-        elif selection_str == 'Regular':
-            top  = 2*heptagons.HEPT_RHO_NUM
-            tail = top * (2 * heptagons.HEPT_RHO_NUM - 1)
-            side = 1 + heptagons.HEPT_SIGMA
+        elif selection_str == "Regular":
+            top = REGULAR_TOP
+            tail = REGULAR_BOTTOM
+            side = REGULAR_WIDTH
         else:
             logging.info("on_pre_pos: oops, default case")
-            top  = 0.1
+            top = 0.1
             tail = 0.1
             side = 0.1
         self.shape.set_kite(top, tail, side)
@@ -408,10 +449,7 @@ class CtrlWin(wx.Frame):
         """Apply new view settings, i.e. whether the kite and/or heptagon should be shown."""
         show_kite = self.view_kite_gui.IsChecked()
         show_hepta = self.view_hept_gui.IsChecked()
-        self.shape.update_view_opt(
-            show_kite=show_kite,
-            show_hepta=show_hepta
-        )
+        self.shape.update_view_opt(show_kite=show_kite, show_hepta=show_hepta)
         self.canvas.paint()
 
     # move to general class
@@ -422,7 +460,8 @@ class CtrlWin(wx.Frame):
         # (I believe it is needed for Windows as well)
         self.SetSize(size)
 
-class Scene():
+
+class Scene:
     """The complete scene (GUI and shape) for an equilateral heptagon from a general kite."""
 
     def __init__(self, parent, canvas):
