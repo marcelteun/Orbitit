@@ -19,7 +19,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 
 import logging
 
@@ -27,11 +27,13 @@ from orbitit import geom_3d, geomtypes, glue, PS, rgb
 
 from OpenGL import GL
 
+
 class Axis:
-    X  = 1
-    Y  = 1 << 1
-    Z  = 1 << 2
-    W  = 1 << 3
+    X = 1
+    Y = 1 << 1
+    Z = 1 << 2
+    W = 1 << 3
+
 
 class Plane:
     XY = Axis.X | Axis.Y
@@ -41,8 +43,10 @@ class Plane:
     YW = Axis.Y | Axis.W
     ZW = Axis.Z | Axis.W
 
+
 class SimpleShape:
     className = "Geom4D.SimpleShape"
+
     def __init__(self, vs, Cs, es=[], ns=[], colors=([], []), name="4DSimpleShape"):
         """
         Cs: and array of cells, consisting of an array of fs.
@@ -65,21 +69,24 @@ class SimpleShape:
         # if useTransparency = False opaque colours are used, even if they
         # specifically set to transparent colours.
         self.useTransparency(True)
-        self.vertex_props = {'vs': vs, 'ns': ns, 'radius': -1., 'color': [1. , 1. , .8]}
-        self.face_props = {'colors': colors, 'draw_faces': True}
+        self.vertex_props = {
+            "vs": vs,
+            "ns": ns,
+            "radius": -1.0,
+            "color": [1.0, 1.0, 0.8],
+        }
+        self.face_props = {"colors": colors, "draw_faces": True}
         self.gl_initialised = False
         # SETTINGS 4D specific:
-        self.setCellProperties(
-            Cs = Cs, colors = colors, drawCells = False, scale = 1.0
-        )
+        self.setCellProperties(Cs=Cs, colors=colors, drawCells=False, scale=1.0)
         # For initialisation setCellProperties needs to be called before
         # edge_props, since the latter will check the scale value
         self.edge_props = {
-            'es': es,
-            'radius': -1.,
-            'color': [0.1, 0.1, 0.1],
-            'draw_edges': True,
-            'showUnscaled': True,
+            "es": es,
+            "radius": -1.0,
+            "color": [0.1, 0.1, 0.1],
+            "draw_edges": True,
+            "showUnscaled": True,
         }
         self.setProjectionProperties(11.0, 10.0)
         # expresses whether the 4D coordinates need to be updated:
@@ -101,10 +108,10 @@ class SimpleShape:
             value is not set. If the value is set it is used by gl_draw
         """
         return {
-            'vs': self.vs,
-            'radius': self.v.radius,
-            'color': self.v.col,
-            'ns': self.ns
+            "vs": self.vs,
+            "radius": self.v.radius,
+            "color": self.v.col,
+            "ns": self.ns,
         }
 
     @vertex_props.setter
@@ -120,15 +127,15 @@ class SimpleShape:
         See setter for the explanation of the keys.
         """
         if props:
-            if 'vs' in props and props['vs'] != None:
-                self.vs  = [ geomtypes.Vec4(v) for v in props['vs'] ]
-            if 'ns' in props and props['ns'] != None:
-                self.ns  = [ geomtypes.Vec4(n) for n in props['ns'] ]
-                #assert len(self.ns) == len(self.vs)
-            if 'radius' in props and props['radius'] != None:
-                self.v.radius = props['radius']
-            if 'color' in props and props['color'] != None:
-                self.v.col = props['color']
+            if "vs" in props and props["vs"] != None:
+                self.vs = [geomtypes.Vec4(v) for v in props["vs"]]
+            if "ns" in props and props["ns"] != None:
+                self.ns = [geomtypes.Vec4(n) for n in props["ns"]]
+                # assert len(self.ns) == len(self.vs)
+            if "radius" in props and props["radius"] != None:
+                self.v.radius = props["radius"]
+            if "color" in props and props["color"] != None:
+                self.v.col = props["color"]
             self.projectedTo3D = False
 
     @property
@@ -148,10 +155,10 @@ class SimpleShape:
                    all.
         """
         return {
-            'es': self.es,
-            'radius': self.e.radius,
-            'color': self.e.col,
-            'draw_edges': self.e.draw
+            "es": self.es,
+            "radius": self.e.radius,
+            "color": self.e.col,
+            "draw_edges": self.e.draw,
         }
 
     @edge_props.setter
@@ -170,53 +177,51 @@ class SimpleShape:
         See setter for the explanation of the keys.
         """
         if props:
-            if 'es' in props and props['es'] != None:
-                self.es = props['es']
+            if "es" in props and props["es"] != None:
+                self.es = props["es"]
                 self.projectedTo3D = False
-            if 'radius' in props and props['radius'] != None:
-                self.e.radius = props['radius']
+            if "radius" in props and props["radius"] != None:
+                self.e.radius = props["radius"]
                 self.projectedTo3D = False
-            if 'color' in props and props['color'] != None:
-                self.e.col = props['color']
+            if "color" in props and props["color"] != None:
+                self.e.col = props["color"]
                 self.projectedTo3D = False
-            if 'draw_edges' in props and props['draw_edges'] != None:
+            if "draw_edges" in props and props["draw_edges"] != None:
                 try:
                     currentSetting = self.e.draw
                 except AttributeError:
                     currentSetting = None
-                if currentSetting != props['draw_edges']:
+                if currentSetting != props["draw_edges"]:
                     self.projectedTo3D = self.projectedTo3D and not (
-                            # if all the below are true, then the edges need
-                            # extra vs, which means we need to reproject.
-                            self.c.scale < 1.0
-                            and
-                            # .. and if the CURRENT settings is show unscaled
-                            # (Though changes in this setting might mean that
-                            # new projection was not needed)
-                            self.e.showUnscaled
-                        )
+                        # if all the below are true, then the edges need
+                        # extra vs, which means we need to reproject.
+                        self.c.scale < 1.0
+                        and
+                        # .. and if the CURRENT settings is show unscaled
+                        # (Though changes in this setting might mean that
+                        # new projection was not needed)
+                        self.e.showUnscaled
+                    )
                     if self.projectedTo3D:
                         # Try is needed,
                         # not for the first time, since then self.projectedTo3D
                         # will be False
                         # but because of the self.mapToSingeShape setting.
                         try:
-                            self.cell.edge_props = {'draw_edges': props['draw_edges']}
+                            self.cell.edge_props = {"draw_edges": props["draw_edges"]}
                         except AttributeError:
                             pass
-                self.e.draw = props['draw_edges']
-            if 'showUnscaled' in props and props['showUnscaled'] != None:
+                self.e.draw = props["draw_edges"]
+            if "showUnscaled" in props and props["showUnscaled"] != None:
                 self.projectedTo3D = self.projectedTo3D and not (
-                        # if all the below are true, then a change in unscaled
-                        # edges means a changes in vs, since the extra edges
-                        # have different vs. This means we need to reproject.
-                        self.e.draw
-                        and
-                        self.c.scale < 1.0
-                        and
-                        self.e.showUnscaled != props['showUnscaled']
-                    )
-                self.e.showUnscaled = props['showUnscaled']
+                    # if all the below are true, then a change in unscaled
+                    # edges means a changes in vs, since the extra edges
+                    # have different vs. This means we need to reproject.
+                    self.e.draw
+                    and self.c.scale < 1.0
+                    and self.e.showUnscaled != props["showUnscaled"]
+                )
+                self.e.showUnscaled = props["showUnscaled"]
 
     def regen_edges(self):
         """
@@ -253,10 +258,7 @@ class SimpleShape:
         NOTE: these settings can be overwritten by setCellProperties, see
         setCellProperties (or getCellProperties).
         """
-        return {
-            'colors': self.f.col,
-            'draw_faces': self.f.draw
-        }
+        return {"colors": self.f.col, "draw_faces": self.f.draw}
 
     @face_props.setter
     def face_props(self, props):
@@ -269,13 +271,13 @@ class SimpleShape:
         See setter for more explanation of these.
         """
         if props:
-            if 'colors' in props and props['colors'] != None:
-                self.f.col = (props['colors'])
-            if 'draw_faces' in props and props['draw_faces'] != None:
-                self.f.draw = props['draw_faces']
+            if "colors" in props and props["colors"] != None:
+                self.f.col = props["colors"]
+            if "draw_faces" in props and props["draw_faces"] != None:
+                self.f.draw = props["draw_faces"]
             self.projectedTo3D = False
 
-    def setCellProperties(self, dictPar = None, **kwargs):
+    def setCellProperties(self, dictPar=None, **kwargs):
         """
         Define the properties of the cells.
 
@@ -298,17 +300,17 @@ class SimpleShape:
                 dict = dictPar
             else:
                 dict = kwargs
-            if 'Cs' in dict and dict['Cs'] != None:
-                self.Cs = dict['Cs']
-            if 'colors' in dict and dict['colors'] != None:
-                self.c.col = dict['colors']
-            if 'drawCells' in dict and dict['drawCells'] != None:
-                self.c.draw = dict['drawCells']
-            if 'scale' in dict and dict['scale'] != None:
-                self.c.scale = dict['scale']
+            if "Cs" in dict and dict["Cs"] != None:
+                self.Cs = dict["Cs"]
+            if "colors" in dict and dict["colors"] != None:
+                self.c.col = dict["colors"]
+            if "drawCells" in dict and dict["drawCells"] != None:
+                self.c.draw = dict["drawCells"]
+            if "scale" in dict and dict["scale"] != None:
+                self.c.scale = dict["scale"]
             self.projectedTo3D = False
 
-    def getCellProperties(self, Cs = None, colors = None):
+    def getCellProperties(self, Cs=None, colors=None):
         """
         Return the current face properties as can be set by setCellProperties.
 
@@ -340,13 +342,13 @@ class SimpleShape:
                gravitational centre. This factor is typically <= 1.
         """
         return {
-                'Cs': self.Cs,
-                'colors': self.c.col,
-                'drawCells': self.c.draw,
-                'scale': self.c.scale
-            }
+            "Cs": self.Cs,
+            "colors": self.c.col,
+            "drawCells": self.c.draw,
+            "scale": self.c.scale,
+        }
 
-    def setProjectionProperties(self, wCameraDistance, w_prj_vol, dbg = False):
+    def setProjectionProperties(self, wCameraDistance, w_prj_vol, dbg=False):
         """
         wCameraDistance: should be > 0. distance in w coordinate between the
                          camera (for which x, y, z, are 0) and the projection
@@ -364,14 +366,14 @@ class SimpleShape:
         #                 |
         #                 |
         #
-        assert (w_prj_vol > 0)
-        assert (wCameraDistance > 0)
+        assert w_prj_vol > 0
+        assert wCameraDistance > 0
         self.w_prj_vol = w_prj_vol
         self.wCamera = w_prj_vol + wCameraDistance
         self.wCameraDistance = wCameraDistance
         self.projectedTo3D = False
 
-    def rotate(self, rotation, successive = False):
+    def rotate(self, rotation, successive=False):
         """
         Rotate the polychoron by the specified rotation.
 
@@ -379,11 +381,13 @@ class SimpleShape:
         successive: specify if this is applied on any previous transform, i.e.
                     if this is not a new transforma.
         """
-        if not successive or self.rot4 == None: self.rot4 = rotation
-        else: self.rot4 = rotation * self.rot4
+        if not successive or self.rot4 == None:
+            self.rot4 = rotation
+        else:
+            self.rot4 = rotation * self.rot4
         self.projectedTo3D = False
 
-    def rotateInStdPlane(self, plane, angle, successive = False):
+    def rotateInStdPlane(self, plane, angle, successive=False):
         """
         Rotate in a plane defined by 2 coordinate axes.
 
@@ -396,7 +400,8 @@ class SimpleShape:
                     if this is not a new transforma.
         """
         q0 = None
-        if Axis.X & plane: q0 = geomtypes.Vec4([1, 0, 0, 0])
+        if Axis.X & plane:
+            q0 = geomtypes.Vec4([1, 0, 0, 0])
         if Axis.Y & plane:
             if q0 == None:
                 q0 = geomtypes.Vec4([0, 1, 0, 0])
@@ -409,9 +414,11 @@ class SimpleShape:
                 q1 = geomtypes.Vec4([0, 0, 1, 0])
         if Axis.W & plane:
             q1 = geomtypes.Vec4([0, 0, 0, 1])
-        r = geomtypes.Rot4(axialPlane = (q0, q1), angle = angle)
-        if not successive or self.rot4 == None: self.rot4 = r
-        else: self.rot4 = r * self.rot4
+        r = geomtypes.Rot4(axialPlane=(q0, q1), angle=angle)
+        if not successive or self.rot4 == None:
+            self.rot4 = r
+        else:
+            self.rot4 = r * self.rot4
         self.projectedTo3D = False
 
     def projectVsTo3D(self, Vs4D):
@@ -449,7 +456,7 @@ class SimpleShape:
         this shape. This function is called in gl_draw for the first time gl_draw
         is called.
         """
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
         GL.glEnable(GL.GL_DEPTH_TEST)
@@ -481,17 +488,17 @@ class SimpleShape:
                 pass
             Ns3D = []
             if self.rot4 != None:
-                Vs4D = [self.rot4*v for v in self.vs]
+                Vs4D = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
             #    if self.ns != []:cleanUp
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
                 Vs4D = [v for v in self.vs]
             Vs3D = self.projectVsTo3D(Vs4D)
-            #for i in range(0, len(self.es), 2):
+            # for i in range(0, len(self.es), 2):
             #    v0 = Vs4D[self.es[i]]
             #    v1 = Vs4D[self.es[i+1]]
-            #if self.ns != []:
+            # if self.ns != []:
             #    Ns3D = self.projectVsTo3D(Ns4D)
             # Now project all to one 3D shape. 1 3D shape is chosen, instean of
             # projecting each cell to one shape because of different reasons:
@@ -509,14 +516,14 @@ class SimpleShape:
             else:
                 shapeCols = self.f.col[0]
             if self.removeTransparency:
-                shapeCols = [ c[0:3] for c in shapeCols ]
+                shapeCols = [c[0:3] for c in shapeCols]
             if self.e.draw and (not isScaledDown or self.e.showUnscaled):
                 shapeVs = Vs3D
                 shapeEs = self.es
             # Add a shape with faces for each cell
             for i in range(len(self.Cs)):
                 # use a copy, since we will filter (v indices will change):
-                cellFs = [ f[:] for f in self.Cs[i]]
+                cellFs = [f[:] for f in self.Cs[i]]
                 if self.c.draw:
                     shapeColIndices.extend([self.c.col[1][i] for f in cellFs])
                 else:
@@ -540,25 +547,29 @@ class SimpleShape:
                         sum = sum + nrUsed[vIndex]
                     if sum != 0:
                         g = g / sum
-                    cellVs = [self.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs]
-
+                    cellVs = [
+                        self.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs
+                    ]
 
                 shapeVs.extend(cellVs)
                 shapeFs.extend(cellFs)
                 # for shapeColIndices.extend() see above
             self.cell = geom_3d.SimpleShape(
-                    shapeVs, shapeFs, shapeEs, [], # vs , fs, es, ns
-                    (shapeCols, shapeColIndices),
-                    name = '%s_projection' % (self.name)
-                )
-            self.cell.vertex_props = {'radius': self.v.radius, 'color': self.v.col}
+                shapeVs,
+                shapeFs,
+                shapeEs,
+                [],  # vs , fs, es, ns
+                (shapeCols, shapeColIndices),
+                name="%s_projection" % (self.name),
+            )
+            self.cell.vertex_props = {"radius": self.v.radius, "color": self.v.col}
             self.cell.edge_props = {
-                'radius': self.e.radius,
-                'color': self.e.col,
-                'draw_edges': self.e.draw,
+                "radius": self.e.radius,
+                "color": self.e.col,
+                "draw_edges": self.e.draw,
             }
-            self.cell.face_props = {'draw_faces': self.f.draw}
-            self.cell.gl_initialised = True # done as first step in self func
+            self.cell.face_props = {"draw_faces": self.f.draw}
+            self.cell.gl_initialised = True  # done as first step in self func
             self.projectedTo3D = True
             self.updateTransparency = False
             if self.e.draw and isScaledDown:
@@ -576,16 +587,16 @@ class SimpleShape:
                     cellEs.extend(self.es)
                 self.cell.es = cellEs
         if self.updateTransparency:
-            cellCols = self.cell.face_props['colors']
+            cellCols = self.cell.face_props["colors"]
             if self.removeTransparency:
-                shapeCols = [ c[0:3] for c in cellCols[0] ]
+                shapeCols = [c[0:3] for c in cellCols[0]]
             else:
                 if self.c.draw:
                     shapeCols = self.c.col[0]
                 else:
                     shapeCols = self.f.col[0]
             cellCols = (shapeCols, cellCols[1])
-            self.cell.face_props = {'colors': cellCols}
+            self.cell.face_props = {"colors": cellCols}
             self.updateTransparency = False
 
     def glDrawSplit(self):
@@ -596,29 +607,28 @@ class SimpleShape:
                 pass
             Ns3D = []
             if self.rot4 != None:
-                Vs4D = [self.rot4*v for v in self.vs]
+                Vs4D = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
             #    if self.ns != []:
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
                 Vs4D = [v for v in self.vs]
             Vs3D = self.projectVsTo3D(Vs4D)
-            #if self.ns != []:
+            # if self.ns != []:
             #    Ns3D = self.projectVsTo3D(Ns4D)
             self.cells = []
             # Add a cell for just the edges:
             if self.e.draw:
                 cell = geom_3d.SimpleShape(
-                        Vs3D, [], self.es, [], # vs , fs, es, ns
-                        name = '%s_Es' % (self.name)
-                    )
-                cell.vertex_props = {'radius': self.v.radius, 'color': self.v.col}
+                    Vs3D, [], self.es, [], name="%s_Es" % (self.name)  # vs , fs, es, ns
+                )
+                cell.vertex_props = {"radius": self.v.radius, "color": self.v.col}
                 cell.edge_props = {
-                    'radius': self.e.radius,
-                    'color': self.e.col,
-                    'draw_edges': self.e.draw,
+                    "radius": self.e.radius,
+                    "color": self.e.col,
+                    "draw_edges": self.e.draw,
                 }
-                cell.face_props = {'draw_faces': False}
+                cell.face_props = {"draw_faces": False}
                 cell.gl_initialised = True
                 self.cells.append(cell)
             # Add a shape with faces for each cell
@@ -628,26 +638,30 @@ class SimpleShape:
                 else:
                     colors = (self.f.col[0], self.f.col[1][i])
                 cell = geom_3d.SimpleShape(
-                        Vs3D, self.Cs[i], [], [], # vs , fs, es, ns
-                        colors,
-                        name = '%s_%d' % (self.name, i)
-                    )
+                    Vs3D,
+                    self.Cs[i],
+                    [],
+                    [],  # vs , fs, es, ns
+                    colors,
+                    name="%s_%d" % (self.name, i),
+                )
                 # The edges and vertices are drawn through a separate shape below.
-                cell.vertex_props = {'radius': -1}
-                cell.edge_props = {'draw_edges': False}
-                cell.face_props = {'draw_faces': self.f.draw}
+                cell.vertex_props = {"radius": -1}
+                cell.edge_props = {"draw_edges": False}
+                cell.face_props = {"draw_faces": self.f.draw}
                 cell.zoom(self.c.scale)
                 cell.gl_initialised = True
                 self.cells.append(cell)
             self.projectedTo3D = True
 
-    def to_postscript(self,
-            face_indices=[],
-            scaling=1,
-            precision=7,
-            pageSize=PS.PageSizeA4,
-        ):
+    def to_postscript(
+        self,
+        face_indices=[],
+        scaling=1,
+        precision=7,
+        pageSize=PS.PageSizeA4,
+    ):
         if self.mapToSingeShape:
             return self.cell.to_postscript(face_indices, scaling, precision, pageSize)
         else:
-            assert False, 'to_postscript not supported for mapping to split draw'
+            assert False, "to_postscript not supported for mapping to split draw"
