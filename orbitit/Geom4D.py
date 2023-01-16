@@ -46,7 +46,7 @@ class Plane:
 class SimpleShape:
     className = "Geom4D.SimpleShape"
 
-    def __init__(self, vs, Cs, es=[], ns=[], colors=([], []), name="4DSimpleShape"):
+    def __init__(self, vs, Cs, es=None, ns=None, colors=None, name="4DSimpleShape"):
         """
         Cs: and array of cells, consisting of an array of fs.
         """
@@ -58,7 +58,7 @@ class SimpleShape:
         self.c = geom_3d.Fields()
         # SETTINGS similar to geom_3d.SimpleShape:
         self.name = name
-        if colors[0] == []:
+        if colors is None:
             colors = ([rgb.gray95[:]], [])
         # if self.mapToSingeShape = False each cell is mapped to one 3D shape
         # and the edges are mapped to one shape as well. The disadvantage is
@@ -70,7 +70,7 @@ class SimpleShape:
         self.useTransparency(True)
         self.vertex_props = {
             "vs": vs,
-            "ns": ns,
+            "ns": ns if ns else [],
             "radius": -1.0,
             "color": [1.0, 1.0, 0.8],
         }
@@ -81,7 +81,7 @@ class SimpleShape:
         # For initialisation setCellProperties needs to be called before
         # edge_props, since the latter will check the scale value
         self.edge_props = {
-            "es": es,
+            "es": es if es else [],
             "radius": -1.0,
             "color": [0.1, 0.1, 0.1],
             "draw_edges": True,
@@ -649,7 +649,7 @@ class SimpleShape:
 
     def to_postscript(
         self,
-        face_indices=[],
+        face_indices=None,
         scaling=1,
         precision=7,
         pageSize=PS.PageSizeA4,
