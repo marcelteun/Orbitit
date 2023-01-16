@@ -171,7 +171,7 @@ class SimpleShape:
           - color,
           - draw_edges.
         Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
+        pairs in the dictionary dict_par.
         If they are not specified (or equel to None) they are not changed.
         See setter for the explanation of the keys.
         """
@@ -276,7 +276,7 @@ class SimpleShape:
                 self.f.draw = props["draw_faces"]
             self.projectedTo3D = False
 
-    def setCellProperties(self, dictPar=None, **kwargs):
+    def setCellProperties(self, dict_par=None, **kwargs):
         """
         Define the properties of the cells.
 
@@ -287,26 +287,26 @@ class SimpleShape:
           - scale: scale is the new scaling factor (i.e. it will not be
             multiplied by the current scaling factor)
         Either these parameters are specified as part of kwargs or as key value
-        pairs in the dictionary dictPar.
+        pairs in the dictionary dict_par.
         If they are not specified (or equal to None) they are not changed.
         See getCellProperties for the explanation of the keywords.
-        The output of getCellProperties can be used as the dictPar parameter.
+        The output of getCellProperties can be used as the dict_par parameter.
         This can be used to copy settings from one shape to another.
-        If dictPar is used and kwargs, then only the dictPar will be used.
+        If dict_par is used and kwargs, then only the dict_par will be used.
         """
-        if dictPar is not None or kwargs != {}:
-            if dictPar is not None:
-                dict = dictPar
+        if dict_par is not None or kwargs != {}:
+            if dict_par is not None:
+                properties = dict_par
             else:
-                dict = kwargs
-            if "Cs" in dict and dict["Cs"] is not None:
-                self.Cs = dict["Cs"]
-            if "colors" in dict and dict["colors"] is not None:
-                self.c.col = dict["colors"]
-            if "drawCells" in dict and dict["drawCells"] is not None:
-                self.c.draw = dict["drawCells"]
-            if "scale" in dict and dict["scale"] is not None:
-                self.c.scale = dict["scale"]
+                properties = kwargs
+            if "Cs" in properties and properties["Cs"] is not None:
+                self.Cs = properties["Cs"]
+            if "colors" in properties and properties["colors"] is not None:
+                self.c.col = properties["colors"]
+            if "drawCells" in properties and properties["drawCells"] is not None:
+                self.c.draw = properties["drawCells"]
+            if "scale" in properties and properties["scale"] is not None:
+                self.c.scale = properties["scale"]
             self.projectedTo3D = False
 
     def getCellProperties(self):
@@ -537,12 +537,12 @@ class SimpleShape:
                 # Now scale from gravitation centre:
                 if isScaledDown:
                     g = geomtypes.Vec3([0, 0, 0])
-                    sum = 0
+                    total = 0
                     for vIndex in range(len(cellVs)):
                         g = g + nrUsed[vIndex] * geomtypes.Vec3(cellVs[vIndex])
-                        sum = sum + nrUsed[vIndex]
-                    if sum != 0:
-                        g = g / sum
+                        total = total + nrUsed[vIndex]
+                    if total != 0:
+                        g = g / total
                     cellVs = [
                         self.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs
                     ]
