@@ -187,10 +187,10 @@ class SimpleShape:
                 self.projectedTo3D = False
             if "draw_edges" in props and props["draw_edges"] is not None:
                 try:
-                    currentSetting = self.e.draw
+                    current_setting = self.e.draw
                 except AttributeError:
-                    currentSetting = None
-                if currentSetting != props["draw_edges"]:
+                    current_setting = None
+                if current_setting != props["draw_edges"]:
                     self.projectedTo3D = self.projectedTo3D and not (
                         # if all the below are true, then the edges need
                         # extra vs, which means we need to reproject.
@@ -420,19 +420,19 @@ class SimpleShape:
             self.rot4 = r * self.rot4
         self.projectedTo3D = False
 
-    def projectVsTo3D(self, Vs4D):
+    def projectVsTo3D(self, vs_4d):
         """
         returns an array of 3D vertices.
         """
-        Vs3D = []
-        for v in Vs4D:
-            wV = v[3]
-            if not geomtypes.FloatHandler.eq(self.wCamera, wV):
-                scale = self.wCameraDistance / (self.wCamera - wV)
-                Vs3D.append([scale * v[0], scale * v[1], scale * v[2]])
+        vs_3d = []
+        for v in vs_4d:
+            v_w = v[3]
+            if not geomtypes.FloatHandler.eq(self.wCamera, v_w):
+                scale = self.wCameraDistance / (self.wCamera - v_w)
+                vs_3d.append([scale * v[0], scale * v[1], scale * v[2]])
             else:
-                Vs3D.append([1e256, 1e256, 1e256])
-        return Vs3D
+                vs_3d.append([1e256, 1e256, 1e256])
+        return vs_3d
 
     def applyTransform(self):
         """
@@ -479,23 +479,23 @@ class SimpleShape:
 
     def glDrawSingleRemoveUnscaledEdges(self):
         with geomtypes.FloatHandler(3) as fh:
-            isScaledDown = not fh.eq(self.c.scale, 1.0)
+            is_scaled_down = not fh.eq(self.c.scale, 1.0)
         if not self.projectedTo3D:
             try:
                 del self.cell
             except AttributeError:
                 pass
             if self.rot4 is not None:
-                Vs4D = [self.rot4 * v for v in self.vs]
+                vs_4d = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
             #    if self.ns != []:cleanUp
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
-                Vs4D = [v for v in self.vs]
-            Vs3D = self.projectVsTo3D(Vs4D)
+                vs_4d = [v for v in self.vs]
+            vs_3d = self.projectVsTo3D(vs_4d)
             # for i in range(0, len(self.es), 2):
-            #    v0 = Vs4D[self.es[i]]
-            #    v1 = Vs4D[self.es[i+1]]
+            #    v0 = vs_4d[self.es[i]]
+            #    v1 = vs_4d[self.es[i+1]]
             # Now project all to one 3D shape. 1 3D shape is chosen, instean of
             # projecting each cell to one shape because of different reasons:
             #  - when drawing transparent faces all the opaqe fae should be
@@ -503,59 +503,59 @@ class SimpleShape:
             #  - if drawing the cells per shape, the glVertexPointer should be
             #    called for each cell. (Currently SimpleShape will not call this
             #    function unless the vertices have been changed...
-            shapeVs = []
-            shapeEs = []
-            shapeFs = []
-            shapeColIndices = []
+            shape_vs = []
+            shape_es = []
+            shape_fs = []
+            shape_col_idx = []
             if self.c.draw:
-                shapeCols = self.c.col[0]
+                shape_cols = self.c.col[0]
             else:
-                shapeCols = self.f.col[0]
+                shape_cols = self.f.col[0]
             if self.removeTransparency:
-                shapeCols = [c[0:3] for c in shapeCols]
-            if self.e.draw and (not isScaledDown or self.e.showUnscaled):
-                shapeVs = Vs3D
-                shapeEs = self.es
+                shape_cols = [c[0:3] for c in shape_cols]
+            if self.e.draw and (not is_scaled_down or self.e.showUnscaled):
+                shape_vs = vs_3d
+                shape_es = self.es
             # Add a shape with faces for each cell
             for i in range(len(self.Cs)):
                 # use a copy, since we will filter (v indices will change):
-                cellFs = [f[:] for f in self.Cs[i]]
+                cell_fs = [f[:] for f in self.Cs[i]]
                 if self.c.draw:
-                    shapeColIndices.extend([self.c.col[1][i] for f in cellFs])
+                    shape_col_idx.extend([self.c.col[1][i] for f in cell_fs])
                 else:
-                    shapeColIndices.extend(self.f.col[1][i])
-                # Now cleanup Vs3D
+                    shape_col_idx.extend(self.f.col[1][i])
+                # Now cleanup vs_3d
                 # TODO
-                # if self.e.draw and (not isScaledDown or self.e.showUnscaled):
-                # Then shapeVs = Vs3D already, and the code below is all
+                # if self.e.draw and (not is_scaled_down or self.e.showUnscaled):
+                # Then shape_vs = vs_3d already, and the code below is all
                 # unecessary.
-                cellVs = Vs3D[:]
-                nrUsed = glue.cleanUpVsFs(cellVs, cellFs)
+                cell_vs = vs_3d[:]
+                number_used = glue.cleanUpVsFs(cell_vs, cell_fs)
                 # Now attaching to current vs, will change index:
-                offset = len(shapeVs)
-                cellFs = [[vIndex + offset for vIndex in f] for f in cellFs]
+                offset = len(shape_vs)
+                cell_fs = [[v_idx + offset for v_idx in f] for f in cell_fs]
                 # Now scale from gravitation centre:
-                if isScaledDown:
+                if is_scaled_down:
                     g = geomtypes.Vec3([0, 0, 0])
                     total = 0
-                    for vIndex in range(len(cellVs)):
-                        g = g + nrUsed[vIndex] * geomtypes.Vec3(cellVs[vIndex])
-                        total = total + nrUsed[vIndex]
+                    for v_idx in range(len(cell_vs)):
+                        g = g + number_used[v_idx] * geomtypes.Vec3(cell_vs[v_idx])
+                        total = total + number_used[v_idx]
                     if total != 0:
                         g = g / total
-                    cellVs = [
-                        self.c.scale * (geomtypes.Vec3(v) - g) + g for v in cellVs
+                    cell_vs = [
+                        self.c.scale * (geomtypes.Vec3(v) - g) + g for v in cell_vs
                     ]
 
-                shapeVs.extend(cellVs)
-                shapeFs.extend(cellFs)
-                # for shapeColIndices.extend() see above
+                shape_vs.extend(cell_vs)
+                shape_fs.extend(cell_fs)
+                # for shape_col_idx.extend() see above
             self.cell = geom_3d.SimpleShape(
-                shapeVs,
-                shapeFs,
-                shapeEs,
+                shape_vs,
+                shape_fs,
+                shape_es,
                 [],  # vs , fs, es, ns
-                (shapeCols, shapeColIndices),
+                (shape_cols, shape_col_idx),
                 name="%s_projection" % (self.name),
             )
             self.cell.vertex_props = {"radius": self.v.radius, "color": self.v.col}
@@ -568,31 +568,31 @@ class SimpleShape:
             self.cell.gl_initialised = True  # done as first step in self func
             self.projectedTo3D = True
             self.updateTransparency = False
-            if self.e.draw and isScaledDown:
+            if self.e.draw and is_scaled_down:
                 self.cell.regen_edges()
                 # Don't use, out of performance issues:
-                # cellEs = self.cell.edges_props['es']
+                # cell_es = self.cell.edges_props['es']
                 # --------------------------
                 # Bad performance during scaling:
-                # cellEs = self.cell.edges_props['es']
+                # cell_es = self.cell.edges_props['es']
                 # self.cell.regen_edges()
-                # cellEs.extend(self.cell.edges_props['es'])
+                # cell_es.extend(self.cell.edges_props['es'])
                 # -------end bad perf---------
-                cellEs = self.cell.es
+                cell_es = self.cell.es
                 if self.e.showUnscaled:
-                    cellEs.extend(self.es)
-                self.cell.es = cellEs
+                    cell_es.extend(self.es)
+                self.cell.es = cell_es
         if self.updateTransparency:
-            cellCols = self.cell.face_props["colors"]
+            cell_cols = self.cell.face_props["colors"]
             if self.removeTransparency:
-                shapeCols = [c[0:3] for c in cellCols[0]]
+                shape_cols = [c[0:3] for c in cell_cols[0]]
             else:
                 if self.c.draw:
-                    shapeCols = self.c.col[0]
+                    shape_cols = self.c.col[0]
                 else:
-                    shapeCols = self.f.col[0]
-            cellCols = (shapeCols, cellCols[1])
-            self.cell.face_props = {"colors": cellCols}
+                    shape_cols = self.f.col[0]
+            cell_cols = (shape_cols, cell_cols[1])
+            self.cell.face_props = {"colors": cell_cols}
             self.updateTransparency = False
 
     def glDrawSplit(self):
@@ -602,18 +602,18 @@ class SimpleShape:
             except AttributeError:
                 pass
             if self.rot4 is not None:
-                Vs4D = [self.rot4 * v for v in self.vs]
+                vs_4d = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
             #    if self.ns != []:
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
-                Vs4D = [v for v in self.vs]
-            Vs3D = self.projectVsTo3D(Vs4D)
+                vs_4d = [v for v in self.vs]
+            vs_3d = self.projectVsTo3D(vs_4d)
             self.cells = []
             # Add a cell for just the edges:
             if self.e.draw:
                 cell = geom_3d.SimpleShape(
-                    Vs3D, [], self.es, [], name="%s_Es" % (self.name)  # vs , fs, es, ns
+                    vs_3d, [], self.es, [], name="%s_Es" % (self.name)  # vs , fs, es, ns
                 )
                 cell.vertex_props = {"radius": self.v.radius, "color": self.v.col}
                 cell.edge_props = {
@@ -631,7 +631,7 @@ class SimpleShape:
                 else:
                     colors = (self.f.col[0], self.f.col[1][i])
                 cell = geom_3d.SimpleShape(
-                    Vs3D,
+                    vs_3d,
                     self.Cs[i],
                     [],
                     [],  # vs , fs, es, ns
