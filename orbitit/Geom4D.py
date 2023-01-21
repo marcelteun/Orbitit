@@ -60,11 +60,11 @@ class SimpleShape:
         self.name = name
         if colors is None:
             colors = ([rgb.gray95[:]], [])
-        # if self.mapToSingeShape = False each cell is mapped to one 3D shape
+        # if self.map_to_single_shape = False each cell is mapped to one 3D shape
         # and the edges are mapped to one shape as well. The disadvantage is
         # that for each shape glVertexPointer is set, while if
-        # self.mapToSingeShape = True is set to True one vertex array is used.
-        self.mapToSingeShape = True
+        # self.map_to_single_shape is set to True one vertex array is used.
+        self.map_to_single_shape = True
         # if useTransparency = False opaque colours are used, even if they
         # specifically set to transparent colours.
         self.useTransparency(True)
@@ -205,7 +205,7 @@ class SimpleShape:
                         # Try is needed,
                         # not for the first time, since then self.projectedTo3D
                         # will be False
-                        # but because of the self.mapToSingeShape setting.
+                        # but because of the self.map_to_single_shape setting.
                         try:
                             self.cell.edge_props = {"draw_edges": props["draw_edges"]}
                         except AttributeError:
@@ -467,7 +467,7 @@ class SimpleShape:
     def gl_draw(self):
         if not self.gl_initialised:
             self.gl_init()
-        if self.mapToSingeShape:
+        if self.map_to_single_shape:
             self.glDrawSingleRemoveUnscaledEdges()
             self.cell.generate_normals = self.generate_normals
             self.cell.gl_draw()
@@ -652,9 +652,10 @@ class SimpleShape:
         face_indices=None,
         scaling=1,
         precision=7,
-        pageSize=PS.PageSizeA4,
+        page_size=PS.PageSizeA4,
     ):
-        if self.mapToSingeShape:
-            return self.cell.to_postscript(face_indices, scaling, precision, pageSize)
-        else:
-            assert False, "to_postscript not supported for mapping to split draw"
+        """Create a Postscript string that shows for each faces where it is met by other faces."""
+        if self.map_to_single_shape:
+            return self.cell.to_postscript(face_indices, scaling, precision, page_size)
+        assert False, "to_postscript not supported for mapping to split draw"
+        return ""
