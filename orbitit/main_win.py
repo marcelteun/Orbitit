@@ -833,7 +833,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_use_transparent(self, _):
         """Handle event '_' to (re)set transparency for certain predefined polychoron faces"""
-        self.canvas.shape.useTransparency((self.use_transparency_gui.GetSelection() == 0))
+        self.canvas.shape.use_transparency((self.use_transparency_gui.GetSelection() == 0))
         self.canvas.paint()
 
     def on_show_unscaled_es(self, _):

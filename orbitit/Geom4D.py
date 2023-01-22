@@ -56,6 +56,8 @@ class SimpleShape:
         self.e = geom_3d.Fields()
         self.f = geom_3d.Fields()
         self.c = geom_3d.Fields()
+        self.cells = []
+        self.cell = None
         # SETTINGS similar to geom_3d.SimpleShape:
         self.name = name
         if colors is None:
@@ -65,9 +67,9 @@ class SimpleShape:
         # that for each shape glVertexPointer is set, while if
         # self.map_to_single_shape is set to True one vertex array is used.
         self.map_to_single_shape = True
-        # if useTransparency = False opaque colours are used, even if they
+        # if use_transparency = False opaque colours are used, even if they
         # specifically set to transparent colours.
-        self.useTransparency(True)
+        self.use_transparency(True)
         self.vertex_props = {
             "vs": vs,
             "ns": ns if ns else [],
@@ -420,7 +422,7 @@ class SimpleShape:
             self.rot4 = r * self.rot4
         self.projectedTo3D = False
 
-    def projectVsTo3D(self, vs_4d):
+    def project_vs_to_3d(self, vs_4d):
         """
         returns an array of 3D vertices.
         """
@@ -434,7 +436,7 @@ class SimpleShape:
                 vs_3d.append([1e256, 1e256, 1e256])
         return vs_3d
 
-    def applyTransform(self):
+    def apply_transform(self):
         """
         Apply current transformation to the current vertices and returns the
         result.
@@ -443,7 +445,7 @@ class SimpleShape:
                     if this is not a new transforma.
         """
 
-    def useTransparency(self, use):
+    def use_transparency(self, use):
         self.removeTransparency = not use
         self.updateTransparency = True
 
@@ -468,16 +470,16 @@ class SimpleShape:
         if not self.gl_initialised:
             self.gl_init()
         if self.map_to_single_shape:
-            self.glDrawSingleRemoveUnscaledEdges()
+            self.gl_draw_single_rm_unscales_es()
             self.cell.generate_normals = self.generate_normals
             self.cell.gl_draw()
         else:
-            self.glDrawSplit()
+            self.gl_draw_split()
             for cell in self.cells:
                 cell.generate_normals = self.generate_normals
                 cell.gl_draw()
 
-    def glDrawSingleRemoveUnscaledEdges(self):
+    def gl_draw_single_rm_unscales_es(self):
         with geomtypes.FloatHandler(3) as fh:
             is_scaled_down = not fh.eq(self.c.scale, 1.0)
         if not self.projectedTo3D:
@@ -492,7 +494,7 @@ class SimpleShape:
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
                 vs_4d = [v for v in self.vs]
-            vs_3d = self.projectVsTo3D(vs_4d)
+            vs_3d = self.project_vs_to_3d(vs_4d)
             # for i in range(0, len(self.es), 2):
             #    v0 = vs_4d[self.es[i]]
             #    v1 = vs_4d[self.es[i+1]]
@@ -595,12 +597,8 @@ class SimpleShape:
             self.cell.face_props = {"colors": cell_cols}
             self.updateTransparency = False
 
-    def glDrawSplit(self):
+    def gl_draw_split(self):
         if not self.projectedTo3D:
-            try:
-                del self.cells
-            except AttributeError:
-                pass
             if self.rot4 is not None:
                 vs_4d = [self.rot4 * v for v in self.vs]
             # TODO fix ns.. if needed..
@@ -608,7 +606,7 @@ class SimpleShape:
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
                 vs_4d = [v for v in self.vs]
-            vs_3d = self.projectVsTo3D(vs_4d)
+            vs_3d = self.project_vs_to_3d(vs_4d)
             self.cells = []
             # Add a cell for just the edges:
             if self.e.draw:
