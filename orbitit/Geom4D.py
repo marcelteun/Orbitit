@@ -20,7 +20,7 @@
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-branches
 
 from OpenGL import GL
 
@@ -493,7 +493,7 @@ class SimpleShape:
             #    if self.ns != []:cleanUp
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
-                vs_4d = [v for v in self.vs]
+                vs_4d = self.vs.copy()
             vs_3d = self.project_vs_to_3d(vs_4d)
             # for i in range(0, len(self.es), 2):
             #    v0 = vs_4d[self.es[i]]
@@ -605,7 +605,7 @@ class SimpleShape:
             #    if self.ns != []:
             #        Ns4D = [self.rot4*n for n in self.ns]
             else:
-                vs_4d = [v for v in self.vs]
+                vs_4d = self.vs.copy()
             vs_3d = self.project_vs_to_3d(vs_4d)
             self.cells = []
             # Add a cell for just the edges:
