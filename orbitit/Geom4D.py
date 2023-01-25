@@ -20,7 +20,8 @@
 # or write to the Free Software Foundation,
 #
 # ------------------------------------------------------------------
-# pylint: disable=too-many-statements,too-many-branches
+# pylint: disable=too-many-statements,too-many-branches,too-many-instance-attributes
+# pylint: disable=too-many-arguments,too-many-locals,too-few-public-methods
 
 from OpenGL import GL
 
