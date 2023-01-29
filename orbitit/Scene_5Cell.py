@@ -120,7 +120,7 @@ class Shape(Geom4D.SimpleShape):
         # On default, don't draw the outer cell:
         this.showWhichCells[-1][0] = False
         this.showFs()
-        this.setProjectionProperties(wCameraDistance = 3.76, w_prj_vol = 0.25)
+        this.set_projection(cam_distance=3.76, w_prj_vol=0.25)
 
     def setShowGroup(this, groupId, show = True):
         this.showGroup[groupId] = show

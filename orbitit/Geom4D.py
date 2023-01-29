@@ -49,7 +49,9 @@ class Plane:
 
 class SimpleShape:
     """Represent a four dimension shape that can be drawn in a 3D engine."""
-    className = "Geom4D.SimpleShape"
+    _remove_transparency = False
+    _update_transparency = False
+    w_cam_offset = 1
 
     def __init__(self, vs, Cs, es=None, ns=None, colors=None, name="4DSimpleShape"):
         """
@@ -94,7 +96,7 @@ class SimpleShape:
             "draw_edges": True,
             "showUnscaled": True,
         }
-        self.setProjectionProperties(11.0, 10.0)
+        self.set_projection(11.0, 10.0)
         # expresses whether the 4D coordinates need to be updated:
         self.rot4 = None
         self.projectedTo3D = False
@@ -354,29 +356,28 @@ class SimpleShape:
             "scale": self.c.scale,
         }
 
-    def setProjectionProperties(self, wCameraDistance, w_prj_vol):
+    def set_projection(self, cam_distance, w_prj_vol):
         """
-        wCameraDistance: should be > 0. distance in w coordinate between the
-                         camera (for which x, y, z, are 0) and the projection
-                         volume>
-        w_prj_vol: should be >= 0. w coordinate of the near volume. This is
-                   the voume in which the object is projected.
+        cam_distance: should be > 0. distance in w coordinate between the camera (for which
+            x, y, z, w are 0) and the projection volume.
+        w_prj_vol: should be >= 0. w coordinate of the near volume. This is the voume in which the
+            object is projected.
         """
         #
         #                 |
-        # wCameraDistance |
+        #   cam_distance  |
         #           |     |
-        #           V     |           V
-        #     wC <-----> wProjV
+        #           V     |
+        #  w_cam <-----> w_projection_volumne
         #                 |
         #                 |
         #                 |
         #
         assert w_prj_vol > 0
-        assert wCameraDistance > 0
+        assert cam_distance > 0
         self.w_prj_vol = w_prj_vol
-        self.wCamera = w_prj_vol + wCameraDistance
-        self.wCameraDistance = wCameraDistance
+        self.wCamera = w_prj_vol + cam_distance
+        self.w_cam_offset = cam_distance
         self.projectedTo3D = False
 
     def rotate(self, rotation, successive=False):
@@ -393,7 +394,7 @@ class SimpleShape:
             self.rot4 = rotation * self.rot4
         self.projectedTo3D = False
 
-    def rotateInStdPlane(self, plane, angle, successive=False):
+    def rotate_in_std_plane(self, plane, angle, successive=False):
         """
         Rotate in a plane defined by 2 coordinate axes.
 
@@ -435,7 +436,7 @@ class SimpleShape:
         for v in vs_4d:
             v_w = v[3]
             if not geomtypes.FloatHandler.eq(self.wCamera, v_w):
-                scale = self.wCameraDistance / (self.wCamera - v_w)
+                scale = self.w_cam_offset / (self.wCamera - v_w)
                 vs_3d.append([scale * v[0], scale * v[1], scale * v[2]])
             else:
                 vs_3d.append([1e256, 1e256, 1e256])
@@ -455,8 +456,8 @@ class SimpleShape:
 
         If set to False only the volumes closest to the 4D camera can be seen.
         """
-        self.removeTransparency = not use
-        self.updateTransparency = True
+        self._remove_transparency = not use
+        self._update_transparency = True
 
     def gl_init(self):
         """
@@ -527,7 +528,7 @@ class SimpleShape:
                 shape_cols = self.c.col[0]
             else:
                 shape_cols = self.f.col[0]
-            if self.removeTransparency:
+            if self._remove_transparency:
                 shape_cols = [c[0:3] for c in shape_cols]
             if self.e.draw and (not is_scaled_down or self.e.showUnscaled):
                 shape_vs = vs_3d
@@ -583,7 +584,7 @@ class SimpleShape:
             self.cell.face_props = {"draw_faces": self.f.draw}
             self.cell.gl_initialised = True  # done as first step in self func
             self.projectedTo3D = True
-            self.updateTransparency = False
+            self._update_transparency = False
             if self.e.draw and is_scaled_down:
                 self.cell.regen_edges()
                 # Don't use, out of performance issues:
@@ -598,9 +599,9 @@ class SimpleShape:
                 if self.e.showUnscaled:
                     cell_es.extend(self.es)
                 self.cell.es = cell_es
-        if self.updateTransparency:
+        if self._update_transparency:
             cell_cols = self.cell.face_props["colors"]
-            if self.removeTransparency:
+            if self._remove_transparency:
                 shape_cols = [c[0:3] for c in cell_cols[0]]
             else:
                 if self.c.draw:
@@ -609,7 +610,7 @@ class SimpleShape:
                     shape_cols = self.f.col[0]
             cell_cols = (shape_cols, cell_cols[1])
             self.cell.face_props = {"colors": cell_cols}
-            self.updateTransparency = False
+            self._update_transparency = False
 
     def gl_draw_split(self):
         """Prepare a 3D draw by defining self.cells.

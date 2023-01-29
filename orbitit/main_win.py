@@ -596,7 +596,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 value=self.val_2_slider(
                     self.cam_dist_factor,
                     self.cam_dist_offset,
-                    self.canvas.shape.wCameraDistance,
+                    self.canvas.shape.w_cam_offset,
                 ),
                 minValue=0,
                 maxValue=steps,
@@ -888,7 +888,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 self.parent_win.set_status_text(
                     'Error: Projection volume:  w should be > 0!'
                 )
-        self.canvas.shape.setProjectionProperties(cam_dist, w_prj_vol, dbg=True)
+        self.canvas.shape.set_projection(cam_dist, w_prj_vol)
         self.canvas.paint()
         e.Skip()
 

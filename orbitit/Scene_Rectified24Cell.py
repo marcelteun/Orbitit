@@ -602,7 +602,7 @@ class Shape(Geom4D.SimpleShape):
         # tmp:
         #this.useTransparency(False)
         this.showFs()
-        this.setProjectionProperties(wCameraDistance = 2.8, w_prj_vol = 1.0)
+        this.set_projection(cam_distance=2.8, w_prj_vol=1.0)
 
     def setShowGroup(this, groupId, show = True):
         this.showGroup[groupId] = show

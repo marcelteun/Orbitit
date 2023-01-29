@@ -269,7 +269,7 @@ class Shape(Geom4D.SimpleShape):
         this.showWichTranspI = [ True for i in range(8) ]
         this.showWichTranspII = [ True for i in range(8) ]
         this.colAlternative = 0
-        this.setProjectionProperties(2.3, 1.0)
+        this.set_projection(2.3, 1.0)
 
     def setShowSolids(this, show = True):
         this.showFs(show, this.showTranspI, this.showTranspII)
