@@ -57,6 +57,7 @@ class SimpleShape:
         """
         Cs: and array of cells, consisting of an array of fs.
         """
+        self._w_cam = 0
         self.dimension = 4
         self.generate_normals = False
         self.v = geom_3d.Fields()
@@ -376,7 +377,7 @@ class SimpleShape:
         assert w_prj_vol > 0
         assert cam_distance > 0
         self.w_prj_vol = w_prj_vol
-        self.wCamera = w_prj_vol + cam_distance
+        self._w_cam = w_prj_vol + cam_distance
         self.w_cam_offset = cam_distance
         self.projectedTo3D = False
 
@@ -435,8 +436,8 @@ class SimpleShape:
         vs_3d = []
         for v in vs_4d:
             v_w = v[3]
-            if not geomtypes.FloatHandler.eq(self.wCamera, v_w):
-                scale = self.w_cam_offset / (self.wCamera - v_w)
+            if not geomtypes.FloatHandler.eq(self._w_cam, v_w):
+                scale = self.w_cam_offset / (self._w_cam - v_w)
                 vs_3d.append([scale * v[0], scale * v[1], scale * v[2]])
             else:
                 vs_3d.append([1e256, 1e256, 1e256])
