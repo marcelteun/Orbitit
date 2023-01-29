@@ -860,7 +860,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.cell_scale_offset,
             self.scale_gui.GetValue(),
         )
-        self.canvas.shape.setCellProperties(scale=scale)
+        self.canvas.shape.set_cell_properties(scale=scale)
         self.canvas.paint()
 
     def on_prj_vol_adjust(self, e):

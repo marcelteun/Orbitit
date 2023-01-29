@@ -86,8 +86,8 @@ class SimpleShape:
         self.face_props = {"colors": colors, "draw_faces": True}
         self.gl_initialised = False
         # SETTINGS 4D specific:
-        self.setCellProperties(Cs=Cs, colors=colors, drawCells=False, scale=1.0)
-        # For initialisation setCellProperties needs to be called before
+        self.set_cell_properties(Cs=Cs, colors=colors, drawCells=False, scale=1.0)
+        # For initialisation set_cell_properties needs to be called before
         # edge_props, since the latter will check the scale value
         self.edge_props = {
             "es": es if es else [],
@@ -263,8 +263,8 @@ class SimpleShape:
                    fs not specified) otherwise the parameter is ignored and the
                    face colors are set by some default algorithm.
         draw_faces: settings that expresses whether the faces should be drawn.
-        NOTE: these settings can be overwritten by setCellProperties, see
-        setCellProperties (or getCellProperties).
+        NOTE: these settings can be overwritten by set_cell_properties, see
+        set_cell_properties (or get_cell_properties).
         """
         return {"colors": self.f.col, "draw_faces": self.f.draw}
 
@@ -285,7 +285,7 @@ class SimpleShape:
                 self.f.draw = props["draw_faces"]
             self.projectedTo3D = False
 
-    def setCellProperties(self, dict_par=None, **kwargs):
+    def set_cell_properties(self, dict_par=None, **kwargs):
         """
         Define the properties of the cells.
 
@@ -298,8 +298,8 @@ class SimpleShape:
         Either these parameters are specified as part of kwargs or as key value
         pairs in the dictionary dict_par.
         If they are not specified (or equal to None) they are not changed.
-        See getCellProperties for the explanation of the keywords.
-        The output of getCellProperties can be used as the dict_par parameter.
+        See get_cell_properties for the explanation of the keywords.
+        The output of get_cell_properties can be used as the dict_par parameter.
         This can be used to copy settings from one shape to another.
         If dict_par is used and kwargs, then only the dict_par will be used.
         """
@@ -318,9 +318,9 @@ class SimpleShape:
                 self.c.scale = properties["scale"]
             self.projectedTo3D = False
 
-    def getCellProperties(self):
+    def get_cell_properties(self):
         """
-        Return the current face properties as can be set by setCellProperties.
+        Return the current face properties as can be set by set_cell_properties.
 
         Cs: optional array of cells. Each cell consists of an array of faces,
             that do not need to be triangular. It is a hierarchical array, ie it
