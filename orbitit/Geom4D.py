@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Classes that can be used to view 4D shapes in a 3D engine."""
 #
 # Copyright (C) 2010 Marcel Tunnissen
 #
@@ -29,6 +30,7 @@ from orbitit import geom_3d, geomtypes, glue, PS, rgb
 
 
 class Axis:
+    """The orthogonal axes in 4D."""
     X = 1
     Y = 1 << 1
     Z = 1 << 2
@@ -36,6 +38,7 @@ class Axis:
 
 
 class Plane:
+    """The orthogonal planes using the orthogonal axes in 4D."""
     XY = Axis.X | Axis.Y
     XZ = Axis.X | Axis.Z
     XW = Axis.X | Axis.W
@@ -45,6 +48,7 @@ class Plane:
 
 
 class SimpleShape:
+    """Represent a four dimension shape that can be drawn in a 3D engine."""
     className = "Geom4D.SimpleShape"
 
     def __init__(self, vs, Cs, es=None, ns=None, colors=None, name="4DSimpleShape"):
@@ -447,6 +451,10 @@ class SimpleShape:
         """
 
     def use_transparency(self, use):
+        """Set to True if transparent faces are supposed to be used.
+
+        If set to False only the volumes closest to the 4D camera can be seen.
+        """
         self.removeTransparency = not use
         self.updateTransparency = True
 
@@ -468,6 +476,7 @@ class SimpleShape:
         self.gl_initialised = True
 
     def gl_draw(self):
+        """Draw the shape in 3D."""
         if not self.gl_initialised:
             self.gl_init()
         if self.map_to_single_shape:
@@ -481,6 +490,10 @@ class SimpleShape:
                 cell.gl_draw()
 
     def gl_draw_single_rm_unscales_es(self):
+        """Prepare a 3D draw by defining one self.cell.
+
+        This will prepare one SimpleShape in self.cell that represents the whole polychoron.
+        """
         with geomtypes.FloatHandler(3) as fh:
             is_scaled_down = not fh.eq(self.c.scale, 1.0)
         if not self.projectedTo3D:
@@ -599,6 +612,11 @@ class SimpleShape:
             self.updateTransparency = False
 
     def gl_draw_split(self):
+        """Prepare a 3D draw by defining self.cells.
+
+        The self.cells is a list for cells and it will consist of one SimpleShape with all the edges (if
+        drawing of edges is enabled) and one SimpleShape with the faces for each cell.
+        """
         if not self.projectedTo3D:
             if self.rot4 is not None:
                 vs_4d = [self.rot4 * v for v in self.vs]
