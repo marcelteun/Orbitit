@@ -482,7 +482,7 @@ class SimpleShape:
         if not self.gl_initialised:
             self.gl_init()
         if self.map_to_single_shape:
-            self.gl_draw_single_rm_unscales_es()
+            self.gl_draw_single_rm_unscaled_es()
             self.cell.generate_normals = self.generate_normals
             self.cell.gl_draw()
         else:
@@ -491,7 +491,7 @@ class SimpleShape:
                 cell.generate_normals = self.generate_normals
                 cell.gl_draw()
 
-    def gl_draw_single_rm_unscales_es(self):
+    def gl_draw_single_rm_unscaled_es(self):
         """Prepare a 3D draw by defining one self.cell.
 
         This will prepare one SimpleShape in self.cell that represents the whole polychoron.
@@ -556,8 +556,8 @@ class SimpleShape:
                 if is_scaled_down:
                     g = geomtypes.Vec3([0, 0, 0])
                     total = 0
-                    for v_idx in range(len(cell_vs)):
-                        g = g + number_used[v_idx] * geomtypes.Vec3(cell_vs[v_idx])
+                    for v_idx, v in enumerate(cell_vs):
+                        g = g + number_used[v_idx] * geomtypes.Vec3(v)
                         total = total + number_used[v_idx]
                     if total != 0:
                         g = g / total
@@ -644,14 +644,14 @@ class SimpleShape:
                 cell.gl_initialised = True
                 self.cells.append(cell)
             # Add a shape with faces for each cell
-            for i in range(len(self.Cs)):
+            for i, cell in enumerate(self.Cs):
                 if self.c.draw:
                     colors = (self.c.col[0][self.c.col[1][i]], [])
                 else:
                     colors = (self.f.col[0], self.f.col[1][i])
                 cell = geom_3d.SimpleShape(
                     vs_3d,
-                    self.Cs[i],
+                    cell,
                     [],
                     [],  # vs , fs, es, ns
                     colors,
