@@ -258,7 +258,7 @@ ES.extend(
 class Shape(Geom4D.SimpleShape):
     def __init__(this):
         Geom4D.SimpleShape.__init__(this,
-            vs, Cs=[], es=ES, ns=[],
+            vs, cells=[], es=ES, ns=[],
             colors=(Cols, ColIdsOpaq),
             name=TITLE
         )
@@ -337,7 +337,7 @@ class Shape(Geom4D.SimpleShape):
                 else:
                     Cs.append([])
                     colIds.append([])
-        this.set_cell_properties(Cs = Cs)
+        this.set_cell_properties(cells=Cs)
         this.face_props = {'colors': (Cols, colIds)}
 
     def setColAlternative(this, index):

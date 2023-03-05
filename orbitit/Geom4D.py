@@ -53,9 +53,9 @@ class SimpleShape:
     _update_transparency = False
     w_cam_offset = 1
 
-    def __init__(self, vs, Cs, es=None, ns=None, colors=None, name="4DSimpleShape"):
+    def __init__(self, vs, cells, es=None, ns=None, colors=None, name="4DSimpleShape"):
         """
-        Cs: and array of cells, consisting of an array of fs.
+        cells: and array of cells, consisting of an array of fs.
         """
         self._w_cam = 0
         self.dimension = 4
@@ -87,7 +87,7 @@ class SimpleShape:
         self.face_props = {"colors": colors, "draw_faces": True}
         self.gl_initialised = False
         # SETTINGS 4D specific:
-        self.set_cell_properties(Cs=Cs, colors=colors, drawCells=False, scale=1.0)
+        self.set_cell_properties(cells=cells, colors=colors, drawCells=False, scale=1.0)
         # For initialisation set_cell_properties needs to be called before
         # edge_props, since the latter will check the scale value
         self.edge_props = {
@@ -291,7 +291,7 @@ class SimpleShape:
         Define the properties of the cells.
 
         Accepted are the optional (keyword) parameters:
-          - Cs
+          - cells
           - colors,
           - drawCells
           - scale: scale is the new scaling factor (i.e. it will not be
@@ -309,8 +309,8 @@ class SimpleShape:
                 properties = dict_par
             else:
                 properties = kwargs
-            if "Cs" in properties and properties["Cs"] is not None:
-                self.Cs = properties["Cs"]
+            if "cells" in properties and properties["cells"] is not None:
+                self.cells = properties["cells"]
             if "colors" in properties and properties["colors"] is not None:
                 self.c.col = properties["colors"]
             if "drawCells" in properties and properties["drawCells"] is not None:
@@ -323,12 +323,12 @@ class SimpleShape:
         """
         Return the current face properties as can be set by set_cell_properties.
 
-        Cs: optional array of cells. Each cell consists of an array of faces,
+        cells: optional array of cells. Each cell consists of an array of faces,
             that do not need to be triangular. It is a hierarchical array, ie it
             consists of sub-array, where each sub-array describes one face. Each
             n-sided face is desribed by n indices. Empty on default. Using
             triangular faces only gives a better performance.
-            If Cs == None, then the previous specified value will be used.
+            If cells == None, then the previous specified value will be used.
         colors: A tuple that defines the colour of the faces. The tuple consists
                 of the following two items:
                 0. colour definitions:
@@ -337,11 +337,11 @@ class SimpleShape:
                    array containing the rgb value between 0 and 1.
                 1. colour index per face:
                    An array of colour indices. It specifies for each cell with
-                   index 'i' in Cs which colour index from the parameter color
+                   index 'i' in cells which colour index from the parameter color
                    is used for this face. If empty then colors[0][0] shall be
                    used for each face.
-                   It should have the same length as Cs (or the current cells if
-                   Cs not specified) otherwise the parameter is ignored and the
+                   It should have the same length as cells (or the current cells if
+                   cells not specified) otherwise the parameter is ignored and the
                    cell colors are set by some default algorithm.
         drawCells: settings that expresses whether the cells should be drawn. If
                    cells are drawn, then the individual faces of the cell will
@@ -351,7 +351,7 @@ class SimpleShape:
                gravitational centre. This factor is typically <= 1.
         """
         return {
-            "Cs": self.Cs,
+            "cells": self.cells,
             "colors": self.c.col,
             "drawCells": self.c.draw,
             "scale": self.c.scale,
@@ -535,9 +535,9 @@ class SimpleShape:
                 shape_vs = vs_3d
                 shape_es = self.es
             # Add a shape with faces for each cell
-            for i in range(len(self.Cs)):
+            for i, cell in enumerate(self.cells):
                 # use a copy, since we will filter (v indices will change):
-                cell_fs = [f[:] for f in self.Cs[i]]
+                cell_fs = [f[:] for f in cell]
                 if self.c.draw:
                     shape_col_idx.extend([self.c.col[1][i] for f in cell_fs])
                 else:
@@ -644,7 +644,7 @@ class SimpleShape:
                 cell.gl_initialised = True
                 self.cells.append(cell)
             # Add a shape with faces for each cell
-            for i, cell in enumerate(self.Cs):
+            for i, cell in enumerate(self.cells):
                 if self.c.draw:
                     colors = (self.c.col[0][self.c.col[1][i]], [])
                 else:
