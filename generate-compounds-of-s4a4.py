@@ -11,20 +11,33 @@ from orbitit import geomtypes, rgb
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
+# ~44.4775 degrees:
 ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
+# ~23.4309
 ACOS_7_3V5_3_2_2V5_8 = math.acos((-7 + 3*V5 + 3*math.sqrt(2 + 2*V5)) / 8)
+# ~31.0449 degrees:
 acos_7_3V5_16 = math.acos((7 + 3*V5) / 16)
+# ~35.2644 degrees:
 ASIN_1_V3 = math.asin(1 / V3)
+# ~54.7356 degrees:
 ACOS_1_V3 = math.acos(1 / V3)
 
+# ~38.9424 degrees:
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
+# ~44.4775 degrees:
 D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
+# ~9.7356 degrees:
 ATAN_3_2V2 = math.atan(3 - 2 * V2)
+# ~33.8305 degrees:
 ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
+# ~14.3592 degrees:
 ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
+# ~19.4712 degrees:
 ATAN_V2_4 = math.atan(V2 / 4)
 
+# ~15.5225 degrees:
 ACOS_1_3V5_8 = math.acos((1+3*V5) / 8)
+# ~7.7612 degrees:
 H_ACOS_1_3V5_8 = ACOS_1_3V5_8 / 2
 
 def save_off(comp, tail=''):
@@ -492,6 +505,20 @@ def create_a5(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/11)  # example angle
     save_off(polyh)
+    # special mu
+    # There is a mu ~= 14.36 which looks like a 15 x D1C2 though not distince ones. The reflection
+    # is part of a each pair in 10 x 3 | D3
+    # There is a mu ~= 38.17 which looks like a 5 x D5C5, but there are no distinct 6 of these
+    # Leave out for now
+    # There is a mu ~= 20.905 10 x 3 | D12D6 / D4D2
+    # There is a mu ~= 24.09 10 x 3 | D6D3 / D2C2
+    # There is a mu ~= 22.47 what happens there?
+    polyh = S4A4.A5_C2(base, 10, col_alt=1)
+    polyh.rot_base(20.905 * math.pi / 180)  # FIXME: calculate real angle
+    save_off(polyh, '_mu2')
+    polyh = S4A4.A5_C2(base, 10)
+    polyh.rot_base(24.09 * math.pi / 180)  # FIXME: calculate real angle
+    save_off(polyh, '_mu3')
 
     # Rigid compound
     polyh = S4A4.A5_A4(base, 5)
