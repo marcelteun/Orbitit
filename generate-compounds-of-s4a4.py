@@ -12,12 +12,16 @@ V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 V10 = math.sqrt(10)
+# ~13.283 degrees:
+ATAN_V5_2 = math.atan(V5 - 2)
 # ~44.4775 degrees:
 ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 # 20.905
 ACOS_V5_1_2V3 = math.acos((V5 + 1) / (2 * V3))
 # ~23.4309
 ACOS_7_3V5_3_2_2V5_8 = math.acos((-7 + 3*V5 + 3*math.sqrt(2 + 2*V5)) / 8)
+# ~24.09
+ATAN_1_V5 = math.atan(1 / V5)
 # ~31.0449 degrees:
 acos_7_3V5_16 = math.acos((7 + 3*V5) / 16)
 # ~31.7175 degrees
@@ -523,9 +527,9 @@ def create_a5(base, js_fd=None):
     # sub-compound of one colour gets a higher symmetry
     # Include the multiplications
 
-    # There is a mu ~= 13.282 degrees 6 x 5 | D10D5 / D2C2
+    # 6 x 5 | D10D5 / D2C2
     polyh = S4A4.A5_C2(base, 6, col_alt=1)
-    polyh.rot_base(13.283 * math.pi / 180)
+    polyh.rot_base(ATAN_V5_2)
     save_off(polyh, '_mu2')
 
     # 10 x 3 | D12D6 / D4D2
@@ -533,9 +537,9 @@ def create_a5(base, js_fd=None):
     polyh.rot_base(ACOS_V5_1_2V3)
     save_off(polyh, '_mu3')
 
-    # There is a mu ~= 24.09 degrees 10 x 3 | D6D3 / D2C2
+    # 10 x 3 | D6D3 / D2C2
     polyh = S4A4.A5_C2(base, 10)
-    polyh.rot_base(24.09 * math.pi / 180)  # FIXME: calculate real angle
+    polyh.rot_base(ATAN_1_V5)
     save_off(polyh, '_mu4')
 
     # 6 x 5 | D20D10 / D4D2
