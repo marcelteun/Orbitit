@@ -469,9 +469,13 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             shape.name = filename
             # TODO add precision through setting:
             precision = geomtypes.FLOAT_OUT_PRECISION
-            org_precision, geomtypes.float_out_precision = (
-                geomtypes.float_out_precision, precision
-            )
+            try:
+                org_precision, geomtypes.float_out_precision = (
+                    geomtypes.float_out_precision, precision
+                )
+            except AttributeError:
+                org_precision = precision
+                geomtypes.float_out_precision = precision
             shape.write_json_file(filepath)
             geomtypes.float_out_precision = org_precision
             self.set_status_text("JSON file written")
