@@ -279,7 +279,7 @@ class Set(set, base.Orbitit):
         try:
             sub_class = cls.to_class[repr_dict["class"]]
         except KeyError as e:
-            raise Exception(f'{repr_dict["class"]} not in {cls.to_class} (expected)') from e
+            raise ValueError(f'{repr_dict["class"]} not in {cls.to_class} (expected)') from e
         return sub_class.from_dict_data(repr_dict["data"])
 
     @classmethod
@@ -781,16 +781,13 @@ def _c2ncn_get_subgroups(n):
         # n odd: group has a reflection
         # CnxI: all divisors are also odd, i.e. they miss reflection
         # C2nCn: none, there are no even divisors
-        g_c2ici = [C2nC(i) for i in divs if i % 2 != 0]
-        g = (g_c2ici)
+        g = [C2nC(i) for i in divs if i % 2 != 0]
     else:
         # n even: group has no reflection
         # CnxI: only add divisors that are odd if n/i is odd too
         #       but since n even, n/i even too. No such subgroup.
         # C2nCn: only add divisors that are even if n/i is odd.
-        g_c2ici = [C2nC(i) for i in divs
-                   if i % 2 == 0 and (n / i) % 2 != 0]
-        g = (g_c2ici)
+        g = [C2nC(i) for i in divs if i % 2 == 0 and (n / i) % 2 != 0]
     divs.insert(0, n)
     g.extend([C(i) for i in divs])
     return _sort_and_del_dups(g)

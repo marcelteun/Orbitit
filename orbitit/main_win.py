@@ -749,7 +749,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_v_radius(self, _):
         """Handle event '_' to set vertex radius as according to settings"""
-        self.v_r = (float(self.v_r_gui.GetValue()) / self.v_r_scale)
+        self.v_r = float(self.v_r_gui.GetValue()) / self.v_r_scale
         self.canvas.shape.vertex_props = {'radius': self.v_r}
         self.canvas.paint()
         self.set_status_text()
@@ -782,7 +782,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_e_radius(self, _):
         """Handle event '_' to set edge radius as according to settings"""
-        self.e_r = (float(self.e_r_gui.GetValue()) / self.e_r_scale)
+        self.e_r = float(self.e_r_gui.GetValue()) / self.e_r_scale
         self.canvas.shape.edge_props = {'radius': self.e_r}
         self.canvas.paint()
         self.set_status_text()

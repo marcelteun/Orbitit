@@ -776,11 +776,11 @@ class TestRot3(unittest.TestCase):
         r1 = geomtypes.Rot3(axis=geomtypes.UX, angle=geomtypes.QUARTER_TURN)
         r = (r1 * r0) * geomtypes.UX  # expected: r1(r0(x))
         self.assertEqual(r, geomtypes.UZ)
-        r = (r1 * r0)
+        r = r1 * r0
         x = geomtypes.Rot3(axis=geomtypes.Vec3([1, -1, 1]),
                            angle=geomtypes.THIRD_TURN)
         self.assertEqual(r, x)
-        r = (r0 * r1)
+        r = r0 * r1
         x = geomtypes.Rot3(axis=geomtypes.Vec3([1, 1, 1]),
                            angle=geomtypes.THIRD_TURN)
         self.assertEqual(r, x)
@@ -1015,10 +1015,10 @@ class TestRefl3(unittest.TestCase):
         # test order: 2 refl planes with 45 degrees in between: 90 rotation
         s0 = geomtypes.Refl3(normal=geomtypes.Vec3([0, 3, 0]))
         s1 = geomtypes.Refl3(normal=geomtypes.Vec3([-1, 1, 0]))
-        r = (s1 * s0)
+        r = s1 * s0
         x = geomtypes.Rot3(axis=geomtypes.UZ, angle=geomtypes.QUARTER_TURN)
         self.assertEqual(r, x)
-        r = (s0 * s1)
+        r = s0 * s1
         x = geomtypes.Rot3(axis=geomtypes.UZ, angle=-geomtypes.QUARTER_TURN)
         self.assertEqual(r, x)
 

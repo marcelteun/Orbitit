@@ -149,7 +149,12 @@ def read_off_file(fd, regen_edges=True, name=""):
     no_of_vs = 0
     no_of_fs = 0
     no_of_es = 0
+    # Initialise all for pylint, though state machine will take care of most
+    vs = []
     es = []
+    fs = []
+    cols = []
+    face_cols = []
     i = 0
     # A dictionary where the key and value pairs are exchanged, for debugging
     # purposes:
