@@ -26,4 +26,9 @@ setup(
     ],
     packages=["orbitit"],
     python_requires=">=3.6",
+    scripts = [
+        "utils/generate-59-icosahedra.py",
+        "utils/generate-compounds-of-s4a4.py",
+        "utils/generate_crosso_lattices.py",
+    ],
 )
