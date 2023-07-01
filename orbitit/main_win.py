@@ -33,7 +33,10 @@ from OpenGL import GL
 from orbitit import geom_3d, geom_gui, geomtypes, Scenes3D
 
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
-    """Window enabling the user to change the face colours of a shape"""
+    """Window enabling the user to change the face colours of a shape.
+
+    width: the amount of colour columns in the widget.
+    """
     def __init__(self, canvas, width, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
@@ -146,6 +149,19 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         """Destroy all widgets of the face colour window"""
         for gui in self.guis:
             gui.Destroy()
+
+class FacesWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
+    """Window to edit which faces should be shown"""
+    def __init__(self, canvas, *args, **kwargs):
+        wx.Frame.__init__(self, *args, **kwargs)
+        self.canvas = canvas
+        self.status_bar = self.CreateStatusBar()
+        self.panel = wx.Panel(self, wx.ID_ANY)
+        self.add_content()
+
+    def add_content(self):
+        self.panel.Layout()
+        self.Show(True)
 
 class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window with controls for transforming current shape

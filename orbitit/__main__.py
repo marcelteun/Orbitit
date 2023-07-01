@@ -185,9 +185,17 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.scene = None
         self.export_dir_name = export_dir if export_dir else os.getcwd()
         self.import_dir_name = os.environ.get("ORBITIT_LIB", os.getcwd())
-        self.view_settings_win = None
-        self.col_settings_win = None
-        self.transform_settings_win = None
+        # use list to refer by reference, though only one will be used
+        self._view_settings_win = []
+        self._col_settings_win = []
+        self._face_settings_win = []
+        self._transform_settings_win = []
+        self.win_to_close = [
+            self._view_settings_win,
+            self._col_settings_win,
+            self._face_settings_win,
+            self._transform_settings_win,
+        ]
         self.scene = None
         self.panel = MainPanel(self, TstScene, shape, wx.ID_ANY)
         if filename and (is_off_model(filename) or is_json_model(filename)):
@@ -200,6 +208,58 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         ]
         self.Bind(wx.EVT_MENU, self.on_key_down, id=self.key_switch_front_back)
         self.SetAcceleratorTable(wx.AcceleratorTable(ac))
+
+    def _get_win(self, internal_win_name):
+        """Get window attribute, which uses a list to be able to assign by reference."""
+        assert internal_win_name[0] == "_", "Only use internal names for this method"
+        win_list = getattr(self, internal_win_name, None)
+        if win_list:
+            return win_list[0]
+        # else return None
+
+    def _set_win(self, internal_win_name, new_win):
+        """Set window attribute, which uses a list to be able to assign by reference."""
+        assert internal_win_name[0] == "_", "Only use internal names for this method"
+        win_list = getattr(self, internal_win_name, None)
+        if win_list:
+            for old_win in win_list:
+                old_win.Destroy()
+        # it is vital to reuse the list, since it can be assigned by reference
+        win_list.clear()
+        if new_win:
+            win_list.append(new_win)
+
+    @property
+    def view_settings_win(self):
+        return self._get_win("_view_settings_win")
+
+    @view_settings_win.setter
+    def view_settings_win(self, new_win):
+        self._set_win("_view_settings_win", new_win)
+
+    @property
+    def col_settings_win(self):
+        return self._get_win("_col_settings_win")
+
+    @col_settings_win.setter
+    def col_settings_win(self, new_win):
+        self._set_win("_col_settings_win", new_win)
+
+    @property
+    def face_settings_win(self):
+        return self._get_win("_face_settings_win")
+
+    @face_settings_win.setter
+    def face_settings_win(self, new_win):
+        self._set_win("_face_settings_win", new_win)
+
+    @property
+    def transform_settings_win(self):
+        return self._get_win("_transform_settings_win")
+
+    @transform_settings_win.setter
+    def transform_settings_win(self, new_win):
+        self._set_win("_transform_settings_win", new_win)
 
     def add_menu_bar(self):
         """Create and add a complete menu-bar"""
@@ -256,6 +316,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
         menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Colours\tCtrl+C")
         self.Bind(wx.EVT_MENU, self.on_col_settings, id=menu_item.GetId())
+        menu.Append(menu_item)
+
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Faces\tCtrl+F")
+        self.Bind(wx.EVT_MENU, self.on_face_settings, id=menu_item.GetId())
         menu.Append(menu_item)
 
         menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Transform\tCtrl+T")
@@ -590,7 +654,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_view_settings(self, _):
         """Handle event '_' to load the view settings"""
-        if self.view_settings_win is None:
+        if not self.view_settings_win:
             self.view_settings_win = main_win.ViewSettingsWindow(
                 self.panel.canvas,
                 None, wx.ID_ANY,
@@ -604,14 +668,21 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_col_settings(self, _):
         """Handle event '_' to change the colours of the current shape"""
-        if not self.col_settings_win is None:
-            # Don't reuse, the colours might be wrong after loading a new model
-            self.col_settings_win.Destroy()
+        # Don't reuse, the colours might be wrong after loading a new model
         self.col_settings_win = main_win.ColourWindow(
             self.panel.canvas, 5, None, wx.ID_ANY,
             title='Colour Settings',
         )
         self.col_settings_win.Bind(wx.EVT_CLOSE, self.on_col_win_closed)
+
+    def on_face_settings(self, _):
+        """Handle event '_' to change the colours of the current shape"""
+        # Don't reuse, the colours might be wrong after loading a new model
+        self.face_settings_win = main_win.FacesWindow(
+            self.panel.canvas, None, wx.ID_ANY,
+            title='Face Settings',
+        )
+        self.face_settings_win.Bind(wx.EVT_CLOSE, self.on_face_win_closed)
 
     def on_transform(self, _):
         """Handle event '_' to transform the current shape"""
@@ -706,6 +777,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.col_settings_win.Destroy()
         self.col_settings_win = None
 
+    def on_face_win_closed(self, _):
+        """Handle event '_' that destroys face settings window"""
+        self.face_settings_win.Destroy()
+        self.face_settings_win = None
+
     def on_transform_win_closed(self, _):
         """Handle event '_' that destroys transform window"""
         self.transform_settings_win.Destroy()
@@ -714,12 +790,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def on_close(self, _):
         """Handle event '_' to close the main window"""
         logging.info('main onclose')
-        if self.view_settings_win is not None:
-            self.view_settings_win.Close()
-        if self.col_settings_win is not None:
-            self.col_settings_win.Close()
-        if self.transform_settings_win is not None:
-            self.transform_settings_win.Close()
+        for win_list in self.win_to_close:
+            if win_list:
+                for win in win_list:
+                    win.Close()
         self.Destroy()
 
     def on_key_down(self, e):
