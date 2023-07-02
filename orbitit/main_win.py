@@ -160,6 +160,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.add_content()
 
     def add_content(self):
+        """Add GUI windgets to the panel"""
         self.panel.Layout()
         self.Show(True)
 

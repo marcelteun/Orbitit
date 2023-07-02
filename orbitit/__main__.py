@@ -21,6 +21,7 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
+# pylint: disable=too-many-lines
 
 import logging
 import math
@@ -231,6 +232,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     @property
     def view_settings_win(self):
+        """Get the GUI object for the view settings settings window."""
         return self._get_win("_view_settings_win")
 
     @view_settings_win.setter
@@ -239,6 +241,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     @property
     def col_settings_win(self):
+        """Get the GUI object for the color settings settings window."""
         return self._get_win("_col_settings_win")
 
     @col_settings_win.setter
@@ -247,6 +250,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     @property
     def face_settings_win(self):
+        """Get the GUI object for the face settings settings window."""
         return self._get_win("_face_settings_win")
 
     @face_settings_win.setter
@@ -255,6 +259,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     @property
     def transform_settings_win(self):
+        """Get the GUI object for the transform settings window."""
         return self._get_win("_transform_settings_win")
 
     @transform_settings_win.setter
