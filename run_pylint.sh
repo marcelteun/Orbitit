@@ -25,5 +25,7 @@ chk_files="
 	unittest/test_geomtypes.py
 	unittest/test_indent.py
 	unittest/test_isometry.py
+	utils/generate-59-icosahedra.py
+	utils/generate-compounds-of-s4a4.py
 "
 pylint --extension-pkg-whitelist=wx $chk_files
