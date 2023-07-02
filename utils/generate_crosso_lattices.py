@@ -4,9 +4,9 @@ import argparse
 import math
 import os
 
-import Geom3D
-import geomtypes
-import Orbitit as orb
+from orbitit import geom_3d
+from orbitit import geomtypes
+import orbitit as orb
 
 DESCR = """Generate crossohedra consisting of multiple crossohedra
 
@@ -34,19 +34,19 @@ def get_flat_tartan(l):
         except KeyError:
             pass
         base_shape, w = get_flat_tartan(l-1)
-        shape = Geom3D.CompoundShape([SWISSO])
+        shape = geom_3d.CompoundShape([SWISSO])
         faces = base_shape.getFaceProperties()
         vs = base_shape.getVertexProperties()['Vs']
         for x in [-1, 1]:
             for y in [-1, 1]:
                 f = w + SWISS_W
                 arm_vs = translate(vs, [x*f, y*f, 0])
-                arm = Geom3D.SimpleShape(Vs=arm_vs,
+                arm = geom_3d.SimpleShape(Vs=arm_vs,
                                          Fs=faces['Fs'],
                                          colors=faces['colors'])
                 shape.addShape(arm)
                 octa_vs = translate(OCTA_VS, [x*SWISS_HW, y*SWISS_HW, 0])
-                octa = Geom3D.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
+                octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                 shape.addShape(octa)
         shape = shape.simple_shape.cleanShape(10)
         FLAT_TARTAN_CACHE[l] = shape.filter_faces(keep_one=False), SWISS_W + 2*w
@@ -65,7 +65,7 @@ def get_3d_tartan(l):
         except KeyError:
             pass
         base_shape, r = get_3d_tartan(l-1)
-        shape = Geom3D.CompoundShape([SWISSO])
+        shape = geom_3d.CompoundShape([SWISSO])
         faces = base_shape.getFaceProperties()
         vs = base_shape.getVertexProperties()['Vs']
         lst = [-1, 1]
@@ -80,7 +80,7 @@ def get_3d_tartan(l):
                         arm_vs = vs
                     f = r + SWISS_R
                     arm_vs = translate(arm_vs, [x*f, y*f, z*f])
-                    arm = Geom3D.SimpleShape(Vs=arm_vs,
+                    arm = geom_3d.SimpleShape(Vs=arm_vs,
                                             Fs=faces['Fs'],
                                             colors=faces['colors'])
                     shape.addShape(arm)
@@ -97,7 +97,7 @@ def get_swisso_sponge_thinned(m):
         if c < m:
             result.append(1)
         return result
-    shape = Geom3D.CompoundShape([])
+    shape = geom_3d.CompoundShape([])
     for x in range(-m, m + 1):
         lx = get_list(x)
         for y in range(-m, m + 1):
@@ -114,7 +114,7 @@ def get_swisso_sponge_thinned(m):
                 if even or odd:
                     #print(x, y, z)
                     vs = translate(SWISS_VS, [x*SWISS_W, y*SWISS_W, z*SWISS_W])
-                    add_shape = Geom3D.SimpleShape(Vs=vs,
+                    add_shape = geom_3d.SimpleShape(Vs=vs,
                                                    Fs=SWISS_FS,
                                                    colors=SWISS_COLS)
                     shape.addShape(add_shape)
@@ -125,26 +125,26 @@ def get_swisso_sponge_thinned(m):
                             octa_vs = translate(OCTA_VS, [x*SWISS_W - SWISS_HW,
                                                           y*SWISS_W - SWISS_HW,
                                                           z*SWISS_W])
-                            octa = Geom3D.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
+                            octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                             shape.addShape(octa)
                         if x < m and y < m:
                             octa_vs = translate(OCTA_VS, [x*SWISS_W + SWISS_HW,
                                                           y*SWISS_W + SWISS_HW,
                                                           z*SWISS_W])
-                            octa = Geom3D.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
+                            octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                             shape.addShape(octa)
                     else:
                         if x > -m and y < m:
                             octa_vs = translate(OCTA_VS, [x*SWISS_W - SWISS_HW,
                                                           y*SWISS_W + SWISS_HW,
                                                           z*SWISS_W])
-                            octa = Geom3D.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
+                            octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                             shape.addShape(octa)
                         if x < m and y > -m:
                             octa_vs = translate(OCTA_VS, [x*SWISS_W + SWISS_HW,
                                                           y*SWISS_W - SWISS_HW,
                                                           z*SWISS_W])
-                            octa = Geom3D.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
+                            octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                             shape.addShape(octa)
                 elif z % 2 == 1 and even:
 
@@ -154,7 +154,7 @@ def get_swisso_sponge_thinned(m):
                                 octa_vs = translate(OCTA_VS, [x*SWISS_W + sx*SWISS_HW,
                                                               y*SWISS_W + sy*SWISS_HW,
                                                               z*SWISS_W + sz*SWISS_HW])
-                                octa = Geom3D.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
+                                octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                                 shape.addShape(octa)
     shape = shape.simple_shape.cleanShape(10)
     return shape.filter_faces(keep_one=False)
@@ -179,6 +179,11 @@ def generate_flat_tartan(i_min, i_max):
 
 
 def generate_3d_tartan(i_min, i_max):
+    """Generate a crossohedron in 3D tartan kind-a-version.
+
+    i_min: generate from this level (including i_min)
+    i_max: generate until this level (excluding i_max)
+    """
     for i in range(i_min, i_max):
         result, _ = get_3d_tartan(i)
         filename = os.path.join(OUT_DIR, f"crosso_fractal_3d_level{i}.off")
@@ -218,13 +223,13 @@ if __name__ == "__main__":
     SWISS_HW = 2  # half width of standard Swissohedron
     V3 = math.sqrt(3)
     SWISS_R = 5 / 3
-    SWISSO = orb.readShapeFile(os.path.join(args.in_dir, "crosso-S4xI-o4_to_o3.off"))
+    SWISSO = orb.read_shape_file(os.path.join(args.in_dir, "crosso-S4xI-o4_to_o3.off"))
     SWISS_VS = SWISSO.getVertexProperties()['Vs']
     SWISS_F_PROPS = SWISSO.getFaceProperties()
     SWISS_FS = SWISS_F_PROPS['Fs']
     SWISS_COLS = SWISS_F_PROPS['colors']
 
-    OCTA = orb.readShapeFile(os.path.join(args.in_dir, "octahedron.off"))
+    OCTA = orb.read_shape_file(os.path.join(args.in_dir, "octahedron.off"))
     OCTA_VS = OCTA.getVertexProperties()['Vs']
     OCTA_F_PROPS = OCTA.getFaceProperties()
     OCTA_FS = OCTA_F_PROPS['Fs']
