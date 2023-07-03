@@ -55,6 +55,14 @@ ACOS_1_3V5_8 = math.acos((1+3*V5) / 8)
 H_ACOS_1_3V5_8 = ACOS_1_3V5_8 / 2
 
 def save_off(comp, tail=''):
+    """Save compound polyhedron in the OFF format.
+
+    The filename will state the amount of elements and then use the compounds internal name.
+    comp: the orbit.Shape object of the compound. From this the name and amount of constituents is
+        used for the file name
+    tail: this will be added to the end of the file name. Typically this is used to add the special
+        angle in the case of a compound with rotational freedom.
+    """
     # If this starts with a version then we need 2A_, 2B etc (not 2_A_)
     sep = '_' if comp.name[1] != '_' else ''
     with open(f'{comp.index}{sep}{comp.name}{tail}.off', 'w') as fd:

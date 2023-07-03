@@ -216,7 +216,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         win_list = getattr(self, internal_win_name, None)
         if win_list:
             return win_list[0]
-        # else return None
+        return None
 
     def _set_win(self, internal_win_name, new_win):
         """Set window attribute, which uses a list to be able to assign by reference."""

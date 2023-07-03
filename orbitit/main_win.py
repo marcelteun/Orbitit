@@ -150,7 +150,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         for gui in self.guis:
             gui.Destroy()
 
-class FacesWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
+class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
     def __init__(self, canvas, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
