@@ -150,6 +150,13 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         for gui in self.guis:
             gui.Destroy()
 
+class FacesTab(wx.Panel):  # pylint: disable=too-few-public-methods
+    def __init__(self, parent, shape, i):
+        wx.Panel.__init__(self, parent)
+        self.shape = shape
+        self.index = i
+        wx.StaticText(self, -1, f"list faces for shape no. {i}")
+
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
     def __init__(self, canvas, *args, **kwargs):
@@ -161,6 +168,16 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
 
     def add_content(self):
         """Add GUI windgets to the panel"""
+        self.nb_sizer = wx.BoxSizer()
+        self.nb = wx.Notebook(self.panel)
+        self.tabs = [
+            FacesTab(self.nb, shape, i)
+            for i, shape in enumerate(self.canvas.shape)
+        ]
+        for tab in self.tabs:
+            self.nb.AddPage(tab, f"{tab.shape.name}")
+        self.nb_sizer.Add(self.nb, 1, wx.EXPAND)
+        self.panel.SetSizer(self.nb_sizer)
         self.panel.Layout()
         self.Show(True)
 

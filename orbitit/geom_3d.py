@@ -2056,6 +2056,10 @@ class CompoundShape(base.Orbitit):
             s = s.insert(f"{__name__}.")
         return s
 
+    def __iter__(self):
+        """Iterate through all shapes."""
+        return iter(self._shapes)
+
     @property
     def repr_dict(self):
         """Return a short representation of the object."""
