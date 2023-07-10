@@ -2154,7 +2154,7 @@ class CompoundShape(base.Orbitit):
             col_defs.extend(s.shape_colors[0])
             col_idx.extend([i + col_offset for i in s.shape_colors[1]])
         self.merged_shape = SimpleShape(
-            vs=vs, fs=fs, es=es, ns=ns, colors=(col_defs, col_idx)
+            vs=vs, fs=fs, es=es, ns=ns, colors=(col_defs, col_idx), name=self.name
         )
         self.merge_needed = False
 

@@ -26,6 +26,7 @@
 import logging
 import math
 import os
+from pathlib import Path
 import sys
 import wx
 import wx.lib.intctrl
@@ -82,20 +83,31 @@ DEFAULT_SCENE = 'scene_orbit'
 del pre_pyopengl
 
 def is_off_model(filename):
-    """Return True if the filename indicates this is an off-file."""
-    return filename[-4:] == '.off'
+    """Return True if the filename indicates this is an off-file.
+
+    filename: a pathlib.Path object pointing to the file to read
+    """
+    return filename.suffix == '.off'
 
 def is_json_model(filename):
-    """Return True if the filename indicates this is an JSON file."""
-    return filename[-5:] == '.json'
+    """Return True if the filename indicates this is an JSON file.
+
+    filename: a pathlib.Path object pointing to the file to read
+    """
+    return filename.suffix == '.json'
 
 def read_shape_file(filename):
-    """Load off-file or python file and return shape"""
+    """Load off-file or JSON file and return shape
+
+    filename: a pathlib.Path object pointing to the file to read (or None)
+
+    return: the Shape object
+    """
     shape = None
-    if filename is not None:
+    if filename:
         if is_off_model(filename):
             with open(filename, 'r') as fd:
-                shape = geom_3d.read_off_file(fd)
+                shape = geom_3d.read_off_file(fd, name=filename.stem)
         elif is_json_model(filename):
             shape = base.Orbitit.from_json_file(filename)
         else:
@@ -175,6 +187,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     """Main window holding the shape for the orbitit program"""
     wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
     def __init__(self, TstScene, shape, filename, export_dir, *args, **kwargs):
+        """Initialise main window
+
+        filename: a pathlib.Path object pointing to the OFF file to open or None
+        """
         wx.Frame.__init__(self, *args, **kwargs)
         self.current_scene = None
         self.current_file = None
@@ -432,7 +448,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_reload(self, _):
         """Handle event '_' to reset current scene or file"""
-        if self.current_file is not None:
+        if self.current_file:
             self.open_file(self.current_file)
         elif self.current_scene is not None:
             self.set_scene(self.current_scene)
@@ -442,19 +458,21 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         dlg = wx.FileDialog(
             self, 'Open an file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetFilename()
-            dirname = dlg.GetDirectory()
+            filename = Path(dlg.GetFilename())
+            dirname = Path(dlg.GetDirectory())
             if dirname is not None:
-                filename = os.path.join(dirname, filename)
+                filename = dirname / filename
             self.open_file(filename)
         dlg.Destroy()
 
     def open_file(self, filename):
-        """Open the shape file with 'filename' and update shape"""
+        """Open the shape file with 'filename' and update shape
+
+        filename: a pathlib.Path object pointing to the OFF / JSON file to open
+        """
         self.close_current_scene()
-        dirname = os.path.dirname(filename)
-        if dirname != "":
-            self.import_dir_name = dirname
+        dirname = filename.parent
+        self.import_dir_name = str(dirname)
         logging.info("opening %s", filename)
         shape = read_shape_file(filename)
         if shape:
@@ -468,7 +486,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             # will not work.
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
-        shape = geom_3d.CompoundShape([shape], name=filename)
+        shape = geom_3d.CompoundShape([shape], name="Compound Shape")
         self.panel.shape = shape
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
@@ -478,7 +496,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 self.panel.shape.vertex_props['radius'] <= 0
         ):
             self.panel.shape.vertex_props = {'radius': 0.05}
-        self.SetTitle(os.path.basename(filename))
+        self.SetTitle(f"{filename.stem}")
         # Save for reload:
         self.current_file = filename
         self.current_scene = None
@@ -489,13 +507,13 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self, 'Add: Choose a file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN
         )
         if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetFilename()
+            filename = Path(dlg.GetFilename())
             self.import_dir_name = dlg.GetDirectory()
             logging.info("adding file: %s", filename)
-            path = os.path.join(self.import_dir_name, filename)
+            path = Path(self.import_dir_name) / filename
             if is_off_model(filename):
                 with open(path, 'r') as fd:
-                    shape = geom_3d.read_off_file(fd)
+                    shape = geom_3d.read_off_file(fd, name=filename.stem)
             else:
                 shape = base.Orbitit.from_json_file(path)
             if isinstance(shape, geom_3d.CompoundShape):
@@ -508,7 +526,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 logging.warning("Cannot 'add' a shape to this scene, use 'File->Open' instead")
             self.set_status_text("OFF file added")
             # TODO: set better title
-            self.SetTitle(f'Added: {os.path.basename(filename)}')
+            self.SetTitle(f'{self.GetTitle()} + {filename.stem}')
         dlg.Destroy()
 
     def on_save_json(self, _):
@@ -522,20 +540,14 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
         )
         if dlg.ShowModal() == wx.ID_OK:
-            filepath = dlg.GetPath()
-            filename = dlg.GetFilename()
-            self.export_dir_name = filepath.rsplit('/', 1)[0]
-            name_ext = filename.split('.')
-            if len(name_ext) == 1:
-                filename = f'{filename}.json'
-            elif name_ext[-1].lower() != 'json':
-                if name_ext[-1] != '':
-                    filename = f'{filename}.json'
-                else:
-                    filename = f'{filename}json'
+            filepath = Path(dlg.GetPath())
+            self.export_dir_name = str(filepath.parent)
+            if filepath.suffix.lower() != ".json":
+                filepath = filepath.with_suffix(".json")
             logging.info("writing to file %s", filepath)
             shape = self.panel.shape
-            shape.name = filename
+            # TODO: should we really use the filename as name?
+            shape.name = filepath.stem
             # TODO add precision through setting:
             precision = geomtypes.FLOAT_OUT_PRECISION
             try:
@@ -570,17 +582,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 )
                 file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
-                    filepath = file_dlg.GetPath()
-                    filename = file_dlg.GetFilename()
-                    self.export_dir_name = filepath.rsplit('/', 1)[0]
-                    name_ext = filename.split('.')
-                    if len(name_ext) == 1:
-                        filename = f'{filename}.off'
-                    elif name_ext[-1].lower() != 'off':
-                        if name_ext[-1] != '':
-                            filename = f'{filename}.off'
-                        else:
-                            filename = f'{filename}off'
+                    filepath = Path(file_dlg.GetPath())
+                    self.export_dir_name = str(filepath.parent)
+                    if filepath.suffix.lower() != ".off":
+                        filepath = filepath.with_suffix(".off")
                     logging.info("writing to file %s", filepath)
                     shape = self.panel.shape
                     try:
@@ -620,17 +625,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 )
                 file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
-                    filepath = file_dlg.GetPath()
-                    filename = file_dlg.GetFilename()
-                    self.export_dir_name = filepath.rsplit('/', 1)[0]
-                    name_ext = filename.split('.')
-                    if len(name_ext) == 1:
-                        filename = f'{filename}.ps'
-                    elif name_ext[-1].lower() != 'ps':
-                        if name_ext[-1] != '':
-                            filename = f'{filename}.ps'
-                        else:
-                            filename = f'{filename}ps'
+                    filepath = Path(file_dlg.GetPath())
+                    self.export_dir_name = str(filepath.parent)
+                    if filepath.suffix != ".ps":
+                        filepath = filepath.with_suffix(".ps")
                     # Note: if file exists is part of file dlg...
                     logging.info("writing to file %s", filepath)
                     shape = self.panel.shape
@@ -917,6 +915,7 @@ if __name__ == "__main__":
         "inputfile",
         metavar='filename',
         nargs="?",
+        default="",
         help="Input files can either be a python file in a certain format or an off file. "
         "If this is specified then the setting for ORBITIT_LIB is overwritten to the path "
         "of this files.",
@@ -983,10 +982,12 @@ if __name__ == "__main__":
         level=logging.DEBUG if PROG_ARGS.debug else logging.INFO,
     )
     START_GUI = True
+    FILENAME = None
     if PROG_ARGS.inputfile:
-        IN_SHAPE = read_shape_file(PROG_ARGS.inputfile)
+        FILENAME = Path(PROG_ARGS.inputfile)
+        IN_SHAPE = read_shape_file(FILENAME)
         if not IN_SHAPE:
-            logging.error("Couldn't read shape file %s", PROG_ARGS.inputfile)
+            logging.error("Couldn't read shape file %s", FILENAME)
             sys.exit(-1)
         if PROG_ARGS.off:
             START_GUI = False
@@ -1010,14 +1011,14 @@ if __name__ == "__main__":
         FRAME = MainWindow(
             Canvas3DScene,
             IN_SHAPE,
-            PROG_ARGS.inputfile,
+            FILENAME,
             PROG_ARGS.export_dir,
             None,
             wx.ID_ANY, "test",
             size=(430, 482),
             pos=wx.Point(980, 0)
         )
-        if not PROG_ARGS.inputfile:
+        if not FILENAME:
             FRAME.load_scene(SCENES[PROG_ARGS.scene])
         APP.MainLoop()
 
