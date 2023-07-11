@@ -154,6 +154,11 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
 class FacesTab(wx.Panel):
     """A panel with all faces and colours of one SimpleShape (as part of a CompoundShape)"""
+
+    # Colour used to select faces
+    # TODO make this a button
+    SEL_COL = (0, 0, 0)
+
     def __init__(self, parent, shape, on_update):
         """
         Initialise the panel
@@ -175,7 +180,7 @@ class FacesTab(wx.Panel):
             self.faces_lst.ClearAll()
         self.faces_lst = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
         self.faces_lst.InsertColumn(0, 'Index and Color (background)', width=250)
-        face_cols = self.shape.face_props["colors"]
+        face_cols = self.shape.shape_colors
         for i, col_i in enumerate(face_cols[1]):
             self.faces_lst.InsertItem(i, f"{i}")
             col = [int(255*c + 0.5) for c in face_cols[0][col_i]]
@@ -187,33 +192,49 @@ class FacesTab(wx.Panel):
         """Add GUI windgets to this panel"""
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.update_face_list()
-        self.faces_lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.invert_col)
-        self.faces_lst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.invert_col)
+        self.faces_lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
+        self.faces_lst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselect)
         self.main_sizer.Add(self.faces_lst, 1, wx.EXPAND)
         self.SetSizer(self.main_sizer)
         self.Layout()
 
-    def invert_col(self, evt):
-        """Handle when a face is selected or deselected by inverting the colour."""
+    def on_select(self, evt):
+        """Handle when a face is selected by updating the colour."""
+        self.on_update_col(evt, self.SEL_COL)
+
+    def on_deselect(self, evt):
+        """Handle when a face is deselected by updating the colour."""
+        org_cols = self.org_face_props["colors"]
+        org_col_defs = org_cols[0]
+        org_face_col_i = org_cols[1]
+        org_col_i = org_face_col_i[evt.GetIndex()]
+        self.on_update_col(evt, org_col_defs[org_col_i])
+
+    def on_update_col(self, evt, new_col):
+        """Handle when a face is selected or deselected by inverting the colour.
+
+        evt: EVT_LIST_ITEM_SELECTED or EVT_LIST_ITEM_DESELECTED event
+        new_col: new RGB colour for the face to use
+        """
         face_i = evt.GetIndex()
         col_prop = self.shape.shape_colors
         col_defs = col_prop[0]
         face_cols = col_prop[1]
-        col = col_defs[face_cols[face_i]]
-        inv_col = [1 - c for c in col]
 
         # update colour
-        if inv_col in col_defs:
-            new_col_i = col_defs.index(inv_col)
+        if new_col in col_defs:
+            new_col_i = col_defs.index(new_col)
         else:
             new_col_i = len(col_defs)
-            col_defs.append(inv_col)
+            col_defs.append(new_col)
         face_cols[face_i] = new_col_i
+        # This is needed since shape.shape_colors is not just an attribute, it is a setter
         self.shape.shape_colors = col_prop
         self.update_shape()
 
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
+
     def __init__(self, canvas, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
