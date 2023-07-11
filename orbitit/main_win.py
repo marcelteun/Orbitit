@@ -151,20 +151,24 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             gui.Destroy()
 
 class FacesTab(wx.Panel):  # pylint: disable=too-few-public-methods
-    def __init__(self, parent, shape, i):
+    """A panel with all faces and colours of one SimpleShape (as part of a CompoundShape)"""
+    def __init__(self, parent, shape, index):
         wx.Panel.__init__(self, parent)
         self.shape = shape
-        self.index = i
-        wx.StaticText(self, -1, f"list faces for shape no. {i}")
+        self.index = index
 
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.faces_lst = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
-        self.faces_lst.InsertColumn(0, 'Index anc Color (background)', width=250)
+        self.faces_lst.InsertColumn(0, 'Index and Color (background)', width=250)
         for i, col_i in enumerate(shape.face_props["colors"][1]):
             self.faces_lst.InsertItem(i, f"{i}")
             col = [int(255*c + 0.5) for c in shape.face_props["colors"][0][col_i]]
             self.faces_lst.SetItemBackgroundColour(i, wx.Colour(*col))
             col = [255 - c for c in col]
             self.faces_lst.SetItemTextColour(i, wx.Colour(*col))
+        self.main_sizer.Add(self.faces_lst, 1, wx.EXPAND)
+        self.SetSizer(self.main_sizer)
+        self.Layout()
 
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
