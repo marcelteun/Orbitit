@@ -21,7 +21,9 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
+# pylint: disable=too-many-lines
 
+import copy
 import logging
 import math
 import wx
@@ -150,25 +152,65 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         for gui in self.guis:
             gui.Destroy()
 
-class FacesTab(wx.Panel):  # pylint: disable=too-few-public-methods
+class FacesTab(wx.Panel):
     """A panel with all faces and colours of one SimpleShape (as part of a CompoundShape)"""
-    def __init__(self, parent, shape, index):
+    def __init__(self, parent, shape, on_update):
+        """
+        Initialise the panel
+
+        parent: parent gui
+        shape: a simple shape. Make sure this is not a compound shape or a orbit shape e.g.
+        on_update: call-back function that is called when the shape was updated
+        """
         wx.Panel.__init__(self, parent)
         self.shape = shape
-        self.index = index
+        self.update_shape = on_update
+        self.org_face_props = copy.deepcopy(shape.face_props)
+        self.faces_lst = None
+        self.add_content()
 
-        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+    def update_face_list(self):
+        """(Re)build the face list."""
+        if self.faces_lst:
+            self.faces_lst.ClearAll()
         self.faces_lst = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
         self.faces_lst.InsertColumn(0, 'Index and Color (background)', width=250)
-        for i, col_i in enumerate(shape.face_props["colors"][1]):
+        face_cols = self.shape.face_props["colors"]
+        for i, col_i in enumerate(face_cols[1]):
             self.faces_lst.InsertItem(i, f"{i}")
-            col = [int(255*c + 0.5) for c in shape.face_props["colors"][0][col_i]]
+            col = [int(255*c + 0.5) for c in face_cols[0][col_i]]
             self.faces_lst.SetItemBackgroundColour(i, wx.Colour(*col))
             col = [255 - c for c in col]
             self.faces_lst.SetItemTextColour(i, wx.Colour(*col))
+
+    def add_content(self):
+        """Add GUI windgets to this panel"""
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.update_face_list()
+        self.faces_lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.invert_col)
+        self.faces_lst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.invert_col)
         self.main_sizer.Add(self.faces_lst, 1, wx.EXPAND)
         self.SetSizer(self.main_sizer)
         self.Layout()
+
+    def invert_col(self, evt):
+        """Handle when a face is selected or deselected by inverting the colour."""
+        face_i = evt.GetIndex()
+        col_prop = self.shape.shape_colors
+        col_defs = col_prop[0]
+        face_cols = col_prop[1]
+        col = col_defs[face_cols[face_i]]
+        inv_col = [1 - c for c in col]
+
+        # update colour
+        if inv_col in col_defs:
+            new_col_i = col_defs.index(inv_col)
+        else:
+            new_col_i = len(col_defs)
+            col_defs.append(inv_col)
+        face_cols[face_i] = new_col_i
+        self.shape.shape_colors = col_prop
+        self.update_shape()
 
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
@@ -184,7 +226,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         self.nb_sizer = wx.BoxSizer()
         self.nb = wx.Notebook(self.panel)
         self.tabs = [
-            FacesTab(self.nb, shape, i)
+            FacesTab(self.nb, shape, self.update_shape)
             for i, shape in enumerate(self.canvas.shape)
         ]
         for tab in self.tabs:
@@ -193,6 +235,10 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         self.panel.SetSizer(self.nb_sizer)
         self.panel.Layout()
         self.Show(True)
+
+    def update_shape(self):
+        """Update shape on display"""
+        self.canvas.paint()
 
 class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window with controls for transforming current shape

@@ -940,9 +940,21 @@ class SimpleShape(base.Orbitit):
             face_cols = colors[1]
         else:
             face_cols = self._shape_colors[1]
+        # TODO clean up non-used:
+        # rm = []
+        # for i in range(len(col_defs)):
+        #     if i not in face_cols:
+        #         rm.append(i)
+        # rm.reverse()
+        # for i in rm:
+        #     del col_defs[i]
+        #     for face_i, col_i in enumerate(face_cols):
+        #         if col_i > i:
+        #             face_cols[face_i] -= 1
         self._shape_colors = (col_defs, face_cols)
         self.no_of_cols = len(col_defs)
         self.col_range = range(self.no_of_cols)
+        self._divide_col()
         assert self.no_of_cols > 0, f"Empty col_defs: {col_defs}"
 
     @property
