@@ -498,6 +498,7 @@ class SimpleShape(base.Orbitit):
                    index 'i' in fs which colour index from the parameter color
                    is used for this face.  If empty then colors[0][0] shall be
                    used for each face.
+                Note the object may update these.
         name: A string expressing the name. This name is used e.g. when
             exporting to other formats, like PS.
         orientation: orientation of the base shape. This is an isometry operation.
@@ -930,7 +931,7 @@ class SimpleShape(base.Orbitit):
     def shape_colors(self, colors):
         """Set the face colours.
 
-        colors: same as in __init__
+        colors: same as in __init__.
         """
         if colors[0] is not None:
             col_defs = colors[0]
@@ -940,22 +941,49 @@ class SimpleShape(base.Orbitit):
             face_cols = colors[1]
         else:
             face_cols = self._shape_colors[1]
-        # TODO clean up non-used:
-        # rm = []
-        # for i in range(len(col_defs)):
-        #     if i not in face_cols:
-        #         rm.append(i)
-        # rm.reverse()
-        # for i in rm:
-        #     del col_defs[i]
-        #     for face_i, col_i in enumerate(face_cols):
-        #         if col_i > i:
-        #             face_cols[face_i] -= 1
+
         self._shape_colors = (col_defs, face_cols)
         self.no_of_cols = len(col_defs)
         self.col_range = range(self.no_of_cols)
         self._divide_col()
         assert self.no_of_cols > 0, f"Empty col_defs: {col_defs}"
+
+        self.clean_up_colors()
+
+    def clean_up_colors(self):
+        """Remove unused colours and remove duplicates
+
+        This will update
+            - self.shape_colors
+            - self.equal_colored_fs
+            - self.no_of_cols
+            - self.col_range
+        """
+        col_defs = self._shape_colors[0]
+        face_cols = self._shape_colors[1]
+
+        # Build all from scratch
+        new_col_defs = []
+        new_face_cols = []
+
+        # Index is the same a colour index in col_defs
+        # The list at that index gives all face indices with that colour.
+        self.equal_colored_fs = []
+
+        for face_i, col_i in enumerate(face_cols):
+            col = col_defs[col_i]
+            if col in new_col_defs:
+                new_col_i = new_col_defs.index(col)
+                self.equal_colored_fs[new_col_i].append(face_i)
+            else:
+                new_col_i = len(new_col_defs)
+                new_col_defs.append(col)
+                self.equal_colored_fs.append([face_i])
+            new_face_cols.append(new_col_i)
+
+        self._shape_colors = [new_col_defs, new_face_cols]
+        self.no_of_cols = len(new_col_defs)
+        self.col_range = range(self.no_of_cols)
 
     @property
     def draw_faces(self):
@@ -1169,7 +1197,9 @@ class SimpleShape(base.Orbitit):
             else:
                 self._shape_colors = (self._shape_colors[0], list(range(self.no_of_fs)))
             assert len(self._shape_colors[1]) == self.no_of_fs
-        # generate an array with Equal coloured faces:
+        # generate an array with equal coloured faces:
+        # Index is the same a colour index in col_defs
+        # The list at that index gives all face indices with that colour.
         self.equal_colored_fs = [[] for col in range(self.no_of_cols)]
         for i in range(self.no_of_fs):
             self.equal_colored_fs[self._shape_colors[1][i]].append(i)
