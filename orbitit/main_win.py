@@ -184,7 +184,7 @@ class FacesTab(wx.Panel):
         self._faces_lst.InsertColumn(0, 'Faces:', width=250)
         face_cols = self.shape.shape_colors
         for i, col_i in enumerate(face_cols[1]):
-            self._faces_lst.InsertItem(i, f"{i}")
+            self._faces_lst.InsertItem(i, f"")
             col = [int(255*c + 0.5) for c in face_cols[0][col_i]]
             self._faces_lst.SetItemBackgroundColour(i, wx.Colour(*col))
             col = [255 - c for c in col]
@@ -223,6 +223,8 @@ class FacesTab(wx.Panel):
         if self._ignore_events:
             return
         self.on_update_col(evt.GetIndex(), self._selection_col)
+        # Tried to set the colour of the selected item in the list to self.selected_col_gui
+        # but it only applies to the item after deselecting again.
 
     def on_deselect(self, evt):
         """Handle when a face is deselected by updating the colour."""
