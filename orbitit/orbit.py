@@ -24,7 +24,7 @@
 
 
 from orbitit import base as orbit_base
-from orbitit import geom_3d, geomtypes, isometry, rgb
+from orbitit import colors, geom_3d, geomtypes, isometry, rgb
 
 
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
@@ -265,92 +265,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
 
     The colours a standardised and the descriptive can be rotated.
     """
-    # TODO: move to geom_3d.OrbitShape
-    # standard colours
-    cols_blue = [
-        rgb.royalBlue,
-        rgb.lightSkyBlue,
-        rgb.midnightBlue,
-        rgb.steelBlue,
-        rgb.azure,
-    ]
-
-    cols_green = [
-        rgb.yellowGreen,
-        rgb.lightSeaGreen,
-        rgb.darkGreen,
-        rgb.limeGreen,
-        rgb.darkOliveGreen,
-    ]
-
-    cols_purple = [
-        rgb.plum,
-        rgb.slateBlue,
-        rgb.blueViolet,
-        rgb.seashell,
-        rgb.lavender,
-    ]
-
-    cols_yellow = [
-        rgb.gold,
-        rgb.yellow,
-        rgb.lemonChiffon,
-        rgb.khaki,
-        rgb.lightGoldenrod,
-    ]
-
-    cols_red = [
-        rgb.firebrick,
-        rgb.indianRed,
-        rgb.red,
-        rgb.peachPuff,
-        rgb.lightCoral,
-    ]
-
-    cols_brown_orange = [
-        rgb.tan,
-        rgb.saddleBrown,
-        rgb.peru,
-        rgb.orange,
-        rgb.darkGoldenrod,
-    ]
-
-    cols = [  # alternate from above colours
-        rgb.royalBlue,      # 0
-        rgb.yellowGreen,
-        rgb.plum,           # 2
-        rgb.gold,
-        rgb.firebrick,
-        rgb.tan,            # 5
-
-        rgb.lightSkyBlue,
-        rgb.lightSeaGreen,  # 7
-        rgb.slateBlue,
-        rgb.yellow,
-        rgb.indianRed,      # 10
-        rgb.saddleBrown,
-
-        rgb.midnightBlue,
-        rgb.darkGreen,
-        rgb.blueViolet,
-        rgb.lemonChiffon,
-        rgb.red,
-        rgb.peru,
-
-        rgb.steelBlue,
-        rgb.limeGreen,
-        rgb.seashell,
-        rgb.khaki,
-        rgb.peachPuff,
-        rgb.orange,
-
-        rgb.azure,
-        rgb.darkOliveGreen,
-        rgb.lavender,
-        rgb.lightGoldenrod,
-        rgb.lightCoral,
-        rgb.darkGoldenrod,
-    ]
+    cols = colors.STD_COLORS
 
     # pylint: disable=too-many-arguments, too-many-locals
     def __init__(

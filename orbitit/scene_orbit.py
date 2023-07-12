@@ -45,7 +45,7 @@ import os
 import wx
 import wx.lib.colourselect as wxLibCS
 
-from orbitit import base, geom_3d, geom_gui, geomtypes, isometry, orbit, rgb
+from orbitit import base, geom_3d, geom_gui, geomtypes, isometry, orbit, rgb, wx_colors
 
 TITLE = 'Create Polyhedron by Orbiting'
 
@@ -534,6 +534,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 wxLibCS.ColourSelect(self.panel, wx.ID_ANY, colour=col,
                                      size=(40, 30))
             )
+            self.select_col_guis[-1].SetCustomColours(wx_colors.COLOR_PALLETE)
             self.panel.Bind(wxLibCS.EVT_COLOURSELECT, self.on_col_select)
             sel_col_sizer_row.Add(self.select_col_guis[-1], 0, wx.EXPAND)
         self.no_of_cols = no_of_cols
