@@ -24,7 +24,7 @@
 
 
 from orbitit import base as orbit_base
-from orbitit import colors, geom_3d, geomtypes, isometry, rgb
+from orbitit import colors, geom_3d, geomtypes, isometry
 
 
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
