@@ -291,7 +291,18 @@ class FacesTab(wx.Panel):
 
     def reset(self):
         """Handle when a face is selected by updating the colour."""
-        self.deselect_all(apply_col=False)
+        org_cols = self._org_face_props["colors"]
+        org_col_defs = org_cols[0]
+        org_face_col_i = org_cols[1]
+        for item in range(self._faces_lst.GetItemCount()):
+            org_col_i = org_face_col_i[item]
+            if self._faces_lst.IsSelected(item):
+                self._faces_lst.Select(item, on=0)
+            else:
+                gl_col = org_col_defs[org_col_i]
+                self.on_update_col(item, gl_col)
+                self._faces_lst.SetItemBackgroundColour(item, [255 * c for c in gl_col])
+        self._update_shape()
 
     def apply_col(self):
         """Call this to apply the colours and deselect all faces."""
@@ -331,7 +342,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         self.guis.append(wx.Button(self.panel, label='Cancel'))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
         self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
-        self.guis.append(wx.Button(self.panel, label='Reset last'))
+        self.guis.append(wx.Button(self.panel, label='Reset all'))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
         self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
         self.guis.append(wx.Button(self.panel, label='Apply colour'))
