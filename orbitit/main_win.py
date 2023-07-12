@@ -153,7 +153,11 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             gui.Destroy()
 
 class FacesTab(wx.Panel):
-    """A panel with all faces and colours of one SimpleShape (as part of a CompoundShape)"""
+    """A panel with all faces and colours of one SimpleShape (as part of a CompoundShape)
+
+    attributes:
+        shape: the SimpleShape object of this tab
+    """
 
     def __init__(self, parent, shape, on_update):
         """
@@ -165,30 +169,35 @@ class FacesTab(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
         self.shape = shape
-        self.update_shape = on_update
-        self.org_face_props = copy.deepcopy(shape.face_props)
-        self.faces_lst = None
-        self.selection_col = (0, 0, 0)
-        self.add_content()
+        self._update_shape = on_update
+        self._org_face_props = copy.deepcopy(shape.face_props)
+        self._faces_lst = None
+        self._ignore_events = False  # set to True to ignore (de)selection events
+        self._selection_col = (0, 0, 0)
+        self._add_content()
 
     def update_face_list(self):
         """(Re)build the face list."""
-        if self.faces_lst:
-            self.faces_lst.ClearAll()
-        self.faces_lst = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
-        self.faces_lst.InsertColumn(0, 'Index and Color (background)', width=250)
+        if self._faces_lst:
+            self._faces_lst.ClearAll()
+        self._faces_lst = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
+        self._faces_lst.InsertColumn(0, 'Faces:', width=250)
         face_cols = self.shape.shape_colors
         for i, col_i in enumerate(face_cols[1]):
-            self.faces_lst.InsertItem(i, f"{i}")
+            self._faces_lst.InsertItem(i, f"{i}")
             col = [int(255*c + 0.5) for c in face_cols[0][col_i]]
-            self.faces_lst.SetItemBackgroundColour(i, wx.Colour(*col))
+            self._faces_lst.SetItemBackgroundColour(i, wx.Colour(*col))
             col = [255 - c for c in col]
-            self.faces_lst.SetItemTextColour(i, wx.Colour(*col))
+            self._faces_lst.SetItemTextColour(i, wx.Colour(*col))
 
-    def add_content(self):
+    def _add_content(self):
         """Add GUI windgets to this panel"""
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.guis = []
+
+        # Selection colour
         self.sel_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.guis.append(self.sel_col_sizer)
         col_txt_gui = wx.StaticText(self, -1, "Selection Colour:")
         self.selected_col_gui = wx.lib.colourselect.ColourSelect(
             self, wx.ID_ANY, colour=(0, 0, 0), size=wx.Size(40, 30),
@@ -196,21 +205,30 @@ class FacesTab(wx.Panel):
         self.sel_col_sizer.Add(col_txt_gui, 1)
         self.sel_col_sizer.Add(self.selected_col_gui, 1)
         self.selected_col_gui.Bind(wx.lib.colourselect.EVT_COLOURSELECT, self.on_selected_col)
+
+        # Faces list
         self.update_face_list()
-        self.faces_lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
-        self.faces_lst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselect)
+        self._faces_lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
+        self._faces_lst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselect)
+        self.guis.append(self._faces_lst)
+
+        # Fill main sizer
         self.main_sizer.Add(self.sel_col_sizer, 0)
-        self.main_sizer.Add(self.faces_lst, 1, wx.EXPAND)
+        self.main_sizer.Add(self._faces_lst, 1, wx.EXPAND)
         self.SetSizer(self.main_sizer)
         self.Layout()
 
     def on_select(self, evt):
         """Handle when a face is selected by updating the colour."""
-        self.on_update_col(evt.GetIndex(), self.selection_col)
+        if self._ignore_events:
+            return
+        self.on_update_col(evt.GetIndex(), self._selection_col)
 
     def on_deselect(self, evt):
         """Handle when a face is deselected by updating the colour."""
-        org_cols = self.org_face_props["colors"]
+        if self._ignore_events:
+            return
+        org_cols = self._org_face_props["colors"]
         org_col_defs = org_cols[0]
         org_face_col_i = org_cols[1]
         org_col_i = org_face_col_i[evt.GetIndex()]
@@ -235,17 +253,51 @@ class FacesTab(wx.Panel):
         face_cols[face_i] = new_col_i
         # This is needed since shape.shape_colors is not just an attribute, it is a setter
         self.shape.shape_colors = col_prop
-        self.update_shape()
+        self._update_shape()
 
     def on_selected_col(self, evt):
         """Update the colour of the selected faces"""
         col = evt.GetValue().Get()
         new_col = [c / 255 for c in col][:3]
-        item = self.faces_lst.GetFirstSelected()
+        item = self._faces_lst.GetFirstSelected()
         while item != -1:
             self.on_update_col(item, new_col)
-            item = self.faces_lst.GetNextSelected(item)
-        self.selection_col = new_col
+            item = self._faces_lst.GetNextSelected(item)
+        self._selection_col = new_col
+
+    def deselect_all(self, apply_col):
+        """Deselect all items and either reset colours or apply them
+
+        apply_col: set to False to apply all colour to the shape and the list items. If True then
+            all colours are reset.
+        """
+        if apply_col:
+            self._ignore_events = True
+            selection_col = wx.Colour([255 * c for c in self._selection_col])
+
+        item = self._faces_lst.GetFirstSelected()
+        while item != -1:
+            self._faces_lst.Select(item, on=0)
+            if apply_col:
+                self._faces_lst.SetItemBackgroundColour(item, selection_col)
+            item = self._faces_lst.GetNextSelected(item)
+        self._ignore_events = False
+        # TODO if deleted faces: we need to do the following as well if not apply:
+        # self.shape.face_props = self._org_face_props
+        self._update_shape()
+
+    def reset(self):
+        """Handle when a face is selected by updating the colour."""
+        self.deselect_all(apply_col=False)
+
+    def apply_col(self):
+        """Call this to apply the colours and deselect all faces."""
+        self.deselect_all(apply_col=True)
+
+    def close(self):
+        """Destroy all widgets of the face colour window"""
+        for gui in self.guis:
+            gui.Destroy()
 
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
@@ -259,22 +311,63 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
 
     def add_content(self):
         """Add GUI windgets to the panel"""
-        self.nb_sizer = wx.BoxSizer()
-        self.nb = wx.Notebook(self.panel)
+        self.guis = []
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.notebook = wx.Notebook(self.panel)
+        self.guis.append(self.notebook)
         self.tabs = [
-            FacesTab(self.nb, shape, self.update_shape)
+            FacesTab(self.notebook, shape, self.update_shape)
             for i, shape in enumerate(self.canvas.shape)
         ]
         for tab in self.tabs:
-            self.nb.AddPage(tab, f"{tab.shape.name}")
-        self.nb_sizer.Add(self.nb, 1, wx.EXPAND)
-        self.panel.SetSizer(self.nb_sizer)
+            self.notebook.AddPage(tab, f"{tab.shape.name}")
+            self.guis.append(tab)
+
+        # Buttons
+        self.buttons_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.guis.append(wx.Button(self.panel, label='Cancel'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
+        self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Reset last'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
+        self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Apply colour'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_set_col)
+        self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label='Done'))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
+        self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+
+        # Sizer stuff
+        self.main_sizer.Add(self.notebook, 1, wx.EXPAND)
+        self.main_sizer.Add(self.buttons_sizer, 0)
+        self.panel.SetSizer(self.main_sizer)
         self.panel.Layout()
         self.Show(True)
 
     def update_shape(self):
         """Update shape on display"""
         self.canvas.paint()
+
+    def on_reset(self, evt):  # pylint: disable=unused-argument
+        """Restore all faces but don't close window."""
+        for tab in self.tabs:
+            tab.reset()
+
+    def on_cancel(self, evt):
+        """Restore all faces and close window."""
+        self.on_reset(evt)
+        self.Close()
+
+    def on_set_col(self, evt):  # pylint: disable=unused-argument
+        """Apply colour to faces, but keep window."""
+        for tab in self.tabs:
+            tab.apply_col()
+
+    def on_done(self, evt):
+        """Apply colour to faces, and close window."""
+        self.on_set_col(evt)
+        self.Close()
 
 class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window with controls for transforming current shape
