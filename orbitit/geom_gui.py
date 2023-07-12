@@ -1496,7 +1496,9 @@ class AxisRotateSizer(wx.BoxSizer):
         # - rotate axis and set angle (button and float input)
         rot_sizer_top = wx.BoxSizer(wx.HORIZONTAL)
         self.Add(rot_sizer_top, 0, wx.EXPAND)
-        self.show_gui.append(Vector3DInput(panel, "Rotate around Axis:"))
+        self.show_gui.append(
+            Vector3DInput(panel, "Rotate around Axis:", v=[0, 0, 1])
+        )
         rot_sizer_top.Add(self.show_gui[-1], 0)
         self._axis_gui_idx = len(self.show_gui) - 1
         self.show_gui.append(wx.Button(panel, wx.ID_ANY, "Angle:"))
