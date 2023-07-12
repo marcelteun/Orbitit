@@ -164,7 +164,7 @@ class doc:
         vs = [[c for c in v] for v in vs]
         Lines = [[i for i in l] for l in Lines]
         # sometimes the vs contains many more vertices then needed: clean up:
-        glue.cleanUpVsFs(vs, Lines)
+        glue.clean_up_vs_fs(vs, Lines)
         for i in range(len(vs)):
             v = vs[i]
             vStr = '%s  [%s %s] %% %d\n' % (

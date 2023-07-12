@@ -548,7 +548,7 @@ class SimpleShape:
                 # Then shape_vs = vs_3d already, and the code below is all
                 # unecessary.
                 cell_vs = vs_3d[:]
-                number_used = glue.cleanUpVsFs(cell_vs, cell_fs)
+                number_used = glue.clean_up_vs_fs(cell_vs, cell_fs)
                 # Now attaching to current vs, will change index:
                 offset = len(shape_vs)
                 cell_fs = [[v_idx + offset for v_idx in f] for f in cell_fs]

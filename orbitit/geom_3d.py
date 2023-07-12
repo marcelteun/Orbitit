@@ -687,7 +687,7 @@ class SimpleShape(base.Orbitit):
         # this may result on less faces, which breaks the colours!
         # TODO either update the colors immediately or return an array with
         # deleted face indices.
-        glue.cleanUpVsFs(vs_copied, fs_copied)
+        glue.clean_up_vs_fs(vs_copied, fs_copied)
         v_props["vs"] = vs_copied
         f_props["fs"] = fs_copied
         shape = SimpleShape([], [], [])

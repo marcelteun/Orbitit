@@ -56,7 +56,7 @@ def getVUsageIn2D(vs, fs, vUsage = None):
             vUsage[vIndex] = vUsage[vIndex] + 1
     return vUsage
 
-def cleanUpVsFs(vs, fs):
+def clean_up_vs_fs(vs, fs):
     """cleanup vs and update fs by removing unused vertices.
 
     Note that the arrays themselves are updated. If this is not wanted, send in
