@@ -197,7 +197,7 @@ class FacesTab(wx.Panel):
 
         # Selection colour
         sel_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        col_txt_gui = wx.StaticText(self, -1, "Selection Colour:")
+        col_txt_gui = wx.StaticText(self, -1, "Use Colour:")
         self.guis.append(col_txt_gui)
         self.selected_col_gui = wx.lib.colourselect.ColourSelect(
             self, wx.ID_ANY, colour=(0, 0, 0), size=wx.Size(40, 30),
