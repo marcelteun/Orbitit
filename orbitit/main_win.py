@@ -446,6 +446,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         if geomtypes.FloatHandler.eq(axis.norm(), 0):
             self.set_status_text("Please define a proper axis")
             return
+        self.canvas.shape.vertex_props = {'vs': self.org_vs}
         self.canvas.shape.transform(geomtypes.Rot3(angle=geom_3d.DEG2RAD*angle, axis=axis))
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
