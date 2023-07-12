@@ -32,7 +32,7 @@ import wx.lib.colourselect
 
 from OpenGL import GL
 
-from orbitit import geom_3d, geom_gui, geomtypes, Scenes3D
+from orbitit import geom_3d, geom_gui, geomtypes, Scenes3D, wx_colors
 
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape.
@@ -196,14 +196,15 @@ class FacesTab(wx.Panel):
         self.guis = []
 
         # Selection colour
-        self.sel_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.guis.append(self.sel_col_sizer)
+        sel_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
         col_txt_gui = wx.StaticText(self, -1, "Selection Colour:")
+        self.guis.append(col_txt_gui)
         self.selected_col_gui = wx.lib.colourselect.ColourSelect(
             self, wx.ID_ANY, colour=(0, 0, 0), size=wx.Size(40, 30),
         )
-        self.sel_col_sizer.Add(col_txt_gui, 1)
-        self.sel_col_sizer.Add(self.selected_col_gui, 1)
+        self.selected_col_gui.SetCustomColours(wx_colors.COLOR_PALLETE)
+        sel_col_sizer.Add(col_txt_gui, 1)
+        sel_col_sizer.Add(self.selected_col_gui, 1)
         self.selected_col_gui.Bind(wx.lib.colourselect.EVT_COLOURSELECT, self.on_selected_col)
 
         # Faces list
@@ -213,7 +214,7 @@ class FacesTab(wx.Panel):
         self.guis.append(self._faces_lst)
 
         # Fill main sizer
-        self.main_sizer.Add(self.sel_col_sizer, 0)
+        self.main_sizer.Add(sel_col_sizer, 0)
         self.main_sizer.Add(self._faces_lst, 1, wx.EXPAND)
         self.SetSizer(self.main_sizer)
         self.Layout()
