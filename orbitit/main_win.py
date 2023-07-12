@@ -21,7 +21,7 @@
 # or write to the Free Software Foundation,
 #
 #------------------------------------------------------------------
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,too-many-instance-attributes
 
 import copy
 import logging
