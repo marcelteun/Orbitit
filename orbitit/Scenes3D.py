@@ -161,7 +161,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
         this.yAxis = geomtypes.UY
         this.angleAroundYaxis = 0
         this.angleAroundXaxis = 0
-        this.bg_col = [0.097656, 0.097656, 0.437500] # midnightBlue
+        this.bg_col = [24, 24, 111] # midnightBlue
         this.size = size
         this.Bind(wx.EVT_ERASE_BACKGROUND, this.onEraseBackground)
         this.Bind(wx.EVT_SIZE, this.onSize)

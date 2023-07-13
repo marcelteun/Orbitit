@@ -29,8 +29,6 @@ import wx
 
 from orbitit import colors
 
-STD_WX_COLORS = [[255 * chn for chn in c] for c in colors.STD_COLORS]
-
 COLOR_PALLETE = wx.lib.colourselect.CustomColourData()
 for i, _ in enumerate(COLOR_PALLETE._customColours):
-    COLOR_PALLETE._customColours[i] = STD_WX_COLORS[i]
+    COLOR_PALLETE._customColours[i] = colors.STD_COLORS[i]

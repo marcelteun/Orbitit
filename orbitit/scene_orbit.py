@@ -45,7 +45,7 @@ import os
 import wx
 import wx.lib.colourselect as wxLibCS
 
-from orbitit import base, geom_3d, geom_gui, geomtypes, isometry, orbit, rgb, wx_colors
+from orbitit import base, colors, geom_3d, geom_gui, geomtypes, isometry, orbit, wx_colors
 
 TITLE = 'Create Polyhedron by Orbiting'
 
@@ -114,39 +114,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
     def set_default_cols(self):
         """Fill colours with some default values"""
-        def c(rgb_col):
-            """Map rgb colour on wxWidgets colour"""
-            return [c*255 for c in rgb_col]
-        self.cols = [c(rgb.royalBlue),
-                     c(rgb.yellowGreen),
-                     c(rgb.plum),
-                     c(rgb.gold),
-                     c(rgb.firebrick),
-                     c(rgb.tan),
-                     c(rgb.lightSkyBlue),
-                     c(rgb.lightSeaGreen),
-                     c(rgb.slateBlue),
-                     c(rgb.yellow),
-                     c(rgb.indianRed),
-                     c(rgb.saddleBrown),
-                     c(rgb.midnightBlue),
-                     c(rgb.darkGreen),
-                     c(rgb.blueViolet),
-                     c(rgb.lemonChiffon),
-                     c(rgb.red),
-                     c(rgb.peru),
-                     c(rgb.steelBlue),
-                     c(rgb.limeGreen),
-                     c(rgb.seashell),
-                     c(rgb.khaki),
-                     c(rgb.peachPuff),
-                     c(rgb.orange),
-                     c(rgb.azure),
-                     c(rgb.darkOliveGreen),
-                     c(rgb.lavender),
-                     c(rgb.lightGoldenrod),
-                     c(rgb.lightCoral),
-                     c(rgb.darkGoldenrod)]
+        self.cols = colors.STD_COLORS
 
     def create_ctrl_sizer(self):
         """Create and return a wxWidget sizer with all the controls"""
@@ -570,10 +538,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 if isom in sub_set:
                     col_per_isom.append(self.cols[i])
                     break
-        cols = [
-            [float(colCh)/255 for colCh in col]
-            for col in col_per_isom
-        ]
+        cols = [col[:3] for col in col_per_isom]
         self.shape.shape_colors = cols
         self.status_text(
             f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
@@ -646,7 +611,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             for col in shape.shape_colors:
                 if col not in included_colors:
                     included_colors.append(col)
-                    self.cols[i] = [255 * c for c in col]
+                    self.cols[i] = col[:3]
                     i += 1
             self._col_pre_selection = len(included_colors)
             shape = shape.base_shape

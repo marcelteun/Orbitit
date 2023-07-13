@@ -220,14 +220,14 @@ def read_off_file(fd, regen_edges=True, name=""):
                             if is_int(words[len_f + 1]):
                                 cols.append(
                                     [
-                                        float(words[j]) / 255
+                                        int(words[j])
                                         for j in range(len_f + 1, len_f + 4)
                                     ]
                                 )
                             else:
                                 cols.append(
                                     [
-                                        float(words[j])
+                                        int(255 * float(words[j]))
                                         for j in range(len_f + 1, len_f + 4)
                                     ]
                                 )
@@ -525,11 +525,11 @@ class SimpleShape(base.Orbitit):
         self.gl = Fields()
         self.gl.sphere = None
         self.gl.vertex_radius = -1
-        self.gl.vertex_col = [1.0, 1.0, 0.8]
+        self.gl.vertex_col = [255, 255, 200]
         self.gl.update_vertices = True
         self.gl.sphere_vertices = False
         self.gl.edge_radius = -1
-        self.gl.edge_col = [0.1, 0.1, 0.1]
+        self.gl.edge_col = [25, 25, 25]
         self.gl.cylindrical_edges = False
         self.gl.cyl = None
         self.gl.draw_faces = True
@@ -610,6 +610,9 @@ class SimpleShape(base.Orbitit):
     @classmethod
     def from_dict_data(cls, data):
         """Create object from a dictionary created by repr_dict."""
+        # older version used a float between 0 and 1
+        if isinstance(data["cols"][0][0], float):
+            data["cols"] = [[int(chn * 255) for chn in d] for d in data["cols"]]
         return cls(
             [geomtypes.Vec3(v) for v in data["vs"]],
             data["fs"],
@@ -706,7 +709,7 @@ class SimpleShape(base.Orbitit):
         radius: If > 0.0 draw vertices as spheres with the specified colour. If
                 no spheres are required (for preformance reasons) set the radius
                 to a value <= 0.0.
-        color: optianl array with 3 rgb values between 0 and 1.
+        color: optional array with 3 rgb values between 0 and 255.
         ns: an array of normals (per vertex) This value might be None if the
             value is not set. If the value is set it is used by gl_draw
         """
@@ -745,6 +748,9 @@ class SimpleShape(base.Orbitit):
                         del self.gl.sphere
                     self.gl.sphere = Scenes3D.VSphere(radius=props["radius"])
             if "color" in props and props["color"] is not None:
+                if props["color"]:
+                    assert isinstance(props["color"][0], int), \
+                        "Oops: old float format, use int up to 255 now"
                 self.gl.vertex_col = props["color"]
 
     def gl_force_set_vs(self, do):
@@ -800,6 +806,9 @@ class SimpleShape(base.Orbitit):
                         del self.gl.cyl
                     self.gl.cyl = Scenes3D.P2PCylinder(radius=props["radius"])
             if "color" in props and props["color"] is not None:
+                if props["color"]:
+                    assert isinstance(props["color"][0], int),\
+                        "Oops: old float format, use int up to 255 now"
                 self.gl.edge_col = props["color"]
             if "draw_edges" in props and props["draw_edges"] is not None:
                 self.gl.draw_edges = props["draw_edges"]
@@ -925,7 +934,9 @@ class SimpleShape(base.Orbitit):
     @property
     def shape_colors(self):
         """Get the color data for this shape (see colors @ __init__)."""
-        return self._shape_colors
+        # return a copy, so updating doesn't influence self.face_colors
+        # self.face_colors should always be updated by assignment
+        return copy.deepcopy(self._shape_colors)
 
     @shape_colors.setter
     def shape_colors(self, colors):
@@ -1406,7 +1417,9 @@ class SimpleShape(base.Orbitit):
         # VERTICES
         if self.gl.sphere_vertices:
             GL.glColor(
-                self.gl.vertex_col[0], self.gl.vertex_col[1], self.gl.vertex_col[2]
+                self.gl.vertex_col[0] / 255, 
+                self.gl.vertex_col[1] / 255,
+                self.gl.vertex_col[2] / 255,
             )
             for i in self.vertex_range:
                 self.gl.sphere.draw(self.vs[i])
@@ -1420,7 +1433,9 @@ class SimpleShape(base.Orbitit):
             else:
                 es = self.es
                 vs = self.vs
-            GL.glColor(self.gl.edge_col[0], self.gl.edge_col[1], self.gl.edge_col[2])
+            GL.glColor(
+                self.gl.edge_col[0] / 255, self.gl.edge_col[1] / 255, self.gl.edge_col[2] / 255
+            )
             if self.gl.cylindrical_edges:
                 # draw edges as cylinders
                 for i in range(0, len(self.es), 2):
@@ -1435,12 +1450,12 @@ class SimpleShape(base.Orbitit):
         # FACES
         if self.gl.draw_faces:
             for col_idx in self.col_range:
-                c = self._shape_colors[0][col_idx]
+                c = [chn / 255 for chn in self._shape_colors[0][col_idx]]
                 if len(c) == 3:
                     GL.glColor(c[0], c[1], c[2])
                 else:
                     a = max(c[3], 0)
-                    a = min(a, 1)
+                    a = min(a, 255)
                     GL.glColor(c[0], c[1], c[2], a)
                 for face_idx in self.equal_colored_fs[col_idx]:
                     triangles = self.triangulated_faces_n_index[face_idx]
@@ -1553,9 +1568,9 @@ class SimpleShape(base.Orbitit):
             for fi in face:
                 s += f" {fi}"
             if color_floats:
-                s += f"  {color[0]:g} {color[1]:g} {color[2]:g}"
+                s += f"  {color[0] / 255:g} {color[1] / 255:g} {color[2] / 255:g}"
             else:
-                s += f"  {int(color[0] * 255)} {int(color[1] * 255)} {int(color[2] * 255)}"
+                s += f"  {color[0]} {color[1]} {color[2]}"
             return s
 
         if one_col:
@@ -1567,12 +1582,9 @@ class SimpleShape(base.Orbitit):
             for i in range(no_of_faces):
                 face = self.fs[i]
                 color = self._shape_colors[0][self._shape_colors[1][i]]
-                # the lambda w didn't work: (Ubuntu 9.10, python 2.5.2)
                 s = f"{s}{face_str(face)}\n"
                 face_idx_str = (
-                    f"{geomtypes.f2s(self.face_normals[i][0], precision)} "
-                    f"{geomtypes.f2s(self.face_normals[i][1], precision)} "
-                    f"{geomtypes.f2s(self.face_normals[i][2], precision)}"
+                    f"{self.face_normals[i][0]} {self.face_normals[i][1]} {self.face_normals[i][2]}"
                 )
                 if info:
                     s = w(f"# face normal: {face_idx_str}")
@@ -2620,6 +2632,9 @@ class SymmetricShape(CompoundShape):
 
     @classmethod
     def from_dict_data(cls, data):
+        # older version used a float between 0 and 1
+        if isinstance(data["cols"][0], float):
+            data["cols"] = [int(chn * 255) for chn in data["cols"]]
         o = data["orientation"]
         return cls(
             data["vs"],
@@ -2981,6 +2996,9 @@ class OrbitShape(SymmetricShape):
 
     @classmethod
     def from_dict_data(cls, data):
+        # older version used a float between 0 and 1
+        if isinstance(data["cols"][0][0], float):
+            data["cols"] = [[int(chn * 255) for chn in d] for d in data["cols"]]
         return cls(
             data["vs"],
             data["fs"],

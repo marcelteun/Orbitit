@@ -63,7 +63,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             added_cols = []
             col_idx = 0
             for col in shape_cols[0]:
-                wx_col = wx.Colour(255*col[0], 255*col[1], 255*col[2])
+                wx_col = wx.Colour(col)
                 if wx_col not in added_cols:
                     if i % self.col_width == 0:
                         col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -115,7 +115,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             shape_idx = col_gui.my_shape_idx
             col_idx = col_gui.my_cols[0]
             c = self.org_cols[shape_idx][0][col_idx]
-            wx_col = wx.Colour(255*c[0], 255*c[1], 255*c[2])
+            wx_col = wx.Colour(c)
             col_gui.SetColour(wx_col)
         self.cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols]
         self.update_shape_cols()
@@ -133,7 +133,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     def on_col_select(self, e):
         """Handle event 'e' that is generated when a colour was updated"""
         wx_col = e.GetColour().Get()
-        col = (float(wx_col[0])/255, float(wx_col[1])/255, float(wx_col[2])/255)
+        col = tuple([c for c in wx_col[:3]])
         gui_id = e.GetId()
         for gui in self.select_col_guis:
             if gui.GetId() == gui_id:
@@ -185,9 +185,8 @@ class FacesTab(wx.Panel):
         face_cols = self.shape.shape_colors
         for i, col_i in enumerate(face_cols[1]):
             self._faces_lst.InsertItem(i, "")
-            col = [int(255*c + 0.5) for c in face_cols[0][col_i]]
-            self._faces_lst.SetItemBackgroundColour(i, wx.Colour(*col))
-            col = [255 - c for c in col]
+            self._faces_lst.SetItemBackgroundColour(i, wx.Colour(*face_cols[0][col_i]))
+            col = [255 - c for c in face_cols[0][col_i]]
             self._faces_lst.SetItemTextColour(i, wx.Colour(*col))
 
     def _add_content(self):
@@ -260,8 +259,7 @@ class FacesTab(wx.Panel):
 
     def on_selected_col(self, evt):
         """Update the colour of the selected faces"""
-        col = evt.GetValue().Get()
-        new_col = [c / 255 for c in col][:3]
+        new_col = evt.GetValue().Get()[:3]
         item = self._faces_lst.GetFirstSelected()
         while item != -1:
             self.on_update_col(item, new_col)
@@ -276,13 +274,12 @@ class FacesTab(wx.Panel):
         """
         if apply_col:
             self._ignore_events = True
-            selection_col = wx.Colour([255 * c for c in self._selection_col])
 
         item = self._faces_lst.GetFirstSelected()
         while item != -1:
             self._faces_lst.Select(item, on=0)
             if apply_col:
-                self._faces_lst.SetItemBackgroundColour(item, selection_col)
+                self._faces_lst.SetItemBackgroundColour(item, self._selection_col)
             item = self._faces_lst.GetNextSelected(item)
         self._ignore_events = False
         # TODO if deleted faces: we need to do the following as well if not apply:
@@ -299,9 +296,9 @@ class FacesTab(wx.Panel):
             if self._faces_lst.IsSelected(item):
                 self._faces_lst.Select(item, on=0)
             else:
-                gl_col = org_col_defs[org_col_i]
-                self.on_update_col(item, gl_col)
-                self._faces_lst.SetItemBackgroundColour(item, [255 * c for c in gl_col])
+                org_col = org_col_defs[org_col_i]
+                self.on_update_col(item, org_col)
+                self._faces_lst.SetItemBackgroundColour(item, org_col)
         self._update_shape()
 
     def apply_col(self):
@@ -716,7 +713,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         col = self.canvas.bg_col
         self.bg_col_gui = wx.lib.colourselect.ColourSelect(
             self.parent_panel,
-            wx.ID_ANY, colour=(col[0]*255, col[1]*255, col[2]*255),
+            wx.ID_ANY, colour=col,
             size=wx.Size(40, 30),
         )
         self.guis.append(self.bg_col_gui)
@@ -998,7 +995,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.vertex_props = {'color': [float(i)/255 for i in rgb]}
+            self.canvas.shape.vertex_props = {'color': rgb[:3]}
             self.canvas.paint()
         dlg.Destroy()
 
@@ -1031,7 +1028,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.edge_props = {'color': [float(i)/255 for i in rgb]}
+            self.canvas.shape.edge_props = {'color': rgb[:3]}
             self.canvas.paint()
         dlg.Destroy()
 
@@ -1064,8 +1061,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_bg_col(self, e):
         """Handle event '_' to set background colour of shape canvas"""
-        col = e.GetValue().Get()
-        self.canvas.bg_col = [float(col[0])/255, float(col[1])/255, float(col[2])/255]
+        self.canvas.bg_col = e.GetValue().Get()[:3]
         self.canvas.paint()
 
     def on_use_transparent(self, _):

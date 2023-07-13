@@ -165,18 +165,18 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE)
         GL.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
-        GL.glClearColor(self.bg_col[0], self.bg_col[1], self.bg_col[2], 0)
+        GL.glClearColor(self.bg_col[0] / 255, self.bg_col[1] / 255, self.bg_col[2] / 255, 0)
 
     @property
     def bg_col(self):
-        """rgb in value between 0 and 1"""
+        """RGB in value between 0 and 255"""
         return self._bg_col
 
     @bg_col.setter
     def bg_col(self, bg_col):
         """rgb in value between 0 and 1"""
         self._bg_col = bg_col
-        GL.glClearColor(bg_col[0], bg_col[1], bg_col[2], 0)
+        GL.glClearColor(bg_col[0] / 255, bg_col[1] / 255, bg_col[2] / 255, 0)
 
     def on_paint(self):
         """Redraw the shape on the OpenGL canvas"""
