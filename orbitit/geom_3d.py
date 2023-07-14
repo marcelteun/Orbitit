@@ -1417,7 +1417,7 @@ class SimpleShape(base.Orbitit):
         # VERTICES
         if self.gl.sphere_vertices:
             GL.glColor(
-                self.gl.vertex_col[0] / 255, 
+                self.gl.vertex_col[0] / 255,
                 self.gl.vertex_col[1] / 255,
                 self.gl.vertex_col[2] / 255,
             )
