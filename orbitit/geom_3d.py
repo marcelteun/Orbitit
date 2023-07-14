@@ -2736,6 +2736,7 @@ class SymmetricShape(CompoundShape):
                 ns=self.base_shape.ns,
                 colors=([self._shape_colors[i]], []),
                 orientation=isom * self.base_shape.orientation,
+                name=f"{self.name}_{i}",
             )
             for i, isom in enumerate(self.isometries)
         ]
@@ -2895,6 +2896,7 @@ class SymmetricShapeSplitCols(SymmetricShape):
                 ns=self.base_shape.ns,
                 colors=self._shape_colors[i],
                 orientation=isom * self.base_shape.orientation,
+                name=f"{self.name}_{i}",
             )
             for i, isom in enumerate(self.isometries)
         ]

@@ -42,6 +42,7 @@ symmetry)
 
 import logging
 import os
+from pathlib import Path
 import wx
 import wx.lib.colourselect as wxLibCS
 
@@ -95,7 +96,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.panel.SetSizer(self.main_sizer)
         self.Show(True)
         self.panel.Layout()
-        self.import_dir_name = os.environ.get("ORBITIT_LIB", os.getcwd())
+        self.import_dir_name = Path(os.environ.get("ORBITIT_LIB", os.getcwd()))
         self.cols = []
         self.select_col_guis = []
         self.orbit = None
@@ -629,17 +630,17 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         dlg = wx.FileDialog(
             self,
             'New: Choose a file',
-            self.import_dir_name,
+            str(self.import_dir_name),
             '',
             wildcard,
             wx.FD_OPEN,
         )
         if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetFilename()
-            self.import_dir_name = dlg.GetDirectory()
+            filename = Path(dlg.GetFilename())
+            self.import_dir_name = Path(dlg.GetDirectory())
             logging.info("opening file: %s", filename)
-            filepath = os.path.join(self.import_dir_name, filename)
-            if filename[-5:] == '.json':
+            filepath = self.import_dir_name / filename
+            if filename.suffix == '.json':
                 shape = self.import_json(filepath)
             else:
                 with  open(filepath) as fd:
@@ -649,7 +650,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             logging.info("read %d vs and %d fs.", len(verts), len(faces))
             self.show_gui[self._vs_gui_idx].set(verts)
             self.show_gui[self._fs_gui_idx].set(faces)
-            self.name = filename
+            self.name = filename.stem
         dlg.Destroy()
 
 
