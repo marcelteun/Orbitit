@@ -936,7 +936,7 @@ class SimpleShape(base.Orbitit):
         """Get the color data for this shape (see colors @ __init__)."""
         # return a copy, so updating doesn't influence self.face_colors
         # self.face_colors should always be updated by assignment
-        return copy.deepcopy(self._shape_colors)
+        return self._shape_colors
 
     @shape_colors.setter
     def shape_colors(self, colors):
@@ -992,7 +992,7 @@ class SimpleShape(base.Orbitit):
                 self.equal_colored_fs.append([face_i])
             new_face_cols.append(new_col_i)
 
-        self._shape_colors = [new_col_defs, new_face_cols]
+        self._shape_colors = (tuple(new_col_defs), tuple(new_face_cols))
         self.no_of_cols = len(new_col_defs)
         self.col_range = range(self.no_of_cols)
 

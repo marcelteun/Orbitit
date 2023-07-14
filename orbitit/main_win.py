@@ -133,7 +133,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     def on_col_select(self, e):
         """Handle event 'e' that is generated when a colour was updated"""
         wx_col = e.GetColour().Get()
-        col = tuple([c for c in wx_col[:3]])
+        col = tuple(wx_col[:3])
         gui_id = e.GetId()
         for gui in self.select_col_guis:
             if gui.GetId() == gui_id:
@@ -242,9 +242,8 @@ class FacesTab(wx.Panel):
         face_i: index of the face
         new_col: new RGB colour for the face to use
         """
-        col_prop = self.shape.shape_colors
-        col_defs = col_prop[0]
-        face_cols = col_prop[1]
+        col_defs = list(self.shape.shape_colors[0])
+        face_cols = list(self.shape.shape_colors[1])
 
         # update colour
         if new_col in col_defs:
@@ -254,7 +253,7 @@ class FacesTab(wx.Panel):
             col_defs.append(new_col)
         face_cols[face_i] = new_col_i
         # This is needed since shape.shape_colors is not just an attribute, it is a setter
-        self.shape.shape_colors = col_prop
+        self.shape.shape_colors = (col_defs, face_cols)
         self._update_shape()
 
     def on_selected_col(self, evt):
