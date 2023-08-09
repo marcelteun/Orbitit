@@ -450,14 +450,31 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Handle event '_' to reset current scene or file"""
         if self.current_file:
             self.open_file(self.current_file)
+            self.invalidate_windows()
         elif self.current_scene is not None:
             self.set_scene(self.current_scene)
+
+    def invalidate_windows(self):
+        """Invalidate windows that relate to a specific shape
+
+        This is needed when you open or add a new window. E.g. in that case the colour settings
+        window isn't valid anymore.
+        """
+        if self.col_settings_win:
+            self.on_col_win_closed(None)
+        if self.face_settings_win:
+            self.on_face_win_closed(None)
+        if self.transform_settings_win:
+            self.on_transform_win_closed(None)
+        if self.view_settings_win:
+            self.on_view_win_closed(None)
 
     def on_open(self, _):
         """Handle event '_' to open file"""
         dlg = wx.FileDialog(
             self, 'Open an file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
+            self.invalidate_windows()
             filename = Path(dlg.GetFilename())
             dirname = Path(dlg.GetDirectory())
             if dirname is not None:
@@ -507,6 +524,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self, 'Add: Choose a file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN
         )
         if dlg.ShowModal() == wx.ID_OK:
+            self.invalidate_windows()
             filename = Path(dlg.GetFilename())
             self.import_dir_name = dlg.GetDirectory()
             logging.info("adding file: %s", filename)
@@ -729,6 +747,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         scene: a dictionary with key 'lab' and 'class', where 'lab' is the class name (string) and
             'class' is the python class.
         """
+        self.invalidate_windows()
         self.close_current_scene()
         logging.info('Switching to scene: "%s".', scene['lab'])
         canvas = self.panel.canvas
@@ -736,10 +755,6 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.panel.shape = self.scene.shape
         self.SetTitle(scene['lab'])
         canvas.resetOrientation()
-        try:
-            self.view_settings_win.rebuild()
-        except AttributeError:
-            pass
         # save for reload:
         self.current_scene = scene
         self.current_file = None
