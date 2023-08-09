@@ -34,6 +34,7 @@ from OpenGL import GL
 
 from orbitit import geom_3d, geom_gui, geomtypes, Scenes3D, wx_colors
 
+
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape.
 
@@ -45,9 +46,9 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.col_width = width
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
-        self.cols = self.canvas.shape.face_props['colors']
+        self.org_cols = self.canvas.shape.face_props['colors']
         # take a copy for reset
-        self.org_cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.cols]
+        self.cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols]
         self.add_content()
 
     def add_content(self):

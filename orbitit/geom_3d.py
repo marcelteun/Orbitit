@@ -934,8 +934,6 @@ class SimpleShape(base.Orbitit):
     @property
     def shape_colors(self):
         """Get the color data for this shape (see colors @ __init__)."""
-        # return a copy, so updating doesn't influence self.face_colors
-        # self.face_colors should always be updated by assignment
         return self._shape_colors
 
     @shape_colors.setter
@@ -947,11 +945,11 @@ class SimpleShape(base.Orbitit):
         if colors[0] is not None:
             col_defs = colors[0]
         else:
-            col_defs = self._shape_colors[0]
+            col_defs = tuple(self._shape_colors[0])
         if colors[1] is not None:
             face_cols = colors[1]
         else:
-            face_cols = self._shape_colors[1]
+            face_cols = tuple(self._shape_colors[1])
 
         self._shape_colors = (col_defs, face_cols)
         self.no_of_cols = len(col_defs)
