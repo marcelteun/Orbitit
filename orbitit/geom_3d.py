@@ -1201,7 +1201,7 @@ class SimpleShape(base.Orbitit):
                     self._shape_colors[0],
                     [0 for i in range(self.no_of_fs)],
                 )
-            elif self.no_of_cols < self.no_of_fs:
+            elif self.no_of_cols and self.no_of_cols < self.no_of_fs:
                 self.divide_col()
             else:
                 self._shape_colors = (self._shape_colors[0], list(range(self.no_of_fs)))
@@ -2792,7 +2792,9 @@ class SymmetricShape(CompoundShape):
         """
         if props:
             if "fs" in props and props["fs"] is not None:
-                self.base_shape.face_props = {"fs": props["fs"]}
+                # The base shape must have some colour (which isn't really used
+                base_shape_col = ((241, 241, 241), ())
+                self.base_shape.face_props = {"fs": props["fs"], "colors": base_shape_col}
                 self.needs_apply_isoms = True
             if "colors" in props and props["colors"] is not None:
                 self.shape_colors = props["colors"]
