@@ -50,6 +50,7 @@ E.g. for Ubuntu or other Debian based Linux dist:
 `sudo apt-get install python3 python3-pip`
 
 Then use pip to install other packages, e.g:
+`pip3 install attrdict3
 `pip3 install pyopengl wxpython`
 
 See section [wxPython](#wxPython) for more about installing wxPython through pip.
