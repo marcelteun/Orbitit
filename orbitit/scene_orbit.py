@@ -85,6 +85,8 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.final_sym_setup = None
         self.stab_sym_setup = None
         self.cur_sym_idx = None
+        self.show_one_col = False
+        self.shape_one_col = None
         self.stat_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -366,7 +368,6 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.shape.regen_edges()
         self.update_orientation(
             self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
-        self.canvas.panel.shape = self.shape
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.
@@ -410,6 +411,8 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             )
         try:
             self.shape.orientation = rot
+            if self.shape_one_col:
+                self.shape_one_col.orientation = rot
         except AttributeError:
             self.status_text(
                 'Apply symmetry first, before pulling the slide-bar',
@@ -419,7 +422,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
     def on_rot(self, angle, axis):
         """Handle when the descriptive is rotated"""
         self.update_orientation(angle, axis)
-        self.canvas.panel.shape = self.shape
+        self.canvas.paint()
 
     def on_no_of_col_select(self, e):
         """Handle when the colour symmetry is chosen"""
@@ -450,6 +453,14 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                             self.on_reset_cols,
                             id=self.col_guis[-1].GetId())
             next_prev_col_sizer.Add(self.col_guis[-1], 0, wx.EXPAND)
+            self.col_guis.append(
+                wx.Button(self.panel, wx.ID_ANY, "Show only one"))
+            self.one_col_button = self.col_guis[-1]
+            self.panel.Bind(wx.EVT_BUTTON,
+                            self.on_one_col,
+                            id=self.one_col_button.GetId())
+            next_prev_col_sizer.AddStretchSpacer()
+            next_prev_col_sizer.Add(self.one_col_button, 0, wx.EXPAND)
             self.col_sizer.Add(next_prev_col_sizer, 0, wx.EXPAND)
 
         col_div_no = e.GetSelection()
@@ -483,7 +494,6 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 )
                 self.fs_orbit = self.shape.isometries
                 self.shape.regen_edges()
-                self.canvas.panel.shape = self.shape
                 self.fs_orbit_org = False  # and do this only once
         assert self.col_syms
         init_col = (255, 255, 255)
@@ -528,22 +538,41 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 self.update_shape_cols()
                 break
 
-    def update_shape_cols(self):
-        """Apply symmetry on colours"""
+    def update_one_col_shape(self):
+        verts = self.show_gui[self._vs_gui_idx].get()
+        faces = self.show_gui[self._fs_gui_idx].get()
         final_sym = self.col_final_sym
         col_quotient_set = final_sym / self.col_syms[self.col_alt[1]]
-        col_per_isom = []
-        for isom in self.fs_orbit:
-            for sub_set, i in zip(col_quotient_set,
-                                  list(range(len(col_quotient_set)))):
-                if isom in sub_set:
-                    col_per_isom.append(self.cols[i])
-                    break
-        cols = [col[:3] for col in col_per_isom]
-        self.shape.shape_colors = cols
-        self.status_text(
-            f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
-            logging.INFO)
+        self.shape_one_col = geom_3d.SymmetricShape(
+            verts,
+            faces,
+            colors=[self.cols[0] for _ in col_quotient_set],
+            isometries=col_quotient_set[0],
+            orientation=self.shape.orientation,
+            name=self.name,
+        )
+
+    def update_shape_cols(self):
+        """Apply symmetry on colours"""
+        if self.show_one_col:
+            self.update_one_col_shape()
+            self.canvas.panel.shape = self.shape_one_col
+        else:
+            final_sym = self.col_final_sym
+            col_quotient_set = final_sym / self.col_syms[self.col_alt[1]]
+            col_per_isom = []
+            for isom in self.fs_orbit:
+                for i, sub_set in enumerate(col_quotient_set):
+                    if isom in sub_set:
+                        col_per_isom.append(self.cols[i])
+                        break
+            cols = [col[:3] for col in col_per_isom]
+            self.shape.shape_colors = cols
+            self.canvas.panel.shape = self.shape
+            self.status_text(
+                f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
+                logging.INFO)
+
         self.canvas.paint()
 
     # move to general class
@@ -562,13 +591,20 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.update_shape_cols()
 
     def on_reset_cols(self, _):
-        """Handle a that the button "Reset Colours" is pressed
+        """Handle that the button "Reset Colours" is pressed
 
         In this case the default palette of colours is used.
         """
         self.set_default_cols()
         for i in range(self.no_of_cols):
             self.select_col_guis[i].SetColour(self.cols[i])
+        self.update_shape_cols()
+
+    def on_one_col(self, _):
+        """Toggle Showing only one of the colours."""
+        self.one_col_button.SetLabel("Show only one" if self.show_one_col else "Show All")
+        self.col_sizer.Layout()
+        self.show_one_col = not self.show_one_col
         self.update_shape_cols()
 
     def on_prev_col_alt(self, _):
