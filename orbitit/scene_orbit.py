@@ -87,6 +87,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.cur_sym_idx = None
         self.show_one_col = False
         self.shape_one_col = None
+        self.one_col_button = None
         self.stat_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -255,7 +256,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.col_alt[0] = no_to_index.index(self._col_pre_selection)
             self.col_alt[1] = 0
         self.col_guis[-1].SetSelection(self.col_alt[0])
-        self._no_of_cols_gui_idx = len(self.col_guis)-1
+        self._no_of_cols_gui_idx = len(self.col_guis) - 1
         self.on_no_of_col_select(self.col_guis[-1])
 
     def on_get_final_sym_setup(self, sym_idx):
@@ -539,6 +540,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 break
 
     def update_one_col_shape(self):
+        """Update the shape that only shows the sub-compound using the first colour."""
         verts = self.show_gui[self._vs_gui_idx].get()
         faces = self.show_gui[self._fs_gui_idx].get()
         final_sym = self.col_final_sym
