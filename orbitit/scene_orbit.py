@@ -548,7 +548,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.shape_one_col = geom_3d.SymmetricShape(
             verts,
             faces,
-            colors=[self.cols[0] for _ in col_quotient_set],
+            colors=[self.cols[0] for _ in self.col_syms[self.col_alt[1]]],
             isometries=col_quotient_set[0],
             orientation=self.shape.orientation,
             name=self.name,
@@ -571,9 +571,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             cols = [col[:3] for col in col_per_isom]
             self.shape.shape_colors = cols
             self.canvas.panel.shape = self.shape
-            self.status_text(
-                f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
-                logging.INFO)
+        self.status_text(
+            f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
+            logging.INFO)
 
         self.canvas.paint()
 
