@@ -59,7 +59,7 @@ DEFAULT_FLOAT_PRECISION = 10
 FLOAT_PRECISION = DEFAULT_FLOAT_PRECISION
 
 # Used for output: use a bit more than when comparing, to not loose when rounding.
-DEFAULT_FLOAT_OUT_PRECISION = 12
+DEFAULT_FLOAT_OUT_PRECISION = 13
 FLOAT_OUT_PRECISION = DEFAULT_FLOAT_OUT_PRECISION
 
 def f2s(f, precision=None):
