@@ -622,6 +622,12 @@ def create_a5xi(base, js_fd=None):
     polyh = S4A4.A5xI_C3(base, 10, col_sym="D3xI")
     polyh.rot_base(H_ACOS_1_3V5_8)
     save_off(polyh, "_mu3")
+    polyh = S4A4.A5xI_C3(base, 5, col_sym="A4xI", col_alt=1)
+    polyh.rot_base(ACOS_1_3V5_8)
+    save_off(polyh, "_mu4")
+    polyh = S4A4.A5xI_C3(base, 5, col_sym="A4xI", col_alt=1)
+    polyh.rot_base(acos_7_3V5_16)
+    save_off(polyh, "_mu5")
 
     polyh = S4A4.A5xI_C2(base, 5)
     if js_fd is not None:
