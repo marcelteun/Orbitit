@@ -587,6 +587,10 @@ def create_a5xi(base, js_fd=None):
         js_fd.write(polyh.to_js())
     polyh.rot_base(math.pi/13)  # example angle
     save_off(polyh)
+    # special mu
+    polyh = S4A4.A5xI_C3(base, 10, col_sym='D3xI')
+    polyh.rot_base(H_ACOS_1_3V5_8)
+    save_off(polyh, '_mu3')
 
     polyh = S4A4.A5xI_C2(base, 5)
     if js_fd is not None:
@@ -617,8 +621,8 @@ def create_a5xi(base, js_fd=None):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-            description="Generate off-files for compound polyhedra of polyhedra with "
-            "tetrahedral symmetry"
+        description="Generate off-files for compound polyhedra of polyhedra with tetrahedral "
+        "symmetry"
     )
     parser.add_argument(
         "-o", "--output-dir",
