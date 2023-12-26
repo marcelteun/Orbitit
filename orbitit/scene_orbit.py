@@ -372,7 +372,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.
-        if (updated0 or updated1):
+        # self.col_guis is None can happen if the stabiliser symmetry wasn't a subgroup of the final
+        # symmetry.
+        if updated0 or updated1 or self.col_guis is None:
             self.add_col_gui()
         else:
             self.on_no_of_col_select(self.col_guis[self._no_of_cols_gui_idx])
