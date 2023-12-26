@@ -625,9 +625,58 @@ def create_a5xi(base, js_fd=None):
     polyh = S4A4.A5xI_C3(base, 5, col_sym="A4xI", col_alt=1)
     polyh.rot_base(ACOS_1_3V5_8)
     save_off(polyh, "_mu4")
+    polyh = S4A4.A5xI_C3(
+        base,
+        40,
+        cols=[
+            S4A4.A5xI_C3.cols[0],
+            S4A4.A5xI_C3.cols[0],
+            S4A4.A5xI_C3.cols[1],
+            S4A4.A5xI_C3.cols[2],
+            S4A4.A5xI_C3.cols[3],
+            S4A4.A5xI_C3.cols[2],
+            S4A4.A5xI_C3.cols[3],
+            S4A4.A5xI_C3.cols[2],
+            S4A4.A5xI_C3.cols[9],
+            S4A4.A5xI_C3.cols[4],
+            S4A4.A5xI_C3.cols[4],
+            S4A4.A5xI_C3.cols[0],
+            S4A4.A5xI_C3.cols[0],
+            S4A4.A5xI_C3.cols[6],
+            S4A4.A5xI_C3.cols[10],
+            S4A4.A5xI_C3.cols[10],
+            S4A4.A5xI_C3.cols[3],
+            S4A4.A5xI_C3.cols[3],
+            S4A4.A5xI_C3.cols[6],
+            S4A4.A5xI_C3.cols[6],
+
+            S4A4.A5xI_C3.cols[6],
+            S4A4.A5xI_C3.cols[7],
+            S4A4.A5xI_C3.cols[8],
+            S4A4.A5xI_C3.cols[7],
+            S4A4.A5xI_C3.cols[7],
+            S4A4.A5xI_C3.cols[9],
+            S4A4.A5xI_C3.cols[8],
+            S4A4.A5xI_C3.cols[10],
+            S4A4.A5xI_C3.cols[8],
+            S4A4.A5xI_C3.cols[1],
+            S4A4.A5xI_C3.cols[9],
+            S4A4.A5xI_C3.cols[7],
+            S4A4.A5xI_C3.cols[1],
+            S4A4.A5xI_C3.cols[1],
+            S4A4.A5xI_C3.cols[9],
+            S4A4.A5xI_C3.cols[10],
+            S4A4.A5xI_C3.cols[2],
+            S4A4.A5xI_C3.cols[4],
+            S4A4.A5xI_C3.cols[4],
+            S4A4.A5xI_C3.cols[8],
+        ],
+    )
+    polyh.rot_base(ACOS_7_3V5_3_2_2V5_8)
+    save_off(polyh, "_mu5")
     polyh = S4A4.A5xI_C3(base, 5, col_sym="A4xI", col_alt=1)
     polyh.rot_base(acos_7_3V5_16)
-    save_off(polyh, "_mu5")
+    save_off(polyh, "_mu6")
 
     polyh = S4A4.A5xI_C2(base, 5)
     if js_fd is not None:
