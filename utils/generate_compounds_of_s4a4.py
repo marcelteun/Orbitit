@@ -12,15 +12,22 @@ import os
 from orbitit.compounds import S4A4
 from orbitit import geomtypes, rgb
 
-# TODO: check if col_alt with Python3 still gives the same alternatives
 V2 = math.sqrt(2)
 V3 = math.sqrt(3)
 V5 = math.sqrt(5)
 V10 = math.sqrt(10)
+# ~7.7612 degrees:
+H_ACOS_1_3V5_8 = math.acos((1 + 3 * V5) / 8) / 2
+# ~9.7356 degrees:
+ATAN_3_2V2 = math.atan(3 - 2 * V2)
 # ~13.283 degrees:
 ATAN_V5_2 = math.atan(V5 - 2)
-# ~44.4775 degrees:
-ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
+# ~14.3592 degrees:
+ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
+# ~15.5225 degrees:
+ACOS_1_3V5_8 = H_ACOS_1_3V5_8 * 2
+# ~19.4712 degrees:
+ATAN_V2_4 = math.atan(V2 / 4)
 # 20.905
 ACOS_V5_1_2V3 = math.acos((V5 + 1) / (2 * V3))
 # ~23.4309
@@ -28,33 +35,22 @@ ACOS_7_3V5_3_2_2V5_8 = math.acos((-7 + 3 * V5 + 3 * math.sqrt(2 + 2 * V5)) / 8)
 # ~24.09
 ATAN_1_V5 = math.atan(1 / V5)
 # ~26.57
-TODO = 26.57 * math.pi / 180
+TODO_26 = 26.57 * math.pi / 180
 # ~31.0449 degrees:
 acos_7_3V5_16 = math.acos((7 + 3 * V5) / 16)
 # ~31.7175 degrees
 ACOS_V_5_V5_V10 = math.acos(math.sqrt(5 + V5) / V10)
+# ~33.8305 degrees:
+ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
 # ~35.2644 degrees:
 ASIN_1_V3 = math.asin(1 / V3)
-# ~54.7356 degrees:
-ACOS_1_V3 = math.acos(1 / V3)
-
 # ~38.9424 degrees:
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
 # ~44.4775 degrees:
+# ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
-# ~9.7356 degrees:
-ATAN_3_2V2 = math.atan(3 - 2 * V2)
-# ~33.8305 degrees:
-ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
-# ~14.3592 degrees:
-ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
-# ~19.4712 degrees:
-ATAN_V2_4 = math.atan(V2 / 4)
-
-# ~15.5225 degrees:
-ACOS_1_3V5_8 = math.acos((1 + 3 * V5) / 8)
-# ~7.7612 degrees:
-H_ACOS_1_3V5_8 = ACOS_1_3V5_8 / 2
+# ~54.7356 degrees:
+ACOS_1_V3 = math.acos(1 / V3)
 
 
 def save_off(comp, tail=""):
@@ -574,11 +570,6 @@ def create_a5(base, js_fd=None):
     # Leave out for now
     # There is a mu ~= 22.47 what happens there?
 
-    # TODO:
-    # To find special angles: select one colour arrangement + variant and check whether the
-    # sub-compound of one colour gets a higher symmetry
-    # Include the multiplications
-
     # 6 x 5 | D10D5 / D2C2
     polyh = S4A4.A5_C2(base, 6, col_alt=1)
     polyh.rot_base(ATAN_V5_2)
@@ -596,7 +587,7 @@ def create_a5(base, js_fd=None):
 
     # 6 x 5 | A5 / A4
     polyh = S4A4.A5_C2(base, 6, col_alt=1)
-    polyh.rot_base(TODO)
+    polyh.rot_base(TODO_26)
     save_off(polyh, "_mu5")
 
     # 6 x 5 | D20D10 / D4D2
@@ -721,7 +712,7 @@ def create_a5xi(base, js_fd=None):
 
     # 6 x 10 | A5xI / A4
     polyh = S4A4.A5xI_C2(base, 6, col_alt=1)
-    polyh.rot_base(TODO)
+    polyh.rot_base(TODO_26)
     save_off(polyh, "_mu5")
 
     # 6 x 10 | D20xI / D4D2
