@@ -409,7 +409,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         """Undo any rotation."""
         self.base_vs = self._org_base_vs
 
-    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=True):
+    def to_off(self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False):
         """Return to off-format representation."""
         s = self.simple_shape.to_off(precision, info, color_floats)
         s += f"# Color alternative based on {self.same_col_isom}\n".format(self.same_col_isom)
