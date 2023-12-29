@@ -731,6 +731,11 @@ def create_a5xi(base, js_fd=None):
     polyh.rot_base(ACOS_V_5_V5_V10)
     save_off(polyh, "_mu6")
 
+    # 10 x 6 | S4xI / D4D2
+    polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI")
+    polyh.rot_base(ATAN_H_V2_1_V5_1)
+    save_off(polyh, "_mu7")
+
     # 60 | A5 x I / C2C1
     #######################################
     polyh = S4A4.A5xI_C2C1(base, 6)
