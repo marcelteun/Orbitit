@@ -47,8 +47,6 @@ ASIN_1_V3 = math.asin(1 / V3)
 # ~38.9424 degrees:
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
 # ~39.32
-TODO_39 = 39.32 * math.pi / 180
-# ~44.4775 degrees:
 # ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
 # ~54.7356 degrees:
@@ -608,48 +606,6 @@ def create_a5(base, js_fd=None):
     polyh.rot_base(ACOS_V_5_V5_V10)
     save_off(polyh, "_mu6")
 
-    # 15 x 2 | C2C1 / E
-    polyh = S4A4.A5_C2(
-        base,
-        30,
-        cols=[
-            S4A4.A5_C2.cols[0],
-            S4A4.A5_C2.cols[1],
-            S4A4.A5_C2.cols[2],
-            S4A4.A5_C2.cols[3],
-            S4A4.A5_C2.cols[0],
-            S4A4.A5_C2.cols[5],
-            S4A4.A5_C2.cols[6],
-            S4A4.A5_C2.cols[7],
-            S4A4.A5_C2.cols[8],
-            S4A4.A5_C2.cols[9],
-
-            S4A4.A5_C2.cols[3],
-            S4A4.A5_C2.cols[10],
-            S4A4.A5_C2.cols[11],
-            S4A4.A5_C2.cols[9],
-            S4A4.A5_C2.cols[12],
-            S4A4.A5_C2.cols[12],
-            S4A4.A5_C2.cols[5],
-            S4A4.A5_C2.cols[8],
-            S4A4.A5_C2.cols[6],
-            S4A4.A5_C2.cols[13],
-
-            S4A4.A5_C2.cols[14],
-            S4A4.A5_C2.cols[7],
-            S4A4.A5_C2.cols[13],
-            S4A4.A5_C2.cols[1],
-            S4A4.A5_C2.cols[14],
-            S4A4.A5_C2.cols[4],
-            S4A4.A5_C2.cols[10],
-            S4A4.A5_C2.cols[4],
-            S4A4.A5_C2.cols[11],
-            S4A4.A5_C2.cols[2],
-        ],
-    )
-    polyh.rot_base(TODO_39)
-    save_off(polyh, "_mu7")
-
     # Rigid compound
     polyh = S4A4.A5_A4(base, 5)
     save_off(polyh)
@@ -774,87 +730,6 @@ def create_a5xi(base, js_fd=None):
     polyh = S4A4.A5xI_C2(base, 6)
     polyh.rot_base(ACOS_V_5_V5_V10)
     save_off(polyh, "_mu6")
-
-    # mu7 ~= 39.32 is not a special angle
-    # using the A5 / C2 | mu7 colouring and merging with the inversion (keeping colours)
-    # You don't get a 15 x 4 | D2xI / C2C1, instead you get 15 x 4 | C2xI / E (same as any other
-    # angle).
-    # The complete compound A5xI / C2 | mu7 cannot be divided into seperate 15 x 4 | D2xI / C2C1
-    # even though they are there.
-    # The colours for dividing like A5 / C2 | mu7:
-    polyh = S4A4.A5xI_C2(
-        base,
-        60,
-        cols=[
-            S4A4.A5_C2.cols[0],
-            S4A4.A5_C2.cols[0],
-            S4A4.A5_C2.cols[1],
-            S4A4.A5_C2.cols[1],
-            S4A4.A5_C2.cols[2],
-            S4A4.A5_C2.cols[3],
-            S4A4.A5_C2.cols[4],
-            S4A4.A5_C2.cols[5],
-            S4A4.A5_C2.cols[4],
-            S4A4.A5_C2.cols[5],
-
-            S4A4.A5_C2.cols[0],
-            S4A4.A5_C2.cols[6],
-            S4A4.A5_C2.cols[6],
-            S4A4.A5_C2.cols[7],
-            S4A4.A5_C2.cols[7],
-            S4A4.A5_C2.cols[8],
-            S4A4.A5_C2.cols[0],
-            S4A4.A5_C2.cols[9],
-            S4A4.A5_C2.cols[9],
-            S4A4.A5_C2.cols[10],
-
-            S4A4.A5_C2.cols[10],
-            S4A4.A5_C2.cols[8],
-            S4A4.A5_C2.cols[8],
-            S4A4.A5_C2.cols[2],
-            S4A4.A5_C2.cols[11],
-            S4A4.A5_C2.cols[8],
-            S4A4.A5_C2.cols[11],
-            S4A4.A5_C2.cols[11],
-            S4A4.A5_C2.cols[7],
-            S4A4.A5_C2.cols[7],
-
-            S4A4.A5_C2.cols[12],
-            S4A4.A5_C2.cols[12],
-            S4A4.A5_C2.cols[11],
-            S4A4.A5_C2.cols[12],
-            S4A4.A5_C2.cols[12],
-            S4A4.A5_C2.cols[13],
-            S4A4.A5_C2.cols[13],
-            S4A4.A5_C2.cols[2],
-            S4A4.A5_C2.cols[2],
-            S4A4.A5_C2.cols[3],
-
-            S4A4.A5_C2.cols[3],
-            S4A4.A5_C2.cols[14],
-            S4A4.A5_C2.cols[14],
-            S4A4.A5_C2.cols[9],
-            S4A4.A5_C2.cols[4],
-            S4A4.A5_C2.cols[9],
-            S4A4.A5_C2.cols[4],
-            S4A4.A5_C2.cols[10],
-            S4A4.A5_C2.cols[14],
-            S4A4.A5_C2.cols[14],
-
-            S4A4.A5_C2.cols[5],
-            S4A4.A5_C2.cols[3],
-            S4A4.A5_C2.cols[5],
-            S4A4.A5_C2.cols[10],
-            S4A4.A5_C2.cols[6],
-            S4A4.A5_C2.cols[6],
-            S4A4.A5_C2.cols[1],
-            S4A4.A5_C2.cols[1],
-            S4A4.A5_C2.cols[13],
-            S4A4.A5_C2.cols[13],
-        ],
-    )
-    polyh.rot_base(TODO_39)
-    # save_off(polyh, "_mu7")
 
     # 60 | A5 x I / C2C1
     #######################################
