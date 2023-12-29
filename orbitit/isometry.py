@@ -2738,6 +2738,7 @@ A5xI.subgroups = [A5xI,            # 120
                   D5xI,            #  20
                   A4, D3xI,        #  12
                   D5, D5C5, C5xI,  #  10
+                  D2xI,            #   8
                   D3, D3C3, C3xI,  #   6
                   C5,              #   5
                   D2, D2C2, C2xI,  #   4
