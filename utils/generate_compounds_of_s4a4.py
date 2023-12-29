@@ -46,7 +46,9 @@ ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
 ASIN_1_V3 = math.asin(1 / V3)
 # ~38.9424 degrees:
 ATAN_4V2_7 = math.atan(4 * V2 / 7)
-# ~39.32
+# ~41.81 degrees
+TODO_41 = 41.81 * math.pi / 180
+# ~44.4775 degrees
 # ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
 D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
 # ~54.7356 degrees:
@@ -735,6 +737,11 @@ def create_a5xi(base, js_fd=None):
     polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI")
     polyh.rot_base(ATAN_H_V2_1_V5_1)
     save_off(polyh, "_mu7")
+
+    # 30 x 2 | D3C3 / C3
+    polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI", col_alt=1)
+    polyh.rot_base(TODO_41)
+    save_off(polyh, "_mu8")
 
     # 60 | A5 x I / C2C1
     #######################################
