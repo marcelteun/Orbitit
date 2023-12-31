@@ -3178,7 +3178,7 @@ class FldHeptagonShape(geom_3d.CompoundShape):
     opposite_edge_alt = 0
 
     def __init__(self, shapes, name="Folded Regular Heptagons"):
-        geom_3d.CompoundShape.__init__(self, shapes, name=name)
+        super().__init__(shapes, name=name)
         self.heptagon = RegularHeptagon()
         self.dihedral_angle = 1.2
         self.pos_angle_min = 0
@@ -3215,7 +3215,7 @@ class FldHeptagonShape(geom_3d.CompoundShape):
         """Draw the shape on the 3D canvas."""
         if self.update_shape:
             self.set_vertices()
-        geom_3d.CompoundShape.gl_draw(self)
+        super().gl_draw()
 
     def set_edge_alt(self, alt=None, opposite_alt=None):
         """Set how to connected vertices of different heptagons to get triangles.

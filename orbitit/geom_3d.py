@@ -2793,7 +2793,7 @@ class SymmetricShape(CompoundShape):
         if props:
             if "fs" in props and props["fs"] is not None:
                 # The base shape must have some colour (which isn't really used
-                base_shape_col = ((241, 241, 241), ())
+                base_shape_col = ([(241, 241, 241)], ())
                 self.base_shape.face_props = {"fs": props["fs"], "colors": base_shape_col}
                 self.needs_apply_isoms = True
             if "colors" in props and props["colors"] is not None:
