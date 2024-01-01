@@ -118,7 +118,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
     def set_default_cols(self):
         """Fill colours with some default values"""
-        self.cols = [col for col in colors.STD_COLORS]
+        self.cols = colors.STD_COLORS[:]
 
     def create_ctrl_sizer(self):
         """Create and return a wxWidget sizer with all the controls"""
