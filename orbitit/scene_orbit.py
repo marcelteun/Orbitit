@@ -163,7 +163,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # - rotate axis and set angle (button and float input)
         self.rot_sizer = geom_gui.AxisRotateSizer(
             self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0)
-        face_sizer.Add(self.rot_sizer)
+        face_sizer.Add(self.rot_sizer, 1, wx.EXPAND)
 
         # SYMMETRY
         self.show_gui.append(geom_gui.SymmetrySelect(

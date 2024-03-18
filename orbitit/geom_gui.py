@@ -436,17 +436,20 @@ class Vector3DInput(wx.BoxSizer):
         self.panel = panel
         self.boxes = []
         # Calling wx.StaticBoxSizer fails on type checking (?? bug?)
-        wx.BoxSizer.__init__(self, orientation)
+        wx.BoxSizer.__init__(self, wx.VERTICAL)
         self.boxes.append(
             wx.StaticText(self.panel, wx.ID_ANY, label + " ", style=wx.ALIGN_RIGHT)
         )
-        self.Add(self.boxes[-1], 1, wx.EXPAND)
+        self.Add(self.boxes[-1], 1)
+        vec_sizer = wx.BoxSizer(orientation)
         self._vec = []
         for _ in range(3):
             self._vec.append(FloatInput(self.panel, wx.ID_ANY, 0, max_len=max_len))
-            self.Add(self._vec[-1], 0, wx.EXPAND)
+            vec_sizer.Add(self._vec[-1], 0, wx.EXPAND)
         if v is not None:
             self.set_vertex(v)
+        self.boxes.append(vec_sizer)
+        self.Add(self.boxes[-1], 1, wx.EXPAND)
 
     def get_vertex(self):
         """Get the currently defined vertex from the GUI"""
@@ -1490,29 +1493,59 @@ class AxisRotateSizer(wx.BoxSizer):
         self.on_angle = on_angle_callback
         self.panel = panel
         self.show_gui = []
-        wx.BoxSizer.__init__(self, wx.VERTICAL)
+        # Create a horizontal sizer to force all the ones inside to have the same width
+        #
+        # +-- self.hor------------------`+
+        # | +----v_sizer.vert---------+ |
+        # | | Rotate araound Axis:    | |
+        # | | x y z                   | |
+        # | | +-set_angle_sizer.hor-+ | |
+        # | | | Set angle .. etc    | | |
+        # | | +---------------------+ | |
+        # | | +-slider_sizer.hor----+ | |
+        # | | | -  -----|----  +    | | |
+        # | | +---------------------+ | |
+        # | +-------------------------+ |
+        # +-----------------------------+
+        super().__init__(wx.HORIZONTAL)
+        v_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.Add(v_sizer, 1, wx.EXPAND)
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
-        rot_sizer_top = wx.BoxSizer(wx.HORIZONTAL)
-        self.Add(rot_sizer_top, 0, wx.EXPAND)
         self.show_gui.append(
             Vector3DInput(panel, "Rotate around Axis:", v=[0, 0, 1])
         )
-        rot_sizer_top.Add(self.show_gui[-1], 0)
+        v_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         self._axis_gui_idx = len(self.show_gui) - 1
-        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "Angle:"))
+
+        # Set angle and step size
+        set_angle_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        v_sizer.Add(set_angle_sizer, 0, wx.EXPAND)
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "Set angle:"))
         panel.Bind(wx.EVT_BUTTON, self._on_angle_set, id=self.show_gui[-1].GetId())
-        rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
+        set_angle_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         self.show_gui.append(
             FloatInput(panel, wx.ID_ANY, initial_angle, max_len=max_len)
         )
         self.show_gui[-1].bind_on_set(self._on_angle_typed)
         self._typed_angle_gui_idx = len(self.show_gui) - 1
-        rot_sizer_top.Add(self.show_gui[-1], 0, wx.EXPAND)
+        set_angle_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        self.show_gui.append(
+            wx.StaticText(panel, wx.ID_ANY, "Angle step:", style=wx.ALIGN_RIGHT)
+        )
+        set_angle_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
+
+        self.show_gui.append(FloatInput(panel, wx.ID_ANY, 0.1, max_len=max_len))
+        self._dir_angle_step_idx = len(self.show_gui) - 1
+        set_angle_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+
         # - slidebar and +/- step (incl. float input)
-        rot_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.Add(rot_sizer, 0, wx.EXPAND)
+        slider_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        v_sizer.Add(slider_sizer, 0, wx.EXPAND)
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-"))
+        panel.Bind(wx.EVT_BUTTON, self._on_angle_step_down, id=self.show_gui[-1].GetId())
+        slider_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         self.show_gui.append(
             wx.Slider(
                 panel,
@@ -1526,18 +1559,10 @@ class AxisRotateSizer(wx.BoxSizer):
         panel.Bind(
             wx.EVT_SLIDER, self._on_slide_angle_adjust, id=self.show_gui[-1].GetId()
         )
-        rot_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
-        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-"))
-        panel.Bind(
-            wx.EVT_BUTTON, self._on_angle_step_down, id=self.show_gui[-1].GetId()
-        )
-        rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        slider_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         self.show_gui.append(wx.Button(panel, wx.ID_ANY, "+"))
         panel.Bind(wx.EVT_BUTTON, self._on_angle_step_up, id=self.show_gui[-1].GetId())
-        rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
-        self.show_gui.append(FloatInput(panel, wx.ID_ANY, 0.1, max_len=max_len))
-        self._dir_angle_step_idx = len(self.show_gui) - 1
-        rot_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        slider_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
     def get_axis(self):
         """Get the direction of the rotation axis in the GUI"""
