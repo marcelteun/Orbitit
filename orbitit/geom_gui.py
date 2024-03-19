@@ -127,7 +127,7 @@ class IntInput(wx.TextCtrl):
         else:
             tail_start = selected[1]
         if tail_start < len(string):
-            tail = string[selected[1] :]
+            tail = string[selected[1]:]
         else:
             tail = ""
         new_string = head + char + tail
@@ -1205,6 +1205,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.groups_lst = groups_lst
         # would be nice is wx.Choice has a SetItems()
         self.boxes[self._sym_gui_idx].Clear()
+        self.__prev = {}
         for c in groups_lst:
             self.boxes[self._sym_gui_idx].Append(c.__name__)
         # Not so good: self requires that E should be last...

@@ -230,6 +230,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.show_gui[self._final_sym_gui_idx].get_selected(),
             self.show_gui[self._stab_sym_gui_idx].get_selected()
         ))
+        # Generate list of colour alternatives
         no_of_cols_choice_lst = []
         no_to_index = []
         for p in self.orbit.higher_order_stab_props:
@@ -239,6 +240,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             no_of_cols_choice_lst.append(f"{p['index']} (based on {p['class'].__name__})")
             no_to_index.append(p['index'])
         self.col_guis = []
+        # Make a choice list of colour alternatives
         self.col_guis.append(
             wx.Choice(self.panel, wx.ID_ANY, choices=no_of_cols_choice_lst)
         )
