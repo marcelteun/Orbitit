@@ -45,6 +45,7 @@ import os
 from pathlib import Path
 import wx
 import wx.lib.colourselect as wxLibCS
+import wx.lib.scrolledpanel as wxLibSP
 
 from orbitit import base, colors, geom_3d, geom_gui, geomtypes, isometry, orbit, wx_colors
 
@@ -89,14 +90,15 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.shape_one_col = None
         self.one_col_button = None
         self.stat_bar = self.CreateStatusBar()
-        self.panel = wx.Panel(self, -1)
+        self.panel = wxLibSP.ScrolledPanel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(
             self.create_ctrl_sizer(),
-            1, wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT)
+            1)  # , wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT)
         self.set_default_size((582, 741))
         self.panel.SetAutoLayout(True)
         self.panel.SetSizer(self.main_sizer)
+        self.panel.SetupScrolling()
         self.Show(True)
         self.panel.Layout()
         self.import_dir_name = Path(os.environ.get("ORBITIT_LIB", os.getcwd()))
@@ -683,7 +685,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             if filename.suffix == '.json':
                 shape = self.import_json(filepath)
             else:
-                with  open(filepath) as fd:
+                with open(filepath) as fd:
                     shape = geom_3d.read_off_file(fd, regen_edges=False)
             verts = shape.vs
             faces = shape.fs
