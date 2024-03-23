@@ -37,7 +37,7 @@ Like vertices, faecs, symmetries, etc.
 
 import logging
 import wx
-import wx.lib.scrolledpanel as wxXtra
+import wx.lib.scrolledpanel as wx_panel
 
 from orbitit import geomtypes, isometry
 
@@ -483,7 +483,7 @@ class Vector3DInput(wx.BoxSizer):
         # wx.StaticBoxSizer.Destroy(self)
 
 
-class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
+class Vector3DSetStaticPanel(wx_panel.ScrolledPanel):
     """A panel defining a list of 3D vectors
 
     The panel doesn't contain any widgets to grow or shrink this list
@@ -503,7 +503,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
             minimal size.
         """
 
-        wxXtra.ScrolledPanel.__init__(self, parent)
+        wx_panel.ScrolledPanel.__init__(self, parent)
 
         self.max_len = max_len
         self.boxes = []
@@ -625,7 +625,7 @@ class Vector3DSetStaticPanel(wxXtra.ScrolledPanel):
     # self can be fixed by SW
 
 
-class Vector3DSetDynamicPanel(wx.Panel):
+class Vector3DSetDynamicPanel(wx_panel.ScrolledPanel):
     """Create a control embedded in a sizer for defining a set of 3D vectors
 
     The set can dynamically grow and shrink by using the GUI.
@@ -645,7 +645,8 @@ class Vector3DSetDynamicPanel(wx.Panel):
                      items.
         """
         self.parent = parent
-        wx.Panel.__init__(self, parent)
+        super().__init__(parent)
+        self.SetupScrolling()
 
         self.boxes = []
         opp_orient = opposite_orientation(orientation)
@@ -663,7 +664,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
         self.boxes.append(IntInput(self, wx.ID_ANY, 1, size=(40, -1), max_len=5))
         self._add_no_of_v_idx = len(self.boxes) - 1
         add_sizer.Add(self.boxes[-1], 0, wx.EXPAND)
-        main_sizer.Add(add_sizer, 1, wx.EXPAND)
+        main_sizer.Add(add_sizer, 0, wx.EXPAND)
 
         # Clear and Delete buttons:
         rm_sizer = wx.BoxSizer(orientation)
@@ -675,7 +676,7 @@ class Vector3DSetDynamicPanel(wx.Panel):
         self.boxes.append(wx.Button(self, wx.ID_ANY, "Delete Vertex"))
         self.Bind(wx.EVT_BUTTON, self.on_rm, id=self.boxes[-1].GetId())
         rm_sizer.Add(self.boxes[-1], 1, wx.EXPAND)
-        main_sizer.Add(rm_sizer, 1, wx.EXPAND)
+        main_sizer.Add(rm_sizer, 0, wx.EXPAND)
 
         self.SetSizer(main_sizer)
         self.SetAutoLayout(True)
@@ -862,7 +863,7 @@ class Vector4DInput(wx.StaticBoxSizer):
         # wx.StaticBoxSizer.Destroy(self)
 
 
-class FaceSetStaticPanel(wxXtra.ScrolledPanel):
+class FaceSetStaticPanel(wx_panel.ScrolledPanel):
     """A control embedded in a sizer for defining a set of faces
 
     This cannot grow or shrink in size through a GUI itself
@@ -890,7 +891,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
         max_index_no: the maximum number of faces / vertices to be used. This will decide how big
             the text input will be and the minimal size will be set from this.
         """
-        wxXtra.ScrolledPanel.__init__(self, parent)
+        wx_panel.ScrolledPanel.__init__(self, parent)
         self.parent = parent
         self.width = width
         self.face_len = face_len
@@ -1015,7 +1016,7 @@ class FaceSetStaticPanel(wxXtra.ScrolledPanel):
     # TODO Insert?
 
 
-class FaceSetDynamicPanel(wx.Panel):
+class FaceSetDynamicPanel(wx_panel.ScrolledPanel):
     """A control for defining a set of faces, which can grow and shrink"""
 
     def __init__(
@@ -1042,7 +1043,9 @@ class FaceSetDynamicPanel(wx.Panel):
             the text input will be and the minimal size will be set from this.
         """
         self.parent = parent
-        wx.Panel.__init__(self, parent)
+        super().__init__(parent)
+        self.SetupScrolling()
+
         self.face_len = face_len
         self.max_index_no = max_index_no
 
@@ -1544,9 +1547,9 @@ class AxisRotateSizer(wx.BoxSizer):
         # - slidebar and +/- step (incl. float input)
         slider_sizer = wx.BoxSizer(wx.HORIZONTAL)
         v_sizer.Add(slider_sizer, 0, wx.EXPAND)
-        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-"))
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-", style=wx.BU_EXACTFIT))
         panel.Bind(wx.EVT_BUTTON, self._on_angle_step_down, id=self.show_gui[-1].GetId())
-        slider_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        slider_sizer.Add(self.show_gui[-1], 0, wx.ALIGN_CENTRE_VERTICAL)
         self.show_gui.append(
             wx.Slider(
                 panel,
@@ -1560,10 +1563,10 @@ class AxisRotateSizer(wx.BoxSizer):
         panel.Bind(
             wx.EVT_SLIDER, self._on_slide_angle_adjust, id=self.show_gui[-1].GetId()
         )
-        slider_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
-        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "+"))
+        slider_sizer.Add(self.show_gui[-1], 2, wx.EXPAND)
+        self.show_gui.append(wx.Button(panel, wx.ID_ANY, "+", style=wx.BU_EXACTFIT))
         panel.Bind(wx.EVT_BUTTON, self._on_angle_step_up, id=self.show_gui[-1].GetId())
-        slider_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        slider_sizer.Add(self.show_gui[-1], 0, wx.ALIGN_CENTRE_VERTICAL)
 
     def get_axis(self):
         """Get the direction of the rotation axis in the GUI"""

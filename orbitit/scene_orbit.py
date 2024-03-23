@@ -45,7 +45,7 @@ import os
 from pathlib import Path
 import wx
 import wx.lib.colourselect as wxLibCS
-import wx.lib.scrolledpanel as wxLibSP
+import wx.lib.scrolledpanel as wx_panel
 
 from orbitit import base, colors, geom_3d, geom_gui, geomtypes, isometry, orbit, wx_colors
 
@@ -90,11 +90,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.shape_one_col = None
         self.one_col_button = None
         self.stat_bar = self.CreateStatusBar()
-        self.panel = wxLibSP.ScrolledPanel(self, -1)
+        self.panel = wx_panel.ScrolledPanel(self, -1)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.main_sizer.Add(
-            self.create_ctrl_sizer(),
-            1)  # , wx.EXPAND | wx.ALIGN_TOP | wx.ALIGN_LEFT)
+        self.main_sizer.Add(self.create_ctrl_sizer(), 1, wx.EXPAND)
         self.set_default_size((582, 741))
         self.panel.SetAutoLayout(True)
         self.panel.SetSizer(self.main_sizer)
@@ -130,17 +128,15 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
         face_sizer = wx.StaticBoxSizer(
             wx.StaticBox(self.panel, label='Face(s) Definition'),
-            wx.VERTICAL
+            wx.VERTICAL,
         )
-        ctrl_sizer.Add(face_sizer, 0, wx.EXPAND)
 
         data_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # VERTICES
         self.show_gui.append(wx.StaticBox(self.panel, label='Vertices'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
-        self.show_gui.append(geom_gui.Vector3DSetDynamicPanel(
-            self.panel, rel_xtra_space=3))
+        self.show_gui.append(geom_gui.Vector3DSetDynamicPanel(self.panel, rel_xtra_space=3))
         self._vs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         data_sizer.Add(b_sizer, 1, wx.EXPAND)
@@ -148,12 +144,11 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # FACES
         self.show_gui.append(wx.StaticBox(self.panel, label='Faces'))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
-        self.show_gui.append(
-            geom_gui.FaceSetDynamicPanel(self.panel, 0, face_len=3))
+        self.show_gui.append(geom_gui.FaceSetDynamicPanel(self.panel, 0, face_len=3))
         self._fs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         data_sizer.Add(b_sizer, 1, wx.EXPAND)
-        face_sizer.Add(data_sizer, 0, wx.EXPAND)
+        face_sizer.Add(data_sizer, 1, wx.EXPAND)
 
         # Import
         self.show_gui.append(wx.Button(self.panel, wx.ID_ANY, "Import"))
@@ -165,7 +160,8 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # - rotate axis and set angle (button and float input)
         self.rot_sizer = geom_gui.AxisRotateSizer(
             self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0)
-        face_sizer.Add(self.rot_sizer, 1, wx.EXPAND)
+        face_sizer.Add(self.rot_sizer, 0)
+        ctrl_sizer.Add(face_sizer, 1, wx.EXPAND)
 
         # SYMMETRY
         self.show_gui.append(geom_gui.SymmetrySelect(
