@@ -215,6 +215,52 @@ class TestPlane(unittest.TestCase):
 
 class TestLine(unittest.TestCase):
     """Unit tests for geom_3d.Line3D"""
+    def test_intersections(self):
+        """Test line intersections, using line within a cube."""
+        test_matrix = {
+            "edges_meet_at_vertex": [
+                # Lines
+                [
+                    geom_3d.Line3D([1, 1, 1], [0, 1, 1]),
+                    geom_3d.Line3D([-1, -1, 1], [-1, 0, 1]),
+                ],
+                # Expected result
+                geomtypes.Vec3([-1, 1, 1]),
+            ],
+            "diagonal_meet_at_edge_centre": [
+                # Lines
+                [
+                    geom_3d.Line3D([1, 1, 1], [-1, 1, 1]),
+                    geom_3d.Line3D([0, -1, -1], [0, 0, 0]),
+                ],
+                # Expected result
+                geomtypes.Vec3([0, 1, 1]),
+            ],
+            "parallel edges": [
+                # Lines
+                [
+                    geom_3d.Line3D([1, 1, 1], [0, 1, 1]),
+                    geom_3d.Line3D([1, 1, -1], [-1, 1, -1]),
+                ],
+                # Expected result
+                None,
+            ],
+            "crossed_edges": [
+                # Lines
+                [
+                    geom_3d.Line3D([1, 1, 1], [0, 1, 1]),
+                    geom_3d.Line3D([1, -1, -1], [1, -1, 1]),
+                ],
+                # Expected result
+                None,
+            ],
+        }
+        for test_name, (lines, expected_result) in test_matrix.items():
+            result = lines[0].intersect(lines[1])
+            if not result == expected_result:
+                self.fail(
+                    f"{result} != {expected_result} (expected) for {test_name}"
+                )
 
 
 class TestSimpleShape(unittest.TestCase):
