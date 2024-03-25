@@ -448,8 +448,7 @@ class Vector3DInput(wx.BoxSizer):
             vec_sizer.Add(self._vec[-1], 0, wx.EXPAND)
         if v is not None:
             self.set_vertex(v)
-        self.boxes.append(vec_sizer)
-        self.Add(self.boxes[-1], 1, wx.EXPAND)
+        self.Add(vec_sizer, 1, wx.EXPAND)
 
     def get_vertex(self):
         """Get the currently defined vertex from the GUI"""
@@ -479,8 +478,6 @@ class Vector3DInput(wx.BoxSizer):
             except RuntimeError:
                 # The user probably closed the window already
                 pass
-        # Segmentation fault in Hardy Heron (with python 2.5.2):
-        # wx.StaticBoxSizer.Destroy(self)
 
 
 class Vector3DSetStaticPanel(wx_panel.ScrolledPanel):
