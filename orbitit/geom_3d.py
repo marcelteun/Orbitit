@@ -347,6 +347,33 @@ class Line3D(geomtypes.Line):
         # p82 of E.Lengyel
         return self.discriminant_with_line(line) == 0
 
+    def intersect(self, line):
+        """Returns the point of intersection of the lines."""
+        assert isinstance(line, Line3D)
+        # TODO: what if the lines cross are a parallel
+        # TODO: add unit tests
+        # TODO: add support for plane
+        vs = [
+            self.p,
+            self.p + self.v,
+            line.p,
+            line.p + line.v,
+        ]
+
+        def d(m, n, o, p):
+            dmnop = 0
+            for i in range(3):
+                dmnop += (vs[m - 1][i] - vs[n - 1][i]) * (vs[o - 1][i] - vs[p - 1][i])
+            return dmnop
+
+        t = (
+            d(1, 3, 4, 3) * d(4, 3, 2, 1) - d(1, 3, 2, 1) * d(4, 3, 4, 3)
+        ) / (
+            d(2, 1, 2, 1) * d(4, 3, 4, 3) - d(4, 3, 2, 1) * d(4, 3, 2, 1)
+        )
+
+        return vs[0] + t * (vs[1] - vs[0])
+
     def __str__(self):
         return f"(x, y, z) = {self.p} + t * {self.v}"
 
