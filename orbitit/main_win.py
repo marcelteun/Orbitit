@@ -20,8 +20,8 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
-# pylint: disable=too-many-lines,too-many-instance-attributes
+# ------------------------------------------------------------------
+# pylint: disable=too-many-lines,too-many-instance-attributes,too-many-ancestors
 
 import copy
 import logging
@@ -29,6 +29,7 @@ import math
 import wx
 import wx.lib.intctrl
 import wx.lib.colourselect
+import wx.lib.scrolledpanel as wx_panel
 
 from OpenGL import GL
 
@@ -40,15 +41,18 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     width: the amount of colour columns in the widget.
     """
+
     def __init__(self, canvas, width, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
         self.col_width = width
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
-        self.org_cols = self.canvas.shape.face_props['colors']
+        self.org_cols = self.canvas.shape.face_props["colors"]
         # take a copy for reset
-        self.cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols]
+        self.cols = [
+            [list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols
+        ]
         self.add_content()
 
     def add_content(self):
@@ -70,8 +74,8 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
                         col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
                         self.col_sizer.Add(col_sizer_row, 0, wx.EXPAND)
                     self.select_col_guis.append(
-                        wx.ColourPickerCtrl(
-                            self.panel, wx.ID_ANY, wx_col))
+                        wx.ColourPickerCtrl(self.panel, wx.ID_ANY, wx_col)
+                    )
                     self.panel.Bind(wx.EVT_COLOURPICKER_CHANGED, self.on_col_select)
                     col_sizer_row.Add(self.select_col_guis[-1], 0, wx.EXPAND)
                     i += 1
@@ -93,15 +97,15 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.col_sizer.Add(self.sub_sizer)
 
-        self.guis.append(wx.Button(self.panel, label='Cancel'))
+        self.guis.append(wx.Button(self.panel, label="Cancel"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.guis.append(wx.Button(self.panel, label='Reset'))
+        self.guis.append(wx.Button(self.panel, label="Reset"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.guis.append(wx.Button(self.panel, label='Done'))
+        self.guis.append(wx.Button(self.panel, label="Done"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
@@ -118,12 +122,16 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             c = self.org_cols[shape_idx][0][col_idx]
             wx_col = wx.Colour(c)
             col_gui.SetColour(wx_col)
-        self.cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols]
+        self.cols = [
+            [list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols
+        ]
         self.update_shape_cols()
 
     def on_cancel(self, _):
         """Handle event '_' to recover original shape colours and close window"""
-        self.cols = [[list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols]
+        self.cols = [
+            [list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols
+        ]
         self.update_shape_cols()
         self.Close()
 
@@ -145,7 +153,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def update_shape_cols(self):
         """Update the face colours of the current shape"""
-        self.canvas.shape.face_props = {'colors': self.cols}
+        self.canvas.shape.face_props = {"colors": self.cols}
         self.canvas.paint()
 
     def close(self):
@@ -153,8 +161,245 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         for gui in self.guis:
             gui.Destroy()
 
+
+class FacePanel(wx.Panel):
+    """A panel that shows all vertices of a face.
+
+    These can be hidden or shown through methods
+    """
+
+    text_for_width = "[1.23456789001, 1.23456789001, 1.2345678901]"
+
+    def __init__(self, parent, list_of_vertices):
+        """
+        Initialize object
+
+        list_of_vertices: the list of 3 dimensional vertices.
+        """
+        super().__init__(parent)
+        self.vs = list_of_vertices
+        self.guis = []
+        self._add_content()
+
+    def _add_content(self):
+        """Add GUI widgets to this panel"""
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.text = ""
+        for vertex in self.vs:
+            self.text += f"\n{vertex}"
+        self.text = self.text[1:]
+        self.text_gui = wx.TextCtrl(
+            self, wx.ID_ANY, self.text, style=wx.TE_READONLY | wx.TE_MULTILINE
+        )
+        text_width = self.text_gui.GetSizeFromTextSize(
+            self.text_gui.GetTextExtent(self.text_for_width).x
+        )
+        self.text_gui.SetInitialSize(text_width)
+        self.guis.append(self.text_gui)
+        self.main_sizer.Add(self.text_gui, 0, wx.EXPAND)
+        self.SetSizer(self.main_sizer)
+
+    def show(self):
+        """Show the list of vertices"""
+        self.text_gui.SetValue(self.text)
+        self.text_gui.Show()
+
+    def hide(self):
+        """Show the list of vertices"""
+        self.text_gui.SetValue("")
+        self.text_gui.Hide()
+
+
+
+class FacesList(wx_panel.ScrolledPanel):
+    """A panel with all faces and colours of one SimpleShape.
+
+    These face are just listed
+
+    Attributes:
+        selected_gui_keys: a list with keys of selected checkbox items. These keys can be used in
+            the attribute checkbox_rows.
+        checkbox_rows: a dictionary which maps checkbox widget IDs on a dictionary with the
+            following items:
+                - check: specifies the checkbox widget
+                - label: specifies the static text widget
+                - face_i: specifies the face index in the shape
+                - org_col: specifies the original RGB colour for that face (before applying)
+        selected_faces: a list for face indices that are selected
+        selection_col: wx.Colour that is used as face colour when it is selected
+    """
+
+    SHOW_LABEL = "Show Vertices"
+    HIDE_LABEL = "Hide Vertices"
+
+    def __init__(self, parent, shape, on_update, selection_col):
+        """
+        parent: parent gui
+        shape: the face properties of a simple shape.
+        on_update: call-back function that is called when the shape was updated
+        selection_col: wx.Colour that is used as face colour when it is selected
+        """
+        super().__init__(parent)
+        self.parent = parent
+        # set to True to ignore (de)selection events, e.g. when applying colours
+        self._ignore_events = False
+        self.selected_gui_keys = []
+        self.shape = shape
+        self.selection_col = selection_col
+        self.checkbox_rows = {}
+        self._update_shape = on_update
+        self.SetupScrolling()
+        self._add_content()
+
+    def _add_content(self):
+        """Add GUI widgets to this panel"""
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # Fill main sizer
+        self.SetSizer(self.main_sizer)
+        self.update_face_list()
+
+    def _destroy_faces_list(self):
+        """Destroy the widgets of the face list"""
+        for gui_row in self.checkbox_rows.values():
+            gui_row["label"].Destroy()
+            gui_row["check"].Destroy()
+            gui_row["button"].Destroy()
+            gui_row["vertices"].Destroy()
+        self.selected_gui_keys = []
+        self.checkbox_rows = {}
+
+    @property
+    def selected_faces(self):
+        """Return the face indices for the selected items in the faces list."""
+        return [
+            self.checkbox_rows[check_id]["face_i"]
+            for check_id in self.selected_gui_keys
+        ]
+
+    def update_face_list(self):
+        """(Re)build the face list."""
+        self._destroy_faces_list()
+        face_cols = self.shape.shape_colors
+        for i, col_i in enumerate(face_cols[1]):
+            f_sizer = wx.BoxSizer(wx.HORIZONTAL)
+            # Add check box
+            check_gui = wx.CheckBox(self)
+            check_id = check_gui.GetId()
+            self.Bind(wx.EVT_CHECKBOX, self._on_checked, id=check_id)
+            f_sizer.Add(check_gui, 0, wx.ALL)
+            # Add coloured text
+            text_gui = wx.StaticText(self, wx.ID_ANY, f" {i} ")
+            face_col = face_cols[0][col_i]
+            text_gui.SetBackgroundColour(wx.Colour(*face_col))
+            text_gui.SetForegroundColour(wx.Colour(*self.inv_col(face_col)))
+            f_sizer.Add(text_gui, 0)
+            # Add button to show vertices
+            show_button = wx.Button(self, label=self.HIDE_LABEL)
+            self.Bind(wx.EVT_BUTTON, self._on_show)
+            f_sizer.Add(show_button, 0)
+            # Add vertices text
+            vertices_gui = FacePanel(self, [self.shape.vs[j] for j in self.shape.fs[i]])
+            show_button.vertices_list = vertices_gui
+            f_sizer.Add(vertices_gui, 0, wx.EXPAND)
+            # Initially hide the vertices
+            self.on_show(show_button)
+            # Admin
+            self.checkbox_rows[check_id] = {
+                "check": check_gui,
+                "label": text_gui,
+                "button": show_button,
+                "vertices": vertices_gui,
+                "org_col": face_col,
+                "face_i": i,
+            }
+            self.main_sizer.Add(f_sizer)
+        self.Layout()
+
+    @staticmethod
+    def inv_col(c):
+        """Get the composite colour of some RGB colour."""
+        # TODO move to RGB
+        result = [255 - ch for ch in c[:3]]
+        if len(c) == 4:
+            result.append(c[3])
+        return result
+
+    def deselect_all(self, apply_col):
+        """Deselect all faces in the list and either reset colours or apply them
+
+        apply_col: set to False to apply all colour to the shape and the list items. If True then
+            all colours are reset.
+        """
+        if apply_col:
+            # Rebuild the faces list from scratch. This will also make sure org_col is updated eg.
+            self.update_face_list()
+        else:
+            for check_id in self.selected_gui_keys:
+                self.checkbox_rows[check_id]["check"].SetValue(False)
+        # TODO if deleted faces: we need to do the following as well if not apply:
+        # self.shape.face_props = self._org_face_props
+
+    def _on_checked(self, event):
+        """Handle when one of the faces checkbox changes state
+
+        This will switch the colour of the face to the new colour of the original one (or keep it
+        hidden when it is supposed to be hidden)
+        """
+        self.switch(event.GetId(), event.IsChecked())
+
+    def switch(self, chk_id, checked):
+        """
+        Check or uncheck the check box with ID chk_id and update related data
+
+        checked: if True apply the selection colour and update static text colour
+        chk_id: check ID used in self.checkbox_rows
+        """
+        row_data = self.checkbox_rows[chk_id]
+        text_gui = row_data["label"]
+        # TODO: centralise this
+        face_index = row_data["face_i"]
+        if checked:
+            text_gui.SetBackgroundColour(self.selection_col)
+            inv_col = wx.Colour(*self.inv_col(self.selection_col))
+            text_gui.SetForegroundColour(inv_col)
+            self.shape.update_face_with_col(face_index, self.selection_col[:3])
+            if chk_id not in self.selected_gui_keys:
+                self.selected_gui_keys.append(chk_id)
+        else:
+            face_col = row_data["org_col"]
+            org_col = wx.Colour(*face_col)
+            inv_col = wx.Colour(*self.inv_col(org_col))
+            text_gui.SetBackgroundColour(org_col)
+            text_gui.SetForegroundColour(inv_col)
+            self.shape.update_face_with_col(face_index, org_col[:3])
+            if chk_id in self.selected_gui_keys:
+                self.selected_gui_keys.remove(chk_id)
+        self._update_shape()
+
+    def _on_show(self, event):
+        """Show or hide the extra face options depending on the state of the button."""
+        self.on_show(event.GetEventObject())
+
+    def on_show(self, button):
+        """Show or hide the extra face options depending on the state of the button.
+
+        button: the button object.
+        """
+        show_items = button.GetLabel() == self.SHOW_LABEL
+        new_label = self.HIDE_LABEL if show_items else self.SHOW_LABEL
+        if show_items:
+            button.vertices_list.show()
+        else:
+            button.vertices_list.hide()
+        button.SetLabel(new_label)
+        self.Layout()
+
+
 class FacesTab(wx.Panel):
     """A panel with all faces and colours of one SimpleShape (as part of a CompoundShape)
+
+    These faces can be updated by using some widgets.
 
     attributes:
         shape: the SimpleShape object of this tab
@@ -168,147 +413,120 @@ class FacesTab(wx.Panel):
         shape: a simple shape. Make sure this is not a compound shape or a orbit shape e.g.
         on_update: call-back function that is called when the shape was updated
         """
-        wx.Panel.__init__(self, parent)
+        super().__init__(parent)
+        self.parent = parent
         self.shape = shape
+        self.guis = []
         self._update_shape = on_update
         self._org_face_props = copy.deepcopy(shape.face_props)
-        self._faces_lst = None
-        self._ignore_events = False  # set to True to ignore (de)selection events
-        self._selection_col = (0, 0, 0)
         self._add_content()
 
-    def update_face_list(self):
-        """(Re)build the face list."""
-        if self._faces_lst:
-            self._faces_lst.ClearAll()
-        self._faces_lst = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
-        self._faces_lst.InsertColumn(0, 'Faces:', width=250)
-        face_cols = self.shape.shape_colors
-        for i, col_i in enumerate(face_cols[1]):
-            self._faces_lst.InsertItem(i, "")
-            self._faces_lst.SetItemBackgroundColour(i, wx.Colour(*face_cols[0][col_i]))
-            col = [255 - c for c in face_cols[0][col_i]]
-            self._faces_lst.SetItemTextColour(i, wx.Colour(*col))
-
     def _add_content(self):
-        """Add GUI windgets to this panel"""
+        """Add GUI widgets to this panel"""
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.guis = []
+        self.SetSizer(self.main_sizer)
+        init_selection_col = wx.Colour((0, 0, 0))
 
-        # Selection colour
-        sel_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        col_txt_gui = wx.StaticText(self, -1, "Use Colour:")
+        # Selection colour and reverse
+        sel_operation_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # Colour selection:
+        col_txt_gui = wx.StaticText(self, -1, "Selection Colour:")
         self.guis.append(col_txt_gui)
         self.selected_col_gui = wx.lib.colourselect.ColourSelect(
-            self, wx.ID_ANY, colour=(0, 0, 0), size=wx.Size(40, 30),
+            self,
+            wx.ID_ANY,
+            colour=init_selection_col,
+            size=wx.Size(40, 30),
         )
         self.selected_col_gui.SetCustomColours(wx_colors.COLOR_PALLETE)
-        sel_col_sizer.Add(col_txt_gui, 1)
-        sel_col_sizer.Add(self.selected_col_gui, 1)
-        self.selected_col_gui.Bind(wx.lib.colourselect.EVT_COLOURSELECT, self.on_selected_col)
+        sel_operation_sizer.Add(col_txt_gui, 1, wx.ALIGN_CENTRE)
+        sel_operation_sizer.Add(self.selected_col_gui, 1)
+        self.selected_col_gui.Bind(
+            wx.lib.colourselect.EVT_COLOURSELECT, self.on_selected_col
+        )
 
-        # Faces list
-        self.update_face_list()
-        self._faces_lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
-        self._faces_lst.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_deselect)
-        self.guis.append(self._faces_lst)
+        # List of faces
+        self.faces_list = FacesList(
+            self, self.shape, self._update_shape, init_selection_col
+        )
+        self.guis.append(self.faces_list)
+
+        # Select all or none etc
+        select_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.guis.append(wx.Button(self, label="Select All"))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_select_all)
+        select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        # Apply colour
+        self.guis.append(wx.Button(self, label="Apply colour"))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.apply_col)
+        select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        # Reverse order
+        self.guis.append(wx.Button(self, label="Flip"))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_flip)
+        select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        # Delete faces
+        self.guis.append(wx.Button(self, label="Delete"))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_delete)
+        select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        # Unselect all
+        self.guis.append(wx.Button(self, label="Unselect All"))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_unselect_all)
+        select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         # Fill main sizer
-        self.main_sizer.Add(sel_col_sizer, 0)
-        self.main_sizer.Add(self._faces_lst, 1, wx.EXPAND)
-        self.SetSizer(self.main_sizer)
+        self.main_sizer.Add(sel_operation_sizer, 0)
+        self.main_sizer.Add(self.faces_list, 1, wx.EXPAND)
+        self.main_sizer.Add(select_sizer, 0, wx.EXPAND)
         self.Layout()
 
-    def on_select(self, evt):
-        """Handle when a face is selected by updating the colour."""
-        if self._ignore_events:
-            return
-        self.on_update_col(evt.GetIndex(), self._selection_col)
-        # Tried to set the colour of the selected item in the list to self.selected_col_gui
-        # but it only applies to the item after deselecting again.
-
-    def on_deselect(self, evt):
-        """Handle when a face is deselected by updating the colour."""
-        if self._ignore_events:
-            return
-        org_cols = self._org_face_props["colors"]
-        org_col_defs = org_cols[0]
-        org_face_col_i = org_cols[1]
-        org_col_i = org_face_col_i[evt.GetIndex()]
-        self.on_update_col(evt.GetIndex(), org_col_defs[org_col_i])
-
-    def on_update_col(self, face_i, new_col):
-        """Handle when a face is selected or deselected by inverting the colour.
-
-        face_i: index of the face
-        new_col: new RGB colour for the face to use
-        """
-        col_defs = list(self.shape.shape_colors[0])
-        face_cols = list(self.shape.shape_colors[1])
-
-        # update colour
-        if new_col in col_defs:
-            new_col_i = col_defs.index(new_col)
-        else:
-            new_col_i = len(col_defs)
-            col_defs.append(new_col)
-        face_cols[face_i] = new_col_i
-        # This is needed since shape.shape_colors is not just an attribute, it is a setter
-        self.shape.shape_colors = (col_defs, face_cols)
-        self._update_shape()
-
-    def on_selected_col(self, evt):
+    def on_selected_col(self, event):
         """Update the colour of the selected faces"""
-        new_col = evt.GetValue().Get()[:3]
-        item = self._faces_lst.GetFirstSelected()
-        while item != -1:
-            self.on_update_col(item, new_col)
-            item = self._faces_lst.GetNextSelected(item)
-        self._selection_col = new_col
+        new_col = event.GetValue().Get()[:3]
+        self.faces_list.selection_col = new_col
+        for gui_id in self.faces_list.selected_gui_keys:
+            self.faces_list.switch(gui_id, True)
 
-    def deselect_all(self, apply_col):
-        """Deselect all items and either reset colours or apply them
+    def on_flip(self, _event):
+        """Update the colour of the selected faces"""
+        for face_i in self.faces_list.selected_faces:
+            self.shape.reverse_face(face_i)
+        self.shape.faces_updated()
+        self._update_shape()
+        self.faces_list.deselect_all(apply_col=False)
+        for check_id in self.faces_list.selected_gui_keys:
+            self.faces_list.switch(check_id, False)
+            self.faces_list.checkbox_rows[check_id]["check"].SetValue(False)
 
-        apply_col: set to False to apply all colour to the shape and the list items. If True then
-            all colours are reset.
-        """
-        if apply_col:
-            self._ignore_events = True
+    def set_all_selected(self, selected):
+        """Select all or none of the faces in the faces list depending on 'selected'."""
+        for row_id, row_data in self.faces_list.checkbox_rows.items():
+            self.faces_list.switch(row_id, selected)
+            row_data["check"].SetValue(selected)
 
-        item = self._faces_lst.GetFirstSelected()
-        while item != -1:
-            self._faces_lst.Select(item, on=0)
-            if apply_col:
-                self._faces_lst.SetItemBackgroundColour(item, self._selection_col)
-            item = self._faces_lst.GetNextSelected(item)
-        self._ignore_events = False
-        # TODO if deleted faces: we need to do the following as well if not apply:
-        # self.shape.face_props = self._org_face_props
+    def apply_col(self, _event=None):
+        """Call this to apply the colours and deselect all faces."""
+        self.faces_list.deselect_all(apply_col=True)
+
+    def on_select_all(self, _event):
+        """Select all faces in the faces list."""
+        self.set_all_selected(True)
+
+    def on_unselect_all(self, _event):
+        """Unselect all faces in the faces list."""
+        self.set_all_selected(False)
+
+    def on_delete(self, _event):
+        """Delete selected faces and ."""
+        self.shape.remove_faces(self.faces_list.selected_faces)
+        self.faces_list.update_face_list()
         self._update_shape()
 
     def reset(self):
         """Handle when a face is selected by updating the colour."""
-        org_cols = self._org_face_props["colors"]
-        org_col_defs = org_cols[0]
-        org_face_col_i = org_cols[1]
-        for item in range(self._faces_lst.GetItemCount()):
-            org_col_i = org_face_col_i[item]
-            if self._faces_lst.IsSelected(item):
-                self._faces_lst.Select(item, on=0)
-            else:
-                org_col = org_col_defs[org_col_i]
-                self.on_update_col(item, org_col)
-                self._faces_lst.SetItemBackgroundColour(item, org_col)
+        self.shape.face_props = self._org_face_props
+        self.faces_list.update_face_list()
         self._update_shape()
 
-    def apply_col(self):
-        """Call this to apply the colours and deselect all faces."""
-        self.deselect_all(apply_col=True)
-
-    def close(self):
-        """Destroy all widgets of the face colour window"""
-        for gui in self.guis:
-            gui.Destroy()
 
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
@@ -321,7 +539,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         self.add_content()
 
     def add_content(self):
-        """Add GUI windgets to the panel"""
+        """Add GUI widgets to the panel"""
         self.guis = []
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.notebook = wx.Notebook(self.panel)
@@ -336,16 +554,13 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
 
         # Buttons
         self.buttons_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.guis.append(wx.Button(self.panel, label='Cancel'))
+        self.guis.append(wx.Button(self.panel, label="Cancel"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
         self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
-        self.guis.append(wx.Button(self.panel, label='Reset all'))
+        self.guis.append(wx.Button(self.panel, label="Reset all"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
         self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
-        self.guis.append(wx.Button(self.panel, label='Apply colour'))
-        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_set_col)
-        self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
-        self.guis.append(wx.Button(self.panel, label='Done'))
+        self.guis.append(wx.Button(self.panel, label="Done"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
         self.buttons_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
@@ -360,39 +575,37 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         """Update shape on display"""
         self.canvas.paint()
 
-    def on_reset(self, evt):  # pylint: disable=unused-argument
+    def on_reset(self, _event):
         """Restore all faces but don't close window."""
         for tab in self.tabs:
             tab.reset()
 
-    def on_cancel(self, evt):
+    def on_cancel(self, event):
         """Restore all faces and close window."""
-        self.on_reset(evt)
+        self.on_reset(event)
         self.Close()
 
-    def on_set_col(self, evt):  # pylint: disable=unused-argument
-        """Apply colour to faces, but keep window."""
-        for tab in self.tabs:
-            tab.apply_col()
-
-    def on_done(self, evt):
+    def on_done(self, _event):
         """Apply colour to faces, and close window."""
-        self.on_set_col(evt)
+        for tab in self.tabs.keys():
+            tab.apply_col()
         self.Close()
+
 
 class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window with controls for transforming current shape
 
     The transform is applied dynamically (i.e. while window is still open), but can be canceled.
     """
+
     def __init__(self, canvas, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
-        self.org_vs = self.canvas.shape.vertex_props['vs']
-        self.org_org_vs = self.org_vs # for cancel
+        self.org_vs = self.canvas.shape.vertex_props["vs"]
+        self.org_org_vs = self.org_vs  # for cancel
         self.set_status_text("")
 
     def add_content(self):
@@ -400,7 +613,8 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.rot_sizer = geom_gui.AxisRotateSizer(
-            self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0)
+            self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0
+        )
         self.main_sizer.Add(self.rot_sizer)
 
         self.guis = []
@@ -414,33 +628,33 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.guis.append(geom_gui.Vector3DInput(self.panel, "Translation vector:"))
         self.translation = self.guis[-1]
         translate_sizer.Add(self.guis[-1], 0, wx.EXPAND)
-        self.guis.append(wx.Button(self.panel, label='Translate'))
+        self.guis.append(wx.Button(self.panel, label="Translate"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_translate)
         translate_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         # Invert
         invert_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.main_sizer.Add(invert_sizer)
-        self.guis.append(wx.Button(self.panel, label='Invert'))
+        self.guis.append(wx.Button(self.panel, label="Invert"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_invert)
         invert_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
         self.sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.main_sizer.Add(self.sub_sizer)
 
-        self.guis.append(wx.Button(self.panel, label='Apply'))
+        self.guis.append(wx.Button(self.panel, label="Apply"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_apply)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.guis.append(wx.Button(self.panel, label='Cancel'))
+        self.guis.append(wx.Button(self.panel, label="Cancel"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_cancel)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.guis.append(wx.Button(self.panel, label='Reset'))
+        self.guis.append(wx.Button(self.panel, label="Reset"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_reset)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        self.guis.append(wx.Button(self.panel, label='Done'))
+        self.guis.append(wx.Button(self.panel, label="Done"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_done)
         self.sub_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
@@ -454,8 +668,10 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         if geomtypes.FloatHandler.eq(axis.norm(), 0):
             self.set_status_text("Please define a proper axis")
             return
-        self.canvas.shape.vertex_props = {'vs': self.org_vs}
-        self.canvas.shape.transform(geomtypes.Rot3(angle=geom_3d.DEG2RAD*angle, axis=axis))
+        self.canvas.shape.vertex_props = {"vs": self.org_vs}
+        self.canvas.shape.transform(
+            geomtypes.Rot3(angle=geom_3d.DEG2RAD * angle, axis=axis)
+        )
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -470,26 +686,23 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         """Handle event '_' to translate shape"""
         # Assume compound shape
         new_vs = [
-            [
-                geomtypes.Vec3(v) + self.translation.get_vertex()
-                for v in shape_vs
-            ]
+            [geomtypes.Vec3(v) + self.translation.get_vertex() for v in shape_vs]
             for shape_vs in self.org_vs
         ]
-        self.canvas.shape.vertex_props = {'vs': new_vs}
+        self.canvas.shape.vertex_props = {"vs": new_vs}
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_apply(self, _=None):
         """Handle event '_' to confirm transform and prepare for a next one"""
-        self.org_vs = self.canvas.shape.vertex_props['vs']
+        self.org_vs = self.canvas.shape.vertex_props["vs"]
         # reset the angle
         self.rot_sizer.set_angle(0)
         self.set_status_text("applied, now you can define another axis")
 
     def on_reset(self, _=None):
         """Handle event '_' to undo all transforms"""
-        self.canvas.shape.vertex_props = {'vs': self.org_org_vs}
+        self.canvas.shape.vertex_props = {"vs": self.org_org_vs}
         self.canvas.paint()
         self.org_vs = self.org_org_vs
 
@@ -511,8 +724,10 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         """Set text of the status bar for this window"""
         self.status_bar.SetStatusText(s)
 
+
 class ViewSettingsWindow(wx.Frame):
     """Class for window with all view settings"""
+
     def __init__(self, canvas, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
@@ -543,7 +758,7 @@ class ViewSettingsWindow(wx.Frame):
     def rebuild(self):
         """Detroy and re-build the content of this windown"""
         # Doesn't work out of the box (Guis are not destroyed...):
-        #self.ctrl_sizer.Destroy()
+        # self.ctrl_sizer.Destroy()
         self.ctrl_sizer.close()
         self.add_contents()
 
@@ -551,13 +766,14 @@ class ViewSettingsWindow(wx.Frame):
         """Set text of the status bar for this window"""
         self.status_bar.SetStatusText(s)
 
+
 class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attributes
     """A sizer with all view settings for the view settings window"""
 
-    cull_show_none = 'Hide'
-    cull_show_both = 'Show Front and Back Faces'
-    cull_show_front = 'Show Only Front Face'
-    cull_show_back = 'Show Only Back Face'
+    cull_show_none = "Hide"
+    cull_show_both = "Show Front and Back Faces"
+    cull_show_front = "Show Only Front Face"
+    cull_show_back = "Show Only Back Face"
 
     # pylint: disable=too-many-branches, too-many-statements, too-many-locals
     def __init__(self, parent_win, parent_panel, canvas, *args, **kwargs):
@@ -579,19 +795,21 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.parent_win = parent_win
         self.parent_panel = parent_panel
         # Show / Hide vertices
-        self.v_r = canvas.shape.vertex_props['radius']
-        self.v_opts_lst = ['hide', 'show']
+        self.v_r = canvas.shape.vertex_props["radius"]
+        self.v_opts_lst = ["hide", "show"]
         if self.v_r > 0:
             default = 1  # key(1) = 'show'
         else:
             default = 0  # key(0) = 'hide'
         self.v_opts_gui = wx.RadioBox(
             self.parent_panel,
-            label='Vertex Options',
+            label="Vertex Options",
             style=wx.RA_VERTICAL,
             choices=self.v_opts_lst,
         )
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_v_option, id=self.v_opts_gui.GetId())
+        self.parent_panel.Bind(
+            wx.EVT_RADIOBOX, self.on_v_option, id=self.v_opts_gui.GetId()
+        )
         self.v_opts_gui.SetSelection(default)
         # Vertex Radius
         no_of_slider_steps = 40
@@ -610,7 +828,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         )
         self.guis.append(self.v_r_gui)
         self.parent_panel.Bind(wx.EVT_SLIDER, self.on_v_radius, id=self.v_r_gui.GetId())
-        self.boxes.append(wx.StaticBox(self.parent_panel, label='Vertex radius'))
+        self.boxes.append(wx.StaticBox(self.parent_panel, label="Vertex radius"))
         v_r_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
         # disable if vertices are hidden anyway:
         if default != 1:
@@ -621,23 +839,25 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.parent_panel.Bind(wx.EVT_BUTTON, self.on_v_col, id=self.v_col_gui.GetId())
         # Show / hide edges
         e_props = canvas.shape.edge_props
-        self.e_r = e_props['radius']
-        self.e_opts_lst = ['hide', 'as cylinders', 'as lines']
-        if e_props['draw_edges']:
+        self.e_r = e_props["radius"]
+        self.e_opts_lst = ["hide", "as cylinders", "as lines"]
+        if e_props["draw_edges"]:
             if self.v_r > 0:
-                default = 1 # key(1) = 'as cylinders'
+                default = 1  # key(1) = 'as cylinders'
             else:
-                default = 2 # key(2) = 'as lines'
+                default = 2  # key(2) = 'as lines'
         else:
-            default = 0 # key(0) = 'hide'
+            default = 0  # key(0) = 'hide'
         self.e_opts_gui = wx.RadioBox(
             self.parent_panel,
-            label='Edge Options',
+            label="Edge Options",
             style=wx.RA_VERTICAL,
             choices=self.e_opts_lst,
         )
         self.guis.append(self.e_opts_gui)
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_e_option, id=self.e_opts_gui.GetId())
+        self.parent_panel.Bind(
+            wx.EVT_RADIOBOX, self.on_e_option, id=self.e_opts_gui.GetId()
+        )
         self.e_opts_gui.SetSelection(default)
         # Edge Radius
         no_of_slider_steps = 40
@@ -656,7 +876,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         )
         self.guis.append(self.e_r_gui)
         self.parent_panel.Bind(wx.EVT_SLIDER, self.on_e_radius, id=self.e_r_gui.GetId())
-        self.boxes.append(wx.StaticBox(self.parent_panel, label='Edge radius'))
+        self.boxes.append(wx.StaticBox(self.parent_panel, label="Edge radius"))
         e_r_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
         # disable if edges are not drawn as scalable items anyway:
         if default != 1:
@@ -674,12 +894,14 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         ]
         self.f_opts_gui = wx.RadioBox(
             self.parent_panel,
-            label='Face Options',
+            label="Face Options",
             style=wx.RA_VERTICAL,
             choices=self.f_opts_lst,
         )
         self.guis.append(self.f_opts_gui)
-        self.parent_panel.Bind(wx.EVT_RADIOBOX, self.on_f_option, id=self.f_opts_gui.GetId())
+        self.parent_panel.Bind(
+            wx.EVT_RADIOBOX, self.on_f_option, id=self.f_opts_gui.GetId()
+        )
         f_sizer = wx.BoxSizer(wx.HORIZONTAL)
         f_sizer.Add(self.f_opts_gui, 1, wx.EXPAND)
         if not GL.glIsEnabled(GL.GL_CULL_FACE):
@@ -691,14 +913,14 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 self.f_opts_gui.SetStringSelection(self.cull_show_front)
             if GL.glGetInteger(GL.GL_CULL_FACE_MODE) == GL.GL_BACK:
                 self.f_opts_gui.SetStringSelection(self.cull_show_back)
-            else: # ie GL.GL_FRONT_AND_BACK
+            else:  # ie GL.GL_FRONT_AND_BACK
                 self.f_opts_gui.SetStringSelection(self.cull_show_none)
 
         # Open GL
-        self.boxes.append(wx.StaticBox(self.parent_panel, label='OpenGL Settings'))
+        self.boxes.append(wx.StaticBox(self.parent_panel, label="OpenGL Settings"))
         back_front_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
         self.guis.append(
-            wx.CheckBox(self.parent_panel, label='Switch Front and Back Face (F3)'),
+            wx.CheckBox(self.parent_panel, label="Switch Front and Back Face (F3)"),
         )
         self.front_back_gui = self.guis[-1]
         self.front_back_gui.SetValue(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
@@ -713,7 +935,8 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         col = self.canvas.bg_col
         self.bg_col_gui = wx.lib.colourselect.ColourSelect(
             self.parent_panel,
-            wx.ID_ANY, colour=col,
+            wx.ID_ANY,
+            colour=col,
             size=wx.Size(40, 30),
         )
         self.guis.append(self.bg_col_gui)
@@ -724,7 +947,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         v_r_sizer.Add(self.v_col_gui, 1, wx.BOTTOM | wx.LEFT)
         e_r_sizer.Add(self.e_r_gui, 1, wx.EXPAND | wx.TOP | wx.LEFT)
         e_r_sizer.Add(self.e_col_gui, 1, wx.BOTTOM | wx.LEFT)
-        #sizer = wx.BoxSizer(wx.VERTICAL)
+        # sizer = wx.BoxSizer(wx.VERTICAL)
         v_sizer = wx.BoxSizer(wx.HORIZONTAL)
         v_sizer.Add(self.v_opts_gui, 2, wx.EXPAND)
         v_sizer.Add(v_r_sizer, 5, wx.EXPAND)
@@ -747,9 +970,9 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             default = 0
             self.use_transparency_gui = wx.RadioBox(
                 self.parent_panel,
-                label='Use Transparency',
+                label="Use Transparency",
                 style=wx.RA_VERTICAL,
-                choices=['Yes', 'No'],
+                choices=["Yes", "No"],
             )
             self.guis.append(self.use_transparency_gui)
             self.parent_panel.Bind(
@@ -763,13 +986,14 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             default = 0
             self.show_es_unscaled_gui = wx.RadioBox(
                 self.parent_panel,
-                label='Unscaled Edges',
+                label="Unscaled Edges",
                 style=wx.RA_VERTICAL,
-                choices=['Show', 'Hide'],
+                choices=["Show", "Hide"],
             )
             self.guis.append(self.show_es_unscaled_gui)
             self.parent_panel.Bind(
-                wx.EVT_RADIOBOX, self.on_show_unscaled_es,
+                wx.EVT_RADIOBOX,
+                self.on_show_unscaled_es,
                 id=self.show_es_unscaled_gui.GetId(),
             )
             self.show_es_unscaled_gui.SetSelection(default)
@@ -791,7 +1015,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.parent_panel.Bind(
                 wx.EVT_SLIDER, self.on_scale, id=self.scale_gui.GetId()
             )
-            self.boxes.append(wx.StaticBox(self.parent_panel, label='Scale Cells'))
+            self.boxes.append(wx.StaticBox(self.parent_panel, label="Scale Cells"))
             scale_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             scale_sizer.Add(self.scale_gui, 1, wx.EXPAND)
 
@@ -817,7 +1041,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 wx.EVT_SLIDER, self.on_prj_vol_adjust, id=self.prj_vol_gui.GetId()
             )
             self.boxes.append(
-                wx.StaticBox(self.parent_panel, label='Projection Volume W-Coordinate')
+                wx.StaticBox(self.parent_panel, label="Projection Volume W-Coordinate")
             )
             prj_vol_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             prj_vol_sizer.Add(self.prj_vol_gui, 1, wx.EXPAND)
@@ -841,30 +1065,32 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 wx.EVT_SLIDER, self.on_prj_vol_adjust, id=self.cam_dist_gui.GetId()
             )
             self.boxes.append(
-                wx.StaticBox(self.parent_panel, label='Camera Distance (from projection volume)')
+                wx.StaticBox(
+                    self.parent_panel, label="Camera Distance (from projection volume)"
+                )
             )
             cam_dist_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             cam_dist_sizer.Add(self.cam_dist_gui, 1, wx.EXPAND)
 
             # Create a ctrl for specifying a 4D rotation
-            self.boxes.append(wx.StaticBox(parent_panel, label='Rotate 4D Object'))
+            self.boxes.append(wx.StaticBox(parent_panel, label="Rotate 4D Object"))
             rotation_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
-            self.boxes.append(wx.StaticBox(parent_panel, label='In a Plane Spanned by'))
+            self.boxes.append(wx.StaticBox(parent_panel, label="In a Plane Spanned by"))
             plane_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.VERTICAL)
             self.v0_gui = geom_gui.Vector4DInput(
                 self.parent_panel,
-                #label='Vector 1',
+                # label='Vector 1',
                 rel_float_size=4,
-                elem_labels=['x0', 'y0', 'z0', 'w0']
+                elem_labels=["x0", "y0", "z0", "w0"],
             )
             self.parent_panel.Bind(
                 geom_gui.EVT_VECTOR_UPDATED, self.rotate, id=self.v0_gui.GetId()
             )
             self.v1_gui = geom_gui.Vector4DInput(
                 self.parent_panel,
-                #label='Vector 1',
+                # label='Vector 1',
                 rel_float_size=4,
-                elem_labels=['x1', 'y1', 'z1', 'w1']
+                elem_labels=["x1", "y1", "z1", "w1"],
             )
             self.parent_panel.Bind(
                 geom_gui.EVT_VECTOR_UPDATED, self.rotate, id=self.v1_gui.GetId()
@@ -880,7 +1106,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 self.rotate,
                 id=self.switch_planes_gui.GetId(),
             )
-            #self.boxes.append?
+            # self.boxes.append?
             self.guis.append(self.v0_gui)
             self.guis.append(self.v1_gui)
             self.guis.append(self.switch_planes_gui)
@@ -899,11 +1125,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 value=0,
                 minValue=0,
                 maxValue=steps,
-                style=wx.SL_HORIZONTAL
+                style=wx.SL_HORIZONTAL,
             )
             self.guis.append(self.angle_gui)
-            self.parent_panel.Bind(wx.EVT_SLIDER, self.rotate, id=self.angle_gui.GetId())
-            self.boxes.append(wx.StaticBox(self.parent_panel, label='Using Angle'))
+            self.parent_panel.Bind(
+                wx.EVT_SLIDER, self.rotate, id=self.angle_gui.GetId()
+            )
+            self.boxes.append(wx.StaticBox(self.parent_panel, label="Using Angle"))
             angle_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
             angle_sizer.Add(self.angle_gui, 1, wx.EXPAND)
 
@@ -917,7 +1145,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 value=0,
                 minValue=0,
                 maxValue=steps,
-                style=wx.SL_HORIZONTAL
+                style=wx.SL_HORIZONTAL,
             )
             self.guis.append(self.angle_scale_gui)
             self.parent_panel.Bind(
@@ -926,7 +1154,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.boxes.append(
                 wx.StaticBox(
                     self.parent_panel,
-                    label='Set Angle (by Scale) of Rotation in the Orthogonal Plane',
+                    label="Set Angle (by Scale) of Rotation in the Orthogonal Plane",
                 )
             )
             angle_scale_sizer = wx.StaticBoxSizer(self.boxes[-1], wx.HORIZONTAL)
@@ -973,18 +1201,18 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         """Handle event '_' to show or hide vertex"""
         sel = self.v_opts_gui.GetSelection()
         sel_str = self.v_opts_lst[sel]
-        if sel_str == 'show':
+        if sel_str == "show":
             self.v_r_gui.Enable()
-            self.canvas.shape.vertex_props = {'radius': self.v_r}
-        elif sel_str == 'hide':
+            self.canvas.shape.vertex_props = {"radius": self.v_r}
+        elif sel_str == "hide":
             self.v_r_gui.Disable()
-            self.canvas.shape.vertex_props = {'radius': -1.0}
+            self.canvas.shape.vertex_props = {"radius": -1.0}
         self.canvas.paint()
 
     def on_v_radius(self, _):
         """Handle event '_' to set vertex radius as according to settings"""
         self.v_r = float(self.v_r_gui.GetValue()) / self.v_r_scale
-        self.canvas.shape.vertex_props = {'radius': self.v_r}
+        self.canvas.shape.vertex_props = {"radius": self.v_r}
         self.canvas.paint()
         self.set_status_text()
 
@@ -995,7 +1223,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.vertex_props = {'color': rgb[:3]}
+            self.canvas.shape.vertex_props = {"color": rgb[:3]}
             self.canvas.paint()
         dlg.Destroy()
 
@@ -1003,21 +1231,21 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         """Handle event '_' to hide or show and edge either as a line or a cylinder"""
         sel = self.e_opts_gui.GetSelection()
         sel_str = self.e_opts_lst[sel]
-        if sel_str == 'hide':
+        if sel_str == "hide":
             self.e_r_gui.Disable()
-            self.canvas.shape.edge_props = {'draw_edges': False}
-        elif sel_str == 'as cylinders':
+            self.canvas.shape.edge_props = {"draw_edges": False}
+        elif sel_str == "as cylinders":
             self.e_r_gui.Enable()
-            self.canvas.shape.edge_props = {'draw_edges': True, 'radius': self.e_r}
-        elif sel_str == 'as lines':
+            self.canvas.shape.edge_props = {"draw_edges": True, "radius": self.e_r}
+        elif sel_str == "as lines":
             self.e_r_gui.Disable()
-            self.canvas.shape.edge_props = {'draw_edges': True, 'radius': 0}
+            self.canvas.shape.edge_props = {"draw_edges": True, "radius": 0}
         self.canvas.paint()
 
     def on_e_radius(self, _):
         """Handle event '_' to set edge radius as according to settings"""
         self.e_r = float(self.e_r_gui.GetValue()) / self.e_r_scale
-        self.canvas.shape.edge_props = {'radius': self.e_r}
+        self.canvas.shape.edge_props = {"radius": self.e_r}
         self.canvas.paint()
         self.set_status_text()
 
@@ -1028,7 +1256,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             data = dlg.GetColourData()
             rgba = data.GetColour()
             rgb = rgba.Get()
-            self.canvas.shape.edge_props = {'color': rgb[:3]}
+            self.canvas.shape.edge_props = {"color": rgb[:3]}
             self.canvas.paint()
         dlg.Destroy()
 
@@ -1038,13 +1266,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         sel = self.f_opts_gui.GetStringSelection()
         # Looks like I switch front and back here, but this makes sense from
         # the GUI.
-        self.canvas.shape.face_props = {'draw_faces': True}
+        self.canvas.shape.face_props = {"draw_faces": True}
         if sel == self.cull_show_both:
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_none:
             # don't use culling here: doesn't work with edge radius and vertext
             # radius > 0
-            self.canvas.shape.face_props = {'draw_faces': False}
+            self.canvas.shape.face_props = {"draw_faces": False}
             GL.glDisable(GL.GL_CULL_FACE)
         elif sel == self.cull_show_front:
             GL.glCullFace(GL.GL_FRONT)
@@ -1066,13 +1294,15 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
 
     def on_use_transparent(self, _):
         """Handle event '_' to (re)set transparency for certain predefined polychoron faces"""
-        self.canvas.shape.use_transparency((self.use_transparency_gui.GetSelection() == 0))
+        self.canvas.shape.use_transparency(
+            (self.use_transparency_gui.GetSelection() == 0)
+        )
         self.canvas.paint()
 
     def on_show_unscaled_es(self, _):
         """Handle event '_' to show or hide unscaled edges of polychoron"""
         self.canvas.shape.edge_props = {
-            'showUnscaled': (self.show_es_unscaled_gui.GetSelection() == 0),
+            "showUnscaled": (self.show_es_unscaled_gui.GetSelection() == 0),
         }
         self.canvas.paint()
 
@@ -1114,12 +1344,10 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             )
         else:
             if cam_dist > 0:
-                self.parent_win.set_status_text(
-                    'Error: Camera distance should be > 0!'
-                )
+                self.parent_win.set_status_text("Error: Camera distance should be > 0!")
             else:
                 self.parent_win.set_status_text(
-                    'Error: Projection volume:  w should be > 0!'
+                    "Error: Projection volume:  w should be > 0!"
                 )
         self.canvas.shape.set_projection(cam_dist, w_prj_vol)
         self.canvas.paint()
@@ -1129,8 +1357,14 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         """Rotate polychoron object according to settings"""
         v0 = self.v0_gui.GetValue()
         v1 = self.v1_gui.GetValue()
-        if v0 == geomtypes.Vec([0, 0, 0, 0]) or v1 == geomtypes.Vec([0, 0, 0, 0]) or v0 == v1:
-            self.parent_win.set_status_text("Please define two vectors spanning a plane")
+        if (
+            v0 == geomtypes.Vec([0, 0, 0, 0])
+            or v1 == geomtypes.Vec([0, 0, 0, 0])
+            or v0 == v1
+        ):
+            self.parent_win.set_status_text(
+                "Please define two vectors spanning a plane"
+            )
             return
         angle = self.slider_to_val(
             self.angle_factor,
@@ -1153,9 +1387,13 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
                 if scale == 0:
                     r = geomtypes.Rot4(axialPlane=(v1, v0), angle=angle)
                 else:
-                    r = geomtypes.DoubleRot4(axialPlane=(v1, v0), angle=(angle, scale*angle))
+                    r = geomtypes.DoubleRot4(
+                        axialPlane=(v1, v0), angle=(angle, scale * angle)
+                    )
             else:
-                r = geomtypes.DoubleRot4(axialPlane=(v1, v0), angle=(scale*angle, angle))
+                r = geomtypes.DoubleRot4(
+                    axialPlane=(v1, v0), angle=(scale * angle, angle)
+                )
             self.canvas.shape.rotate(r)
             self.canvas.paint()
             deg = geom_3d.RAD2DEG * angle
@@ -1166,10 +1404,10 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             # zero division means 1 of the vectors is (0, 0, 0, 0)
             self.parent_win.set_status_text("Error: Don't use a zero vector")
 
-        #except AssertionError:
-        #    z_v = geomtypes.Vec4([0, 0, 0, 0])
-        #    if v0 == z_v or v1 == z_v:
-        #        self.parent_win.set_status_text("Error: Don't use a zero vector")
-        #    else:
-        #        self.parent_win.set_status_text("Error: The specified vectors are (too) parallel")
-        #    pass
+        # except AssertionError:
+        #     z_v = geomtypes.Vec4([0, 0, 0, 0])
+        #     if v0 == z_v or v1 == z_v:
+        #         self.parent_win.set_status_text("Error: Don't use a zero vector")
+        #     else:
+        #         self.parent_win.set_status_text("Error: The specified vectors are (too) parallel")
+        #     pass

@@ -65,21 +65,26 @@ from orbitit import base, geom_2d, geomtypes, glue, indent, isometry, PS, rgb, S
 # Done
 # - edges after reading off file
 
+
 def vec(x, y, z):
     """Return 3D vector type."""
     return geomtypes.Vec3([x, y, z])
+
 
 def gl_vertex_pointer(v):
     """Wrapper of GL.glVertexPointerf to disable pylint no-member issue."""
     return GL.glVertexPointerf(v)  # pylint: disable=no-member
 
+
 def gl_normal_pointer(v):
     """Wrapper of GL.glNormalPointerf to disable pylint no-member issue."""
     return GL.glNormalPointerf(v)  # pylint: disable=no-member
 
+
 def gl_draw_elements(s, e):
     """Wrapper of GL.glDrawElementsui to disable pylint no-member issue."""
     return GL.glDrawElementsui(s, e)  # pylint: disable=no-member
+
 
 E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
@@ -219,10 +224,7 @@ def read_off_file(fd, regen_edges=True, name=""):
                         else:
                             if is_int(words[len_f + 1]):
                                 cols.append(
-                                    [
-                                        int(words[j])
-                                        for j in range(len_f + 1, len_f + 4)
-                                    ]
+                                    [int(words[j]) for j in range(len_f + 1, len_f + 4)]
                                 )
                             else:
                                 cols.append(
@@ -252,9 +254,7 @@ def read_off_file(fd, regen_edges=True, name=""):
                         break
             else:
                 break
-    assert (
-        state == states["readOk"]
-    ), (
+    assert state == states["readOk"], (
         f"EOF occurred while not done reading:\n"
         f"\tWould read {no_of_vs} vertices and {no_of_fs} faces;\n"
         f"\tcurrent state {states_to_name[state]} with {i} items read"
@@ -296,6 +296,7 @@ class Line3D(geomtypes.Line):
 
     This can either be infinite lines or line segments.
     """
+
     str_precision = 2
 
     def __init__(self, p0, p1=None, v=None, is_segment=False):
@@ -352,6 +353,7 @@ class Line3D(geomtypes.Line):
 
 class Triangle:
     """Model a triangle in 3D space."""
+
     def __init__(self, v0, v1, v2):
         self.v = [
             vec(v0[0], v0[1], v0[2]),
@@ -513,6 +515,7 @@ class SimpleShape(base.Orbitit):
         self.dimension = 3
         self.face_normals = []
         self.generate_normals = True
+        self._shape_colors = [[], []]
         self.name = name
         # For four below, see create_vertex_normals
         self.normal_per_vertex = []
@@ -558,7 +561,7 @@ class SimpleShape(base.Orbitit):
         self.face_props = {"fs": fs, "colors": colors}
         if orientation:
             self.orientation = orientation
-            if not orientation.is_rot():
+            if not orientation.is_opposite():
                 self.normal_direction = TRI_IN
         else:
             self.orientation = geomtypes.E
@@ -749,8 +752,9 @@ class SimpleShape(base.Orbitit):
                     self.gl.sphere = Scenes3D.VSphere(radius=props["radius"])
             if "color" in props and props["color"] is not None:
                 if props["color"]:
-                    assert isinstance(props["color"][0], int), \
-                        "Oops: old float format, use int up to 255 now"
+                    assert isinstance(
+                        props["color"][0], int
+                    ), "Oops: old float format, use int up to 255 now"
                 self.gl.vertex_col = props["color"]
 
     def gl_force_set_vs(self, do):
@@ -807,8 +811,9 @@ class SimpleShape(base.Orbitit):
                     self.gl.cyl = Scenes3D.P2PCylinder(radius=props["radius"])
             if "color" in props and props["color"] is not None:
                 if props["color"]:
-                    assert isinstance(props["color"][0], int),\
-                        "Oops: old float format, use int up to 255 now"
+                    assert isinstance(
+                        props["color"][0], int
+                    ), "Oops: old float format, use int up to 255 now"
                 self.gl.edge_col = props["color"]
             if "draw_edges" in props and props["draw_edges"] is not None:
                 self.gl.draw_edges = props["draw_edges"]
@@ -915,6 +920,18 @@ class SimpleShape(base.Orbitit):
             for f in faces
         ]
 
+    def faces_updated(self):
+        """Call this method when faces were updated without setting face_props
+
+        E.g. when reverse_face is used or any other time the faces array is updated.
+        """
+        self.triangulated_faces_n_index = self.triangulate(self.fs)
+        self.no_of_fs = len(self.fs)
+        self.face_normals_up_to_date = False
+        # if you autogenerate the vertex normal, using the faces, you need to
+        # regenerate by setting self.gl.update_vertices
+        self.gl.update_vertices = self.generate_normals
+
     def _set_faces(self, fs):
         """
         Define the shape faces
@@ -924,12 +941,7 @@ class SimpleShape(base.Orbitit):
         for f in fs:
             assert len(f) > 2, "A face should have at least 3 vertices"
         self.fs = fs
-        self.triangulated_faces_n_index = self.triangulate(fs)
-        self.no_of_fs = len(self.fs)
-        self.face_normals_up_to_date = False
-        # if you autogenerate the vertex normal, using the faces, you need to
-        # regenerate by setting self.gl.update_vertices
-        self.gl.update_vertices = self.generate_normals
+        self.faces_updated()
 
     @property
     def shape_colors(self):
@@ -994,6 +1006,40 @@ class SimpleShape(base.Orbitit):
         self.no_of_cols = len(new_col_defs)
         self.col_range = range(self.no_of_cols)
 
+    def update_face_with_col(self, face_i, new_col):
+        """Update the face with index 'face_i' with the colour 'new_col'
+
+        face_i: index of the face
+        new_col: new RGB colour for the face to use
+        """
+        col_defs = list(self.shape_colors[0])
+        face_cols = list(self.shape_colors[1])
+
+        # update colour
+        if new_col in col_defs:
+            new_col_i = col_defs.index(new_col)
+        else:
+            new_col_i = len(col_defs)
+            col_defs.append(new_col)
+        face_cols[face_i] = new_col_i
+        # This is needed since shape.shape_colors is not just an attribute, it is a setter
+        self.shape_colors = (col_defs, face_cols)
+
+    def remove_faces(self, indices):
+        """Remove all faces with the specified indices"""
+        fs = [face for i, face in enumerate(self.fs) if i not in indices]
+        # Also remove these faces from face_colors
+        face_colors = [
+            col_i for i, col_i in enumerate(self._shape_colors[1]) if i not in indices
+        ]
+        self._shape_colors = (self._shape_colors[0], face_colors)
+        self.clean_up_colors()
+        self._set_faces(fs)
+
+    def reverse_face(self, face_i):
+        """Use reverse order for the face with face index face_i"""
+        self.fs[face_i].reverse()
+
     @property
     def draw_faces(self):
         """Return whether the shape faces are drawn by OpenGL."""
@@ -1042,7 +1088,10 @@ class SimpleShape(base.Orbitit):
 
         return: none
         """
-        if not self.face_normals_up_to_date or self.face_normals_normalised != normalise:
+        if (
+            not self.face_normals_up_to_date
+            or self.face_normals_normalised != normalise
+        ):
             self.face_normals = [
                 self.generate_face_normal(f, normalise) for f in self.fs
             ]
@@ -1432,7 +1481,9 @@ class SimpleShape(base.Orbitit):
                 es = self.es
                 vs = self.vs
             GL.glColor(
-                self.gl.edge_col[0] / 255, self.gl.edge_col[1] / 255, self.gl.edge_col[2] / 255
+                self.gl.edge_col[0] / 255,
+                self.gl.edge_col[1] / 255,
+                self.gl.edge_col[2] / 255,
             )
             if self.gl.cylindrical_edges:
                 # draw edges as cylinders
@@ -1508,6 +1559,7 @@ class SimpleShape(base.Orbitit):
         color_floats: whether to export the colours as floating point numbers
                       between 0 and 1. If False an integer 0 to 255 is used.
         """
+
         def w(s1):
             nonlocal s
             return f"{s}{s1}\n"
@@ -1581,9 +1633,8 @@ class SimpleShape(base.Orbitit):
                 face = self.fs[i]
                 color = self._shape_colors[0][self._shape_colors[1][i]]
                 s = f"{s}{face_str(face)}\n"
-                face_idx_str = (
-                    f"{self.face_normals[i][0]} {self.face_normals[i][1]} {self.face_normals[i][2]}"
-                )
+                face_normal = self.face_normals[i]
+                face_idx_str = f"{face_normal[0]} {face_normal[1]} {face_normal[2]}"
                 if info:
                     s = w(f"# face normal: {face_idx_str}")
         if info:
@@ -2794,7 +2845,10 @@ class SymmetricShape(CompoundShape):
             if "fs" in props and props["fs"] is not None:
                 # The base shape must have some colour (which isn't really used
                 base_shape_col = ([(241, 241, 241)], ())
-                self.base_shape.face_props = {"fs": props["fs"], "colors": base_shape_col}
+                self.base_shape.face_props = {
+                    "fs": props["fs"],
+                    "colors": base_shape_col,
+                }
                 self.needs_apply_isoms = True
             if "colors" in props and props["colors"] is not None:
                 self.shape_colors = props["colors"]
