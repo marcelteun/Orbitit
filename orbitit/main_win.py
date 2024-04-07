@@ -642,7 +642,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
 
     def on_done(self, _event):
         """Apply colour to faces, and close window."""
-        for tab in self.tabs.keys():
+        for tab in self.tabs:
             tab.apply_col()
         self.Close()
 
