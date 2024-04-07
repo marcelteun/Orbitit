@@ -22,6 +22,7 @@
 #
 # ------------------------------------------------------------------
 # pylint: disable=too-many-lines,too-many-instance-attributes,too-many-ancestors
+# pylint: disable=too-many-arguments
 
 import copy
 import logging
@@ -169,25 +170,46 @@ class FacePanel(wx.Panel):
     """
 
     text_for_width = "[1.23456789001, 1.23456789001, 1.2345678901]"
+    HIDE_COL = [1, 1, 1, 0]  # use full transparency
 
-    def __init__(self, parent, list_of_vertices):
+    def __init__(self, parent, shape, face_index, update_shape, style=wx.VERTICAL):
         """
         Initialize object
 
         list_of_vertices: the list of 3 dimensional vertices.
         """
         super().__init__(parent)
-        self.vs = list_of_vertices
-        self.guis = []
-        self._add_content()
-
-    def _add_content(self):
-        """Add GUI widgets to this panel"""
-        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.shape = shape
+        self.face_index = face_index
+        self.org_face_col = self.shape.shape_colors[0][
+            self.shape.shape_colors[1][face_index]
+        ]
+        self._update_shape = update_shape
         self.text = ""
-        for vertex in self.vs:
-            self.text += f"\n{vertex}"
+        for vertex_index in self.shape.fs[face_index]:
+            self.text += f"\n{self.shape.vs[vertex_index]}"
         self.text = self.text[1:]
+        self.guis = []
+        self._add_content(style)
+
+    def _add_content(self, style):
+        """Add GUI widgets to this panel"""
+        main_sizer = wx.BoxSizer(style)
+
+        # CheckBox: hide face
+        hide_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.check_gui = wx.CheckBox(self)
+        self.Bind(wx.EVT_CHECKBOX, self._on_checked)
+        hide_sizer.Add(self.check_gui, 0, wx.ALL)
+        self.guis.append(self.check_gui)
+
+        self.hide_gui = wx.StaticText(self, wx.ID_ANY, "Hide")
+        hide_sizer.Add(self.hide_gui)
+        main_sizer.Add(hide_sizer, 0, wx.ALL)
+        self.guis.append(self.hide_gui)
+
+        # List of vertices
+        vertices_sizer = wx.BoxSizer(wx.VERTICAL)
         self.text_gui = wx.TextCtrl(
             self, wx.ID_ANY, self.text, style=wx.TE_READONLY | wx.TE_MULTILINE
         )
@@ -196,19 +218,52 @@ class FacePanel(wx.Panel):
         )
         self.text_gui.SetInitialSize(text_width)
         self.guis.append(self.text_gui)
-        self.main_sizer.Add(self.text_gui, 0, wx.EXPAND)
-        self.SetSizer(self.main_sizer)
+        vertices_sizer.Add(self.text_gui, 0, wx.EXPAND)
+        main_sizer.Add(vertices_sizer, 0, wx.EXPAND)
+
+        self.SetSizer(main_sizer)
 
     def show(self):
         """Show the list of vertices"""
         self.text_gui.SetValue(self.text)
-        self.text_gui.Show()
+        for widget in self.guis:
+            widget.Show()
 
     def hide(self):
         """Show the list of vertices"""
+        # It is easier for the user to make the face visible again when this menu is hidden,
+        # otherwise updating the colour will not have any effect. Besides it might be hard to find
+        # the check box in a list of many faces to do unhide
+        self.check_gui.SetValue(False)
+        self._update_face_col(self.org_face_col)
         self.text_gui.SetValue("")
-        self.text_gui.Hide()
+        for widget in self.guis:
+            widget.Hide()
 
+    def _update_face_col(self, face_col):
+        """Update the shape face with the specified colour and call update function"""
+        self.shape.update_face_with_col(self.face_index, face_col)
+        self._update_shape()
+
+    def _on_checked(self, event):
+        """Is called when the check box changes state
+
+        This will either hide or show the face with the current colour.
+        """
+        if event.GetEventObject().GetValue():
+            self._update_face_col(self.HIDE_COL)
+        else:
+            self._update_face_col(self.org_face_col)
+
+    def set_new_org_col(self, col):
+        """Update the original face colour.
+
+        This assumes that the shapes face has updated colour already. I.e. if the face is supposed
+        to be hidden, hide it again.
+        """
+        self.org_face_col = col
+        if self.check_gui.IsChecked():
+            self._update_face_col(self.HIDE_COL)
 
 
 class FacesList(wx_panel.ScrolledPanel):
@@ -229,8 +284,8 @@ class FacesList(wx_panel.ScrolledPanel):
         selection_col: wx.Colour that is used as face colour when it is selected
     """
 
-    SHOW_LABEL = "Show Vertices"
-    HIDE_LABEL = "Hide Vertices"
+    SHOW_LABEL = "More.."
+    HIDE_LABEL = "Less"
 
     def __init__(self, parent, shape, on_update, selection_col):
         """
@@ -265,7 +320,7 @@ class FacesList(wx_panel.ScrolledPanel):
             gui_row["label"].Destroy()
             gui_row["check"].Destroy()
             gui_row["button"].Destroy()
-            gui_row["vertices"].Destroy()
+            gui_row["face"].Destroy()
         self.selected_gui_keys = []
         self.checkbox_rows = {}
 
@@ -287,29 +342,31 @@ class FacesList(wx_panel.ScrolledPanel):
             check_gui = wx.CheckBox(self)
             check_id = check_gui.GetId()
             self.Bind(wx.EVT_CHECKBOX, self._on_checked, id=check_id)
-            f_sizer.Add(check_gui, 0, wx.ALL)
+            f_sizer.Add(check_gui, 0)
             # Add coloured text
             text_gui = wx.StaticText(self, wx.ID_ANY, f" {i} ")
             face_col = face_cols[0][col_i]
             text_gui.SetBackgroundColour(wx.Colour(*face_col))
             text_gui.SetForegroundColour(wx.Colour(*self.inv_col(face_col)))
             f_sizer.Add(text_gui, 0)
-            # Add button to show vertices
+            # Add button to show face options
             show_button = wx.Button(self, label=self.HIDE_LABEL)
             self.Bind(wx.EVT_BUTTON, self._on_show)
             f_sizer.Add(show_button, 0)
-            # Add vertices text
-            vertices_gui = FacePanel(self, [self.shape.vs[j] for j in self.shape.fs[i]])
-            show_button.vertices_list = vertices_gui
-            f_sizer.Add(vertices_gui, 0, wx.EXPAND)
+
+            # Add face options text
+            face_gui = FacePanel(self, self.shape, i, self._update_shape)
+            show_button.vertices_list = face_gui
+            f_sizer.Add(face_gui, 0, wx.EXPAND)
             # Initially hide the vertices
             self.on_show(show_button)
+
             # Admin
             self.checkbox_rows[check_id] = {
                 "check": check_gui,
                 "label": text_gui,
                 "button": show_button,
-                "vertices": vertices_gui,
+                "face": face_gui,
                 "org_col": face_col,
                 "face_i": i,
             }
@@ -360,21 +417,19 @@ class FacesList(wx_panel.ScrolledPanel):
         # TODO: centralise this
         face_index = row_data["face_i"]
         if checked:
-            text_gui.SetBackgroundColour(self.selection_col)
-            inv_col = wx.Colour(*self.inv_col(self.selection_col))
-            text_gui.SetForegroundColour(inv_col)
-            self.shape.update_face_with_col(face_index, self.selection_col[:3])
+            new_col = self.selection_col
             if chk_id not in self.selected_gui_keys:
                 self.selected_gui_keys.append(chk_id)
         else:
             face_col = row_data["org_col"]
-            org_col = wx.Colour(*face_col)
-            inv_col = wx.Colour(*self.inv_col(org_col))
-            text_gui.SetBackgroundColour(org_col)
-            text_gui.SetForegroundColour(inv_col)
-            self.shape.update_face_with_col(face_index, org_col[:3])
+            new_col = wx.Colour(*face_col)
             if chk_id in self.selected_gui_keys:
                 self.selected_gui_keys.remove(chk_id)
+        inv_col = wx.Colour(*self.inv_col(new_col))
+        text_gui.SetBackgroundColour(new_col)
+        text_gui.SetForegroundColour(inv_col)
+        self.shape.update_face_with_col(face_index, new_col[:3])
+        row_data["face"].set_new_org_col(new_col)
         self._update_shape()
 
     def _on_show(self, event):
