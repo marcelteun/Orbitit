@@ -543,14 +543,14 @@ class FacesTab(wx.Panel):
 
     def on_flip(self, _event):
         """Update the colour of the selected faces"""
-        for face_i in self.faces_list.selected_faces:
+        for check_id, row_data in self.faces_list.checkbox_rows.items():
+            face_i = row_data["face_i"]
             self.shape.reverse_face(face_i)
+            self.faces_list.switch(check_id, False)
+            row_data["check"].SetValue(False)
+        self.faces_list.deselect_all(apply_col=False)
         self.shape.faces_updated()
         self._update_shape()
-        self.faces_list.deselect_all(apply_col=False)
-        for check_id in self.faces_list.selected_gui_keys:
-            self.faces_list.switch(check_id, False)
-            self.faces_list.checkbox_rows[check_id]["check"].SetValue(False)
 
     def set_all_selected(self, selected):
         """Select all or none of the faces in the faces list depending on 'selected'."""
