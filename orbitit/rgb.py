@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Python translation of Linux standard rgb.txt"""
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -20,7 +20,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 # This file is a conversion from the linux rgb.txt
 
 # This naming comes directly from rgb.txt, so:

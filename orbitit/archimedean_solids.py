@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Classes defining the 13 Archimedean polyhedra."""
 
-# Copyright (C) 2022 Marcel Tunnissen
+# Copyright (C) 2022-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #

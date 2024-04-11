@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Some geometry definitions that are strictly 2D."""
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #

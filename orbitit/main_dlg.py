@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Utility for handling polyhedra"""
 #
-# Copyright (C) 2010-2019 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -20,11 +20,12 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 
 import wx
 import wx.lib.intctrl
 import wx.lib.colourselect
+
 
 class ExportOffDialog(wx.Dialog):
     """
@@ -55,28 +56,28 @@ class ExportOffDialog(wx.Dialog):
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "vertex precision (decimals):")
-        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        hbox.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         self.precision_gui = wx.lib.intctrl.IntCtrl(
             self,
             value=self.precision,
             min=1,
             max=16,
         )
-        hbox.Add(self.precision_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
+        hbox.Add(self.precision_gui, 1, wx.ALIGN_CENTRE | wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW | wx.ALL, 5)
 
         self.extra_data_gui = wx.CheckBox(self, label='Print extra info')
         self.extra_data_gui.SetValue(self.extra_data)
-        sizer.Add(self.extra_data_gui, 0, wx.GROW|wx.ALL, 5)
+        sizer.Add(self.extra_data_gui, 0, wx.GROW | wx.ALL, 5)
 
         self.clean_up_gui = wx.CheckBox(self, label='Merge equal vertices (can take a while)')
         self.clean_up_gui.SetValue(self.clean_up)
         self.clean_up_gui.Bind(wx.EVT_CHECKBOX, self.on_clean_up)
-        sizer.Add(self.clean_up_gui, 0, wx.GROW|wx.ALL, 5)
+        sizer.Add(self.clean_up_gui, 0, wx.GROW | wx.ALL, 5)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
-        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        hbox.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         self.float_margin_gui = wx.lib.intctrl.IntCtrl(
             self,
             value=self.float_margin,
@@ -85,8 +86,8 @@ class ExportOffDialog(wx.Dialog):
         )
         if not self.clean_up:
             self.float_margin_gui.Disable()
-        hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
+        hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE | wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW | wx.ALL, 5)
 
         button_sizer = wx.StdDialogButtonSizer()
 
@@ -132,6 +133,7 @@ class ExportOffDialog(wx.Dialog):
         self.__class__.float_margin = value
         return value
 
+
 class ExportPsDialog(wx.Dialog):
     """
     Dialog for exporting a polyhedron to a PS file.
@@ -161,37 +163,37 @@ class ExportPsDialog(wx.Dialog):
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "Scaling Factor:")
-        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        hbox.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         self.scale_factor_gui = wx.lib.intctrl.IntCtrl(
             self,
             value=self.__class__.scaling,
             min=1,
             max=10000,
         )
-        hbox.Add(self.scale_factor_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
+        hbox.Add(self.scale_factor_gui, 1, wx.ALIGN_CENTRE | wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW | wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "vertex precision (decimals):")
-        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        hbox.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         self.precision_gui = wx.lib.intctrl.IntCtrl(
             self,
             value=self.__class__.precision,
             min=1,
             max=16,
         )
-        hbox.Add(self.precision_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
+        hbox.Add(self.precision_gui, 1, wx.ALIGN_CENTRE | wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW | wx.ALL, 5)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         label = wx.StaticText(self, -1, "float margin for being equal (decimals):")
-        hbox.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        hbox.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         self.float_margin_gui = wx.lib.intctrl.IntCtrl(
             self,
             value=self.__class__.float_margin,
             min=1,
             max=16,
         )
-        hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-        sizer.Add(hbox, 0, wx.GROW|wx.ALL, 5)
+        hbox.Add(self.float_margin_gui, 1, wx.ALIGN_CENTRE | wx.ALL, 5)
+        sizer.Add(hbox, 0, wx.GROW | wx.ALL, 5)
 
         button_sizer = wx.StdDialogButtonSizer()
 

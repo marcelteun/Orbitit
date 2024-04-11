@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -19,7 +19,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-#--------------------------------------------------------------------
+# -------------------------------------------------------------------
 
 import wx
 import math

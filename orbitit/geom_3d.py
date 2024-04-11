@@ -3,7 +3,7 @@
 Geometry types specifically related to 3D
 """
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -41,29 +41,6 @@ import wx
 from OpenGL import GL
 
 from orbitit import base, geom_2d, geomtypes, glue, indent, isometry, PS, rgb, Scenes3D
-
-# TODO:
-# - Test the gl stuf of SimpleShape: create an Interactive3DCanvas
-#   the Symmetry stuff should not contain any shape stuff
-# - Add a flatten option to the Symmetric Face: resulting will be a SimpleShape
-#   that can be exported.
-# - Add class function: intersect faces: which will return a new shape for
-#   which the faces do not intersect anymore. Then there should be a class
-#   function for converting the faces to PS string as is.
-# - remove depedency towards cgkit: move to Scientific Python: make your own
-#   wrapper to abstract from this dependency?
-# - Add possible scene objects, containing shapes.
-# - add transforms
-# - add print pieces (cp from p3D)
-# - function to_postscript finds intersection: this should be part of a separate
-#   functons mapping the SimpleShape on a shape consisting of none intersecting
-#   pieces. This could be a child of SimpleShape.
-# - add function to filter out vertices that ly within a certain area: these
-#   should be projected on the avg of all of them: use a counter for this.
-# - clean up a bit: some functions return objects, other return the strings.
-
-# Done
-# - edges after reading off file
 
 
 def vec(x, y, z):
@@ -837,7 +814,7 @@ class SimpleShape(base.Orbitit):
                 edge = [j, i]
             else:
                 return
-            if not edge in added_edges:
+            if edge not in added_edges:
                 added_edges.append(edge)
                 es.extend(edge)
 
@@ -1066,11 +1043,8 @@ class SimpleShape(base.Orbitit):
 
         return: the normal
         """
-        l = len(f)
-        assert l > 2, "An face should at least have 2 vertices"
-        if l < 3:
-            assert False, "Normal for digons not implemented"
-            # TODO: what to do here?
+        length = len(f)
+        assert length > 2, "An face should at least have 2 vertices"
         normal = Triangle(self.vs[f[0]], self.vs[f[1]], self.vs[f[2]]).normal(normalise)
         if self.normal_direction in (TRI_OUT, TRI_IN):
             v0 = geomtypes.Vec3(self.vs[f[0]])
@@ -1164,12 +1138,12 @@ class SimpleShape(base.Orbitit):
                 t = (vi0, vi1)
             else:
                 t = (vi1, vi0)
-            l = (geomtypes.Vec3(self.vs[vi1]) - geomtypes.Vec3(self.vs[vi0])).norm()
-            l = round(l, precision)
+            length = (geomtypes.Vec3(self.vs[vi1]) - geomtypes.Vec3(self.vs[vi0])).norm()
+            length = round(length, precision)
             try:
-                len_to_edge[l].append(t)
+                len_to_edge[length].append(t)
             except KeyError:
-                len_to_edge[l] = [t]
+                len_to_edge[length] = [t]
         self.len_to_edge = len_to_edge
         return len_to_edge
 
@@ -1584,8 +1558,8 @@ class SimpleShape(base.Orbitit):
                 if len(es) > 2:
                     s = w(f"#                 E.g. {es[0]}, {es[1]}, {es[2]} etc")
             len_to_edge = self.create_edge_lengths()
-            for l, es in len_to_edge.items():
-                s = w(f"# Length: {geomtypes.f2s(l, precision)} for {len(es)} edges")
+            for norm, es in len_to_edge.items():
+                s = w(f"# Length: {geomtypes.f2s(norm, precision)} for {len(es)} edges")
                 if len(es) > 2:
                     s = w(f"#         E.g. {es[0]}, {es[1]}, {es[2]}, etc")
         s = w("# Vertices Faces Edges")
@@ -1936,12 +1910,12 @@ class SimpleShape(base.Orbitit):
                 calc_intersection = False
             else:
                 # Check whether they share an edge
-                l = len(intersecting_face)
-                for p in range(l):
+                length = len(intersecting_face)
+                for p in range(length):
                     for face in compound_face:
                         if intersecting_face[p] in face:
                             q = p + 1
-                            if q == l:
+                            if q == length:
                                 q = 0
                             if intersecting_face[q] in face:
                                 p_idx = face.index(intersecting_face[p])
@@ -2070,8 +2044,8 @@ class SimpleShape(base.Orbitit):
             # func global no_of_vs_org, cols
             # assumes that the gravity centres will be added to vs in face order
             # independently.
-            l = len(f)
-            return [[i + no_of_vs_org, f[j], f[(j + 1) % l]] for j in range(l)]
+            norm = len(f)
+            return [[i + no_of_vs_org, f[j], f[(j + 1) % norm]] for j in range(norm)]
 
         def dome_level_2(f):
             # f can only be a triangle: no check
@@ -2094,11 +2068,11 @@ class SimpleShape(base.Orbitit):
                 # add the gravity centres as assumed by dome_level_1:
                 add_projected_vs(self.fs_gravity)
             else:
-                l = len(f)
-                if l == 3:
+                norm = len(f)
+                if norm == 3:
                     extra_vs, extra_fs = dome_level_2(f)
                     add_projected_vs(extra_vs)
-                elif l > 3:
+                elif norm > 3:
                     tmp_fs = dome_level_1(f, i)
                     # add the gravity centres as assumed by dome_level_1:
                     add_projected_vs(self.fs_gravity)

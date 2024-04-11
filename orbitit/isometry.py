@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Module that contains classes for symmetry groups using group algebra."""
 #
-# Copyright (C) 2010-2019 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #

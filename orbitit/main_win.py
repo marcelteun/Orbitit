@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Help windows class definitions for main utility"""
 #
-# Copyright (C) 2010-2021 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #

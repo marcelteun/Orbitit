@@ -4,7 +4,7 @@
 It defines RGB colours with values between 0 and 1
 """
 #
-# Copyright (C) 2010-2021 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -23,7 +23,7 @@ It defines RGB colours with values between 0 and 1
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 from orbitit import rgb
 
 STD_COLORS = [

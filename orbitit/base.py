@@ -1,5 +1,33 @@
 #!/usr/bin/env python
 """Basic definitions for orbitit."""
+
+# Copyright (C) 2022-2024 Marcel Tunnissen
+#
+# License: GNU Public License version 2
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not,
+# check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+# or write to the Free Software Foundation,
+# ------------------------------------------------------------------
+#
+# The following is because of the class names. I keep the naming because the capitals are used in
+# mathematics and they are best separated by _
+# I also would like to keep the Greek variable names without using capitals.
+# pylint: disable=invalid-name,too-many-lines,non-ascii-name
+# pylint: disable=too-few-public-methods
+# Ignore duplicate code with platonic_solids
+# pylint: disable=duplicate-code
 from abc import ABC, abstractclassmethod, abstractproperty
 import json
 
@@ -10,6 +38,7 @@ json_to_class = {  # pylint: disable=C0103
 # Any class support to_json should update this: mapping a class to a string representation
 class_to_json = {  # pylint: disable=C0103
 }
+
 
 class Orbitit(ABC):
     """Shared base class for orbitit library."""
@@ -56,6 +85,7 @@ class Orbitit(ABC):
 class Singleton(type):
     """Way of defining singleton classes."""
     _instances = {}
+
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
@@ -83,6 +113,7 @@ def find_module_class_name(c, m):
         return None
 
     return rec(c)
+
 
 def add_std_arguments_for_generating_models(parser, models_list, add_separate=True):
     """Add program arguments for generating standard polyhedra.

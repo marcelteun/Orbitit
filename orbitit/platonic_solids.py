@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Classes defining the 5 Platonic "solids"."""
 
-# Copyright (C) 2022 Marcel Tunnissen
+# Copyright (C) 2022-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #

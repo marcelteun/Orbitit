@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Utility for handling polyhedra"""
 #
-# Copyright (C) 2010-2019 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -20,7 +20,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 # pylint: disable=too-many-lines
 
 import logging
@@ -82,6 +82,7 @@ DEFAULT_SCENE = 'scene_orbit'
 # prevent warning for not being used:
 del pre_pyopengl
 
+
 def is_off_model(filename):
     """Return True if the filename indicates this is an off-file.
 
@@ -89,12 +90,14 @@ def is_off_model(filename):
     """
     return filename.suffix == '.off'
 
+
 def is_json_model(filename):
     """Return True if the filename indicates this is an JSON file.
 
     filename: a pathlib.Path object pointing to the file to read
     """
     return filename.suffix == '.json'
+
 
 def read_shape_file(filename):
     """Load off-file or JSON file and return shape
@@ -114,6 +117,7 @@ def read_shape_file(filename):
             logging.warning('unrecognised file extension, file not opened')
     return shape
 
+
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     """OpenGL canvas where the 3D shape is painted"""
     def __init__(self, shape, *args, **kwargs):
@@ -125,18 +129,18 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         self.set_cam_pos(15.0)
         Scenes3D.Interactive3DCanvas.init_gl(self)
 
-        #GL.glShadeModel(GL.GL_SMOOTH)
+        # GL.glShadeModel(GL.GL_SMOOTH)
 
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
 
         mat_ambient = [0.2, 0.2, 0.2, 0.0]
         mat_diffuse = [0.1, 0.6, 0.0, 0.0]
-        #mat_specular = [0.2, 0.2, 0.2, 1.]
+        # mat_specular = [0.2, 0.2, 0.2, 1.]
         mat_shininess = 0.0
         GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, mat_ambient)
         GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, mat_diffuse)
-        #GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, mat_specular)
+        # GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, mat_specular)
         GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, mat_shininess)
 
         light_pos = [10.0, -30.0, -20.0, 0.0]
@@ -183,9 +187,11 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         self.shape.gl_draw()
 
+
 class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Main window holding the shape for the orbitit program"""
     wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
+
     def __init__(self, TstScene, shape, filename, export_dir, *args, **kwargs):
         """Initialise main window
 
@@ -819,6 +825,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         if e.GetId() == self.key_switch_front_back:
             Scenes3D.on_switch_front_and_back(self.panel.canvas)
 
+
 class MainPanel(wx.Panel):
     """Main orbitit window holding showing a shape in 3 dimensions"""
     def __init__(self, parent, TstScene, shape, *args, **kwargs):
@@ -848,7 +855,7 @@ class MainPanel(wx.Panel):
         Bind this function, and read and set the correct size in the scene.
         """
         s = self.GetClientSize()
-        logging.info("Window size: [%d, %d]", s[0]+2, s[1]+54)
+        logging.info("Window size: [%d, %d]", s[0] + 2, s[1] + 54)
         self.Layout()
 
     @property
@@ -887,6 +894,7 @@ class MainPanel(wx.Panel):
         self.parent.set_status_text("Shape Updated")
         del old_shape
 
+
 def convert_to_ps(shape, fd, scale, precision, margin):
     """Convert shape to PostScript and save to file descriptor fd"""
     fd.write(
@@ -896,6 +904,7 @@ def convert_to_ps(shape, fd, scale, precision, margin):
             margin=math.pow(10, -margin),
         )
     )
+
 
 def convert_to_off(shape, fd, precision, margin=0):
     """
@@ -915,6 +924,7 @@ def convert_to_off(shape, fd, precision, margin=0):
         shape = shape.clean_shape(margin)
     # TODO: support for saving extra_data?
     fd.write(shape.to_off(precision))
+
 
 if __name__ == "__main__":
     import argparse

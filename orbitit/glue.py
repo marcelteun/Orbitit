@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -19,17 +19,15 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 #
 # I am not sure where to put these functions. These convert objects from A to
 # B. Should they be in A or in B?
 
 import logging
-import math
 
-from orbitit import geomtypes
 
-def getVUsageIn1D(vs, es, vUsage = None):
+def getVUsageIn1D(vs, es, vUsage=None):
     """
     Check how often the vertices in vs are referred through the 1D array es
 

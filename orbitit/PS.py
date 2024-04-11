@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2010 Marcel Tunnissen
+# Copyright (C) 2010-2024 Marcel Tunnissen
 #
 # License: GNU Public License version 2
 #
@@ -19,7 +19,7 @@
 # check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 # or write to the Free Software Foundation,
 #
-#------------------------------------------------------------------
+# -----------------------------------------------------------------
 
 import sys
 
@@ -29,6 +29,7 @@ from orbitit import glue
 
 # TODO: Add standard page sizes here (and check if A4 is correct)
 PageSizeA4 = (559, 774)
+
 
 class doc:
     name  = "PS.doc"
