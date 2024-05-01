@@ -61,23 +61,23 @@ from orbitit import (  # pylint: disable=ungrouped-imports
 )
 
 SCENES = {
-    '24Cell': Scene_24Cell,
-    '5Cell': Scene_5Cell,
-    '8Cell': Scene_8Cell,
-    'eqlHeptA5xI': Scene_EqlHeptA5xI,
-    'eqlHeptA5xI_GD': Scene_EqlHeptA5xI_GD,
-    'eqlHeptA5xI_GI': Scene_EqlHeptA5xI_GI,
-    'eqlHeptFromKite': scene_eql_hept_from_kite,
-    'eqlHeptS4A4': Scene_EqlHeptS4A4,
-    'eqlHeptS4xI': Scene_EqlHeptS4xI,
-    'fldHeptA4': Scene_FldHeptA4,
-    'fldHeptA5': Scene_FldHeptA5,
-    'fldHeptS4': Scene_FldHeptS4,
-    'rectified24Cell': Scene_Rectified24Cell,
-    'rectified8Cell': Scene_Rectified8Cell,
-    'scene_orbit': scene_orbit,
+    "24Cell": Scene_24Cell,
+    "5Cell": Scene_5Cell,
+    "8Cell": Scene_8Cell,
+    "eqlHeptA5xI": Scene_EqlHeptA5xI,
+    "eqlHeptA5xI_GD": Scene_EqlHeptA5xI_GD,
+    "eqlHeptA5xI_GI": Scene_EqlHeptA5xI_GI,
+    "eqlHeptFromKite": scene_eql_hept_from_kite,
+    "eqlHeptS4A4": Scene_EqlHeptS4A4,
+    "eqlHeptS4xI": Scene_EqlHeptS4xI,
+    "fldHeptA4": Scene_FldHeptA4,
+    "fldHeptA5": Scene_FldHeptA5,
+    "fldHeptS4": Scene_FldHeptS4,
+    "rectified24Cell": Scene_Rectified24Cell,
+    "rectified8Cell": Scene_Rectified8Cell,
+    "scene_orbit": scene_orbit,
 }
-DEFAULT_SCENE = 'scene_orbit'
+DEFAULT_SCENE = "scene_orbit"
 
 # prevent warning for not being used:
 del pre_pyopengl
@@ -88,7 +88,7 @@ def is_off_model(filename):
 
     filename: a pathlib.Path object pointing to the file to read
     """
-    return filename.suffix == '.off'
+    return filename.suffix == ".off"
 
 
 def is_json_model(filename):
@@ -96,7 +96,7 @@ def is_json_model(filename):
 
     filename: a pathlib.Path object pointing to the file to read
     """
-    return filename.suffix == '.json'
+    return filename.suffix == ".json"
 
 
 def read_shape_file(filename):
@@ -109,17 +109,18 @@ def read_shape_file(filename):
     shape = None
     if filename:
         if is_off_model(filename):
-            with open(filename, 'r') as fd:
+            with open(filename, "r") as fd:
                 shape = geom_3d.read_off_file(fd, name=filename.stem)
         elif is_json_model(filename):
             shape = base.Orbitit.from_json_file(filename)
         else:
-            logging.warning('unrecognised file extension, file not opened')
+            logging.warning("unrecognised file extension, file not opened")
     return shape
 
 
 class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     """OpenGL canvas where the 3D shape is painted"""
+
     def __init__(self, shape, *args, **kwargs):
         self.shape = shape
         Scenes3D.Interactive3DCanvas.__init__(self, *args, **kwargs)
@@ -147,7 +148,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         light_ambient = [0.3, 0.3, 0.3, 1.0]
         light_diffuse = [0.5, 0.5, 0.5, 1.0]
         # disable specular part:
-        light_specular = [0., 0., 0., 1.]
+        light_specular = [0.0, 0.0, 0.0, 1.0]
         GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, light_pos)
         GL.glLightfv(GL.GL_LIGHT0, GL.GL_AMBIENT, light_ambient)
         GL.glLightfv(GL.GL_LIGHT0, GL.GL_DIFFUSE, light_diffuse)
@@ -155,9 +156,9 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glEnable(GL.GL_LIGHT0)
 
         light_pos = [-30.0, 0.0, -20.0, 0.0]
-        light_ambient = [0.0, 0.0, 0.0, 1.]
-        light_diffuse = [0.08, 0.08, 0.08, 1.]
-        light_specular = [0.0, 0.0, 0.0, 1.]
+        light_ambient = [0.0, 0.0, 0.0, 1.0]
+        light_diffuse = [0.08, 0.08, 0.08, 1.0]
+        light_specular = [0.0, 0.0, 0.0, 1.0]
         GL.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, light_pos)
         GL.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, light_ambient)
         GL.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, light_diffuse)
@@ -169,7 +170,9 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE)
         GL.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
-        GL.glClearColor(self.bg_col[0] / 255, self.bg_col[1] / 255, self.bg_col[2] / 255, 0)
+        GL.glClearColor(
+            self.bg_col[0] / 255, self.bg_col[1] / 255, self.bg_col[2] / 255, 0
+        )
 
     @property
     def bg_col(self):
@@ -188,8 +191,11 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         self.shape.gl_draw()
 
 
-class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
+class MainWindow(
+    wx.Frame
+):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Main window holding the shape for the orbitit program"""
+
     wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
 
     def __init__(self, scene, shape, filename, export_dir, *args, **kwargs):
@@ -226,9 +232,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.Show(True)
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.key_switch_front_back = wx.NewIdRef().GetId()
-        ac = [
-            (wx.ACCEL_NORMAL, wx.WXK_F3, self.key_switch_front_back)
-        ]
+        ac = [(wx.ACCEL_NORMAL, wx.WXK_F3, self.key_switch_front_back)]
         self.Bind(wx.EVT_MENU, self.on_key_down, id=self.key_switch_front_back)
         self.SetAcceleratorTable(wx.AcceleratorTable(ac))
 
@@ -291,10 +295,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def add_menu_bar(self):
         """Create and add a complete menu-bar"""
         menu_bar = wx.MenuBar()
-        menu_bar.Append(self.create_file_menu(), '&File')
-        menu_bar.Append(self.create_edit_menu(), '&Edit')
-        menu_bar.Append(self.create_view_menu(), '&View')
-        menu_bar.Append(self.create_tools_menu(), '&Tools')
+        menu_bar.Append(self.create_file_menu(), "&File")
+        menu_bar.Append(self.create_edit_menu(), "&Edit")
+        menu_bar.Append(self.create_view_menu(), "&View")
+        menu_bar.Append(self.create_tools_menu(), "&Tools")
         self.SetMenuBar(menu_bar)
 
     def create_file_menu(self):
@@ -478,7 +482,8 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def on_open(self, _):
         """Handle event '_' to open file"""
         dlg = wx.FileDialog(
-            self, 'Open an file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN)
+            self, "Open an file", self.import_dir_name, "", self.wildcard, wx.FD_OPEN
+        )
         if dlg.ShowModal() == wx.ID_OK:
             self.invalidate_windows()
             filename = Path(dlg.GetFilename())
@@ -514,11 +519,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
         if (
-                len(shape.face_props['fs']) == 0
-                and
-                self.panel.shape.vertex_props['radius'] <= 0
+            len(shape.face_props["fs"]) == 0
+            and self.panel.shape.vertex_props["radius"] <= 0
         ):
-            self.panel.shape.vertex_props = {'radius': 0.05}
+            self.panel.shape.vertex_props = {"radius": 0.05}
         self.SetTitle(f"{filename.stem}")
         # Save for reload:
         self.current_file = filename
@@ -527,7 +531,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     def on_add(self, _):
         """Handle event '_' to add file to the current shape"""
         dlg = wx.FileDialog(
-            self, 'Add: Choose a file', self.import_dir_name, '', self.wildcard, wx.FD_OPEN
+            self,
+            "Add: Choose a file",
+            self.import_dir_name,
+            "",
+            self.wildcard,
+            wx.FD_OPEN,
         )
         if dlg.ShowModal() == wx.ID_OK:
             self.invalidate_windows()
@@ -536,7 +545,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             logging.info("adding file: %s", filename)
             path = Path(self.import_dir_name) / filename
             if is_off_model(filename):
-                with open(path, 'r') as fd:
+                with open(path, "r") as fd:
                     shape = geom_3d.read_off_file(fd, name=filename.stem)
             else:
                 shape = base.Orbitit.from_json_file(path)
@@ -548,20 +557,22 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 shape.scale(self.panel.original_scale_factor)
                 self.panel.shape.add_shape(shape)
             except AttributeError:
-                logging.warning("Cannot 'add' a shape to this scene, use 'File->Open' instead")
+                logging.warning(
+                    "Cannot 'add' a shape to this scene, use 'File->Open' instead"
+                )
             self.set_status_text("OFF file added")
             # TODO: set better title
-            self.SetTitle(f'{self.GetTitle()} + {filename.stem}')
+            self.SetTitle(f"{self.GetTitle()} + {filename.stem}")
         dlg.Destroy()
 
     def on_save_json(self, _):
         """Handle event '_' to export the current shape to a JSON file"""
         dlg = wx.FileDialog(
             self,
-            'Save as .json file',
+            "Save as .json file",
             self.export_dir_name,
-            '',
-            '*.json',
+            "",
+            "*.json",
             style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
         )
         if dlg.ShowModal() == wx.ID_OK:
@@ -577,7 +588,8 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             precision = geomtypes.FLOAT_OUT_PRECISION
             try:
                 org_precision, geomtypes.float_out_precision = (
-                    geomtypes.float_out_precision, precision
+                    geomtypes.float_out_precision,
+                    precision,
                 )
             except AttributeError:
                 org_precision = precision
@@ -589,7 +601,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_save_off(self, _):
         """Handle event '_' to save the current shape as off-file"""
-        dlg = main_dlg.ExportOffDialog(self, wx.ID_ANY, 'OFF settings')
+        dlg = main_dlg.ExportOffDialog(self, wx.ID_ANY, "OFF settings")
         file_chosen = False
         while not file_chosen:
             if dlg.ShowModal() == wx.ID_OK:
@@ -599,10 +611,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 margin = dlg.get_float_margin()
                 file_dlg = wx.FileDialog(
                     self,
-                    'Save as .off file',
+                    "Save as .off file",
                     self.export_dir_name,
-                    '',
-                    '*.off',
+                    "",
+                    "*.off",
                     wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 )
                 file_chosen = file_dlg.ShowModal() == wx.ID_OK
@@ -619,7 +631,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                         pass
                     if clean_up:
                         shape = shape.clean_shape(margin)
-                    with open(filepath, 'w') as fd:
+                    with open(filepath, "w") as fd:
                         fd.write(shape.to_off(precision, extra_data))
                     self.set_status_text("OFF file written")
                 else:
@@ -632,21 +644,21 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_save_ps(self, _):
         """Handle event '_' to save PostScript faces of the current shape"""
-        dlg = main_dlg.ExportPsDialog(self, wx.ID_ANY, 'PS settings')
+        dlg = main_dlg.ExportPsDialog(self, wx.ID_ANY, "PS settings")
         file_chosen = False
         while not file_chosen:
             if dlg.ShowModal() == wx.ID_OK:
                 scale_factor = dlg.get_scaling()
                 precision = dlg.get_precision()
                 margin = dlg.get_float_margin()
-                assert (scale_factor >= 0 and scale_factor is not None)
+                assert scale_factor >= 0 and scale_factor is not None
                 file_dlg = wx.FileDialog(
                     self,
-                    'Save as .ps file',
+                    "Save as .ps file",
                     self.export_dir_name,
-                    '',
-                    '*.ps',
-                    style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+                    "",
+                    "*.ps",
+                    style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 )
                 file_chosen = file_dlg.ShowModal() == wx.ID_OK
                 if file_chosen:
@@ -662,16 +674,19 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                     except AttributeError:
                         pass
                     shape = shape.clean_shape(margin)
-                    with open(filepath, 'w') as fd:
+                    with open(filepath, "w") as fd:
                         try:
                             with geomtypes.FloatHandler(margin):
                                 fd.write(
-                                    shape.to_postscript(scaling=scale_factor, precision=precision)
+                                    shape.to_postscript(
+                                        scaling=scale_factor, precision=precision
+                                    )
                                 )
                                 self.set_status_text("PS file written")
                         except ValueError:
                             self.set_status_text(
-                                "Precision error, try to decrease float margin")
+                                "Precision error, try to decrease float margin"
+                            )
                 else:
                     dlg.Show()
                 file_dlg.Destroy()
@@ -685,9 +700,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         if not self.view_settings_win:
             self.view_settings_win = main_win.ViewSettingsWindow(
                 self.panel.canvas,
-                None, wx.ID_ANY,
-                title='View Settings',
-                size=(394, 300)
+                None,
+                wx.ID_ANY,
+                title="View Settings",
+                size=(394, 300),
             )
             self.view_settings_win.Bind(wx.EVT_CLOSE, self.on_view_win_closed)
         else:
@@ -698,8 +714,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Handle event '_' to change the colours of the current shape"""
         # Don't reuse, the colours might be wrong after loading a new model
         self.col_settings_win = main_win.ColourWindow(
-            self.panel.canvas, 5, None, wx.ID_ANY,
-            title='Colour Settings',
+            self.panel.canvas,
+            5,
+            None,
+            wx.ID_ANY,
+            title="Colour Settings",
         )
         self.col_settings_win.Bind(wx.EVT_CLOSE, self.on_col_win_closed)
 
@@ -707,8 +726,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Handle event '_' to change the colours of the current shape"""
         # Don't reuse, the colours might be wrong after loading a new model
         self.face_settings_win = main_win.FacesWindow(
-            self.panel.canvas, None, wx.ID_ANY,
-            title='Face Settings',
+            self.panel.canvas,
+            None,
+            wx.ID_ANY,
+            title="Face Settings",
         )
         self.face_settings_win.Bind(wx.EVT_CLOSE, self.on_face_win_closed)
 
@@ -716,8 +737,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """Handle event '_' to transform the current shape"""
         if self.transform_settings_win is None:
             self.transform_settings_win = main_win.TransformWindow(
-                self.panel.canvas, None, wx.ID_ANY,
-                title='Transform Settings',
+                self.panel.canvas,
+                None,
+                wx.ID_ANY,
+                title="Transform Settings",
             )
             self.transform_settings_win.Bind(wx.EVT_CLOSE, self.on_transform_win_closed)
         else:
@@ -740,10 +763,10 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         self.load_scene(self.id_to_scene[evt.GetId()])
 
     def load_scene(self, scene):
-        """ Set the current scene to the scene with the specified name"""
+        """Set the current scene to the scene with the specified name"""
         scene = {
-            'lab': scene.TITLE,
-            'class': scene.Scene,
+            "lab": scene.TITLE,
+            "class": scene.Scene,
         }
         self.set_scene(scene)
 
@@ -756,11 +779,11 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
         """
         self.invalidate_windows()
         self.close_current_scene()
-        logging.info('Switching to scene: "%s".', scene['lab'])
+        logging.info('Switching to scene: "%s".', scene["lab"])
         canvas = self.panel.canvas
-        self.scene = scene['class'](self, canvas)
+        self.scene = scene["class"](self, canvas)
         self.panel.shape = self.scene.shape
-        self.SetTitle(scene['lab'])
+        self.SetTitle(scene["lab"])
         canvas.resetOrientation()
         # save for reload:
         self.current_scene = scene
@@ -783,9 +806,12 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_exit(self, _):
         """Handle event '_' to quite application"""
-        dlg = wx.MessageDialog(None,
-                               'Are you sure you want to quit?', 'Question',
-                               wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(
+            None,
+            "Are you sure you want to quit?",
+            "Question",
+            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION,
+        )
         if dlg.ShowModal() == wx.ID_YES:
             dlg.Destroy()
             self.Close(True)
@@ -814,7 +840,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
     def on_close(self, _):
         """Handle event '_' to close the main window"""
-        logging.info('main onclose')
+        logging.info("main onclose")
         for win_list in self.win_to_close:
             if win_list:
                 for win in win_list:
@@ -829,6 +855,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
 class MainPanel(wx.Panel):
     """Main orbitit window holding showing a shape in 3 dimensions"""
+
     def __init__(self, parent, scene, shape, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         self.parent = parent
@@ -872,8 +899,9 @@ class MainPanel(wx.Panel):
         """
         old_shape = self.canvas.shape
         self.canvas.shape = shape
-        assert isinstance(shape, geom_3d.CompoundShape),\
-            f"expected a CompoundShape, got {type(shape)}"
+        assert isinstance(
+            shape, geom_3d.CompoundShape
+        ), f"expected a CompoundShape, got {type(shape)}"
         # TODO: clean up vertices in case a vertex isn't used
         max_norm = 0
         for sub_shape in shape:
@@ -887,15 +915,15 @@ class MainPanel(wx.Panel):
         # Use all the vertex settings except for vs, i.e. keep the view
         # vertex settings the same.
         old_v_settings = old_shape.vertex_props
-        del old_v_settings['vs']
-        del old_v_settings['ns']
+        del old_v_settings["vs"]
+        del old_v_settings["ns"]
         self.canvas.shape.vertex_props = old_v_settings
         # Use all the edge settings except for es
         old_e_settings = old_shape.edge_props
-        del old_e_settings['es']
+        del old_e_settings["es"]
         self.canvas.shape.edge_props = old_e_settings
         # Use only the 'draw_faces' setting:
-        old_f_settings = {'draw_faces': old_shape.face_props['draw_faces']}
+        old_f_settings = {"draw_faces": old_shape.face_props["draw_faces"]}
         self.canvas.shape.face_props = old_f_settings
         # if the shape generates the normals itself:
         # TODO: handle that this.ns is set correctly, i.e. normalised
@@ -951,7 +979,7 @@ if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=DESCR)
     PARSER.add_argument(
         "inputfile",
-        metavar='filename',
+        metavar="filename",
         nargs="?",
         default="",
         help="Input files can either be a python file in a certain format or an off file. "
@@ -959,56 +987,65 @@ if __name__ == "__main__":
         "of this files.",
     )
     PARSER.add_argument(
-        "-d", "--debug",
-        action='store_true',
+        "-d",
+        "--debug",
+        action="store_true",
         help="Enable logs for debugging.",
     )
     PARSER.add_argument(
-        "-e", "--export-dir",
+        "-e",
+        "--export-dir",
         metavar="path",
         help="Export to this directory when exporting files. If nothing is specified, then "
         "the current working dir is used.",
     )
     PARSER.add_argument(
-        "-m", "--margin",
+        "-m",
+        "--margin",
         type=int,
-        metavar='i',
+        metavar="i",
         default=10,
         help="Set the margin for floating point numbers to be considered equal. All numbers with a"
         "difference that is smaller than 1.0e-<i> will be considered equal.",
     )
     PARSER.add_argument(
-        "-o", "--off",
-        metavar='filename',
+        "-o",
+        "--off",
+        metavar="filename",
         help="Export an input file to an off-file. Specify full path. Any --export-dir is ignored.",
     )
     PARSER.add_argument(
-        "-P", "--precision",
+        "-P",
+        "--precision",
         type=int,
-        metavar='i',
+        metavar="i",
         default=15,
         help="Write floating point numbers with <i> number of decimals.",
     )
     PARSER.add_argument(
-        "-p", "--ps",
-        metavar='filename',
+        "-p",
+        "--ps",
+        metavar="filename",
         help="Export an input file to post-script. Specify full path. Any --export-dir is ignored.",
     )
     PARSER.add_argument(
-        "-y", "--py",
-        metavar='filename',
+        "-y",
+        "--py",
+        metavar="filename",
         help="Export an input file to python. Specify full path. Any --export-dir is ignored.",
     )
     PARSER.add_argument(
-        "-s", "--scene",
-        metavar='scene-name',
+        "-s",
+        "--scene",
+        metavar="scene-name",
         default=DEFAULT_SCENE,
         help="Start the user interface with the specified scene name. This parameter is ignored if "
         f"the '-i' option is used. Valid scene names are: {list(SCENES.keys())}",
     )
     PARSER.add_argument(
-        "-x", "--scale",
-        metavar='n',
+        "-x",
+        "--scale",
+        metavar="n",
         default=50,
         help="When saving to PostScript, then use the specified scale factor",
     )
@@ -1029,17 +1066,21 @@ if __name__ == "__main__":
             sys.exit(-1)
         if PROG_ARGS.off:
             START_GUI = False
-            with open(PROG_ARGS.off, 'w') as o_fd:
+            with open(PROG_ARGS.off, "w") as o_fd:
                 convert_to_off(IN_SHAPE, o_fd, PROG_ARGS.precision, PROG_ARGS.margin)
         elif PROG_ARGS.py:
             START_GUI = False
-            with open(PROG_ARGS.py, 'w') as o_fd:
+            with open(PROG_ARGS.py, "w") as o_fd:
                 IN_SHAPE.save_file(o_fd)
         elif PROG_ARGS.ps:
             START_GUI = False
-            with open(PROG_ARGS.ps, 'w') as o_fd:
+            with open(PROG_ARGS.ps, "w") as o_fd:
                 convert_to_ps(
-                    IN_SHAPE, o_fd, PROG_ARGS.scale, PROG_ARGS.precision, PROG_ARGS.margin
+                    IN_SHAPE,
+                    o_fd,
+                    PROG_ARGS.scale,
+                    PROG_ARGS.precision,
+                    PROG_ARGS.margin,
                 )
     else:
         IN_SHAPE = geom_3d.SimpleShape([], [])
@@ -1052,9 +1093,10 @@ if __name__ == "__main__":
             FILENAME,
             PROG_ARGS.export_dir,
             None,
-            wx.ID_ANY, "test",
+            wx.ID_ANY,
+            "test",
             size=(430, 482),
-            pos=wx.Point(980, 0)
+            pos=wx.Point(980, 0),
         )
         if not FILENAME:
             FRAME.load_scene(SCENES[PROG_ARGS.scene])
