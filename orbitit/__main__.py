@@ -192,7 +192,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
     """Main window holding the shape for the orbitit program"""
     wildcard = "OFF shape (*.off)|*.off| JSON shape (*.json)|*.json"
 
-    def __init__(self, TstScene, shape, filename, export_dir, *args, **kwargs):
+    def __init__(self, scene, shape, filename, export_dir, *args, **kwargs):
         """Initialise main window
 
         filename: a pathlib.Path object pointing to the OFF file to open or None
@@ -220,7 +220,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
             self._transform_settings_win,
         ]
         self.scene = None
-        self.panel = MainPanel(self, TstScene, shape, wx.ID_ANY)
+        self.panel = MainPanel(self, scene, shape, wx.ID_ANY)
         if filename and (is_off_model(filename) or is_json_model(filename)):
             self.open_file(filename)
         self.Show(True)
@@ -545,6 +545,7 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
                 # will not work.
                 shape = shape.simple_shape
             try:
+                shape.scale(self.panel.original_scale_factor)
                 self.panel.shape.add_shape(shape)
             except AttributeError:
                 logging.warning("Cannot 'add' a shape to this scene, use 'File->Open' instead")
@@ -828,14 +829,14 @@ class MainWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes,too-
 
 class MainPanel(wx.Panel):
     """Main orbitit window holding showing a shape in 3 dimensions"""
-    def __init__(self, parent, TstScene, shape, *args, **kwargs):
+    def __init__(self, parent, scene, shape, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         # Note that uncommenting this will override the default size
         # handler, which resizes the sizers that are part of the Frame.
         self.Bind(wx.EVT_SIZE, self.on_size)
 
-        self.canvas = TstScene(shape, self)
+        self.canvas = scene(shape, self)
         self.canvas.panel = self
         self.canvas.SetMinSize((300, 300))
         self.canvas_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -871,6 +872,18 @@ class MainPanel(wx.Panel):
         """
         old_shape = self.canvas.shape
         self.canvas.shape = shape
+        assert isinstance(shape, geom_3d.CompoundShape),\
+            f"expected a CompoundShape, got {type(shape)}"
+        # TODO: clean up vertices in case a vertex isn't used
+        max_norm = 0
+        for sub_shape in shape:
+            for vs in sub_shape.vs:
+                max_norm = max(max_norm, vs.norm())
+        # Now scale to fit FoV
+        max_fit = 5.6
+        self.original_scale_factor = max_fit / max_norm
+        shape.scale(self.original_scale_factor)
+
         # Use all the vertex settings except for vs, i.e. keep the view
         # vertex settings the same.
         old_v_settings = old_shape.vertex_props

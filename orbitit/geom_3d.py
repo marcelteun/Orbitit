@@ -1254,6 +1254,11 @@ class SimpleShape(base.Orbitit):
         face_cols.extend(list(range(mod)))
         self._shape_colors = (self._shape_colors[0], face_cols)
 
+    def translate(self, trans):
+        """Translate the model using the specified 3D vector."""
+        self.vs = [geomtypes.Vec3(trans) + v for v in self.vs]
+        self.gl.update_vertices = True
+
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
         self.vs = [trans * v for v in self.vs]
