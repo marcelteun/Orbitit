@@ -444,7 +444,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         if self.angle_domain:
             js += (
                 f"{self.name}.angle_domain = "
-                f"[{self.angle_domain[0]:.3f}, {self.angle_domain[1]:.3f}];\n"
+                f"[{self.angle_domain[0]:.3f}, {self.angle_domain[-1]:.3f}];\n"
             )
 
         return js
