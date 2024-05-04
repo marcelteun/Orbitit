@@ -823,6 +823,8 @@ class A5xI_D3C3(Compound):
 
         version: either 'A' or 'B'
         """
+        versions = ["A", "B"]
+        assert version in versions, f"{type(self).__name__} only supports versions {versions}"
         axis = geomtypes.Vec3([1, 1, 1])
         phi = (1 + V5) / 2
         normal = geomtypes.Vec3([-1, -phi, phi + 1])
@@ -830,7 +832,7 @@ class A5xI_D3C3(Compound):
             base,
             isometry.A5xI(),
             isometry.D3C3(setup={"axis_n": axis, "normal_r": normal}),
-            name="{}_A5xI_D3C3".format(version),
+            name=f"{version}_A5xI_D3C3",
             no_of_cols=no_of_cols,
             col_alt=col_alt,
             cols=cols,
