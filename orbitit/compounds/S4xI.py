@@ -7,7 +7,7 @@ tetrahedron below.
 
 import math
 
-from orbitit.compounds import base
+from orbitit.compounds import angle
 from orbitit import geomtypes, isometry, orbit
 
 
@@ -59,7 +59,7 @@ class A4xI_ExI(Compound):
 
 class A4xI_C2xI(Compound):
 
-    mu = [0, math.pi / 2, base.ASIN_1_V3]
+    mu = [0, math.pi / 2, angle.ASIN_1_V3]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 6 elements with final symmetry A4xI (rotation freedom)
@@ -83,7 +83,7 @@ class A4xI_C2xI(Compound):
 
 class A4xI_C3xI(Compound):
 
-    mu = [0, math.pi / 3, base.D_ATAN_V3_2_V5]
+    mu = [0, math.pi / 3, angle.D_ATAN_V3_2_V5]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry A4xI (rotation freedom)
@@ -126,7 +126,7 @@ class S4xI_ExI(Compound):
 
 class S4xI_C2xI_A(Compound):
 
-    mu = [0, base.ASIN_2V2_3, math.pi / 2, base.ASIN_1_V3, base.ACOS_1_V3, math.pi / 4]
+    mu = [0, angle.ASIN_2V2_3, math.pi / 2, angle.ASIN_1_V3, angle.ACOS_1_V3, math.pi / 4]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4xI (rotation freedom)
@@ -153,10 +153,10 @@ class S4xI_C2xI_B(Compound):
     mu = [
         0,
         math.pi / 4,
-        base.ACOS_1_V3 - math.pi / 4,
-        base.ASIN_1_V3,
+        angle.ACOS_1_V3 - math.pi / 4,
+        angle.ASIN_1_V3,
         math.pi / 8,
-        base.ATAN_4V2_7 / 2,
+        angle.ATAN_4V2_7 / 2,
     ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
@@ -185,10 +185,10 @@ class S4xI_D1xI(Compound):
     mu = [
         0,
         math.pi / 4,
-        base.ACOS_1_V3 - math.pi / 4,
-        base.ASIN_1_V3,
+        angle.ACOS_1_V3 - math.pi / 4,
+        angle.ASIN_1_V3,
         math.pi / 8,
-        base.ATAN_4V2_7 / 2,
+        angle.ATAN_4V2_7 / 2,
     ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
@@ -214,7 +214,7 @@ class S4xI_D1xI(Compound):
 
 class S4xI_C3xI(Compound):
 
-    mu = [0, math.pi / 3, base.D_ATAN_V3_2_V5, math.pi / 6]
+    mu = [0, math.pi / 3, angle.D_ATAN_V3_2_V5, math.pi / 6]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry S4xI (rotation freedom)
@@ -342,3 +342,191 @@ class S4xI_D2xI(Compound):
         self.transform_base(self.base_to_o2)
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / 4)
         self.transform_base(base_rot)
+
+
+###############################################################################
+#
+# A5 x I
+#
+###############################################################################
+class A5xI_ExI(Compound):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """General compound of 60 with A5xI symmetry with central freedom."""
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.ExI(),
+            name="A5xI_ExI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+
+class A5xI_C2xI_A(Compound):
+
+    mu = [
+        0,
+        angle.ATAN_H_V2_1_V5__1,
+        angle.ACOS_V2_1_V5_V2_1__6,
+        math.pi / 2,
+        angle.ASIN_1_V3,  # 4
+        angle.ACOS_1_V3,
+        angle.ACOS_V5_1_2V3,  # 6
+        angle.ACOS_V_5_V5_V10,
+        angle.ASIN_V_5_V5_V10,  # 8
+        angle.ASIN_V5_1_2V3,
+        math.pi / 4,
+    ]
+
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 30 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.C2xI(setup={"axis": axis}),
+            name="A_A5xI_C2xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis, self.mu[:4])
+        self.transform_base(self.base_to_o2)
+
+
+class A5xI_C2xI_B(Compound):
+
+    mu = [
+        0,
+        math.pi / 4,
+        angle.ATAN_V5_2,
+        angle.ACOS_V5_1_2V3,  # 3
+        angle.ATAN_1_V5,
+        angle.ACOS_V_5_V5_V10,  # 5
+        math.pi / 8,
+    ]
+
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 30 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 4-fold axis with a 2-fold axis in the final symmetry
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.C2xI(setup={"axis": axis}),
+            name="B_A5xI_C2xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis, self.mu[:2])
+
+
+class A5xI_C3xI(Compound):
+
+    mu = [
+        -angle.ACOS_V2_3_V5_8,
+        0,
+        angle.ACOS_V10_4,  # 2
+        angle.acos_7_3V5_16,
+        angle.ACOS_7_3V5_3_2_2V5_8,  # 4
+        angle.ACOS_1_3V5_8,
+        angle.H_ACOS_1_3V5_8,  # 6
+    ]
+
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 20 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 3-fold axis with the final symmetry
+        """
+        axis = geomtypes.Vec3([1, 1, 1])
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.C3xI(setup={"axis": axis}),
+            name="A5xI_C3xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis, self.mu[:3])
+
+
+# Rigid Compounds
+class A5xI_A4xI(Compound):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Rigid ompound of 5 elements with final symmetry A5xI
+
+        With the orginisation as in the classical compound of 5 cubes
+        """
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.A4xI(),
+            name="A5xI_A4",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+
+class A5xI_D3xI(Compound):
+    def __init__(self, version, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 10 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 3-fold axis with the final symmetry and three
+        reflection planes that meet in that same axis.
+
+        version: either 'A' or 'B'
+        """
+        axis = geomtypes.Vec3([1, 1, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        phi = (1 + angle.V5) / 2
+        axis_2 = geomtypes.Vec3([-1, -phi, phi + 1])
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.D3xI(setup={"axis_n": axis, "axis_2": axis_2}),
+            name="{}_A5xI_D3xI".format(version),
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        mu_i = 2 if version == "A" else 0
+        base_rot = geomtypes.Rot3(axis=axis, angle=A5xI_C3xI.mu[mu_i])
+        self.transform_base(base_rot)
+
+
+class A5xI_D2xI(Compound):
+    def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 15 elements with final symmetry A5xI (rotation freedom)
+
+        The descriptive shares a 2-fold axis with the final symmetry and
+        reflection planes fall together.
+        """
+        axis = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        super().__init__(
+            base,
+            isometry.A5xI(),
+            isometry.D2xI(setup={"axis_n": axis, "axis_2": axis_2}),
+            name="A5xI_D2xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+        self.transform_base(self.base_to_o2)
