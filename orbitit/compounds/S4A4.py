@@ -4,6 +4,30 @@
 All base elements should be positioned with the synnetries as the standard
 tetrahedron below.
 """
+#
+# Copyright (C) 2010-2024 Marcel Tunnissen
+#
+# License: GNU Public License version 2
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not,
+# check at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+# or write to the Free Software Foundation,
+#
+# -----------------------------------------------------------------
+# Disable some pylint:
+#     The class naming follows the group algebra names instead
+# pylint: disable=invalid-name,too-many-arguments
 
 import math
 
@@ -24,6 +48,8 @@ tetrahedron = {
 
 
 class Compound(orbit.Shape):
+    """A compound object, see orbit.Shape class for more info."""
+
     alt_base_pos = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / 4)
 
 
@@ -33,6 +59,8 @@ class Compound(orbit.Shape):
 #
 ###############################################################################
 class A4_E(Compound):
+    """General compound with A4 symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with A4 symmetry with central freedom."""
         super().__init__(
@@ -48,6 +76,8 @@ class A4_E(Compound):
 
 
 class A4_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 4 elements with final symmetry A4 (rotation freedom)
 
@@ -74,6 +104,8 @@ class A4_C3(Compound):
 #
 ###############################################################################
 class A4xI_E(Compound):
+    """General compound with A4xI symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with A4xI symmetry with central freedom."""
         super().__init__(
@@ -89,6 +121,8 @@ class A4xI_E(Compound):
 
 
 class A4xI_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry A4xI (rotation freedom)
 
@@ -109,6 +143,8 @@ class A4xI_C3(Compound):
 
 
 class A4xI_C2C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry A4xI (rotation freedom)
 
@@ -135,6 +171,8 @@ class A4xI_C2C1(Compound):
 #
 ###############################################################################
 class S4A4_E(Compound):
+    """General compound with S4A4 symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with S4A4 symmetry with central freedom."""
         super().__init__(
@@ -150,6 +188,8 @@ class S4A4_E(Compound):
 
 
 class S4A4_C4C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 6 elements with final symmetry S4A4 (rotation freedom)
 
@@ -170,6 +210,8 @@ class S4A4_C4C2(Compound):
 
 
 class S4A4_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry S4A4 (rotation freedom)
 
@@ -190,6 +232,8 @@ class S4A4_C3(Compound):
 
 
 class S4A4_C2C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4A4 (rotation freedom)
 
@@ -211,6 +255,8 @@ class S4A4_C2C1(Compound):
 
 # Rigid Compounds
 class S4A4_S4A4(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Trivial "compound" of 1 element with final symmetry S4A4
 
@@ -229,6 +275,8 @@ class S4A4_S4A4(Compound):
 
 
 class S4A4_D3C3(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid compound of 4 elements with S4A4 symmetry"""
         # Same as S4A4_C3 with special mu = 60 degrees
@@ -255,6 +303,8 @@ class S4A4_D3C3(Compound):
 #
 ###############################################################################
 class S4_E(Compound):
+    """General compound with S4 symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with S4 symmetry with central freedom."""
         super().__init__(
@@ -270,6 +320,8 @@ class S4_E(Compound):
 
 
 class S4_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry S4 (rotation freedom)
 
@@ -291,6 +343,8 @@ class S4_C3(Compound):
 
 
 class S4_C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4 (rotation freedom)
 
@@ -320,6 +374,8 @@ class S4_C2(Compound):
 #
 ###############################################################################
 class S4xI_E(Compound):
+    """General compound with S4xI symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with S4xI symmetry with central freedom."""
         super().__init__(
@@ -335,6 +391,8 @@ class S4xI_E(Compound):
 
 
 class S4xI_C4C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4xI (rotation freedom)
 
@@ -356,6 +414,8 @@ class S4xI_C4C2(Compound):
 
 
 class S4xI_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 16 elements with final symmetry S4xI (rotation freedom)
 
@@ -376,6 +436,8 @@ class S4xI_C3(Compound):
 
 
 class S4xI_C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
@@ -398,6 +460,8 @@ class S4xI_C2(Compound):
 
 
 class S4xI_C2C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
@@ -420,6 +484,8 @@ class S4xI_C2C1(Compound):
 
 
 class S4xI_D1C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
 
@@ -445,6 +511,8 @@ class S4xI_D1C1(Compound):
 
 # Rigid Compounds
 class S4xI_S4A4(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid ompound of 2 elements with final symmetry S4xI
 
@@ -463,6 +531,8 @@ class S4xI_S4A4(Compound):
 
 
 class S4xI_D4D2(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid ompound of 6 elements with final symmetry S4xI
 
@@ -485,6 +555,8 @@ class S4xI_D4D2(Compound):
 
 
 class S4xI_D3C3(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid ompound of 8 elements with final symmetry S4xI
 
@@ -510,6 +582,8 @@ class S4xI_D3C3(Compound):
 
 
 class S4xI_D2C2(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid ompound of 12 elements with final symmetry S4xI
 
@@ -540,6 +614,8 @@ class S4xI_D2C2(Compound):
 #
 ###############################################################################
 class A5_E(Compound):
+    """General compound with A5 symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with A5 symmetry with central freedom."""
         super().__init__(
@@ -555,6 +631,8 @@ class A5_E(Compound):
 
 
 class A5_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 20 elements with final symmetry A5 (rotation freedom)
 
@@ -578,6 +656,8 @@ class A5_C3(Compound):
 
 
 class A5_C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 30 elements with final symmetry A5 (rotation freedom)
 
@@ -599,6 +679,8 @@ class A5_C2(Compound):
 
 # Rigid Compounds
 class A5_A4(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid ompound of 5 elements with final symmetry A5
 
@@ -622,6 +704,8 @@ class A5_A4(Compound):
 #
 ###############################################################################
 class A5xI_E(Compound):
+    """General compound with A5xI symmetry, the descriptive doesn't need to have any symmetry."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """General compound with A5xI symmetry with central freedom."""
         super().__init__(
@@ -637,6 +721,8 @@ class A5xI_E(Compound):
 
 
 class A5xI_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 40 elements with final symmetry A5xI (rotation freedom)
 
@@ -659,6 +745,8 @@ class A5xI_C3(Compound):
 
 
 class A5xI_C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
@@ -679,6 +767,8 @@ class A5xI_C2(Compound):
 
 
 class A5xI_C2C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
@@ -702,6 +792,8 @@ class A5xI_C2C1(Compound):
 
 # Rigid Compounds
 class A5xI_A4(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Rigid ompound of 10 elements with final symmetry A5xI
 
@@ -720,6 +812,8 @@ class A5xI_A4(Compound):
 
 
 class A5xI_D3C3(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, version, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 20 elements with final symmetry A5xI (rotation freedom)
 
@@ -751,6 +845,8 @@ class A5xI_D3C3(Compound):
 
 
 class A5xI_D2C2(Compound):
+    """Rigid compound, see __init__ for more."""
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 30 elements with final symmetry A5xI (rotation freedom)
 

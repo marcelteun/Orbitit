@@ -34,7 +34,7 @@ ATAN_1_V5 = math.atan(1 / V5)
 # ~26.57
 TODO_26 = 26.57 * math.pi / 180
 # ~31.0449 degrees:
-acos_7_3V5_16 = math.acos((7 + 3 * V5) / 16)
+ACOS_7_3V5_16 = math.acos((7 + 3 * V5) / 16)
 # ~31.7175 degrees
 # == asin(math.sqrt(5 - V5) / V10)
 ACOS_V_5_V5_V10 = math.acos(math.sqrt(5 + V5) / V10)

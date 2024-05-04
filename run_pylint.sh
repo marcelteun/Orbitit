@@ -20,6 +20,9 @@ chk_files="
 	orbitit/scene_eql_hept_from_kite.py
 	orbitit/scene_orbit.py
 	orbitit/wx_colors.py
+	orbitit/compounds/angle.py
+	orbitit/compounds/S4A4.py
+	orbitit/compounds/S4xI.py
 	unittest/test_geom_2d.py
 	unittest/test_geom_3d.py
 	unittest/test_geom_3d_long.py
@@ -28,5 +31,6 @@ chk_files="
 	unittest/test_isometry.py
 	utils/generate_59_icosahedra.py
 	utils/generate_compounds_of_s4a4.py
+	utils/generate_compounds_of_s4xi.py
 "
 pylint --extension-pkg-whitelist=wx $chk_files

@@ -9,50 +9,8 @@ import argparse
 import math
 import os
 
-from orbitit.compounds import S4A4
+from orbitit.compounds import angle, S4A4
 from orbitit import geomtypes, rgb
-
-V2 = math.sqrt(2)
-V3 = math.sqrt(3)
-V5 = math.sqrt(5)
-V10 = math.sqrt(10)
-# ~7.7612 degrees:
-H_ACOS_1_3V5_8 = math.acos((1 + 3 * V5) / 8) / 2
-# ~9.7356 degrees:
-ATAN_3_2V2 = math.atan(3 - 2 * V2)
-# ~13.283 degrees:
-ATAN_V5_2 = math.atan(V5 - 2)
-# ~14.3592 degrees:
-ATAN_H_V2_1_V5__1 = math.atan((V2 - 1) * (V5 - 1) / 2)
-# ~15.5225 degrees:
-ACOS_1_3V5_8 = H_ACOS_1_3V5_8 * 2
-# ~19.4712 degrees:
-ATAN_V2_4 = math.atan(V2 / 4)
-# 20.905
-ACOS_V5_1_2V3 = math.acos((V5 + 1) / (2 * V3))
-# ~23.4309
-ACOS_7_3V5_3_2_2V5_8 = math.acos((-7 + 3 * V5 + 3 * math.sqrt(2 + 2 * V5)) / 8)
-# ~24.09
-ATAN_1_V5 = math.atan(1 / V5)
-# ~26.57
-TODO_26 = 26.57 * math.pi / 180
-# ~31.0449 degrees:
-acos_7_3V5_16 = math.acos((7 + 3 * V5) / 16)
-# ~31.7175 degrees
-ACOS_V_5_V5_V10 = math.acos(math.sqrt(5 + V5) / V10)
-# ~33.8305 degrees:
-ATAN_H_V2_1_V5_1 = math.atan((V2 - 1) * (1 + V5) / 2)
-# ~35.2644 degrees:
-ASIN_1_V3 = math.asin(1 / V3)
-# ~38.9424 degrees:
-ATAN_4V2_7 = math.atan(4 * V2 / 7)
-# ~41.81 degrees
-TODO_41 = 41.81 * math.pi / 180
-# ~44.4775 degrees
-# ACOS__1_3V5_8 = math.acos((-1 + 3 * V5) / 8)
-D_ATAN_V3_2_V5 = -2 * math.atan(V3 * (2 - V5))
-# ~54.7356 degrees:
-ACOS_1_V3 = math.acos(1 / V3)
 
 
 def save_off(comp, tail=""):
@@ -85,7 +43,7 @@ def create_a4(base, js_fd=None):
     if js_fd is not None:
         js_fd.write(polyh.to_js())
     # example angle for which the compound is 5 | A5 / A4 with 1 removed
-    polyh.rot_base(D_ATAN_V3_2_V5)
+    polyh.rot_base(angle.D_ATAN_V3_2_V5)
     save_off(polyh)
 
 
@@ -116,7 +74,7 @@ def create_a4xi(base, js_fd=None):
             S4A4.A4xI_C3.cols[0],
         ],
     )
-    polyh.rot_base(D_ATAN_V3_2_V5)
+    polyh.rot_base(angle.D_ATAN_V3_2_V5)
     save_off(polyh, "_mu2")
 
     polyh = S4A4.A4xI_C2C1(base, 3)
@@ -126,7 +84,7 @@ def create_a4xi(base, js_fd=None):
     save_off(polyh)
     # special mu
     polyh = S4A4.A4xI_C2C1(base, 3)
-    polyh.rot_base(ASIN_1_V3)
+    polyh.rot_base(angle.ASIN_1_V3)
     save_off(polyh, "_mu2")
 
 
@@ -164,7 +122,7 @@ def create_s4a4(base, js_fd=None):
     save_off(polyh)
     # special mu
     polyh = S4A4.S4A4_C2C1(base, 3)
-    polyh.rot_base(ACOS_1_V3)
+    polyh.rot_base(angle.ACOS_1_V3)
     save_off(polyh, "_mu3")
 
     # Rigid compounds
@@ -189,7 +147,7 @@ def create_s4(base, js_fd=None):
     polyh = S4A4.S4_C3(base, 4)
     if js_fd is not None:
         js_fd.write(polyh.to_js())
-    polyh.rot_base(D_ATAN_V3_2_V5)  # use special angle as example angle
+    polyh.rot_base(angle.D_ATAN_V3_2_V5)  # use special angle as example angle
     save_off(polyh)
     # special mu
     polyh = S4A4.S4_C3(base, 4)
@@ -210,7 +168,7 @@ def create_s4(base, js_fd=None):
             S4A4.S4_C3.cols[3],
         ],
     )
-    polyh.rot_base(D_ATAN_V3_2_V5)
+    polyh.rot_base(angle.D_ATAN_V3_2_V5)
     save_off(polyh, "_mu3")
 
     polyh = S4A4.S4_C2(base, 6)
@@ -220,10 +178,10 @@ def create_s4(base, js_fd=None):
     save_off(polyh)
     # special mu
     polyh = S4A4.S4_C2(base, 4, col_alt=1)
-    polyh.rot_base(ATAN_3_2V2)
+    polyh.rot_base(angle.ATAN_3_2V2)
     save_off(polyh, "_mu2")
     polyh = S4A4.S4_C2(base, 4)
-    polyh.rot_base(ASIN_1_V3)
+    polyh.rot_base(angle.ASIN_1_V3)
     save_off(polyh, "_mu3")
     polyh = S4A4.S4_C2(
         base,
@@ -243,7 +201,7 @@ def create_s4(base, js_fd=None):
             S4A4.S4_C2.cols[2],
         ],
     )
-    polyh.rot_base(2 * ATAN_3_2V2)
+    polyh.rot_base(2 * angle.ATAN_3_2V2)
     save_off(polyh, "_mu4")
     polyh = S4A4.S4_C2(
         base,
@@ -263,7 +221,7 @@ def create_s4(base, js_fd=None):
             S4A4.S4_C2.cols[2],
         ],
     )
-    polyh.rot_base(ATAN_H_V2_1_V5__1)
+    polyh.rot_base(angle.ATAN_H_V2_1_V5__1)
     save_off(polyh, "_mu5")
     polyh = S4A4.S4_C2(
         base,
@@ -283,7 +241,7 @@ def create_s4(base, js_fd=None):
             S4A4.S4_C2.cols[2],
         ],
     )
-    polyh.rot_base(ATAN_H_V2_1_V5_1)
+    polyh.rot_base(angle.ATAN_H_V2_1_V5_1)
     save_off(polyh, "_mu6")
 
 
@@ -318,10 +276,10 @@ def create_s4xi(base, js_fd=None):
     polyh.rot_base(math.pi / 6)
     save_off(polyh, "_mu2")
     polyh = S4A4.S4xI_C3(base, 2, col_sym="S4")
-    polyh.rot_base(D_ATAN_V3_2_V5)
+    polyh.rot_base(angle.D_ATAN_V3_2_V5)
     save_off(polyh, "_mu3")
     polyh = S4A4.S4xI_C3(base, 2, col_sym="A4xI")
-    polyh.rot_base(D_ATAN_V3_2_V5)
+    polyh.rot_base(angle.D_ATAN_V3_2_V5)
     save_off(polyh, "_mu3_1")
 
     polyh = S4A4.S4xI_C2(base, 6, col_sym="D2xI")
@@ -331,10 +289,10 @@ def create_s4xi(base, js_fd=None):
     save_off(polyh)
     # special mu
     polyh = S4A4.S4xI_C2(base, 4, col_alt=1)
-    polyh.rot_base(ACOS_1_V3 - math.pi / 4)
+    polyh.rot_base(angle.ACOS_1_V3 - math.pi / 4)
     save_off(polyh, "_mu2")
     polyh = S4A4.S4xI_C2(base, 4, col_alt=0)
-    polyh.rot_base(ASIN_1_V3)
+    polyh.rot_base(angle.ASIN_1_V3)
     save_off(polyh, "_mu3")
     polyh = S4A4.S4xI_C2(base, 6, col_sym="D2xI")
     polyh.rot_base(math.pi / 8)
@@ -358,7 +316,7 @@ def create_s4xi(base, js_fd=None):
             S4A4.A4xI_C3.cols[0],
         ],
     )
-    polyh.rot_base(ATAN_4V2_7 / 2)
+    polyh.rot_base(angle.ATAN_4V2_7 / 2)
     save_off(polyh, "_mu5")
     # FIXME: generated in a different order after upgrading Python
     polyh = S4A4.S4xI_C2(
@@ -392,7 +350,7 @@ def create_s4xi(base, js_fd=None):
             S4A4.A4xI_C3.cols[3],
         ],
     )
-    polyh.rot_base(ATAN_H_V2_1_V5__1)
+    polyh.rot_base(angle.ATAN_H_V2_1_V5__1)
     save_off(polyh, "_mu6")
     # FIXME: generated in a different order after upgrading Python
     polyh = S4A4.S4xI_C2(
@@ -426,7 +384,7 @@ def create_s4xi(base, js_fd=None):
             S4A4.A4xI_C3.cols[1],
         ],
     )
-    polyh.rot_base(ATAN_H_V2_1_V5_1)
+    polyh.rot_base(angle.ATAN_H_V2_1_V5_1)
     save_off(polyh, "_mu7")
 
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym="D4C4")
@@ -436,10 +394,10 @@ def create_s4xi(base, js_fd=None):
     save_off(polyh)
     # special mu
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym="D2xI")
-    polyh.rot_base(ASIN_1_V3)
+    polyh.rot_base(angle.ASIN_1_V3)
     save_off(polyh, "_mu3")
     polyh = S4A4.S4xI_C2C1(base, 3)
-    polyh.rot_base(ACOS_1_V3)
+    polyh.rot_base(angle.ACOS_1_V3)
     save_off(polyh, "_mu4")
     polyh = S4A4.S4xI_C2C1(base, 6, col_sym="D2xI")
     polyh.rot_base(math.pi / 4)
@@ -451,18 +409,18 @@ def create_s4xi(base, js_fd=None):
     polyh.rot_base(16 * math.pi / 180)  # example angle
     save_off(polyh)
     # special mu
-    #            , , , math.pi/8, ACOS_1_V3]
+    #            , , , math.pi/8, angle.ACOS_1_V3]
     polyh = S4A4.S4xI_D1C1(base, 12, col_sym="D2C2", col_alt=2)
-    polyh.rot_base(ATAN_V2_4 / 2)
+    polyh.rot_base(angle.ATAN_V2_4 / 2)
     save_off(polyh, "_mu2")
     polyh = S4A4.S4xI_D1C1(base, 3, col_alt=1)
-    polyh.rot_base(ATAN_V2_4)
+    polyh.rot_base(angle.ATAN_V2_4)
     save_off(polyh, "_mu3")
     polyh = S4A4.S4xI_D1C1(base, 3)
     polyh.rot_base(math.pi / 8)
     save_off(polyh, "_mu4")
     polyh = S4A4.S4xI_D1C1(base, 3, col_alt=1)
-    polyh.rot_base(ASIN_1_V3)
+    polyh.rot_base(angle.ASIN_1_V3)
     save_off(polyh, "_mu5")
 
     # Rigid compounds
@@ -500,12 +458,12 @@ def create_a5(base, js_fd=None):
     # special mu
     # 10 x 2 | D6D3 / D3C3
     polyh = S4A4.A5_C3(base, 10)
-    polyh.rot_base(H_ACOS_1_3V5_8)
+    polyh.rot_base(angle.H_ACOS_1_3V5_8)
     save_off(polyh, "_mu3")
 
     # 5 x 4 | S4A4 / D3C3
     polyh = S4A4.A5_C3(base, 5, col_alt=1)
-    polyh.rot_base(ACOS_1_3V5_8)
+    polyh.rot_base(angle.ACOS_1_3V5_8)
     save_off(polyh, "_mu4")
 
     # 10 x 2 | D2C2 / C2C1
@@ -535,7 +493,7 @@ def create_a5(base, js_fd=None):
             S4A4.A4xI_C3.cols[10],
         ],
     )
-    polyh.rot_base(ACOS_7_3V5_3_2_2V5_8)
+    polyh.rot_base(angle.ACOS_7_3V5_3_2_2V5_8)
     save_off(polyh, "_mu5")
 
     # 10 x 2 | D3 / C3
@@ -565,7 +523,7 @@ def create_a5(base, js_fd=None):
             S4A4.A4xI_C3.cols[10],
         ],
     )
-    polyh.rot_base(acos_7_3V5_16)
+    polyh.rot_base(angle.ACOS_7_3V5_16)
     save_off(polyh, "_mu6")
 
     # 40 | A5 / C2
@@ -585,27 +543,27 @@ def create_a5(base, js_fd=None):
 
     # 6 x 5 | D10D5 / D2C2
     polyh = S4A4.A5_C2(base, 6, col_alt=1)
-    polyh.rot_base(ATAN_V5_2)
+    polyh.rot_base(angle.ATAN_V5_2)
     save_off(polyh, "_mu2")
 
     # 10 x 3 | D12D6 / D4D2
     polyh = S4A4.A5_C2(base, 10, col_alt=1)
-    polyh.rot_base(ACOS_V5_1_2V3)
+    polyh.rot_base(angle.ACOS_V5_1_2V3)
     save_off(polyh, "_mu3")
 
     # 10 x 3 | D6D3 / D2C2
     polyh = S4A4.A5_C2(base, 10)
-    polyh.rot_base(ATAN_1_V5)
+    polyh.rot_base(angle.ATAN_1_V5)
     save_off(polyh, "_mu4")
 
     # 6 x 5 | A5 / A4
     polyh = S4A4.A5_C2(base, 6, col_alt=1)
-    polyh.rot_base(TODO_26)
+    polyh.rot_base(angle.TODO_26)
     save_off(polyh, "_mu5")
 
     # 6 x 5 | D20D10 / D4D2
     polyh = S4A4.A5_C2(base, 6)
-    polyh.rot_base(ACOS_V_5_V5_V10)
+    polyh.rot_base(angle.ACOS_V_5_V5_V10)
     save_off(polyh, "_mu6")
 
     # Rigid compound
@@ -635,12 +593,12 @@ def create_a5xi(base, js_fd=None):
     # special mu
     # 10 x 4 | D6 x I / D3C3
     polyh = S4A4.A5xI_C3(base, 10, col_sym="D3xI")
-    polyh.rot_base(H_ACOS_1_3V5_8)
+    polyh.rot_base(angle.H_ACOS_1_3V5_8)
     save_off(polyh, "_mu3")
 
     # 5 x 8 | S4 x I / D3C3
     polyh = S4A4.A5xI_C3(base, 5, col_sym="A4xI", col_alt=1)
-    polyh.rot_base(ACOS_1_3V5_8)
+    polyh.rot_base(angle.ACOS_1_3V5_8)
     save_off(polyh, "_mu4")
 
     # 10 x 4 | C2 x I / E
@@ -668,7 +626,6 @@ def create_a5xi(base, js_fd=None):
             S4A4.A5xI_C3.cols[3],
             S4A4.A5xI_C3.cols[6],
             S4A4.A5xI_C3.cols[6],
-
             S4A4.A5xI_C3.cols[6],
             S4A4.A5xI_C3.cols[7],
             S4A4.A5xI_C3.cols[8],
@@ -691,12 +648,12 @@ def create_a5xi(base, js_fd=None):
             S4A4.A5xI_C3.cols[8],
         ],
     )
-    polyh.rot_base(ACOS_7_3V5_3_2_2V5_8)
+    polyh.rot_base(angle.ACOS_7_3V5_3_2_2V5_8)
     save_off(polyh, "_mu5")
 
     # 5 x 8 | A4 x I / C3 | mu2
     polyh = S4A4.A5xI_C3(base, 5, col_sym="A4xI", col_alt=1)
-    polyh.rot_base(acos_7_3V5_16)
+    polyh.rot_base(angle.ACOS_7_3V5_16)
     save_off(polyh, "_mu6")
 
     # 60 | A5 x I / C2
@@ -710,37 +667,37 @@ def create_a5xi(base, js_fd=None):
     # special mu
     # 6 x 10 | D10xI / D2C2
     polyh = S4A4.A5xI_C2(base, 6, col_alt=1)
-    polyh.rot_base(ATAN_V5_2)
+    polyh.rot_base(angle.ATAN_V5_2)
     save_off(polyh, "_mu2")
 
     # 10 x 6 | D12xI / D4D2
     polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI", col_alt=1)
-    polyh.rot_base(ACOS_V5_1_2V3)
+    polyh.rot_base(angle.ACOS_V5_1_2V3)
     save_off(polyh, "_mu3")
 
     # 10 x 6 | D6xI / D2C2
     polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI")
-    polyh.rot_base(ATAN_1_V5)
+    polyh.rot_base(angle.ATAN_1_V5)
     save_off(polyh, "_mu4")
 
     # 6 x 10 | A5xI / A4
     polyh = S4A4.A5xI_C2(base, 6, col_alt=1)
-    polyh.rot_base(TODO_26)
+    polyh.rot_base(angle.TODO_26)
     save_off(polyh, "_mu5")
 
     # 6 x 10 | D20xI / D4D2
     polyh = S4A4.A5xI_C2(base, 6)
-    polyh.rot_base(ACOS_V_5_V5_V10)
+    polyh.rot_base(angle.ACOS_V_5_V5_V10)
     save_off(polyh, "_mu6")
 
     # 10 x 6 | S4xI / D4D2
     polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI")
-    polyh.rot_base(ATAN_H_V2_1_V5_1)
+    polyh.rot_base(angle.ATAN_H_V2_1_V5_1)
     save_off(polyh, "_mu7")
 
     # 30 x 2 | D3C3 / C3
     polyh = S4A4.A5xI_C2(base, 10, col_sym="D3xI", col_alt=1)
-    polyh.rot_base(TODO_41)
+    polyh.rot_base(angle.TODO_41)
     save_off(polyh, "_mu8")
 
     # 60 | A5 x I / C2C1
