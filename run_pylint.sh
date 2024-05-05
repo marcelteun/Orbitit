@@ -23,6 +23,7 @@ chk_files="
 	orbitit/compounds/angle.py
 	orbitit/compounds/S4A4.py
 	orbitit/compounds/S4xI.py
+	orbitit/compounds/generate.py
 	unittest/test_geom_2d.py
 	unittest/test_geom_3d.py
 	unittest/test_geom_3d_long.py
@@ -30,7 +31,6 @@ chk_files="
 	unittest/test_indent.py
 	unittest/test_isometry.py
 	utils/generate_59_icosahedra.py
-	utils/generate_compounds_of_s4a4.py
-	utils/generate_compounds_of_s4xi.py
+	utils/generate_compound_polyhedra.py
 "
 pylint --extension-pkg-whitelist=wx $chk_files

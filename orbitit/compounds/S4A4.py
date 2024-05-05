@@ -37,16 +37,6 @@ from orbitit.compounds import angle
 V2 = math.sqrt(2)
 V5 = math.sqrt(5)
 
-tetrahedron = {
-    "vs": [
-        geomtypes.Vec3([1, 1, 1]),
-        geomtypes.Vec3([-1, -1, 1]),
-        geomtypes.Vec3([1, -1, -1]),
-        geomtypes.Vec3([-1, 1, -1]),
-    ],
-    "fs": [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]],
-}
-
 
 class Compound(orbit.Shape):
     """A compound object, see orbit.Shape class for more info."""
@@ -968,9 +958,3 @@ class A5xI_D2C2(Compound):
         )
 
         self.transform_base(self.alt_base_pos)
-
-
-if __name__ == "__main__":
-    a4_c3 = A4_C3(tetrahedron, 4, col_alt=0)
-    a4_c3.rot_base(math.pi / 6)
-    print(a4_c3.to_off())
