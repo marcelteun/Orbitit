@@ -24,11 +24,12 @@ def save_off(comp, tail=""):
     """
     # If this starts with a version then we need 2A_, 2B etc (not 2_A_)
     sep = "_" if comp.name[1] != "_" else ""
+    # pylint: disable=redefined-outer-name
     with open(f"{comp.index}{sep}{comp.name}{tail}.off", "w") as fd:
         fd.write(comp.to_off())
 
 
-class CompoundS4A4():
+class CompoundS4A4:
     """Create set of files with compounds with a descriptive with S4xI symmetry,
 
     E.g. a tetrahedron.
@@ -576,9 +577,9 @@ class CompoundS4A4():
         polyh.rot_base(math.pi / 11)  # example angle
         save_off(polyh)
         # special mu
-        # There is a mu ~= 14.36 which looks like a 15 x D1C2 though not distinct ones. The reflection
-        # --> could be related to angle math.acos(((V2+1)*V5 + V2-1)/6) of cube compounds (14.3592)
-        # is part of a each pair in 10 x 3 | D3
+        # There is a mu ~= 14.36 which looks like a 15 x D1C2 though not distinct ones. The
+        # reflection --> could be related to angle math.acos(((V2+1)*V5 + V2-1)/6) of cube compounds
+        # (14.3592) is part of a each pair in 10 x 3 | D3
         # There is a mu ~= 38.17 which looks like a 5 x D5C5, but there are no distinct 6 of these
         # Leave out for now
         # There is a mu ~= 22.47 what happens there?
@@ -775,11 +776,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--descriptive",
-        help="The .off file for the descriptive, i.e. what you want to make a compound of. "
-        "It should have the correct symmetry and it should be positioned in the standard way, "
-        "I.e. for cube symmetry the 4-fold axes should be along the coordinate axes, "
-        "and for tetrahedron and icosahedron symmetry the 2-fold axis should be along the "
-        "z-axis. "
+        help="The .off file for the descriptive, i.e. what you want to make a compound of. It "
+        "should have the correct symmetry and it should be positioned in the standard way, "
+        "I.e. for cube symmetry the 4-fold axes should be along the coordinate axes, and "
+        "for tetrahedron and icosahedron symmetry the 2-fold axis should be along the z-axis. "
         "For all those symmetries, the 3-fold axis is along [1, 1, 1]. "
         "For the cyclic and the dihedral symmetries the n-fold axis is along the z-axis. "
         "Note that the script will not verify that this is the case. "

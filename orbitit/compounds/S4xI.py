@@ -552,7 +552,9 @@ class A5xI_D3xI(Compound):
         version: either 'A' or 'B'
         """
         versions = ["A", "B"]
-        assert version in versions, f"{type(self).__name__} only supports versions {versions}"
+        assert (
+            version in versions
+        ), f"{type(self).__name__} only supports versions {versions}"
         axis = geomtypes.Vec3([1, 1, 1])
         axis_2 = geomtypes.Vec3([1, 0, 0])
         phi = (1 + angle.V5) / 2

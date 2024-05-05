@@ -29,7 +29,7 @@ def save_off(comp, tail=""):
         fd.write(comp.to_off())
 
 
-class CompoundS4xI():
+class CompoundS4xI:
     """Create set of files with compounds with a descriptive with S4xI symmetry."""
 
     final_sym = set({"A4xI", "S4xI", "A5xI"})
