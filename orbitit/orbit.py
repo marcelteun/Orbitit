@@ -420,11 +420,11 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         """Return javascript representation so it can be shown with the showoff library."""
         js = f"var {self.name} = new Object();\n"
         js += f"{self.name}.descr = new Object();\n"
-        js += f"{self.name}.descr.vs = [\n"
+        js += f"{self.name}.descr.Vs = [\n"
         for v in self.base_vs:
             js += f"  {v},\n"
         js += '];'
-        js += f"{self.name}.descr.fs = {self.base_shape.fs};"
+        js += f"{self.name}.descr.Fs = {self.base_shape.fs};"
         eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         js += f"{self.name}.descr.transform = {eye};\n"
         js += f"{self.name}.isoms = [\n"

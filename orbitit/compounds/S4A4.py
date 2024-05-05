@@ -32,6 +32,7 @@ tetrahedron below.
 import math
 
 from orbitit import geomtypes, isometry, orbit
+from orbitit.compounds import angle
 
 V2 = math.sqrt(2)
 V5 = math.sqrt(5)
@@ -78,6 +79,8 @@ class A4_E(Compound):
 class A4_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [-math.pi / 3, math.pi / 3, angle.D_ATAN_V3_2_V5]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 4 elements with final symmetry A4 (rotation freedom)
 
@@ -95,7 +98,7 @@ class A4_C3(Compound):
             col_sym=col_sym,
         )
         # Note double domain to show laevo and dextro
-        self.set_rot_axis(axis, [-math.pi / 3, math.pi / 3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 ###############################################################################
@@ -123,6 +126,8 @@ class A4xI_E(Compound):
 class A4xI_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [0, math.pi / 3, angle.D_ATAN_V3_2_V5]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry A4xI (rotation freedom)
 
@@ -139,11 +144,13 @@ class A4xI_C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class A4xI_C2C1(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, math.pi / 4, angle.ASIN_1_V3]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry A4xI (rotation freedom)
@@ -162,7 +169,7 @@ class A4xI_C2C1(Compound):
             col_sym=col_sym,
         )
         self.transform_base(self.alt_base_pos)
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 ###############################################################################
@@ -190,6 +197,8 @@ class S4A4_E(Compound):
 class S4A4_C4C2(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [0, math.pi / 4]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 6 elements with final symmetry S4A4 (rotation freedom)
 
@@ -206,11 +215,13 @@ class S4A4_C4C2(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class S4A4_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, math.pi / 3, math.pi / 6, angle.ACOS_1_V3]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry S4A4 (rotation freedom)
@@ -228,11 +239,13 @@ class S4A4_C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class S4A4_C2C1(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, 2 * angle.ASIN_1_V3, math.pi / 2, angle.ACOS_1_V3]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4A4 (rotation freedom)
@@ -250,7 +263,7 @@ class S4A4_C2C1(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 2])
+        self.set_rot_axis(axis, self.mu[:3])
 
 
 # Rigid Compounds
@@ -322,6 +335,8 @@ class S4_E(Compound):
 class S4_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [-math.pi / 3, math.pi / 3, math.pi / 6, angle.D_ATAN_V3_2_V5]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 8 elements with final symmetry S4 (rotation freedom)
 
@@ -339,11 +354,21 @@ class S4_C3(Compound):
             col_sym=col_sym,
         )
         # Note double domain to show laevo and dextro
-        self.set_rot_axis(axis, [-math.pi / 3, math.pi / 3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class S4_C2(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        -math.pi / 4,
+        math.pi / 4,
+        angle.ATAN_3_2V2,
+        angle.ASIN_1_V3,
+        2 * angle.ATAN_3_2V2,
+        angle.ATAN_H_V2_1_V5__1,
+        angle.ATAN_H_V2_1_V5_1,
+    ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4 (rotation freedom)
@@ -363,7 +388,7 @@ class S4_C2(Compound):
             col_sym=col_sym,
         )
         # Note double domain to show laevo and dextro
-        self.set_rot_axis(axis, [-math.pi / 4, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
         self.transform_base(self.alt_base_pos)
 
@@ -393,6 +418,8 @@ class S4xI_E(Compound):
 class S4xI_C4C2(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [0, math.pi / 4, math.pi / 8]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 12 elements with final symmetry S4xI (rotation freedom)
 
@@ -410,11 +437,13 @@ class S4xI_C4C2(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class S4xI_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, math.pi / 3, math.pi / 6, angle.D_ATAN_V3_2_V5]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 16 elements with final symmetry S4xI (rotation freedom)
@@ -432,11 +461,22 @@ class S4xI_C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class S4xI_C2(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+        angle.ACOS_1_V3 - math.pi / 4,
+        angle.ASIN_1_V3,
+        math.pi / 8,
+        angle.ATAN_4V2_7 / 2,
+        angle.ATAN_H_V2_1_V5__1,
+        angle.ATAN_H_V2_1_V5_1,
+    ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
@@ -455,12 +495,21 @@ class S4xI_C2(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
         self.transform_base(self.alt_base_pos)
 
 
 class S4xI_C2C1(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        2 * angle.ASIN_1_V3,
+        math.pi / 2,
+        angle.ASIN_1_V3,
+        angle.ACOS_1_V3,
+        math.pi / 4,
+    ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
@@ -480,11 +529,20 @@ class S4xI_C2C1(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 2])
+        self.set_rot_axis(axis, self.mu[:3])
 
 
 class S4xI_D1C1(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+        angle.ATAN_V2_4 / 2,
+        angle.ATAN_V2_4,
+        math.pi / 8,
+        angle.ASIN_1_V3,
+    ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 24 elements with final symmetry S4xI (rotation freedom)
@@ -504,7 +562,7 @@ class S4xI_D1C1(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
         self.transform_base(self.alt_base_pos)
 
@@ -633,6 +691,16 @@ class A5_E(Compound):
 class A5_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [
+        -angle.ACOS_V2_3_V5_8,
+        0,
+        angle.ACOS_V10_4,
+        angle.H_ACOS_1_3V5_8,
+        angle.ACOS_1_3V5_8,
+        angle.ACOS_7_3V5_3_2_2V5_8,
+        angle.ACOS_7_3V5_16,
+    ]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 20 elements with final symmetry A5 (rotation freedom)
 
@@ -649,14 +717,21 @@ class A5_C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis)
-        self.set_rot_axis(
-            axis, [-math.acos((V2 * (3 + V5) / 8)), math.acos(V2 * V5 / 4)]
-        )
+        self.set_rot_axis(axis, self.mu[:3])
 
 
 class A5_C2(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+        angle.ATAN_V5_2,
+        angle.ACOS_V5_1_2V3,
+        angle.ATAN_1_V5,
+        angle.TODO_26,
+        angle.ACOS_V_5_V5_V10,
+    ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 30 elements with final symmetry A5 (rotation freedom)
@@ -674,7 +749,7 @@ class A5_C2(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 # Rigid Compounds
@@ -723,6 +798,16 @@ class A5xI_E(Compound):
 class A5xI_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
+    mu = [
+        -angle.ACOS_V2_3_V5_8,
+        0,
+        angle.ACOS_V10_4,
+        angle.H_ACOS_1_3V5_8,
+        angle.ACOS_1_3V5_8,
+        angle.ACOS_7_3V5_3_2_2V5_8,
+        angle.ACOS_7_3V5_16,
+    ]
+
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 40 elements with final symmetry A5xI (rotation freedom)
 
@@ -739,13 +824,23 @@ class A5xI_C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(
-            axis, [-math.acos((V2 * (3 + V5) / 8)), math.acos(V2 * V5 / 4)]
-        )
+        self.set_rot_axis(axis, self.mu[:3])
 
 
 class A5xI_C2(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+        angle.ATAN_V5_2,
+        angle.ACOS_V5_1_2V3,
+        angle.ATAN_1_V5,
+        angle.TODO_26,
+        angle.ACOS_V_5_V5_V10,
+        angle.ATAN_H_V2_1_V5_1,
+        angle.TODO_41,
+    ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
@@ -763,11 +858,13 @@ class A5xI_C2(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, [0, math.pi / 4])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class A5xI_C2C1(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, 75.64 * math.pi / 180]  # TODO calc algebraicly
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
@@ -787,7 +884,7 @@ class A5xI_C2C1(Compound):
         )
 
         self.transform_base(self.alt_base_pos)
-        self.set_rot_axis(axis, [0, 75.64 * math.pi / 180])  # TODO calc
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 # Rigid Compounds
@@ -824,7 +921,9 @@ class A5xI_D3C3(Compound):
         version: either 'A' or 'B'
         """
         versions = ["A", "B"]
-        assert version in versions, f"{type(self).__name__} only supports versions {versions}"
+        assert (
+            version in versions
+        ), f"{type(self).__name__} only supports versions {versions}"
         axis = geomtypes.Vec3([1, 1, 1])
         phi = (1 + V5) / 2
         normal = geomtypes.Vec3([-1, -phi, phi + 1])
