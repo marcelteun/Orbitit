@@ -306,7 +306,7 @@ if __name__ == "__main__":
     SYMMETRIES = CompoundS4xI.final_sym
 
     parser = argparse.ArgumentParser(
-        description="Generate off-files for compound polyhedra of polyhedra with tetrahedral "
+        description="Generate off-files for compound polyhedra of polyhedra with cube "
         "symmetry. Will also create a JS script file for the interactive models"
     )
     parser.add_argument(
