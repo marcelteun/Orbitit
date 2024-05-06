@@ -43,6 +43,29 @@ class Compound(orbit.Shape):
 
 ###############################################################################
 #
+# Cn x I
+#
+###############################################################################
+class CnxI_ExI(Compound):
+    """General compound with spherical freedom, see __init__ for more info."""
+
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """General compound with A4xI symmetry with central freedom."""
+        assert n >= 2, f"Only n >= 2 is supported, got {n}"
+        super().__init__(
+            base,
+            isometry.CxI(n)(),
+            isometry.ExI(),
+            name=f"C{n}xI_ExI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+
+###############################################################################
+#
 # A4 x I
 #
 ###############################################################################

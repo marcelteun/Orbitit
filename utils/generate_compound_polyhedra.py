@@ -39,6 +39,14 @@ parser.add_argument(
     "If not specified, then the cube is used. ",
 )
 parser.add_argument(
+    "-n",
+    nargs="+",
+    type=int,
+    default=[3],
+    help="In case a dihedral or cyclic symmetry is specified, specify the order of the n-fold "
+    "axis here.",
+)
+parser.add_argument(
     "-o",
     "--output-dir",
     default="",
@@ -80,4 +88,4 @@ output_dir = args.output_dir
 if not output_dir:
     output_dir = f"output/{args.args.descriptive_sym}"
 
-compounds = generator(DESCR, output_dir, args.final_symmetry)
+compounds = generator(DESCR, output_dir, args.final_symmetry, n=args.n)
