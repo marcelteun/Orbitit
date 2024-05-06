@@ -269,16 +269,16 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
 
     # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
-            self,
-            base,
-            final_sym,
-            stab_sym,
-            name,
-            no_of_cols,
-            col_alt=0,
-            cols=None,
-            col_sym='',
-        ):
+        self,
+        base,
+        final_sym,
+        stab_sym,
+        name,
+        no_of_cols,
+        col_alt=0,
+        cols=None,
+        col_sym='',
+    ):
         """
         base: the descriptive. A dictionary with 'vs' and 'fs'
         final_sym: isometry object describing the final symmetry
@@ -327,6 +327,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         for idx, col_choice in enumerate(col_choices):
             if col_choice['index'] == no_of_cols:
                 if col_sym in ["", col_choice['class'].__name__]:
+                    self.col_sym = col_sym
                     break
         assert col_choice is not None
         assert col_choice['index'] == no_of_cols, f"Cannot divide {no_of_cols} colours"
@@ -449,5 +450,56 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
 
         return js
 
+    @property
+    def repr_dict(self):
+        """Return a short representation of the object."""
+        result = {
+            "class": orbit_base.class_to_json[self.json_class],
+            "data": {
+                "version": 2,
+                "name": self.name,
+                "base": {
+                    "vs": self.base_shape.vs,
+                    "fs": self.base_shape.fs,
+                },
+                "final_sym": self.final_sym.repr_dict,
+                "stab_sym": self.stab_sym.repr_dict,
+                "cols": getattr(self, "cols", ""),
+                "no_of_cols": self.no_of_cols,
+                "col_alt": self.col_alt,
+                "col_sym": self.col_sym,
+            },
+        }
+        if self.axis is not None:
+            result["data"]["axis"] = self.axis
+        if self.angle_domain:
+            result["data"]["angle_domain"] = self.angle_domain
+
+        return result
+
+    @classmethod
+    def from_dict_data(cls, data):
+        if "version" in data:
+            if isinstance(data["cols"][0][0], float):
+                data["cols"] = [[int(chn * 255) for chn in d] for d in data["cols"]]
+            obj = cls(
+                base=data["base"],
+                final_sym=isometry.Set.from_json_dict(data["final_sym"]),
+                stab_sym=isometry.Set.from_json_dict(data["stab_sym"]),
+                name=data["name"],
+                cols=data["cols"],
+                no_of_cols=data["no_of_cols"],
+                col_alt=data["col_alt"],
+                col_sym=data["col_sym"],
+            )
+            if "axis" in data:
+                obj.axis = data["axis"]
+            if "angle_domain" in data:
+                obj.angle_domain = data["angle_domain"]
+        else:
+            obj = geom_3d.OrbitShape.from_dict_data(data)
+        return obj
+
 
 orbit_base.class_to_json[Shape] = "orbit_shape"
+orbit_base.json_to_class["orbit_shape"] = Shape

@@ -47,13 +47,23 @@ import wx
 import wx.lib.colourselect as wxLibCS
 import wx.lib.scrolledpanel as wx_panel
 
-from orbitit import base, colors, geom_3d, geom_gui, geomtypes, isometry, orbit, wx_colors
+from orbitit import (
+    base,
+    colors,
+    geom_3d,
+    geom_gui,
+    geomtypes,
+    isometry,
+    orbit,
+    wx_colors,
+)
 
-TITLE = 'Create Polyhedron by Orbiting'
+TITLE = "Create Polyhedron by Orbiting"
 
 
 class Shape(geom_3d.CompoundShape):
     """Simple wrapper for the Shape being used."""
+
     def __init__(self):
         super().__init__([geom_3d.SimpleShape([], [])])
 
@@ -68,11 +78,12 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
       - the colours
       - any rotation for the stabiliser
     """
+
     def __init__(self, shape, canvas, *args, **kwargs):
         self.shape = shape
         self.name = shape.name
         self.canvas = canvas
-        kwargs['title'] = TITLE
+        kwargs["title"] = TITLE
         wx.Frame.__init__(self, *args, **kwargs)
         self.no_of_cols = 1
         # save which colour alternative was chosen per final symmetry and
@@ -127,22 +138,24 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.show_gui = []
 
         face_sizer = wx.StaticBoxSizer(
-            wx.StaticBox(self.panel, label='Face(s) Definition'),
+            wx.StaticBox(self.panel, label="Face(s) Definition"),
             wx.VERTICAL,
         )
 
         data_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # VERTICES
-        self.show_gui.append(wx.StaticBox(self.panel, label='Vertices'))
+        self.show_gui.append(wx.StaticBox(self.panel, label="Vertices"))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
-        self.show_gui.append(geom_gui.Vector3DSetDynamicPanel(self.panel, rel_xtra_space=3))
+        self.show_gui.append(
+            geom_gui.Vector3DSetDynamicPanel(self.panel, rel_xtra_space=3)
+        )
         self._vs_gui_idx = len(self.show_gui) - 1
         b_sizer.Add(self.show_gui[-1], 1, wx.EXPAND)
         data_sizer.Add(b_sizer, 1, wx.EXPAND)
 
         # FACES
-        self.show_gui.append(wx.StaticBox(self.panel, label='Faces'))
+        self.show_gui.append(wx.StaticBox(self.panel, label="Faces"))
         b_sizer = wx.StaticBoxSizer(self.show_gui[-1])
         self.show_gui.append(geom_gui.FaceSetDynamicPanel(self.panel, 0, face_len=3))
         self._fs_gui_idx = len(self.show_gui) - 1
@@ -152,22 +165,26 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
         # Import
         self.show_gui.append(wx.Button(self.panel, wx.ID_ANY, "Import"))
-        self.panel.Bind(wx.EVT_BUTTON, self.on_import,
-                        id=self.show_gui[-1].GetId())
+        self.panel.Bind(wx.EVT_BUTTON, self.on_import, id=self.show_gui[-1].GetId())
         face_sizer.Add(self.show_gui[-1], 0)
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
         self.rot_sizer = geom_gui.AxisRotateSizer(
-            self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0)
+            self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0
+        )
         face_sizer.Add(self.rot_sizer, 0)
         ctrl_sizer.Add(face_sizer, 1, wx.EXPAND)
 
         # SYMMETRY
-        self.show_gui.append(geom_gui.SymmetrySelect(
-            self.panel, 'Final Symmetry',
-            on_sym_select=self.on_final_sym_select,
-            on_get_sym_setup=self.on_get_final_sym_setup))
+        self.show_gui.append(
+            geom_gui.SymmetrySelect(
+                self.panel,
+                "Final Symmetry",
+                on_sym_select=self.on_final_sym_select,
+                on_get_sym_setup=self.on_get_final_sym_setup,
+            )
+        )
         self._final_sym_gui_idx = len(self.show_gui) - 1
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         if self.col_select is None:
@@ -178,32 +195,32 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # Stabiliser
         stab_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.show_gui.append(wx.Button(self.panel, wx.ID_ANY, ""))
-        self.panel.Bind(wx.EVT_BUTTON,
-                        self.on_generate_stab_list,
-                        id=self.show_gui[-1].GetId())
+        self.panel.Bind(
+            wx.EVT_BUTTON, self.on_generate_stab_list, id=self.show_gui[-1].GetId()
+        )
         stab_sizer.Add(self.show_gui[-1], 1, wx.TOP)
         self._gen_stab_sym_gui_idx = len(self.show_gui) - 1
-        self.show_gui.append(geom_gui.SymmetrySelect(
-            self.panel,
-            'Stabiliser Symmetry',
-            self.show_gui[self._final_sym_gui_idx].get_sym_class(
-                apply_order=True).subgroups,
-            on_get_sym_setup=self.on_get_stab_sym_setup))
+        self.show_gui.append(
+            geom_gui.SymmetrySelect(
+                self.panel,
+                "Stabiliser Symmetry",
+                self.show_gui[self._final_sym_gui_idx]
+                .get_sym_class(apply_order=True)
+                .subgroups,
+                on_get_sym_setup=self.on_get_stab_sym_setup,
+            )
+        )
         self._stab_sym_gui_idx = len(self.show_gui) - 1
         stab_sizer.Add(self.show_gui[-1], 2, wx.EXPAND)
         self.hide_stab_list()
         ctrl_sizer.Add(stab_sizer, 0, wx.EXPAND)
 
-        self.show_gui.append(wx.Button(self.panel,
-                                       wx.ID_ANY, "Apply Symmetry"))
-        self.panel.Bind(wx.EVT_BUTTON,
-                        self.on_apply_sym,
-                        id=self.show_gui[-1].GetId())
+        self.show_gui.append(wx.Button(self.panel, wx.ID_ANY, "Apply Symmetry"))
+        self.panel.Bind(wx.EVT_BUTTON, self.on_apply_sym, id=self.show_gui[-1].GetId())
         ctrl_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
 
         self.show_gui[self._final_sym_gui_idx].set_selected(0)
-        self.on_final_sym_select(
-            self.show_gui[self._final_sym_gui_idx].get_sym_class())
+        self.on_final_sym_select(self.show_gui[self._final_sym_gui_idx].get_sym_class())
 
         self.ctrl_sizer = ctrl_sizer
         return ctrl_sizer
@@ -219,38 +236,42 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.col_sizer.Clear(True)
             self.select_col_sizer = None
         except AttributeError:
-            self.col_gui_box = wx.StaticBox(self.panel, label='Colour Setup')
+            self.col_gui_box = wx.StaticBox(self.panel, label="Colour Setup")
             self.col_sizer = wx.StaticBoxSizer(self.col_gui_box, wx.VERTICAL)
             self.ctrl_sizer.Add(self.col_sizer, 0, wx.EXPAND)
-        self.orbit = orbit.Orbit((
-            self.show_gui[self._final_sym_gui_idx].get_selected(),
-            self.show_gui[self._stab_sym_gui_idx].get_selected()
-        ))
+        self.orbit = orbit.Orbit(
+            (
+                self.show_gui[self._final_sym_gui_idx].get_selected(),
+                self.show_gui[self._stab_sym_gui_idx].get_selected(),
+            )
+        )
         # Generate list of colour alternatives
         no_of_cols_choice_lst = []
         no_to_index = []
         for p in self.orbit.higher_order_stab_props:
-            no_of_cols_choice_lst.append(f"{p['index']} (based on {p['class'].__name__})")
-            no_to_index.append(p['index'])
+            no_of_cols_choice_lst.append(
+                f"{p['index']} (based on {p['class'].__name__})"
+            )
+            no_to_index.append(p["index"])
         for p in self.orbit.lower_order_stab_props:
-            no_of_cols_choice_lst.append(f"{p['index']} (based on {p['class'].__name__})")
-            no_to_index.append(p['index'])
+            no_of_cols_choice_lst.append(
+                f"{p['index']} (based on {p['class'].__name__})"
+            )
+            no_to_index.append(p["index"])
         self.col_guis = []
         # Make a choice list of colour alternatives
         self.col_guis.append(
             wx.Choice(self.panel, wx.ID_ANY, choices=no_of_cols_choice_lst)
         )
         self.col_sizer.Add(self.col_guis[-1], 0, wx.EXPAND)
-        self.panel.Bind(wx.EVT_CHOICE,
-                        self.on_no_of_col_select,
-                        id=self.col_guis[-1].GetId())
+        self.panel.Bind(
+            wx.EVT_CHOICE, self.on_no_of_col_select, id=self.col_guis[-1].GetId()
+        )
         # col_alt[0]: index for no of colors
         # col_atl[1]: index for alternative number with that amount of colors
         self.col_alt = self.col_select[
             self.show_gui[self._final_sym_gui_idx].get_selected_idx()
-        ][
-            self.show_gui[self._stab_sym_gui_idx].get_selected_idx()
-        ]
+        ][self.show_gui[self._stab_sym_gui_idx].get_selected_idx()]
         # overwrite if self._col_pre_selection (by importing JSON file with colours defined)
         if self._col_pre_selection != 0 and self._col_pre_selection in no_to_index:
             self.col_alt[0] = no_to_index.index(self._col_pre_selection)
@@ -271,14 +292,11 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
     def on_get_stab_sym_setup(self, sym_idx):
         """Return the orientation of the stabiliser symmetry"""
-        final_sym_idx = self.show_gui[
-            self._final_sym_gui_idx].get_selected_idx()
+        final_sym_idx = self.show_gui[self._final_sym_gui_idx].get_selected_idx()
         try:
             return self.stab_sym_setup[final_sym_idx][sym_idx]
         except TypeError:
-            logging.info(
-                "Note: ignoring error at on_get_stab_sym_setup: 1st time = ok"
-            )
+            logging.info("Note: ignoring error at on_get_stab_sym_setup: 1st time = ok")
             return None
 
     def on_final_sym_select(self, sym):
@@ -333,14 +351,12 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # Check these first before you retrieve values. E.g. if the 'n' in Cn
         # symmetry is updated, then the class is updated. As soon as you
         # retrieve the value, val_updated will be reset.
-        updated0 = self.show_gui[
-            self._final_sym_gui_idx].is_sym_class_updated()
-        updated1 = self.show_gui[
-            self._stab_sym_gui_idx].is_sym_class_updated()
+        updated0 = self.show_gui[self._final_sym_gui_idx].is_sym_class_updated()
+        updated1 = self.show_gui[self._stab_sym_gui_idx].is_sym_class_updated()
         verts = self.show_gui[self._vs_gui_idx].get()
         faces = self.show_gui[self._fs_gui_idx].get()
         if faces == []:
-            self.status_text('No faces defined!', logging.ERROR)
+            self.status_text("No faces defined!", logging.ERROR)
             return
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
         final_sym_obj = final_sym_gui.get_selected()
@@ -352,23 +368,19 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup
         try:
             self.shape = geom_3d.OrbitShape(
-                verts,
-                faces,
-                final_sym=final_sym_obj,
-                stab_sym=stab_sym,
-                name=self.name
+                verts, faces, final_sym=final_sym_obj, stab_sym=stab_sym, name=self.name
             )
         except isometry.ImproperSubgroupError:
             self.status_text(
-                'Stabiliser not a subgroup of final symmetry!', logging.ERROR)
+                "Stabiliser not a subgroup of final symmetry!", logging.ERROR
+            )
             if e is not None:
                 e.Skip()
             return
         self.fs_orbit = self.shape.isometries
         self.fs_orbit_org = True
         self.shape.regen_edges()
-        self.update_orientation(
-            self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
+        self.update_orientation(self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.
@@ -404,22 +416,17 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         if axis == geomtypes.Vec3([0, 0, 0]):
             rot = geomtypes.E
             self.status_text(
-                'Rotation axis is the null-vector: applying identity',
-                logging.INFO
+                "Rotation axis is the null-vector: applying identity", logging.INFO
             )
         else:
-            rot = geomtypes.Rot3(
-                axis=axis,
-                angle=geom_3d.DEG2RAD * angle
-            )
+            rot = geomtypes.Rot3(axis=axis, angle=geom_3d.DEG2RAD * angle)
         try:
             self.shape.orientation = rot
             if self.shape_one_col:
                 self.shape_one_col.orientation = rot
         except AttributeError:
             self.status_text(
-                'Apply symmetry first, before pulling the slide-bar',
-                logging.WARNING
+                "Apply symmetry first, before pulling the slide-bar", logging.WARNING
             )
 
     def on_rot(self, angle, axis):
@@ -436,32 +443,28 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.col_sizer.Add(self.select_col_sizer, 0, wx.EXPAND)
             next_prev_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
             self.col_guis.append(
-                wx.Button(self.panel, wx.ID_ANY, "Previous Alternative"))
+                wx.Button(self.panel, wx.ID_ANY, "Previous Alternative")
+            )
             self.panel.Bind(
-                wx.EVT_BUTTON,
-                self.on_prev_col_alt,
-                id=self.col_guis[-1].GetId())
+                wx.EVT_BUTTON, self.on_prev_col_alt, id=self.col_guis[-1].GetId()
+            )
             next_prev_col_sizer.Add(self.col_guis[-1], 0, wx.EXPAND)
-            self.col_guis.append(
-                wx.Button(self.panel, wx.ID_ANY, "Next Alternative"))
+            self.col_guis.append(wx.Button(self.panel, wx.ID_ANY, "Next Alternative"))
             self.panel.Bind(
-                wx.EVT_BUTTON,
-                self.on_next_col_alt,
-                id=self.col_guis[-1].GetId())
+                wx.EVT_BUTTON, self.on_next_col_alt, id=self.col_guis[-1].GetId()
+            )
             next_prev_col_sizer.Add(self.col_guis[-1], 0, wx.EXPAND)
             next_prev_col_sizer.Add(wx.BoxSizer(wx.HORIZONTAL), 1, wx.EXPAND)
-            self.col_guis.append(
-                wx.Button(self.panel, wx.ID_ANY, "Reset Colours"))
-            self.panel.Bind(wx.EVT_BUTTON,
-                            self.on_reset_cols,
-                            id=self.col_guis[-1].GetId())
+            self.col_guis.append(wx.Button(self.panel, wx.ID_ANY, "Reset Colours"))
+            self.panel.Bind(
+                wx.EVT_BUTTON, self.on_reset_cols, id=self.col_guis[-1].GetId()
+            )
             next_prev_col_sizer.Add(self.col_guis[-1], 0, wx.EXPAND)
-            self.col_guis.append(
-                wx.Button(self.panel, wx.ID_ANY, "Show only one"))
+            self.col_guis.append(wx.Button(self.panel, wx.ID_ANY, "Show only one"))
             self.one_col_button = self.col_guis[-1]
-            self.panel.Bind(wx.EVT_BUTTON,
-                            self.on_one_col,
-                            id=self.one_col_button.GetId())
+            self.panel.Bind(
+                wx.EVT_BUTTON, self.on_one_col, id=self.one_col_button.GetId()
+            )
             next_prev_col_sizer.AddStretchSpacer()
             next_prev_col_sizer.Add(self.one_col_button, 0, wx.EXPAND)
             self.col_sizer.Add(next_prev_col_sizer, 0, wx.EXPAND)
@@ -469,17 +472,15 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         col_div_no = e.GetSelection()
         self.col_alt[0] = col_div_no
         l0 = len(self.orbit.higher_order_stab_props)
-        assert l0 != 0, 'no higher order stabilisers found'
+        assert l0 != 0, "no higher order stabilisers found"
         if col_div_no < l0:
             self.col_final_sym = self.orbit.final
             self.col_syms = self.orbit.higher_order_stab(col_div_no)
-            no_of_cols = self.orbit.higher_order_stab_props[
-                col_div_no]['index']
+            no_of_cols = self.orbit.higher_order_stab_props[col_div_no]["index"]
         else:
             self.col_final_sym = self.orbit.final_sym_alt
             self.col_syms = self.orbit.lower_order_stab(col_div_no - l0)
-            no_of_cols = self.orbit.lower_order_stab_props[
-                col_div_no - l0]['index']
+            no_of_cols = self.orbit.lower_order_stab_props[col_div_no - l0]["index"]
             # now the fs_orbit might contain isometries that are not part of
             # the colouring isometries. Recreate the shape with isometries that
             # only have these:
@@ -487,13 +488,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 final_sym = self.orbit.final_sym_alt
                 stab_sym = self.orbit.stab_sym_alt
                 verts = self.shape.base_vs
-                faces = self.shape.base_shape.face_props['fs']
+                faces = self.shape.base_shape.face_props["fs"]
                 self.shape = geom_3d.OrbitShape(
-                    verts,
-                    faces,
-                    final_sym=final_sym,
-                    stab_sym=stab_sym,
-                    name=self.name
+                    verts, faces, final_sym=final_sym, stab_sym=stab_sym, name=self.name
                 )
                 self.fs_orbit = self.shape.isometries
                 self.shape.regen_edges()
@@ -513,8 +510,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 sel_col_sizer_row = wx.BoxSizer(wx.HORIZONTAL)
                 self.select_col_sizer.Add(sel_col_sizer_row, 0, wx.EXPAND)
             self.select_col_guis.append(
-                wxLibCS.ColourSelect(self.panel, wx.ID_ANY, colour=col,
-                                     size=(40, 30))
+                wxLibCS.ColourSelect(self.panel, wx.ID_ANY, colour=col, size=(40, 30))
             )
             self.select_col_guis[-1].SetCustomColours(wx_colors.COLOR_PALLETE)
             self.panel.Bind(wxLibCS.EVT_COLOURSELECT, self.on_col_select)
@@ -534,8 +530,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         """
         col = e.GetValue().Get()
         gui_idx = e.GetId()
-        for i, gui in zip(list(range(len(self.select_col_guis))),
-                          self.select_col_guis):
+        for i, gui in zip(list(range(len(self.select_col_guis))), self.select_col_guis):
             if gui.GetId() == gui_idx:
                 self.cols[i] = col
                 self.update_shape_cols()
@@ -575,7 +570,8 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.canvas.panel.shape = self.shape
         self.status_text(
             f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
-            logging.INFO)
+            logging.INFO,
+        )
 
         self.canvas.paint()
 
@@ -606,7 +602,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
     def on_one_col(self, _):
         """Toggle Showing only one of the colours."""
-        self.one_col_button.SetLabel("Show only one" if self.show_one_col else "Show All")
+        self.one_col_button.SetLabel(
+            "Show only one" if self.show_one_col else "Show All"
+        )
         self.col_sizer.Layout()
         self.show_one_col = not self.show_one_col
         self.update_shape_cols()
@@ -629,8 +627,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         shape is returned.
         """
         shape = base.Orbitit.from_json_file(filename)
-        if not isinstance(shape, geom_3d.SimpleShape) and\
-               not isinstance(shape, geom_3d.CompoundShape):
+        if not isinstance(shape, geom_3d.SimpleShape) and not isinstance(
+            shape, geom_3d.CompoundShape
+        ):
             self.status_text("The JSON file doesn't represent a shape", logging.ERROR)
         # For Compound derived shapes (isinstance) use merge:
         if isinstance(shape, geom_3d.OrbitShape):
@@ -654,6 +653,12 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                     included_colors.append(col)
                     self.cols[i] = col[:3]
                     i += 1
+            axis = getattr(shape, "axis", None)
+            if axis:
+                self.rot_sizer.set_axis(axis)
+            domain = getattr(shape, "domain", None)
+            if domain:
+                self.rot_sizer.set_aangle(domain[0])
             self._col_pre_selection = len(included_colors)
             shape = shape.base_shape
         if isinstance(shape, geom_3d.CompoundShape):
@@ -669,9 +674,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         wildcard = "Python shape (*.json)|*.json|OFF shape (*.off)|*.off"
         dlg = wx.FileDialog(
             self,
-            'New: Choose a file',
+            "New: Choose a file",
             str(self.import_dir_name),
-            '',
+            "",
             wildcard,
             wx.FD_OPEN,
         )
@@ -680,7 +685,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.import_dir_name = Path(dlg.GetDirectory())
             logging.info("opening file: %s", filename)
             filepath = self.import_dir_name / filename
-            if filename.suffix == '.json':
+            if filename.suffix == ".json":
                 shape = self.import_json(filepath)
             else:
                 with open(filepath) as fd:
@@ -696,5 +701,6 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
 class Scene(geom_3d.Scene):
     """Implementation of the scene: control window and the shape"""
+
     def __init__(self, parent, canvas):
         geom_3d.Scene.__init__(self, Shape, CtrlWin, parent, canvas)

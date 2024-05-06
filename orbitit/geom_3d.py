@@ -1138,7 +1138,9 @@ class SimpleShape(base.Orbitit):
                 t = (vi0, vi1)
             else:
                 t = (vi1, vi0)
-            length = (geomtypes.Vec3(self.vs[vi1]) - geomtypes.Vec3(self.vs[vi0])).norm()
+            length = (
+                geomtypes.Vec3(self.vs[vi1]) - geomtypes.Vec3(self.vs[vi0])
+            ).norm()
             length = round(length, precision)
             try:
                 len_to_edge[length].append(t)
@@ -3023,9 +3025,10 @@ class OrbitShape(SymmetricShape):
                 "name": self.name,
                 "vs": self.base_shape.vs,
                 "fs": self.base_shape.fs,
-                "cols": self._shape_colors,
                 "final_sym": self.final_sym.repr_dict,
                 "stab_sym": self.stab_sym.repr_dict,
+                "no_of_cols": self.no_of_cols,
+                "cols": self._shape_colors,
             },
         }
 
@@ -3034,7 +3037,7 @@ class OrbitShape(SymmetricShape):
         # older version used a float between 0 and 1
         if isinstance(data["cols"][0][0], float):
             data["cols"] = [[int(chn * 255) for chn in d] for d in data["cols"]]
-        return cls(
+        result = cls(
             data["vs"],
             data["fs"],
             final_sym=isometry.Set.from_json_dict(data["final_sym"]),
@@ -3042,6 +3045,7 @@ class OrbitShape(SymmetricShape):
             colors=data["cols"],
             name=data["name"],
         )
+        return result
 
     def __repr__(self):
         # This repr should be fixed, since you cannot be sure in which order the
