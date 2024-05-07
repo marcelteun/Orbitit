@@ -909,7 +909,10 @@ class MainPanel(wx.Panel):
                 max_norm = max(max_norm, vs.norm())
         # Now scale to fit FoV
         max_fit = 5.6
-        self.original_scale_factor = max_fit / max_norm
+        if max_norm:
+            self.original_scale_factor = max_fit / max_norm
+        else:
+            self.original_scale_factor = max_fit
         shape.scale(self.original_scale_factor)
 
         # Use all the vertex settings except for vs, i.e. keep the view
