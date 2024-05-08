@@ -56,11 +56,16 @@ class CompoundS4A4:
         "fs": [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]],
     }
 
-    def __init__(self, descr, output_dir, final_symmetry, n=None):
+    def __init__(self, descr, output_dir, final_symmetry, n_domain=None):
         """
-        n: a list with n-values to generate the cyclic and dihedral groups for.
+        n_domain: a list of integer to specify for which n-fold symmetry axis for `the cyclic and
+        dihedral symmetry groups to generate compounds.
         """
         self.descr = descr
+        if n_domain:
+            self.n_domain = n_domain
+        else:
+            self.n_domain = []
 
         # Create all models in one dir
         if not os.path.isdir(output_dir):
@@ -833,16 +838,17 @@ class CompoundS4xI:
         ],
     }
 
-    def __init__(self, descr, output_dir, final_symmetry, n=None):
+    def __init__(self, descr, output_dir, final_symmetry, n_domain=None):
         """
-        n: a list with n-values to generate the cyclic and dihedral groups for.
+        n_domain: a list of integer to specify for which n-fold symmetry axis for `the cyclic and
+        dihedral symmetry groups to generate compounds.
         """
         self.descr = descr
 
-        if n:
-            self.n = n
+        if n_domain:
+            self.n_domain = n_domain
         else:
-            self.n = []
+            self.n_domain = []
         # Create all models in one dir
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
@@ -868,8 +874,12 @@ class CompoundS4xI:
         print(f"Files saved in {output_dir}/")
 
     def create_cnxi(self, js_fd=None):
+        """Create all compounds with the cylcic symmetry.
+
+        The self.n_domain specifies for which n-fold symmetry axis.
+        """
         # example rotation
-        for n in self.n:
+        for n in self.n_domain:
             base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
             polyh = S4xI.CnxI_ExI(self.descr, n, n)
             polyh.transform_base(base_rot)
