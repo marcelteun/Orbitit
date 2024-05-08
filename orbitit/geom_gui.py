@@ -1403,13 +1403,15 @@ class SymmetrySelect(wx.StaticBoxSizer):
         found = False
         i = 0
         for i, cl_i in enumerate(self.groups_lst):
-            if cl == cl_i:
+            # The in relation is for cyclic and dihedral symmetry, e.g.
+            # cl can be C4xI, while cl_i is CnxI
+            if cl == cl_i or cl_i in cl.__bases__:
                 found = True
                 break
         if found:
             self.set_selected(i)
         else:
-            logging.warning("set_selected_class: class not found")
+            logging.warning("set_selected_class: class %s not found", cl.__name__)
 
     def set_selected(self, i):
         """Set the selected symmetry in the drop down menu by index"""

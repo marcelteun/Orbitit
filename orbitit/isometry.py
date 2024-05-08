@@ -966,6 +966,7 @@ class CnxI(Set, metaclass=MetaCnxI):
             # then if you specify n it should be the correct value
             assert self.n in (0, s['n'])
             cn = Cn(setup=s)
+            self.generator = cn.generator
             self.n = cn.n
             self.direct_parent = C(self.n)
             self.direct_parent_setup = copy(s)

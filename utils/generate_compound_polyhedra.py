@@ -88,4 +88,4 @@ output_dir = args.output_dir
 if not output_dir:
     output_dir = f"output/{args.args.descriptive_sym}"
 
-compounds = generator(DESCR, output_dir, args.final_symmetry, n=args.n)
+compounds = generator(DESCR, output_dir, args.final_symmetry, n_domain=args.n)

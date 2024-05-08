@@ -880,10 +880,12 @@ class CompoundS4xI:
         """
         # example rotation
         for n in self.n_domain:
-            base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
-            polyh = S4xI.CnxI_ExI(self.descr, n, n)
+            axis_eg = geomtypes.Vec3([1, 2, 3])
+            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
+            polyh = S4xI.CnxI_ExI(self.descr, n, n, axis=axis_eg)
             polyh.transform_base(base_rot)
             save_off(polyh)
+            polyh.write_json_file(get_stem(polyh) + ".json")
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
 
