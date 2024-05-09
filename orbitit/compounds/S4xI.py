@@ -39,6 +39,7 @@ class Compound(orbit.Shape):
     """A compound object, see orbit.Shape class for more info."""
 
     base_to_o2 = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=math.pi / 4)
+    base_to_q = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / 4)
 
 
 ###############################################################################
@@ -101,6 +102,63 @@ class DnxI_ExI(Compound):
             col_sym=col_sym,
         )
         self.set_rot_axis(axis, self.mu[:2])
+
+
+class DnxI_C2xI_A(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, angle.ACOS_1_V3, math.pi / 2, math.pi / 4, angle.ASIN_1_V3, angle.ASIN_2V2_3]
+
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
+        """Compound of n elements with final symmetry DnxI (rotation freedom)
+
+        The descriptive shares a mirror plane with that in the final symmetry.
+        symmetry, 'A' variant.
+        """
+        assert n >= 3, f"Only n >= 3 is supported, got {n}"
+        axis = geomtypes.Vec3([1, 0, 0])
+        super().__init__(
+            base,
+            isometry.DxI(n)(),
+            isometry.C2xI(setup={"axis": axis}),
+            name=f"A_D{n}xI_C2xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_q)
+        self.set_rot_axis(axis, self.mu[:3])
+
+
+class DnxI_C2xI_B(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [0, math.pi / 4, math.pi / 8, angle.ASIN_1_V3, angle.ACOS_V_5_V5_V10]
+
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
+        """Compound of n elements with final symmetry DnxI (rotation freedom)
+
+        The descriptive shares a mirror plane with that in the final symmetry.
+        symmetry, 'B' variant.
+        """
+        assert n >= 3, f"Only n >= 3 is supported, got {n}"
+        axis = geomtypes.Vec3([1, 0, 0])
+        super().__init__(
+            base,
+            isometry.DxI(n)(),
+            isometry.C2xI(setup={"axis": axis}),
+            name=f"B_D{n}xI_C2xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis, self.mu[:3])
 
 
 ###############################################################################

@@ -907,6 +907,49 @@ class CompoundS4xI:
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
 
+        # Rotation freedom (around 1 axis)
+        for n in self.n_domain:
+            # nA | DnxI  / C2xI
+            polyh = S4xI.DnxI_C2xI_A(self.descr, n, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            polyh.rot_base(math.pi / 6)  # example angle
+            save_off(polyh)
+            # special mu
+            m, no_col = (n, n // 2) if n % 2 == 0 else (2 * n, n)
+            polyh = S4xI.DnxI_C2xI_A(self.descr, m, no_col)
+            polyh.rot_base(polyh.mu[3])
+            save_off(polyh, "_mu3")
+            polyh = S4xI.DnxI_C2xI_A(self.descr, m, no_col)
+            polyh.rot_base(polyh.mu[4])
+            save_off(polyh, "_mu4")
+            m, no_col = (n, n // 4) if n % 4 == 0 else (4 * n, n)
+            polyh = S4xI.DnxI_C2xI_A(self.descr, m, no_col)
+            polyh.rot_base(polyh.mu[5])
+            save_off(polyh, "_mu5")
+
+            # nB | DnxI  / C2xI
+            polyh = S4xI.DnxI_C2xI_B(self.descr, n, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            polyh.rot_base(math.pi / 6)  # example angle
+            save_off(polyh)
+            # special mu
+            m, no_col = (n, n // 2) if n % 2 == 0 else (2 * n, n)
+            polyh = S4xI.DnxI_C2xI_B(self.descr, m, no_col)
+            polyh.rot_base(polyh.mu[2])
+            save_off(polyh, "_mu2")
+            m, no_col = (n, n // 3) if n % 3 == 0 else (3 * n, n)
+            polyh = S4xI.DnxI_C2xI_B(self.descr, m, no_col)
+            polyh.rot_base(polyh.mu[3])
+            save_off(polyh, "_mu3")
+            m, no_col = (n, n // 5) if n % 5 == 0 else (5 * n, n)
+            polyh = S4xI.DnxI_C2xI_B(self.descr, m, no_col)
+            polyh.rot_base(polyh.mu[4])
+            save_off(polyh, "_mu4")
+
     def create_a4xi(self, js_fd=None):
         """Create all compounds with the symmetry of a tetrahedron and a cetral inversion."""
         # example rotation

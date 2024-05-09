@@ -40,6 +40,7 @@ symmetry)
 # pylint: disable=too-many-statements,too-many-locals,too-many-branches
 
 
+from copy import copy
 import logging
 import os
 from pathlib import Path
@@ -644,7 +645,19 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.on_generate_stab_list()
             self.show_gui[self._stab_sym_gui_idx].set_selected_class(type(stab_sym))
             self.show_gui[self._stab_sym_gui_idx].on_set_sym(None)
-            self.show_gui[self._stab_sym_gui_idx].setup_sym(stab_sym.setup)
+            # For the stabiliser symmetry the GUI doesn't use the generatl classes, like
+            # CnxI, but instead uses the inherited classes with "n" set, like C2xI, C3xI. If a JSON
+            # file is loadded, then the "n" is actually defined in the setup as well (which will is
+            # need to make things work for the final symmetry, where only the general classes are
+            # used). The setup_sym will check whether the setup has the expected amount of inputs
+            # (compoared to what is available in the GUI). In the GUI one cannot set "n", i.e.
+            # removec. To prevent screwing up something in the opject, use a copy.
+            setup = copy(stab_sym.setup)
+            try:
+                del setup["n"]
+            except KeyError:
+                pass
+            self.show_gui[self._stab_sym_gui_idx].setup_sym(setup)
             # TODO: set the colours
             included_colors = []
             i = 0
