@@ -51,7 +51,9 @@ class CnxI_ExI(Compound):
 
     mu = [0, 2 * math.pi]
 
-    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None):
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
         """General compound with CnxI symmetry with central freedom.
 
         axis: this is a polyhedron with spherical freedom, so in general any axis is fine here.
@@ -80,7 +82,9 @@ class DnxI_ExI(Compound):
 
     mu = [0, 2 * math.pi]
 
-    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None):
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
         """General compound with DnxI symmetry with central freedom.
 
         axis: this is a polyhedron with spherical freedom, so in general any axis is fine here.

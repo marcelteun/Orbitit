@@ -127,7 +127,7 @@ class IntInput(wx.TextCtrl):
         else:
             tail_start = selected[1]
         if tail_start < len(string):
-            tail = string[selected[1]:]
+            tail = string[selected[1] :]
         else:
             tail = ""
         new_string = head + char + tail
@@ -1516,9 +1516,7 @@ class AxisRotateSizer(wx.BoxSizer):
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
-        self.show_gui.append(
-            Vector3DInput(panel, "Rotate around Axis:", v=[0, 0, 1])
-        )
+        self.show_gui.append(Vector3DInput(panel, "Rotate around Axis:", v=[0, 0, 1]))
         v_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
         self._axis_gui_idx = len(self.show_gui) - 1
 
@@ -1547,7 +1545,9 @@ class AxisRotateSizer(wx.BoxSizer):
         slider_sizer = wx.BoxSizer(wx.HORIZONTAL)
         v_sizer.Add(slider_sizer, 0, wx.EXPAND)
         self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-", style=wx.BU_EXACTFIT))
-        panel.Bind(wx.EVT_BUTTON, self._on_angle_step_down, id=self.show_gui[-1].GetId())
+        panel.Bind(
+            wx.EVT_BUTTON, self._on_angle_step_down, id=self.show_gui[-1].GetId()
+        )
         slider_sizer.Add(self.show_gui[-1], 0, wx.ALIGN_CENTRE_VERTICAL)
         self.show_gui.append(
             wx.Slider(

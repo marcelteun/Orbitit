@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument(
     "descriptive_sym",
-    help=f"The symmetry of the descriptive. Supported are {list(GENERATORS.keys())}"
+    help=f"The symmetry of the descriptive. Supported are {list(GENERATORS.keys())}",
 )
 parser.add_argument(
     "-d",
@@ -65,8 +65,7 @@ final_symmetry = args.final_symmetry
 try:
     generator = GENERATORS[args.descriptive_sym]
 except KeyError as exception:
-    err_msg = \
-        f"Got invalid symmetry {args.descriptive_sym}, supported are {list(GENERATORS.keys())}"
+    err_msg = f"Got invalid symmetry {args.descriptive_sym}, supported: {list(GENERATORS.keys())}"
     raise ValueError(err_msg) from exception
 if final_symmetry and final_symmetry not in generator.final_sym:
     raise ValueError(
