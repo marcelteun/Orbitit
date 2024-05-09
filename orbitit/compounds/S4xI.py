@@ -72,6 +72,35 @@ class CnxI_ExI(Compound):
 
 ###############################################################################
 #
+# Dn x I
+#
+###############################################################################
+class DnxI_ExI(Compound):
+    """General compound with spherical freedom, see __init__ for more info."""
+
+    mu = [0, 2 * math.pi]
+
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None):
+        """General compound with DnxI symmetry with central freedom.
+
+        axis: this is a polyhedron with spherical freedom, so in general any axis is fine here.
+        """
+        assert n >= 2, f"Only n >= 2 is supported, got {n}"
+        super().__init__(
+            base,
+            isometry.DxI(n)(),
+            isometry.ExI(),
+            name=f"D{n}xI_ExI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis, self.mu[:2])
+
+
+###############################################################################
+#
 # A4 x I
 #
 ###############################################################################

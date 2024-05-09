@@ -815,7 +815,7 @@ class CompoundS4A4:
 class CompoundS4xI:
     """Create set of files with compounds with a descriptive with S4xI symmetry."""
 
-    final_sym = set({"CnxI", "A4xI", "S4xI", "A5xI"})
+    final_sym = set({"CnxI", "DnxI", "A4xI", "S4xI", "A5xI"})
     # Cube
     example_descriptive = {
         "vs": [
@@ -861,12 +861,14 @@ class CompoundS4xI:
 
             if not final_symmetry:
                 self.create_cnxi(js_fd)
+                self.create_dnxi(js_fd)
                 self.create_a4xi(js_fd)
                 self.create_s4xi(js_fd)
                 self.create_a5xi(js_fd)
             else:
                 {
                     "CnxI": self.create_cnxi,
+                    "DnxI": self.create_dnxi,
                     "A4xI": self.create_a4xi,
                     "S4xI": self.create_s4xi,
                     "A5xI": self.create_a5xi,
@@ -883,6 +885,22 @@ class CompoundS4xI:
             axis_eg = geomtypes.Vec3([1, 2, 3])
             base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
             polyh = S4xI.CnxI_ExI(self.descr, n, n, axis=axis_eg)
+            polyh.transform_base(base_rot)
+            save_off(polyh)
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+
+    def create_dnxi(self, js_fd=None):
+        """Create all compounds with the dihedral symmetry.
+
+        The self.n_domain specifies for which n-fold symmetry axis.
+        """
+        # example rotation
+        for n in self.n_domain:
+            axis_eg = geomtypes.Vec3([1, 2, 3])
+            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
+            polyh = S4xI.DnxI_ExI(self.descr, n, n, axis=axis_eg)
             polyh.transform_base(base_rot)
             save_off(polyh)
             polyh.write_json_file(get_stem(polyh) + ".json")

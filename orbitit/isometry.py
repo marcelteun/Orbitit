@@ -1376,6 +1376,7 @@ class DnxI(Set, metaclass=MetaDnxI):
             # then if you specify n it should be the correct value
             assert self.n in (0, s['n'])
             dn = Dn(setup=s)
+            self.generator = dn.generator
             self.n = dn.n
             self.direct_parent = D(self.n)
             self.direct_parent_setup = copy(s)
