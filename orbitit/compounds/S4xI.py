@@ -90,7 +90,7 @@ class DnxI_ExI(Compound):
 
         axis: this is a polyhedron with spherical freedom, so in general any axis is fine here.
         """
-        assert n >= 2, f"Only n >= 2 is supported, got {n}"
+        assert n >= 1, f"Only n >= 1 is supported, got {n}"
         super().__init__(
             base,
             isometry.DxI(n)(),

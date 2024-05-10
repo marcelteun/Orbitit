@@ -56,16 +56,16 @@ class CompoundS4A4:
         "fs": [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]],
     }
 
-    def __init__(self, descr, output_dir, final_symmetry, n_domain=None):
+    def __init__(self, descr, output_dir, final_symmetry, no_of=None):
         """
-        n_domain: a list of integer to specify for which n-fold symmetry axis for `the cyclic and
-        dihedral symmetry groups to generate compounds.
+        no_of: a list of indices in a list consisting of valid list with n values for the cyclic and
+        dihedral symmetry groups. For these indices the compounds will be generated.
         """
         self.descr = descr
-        if n_domain:
-            self.n_domain = n_domain
+        if no_of:
+            self.no_of = no_of
         else:
-            self.n_domain = []
+            self.no_of = []
 
         # Create all models in one dir
         if not os.path.isdir(output_dir):
@@ -838,17 +838,17 @@ class CompoundS4xI:
         ],
     }
 
-    def __init__(self, descr, output_dir, final_symmetry, n_domain=None):
+    def __init__(self, descr, output_dir, final_symmetry, no_of=None):
         """
-        n_domain: a list of integer to specify for which n-fold symmetry axis for `the cyclic and
-        dihedral symmetry groups to generate compounds.
+        no_of: a list of indices in a list consisting of valid list with n values for the cyclic and
+        dihedral symmetry groups. For these indices the compounds will be generated.
         """
         self.descr = descr
 
-        if n_domain:
-            self.n_domain = n_domain
+        if no_of:
+            self.no_of = no_of
         else:
-            self.n_domain = []
+            self.no_of = []
         # Create all models in one dir
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
@@ -878,10 +878,13 @@ class CompoundS4xI:
     def create_cnxi(self, js_fd=None):
         """Create all compounds with the cylcic symmetry.
 
-        The self.n_domain specifies for which n-fold symmetry axis.
+        The self.no_of specifies for which n-fold symmetry axis.
         """
         # example rotation
-        for n in self.n_domain:
+        for i in self.no_of:
+            # n | CnxI  / ExI
+            # with n >= 2
+            n = i + 1
             axis_eg = geomtypes.Vec3([1, 2, 3])
             base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
             polyh = S4xI.CnxI_ExI(self.descr, n, n, axis=axis_eg)
@@ -894,12 +897,15 @@ class CompoundS4xI:
     def create_dnxi(self, js_fd=None):
         """Create all compounds with the dihedral symmetry.
 
-        The self.n_domain specifies for which n-fold symmetry axis.
+        The self.no_of specifies for which n-fold symmetry axis.
         """
         # example rotation
-        for n in self.n_domain:
+        for i in self.no_of:
+            # 2n | DnxI  / ExI
+            # with n >= 1
+            n = i
             axis_eg = geomtypes.Vec3([1, 2, 3])
-            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
+            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / (2 * i))
             polyh = S4xI.DnxI_ExI(self.descr, n, n, axis=axis_eg)
             polyh.transform_base(base_rot)
             save_off(polyh)
@@ -908,8 +914,10 @@ class CompoundS4xI:
                 js_fd.write(polyh.to_js())
 
         # Rotation freedom (around 1 axis)
-        for n in self.n_domain:
+        for i in self.no_of:
             # nA | DnxI  / C2xI
+            # with n >= 3
+            n = i + 2
             polyh = S4xI.DnxI_C2xI_A(self.descr, n, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
@@ -917,19 +925,24 @@ class CompoundS4xI:
             polyh.rot_base(math.pi / 6)  # example angle
             save_off(polyh)
             # special mu
-            m, no_col = (n, n // 2) if n % 2 == 0 else (2 * n, n)
-            polyh = S4xI.DnxI_C2xI_A(self.descr, m, no_col)
+            # mu_3: for n = 4, 6, 8 etc
+            n, no_col = 2 + 2 * i, i + 1
+            polyh = S4xI.DnxI_C2xI_A(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[3])
             save_off(polyh, "_mu3")
-            polyh = S4xI.DnxI_C2xI_A(self.descr, m, no_col)
+            # mu_4: for n = 4, 6, 8 etc (same as mu_3)
+            polyh = S4xI.DnxI_C2xI_A(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[4])
             save_off(polyh, "_mu4")
-            m, no_col = (n, n // 4) if n % 4 == 0 else (4 * n, n)
-            polyh = S4xI.DnxI_C2xI_A(self.descr, m, no_col)
+            # mu_5: for n = 5, 6, 7 etc (same as mu_3)
+            n, no_col = 4 * i, i
+            polyh = S4xI.DnxI_C2xI_A(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[5])
             save_off(polyh, "_mu5")
 
             # nB | DnxI  / C2xI
+            # with n >= 3
+            n = i + 2
             polyh = S4xI.DnxI_C2xI_B(self.descr, n, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
@@ -937,16 +950,20 @@ class CompoundS4xI:
             polyh.rot_base(math.pi / 6)  # example angle
             save_off(polyh)
             # special mu
-            m, no_col = (n, n // 2) if n % 2 == 0 else (2 * n, n)
-            polyh = S4xI.DnxI_C2xI_B(self.descr, m, no_col)
+            # mu_2: for n = 4, 6, 8,..
+            n, no_col = 2 + 2 * i, i + 1
+            polyh = S4xI.DnxI_C2xI_B(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[2])
             save_off(polyh, "_mu2")
-            m, no_col = (n, n // 3) if n % 3 == 0 else (3 * n, n)
-            polyh = S4xI.DnxI_C2xI_B(self.descr, m, no_col)
+            # mu_3: for n = 3, 6, 9,..
+            n, no_col = 3 * i, i
+            n, no_col = (n, n // 3) if n % 3 == 0 else (3 * n, n)
+            polyh = S4xI.DnxI_C2xI_B(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[3])
             save_off(polyh, "_mu3")
-            m, no_col = (n, n // 5) if n % 5 == 0 else (5 * n, n)
-            polyh = S4xI.DnxI_C2xI_B(self.descr, m, no_col)
+            # mu_4: for n = 5, 10, 15,..
+            n, no_col = 5 * i, i
+            polyh = S4xI.DnxI_C2xI_B(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[4])
             save_off(polyh, "_mu4")
 

@@ -39,12 +39,15 @@ parser.add_argument(
     "If not specified, then the cube is used. ",
 )
 parser.add_argument(
-    "-n",
+    "-m",
     nargs="+",
     type=int,
     default=[3],
-    help="In case a dihedral or cyclic symmetry is specified, specify the order of the n-fold "
-    "axis here.",
+    help="In case a dihedral or cyclic symmetry is specified, specify the number from the list of "
+    "possible compopunds. This is not the same the number of constituents, but it is related. "
+    "If the possible numbers are 3, 4, 5, etc, then 1 will give the compound of 3, while 2 will "
+    "give the compound of 4, etc. In case there are special angles involved, then these might only "
+    "occur for 5, 10, 15, .. constituents. These cases can be obtained by specifying 1 2 3 here."
 )
 parser.add_argument(
     "-o",
@@ -87,4 +90,4 @@ output_dir = args.output_dir
 if not output_dir:
     output_dir = f"output/{args.args.descriptive_sym}"
 
-compounds = generator(DESCR, output_dir, args.final_symmetry, n_domain=args.n)
+compounds = generator(DESCR, output_dir, args.final_symmetry, no_of=args.m)
