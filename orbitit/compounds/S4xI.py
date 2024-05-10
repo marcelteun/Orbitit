@@ -161,6 +161,38 @@ class DnxI_C2xI_B(Compound):
         self.set_rot_axis(axis, self.mu[:3])
 
 
+class DnxI_D1xI(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
+        """Compound of n elements with final symmetry DnxI (rotation freedom)
+
+        The descriptive shares a mirror plane with that in the final symmetry.
+        symmetry, 'B' variant.
+        """
+        assert n >= 2 and n % 2 == 0, f"Only n >= 2 and even n are supported, got {n}"
+        self.mu = [0, 0]
+        if n == 2:
+            self.mu[1] = angle.ASIN_1_V3
+        self.mu.append(math.pi / (2 * n))
+        self.mu.append(abs(angle.ASIN_1_V3 - math.pi / n))
+        axis = geomtypes.Vec3([0, 0, 1])
+        super().__init__(
+            base,
+            isometry.DxI(n)(),
+            isometry.D1xI(setup={"axis": axis}),
+            name=f"D{n}xI_D1xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o2)
+        self.set_rot_axis(axis, self.mu[:3])
+
+
 ###############################################################################
 #
 # A4 x I
