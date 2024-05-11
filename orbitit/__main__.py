@@ -906,7 +906,14 @@ class MainPanel(wx.Panel):
         max_norm = 0
         for sub_shape in shape:
             for vs in sub_shape.vs:
-                max_norm = max(max_norm, vs.norm())
+                try:
+                    max_norm = max(max_norm, vs.norm())
+                except AttributeError:
+                    # This is probably a SymmetricShape with a list of vertices,
+                    for vs_ in vs:
+                        max_norm = max(max_norm, vs_.norm())
+                    # Since it is a symmetric shape, it is enough with the first element in the list
+                    break
         # Now scale to fit FoV
         max_fit = 5.6
         if max_norm:
