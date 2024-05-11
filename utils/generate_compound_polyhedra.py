@@ -88,6 +88,6 @@ else:
 
 output_dir = args.output_dir
 if not output_dir:
-    output_dir = f"output/{args.args.descriptive_sym}"
+    output_dir = f"output/{args.descriptive_sym}"
 
 compounds = generator(DESCR, output_dir, args.final_symmetry, no_of=args.m)
