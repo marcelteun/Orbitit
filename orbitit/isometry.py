@@ -29,6 +29,7 @@
 from copy import copy, deepcopy
 import logging
 import math
+import re
 
 from orbitit import base, geomtypes, indent
 
@@ -280,9 +281,59 @@ class Set(set, base.Orbitit):
             result["data"]["isometries"] = [e.repr_dict for e in self]
         return result
 
+    RE_XN = r"^([CD])(\d+)$"
+    RE_XNxI = r"^([CD])(\d+)xI$"
+    RE_X2NXN = r"^([DC])(\d+)([DC])(\d+)$"
+    RE_DNCN = r"^D(\d+)C(\d+)$"
+
+    @classmethod
+    def create_dihedral_and_cyclic_on_the_fly(cls, repr_dict):
+        """Create class on the fly if needed.
+
+        This is load classes from JSON files while these aren't created by default. The class should
+        be any off: Cn, Dn, CnxI, C2nCn, DnCn, DnxI, D2nDn
+        """
+        class_name = repr_dict["class"]
+        new_class = None
+        if class_name not in cls.to_class:
+            if re_result := re.search(cls.RE_XN, class_name):
+                elements = re_result.groups()[0]
+                sym = elements[0]
+                n = int(elements[1])
+                syms = {"C": C, "D": D}
+                if sym in syms:
+                    new_class = syms[sym](n)
+            elif re_result := re.search(cls.RE_XNxI, class_name):
+                elements = re_result.groups()
+                sym = elements[0]
+                n = int(elements[1])
+                syms = {"C": CxI, "D": DxI}
+                if sym in syms:
+                    new_class = syms[sym](n)
+            elif re_result := re.search(cls.RE_X2NXN, class_name):
+                elements = re_result.groups()
+                sym_m = int(elements[0])
+                m = int(elements[1])
+                sym_n = int(elements[2])
+                n = int(elements[3])
+                syms = {"C": C2nC, "D": D2nD}
+                if sym_m == sym_n and sym_m in syms and m == 2 * n:
+                    new_class = syms[sym](n)
+            elif re_result := re.search(cls.RE_DNCN, class_name):
+                elements = re_result.groups()
+                m = elements[0]
+                n = elements[1]
+                if m == n:
+                    new_class = DnC(n)
+
+        if new_class:
+            cls.to_class[class_name] = new_class
+            base.class_to_json[new_class] = class_name
+
     @classmethod
     def from_json_dict(cls, repr_dict):
         """Recreate object from complete dict representation."""
+        cls.create_dihedral_and_cyclic_on_the_fly(repr_dict)
         try:
             sub_class = cls.to_class[repr_dict["class"]]
         except KeyError as e:
@@ -2914,19 +2965,19 @@ S4xI.subgroups = [
     D2xI,
     D4,
     C4xI,
-    D4C4,  #  8
+    D4C4,  # 8
     D3,
     D3C3,
-    C3xI,  #  6
+    C3xI,  # 6
     D2,
     D2C2,
     C2xI,
     C4,
-    C4C2,  #  4
-    C3,  #  3
+    C4C2,  # 4
+    C3,  # 3
     C2,
     C2C1,
-    ExI,  #  2
+    ExI,  # 2
     E,
 ]
 
@@ -2945,26 +2996,26 @@ A5.subgroups = [
 
 A5xI.subgroups = [
     A5xI,  # 120
-    A5,  #  60
-    A4xI,  #  24
-    D5xI,  #  20
+    A5,  # 60
+    A4xI,  # 24
+    D5xI,  # 20
     A4,
-    D3xI,  #  12
+    D3xI,  # 12
     D5,
     D5C5,
-    C5xI,  #  10
-    D2xI,  #   8
+    C5xI,  # 10
+    D2xI,  # 8
     D3,
     D3C3,
-    C3xI,  #   6
-    C5,  #   5
+    C3xI,  # 6
+    C5,  # 5
     D2,
     D2C2,
-    C2xI,  #   4
-    C3,  #   3
+    C2xI,  # 4
+    C3,  # 3
     C2,
     C2C1,
-    ExI,  #   2
+    ExI,  # 2
     E,
 ]
 
@@ -2983,6 +3034,7 @@ Set.to_class["ExI"] = ExI
 Set.to_class["Cn"] = Cn
 Set.to_class["CnxI"] = CnxI
 Set.to_class["C2nCn"] = C2nCn
+Set.to_class["DnCn"] = DnCn
 Set.to_class["Dn"] = Dn
 Set.to_class["DnxI"] = DnxI
 Set.to_class["D2nDn"] = D2nDn
@@ -2999,6 +3051,7 @@ base.class_to_json[ExI] = "ExI"
 base.class_to_json[Cn] = "Cn"
 base.class_to_json[CnxI] = "CnxI"
 base.class_to_json[C2nCn] = "C2nCn"
+base.class_to_json[DnCn] = "DnCn"
 base.class_to_json[Dn] = "Dn"
 base.class_to_json[DnxI] = "DnxI"
 base.class_to_json[D2nDn] = "D2nDn"
