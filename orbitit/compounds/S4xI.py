@@ -127,8 +127,7 @@ class DnxI_C2xI_A(Compound):
     ):
         """Compound of n elements with final symmetry DnxI (rotation freedom)
 
-        The descriptive shares a mirror plane with that in the final symmetry.
-        symmetry, 'A' variant.
+        The descriptive shares a mirror plane with that in the final symmetry, 'A' variant.
         """
         assert n >= 3, f"Only n >= 3 is supported, got {n}"
         axis = geomtypes.Vec3([1, 0, 0])
@@ -156,8 +155,7 @@ class DnxI_C2xI_B(Compound):
     ):
         """Compound of n elements with final symmetry DnxI (rotation freedom)
 
-        The descriptive shares a mirror plane with that in the final symmetry.
-        symmetry, 'B' variant.
+        The descriptive shares a mirror plane with that in the final symmetry, 'B' variant.
         """
         assert n >= 3, f"Only n >= 3 is supported, got {n}"
         axis = geomtypes.Vec3([1, 0, 0])
@@ -182,8 +180,7 @@ class DnxI_D1xI(Compound):
     ):
         """Compound of 2n elements with final symmetry DnxI (rotation freedom)
 
-        The descriptive shares a mirror plane with that in the final symmetry.
-        symmetry, 'B' variant.
+        The descriptive shares a 2-fold symmetry axis with the 2n-fold axis of D2nxI.
         """
         assert n >= 2 and n % 2 == 0, f"Only n >= 2 and even n are supported, got {n}"
         self.mu = [0, 0]
@@ -214,8 +211,7 @@ class D3nxI_C3xI(Compound):
     ):
         """Compound of 2n elements with final symmetry DnxI (rotation freedom)
 
-        The descriptive shares a mirror plane with that in the final symmetry.
-        symmetry, 'B' variant.
+        The descriptive shares a 3-fold axis with the final 3n-fold axis of D3nxI
         """
         assert n >= 1, f"Only n >= 1 is supported, got {n}"
         self.mu = [0, math.pi / (6 * n)]
@@ -231,6 +227,33 @@ class D3nxI_C3xI(Compound):
             col_sym=col_sym,
         )
         self.transform_base(self.base_to_o3)
+        self.set_rot_axis(axis, self.mu[:2])
+
+
+class D4nxI_C4xI(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
+        """Compound of 2n elements with final symmetry DnxI (rotation freedom)
+
+        The descriptive shares a mirror plane with that in the final symmetry.
+        symmetry, 'B' variant.
+        """
+        assert n >= 1, f"Only n >= 1 is supported, got {n}"
+        self.mu = [0, math.pi / (8 * n)]
+        axis = geomtypes.Vec3([0, 0, 1])
+        super().__init__(
+            base,
+            isometry.DxI(4 * n)(),
+            isometry.C4xI(setup={"axis": axis}),
+            name=f"D{4*n}xI_C4xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
         self.set_rot_axis(axis, self.mu[:2])
 
 
