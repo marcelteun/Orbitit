@@ -991,6 +991,17 @@ class CompoundS4xI:
             polyh.rot_base(polyh.mu[3])
             save_off(polyh, "_mu3")
 
+            # 2n | D3nxI  / C3xI
+            # with n >= 1
+            n = i
+            no_col = 2 if n == 1 else n
+            polyh = S4xI.D3nxI_C3xI(self.descr, n, no_col)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            polyh.rot_base(polyh.mu[1] / 2)  # example angle
+            save_off(polyh)
+
     def create_a4xi(self, js_fd=None):
         """Create all compounds with the symmetry of a tetrahedron and a cetral inversion."""
         # example rotation

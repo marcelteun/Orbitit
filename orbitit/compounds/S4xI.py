@@ -35,11 +35,24 @@ from orbitit.compounds import angle
 from orbitit import geomtypes, isometry, orbit
 
 
+# Rotation of 45 degrees around the x-axis
+X_45_DEG = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=math.pi / 4)
+
+
 class Compound(orbit.Shape):
     """A compound object, see orbit.Shape class for more info."""
 
-    base_to_o2 = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=math.pi / 4)
+    # For this one, if the base is a cube, the 2-fold axis is the z-axis while one pair of edges is
+    # parallel to the x-axis
+    base_to_o2 = X_45_DEG
+
+    # For this one of the base is a cube, the 4-fold axis is the z-axis while one 2-fold axis is the
+    # x-axis.
     base_to_q = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / 4)
+
+    # For this one of the base is a cube, the 3-fold axis is the z-axis while and the XoZ plane is a
+    # mirror plane.
+    base_to_o3 = geomtypes.Rot3(axis=geomtypes.Vec3([0, 1, 0]), angle=angle.ASIN_1_V3) * X_45_DEG
 
 
 ###############################################################################
@@ -86,7 +99,7 @@ class DnxI_ExI(Compound):
     def __init__(
         self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
     ):
-        """General compound with DnxI symmetry with central freedom.
+        """General compound of 2n elements with DnxI symmetry with central freedom.
 
         axis: this is a polyhedron with spherical freedom, so in general any axis is fine here.
         """
@@ -167,7 +180,7 @@ class DnxI_D1xI(Compound):
     def __init__(
         self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
     ):
-        """Compound of n elements with final symmetry DnxI (rotation freedom)
+        """Compound of 2n elements with final symmetry DnxI (rotation freedom)
 
         The descriptive shares a mirror plane with that in the final symmetry.
         symmetry, 'B' variant.
@@ -191,6 +204,34 @@ class DnxI_D1xI(Compound):
         )
         self.transform_base(self.base_to_o2)
         self.set_rot_axis(axis, self.mu[:3])
+
+
+class D3nxI_C3xI(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    def __init__(
+        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
+    ):
+        """Compound of 2n elements with final symmetry DnxI (rotation freedom)
+
+        The descriptive shares a mirror plane with that in the final symmetry.
+        symmetry, 'B' variant.
+        """
+        assert n >= 1, f"Only n >= 1 is supported, got {n}"
+        self.mu = [0, math.pi / (6 * n)]
+        axis = geomtypes.Vec3([0, 0, 1])
+        super().__init__(
+            base,
+            isometry.DxI(3 * n)(),
+            isometry.C3xI(setup={"axis": axis}),
+            name=f"D{3*n}xI_C3xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o3)
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 ###############################################################################
