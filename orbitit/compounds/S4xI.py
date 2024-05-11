@@ -257,6 +257,68 @@ class D4nxI_C4xI(Compound):
         self.set_rot_axis(axis, self.mu[:2])
 
 
+class D2nxI_D2xI(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Rigid ompound of n elements with final symmetry D2nxI"""
+        assert n >= 2, f"Only n >= 2 is supported, got {n}"
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        super().__init__(
+            base,
+            isometry.DxI(2 * n)(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            isometry.D2xI(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            name=f"D{2*n}xI_D2xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o2)
+
+
+class D3nxI_D3xI(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Rigid ompound of n elements with final symmetry D3nxI"""
+        assert n >= 2, f"Only n >= 2 is supported, got {n}"
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([0, 1, 0])
+        super().__init__(
+            base,
+            isometry.DxI(3 * n)(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            isometry.D3xI(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            name=f"D{3*n}xI_D3xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o3)
+
+
+class D4nxI_D4xI(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Rigid ompound of n elements with final symmetry D4nxI"""
+        assert n >= 2, f"Only n >= 2 is supported, got {n}"
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        super().__init__(
+            base,
+            isometry.DxI(4 * n)(),
+            isometry.D4xI(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            name=f"D{4*n}xI_D4xI",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+
 ###############################################################################
 #
 # A4 x I

@@ -1013,6 +1013,18 @@ class CompoundS4xI:
             polyh.rot_base(polyh.mu[1] / 2)  # example angle
             save_off(polyh)
 
+            # Rigid compounds
+            n = i + 1
+            no_col = n
+            polyh = S4xI.D4nxI_D4xI(self.descr, n, no_col)
+            save_off(polyh)
+
+            polyh = S4xI.D3nxI_D3xI(self.descr, n, no_col)
+            save_off(polyh)
+
+            polyh = S4xI.D2nxI_D2xI(self.descr, n, no_col)
+            save_off(polyh)
+
     def create_a4xi(self, js_fd=None):
         """Create all compounds with the symmetry of a tetrahedron and a cetral inversion."""
         # example rotation
