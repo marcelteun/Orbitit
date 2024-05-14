@@ -102,22 +102,22 @@ class CompoundS4A4:
 
         A4 contains all rotational symmetries of a tetrahedron.
         """
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 4)
         polyh = S4A4.A4_E(self.descr, 4, col_alt=1)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 4)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.A4_C3(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         # example angle for which the compound is 5 | A5 / A4 with 1 removed
         polyh.rot_base(polyh.mu[2])
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # also save as special angle
         save_off(polyh, "_mu2")
 
@@ -126,21 +126,21 @@ class CompoundS4A4:
 
         A4xI contains the rotational symmetry of a tetrahedron and a cetral inversion.
         """
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
         polyh = S4A4.A4xI_E(self.descr, 4, col_alt=2)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.A4xI_C3(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(5 * math.pi / 18)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.A4xI_C3(
             self.descr,
@@ -158,9 +158,9 @@ class CompoundS4A4:
         polyh = S4A4.A4xI_C2C1(self.descr, 3)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 6)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.A4xI_C2C1(self.descr, 3)
         polyh.rot_base(polyh.mu[2])
@@ -168,28 +168,28 @@ class CompoundS4A4:
 
     def create_s4a4(self, js_fd=None):
         """Create all compounds with the complete symmetry of a tetrahedron."""
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 4)
         polyh = S4A4.S4A4_E(self.descr, 4, col_alt=0)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 4)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.S4A4_C4C2(self.descr, 3)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 6)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
 
         polyh = S4A4.S4A4_C3(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 5)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4A4_C3(self.descr, 4)
         polyh.rot_base(polyh.mu[2])
@@ -198,9 +198,9 @@ class CompoundS4A4:
         polyh = S4A4.S4A4_C2C1(self.descr, 3)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 6)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4A4_C2C1(self.descr, 3)
         polyh.rot_base(polyh.mu[3])
@@ -215,21 +215,21 @@ class CompoundS4A4:
 
     def create_s4(self, js_fd=None):
         """Create all compounds with the S4 symmetry: i.e. the rotational symmetry of a cube."""
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 1]), angle=2 * math.pi / 9)
         polyh = S4A4.S4_E(self.descr, 6, col_alt=2, col_sym="C4")
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 1]), angle=2 * math.pi / 9)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.S4_C3(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(polyh.mu[3])  # use special angle as example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4_C3(self.descr, 4)
         polyh.rot_base(polyh.mu[2])
@@ -255,9 +255,9 @@ class CompoundS4A4:
         polyh = S4A4.S4_C2(self.descr, 6)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(27.968 * math.pi / 180)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4_C2(self.descr, 4, col_alt=1)
         polyh.rot_base(polyh.mu[2])
@@ -328,21 +328,21 @@ class CompoundS4A4:
 
     def create_s4xi(self, js_fd=None):
         """Create all compounds with the S4xI symmetries, i.e. the complete symmetry of a cube."""
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([2, 1, 0]), angle=math.pi / 2)
         polyh = S4A4.S4xI_E(self.descr, 6, col_sym="C4xI")
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([2, 1, 0]), angle=math.pi / 2)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.S4xI_C4C2(self.descr, 6, col_sym="C4xI")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 3)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4xI_C4C2(self.descr, 3)
         polyh.rot_base(polyh.mu[2])
@@ -351,9 +351,9 @@ class CompoundS4A4:
         polyh = S4A4.S4xI_C3(self.descr, 4, col_sym="D3xI")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(2 * math.pi / 9)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4xI_C3(self.descr, 4, col_sym="D3xI")
         polyh.rot_base(polyh.mu[2])
@@ -368,9 +368,9 @@ class CompoundS4A4:
         polyh = S4A4.S4xI_C2(self.descr, 6, col_sym="D2xI")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 9)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4xI_C2(self.descr, 4, col_alt=1)
         polyh.rot_base(polyh.mu[2])
@@ -474,9 +474,9 @@ class CompoundS4A4:
         polyh = S4A4.S4xI_C2C1(self.descr, 6, col_sym="D4C4")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(2 * math.pi / 9)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4A4.S4xI_C2C1(self.descr, 6, col_sym="D2xI")
         polyh.rot_base(polyh.mu[3])
@@ -491,9 +491,9 @@ class CompoundS4A4:
         polyh = S4A4.S4xI_D1C1(self.descr, 6, col_sym="D4C4")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(16 * math.pi / 180)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         #            , , , math.pi/8, angle.ACOS_1_V3]
         polyh = S4A4.S4xI_D1C1(self.descr, 12, col_sym="D2C2", col_alt=2)
@@ -524,13 +524,13 @@ class CompoundS4A4:
 
     def create_a5(self, js_fd=None):
         """Create all compounds with the A5 symmetry, the rotational symmetry of a dodecahedron."""
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
         polyh = S4A4.A5_E(self.descr, 12, col_alt=3)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         # 40 | A5 / C3
@@ -538,9 +538,9 @@ class CompoundS4A4:
         polyh = S4A4.A5_C3(self.descr, 5, col_alt=1)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 13)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         # 10 x 2 | D6D3 / D3C3
         polyh = S4A4.A5_C3(self.descr, 10)
@@ -617,9 +617,9 @@ class CompoundS4A4:
         polyh = S4A4.A5_C2(self.descr, 5)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 11)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         # There is a mu ~= 14.36 which looks like a 15 x D1C2 though not distinct ones. The
         # reflection --> could be related to angle math.acos(((V2+1)*V5 + V2-1)/6) of cube compounds
@@ -659,13 +659,13 @@ class CompoundS4A4:
 
     def create_a5xi(self, js_fd=None):
         """Create all compounds with the A5xI: i.e. the complete symmetry of a dodecahedron."""
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
         polyh = S4A4.A5xI_E(self.descr, 12, col_alt=3)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
+        polyh.transform_base(base_rot)
 
         # Rotation freedom (around 1 axis)
         # 40 | A5 x I / C3
@@ -673,9 +673,9 @@ class CompoundS4A4:
         polyh = S4A4.A5xI_C3(self.descr, 5)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 13)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
 
         # special mu
         # 10 x 4 | D6 x I / D3C3
@@ -748,9 +748,9 @@ class CompoundS4A4:
         polyh = S4A4.A5xI_C2(self.descr, 5)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 11)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
 
         # special mu
         # 6 x 10 | D10xI / D2C2
@@ -793,9 +793,9 @@ class CompoundS4A4:
         polyh = S4A4.A5xI_C2C1(self.descr, 6)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 9)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
 
         # Rigid compound
         #######################################
@@ -886,13 +886,13 @@ class CompoundS4xI:
             # with n >= 2
             n = i + 1
             axis_eg = geomtypes.Vec3([1, 2, 3])
-            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
             polyh = S4xI.CnxI_ExI(self.descr, n, n, axis=axis_eg)
-            polyh.transform_base(base_rot)
-            save_off(polyh)
-            polyh.write_json_file(get_stem(polyh) + ".json")
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / 6)
+            polyh.transform_base(base_rot)
+            save_off(polyh)
 
     def create_dnxi(self, js_fd=None):
         """Create all compounds with the dihedral symmetry.
@@ -905,13 +905,13 @@ class CompoundS4xI:
             # with n >= 1
             n = i
             axis_eg = geomtypes.Vec3([1, 2, 3])
-            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / (2 * i))
             polyh = S4xI.DnxI_ExI(self.descr, n, n, axis=axis_eg)
-            polyh.transform_base(base_rot)
-            save_off(polyh)
-            polyh.write_json_file(get_stem(polyh) + ".json")
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            base_rot = geomtypes.Rot3(axis=axis_eg, angle=math.pi / (2 * i))
+            polyh.transform_base(base_rot)
+            save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         for i in self.no_of:
@@ -967,7 +967,7 @@ class CompoundS4xI:
             polyh.rot_base(polyh.mu[4])
             save_off(polyh, "_mu4")
 
-            # m | DmxI  / C2xI, with m = 2n, n >= 1
+            # m | DmxI  / D1xI, with m = 2n, n >= 1
             n = 2 * i
             no_col = n if n == 2 else i
             polyh = S4xI.DnxI_D1xI(self.descr, n, no_col)
@@ -976,20 +976,12 @@ class CompoundS4xI:
             polyh.write_json_file(get_stem(polyh) + ".json")
             polyh.rot_base(math.pi / (3 * n / 2))  # example angle
             save_off(polyh)
-            # special mu
-            # mu_2: for n = 2, 4, 6
+            # mu_3: for n = 2, 4, 6
             n = 2 * i
             no_col = n if n == 2 else i
             polyh = S4xI.DnxI_D1xI(self.descr, n, no_col)
             polyh.rot_base(polyh.mu[2])
             save_off(polyh, "_mu2")
-            # mu_4: for n = 2, 4, 6
-            n = 2 * i
-            no_col = n if n == 2 else i
-            col_alt = 0 if n == 2 else 1
-            polyh = S4xI.DnxI_D1xI(self.descr, n, no_col, col_alt=col_alt)
-            polyh.rot_base(polyh.mu[3])
-            save_off(polyh, "_mu3")
 
             # 2n | D3nxI  / C3xI
             # with n >= 1
@@ -1015,7 +1007,7 @@ class CompoundS4xI:
 
             # Rigid compounds
             n = i + 1
-            no_col = n
+            no_col = n if n % 2 == 1 or n == 2 else n // 2
             polyh = S4xI.D4nxI_D4xI(self.descr, n, no_col)
             save_off(polyh)
 
@@ -1028,20 +1020,21 @@ class CompoundS4xI:
     def create_a4xi(self, js_fd=None):
         """Create all compounds with the symmetry of a tetrahedron and a cetral inversion."""
         # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
         polyh = S4xI.A4xI_ExI(self.descr, 4, col_alt=2)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
+        polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4xI.A4xI_C2xI(self.descr, 3)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 6)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.A4xI_C2xI(self.descr, 3)
         polyh.rot_base(polyh.mu[2])
@@ -1050,9 +1043,9 @@ class CompoundS4xI:
         polyh = S4xI.A4xI_C3xI(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(5 * math.pi / 18)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.A4xI_C3xI(self.descr, 4)
         polyh.rot_base(polyh.mu[2])
@@ -1060,21 +1053,22 @@ class CompoundS4xI:
 
     def create_s4xi(self, js_fd=None):
         """Create all compounds with the complete symmetry of a cube."""
-        # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([2, 1, 0]), angle=math.pi / 2)
         polyh = S4xI.S4xI_ExI(self.descr, 4)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        # example rotation
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([2, 1, 0]), angle=math.pi / 2)
+        polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4xI.S4xI_C2xI_A(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 3)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.S4xI_C2xI_A(self.descr, 4)
         polyh.rot_base(polyh.mu[3])
@@ -1095,9 +1089,9 @@ class CompoundS4xI:
         polyh = S4xI.S4xI_C2xI_B(self.descr, 6)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 3)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.S4xI_C2xI_B(self.descr, 4)
         polyh.rot_base(polyh.mu[2])
@@ -1115,9 +1109,9 @@ class CompoundS4xI:
         polyh = S4xI.S4xI_D1xI(self.descr, 6)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 6)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.S4xI_D1xI(self.descr, 6, col_alt=1)
         polyh.rot_base(polyh.mu[2])
@@ -1135,13 +1129,29 @@ class CompoundS4xI:
         polyh = S4xI.S4xI_C3xI(self.descr, 4)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(2 * math.pi / 9)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.S4xI_C3xI(self.descr, 4)
         polyh.rot_base(polyh.mu[2])
         save_off(polyh, "_mu2")
+        polyh = S4xI.S4xI_C3xI(
+            self.descr,
+            8,
+            cols=[
+                polyh.cols[0],
+                polyh.cols[0],
+                polyh.cols[1],
+                polyh.cols[2],
+                polyh.cols[3],
+                polyh.cols[2],
+                polyh.cols[3],
+                polyh.cols[1],
+            ],
+        )
+        polyh.rot_base(polyh.mu[2])
+        save_off(polyh, "_mu2.alt1")
         polyh = S4xI.S4xI_C3xI(self.descr, 4)
         polyh.rot_base(polyh.mu[3])
         save_off(polyh, "_mu3")
@@ -1149,9 +1159,9 @@ class CompoundS4xI:
         polyh = S4xI.S4xI_C4xI(self.descr, 3)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 12)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.S4xI_C4xI(self.descr, 3)
         polyh.rot_base(polyh.mu[2])
@@ -1173,12 +1183,13 @@ class CompoundS4xI:
     def create_a5xi(self, js_fd=None):
         """Create all compounds with the complete symmetry of a dodecahedron."""
         # example rotation
-        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
         polyh = S4xI.A5xI_ExI(self.descr, 12, col_alt=3)
-        polyh.transform_base(base_rot)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
+        base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
+        polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         # 30A | A5 x I / C2 x I
@@ -1186,9 +1197,9 @@ class CompoundS4xI:
         polyh = S4xI.A5xI_C2xI_A(self.descr, 6)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 7.3)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.A5xI_C2xI_A(self.descr, 15)
         polyh.rot_base(polyh.mu[4])
@@ -1217,9 +1228,9 @@ class CompoundS4xI:
         polyh = S4xI.A5xI_C2xI_B(self.descr, 6)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 7.3)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.A5xI_C2xI_B(self.descr, 6, col_alt=1)
         polyh.rot_base(polyh.mu[2])
@@ -1242,9 +1253,9 @@ class CompoundS4xI:
         polyh = S4xI.A5xI_C3xI(self.descr, 5)
         if js_fd is not None:
             js_fd.write(polyh.to_js())
+        polyh.write_json_file(get_stem(polyh) + ".json")
         polyh.rot_base(math.pi / 7)  # example angle
         save_off(polyh)
-        polyh.write_json_file(get_stem(polyh) + ".json")
         # special mu
         polyh = S4xI.A5xI_C3xI(self.descr, 5)
         polyh.rot_base(polyh.mu[3])

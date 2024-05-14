@@ -419,32 +419,35 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
 
     def to_js(self):
         """Return javascript representation so it can be shown with the showoff library."""
-        js = f"var {self.name} = new Object();\n"
-        js += f"{self.name}.descr = new Object();\n"
-        js += f"{self.name}.descr.Vs = [\n"
+        name = self.name
+        sep = "" if self.name[1] == "_" else "_"  # Don't use seperator for A_, B_ variants
+        name = f"n{self.index}{sep}{name}"
+        js = f"var {name} = new Object();\n"
+        js += f"{name}.descr = new Object();\n"
+        js += f"{name}.descr.Vs = [\n"
         for v in self.base_vs:
             js += f"  {v},\n"
-        js += '];'
-        js += f"{self.name}.descr.Fs = {self.base_shape.fs};"
+        js += '];\n'
+        js += f"{name}.descr.Fs = {self.base_shape.fs};"
         eye = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-        js += f"{self.name}.descr.transform = {eye};\n"
-        js += f"{self.name}.isoms = [\n"
+        js += f"{name}.descr.transform = {eye};\n"
+        js += f"{name}.isoms = [\n"
         # note: all isometries are stored in 'direct'
         for q in self.isoms:
             js += str(q.glMatrix())
             js += ','
         js += '];\n'
         for i, col in enumerate(self.col_per_isom):
-            js += f"{self.name}.isoms[{i}].col = [{col[0]}, {col[1]}, {col[2]}];\n"
+            js += f"{name}.isoms[{i}].col = [{col[0]}, {col[1]}, {col[2]}];\n"
 
         if self.axis is not None:
-            js += f"{self.name}.rot_axis = {self.axis};\n"
+            js += f"{name}.rot_axis = {self.axis};\n"
 
         # The angle domain is used for the slide-bar, therefore the precision
         # isn't very important
         if self.angle_domain:
             js += (
-                f"{self.name}.angle_domain = "
+                f"{name}.angle_domain = "
                 f"[{self.angle_domain[0]:.3f}, {self.angle_domain[-1]:.3f}];\n"
             )
 

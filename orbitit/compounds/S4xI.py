@@ -169,7 +169,7 @@ class DnxI_C2xI_B(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.set_rot_axis(axis, self.mu[:3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class DnxI_D1xI(Compound):
@@ -178,16 +178,12 @@ class DnxI_D1xI(Compound):
     def __init__(
         self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
     ):
-        """Compound of 2n elements with final symmetry DnxI (rotation freedom)
+        """Compound of n = 2m elements with final symmetry DnxI (rotation freedom)
 
-        The descriptive shares a 2-fold symmetry axis with the 2n-fold axis of D2nxI.
+        The descriptive shares a 2-fold symmetry axis with the n-fold axis of DnxI.
         """
         assert n >= 2 and n % 2 == 0, f"Only n >= 2 and even n are supported, got {n}"
-        self.mu = [0, 0]
-        if n == 2:
-            self.mu[1] = angle.ASIN_1_V3
-        self.mu.append(math.pi / (2 * n))
-        self.mu.append(abs(angle.ASIN_1_V3 - math.pi / n))
+        self.mu = [0, math.pi / (2 * n), angle.ASIN_1_V3]
         axis = geomtypes.Vec3([0, 0, 1])
         super().__init__(
             base,
@@ -200,7 +196,7 @@ class DnxI_D1xI(Compound):
             col_sym=col_sym,
         )
         self.transform_base(self.base_to_o2)
-        self.set_rot_axis(axis, self.mu[:3])
+        self.set_rot_axis(axis, self.mu[:2])
 
 
 class D3nxI_C3xI(Compound):
@@ -215,11 +211,12 @@ class D3nxI_C3xI(Compound):
         """
         assert n >= 1, f"Only n >= 1 is supported, got {n}"
         self.mu = [0, math.pi / (6 * n)]
-        axis = geomtypes.Vec3([0, 0, 1])
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([angle.V3, 1, 0])
         super().__init__(
             base,
-            isometry.DxI(3 * n)(),
-            isometry.C3xI(setup={"axis": axis}),
+            isometry.DxI(3 * n)(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            isometry.C3xI(setup={"axis": axis_n}),
             name=f"D{3*n}xI_C3xI",
             no_of_cols=no_of_cols,
             col_alt=col_alt,
@@ -227,7 +224,7 @@ class D3nxI_C3xI(Compound):
             col_sym=col_sym,
         )
         self.transform_base(self.base_to_o3)
-        self.set_rot_axis(axis, self.mu[:2])
+        self.set_rot_axis(axis_n, self.mu[:2])
 
 
 class D4nxI_C4xI(Compound):
@@ -404,7 +401,7 @@ class S4xI_ExI(Compound):
             base,
             isometry.S4xI(),
             isometry.ExI(),
-            name="S4xI_E",
+            name="S4xI_ExI",
             no_of_cols=no_of_cols,
             col_alt=col_alt,
             cols=cols,
@@ -568,7 +565,7 @@ class S4xI_S4xI(Compound):
             base,
             isometry.S4xI(),
             isometry.S4xI(),
-            name="S4xI_S4A4",
+            name="S4xI_S4xI",
             no_of_cols=no_of_cols,
             col_alt=col_alt,
             cols=cols,
@@ -788,7 +785,7 @@ class A5xI_A4xI(Compound):
             base,
             isometry.A5xI(),
             isometry.A4xI(),
-            name="A5xI_A4",
+            name="A5xI_A4xI",
             no_of_cols=no_of_cols,
             col_alt=col_alt,
             cols=cols,
