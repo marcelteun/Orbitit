@@ -274,8 +274,6 @@ class Line3D(geomtypes.Line):
     This can either be infinite lines or line segments.
     """
 
-    str_precision = 2
-
     def __init__(self, p0, p1=None, v=None, is_segment=False):
         """
         Define a line in 3D space.
@@ -3019,6 +3017,10 @@ class OrbitShape(SymmetricShape):
     @property
     def repr_dict(self):
         """Return a short representation of the object."""
+        try:
+            no_of_cols = self.no_of_cols
+        except AttributeError:
+            no_of_cols = 1
         return {
             "class": base.class_to_json[self.json_class],
             "data": {
@@ -3027,7 +3029,7 @@ class OrbitShape(SymmetricShape):
                 "fs": self.base_shape.fs,
                 "final_sym": self.final_sym.repr_dict,
                 "stab_sym": self.stab_sym.repr_dict,
-                "no_of_cols": self.no_of_cols,
+                "no_of_cols": no_of_cols,
                 "cols": self._shape_colors,
             },
         }
