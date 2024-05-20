@@ -75,6 +75,7 @@ class TrisCounter:
 
     Used to give unique IDs to special positions for folded regular heptagons.
     """
+
     def __init__(self):
         self.reset(TRIS_OFFSET)
 
@@ -89,8 +90,9 @@ class TrisCounter:
         return i
 
 
-class TrisAltBase():
+class TrisAltBase:
     """A base class holding names for triangle filling options, one side only."""
+
     # Note nrs should be different from below
     refl_1 = 0
     strip_I = 1
@@ -211,9 +213,11 @@ class TrisAltBase():
         if triangle_id is None:
             triangle_id = self.key[triangle_str]
         if not isinstance(triangle_id, int):
-            triangle_str = "{}-opp_{}".format(  # pylint: disable=consider-using-f-string
-                self.stringify[triangle_id[0]],
-                self.stringify[triangle_id[1]],
+            triangle_str = (
+                "{}-opp_{}".format(  # pylint: disable=consider-using-f-string
+                    self.stringify[triangle_id[0]],
+                    self.stringify[triangle_id[1]],
+                )
             )
         elif triangle_str is None:
             triangle_str = self.stringify[triangle_id]
@@ -268,8 +272,8 @@ def to_triangle_python_name(triangle_id=None, triangle_str=None):
             )
         # TODO: remove share under new position
         elif (
-                triangle_id[0] == TrisAltBase.twist_strip_I
-                and triangle_id[1] == TrisAltBase.twist_strip_I
+            triangle_id[0] == TrisAltBase.twist_strip_I
+            and triangle_id[1] == TrisAltBase.twist_strip_I
         ):
             triangle_str = "twist_strip_I_strip_I"
         else:
@@ -290,6 +294,7 @@ def to_triangle_python_name(triangle_id=None, triangle_str=None):
 
 class MetaTrisAlt(type):
     """Meta class to define triangle fill alternatives."""
+
     def __init__(cls, classname, bases, classdict):
         type.__init__(cls, classname, bases, classdict)
 
@@ -327,8 +332,7 @@ def define_tris_alt(name, tris_keys):
                     f"{TrisAltBase.stringify[k[1] & ~LOOSE_BIT]}"
                 )
             elif (
-                    k[0] == TrisAltBase.twist_strip_I
-                    and k[1] == TrisAltBase.twist_strip_I
+                k[0] == TrisAltBase.twist_strip_I and k[1] == TrisAltBase.twist_strip_I
             ):
                 s = "strip I - twisted - strip I"
             else:
@@ -455,6 +459,7 @@ class FoldMethod(Enum):
 
 class RegularHeptagon:
     """The vertices and edges (and single face) of a regular folded heptagon in 3D space."""
+
     def __init__(self):
         # V0 in origin
         #             0 = (0, 0)
@@ -482,19 +487,19 @@ class RegularHeptagon:
             Vec([-HEPT_SIGMA / 2, -(1 + HEPT_SIGMA) * HEPT_DENOM, 0.0]),
             Vec([-HEPT_RHO / 2, -HEPT_DENOM, 0.0]),
         ]
-        self.vs = self.vs_org.copy() # pylint: disable=C0103
+        self.vs = self.vs_org.copy()  # pylint: disable=C0103
         self.fs = [[6, 5, 4, 3, 2, 1, 0]]  # pylint: disable=C0103
         self.es = [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 0]  # pylint: disable=C0103
 
     def fold(
-            self,
-            a0,
-            b0,
-            a1=None,
-            b1=None,
-            keep_v0=True,
-            fold=FoldMethod.PARALLEL,
-            rotate=0,
+        self,
+        a0,
+        b0,
+        a1=None,
+        b1=None,
+        keep_v0=True,
+        fold=FoldMethod.PARALLEL,
+        rotate=0,
     ):
         """Fold the heptagon around 2, 3, or 4 axes using the specified fold method"""
         method = {
@@ -515,7 +520,9 @@ class RegularHeptagon:
             rotate,
         )
 
-    def fold_parallel(self, a, b, _=None, __=None, keep_v0=True, rotate=0):  # pylint: disable=C0103
+    def fold_parallel(
+        self, a, b, _=None, __=None, keep_v0=True, rotate=0
+    ):  # pylint: disable=C0103
         """Fold around the 2 parallel diagonals, two options
 
         In rotate 0 the parallel lines are between vertices 1-6, and 2-5
@@ -3138,7 +3145,6 @@ def kite_to_hept(left, top, right, bottom, alt_hept_pos=False):
     def rel_position(v0, v1, rat):
         return rat * (v1 - v0) + v0
 
-
     # h0 = v_top
     h1 = rel_position(v_top, v_right, w1_factor)
     h2 = rel_position(v_bottom, v_right, w2_factor)
@@ -3174,6 +3180,7 @@ class FldHeptagonShape(geom_3d.CompoundShape):
     positioned on a 2-fold symmetry axis of the polyhedron. The heptagons are folded over diagonals
     and the pair can be translated along and rotated around that 2-fold axis.
     """
+
     edge_alt = 0
     opposite_edge_alt = 0
 
@@ -3332,7 +3339,9 @@ class FldHeptagonShape(geom_3d.CompoundShape):
         )
         self.heptagon.translate(HEPT_HEIGHT * geomtypes.UY)
         # Note: the rotation angle != the dihedral angle
-        self.heptagon.rotate(-geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedral_angle)
+        self.heptagon.rotate(
+            -geomtypes.UX, geomtypes.QUARTER_TURN - self.dihedral_angle
+        )
         self.heptagon.translate(self.height * geomtypes.UZ)
         if self._pos_angle != 0:
             self.heptagon.rotate(-geomtypes.UZ, self._pos_angle)
@@ -3352,6 +3361,7 @@ class FldHeptagonCtrlWin(wx.Frame):
     - pre_pos_file_name: holds the name when a file was loaded with predefined properies. If none,
       then no predefined file is being displaued.
     """
+
     refl_min_size = (525, 425)
     rot_min_size = (545, 600)
     pre_pos_file_name = None
@@ -3374,17 +3384,21 @@ class FldHeptagonCtrlWin(wx.Frame):
     tris_setup_refl = None
     tris_setup_no_refl = None
 
+    # Should be set by child class
+    pre_defined_special_pos_refl = {}
+    pre_defined_special_pos_rot = {}
+
     def __init__(
-            self,
-            shape,
-            canvas,
-            max_height,
-            pre_pos_strings,
-            triangle_alts,
-            pre_pos_to_number,
-            parent,
-            *args,
-            **kwargs,
+        self,
+        shape,
+        canvas,
+        max_height,
+        pre_pos_strings,
+        triangle_alts,
+        pre_pos_to_number,
+        parent,
+        *args,
+        **kwargs,
     ):
         """Create a control window for the scene that folds heptagons
 
@@ -3403,6 +3417,8 @@ class FldHeptagonCtrlWin(wx.Frame):
         **kwargs: standard wx Frame **kwargs
         """
         # TODO assert (type(shape) == type(RegHeptagonShape()))
+        assert self.pre_defined_special_pos_refl, "pre_defined_special_pos_refl shall not be empty"
+        assert self.pre_defined_special_pos_rot, "pre_defined_special_pos_rot shall not be empty"
         wx.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.shape = shape
@@ -3415,7 +3431,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.stringify = pre_pos_to_number
         self._saved_angle = {}
         # One of the items in the UI should an option to read from File.
-        if not OPEN_FILE in pre_pos_to_number:
+        if OPEN_FILE not in pre_pos_to_number:
             self.stringify[OPEN_FILE] = "From File"
         self.panel = wx.Panel(self, -1)
         self.status_bar = self.CreateStatusBar()
@@ -3503,7 +3519,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             FoldMethod.MIXED.name.capitalize(),
             FoldMethod.G.name.capitalize(),
         ]
-        self.fold_method_items = [FoldMethod.get(fold) for fold in self.fold_method_list]
+        self.fold_method_items = [
+            FoldMethod.get(fold) for fold in self.fold_method_list
+        ]
         self.valid_fold_incl_refl = {
             True: [
                 FoldMethod.PARALLEL.name.capitalize(),
@@ -3756,17 +3774,22 @@ class FldHeptagonCtrlWin(wx.Frame):
         Valid here means that the model has the right symmetry conform the current settings.
         """
         if self.shape.has_reflections:
-            psp = self.predefReflSpecPos
+            psp = self.pre_defined_special_pos_refl
         else:
-            psp = self.predefRotSpecPos
+            psp = self.pre_defined_special_pos_rot
         return pre_pos_id in psp
+
+    @staticmethod
+    def warn_file_string_map(filename, funcname):
+        """Log warning is filename holding position data cannot be interpreted."""
+        logging.warning("unable to interprete filename %s in %s", filename, funcname)
 
     def filename_map_fold_method(self, filename):
         """From a JSON with predefined positioned return the heptagon fold name."""
         result = re.search(r"-fld_([^.]*)\.", filename)
         if result:
             return result.groups()[0]
-        self.printFileStrMapWarning(filename, "filename_map_fold_method")
+        self.warn_file_string_map(filename, "filename_map_fold_method")
         return ""
 
     def filename_map_fold_pos_str(self, filename):
@@ -3780,7 +3803,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         result = re.search(r"-fld_[^.]*\.([0-6])-.*", filename)
         if result:
             return result.groups()[0]
-        self.printFileStrMapWarning(filename, "filename_map_fold_pos_str")
+        self.warn_file_string_map(filename, "filename_map_fold_pos_str")
         return ""
 
     def filename_map_fold_pos(self, filename):
@@ -3800,7 +3823,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             pos_vals = slider_values.groups()[0].split("_")
             no_of_vals = len(pos_vals)
             return (no_of_vals == 4) or (no_of_vals == 5 and pos_vals[4] == "0")
-        self.printFileStrMapWarning(filename, "filename_map_has_reflections")
+        self.warn_file_string_map(filename, "filename_map_has_reflections")
         return True
 
     def filename_map_tris_fill(self, filename):
@@ -3813,7 +3836,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         if result:
             tris_str = result.groups()[0]
             return self.tris_alt.map_file_str_on_str[tris_str]
-        self.printFileStrMapWarning(filename, "filename_map_tris_fill")
+        self.warn_file_string_map(filename, "filename_map_tris_fill")
         return ""
 
     def filename_map_tris_pos(self, filename):
@@ -3828,7 +3851,7 @@ class FldHeptagonCtrlWin(wx.Frame):
             return int(tris_pos)
         # try old syntax:
         if not re.search(r"-fld_[^.]*\.[0-7]-([^.]*)\.json", filename):
-            self.printFileStrMapWarning(filename, "filename_map_tris_pos")
+            self.warn_file_string_map(filename, "filename_map_tris_pos")
             raise ValueError(f"Unexpected filename {filename}")
         return 0
 
@@ -3887,7 +3910,9 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def on_dihedral_angle(self, event):
         """Apply new angle between two heptagons sharing an edge in GUI to polyhedron."""
-        self.shape.set_dihedral_angle(geom_3d.DEG2RAD * self.dihedral_angle_gui.GetValue())
+        self.shape.set_dihedral_angle(
+            geom_3d.DEG2RAD * self.dihedral_angle_gui.GetValue()
+        )
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
@@ -3918,14 +3943,18 @@ class FldHeptagonCtrlWin(wx.Frame):
 
     def on_opp_fold1(self, event):
         """Apply new fold of opposite diagonal no. 1 in GUI of base heptagon to polyhedron."""
-        self.shape.set_fold1(opposite_angle=geom_3d.DEG2RAD * self.opp_fold1_gui.GetValue())
+        self.shape.set_fold1(
+            opposite_angle=geom_3d.DEG2RAD * self.opp_fold1_gui.GetValue()
+        )
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
 
     def on_opp_fold2(self, event):
         """Apply new fold of opposite diagonal no. 2 in GUI of base heptagon to polyhedron."""
-        self.shape.set_fold2(opposite_angle=geom_3d.DEG2RAD * self.opp_fold2_gui.GetValue())
+        self.shape.set_fold2(
+            opposite_angle=geom_3d.DEG2RAD * self.opp_fold2_gui.GetValue()
+        )
         self.status_bar.SetStatusText(self.shape.get_status_str())
         self.update_shape()
         event.Skip()
@@ -4021,10 +4050,10 @@ class FldHeptagonCtrlWin(wx.Frame):
                 self.opp_fold1_gui.Disable()
                 self.opp_fold2_gui.Disable()
             elif self.fold_method in (
-                    FoldMethod.W,
-                    FoldMethod.SHELL,
-                    FoldMethod.MIXED,
-                    FoldMethod.G,
+                FoldMethod.W,
+                FoldMethod.SHELL,
+                FoldMethod.MIXED,
+                FoldMethod.G,
             ):
                 self.opp_fold1_gui.Enable()
                 self.opp_fold2_gui.Enable()
@@ -4215,8 +4244,10 @@ class FldHeptagonCtrlWin(wx.Frame):
         except KeyError:
             current_val = self.tris_alt.strip_I
         if self.shape.has_reflections:
+
             def is_valid(c):
                 return self.tris_alt.is_base_key(self.tris_alt.key[c])
+
             if not self.tris_alt.is_base_key(current_val):
                 if self.tris_setup_refl is None:
                     # TODO: use the first one that is valid
@@ -4224,6 +4255,7 @@ class FldHeptagonCtrlWin(wx.Frame):
                 else:
                     current_val = self.tris_alt.key[self.tris_setup_refl]
         else:
+
             def is_valid(c):
                 c_key = self.tris_alt.key[c]
                 if self.tris_alt.is_base_key(c_key) or isinstance(c_key, int):
@@ -4239,6 +4271,7 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         self.tris_fill_gui.Clear()
         current_still_valid = False
+        last_valid = None
         for choice in self.tris_alt.choice_list:
             if is_valid(choice):
                 self.tris_fill_gui.Append(choice)
@@ -4248,12 +4281,10 @@ class FldHeptagonCtrlWin(wx.Frame):
 
         if current_still_valid:
             self.tris_fill_gui.SetStringSelection(self.tris_alt.stringify[current_val])
+        elif last_valid is not None:
+            self.tris_fill_gui.SetStringSelection(last_valid)
         else:
-            try:
-                self.tris_fill_gui.SetStringSelection(last_valid)
-            except UnboundLocalError:
-                # None are valid...
-                return
+            return
         self.shape.set_edge_alt(self.tris_fill, self.opp_tris_fill)
 
     @property
@@ -4299,7 +4330,10 @@ class FldHeptagonCtrlWin(wx.Frame):
             and self.opp_tris_fill == self.tris_alt.twist_strip_I
         )
         if change_my_shape:
-            if self.tris_alt.twist_strip_I not in (self.prev_tris_fill, self.prev_opp_tris_fill):
+            if self.tris_alt.twist_strip_I not in (
+                self.prev_tris_fill,
+                self.prev_opp_tris_fill,
+            ):
                 logging.info("---------nvidia-seg-fault-work-around-----------")
                 self.nvidea_workaround_0()
             self.shape.set_vertices()  # make sure the shape is updated
@@ -4435,7 +4469,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         """Open a given file in JSON format with predefined folds and offsets."""
         with open(filename, "r") as fd:
             data = json.load(fd)
-        assert isinstance(data, list), f"Expected a JSON holding a list, got {type(data)}"
+        assert isinstance(
+            data, list
+        ), f"Expected a JSON holding a list, got {type(data)}"
         for l in data:
             assert len(l) in (
                 4,
@@ -4468,9 +4504,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             return self._std_pre_pos
         # use correct predefined special positions
         if self.shape.has_reflections:
-            psp = self.predefReflSpecPos
+            psp = self.pre_defined_special_pos_refl
         else:
-            psp = self.predefRotSpecPos
+            psp = self.pre_defined_special_pos_rot
         # Oops not good for performance:
         # TODO only return correct one en add length func
         self._std_pre_pos = [sp["set"] for sp in psp[self.pre_pos_enum]]
@@ -4559,7 +4595,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.on_refl()
         # not needed: self.shape.update_shape = True
         self.update_triangle_fill_options()
-        self.tris_fill_gui.SetStringSelection(self.filename_map_tris_fill(self.pre_pos_file_name))
+        self.tris_fill_gui.SetStringSelection(
+            self.filename_map_tris_fill(self.pre_pos_file_name)
+        )
         self.on_triangle_fill()
         self.tris_position = self.filename_map_tris_pos(self.pre_pos_file_name)
         # it's essential that pre_pos_gui is set to dynamic be4 std_pre_pos is read
@@ -4592,7 +4630,9 @@ class FldHeptagonCtrlWin(wx.Frame):
             opposite_fld1 = setting[self.special_pos_idx][5]
             opposite_fld2 = setting[self.special_pos_idx][6]
             v_str += ", positional_angle, opposite_fold_1, opposite_fold_2] ="
-            dbg_str += f", {pos_angle:.12f}, {opposite_fld1:.12f}, {opposite_fld2:.12f}]"
+            dbg_str += (
+                f", {pos_angle:.12f}, {opposite_fld1:.12f}, {opposite_fld2:.12f}]"
+            )
         else:
             opposite_fld1 = fold_1
             opposite_fld2 = fold_2
@@ -4706,13 +4746,13 @@ class FldHeptagonCtrlWin(wx.Frame):
             self.on_triangle_fill()
 
             for gui in [
-                    self.dihedral_angle_gui,
-                    self.pos_angle_gui,
-                    self.height_gui,
-                    self.fold1_gui,
-                    self.fold2_gui,
-                    self.opp_fold1_gui,
-                    self.opp_fold2_gui,
+                self.dihedral_angle_gui,
+                self.pos_angle_gui,
+                self.height_gui,
+                self.fold1_gui,
+                self.fold2_gui,
+                self.opp_fold1_gui,
+                self.opp_fold2_gui,
             ]:
                 gui.SetValue(0)
                 gui.Disable()
@@ -4735,13 +4775,13 @@ class FldHeptagonCtrlWin(wx.Frame):
         # updating the sliders...
         if self.pre_pos_enum in (DYN_POS, OPEN_FILE):
             for gui in [
-                    self.dihedral_angle_gui,
-                    self.pos_angle_gui,
-                    self.height_gui,
-                    self.fold1_gui,
-                    self.fold2_gui,
-                    self.opp_fold1_gui,
-                    self.opp_fold2_gui,
+                self.dihedral_angle_gui,
+                self.pos_angle_gui,
+                self.height_gui,
+                self.fold1_gui,
+                self.fold2_gui,
+                self.opp_fold1_gui,
+                self.opp_fold2_gui,
             ]:
                 gui.Enable()
             s = self.shape
@@ -4770,11 +4810,12 @@ class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
 
     It should be seen as an abstract base class, for which set_vs needs to be implemented.
     """
+
     def __init__(
-            self,
-            base_isometries=None,
-            extra_isometry=None,
-            name="EqlHeptagonShape",
+        self,
+        base_isometries=None,
+        extra_isometry=None,
+        name="EqlHeptagonShape",
     ):
         """
         Define a shape with many equilateral heptagons.
@@ -4858,14 +4899,14 @@ class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
         self.set_vs()
 
     def update_view_opt(
-            self,
-            show_kite=None,
-            show_hepta=None,
-            show_extra=None,
-            tri_alt=None,
-            add_extra_edge=None,
-            alt_hept_pos=None,
-            opaqueness=None,
+        self,
+        show_kite=None,
+        show_hepta=None,
+        show_extra=None,
+        tri_alt=None,
+        add_extra_edge=None,
+        alt_hept_pos=None,
+        opaqueness=None,
     ):
         """Update options of how the shape should be drawn.
 
@@ -4888,11 +4929,11 @@ class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
             # TODO...
             self.opaqueness = opaqueness
         if (
-                show_kite is not None  # not so efficient perhaps, but works..
-                or show_hepta is not None  # not so efficient perhaps, but works..
-                or show_extra is not None  # not so efficient perhaps, but works..
-                or alt_hept_pos is not None
-                or add_extra_edge is not None
+            show_kite is not None  # not so efficient perhaps, but works..
+            or show_hepta is not None  # not so efficient perhaps, but works..
+            or show_extra is not None  # not so efficient perhaps, but works..
+            or alt_hept_pos is not None
+            or add_extra_edge is not None
         ):
             self.set_vs()
 
@@ -4910,6 +4951,7 @@ class EqlHeptagonShape(geom_3d.SymmetricShapeSplitCols):
 
 class EqlHeptagonCtrlWin(wx.Frame):
     """Common class for controlling equilateral heptagons."""
+
     KITE_ANGLE_STEPS = 200
 
     kite_angle_factor = 1
@@ -4994,9 +5036,13 @@ class EqlHeptagonCtrlWin(wx.Frame):
         self.view_hept_gui.SetValue(self.shape.show_hepta)
         self.add_extra_face_gui = wx.CheckBox(self.panel, label="Show extra faces")
         self.add_extra_face_gui.SetValue(self.shape.show_extra)
-        self.add_extra_edge_gui = wx.CheckBox(self.panel, label="Add extra edge (if extra face)")
+        self.add_extra_edge_gui = wx.CheckBox(
+            self.panel, label="Add extra edge (if extra face)"
+        )
         self.add_extra_edge_gui.SetValue(self.shape.add_extra_edge)
-        self.tri_alt_gui = wx.CheckBox(self.panel, label="Triangle alternative (if extra face)")
+        self.tri_alt_gui = wx.CheckBox(
+            self.panel, label="Triangle alternative (if extra face)"
+        )
         self.tri_alt_gui.SetValue(self.shape.tri_alt)
         self.alt_hept_pos_gui = wx.CheckBox(
             self.panel, label="Use alternative heptagon position"
