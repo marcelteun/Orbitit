@@ -671,7 +671,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 self.rot_sizer.set_axis(axis)
             domain = getattr(shape, "domain", None)
             if domain:
-                self.rot_sizer.set_aangle(domain[0])
+                self.rot_sizer.set_angle(domain[0])
             self._col_pre_selection = len(included_colors)
             shape = shape.base_shape
         if isinstance(shape, geom_3d.CompoundShape):
