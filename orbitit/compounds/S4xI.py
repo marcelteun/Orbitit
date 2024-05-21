@@ -122,9 +122,7 @@ class DnxI_C2xI_A(Compound):
 
     mu = [0, angle.ACOS_1_V3, math.pi / 2, math.pi / 4, angle.ASIN_1_V3, angle.ASIN_2V2_3]
 
-    def __init__(
-        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
-    ):
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of n elements with final symmetry DnxI (rotation freedom)
 
         The descriptive shares a mirror plane with that in the final symmetry, 'A' variant.
@@ -150,9 +148,7 @@ class DnxI_C2xI_B(Compound):
 
     mu = [0, math.pi / 4, math.pi / 8, angle.ASIN_1_V3, angle.ACOS_V_5_V5_V10]
 
-    def __init__(
-        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
-    ):
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of n elements with final symmetry DnxI (rotation freedom)
 
         The descriptive shares a mirror plane with that in the final symmetry, 'B' variant.
@@ -175,9 +171,7 @@ class DnxI_C2xI_B(Compound):
 class DnxI_D1xI(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
-    def __init__(
-        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
-    ):
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of n = 2m elements with final symmetry DnxI (rotation freedom)
 
         The descriptive shares a 2-fold symmetry axis with the n-fold axis of DnxI.
@@ -202,9 +196,7 @@ class DnxI_D1xI(Compound):
 class D3nxI_C3xI(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
-    def __init__(
-        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
-    ):
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 2n elements with final symmetry DnxI (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final 3n-fold axis of D3nxI
@@ -230,9 +222,7 @@ class D3nxI_C3xI(Compound):
 class D4nxI_C4xI(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
-    def __init__(
-        self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None, axis=None
-    ):
+    def __init__(self, base, n, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 2n elements with final symmetry DnxI (rotation freedom)
 
         The descriptive shares a mirror plane with that in the final symmetry.
