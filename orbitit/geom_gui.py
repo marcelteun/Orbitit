@@ -127,7 +127,7 @@ class IntInput(wx.TextCtrl):
         else:
             tail_start = selected[1]
         if tail_start < len(string):
-            tail = string[selected[1] :]
+            tail = string[selected[1]:]
         else:
             tail = ""
         new_string = head + char + tail
@@ -1248,7 +1248,9 @@ class SymmetrySelect(wx.StaticBoxSizer):
                     C = isometry.D2nD
                 elif selected_class == isometry.DnxI:
                     C = isometry.DxI
-                assert n > 0, "warning"
+                else:
+                    raise ValueError(f"Unknown cyclic/dihedral group {selected_class} used")
+                assert n > 0, f"warning n = {n} should be > 0"
                 selected_class = C(n)
             elif selected_class in [
                 isometry.E,
@@ -1392,6 +1394,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 v = gui.get_vertex()
             elif input_type == "int":
                 v = gui.GetValue()
+            else:
+                raise ValueError(f"Unexpected type for {input_type} to orientate symmetry.")
             cur_setup.append(v)
         try:
             prev_setup = self.__prev["setup"]
