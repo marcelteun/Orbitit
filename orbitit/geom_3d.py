@@ -1721,10 +1721,30 @@ class SimpleShape(base.Orbitit):
     # TODO: Instead of face, vs perhaps you should just have a list of vertices for face
     @staticmethod
     def _calc_intersection(intersecting_face, face_plane, hor_plane, z, vs):
-        """Calculate the intersections for a face with a horizontal plane
+        r"""Calculate the intersections for a face with a horizontal plane
 
         The result will consist of line segments that are part of the face. For a convex face there
         is only one segment, but for a concave there can be more than one.
+
+        Convex case:
+                ___________
+               /          /
+              /__________/
+             /     l    / z=0
+            /          /
+           /__________/
+
+        Where l is the line segment that is returned
+
+        Concave:
+             __        ___
+            |  \      /   |
+            |___\    /____| z=0
+            | l1 \  /  l2 |
+            |     \/      |
+            |_____________|
+
+        Where l1 and l2 are the line segments that are returned in one tuple, see below
 
         intersecting_face: the face to intersect with the horizontal plane. It is a list of vertex
             indices.
@@ -1795,38 +1815,73 @@ class SimpleShape(base.Orbitit):
 
         With the line segments that are valid segments for for the face(s) that are intersecting the
         horizontal plane, check how much of these segments are valid segments in the face(s) we are
-        intersecting with, i.e. the face(s) in that horizontal plane.
+        intersecting with, i.e. the face(s) in that horizontal plane. Here valid means what part are
+        part of the faces to intersect with, since these segments were created as being part of the
+        intersecting faces only.
+
+        So you could have the following situation:
+             .---------.
+            /  l1       '.  l2
+           /  ------   ---+---
+          /________________'.
+
+        Where l1 and l2 is defined by one tuple representing one line in intersection lines.
 
         intersection_lines: an list of tuples consisting of a geom_2d.Line object and a list of line
             factors that are valid factors for the faces that intersect the specified faces
+            See _calc_intersection on how these were created.
         faces_to_intersect_with: the faces that are intersected with the intersection_lines.
         vs: the vertex indices as used for the face.
 
         return: An updated list of tuples consisting of a geom_2d.Line object and a list of line
             factors.
         """
-        # for each intersecting line segment:
+        # for each intersecting set of line segments:
         resulting_intersections = []
         for i, (line_2d, line_factors_0) in enumerate(intersection_lines):
             logging.debug("phase 2: check intersection %d", i)
             # line_2d: the line object representing the line of intersection
-            # line_factors_0: the line segments (factors) valid for the intersecting face
-            # line_factors_1: the line segments (factors) valid for the face to intersect with
+            # line_factors_0: the line segment factors valid for the intersecting face
+            # line_factors_1: the line segment factors valid for the face to intersect with
             # updated_factors: the valid factors resulting in combining the above.
+            #
+            #      .---------.                       .---------.
+            #     /  l1       '.  l2                /  l1       '. l2
+            #    /  ------   ---+---     --->      /  ------   ---+ g1
+            #   /  f1   f2  f3   `. f4            /  f1   f2  f3   `.
+            #  /___________________'.            /___________________'.
+            #
+            # For the line L consisting of two segments l1 and l2, represented by the factors
+            # (f1, f2) and (f3, f4) the updated factors will be (f1, f2), (f3, g1)
+
             new_factors = []
             for face_to_intersect_with in faces_to_intersect_with:
                 polygon_2d = geom_2d.Polygon(
+                    # the face to intersect with is in z=0, so only consider (x, y)
                     [v[:2] for v in vs], face_to_intersect_with
                 )
                 line_factors_1 = line_2d.intersect_polygon_get_factors(polygon_2d)
+                # So for the case above line_factors_1 consists of (g0, g1):
+                #      .---------.
+                #     /  l1       '.g1   l2
+                # g0 +  ------   ---+---
+                #   /  f1   f2  f3   `. f4
+                #  /___________________'.
+                #
+                # Note that even here it holds that there can be more than one segment: i.e. there
+                # can be (g0, g1), (g2, g3), etc
                 logging.debug("line_factors_1 %s", line_factors_1)
                 # Now combine the results of line_factors_0 and line_factors_1:
                 # Only keep intersections that fall within 2 segments for
                 # both line_factors_0 and line_factors_1.
                 i_segment_0 = 0  # segment number in line_factors_0
                 i_segment_1 = 0  # segment number in line_factors_1
+                # set to True to get the factors for the new segment
                 select_segment_0 = True
                 select_segment_1 = True
+                # initialise f0, f1, g0, g1 to shutdown pylint, note that f0, f1, g0, g1 will always
+                # be set, since the variables above are set to True
+                f0, f1, g0, g1 = 0, 1, 0, 1
 
                 while i_segment_0 < len(line_factors_0) and i_segment_1 < len(
                     line_factors_1
@@ -1916,19 +1971,43 @@ class SimpleShape(base.Orbitit):
             else:
                 # Check whether they share an edge
                 length = len(intersecting_face)
-                for p in range(length):
-                    for face in compound_face:
-                        if intersecting_face[p] in face:
-                            q = p + 1
-                            if q == length:
-                                q = 0
-                            if intersecting_face[q] in face:
-                                p_idx = face.index(intersecting_face[p])
-                                q_idx = face.index(intersecting_face[q])
+                for v_idx_in_face, v_idx in enumerate(intersecting_face):
+                    # The loop below checks whether the edge starting with vertex index v_idx
+                    # is shared with any of the edges in compound faces. In that case we don't
+                    # need to calculate the point of intersection
+                    # The intersecting line then is the edge itself, which doesn't need to be added
+                    for hor_face in compound_face:
+                        if v_idx in hor_face:
+                            # At least the vertex v is in this horinzontal face
+                            next_v_idx_in_face = v_idx_in_face + 1
+                            if next_v_idx_in_face == length:
+                                next_v_idx_in_face = 0
+                            next_v_idx = intersecting_face[next_v_idx_in_face]
+                            if next_v_idx in hor_face:
+                                p_idx = hor_face.index(v_idx)
+                                q_idx = hor_face.index(next_v_idx)
                                 delta = abs(p_idx - q_idx)
-                                if delta in (1, len(face) - 1):
+                                # There is also this possibility:
+                                #   .========.--------.=======.
+                                #  / \        \______/       / \
+                                # |    \____________________/  |
+                                # \____________________________|
+                                #
+                                # It seems that in that case we do calculated the line of
+                                # intersection.
+                                # TODO: consider filtering out this case here.
+                                #
+                                # Note that it might also be a situation where the edge isn't shared
+                                # like here:
+                                #             /\
+                                #   .________.  \
+                                #  /|\      / \  \
+                                # | | \____/   |  |
+                                # | |__________| /
+                                # |______________|
+                                if delta in (1, len(hor_face) - 1):
                                     calc_intersection = False
-                                    logging.debug("Intersecting face shares an edge")
+                                    logging.debug("Intersecting face shares at least one edge")
                                     break
 
             # line of intersection:
@@ -2315,16 +2394,16 @@ class CompoundShape(base.Orbitit):
                 color = props["color"]
             else:
                 color = None
-        assert len(vs) == len(self._shapes)
-        assert len(ns) == len(self._shapes)
-        for i, shape in enumerate(self._shapes):
-            shape.vertex_props = {
-                "vs": vs[i],
-                "ns": ns[i],
-                "radius": radius,
-                "color": color,
-            }
-        self.merge_needed = True
+            assert len(vs) == len(self._shapes)
+            assert len(ns) == len(self._shapes)
+            for i, shape in enumerate(self._shapes):
+                shape.vertex_props = {
+                    "vs": vs[i],
+                    "ns": ns[i],
+                    "radius": radius,
+                    "color": color,
+                }
+            self.merge_needed = True
 
     @property
     def edge_props(self):
@@ -2370,14 +2449,14 @@ class CompoundShape(base.Orbitit):
                 draw_edges = props["draw_edges"]
             else:
                 draw_edges = None
-        for i, shape in enumerate(self._shapes):
-            shape.edge_props = {
-                "es": es[i],
-                "radius": radius,
-                "color": color,
-                "draw_edges": draw_edges,
-            }
-        self.merge_needed = True
+            for i, shape in enumerate(self._shapes):
+                shape.edge_props = {
+                    "es": es[i],
+                    "radius": radius,
+                    "color": color,
+                    "draw_edges": draw_edges,
+                }
+            self.merge_needed = True
 
     @property
     def face_props(self):
@@ -2417,13 +2496,13 @@ class CompoundShape(base.Orbitit):
                 draw_faces = props["draw_faces"]
             else:
                 draw_faces = None
-        for i, shape in enumerate(self._shapes):
-            shape.face_props = {
-                "fs": fs[i],
-                "colors": colors[i],
-                "draw_faces": draw_faces,
-            }
-        self.merge_needed = True
+            for i, shape in enumerate(self._shapes):
+                shape.face_props = {
+                    "fs": fs[i],
+                    "colors": colors[i],
+                    "draw_faces": draw_faces,
+                }
+            self.merge_needed = True
 
     def transform(self, trans):
         """Transform the model using the specified instance of a geomtypes.Trans3 object."""
