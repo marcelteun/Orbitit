@@ -915,12 +915,19 @@ class MainPanel(wx.Panel):
                     # Since it is a symmetric shape, it is enough with the first element in the list
                     break
         # Now scale to fit FoV
-        max_fit = 5.6
-        if max_norm:
-            self.original_scale_factor = max_fit / max_norm
+        # FIXME: the scale factor changes the size. This leads to problem when saving and merging
+        # shapes. E.g. make a classical compound of 3 cubes and merge it with the original. Also I
+        # think this messes up the the Invert function. I think that in the orbit scene the faces
+        # get inverted.
+        if False:
+            max_fit = 5.6
+            if max_norm:
+                self.original_scale_factor = max_fit / max_norm
+            else:
+                self.original_scale_factor = max_fit
+            shape.scale(self.original_scale_factor)
         else:
-            self.original_scale_factor = max_fit
-        shape.scale(self.original_scale_factor)
+            self.original_scale_factor = 1
 
         # Use all the vertex settings except for vs, i.e. keep the view
         # vertex settings the same.
