@@ -491,6 +491,7 @@ class SimpleShape(base.Orbitit):
         self.face_normals = []
         self.generate_normals = True
         self._shape_colors = [[], []]
+        self.no_of_colors = 0
         self.name = name
         # For four below, see create_vertex_normals
         self.normal_per_vertex = []
@@ -2799,8 +2800,8 @@ class SymmetricShape(CompoundShape):
     @shape_colors.setter
     def shape_colors(self, colors):
         """Check and set the face colours and and save their properties."""
-        colors = self._chk_face_colors_par(colors)
-        self._shape_colors = colors
+        self._shape_colors = self._chk_face_colors_par(colors)
+        self.no_of_cols = len(self._shape_colors)
         self.merge_needed = True
         self.needs_apply_isoms = True
 
