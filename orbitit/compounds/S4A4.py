@@ -854,7 +854,21 @@ class A5xI_C2(Compound):
 class A5xI_C2C1(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
-    mu = [0, 75.64 * math.pi / 180]  # TODO calc algebraicly
+    mu = [
+        0,
+        3.55 * math.pi / 180,  # 6 * 10 | D15 x I / D3C3 ?
+        # ~5
+        20.91 * math.pi / 180,  # 10 * 12 | D12 x I / ? (col alt 2)
+        # ~30.93 30 x 2 | ? , whereh 5 | .. is subcompound of 20 | A5 x I
+        31.72 * math.pi / 180,  # 6 * 10 | D10 x I / ? # col alt 2) |
+        33.83 * math.pi / 180,
+        # ~37
+        45.00 * math.pi / 180,  # 5 * 12 | S4 x I / D2C2
+        58.26 * math.pi / 180,  # 6 * 10 | D20 x I / D4D2 ?
+        66.98 * math.pi / 180,  # 6 * 10 | D15 x I / ? # col alt 2
+        69.11 * math.pi / 180,  # 10 * 6 | D6 x I / ??
+        75.64 * math.pi / 180,
+    ]  # TODO calc algebraicly
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
