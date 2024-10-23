@@ -27,6 +27,7 @@ Geometry types specifically related to 3D
 # pylint: disable=too-many-lines,too-many-return-statements,
 # pylint: disable=too-many-locals,too-many-statements,too-many-ancestors
 # pylint: disable=too-many-instance-attributes,too-many-arguments
+# pylint: disable=too-many-positional-arguments
 # pylint: disable=too-many-branches,too-many-nested-blocks
 # pylint: disable=too-few-public-methods,too-many-public-methods
 

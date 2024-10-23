@@ -24,7 +24,7 @@ Module with geometrical types.
 #
 # ------------------------------------------------------------------
 # Old sins:
-# pylint: disable=too-many-lines,too-many-branches,too-many-arguments
+# pylint: disable=too-many-lines,too-many-branches
 
 
 import json
@@ -32,7 +32,7 @@ import logging
 import math
 
 from orbitit import base, indent
-from orbitit.base import Singleton # to prevent pylint (2.4.4): Undefined variable 'base.Singleton'
+from orbitit.base import Singleton  # to prevent pylint (2.4.4): Undefined variable 'base.Singleton'
 
 
 def turn(r):

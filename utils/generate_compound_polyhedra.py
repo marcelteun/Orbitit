@@ -68,8 +68,8 @@ final_symmetry = args.final_symmetry
 try:
     generator = GENERATORS[args.descriptive_sym]
 except KeyError as exception:
-    err_msg = f"Got invalid symmetry {args.descriptive_sym}, supported: {list(GENERATORS.keys())}"
-    raise ValueError(err_msg) from exception
+    ERR_MSG = f"Got invalid symmetry {args.descriptive_sym}, supported: {list(GENERATORS.keys())}"
+    raise ValueError(ERR_MSG) from exception
 if final_symmetry and final_symmetry not in generator.final_sym:
     raise ValueError(
         f"Final symmetry {args.final_symmetry} not supported, only {generator.final_sym} "
@@ -86,8 +86,9 @@ else:
             "fs": shape.fs,
         }
 
-output_dir = args.output_dir
-if not output_dir:
-    output_dir = f"output/{args.descriptive_sym}"
-
-compounds = generator(DESCR, output_dir, args.final_symmetry, no_of=args.m)
+compounds = generator(
+    DESCR,
+    args.output_dir if args.output_dir else f"output/{args.descriptive_sym}",
+    args.final_symmetry,
+    no_of=args.m,
+)

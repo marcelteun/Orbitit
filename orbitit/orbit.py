@@ -21,6 +21,8 @@
 # or write to the Free Software Foundation,
 #
 # -----------------------------------------------------------------
+# Old sins:
+# pylint: disable=too-many-positional-arguments
 
 
 from orbitit import base as orbit_base

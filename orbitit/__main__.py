@@ -79,6 +79,11 @@ SCENES = {
 }
 DEFAULT_SCENE = "scene_orbit"
 
+# FIXME: the scale factor changes the size. This leads to problem when saving and merging shapes.
+# E.g. make a classical compound of 3 cubes and merge it with the original. Also I think this messes
+# up the the Invert function. I think that in the orbit scene the faces get inverted.
+ENABLE_FIT_TO_SCREEN = False
+
 # prevent warning for not being used:
 del pre_pyopengl
 
@@ -919,7 +924,7 @@ class MainPanel(wx.Panel):
         # shapes. E.g. make a classical compound of 3 cubes and merge it with the original. Also I
         # think this messes up the the Invert function. I think that in the orbit scene the faces
         # get inverted.
-        if False:
+        if ENABLE_FIT_TO_SCREEN:
             max_fit = 5.6
             if max_norm:
                 self.original_scale_factor = max_fit / max_norm

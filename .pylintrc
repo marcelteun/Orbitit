@@ -49,3 +49,5 @@ disable=W0511,W1514
 [DESIGN]
 # Since inheriting from wx.Frame leads to 8 already
 max-parents=8
+max-positional-arguments=8
+max-args=6
