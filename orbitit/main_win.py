@@ -723,6 +723,10 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         if geomtypes.FloatHandler.eq(axis.norm(), 0):
             self.set_status_text("Please define a proper axis")
             return
+        # FIXME: This statement doesn't help for a SymmetricShape, since the transform will not
+        # transform the original vertices, but instead transform each symmetry. Transforming the
+        # base result in something else. I think we need to reset the whole shape to org.
+        # Write a unit test?
         self.canvas.shape.vertex_props = {"vs": self.org_vs}
         self.canvas.shape.transform(
             geomtypes.Rot3(angle=geom_3d.DEG2RAD * angle, axis=axis)
