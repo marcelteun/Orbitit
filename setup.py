@@ -28,7 +28,7 @@ setup(
     python_requires=">=3.6",
     scripts = [
         "utils/generate_59_icosahedra.py",
-        "utils/generate_compounds_of_s4a4.py",
+        "utils/generate_compound_polyhedra.py",
         "utils/generate_crosso_lattices.py",
     ],
 )
