@@ -44,7 +44,7 @@ parser.add_argument(
     type=int,
     default=[3],
     help="In case a dihedral or cyclic symmetry is specified, specify the number from the list of "
-    "possible compopunds. This is not the same the number of constituents, but it is related. "
+    "possible compounds. This is not the same the number of constituents, but it is related. "
     "If the possible numbers are 3, 4, 5, etc, then 1 will give the compound of 3, while 2 will "
     "give the compound of 4, etc. In case there are special angles involved, then these might only "
     "occur for 5, 10, 15, .. constituents. These cases can be obtained by specifying 1 2 3 here."
