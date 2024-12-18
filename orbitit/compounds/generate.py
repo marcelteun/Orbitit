@@ -44,7 +44,7 @@ class CompoundS4A4:
     E.g. a tetrahedron.
     """
 
-    final_sym = set({"A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI"})
+    final_sym = set({"A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn"})
     # Tetrahedron
     example_descriptive = {
         "vs": [
@@ -56,22 +56,83 @@ class CompoundS4A4:
         "fs": [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]],
     }
 
-    def __init__(self, descr, output_dir, final_symmetry, no_of=None):
+    # default orientation of the descriptive for general cyclic and dihedral symmetries.
+    _eg_rotate = geomtypes.Rot3(axis=geomtypes.Vec3([-1, 2, -3]), angle=math.pi / 5)
+    _eg_descr = None
+    # by default create dihedral and cyclic compounds for the specified n-fold axis:
+    _no_of = [2, 3, 4, 5]
+
+    def __init__(self, descr, output_dir, final_symmetry=None, no_of=None, rot=None):
         """
-        no_of: a list of indices in a list consisting of valid list with n values for the cyclic and
-        dihedral symmetry groups. For these indices the compounds will be generated.
+        Initialize compounds of polyhedra with tetrahedron symmetry.
+
+        descr: specify the descriptive here. It is a dictionary with the following fields:
+               - "vs": which is a list of geomtypes.Vec3 values specifing the vertices.
+               - "fs": which is a list of faces where each face is a list of vertex indices from
+                       "vs".
+            The descriptive is supposed to have tetrahedron symmetry (S4A4) in its standard
+            orientation, where X-, Y-, and Z-axis are the 2-fold symmetry axes.
+        output_dir: specify where to save all the files. If this directory doesn't exist it is
+            created.
+        final_symmetry: a string specifying which final symmetry should be generated immediately. If
+            nothing is specified then nothing is generated. Call generate_compounds separately to
+            generate the compounds.
+        no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
+            generated models for the cyclic and dihedral symmetry groups.
+        rot: the descriptive will be rotated as according to the specified geomtypes.Rot3 for the
+            generated models where the descriptive doesn't share any symmetries witrh the final
+            symmetry (for any of them).
         """
         self.descr = descr
-        if no_of:
-            self.no_of = no_of
-        else:
-            self.no_of = []
+        self.output_dir = output_dir
 
         # Create all models in one dir
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
         os.chdir(output_dir)
 
+        if rot is None:
+            self.transform_descr(self._eg_rotate)
+        else:
+            self.transform_descr(rot)
+
+        if no_of:
+            self.no_of = no_of
+        else:
+            self.no_of = self._no_of
+
+        self.create = {
+            "A4": self.create_a4,
+            "A4xI": self.create_a4xi,
+            "S4A4": self.create_s4a4,
+            "S4": self.create_s4,
+            "S4xI": self.create_s4xi,
+            "A5": self.create_a5,
+            "A5xI": self.create_a5xi,
+            "Cn": self.create_cn,
+        }
+        # TODO: call this actively (always for all generators)
+        #if final_symmetry is not None:
+        self.generate_compounds(final_symmetry)
+
+    def transform_descr(self, rot):
+        """Create a rotated descriptive for the cyclic and dihedral symmetries.
+
+        rot: a geomtypes.Rot3 specifying a 3D rotation.
+        """
+
+        self._eg_descr = {
+            "vs": [rot * v for v in self.descr["vs"]],
+            "fs": self.descr["fs"],
+        }
+
+    def generate_compounds(self, final_symmetry=None):
+        """
+        Generate the compounds polyhedra for the specified symmetry
+
+        final_symmetry: the final symmetry of the generated compounds. If nothing specified, then
+            all symmetries will be generated. This might take some time.
+        """
         # Create javascript file for models with rotational freedom
         with open("rotational_freedom.js", "w") as js_fd:
             js_fd.write("// Compounds with rotational freedom\n")
@@ -85,17 +146,11 @@ class CompoundS4A4:
                 self.create_s4xi(js_fd)
                 self.create_a5(js_fd)
                 self.create_a5xi(js_fd)
+                self.create_cn(js_fd)
             else:
-                {
-                    "A4": self.create_a4,
-                    "A4xI": self.create_a4xi,
-                    "S4A4": self.create_s4a4,
-                    "S4": self.create_s4,
-                    "S4xI": self.create_s4xi,
-                    "A5": self.create_a5,
-                    "A5xI": self.create_a5xi,
-                }[final_symmetry](js_fd)
-        print(f"Files saved in {output_dir}/")
+                self.create[final_symmetry](js_fd)
+
+        print(f"Files saved in {self.output_dir}/")
 
     def create_a4(self, js_fd=None):
         """Create all compounds with the A4 symmetry.
@@ -109,6 +164,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 4)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.A4_C3(self.descr, 4)
@@ -133,6 +189,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 6)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.A4xI_C3(self.descr, 4)
@@ -175,6 +232,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 4)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.S4A4_C4C2(self.descr, 3)
@@ -222,6 +280,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 1]), angle=2 * math.pi / 9)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.S4_C3(self.descr, 4)
@@ -335,6 +394,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([2, 1, 0]), angle=math.pi / 2)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         polyh = S4A4.S4xI_C4C2(self.descr, 6, col_sym="C4xI")
@@ -531,6 +591,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         # 40 | A5 / C3
@@ -666,6 +727,7 @@ class CompoundS4A4:
         # example rotation
         base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 0]), angle=math.pi / 9)
         polyh.transform_base(base_rot)
+        save_off(polyh)
 
         # Rotation freedom (around 1 axis)
         # 40 | A5 x I / C3
@@ -811,6 +873,30 @@ class CompoundS4A4:
         polyh = S4A4.A5xI_D2C2(self.descr, 5)
         save_off(polyh)
 
+    def create_cn(self, js_fd=None, no_of=None):
+        """Create all compounds with the Cn symmetry.
+
+        The Cn symmetry consists of pure cyclic symmetries where the n-fold symmetry axis is the
+        Z-axis.
+
+        js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
+        no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
+            generated models for the cyclic and dihedral symmetry groups. This will overwrite the
+            value specified during initialisation.
+        """
+        if no_of is None:
+            no_of = self.no_of
+        for i in no_of:
+            n = i + 1
+            polyh = S4A4.Cn_E(n, self._eg_descr, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            # example rotation
+            base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 3)
+            polyh.transform_base(base_rot)
+            save_off(polyh)
+
 
 class CompoundS4xI:
     """Create set of files with compounds with a descriptive with S4xI symmetry."""
@@ -838,10 +924,23 @@ class CompoundS4xI:
         ],
     }
 
-    def __init__(self, descr, output_dir, final_symmetry, no_of=None):
+    def __init__(self, descr, output_dir, final_symmetry=None, no_of=None):
         """
-        no_of: a list of indices in a list consisting of valid list with n values for the cyclic and
-        dihedral symmetry groups. For these indices the compounds will be generated.
+        Initialize compounds of polyhedra with cube symmetry.
+
+        descr: specify the descriptive here. It is a dictionary with the following fields:
+               - "vs": which is a list of geomtypes.Vec3 values specifing the vertices.
+               - "fs": which is a list of faces where each face is a list of vertex indices from
+                       "vs".
+            The descriptive is supposed to have cube symmetry (S4xI) in its standard orientation,
+            where X-, Y-, and Z-axis are the 4-fold symmetry axes.
+        output_dir: specify where to save all the files. If this directory doesn't exist it is
+            created.
+        final_symmetry: a string specifying which final symmetry should be generated immediately. If
+            nothing is specified then nothing is generated. Call generate_compounds separately to
+            generate the compounds.
+        no_of: specify for which n in n-fold symmetry axis to generated models for the cyclic and
+            dihedral symmetry groups.
         """
         self.descr = descr
 
@@ -878,7 +977,7 @@ class CompoundS4xI:
     def create_cnxi(self, js_fd=None):
         """Create all compounds with the cylcic symmetry.
 
-        The self.no_of specifies for which n-fold symmetry axis.
+        The self.no_of specifies for which n in n-fold symmetry axis to generated models.
         """
         # example rotation
         for i in self.no_of:
