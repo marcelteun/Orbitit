@@ -997,3 +997,28 @@ class Cn_E(Compound):
             cols=cols,
             col_sym=col_sym,
         )
+
+
+###############################################################################
+#
+# CnxI
+#
+###############################################################################
+class CnxI_E(Compound):
+    """General compound with CnxI symmetry, the descriptive doesn't need to have any symmetry."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+        """General compound with CnxI symmetry with central freedom."""
+        setup = {"n": n}
+        if n_fold_axis:
+            setup["axis"] = n_fold_axis
+        super().__init__(
+            base,
+            isometry.CnxI(setup=setup),
+            isometry.E(),
+            name=f"C{n}xI_E",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
