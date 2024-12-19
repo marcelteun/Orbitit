@@ -1001,6 +1001,31 @@ class Cn_E(Compound):
 
 ###############################################################################
 #
+# C2nCn
+#
+###############################################################################
+class C2nCn_E(Compound):
+    """General compound with C2nCn symmetry, the descriptive doesn't need to have any symmetry."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+        """General compound with C2nCn symmetry with central freedom."""
+        setup = {"n": n}
+        if n_fold_axis:
+            setup["axis"] = n_fold_axis
+        super().__init__(
+            base,
+            isometry.C2nCn(setup=setup),
+            isometry.E(),
+            name=f"C{2 * n}C{n}_E",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+
+###############################################################################
+#
 # CnxI
 #
 ###############################################################################

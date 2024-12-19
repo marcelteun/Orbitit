@@ -44,7 +44,11 @@ class CompoundS4A4:
     E.g. a tetrahedron.
     """
 
-    final_sym = set({"A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn", "CnxI"})
+    final_sym = set(
+        {
+            "A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn", "C2nCn", "CnxI",
+        }
+    )
     # Tetrahedron
     example_descriptive = {
         "vs": [
@@ -110,6 +114,7 @@ class CompoundS4A4:
             "A5": self.create_a5,
             "A5xI": self.create_a5xi,
             "Cn": self.create_cn,
+            "C2nCn": self.create_c2ncn,
             "CnxI": self.create_cnxi,
         }
         # TODO: call this actively (always for all generators)
@@ -148,6 +153,7 @@ class CompoundS4A4:
                 self.create_a5(js_fd)
                 self.create_a5xi(js_fd)
                 self.create_cn(js_fd)
+                self.create_c2ncn(js_fd)
                 self.create_cnxi(js_fd)
             else:
                 self.create[final_symmetry](js_fd)
@@ -891,6 +897,31 @@ class CompoundS4A4:
         for i in no_of:
             n = i + 1
             polyh = S4A4.Cn_E(n, self._eg_descr, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            # example rotation
+            base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 3)
+            polyh.transform_base(base_rot)
+            save_off(polyh)
+
+    def create_c2ncn(self, js_fd=None, no_of=None):
+        """Create all compounds with the CnxI symmetry.
+
+        The C2nCn symmetry consists of pure cyclic symmetries where the n-fold symmetry axis is the
+        Z-axis.
+
+        Note for n = 1 CnxI consists of {E, S}
+
+        js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
+        no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
+            generated models for the cyclic and dihedral symmetry groups. This will overwrite the
+            value specified during initialisation.
+        """
+        if no_of is None:
+            no_of = self.no_of
+        for n in no_of:
+            polyh = S4A4.C2nCn_E(n, self._eg_descr, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
             polyh.write_json_file(get_stem(polyh) + ".json")
