@@ -38,10 +38,18 @@ V2 = math.sqrt(2)
 V5 = math.sqrt(5)
 
 
+# Rotation of 45 degrees around the x-axis
+X_45_DEG = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=math.pi / 4)
+
+
 class Compound(orbit.Shape):
     """A compound object, see orbit.Shape class for more info."""
 
     alt_base_pos = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / 4)
+
+    # transform a vertex (1, 1, 1) to (0, 0, 1) so the 3-fold axis is the z-axis while and the XoZ
+    # plane is a mirror plane.
+    base_to_o3 = -geomtypes.Rot3(axis=geomtypes.Vec3([0, 1, 0]), angle=angle.ASIN_1_V3) * X_45_DEG
 
 
 ###############################################################################
@@ -53,7 +61,10 @@ class A4_E(Compound):
     """General compound with A4 symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with A4 symmetry with central freedom."""
+        """General compound with A4 symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.A4(),
@@ -75,6 +86,8 @@ class A4_C3(Compound):
         """Compound of 4 elements with final symmetry A4 (rotation freedom)
 
         The descriptive shares a order 3 symmetry axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -100,7 +113,10 @@ class A4xI_E(Compound):
     """General compound with A4xI symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with A4xI symmetry with central freedom."""
+        """General compound with A4xI symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.A4xI(),
@@ -122,6 +138,8 @@ class A4xI_C3(Compound):
         """Compound of 8 elements with final symmetry A4xI (rotation freedom)
 
         The descriptive shares a order 3 symmetry axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -146,6 +164,8 @@ class A4xI_C2C1(Compound):
         """Compound of 12 elements with final symmetry A4xI (rotation freedom)
 
         The descriptive shares a reflection plane with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 0, 0])
         super().__init__(
@@ -171,7 +191,10 @@ class S4A4_E(Compound):
     """General compound with S4A4 symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with S4A4 symmetry with central freedom."""
+        """General compound with S4A4 symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.S4A4(),
@@ -193,6 +216,8 @@ class S4A4_C4C2(Compound):
         """Compound of 6 elements with final symmetry S4A4 (rotation freedom)
 
         The descriptive shares a order 2 symmetry axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([0, 0, 1])
         super().__init__(
@@ -217,6 +242,8 @@ class S4A4_C3(Compound):
         """Compound of 8 elements with final symmetry S4A4 (rotation freedom)
 
         The descriptive shares a order 3 symmetry axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -241,6 +268,8 @@ class S4A4_C2C1(Compound):
         """Compound of 12 elements with final symmetry S4A4 (rotation freedom)
 
         The descriptive shares a reflection plane with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 0])
         super().__init__(
@@ -264,6 +293,8 @@ class S4A4_S4A4(Compound):
         """Trivial "compound" of 1 element with final symmetry S4A4
 
         The descriptive shares all symmetries with the final one.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         super().__init__(
             base,
@@ -281,7 +312,10 @@ class S4A4_D3C3(Compound):
     """Rigid compound, see __init__ for more."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """Rigid compound of 4 elements with S4A4 symmetry"""
+        """Rigid compound of 4 elements with S4A4 symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
+        """
         # Same as S4A4_C3 with special mu = 60 degrees
         axis = geomtypes.Vec3([1, 1, 1])
         normal = geomtypes.Vec3([-1, 1, 0])
@@ -309,7 +343,10 @@ class S4_E(Compound):
     """General compound with S4 symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with S4 symmetry with central freedom."""
+        """General compound with S4 symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.S4(),
@@ -331,6 +368,8 @@ class S4_C3(Compound):
         """Compound of 8 elements with final symmetry S4 (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -365,6 +404,8 @@ class S4_C2(Compound):
 
         The descriptive shares a 2-fold axis with the final symmetry (a pure
         2-fold axis, i.e. not a 4-fold axis)
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 0])
         super().__init__(
@@ -392,7 +433,10 @@ class S4xI_E(Compound):
     """General compound with S4xI symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with S4xI symmetry with central freedom."""
+        """General compound with S4xI symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.S4xI(),
@@ -415,6 +459,8 @@ class S4xI_C4C2(Compound):
 
         The descriptive shares a 2-fold axis with the 4-fold axis in the final
         symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([0, 0, 1])
         super().__init__(
@@ -439,6 +485,8 @@ class S4xI_C3(Compound):
         """Compound of 16 elements with final symmetry S4xI (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -473,6 +521,8 @@ class S4xI_C2(Compound):
 
         The descriptive shares a 2-fold axis with the final symmetry (a pure
         2-fold axis, i.e. not a 4-fold axis)
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 0])
         super().__init__(
@@ -507,6 +557,8 @@ class S4xI_C2C1(Compound):
         The descriptive shares a reflection plane with one from the final
         symmetry in such a way that the normal of the reflection plane goes
         through a pure 2-fold axis of the final symmetry.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 0])
         super().__init__(
@@ -540,6 +592,8 @@ class S4xI_D1C1(Compound):
         The descriptive shares a reflection plane with one from the final
         symmetry in such a way that the normal of the reflection plane goes
         through a 4-fold axis of the final symmetry.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 0, 0])
         super().__init__(
@@ -565,6 +619,8 @@ class S4xI_S4A4(Compound):
         """Rigid ompound of 2 elements with final symmetry S4xI
 
         With the orginisation as the classical Stella Octangula.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         super().__init__(
             base,
@@ -586,6 +642,8 @@ class S4xI_D4D2(Compound):
 
         With the orginisation as the classical compound of 3 cubes, but by
         replacing each cube by a Stella Octangula.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis_n = geomtypes.Vec3([0, 0, 1])
         axis_2 = geomtypes.Vec3([1, 1, 0])
@@ -610,6 +668,8 @@ class S4xI_D3C3(Compound):
 
         Special case of S4 X I / C3 where mu = 60 degrees. In this case two
         elements that share a 3-fold axis are mapped onto eachother
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis_n = geomtypes.Vec3([1, 1, 1])
         normal_r = geomtypes.Vec3([-1, 1, 0])
@@ -637,6 +697,8 @@ class S4xI_D2C2(Compound):
 
         The descriptive shares 2 reflection planes through its 2-fold axis
         with 2 mirror planes through a 2-fold axis of the final symmetry.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis_n = geomtypes.Vec3([1, 1, 0])
         normal_r = geomtypes.Vec3([0, 0, 1])
@@ -665,7 +727,10 @@ class A5_E(Compound):
     """General compound with A5 symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with A5 symmetry with central freedom."""
+        """General compound with A5 symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.A5(),
@@ -695,6 +760,8 @@ class A5_C3(Compound):
         """Compound of 20 elements with final symmetry A5 (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -727,6 +794,8 @@ class A5_C2(Compound):
         """Compound of 30 elements with final symmetry A5 (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([0, 0, 1])
         super().__init__(
@@ -750,6 +819,8 @@ class A5_A4(Compound):
         """Rigid ompound of 5 elements with final symmetry A5
 
         With the orginisation as in the classical compound of 5 tetrahedra
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         super().__init__(
             base,
@@ -772,7 +843,10 @@ class A5xI_E(Compound):
     """General compound with A5xI symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """General compound with A5xI symmetry with central freedom."""
+        """General compound with A5xI symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         super().__init__(
             base,
             isometry.A5xI(),
@@ -802,6 +876,8 @@ class A5xI_C3(Compound):
         """Compound of 40 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a 3-fold axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 1, 1])
         super().__init__(
@@ -836,6 +912,8 @@ class A5xI_C2(Compound):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a 2-fold axis with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([0, 0, 1])
         super().__init__(
@@ -874,6 +952,8 @@ class A5xI_C2C1(Compound):
         """Compound of 60 elements with final symmetry A5xI (rotation freedom)
 
         The descriptive shares a reflection plane with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([1, 0, 0])
         super().__init__(
@@ -899,6 +979,8 @@ class A5xI_A4(Compound):
         """Rigid ompound of 10 elements with final symmetry A5xI
 
         With the orginisation as in the classical compound of 10 tetrahedra
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         super().__init__(
             base,
@@ -923,6 +1005,7 @@ class A5xI_D3C3(Compound):
         same was as cube compound 10A and 10B occur.
 
         version: either 'A' or 'B'
+        base: a base model with S4A4 symmetry in its standard position
         """
         versions = ["A", "B"]
         assert (
@@ -957,6 +1040,8 @@ class A5xI_D2C2(Compound):
 
         The descriptive shares a 2-fold axis with the final symmetry and
         reflection planes fall together.
+
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis = geomtypes.Vec3([0, 0, 1])
         normal = geomtypes.Vec3([1, 0, 0])
@@ -983,7 +1068,10 @@ class Cn_E(Compound):
     """General compound with Cn symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with Cn symmetry with central freedom."""
+        """General compound with Cn symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
@@ -1008,7 +1096,10 @@ class C2nCn_E(Compound):
     """General compound with C2nCn symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with C2nCn symmetry with central freedom."""
+        """General compound with C2nCn symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
@@ -1037,7 +1128,10 @@ class CnxI_E(Compound):
     """General compound with CnxI symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with CnxI symmetry with central freedom."""
+        """General compound with CnxI symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
@@ -1062,7 +1156,10 @@ class DnCn_E(Compound):
     """General compound with DnCn symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with DnCn symmetry with central freedom."""
+        """General compound with DnCn symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
@@ -1078,6 +1175,33 @@ class DnCn_E(Compound):
         )
 
 
+# Rigid Compounds
+class D3nC3n_D3C3(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Trivial "compound" of n elements element with final symmetry S4A4
+
+        The descriptive shares the n-fold axis and 3 relection planes with the final symmetry.
+        """
+        self.mu = [0, math.pi / (6 * n)]
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        normal_r = geomtypes.Vec3([0, 1, 0])
+        setup = {"axis_n": axis_n, "normal_r": normal_r}
+        super().__init__(
+            base,
+            isometry.DnC(3 * n)(setup=setup),
+            isometry.D3C3(setup=setup),
+            name=f"D{3 * n}C{3 * n}_D3C3",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o3)
+        self.set_rot_axis(axis_n, self.mu[:2])
+
+
 ###############################################################################
 #
 # Dn
@@ -1087,7 +1211,10 @@ class Dn_E(Compound):
     """General compound with Dn symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with Dn symmetry with central freedom."""
+        """General compound with Dn symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
@@ -1112,7 +1239,10 @@ class D2nDn_E(Compound):
     """General compound with D2nDn symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with D2nDn symmetry with central freedom."""
+        """General compound with D2nDn symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
@@ -1137,7 +1267,10 @@ class DnxI_E(Compound):
     """General compound with DnxI symmetry, the descriptive doesn't need to have any symmetry."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
-        """General compound with DnxI symmetry with central freedom."""
+        """General compound with DnxI symmetry with central freedom.
+
+        base: a base model with S4A4 symmetry
+        """
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
