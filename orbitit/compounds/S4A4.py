@@ -1180,11 +1180,11 @@ class D3nC3n_D3C3(Compound):
     """Rigid compound, see __init__ for more."""
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
-        """Trivial "compound" of n elements element with final symmetry S4A4
+        """Compound of n elements elements with the symmetry D3nC3n
 
-        The descriptive shares the n-fold axis and 3 relection planes with the final symmetry.
+        The descriptive shares a 3-fold axis with the n-fold axis of the final symmetry and also 3
+        relection planes with those of the final symmetry.
         """
-        self.mu = [0, math.pi / (6 * n)]
         axis_n = geomtypes.Vec3([0, 0, 1])
         normal_r = geomtypes.Vec3([0, 1, 0])
         setup = {"axis_n": axis_n, "normal_r": normal_r}
@@ -1199,7 +1199,6 @@ class D3nC3n_D3C3(Compound):
             col_sym=col_sym,
         )
         self.transform_base(self.base_to_o3)
-        self.set_rot_axis(axis_n, self.mu[:2])
 
 
 ###############################################################################
@@ -1256,6 +1255,38 @@ class D2nDn_E(Compound):
             cols=cols,
             col_sym=col_sym,
         )
+
+
+# Rigid Compounds
+class D2nDn_D2C2(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements elements with the symmetry D2nDn
+
+        The descriptive shares a 2-fold axis with a 2-fold axis of the final symmetry and also 2
+        orthogonal relection planes with those of the final symmetry. These reflection planes share
+        the 2-fold axis.
+
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        base: a base model with S4A4 symmetry in its standard position
+        """
+        if n % 2 == 0 or n < 3:
+            raise ValueError(f"The value of 'n' must be odd, got {n}")
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        normal_r = geomtypes.Vec3([0, 1, 0])
+        super().__init__(
+            base,
+            isometry.D2nD(n)(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            isometry.D2C2(setup={"axis_n": axis_2, "normal_r": normal_r}),
+            name=f"D{2 * n}D{n}_D2C2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(X_45_DEG)
 
 
 ###############################################################################
