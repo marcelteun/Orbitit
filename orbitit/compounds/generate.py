@@ -996,6 +996,11 @@ class CompoundS4A4:
             polyh.transform_base(base_rot)
             save_off(polyh)
 
+            # Rigid compound
+            #######################################
+            polyh = S4A4.D3nC3n_D3C3(n, self.descr, n)
+            save_off(polyh)
+
     def create_dn(self, js_fd=None, no_of=None):
         """Create all compounds with the Dn symmetry.
 
