@@ -928,7 +928,8 @@ class CompoundS4A4:
         if no_of is None:
             no_of = self.no_of
         for n in no_of:
-            polyh = S4A4.C2nCn_E(n, self._eg_descr, n)
+            no_of_cols = 2 if n == 1 else n
+            polyh = S4A4.C2nCn_E(n, self._eg_descr, no_of_cols)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
             polyh.write_json_file(get_stem(polyh) + ".json")
@@ -943,7 +944,10 @@ class CompoundS4A4:
         The CnxI symmetry consists of pure cyclic symmetries where the n-fold symmetry axis is the
         Z-axis and all those multiplied with the central inversion.
 
-        Note for n = 1 CnxI consists of {E, I}
+        Note for n = 1 CnxI consists of {E, I}. When using the a descriptive with S4A4 symmetry,
+        e.g. a tetrahedron, then a higher symmetry is obtained. In the case of a tetrahedron it is
+        the Stella Octangula, which is a rigid compound. For this reason if no_of equals to 1, then
+        n=2 is used.
 
         js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
         no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
@@ -952,7 +956,8 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
-        for n in no_of:
+        for i in no_of:
+            n = i + 1
             polyh = S4A4.CnxI_E(n, self._eg_descr, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
@@ -968,7 +973,8 @@ class CompoundS4A4:
         The DnCn symmetry has an n-fold rotation axis and n reflection planes that share the n-fold
         axis.
 
-        Note for n = 1 D1C1 is obtained which is isomorph to C2C1, i.e. it consists of {E, S}
+        Note for n = 1 D1C1 is obtained which is isomorph to C2C1, i.e. it consists of {E, S}. Use
+        that symmetry instead.
 
         js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
         no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
@@ -977,7 +983,8 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
-        for n in no_of:
+        for i in no_of:
+            n = i + 1
             polyh = S4A4.DnCn_E(n, self._eg_descr, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
@@ -993,7 +1000,7 @@ class CompoundS4A4:
         The Dn symmetry has an n-fold rotation axis and n 2-fold axes meeting the n-fold axis
         orthogonally in one point.
 
-        Note for n = 1 D1 is obtained which is isomorph to C2.
+        Note for n = 1 D1 is obtained which is isomorph to C2. Use that symmetry instead.
 
         js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
         no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
@@ -1002,7 +1009,8 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
-        for n in no_of:
+        for i in no_of:
+            n = i + 1
             polyh = S4A4.Dn_E(n, self._eg_descr, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
