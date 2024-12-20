@@ -47,6 +47,7 @@ class CompoundS4A4:
     final_sym = set(
         {
             "A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn", "C2nCn", "CnxI", "DnCn", "Dn",
+            "D2nDn",
         }
     )
     # Tetrahedron
@@ -118,6 +119,7 @@ class CompoundS4A4:
             "CnxI": self.create_cnxi,
             "DnCn": self.create_dncn,
             "Dn": self.create_dn,
+            "D2nDn": self.create_d2ndn,
         }
         # TODO: call this actively (always for all generators)
         #if final_symmetry is not None:
@@ -159,6 +161,7 @@ class CompoundS4A4:
                 self.create_cnxi(js_fd)
                 self.create_dncn(js_fd)
                 self.create_dn(js_fd)
+                self.create_d2ndn(js_fd)
             else:
                 self.create[final_symmetry](js_fd)
 
@@ -988,7 +991,7 @@ class CompoundS4A4:
         """Create all compounds with the Dn symmetry.
 
         The Dn symmetry has an n-fold rotation axis and n 2-fold axes meeting the n-fold axis
-        orthogonally on one point.
+        orthogonally in one point.
 
         Note for n = 1 D1 is obtained which is isomorph to C2.
 
@@ -1001,6 +1004,34 @@ class CompoundS4A4:
             no_of = self.no_of
         for n in no_of:
             polyh = S4A4.Dn_E(n, self._eg_descr, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            # example rotation
+            base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 3)
+            polyh.transform_base(base_rot)
+            save_off(polyh)
+
+    def create_d2ndn(self, js_fd=None, no_of=None):
+        """Create all compounds with the D2nDn symmetry.
+
+        The D2nDn symmetry has an n-fold rotation axis and n 2-fold axes meeting the n-fold axis
+        orthogonally in one point and n reflecion planes sharing the n-fold axis.
+        For even n the 2-fold axes are between the reflection planes for odd n the 2-fold axes ly in
+        the reflection planes and there is one extra reflection plane orthogonal to the n-fold axis.
+
+        Note for n = 1 D2D1 is obtained which is isomorph to D2C2. Use that symmetry instead.
+
+        js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
+        no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
+            generated models for the cyclic and dihedral symmetry groups. This will overwrite the
+            value specified during initialisation.
+        """
+        if no_of is None:
+            no_of = self.no_of
+        for i in no_of:
+            n = i + 1
+            polyh = S4A4.D2nDn_E(n, self._eg_descr, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
             polyh.write_json_file(get_stem(polyh) + ".json")

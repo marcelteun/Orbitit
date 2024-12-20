@@ -1097,3 +1097,28 @@ class Dn_E(Compound):
             cols=cols,
             col_sym=col_sym,
         )
+
+
+###############################################################################
+#
+# D2nDn
+#
+###############################################################################
+class D2nDn_E(Compound):
+    """General compound with D2nDn symmetry, the descriptive doesn't need to have any symmetry."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+        """General compound with D2nDn symmetry with central freedom."""
+        setup = {"n": n}
+        if n_fold_axis:
+            setup["axis"] = n_fold_axis
+        super().__init__(
+            base,
+            isometry.D2nDn(setup=setup),
+            isometry.E(),
+            name=f"D{2 * n}D{n}_E",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
