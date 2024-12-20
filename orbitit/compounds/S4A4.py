@@ -1012,6 +1012,10 @@ class C2nCn_E(Compound):
         setup = {"n": n}
         if n_fold_axis:
             setup["axis"] = n_fold_axis
+        elif n == 1:
+            # C2C1 consists of {E, S} and the orientation of a 1-fold axis doesn't really matter. In
+            # that case it makes more sense to have the reflection plane shared with the Z-axis.
+            setup["axis"] = geomtypes.Vec3([1, 0, 0])
         super().__init__(
             base,
             isometry.C2nCn(setup=setup),
