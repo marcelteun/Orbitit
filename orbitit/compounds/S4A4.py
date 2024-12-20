@@ -856,6 +856,7 @@ class A5xI_C2C1(Compound):
 
     mu = [
         0,
+        75.64 * math.pi / 180,
         3.55 * math.pi / 180,  # 6 * 10 | D15 x I / D3C3 ?
         # ~5
         20.91 * math.pi / 180,  # 10 * 12 | D12 x I / ? (col alt 2)
@@ -867,7 +868,6 @@ class A5xI_C2C1(Compound):
         58.26 * math.pi / 180,  # 6 * 10 | D20 x I / D4D2 ?
         66.98 * math.pi / 180,  # 6 * 10 | D15 x I / ? # col alt 2
         69.11 * math.pi / 180,  # 10 * 6 | D6 x I / ??
-        75.64 * math.pi / 180,
     ]  # TODO calc algebraicly
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
