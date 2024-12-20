@@ -1055,6 +1055,12 @@ class CompoundS4A4:
             polyh.transform_base(base_rot)
             save_off(polyh)
 
+            # Rigid compound
+            #######################################
+            m = 2 * i + 1
+            polyh = S4A4.D2nDn_D2C2(m, self.descr, m)
+            save_off(polyh)
+
     def create_dnxi(self, js_fd=None, no_of=None):
         """Create all compounds with the DnxI symmetry.
 
