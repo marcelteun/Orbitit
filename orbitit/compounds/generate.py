@@ -46,7 +46,7 @@ class CompoundS4A4:
 
     final_sym = set(
         {
-            "A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn", "C2nCn", "CnxI",
+            "A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn", "C2nCn", "CnxI", "DnCn",
         }
     )
     # Tetrahedron
@@ -116,6 +116,7 @@ class CompoundS4A4:
             "Cn": self.create_cn,
             "C2nCn": self.create_c2ncn,
             "CnxI": self.create_cnxi,
+            "DnCn": self.create_dncn,
         }
         # TODO: call this actively (always for all generators)
         #if final_symmetry is not None:
@@ -155,6 +156,7 @@ class CompoundS4A4:
                 self.create_cn(js_fd)
                 self.create_c2ncn(js_fd)
                 self.create_cnxi(js_fd)
+                self.create_dncn(js_fd)
             else:
                 self.create[final_symmetry](js_fd)
 
@@ -947,6 +949,31 @@ class CompoundS4A4:
             no_of = self.no_of
         for n in no_of:
             polyh = S4A4.CnxI_E(n, self._eg_descr, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            # example rotation
+            base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 3)
+            polyh.transform_base(base_rot)
+            save_off(polyh)
+
+    def create_dncn(self, js_fd=None, no_of=None):
+        """Create all compounds with the DnCn symmetry.
+
+        The DnCn symmetry has an n-fold rotation axis and n reflection planes that share the n-fold
+        axis.
+
+        Note for n = 1 you D1C1 is obtained which is isomorph to C2C1, i.e. it consists of {E, S}
+
+        js_fd: file descriptor to the JavaScript file for the models using a slide-bar.
+        no_of: starting from 1 specify for which number in the list of valid n-fold symmetry axes to
+            generated models for the cyclic and dihedral symmetry groups. This will overwrite the
+            value specified during initialisation.
+        """
+        if no_of is None:
+            no_of = self.no_of
+        for n in no_of:
+            polyh = S4A4.DnCn_E(n, self._eg_descr, n)
             if js_fd is not None:
                 js_fd.write(polyh.to_js())
             polyh.write_json_file(get_stem(polyh) + ".json")
