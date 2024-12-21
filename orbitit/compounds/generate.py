@@ -1064,6 +1064,9 @@ class CompoundS4A4:
             polyh = S4A4.D4nD2n_D4D2(m, self.descr, m)
             save_off(polyh)
 
+            polyh = S4A4.D6nD3n_D3C3(n, self.descr, 2)
+            save_off(polyh)
+
     def create_dnxi(self, js_fd=None, no_of=None):
         """Create all compounds with the DnxI symmetry.
 

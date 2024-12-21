@@ -1318,6 +1318,37 @@ class D4nD2n_D4D2(Compound):
         )
 
 
+class D6nD3n_D3C3(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements elements with the symmetry D6nD3n
+
+        The descriptive shares a 3-fold axis with the 3n-fold axis of the final symmetry and also 3
+        relection planes with those of the final symmetry. These planes share the 3n-fold axis.
+
+        n: this will be half the number of constituents.
+        base: a base model with S4A4 symmetry in its standard position
+        """
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        o2_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / (2 * n))
+        axis_2 = o2_rot * geomtypes.Vec3([1, 0, 0])
+        normal_r = geomtypes.Vec3([1, 0, 0])
+        setup_final = {"axis_n": axis_n, "axis_2": axis_2}
+        setup_sub = {"axis_n": axis_n, "normal_r": normal_r}
+        super().__init__(
+            base,
+            isometry.D2nD(3 * n)(setup=setup_final),
+            isometry.D3C3(setup=setup_sub),
+            name=f"D{6 * n}D{3 * n}_D3C3",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o3)
+
+
 ###############################################################################
 #
 # DnxI
