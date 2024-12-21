@@ -126,7 +126,7 @@ def a5_sub_a4_setup(rot_axes):
     setup = []
     look_for_no = 0
     for n, axis1 in enumerate(rot_axes[2]):
-        for axis2 in rot_axes[2][n + 1 :]:
+        for axis2 in rot_axes[2][n + 1:]:
             if geomtypes.FloatHandler.eq(axis1 * axis2, 0):
                 setup.append({"o2axis0": axis1, "o2axis1": axis2})
                 look_for_no += 1
@@ -465,15 +465,22 @@ class Set(set, base.Orbitit):
             elif len(subgroup) > len(self):
                 raise ImproperSubgroupError(
                     f"{o.__class__.__name__} not subgroup of {self.__class__.__name__}"
-                    " (with this orientation)"
+                    f" (with this orientation): subgroup size {len(subgroup)} > {len(self)}"
                 )
             return subgroup
 
         # except ImproperSubgroupError:
         except AssertionError as e:
+            help_str = "\nMain group:"
+            for isom in self:
+                help_str += "\n  -" + str(isom)
+            help_str += "\nSuposed subgroup:"
+            for isom in o:
+                help_str += "\n  -" + str(isom)
+            print(help_str)
             raise ImproperSubgroupError(
                 f"{o.__class__.__name__} not subgroup of {self.__class__.__name__}"
-                " (with this orientation)"
+                " (with this orientation)" + help_str
             ) from e
 
     def __truediv__(self, o):
