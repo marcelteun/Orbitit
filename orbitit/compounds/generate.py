@@ -1096,6 +1096,11 @@ class CompoundS4A4:
             polyh.transform_base(base_rot)
             save_off(polyh)
 
+            # Rigid compound
+            #######################################
+            polyh = S4A4.D2nxI_D2C2(n, self.descr, n)
+            save_off(polyh)
+
 
 class CompoundS4xI:
     """Create set of files with compounds with a descriptive with S4xI symmetry."""

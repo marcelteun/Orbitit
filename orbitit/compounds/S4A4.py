@@ -1375,3 +1375,33 @@ class DnxI_E(Compound):
             cols=cols,
             col_sym=col_sym,
         )
+
+
+class D2nxI_D2C2(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements elements with the symmetry D2nxI.
+
+        The descriptive shares a 2-fold axis with a 2-fold axis of the final symmetry and also 2
+        relection planes with those of the final symmetry. These planes share that 2-fold axis.
+
+        n: this will be half the number of constituents.
+        base: a base model with S4A4 symmetry in its standard position
+        """
+        o2_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / n)
+        axis_2 = o2_rot * geomtypes.Vec3([1, 0, 0])
+        setup_final = {"axis_n": geomtypes.Vec3([0, 0, 1]), "axis_2": axis_2}
+        normal_r = geomtypes.Vec3([0, 1, 0])
+        setup_sub = {"axis_n": geomtypes.Vec3([1, 0, 0]), "normal_r": normal_r}
+        super().__init__(
+            base,
+            isometry.DxI(2 * n)(setup=setup_final),
+            isometry.D2C2(setup=setup_sub),
+            name=f"D{2 * n}xI_D2C2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(X_45_DEG)
