@@ -1289,6 +1289,35 @@ class D2nDn_D2C2(Compound):
         self.transform_base(X_45_DEG)
 
 
+class D4nD2n_D4D2(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements elements with the symmetry D4nD2n
+
+        The descriptive shares a 2-fold axis with the 2n-fold axis of the final symmetry and also 2
+        relection planes with those of the final symmetry. These planes share the 2n-fold axis.
+
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        base: a base model with S4A4 symmetry in its standard position
+        """
+        if n % 2 == 0 or n < 3:
+            raise ValueError(f"The value of 'n' must be odd, got {n}")
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        setup = {"axis_n": axis_n, "axis_2": axis_2}
+        super().__init__(
+            base,
+            isometry.D2nD(2 * n)(setup=setup),
+            isometry.D4D2(setup=setup),
+            name=f"D{4 * n}D{2 * n}_D4D2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+
+
 ###############################################################################
 #
 # DnxI
