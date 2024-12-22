@@ -1431,3 +1431,27 @@ class D3nxI_D3C3(Compound):
             col_sym=col_sym,
         )
         self.transform_base(self.base_to_o3)
+
+
+class D4nxI_D4D2(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements elements with the symmetry D4nxI.
+
+        The descriptive shares a 2-fold axis with a 4n-fold axis of the final symmetry and also 2
+        relection planes with those of the final symmetry. These planes share that same 4n-fold axis
+
+        n: this will be half the number of constituents.
+        base: a base model with S4A4 symmetry in its standard position
+        """
+        super().__init__(
+            base,
+            isometry.DxI(4 * n)(),
+            isometry.D4D2(),
+            name=f"D{4 * n}xI_D4D2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
