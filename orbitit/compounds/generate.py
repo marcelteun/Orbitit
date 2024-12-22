@@ -1104,6 +1104,9 @@ class CompoundS4A4:
             polyh = S4A4.D3nxI_D3C3(n, self.descr, n)
             save_off(polyh)
 
+            polyh = S4A4.D4nxI_D4D2(n, self.descr, n)
+            save_off(polyh)
+
 
 class CompoundS4xI:
     """Create set of files with compounds with a descriptive with S4xI symmetry."""
