@@ -1101,7 +1101,8 @@ class CompoundS4A4:
             polyh = S4A4.D2nxI_D2C2(n, self.descr, n)
             save_off(polyh)
 
-            polyh = S4A4.D3nxI_D3C3(n, self.descr, n)
+            no_of_cols = 2 if i == 1 else i
+            polyh = S4A4.D3nxI_D3C3(i, self.descr, no_of_cols)
             save_off(polyh)
 
             polyh = S4A4.D4nxI_D4D2(n, self.descr, n)
