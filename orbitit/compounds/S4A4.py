@@ -859,6 +859,7 @@ class A5xI_E(Compound):
         )
 
 
+# Compounds with rotational freedom
 class A5xI_C3(Compound):
     """Compound with rotational freedom axis, see __init__ for more."""
 
@@ -1175,6 +1176,78 @@ class DnCn_E(Compound):
         )
 
 
+# Compounds with rotational freedom
+class DnCn_C2C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 2,
+        angle.ASIN_1_V3,
+        angle.ACOS_1_V3,  # only for n = 2m
+    ]
+    # for even n
+    mu_even = angle.ACOS_1_V3
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements with final symmetry DnCn with rotational freedom
+
+        The descriptive shares a reflection with the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        """
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        rot_axis = geomtypes.Vec3([0, 1, 0])
+        if n % 2 == 0:
+            self.mu = self.mu[:]
+            self.mu.append(self.mu_even)
+        super().__init__(
+            base,
+            isometry.DnC(n)(setup={"axis_n": axis_n, "normal_r": rot_axis}),
+            isometry.C2C1(setup={"axis": rot_axis}),
+            name=f"D{n}C{n}_C2C1",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(X_45_DEG)
+        self.set_rot_axis(rot_axis, self.mu[:2])
+
+
+class D3nC3n_C3(Compound):
+    """Rigid compound, see __init__ for more."""
+
+    mu = [
+        0,
+    ]
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements elements with the symmetry D3nC3n
+
+        The descriptive shares a 3-fold axis with the n-fold axis of the final symmetry.
+
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        base: a base model with S4A4 symmetry in its standard position
+        """
+        self.mu = self.mu[:]
+        self.mu.append(math.pi / (6 * n))
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        super().__init__(
+            base,
+            isometry.DnC(3 * n)(setup={"axis_n": axis_n, "normal_r": geomtypes.Vec3([0, 1, 0])}),
+            isometry.C3(setup={"axis": axis_n}),
+            name=f"D{3 * n}C{3 * n}_C3",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o3)
+        self.set_rot_axis(geomtypes.Vec3([0, 0, 1]), self.mu[:2])
+
+
 # Rigid Compounds
 class D3nC3n_D3C3(Compound):
     """Rigid compound, see __init__ for more."""
@@ -1184,6 +1257,9 @@ class D3nC3n_D3C3(Compound):
 
         The descriptive shares a 3-fold axis with the n-fold axis of the final symmetry and also 3
         relection planes with those of the final symmetry.
+
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        base: a base model with S4A4 symmetry in its standard position
         """
         axis_n = geomtypes.Vec3([0, 0, 1])
         normal_r = geomtypes.Vec3([0, 1, 0])

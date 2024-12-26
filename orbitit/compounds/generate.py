@@ -6,7 +6,7 @@ import math
 import os
 
 from orbitit.compounds import S4A4, S4xI
-from orbitit import geomtypes, rgb
+from orbitit import geom_3d, geomtypes, rgb
 
 
 def get_stem(comp, tail=""):
@@ -985,6 +985,11 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
+        eg_angle = {
+            2: math.pi / 4,
+            4: geom_3d.DEG2RAD * 55,
+            5: geom_3d.DEG2RAD * 62.645,
+        }
         for i in no_of:
             n = i + 1
             polyh = S4A4.DnCn_E(n, self._eg_descr, n)
@@ -996,10 +1001,43 @@ class CompoundS4A4:
             polyh.transform_base(base_rot)
             save_off(polyh)
 
+            # n | DnCn / C2C1
+            #######################################
+            polyh = S4A4.DnCn_C2C1(n, self.descr, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            if n in eg_angle:
+                angle = eg_angle[n]
+            else:
+                angle = eg_angle[2]
+            polyh.rot_base(angle)  # example angle
+            save_off(polyh)
+
+            # special mu
+            if n % 2 == 0:
+                # Don't start with n == 2
+                m = n + 2
+                # for m = 2k
+                # k x 2 | D3xI / D3C3
+                k = m // 2
+                polyh = S4A4.DnCn_C2C1(m, self.descr, k)
+                polyh.rot_base(polyh.mu[3])
+                save_off(polyh, "_mu3")
+
+            # 2n | D3nC3n / C3
+            #######################################
+            no_of_cols = 2 if i == 1 else i
+            polyh = S4A4.D3nC3n_C3(i, self.descr, no_of_cols)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            polyh.rot_base(2 * math.pi / (6 * i) / 3)  # example angle
+            save_off(polyh)
+
             # Rigid compound
             #######################################
             polyh = S4A4.D3nC3n_D3C3(n, self.descr, n)
-            save_off(polyh)
 
     def create_dn(self, js_fd=None, no_of=None):
         """Create all compounds with the Dn symmetry.
