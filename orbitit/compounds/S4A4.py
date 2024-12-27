@@ -1305,6 +1305,44 @@ class Dn_E(Compound):
         )
 
 
+# Compounds with rotational freedom
+class Dn_C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+    ]
+    # TODO: calculate for real
+    mu_classic_5 = angle.ACOS_V_5_V5_V10
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements with final symmetry Dn with rotational freedom
+
+        The descriptive shares a 2-fold axis with a 2-fold axis of the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        """
+        # Note for n = 2 a higher symmetry is obtained: D4D2
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        if n % 5 == 0:
+            self.mu = self.mu[:]
+            self.mu.append(self.mu_classic_5)
+        super().__init__(
+            base,
+            isometry.D(n)(setup={"axis_n": axis_n, "axis_2": axis_2}),
+            isometry.C2(setup={"axis": axis_2}),
+            name=f"D{n}_C2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis_2, self.mu[:2])
+
+
 ###############################################################################
 #
 # D2nDn

@@ -6,6 +6,7 @@ import math
 import os
 
 from orbitit.compounds import S4A4, S4xI
+from orbitit.compounds import angle as special_angle
 from orbitit import geom_3d, geomtypes, rgb
 
 
@@ -1054,6 +1055,8 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
+        angles = {6: special_angle.ASIN_1_V3}
+        eg_angle = 20 * math.pi / 180
         for i in no_of:
             n = i + 1
             polyh = S4A4.Dn_E(n, self._eg_descr, n)
@@ -1064,6 +1067,26 @@ class CompoundS4A4:
             base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 3)
             polyh.transform_base(base_rot)
             save_off(polyh)
+
+            # n | Dn / C2
+            #######################################
+            # Note for n = 2 a higher symmetry is obtained: D4D2
+            m = n + 1
+            polyh = S4A4.Dn_C2(m, self.descr, m)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            if m in angles:
+                angle = angles[m]
+            else:
+                angle = eg_angle
+            polyh.rot_base(angle)  # example angle
+            save_off(polyh)
+
+            p = 5 * n
+            polyh = S4A4.Dn_C2(p, self.descr, n)
+            polyh.rot_base(polyh.mu[2])
+            save_off(polyh, "_mu2")
 
     def create_d2ndn(self, js_fd=None, no_of=None):
         """Create all compounds with the D2nDn symmetry.
