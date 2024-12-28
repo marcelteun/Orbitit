@@ -1088,6 +1088,17 @@ class CompoundS4A4:
             polyh.rot_base(polyh.mu[2])
             save_off(polyh, "_mu2")
 
+            # 2n | D3n / C3
+            #######################################
+            # Note for n = 2 a higher symmetry is obtained: D4D2
+            no_of_cols = i if i > 1 else 2
+            polyh = S4A4.D3n_C3(i, self.descr, no_of_cols)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            polyh.rot_base(polyh.mu[1] / 3)  # example angle
+            save_off(polyh)
+
     def create_d2ndn(self, js_fd=None, no_of=None):
         """Create all compounds with the D2nDn symmetry.
 
