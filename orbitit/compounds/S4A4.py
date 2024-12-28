@@ -1354,7 +1354,7 @@ class D3n_C3(Compound):
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of n elements with final symmetry D3n with rotational freedom
 
-        The descriptive shares a 3-fold axis with a 3-fold axis of the final symmetry
+        The descriptive shares a 3-fold axis with a 3n-fold axis of the final symmetry
 
         base: a base model with S4A4 symmetry in its standard position
         n: number of constituents. Can only be an odd number and bigger than 1.
@@ -1404,6 +1404,52 @@ class D2nDn_E(Compound):
             cols=cols,
             col_sym=col_sym,
         )
+
+
+# Compounds with rotational freedom
+class D2nDn_C2(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+    ]
+    mu_2 = {
+        4: 27.9688 * math.pi / 180,
+        5: 14.0861 * math.pi / 180,
+        6: 34.0789 * math.pi / 180,
+        7: 25.0916 * math.pi / 180,
+    }
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 2n elements with final symmetry D2nDn with rotational freedom
+
+        The descriptive shares a 2-fold axis with a 2-fold axis of the final symmetry
+
+        Note that D2D1 ~= D2C2 so for n = 1 there is no 2-fold axis.
+
+        base: a base model with S4A4 symmetry in its standard position
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        """
+        assert n > 1, f"n must be bigger than 1 otherwise there is no 2-fold axis, got {n}"
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        setup_final = {"axis_n": axis_n, "axis_2": axis_2}
+        setup_sub = {"axis": axis_2}
+        if n in self.mu_2:
+            self.mu = self.mu[:]
+            self.mu.append(self.mu_2[n])
+        super().__init__(
+            base,
+            isometry.D2nD(n)(setup=setup_final),
+            isometry.C2(setup=setup_sub),
+            name=f"D{2 * n}D{n}_C2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis_2, self.mu[:2])
 
 
 # Rigid Compounds

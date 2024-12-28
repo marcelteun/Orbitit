@@ -1808,33 +1808,32 @@ class D2nDn(Set, metaclass=MetaD2nDn):
 # dynamically create D2nDn classes:
 def D2nD(n):
     """Create class for D2nDn with specific n"""
-    assert n != 0
+    assert n >= 1
     try:
         return __D2nDn_metas[n]
     except KeyError:
-        if n == 1:
-            # D2D1 ~= D2C2
-            __D2nDn_metas[n] = D2C2
-        else:
-            class_name = f"D{2*n}D{n}"
-            d_2n_d_n = MetaD2nDn(
-                class_name,
-                (D2nDn,),
-                {
-                    "n": n,
-                    "order": 4 * n,
-                    "mixed": True,
-                    "direct_parent": D(n),
-                    "init_pars": _init_pars("Dn", n),
-                    "std_setup": _std_setup("Dn", n),
-                },
-            )
-            d_2n_d_n.subgroups = _d2ndn_get_subgroups(n)
-            d_2n_d_n.subgroups.insert(0, d_2n_d_n)
-            d_2n_d_n.remove_init_par("n")
-            __D2nDn_metas[n] = d_2n_d_n
-            base.class_to_json[d_2n_d_n] = class_name
-            Set.to_class[class_name] = d_2n_d_n
+        # evrn thoug D2D1 ~= D2C2, we cannot use that, since D2C2 uses normal_r in setup, while D2D1
+        # uses a half-turn
+        class_name = f"D{2*n}D{n}"
+        d_2n_d_n = MetaD2nDn(
+            class_name,
+            (D2nDn,),
+            {
+                "n": n,
+                "order": 4 * n,
+                "mixed": True,
+                "direct_parent": D(n),
+                "init_pars": _init_pars("Dn", n),
+                "std_setup": _std_setup("Dn", n),
+            },
+        )
+        d_2n_d_n.subgroups = _d2ndn_get_subgroups(n)
+        d_2n_d_n.subgroups.insert(0, d_2n_d_n)
+        d_2n_d_n.remove_init_par("n")
+        __D2nDn_metas[n] = d_2n_d_n
+        base.class_to_json[d_2n_d_n] = class_name
+        Set.to_class[class_name] = d_2n_d_n
+
         return __D2nDn_metas[n]
 
 

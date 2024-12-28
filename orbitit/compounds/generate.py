@@ -1116,6 +1116,45 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
+        cols = {
+            4: [
+                S4A4.D2nDn_C2.cols[0],
+                S4A4.D2nDn_C2.cols[3],
+                S4A4.D2nDn_C2.cols[2],
+                S4A4.D2nDn_C2.cols[1],
+                S4A4.D2nDn_C2.cols[3],
+                S4A4.D2nDn_C2.cols[2],
+                S4A4.D2nDn_C2.cols[0],
+                S4A4.D2nDn_C2.cols[1],
+            ],
+            5: [
+                S4A4.D2nDn_C2.cols[0],
+                S4A4.D2nDn_C2.cols[1],
+                S4A4.D2nDn_C2.cols[2],
+                S4A4.D2nDn_C2.cols[2],
+                S4A4.D2nDn_C2.cols[3],
+                S4A4.D2nDn_C2.cols[4],
+                S4A4.D2nDn_C2.cols[1],
+                S4A4.D2nDn_C2.cols[3],
+                S4A4.D2nDn_C2.cols[4],
+                S4A4.D2nDn_C2.cols[0],
+            ],
+            6: [
+                S4A4.D2nDn_C2.cols[0],
+                S4A4.D2nDn_C2.cols[1],
+                S4A4.D2nDn_C2.cols[3],
+                S4A4.D2nDn_C2.cols[2],
+                S4A4.D2nDn_C2.cols[1],
+                S4A4.D2nDn_C2.cols[3],
+                S4A4.D2nDn_C2.cols[4],
+                S4A4.D2nDn_C2.cols[0],
+                S4A4.D2nDn_C2.cols[5],
+                S4A4.D2nDn_C2.cols[2],
+                S4A4.D2nDn_C2.cols[5],
+                S4A4.D2nDn_C2.cols[4],
+            ],
+            7: None,
+        }
         for i in no_of:
             n = i + 1
             polyh = S4A4.D2nDn_E(n, self._eg_descr, n)
@@ -1126,6 +1165,20 @@ class CompoundS4A4:
             base_rot = geomtypes.Rot3(axis=geomtypes.Vec3([1, 2, 3]), angle=math.pi / 3)
             polyh.transform_base(base_rot)
             save_off(polyh)
+
+            # 2n | D2nDn / C2
+            #######################################
+            polyh = S4A4.D2nDn_C2(n, self.descr, n)
+            if js_fd is not None:
+                js_fd.write(polyh.to_js())
+            polyh.write_json_file(get_stem(polyh) + ".json")
+            polyh.rot_base(polyh.mu[1] / 3)  # example angle
+            save_off(polyh)
+
+            m = i + 3
+            polyh = S4A4.D2nDn_C2(m, self.descr, 2 * m, cols=cols[m])
+            polyh.rot_base(polyh.mu[2])
+            save_off(polyh, "_mu2")
 
             # Rigid compound
             #######################################
