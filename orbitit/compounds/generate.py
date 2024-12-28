@@ -1028,9 +1028,6 @@ class CompoundS4A4:
 
             # 2n | D3nC3n / C3
             #######################################
-
-            # Rigid compound
-            #######################################
             no_of_cols = 2 if i == 1 else i
             polyh = S4A4.D3nC3n_C3(i, self.descr, no_of_cols)
             if js_fd is not None:
@@ -1038,6 +1035,10 @@ class CompoundS4A4:
             polyh.write_json_file(get_stem(polyh) + ".json")
             polyh.rot_base(2 * math.pi / (6 * i) / 3)  # example angle
             save_off(polyh)
+
+            # Rigid compound
+            #######################################
+            polyh = S4A4.D3nC3n_D3C3(n, self.descr, n)
 
     def create_dn(self, js_fd=None, no_of=None):
         """Create all compounds with the Dn symmetry.
