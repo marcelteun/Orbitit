@@ -1313,7 +1313,7 @@ class Dn_C2(Compound):
         0,
         math.pi / 4,
     ]
-    # TODO: calculate for real
+    # TODO: calculate for real: the algebraic angle might be wrong, but seems to be right:
     mu_classic_5 = angle.ACOS_V_5_V5_V10
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
@@ -1341,6 +1341,41 @@ class Dn_C2(Compound):
             col_sym=col_sym,
         )
         self.set_rot_axis(axis_2, self.mu[:2])
+
+
+class D3n_C3(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 6,  # still needs to be divided by n
+    ]
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of n elements with final symmetry D3n with rotational freedom
+
+        The descriptive shares a 3-fold axis with a 3-fold axis of the final symmetry
+
+        base: a base model with S4A4 symmetry in its standard position
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        """
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        setup_final = {"axis_n": axis_n, "axis_2": geomtypes.Vec3([1, 0, 0])}
+        setup_sub = {"axis": axis_n}
+        self.mu = self.mu[:]
+        self.mu[1] = self.mu[1] / n
+        super().__init__(
+            base,
+            isometry.D(3 * n)(setup=setup_final),
+            isometry.C3(setup=setup_sub),
+            name=f"D{3 * n}_C3",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.transform_base(self.base_to_o3)
+        self.set_rot_axis(axis_n, self.mu[:2])
 
 
 ###############################################################################
