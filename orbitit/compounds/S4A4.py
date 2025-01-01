@@ -788,6 +788,7 @@ class A5_C2(Compound):
         angle.ATAN_1_V5,
         angle.TODO_26,
         angle.ACOS_V_5_V5_V10,
+        38.172 * math.pi / 180,
     ]
 
     def __init__(self, base, no_of_cols, col_alt=0, col_sym="", cols=None):
