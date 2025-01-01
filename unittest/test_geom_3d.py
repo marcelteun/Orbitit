@@ -104,6 +104,52 @@ def chk_with_org(filename, chk_str):
     return (True, "")
 
 
+class TestPlane(unittest.TestCase):
+    """Unit tests for geom_3d.PlaneFromNormal"""
+
+    def test_is_in_plane(self):
+        """Test method geom_3d.PlaneFromNormal.is_in_plane(point)."""
+        x = [1, 0, 0]
+        y = [0, 1, 0]
+        z = [0, 0, 1]
+        test_matrix = {
+            # normal, point, test_inputs, precisions, expected_results
+            "simple_normal_z": (
+                z,
+                [1, 1, 1],
+                [[1, 1, 1], z, [1, 0, 1], [1, 0, 0.99999], [1, 0, 0.99999]],
+                [None, None, None, None, 5, 6],
+                [True, True, True, False, True, False],
+            ),
+        }
+        div3 = 1 / 3
+        v0_d3 = [div3, div3, div3]
+        # Test 1e-6, only one component
+        v1_d3 = [div3 + 1.0e-6, div3, div3]
+        # Test 1e-6, divided equally over all components
+        d3 = div3 + 1.0e-6 / 3
+        v2_d3 = [d3, d3, d3]
+        # Test 1e-6, divided irregularly over all components
+        v3_d3 = [div3 + 0.2e-6, div3 + 0.3e-6, div3 + 0.5e-6]
+        test_matrix["normal_z"] = (
+            [1, 1, 1],
+            x,
+            [x, y, z, v0_d3, v1_d3, v1_d3, v1_d3, v2_d3, v2_d3, v2_d3, v3_d3, v3_d3, v3_d3],
+            [None, None, None, None, None, 6, 7, None, 6, 7, None, 6, 7],
+            [True, True, True, True, False, True, False, False, True, False, False, True, False],
+        )
+        for test_name, (normal, point, inputs, precisions, expecteds) in test_matrix.items():
+            plane = geom_3d.PlaneFromNormal(geomtypes.Vec(normal), geomtypes.Vec(point))
+            for in_point, precision, expected in zip(inputs, precisions, expecteds):
+                prec = f"1e-{precision}" if precision else "None"
+                msg = f"{test_name} failed for {in_point} with precision {prec}"
+                if precision is None:
+                    self.assertEqual(plane.is_in_plane(geomtypes.Vec(in_point)), expected, msg)
+                else:
+                    with geomtypes.FloatHandler(precision):
+                        self.assertEqual(plane.is_in_plane(geomtypes.Vec(in_point)), expected, msg)
+
+
 class TestLine(unittest.TestCase):
     """Unit tests for geom_3d.Line3D"""
 
