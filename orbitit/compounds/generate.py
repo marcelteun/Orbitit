@@ -732,6 +732,11 @@ class CompoundS4A4:
         polyh.rot_base(polyh.mu[6])
         save_off(polyh, "_mu6")
 
+        # 6 x 5 | TODO
+        polyh = S4A4.A5_C2(self.descr, 12, col_alt=0)
+        polyh.rot_base(polyh.mu[7])
+        save_off(polyh, "_mu7")
+
         # Rigid compound
         polyh = S4A4.A5_A4(self.descr, 5)
         save_off(polyh)
