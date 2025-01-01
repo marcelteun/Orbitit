@@ -360,6 +360,12 @@ class PlaneFromNormal:
     """
 
     def __init__(self, normal, point):
+        """
+        Initialise object
+
+        normal: a geomtypes.Vec object of dimension 3 specifying the normal of the plane.
+        point: a geomtypes.Vec object of dimension 3 specifying a point in the plane.
+        """
         self.normal = normal
         self.D = geomtypes.RoundedFloat(-self.normal * geomtypes.Vec3(point))
 
@@ -389,6 +395,18 @@ class PlaneFromNormal:
             mat = geomtypes.Mat([n0, n1, v])
             q = mat.solve(geomtypes.Vec([-self.D, -plane.D, 0]))
         return Line3D(q, v=v)
+
+    def is_in_plane(self, point):
+        """Return whether point 'point' is in the plane
+
+        Use geomtypes.FloatHandler(precision) to set precision.
+
+        point: a 3D list with x, y, and z coordinates
+        """
+        sum = 0
+        for i in range(3):
+            sum += self.normal[i] * point[i]
+        return sum + self.D == 0
 
     def __eq__(self, plane):
         """Return True if the planes define the same one."""
