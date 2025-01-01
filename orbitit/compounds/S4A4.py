@@ -1452,6 +1452,49 @@ class D2nDn_C2(Compound):
         self.set_rot_axis(axis_2, self.mu[:2])
 
 
+class D2nDn_C2C1(Compound):
+    """Compound with rotational freedom axis, see __init__ for more."""
+
+    mu = [
+        0,
+        math.pi / 4,
+    ]
+
+    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
+        """Compound of 2n elements with final symmetry D2nDn with rotational freedom
+
+        The descriptive shares a reflection plane with a relection plane of the final symmetry. The
+        reflection plane of the final symmetry is one of the reflection planes that share the n-fold
+        axis (i.e. the principal axis).
+
+        Note that D2D1 ~= D2C2 so for n = 1 there is no 2-fold axis.
+
+        base: a base model with S4A4 symmetry in its standard position
+        n: number of constituents. Can only be an odd number and bigger than 1.
+        """
+        assert n > 1, f"n must be bigger than 1 otherwise there is no 2-fold axis, got {n}"
+        if n % 2 == 0:
+            pass
+        axis_n = geomtypes.Vec3([0, 0, 1])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        setup_final = {"axis_n": axis_n, "axis_2": axis_2}
+        setup_sub = {"axis": axis_2}
+        if n in self.mu_2:
+            self.mu = self.mu[:]
+            self.mu.append(self.mu_2[n])
+        super().__init__(
+            base,
+            isometry.D2nD(n)(setup=setup_final),
+            isometry.C2(setup=setup_sub),
+            name=f"D{2 * n}D{n}_C2",
+            no_of_cols=no_of_cols,
+            col_alt=col_alt,
+            cols=cols,
+            col_sym=col_sym,
+        )
+        self.set_rot_axis(axis_2, self.mu[:2])
+
+
 # Rigid Compounds
 class D2nDn_D2C2(Compound):
     """Rigid compound, see __init__ for more."""
