@@ -24,7 +24,6 @@
 # pylint: disable=too-many-lines
 
 import logging
-import math
 import os
 from pathlib import Path
 import sys

@@ -403,10 +403,10 @@ class PlaneFromNormal:
 
         point: a 3D list with x, y, and z coordinates
         """
-        sum = 0
+        total = 0
         for i in range(3):
-            sum += self.normal[i] * point[i]
-        return sum + self.D == 0
+            total += self.normal[i] * point[i]
+        return total + self.D == 0
 
     def __eq__(self, plane):
         """Return True if the planes define the same one."""
@@ -1771,7 +1771,7 @@ class SimpleShape(base.Orbitit):
         face_plane: the Plane object in which face is part of.
         hor_plane: the Plane object that defines the horizontal plane to intersect with.
         z: the z-coordinate for the horizontal plane.
-        vs: the vertex indices as used for the face.
+        vs: the list of vertex coordinates referred to by the indices in intersecting_face
 
         return: a tuple with a geom_2d.Line object and a list of line factors that form line
             segments of where the face intersects the horizontal plane. Each segment is represented
@@ -1794,6 +1794,9 @@ class SimpleShape(base.Orbitit):
                 f"(margin: {geomtypes.FloatHandler.margin})"
             )
 
+            # Only use the vertices for this plane for optimisation purpose
+            vs = [vs[i] for i in intersecting_face]
+            vs_indices = list(range(len(vs)))
             line_2d = geom_2d.Line(line_3d.p[:2], v=line_3d.v[:2])
             # Get the line_2d elements where it intersects the face. One can do this as follows
             #  - translate face plane to XOY (T1)
@@ -1802,14 +1805,18 @@ class SimpleShape(base.Orbitit):
             #  - translate the face back within the XoY plane (-T2)
             #  - intersect in 2D
             # However this makes the algorithm very slow. Is is quicker just to project the whole
-            # face orthogonally to the XoY plane. The same line factors will be obtained, unless the
-            # face is orthogonal, or almost for precision reasons, to the XoY plane.
+            # face orthogonally to the XoY plane. The same line factors will be obtained, unless:
+            #  - the face normal is orthogonal, or almost for precision reasons, to the XoY plane.
+            #  - the face_plane is orthogonal to the horzontal plane. In that case projecting the
+            #    vertices to create a polygon to intersect with will all be on one line.
             z_axis = vec(0, 0, 1)
             with geomtypes.FloatHandler(1):
-                simplify = face_plane.normal != z_axis
+                simplify = face_plane.normal != z_axis and \
+                    not geomtypes.FloatHandler.eq(face_plane.normal * z_axis, 0)
             if simplify:
-                vs_2d = [v[:2] for v in vs]
+                vs_2d = [geomtypes.Vec(v[:2]) for v in vs]
             else:
+                # use the slower method
                 # translate with T1 and T2:
                 vs = [c - line_3d.p for c in vs]
                 # rotate to make plane horizontal and translate back (-T2)
@@ -1820,7 +1827,7 @@ class SimpleShape(base.Orbitit):
                 t_back = line_3d.p[:]
                 vs_2d = [geomtypes.Vec((rot_mat * v)[:2]) + t_back for v in vs]
 
-            polygon_2d = geom_2d.Polygon(vs_2d, intersecting_face)
+            polygon_2d = geom_2d.Polygon(vs_2d, vs_indices)
             line_factors = line_2d.intersect_polygon_get_factors(polygon_2d)
             logging.debug("line factors %s", line_factors)
             if line_factors != []:
@@ -1878,7 +1885,8 @@ class SimpleShape(base.Orbitit):
             for face_to_intersect_with in faces_to_intersect_with:
                 polygon_2d = geom_2d.Polygon(
                     # the face to intersect with is in z=0, so only consider (x, y)
-                    [v[:2] for v in vs], face_to_intersect_with
+                    [v[:2] for v in vs],
+                    face_to_intersect_with,
                 )
                 line_factors_1 = line_2d.intersect_polygon_get_factors(polygon_2d)
                 # So for the case above line_factors_1 consists of (g0, g1):
@@ -1954,7 +1962,7 @@ class SimpleShape(base.Orbitit):
         vs: the list of vertices for an shape with an updated orientation so that the compound face
             is in a horizontal plane.
         comound_face: a list of faces. Each face is a list of vertex indices. The faces should all
-            ly in the horizontal plane (with the orientatoin specified by vs)
+            ly in the horizontal plane (with the orientation specified by vs)
         z: the z-value of the horizontal plane to intersect with.
 
         return: a tuple of a points list and a polygons list. Each point consists of an X, Y
@@ -1973,10 +1981,10 @@ class SimpleShape(base.Orbitit):
         polygons = []
         faces_to_intersect_with = []
         intersection_lines = []
-        for intersecting_face in self.fs:
+        for f_index, intersecting_face in enumerate(self.fs):
             logging.debug(
                 "Intersecting face[%d] = %s with the compound face",
-                self.fs.index(intersecting_face),
+                f_index,
                 intersecting_face,
             )
             intersecting_plane = self._get_face_plane(vs, intersecting_face)
@@ -2027,7 +2035,9 @@ class SimpleShape(base.Orbitit):
                                 # |______________|
                                 if delta in (1, len(hor_face) - 1):
                                     calc_intersection = False
-                                    logging.debug("Intersecting face shares at least one edge")
+                                    logging.debug(
+                                        "Intersecting face shares at least one edge"
+                                    )
                                     break
 
             # line of intersection:
@@ -2091,8 +2101,9 @@ class SimpleShape(base.Orbitit):
 
         compound_faces = self._merge_faces_sharing_plane(face_indices)
 
+        total = len(compound_faces)
         for i, (compound_face, face_plane) in enumerate(compound_faces):
-            logging.debug("checking face %d (of %d)", i + 1, len(compound_faces))
+            logging.debug("checking face %d (of %d)", i + 1, total)
 
             vs = self._rotate_shape_to_hor_plane(face_plane)
 
