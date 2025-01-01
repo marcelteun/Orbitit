@@ -39,30 +39,30 @@ class Line(geomtypes.Line):
         """
         geomtypes.Line.__init__(self, p0, p1, v, d=2, is_segment=is_segment)
 
-    def intersect_get_factor(self, l):
-        """Gets the factor for the vertex for which the l intersects this line
+    def intersect_get_factor(self, obj):
+        """Gets the factor for the vertex for which the obj intersects this line
 
         I.e. the point of intersection is specified by self.p + result * self.v
-        l: the object to intersect with. Currently only a 2D line is supported.
+        obj: the object to intersect with. Currently only a 2D line is supported.
 
         return: the factor as a geomtypes.RoundedFloat number or None if the object don't share one
         point (e.g.lines are parallel).
         """
         assert isinstance(
-            l, Line
-        ), f"Only 2D lines are supported when intersecting, got {l}"
-        nom = geomtypes.RoundedFloat(l.v[0] * self.v[1] - l.v[1] * self.v[0])
+            obj, Line
+        ), f"Only 2D lines are supported when intersecting, got {obj}"
+        nom = geomtypes.RoundedFloat(obj.v[0] * self.v[1] - obj.v[1] * self.v[0])
         if not nom == 0:
-            denom = l.v[0] * (l.p[1] - self.p[1]) + l.v[1] * (self.p[0] - l.p[0])
+            denom = obj.v[0] * (obj.p[1] - self.p[1]) + obj.v[1] * (self.p[0] - obj.p[0])
             return geomtypes.RoundedFloat(denom / nom)
         return None
 
-    def intersect(self, l):
-        """returns the point of intersection with line l or None if not exactly one solution.
+    def intersect(self, obj):
+        """returns the point of intersection with line obj or None if not exactly one solution.
 
         See intersect_get_factor
         """
-        return self.get_point(self.intersect_get_factor(l))
+        return self.get_point(self.intersect_get_factor(obj))
 
     def intersect_polygon_get_factors(self, p, add_edges=False):
         """returns a list of factors where the line inters the polygon p.
@@ -70,7 +70,7 @@ class Line(geomtypes.Line):
         p: an object of Polygon
         add_edges: if set to True if an edge is shared with the line, it is added as intersection
 
-        return a list of two tuples with are the factor of the line. Eacho tuple consist of a factor
+        return a list of two tuples with are the factor of the line. Each tuple consists of a factor
             where the line enters the polygon and where it exits.
         """
         factors = []
