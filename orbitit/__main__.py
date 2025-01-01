@@ -1065,6 +1065,7 @@ if __name__ == "__main__":
         "-x",
         "--scale",
         metavar="n",
+        type=int,
         default=50,
         help="When saving to PostScript, then use the specified scale factor",
     )
