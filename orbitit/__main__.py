@@ -960,13 +960,10 @@ class MainPanel(wx.Panel):
 
 def convert_to_ps(shape, fd, scale, precision, margin):
     """Convert shape to PostScript and save to file descriptor fd"""
-    fd.write(
-        shape.to_postscript(
-            scaling=scale,
-            precision=precision,
-            margin=math.pow(10, -margin),
+    with geomtypes.FloatHandler(margin):
+        fd.write(
+            shape.to_postscript(scaling=scale, precision=precision)
         )
-    )
 
 
 def convert_to_off(shape, fd, precision, margin=0):
