@@ -1731,7 +1731,15 @@ class Mat(list):
 
 
 class Line:
-    """A base class for representing a line in any dimension."""
+    """A base class for representing a line in any dimension.
+
+    Attributes:
+        - p: base point of the line, it is point on the line.
+        - v: direction vector of the line.
+        - dimension: the spade dimension the line is defined in
+        - is_segment: if False the line is infinite, otherwise this is a finite line only valid for
+            the values p + t.v with t in [0, 1]
+    """
 
     def __init__(self, p0, p1=None, v=None, d=None, is_segment=False):
         """
@@ -1761,8 +1769,8 @@ class Line:
         assert len(v) == self.dimension, (
             f"Wrong dimension vector, got {v}, expected {self.dimension}"
         )
-        #if len(v) > self.dimension:
-        #    v = v[:self.dimension]
+        # if len(v) > self.dimension:
+        #     v = v[:self.dimension]
         if not isinstance(v, Vec):
             v = Vec(v)
         return v
@@ -1829,7 +1837,7 @@ class Line:
         """
         for i in range(self.dimension):
             t = self.get_factor_at(p[i], i)
-            if not t is None:
+            if t is not None:
                 break
         assert t is not None
         if check:
