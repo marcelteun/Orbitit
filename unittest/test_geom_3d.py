@@ -30,9 +30,9 @@ import unittest
 
 from orbitit import geom_3d, geomtypes, isometry
 
-RED = (.8, .1, .1)
-YELLOW = (.8, .8, .3)
-BLUE = (.3, .3, .8)
+RED = (0.8, 0.1, 0.1)
+YELLOW = (0.8, 0.8, 0.3)
+BLUE = (0.3, 0.3, 0.8)
 
 DIR_PATH = path.dirname(path.realpath(__file__))
 OUT_DIR = "output"
@@ -41,44 +41,52 @@ IN_DIR = "expected"
 
 def get_cube():
     """Return a shape describing one cube"""
-    vs = [geomtypes.Vec3([ 1,  1,  1]),
-          geomtypes.Vec3([-1,  1,  1]),
-          geomtypes.Vec3([-1, -1,  1]),
-          geomtypes.Vec3([ 1, -1,  1]),
-          geomtypes.Vec3([ 1,  1, -1]),
-          geomtypes.Vec3([-1,  1, -1]),
-          geomtypes.Vec3([-1, -1, -1]),
-          geomtypes.Vec3([ 1, -1, -1]),
-          geomtypes.Vec3([ 1,  1, -2]),
-          geomtypes.Vec3([.5,  1,  1])]
-    fs = [[0, 1, 2, 3],
-          [0, 3, 7, 4],
-          [1, 0, 4, 5],
-          [2, 1, 5, 6],
-          [3, 2, 6, 7],
-          [7, 6, 5, 4]]
-    return geom_3d.SimpleShape(vs=vs, fs=fs,
-                              colors=([RED, YELLOW, BLUE], [0, 1, 2, 1, 2, 0]))
+    vs = [
+        geomtypes.Vec3([1, 1, 1]),
+        geomtypes.Vec3([-1, 1, 1]),
+        geomtypes.Vec3([-1, -1, 1]),
+        geomtypes.Vec3([1, -1, 1]),
+        geomtypes.Vec3([1, 1, -1]),
+        geomtypes.Vec3([-1, 1, -1]),
+        geomtypes.Vec3([-1, -1, -1]),
+        geomtypes.Vec3([1, -1, -1]),
+        geomtypes.Vec3([1, 1, -2]),
+        geomtypes.Vec3([0.5, 1, 1]),
+    ]
+    fs = [
+        [0, 1, 2, 3],
+        [0, 3, 7, 4],
+        [1, 0, 4, 5],
+        [2, 1, 5, 6],
+        [3, 2, 6, 7],
+        [7, 6, 5, 4],
+    ]
+    return geom_3d.SimpleShape(
+        vs=vs, fs=fs, colors=([RED, YELLOW, BLUE], [0, 1, 2, 1, 2, 0])
+    )
 
 
 def get_octahedron():
     """Return a shape describing one octahedron"""
-    vs = [geomtypes.Vec3([ 0,  0,  2]),
-          geomtypes.Vec3([ 2,  0,  0]),
-          geomtypes.Vec3([ 0,  2,  0]),
-          geomtypes.Vec3([-2,  0,  0]),
-          geomtypes.Vec3([ 0, -2,  0]),
-          geomtypes.Vec3([ 0,  0, -2])]
-    fs = [[0, 1, 2],
-          [0, 2, 3],
-          [0, 3, 4],
-          [0, 4, 1],
-          [5, 2, 1],
-          [5, 3, 2],
-          [5, 4, 3],
-          [5, 1, 4]]
-    return geom_3d.SimpleShape(vs=vs, fs=fs,
-                              colors=([YELLOW], []))
+    vs = [
+        geomtypes.Vec3([0, 0, 2]),
+        geomtypes.Vec3([2, 0, 0]),
+        geomtypes.Vec3([0, 2, 0]),
+        geomtypes.Vec3([-2, 0, 0]),
+        geomtypes.Vec3([0, -2, 0]),
+        geomtypes.Vec3([0, 0, -2]),
+    ]
+    fs = [
+        [0, 1, 2],
+        [0, 2, 3],
+        [0, 3, 4],
+        [0, 4, 1],
+        [5, 2, 1],
+        [5, 3, 2],
+        [5, 4, 3],
+        [5, 1, 4],
+    ]
+    return geom_3d.SimpleShape(vs=vs, fs=fs, colors=([YELLOW], []))
 
 
 def get_path(filename, sub_dir):
@@ -89,16 +97,16 @@ def get_path(filename, sub_dir):
 def chk_with_org(filename, chk_str):
     """Get file contents from file with expected data"""
     org_name = get_path(filename, IN_DIR)
-    chk_name = get_path(filename + '.chk', OUT_DIR)
+    chk_name = get_path(filename + ".chk", OUT_DIR)
     try:
-        with open(org_name, 'r') as fd:
+        with open(org_name, "r") as fd:
             expect_str = fd.read()
     except IOError:
-        with open(chk_name, 'w') as fd:
+        with open(chk_name, "w") as fd:
             fd.write(chk_str)
         return (False, f"Missing file, check {org_name}")
     if chk_str != expect_str:
-        with open(chk_name, 'w') as fd:
+        with open(chk_name, "w") as fd:
             fd.write(chk_str)
         return (False, f"Unexpected content {chk_name} != {org_name} (expected)")
     return (True, "")
@@ -134,20 +142,58 @@ class TestPlane(unittest.TestCase):
         test_matrix["normal_z"] = (
             [1, 1, 1],
             x,
-            [x, y, z, v0_d3, v1_d3, v1_d3, v1_d3, v2_d3, v2_d3, v2_d3, v3_d3, v3_d3, v3_d3],
+            [
+                x,
+                y,
+                z,
+                v0_d3,
+                v1_d3,
+                v1_d3,
+                v1_d3,
+                v2_d3,
+                v2_d3,
+                v2_d3,
+                v3_d3,
+                v3_d3,
+                v3_d3,
+            ],
             [None, None, None, None, None, 6, 7, None, 6, 7, None, 6, 7],
-            [True, True, True, True, False, True, False, False, True, False, False, True, False],
+            [
+                True,
+                True,
+                True,
+                True,
+                False,
+                True,
+                False,
+                False,
+                True,
+                False,
+                False,
+                True,
+                False,
+            ],
         )
-        for test_name, (normal, point, inputs, precisions, expecteds) in test_matrix.items():
+        for test_name, (
+            normal,
+            point,
+            inputs,
+            precisions,
+            expecteds,
+        ) in test_matrix.items():
             plane = geom_3d.PlaneFromNormal(geomtypes.Vec(normal), geomtypes.Vec(point))
             for in_point, precision, expected in zip(inputs, precisions, expecteds):
                 prec = f"1e-{precision}" if precision else "None"
                 msg = f"{test_name} failed for {in_point} with precision {prec}"
                 if precision is None:
-                    self.assertEqual(plane.is_in_plane(geomtypes.Vec(in_point)), expected, msg)
+                    self.assertEqual(
+                        plane.is_in_plane(geomtypes.Vec(in_point)), expected, msg
+                    )
                 else:
                     with geomtypes.FloatHandler(precision):
-                        self.assertEqual(plane.is_in_plane(geomtypes.Vec(in_point)), expected, msg)
+                        self.assertEqual(
+                            plane.is_in_plane(geomtypes.Vec(in_point)), expected, msg
+                        )
 
 
 class TestLine(unittest.TestCase):
@@ -156,6 +202,7 @@ class TestLine(unittest.TestCase):
 
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape"""
+
     shape = None
     name = "simple_shape"
     ps_margin = 10
@@ -230,6 +277,7 @@ class TestSimpleShapeExtended(TestSimpleShape):
 
 class TestCompoundShape(TestSimpleShapeExtended):
     """Unit tests for geom_3d.CompoundShape"""
+
     ps_margin = 6
     name = "compound_shape"
 
@@ -240,6 +288,7 @@ class TestCompoundShape(TestSimpleShapeExtended):
 
 class TestSymmetricShape(TestSimpleShapeExtended):
     """Unit test for geom_3d.SymmetricShape"""
+
     shape = None
     name = "isom_12cubes"
     scale = 50
@@ -251,22 +300,25 @@ class TestSymmetricShape(TestSimpleShapeExtended):
         """
         v2_div_2 = math.sqrt(2) / 2
         self.shape = geom_3d.SymmetricShape(
-            vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+            vs=[
+                geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
-                geomtypes.Vec3([1.0, -1.0, -1.0])],
-            fs=[[0, 1, 2, 3],
+                geomtypes.Vec3([1.0, -1.0, -1.0]),
+            ],
+            fs=[
+                [0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
                 [2, 1, 5, 6],
                 [3, 2, 6, 7],
-                [7, 6, 5, 4]],
-            es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2,
-                6, 6, 7],
+                [7, 6, 5, 4],
+            ],
+            es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2, 6, 6, 7],
             colors=[
                 [0.996094, 0.839844, 0.0],
                 [0.132812, 0.542969, 0.132812],
@@ -282,48 +334,98 @@ class TestSymmetricShape(TestSimpleShapeExtended):
                 [0.996094, 0.839844, 0.0],
             ],
             isometries=[
-                geomtypes.Rot3((geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
-                                geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]))),
-                geomtypes.Rot3((geomtypes.Quat([-v2_div_2, 0, -v2_div_2, 0]),
-                                geomtypes.Quat([-v2_div_2, 0, v2_div_2, 0]))),
-                geomtypes.Rot3((geomtypes.Quat([0, 0, -v2_div_2, -v2_div_2]),
-                                geomtypes.Quat([0, 0, v2_div_2, v2_div_2]))),
-                geomtypes.Rot3((geomtypes.Quat([v2_div_2, -v2_div_2, 0, 0]),
-                                geomtypes.Quat([v2_div_2, v2_div_2, 0, 0]))),
-                geomtypes.Rot3((geomtypes.Quat([0, -v2_div_2, v2_div_2, 0]),
-                                geomtypes.Quat([0, v2_div_2, -v2_div_2, 0]))),
-                geomtypes.Rot3((geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
-                                geomtypes.Quat([0.5, 0.5, 0.5, 0.5]))),
-                geomtypes.Rot3((geomtypes.Quat([-0.5, -0.5, 0.5, -0.5]),
-                                geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]))),
-                geomtypes.Rot3((geomtypes.Quat([0, v2_div_2, 0, -v2_div_2]),
-                                geomtypes.Quat([0, -v2_div_2, 0, v2_div_2]))),
-                geomtypes.Rot3((geomtypes.Quat([-v2_div_2, -v2_div_2, 0, 0]),
-                                geomtypes.Quat([-v2_div_2, v2_div_2, 0, 0]))),
-                geomtypes.Rot3((geomtypes.Quat([0, v2_div_2, 0, v2_div_2]),
-                                geomtypes.Quat([0, -v2_div_2, 0, -v2_div_2]))),
-                geomtypes.Rot3((geomtypes.Quat([0, 0, -v2_div_2, v2_div_2]),
-                                geomtypes.Quat([0, 0, v2_div_2, -v2_div_2]))),
-                geomtypes.Rot3((geomtypes.Quat([v2_div_2, 0, -v2_div_2, 0]),
-                                geomtypes.Quat([v2_div_2, 0, v2_div_2, 0]))),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([-0.5, 0.5, -0.5, -0.5]),
+                        geomtypes.Quat([-0.5, -0.5, 0.5, 0.5]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([-v2_div_2, 0, -v2_div_2, 0]),
+                        geomtypes.Quat([-v2_div_2, 0, v2_div_2, 0]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0, 0, -v2_div_2, -v2_div_2]),
+                        geomtypes.Quat([0, 0, v2_div_2, v2_div_2]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([v2_div_2, -v2_div_2, 0, 0]),
+                        geomtypes.Quat([v2_div_2, v2_div_2, 0, 0]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0, -v2_div_2, v2_div_2, 0]),
+                        geomtypes.Quat([0, v2_div_2, -v2_div_2, 0]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0.5, -0.5, -0.5, -0.5]),
+                        geomtypes.Quat([0.5, 0.5, 0.5, 0.5]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([-0.5, -0.5, 0.5, -0.5]),
+                        geomtypes.Quat([-0.5, 0.5, -0.5, 0.5]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0, v2_div_2, 0, -v2_div_2]),
+                        geomtypes.Quat([0, -v2_div_2, 0, v2_div_2]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([-v2_div_2, -v2_div_2, 0, 0]),
+                        geomtypes.Quat([-v2_div_2, v2_div_2, 0, 0]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0, v2_div_2, 0, v2_div_2]),
+                        geomtypes.Quat([0, -v2_div_2, 0, -v2_div_2]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0, 0, -v2_div_2, v2_div_2]),
+                        geomtypes.Quat([0, 0, v2_div_2, -v2_div_2]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([v2_div_2, 0, -v2_div_2, 0]),
+                        geomtypes.Quat([v2_div_2, 0, v2_div_2, 0]),
+                    )
+                ),
             ],
             name=self.name,
-            orientation=geomtypes.Rot3((
-                geomtypes.Quat([0.953020613871,
-                                0.214186495298,
-                                0.0,
-                                0.214186495298]),
-                geomtypes.Quat([0.953020613871,
-                                -0.214186495298,
-                                0.0,
-                                -0.214186495298])))
+            orientation=geomtypes.Rot3(
+                (
+                    geomtypes.Quat(
+                        [0.953020613871, 0.214186495298, 0.0, 0.214186495298]
+                    ),
+                    geomtypes.Quat(
+                        [0.953020613871, -0.214186495298, 0.0, -0.214186495298]
+                    ),
+                )
+            ),
         )
         # for debugging:
-        #self.shape.json_indent = 2
+        # self.shape.json_indent = 2
 
 
 class TestSymmetricShape1(TestSimpleShapeExtended):
     """More unit test for geom_3d.SymmetricShape"""
+
     shape = None
     name = "isom_5cubes"
     scale = 50
@@ -336,22 +438,25 @@ class TestSymmetricShape1(TestSimpleShapeExtended):
         a = 0.809016994375
         b = 0.309016994375
         self.shape = geom_3d.SymmetricShape(
-            vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+            vs=[
+                geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
-                geomtypes.Vec3([1.0, -1.0, -1.0])],
-            fs=[[0, 1, 2, 3],
+                geomtypes.Vec3([1.0, -1.0, -1.0]),
+            ],
+            fs=[
+                [0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
                 [2, 1, 5, 6],
                 [3, 2, 6, 7],
-                [7, 6, 5, 4]],
-            es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6,
-                2, 6, 6, 7],
+                [7, 6, 5, 4],
+            ],
+            es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2, 6, 6, 7],
             colors=[
                 [0.996094, 0.839844, 0.0],
                 [0.132812, 0.542969, 0.132812],
@@ -360,29 +465,43 @@ class TestSymmetricShape1(TestSimpleShapeExtended):
                 [0.542969, 0.523438, 0.304688],
             ],
             isometries=[
-                geomtypes.Rot3((geomtypes.Quat([-a, -0.5, b, 0]),
-                                geomtypes.Quat([-a, 0.5, -b, 0]))),
-                geomtypes.Rot3((geomtypes.Quat([a, -b, 0, -0.5]),
-                                geomtypes.Quat([a, b, 0, 0.5]))),
-                geomtypes.Rot3((geomtypes.Quat([0.5, 0.5, -0.5, -0.5]),
-                                geomtypes.Quat([0.5, -0.5, 0.5, 0.5]))),
-                geomtypes.Rot3((geomtypes.Quat([0.5, 0, -b, a]),
-                                geomtypes.Quat([0.5, 0, b, -a]))),
-                geomtypes.Rot3((geomtypes.Quat([0, -0.5, a, b]),
-                                geomtypes.Quat([0, 0.5, -a, -b])))
+                geomtypes.Rot3(
+                    (geomtypes.Quat([-a, -0.5, b, 0]), geomtypes.Quat([-a, 0.5, -b, 0]))
+                ),
+                geomtypes.Rot3(
+                    (geomtypes.Quat([a, -b, 0, -0.5]), geomtypes.Quat([a, b, 0, 0.5]))
+                ),
+                geomtypes.Rot3(
+                    (
+                        geomtypes.Quat([0.5, 0.5, -0.5, -0.5]),
+                        geomtypes.Quat([0.5, -0.5, 0.5, 0.5]),
+                    )
+                ),
+                geomtypes.Rot3(
+                    (geomtypes.Quat([0.5, 0, -b, a]), geomtypes.Quat([0.5, 0, b, -a]))
+                ),
+                geomtypes.Rot3(
+                    (geomtypes.Quat([0, -0.5, a, b]), geomtypes.Quat([0, 0.5, -a, -b]))
+                ),
             ],
             name=self.name,
-            orientation=geomtypes.Rot3((geomtypes.Quat([1.0, 0.0, 0.0, 0.0]),
-                                        geomtypes.Quat([1.0, 0.0, 0.0, 0.0])))
+            orientation=geomtypes.Rot3(
+                (
+                    geomtypes.Quat([1.0, 0.0, 0.0, 0.0]),
+                    geomtypes.Quat([1.0, 0.0, 0.0, 0.0]),
+                )
+            ),
         )
         # for debugging:
-        #self.shape.json_indent = 2
+        # self.shape.json_indent = 2
+
 
 class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
     """More unit test for geom_3d.SymmetricShape with different isometries.
 
     Different isometries as in reflections, rotary inversion.
     """
+
     shape = None
     name = "different_isoms"
     scale = 50
@@ -393,7 +512,8 @@ class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
         The descriptive uses the default orientation
         """
         self.shape = geom_3d.SymmetricShape(
-            vs=[geomtypes.Vec3([1.0, -0.5, 1.0]),
+            vs=[
+                geomtypes.Vec3([1.0, -0.5, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
@@ -412,19 +532,23 @@ class TestSymmetricShapeDifferentIsometries1(TestSimpleShapeExtended):
             isometries=[
                 geomtypes.Rot3(angle=0, axis=geomtypes.Vec3([1, 0, 0])),
                 geomtypes.Refl3(normal=geomtypes.Vec3([1, 0, 0])),
-                geomtypes.RotInv3(angle=2*math.pi/3, axis=geomtypes.Vec3([-1, 1, 1])),
+                geomtypes.RotInv3(
+                    angle=2 * math.pi / 3, axis=geomtypes.Vec3([-1, 1, 1])
+                ),
             ],
             name=self.name,
-            #orientation=geomtypes.Rot3(angle=math.pi/4, axis=geomtypes.Vec3([0, 0, 1]))
+            # orientation=geomtypes.Rot3(angle=math.pi/4, axis=geomtypes.Vec3([0, 0, 1]))
         )
         # for debugging:
-        #self.shape.json_indent = 2
+        # self.shape.json_indent = 2
+
 
 class TstSymmetricShapeDifferentIsometries2(TestSymmetricShapeDifferentIsometries1):
     """More unit test for geom_3d.SymmetricShape with different isometries.
 
     Different isometries as in reflections, rotary inversion.
     """
+
     shape = None
     name = "different_isoms2"
     scale = 50
@@ -435,13 +559,17 @@ class TstSymmetricShapeDifferentIsometries2(TestSymmetricShapeDifferentIsometrie
         The descriptive doesn't use the default orientation
         """
         super().def_shape()
-        self.shape.orientation = geomtypes.Rot3(angle=math.pi/4, axis=geomtypes.Vec3([0, 0, 1]))
+        self.shape.orientation = geomtypes.Rot3(
+            angle=math.pi / 4, axis=geomtypes.Vec3([0, 0, 1])
+        )
         self.shape.name = self.name
         # for debugging:
-        #self.shape.json_indent = 2
+        # self.shape.json_indent = 2
+
 
 class TestOrbitShape(TestSimpleShapeExtended):
     """More unit test for geom_3d.OrbitShape"""
+
     shape = None
     name = "orbit_5cubes"
     scale = 50
@@ -452,22 +580,25 @@ class TestOrbitShape(TestSimpleShapeExtended):
         The descriptive uses the default orientation
         """
         self.shape = geom_3d.OrbitShape(
-            vs=[geomtypes.Vec3([1.0, 1.0, 1.0]),
+            vs=[
+                geomtypes.Vec3([1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, 1.0, 1.0]),
                 geomtypes.Vec3([-1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, -1.0, 1.0]),
                 geomtypes.Vec3([1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, 1.0, -1.0]),
                 geomtypes.Vec3([-1.0, -1.0, -1.0]),
-                geomtypes.Vec3([1.0, -1.0, -1.0])],
-            fs=[[0, 1, 2, 3],
+                geomtypes.Vec3([1.0, -1.0, -1.0]),
+            ],
+            fs=[
+                [0, 1, 2, 3],
                 [0, 3, 7, 4],
                 [1, 0, 4, 5],
                 [2, 1, 5, 6],
                 [3, 2, 6, 7],
-                [7, 6, 5, 4]],
-            es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6,
-                2, 6, 6, 7],
+                [7, 6, 5, 4],
+            ],
+            es=[0, 1, 1, 2, 2, 3, 0, 3, 3, 7, 4, 7, 0, 4, 4, 5, 1, 5, 5, 6, 2, 6, 6, 7],
             colors=[
                 [0.996094, 0.839844, 0.0],
                 [0.132812, 0.542969, 0.132812],
@@ -480,8 +611,8 @@ class TestOrbitShape(TestSimpleShapeExtended):
             name=self.name,
         )
         # for debugging:
-        #self.shape.json_indent = 2
+        # self.shape.json_indent = 2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
