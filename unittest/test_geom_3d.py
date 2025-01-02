@@ -28,7 +28,7 @@ import math
 from os import path
 import unittest
 
-from orbitit import geom_3d, geomtypes, isometry
+from orbitit import geom_3d, geomtypes, isometry, orbit, rgb
 
 RED = (0.8, 0.1, 0.1)
 YELLOW = (0.8, 0.8, 0.3)
@@ -85,6 +85,23 @@ def get_octahedron():
         [5, 3, 2],
         [5, 4, 3],
         [5, 1, 4],
+    ]
+    return geom_3d.SimpleShape(vs=vs, fs=fs, colors=([YELLOW], []))
+
+
+def get_tetrahedron():
+    """Return a shape describing one octahedron"""
+    vs = [
+        geomtypes.Vec3([1, 1, 1]),
+        geomtypes.Vec3([-1, -1, 1]),
+        geomtypes.Vec3([1, -1, -1]),
+        geomtypes.Vec3([-1, 1, -1]),
+    ]
+    fs = [
+        [0, 1, 2],
+        [0, 3, 1],
+        [2, 3, 0],
+        [1, 3, 2],
     ]
     return geom_3d.SimpleShape(vs=vs, fs=fs, colors=([YELLOW], []))
 
@@ -207,6 +224,7 @@ class TestSimpleShape(unittest.TestCase):
     name = "simple_shape"
     ps_margin = 10
     ps_precision = 7
+    off_precision = 15
     scale = 1
 
     def def_shape(self):
@@ -232,7 +250,7 @@ class TestSimpleShape(unittest.TestCase):
     def test_export_to_off(self):
         """Test export to off-format function"""
         self.ensure_shape()
-        tst_str = self.shape.to_off(precision=15)
+        tst_str = self.shape.to_off(precision=self.off_precision)
         result, msg = chk_with_org(self.name + ".off", tst_str)
         self.assertTrue(result, msg)
 
@@ -609,6 +627,50 @@ class TestOrbitShape(TestSimpleShapeExtended):
             final_sym=isometry.A5(),
             stab_sym=isometry.A4(),
             name=self.name,
+        )
+        # for debugging:
+        # self.shape.json_indent = 2
+
+
+class TestTetraCompound(TestSimpleShapeExtended):
+    """Unit tests for orbit.Shape and fix for issue 24.
+
+    Note: this test uses the module orbit and not geom_3d, but indirectly geom_3d is tested.
+    This test was introduced to test the fix for issue 24 lead to missing lines in PostScript files
+    due to orthogonal planes. The fix was needed in geom_3d and that is why this test is part of
+    this file and at the time of writing there was not unit test for the orbit scene (besides
+    perhaps the shape should be moved).
+    """
+    off_precision = 14
+    ps_margin = 6
+    name = "tet_4_D4xI_D2C2"
+    scale = 200
+
+    def def_shape(self):
+        """Define shape"""
+        tetrahedron = get_tetrahedron()
+        rot_45deg_x = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=math.pi / 4)
+        tetrahedron.transform(rot_45deg_x)
+        self.shape = orbit.Shape(
+            {
+                "vs": tetrahedron.vs,
+                "fs": tetrahedron.fs,
+            },
+            isometry.D4xI(
+                setup={
+                    "axis_n": geomtypes.Vec([0, 0, 1]),
+                    "axis_2": geomtypes.Vec([1, 0, 0]),
+                }
+            ),
+            isometry.D2C2(
+                setup={
+                    "axis_n": geomtypes.Vec([1, 0, 0]),
+                    "normal_r": geomtypes.Vec([0, 1, 0]),
+                }
+            ),
+            self.name,
+            no_of_cols=2,
+            cols=[rgb.plum, rgb.gold],
         )
         # for debugging:
         # self.shape.json_indent = 2

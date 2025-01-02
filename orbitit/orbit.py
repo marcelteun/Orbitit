@@ -267,7 +267,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
 
     The colours a standardised and the descriptive can be rotated.
     """
-    cols = colors.STD_COLORS
+    orbit_cols = colors.STD_COLORS
 
     # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
@@ -312,11 +312,11 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         )
 
         if cols:
-            self.cols = cols
+            self.orbit_cols = cols
 
-        assert no_of_cols <= len(self.cols), 'Not enough colours defined'
+        assert no_of_cols <= len(self.orbit_cols), 'Not enough colours defined'
         # Generate cols:
-        self.no_of_cols = no_of_cols
+        self._org_no_of_cols = no_of_cols
         self.col_alt = col_alt
         self.orbit = Orbit((final_sym, stab_sym))
         col_choices = self.orbit.higher_order_stab_props
@@ -370,7 +370,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         for isom in fs_orbit:
             for i, sub_set in enumerate(col_quotient_set):
                 if isom in sub_set:
-                    self.col_per_isom.append(self.cols[i])
+                    self.col_per_isom.append(self.orbit_cols[i])
                     break
         # update with correct format
         self.shape_colors = self.col_per_isom.copy()
@@ -469,8 +469,8 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
                 },
                 "final_sym": self.final_sym.repr_dict,
                 "stab_sym": self.stab_sym.repr_dict,
-                "cols": getattr(self, "cols", ""),
-                "no_of_cols": self.no_of_cols,
+                "cols": getattr(self, "orbit_cols", ""),
+                "no_of_cols": self._org_no_of_cols,
                 "col_alt": self.col_alt,
                 "col_sym": self.col_sym,
             },
@@ -485,7 +485,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
     @classmethod
     def from_dict_data(cls, data):
         if "version" in data:
-            if isinstance(data["cols"][0][0], float):
+            if data["cols"] and isinstance(data["cols"][0][0], float):
                 data["cols"] = [[int(chn * 255) for chn in d] for d in data["cols"]]
             obj = cls(
                 base=data["base"],
