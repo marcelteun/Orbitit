@@ -403,10 +403,10 @@ class PlaneFromNormal:
 
         point: a 3D list with x, y, and z coordinates
         """
-        sum = 0
+        total = 0
         for i in range(3):
-            sum += self.normal[i] * point[i]
-        return sum + self.D == 0
+            total += self.normal[i] * point[i]
+        return total + self.D == 0
 
     def __eq__(self, plane):
         """Return True if the planes define the same one."""
@@ -1796,7 +1796,7 @@ class SimpleShape(base.Orbitit):
 
             # Only use the vertices for this plane for optimisation purpose
             vs = [vs[i] for i in intersecting_face]
-            vs_indices = [i for i in range(len(vs))]
+            vs_indices = list(range(len(vs)))
             line_2d = geom_2d.Line(line_3d.p[:2], v=line_3d.v[:2])
             # Get the line_2d elements where it intersects the face. One can do this as follows
             #  - translate face plane to XOY (T1)
@@ -1812,13 +1812,13 @@ class SimpleShape(base.Orbitit):
                 simplify = face_plane.normal != z_axis
             if simplify:
                 vs_2d = [geomtypes.Vec(v[:2]) for v in vs]
-            # Cannot use these simplified 2D vertices if they are on one line
-            dir0 = vs_2d[0] - vs_2d[1]
-            dir1 = vs_2d[0] - vs_2d[2]
-            # use unique notation, one that is faster than normalise:
-            dir0 /= dir0[0]
-            dir1 /= dir1[0]
-            simplify = dir0 != dir1
+                # Cannot use these simplified 2D vertices if they are on one line
+                dir0 = vs_2d[0] - vs_2d[1]
+                dir1 = vs_2d[0] - vs_2d[2]
+                # use unique notation, one that is faster than normalise:
+                dir0 /= dir0[0]
+                dir1 /= dir1[0]
+                simplify = dir0 != dir1
             if not simplify:
                 # use the slower method
                 # translate with T1 and T2:
