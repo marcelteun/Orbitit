@@ -114,7 +114,7 @@ def get_path(filename, sub_dir):
 def chk_with_org(filename, chk_str):
     """Get file contents from file with expected data"""
     org_name = get_path(filename, IN_DIR)
-    chk_name = get_path(filename + ".chk", OUT_DIR)
+    chk_name = get_path(filename, OUT_DIR)
     try:
         with open(org_name, "r") as fd:
             expect_str = fd.read()
