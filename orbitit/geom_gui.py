@@ -389,7 +389,8 @@ class LabeledIntInput(wx.BoxSizer):
         self.boxes.append(
             IntInput(panel, wx.ID_ANY, init, size=(width, -1), max_len=max_len)
         )
-        self.Add(self.boxes[-1], 0, wx.EXPAND)
+        self.gui = self.boxes[-1]
+        self.Add(self.gui, 0, wx.EXPAND)
         self.int_gui_idx = len(self.boxes) - 1
 
     @property
@@ -1130,6 +1131,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         groups_lst=None,
         on_sym_select=None,
         on_get_sym_setup=None,
+        on_order_update=None,
     ):
         """
         Create a control embedded in a sizer for defining a symmetry.
@@ -1148,6 +1150,8 @@ class SymmetrySelect(wx.StaticBoxSizer):
                           symmetries list. If self function is not set, the
                           class default is used. The class default is also used
                           if the function returns None.
+        on_order_update: Specify the function to be called when the order of a cyclic or dihedral
+                         symmetry is updated. No parameters.
         """
         if groups_lst:
             self.groups_lst = groups_lst
@@ -1172,6 +1176,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
             ]
         self.on_sym_select = on_sym_select
         self.on_get_sym_setup = on_get_sym_setup
+        self.on_order_update = on_order_update
         self.panel = panel
         self.boxes = [wx.StaticBox(panel, label=label)]
         self.__prev = {}
@@ -1217,41 +1222,29 @@ class SymmetrySelect(wx.StaticBoxSizer):
         """Return the index of the selected symmetry class"""
         return self.boxes[self._sym_gui_idx].GetSelection()
 
+    # Map general dihedral and cyclic classes on functions that use the meta class to return a new
+    # class for a specific 'n'
+    dc_class_generator_map = {
+        isometry.Cn: isometry.C,
+        isometry.CnxI: isometry.CxI,
+        isometry.C2nCn: isometry.C2nC,
+        isometry.DnCn: isometry.DnC,
+        isometry.Dn: isometry.D,
+        isometry.D2nDn: isometry.D2nD,
+        isometry.DnxI: isometry.DxI,
+    }
+
     def get_sym_class(self, apply_order=True):
         """Return the selected symmetry class"""
         selected_class = self.groups_lst[self.get_selected_idx()]
         if apply_order:
-            if selected_class in [
-                isometry.Cn,
-                isometry.CnxI,
-                isometry.C2nCn,
-                isometry.DnCn,
-                isometry.Dn,
-                isometry.DnxI,
-                isometry.D2nDn,
-            ]:
+            if selected_class in self.dc_class_generator_map:
                 assert (
                     selected_class.init_pars[0]["type"] == "int"
                 ), "The first index should specify the n-order"
                 n = self.orient_guis[0].GetValue()
-                if selected_class == isometry.Cn:
-                    C = isometry.C
-                elif selected_class == isometry.CnxI:
-                    C = isometry.CxI
-                elif selected_class == isometry.C2nCn:
-                    C = isometry.C2nC
-                elif selected_class == isometry.DnCn:
-                    C = isometry.DnC
-                elif selected_class == isometry.Dn:
-                    C = isometry.D
-                elif selected_class == isometry.D2nDn:
-                    C = isometry.D2nD
-                elif selected_class == isometry.DnxI:
-                    C = isometry.DxI
-                else:
-                    raise ValueError(f"Unknown cyclic/dihedral group {selected_class} used")
                 assert n > 0, f"warning n = {n} should be > 0"
-                selected_class = C(n)
+                selected_class = self.dc_class_generator_map[selected_class](n)
             elif selected_class in [
                 isometry.E,
                 isometry.ExI,
@@ -1333,9 +1326,14 @@ class SymmetrySelect(wx.StaticBoxSizer):
             if input_type == "vec3":
                 gui = Vector3DInput(self.panel, init["lab"], v=sym_setup[init["par"]])
             elif input_type == "int":
+                # The only parameter that is an int is the order parameter of cyclic and dihedral
+                # symmetries.
                 gui = LabeledIntInput(
                     self.panel, init["lab"], init=sym_setup[init["par"]]
                 )
+                if self.on_order_update:
+                    # Note the first gui is a sizer really:
+                    gui.gui.Bind(wx.EVT_TEXT, self._on_order_update)
                 self.chk_if_updated.append(gui)
             else:
                 assert False, "oops unimplemented input type"
@@ -1348,6 +1346,12 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.setup_sizer.Add(self.hide, flag=wx.LEFT)
         self.setup_sizer.Add(self.orient_sizer, flag=wx.RIGHT | wx.EXPAND)
         self.Add(self.setup_sizer, wx.EXPAND)
+
+    def _on_order_update(self, event):
+        """Called after update of the order parameter for cyclic and dihedral symmetries."""
+        if event.GetString():
+            self.on_order_update()
+        event.Skip()
 
     def on_hide(self, _):
         """Hide or show the setup part"""

@@ -184,6 +184,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 "Final Symmetry",
                 on_sym_select=self.on_final_sym_select,
                 on_get_sym_setup=self.on_get_final_sym_setup,
+                on_order_update=self.on_generate_stab_list,
             )
         )
         self._final_sym_gui_idx = len(self.show_gui) - 1
