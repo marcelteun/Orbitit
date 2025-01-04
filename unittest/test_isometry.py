@@ -26,7 +26,7 @@ import math
 import os
 import unittest
 
-from orbitit import geomtypes, isometry, geomtypes
+from orbitit import geomtypes, isometry
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 IN_DIR = "expected"
