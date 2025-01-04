@@ -435,6 +435,53 @@ class TestSubGroups(unittest.TestCase):
                     "or missmatching orientations"
                 )
 
+    def test_cn_ext_get_subgroups(self):
+        """Test extended cyclic subgroups at the object level by actual checking with practice.
+
+        Test _cnxi_get_subgroups and _c2ncn_get_subgroups in practice.
+
+        This test can check the rules that are applied by actually creating a subgroup and checking
+        the isometries directly in that functions and whether more subgroups exist.
+        """
+        test_matrix = {}
+        for d_class in (isometry.CxI, isometry.C2nC):
+            class_name = d_class.__name__
+            test_n_12 = d_class(12)
+            test_n_15 = d_class(15)
+            test_matrix[f"CmxI in {class_name} with n and m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C4xI,
+            }
+            test_matrix[f"CmxI in {class_name} with n even and m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C3xI,
+            }
+            test_matrix[f"CmxI in {class_name} with n and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.C3xI,
+            }
+            test_matrix[f"C2mCm in {class_name} with n even and n/m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C6C3,
+            }
+            test_matrix[f"C2mCm in {class_name} with n even and n/m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C8C4,
+            }
+            test_matrix[f"C2mCm in {class_name} with n and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.C6C3,
+            }
+
+            for test_name, test_data in test_matrix.items():
+                self._subgroups_per_object(
+                    test_name,
+                    test_data["class"],
+                    test_data["subgroup_class"],
+                    test_data.get("class_setup"),
+                    test_data.get("subgroup_setup"),
+                )
+
     def test_dn_ext_get_subgroups(self):
         """Test extended dihedral subgroups at the object level by actual checking with practice.
 
