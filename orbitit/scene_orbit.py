@@ -334,6 +334,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         subgroups and thus the stabilisers are dependent on the order n.
         """
         label = "Regenerate Stabilisers"
+        self.stat_bar.SetStatusText("Generating stabilisers for final symmetry...")
         cur_label = self.show_gui[self._gen_stab_sym_gui_idx].GetLabel()
         if cur_label != label:
             self.show_gui[self._gen_stab_sym_gui_idx].SetLabel(label)
@@ -342,6 +343,10 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # might have been updated
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
         final_sym_obj = final_sym_gui.get_selected()
+        class_name = type(final_sym_obj).__name__
+        self.status_text(
+            f"Stabilisers generated for final symmetry: {class_name}(n={final_sym_obj.n})"
+        )
         final_sym_idx = final_sym_gui.get_selected_idx()
         stab_syms = final_sym_obj.subgroups
         self.stab_sym_setup[final_sym_idx] = [None for _ in stab_syms]

@@ -36,7 +36,10 @@ Like vertices, faecs, symmetries, etc.
 
 
 import logging
+import threading
+import time
 import wx
+import wx.lib.newevent as new_event
 import wx.lib.scrolledpanel as wx_panel
 
 from orbitit import geomtypes, isometry
@@ -75,6 +78,18 @@ class DisabledDropTarget(wx.TextDropTarget):  # pylint: disable=too-few-public-m
     def OnDropText(self, *_, **__):  # pylint: disable=C0103, R0201
         """Disable ancestor method."""
         return False
+
+
+# For IntInput needs a new event that is triggered with the current updated text, since
+# EVT_CHAR only sends the latest charaacter and EVT_TEXT doesn't come for all characters.
+# Create an event with some delay to give time to get the updated value
+TextInputEvent, EVT_TEXT_INPUT = new_event.NewEvent()
+EVENT_DELAY = 0.01
+
+
+def _int_input_thread(win):
+    time.sleep(EVENT_DELAY)
+    wx.PostEvent(win, TextInputEvent())
 
 
 class IntInput(wx.TextCtrl):
@@ -186,6 +201,9 @@ class IntInput(wx.TextCtrl):
             e.Skip(False)
         # elif k >= 256:
         #     e.Skip()
+        t = threading.Thread(target=_int_input_thread, args=(self, ))
+        t.setDaemon(True)
+        t.start()
 
     def on_text(self, _):
         """Handle after string after character update is done."""
@@ -1333,7 +1351,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
                 )
                 if self.on_order_update:
                     # Note the first gui is a sizer really:
-                    gui.gui.Bind(wx.EVT_TEXT, self._on_order_update)
+                    gui.gui.Bind(EVT_TEXT_INPUT, self._on_order_update)
                 self.chk_if_updated.append(gui)
             else:
                 assert False, "oops unimplemented input type"
@@ -1349,9 +1367,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
 
     def _on_order_update(self, event):
         """Called after update of the order parameter for cyclic and dihedral symmetries."""
-        if event.GetString():
-            self.on_order_update()
-        event.Skip()
+        self.on_order_update()
 
     def on_hide(self, _):
         """Hide or show the setup part"""
