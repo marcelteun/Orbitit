@@ -40,12 +40,17 @@ class TestSubGroups(unittest.TestCase):
         """Compare whether the two sets of subgroups are the same."""
         g_subs = g_tst.subgroups
         for g in g_subs:
-            self.assertTrue(g in g_exp, msg=f"{test_name}: extra subgroup {g} in {g_tst}")
+            self.assertTrue(
+                g in g_exp, msg=f"{test_name}: extra subgroup {g} in {g_tst}"
+            )
         for g in g_exp:
-            self.assertTrue(g in g_subs, msg=f"{test_name}: missing subgroup {g} in {g_tst}")
+            self.assertTrue(
+                g in g_subs, msg=f"{test_name}: missing subgroup {g} in {g_tst}"
+            )
         bigger_group_str = "expected" if len(g_exp) > len(g_subs) else g_tst
         self.assertTrue(
-            len(g_subs) == len(g_exp), f"{test_name}: Duplicates subgroups in {bigger_group_str}"
+            len(g_subs) == len(g_exp),
+            f"{test_name}: Duplicates subgroups in {bigger_group_str}",
         )
 
     def test_subgroups_per_class(self):
@@ -403,7 +408,12 @@ class TestSubGroups(unittest.TestCase):
             self._chk_groups(test_name, class_to_test, expect)
 
     def _subgroups_per_object(
-        self, test_name, test_class, subgroup_class, class_setup=None, subgroup_setup=None
+        self,
+        test_name,
+        test_class,
+        subgroup_class,
+        class_setup=None,
+        subgroup_setup=None,
     ):
         """General test function for testin <class>_get_subgroup funcitons
 
