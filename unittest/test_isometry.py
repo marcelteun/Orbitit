@@ -26,7 +26,7 @@ import math
 import os
 import unittest
 
-from orbitit import geomtypes, isometry
+from orbitit import geomtypes, isometry, geomtypes
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 IN_DIR = "expected"
@@ -36,352 +36,487 @@ OUT_DIR = "output"
 class TestSubGroups(unittest.TestCase):
     """Unit test subgroups"""
 
-    def _chk_groups(self, g_tst, g_exp):
+    def _chk_groups(self, test_name, g_tst, g_exp):
+        """Compare whether the two sets of subgroups are the same."""
         g_subs = g_tst.subgroups
         for g in g_subs:
-            self.assertTrue(g in g_exp, msg=f"Extra subgroup {g} in {g_tst}")
+            self.assertTrue(g in g_exp, msg=f"{test_name}: extra subgroup {g} in {g_tst}")
         for g in g_exp:
-            self.assertTrue(g in g_subs, msg=f"Missing subgroup {g} in {g_tst}")
+            self.assertTrue(g in g_subs, msg=f"{test_name}: missing subgroup {g} in {g_tst}")
         bigger_group_str = "expected" if len(g_exp) > len(g_subs) else g_tst
         self.assertTrue(
-            len(g_subs) == len(g_exp), f"Duplicates subgroups in {bigger_group_str}"
+            len(g_subs) == len(g_exp), f"{test_name}: Duplicates subgroups in {bigger_group_str}"
         )
 
-    def test_c(self):
-        """Test some subgroups of C"""
-        # Test one even with even and odd divisors:
-        h = isometry.C(12)
-        expect = [
-            # trivial:
-            isometry.C(12),
-            isometry.E,
-            # all divisors Cn:
-            isometry.C(6),
-            isometry.C(4),
-            isometry.C(3),
-            isometry.C(2),
-            # isometry.C(1) ~= E
-        ]
-        self._chk_groups(h, expect)
-        # Test one odd
-        h = isometry.C(15)
-        expect = [
-            # trivial:
-            isometry.C(15),
-            isometry.E,
-            # all divisors Cn:
-            isometry.C(5),
-            isometry.C(3),
-            # isometry.C(1) ~= E
-        ]
-        self._chk_groups(h, expect)
-        # Test lower limit: n = 2, n = 1
-        h = isometry.C(2)
-        expect = [
-            # trivial:
-            isometry.C(2),
-            isometry.E,
-        ]
-        self._chk_groups(h, expect)
-        h = isometry.C(1)
-        expect = [
-            # trivial:
-            # isometry.C(1) ~= E
-            isometry.E,
-        ]
-        self._chk_groups(h, expect)
+    def test_subgroups_per_class(self):
+        """Test subgroups of dihedral and cyclic class at the class level"""
+        test_matrix = {}
+        # key: test ID
+        # values: class_under_test, expected_sub_groups
 
-    def test_cnxi(self):
-        """Test some subgroups in CnxI"""
-        # Test one even with even and odd divisors:
-        h = isometry.CxI(12)
-        expect = [
-            # trivial:
-            isometry.CxI(12),
-            isometry.E,
-            # all divisors CnxI
-            isometry.CxI(6),
-            isometry.CxI(4),
-            isometry.CxI(3),
-            isometry.CxI(2),
-            isometry.ExI,
-            # all divisors Cn
+        #############################################
+        # Cn                                        #
+        #############################################
+        test_matrix["test_Cn_even_n"] = [
             isometry.C(12),
-            isometry.C(6),
-            isometry.C(4),
-            isometry.C(3),
-            isometry.C(2),
-            # C2nCn: all odd divisors:
-            isometry.C2nC(3),
-            # C2nCn: even divisors, only if divide is even
-            isometry.C2nC(6),
-            isometry.C2nC(2),
-            isometry.C2nC(1),
+            [
+                # trivial:
+                isometry.C(12),
+                isometry.E,
+                # all divisors Cn:
+                isometry.C(6),
+                isometry.C(4),
+                isometry.C(3),
+                isometry.C(2),
+                # isometry.C(1) ~= E
+            ],
         ]
-        self._chk_groups(h, expect)
+        test_matrix["test_Cn_odd_n"] = [
+            isometry.C(15),
+            [
+                # trivial:
+                isometry.C(15),
+                isometry.E,
+                # all divisors Cn:
+                isometry.C(5),
+                isometry.C(3),
+                # isometry.C(1) ~= E
+            ],
+        ]
+        test_matrix["test_Cn_lowest_n_even"] = [
+            isometry.C(2),
+            [
+                # trivial:
+                isometry.C(2),
+                isometry.E,
+            ],
+        ]
+        test_matrix["test_Cn_lowest_n_odd"] = [
+            isometry.C(1),
+            [
+                # trivial:
+                # isometry.C(1) ~= E
+                isometry.E,
+            ],
+        ]
+        #############################################
+        # CnxI                                      #
+        #############################################
+        test_matrix["test_CnxI_even_n_with_odd_divisors"] = [
+            isometry.CxI(12),
+            [
+                # trivial:
+                isometry.CxI(12),
+                isometry.E,
+                # all divisors CnxI
+                isometry.CxI(6),
+                isometry.CxI(4),
+                isometry.CxI(3),
+                isometry.CxI(2),
+                isometry.ExI,
+                # all divisors Cn
+                isometry.C(12),
+                isometry.C(6),
+                isometry.C(4),
+                isometry.C(3),
+                isometry.C(2),
+                # C2nCn: all odd divisors:
+                isometry.C2nC(3),
+                # C2nCn: even divisors, only if divide is even
+                isometry.C2nC(6),
+                isometry.C2nC(2),
+                isometry.C2nC(1),
+            ],
+        ]
         # Test one odd with divisors:
-        h = isometry.CxI(9)
-        expect = [
-            # trivial:
+        test_matrix["test_CnxI_odd_n"] = [
             isometry.CxI(9),
-            isometry.E,
-            # all divisors CnxI
-            isometry.CxI(3),
-            isometry.ExI,
-            # all divisors Cn
-            isometry.C(9),
-            isometry.C(3),
+            [
+                # trivial:
+                isometry.CxI(9),
+                isometry.E,
+                # all divisors CnxI
+                isometry.CxI(3),
+                isometry.ExI,
+                # all divisors Cn
+                isometry.C(9),
+                isometry.C(3),
+            ],
         ]
-        self._chk_groups(h, expect)
 
-    def test_c2ncn(self):
-        """Test some subgroups of C2nCn"""
-        # Test one even with even and odd divisors:
-        h = isometry.C2nC(12)
-        expect = [
-            # trivial:
+        #############################################
+        # C2nCn                                     #
+        #############################################
+        test_matrix["test_C2nCn_even_n_with_odd_divisors"] = [
             isometry.C2nC(12),
-            isometry.E,
-            # All Cn:
-            isometry.C(12),
-            isometry.C(6),
-            isometry.C(4),
-            isometry.C(3),
-            isometry.C(2),
-            # C2nCn:
-            #  - don't add odd divisors: have refl
-            #  - even divisor: add if (n/i) % 2 != 0
-            isometry.C2nC(4),
-            # CnxI: no subgroups, since:
-            #  - even divisors have reflection
-            #  - odd divisors: since n even, n / odd is even. I.e. not mapped
-            #    on rotated one.
+            [
+                # trivial:
+                isometry.C2nC(12),
+                isometry.E,
+                # All Cn:
+                isometry.C(12),
+                isometry.C(6),
+                isometry.C(4),
+                isometry.C(3),
+                isometry.C(2),
+                # C2nCn:
+                #  - don't add odd divisors: have refl
+                #  - even divisor: add if (n/i) % 2 != 0
+                isometry.C2nC(4),
+                # CnxI: no subgroups, since:
+                #  - even divisors have reflection
+                #  - odd divisors: since n even, n / odd is even. I.e. not mapped
+                #    on rotated one.
+            ],
         ]
-        self._chk_groups(h, expect)
-        # Test one odd
-        # Odd C2nCn have reflections
-        h = isometry.C2nC(15)
-        expect = [
-            # trivial:
+        test_matrix["test_C2nCn_odd_n"] = [
+            # Odd C2nCn have reflections
             isometry.C2nC(15),
-            isometry.E,
-            # All Cn:
-            isometry.C(15),
-            isometry.C(5),
-            isometry.C(3),
-            # C2nCn:
-            #  - add all divisors, since all are odd (since n is odd)
-            isometry.C2nC(5),
-            isometry.C2nC(3),
-            isometry.C2nC(1),
-            # CnxI: no subgroups:
-            #  - all divisors are odd (since n odd), i.e. no reflections
+            [
+                # trivial:
+                isometry.C2nC(15),
+                isometry.E,
+                # All Cn:
+                isometry.C(15),
+                isometry.C(5),
+                isometry.C(3),
+                # C2nCn:
+                #  - add all divisors, since all are odd (since n is odd)
+                isometry.C2nC(5),
+                isometry.C2nC(3),
+                isometry.C2nC(1),
+                # CnxI: no subgroups:
+                #  - all divisors are odd (since n odd), i.e. no reflections
+            ],
         ]
-        self._chk_groups(h, expect)
 
-    def test_d(self):
-        """Test some subgroups of D"""
-        # Test one even with even and odd divisors:
-        h = isometry.D(12)
-        expect = [
-            # trivial:
+        #############################################
+        # Dn                                        #
+        #############################################
+        test_matrix["test_Dn_even_n_with_odd_divisors"] = [
             isometry.D(12),
-            isometry.E,
-            # all divisors Dn, Cn:
-            isometry.D(6),
-            isometry.D(4),
-            isometry.D(3),
-            isometry.D(2),
-            # isometry.D(1) ~= C2
-            isometry.C(12),
-            isometry.C(6),
-            isometry.C(4),
-            isometry.C(3),
-            isometry.C(2),
-            # isometry.C(1) ~= E
+            [
+                # trivial:
+                isometry.D(12),
+                isometry.E,
+                # all divisors Dn, Cn:
+                isometry.D(6),
+                isometry.D(4),
+                isometry.D(3),
+                isometry.D(2),
+                # isometry.D(1) ~= C2
+                isometry.C(12),
+                isometry.C(6),
+                isometry.C(4),
+                isometry.C(3),
+                isometry.C(2),
+                # isometry.C(1) ~= E
+            ],
         ]
-        self._chk_groups(h, expect)
-        # Test one odd
-        h = isometry.D(15)
-        expect = [
-            # trivial:
+        test_matrix["test_Dn_odd_n"] = [
             isometry.D(15),
-            isometry.E,
-            # all divisors Dn, Cn:
-            isometry.D(5),
-            isometry.D(3),
-            isometry.D(1),  # ~= C2
-            isometry.C(15),
-            isometry.C(5),
-            isometry.C(3),
-            # isometry.C(1) ~= E
+            [
+                # trivial:
+                isometry.D(15),
+                isometry.E,
+                # all divisors Dn, Cn:
+                isometry.D(5),
+                isometry.D(3),
+                isometry.D(1),  # ~= C2
+                isometry.C(15),
+                isometry.C(5),
+                isometry.C(3),
+                # isometry.C(1) ~= E
+            ],
         ]
-        self._chk_groups(h, expect)
-        # Test lower limit: n = 2, n = 1
-        h = isometry.D(2)
-        expect = [
-            # trivial:
+        test_matrix["test_Dn_lowest_n_even"] = [
             isometry.D(2),
-            isometry.E,
-            # all divisors Dn, Cn:
-            # isometry.D(1),  # ~= C2
-            isometry.C(2),
+            [
+                # trivial:
+                isometry.D(2),
+                isometry.E,
+                # all divisors Dn, Cn:
+                # isometry.D(1),  # ~= C2
+                isometry.C(2),
+            ],
         ]
-        self._chk_groups(h, expect)
-        h = isometry.D(1)
-        expect = [
-            # trivial:
-            isometry.C(2),
-            # isometry.D(1),  # ~= C2
-            isometry.E,
-            # no divisors..
+        test_matrix["test_Dn_lowest_n_odd"] = [
+            isometry.D(1),
+            [
+                # trivial:
+                isometry.C(2),
+                # isometry.D(1),  # ~= C2
+                isometry.E,
+                # no divisors..
+            ],
         ]
-        self._chk_groups(h, expect)
 
-    def test_dxi(self):
-        """Test some subgroups of DxI"""
-        # Test one even with even and odd divisors:
-        h = isometry.DxI(12)
-        expect = [
-            # trivial:
+        #############################################
+        # DnxI                                      #
+        #############################################
+        test_matrix["test_DnxI_even_n_with_odd_divisors"] = [
             isometry.DxI(12),
-            isometry.E,
-            # all divisors D2nCn, Cn, Dn:
-            isometry.DnC(12),
-            isometry.DnC(6),
-            isometry.DnC(4),
-            isometry.DnC(3),
-            isometry.DnC(2),
-            # isometry.DnC(1) ~= C2C1
-            isometry.D(12),
-            isometry.D(6),
-            isometry.D(4),
-            isometry.D(3),
-            isometry.D(2),
-            # isometry.D(1) ~= C2
-            isometry.C(12),
-            isometry.C(6),
-            isometry.C(4),
-            isometry.C(3),
-            isometry.C(2),
-            # isometry.C(1) ~= E
-            # even divisors: DnxI, CnxI
-            isometry.DxI(6),
-            isometry.DxI(4),
-            isometry.DxI(2),
-            isometry.CxI(12),
-            isometry.CxI(6),
-            isometry.CxI(4),
-            isometry.CxI(2),
-            # odd divisors: D2nDn, C2nCn
-            isometry.D2nD(3),
-            # D2nD(1) ~= D2C2
-            isometry.C2nC(3),
-            isometry.C2nC(1),
-            # even divisors: D2nDn, C2nCn if 12/n even
-            isometry.D2nD(6),
-            isometry.D2nD(2),
-            isometry.C2nC(6),
-            isometry.C2nC(2),
+            [
+                # trivial:
+                isometry.DxI(12),
+                isometry.E,
+                isometry.ExI,
+                # all divisors D2nCn, Cn, Dn:
+                isometry.DnC(12),
+                isometry.DnC(6),
+                isometry.DnC(4),
+                isometry.DnC(3),
+                isometry.DnC(2),
+                # isometry.DnC(1) ~= C2C1
+                isometry.D(12),
+                isometry.D(6),
+                isometry.D(4),
+                isometry.D(3),
+                isometry.D(2),
+                # isometry.D(1) ~= C2
+                isometry.C(12),
+                isometry.C(6),
+                isometry.C(4),
+                isometry.C(3),
+                isometry.C(2),
+                # isometry.C(1) ~= E
+                # even divisors: DnxI, CnxI
+                isometry.DxI(6),
+                isometry.DxI(4),
+                isometry.DxI(3),
+                isometry.DxI(2),
+                isometry.CxI(12),
+                isometry.CxI(6),
+                isometry.CxI(4),
+                isometry.CxI(3),
+                isometry.CxI(2),
+                # odd divisors: D2nDn, C2nCn
+                isometry.D2nD(3),
+                # D2nD(1) ~= D2C2
+                isometry.C2nC(3),
+                isometry.C2nC(1),
+                # even divisors: D2nDn, C2nCn if 12/n even
+                isometry.D2nD(6),
+                isometry.D2nD(2),
+                isometry.C2nC(6),
+                isometry.C2nC(2),
+            ],
         ]
-        self._chk_groups(h, expect)
-        # Test one odd
-        # Odd C2nCn have reflections
-        h = isometry.DxI(15)
-        expect = [
-            # trivial:
+        test_matrix["test_DnxI_odd_n"] = [
             isometry.DxI(15),
-            isometry.E,
-            # all divisors D2nCn, Cn, Dn:
-            isometry.DnC(15),
-            isometry.DnC(5),
-            isometry.DnC(3),
-            isometry.DnC(1),  # ~= C2C1
-            isometry.D(15),
-            isometry.D(5),
-            isometry.D(3),
-            isometry.D(1),  # ~= C2
-            isometry.C(15),
-            isometry.C(5),
-            isometry.C(3),
-            # isometry.C(1) ~= E
-            # odd divisors: DnxI, CnxI
-            isometry.DxI(5),
-            isometry.DxI(3),
-            isometry.DxI(1),  # ~= C2xI
-            isometry.CxI(15),
-            isometry.CxI(5),
-            isometry.CxI(3),
-            isometry.CxI(1),  # ~= ExI
-            # no even divisors: no D2nDn or C2nCn
+            [
+                # trivial:
+                isometry.DxI(15),
+                isometry.E,
+                # all divisors D2nCn, Cn, Dn:
+                isometry.DnC(15),
+                isometry.DnC(5),
+                isometry.DnC(3),
+                isometry.DnC(1),  # ~= C2C1
+                isometry.D(15),
+                isometry.D(5),
+                isometry.D(3),
+                isometry.D(1),  # ~= C2
+                isometry.C(15),
+                isometry.C(5),
+                isometry.C(3),
+                # isometry.C(1) ~= E
+                # odd divisors: DnxI, CnxI
+                isometry.DxI(5),
+                isometry.DxI(3),
+                isometry.DxI(1),  # ~= C2xI
+                isometry.CxI(15),
+                isometry.CxI(5),
+                isometry.CxI(3),
+                isometry.CxI(1),  # ~= ExI
+                # no even divisors: no D2nDn or C2nCn
+            ],
         ]
-        self._chk_groups(h, expect)
 
-    def test_d2ndn(self):
-        """Test some subgroups of D2nDn"""
-        # Test one even with even and odd divisors:
-        h = isometry.D2nD(12)
-        expect = [
-            # trivial:
+        #############################################
+        # D2nDn                                     #
+        #############################################
+        test_matrix["test_D2nDn_even_n_with_odd_divisors"] = [
             isometry.D2nD(12),
-            isometry.E,
-            # all divisors D2nCn, Cn, Dn:
-            isometry.DnC(12),
-            isometry.DnC(6),
-            isometry.DnC(4),
-            isometry.DnC(3),
-            isometry.DnC(2),
-            isometry.DnC(1),  # ~= C2C1
-            isometry.D(12),
-            isometry.D(6),
-            isometry.D(4),
-            isometry.D(3),
-            isometry.D(2),
-            # isometry.D(1) ~= C2
-            isometry.C(12),
-            isometry.C(6),
-            isometry.C(4),
-            isometry.C(3),
-            isometry.C(2),
-            # isometry.C(1) ~= E
-            # even divisors i if n/i odd: D2nDn, C2nCn
-            isometry.D2nD(4),
-            isometry.C2nC(12),
-            isometry.C2nC(4),
-            # no DxI, CxI
+            [
+                # trivial:
+                isometry.D2nD(12),
+                isometry.E,
+                # all divisors D2nCn, Cn, Dn:
+                isometry.DnC(12),
+                isometry.DnC(6),
+                isometry.DnC(4),
+                isometry.DnC(3),
+                isometry.DnC(2),
+                isometry.DnC(1),  # ~= C2C1
+                isometry.D(12),
+                isometry.D(6),
+                isometry.D(4),
+                isometry.D(3),
+                isometry.D(2),
+                # isometry.D(1) ~= C2
+                isometry.C(12),
+                isometry.C(6),
+                isometry.C(4),
+                isometry.C(3),
+                isometry.C(2),
+                # isometry.C(1) ~= E
+                # even divisors i if n/i odd: D2nDn, C2nCn
+                isometry.D2nD(4),
+                isometry.C2nC(12),
+                isometry.C2nC(4),
+                # no DxI, CxI
+            ],
         ]
-        self._chk_groups(h, expect)
-        # Test one odd
-        # Odd C2nCn have reflections
-        h = isometry.D2nD(15)
-        expect = [
-            # trivial:
+        test_matrix["test_D2nDn_odd_n"] = [
             isometry.D2nD(15),
-            isometry.E,
-            # all divisors D2nCn, Cn, Dn:
-            isometry.DnC(15),
-            isometry.DnC(5),
-            isometry.DnC(3),
-            # isometry.DnC(1),  # ~= C2C1
-            isometry.D(15),
-            isometry.D(5),
-            isometry.D(3),
-            isometry.D(1),  # ~= C2
-            isometry.C(15),
-            isometry.C(5),
-            isometry.C(3),
-            # isometry.C(1) ~= E
-            # odd divisors: D2nDn or C2nCn
-            isometry.D2nD(5),
-            isometry.D2nD(3),
-            isometry.D2nD(1),  # ~= D2C2
-            isometry.C2nC(15),
-            isometry.C2nC(5),
-            isometry.C2nC(3),
-            isometry.C2nC(1),  # ~= E + S
-            # no DnxI, CnxI
+            [
+                # trivial:
+                isometry.D2nD(15),
+                isometry.E,
+                # all divisors D2nCn, Cn, Dn:
+                isometry.DnC(15),
+                isometry.DnC(5),
+                isometry.DnC(3),
+                # isometry.DnC(1),  # ~= C2C1
+                isometry.D(15),
+                isometry.D(5),
+                isometry.D(3),
+                isometry.D(1),  # ~= C2
+                isometry.C(15),
+                isometry.C(5),
+                isometry.C(3),
+                # isometry.C(1) ~= E
+                # odd divisors: D2nDn or C2nCn
+                isometry.D2nD(5),
+                isometry.D2nD(3),
+                isometry.D2nD(1),  # ~= D2C2
+                isometry.C2nC(15),
+                isometry.C2nC(5),
+                isometry.C2nC(3),
+                isometry.C2nC(1),  # ~= E + S
+                # no DnxI, CnxI
+            ],
         ]
-        self._chk_groups(h, expect)
+
+        for test_name, (class_to_test, expect) in test_matrix.items():
+            self._chk_groups(test_name, class_to_test, expect)
+
+    def _subgroups_per_object(
+        self, test_name, test_class, subgroup_class, class_setup=None, subgroup_setup=None
+    ):
+        """General test function for testin <class>_get_subgroup funcitons
+
+        This test can check the rules that are applied by actually creating a subgroup and checking
+        the isometries directly in that functions and whether more subgroups exist.
+
+        test_name: test name to show when test fails
+        test_class: class to test
+        subgroup_class: the subgroup class to test for
+        setup_class: if defined the setup parameter for test_class
+        setup_subgroup: if defined the setup parameter for subgroup
+        """
+        # Optionally one can define a setup and check if the setup is define in test_data
+        test_obj = test_class(setup=class_setup)
+        test_subgroup = subgroup_class(setup=subgroup_setup)
+        is_subgroup = True
+        for isom in test_subgroup:
+            if isom not in test_obj:
+                is_subgroup = False
+                break
+        if is_subgroup != (subgroup_class in test_class.subgroups):
+            if is_subgroup:
+                self.fail(
+                    f"{test_name}: Missing subgroup {subgroup_class} in {test_class}"
+                )
+            else:
+                self.fail(
+                    f"{test_name}: False subgroup {subgroup_class} in {test_class} "
+                    "or missmatching orientations"
+                )
+
+    def test_dn_ext_get_subgroups(self):
+        """Test extended dihedral subgroups at the object level by actual checking with practice.
+
+        Test _dnxi_get_subgroups and _d2ndn_get_subgroups in practice.
+
+        This test can check the rules that are applied by actually creating a subgroup and checking
+        the isometries directly in that functions and whether more subgroups exist.
+        """
+        test_matrix = {}
+        for d_class in (isometry.DxI, isometry.D2nD):
+            class_name = d_class.__name__
+            test_n_12 = d_class(12)
+            test_n_15 = d_class(15)
+            test_matrix[f"CmxI in {class_name} with n and m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C4xI,
+            }
+            test_matrix[f"CmxI in {class_name} with n even and m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C3xI,
+            }
+            test_matrix[f"CmxI in {class_name} with n and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.C3xI,
+            }
+            test_matrix[f"DmxI in {class_name} with n and m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.D4xI,
+            }
+            test_matrix[f"DmxI in {class_name} with n even and m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.D3xI,
+            }
+            test_matrix[f"DmxI in {class_name} with n and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.D3xI,
+            }
+            test_matrix[f"C2mxI in {class_name} with n even and n/m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C3xI,
+            }
+            test_matrix[f"C2mxI in {class_name} with n even and n/m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C4xI,
+            }
+            test_matrix[f"C2mxI in {class_name} with n and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.C3xI,
+            }
+            test_matrix[f"C2mCm in {class_name} with n even and n/m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C6C3,
+            }
+            test_matrix[f"C2mCm in {class_name} with n even and n/m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.C8C4,
+            }
+            test_matrix[f"C2mCm in {class_name} with n and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.C6C3,
+            }
+            test_matrix[f"D2mDm in {class_name} with n even and n/m even"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.D6D3,
+            }
+            test_matrix[f"D2mDm in {class_name} with n even and n/m odd"] = {
+                "class": test_n_12,
+                "subgroup_class": isometry.D8D4,
+            }
+            test_matrix[f"D2mDm in {class_name} with n odd and m a divisor of n"] = {
+                "class": test_n_15,
+                "subgroup_class": isometry.D6D3,
+            }
+
+            for test_name, test_data in test_matrix.items():
+                self._subgroups_per_object(
+                    test_name,
+                    test_data["class"],
+                    test_data["subgroup_class"],
+                    test_data.get("class_setup"),
+                    test_data.get("subgroup_setup"),
+                )
 
     def test_close(self):
         """Test closing the set of an isometries by adding the missing symmetries."""
@@ -490,7 +625,7 @@ class TestSubGroups(unittest.TestCase):
             s = q[i]
             for transform in s:
                 for j in range(i + 1, len(q)):
-                    self.assertTrue(not transform in q[j])
+                    self.assertTrue(transform not in q[j])
 
     def test_some_std_sub_groups(self):
         """Test some standard subgroups."""

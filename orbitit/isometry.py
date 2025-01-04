@@ -1421,19 +1421,51 @@ def _dnxi_get_subgroups(n):
 
     The own class (by calling DxI(n) cannot be added, since it leads to
     recursion.
+
+    For n is odd the symmetry contains the following
+        - an n-fold axis, n rotations + the identity
+        - n mirrors sharing the n-fold axis
+        - n 2-fold axes orthogonal to the n-fold axis and bisecting the n mirrors
+        - n rotary inversions from the n-fold rotations, special one:
+            - the central inversion itself after applying to the identity
+
+    For n is even the symmetry contains the following:
+        - an n-fold axis, n rotations + the identity
+        - n mirrors sharing the n-fold axis
+        - n 2-fold axes orthogonal to the n-fold axis and each lying in a mirror plane
+        - n rotary inversions from the n-fold rotations, though special are:
+            - the central inversion itself after applying to the identity
+            - a reflection plane after applying to the half-turn around the n-fold axis. This plane
+              is orthogonal to the n-fold axis.
+
+    This means that the difference between the two are:
+        1. for odd n the 2-fold axes bisect the mirror planes, while for even n they are shared with
+           the planes.
+        2. for even n one of rotary inversions becomes a reflection plane orthogonal to the n-fold
+           axis.
+
+    Note that for D2nDn this looks they same with odd and even swapped, but with the following big
+    differences:
+        1. D2nDn doesn't contain the central inversion itself, while DnxI does.
+        2. For DnxI the 2-fold axes are always orthogonal to one of the mirrors (since n is even),
+           while for D2nDn this is never the case, due to the fact that the half-turns are from Dn
+           while the reflection planes are from D2n - Dn (after applying the central inversion to
+           the half-turns)
     """
     # divisors (incl 1)
     divs = [i for i in range(n // 2, 0, -1) if n % i == 0]
-    # DxI if n odd and divisor odd, or n even and divisor even
-    g = [DxI(i) for i in divs if n % 2 == i % 2]
+    # DxI if n odd and divisor odd, or n even and divisor even and even when n is even and m is odd
+    g = [DxI(i) for i in divs]
     divs.insert(0, n)
     # CxI if n odd and divisor odd, or n even and divisor even
-    g.extend([CxI(i) for i in divs if n % 2 == i % 2])
+    g.extend([CxI(i) for i in divs])
     # only needed for n even, since
     # if n odd, there are no even divisors
     if n % 2 == 0:
         # as long as n / divisor is even (then the half-turns are covered)
         g.extend([D2nD(i) for i in divs if (n / i) % 2 == 0])
+        # TODO: do we really need the extra requirement?
+        # Isn't C2nCn always a subgroup independent on n even or odd?
         g.extend([C2nC(i) for i in divs if (n / i) % 2 == 0])
     g.extend([D(i) for i in divs])
     g.extend([C(i) for i in divs])
@@ -1592,6 +1624,34 @@ def _d2ndn_get_subgroups(n):
 
     The own class (by calling D2nD(n) cannot be added, since it leads to
     recursion.
+
+    For n is even the symmetry contains the following
+        - an n-fold axis, n rotations + the identity
+        - n mirrors sharing the n-fold axis
+        - n 2-fold axes bisecting the n mirrors, never orthogonal to the n-fold axis
+        - n rotary inversions from the n-fold rotations
+
+    For n is odd the symmetry contains the following:
+        - an n-fold axis, n rotations + the identity
+        - n mirrors sharing the n-fold axis
+        - n 2-fold axes orthogonal to the n-fold axis and each lying in a mirror plane
+        - n rotary inversions from the n-fold rotations with a special one:
+            - a reflection plane after applying to the half-turn around the n-fold axis (from D2n -
+            Dn). This plane is orthogonal to the n-fold axis.
+
+    This means that the difference between the two are:
+        1. for even n the 2-fold axes bisect the mirror planes, while for odd n they are shared
+           with the planes.
+        2. for odd n one of rotary inversions becomes a reflection plane orthogonal to the n-fold
+           axis.
+
+    Note that for DnxI this looks they same with odd and even swapped, but with the following big
+    differences:
+        1. D2nDn doesn't contain the central inversion itself, while DnxI does
+        2. For DnxI the 2-fold axes are always orthogonal to one of the mirrors (since n is even),
+           while for D2nDn this is never the case, due to the fact that the half-turns are from Dn
+           while the reflection planes are from D2n - Dn (after applying the central inversion to
+           the half-turns)
     """
     # divisors (incl 1)
     divs = [i for i in range(n // 2, 0, -1) if n % i == 0]
@@ -1599,7 +1659,8 @@ def _d2ndn_get_subgroups(n):
     if n % 2 == 0:
         g = [D2nD(i) for i in divs if i % 2 == 0 and (n / i) % 2 == 1]
     else:
-        g = [D2nD(i) for i in divs if i % 2 == 1]
+        # no need to test whether i is odd, since all divisors of off numbers are odd:
+        g = [D2nD(i) for i in divs]
     divs.insert(0, n)
     if n % 2 == 0:
         # C2nxCn if n even and divisor even, and n/i odd
@@ -1607,7 +1668,8 @@ def _d2ndn_get_subgroups(n):
     else:
         # TODO: this ok for all odd?
         # C2nxCn if n odd and divisor odd
-        g.extend([C2nC(i) for i in divs if i % 2 == 1])
+        # No need to check if i % 2 == 1, since n is odd, hence i is odd as well
+        g.extend([C2nC(i) for i in divs])
     # DnxI and CnxI cannot be aligned if i % 2 != n % 2
     g.extend([D(i) for i in divs])
     g.extend([C(i) for i in divs])
