@@ -202,7 +202,7 @@ class IntInput(wx.TextCtrl):
         # elif k >= 256:
         #     e.Skip()
         t = threading.Thread(target=_int_input_thread, args=(self,))
-        t.setDaemon(True)
+        t.daemon = True
         t.start()
 
     def on_text(self, _):
@@ -1365,7 +1365,7 @@ class SymmetrySelect(wx.StaticBoxSizer):
         self.setup_sizer.Add(self.orient_sizer, flag=wx.RIGHT | wx.EXPAND)
         self.Add(self.setup_sizer, wx.EXPAND)
 
-    def _on_order_update(self, event):
+    def _on_order_update(self, _):
         """Called after update of the order parameter for cyclic and dihedral symmetries."""
         self.on_order_update()
 
