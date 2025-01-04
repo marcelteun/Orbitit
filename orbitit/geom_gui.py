@@ -142,7 +142,7 @@ class IntInput(wx.TextCtrl):
         else:
             tail_start = selected[1]
         if tail_start < len(string):
-            tail = string[selected[1]:]
+            tail = string[selected[1] :]
         else:
             tail = ""
         new_string = head + char + tail
@@ -201,7 +201,7 @@ class IntInput(wx.TextCtrl):
             e.Skip(False)
         # elif k >= 256:
         #     e.Skip()
-        t = threading.Thread(target=_int_input_thread, args=(self, ))
+        t = threading.Thread(target=_int_input_thread, args=(self,))
         t.setDaemon(True)
         t.start()
 
@@ -1415,7 +1415,9 @@ class SymmetrySelect(wx.StaticBoxSizer):
             elif input_type == "int":
                 v = gui.GetValue()
             else:
-                raise ValueError(f"Unexpected type for {input_type} to orientate symmetry.")
+                raise ValueError(
+                    f"Unexpected type for {input_type} to orientate symmetry."
+                )
             cur_setup.append(v)
         try:
             prev_setup = self.__prev["setup"]
