@@ -344,8 +344,10 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         final_sym_gui = self.show_gui[self._final_sym_gui_idx]
         final_sym_obj = final_sym_gui.get_selected()
         class_name = type(final_sym_obj).__name__
+        n = getattr(final_sym_obj, "n", None)
+        init_pars = f"n={n}" if n else ""
         self.status_text(
-            f"Stabilisers generated for final symmetry: {class_name}(n={final_sym_obj.n})"
+            f"Stabilisers generated for final symmetry: {class_name}({init_pars})"
         )
         final_sym_idx = final_sym_gui.get_selected_idx()
         stab_syms = final_sym_obj.subgroups
