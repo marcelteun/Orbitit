@@ -1088,10 +1088,36 @@ class CompoundS4A4:
             polyh.rot_base(angle)  # example angle
             save_off(polyh)
 
-            p = 5 * n
-            polyh = S4A4.Dn_C2(p, self.descr, n)
+            # special mu
+            m = 5 * n
+            polyh = S4A4.Dn_C2(m, self.descr, n)
             polyh.rot_base(polyh.mu[2])
             save_off(polyh, "_mu2")
+
+            mu_kx2_c2c1 = getattr(S4A4.Dn_C2, "mu_kx2_c2c1")
+            n_list = list(mu_kx2_c2c1.keys())
+            try:
+                m = n_list[i - 1]
+                col_opts = {
+                    6: 2,
+                    9: 3,
+                    10: 2,
+                    12: 4,
+                    14: 2,
+                    15: 3,
+                }
+                no_of_cols = col_opts[m] if m in col_opts else m
+                if isinstance(mu_kx2_c2c1[m], list):
+                    for alt, mu in enumerate(mu_kx2_c2c1[m]):
+                        polyh = S4A4.Dn_C2(m, self.descr, no_of_cols)
+                        polyh.rot_base(mu)
+                        save_off(polyh, f"_mu3_{alt}")
+                else:
+                    polyh = S4A4.Dn_C2(m, self.descr, no_of_cols)
+                    polyh.rot_base(mu_kx2_c2c1[m])
+                    save_off(polyh, "_mu3")
+            except IndexError:
+                pass
 
             # 2n | D3n / C3
             #######################################

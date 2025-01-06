@@ -1316,6 +1316,21 @@ class Dn_C2(Compound):
     ]
     # TODO: calculate for real: the algebraic angle might be wrong, but seems to be right:
     mu_classic_5 = angle.ACOS_V_5_V5_V10
+    # For some n there are conjunctive pairs for which the symmetry sudden has a reflection
+    mu_kx2_c2c1 = {
+        3: angle.ASIN_1_V3,
+        5: 18.96 * math.pi / 180,
+        6: angle.ASIN_1_V3,
+        7: [13.19 * math.pi / 180, 37.11 * math.pi / 180],
+        8: 24.47 * math.pi / 180,  # 5
+        9: [10.156 * math.pi / 180, angle.ASIN_1_V3],
+        10: 18.96 * math.pi / 180,
+        11: [8.266 * math.pi / 180, 27.18 * math.pi / 180],
+        12: [15.543 * math.pi / 180, angle.ASIN_1_V3],
+        13: [6.974 * math.pi / 180, 22.29 * math.pi / 180, 43.65 * math.pi / 180],  # 10
+        14: [13.19 * math.pi / 180, 28.79 * math.pi / 180, 37.11 * math.pi / 180],
+        15: [6.034 * math.pi / 180, 18.96 * math.pi / 180, angle.ASIN_1_V3],
+    }
 
     def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None):
         """Compound of n elements with final symmetry Dn with rotational freedom
@@ -1331,6 +1346,9 @@ class Dn_C2(Compound):
         if n % 5 == 0:
             self.mu = self.mu[:]
             self.mu.append(self.mu_classic_5)
+        if n in self.mu_kx2_c2c1:
+            self.mu = self.mu[:]
+            self.mu.append(self.mu_kx2_c2c1[n])
         super().__init__(
             base,
             isometry.D(n)(setup={"axis_n": axis_n, "axis_2": axis_2}),
