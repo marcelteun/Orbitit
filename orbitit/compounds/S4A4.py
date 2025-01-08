@@ -40,6 +40,7 @@ V5 = math.sqrt(5)
 
 # Rotation of 45 degrees around the x-axis
 X_45_DEG = geomtypes.Rot3(axis=geomtypes.Vec3([1, 0, 0]), angle=math.pi / 4)
+Z_90_DEG = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / 2)
 
 
 class Compound(orbit.Shape):
@@ -1588,9 +1589,13 @@ class D6nD3n_D3C3(Compound):
         base: a base model with S4A4 symmetry in its standard position
         """
         axis_n = geomtypes.Vec3([0, 0, 1])
-        o2_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / (2 * n))
-        axis_2 = o2_rot * geomtypes.Vec3([1, 0, 0])
-        normal_r = geomtypes.Vec3([1, 0, 0])
+        axis_2 = geomtypes.Vec3([1, 0, 0])
+        normal_r = geomtypes.Vec3([0, 1, 0])
+        rot_descriptor = self.base_to_o3
+        if n % 2 == 0:
+            extra_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / (2 * n))
+            rot_descriptor = extra_rot * rot_descriptor
+            normal_r = extra_rot * normal_r
         setup_final = {"axis_n": axis_n, "axis_2": axis_2}
         setup_sub = {"axis_n": axis_n, "normal_r": normal_r}
         super().__init__(
@@ -1603,7 +1608,7 @@ class D6nD3n_D3C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.transform_base(self.base_to_o3)
+        self.transform_base(rot_descriptor)
 
 
 ###############################################################################
@@ -1687,7 +1692,7 @@ class D3nxI_D3C3(Compound):
             cols=cols,
             col_sym=col_sym,
         )
-        self.transform_base(self.base_to_o3)
+        self.transform_base(Z_90_DEG * self.base_to_o3)
 
 
 class D4nxI_D4D2(Compound):

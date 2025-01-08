@@ -1147,45 +1147,6 @@ class CompoundS4A4:
         """
         if no_of is None:
             no_of = self.no_of
-        cols = {
-            4: [
-                S4A4.D2nDn_C2.cols[0],
-                S4A4.D2nDn_C2.cols[3],
-                S4A4.D2nDn_C2.cols[2],
-                S4A4.D2nDn_C2.cols[1],
-                S4A4.D2nDn_C2.cols[3],
-                S4A4.D2nDn_C2.cols[2],
-                S4A4.D2nDn_C2.cols[0],
-                S4A4.D2nDn_C2.cols[1],
-            ],
-            5: [
-                S4A4.D2nDn_C2.cols[0],
-                S4A4.D2nDn_C2.cols[1],
-                S4A4.D2nDn_C2.cols[2],
-                S4A4.D2nDn_C2.cols[2],
-                S4A4.D2nDn_C2.cols[3],
-                S4A4.D2nDn_C2.cols[4],
-                S4A4.D2nDn_C2.cols[1],
-                S4A4.D2nDn_C2.cols[3],
-                S4A4.D2nDn_C2.cols[4],
-                S4A4.D2nDn_C2.cols[0],
-            ],
-            6: [
-                S4A4.D2nDn_C2.cols[0],
-                S4A4.D2nDn_C2.cols[1],
-                S4A4.D2nDn_C2.cols[3],
-                S4A4.D2nDn_C2.cols[2],
-                S4A4.D2nDn_C2.cols[1],
-                S4A4.D2nDn_C2.cols[3],
-                S4A4.D2nDn_C2.cols[4],
-                S4A4.D2nDn_C2.cols[0],
-                S4A4.D2nDn_C2.cols[5],
-                S4A4.D2nDn_C2.cols[2],
-                S4A4.D2nDn_C2.cols[5],
-                S4A4.D2nDn_C2.cols[4],
-            ],
-            7: None,
-        }
         for i in no_of:
             n = i + 1
             polyh = S4A4.D2nDn_E(n, self._eg_descr, n)
@@ -1207,7 +1168,47 @@ class CompoundS4A4:
             save_off(polyh)
 
             m = i + 3
-            polyh = S4A4.D2nDn_C2(m, self.descr, 2 * m, cols=cols[m])
+            cols_alt = {
+                4: [
+                    S4A4.D2nDn_C2.cols[0],
+                    S4A4.D2nDn_C2.cols[3],
+                    S4A4.D2nDn_C2.cols[2],
+                    S4A4.D2nDn_C2.cols[1],
+                    S4A4.D2nDn_C2.cols[3],
+                    S4A4.D2nDn_C2.cols[2],
+                    S4A4.D2nDn_C2.cols[0],
+                    S4A4.D2nDn_C2.cols[1],
+                ],
+                5: [
+                    S4A4.D2nDn_C2.cols[0],
+                    S4A4.D2nDn_C2.cols[1],
+                    S4A4.D2nDn_C2.cols[2],
+                    S4A4.D2nDn_C2.cols[2],
+                    S4A4.D2nDn_C2.cols[3],
+                    S4A4.D2nDn_C2.cols[4],
+                    S4A4.D2nDn_C2.cols[1],
+                    S4A4.D2nDn_C2.cols[3],
+                    S4A4.D2nDn_C2.cols[4],
+                    S4A4.D2nDn_C2.cols[0],
+                ],
+                6: [
+                    S4A4.D2nDn_C2.cols[0],
+                    S4A4.D2nDn_C2.cols[1],
+                    S4A4.D2nDn_C2.cols[3],
+                    S4A4.D2nDn_C2.cols[2],
+                    S4A4.D2nDn_C2.cols[1],
+                    S4A4.D2nDn_C2.cols[3],
+                    S4A4.D2nDn_C2.cols[4],
+                    S4A4.D2nDn_C2.cols[0],
+                    S4A4.D2nDn_C2.cols[5],
+                    S4A4.D2nDn_C2.cols[2],
+                    S4A4.D2nDn_C2.cols[5],
+                    S4A4.D2nDn_C2.cols[4],
+                ],
+                7: None,
+            }
+            cols = cols_alt[m] if m in cols_alt else None
+            polyh = S4A4.D2nDn_C2(m, self.descr, 2 * m, cols=cols)
             polyh.rot_base(polyh.mu[2])
             save_off(polyh, "_mu2")
 
@@ -1220,7 +1221,7 @@ class CompoundS4A4:
             polyh = S4A4.D4nD2n_D4D2(m, self.descr, m)
             save_off(polyh)
 
-            polyh = S4A4.D6nD3n_D3C3(n, self.descr, 2)
+            polyh = S4A4.D6nD3n_D3C3(i, self.descr, 2)
             save_off(polyh)
 
     def create_dnxi(self, js_fd=None, no_of=None):
@@ -1257,8 +1258,7 @@ class CompoundS4A4:
             polyh = S4A4.D2nxI_D2C2(n, self.descr, n)
             save_off(polyh)
 
-            no_of_cols = 2 if i == 1 else i
-            polyh = S4A4.D3nxI_D3C3(i, self.descr, no_of_cols)
+            polyh = S4A4.D3nxI_D3C3(n, self.descr, n, col_sym="D3xI")
             save_off(polyh)
 
             polyh = S4A4.D4nxI_D4D2(n, self.descr, n)
