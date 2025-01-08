@@ -47,8 +47,20 @@ class CompoundS4A4:
 
     final_sym = set(
         {
-            "A4", "A4xI", "S4A4", "S4", "S4xI", "A5", "A5xI", "Cn", "C2nCn", "CnxI", "DnCn", "Dn",
-            "D2nDn", "DnxI",
+            "A4",
+            "A4xI",
+            "S4A4",
+            "S4",
+            "S4xI",
+            "A5",
+            "A5xI",
+            "Cn",
+            "C2nCn",
+            "CnxI",
+            "DnCn",
+            "Dn",
+            "D2nDn",
+            "DnxI",
         }
     )
     # Tetrahedron
@@ -124,7 +136,7 @@ class CompoundS4A4:
             "DnxI": self.create_dnxi,
         }
         # TODO: call this actively (always for all generators)
-        #if final_symmetry is not None:
+        # if final_symmetry is not None:
         self.generate_compounds(final_symmetry)
 
     def transform_descr(self, rot):

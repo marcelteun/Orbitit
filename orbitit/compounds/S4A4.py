@@ -50,7 +50,10 @@ class Compound(orbit.Shape):
 
     # transform a vertex (1, 1, 1) to (0, 0, 1) so the 3-fold axis is the z-axis while and the XoZ
     # plane is a mirror plane.
-    base_to_o3 = -geomtypes.Rot3(axis=geomtypes.Vec3([0, 1, 0]), angle=angle.ASIN_1_V3) * X_45_DEG
+    base_to_o3 = (
+        -geomtypes.Rot3(axis=geomtypes.Vec3([0, 1, 0]), angle=angle.ASIN_1_V3)
+        * X_45_DEG
+    )
 
 
 ###############################################################################
@@ -1070,7 +1073,9 @@ class A5xI_D2C2(Compound):
 class Cn_E(Compound):
     """General compound with Cn symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with Cn symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
@@ -1098,7 +1103,9 @@ class Cn_E(Compound):
 class C2nCn_E(Compound):
     """General compound with C2nCn symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with C2nCn symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
@@ -1130,7 +1137,9 @@ class C2nCn_E(Compound):
 class CnxI_E(Compound):
     """General compound with CnxI symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with CnxI symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
@@ -1158,7 +1167,9 @@ class CnxI_E(Compound):
 class DnCn_E(Compound):
     """General compound with DnCn symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with DnCn symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
@@ -1238,7 +1249,9 @@ class D3nC3n_C3(Compound):
         axis_n = geomtypes.Vec3([0, 0, 1])
         super().__init__(
             base,
-            isometry.DnC(3 * n)(setup={"axis_n": axis_n, "normal_r": geomtypes.Vec3([0, 1, 0])}),
+            isometry.DnC(3 * n)(
+                setup={"axis_n": axis_n, "normal_r": geomtypes.Vec3([0, 1, 0])}
+            ),
             isometry.C3(setup={"axis": axis_n}),
             name=f"D{3 * n}C{3 * n}_C3",
             no_of_cols=no_of_cols,
@@ -1287,7 +1300,9 @@ class D3nC3n_D3C3(Compound):
 class Dn_E(Compound):
     """General compound with Dn symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with Dn symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
@@ -1406,7 +1421,9 @@ class D3n_C3(Compound):
 class D2nDn_E(Compound):
     """General compound with D2nDn symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with D2nDn symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
@@ -1451,7 +1468,9 @@ class D2nDn_C2(Compound):
         base: a base model with S4A4 symmetry in its standard position
         n: number of constituents. Can only be an odd number and bigger than 1.
         """
-        assert n > 1, f"n must be bigger than 1 otherwise there is no 2-fold axis, got {n}"
+        assert (
+            n > 1
+        ), f"n must be bigger than 1 otherwise there is no 2-fold axis, got {n}"
         axis_n = geomtypes.Vec3([0, 0, 1])
         axis_2 = geomtypes.Vec3([1, 0, 0])
         setup_final = {"axis_n": axis_n, "axis_2": axis_2}
@@ -1492,7 +1511,9 @@ class D2nDn_C2C1(Compound):
         base: a base model with S4A4 symmetry in its standard position
         n: number of constituents. Can only be an odd number and bigger than 1.
         """
-        assert n > 1, f"n must be bigger than 1 otherwise there is no 2-fold axis, got {n}"
+        assert (
+            n > 1
+        ), f"n must be bigger than 1 otherwise there is no 2-fold axis, got {n}"
         if n % 2 == 0:
             pass
         axis_n = geomtypes.Vec3([0, 0, 1])
@@ -1593,7 +1614,9 @@ class D6nD3n_D3C3(Compound):
         normal_r = geomtypes.Vec3([0, 1, 0])
         rot_descriptor = self.base_to_o3
         if n % 2 == 0:
-            extra_rot = geomtypes.Rot3(axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / (2 * n))
+            extra_rot = geomtypes.Rot3(
+                axis=geomtypes.Vec3([0, 0, 1]), angle=math.pi / (2 * n)
+            )
             rot_descriptor = extra_rot * rot_descriptor
             normal_r = extra_rot * normal_r
         setup_final = {"axis_n": axis_n, "axis_2": axis_2}
@@ -1619,7 +1642,9 @@ class D6nD3n_D3C3(Compound):
 class DnxI_E(Compound):
     """General compound with DnxI symmetry, the descriptive doesn't need to have any symmetry."""
 
-    def __init__(self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None):
+    def __init__(
+        self, n, base, no_of_cols, col_alt=0, col_sym="", cols=None, n_fold_axis=None
+    ):
         """General compound with DnxI symmetry with central freedom.
 
         base: a base model with S4A4 symmetry
