@@ -465,6 +465,27 @@ class Vec3(Vec):
             self[2] * w[0] - self[0] * w[2],
             self[0] * w[1] - self[1] * w[0]])
 
+    def directed_angle(self, v1, vn, ge_0=True):
+        """Directed angle from self and v1 when rotating around the axis vn
+
+        With directed is meant that the resulting angle will not just be the smallest angle between
+        the two vectors, but the angle is always taken in one direction.
+
+        Make sure self, v1, and vn are geomtypes.Vec3 that are normalised.
+
+        v1: Vec3 object to take angle with. Must be normalised.
+        vn: must be the normalised axis orthogonal to self and v1.
+        ge_0: set to False if you require the domain to be (-pi, pi] which will also save an extra
+            step in the code. Leaving this to the default value (True) will result in an angle of
+            domain [0, 2pi)
+
+        Return: angle in radians
+        """
+        angle = math.atan2(self.cross(v1) * vn, self * v1)
+        if ge_0:
+            angle = angle % (2 * math.pi)
+        return angle
+
     # TODO implement Scenes3D.getAxis2AxisRotation here
 
 
@@ -1783,11 +1804,21 @@ class Line:
         """From a point 'p' and a direction vector 'v' define the line."""
         self.p = p
         self.v = v
+        self.p1 = self.get_point(1)
+
+    @property
+    def p0(self):
+        """Return base point of the line."""
+        return self.p
 
     def get_point(self, t):
         """Return the point on the line that equals to self.b + t*self.v (or [] when t is None)
 
-        return: the point is an instance of Vec
+        t: the slope factor, For 0 the starting point p0 from ___init is returned, for 1 the end
+            point p1 is returned.
+
+        return: the point is an instance of Vec. This will return a point even for segments where
+        you fill in a value of t that isn't part of the domain [0, 1]
         """
         if t is not None:
             return Vec([self.p[i] + t * (self.v[i]) for i in range(self.dimension)])
@@ -1808,9 +1839,18 @@ class Line:
             return RoundedFloat((c - self.p[i]) / self.v[i])
         return None
 
+    def is_valid_factor(self, t):
+        """Return a boolean expresssing whether the factor value 't'  is valid."""
+        if self.is_segment:
+            return 0 <= t <= 1
+        return True
+
     def is_on_line(self, v):
         """
         Return True if vertex 'v' is on the line, False otherwise
+
+        If the line is a segment then False is returned when the point is on the line, but outside
+        the segment.
 
         v: a point which should be an instance of Vec with the same dimension of the line.
         """
@@ -1821,8 +1861,10 @@ class Line:
                 break
             # else either 0 or an infinite amount of solutions (e.g. line x == 1 while looking for
             # specific x coordinate)
-        assert t is not None
-        return self.get_point(t) == v
+
+        if self.is_valid_factor(t):
+            return self.get_point(t) == v
+        return False
 
     def get_factor(self, p, check=True):
         """Assuming the point p lies on the line, the factor is returned.

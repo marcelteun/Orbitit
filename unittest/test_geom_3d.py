@@ -263,6 +263,413 @@ class TestLine(unittest.TestCase):
                 )
 
 
+class TestFace(unittest.TestCase):
+    """Test Face class."""
+
+    def test_face_shapes(self):
+        """Test the some methods for the Face class.
+
+        The following is tested:
+            - gravity property
+            - first_vec property
+            - the face normal (method)
+            - angles property
+            - outline property (with tests sorted_edge_intersections and
+                edge_intersections properties implicitely).
+        """
+        skip = None  # use this value to skip the test
+        test_matrix = {
+            "square": {
+                #          ^ y
+                #          |
+                #         4|
+                #        _-+-_
+                #      _/  |  \_
+                #    _/    |    \_
+                # --+------+------+--> x
+                # -4 \_    |    _/ 4
+                #      \_  |  _/
+                #        '-+-'
+                #        -4|
+                #          |
+                "vs": [
+                    geomtypes.Vec3([4, 0, 0]),
+                    geomtypes.Vec3([0, 4, 0]),
+                    geomtypes.Vec3([-4, 0, 0]),
+                    geomtypes.Vec3([0, -4, 0]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([0, 0, 0]),
+                    "first_vec": geomtypes.Vec3([1, 0, 0]),
+                    "normal": geomtypes.Vec3([0, 0, 1]),
+                    "angles_deg": [0, 90, 180, 270],
+                    "outline": [
+                        geomtypes.Vec3([4, 0, 0]),
+                        geomtypes.Vec3([0, 4, 0]),
+                        geomtypes.Vec3([-4, 0, 0]),
+                        geomtypes.Vec3([0, -4, 0]),
+                    ],
+                },
+            },
+            "5-star": {  # a star with concave points between all vertices (using ints)
+                #   z
+                #   ^
+                # 18|                       . 4
+                #   |                      /|
+                # 16|                    .' |
+                #   |                   /   |
+                # 14|                  /    |
+                #   |                 /     |
+                # 12|               .'      |
+                #   |              /        |
+                # 10|             /         |
+                #   |            /          |
+                #  8| 2 ._______/___________|______________. 1
+                #   |    '_    /            |       ___---'
+                #  6|      '-_'            _----''''
+                #   |       / '-_   ___--'' |
+                #  4|      /    _-.-        |
+                #   |     /__--'   '-._     |
+                #  2|   .='            '-_  |
+                #   |   0                 '-| 3
+                #   +-----------------------.-----------------> y
+                #  0    2    4    6    8    10   11   12   14
+                "vs": [
+                    geomtypes.Vec3([1, 2, 2]),
+                    geomtypes.Vec3([1, 14, 8]),
+                    geomtypes.Vec3([1, 2, 8]),
+                    geomtypes.Vec3([1, 10, 0]),
+                    geomtypes.Vec3([1, 10, 18]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([1, 7.6, 7.2]),
+                    "first_vec": geomtypes.Vec3([0, -5.6, -5.2]).normalise(),
+                    "normal": geomtypes.Vec3([1, 0, 0]),
+                    "angles_deg": skip,
+                    "outline": [
+                        geomtypes.Vec3([1, 2, 2]),
+                        geomtypes.Vec3([1, 6, 4]),
+                        geomtypes.Vec3([1, 10, 0]),
+                        geomtypes.Vec3([1, 10, 6]),
+                        geomtypes.Vec3([1, 14, 8]),
+                        geomtypes.Vec3([1, 10, 8]),
+                        geomtypes.Vec3([1, 10, 18]),
+                        geomtypes.Vec3([1, 5, 8]),
+                        geomtypes.Vec3([1, 2, 8]),
+                        geomtypes.Vec3([1, 4, 6]),
+                    ],
+                },
+            },
+            "bowtie": {
+                # A bowtie: mixes concave points and no concave points
+                #
+                #   y
+                #   ^
+                #  2|   -----------
+                #   |    '-_    _'
+                #  1|       -.-'
+                #   |     _-' '-_
+                #  0|---.---------.---> x
+                #       1    2    3
+                "vs": [
+                    geomtypes.Vec3([1, 0, 1]),
+                    geomtypes.Vec3([3, 0, 1]),
+                    geomtypes.Vec3([1, 2, 1]),
+                    geomtypes.Vec3([3, 2, 1]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([2, 1, 1]),
+                    "first_vec": geomtypes.Vec3([-1, -1, 0]).normalise(),
+                    "normal": geomtypes.Vec3([0, 0, 1]),
+                    "angles_deg": [0, 90, 270, 180],
+                    "outline": [
+                        geomtypes.Vec3([1, 0, 1]),
+                        geomtypes.Vec3([3, 0, 1]),
+                        geomtypes.Vec3([2, 1, 1]),
+                        geomtypes.Vec3([3, 2, 1]),
+                        geomtypes.Vec3([1, 2, 1]),
+                        geomtypes.Vec3([2, 1, 1]),
+                    ],
+                },
+            },
+            "hole-or-no": {
+                # a shape where some would expect a hole
+                #
+                #   z
+                #   ^
+                # 6 |     .-------------g+
+                #   |    /           .-'
+                # 4 |   -    .......1.....
+                #   |   |    |  .-'      |
+                # 2 |  -     |-'         |
+                # 1 |  +-----------------+
+                #   +--.--.--.--.--.--.--.--> x
+                #      1  2  3     5     7
+                #
+                "vs": [
+                    geomtypes.Vec3([1, 2, 1]),
+                    geomtypes.Vec3([7, 2, 1]),
+                    geomtypes.Vec3([7, 2, 4]),
+                    geomtypes.Vec3([3, 2, 4]),
+                    geomtypes.Vec3([3, 2, 2]),
+                    geomtypes.Vec3([7, 2, 6]),
+                    geomtypes.Vec3([2, 2, 6]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([30 / 7, 2, 24 / 7]),
+                    "first_vec": skip,
+                    "normal": geomtypes.Vec3([0, -1, 0]),
+                    "angles_deg": skip,
+                    "outline": [
+                        geomtypes.Vec3([1, 2, 1]),
+                        geomtypes.Vec3([7, 2, 1]),
+                        geomtypes.Vec3([7, 2, 4]),
+                        geomtypes.Vec3([5, 2, 4]),
+                        geomtypes.Vec3([7, 2, 6]),
+                        geomtypes.Vec3([2, 2, 6]),
+                    ],
+                },
+            },
+            "crown": {
+                # a shape where a vertex ends up in another edge
+                #
+                #   z
+                #   ^
+                # 3 |  |\_   _/|
+                #   |  |  \ /  |
+                # 1 |  +-------+
+                #   +--.---.---.---> y
+                #      1   3   5
+                #
+                "vs": [
+                    geomtypes.Vec3([-1, 1, 1]),
+                    geomtypes.Vec3([-1, 5, 1]),
+                    geomtypes.Vec3([-1, 5, 3]),
+                    geomtypes.Vec3([-1, 3, 1]),
+                    geomtypes.Vec3([-1, 1, 3]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([-1, 3, 9 / 5]),
+                    "first_vec": skip,
+                    "normal": geomtypes.Vec3([1, 0, 0]),
+                    "angles_deg": skip,
+                    "outline": [
+                        geomtypes.Vec3([-1, 1, 1]),
+                        geomtypes.Vec3([-1, 3, 1]),
+                        geomtypes.Vec3([-1, 5, 1]),
+                        geomtypes.Vec3([-1, 5, 3]),
+                        geomtypes.Vec3([-1, 3, 1]),
+                        geomtypes.Vec3([-1, 1, 3]),
+                    ],
+                },
+            },
+            "double_intersection": {
+                #   y
+                #   ^
+                #   |        3              6
+                # 14|       _._            _.
+                #   |     -'   -_       _-' |
+                # 12|   .=_      '.   -'    |
+                #   |  2   ''--_   '.'      |
+                # 10|           '-'_ '._    |
+                #   |          -'   ''-='-_ |
+                #  8|        -'             |'+___
+                #   |     _-'               |  ''--______
+                #  6|   .'------------------+--------=._-'''====. 1
+                #   |  0                    |           ''-__
+                #  4|                       |                '_=. 4
+                #   |                       |         __..--''
+                #  2|                       |__..---''
+                #   |                       5
+                #   +-----------------------.----------------------> y
+                #  0    2    4    6    8    10   11   12   13   14
+                "vs": [
+                    geomtypes.Vec3([2, 6, 0]),
+                    geomtypes.Vec3([14, 6, 0]),
+                    geomtypes.Vec3([2, 12, 0]),
+                    geomtypes.Vec3([4, 14, 0]),
+                    geomtypes.Vec3([14, 4, 0]),
+                    geomtypes.Vec3([10, 2, 0]),
+                    geomtypes.Vec3([10, 14, 0]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([8, 58 / 7, 0]),
+                    "first_vec": skip,
+                    "normal": geomtypes.Vec3([0, 0, 1]),
+                    "angles_deg": skip,
+                    "outline": [
+                        geomtypes.Vec3([2, 6, 0]),
+                        geomtypes.Vec3([10, 6, 0]),
+                        geomtypes.Vec3([10, 2, 0]),
+                        geomtypes.Vec3([14, 4, 0]),
+                        geomtypes.Vec3([12, 6, 0]),
+                        geomtypes.Vec3([14, 6, 0]),
+                        geomtypes.Vec3([10, 8, 0]),
+                        geomtypes.Vec3([10, 14, 0]),
+                        geomtypes.Vec3([7, 11, 0]),
+                        geomtypes.Vec3([4, 14, 0]),
+                        geomtypes.Vec3([2, 12, 0]),
+                        geomtypes.Vec3([6, 10, 0]),
+                    ],
+                },
+            },
+            "noble octagrammic icositetrahedron ": {
+                "vs": [
+                    # source: https://polytope.miraheze.org/wiki/Noble_octagrammic_icositetrahedron
+                    #              v3
+                    #                         v0
+                    #                   .
+                    #                                v5
+                    #              .          .
+                    #
+                    #      v1                 .
+                    #         .
+                    #      v6                 .
+                    #
+                    #              .          .
+                    #                                v2
+                    #                   -
+                    #                         v7
+                    #              v4
+                    geom_3d.vec(2.647899035704787,   4.113470267581556,  0.5),  # 0
+                    geom_3d.vec(-2.647899035704787,  0.5,                4.113470267581556),  # 1
+                    geom_3d.vec(4.113470267581556,  -2.647899035704787, -0.5),  # 2
+                    geom_3d.vec(-0.5,                4.113470267581556,  2.647899035704787),  # 3
+                    geom_3d.vec(-0.5,               -4.113470267581556,  2.647899035704787),  # 4
+                    geom_3d.vec(4.113470267581556,   2.647899035704787, -0.5),  # 5
+                    geom_3d.vec(-2.647899035704787, -0.5,                4.113470267581556),  # 6
+                    geom_3d.vec(2.647899035704787,  -4.113470267581556,  0.5),  # 7
+                ],
+                "expected": {
+                    "gravity": skip,
+                    "first_vec": skip,
+                    "normal": skip,
+                    "angles_deg": skip,
+                    "outline": [
+                        geom_3d.vec(2.6478990357048, 4.1134702675816, 0.5),
+                        geom_3d.vec(0.5, 2.6478990357048, 1.9655712318768),
+                        geom_3d.vec(-0.5, 4.1134702675816, 2.6478990357048),
+                        geom_3d.vec(-0.5, 1.9655712318768, 2.6478990357048),
+                        geom_3d.vec(-2.6478990357048, 0.5, 4.1134702675816),
+                        geom_3d.vec(-1.5739495178524, 0, 3.3806846516432),
+                        geom_3d.vec(-2.6478990357048, -0.5, 4.1134702675816),
+                        geom_3d.vec(-0.5, -1.9655712318768, 2.6478990357048),
+                        geom_3d.vec(-0.5, -4.1134702675816, 2.6478990357048),
+                        geom_3d.vec(0.5, -2.6478990357048, 1.9655712318768),
+                        geom_3d.vec(2.6478990357048, -4.1134702675816, 0.5),
+                        geom_3d.vec(2.6478990357048, -1.9655712318768, 0.5),
+                        geom_3d.vec(4.1134702675816, -2.6478990357048, -0.5),
+                        geom_3d.vec(2.6478990357048, -0.5, 0.5),
+                        geom_3d.vec(2.6478990357048, 0.5, 0.5),
+                        geom_3d.vec(4.1134702675816, 2.6478990357048, -0.5),
+                        geom_3d.vec(2.6478990357048, 1.9655712318768, 0.5),
+                    ],
+                },
+            },
+        }
+
+        def my_reverse(lst):
+            """convert [0, 1, .., n-2, n-1] to [0, n-1, n-2, .., 1].
+
+            Handle skip value gracefully
+            """
+            return skip if lst is skip else lst[0:1] + lst[:0:-1]
+
+        def new_angles(angles):
+            """Convert angles for a reversed array."""
+            return skip if angles is skip else [
+                -a % 360 for a in my_reverse(angles)
+            ]
+
+        # Test for each their reverse:
+        test_matrix = test_matrix | {
+            name + "_reverse": {
+                "vs": my_reverse(data["vs"]),
+                "expected": {
+                    "gravity": data["expected"]["gravity"],
+                    "first_vec": data["expected"]["first_vec"],
+                    "normal": -data["expected"]["normal"] if data["expected"]["normal"] else skip,
+                    "angles_deg": new_angles(data["expected"]["angles_deg"]),
+                    "outline": my_reverse(data["expected"]["outline"]),
+                },
+            }
+            for name, data in test_matrix.items()
+        }
+
+        for test_case, test_data in test_matrix.items():
+            vs = test_data["vs"]
+            expected = test_data["expected"]
+            test_face = geom_3d.Face(vs)
+
+            # Test gravity attribute
+            if expected["gravity"] is not skip:
+                self.assertEqual(
+                    test_face.gravity,
+                    expected["gravity"],
+                    f"while testing gravity for {test_case}",
+                )
+
+            # Test first_vac attribute
+            if expected["first_vec"] is not skip:
+                self.assertEqual(
+                    test_face.first_vec,
+                    expected["first_vec"],
+                    f"while testing first_vec for {test_case}",
+                )
+
+            # Test normal attribute
+            if expected["normal"] is not skip:
+                self.assertEqual(
+                    test_face.normal(normalise=True),
+                    expected["normal"],
+                    f"while testing normal for {test_case}",
+                )
+
+            # Test angles attribute
+            expected_angles = expected["angles_deg"]
+            if expected_angles is not skip:
+                if expected_angles:
+                    result = test_face.angles
+                    self.assertEqual(
+                        len(result), len(expected_angles), f"while testing {test_case}"
+                    )
+                    for i, (expected_angle, angle) in enumerate(zip(expected_angles, result)):
+                        if expected_angle is not skip:
+                            self.assertEqual(
+                                angle / geom_3d.DEG2RAD,
+                                expected_angle,
+                                f"while testing angles for {test_case}, angle #{i} (got {result})",
+                            )
+
+            # Test len, iter and outline attribute
+            result = test_face.outline
+            self.assertEqual(
+                len(result),
+                len(expected["outline"]),
+                f"while testing amount of concave points for {test_case}, got {len(result)}",
+            )
+            errors = []
+            with geomtypes.FloatHandler(12):
+                for i, (expected_point, point) in enumerate(
+                    zip(expected["outline"], result)
+                ):
+                    if point != expected_point:
+                        errors.append(i)
+            if errors:
+                error_str = f"Unexpected result while testing concave points for {test_case}:\n"
+                result_str = "["
+                expected_str = "["
+                for i, (expected_point, point) in enumerate(
+                    zip(expected["outline"], result)
+                ):
+                    result_str += f"  {i}. {point}\n"
+                    expected_str += f"  {i}. {expected_point}\n"
+                result_str += "]"
+                expected_str += "]"
+                error_str += f"{result_str} !=\n{expected_str} (expected)\n for {errors}"
+                self.fail(error_str)
+
+
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape"""
 
