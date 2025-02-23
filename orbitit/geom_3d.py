@@ -68,6 +68,7 @@ E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
 
 # constant that have deal with angles
+TWO_PI = math.pi * 2
 RAD2DEG = 180.0 / math.pi
 DEG2RAD = math.pi / 180
 R1_2 = math.pi  # 1/2 of a circle
@@ -348,8 +349,14 @@ class Line3D(geomtypes.Line):
             d(1, 3, 4, 3) * d(4, 3, 2, 1) - d(1, 3, 2, 1) * d(4, 3, 4, 3)
         ) / denom
 
+        if not self.is_valid_factor(t):
+            return None
+
         intersection = self.get_point(t)
         if geomtypes.FloatHandler.eq(line.squared_distance_to(intersection), 0):
+            # even though intersection is on self, it might not be on line, if line is a segment:
+            if line.is_segment and not line.is_on_line(intersection):
+                intersection = None
             return intersection
 
         return None
@@ -358,28 +365,361 @@ class Line3D(geomtypes.Line):
         return f"(x, y, z) = {self.p} + t * {self.v}"
 
 
-class Triangle:
-    """Model a triangle in 3D space."""
+class Face:
+    """Model a single face in 3D space."""
 
-    def __init__(self, v0, v1, v2):
-        self.v = [
-            vec(v0[0], v0[1], v0[2]),
-            vec(v1[0], v1[1], v1[2]),
-            vec(v2[0], v2[1], v2[2]),
+    def __init__(self, vs):
+        """Initialise object
+
+        vs: a list of 3D coordinates. These are supposed to be lying in one plane. The vertices are
+            ordered in the way they are supposed to be connected, either clockwise or counter-
+            clockwise.
+        """
+        self._v = [
+            vec(v[0], v[1], v[2])
+            for v in vs
         ]
-        self._normal = vec(0, 0, 0)
+
+        self._normal = None
+        self._gravity = None
+        self._first_vec = None
+        self._angles = None
+        self._normal_n = None
+        self._edges = None
+        self._edge_intersections = None
+        self._sorted_edge_intersections = None
+
+    def __len__(self):
+        return len(self._v)
+
+    def __iter__(self):
+        return iter(self._v)
+
+    @property
+    def vs(self):
+        """Return ordered vertices of this face."""
+        return self._v
+
+    @property
+    def gravity(self):
+        """return the point of gravity for the polygon."""
+        if self._gravity is None:
+            total = vec(0, 0, 0)
+            for v in self.vs:
+                total += v
+            self._gravity = total / len(self.vs)
+        return self._gravity
+
+    @property
+    def angles(self):
+        """Return angles of the vertices with the vector from gravity to first vertex."""
+        if self._angles is None:
+            axis = self.normal(normalise=True)
+            self._angles = [
+                self.first_vec.directed_angle((v - self.gravity).normalize(), axis)
+                for v in self.vs
+            ]
+
+        # return copy to prevent the caller making unintended changes
+        return copy.deepcopy(self._angles)
+
+    def _get_angle(self, v):
+        """Calculate the angle of v with first_vec using the gravity point.
+
+        Knowing that self.angles makes sure that
+            - self._first_vec is set:
+            - self._normal_ is set:
+        """
+        return self._first_vec.directed_angle((v - self.gravity).normalize(), self._normal_n)
+
+    @property
+    def edges(self):
+        """For each edge return sorted intersections with other edges."""
+        if self._edges is None:
+            length = len(self)
+            edges = [
+                Line3D(v_i, self.vs[(i + 1) % length], is_segment=True)
+                for i, v_i in enumerate(self.vs)
+            ]
+            self._edges = edges
+        return edges
+
+    @property
+    def edge_intersections(self):
+        """For each edge return non-sorted intersections with other edges.
+
+        The vertices at the beginning and the end of the edge are included.
+
+        Return:
+            An dictionary with two kinds of keys:
+                1. Keys that are edge indices, where for edge with index i the starting vertex is
+                   self.vs[i] and the end vertex is self.vs[i+1]. The value is a list with points of
+                   intersections.
+                2. Keys that are 2-tuples, (i, j), where i and j are edge indices, with i < j. The
+                   value is a geomtypes.Vec3 point that is the point of intersection between edge i
+                   and j.
+        """
+        if self._edge_intersections is None:
+            edges = self.edges
+            self._edge_intersections = {i: [] for i in range(len(edges))}
+            # Note: no need to calculate the intersection of edge(i) with edge(i+1): they share the
+            # vertex(i+1)
+            for i, edge in enumerate(edges):
+                for j in range(i + 1, len(edges)):
+                    meeting_edge = edges[j]
+                    intersection = edge.intersect(meeting_edge)
+                    if intersection:
+                        if intersection not in self._edge_intersections[i]:
+                            self._edge_intersections[i].append(intersection)
+                        if intersection not in self._edge_intersections[j]:
+                            self._edge_intersections[j].append(intersection)
+                        self._edge_intersections[(i, j)] = intersection
+        return self._edge_intersections
+
+    @property
+    def sorted_edge_intersections(self):
+        """For each edge return sorted intersections with other edges.
+
+        Return:
+            Same as edge_intersections but for each edge the intersections are sorted from closest
+            to the beginning vertex to furthest away. As a side effect edge_intersections is sorted
+            as well. In fact they refer to the same dictionary.
+        """
+        # TODO: also sort these clockwise only
+        if self._sorted_edge_intersections is None:
+            self._sorted_edge_intersections = self.edge_intersections
+            for i, intersections in self.edge_intersections.items():
+                if isinstance(i, int):
+                    intersections.sort(key=lambda v, index=i: (self.vs[index] - v).norm())
+        return self._sorted_edge_intersections
+
+    def _from_intersection_get_angle(self, with_vec, from_vertex, to_vertex):
+        """Get how much one will turn using the specified vertex.
+
+        Make sure that self._normal_n is set.
+
+        Return: an angle between (-pi, pi] where negative values indicate a right turn, positive
+            value indicate a left turn and 0 indicates straight.
+        """
+        assert self._normal_n is not None, "self.normal(normalise=True)) not called"
+        try_vec_to = (to_vertex - from_vertex).normalize()
+        return with_vec.directed_angle(try_vec_to, self._normal_n, False)
+
+    def _intersecting_edge_turn_right(
+        self,
+        intersecting_edge,
+        intersection_index,
+        vec_to,
+    ):
+        """
+        For a given direction return an edge segment that represents a right turn.
+
+        Assuming that we were following an outer edge in the direction vec_to and that we ended up
+        on the specified edge at a specified point of intersection, return the edge segment that is
+        a right turn.
+
+        intersecting_edge: an edge in self._sorted_edge_intersections that represents the edge to
+            turn onto.
+        intersection_index: the index in the intersecting_edge that gives the geomtypes.Vec3 point
+            where the turn will take place.
+        vec_to: the direction that was being followed until the turn.
+
+        Return: a tuple with the following data:
+            - an angle between (-pi, pi] where negative values indicate a right turn, positive
+                value indicate a left turn and 0 indicates straight.
+            - a vertex index in intersecting_edge that represents the next vertex
+            - a geomtypes.Vec3 point for the next vertex.
+        """
+        # _from_intersection_get_angle requires this:
+        self.normal(normalise=True)
+        # The vertex index in the list of intersections intersecting_edge
+        no_of_points_on_try_edge = len(intersecting_edge)
+        vertex = intersecting_edge[intersection_index]
+        try_both = False
+        if intersection_index == 0:
+            # There is only one choice: follow this edge forward
+            next_vertex_index = intersection_index + 1
+        elif no_of_points_on_try_edge == 2:
+            # There is only one choice: the other vertex, and in combination with the previous
+            # if statement this can only be back
+            next_vertex_index = intersection_index - 1
+        elif intersection_index == no_of_points_on_try_edge - 1:
+            # There is only one choice: back
+            next_vertex_index = intersection_index - 1
+        else:
+            try_both = True
+
+        if try_both:
+            # Try following the edge in forward direction
+            next_vertex_index = intersection_index + 1
+            next_vertex = intersecting_edge[next_vertex_index]
+            angle = self._from_intersection_get_angle(vec_to, vertex, next_vertex)
+            if angle > 0:
+                # The other angle is preferred
+                next_vertex_index = intersection_index - 1
+                next_vertex = intersecting_edge[next_vertex_index]
+                angle = self._from_intersection_get_angle(vec_to, vertex, next_vertex)
+        else:
+            next_vertex = intersecting_edge[next_vertex_index]
+            angle = self._from_intersection_get_angle(vec_to, vertex, next_vertex)
+
+        return angle, next_vertex_index
+
+    def _intersection_get_edges(self, current_data):
+        """For a point of intersection on edge index return how to follow to next outer edge.
+
+        Assuming you are following an outer edge from one point of intersection to the next, return
+        the data of how to continue following the outer edges.
+
+        current_data: a dictionary with the following data:
+            edge_id: the ID value in self.sorted_edge_intersections for the current edge
+            prev_vertex_i: the index in the intersections of edge_id that indicates from what vertex
+                we were following the outer edge.
+            vertex_i: the index in the intersections of edge_id that indicates towards which vertex
+                we were following the outer edge.
+            vertex: a geomtypes.Vec3 point representing vertex_i. In principle this parameter isn't
+                needed, but the outer scope knows it already anyway.
+
+        Return: a two tuple consisting of
+            - the next edge ID in _sorted_edge_intersections
+            - a tuple with indices of intersection. The first gives the index in the provided edge
+                that gives the same vertex as current_data["vertex"], the second gives the index of
+                the next vertex on that edge so that we are following the outer edge from that
+                vertex.
+        """
+        edge_id = current_data["edge_id"]
+        prev_vertex_index = current_data["prev_vertex_i"]
+        vertex_index = current_data["vertex_i"]
+        vertex = current_data["vertex"]
+        next_edge_id = None
+        # for debugging only:
+        next_vertex = None
+
+        edges = self.sorted_edge_intersections
+        current_edge = edges[edge_id]
+        vec_to = (current_edge[vertex_index] - current_edge[prev_vertex_index]).normalize()
+        # Worst case we could try to follow this edge from this point on the edge
+        # Get the direction we were following on the current edge:
+        offset = vertex_index - prev_vertex_index
+        if 0 < vertex_index + offset < len(current_edge):
+            # If we can follow this edge in the same direction then the "turn" is 0.
+            next_edge_id = edge_id
+            prev_vertex_index = vertex_index
+            next_vertex_index = vertex_index + offset
+            angle = 0
+            # for debugging only:
+            next_vertex = current_edge[next_vertex_index]
+        else:
+            # we have come to the end, in that case follow another edge that ends up here
+            next_vertex_index = None
+            # find any smallest angle any (all angles are smaller than 360 degrees)
+            angle = 2 * math.pi
+        for key, val in edges.items():
+            if not isinstance(key, tuple):
+                continue
+            if not (edge_id in key and val == vertex):
+                continue
+
+            # key is a tuple with two edge indices, which meet in vertex
+            key_index = (key.index(edge_id) + 1) % 2
+            intersecting_edge_index = key[key_index]
+            intersecting_edge = edges[intersecting_edge_index]
+            intersection_index = intersecting_edge.index(vertex)
+            try_angle, try_next_index = self._intersecting_edge_turn_right(
+                intersecting_edge,
+                intersection_index,
+                vec_to,
+            )
+            if try_angle < angle:
+                next_edge_id = intersecting_edge_index
+                prev_vertex_index = intersection_index
+                next_vertex_index = try_next_index
+                angle = try_angle
+                # for debugging only:
+                next_vertex = intersecting_edge[next_vertex_index]
+
+        logging.debug("Turn: %.2f degrees to %s", 180 + angle * 180 / math.pi, next_vertex)
+        assert next_edge_id is not None, "Unable to find next edge ID"
+        return next_edge_id, (prev_vertex_index, next_vertex_index)
+
+    @property
+    def outline(self):
+        """Get a face that includes the extra concave points for a concave polygon.
+
+        The resulting polygon will be one that follows the outer edges and will not have any holes,
+        i.e. any edges that end up inside the circumference will be filtered out.
+
+        Suggested usage is :
+            with geomtypes.FloatHandler(precision):
+                extended_face = face.outline
+        """
+        # 1. take the first vertex, and follow first edge in positive direction
+        edges = self.sorted_edge_intersections
+        # 2. find intersections with other edges and add the one closest to the vertex
+        new_vs = [self.vs[0]]
+        next_edge_id = 0  # index in sorted edge intersections
+        prev_vertex_index = 0  # index in next_edge (in edge intersections)
+        next_vertex_index = 1  # index in next_edge (in edge intersections)
+        next_vertex = edges[next_edge_id][next_vertex_index]
+        # To prevent hanging loop (each edge can have max 2 extra vertices)
+        max_loop_count = 3 * len(self)
+        count = 0
+        while next_vertex != new_vs[0]:
+            count += 1
+            if count > max_loop_count:
+                logging.error("exiting loop to prevent hanging")
+                break
+            new_vs.append(next_vertex)
+            # 3. switch over to intersecting edge(s) to find a smallest (positive) angle
+            current_data = {
+                "edge_id": next_edge_id,
+                "prev_vertex_i": prev_vertex_index,
+                "vertex_i": next_vertex_index,
+                "vertex": next_vertex,
+            }
+            next_edge_id, vertex_indices = self._intersection_get_edges(current_data)
+            prev_vertex_index, next_vertex_index = vertex_indices
+            next_vertex = edges[next_edge_id][next_vertex_index]
+
+            # 5. repeat from 3 until original vertex is met.
+
+        # TODO
+        # 6. make sure all vertices are used, otherwise one could start at 1. again, but then
+        #    support for compound faces is needed.
+        return Face(new_vs)
+
+    @property
+    def first_vec(self):
+        """The normalised vector from the gravity point to the first vertec."""
+        if self._first_vec is None:
+            base_vec = self.vs[0] - self.gravity
+            self._first_vec = base_vec.normalize()
+        return self._first_vec
 
     # since there is an extra parameter this isn't a property
     def normal(self, normalise=False):
         """Return the normal of the triangle."""
-        if self._normal.norm() == 0:
-            self._normal = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
+        if self._normal is None:
+            self._normal = vec(0, 0, 0)
+            for i in range(1, len(self)):
+                self._normal = self.first_vec.cross((self.vs[i] - self.gravity).normalize())
+                # E.g. this happens is vs[0] = -vs[i]
+                if self._normal != vec(0, 0, 0):
+                    break
             if normalise:
                 try:
                     self._normal = self._normal.normalize()
+                    self._normal_n = self._normal
                 except ZeroDivisionError:
                     pass
         return self._normal
+
+
+class Triangle(Face):
+    """Model a triangle in 3D space."""
+
+    def __init__(self, v0, v1, v2):
+        super().__init__([v0, v1, v2])
 
 
 class PlaneFromNormal:
