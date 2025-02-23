@@ -1775,6 +1775,11 @@ class Line:
         """From a point 'p' and a direction vector 'v' define the line."""
         self.p = p
         self.v = v
+        self.p1 = self.get_point(1)
+
+    @property
+    def p0(self):
+        return self.p
 
     def get_point(self, t):
         """Return the point on the line that equals to self.b + t*self.v (or [] when t is None)

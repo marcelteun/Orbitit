@@ -127,6 +127,146 @@ class TestLine(unittest.TestCase):
                 )
 
 
+class TestFace(unittest.TestCase):
+
+    def test_face_shapes(self):
+        test_matrix = {
+            "square": {
+                "vs": [
+                    geomtypes.Vec3([4, 0, 0]),
+                    geomtypes.Vec3([0, 4, 0]),
+                    geomtypes.Vec3([-4, 0, 0]),
+                    geomtypes.Vec3([0, -4, 0]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([0, 0, 0]),
+                    "first_vec": geomtypes.Vec3([1, 0, 0]),
+                    "normal": geomtypes.Vec3([0, 0, 1]),
+                    "angles_deg": [0, 90, 180, 270],
+                    "with_concave_points": [
+                        geomtypes.Vec3([4, 0, 0]),
+                        geomtypes.Vec3([0, 4, 0]),
+                        geomtypes.Vec3([-4, 0, 0]),
+                        geomtypes.Vec3([0, -4, 0]),
+                    ],
+                },
+            },
+            "5-star": {  # a star with concave points between all vertices (using ints)
+                "vs": [
+                    geomtypes.Vec3([1, 2, 2]),
+                    geomtypes.Vec3([1, 14, 8]),
+                    geomtypes.Vec3([1, 2, 8]),
+                    geomtypes.Vec3([1, 10, 0]),
+                    geomtypes.Vec3([1, 10, 18]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([1, 7.6, 7.2]),
+                    "first_vec": geomtypes.Vec3([0, -5.6, -5.2]).normalise(),
+                    "normal": geomtypes.Vec3([1, 0, 0]),
+                    "angles_deg": None,  # skip
+                    "with_concave_points": [
+                        geomtypes.Vec3([1, 2, 2]),
+                        geomtypes.Vec3([1, 6, 4]),
+                        geomtypes.Vec3([1, 10, 0]),
+                        geomtypes.Vec3([1, 10, 6]),
+                        geomtypes.Vec3([1, 14, 8]),
+                        geomtypes.Vec3([1, 10, 8]),
+                        geomtypes.Vec3([1, 10, 18]),
+                        geomtypes.Vec3([1, 5, 8]),
+                        geomtypes.Vec3([1, 2, 8]),
+                        geomtypes.Vec3([1, 4, 6]),
+                    ],
+                },
+            },
+            "bowtie": {  # a bowtie: mixes concave points and no concave points
+                "vs": [
+                    geomtypes.Vec3([1, 0, 1]),
+                    geomtypes.Vec3([3, 2, 1]),
+                    geomtypes.Vec3([1, 2, 1]),
+                    geomtypes.Vec3([3, 0, 1]),
+                ],
+                "expected": {
+                    "gravity": geomtypes.Vec3([2, 1, 1]),
+                    "first_vec": geomtypes.Vec3([-1, -1, 0]).normalise(),
+                    "normal": geomtypes.Vec3([0, 0, -1]),
+                    "angles_deg": [0, 180, 90, 270],
+                    "with_concave_points": [
+                        geomtypes.Vec3([1, 0, 1]),
+                        geomtypes.Vec3([2, 1, 1]),
+                        geomtypes.Vec3([1, 2, 1]),
+                        geomtypes.Vec3([3, 2, 1]),
+                        geomtypes.Vec3([2, 1, 1]),
+                        geomtypes.Vec3([3, 0, 1]),
+                    ],
+                },
+            },
+        }
+        for test_case, test_data in test_matrix.items():
+            vs = test_data["vs"]
+            expected = test_data["expected"]
+            test_face = geom_3d.Face(vs)
+
+            # Test gravity attribute
+            self.assertEqual(
+                test_face.gravity,
+                expected["gravity"],
+                f"while testing gravity for {test_case}",
+            )
+
+            # Test first_vac attribute
+            self.assertEqual(
+                test_face.first_vec,
+                expected["first_vec"],
+                f"while testing first_vec for {test_case}",
+            )
+
+            # Test normal attribute
+            self.assertEqual(
+                test_face.normal(normalise=True),
+                expected["normal"],
+                f"while testing normal for {test_case}",
+            )
+
+            # Test angles attribute
+            expected_angles = expected["angles_deg"]
+            if expected_angles:
+                result = test_face.angles
+                self.assertEqual(len(result), len(expected_angles), f"while testing {test_case}")
+                for i, (expected_angle, angle) in enumerate(zip(expected_angles, result)):
+                    self.assertEqual(
+                        angle / geom_3d.DEG2RAD,
+                        expected_angle,
+                        f"while testing angles for {test_case}, angle #{i}",
+                    )
+
+            # Test len, iter and with_concave_points attribute
+            result = test_face.with_concave_points
+            self.assertEqual(
+                len(result),
+                len(expected["with_concave_points"]),
+                f"while testing amount of concave points for {test_case}",
+            )
+            errors = []
+            for i, (expected_point, point) in enumerate(
+                zip(expected["with_concave_points"], result)
+            ):
+                if point != expected_point:
+                    errors.append(i)
+            if errors:
+                error_str = f"Unexpected result while testing concave points for {test_case}:\n"
+                result_str = "["
+                expected_str = "["
+                for i, (expected_point, point) in enumerate(
+                    zip(expected["with_concave_points"], result)
+                ):
+                    result_str += f"  {i}. {point}\n"
+                    expected_str += f"  {i}. {expected_point}\n"
+                result_str += "]"
+                expected_str += "]"
+                error_str += f"{result_str} !=\n{expected_str} (expected)\n for {errors}"
+                self.fail(error_str)
+
+
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape"""
     shape = None

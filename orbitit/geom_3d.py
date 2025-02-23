@@ -35,6 +35,7 @@ from abc import ABC
 import copy
 import logging
 import math
+from operator import itemgetter
 from functools import reduce
 import wx
 
@@ -90,6 +91,7 @@ E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
 
 # constant that have deal with angles
+TWO_PI = math.pi * 2
 RAD2DEG = 180.0 / math.pi
 DEG2RAD = math.pi / 180
 R1_2 = math.pi  # 1/2 of a circle
@@ -378,28 +380,262 @@ class Line3D(geomtypes.Line):
         return f"(x, y, z) = {self.p} + t * {self.v}"
 
 
-class Triangle:
-    """Model a triangle in 3D space."""
+class Face:
+    """Model a single face in 3D space."""
 
-    def __init__(self, v0, v1, v2):
-        self.v = [
-            vec(v0[0], v0[1], v0[2]),
-            vec(v1[0], v1[1], v1[2]),
-            vec(v2[0], v2[1], v2[2]),
+    def __init__(self, vs):
+        """Initialise object
+
+        vs: a list of 3D coordinates. These are supposed to be lying in one plane. The vertices are
+            ordered in the way they are supposed to be connected, either clockwise or counter-
+            clockwise.
+        """
+        self._v = [
+            vec(v[0], v[1], v[2])
+            for v in vs
         ]
-        self._normal = vec(0, 0, 0)
+        self._normal = None
+        self._gravity = None
+        self._first_vec = None
+        self._angles = None
+        self._normal_n = None
+
+    def __len__(self):
+        return len(self._v)
+
+    def __iter__(self):
+        return iter(self._v)
+
+    @property
+    def vs(self):
+        return self._v
+
+    @property
+    def gravity(self):
+        """return the point of gravity for the polygon."""
+        if self._gravity is None:
+            total = vec(0, 0, 0)
+            for v in self.vs:
+                total += v
+            self._gravity = total / len(self.vs)
+        return self._gravity
+
+    # TODO: move to Vec3 class
+    @staticmethod
+    def directed_angle(v0, v1, vn, ge_0=True):
+        """Directed angle from v0 and v1 when rotating around the axis vn
+
+        With directed is meant that the resulting angle will not just be the smallest angle between
+        the two vectors, but the angle is always taken in the one direction.
+
+        Make sure v0, v1, and vn are geomtypes.Vec3 that are normalised.
+
+        ge_0: sett to True if you are okay with the angles to being part of <-pi, pi]
+            otherwise an extra step is made to change the domain to [0, 2pi>
+
+        Return: angle in radians
+        """
+        angle = math.atan2(v0.cross(v1) * vn, v0 * v1)
+        if ge_0:
+            angle = angle % (2 * math.pi)
+        return angle
+
+    @property
+    def angles(self):
+        """Return angles of the vertices with the vector from graity to first vertex."""
+        if self._angles is None:
+            axis = self.normal(normalise=True)
+            self._angles = [
+                self.directed_angle(self.first_vec, (v - self.gravity).normalize(), axis)
+                for v in self.vs
+            ]
+
+        # return copy to prevent the caller making unintended changes
+        return copy.deepcopy(self._angles)
+
+    def _get_angle(self, v):
+        """Calculate the angle of v with first_vec using the gravity point.
+
+        Knowing that self.angles makes sure that
+            - self._first_vec is set:
+            - self._normal_ is set:
+        """
+        return self.directed_angle(
+            self._first_vec, (v - self.gravity).normalize(), self._normal_n
+        )
+
+    @property
+    def with_concave_points(self):
+        """Get a face that includes the extra concave points for a concave polygon.
+
+        Suggested usage is :
+            with geomtypes.FloatHandler(precision):
+                extended_face = face.with_concave_points
+        """
+        angles = [(i, a) for i, a in enumerate(self.angles)]
+        for i, a in enumerate(self.angles):
+            logging.debug(f"- #%d: %s angle {a * 360 / TWO_PI} degrees", i, self.vs[i])
+        angles_sorted = sorted(angles, key=itemgetter(1))
+        no_of_vs = len(self.vs)
+
+        def find_closest_intersection(
+            with_edge, from_v_i, stop_at_v_i, get_edge, get_next_v, first_guess
+        ):
+            """
+            Find the intersection with edge closest to a vertex
+
+            with_edge: a Line3D where with_edge.p is the point to which we want to be the closest to
+            from_v_i: index in angles_sorted of the vertex to start intersecting edges for. May be
+                smaller than 0 or bigger than no_of_vs.
+            stop_at_v_i: do not continue after this vertex index in angles_sorted
+            get_edge: should be either self._get_edge_fwd or self._get_edge_back
+            get_next_v: a function that either increases or decreases (from_v_i)
+            first_guess: return this if nothing closer is found.
+
+            From outer scope:
+                self,
+                no_of_vs,
+                angles,
+                angles_sorted
+            """
+            result = first_guess
+            closest_to_v = with_edge.p0
+            shortest_distance = (first_guess - closest_to_v).norm()
+            while True:
+                check_v_i, check_angle_i = angles_sorted[from_v_i % no_of_vs]
+                if check_v_i == stop_at_v_i:
+                    break
+                if not with_edge.is_on_line(self.vs[check_v_i]):
+                    v_connect_to = get_edge(check_v_i, check_angle_i, angles, no_of_vs)
+                    check_edge = Line3D(self.vs[check_v_i], self.vs[v_connect_to])
+                    check_v = with_edge.intersect(check_edge)
+                    if (check_v - closest_to_v).norm() < shortest_distance:
+                        result = check_v
+                from_v_i = get_next_v(from_v_i)
+            return result
+
+        new_vs = []
+        for sorted_i, (v_i, angle_i) in enumerate(angles_sorted):
+            new_vs.append(self.vs[v_i])
+            # Note:
+            #     sorted_i is the vertex index in the list sorted to angle
+            #     v_i is the index in the list with connected edges.
+            # -------
+            # Get next concave point:
+            # Check for concave points between two neieghbouring vertices v_i and v_i+1:
+            # 1 if v_i and v_i+1 are connected: no concave points:
+            # 2 define edge_i_p as the edge from v_i in the direction of v_i+1 (to get the right
+            #   direction check the angle of the connection vertex with the original vertex)
+            # 3 define edge_i+1_m as the edge from v_i+1 in the direction of v_i (to get the right
+            #   direction check the angle of the connection vertex with the original vertex)
+            # 4 find concave points of edge_i_p with other edges and keep the closest one
+            # 5 find concave points of edge_i+1_m with other edges and keep the closest one as long
+            #   as it is different from the previous step.
+
+            # next_v_i is the index in self.vs for the next sorted vertex
+            next_v_i, next_angle_i = angles_sorted[(sorted_i + 1) % no_of_vs]
+
+            # step 1.
+            connected = (
+                next_v_i == (v_i + 1) % no_of_vs
+                or
+                v_i == (next_v_i + 1) % no_of_vs
+            )
+            if connected:
+                continue
+
+            # step 2. find edge_i_p: edge_fwd
+            vertex_fwd_i = self._get_edge_fwd(v_i, angle_i, angles, no_of_vs)
+            edge_fwd = Line3D(self.vs[v_i], self.vs[vertex_fwd_i])
+
+            # step 3. find edge_i+1_m: edge_back
+            vertex_back_i = self._get_edge_back(next_v_i, next_angle_i, angles, no_of_vs)
+            edge_back = Line3D(self.vs[next_v_i], self.vs[vertex_back_i])
+
+            # step 4.
+            # Until vertex_fwd_i find the closest intersection with edge_fwd
+            # start with edge_back (from the next vertex):
+            base_concave_v = edge_fwd.intersect(edge_back)
+            concave_v = find_closest_intersection(
+                with_edge=edge_fwd,
+                from_v_i=sorted_i + 2,
+                stop_at_v_i=vertex_fwd_i,
+                get_edge=self._get_edge_back,
+                get_next_v=lambda i: i + 1,
+                first_guess=base_concave_v
+            )
+            logging.debug("==> add concave %s", concave_v)
+            new_vs.append(concave_v)
+
+            # step 5.
+            # Until vertex_back_i find the closest intersection with edge_fwd
+            # start with edge_back (from the next vertex):
+            concave_v = find_closest_intersection(
+                with_edge=edge_back,
+                from_v_i=sorted_i - 1,
+                stop_at_v_i=vertex_back_i,
+                get_edge=self._get_edge_fwd,
+                get_next_v=lambda i: i - 1,
+                first_guess=base_concave_v
+            )
+            if concave_v != base_concave_v:
+                new_vs.append(concave_v)
+                logging.debug("==> add concave %s", concave_v)
+        return Face(new_vs)
+
+    def _get_edge_fwd_or_back(self, v_i, angle_i, angles, no_of_vs, comp):
+        """Shared code for finding the edges from step 2 or 3  in with_concave_points.
+
+        The comp parameter is a function comparing two angles
+
+        Otherwise see _get_edge_fwd or _get_edge_back
+        """
+        next_v_0 = (v_i + 1) % no_of_vs
+        angle_0 = (angles[next_v_0][1] - angle_i) % TWO_PI
+        next_v_1 = (v_i - 1) % no_of_vs
+        angle_1 = (angles[next_v_1][1] - angle_i) % TWO_PI
+        return next_v_0 if comp(angle_0, angle_1) else next_v_1
+
+    def _get_edge_fwd(self, v_i, angle_i, angles, no_of_vs):
+        """Get the vertex index (in self.vs) of the edge from step 2 in with_concave_points."""
+        return self._get_edge_fwd_or_back(v_i, angle_i, angles, no_of_vs, lambda a, b: a < b)
+
+    def _get_edge_back(self, v_i, angle_i, angles, no_of_vs):
+        """Get the vertex index (in self.vs) of the edge from step 3 in with_concave_points."""
+        return self._get_edge_fwd_or_back(v_i, angle_i, angles, no_of_vs, lambda a, b: a > b)
+
+    @property
+    def first_vec(self):
+        """The normalised vector from the gravity point to the first vertec."""
+        if self._first_vec is None:
+            base_vec = self.vs[0] - self.gravity
+            self._first_vec = base_vec.normalize()
+        return self._first_vec
 
     # since there is an extra parameter this isn't a property
     def normal(self, normalise=False):
         """Return the normal of the triangle."""
-        if self._normal.norm() == 0:
-            self._normal = (self.v[1] - self.v[0]).cross(self.v[2] - self.v[0])
+        if self._normal is None:
+            self._normal == vec(0, 0, 0)
+            for i in range(1, len(self)):
+                self._normal = self.first_vec.cross((self.vs[i] - self.gravity).normalize())
+                # E.g. this happens is vs[0] = -vs[i]
+                if self._normal != vec(0, 0, 0):
+                    break
             if normalise:
                 try:
                     self._normal = self._normal.normalize()
+                    self._normal_n = self._normal
                 except ZeroDivisionError:
                     pass
         return self._normal
+
+
+class Triangle(Face):
+    """Model a triangle in 3D space."""
+
+    def __init__(self, v0, v1, v2):
+        super().__init__([v0, v1, v2])
 
 
 class PlaneFromNormal:
@@ -864,7 +1100,7 @@ class SimpleShape(base.Orbitit):
                 edge = [j, i]
             else:
                 return
-            if not edge in added_edges:
+            if edge not in added_edges:
                 added_edges.append(edge)
                 es.extend(edge)
 
