@@ -346,8 +346,8 @@ class FacesList(wx_panel.ScrolledPanel):
             # Add coloured text
             text_gui = wx.StaticText(self, wx.ID_ANY, f" {i} ")
             face_col = face_cols[0][col_i]
-            text_gui.SetBackgroundColour(wx.Colour(*face_col))
-            text_gui.SetForegroundColour(wx.Colour(*self.inv_col(face_col)))
+            text_gui.SetBackgroundColour(wx.Colour(face_col))
+            text_gui.SetForegroundColour(wx.Colour(self.inv_col(face_col)))
             f_sizer.Add(text_gui, 0)
             # Add button to show face options
             show_button = wx.Button(self, label=self.HIDE_LABEL)
@@ -422,10 +422,10 @@ class FacesList(wx_panel.ScrolledPanel):
                 self.selected_gui_keys.append(chk_id)
         else:
             face_col = row_data["org_col"]
-            new_col = wx.Colour(*face_col)
+            new_col = wx.Colour(face_col)
             if chk_id in self.selected_gui_keys:
                 self.selected_gui_keys.remove(chk_id)
-        inv_col = wx.Colour(*self.inv_col(new_col))
+        inv_col = wx.Colour(self.inv_col(new_col))
         text_gui.SetBackgroundColour(new_col)
         text_gui.SetForegroundColour(inv_col)
         self.shape.update_face_with_col(face_index, new_col[:3])
