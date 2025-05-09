@@ -1624,7 +1624,7 @@ class AxisRotateSizer(wx.BoxSizer):
     def _on_angle_typed(self, angle):
         """Called when user types a new angle in the input field"""
         self.current_angle = angle
-        self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
+        self.show_gui[self._slide_angle_gui_idx].SetValue(int(angle))
         self.on_angle(self.current_angle, self.get_axis())
 
     def _on_angle_set(self, e):

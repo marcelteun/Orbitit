@@ -298,6 +298,7 @@ class TestFace(unittest.TestCase):
                     geomtypes.Vec3([-4, 0, 0]),
                     geomtypes.Vec3([0, -4, 0]),
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": geomtypes.Vec3([0, 0, 0]),
                     "first_vec": geomtypes.Vec3([1, 0, 0]),
@@ -341,6 +342,7 @@ class TestFace(unittest.TestCase):
                     geomtypes.Vec3([1, 10, 0]),
                     geomtypes.Vec3([1, 10, 18]),
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": geomtypes.Vec3([1, 7.6, 7.2]),
                     "first_vec": geomtypes.Vec3([0, -5.6, -5.2]).normalise(),
@@ -377,6 +379,7 @@ class TestFace(unittest.TestCase):
                     geomtypes.Vec3([1, 2, 1]),
                     geomtypes.Vec3([3, 2, 1]),
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": geomtypes.Vec3([2, 1, 1]),
                     "first_vec": geomtypes.Vec3([-1, -1, 0]).normalise(),
@@ -415,6 +418,7 @@ class TestFace(unittest.TestCase):
                     geomtypes.Vec3([7, 2, 6]),
                     geomtypes.Vec3([2, 2, 6]),
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": geomtypes.Vec3([30 / 7, 2, 24 / 7]),
                     "first_vec": skip,
@@ -448,6 +452,7 @@ class TestFace(unittest.TestCase):
                     geomtypes.Vec3([-1, 3, 1]),
                     geomtypes.Vec3([-1, 1, 3]),
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": geomtypes.Vec3([-1, 3, 9 / 5]),
                     "first_vec": skip,
@@ -492,6 +497,7 @@ class TestFace(unittest.TestCase):
                     geomtypes.Vec3([10, 2, 0]),
                     geomtypes.Vec3([10, 14, 0]),
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": geomtypes.Vec3([8, 58 / 7, 0]),
                     "first_vec": skip,
@@ -512,6 +518,141 @@ class TestFace(unittest.TestCase):
                         geomtypes.Vec3([6, 10, 0]),
                     ],
                 },
+            },
+            "oops for noble stellation of RTC no. 6": {
+                "vs": [
+                    # integer version of that face:
+                    #  19|               v7            v0
+                    #    |               _+             +_
+                    #  15|            .-' |             | '-_
+                    #    |        v8 '-_  |             |  _-' v11
+                    #  11| v3           '-|_           _|-'
+                    #   9| _______________|_=_._____._=_|_______________ v4
+                    #   7|  '-.           |    '-.-'    |           .-'
+                    #    |     '-.        |   _-' '-_   |        .-'
+                    #   3|        '-.     |.-'       '-.|     .-'
+                    #   0|           '-.-'|             |'-_-'
+                    #  -3|          .-' '-|             |_-'-.
+                    #    |       .-'      |'-.        .-|     '-.
+                    #  -7|    .-'         |   '-._ _-'  |        '-._
+                    #  -9| _='____________|_____/__'____|____________-_ v9
+                    # -11| v10            |.-'        '-|_
+                    #    |            .-' |             | '-_
+                    # -15|        v5 '-_  |             |  _-' v2
+                    #    |              '-|             |-'
+                    # -19|               v6            v1
+                    #    +----------------------------------------------
+                    #     -32    -16-14   -8  -4 0  4   8 14 16       32
+                    geomtypes.Vec3([8, 19, 0]),  # v0
+                    geomtypes.Vec3([8, -19, 0]),
+                    geomtypes.Vec3([16, -15, 0]),
+                    geomtypes.Vec3([-32, 9, 0]),  # v3
+                    geomtypes.Vec3([32, 9, 0]),
+                    geomtypes.Vec3([-16, -15, 0]),  # v5
+                    geomtypes.Vec3([-8, -19, 0]),
+                    geomtypes.Vec3([-8, 19, 0]),
+                    geomtypes.Vec3([-16, 15, 0]),  # v8
+                    geomtypes.Vec3([32, -9, 0]),
+                    geomtypes.Vec3([-32, -9, 0]),  # 10
+                    geomtypes.Vec3([16, 15, 0]),
+                ],
+                # Here: traversing from v0, v1, to v2 the normal will become (0, 0, -1)
+                # Right turns, starting with vo will lead to one small triangle
+                # However the reverse does lead to the whole outline, therefore the norma needs to
+                # be flipped for the original only
+                "flip_normal": {"reverse"},
+                "expected": {
+                    "gravity": skip,
+                    "first_vec": skip,
+                    "normal": skip,
+                    "angles_deg": skip,
+                    "outline": [
+                        geom_3d.vec(8, 19, 0),
+                        geom_3d.vec(8, 11, 0),
+                        geom_3d.vec(16, 15, 0),
+                    ],
+                }
+            },
+            "similar to noble stellation of RTC no. 6": {
+                "vs": [
+                    # integer version of that face:
+                    #  19|               v7            v0
+                    #    |               _+             +_
+                    #  15|            .-' |             | '-_
+                    #    |        v8 '-_  |             |  _-' v11
+                    #  11| v3           '-|_           _|-'
+                    #   9| _______________|_=_._____._=_|_______________ v4
+                    #   7|  '-.           |    '-.-'    |           .-'
+                    #    |     '-.        |   _-' '-_   |        .-'
+                    #   3|        '-.     |.-'       '-.|     .-'
+                    #   0|           '-.-'|             |'-_-'
+                    #  -3|          .-' '-|             |_-'-.
+                    #    |       .-'      |'-.        .-|     '-.
+                    #  -7|    .-'         |   '-.__--'  |        '-._
+                    #  -9| _='____________|_____=__=____|____________-_ v9
+                    # -11| v10            |.-'        '-|_
+                    #    |            .-' |             | '-_
+                    # -15|        v5 '-_  |             |  _-' v2
+                    #    |              '-|             |-'
+                    # -19|               v6            v1
+                    #    +----------------------------------------------
+                    #     -32    -16-14   -8  -4 0  4   8 14 16       32
+                    geomtypes.Vec3([8, 19, 0]),  # v0
+                    geomtypes.Vec3([8, -19, 0]),
+                    geomtypes.Vec3([16, -15, 0]),
+                    geomtypes.Vec3([-32, 9, 0]),  # v3
+                    geomtypes.Vec3([32, 9, 0]),
+                    geomtypes.Vec3([-16, -15, 0]),  # v5
+                    geomtypes.Vec3([-8, -19, 0]),
+                    geomtypes.Vec3([-8, 19, 0]),
+                    geomtypes.Vec3([-16, 15, 0]),  # v8
+                    geomtypes.Vec3([32, -9, 0]),
+                    geomtypes.Vec3([-32, -9, 0]),  # 10
+                    geomtypes.Vec3([16, 15, 0]),
+                ],
+                # Here: traversing from v0, v1, to v2 the normal will become (0, 0, -1)
+                # Right turns, starting with vo will lead to one small triangle
+                # However the reverse does lead to the whole outline, therefore the norma needs to
+                # be flipped for the original only
+                "flip_normal": {"org"},
+                "expected": {
+                    "gravity": skip,
+                    "first_vec": skip,
+                    "normal": skip,
+                    "angles_deg": skip,
+                    "outline": [
+                        geom_3d.vec(8, 19, 0),
+                        geom_3d.vec(8, 11, 0),
+                        geom_3d.vec(4, 9, 0),
+                        geom_3d.vec(-4, 9, 0),
+                        geom_3d.vec(-8, 11, 0),
+                        geom_3d.vec(-8, 19, 0),
+                        geom_3d.vec(-16, 15, 0),
+                        geom_3d.vec(-8, 11, 0),
+                        geom_3d.vec(-8, 9, 0),
+                        geom_3d.vec(-32, 9, 0),
+                        geom_3d.vec(-14, 0, 0),
+                        geom_3d.vec(-32, -9, 0),
+                        geom_3d.vec(-8, -9, 0),
+                        geom_3d.vec(-8, -11, 0),
+                        geom_3d.vec(-16, -15, 0),
+                        geom_3d.vec(-8, -19, 0),
+                        geom_3d.vec(-8, -11, 0),
+                        geom_3d.vec(-4, -9, 0),
+                        geom_3d.vec(4, -9, 0),
+                        geom_3d.vec(8, -11, 0),
+                        geom_3d.vec(8, -19, 0),
+                        geom_3d.vec(16, -15, 0),
+                        geom_3d.vec(8, -11, 0),
+                        geom_3d.vec(8, -9, 0),
+                        geom_3d.vec(32, -9, 0),
+                        geom_3d.vec(14, 0, 0),
+                        geom_3d.vec(32, 9, 0),
+                        geom_3d.vec(8, 9, 0),
+                        geom_3d.vec(8, 11, 0),
+                        geom_3d.vec(16, 15, 0),
+                    ],
+                }
             },
             "noble octagrammic icositetrahedron ": {
                 "vs": [
@@ -540,6 +681,7 @@ class TestFace(unittest.TestCase):
                     geom_3d.vec(-2.647899035704787, -0.5,                4.113470267581556),  # 6
                     geom_3d.vec(2.647899035704787,  -4.113470267581556,  0.5),  # 7
                 ],
+                "flip_normal": {},
                 "expected": {
                     "gravity": skip,
                     "first_vec": skip,
@@ -585,6 +727,7 @@ class TestFace(unittest.TestCase):
         test_matrix = test_matrix | {
             name + "_reverse": {
                 "vs": my_reverse(data["vs"]),
+                "flip_normal": data["flip_normal"],
                 "expected": {
                     "gravity": data["expected"]["gravity"],
                     "first_vec": data["expected"]["first_vec"],
@@ -600,6 +743,12 @@ class TestFace(unittest.TestCase):
             vs = test_data["vs"]
             expected = test_data["expected"]
             test_face = geom_3d.Face(vs)
+
+            if "reverse" in test_case:
+                if "reverse" in test_data["flip_normal"]:
+                    test_face.flip_normal()
+            elif "org" in test_data["flip_normal"]:
+                test_face.flip_normal()
 
             # Test gravity attribute
             if expected["gravity"] is not skip:
@@ -620,7 +769,7 @@ class TestFace(unittest.TestCase):
             # Test normal attribute
             if expected["normal"] is not skip:
                 self.assertEqual(
-                    test_face.normal(normalise=True),
+                    test_face.normal_n,
                     expected["normal"],
                     f"while testing normal for {test_case}",
                 )

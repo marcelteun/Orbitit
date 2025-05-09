@@ -381,10 +381,10 @@ class Face:
         ]
 
         self._normal = None
+        self._normal_n = None
         self._gravity = None
         self._first_vec = None
         self._angles = None
-        self._normal_n = None
         self._edges = None
         self._edge_intersections = None
         self._sorted_edge_intersections = None
@@ -414,7 +414,7 @@ class Face:
     def angles(self):
         """Return angles of the vertices with the vector from gravity to first vertex."""
         if self._angles is None:
-            axis = self.normal(normalise=True)
+            axis = self.normal_n
             self._angles = [
                 self.first_vec.directed_angle((v - self.gravity).normalize(), axis)
                 for v in self.vs
@@ -428,9 +428,8 @@ class Face:
 
         Knowing that self.angles makes sure that
             - self._first_vec is set:
-            - self._normal_ is set:
         """
-        return self._first_vec.directed_angle((v - self.gravity).normalize(), self._normal_n)
+        return self._first_vec.directed_angle((v - self.gravity).normalize(), self.normal_n)
 
     @property
     def edges(self):
@@ -496,14 +495,11 @@ class Face:
     def _from_intersection_get_angle(self, with_vec, from_vertex, to_vertex):
         """Get how much one will turn using the specified vertex.
 
-        Make sure that self._normal_n is set.
-
         Return: an angle between (-pi, pi] where negative values indicate a right turn, positive
             value indicate a left turn and 0 indicates straight.
         """
-        assert self._normal_n is not None, "self.normal(normalise=True)) not called"
         try_vec_to = (to_vertex - from_vertex).normalize()
-        return with_vec.directed_angle(try_vec_to, self._normal_n, False)
+        return with_vec.directed_angle(try_vec_to, self.normal_n, False)
 
     def _intersecting_edge_turn_right(
         self,
@@ -530,8 +526,6 @@ class Face:
             - a vertex index in intersecting_edge that represents the next vertex
             - a geomtypes.Vec3 point for the next vertex.
         """
-        # _from_intersection_get_angle requires this:
-        self.normal(normalise=True)
         # The vertex index in the list of intersections intersecting_edge
         no_of_points_on_try_edge = len(intersecting_edge)
         vertex = intersecting_edge[intersection_index]
@@ -646,6 +640,9 @@ class Face:
     def outline(self):
         """Get a face that includes the extra concave points for a concave polygon.
 
+        The outline is obtained by taking right turns with respect to the normal only. If the result
+        of the outline gives unexpected results, try using self.flip_normal.
+
         The resulting polygon will be one that follows the outer edges and will not have any holes,
         i.e. any edges that end up inside the circumference will be filtered out.
 
@@ -680,12 +677,8 @@ class Face:
             next_edge_id, vertex_indices = self._intersection_get_edges(current_data)
             prev_vertex_index, next_vertex_index = vertex_indices
             next_vertex = edges[next_edge_id][next_vertex_index]
-
             # 5. repeat from 3 until original vertex is met.
 
-        # TODO
-        # 6. make sure all vertices are used, otherwise one could start at 1. again, but then
-        #    support for compound faces is needed.
         return Face(new_vs)
 
     @property
@@ -696,9 +689,21 @@ class Face:
             self._first_vec = base_vec.normalize()
         return self._first_vec
 
+    def flip_normal(self):
+        """Flip existing normal."""
+        # make sure both self._normal and self.normal_n are set with the same sign
+        normalised = self.normal_n
+        self._normal = -self.normal
+        self._normal_n = -normalised
+
     # since there is an extra parameter this isn't a property
-    def normal(self, normalise=False):
-        """Return the normal of the triangle."""
+
+    @property
+    def normal(self):
+        """Return the normal of the first vertices.
+
+        The normal isn't normalised. Only the first vertices of the face are used.
+        """
         if self._normal is None:
             self._normal = vec(0, 0, 0)
             for i in range(1, len(self)):
@@ -706,13 +711,17 @@ class Face:
                 # E.g. this happens is vs[0] = -vs[i]
                 if self._normal != vec(0, 0, 0):
                     break
-            if normalise:
-                try:
-                    self._normal = self._normal.normalize()
-                    self._normal_n = self._normal
-                except ZeroDivisionError:
-                    pass
         return self._normal
+
+    @property
+    def normal_n(self):
+        """Return the normalised normal of the triangle."""
+        if self._normal_n is None:
+            try:
+                self._normal_n = self.normal.normalize()
+            except ZeroDivisionError:
+                assert self._normal_n is not None, "Error getting normalised normal"
+        return self._normal_n
 
 
 class Triangle(Face):
@@ -1434,7 +1443,7 @@ class SimpleShape(base.Orbitit):
         """
         length = len(f)
         assert length > 2, "An face should at least have 2 vertices"
-        normal = Triangle(self.vs[f[0]], self.vs[f[1]], self.vs[f[2]]).normal(normalise)
+        normal = Triangle(self.vs[f[0]], self.vs[f[1]], self.vs[f[2]]).normal_n
         if self.normal_direction in (TRI_OUT, TRI_IN):
             v0 = geomtypes.Vec3(self.vs[f[0]])
             outwards = v0.norm() < (v0 + normal).norm()
