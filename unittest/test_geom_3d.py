@@ -266,6 +266,32 @@ class TestLine(unittest.TestCase):
 class TestFace(unittest.TestCase):
     """Test Face class."""
 
+    def test_ensure_domain(self):
+        dummy_face = geom_3d.Face(
+            [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([0, 1, 0]),
+                    geomtypes.Vec3([-1, 0, 0]),
+            ],
+        )
+        two_pi = 2 * math.pi
+        test_matrix = {
+            "0 deg": (0, 0),
+            "45 deg": (math.pi / 4, math.pi / 4),
+            "90 deg": (math.pi / 2, math.pi / 2),
+            "135 deg": (3 * math.pi / 4, 3 * math.pi / 4),
+            "180 deg": (math.pi, math.pi),
+            "225 deg": (5 * math.pi / 4, -3 * math.pi / 4),
+            "270 deg": (3 * math.pi / 2, -math.pi / 2),
+            "315 deg": (7 * math.pi / 4, -math.pi / 4),
+        }
+        for test_case, (angle_in, angle_exp) in test_matrix.items():
+            with geomtypes.FloatHandler(8):
+                for i in [0, -1, 1]:
+                    angle_out = dummy_face.ensure_domain(angle_in + i * two_pi)
+                    if geomtypes.FloatHandler.ne(angle_out, angle_exp):
+                        self.fail(f"failure for {test_case} + {i}x360: {angle_out} != {angle_exp}")
+
     def test_face_shapes(self):
         """Test the some methods for the Face class.
 

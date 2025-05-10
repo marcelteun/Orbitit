@@ -423,13 +423,15 @@ class Face:
         # return copy to prevent the caller making unintended changes
         return copy.deepcopy(self._angles)
 
-    def _get_angle(self, v):
-        """Calculate the angle of v with first_vec using the gravity point.
 
-        Knowing that self.angles makes sure that
-            - self._first_vec is set:
-        """
-        return self._first_vec.directed_angle((v - self.gravity).normalize(), self.normal_n)
+    @staticmethod
+    def ensure_domain(angle):
+        """Ensure that angle is of the domain (-pi, pi]."""
+        # To prevent getting the domain [-pi, pi)
+        angle = -angle
+        # shift up by 180 degrees then use % to get [0, 360) and then subtract 180 again
+        angle = ((angle + math.pi) % (2 * math.pi)) - math.pi
+        return -angle
 
     @property
     def edges(self):
@@ -683,7 +685,7 @@ class Face:
 
     @property
     def first_vec(self):
-        """The normalised vector from the gravity point to the first vertec."""
+        """The normalised vector from the gravity point to the first vertex."""
         if self._first_vec is None:
             base_vec = self.vs[0] - self.gravity
             self._first_vec = base_vec.normalize()
