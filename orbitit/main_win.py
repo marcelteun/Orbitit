@@ -519,6 +519,10 @@ class FacesTab(wx.Panel):
         self.guis.append(wx.Button(self, label="Flip"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_flip)
         select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        # Replace by outline
+        self.guis.append(wx.Button(self, label="Outline"))
+        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_outline)
+        select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
         # Delete faces
         self.guis.append(wx.Button(self, label="Delete"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_delete)
@@ -544,10 +548,23 @@ class FacesTab(wx.Panel):
     def on_flip(self, _event):
         """Update the colour of the selected faces"""
         for check_id, row_data in self.faces_list.checkbox_rows.items():
-            face_i = row_data["face_i"]
-            self.shape.reverse_face(face_i)
-            self.faces_list.switch(check_id, False)
-            row_data["check"].SetValue(False)
+            if row_data["check"].IsChecked():
+                face_i = row_data["face_i"]
+                self.shape.reverse_face(face_i)
+                self.faces_list.switch(check_id, False)
+                row_data["check"].SetValue(False)
+        self.faces_list.deselect_all(apply_col=False)
+        self.shape.faces_updated()
+        self._update_shape()
+
+    def on_outline(self, _event):
+        """Replace the face by its outline"""
+        for check_id, row_data in self.faces_list.checkbox_rows.items():
+            if row_data["check"].IsChecked():
+                face_i = row_data["face_i"]
+                self.shape.replace_face_by_outline(face_i)
+                self.faces_list.switch(check_id, False)
+                row_data["check"].SetValue(False)
         self.faces_list.deselect_all(apply_col=False)
         self.shape.faces_updated()
         self._update_shape()
