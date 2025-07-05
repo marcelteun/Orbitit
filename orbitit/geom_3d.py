@@ -2584,6 +2584,31 @@ class SimpleShape(base.Orbitit):
         shape.regen_edges()
         return shape
 
+    def replace_face_by_outline(self, face_index, exp_tol_eq_float=8, flip_normal=False):
+        """Replace a face by its outline.
+
+        A self-intersecting face contains holes where it has double coverage when the stencil buffer
+        is used. This method will replace a face with the outline, by following the edges in order
+        and by just taking right (left) turns at each intersection.
+
+        This will lead to the introduction of extra vertices of which some might already be part of
+        the vertex array. I.e. a clean-up might be needed after one or more calls to this method.
+
+        face_index: one face_index in self.fs indicating the face to replace
+        exp_tol_eq_float: the tolerance to use when deciding whether 3D coordinates represent the
+            same point.
+        flip_normal: if set only left turns instead of right turns will be taken
+        """
+        org_face = self.fs[face_index]
+        face = Face([self.vs[org_face[i]] for i in range(len(org_face))])
+        if flip_normal:
+            face.flip_normal()
+        with geomtypes.FloatHandler(exp_tol_eq_float):
+            outline = face.outline
+            offset = len(self.vs)
+            self.vs.extend(outline)
+            self.fs[face_index] = [i + offset for i in range(len(outline))]
+
 
 class CompoundShape(base.Orbitit):
     """
