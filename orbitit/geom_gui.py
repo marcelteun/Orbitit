@@ -1587,7 +1587,7 @@ class AxisRotateSizer(wx.BoxSizer):
         self.show_gui.append(
             wx.Slider(
                 panel,
-                value=initial_angle,
+                value=int(initial_angle),
                 minValue=min_angle,
                 maxValue=max_angle,
                 style=wx.SL_HORIZONTAL | wx.SL_LABELS,

@@ -893,9 +893,9 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.v_r_scale = (self.v_r_scale * no_of_slider_steps) / s
         self.v_r_gui = wx.Slider(
             self.parent_panel,
-            value=self.v_r_scale * self.v_r,
-            minValue=self.v_r_scale * self.v_r_min,
-            maxValue=self.v_r_scale * self.v_r_max,
+            value=int(self.v_r_scale * self.v_r),
+            minValue=int(self.v_r_scale * self.v_r_min),
+            maxValue=int(self.v_r_scale * self.v_r_max),
             style=wx.SL_HORIZONTAL,
         )
         self.guis.append(self.v_r_gui)
@@ -941,9 +941,9 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             self.e_r_scale = (self.e_r_scale * no_of_slider_steps) / s
         self.e_r_gui = wx.Slider(
             self.parent_panel,
-            value=self.e_r_scale * self.e_r,
-            minValue=self.e_r_scale * self.e_r_min,
-            maxValue=self.e_r_scale * self.e_r_max,
+            value=int(self.e_r_scale * self.e_r),
+            minValue=int(self.e_r_scale * self.e_r_min),
+            maxValue=int(self.e_r_scale * self.e_r_max),
             style=wx.SL_HORIZONTAL,
         )
         self.guis.append(self.e_r_gui)
@@ -1381,7 +1381,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
     @staticmethod
     def val_2_slider(factor, offset, y):
         """Convert value a slider represents to slider value"""
-        return (y - offset) / factor
+        return int((y - offset) / factor)
 
     @staticmethod
     def slider_to_val(factor, offset, x):

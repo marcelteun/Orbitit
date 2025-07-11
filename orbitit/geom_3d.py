@@ -423,6 +423,20 @@ class Face:
         # return copy to prevent the caller making unintended changes
         return copy.deepcopy(self._angles)
 
+    def average_angle(self):
+        """With the current normal, get the average angle moving from v(n) to v(n+1)
+
+        This can be used to decide in which direction the normal should be. Preferably the angle
+        should be positive, for instance for the outline property.
+
+        return: average signed angle in radians with domain: (-pi, pi]
+        """
+        angles = self.angles
+        no_of_vs = len(angles)
+        total_angle = 0
+        for i, angle_0 in enumerate(angles):
+            total_angle += self.ensure_domain(angles[(i + 1) % no_of_vs] - angle_0)
+        return total_angle / no_of_vs
 
     @staticmethod
     def ensure_domain(angle):

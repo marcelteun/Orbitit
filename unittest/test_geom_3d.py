@@ -816,6 +816,12 @@ class TestFace(unittest.TestCase):
                                 f"while testing angles for {test_case}, angle #{i} (got {result})",
                             )
 
+            print("")
+            print(test_case)
+            print(test_face.average_angle() * geom_3d.RAD2DEG)
+            if "RTC" in test_case:
+                breakpoint()
+
             # Test len, iter and outline attribute
             result = test_face.outline
             self.assertEqual(

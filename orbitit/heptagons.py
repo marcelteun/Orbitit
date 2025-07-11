@@ -3586,9 +3586,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         # dynamic adjustments
         self.pos_angle_gui = wx.Slider(
             self.panel,
-            value=geom_3d.RAD2DEG * self.shape.pos_angle,
-            minValue=geom_3d.RAD2DEG * self.shape.pos_angle_min,
-            maxValue=geom_3d.RAD2DEG * self.shape.pos_angle_max,
+            value=int(geom_3d.RAD2DEG * self.shape.pos_angle),
+            minValue=int(geom_3d.RAD2DEG * self.shape.pos_angle_min),
+            maxValue=int(geom_3d.RAD2DEG * self.shape.pos_angle_max),
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
         )
         self.guis.append(self.pos_angle_gui)
@@ -3597,7 +3597,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.max_fold_angle = 180
         self.dihedral_angle_gui = wx.Slider(
             self.panel,
-            value=geom_3d.RAD2DEG * self.shape.dihedral_angle,
+            value=int(geom_3d.RAD2DEG * self.shape.dihedral_angle),
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3606,7 +3606,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.dihedral_angle_gui.Bind(wx.EVT_SLIDER, self.on_dihedral_angle)
         self.fold1_gui = wx.Slider(
             self.panel,
-            value=geom_3d.RAD2DEG * self.shape.fold1,
+            value=int(geom_3d.RAD2DEG * self.shape.fold1),
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3615,7 +3615,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.fold1_gui.Bind(wx.EVT_SLIDER, self.on_fold1)
         self.fold2_gui = wx.Slider(
             self.panel,
-            value=geom_3d.RAD2DEG * self.shape.fold2,
+            value=int(geom_3d.RAD2DEG * self.shape.fold2),
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3624,7 +3624,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.fold2_gui.Bind(wx.EVT_SLIDER, self.on_fold2)
         self.opp_fold1_gui = wx.Slider(
             self.panel,
-            value=geom_3d.RAD2DEG * self.shape.opposite_fold1,
+            value=int(geom_3d.RAD2DEG * self.shape.opposite_fold1),
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3633,7 +3633,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.opp_fold1_gui.Bind(wx.EVT_SLIDER, self.on_opp_fold1)
         self.opp_fold2_gui = wx.Slider(
             self.panel,
-            value=geom_3d.RAD2DEG * self.shape.opposite_fold2,
+            value=int(geom_3d.RAD2DEG * self.shape.opposite_fold2),
             minValue=self.min_fold_angle,
             maxValue=self.max_fold_angle,
             style=wx.SL_HORIZONTAL | wx.SL_LABELS,
@@ -3642,9 +3642,9 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.opp_fold2_gui.Bind(wx.EVT_SLIDER, self.on_opp_fold2)
         self.height_gui = wx.Slider(
             self.panel,
-            value=self.max_height - self.shape.height * self.height_factor,
-            minValue=-self.max_height * self.height_factor,
-            maxValue=self.max_height * self.height_factor,
+            value=int(self.max_height - self.shape.height * self.height_factor),
+            minValue=-int(self.max_height * self.height_factor),
+            maxValue=int(self.max_height * self.height_factor),
             style=wx.SL_VERTICAL,
         )
         self.guis.append(self.height_gui)
@@ -5015,7 +5015,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
         # GUI for dynamic adjustment
         self.kite_angle_gui = wx.Slider(
             self.panel,
-            value=self.get_slider_val(self.shape.angle),
+            value=int(self.get_slider_val(self.shape.angle)),
             minValue=0,
             maxValue=self.KITE_ANGLE_STEPS,
             style=wx.SL_HORIZONTAL,

@@ -282,9 +282,9 @@ class CtrlWin(wx.Frame):
         # GUI for dynamic adjustment
         self.kite_side_adjust = wx.Slider(
             self.panel,
-            value=self.shape.side * self.side_scale,
-            minValue=self.shape.side_min * self.side_scale,
-            maxValue=self.shape.side_max * self.side_scale,
+            value=int(self.shape.side * self.side_scale),
+            minValue=int(self.shape.side_min * self.side_scale),
+            maxValue=int(self.shape.side_max * self.side_scale),
             style=wx.SL_HORIZONTAL,
         )
         self.panel.Bind(
@@ -298,9 +298,9 @@ class CtrlWin(wx.Frame):
 
         self.kite_top_adjust = wx.Slider(
             self.panel,
-            value=self.shape.top * self.side_scale,
-            maxValue=self.shape.top_max * self.top_scale,
-            minValue=self.shape.top_min * self.top_scale,
+            value=int(self.shape.top * self.side_scale),
+            maxValue=int(self.shape.top_max * self.top_scale),
+            minValue=int(self.shape.top_min * self.top_scale),
             style=wx.SL_VERTICAL,
         )
         self.panel.Bind(
@@ -314,8 +314,8 @@ class CtrlWin(wx.Frame):
         self.kite_tail_adjust = wx.Slider(
             self.panel,
             value=self.shape.tail * self.side_scale,
-            minValue=self.shape.tail_min * self.tail_scale,
-            maxValue=self.shape.tail_max * self.tail_scale,
+            minValue=int(self.shape.tail_min * self.tail_scale),
+            maxValue=int(self.shape.tail_max * self.tail_scale),
             style=wx.SL_VERTICAL,
         )
         self.panel.Bind(

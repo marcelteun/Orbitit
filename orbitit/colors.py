@@ -62,3 +62,13 @@ STD_COLORS = [
     rgb.lightCoral,
     rgb.darkGoldenrod,
 ]
+
+# These colour I took from Gimp after taken pictures of the paper; i.e. it all depends a bit on the
+# white balance of the phone, the light that was used the reflection (angle), while the pearl
+# colours aren't really one colour.
+# So for that reason I adjusted the colours a bit after my liking
+CHROMOLUX = {
+    "pearl_light_blue": [0xc5, 0xf0, 0xe8],
+    "pearl_light_mango": [0xe9, 0xcf, 0xab],
+    "pearl_medium_blue": [0x3c, 0x5d, 0x83],
+}
