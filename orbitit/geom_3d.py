@@ -1467,6 +1467,8 @@ class SimpleShape(base.Orbitit):
                 not outwards and self.normal_direction == TRI_OUT
             ):
                 normal = -normal
+        if normalise:
+            return normal.normalise()
         return normal
 
     def create_face_normals(self, normalise):
