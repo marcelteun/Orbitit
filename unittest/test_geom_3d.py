@@ -23,7 +23,7 @@
 # ------------------------------------------------------------------
 # Since these tests are quite straight forward tests, and thers is no gain to
 # split the methods and the file other than to shut up pylint:
-# pylint: disable=too-many-lines,too-many-statements,too-many-locals
+# pylint: disable=too-many-lines,too-many-statements,too-many-locals,too-many-branches
 import math
 from os import path
 import unittest
@@ -267,6 +267,7 @@ class TestFace(unittest.TestCase):
     """Test Face class."""
 
     def test_ensure_domain(self):
+        """Test the method geom_3d.Face.test_ensure_domain."""
         dummy_face = geom_3d.Face(
             [
                     geomtypes.Vec3([1, 0, 0]),
@@ -815,12 +816,6 @@ class TestFace(unittest.TestCase):
                                 expected_angle,
                                 f"while testing angles for {test_case}, angle #{i} (got {result})",
                             )
-
-            print("")
-            print(test_case)
-            print(test_face.average_angle() * geom_3d.RAD2DEG)
-            if "RTC" in test_case:
-                breakpoint()
 
             # Test len, iter and outline attribute
             result = test_face.outline
