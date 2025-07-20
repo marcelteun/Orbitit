@@ -108,7 +108,7 @@ class Shape(heptagons.EqlHeptagonShape):
         if this.alt_hept_pos:
             ns = vs
             heptN = heptagons.kite_to_hept(vs[3], vs[0], vs[1], vs[2])
-            if heptN == None:
+            if not heptN:
               this.error_msg = 'No valid equilateral heptagon for this position'
               return
             Mr = Rot(axis = geomtypes.Vec3(vs[2]), angle = geomtypes.turn(0.2))
@@ -144,7 +144,7 @@ class Shape(heptagons.EqlHeptagonShape):
                     ]
         else:
             heptN = heptagons.kite_to_hept(vs[1], vs[2], vs[3], vs[0])
-            if heptN == None:
+            if not heptN:
               this.error_msg = 'No valid equilateral heptagon for this position'
               return
             if this.tri_alt:
@@ -167,7 +167,7 @@ class Shape(heptagons.EqlHeptagonShape):
                         heptN[0][2],
                         vt
                     ]
-        if heptN == None:
+        if not heptN:
             this.error_msg = 'No valid equilateral heptagon for this position'
             return
         else:

@@ -148,7 +148,7 @@ class Shape(heptagons.EqlHeptagonShape):
 
         # add heptagons
         heptN = heptagons.kite_to_hept(vs[3], vs[2], vs[1], vs[0])
-        if heptN == None:
+        if not heptN:
           this.error_msg = 'No valid equilateral heptagon for this position'
           return
         else:
