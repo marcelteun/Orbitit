@@ -165,7 +165,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 IsoscelesTriangleV[0],
                 IsoscelesTriangleV[1],
                 IsoscelesTriangleV[2]
-            ).normal()
+            ).normal
         ns.extend([IsoscelesTriangleN for i in range(3)])
         this.xtraEs = []
         if this.add_extra_edge:

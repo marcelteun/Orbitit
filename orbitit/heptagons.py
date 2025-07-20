@@ -5006,7 +5006,7 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
         angle: signed angle (in degrees) of the kite with a face of the base model.
         """
-        return (angle - self.kite_angle_offset) / self.kite_angle_factor
+        return int((angle - self.kite_angle_offset) / self.kite_angle_factor)
 
     def create_ctrl_sizer(self):
         """Create and return the main sizer with all the control widgets."""

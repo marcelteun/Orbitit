@@ -212,7 +212,7 @@ class Shape(heptagons.EqlHeptagonShape):
                 vs[o],
                 vs[o+1],
                 vs[o+2]
-            ).normal()
+            ).normal
             ns.extend([IsoscelesTriangleN, IsoscelesTriangleN, IsoscelesTriangleN])
 
         this.xtraFs = [
