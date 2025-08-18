@@ -645,6 +645,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
 
     def update_shape(self):
         """Update shape on display"""
+        self.canvas.shape.merge_needed = True
         self.canvas.paint()
 
     def on_reset(self, _event):
