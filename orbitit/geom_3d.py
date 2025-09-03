@@ -306,6 +306,18 @@ class Line3D(geomtypes.Line):
             return self.p + t * self.v
         return []
 
+    def project(self, point):
+        """Project a point orthogonally onto the line.
+
+        return: a point (Vec3) in space that is on the line.
+        """
+        to_point = point - self.p
+        return self.v * (to_point * self.v) / (self.v * self.v) + self.p
+
+    def to_point(self, point):
+        """Return the orthogonal vector from the line to the point."""
+        return point - self.project(point)
+
     def squared_distance_to(self, point):
         """Return the square distance to a point."""
         # see p81 of E.Lengyel
