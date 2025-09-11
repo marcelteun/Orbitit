@@ -1664,6 +1664,7 @@ class AxisRotateSizer(wx.BoxSizer):
         # In that case the user can set the value, use the slide bar and jump
         # jump back to the old value, that is still in the float input.
         self.current_angle = self.show_gui[self._slide_angle_gui_idx].GetValue()
+        self.show_gui[self._typed_angle_gui_idx].SetValue(self.current_angle)
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
