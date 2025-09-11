@@ -1617,7 +1617,7 @@ class AxisRotateSizer(wx.BoxSizer):
     def set_angle(self, angle):
         """Define the angle to be used"""
         self.current_angle = angle
-        self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
+        self.show_gui[self._slide_angle_gui_idx].SetValue(int(angle))
         self.show_gui[self._typed_angle_gui_idx].SetValue(angle)
         self.on_angle(angle, self.get_axis())
 
@@ -1630,7 +1630,7 @@ class AxisRotateSizer(wx.BoxSizer):
     def _on_angle_set(self, e):
         """Called when when user presses button to applied typed angle"""
         self.current_angle = self.show_gui[self._typed_angle_gui_idx].GetValue()
-        self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
+        self.show_gui[self._slide_angle_gui_idx].SetValue(int(self.current_angle))
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
@@ -1641,7 +1641,7 @@ class AxisRotateSizer(wx.BoxSizer):
         # Update input float with precise input
         self.show_gui[self._typed_angle_gui_idx].SetValue(self.current_angle)
         # Update slide bar (which rounds to integer
-        self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
+        self.show_gui[self._slide_angle_gui_idx].SetValue(int(self.current_angle))
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
