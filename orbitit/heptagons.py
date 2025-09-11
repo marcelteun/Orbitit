@@ -41,7 +41,7 @@ import wx
 from OpenGL.GL import glBlendFunc
 from OpenGL.GL import GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
 
-from orbitit import geom_3d, geomtypes, rgb
+from orbitit import geom_3d, geom_gui, geomtypes, rgb
 from orbitit.geomtypes import Rot3 as Rot
 from orbitit.geomtypes import Vec3 as Vec
 
@@ -3584,7 +3584,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.last_button.Bind(wx.EVT_BUTTON, self.on_last)
 
         # dynamic adjustments
-        self.pos_angle_gui = wx.Slider(
+        self.pos_angle_gui = geom_gui.Slider(
             self.panel,
             value=int(geom_3d.RAD2DEG * self.shape.pos_angle),
             minValue=int(geom_3d.RAD2DEG * self.shape.pos_angle_min),
@@ -3595,7 +3595,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         self.pos_angle_gui.Bind(wx.EVT_SLIDER, self.on_pos_angle)
         self.min_fold_angle = -180
         self.max_fold_angle = 180
-        self.dihedral_angle_gui = wx.Slider(
+        self.dihedral_angle_gui = geom_gui.Slider(
             self.panel,
             value=int(geom_3d.RAD2DEG * self.shape.dihedral_angle),
             minValue=self.min_fold_angle,
@@ -3604,7 +3604,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.guis.append(self.dihedral_angle_gui)
         self.dihedral_angle_gui.Bind(wx.EVT_SLIDER, self.on_dihedral_angle)
-        self.fold1_gui = wx.Slider(
+        self.fold1_gui = geom_gui.Slider(
             self.panel,
             value=int(geom_3d.RAD2DEG * self.shape.fold1),
             minValue=self.min_fold_angle,
@@ -3613,7 +3613,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.guis.append(self.fold1_gui)
         self.fold1_gui.Bind(wx.EVT_SLIDER, self.on_fold1)
-        self.fold2_gui = wx.Slider(
+        self.fold2_gui = geom_gui.Slider(
             self.panel,
             value=int(geom_3d.RAD2DEG * self.shape.fold2),
             minValue=self.min_fold_angle,
@@ -3622,7 +3622,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.guis.append(self.fold2_gui)
         self.fold2_gui.Bind(wx.EVT_SLIDER, self.on_fold2)
-        self.opp_fold1_gui = wx.Slider(
+        self.opp_fold1_gui = geom_gui.Slider(
             self.panel,
             value=int(geom_3d.RAD2DEG * self.shape.opposite_fold1),
             minValue=self.min_fold_angle,
@@ -3631,7 +3631,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.guis.append(self.opp_fold1_gui)
         self.opp_fold1_gui.Bind(wx.EVT_SLIDER, self.on_opp_fold1)
-        self.opp_fold2_gui = wx.Slider(
+        self.opp_fold2_gui = geom_gui.Slider(
             self.panel,
             value=int(geom_3d.RAD2DEG * self.shape.opposite_fold2),
             minValue=self.min_fold_angle,
@@ -3640,7 +3640,7 @@ class FldHeptagonCtrlWin(wx.Frame):
         )
         self.guis.append(self.opp_fold2_gui)
         self.opp_fold2_gui.Bind(wx.EVT_SLIDER, self.on_opp_fold2)
-        self.height_gui = wx.Slider(
+        self.height_gui = geom_gui.Slider(
             self.panel,
             value=int(self.max_height - self.shape.height * self.height_factor),
             minValue=-int(self.max_height * self.height_factor),
@@ -5006,16 +5006,16 @@ class EqlHeptagonCtrlWin(wx.Frame):
 
         angle: signed angle (in degrees) of the kite with a face of the base model.
         """
-        return int((angle - self.kite_angle_offset) / self.kite_angle_factor)
+        return (angle - self.kite_angle_offset) / self.kite_angle_factor
 
     def create_ctrl_sizer(self):
         """Create and return the main sizer with all the control widgets."""
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
-        self.kite_angle_gui = wx.Slider(
+        self.kite_angle_gui = geom_gui.Slider(
             self.panel,
-            value=int(self.get_slider_val(self.shape.angle)),
+            value=self.get_slider_val(self.shape.angle),
             minValue=0,
             maxValue=self.KITE_ANGLE_STEPS,
             style=wx.SL_HORIZONTAL,

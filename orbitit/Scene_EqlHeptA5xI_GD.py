@@ -344,23 +344,10 @@ class CtrlWin(heptagons.EqlHeptagonCtrlWin):
         parentFrame.Bind(wx.EVT_RADIOBOX, this.onAltHeptSpecPos, id = this.altHeptSpecPosGui.GetId())
         this.altHeptSpecPreviousIndex = 0
 
-        # TODO port to new shape framework:
-        #this.transparencyGui = wx.Slider(parentFrame,
-        #        value = this.Opaqueness2Transparency(this.shape.opaqueness),
-        #        minValue = 0,
-        #        maxValue = 100,
-        #        style = wx.SL_HORIZONTAL
-        #    )
-        #this.transparencyGui.Bind(wx.EVT_SLIDER, this.onOpaquenessAdjust)
-        #this.transparencyBox = wx.StaticBox(parentFrame, label = 'Transparency of Heptagons (Experimental)')
-        #this.transparencySizer = wx.StaticBoxSizer(this.transparencyBox, wx.HORIZONTAL)
-        #this.transparencySizer.Add(this.transparencyGui, 1, wx.EXPAND)
-
         specPosSizer = wx.BoxSizer(wx.HORIZONTAL)
         specPosSizer.Add(this.prefHeptSpecPosGui, 1, wx.EXPAND)
         specPosSizer.Add(this.altHeptSpecPosGui,  1, wx.EXPAND)
 
-        #parentSizer.Add(this.transparencySizer,  .1, wx.EXPAND)
         parentSizer.Add(this.specialSolidPosGui, 10, wx.EXPAND)
         parentSizer.Add(specPosSizer,      14, wx.EXPAND)
 

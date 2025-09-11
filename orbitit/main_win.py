@@ -892,7 +892,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         s = (self.v_r_max - self.v_r_min) * self.v_r_scale
         if int(s) < no_of_slider_steps:
             self.v_r_scale = (self.v_r_scale * no_of_slider_steps) / s
-        self.v_r_gui = wx.Slider(
+        self.v_r_gui = geom_gui.Slider(
             self.parent_panel,
             value=int(self.v_r_scale * self.v_r),
             minValue=int(self.v_r_scale * self.v_r_min),
@@ -940,7 +940,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         s = (self.e_r_max - self.e_r_min) * self.e_r_scale
         if int(s) < no_of_slider_steps:
             self.e_r_scale = (self.e_r_scale * no_of_slider_steps) / s
-        self.e_r_gui = wx.Slider(
+        self.e_r_gui = geom_gui.Slider(
             self.parent_panel,
             value=int(self.e_r_scale * self.e_r),
             minValue=int(self.e_r_scale * self.e_r_min),
@@ -1077,7 +1077,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             steps = 100
             self.cell_scale_factor = float(max_val - min_val) / steps
             self.cell_scale_offset = min_val
-            self.scale_gui = wx.Slider(
+            self.scale_gui = geom_gui.Slider(
                 self.parent_panel,
                 value=100,
                 minValue=0,
@@ -1098,7 +1098,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             max_val = 5
             self.prj_vol_factor = float(max_val - min_val) / steps
             self.prj_vol_offset = min_val
-            self.prj_vol_gui = wx.Slider(
+            self.prj_vol_gui = geom_gui.Slider(
                 self.parent_panel,
                 value=self.val_2_slider(
                     self.prj_vol_factor,
@@ -1122,7 +1122,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             max_val = 5
             self.cam_dist_factor = float(max_val - min_val) / steps
             self.cam_dist_offset = min_val
-            self.cam_dist_gui = wx.Slider(
+            self.cam_dist_gui = geom_gui.Slider(
                 self.parent_panel,
                 value=self.val_2_slider(
                     self.cam_dist_factor,
@@ -1193,7 +1193,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             steps = 360
             self.angle_factor = float(max_val - min_val) / steps
             self.angle_offset = min_val
-            self.angle_gui = wx.Slider(
+            self.angle_gui = geom_gui.Slider(
                 self.parent_panel,
                 value=0,
                 minValue=0,
@@ -1213,7 +1213,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             steps = 100
             self.angle_scale_factor = float(max_val - min_val) / steps
             self.angle_scale_offset = min_val
-            self.angle_scale_gui = wx.Slider(
+            self.angle_scale_gui = geom_gui.Slider(
                 self.parent_panel,
                 value=0,
                 minValue=0,

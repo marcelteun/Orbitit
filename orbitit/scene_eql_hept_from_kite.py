@@ -28,7 +28,7 @@ Implement a GUI scene to demonstrate how to make an equilateral heptagon from a 
 import logging
 import wx
 
-from orbitit import geom_2d, geom_3d, geomtypes, heptagons, rgb
+from orbitit import geom_2d, geom_3d, geom_gui, geomtypes, heptagons, rgb
 
 TITLE = "Equilateral Heptagons from Kite"
 
@@ -280,7 +280,7 @@ class CtrlWin(wx.Frame):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # GUI for dynamic adjustment
-        self.kite_side_adjust = wx.Slider(
+        self.kite_side_adjust = geom_gui.Slider(
             self.panel,
             value=int(self.shape.side * self.side_scale),
             minValue=int(self.shape.side_min * self.side_scale),
@@ -296,7 +296,7 @@ class CtrlWin(wx.Frame):
         )
         self.kite_side_sizer.Add(self.kite_side_adjust, 1, wx.EXPAND)
 
-        self.kite_top_adjust = wx.Slider(
+        self.kite_top_adjust = geom_gui.Slider(
             self.panel,
             value=int(self.shape.top * self.side_scale),
             maxValue=int(self.shape.top_max * self.top_scale),
@@ -311,7 +311,7 @@ class CtrlWin(wx.Frame):
             wx.VERTICAL,
         )
         self.kite_top_sizer.Add(self.kite_top_adjust, 1, wx.EXPAND)
-        self.kite_tail_adjust = wx.Slider(
+        self.kite_tail_adjust = geom_gui.Slider(
             self.panel,
             value=self.shape.tail * self.side_scale,
             minValue=int(self.shape.tail_min * self.tail_scale),

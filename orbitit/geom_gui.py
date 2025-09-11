@@ -92,6 +92,19 @@ def _int_input_thread(win):
     wx.PostEvent(win, TextInputEvent())
 
 
+class Slider(wx.Slider):  # pylint: disable=too-few-public-methods
+    """Wrap the wx.Slider since at some version it stopped supporting floats for SetValue."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialise object."""
+        if "value" in kwargs:
+            kwargs["value"] = int(round(kwargs["value"]))
+        super().__init__(*args, **kwargs)
+
+    def SetValue(self, val):
+        """Set slider value where val might be a float, which will be rounded to an integer."""
+        super().SetValue(int(round(val)))
+
 class IntInput(wx.TextCtrl):
     """An input field for typing integer numbers"""
 
@@ -1585,7 +1598,7 @@ class AxisRotateSizer(wx.BoxSizer):
         )
         slider_sizer.Add(self.show_gui[-1], 0, wx.ALIGN_CENTRE_VERTICAL)
         self.show_gui.append(
-            wx.Slider(
+            Slider(
                 panel,
                 value=int(initial_angle),
                 minValue=min_angle,
@@ -1617,20 +1630,20 @@ class AxisRotateSizer(wx.BoxSizer):
     def set_angle(self, angle):
         """Define the angle to be used"""
         self.current_angle = angle
-        self.show_gui[self._slide_angle_gui_idx].SetValue(int(angle))
+        self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
         self.show_gui[self._typed_angle_gui_idx].SetValue(angle)
         self.on_angle(angle, self.get_axis())
 
     def _on_angle_typed(self, angle):
         """Called when user types a new angle in the input field"""
         self.current_angle = angle
-        self.show_gui[self._slide_angle_gui_idx].SetValue(int(angle))
+        self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
         self.on_angle(self.current_angle, self.get_axis())
 
     def _on_angle_set(self, e):
         """Called when when user presses button to applied typed angle"""
         self.current_angle = self.show_gui[self._typed_angle_gui_idx].GetValue()
-        self.show_gui[self._slide_angle_gui_idx].SetValue(int(self.current_angle))
+        self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
@@ -1641,7 +1654,7 @@ class AxisRotateSizer(wx.BoxSizer):
         # Update input float with precise input
         self.show_gui[self._typed_angle_gui_idx].SetValue(self.current_angle)
         # Update slide bar (which rounds to integer
-        self.show_gui[self._slide_angle_gui_idx].SetValue(int(self.current_angle))
+        self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
         self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
