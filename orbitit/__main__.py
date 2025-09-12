@@ -902,10 +902,12 @@ class MainPanel(wx.Panel):
         shape: the new shape. This will refresh the canvas.
         """
         old_shape = self.canvas.shape
-        self.canvas.shape = shape
+        if not isinstance(shape, geom_3d.CompoundShape) and isinstance(shape, geom_3d.SimpleShape):
+            shape = geom_3d.CompoundShape([shape])
         assert isinstance(
             shape, geom_3d.CompoundShape
         ), f"expected a CompoundShape, got {type(shape)}"
+        self.canvas.shape = shape
         # TODO: clean up vertices in case a vertex isn't used
         max_norm = 0
         for sub_shape in shape:
