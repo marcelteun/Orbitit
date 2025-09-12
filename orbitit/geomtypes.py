@@ -486,6 +486,19 @@ class Vec3(Vec):
             angle = angle % (2 * math.pi)
         return angle
 
+    def rotate_at(self, rot, axis_point):
+        """Rotate self around an axis that goes through the axis_point.
+
+        rot: the rotation of type Rot3
+        axis_point: a point on the rotation axis
+
+        Return: a new point
+        """
+        result = self - axis_point
+        result = rot * result
+        result += axis_point
+        return result
+
     # TODO implement Scenes3D.getAxis2AxisRotation here
 
 

@@ -401,6 +401,68 @@ class TestVec(unittest.TestCase):
             self.assertEqual(v, w)
             self.assertEqual(w, v)
 
+    def test_rotate_at(self):
+        """Test the rotate_at method"""
+        rotate = geomtypes.Rot3(axis=geomtypes.UZ, angle=math.pi/2)
+        test_matrix = {
+            "rotate around origin": {
+                "axis_point": geomtypes.Vec3([0, 0, 0]),
+                "invec": [
+                    geomtypes.Vec3([0, 0, 0]),
+                    geomtypes.Vec3([1, 0, 1]),
+                    geomtypes.Vec3([0, 1, 2]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([0, 0, 0]),
+                    geomtypes.Vec3([0, 1, 1]),
+                    geomtypes.Vec3([-1, 0, 2]),
+                ],
+            },
+            "still_rotate around origin": {
+                "axis_point": geomtypes.Vec3([0, 0, 3]),
+                "invec": [
+                    geomtypes.Vec3([0, 0, 0]),
+                    geomtypes.Vec3([1, 0, 1]),
+                    geomtypes.Vec3([0, 1, 2]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([0, 0, 0]),
+                    geomtypes.Vec3([0, 1, 1]),
+                    geomtypes.Vec3([-1, 0, 2]),
+                ],
+            },
+            "rotate around (0, 1)": {
+                "axis_point": geomtypes.Vec3([0, 1, 0]),
+                "invec": [
+                    geomtypes.Vec3([1, 0, 1]),
+                    geomtypes.Vec3([0, 1, 2]),
+                    geomtypes.Vec3([1, 1, 3]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([1, 2, 1]),
+                    geomtypes.Vec3([0, 1, 2]),
+                    geomtypes.Vec3([0, 2, 3]),
+                ],
+            },
+            "still rotate around (0, 1)": {
+                "axis_point": geomtypes.Vec3([0, 1, 5]),
+                "invec": [
+                    geomtypes.Vec3([1, 0, 1]),
+                    geomtypes.Vec3([0, 1, 2]),
+                    geomtypes.Vec3([1, 1, 3]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([1, 2, 1]),
+                    geomtypes.Vec3([0, 1, 2]),
+                    geomtypes.Vec3([0, 2, 3]),
+                ],
+            },
+        }
+        for test_case, test_data in test_matrix.items():
+            for org, exp in zip(test_data["invec"], test_data["expected"]):
+                result = org.rotate_at(rotate, test_data["axis_point"])
+                self.assertEqual(result, exp, f"test case {test_case} failed")
+
 
 class TestRot3(unittest.TestCase):
     """Unit tests for geomtypes.Rot3"""
