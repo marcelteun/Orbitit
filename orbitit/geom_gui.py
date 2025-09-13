@@ -1523,6 +1523,7 @@ class AxisRotateSizer(wx.BoxSizer):
         max_angle=180,
         initial_angle=0,
         max_len=8,
+        incl_axis_point=False,
     ):
         """
         Create a sizer for setting a rotation.
@@ -1539,16 +1540,21 @@ class AxisRotateSizer(wx.BoxSizer):
         initial_angle: the angle that will be used from the beginning.
         max_len: the amount characters to fit in the float inputs (angle, and angle step). The
             minimum size will be calculated from this.
+        incl_axis_point: if True then one can set a point on the rotation axis which can be used if
+            you want the rotate around an axis that doesn't meet the origin. If set the
+            on_angle_callback will be called an third argument axis_point. If the axis goes
+            through the origin axis_point is set to None.
         """
         self.current_angle = initial_angle
         self.on_angle = on_angle_callback
+        self.incl_axis_point = incl_axis_point
         self.panel = panel
         self.show_gui = []
         # Create a horizontal sizer to force all the ones inside to have the same width
         #
         # +-- self.hor------------------`+
         # | +----v_sizer.vert---------+ |
-        # | | Rotate araound Axis:    | |
+        # | | Rotate araound Axis:  + | | <- '+'-button to add axis point
         # | | x y z                   | |
         # | | +-set_angle_sizer.hor-+ | |
         # | | | Set angle .. etc    | | |
@@ -1564,9 +1570,23 @@ class AxisRotateSizer(wx.BoxSizer):
 
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
+        h_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.show_gui.append(Vector3DInput(panel, "Rotate around Axis:", v=[0, 0, 1]))
-        v_sizer.Add(self.show_gui[-1], 0, wx.EXPAND)
+        h_sizer.Add(self.show_gui[-1], 0, wx.LEFT | wx.EXPAND)
         self._axis_gui_idx = len(self.show_gui) - 1
+        v_sizer.Add(h_sizer, 0, wx.EXPAND)
+        # Point on axis (incl. hide and show)
+        if self.incl_axis_point:
+            self.show_gui.append(wx.Button(panel, wx.ID_ANY, "-", style=wx.BU_EXACTFIT))
+            h_sizer.Add(self.show_gui[-1], 0, wx.RIGHT | wx.EXPAND)
+            panel.Bind(wx.EVT_BUTTON, self._on_axis_point_gui, id=self.show_gui[-1].GetId())
+            self._axis_point_gui_show_hide = len(self.show_gui) - 1
+            self.show_gui.append(Vector3DInput(panel, "Axis goes through:", v=[0, 0, 0]))
+            self._axis_gui_point_idx = len(self.show_gui) - 1
+            v_sizer.Add(self.show_gui[-1], 0, wx.RIGHT)
+            self._axis_point_gui = len(self.show_gui) - 1
+            # Hide this part initially
+            self._on_axis_point_gui()
 
         # Set angle and step size
         set_angle_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1619,6 +1639,13 @@ class AxisRotateSizer(wx.BoxSizer):
         """Get the direction of the rotation axis in the GUI"""
         return self.show_gui[self._axis_gui_idx].get_vertex()
 
+    def get_axis_point(self):
+        """Get a point on the rotation axis. Returns None if the axis goes through the origin."""
+        axis_point = self.show_gui[self._axis_gui_point_idx].get_vertex()
+        if axis_point == geomtypes.Vec3([0, 0, 0]):
+            axis_point = None
+        return axis_point
+
     def set_axis(self, axis):
         """Set the direction of the rotation axis in the GUI"""
         self.show_gui[self._axis_gui_idx].set_vertex(axis)
@@ -1627,24 +1654,43 @@ class AxisRotateSizer(wx.BoxSizer):
         """Get the current rotation angle"""
         return self.current_angle
 
+    def _callback_angle(self):
+        """Invoke the angle call-back."""
+        if self.incl_axis_point:
+            self.on_angle(self.current_angle, self.get_axis(), self.get_axis_point())
+        else:
+            self.on_angle(self.current_angle, self.get_axis())
+
     def set_angle(self, angle):
         """Define the angle to be used"""
         self.current_angle = angle
         self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
         self.show_gui[self._typed_angle_gui_idx].SetValue(angle)
-        self.on_angle(angle, self.get_axis())
+        self._callback_angle()
 
     def _on_angle_typed(self, angle):
         """Called when user types a new angle in the input field"""
         self.current_angle = angle
         self.show_gui[self._slide_angle_gui_idx].SetValue(angle)
-        self.on_angle(self.current_angle, self.get_axis())
+        self._callback_angle()
+
+    def _on_axis_point_gui(self, e=None):
+        """Called when when user presses button to applied typed angle"""
+        show = self.show_gui[self._axis_point_gui_show_hide].GetLabel() == "+"
+        if show:
+            new_label = "-"
+        else:
+            new_label = "+"
+        self.show_gui[self._axis_point_gui_show_hide].SetLabel(new_label)
+        self.show_gui[self._axis_point_gui].ShowItems(show)
+        self.panel.Layout()
+        if e is not None:
+            e.Skip()
 
     def _on_angle_set(self, e):
         """Called when when user presses button to applied typed angle"""
         self.current_angle = self.show_gui[self._typed_angle_gui_idx].GetValue()
         self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
-        self.on_angle(self.current_angle, self.get_axis())
         if e is not None:
             e.Skip()
 
@@ -1655,7 +1701,7 @@ class AxisRotateSizer(wx.BoxSizer):
         self.show_gui[self._typed_angle_gui_idx].SetValue(self.current_angle)
         # Update slide bar (which rounds to integer
         self.show_gui[self._slide_angle_gui_idx].SetValue(self.current_angle)
-        self.on_angle(self.current_angle, self.get_axis())
+        self._callback_angle()
         if e is not None:
             e.Skip()
 
@@ -1678,6 +1724,6 @@ class AxisRotateSizer(wx.BoxSizer):
         # jump back to the old value, that is still in the float input.
         self.current_angle = self.show_gui[self._slide_angle_gui_idx].GetValue()
         self.show_gui[self._typed_angle_gui_idx].SetValue(self.current_angle)
-        self.on_angle(self.current_angle, self.get_axis())
+        self._callback_angle()
         if e is not None:
             e.Skip()

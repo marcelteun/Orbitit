@@ -1181,6 +1181,123 @@ class TestRotInv3(unittest.TestCase):
             self.assertEqual(r1 * r1.inverse(), geomtypes.E)
             self.assertEqual(r * r.inverse(), geomtypes.E)
 
+class TestRot3NonCentered(unittest.TestCase):
+    """Test class Rot3NonCentered."""
+
+    def test_rotate(self):
+        """Test rotating with some basic axes, axis points and some angles."""
+        hv3 = math.sqrt(3) / 2
+        test_matrix = {
+            "rotate around axis with z=1 direction and through (1, 0, 0)": {
+                "axis": geomtypes.Vec3([0, 0, 1]),
+                "through": geomtypes.Vec3([1, 0, 0]),
+                "angle": math.pi / 6,
+                "vecs": [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([1, 0, 3]),
+                    geomtypes.Vec3([2, 0, 0]),
+                    geomtypes.Vec3([0, 0, 0]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([1, 0, 3]),
+                    geomtypes.Vec3([1 + hv3, 0.5, 0]),
+                    geomtypes.Vec3([1 - hv3, -0.5, 0]),
+                ]
+            }
+        }
+        for test_case, test_data in test_matrix.items():
+            rot = geomtypes.Rot3NonCentered(
+                test_data["axis"],
+                test_data["through"],
+                test_data["angle"],
+            )
+            for in_v, exp_v in zip(test_data["vecs"], test_data["expected"]):
+                result = rot * in_v
+                with geomtypes.FloatHandler():
+                    passed = result == exp_v
+                    self.assertTrue(
+                        passed,
+                        f"'{test_case}' failed for vector {in_v}, got {result} != {exp_v}",
+                    )
+
+    def test_double_rotate(self):
+        """Test rot*rot with some basic axes, axis points and some angles."""
+        hv3 = math.sqrt(3) / 2
+        test_matrix = {
+            "rot*rot around axis with z=1 direction and through (1, 0, 0)": {
+                "axis": geomtypes.Vec3([0, 0, 1]),
+                "through": geomtypes.Vec3([1, 0, 0]),
+                "angle": math.pi / 6,
+                "vecs": [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([1, 0, 3]),
+                    geomtypes.Vec3([2, 0, 0]),
+                    geomtypes.Vec3([0, 0, 0]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([1, 0, 3]),
+                    geomtypes.Vec3([1.5, hv3, 0]),
+                    geomtypes.Vec3([0.5, -hv3, 0]),
+                ]
+            }
+        }
+        for test_case, test_data in test_matrix.items():
+            rot = geomtypes.Rot3NonCentered(
+                test_data["axis"],
+                test_data["through"],
+                test_data["angle"],
+            )
+            rot = rot * rot
+            for in_v, exp_v in zip(test_data["vecs"], test_data["expected"]):
+                result = rot * in_v
+                with geomtypes.FloatHandler():
+                    passed = result == exp_v
+                    self.assertTrue(
+                        passed,
+                        f"'{test_case}' failed for vector {in_v}, got {result} != {exp_v}",
+                    )
+
+    def test_triple_rotate(self):
+        """Test rot*rot*rot with some basic axes, axis points and some angles."""
+        test_matrix = {
+            "rot*rot*rot around axis with z=1 direction and through (1, 0, 0)": {
+                "axis": geomtypes.Vec3([0, 0, 1]),
+                "through": geomtypes.Vec3([1, 0, 0]),
+                "angle": math.pi / 6,
+                "vecs": [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([1, 0, 3]),
+                    geomtypes.Vec3([2, 0, 0]),
+                    geomtypes.Vec3([0, 0, 0]),
+                ],
+                "expected": [
+                    geomtypes.Vec3([1, 0, 0]),
+                    geomtypes.Vec3([1, 0, 3]),
+                    geomtypes.Vec3([1, 1, 0]),
+                    geomtypes.Vec3([1, -1, 0]),
+                ]
+            }
+        }
+        for test_case, test_data in test_matrix.items():
+            rot = geomtypes.Rot3NonCentered(
+                test_data["axis"],
+                test_data["through"],
+                test_data["angle"],
+            )
+            rr = rot * rot
+            test_rots = [rr * rot, rot * rr]
+            for in_v, exp_v in zip(test_data["vecs"], test_data["expected"]):
+                for rrr in test_rots:
+                    result = rrr * in_v
+                    with geomtypes.FloatHandler():
+                        passed = result == exp_v
+                        self.assertTrue(
+                            passed,
+                            f"'{test_case}' failed for vector {in_v}, got {result} != {exp_v}",
+                        )
+
 
 class TestRot4(unittest.TestCase):
     """Unit tests for geomtypes.Rot4"""

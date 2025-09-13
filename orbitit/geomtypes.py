@@ -27,9 +27,11 @@ Module with geometrical types.
 # pylint: disable=too-many-lines,too-many-branches
 
 
+from __future__ import annotations
 import json
 import logging
 import math
+from typing import overload
 
 from orbitit import base, indent
 from orbitit.base import Singleton  # to prevent pylint (2.4.4): Undefined variable 'base.Singleton'
@@ -325,6 +327,8 @@ class UnsupportedOperand(Exception):
 # Use tuples instead of lists to enable building sets used for isometries
 class Vec(tuple, base.Orbitit):
     """Define a Euclidean vector"""
+    is_homogeneous = False
+
     def __new__(cls, v):
         return tuple.__new__(cls, [float(a) for a in v])
 
@@ -449,6 +453,22 @@ class Vec(tuple, base.Orbitit):
         if s_norm == 0 or w_norm == 0:
             raise ValueError("Cannot take angle with nul vector")
         return math.acos((self / s_norm) * (w / w_norm))
+
+    @property
+    def homogeneous(self):
+        """Return the homogeneous coordinate."""
+        result = self.insert(1, i=len(self))
+        result.is_homogeneous = True
+        return result
+
+    @property
+    def cartesian(self):
+        """For a homogeneous vector return the coordinate."""
+        if FloatHandler.eq(self[-1], 1):
+            return Vec([self[i] for i in range(len(self) - 1)])
+        if FloatHandler.ne(self[-1], 0):
+            return Vec([self[i] / self[-1]  for i in range(len(self) - 1)])
+        return Vec([self[i] for i in range(len(self) - 1)])
 
     # TODO cross product from GA?
 
@@ -763,6 +783,8 @@ class Transform3(tuple, base.Orbitit):
             return (self[0] * Quat([0, u[0], u[1], u[2]]) * self[1]).V()
         if isinstance(u, Quat):
             return (self[0] * u * self[1]).V()
+        if isinstance(u, Rot3NonCentered):
+            return self.matrix(homogeneous=True) * u.matrix()
         return u.__rmul__(self)
 
     def __eq__(self, u):
@@ -878,9 +900,7 @@ class Transform3(tuple, base.Orbitit):
         if not homogeneous:
             return result
 
-        result = result.insert_col([0, 0, 0], 3)
-        result = result.insert_row(Vec([0, 0, 0, 1]), 3)
-        return result
+        return result.homogeneous
 
     def inverse(self):
         """Return a new object with the inverse of this transform"""
@@ -1355,6 +1375,100 @@ I = RotInv3(Quat([1, 0, 0, 0]))
 E = Rot3(Quat([1, 0, 0, 0]))
 
 
+class Rot3NonCentered():
+    """A 3D rotation around an axis that doesn't intersect the origin."""
+    def __init__(self, axis, axis_point, angle):
+        """
+        Initialise the 3D rotation.
+
+        axis: axis to rotate around: doesn't need to be normalised
+        axis_point: a point on the axis
+        angle: angle in radians to rotate
+        """
+        # the rotation if the origin was on the axis
+        self.rot3 = Rot3(axis=axis, angle=angle)
+        self.axis = Vec3(axis)
+        self.axis_point = Vec3(axis_point)
+        self.angle = angle
+
+    def glMatrix(self):
+        """Return the glMatrix representation of this transform"""
+        return self.matrix().transpose()
+
+    def matrix(self, **_):
+        """Return the 4x4 matrix representation of this transform.
+
+        _: ignored. This is added to be compatible with other 3D transforms
+        """
+        result = self.rot3.matrix(homogeneous=False)
+
+        # What needs to be done:
+        # 1. a translation -t that translate the axis_point to the origin
+        # 2. the rotation
+        # 3. translate back to axis_point, i.e. translate by t
+        # The resulting translation in the matrix is the -rotation*t + t
+        def rotate_one(i):
+            """rotate one translation element."""
+            t = 0
+            for j in range(3):
+                t += -self.axis_point[j] * result[i][j]
+            return t + self.axis_point[i]
+
+        translate = [rotate_one(i) for i in range(3)]
+        result = result.insert_col(translate, 3)
+        result = result.insert_row(Vec([0, 0, 0, 1]), 3)
+        result.is_homogeneous = True
+
+        return result
+
+    def is_opposite(self):
+        """Return False a rotation is never opposite."""
+        return False
+
+    @overload
+    def __mul__(self, v: Vec3) -> Vec3:
+        """Left rotate a 3D vector and return as 3D vector"""
+
+    @overload
+    def __mul__(self, t: Transform3) -> Vec3:
+        """Left rotate a transform and return a homogeneous Mat object"""
+
+    @overload
+    def __mul__(self, t: Mat) -> Mat:
+        """Left rotate a matrix representing a 3D transform."""
+
+    @overload
+    def __mul__(self, t: Rot3NonCentered) -> Mat:
+        """Left rotate a matrix representing a 3D transform."""
+
+    def __mul__(self, w):
+        right_side = w
+        return_vec = False
+        right_side_vec = False
+        if isinstance(right_side, Vec3):
+            right_side = right_side.homogeneous
+            right_side_vec = True
+            return_vec = True
+        elif isinstance(right_side, Transform3):
+            right_side = right_side.matrix(homogeneous=True)
+        elif isinstance(right_side, Rot3NonCentered):
+            right_side = right_side.matrix()
+        elif isinstance(right_side, Mat):
+            if right_side.rows == 3:
+                assert right_side.cols == 3
+                right_side = right_side.homogeneous
+        else:
+            raise NotImplementedError
+
+        assert len(right_side) == 4
+        assert right_side_vec or right_side.cols == 4
+        result = self.matrix() * right_side
+
+        if return_vec:
+            return result.cartesian
+        return result
+
+
 # TODO: make the 3D case a special case of 4D...
 class Transform4(tuple):
     """Define a tranform in 4D"""
@@ -1603,6 +1717,8 @@ class DoubleRot4(Transform4):
 
 class Mat(list):
     """Contruct matrix"""
+    is_homogeneous = False
+
     def __init__(self, m=None, dim=3):
         """Initialise matrix as m or as unit with dimension dimxdim"""
         if m is None:
@@ -1721,6 +1837,15 @@ class Mat(list):
             sign = -sign
         return r
 
+    @property
+    def determinant(self):
+        """Determinant of matrix"""
+        return self.det()
+
+    def is_opposite(self):
+        """Return whether this matrix represents an opposite transform."""
+        return self.determinant < 0
+
     def __mul__(self, n):
         """Mulitply matrix with matrix / vector"""
         result = None
@@ -1729,9 +1854,28 @@ class Mat(list):
             assert n.rows == self.cols
             n_t = n.T()
             result = Mat([Vec([row * col for col in n_t]) for row in self])
+            result.is_homogeneous = self.is_homogeneous
         elif isinstance(n, Vec):
-            assert self.rows == len(n)
-            result = Vec([row * n for row in self])
+            left_side = self
+            right_side = n
+            if left_side.rows == len(right_side) + 1:
+                right_side = right_side.homogeneous
+            if left_side.rows + 1 == len(right_side) and not left_side.is_homogeneous:
+                left_side = left_side.homogeneous
+            assert left_side.rows == len(right_side)
+            result = Vec([row * right_side for row in left_side])
+            if right_side.is_homogeneous and not n.is_homogeneous:
+                result = result.cartesian
+        elif isinstance(n, Rot3NonCentered):
+            right_side = n.matrix()
+            left_side = self
+            if left_side.rows == right_side.rows + 1:
+                right_side = right_side.homogeneous
+            elif left_side.rows + 1 == right_side.rows:
+                left_side = left_side.homogeneous
+            assert left_side.rows == right_side.rows
+            assert left_side.cols == right_side.cols
+            result = left_side * right_side
         else:
             assert False, f'unknown type of object to multiply matrix: {n}.'
         return result
@@ -1762,6 +1906,22 @@ class Mat(list):
             raise ValueError(f"No solution for {self}")
         return Vec(
             [self.replace_col(i, v).det() / det for i in range(self.cols)])
+
+    @property
+    def homogeneous(self):
+        """Return the homogeneous coordinate."""
+        if self.is_homogeneous:
+            return self
+
+        last = len(self)
+        result = self.insert_col([0 if i != last - 1 else 1 for i in range(last)], last)
+        result = result.insert_row([0 if i != last else 1 for i in range(last + 1)], last)
+        result.is_homogeneous = True
+        return result
+
+    def glMatrix(self):
+        """Return the glMatrix representation"""
+        return self.homogeneous.transpose()
 
 
 class Line:

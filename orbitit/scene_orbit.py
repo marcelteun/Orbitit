@@ -172,9 +172,14 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         # Rotate Axis
         # - rotate axis and set angle (button and float input)
         self.rot_sizer = geom_gui.AxisRotateSizer(
-            self.panel, self.on_rot, min_angle=-180, max_angle=180, initial_angle=0
+            self.panel,
+            self.on_rot,
+            min_angle=-180,
+            max_angle=180,
+            initial_angle=0,
+            incl_axis_point=True,
         )
-        face_sizer.Add(self.rot_sizer, 0)
+        face_sizer.Add(self.rot_sizer, 0, wx.EXPAND)
         ctrl_sizer.Add(face_sizer, 1, wx.EXPAND)
 
         # SYMMETRY
@@ -389,7 +394,11 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.fs_orbit = self.shape.isometries
         self.fs_orbit_org = True
         self.shape.regen_edges()
-        self.update_orientation(self.rot_sizer.get_angle(), self.rot_sizer.get_axis())
+        self.update_orientation(
+            self.rot_sizer.get_angle(),
+            self.rot_sizer.get_axis(),
+            self.rot_sizer.get_axis_point(),
+        )
         # Note the functions above need to be called to update the latest
         # status. I.e. don't call them in the or below, because the second will
         # not be called if the first is true.
@@ -420,16 +429,19 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             txt = f"{logging.getLevelName(level)}: {txt}"
             self.stat_bar.SetStatusText(txt)
 
-    def update_orientation(self, angle, axis):
+    def update_orientation(self, angle, axis, axis_point):
         """Handle when the orientation of a symmetry is updated"""
         if axis == geomtypes.Vec3([0, 0, 0]):
             rot = geomtypes.E
             self.status_text(
                 "Rotation axis is the null-vector: applying identity", logging.INFO
             )
-        else:
+        elif axis_point is None:
             rot = geomtypes.Rot3(axis=axis, angle=geom_3d.DEG2RAD * angle)
+        else:
+            rot = geomtypes.Rot3NonCentered(axis, axis_point, angle=geom_3d.DEG2RAD * angle)
         try:
+            # TODO: apply axis_point here
             self.shape.orientation = rot
             if self.shape_one_col:
                 self.shape_one_col.orientation = rot
@@ -438,9 +450,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
                 "Apply symmetry first, before pulling the slide-bar", logging.WARNING
             )
 
-    def on_rot(self, angle, axis):
+    def on_rot(self, angle, axis, axis_point):
         """Handle when the descriptive is rotated"""
-        self.update_orientation(angle, axis)
+        self.update_orientation(angle, axis, axis_point)
         self.canvas.paint()
 
     def on_no_of_col_select(self, e):
