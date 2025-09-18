@@ -3,6 +3,7 @@
 
 It defines RGB colours with values between 0 and 1
 """
+
 #
 # Copyright (C) 2010-2024 Marcel Tunnissen
 #
@@ -27,34 +28,30 @@ It defines RGB colours with values between 0 and 1
 from orbitit import rgb
 
 STD_COLORS = [
-    rgb.royalBlue,      # 0
+    rgb.royalBlue,  # 0
     rgb.yellowGreen,
-    rgb.plum,           # 2
+    rgb.plum,  # 2
     rgb.gold,
     rgb.firebrick,
-    rgb.tan,            # 5
-
+    rgb.tan,  # 5
     rgb.lightSkyBlue,
     rgb.lightSeaGreen,  # 7
     rgb.slateBlue,
     rgb.yellow,
-    rgb.indianRed,      # 10
+    rgb.indianRed,  # 10
     rgb.saddleBrown,
-
     rgb.midnightBlue,
     rgb.darkGreen,
     rgb.blueViolet,
     rgb.lemonChiffon,
     rgb.red,
     rgb.peru,
-
     rgb.steelBlue,
     rgb.limeGreen,
     rgb.seashell,
     rgb.khaki,
     rgb.peachPuff,
     rgb.orange,
-
     rgb.azure,
     rgb.darkOliveGreen,
     rgb.lavender,
@@ -68,13 +65,12 @@ STD_COLORS = [
 # colours aren't really one colour.
 # So for that reason I adjusted the colours a bit after my liking
 CHROMOLUX = {
-    "pearl_light_blue": [0xc5, 0xf0, 0xe8],
-    "pearl_light_mango": [0xe9, 0xcf, 0xab],
-    "pearl_medium_blue": [0x3c, 0x5d, 0x83],
-
-    "red": [0xe1, 0x0, 0x13],
+    "pearl_light_blue": [0x97, 0xA3, 0xA2],
+    "pearl_light_mango": [0xEB, 0xC9, 0xBD],
+    "pearl_medium_blue": [0x57, 0x75, 0x96],
+    "red": [0xE1, 0x0, 0x13],
     "black": [0x19, 0x19, 0x19],
-    "bordeaux_red": [0x6d, 0x22, 0x2a],
-    "light_pink": [0xee, 0xd1, 0xce],
-    "pink": [0xe1, 0x8c, 0x96],
+    "bordeaux_red": [0x6D, 0x22, 0x2A],
+    "light_pink": [0xEE, 0xD1, 0xCE],
+    "pink": [0xE1, 0x8C, 0x96],
 }
