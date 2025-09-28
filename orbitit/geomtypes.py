@@ -1914,7 +1914,7 @@ class Mat(list):
             return self
 
         last = len(self)
-        result = self.insert_col([0 if i != last - 1 else 1 for i in range(last)], last)
+        result = self.insert_col([0 for _ in range(last)], last)
         result = result.insert_row([0 if i != last else 1 for i in range(last + 1)], last)
         result.is_homogeneous = True
         return result
