@@ -1963,10 +1963,11 @@ class SimpleShape(base.Orbitit):
     ):
         """Return a representation of the object in the 3D 'OFF' file format.
 
-        precision: the precision that will be used for printing the coordinates
-                   of the vertices.
-        color_floats: whether to export the colours as floating point numbers
-                      between 0 and 1. If False an integer 0 to 255 is used.
+        precision: the precision that will be used for printing the coordinates of the vertices. It
+            is expressed as an integer expressing the amount of digits after the comma that shall be
+            used.
+        color_floats: whether to export the colours as floating point numbers between 0 and 1. If
+            False an integer 0 to 255 is used.
         """
 
         def w(s1):
