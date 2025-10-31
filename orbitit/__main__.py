@@ -518,7 +518,7 @@ class MainWindow(
             # will not work.
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
-        shape = geom_3d.CompoundShape([shape], name="Compound Shape")
+        shape = geom_3d.CompoundShape([shape])
         self.panel.shape = shape
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
@@ -575,7 +575,7 @@ class MainWindow(
             self,
             "Save as .json file",
             self.export_dir_name,
-            "",
+            self.use_filestem() + ".json",
             "*.json",
             style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
         )
@@ -603,6 +603,11 @@ class MainWindow(
             self.set_status_text("JSON file written")
         dlg.Destroy()
 
+    def use_filestem(self):
+        """For the current shape return a suggested default filename."""
+        shape = self.panel.shape
+        return "".join(shape.name.split())
+
     def on_save_off(self, _):
         """Handle event '_' to save the current shape as off-file"""
         dlg = main_dlg.ExportOffDialog(self, wx.ID_ANY, "OFF settings")
@@ -617,7 +622,7 @@ class MainWindow(
                     self,
                     "Save as .off file",
                     self.export_dir_name,
-                    "",
+                    self.use_filestem() + ".off",
                     "*.off",
                     wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 )
@@ -660,7 +665,7 @@ class MainWindow(
                     self,
                     "Save as .ps file",
                     self.export_dir_name,
-                    "",
+                    self.use_filestem() + ".ps",
                     "*.ps",
                     style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                 )

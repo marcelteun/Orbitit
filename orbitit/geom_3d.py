@@ -2650,12 +2650,12 @@ class CompoundShape(base.Orbitit):
         self,
         shapes,
         regen_edges=True,
-        name="CompoundShape",
+        name="",
     ):
         """
         shapes: a list of SimpleShape objects of which the shape is a compound.
         """
-        self.name = name
+        self._name = name
         self.merge_needed = False
         # This is save so heirs can still use repr_dict from this class
         self.json_class = CompoundShape
@@ -2687,6 +2687,15 @@ class CompoundShape(base.Orbitit):
     def __iter__(self):
         """Iterate through all shapes."""
         return iter(self._shapes)
+
+    @property
+    def name(self):
+        """Return the shape name by composing it from the component names."""
+        name = self._name
+        if not name:
+            for shape in self.shapes:
+                name += shape.name
+        return name
 
     @property
     def repr_dict(self):
