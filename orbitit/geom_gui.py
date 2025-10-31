@@ -83,13 +83,13 @@ class DisabledDropTarget(wx.TextDropTarget):  # pylint: disable=too-few-public-m
 # For IntInput needs a new event that is triggered with the current updated text, since
 # EVT_CHAR only sends the latest charaacter and EVT_TEXT doesn't come for all characters.
 # Create an event with some delay to give time to get the updated value
-TextInputEvent, EVT_TEXT_INPUT = new_event.NewEvent()
+TEXT_INPUT_EVENT, EVT_TEXT_INPUT = new_event.NewEvent()
 EVENT_DELAY = 0.01
 
 
 def _int_input_thread(win):
     time.sleep(EVENT_DELAY)
-    wx.PostEvent(win, TextInputEvent())
+    wx.PostEvent(win, TEXT_INPUT_EVENT())
 
 
 class Slider(wx.Slider):  # pylint: disable=too-few-public-methods

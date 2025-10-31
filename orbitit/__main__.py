@@ -1082,24 +1082,24 @@ if __name__ == "__main__":
         format="%(levelname)s@<%(filename)s:%(lineno)d> %(message)s",
         level=logging.DEBUG if PROG_ARGS.debug else logging.INFO,
     )
-    START_GUI = True
-    FILENAME = None
+    start_gui = True
+    inputfile = None
     if PROG_ARGS.inputfile:
-        FILENAME = Path(PROG_ARGS.inputfile)
-        IN_SHAPE = read_shape_file(FILENAME)
+        inputfile = Path(PROG_ARGS.inputfile)
+        IN_SHAPE = read_shape_file(inputfile)
         if not IN_SHAPE:
-            logging.error("Couldn't read shape file %s", FILENAME)
+            logging.error("Couldn't read shape file %s", inputfile)
             sys.exit(-1)
         if PROG_ARGS.off:
-            START_GUI = False
+            start_gui = False
             with open(PROG_ARGS.off, "w") as o_fd:
                 convert_to_off(IN_SHAPE, o_fd, PROG_ARGS.precision, PROG_ARGS.margin)
         elif PROG_ARGS.py:
-            START_GUI = False
+            start_gui = False
             with open(PROG_ARGS.py, "w") as o_fd:
                 IN_SHAPE.save_file(o_fd)
         elif PROG_ARGS.ps:
-            START_GUI = False
+            start_gui = False
             with open(PROG_ARGS.ps, "w") as o_fd:
                 convert_to_ps(
                     IN_SHAPE,
@@ -1111,12 +1111,12 @@ if __name__ == "__main__":
     else:
         IN_SHAPE = geom_3d.SimpleShape([], [])
 
-    if START_GUI:
+    if start_gui:
         APP = wx.App(False)
         FRAME = MainWindow(
             Canvas3DScene,
             IN_SHAPE,
-            FILENAME,
+            inputfile,
             PROG_ARGS.export_dir,
             None,
             wx.ID_ANY,
@@ -1124,7 +1124,7 @@ if __name__ == "__main__":
             size=(430, 482),
             pos=wx.Point(980, 0),
         )
-        if not FILENAME:
+        if not inputfile:
             FRAME.load_scene(SCENES[PROG_ARGS.scene])
         APP.MainLoop()
 
