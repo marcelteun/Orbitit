@@ -256,15 +256,15 @@ if __name__ == "__main__":
     PARSER = ArgumentParser(DESCR)
     add_std_arguments_for_generating_models(PARSER, list(MODELS_MAP.keys()))
     ARGS = PARSER.parse_args()
-    OUT_DIR = Path(ARGS.out_dir)
+    out_dir = Path(ARGS.out_dir)
 
     # TODO: share even more code. Perhaps make a class
     if ARGS.out_dir:
-        OUT_DIR = Path(ARGS.out_dir)
-        if not OUT_DIR.is_dir():
+        out_dir = Path(ARGS.out_dir)
+        if not out_dir.is_dir():
             raise ValueError(f"The path '{ARGS.out_dir}' doesn't exist")
     else:
-        OUT_DIR = Path("")
+        out_dir = Path("")
 
     if ARGS.precision and ARGS.precision > 0:
         geomtypes.float_out_precision = ARGS.precision
@@ -283,12 +283,12 @@ if __name__ == "__main__":
                 print(f"written {FILENAME}")
         FILENAME = model.name.lower().replace(" ", "_")
         if ARGS.json:
-            FILENAME = OUT_DIR / Path(FILENAME + ".json")
+            FILENAME = out_dir / Path(FILENAME + ".json")
             if ARGS.indent:
                 model.json_indent = ARGS.indent
             model.write_json_file(FILENAME)
         else:
-            FILENAME = OUT_DIR / Path(FILENAME + ".off")
+            FILENAME = out_dir / Path(FILENAME + ".off")
             with open(FILENAME, "w") as fd:
                 model.clean_shape(geomtypes.FLOAT_PRECISION)
                 fd.write(model.to_off(precision=geomtypes.float_out_precision))
