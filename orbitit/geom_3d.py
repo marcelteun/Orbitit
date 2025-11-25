@@ -907,13 +907,14 @@ class SimpleShape(base.Orbitit):
             exporting to other formats, like PS.
         orientation: orientation of the base shape. This is an isometry operation.
         """
+        self._edges = {}
         if not es:
             es = []
         if not ns:
             ns = []
-        self.fs = []
-        self.vs = []
-        self.es = []
+        self.fs = []  # just initialise, will be set properly in face_props
+        self.vs = []  # just initialise, will be set properly in vertex_props
+        self.es = []  # just initialise, will be set properly in edge_props
         self.dimension = 3
         self.face_normals = []
         self.generate_normals = True
@@ -1221,6 +1222,39 @@ class SimpleShape(base.Orbitit):
             if "draw_edges" in props and props["draw_edges"] is not None:
                 self.gl.draw_edges = props["draw_edges"]
 
+    def check_proper_edges(self, restrict=False, regen_edges=True):
+        """Check wether this is a proper polyhedron with regards to edges.
+
+        A proper polyhedron will not have loose edges, i.e. edges that is only shared by one face.
+        According to Grünbaum it is okay to have edges sharing space, as long as the edges are
+        considered to be distinct. Here this is converted to the requirement that edges should be
+        shared by an even amount of faces.
+
+        restrict: if set to True, then edges can only be shared by exactly 2 faces.
+        regen_edges: if True then edges will be regenerated from the vertex and face arrays.
+
+        return: return True if all edges are proper. False otherwise.
+        """
+        if regen_edges:
+            self.regen_edges()
+
+        proper = True
+        for edge, shared_with in self._edges.items():
+            no_of_faces = len(shared_with)
+            if not restrict:
+                if no_of_faces % 2 != 0:
+                    proper = False
+                    logging.warning("Edge %s shared by odd amount (%d) of faces", edge, no_of_faces)
+                    for face in shared_with:
+                        logging.debug(" - face no. %d, edge no. %d", face[0], face[1])
+            else:
+                if no_of_faces != 2:
+                    proper = False
+                    logging.warning("Edge %s shared by %d", edge, no_of_faces)
+                    for face in shared_with:
+                        logging.debug(" - face no. %d, edge no. %d", face[0], face[1])
+        return proper
+
     def regen_edges(self):
         """
         Recreates the edges in the 3D object by using an adges for every side of
@@ -1230,28 +1264,29 @@ class SimpleShape(base.Orbitit):
         i.e. edges that have the same vertex index, only appear once.
         The creation of edges is not optimised and can take a long time.
         """
-        added_edges = []
-        es = []
+        # edge dictionary:
+        # key: the edge, an ordered tuple of indices in self.vs
+        # value: tuple of face index, and index inside the face
+        edge_dict = {}
 
-        def add_edge(i, j):
-            if i < j:
-                edge = [i, j]
-            elif i > j:
-                edge = [j, i]
-            else:
-                return
-            if edge not in added_edges:
-                added_edges.append(edge)
-                es.extend(edge)
+        self.es = []
+        for face_i, face in enumerate(self.fs):
+            no_of_vs = len(face)
+            for e_i, v_i in enumerate(face):
+                v_j = face[(e_i + 1) % no_of_vs]
+                if v_i < v_j:
+                    edge = (v_i, v_j)
+                elif v_i > v_j:
+                    # note: including edges of length 0
+                    edge = (v_j, v_i)
+                try:
+                    edge_dict[edge].append((face_i, e_i))
+                except KeyError:
+                    # New edge
+                    edge_dict[edge] = [(face_i, e_i)]
+                    self.es.extend(edge)
 
-        for face in self.fs:
-            last_idx = len(face) - 1
-            for i in range(last_idx):
-                add_edge(face[i], face[i + 1])
-            # handle the edge from the last vertex to the first vertex separately
-            # (instead of using % for every index)
-            add_edge(face[last_idx], face[0])
-        self.es = es
+        self._edges = edge_dict
 
     @property
     def face_props(self):

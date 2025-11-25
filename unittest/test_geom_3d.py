@@ -847,6 +847,87 @@ class TestFace(unittest.TestCase):
 
 
 class TestSimpleShape(unittest.TestCase):
+    """Unit tests for geom_3d.SimpleShape that aren't inherited"""
+    def test_proper_edges(self):
+        """Test the method check_proper_edges."""
+        test_matrix = {
+            "tetrahedron": {
+                "shape": get_tetrahedron(),
+                "test_pars": [
+                    {"restrict": True, "expect": True},
+                    {"restrict": False, "expect": True},
+                ]
+            },
+            "tetrahedron_min_one": {
+                "vs": [
+                    geomtypes.Vec3([1, 1, 1]),
+                    geomtypes.Vec3([-1, -1, 1]),
+                    geomtypes.Vec3([1, -1, -1]),
+                    geomtypes.Vec3([-1, 1, -1]),
+                ],
+                "fs": [
+                    [0, 1, 2],
+                    [0, 3, 1],
+                    [2, 3, 0],
+                ],
+                "test_pars": [
+                    {"restrict": True, "expect": False},
+                    {"restrict": False, "expect": False},
+                ]
+            },
+            "shared edges 4 times": {
+                "vs": [
+                    geomtypes.Vec3([1, 1, 1]),
+                    geomtypes.Vec3([-1, -1, 1]),
+                    geomtypes.Vec3([1, -1, -1]),
+                ],
+                "fs": [
+                    [0, 1, 2],
+                    [0, 1, 2],
+                    [0, 1, 2],
+                    [0, 1, 2],
+                ],
+                "test_pars": [
+                    {"restrict": True, "expect": False},
+                    {"restrict": False, "expect": True},
+                ]
+            },
+            "shared edges 4 times split": {
+                "vs": [
+                    geomtypes.Vec3([1, 1, 1]),
+                    geomtypes.Vec3([-1, -1, 1]),
+                    geomtypes.Vec3([1, -1, -1]),
+                    geomtypes.Vec3([1, 1, 1]),
+                    geomtypes.Vec3([-1, -1, 1]),
+                    geomtypes.Vec3([1, -1, -1]),
+                ],
+                "fs": [
+                    [0, 1, 2],
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [3, 4, 5],
+                ],
+                "test_pars": [
+                    {"restrict": True, "expect": True},
+                    {"restrict": False, "expect": True},
+                ]
+            },
+        # TODO: test with clean up shape?
+        }
+        for test_case, data in test_matrix.items():
+            if data.get("shape"):
+                shape = data["shape"]
+            else:
+                shape = geom_3d.SimpleShape(vs=data["vs"], fs=data["fs"], colors=([YELLOW], []))
+            for result in data["test_pars"]:
+                self.assertEqual(
+                    shape.check_proper_edges(restrict=result["restrict"]),
+                    result["expect"],
+                    f"test case '{test_case}' failed for check_proper_edges.",
+                )
+
+
+class TestSimpleShapeInherit(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape"""
 
     shape = None
@@ -900,7 +981,7 @@ class TestSimpleShape(unittest.TestCase):
         self.assertTrue(result, msg)
 
 
-class TestSimpleShapeExtended(TestSimpleShape):
+class TestSimpleShapeExtended(TestSimpleShapeInherit):
     """Unit tests for geom_3d.SimpleShape"""
 
     def test_scale(self):
