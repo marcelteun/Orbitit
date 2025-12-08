@@ -1279,6 +1279,11 @@ class SimpleShape(base.Orbitit):
                 elif v_i > v_j:
                     # note: including edges of length 0
                     edge = (v_j, v_i)
+                else:
+                    # remove edges that connect the exact same vertex. If you want to use a vertex
+                    # connecting the same point in space, use different vertices with the same
+                    # coordinate and don't simplify the shape
+                    continue
                 try:
                     edge_dict[edge].append((face_i, e_i))
                 except KeyError:

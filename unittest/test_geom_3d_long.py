@@ -39,6 +39,7 @@ class TestUniformShape1(TestSimpleShape):
     ps_precision = 7
 
     def def_shape(self):
+        """Define the shape being tested by opening a file with self.name."""
         name = get_path(self.name + ".off", IN_DIR)
         with open(name, 'r') as fd:
             self.shape = geom_3d.read_off_file(fd, regen_edges=True)
