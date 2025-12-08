@@ -587,6 +587,8 @@ class MainWindow(
             logging.info("writing to file %s", filepath)
             shape = self.panel.shape
             # TODO: should we really use the filename as name?
+            # No, the user should be able to set the name in the UI and be able to use another file
+            # name. Keep this for now, but FIXME
             shape.name = filepath.stem
             # TODO add precision through setting:
             precision = geomtypes.FLOAT_OUT_PRECISION

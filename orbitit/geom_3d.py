@@ -2737,6 +2737,11 @@ class CompoundShape(base.Orbitit):
                 name += shape.name
         return name
 
+    @name.setter
+    def name(self, name: str):
+        """Set this shape's name."""
+        self._name = name
+
     @property
     def repr_dict(self):
         """Return a short representation of the object."""
