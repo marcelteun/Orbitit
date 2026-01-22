@@ -17,16 +17,25 @@ pain to install wxPython especially through pip in a virtual environment. Some
 might want to skip the virtual evironment and install and use wxPython from
 inside the OS instead.
 
-When wxPython is installed through pip it is compiled. This can take quite some
-time (e.g. more than 15 minutes). This means that there should be C-compiler
-available at least. For a Debian Linux you would need have installed (e.g.
+When wxPython is installed through pip the standard way it is compiled. This
+can take quite some time (e.g. more than 15 minutes) and it can be quite
+cumbersome. It is easier to check whether there is a pre-compiled version available for your OS on https://extras.wxpython.org/wxPython4/extras
+
+For instance for Ubuntu 24 LTS one can install a pre-compiled version through:
+pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-24.04/ wxPython
+
+This is quicker and much easier.
+
+Below follows some tips if you decide to compile your own version. Make sure
+that you have the right packages installed. You will need a a C-compiler at
+least. For a Debian Linux you would need have installed (e.g.
 through apt-get) the packages
  - build-essential
  - libgtk-3-dev and libwxgtk3.0-gtk3-dev (or whathever GTK version you are using)
  - python3-dev
  - libgl1-mesa-glx libglu1-mesa
 
-For Ubuntu I also had:
+For Ubuntu I also did:
 `sudo apt-get install python3-dev`
 I am not sure whether this was needed.
 

@@ -33,4 +33,5 @@ chk_files="
 	utils/generate_59_icosahedra.py
 	utils/generate_compound_polyhedra.py
 "
-pylint --extension-pkg-whitelist=wx $chk_files
+pylint --version
+pylint $chk_files
