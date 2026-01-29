@@ -41,14 +41,14 @@ class ExportOffDialog(wx.Dialog):
     clean_up = False
     extra_data = False
 
-    def __init__(self, parent, ID, title):
+    def __init__(self, parent, window_id, title):
         # Instead of calling wx.Dialog.__init__ we precreate the dialog
         # so we can set an extra style that must be set before
         # creation, and then we create the GUI dialog using the Create
         # method.
         wx.Dialog.__init__(self)
         self.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.Create(parent, ID, title)
+        self.Create(parent, window_id, title)
 
         # Now continue with the normal construction of the dialog
         # contents
@@ -147,7 +147,7 @@ class ExportPsDialog(wx.Dialog):
     precision = 12
     float_margin = 10
 
-    def __init__(self, parent, ID, title):
+    def __init__(self, parent, window_id, title):
 
         # Instead of calling wx.Dialog.__init__ we precreate the dialog
         # so we can set an extra style that must be set before
@@ -155,7 +155,7 @@ class ExportPsDialog(wx.Dialog):
         # method.
         wx.Dialog.__init__(self)
         self.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.Create(parent, ID, title)
+        self.Create(parent, window_id, title)
 
         # Now continue with the normal construction of the dialog
         # contents
