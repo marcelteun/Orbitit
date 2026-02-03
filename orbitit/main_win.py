@@ -705,12 +705,18 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_translate)
         translate_sizer.Add(self.guis[-1], 0, wx.EXPAND)
 
-        # Invert
-        invert_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.main_sizer.Add(invert_sizer)
-        self.guis.append(wx.Button(self.panel, label="Invert"))
-        self.guis[-1].Bind(wx.EVT_BUTTON, self.on_invert)
-        invert_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        # Scale
+        scale_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.main_sizer.Add(scale_sizer)
+        self.scale_factor_gui = geom_gui.FloatInput(self.panel, wx.ID_ANY, 1, max_len=16)
+        self.guis.append(self.scale_factor_gui)
+        scale_sizer.Add(self.scale_factor_gui, 0, wx.EXPAND)
+        self.guis.append(wx.Button(self.panel, label="Scale"))
+        scale_sizer.Add(self.guis[-1], 0, wx.EXPAND)
+        self.guis[-1].Bind(
+            wx.EVT_BUTTON,
+            lambda _id: self.on_scale(self.scale_factor_gui.GetValue()),
+        )
 
         self.sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.main_sizer.Add(self.sub_sizer)
@@ -748,10 +754,10 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
-    def on_invert(self, _=None):
+    def on_scale(self, factor):
         """Handle event '_' to invert shape"""
         # Assume compound shape
-        self.canvas.shape.scale(-1)
+        self.canvas.shape.scale(factor)
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -771,6 +777,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.org_vs = self.canvas.shape.vertex_props["vs"]
         # reset the angle
         self.rot_sizer.set_angle(0)
+        self.scale_factor_gui.SetValue(0)
         self.set_status_text("applied, now you can define another axis")
 
     def on_reset(self, _=None):
