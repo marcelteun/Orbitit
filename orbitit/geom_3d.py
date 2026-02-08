@@ -3325,6 +3325,13 @@ class SymmetricShape(CompoundShape):
         self.merge_needed = True
         self.needs_apply_isoms = True
 
+    @property
+    def shapes(self):
+        """Return all shapes of this compound shape"""
+        if self.needs_apply_isoms:
+            self.apply_isoms()
+        return self._shapes
+
     def apply_colors(self):
         """
         Divide the shape colors over the isometries and re-assign class field.
