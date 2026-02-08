@@ -53,3 +53,4 @@ disable=W0511,W1514
 max-parents=8
 max-positional-arguments=8
 max-args=6
+max-locals=30
