@@ -101,7 +101,7 @@ class AntiPrism(geom_3d.SimpleShape):
         n: int,
         m: int = 1,
         edge_length: float = EDGE_LENGTH,
-        use_outline: bool = True,
+        use_outline: bool = False,
     ) -> geom_3d.SimpleShape:
         """Return a SimpleShape object that represents an anti-prism with {n/m} base.
 
@@ -196,7 +196,7 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
         n: int,
         m: int = 1,
         edge_length: float = EDGE_LENGTH,
-        use_outline: bool = True,
+        use_outline: bool = False,
     ) -> geom_3d.CompoundShape:
         """Return an object of three anti-prism with {n/m} base.
 
@@ -224,26 +224,37 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
         angle = orig_to_triangle_gravity.directed_angle(geomtypes.UZ, axis)
         one.transform(geomtypes.Rot3(angle=angle, axis=axis))
 
-        rm_triangles = n % 2 == 1 and m % 2 == 1
-        # For off n: a symmetry of D3xI is obtained,
-        # For even n: you'll get less symmetry: D3C3
-        # This is because for odd n there are pairs of parallel triangles
-        if rm_triangles:
-            # The top and bottom triangles are shared by all three anti-prisms
+        # In some cases the bottom is also shared, e.g. {7/1}, {7/3} and {8/2}
+        # In general this happens when the triangles in the anti-prism come in parallel pairs
+        # In other cases only to the top triangle is shared, e.g. {4/1} and {7/2}
+        self.shared_top_and_bottom = n % 2 == 1 and m % 2 == 1
+        self.symmetry = {True: "D3xI", False: "D3C3"}[self.shared_top_and_bottom]
+
+        # When only the top triangle is shared the symmetry is D3C3
+        # If both top and bottom are shared, then the symmetry is D3xI
+        # Note that D3C3 is a subgroup of D3xI
+
+        # Remove the top triangle and the ones attacted to that one
+        bases_offset = 2
+        ring_offset = n
+        centre_down_i = n // 2
+        top_triangle_i = bases_offset
+        top_triangle = one.fs[top_triangle_i]
+        remove_fs = [top_triangle_i]
+        recover_fs = [top_triangle]
+        # first and last for second ring are attached
+        remove_fs += [bases_offset + ring_offset, bases_offset + ring_offset + n - 1]
+
+        if self.shared_top_and_bottom:
+            # For this case both top and bottom triangles are shared by all three anti-prisms
             # Remove all and add single ones later
-            bases_offset = 2
-            ring_offset = n
-            centre_down_i = n // 2
-            top_triangle_i = bases_offset
             bottom_triangle_i = centre_down_i + bases_offset + ring_offset
-            top_triangle = one.fs[top_triangle_i]
             bottom_triangle = one.fs[bottom_triangle_i]
-            remove_fs = [top_triangle_i, bottom_triangle_i]
+            remove_fs.append(bottom_triangle_i)
+            recover_fs.append(bottom_triangle)
             # The two in the middle for first ring
             remove_fs += [bases_offset + centre_down_i, bases_offset + centre_down_i + 1]
-            # first and last for second ring
-            remove_fs += [bases_offset + ring_offset, bases_offset + ring_offset + n - 1]
-            one.remove_faces(remove_fs)
+        one.remove_faces(remove_fs)
 
         orbit_shape = orbit.Shape(
             {'vs': one.vs, 'fs': one.fs},
@@ -253,34 +264,54 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
             3,
         )
         shapes = orbit_shape.shapes
-        if rm_triangles:
+        if self.shared_top_and_bottom:
             shapes.append(
                 geom_3d.SimpleShape(
                     one.vs,
-                    [top_triangle, bottom_triangle],
+                    recover_fs,
                     colors=(cols, [3, 3]),
                     name="top_and_bottom"
                 )
             )
         else:
-            logging.error("Add support for anti-prisms {%d/%d}", n, m)
+            shapes.append(
+                geom_3d.SimpleShape(
+                    one.vs,
+                    [top_triangle],
+                    colors=(cols, [3]),
+                    name="top"
+                )
+            )
 
         super().__init__(orbit_shape.shapes, name=orbit_shape.name)
 
-        # TODO: case 7/2 isn't working: it is the same as got even n: no parallel triangles
-        # TODO: support parameter outline and call self.shape.replace_face_by_outline(face_i)
+        # FIXME: case {6/2}, {8/2}, {9/3} aren't working
 
 
 if __name__ == "__main__":
-    check = [(4, 1), (5, 1), (6, 1), (7, 1), (5, 2), (7, 3), (7, 2), (8, 2), (9, 1)]
+    folder = "out/tri_composites_of_antriprisms"
+    check = [
+        (3, 1),
+        (4, 1),
+        (5, 1), (5, 2),
+        (6, 1), (6, 2),
+        (7, 1), (7, 2), (7, 3),
+        (8, 2),
+        (9, 1), (9, 2), (9, 3),
+    ]
     for N, M in check:
-        with open(f"out/3_antiprims_{N}_{M}_D3xI.off", "w") as fd:
-            fd.write(ThreeAntiPrisms(N, M).to_off())
+        star_polygon_basis = M > 1 and not N % M == 0
+        tca = ThreeAntiPrisms(N, M)
+        with open(f"{folder}/3_antiprims_{N}_{M}_{tca.symmetry}.off", "w") as fd:
+            fd.write(tca.to_off())
+        if star_polygon_basis:
+            # Also create a version using outlines
+            tca = ThreeAntiPrisms(N, M, use_outline=True)
+            with open(f"{folder}/3_antiprims_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
+                fd.write(tca.to_off())
 
     check = [(4, 1), (5, 1), (5, 2), (6, 1), (7, 1), (7, 2), (7, 3), (8, 2), (9, 1), (9, 3)]
-    # FIXME: (9, 3) indices
     for N, M in check:
-        with open(f"out/antiprims_{N}_{M}.off", "w") as fd:
+        # Use outline here as well
+        with open(f"{folder}/antiprims_{N}_{M}.off", "w") as fd:
             fd.write(AntiPrism(N, M).to_off())
-    # This is very special: degenerative. Decide how to handle
-    # anti_prism(6, 2)
