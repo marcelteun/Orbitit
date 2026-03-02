@@ -26,6 +26,7 @@ Like prisms and anti-prisms
 #
 # ------------------------------------------------------------------
 import logging
+from copy import deepcopy
 from math import cos, gcd, pi, sin, sqrt
 
 from orbitit import geomtypes, geom_3d, isometry, orbit
@@ -168,8 +169,9 @@ class AntiPrism(geom_3d.SimpleShape):
             for sub_i in range(no_of_subs)
             for v_i in range(sub_len)
         ]
-        # Reverse the bottom base to keep the counter-clockwise order:
-        for i in range(1, len(bases), 2):
+        # TODO: handle n == m, ValueError?
+        # Reverse the bottom base (or top is m > n/2) to keep the counter-clockwise order:
+        for i in range(1 if m < n / 2 else 0, len(bases), 2):
             bases[i].reverse()
         ring_len = no_of_subs * sub_len
         col_i = [0 for _ in range(self.no_of_bases)] + [
@@ -197,6 +199,7 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
         m: int = 1,
         edge_length: float = EDGE_LENGTH,
         use_outline: bool = False,
+        gen_compound: bool = False,
     ) -> geom_3d.CompoundShape:
         """Return an object of three anti-prism with {n/m} base.
 
@@ -207,8 +210,33 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
             will lead to holes for parts of the polygon that have double coverage. Using the outline
             lead to edges not really being shared between faces, since the {n/m}-gram will have 2n
             edges.
+        gen_compound: set to True and a 3-compound of antiprisms is generated instead of a TCA.
         """
+        if n < 4:
+            raise ValueError("Only considering TCAs for polygons with more than 3 sides.")
+        d = gcd(n, m)
+
+        # Compound of d {m'/n'} wih m' = m / d and n' = n / d
+        n_, m_ = n // d, m // d
+
+        # In some cases the bottom is also shared, e.g. {7/1}, {7/3} and {8/2}
+        # In general this happens when the triangles in the anti-prism come in parallel pairs
+        # In other cases only to the top triangle is shared, e.g. {4/1} and {7/2}
+        self.shared_top_and_bottom = (n % 2) == (m % 2)
+
+        sym_group = f"D{3 * d}" + {True: "xI", False: f"C{3 * d}"}[self.shared_top_and_bottom]
+        head = "" if d == 1 else f"{d}x_"
+        self.symmetry = sym_group
+        name = f"3_antiprism_{head}{n_}_{m_}_{sym_group}",
         one = AntiPrism(n, m, edge_length, use_outline=use_outline)
+        if d > 1:
+            # FIXME: this is wrong you shouldn't rotate around the 3-fold axis...
+            if n_ < 4:
+                raise ValueError(
+                    "Only considering compounds of TCAs for polygons with more than 3 sides. "
+                    f"The parameters lead to {d} x {{{n_}/{m_}}}, where {n_} <= 3."
+                )
+            # FIXME: case {6/2}, {8/2}, {9/3} aren't working
         # The way this is set-up the first triangle goes through X-axis
         triangle = one.fs[one.no_of_bases]
         assert len(triangle) == 3
@@ -217,23 +245,18 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
         # The gravity point of the triangle is supposed to be in the XoZ-plane
         with geomtypes.FloatHandler(precision=15) as fh:
             assert fh.eq(orig_to_triangle_gravity[1], 0),\
-                f"{orig_to_triangle_gravity} not in XoZ for {{{n}/{m}}}"
+                f"{orig_to_triangle_gravity} not in XoZ for {{{n_}/{m_}}}"
 
         # Rotate around Y-axis so that the gravity point is on Z-axis:
         axis = geomtypes.UY
         angle = orig_to_triangle_gravity.directed_angle(geomtypes.UZ, axis)
         one.transform(geomtypes.Rot3(angle=angle, axis=axis))
 
-        # In some cases the bottom is also shared, e.g. {7/1}, {7/3} and {8/2}
-        # In general this happens when the triangles in the anti-prism come in parallel pairs
-        # In other cases only to the top triangle is shared, e.g. {4/1} and {7/2}
-        self.shared_top_and_bottom = n % 2 == 1 and m % 2 == 1
-        self.symmetry = {True: "D3xI", False: "D3C3"}[self.shared_top_and_bottom]
-
         # When only the top triangle is shared the symmetry is D3C3
         # If both top and bottom are shared, then the symmetry is D3xI
         # Note that D3C3 is a subgroup of D3xI
 
+        # FIXME: move out and use gen_compound
         # Remove the top triangle and the ones attacted to that one
         bases_offset = 2
         ring_offset = n
@@ -254,63 +277,99 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
             recover_fs.append(bottom_triangle)
             # The two in the middle for first ring
             remove_fs += [bases_offset + centre_down_i, bases_offset + centre_down_i + 1]
-        one.remove_faces(remove_fs)
+
+        # For now: see FIXME above
+        if not gen_compound:
+            one.remove_faces(remove_fs)
 
         orbit_shape = orbit.Shape(
             {'vs': one.vs, 'fs': one.fs},
             isometry.C3(),
             isometry.E(),
-            f"3_antiprism_{n}_{m}_D3xI",
+            name,
             3,
         )
         shapes = orbit_shape.shapes
-        if self.shared_top_and_bottom:
-            shapes.append(
-                geom_3d.SimpleShape(
-                    one.vs,
-                    recover_fs,
-                    colors=(cols, [3, 3]),
-                    name="top_and_bottom"
+        if not gen_compound:
+            if self.shared_top_and_bottom:
+                shapes.append(
+                    geom_3d.SimpleShape(
+                        one.vs,
+                        recover_fs,
+                        colors=(cols, [3, 3]),
+                        name="top_and_bottom"
+                    )
                 )
-            )
-        else:
-            shapes.append(
-                geom_3d.SimpleShape(
-                    one.vs,
-                    [top_triangle],
-                    colors=(cols, [3]),
-                    name="top"
+            else:
+                shapes.append(
+                    geom_3d.SimpleShape(
+                        one.vs,
+                        [top_triangle],
+                        colors=(cols, [3]),
+                        name="top"
+                    )
                 )
-            )
 
         super().__init__(orbit_shape.shapes, name=orbit_shape.name)
-
-        # FIXME: case {6/2}, {8/2}, {9/3} aren't working
 
 
 if __name__ == "__main__":
     folder = "out/tri_composites_of_antriprisms"
+    base_name = "tca"
     check = [
-        (3, 1),
-        (4, 1),
-        (5, 1), (5, 2),
-        (6, 1), (6, 2),
-        (7, 1), (7, 2), (7, 3),
-        (8, 2),
-        (9, 1), (9, 2), (9, 3),
+        #(3, 1),
+        #(4, 1),
+        #(5, 1), (5, 2), (5, 3),
+        #(6, 1),
+        #(7, 1), (7, 2), (7, 3), (7, 4),
+        #(8, 1), (8, 2), (8, 3),
+        #(9, 1), (9, 2), (9, 3), (9, 5),
+        #(12, 3),
     ]
     for N, M in check:
         star_polygon_basis = M > 1 and not N % M == 0
         tca = ThreeAntiPrisms(N, M)
-        with open(f"{folder}/3_antiprims_{N}_{M}_{tca.symmetry}.off", "w") as fd:
+        with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}.off", "w") as fd:
             fd.write(tca.to_off())
         if star_polygon_basis:
             # Also create a version using outlines
             tca = ThreeAntiPrisms(N, M, use_outline=True)
-            with open(f"{folder}/3_antiprims_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
+            with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
                 fd.write(tca.to_off())
 
-    check = [(4, 1), (5, 1), (5, 2), (6, 1), (7, 1), (7, 2), (7, 3), (8, 2), (9, 1), (9, 3)]
+    folder = "out/tri_composites_of_antriprisms"
+    base_name = "3_compound_of"
+    check = [
+        #(3, 1),
+        #(4, 1),
+        #(5, 1), (5, 2), (5, 3),
+        #(6, 1),
+        #(7, 1), (7, 2), (7, 3), (7, 4),
+        #(8, 1), (8, 2), (8, 3),
+        (8, 2),
+        #(9, 1), (9, 2), (9, 3), (9, 5),
+        #(12, 3),
+    ]
+    for N, M in check:
+        star_polygon_basis = M > 1 and not N % M == 0
+        tca = ThreeAntiPrisms(N, M, gen_compound=True)
+        with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}.off", "w") as fd:
+            fd.write(tca.to_off())
+        if star_polygon_basis:
+            # Also create a version using outlines
+            tca = ThreeAntiPrisms(N, M, use_outline=True, gen_compound=True)
+            with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
+                fd.write(tca.to_off())
+
+    check = [(4, 1), (5, 1), (5, 2), (9, 5), (6, 1), (7, 1), (7, 2), (7, 3), (8, 2), (9, 1), (9, 3)]
+    check = [
+        #(4, 1),
+        #(5, 1), (5, 2),
+        #(6, 1),
+        #(7, 1), (7, 2), (7, 3),
+        #(8, 2),
+        #(9, 1), (9, 3), (9, 5),
+    ]
     for N, M in check:
         # Use outline here as well
         with open(f"{folder}/antiprims_{N}_{M}.off", "w") as fd:
