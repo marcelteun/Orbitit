@@ -190,7 +190,7 @@ class AntiPrism(geom_3d.SimpleShape):
             self.replace_face_by_outline(1)
 
 
-class ThreeAntiPrisms(geom_3d.CompoundShape):
+class ThreeAntiPrisms(geom_3d.SimpleShape):
     """Compound of three {n/m} anti-prisms all sharing one opposite pairs of triangles."""
 
     def __init__(
@@ -224,19 +224,17 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
         # In other cases only to the top triangle is shared, e.g. {4/1} and {7/2}
         self.shared_top_and_bottom = (n % 2) == (m % 2)
 
-        sym_group = f"D{3 * d}" + {True: "xI", False: f"C{3 * d}"}[self.shared_top_and_bottom]
+        sym_group = f"D{3}" + {True: "xI", False: f"C{3}"}[self.shared_top_and_bottom]
         head = "" if d == 1 else f"{d}x_"
         self.symmetry = sym_group
         name = f"3_antiprism_{head}{n_}_{m_}_{sym_group}",
         one = AntiPrism(n, m, edge_length, use_outline=use_outline)
         if d > 1:
-            # FIXME: this is wrong you shouldn't rotate around the 3-fold axis...
             if n_ < 4:
                 raise ValueError(
                     "Only considering compounds of TCAs for polygons with more than 3 sides. "
                     f"The parameters lead to {d} x {{{n_}/{m_}}}, where {n_} <= 3."
                 )
-            # FIXME: case {6/2}, {8/2}, {9/3} aren't working
         # The way this is set-up the first triangle goes through X-axis
         triangle = one.fs[one.no_of_bases]
         assert len(triangle) == 3
@@ -256,32 +254,6 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
         # If both top and bottom are shared, then the symmetry is D3xI
         # Note that D3C3 is a subgroup of D3xI
 
-        # FIXME: move out and use gen_compound
-        # Remove the top triangle and the ones attacted to that one
-        bases_offset = 2
-        ring_offset = n
-        centre_down_i = n // 2
-        top_triangle_i = bases_offset
-        top_triangle = one.fs[top_triangle_i]
-        remove_fs = [top_triangle_i]
-        recover_fs = [top_triangle]
-        # first and last for second ring are attached
-        remove_fs += [bases_offset + ring_offset, bases_offset + ring_offset + n - 1]
-
-        if self.shared_top_and_bottom:
-            # For this case both top and bottom triangles are shared by all three anti-prisms
-            # Remove all and add single ones later
-            bottom_triangle_i = centre_down_i + bases_offset + ring_offset
-            bottom_triangle = one.fs[bottom_triangle_i]
-            remove_fs.append(bottom_triangle_i)
-            recover_fs.append(bottom_triangle)
-            # The two in the middle for first ring
-            remove_fs += [bases_offset + centre_down_i, bases_offset + centre_down_i + 1]
-
-        # For now: see FIXME above
-        if not gen_compound:
-            one.remove_faces(remove_fs)
-
         orbit_shape = orbit.Shape(
             {'vs': one.vs, 'fs': one.fs},
             isometry.C3(),
@@ -289,28 +261,60 @@ class ThreeAntiPrisms(geom_3d.CompoundShape):
             name,
             3,
         )
-        shapes = orbit_shape.shapes
-        if not gen_compound:
-            if self.shared_top_and_bottom:
-                shapes.append(
-                    geom_3d.SimpleShape(
-                        one.vs,
-                        recover_fs,
-                        colors=(cols, [3, 3]),
-                        name="top_and_bottom"
-                    )
-                )
-            else:
-                shapes.append(
-                    geom_3d.SimpleShape(
-                        one.vs,
-                        [top_triangle],
-                        colors=(cols, [3]),
-                        name="top"
-                    )
-                )
 
-        super().__init__(orbit_shape.shapes, name=orbit_shape.name)
+        simple_shape = orbit_shape.simple_shape
+        if not gen_compound:
+            vs, fs, colors = self._handle_multi(simple_shape)
+            name = f"TCA_{n}_{m}_{sym_group}"
+            super().__init__(vs, fs, colors=colors, name=name)
+        else:
+            super().__init__(
+                simple_shape.vs,
+                simple_shape.fs,
+                colors=simple_shape.shape_colors,
+                name=orbit_shape.name,
+            )
+
+    def _handle_multi(self, simple_shape):
+        """Handle multiple faces: remove all doubles
+
+        For triple faces: remove two, keep one and change colour.
+
+        Return: vertices, faces, colours
+        """
+        count_faces = {1: {}, 2: {}, 3: {}}
+        clean_shape = simple_shape.clean_shape(10)
+        for face_i, face in enumerate(clean_shape.fs):
+            min_vi = min(face)
+            i = face.index(min_vi)
+            face_tuple = tuple(face[i:] + face[:i])
+            for occurence in range(1, 4):
+                if face_tuple in count_faces[occurence]:
+                    count_faces[occurence + 1][face_tuple] = count_faces[occurence][face_tuple]
+                    count_faces[occurence + 1][face_tuple].append(face_i)
+                    del count_faces[occurence][face_tuple]
+                    break
+            else:
+                count_faces[1][face_tuple] = [face_i]
+        # Use all single face occurences
+        new_fs_1 = list(count_faces[1].keys())
+        cols_1 = [
+            clean_shape.shape_colors[1][i] for faces_i in count_faces[1].values() for i in faces_i
+        ]
+        # Skip double occurences i.e. clean_shape.shape_colors[2]
+        # pass
+        # Use new colour for triple occurences, but only keep one face
+        # assuming that cols[0], cols[1], etc is used in shape_colors
+        new_col_index = len(clean_shape.shape_colors[0])
+        new_fs_3 = list(count_faces[3].keys())
+        cols_3 = [new_col_index for _ in new_fs_3]
+        #
+        new_fs = new_fs_1 + new_fs_3
+        new_cols = (
+            clean_shape.shape_colors[0] + tuple([cols[new_col_index]]),
+            tuple(cols_1 + cols_3),
+        )
+        return clean_shape.vs, new_fs, new_cols
 
 
 if __name__ == "__main__":
@@ -321,10 +325,11 @@ if __name__ == "__main__":
         #(4, 1),
         #(5, 1), (5, 2), (5, 3),
         #(6, 1),
+        (7, 1),
         #(7, 1), (7, 2), (7, 3), (7, 4),
-        #(8, 1), (8, 2), (8, 3),
-        #(9, 1), (9, 2), (9, 3), (9, 5),
-        #(12, 3),
+        (8, 1), (8, 2), (8, 3),
+        #(9, 1), (9, 2), (9, 5),
+        (12, 3),
     ]
     for N, M in check:
         star_polygon_basis = M > 1 and not N % M == 0
@@ -346,7 +351,6 @@ if __name__ == "__main__":
         #(6, 1),
         #(7, 1), (7, 2), (7, 3), (7, 4),
         #(8, 1), (8, 2), (8, 3),
-        (8, 2),
         #(9, 1), (9, 2), (9, 3), (9, 5),
         #(12, 3),
     ]

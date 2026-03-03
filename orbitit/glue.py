@@ -67,8 +67,8 @@ def clean_up_vs_fs(vs, fs):
     # remove all unused indices from vs and subtract the approproate amount
     # from the indices in fs that are bigger
     # vUsage contains for each vertex a tuple that expresses:
-    # - how ofter the vertex is used:
-    # After the unused vertices are deleted, vReoved will contain:
+    # - how often the vertex is used:
+    # After the unused vertices are deleted, vRemoved will contain:
     # - how many vertices that come before this (vertex) index are deleted.
     #
     vUsage = getVUsageIn2D(vs, fs)
