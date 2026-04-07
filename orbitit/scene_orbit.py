@@ -112,25 +112,20 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.Show(True)
         self.panel.Layout()
         self.import_dir_name = Path(os.environ.get("ORBITIT_LIB", os.getcwd()))
-        self.cols = []
+        self.cols = colors.STD_COLORS[:]
         self.select_col_guis = []
-        self.orbit = None
-        self.fs_orbit = None
-        self.fs_orbit_org = None
-        self.col_final_sym = None
         self.col_sizer = None
         self.col_guis = None
         self.col_gui_box = None
-        self.col_syms = None
         self.col_alt = None
         self.select_col_sizer = None
         self._no_of_cols_gui_idx = None
-        self.set_default_cols()
-        self._col_pre_selection = 0
+        self._col_pre_selection = None
 
     def set_default_cols(self):
         """Fill colours with some default values"""
         self.cols = colors.STD_COLORS[:]
+        self.shape.orbit_cols = self.cols
 
     def create_ctrl_sizer(self):
         """Create and return a wxWidget sizer with all the controls"""
@@ -246,25 +241,14 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.col_gui_box = wx.StaticBox(self.panel, label="Colour Setup")
             self.col_sizer = wx.StaticBoxSizer(self.col_gui_box, wx.VERTICAL)
             self.ctrl_sizer.Add(self.col_sizer, 0, wx.EXPAND)
-        self.orbit = orbit.Orbit(
-            (
-                self.show_gui[self._final_sym_gui_idx].get_selected(),
-                self.show_gui[self._stab_sym_gui_idx].get_selected(),
-            )
-        )
         # Generate list of colour alternatives
         no_of_cols_choice_lst = []
         no_to_index = []
-        for p in self.orbit.higher_order_stab_props:
+        for p in self.shape.orbit.higher_order_stab_props:
             no_of_cols_choice_lst.append(
-                f"{p['index']} (based on {p['class'].__name__})"
+                f"{p['order']} (based on {p['class'].__name__})"
             )
-            no_to_index.append(p["index"])
-        for p in self.orbit.lower_order_stab_props:
-            no_of_cols_choice_lst.append(
-                f"{p['index']} (based on {p['class'].__name__})"
-            )
-            no_to_index.append(p["index"])
+            no_to_index.append(p["order"])
         self.col_guis = []
         # Make a choice list of colour alternatives
         self.col_guis.append(
@@ -279,10 +263,12 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.col_alt = self.col_select[
             self.show_gui[self._final_sym_gui_idx].get_selected_idx()
         ][self.show_gui[self._stab_sym_gui_idx].get_selected_idx()]
-        # overwrite if self._col_pre_selection (by importing JSON file with colours defined)
-        if self._col_pre_selection != 0 and self._col_pre_selection in no_to_index:
-            self.col_alt[0] = no_to_index.index(self._col_pre_selection)
-            self.col_alt[1] = 0
+        # overwrite self._col_pre_selection (by importing JSON file with colours defined)
+        if self._col_pre_selection is not None and self._col_pre_selection[0] in no_to_index:
+            self.col_alt[0] = no_to_index.index(self._col_pre_selection[0])
+            self.col_alt[1] = self._col_pre_selection[1]
+            # Needed to prevent col_alt[1] being reset in on_no_of_col_select
+            self.shape.set_col_alt(self.col_alt[0], self.col_alt[1])
         self.col_guis[-1].SetSelection(self.col_alt[0])
         self._no_of_cols_gui_idx = len(self.col_guis) - 1
         self.on_no_of_col_select(self.col_guis[-1])
@@ -381,8 +367,13 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         self.final_sym_setup[final_sym_idx] = final_sym_obj.setup
         self.stab_sym_setup[final_sym_idx][stab_sym_idx] = stab_sym.setup
         try:
-            self.shape = geom_3d.OrbitShape(
-                verts, faces, final_sym=final_sym_obj, stab_sym=stab_sym, name=self.name
+            self.shape = orbit.Shape(
+                base={"vs": verts, "fs": faces},
+                final_sym=final_sym_obj,
+                stab_sym=stab_sym,
+                name=self.name,
+                no_of_cols=self.no_of_cols,
+                cols=self.cols,
             )
         except isometry.ImproperSubgroupError:
             self.status_text(
@@ -391,8 +382,6 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             if e is not None:
                 e.Skip()
             return
-        self.fs_orbit = self.shape.isometries
-        self.fs_orbit_org = True
         self.shape.regen_edges()
         self.update_orientation(
             self.rot_sizer.get_angle(),
@@ -492,35 +481,15 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
 
         col_div_no = e.GetSelection()
         self.col_alt[0] = col_div_no
-        l0 = len(self.orbit.higher_order_stab_props)
-        assert l0 != 0, "no higher order stabilisers found"
-        if col_div_no < l0:
-            self.col_final_sym = self.orbit.final
-            self.col_syms = self.orbit.higher_order_stab(col_div_no)
-            no_of_cols = self.orbit.higher_order_stab_props[col_div_no]["index"]
-        else:
-            self.col_final_sym = self.orbit.final_sym_alt
-            self.col_syms = self.orbit.lower_order_stab(col_div_no - l0)
-            no_of_cols = self.orbit.lower_order_stab_props[col_div_no - l0]["index"]
-            # now the fs_orbit might contain isometries that are not part of
-            # the colouring isometries. Recreate the shape with isometries that
-            # only have these:
-            if self.fs_orbit_org:
-                final_sym = self.orbit.final_sym_alt
-                stab_sym = self.orbit.stab_sym_alt
-                verts = self.shape.base_vs
-                faces = self.shape.base_shape.face_props["fs"]
-                self.shape = geom_3d.OrbitShape(
-                    verts, faces, final_sym=final_sym, stab_sym=stab_sym, name=self.name
-                )
-                self.fs_orbit = self.shape.isometries
-                self.shape.regen_edges()
-                self.fs_orbit_org = False  # and do this only once
-        assert self.col_syms
+        # replace invalid index of colour alternative with the last possible
+        no_of_col_options = len(self.shape.col_syms_for_index(col_div_no))
+        if self.col_alt[1] >= no_of_col_options:
+            self.col_alt[1] = no_of_col_options - 1
         init_col = (255, 255, 255)
         max_col_per_row = 20
         # Add buttons for choosing individual colours:
         self.select_col_guis = []
+        no_of_cols = self.shape.orbit.higher_order_stab_props[col_div_no]["order"]
         for i in range(no_of_cols):
             try:
                 col = self.cols[i]
@@ -537,9 +506,6 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.panel.Bind(wxLibCS.EVT_COLOURSELECT, self.on_col_select)
             sel_col_sizer_row.Add(self.select_col_guis[-1], 0, wx.EXPAND)
         self.no_of_cols = no_of_cols
-        # replace invalid index of colour alternative with the last possible
-        if self.col_alt[1] >= len(self.col_syms):
-            self.col_alt[1] = len(self.col_syms) - 1
         self.update_shape_cols()
         self.panel.Layout()
 
@@ -561,12 +527,11 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         """Update the shape that only shows the sub-compound using the first colour."""
         verts = self.show_gui[self._vs_gui_idx].get()
         faces = self.show_gui[self._fs_gui_idx].get()
-        final_sym = self.col_final_sym
-        col_quotient_set = final_sym / self.col_syms[self.col_alt[1]]
+        col_quotient_set = self.shape.orbit.final / self.shape.col_syms[self.col_alt[1]]
         self.shape_one_col = geom_3d.SymmetricShape(
             verts,
             faces,
-            colors=[self.cols[0] for _ in self.col_syms[self.col_alt[1]]],
+            colors=[self.cols[0] for _ in self.shape.col_syms[self.col_alt[1]]],
             isometries=col_quotient_set[0],
             orientation=self.shape.orientation,
             name=self.name,
@@ -578,19 +543,10 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             self.update_one_col_shape()
             self.canvas.panel.shape = self.shape_one_col
         else:
-            final_sym = self.col_final_sym
-            col_quotient_set = final_sym / self.col_syms[self.col_alt[1]]
-            col_per_isom = []
-            for isom in self.fs_orbit:
-                for i, sub_set in enumerate(col_quotient_set):
-                    if isom in sub_set:
-                        col_per_isom.append(self.cols[i])
-                        break
-            cols = [col[:3] for col in col_per_isom]
-            self.shape.shape_colors = cols
+            self.shape.set_col_alt(self.col_alt[0], self.col_alt[1])
             self.canvas.panel.shape = self.shape
         self.status_text(
-            f"Colour alternative {self.col_alt[1] + 1} of {len(self.col_syms)} applied",
+            f"Colour alternative {self.col_alt[1] + 1} of {len(self.shape.col_syms)} applied",
             logging.INFO,
         )
 
@@ -607,8 +563,8 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
     def on_next_col_alt(self, _):
         """Handle when the next colour setup is chosen"""
         self.col_alt[1] += 1
-        if self.col_alt[1] >= len(self.col_syms):
-            self.col_alt[1] -= len(self.col_syms)
+        if self.col_alt[1] >= len(self.shape.col_syms):
+            self.col_alt[1] -= len(self.shape.col_syms)
         self.update_shape_cols()
 
     def on_reset_cols(self, _):
@@ -634,7 +590,7 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         """Handle when the previous colour setup is chosen"""
         self.col_alt[1] -= 1
         if self.col_alt[1] < 0:
-            self.col_alt[1] += len(self.col_syms)
+            self.col_alt[1] += len(self.shape.col_syms)
         self.update_shape_cols()
 
     def import_json(self, filename):
@@ -678,21 +634,29 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
             except KeyError:
                 pass
             self.show_gui[self._stab_sym_gui_idx].setup_sym(setup)
-            # TODO: set the colours
-            included_colors = []
-            i = 0
-            for col in shape.shape_colors:
-                if col not in included_colors:
-                    included_colors.append(col)
-                    self.cols[i] = col[:3]
-                    i += 1
+            if getattr(shape, "orbit_cols", None):
+                shape_cols = shape.orbit_cols
+            else:
+                shape_cols = []
+                i = 0
+                for col in shape.shape_colors:
+                    if col not in shape_cols:
+                        shape_cols.append(col)
+                        self.cols[i] = col[:3]
+                        i += 1
+            if getattr(shape, "orbit_no_of_cols", None):
+                no_of_cols = shape.orbit_no_of_cols
+            else:
+                no_of_cols = len(shape_cols)
             axis = getattr(shape, "axis", None)
             if axis:
                 self.rot_sizer.set_axis(axis)
             domain = getattr(shape, "domain", None)
             if domain:
                 self.rot_sizer.set_angle(domain[0])
-            self._col_pre_selection = len(included_colors)
+            self._col_pre_selection = [no_of_cols, 0]
+            if getattr(shape, "col_alt", None):
+                self._col_pre_selection[1] = shape.col_alt
             shape = shape.base_shape
         if isinstance(shape, geom_3d.CompoundShape):
             shape = shape.simple_shape
