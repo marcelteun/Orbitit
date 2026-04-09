@@ -804,6 +804,17 @@ class PlaneFromNormal:
             q = mat.solve(geomtypes.Vec([-self.D, -plane.D, 0]))
         return Line3D(q, v=v)
 
+    def intersect_with_line(self, line: Line3D):
+        """Calculate the intersection of a line with the current plane.
+
+        line: a Line object
+        """
+        dot = self.normal * line.v
+        if dot == 0:
+            raise ValueError("The line is parallel to the plabe")
+        t = -(self.normal * line.p0 + self.D) / dot
+        return line.get_point(t)
+
     def is_in_plane(self, point):
         """Return whether point 'point' is in the plane
 
