@@ -2855,7 +2855,7 @@ class CompoundShape(base.Orbitit):
         precision: number of decimals to consider when deciding whether two floating point numbers
             are equal.
         """
-        self.simple_shape.clean_shape(precision)
+        return self.simple_shape.clean_shape(precision)
 
     def gl_draw(self):
         """Draws the compound shape as compound shape
