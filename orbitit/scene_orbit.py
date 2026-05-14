@@ -612,6 +612,9 @@ class CtrlWin(wx.Frame):  # pylint: disable=too-many-public-methods
         if isinstance(shape, geom_3d.OrbitShape):
             final_sym = shape.final_sym
             stab_sym = shape.stab_sym
+            orientation = shape.orientation
+            self.rot_sizer.set_angle(geom_3d.RAD2DEG * orientation.angle())
+            self.rot_sizer.set_axis(orientation.axis())
             self.show_gui[self._final_sym_gui_idx].set_selected_class(type(final_sym))
             self.show_gui[self._final_sym_gui_idx].on_set_sym(None)
             self.show_gui[self._final_sym_gui_idx].setup_sym(final_sym.setup)

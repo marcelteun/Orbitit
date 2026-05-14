@@ -359,11 +359,12 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         s += f"# Used colour alternative {self.col_alt} (max {self.total_no_of_col_alt - 1})"
         return s
 
-    def to_js(self):
+    def to_js(self, name=""):
         """Return javascript representation so it can be shown with the showoff library."""
-        name = self.name
-        sep = "" if self.name[1] == "_" else "_"  # Don't use seperator for A_, B_ variants
-        name = f"n{self.index}{sep}{name}"
+        if not name:
+            name = self.name
+            sep = "" if self.name[1] == "_" else "_"  # Don't use seperator for A_, B_ variants
+            name = f"n{self.index}{sep}{name}"
         js = f"var {name} = new Object();\n"
         js += f"{name}.descr = new Object();\n"
         js += f"{name}.descr.Vs = [\n"
@@ -436,6 +437,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
                 "no_of_cols": self.orbit_no_of_cols,
                 "col_alt": self.col_alt,
                 "col_sym": self.same_col_isom,
+                "orientation": self.orientation.repr_dict,
             },
         }
         if self.axis is not None:
@@ -466,6 +468,9 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
                 obj.angle_domain = data["angle_domain"]
         else:
             obj = geom_3d.OrbitShape.from_dict_data(data)
+        if data.get("orientation"):
+            ori = data["orientation"]
+            obj.orientation = geomtypes.Transform3.from_json_dict(ori)
         return obj
 
 
