@@ -30,6 +30,10 @@ from orbitit import base as orbit_base
 from orbitit import colors, geom_3d, geomtypes, isometry
 
 
+class ColourDivideError(Exception):
+    pass
+
+
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
     """A class for handling algebraic orbits."""
 
@@ -253,7 +257,10 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         # TODO: why is this needed?
         self._org_base_vs = self.base_vs
 
-        self.generate_cols(no_of_cols, col_sym, col_alt)
+        try:
+            self.generate_cols(no_of_cols, col_sym, col_alt)
+        except ColourDivideError:
+            self.generate_cols(1)
 
     # TODO: use annotated type hint for col_alt >= 0
     def generate_cols(self, no_of_cols, col_sym: str = "", col_alt: int = 0):
@@ -281,7 +288,7 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
                     f"Cannot divide {no_of_cols} colours with symmetry {col_sym} over "
                     f"{self.orbit.final.__class__.__name__}"
                 )
-            raise ValueError(msg)
+            raise ColourDivideError(msg)
 
         self.set_col_alt(idx, col_alt)
 
