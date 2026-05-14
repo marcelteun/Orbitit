@@ -31,7 +31,7 @@ from orbitit import colors, geom_3d, geomtypes, isometry
 
 
 class ColourDivideError(Exception):
-    pass
+    """Raise specific error when failing to divide colours using a certain symmetry."""
 
 
 class Orbit(list):  # pylint: disable=too-many-instance-attributes
@@ -253,6 +253,10 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         self.axis = None
         self.angle_domain = None
         self.col_sym = None
+        self.col_choice_index = None
+        self.total_no_of_col_alt = None
+        self.col_alt = None
+        self.col_per_isom = []
         # Save original
         # TODO: why is this needed?
         self._org_base_vs = self.base_vs
@@ -273,7 +277,6 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         col_alt: if there is more than one possibility for a colour symmetry, specify an index here.
         """
         idx = 0
-        col_choice = None
         subgroups = self.orbit.higher_order_stab_props
         for idx, col_choice in enumerate(subgroups):
             if col_choice['order'] == no_of_cols:
@@ -301,13 +304,12 @@ class Shape(geom_3d.OrbitShape):  # pylint: disable=too-many-instance-attributes
         # Elements with the same colour are mapped onto each other by:
         self.col_choice_index = index
         col_syms = self.orbit.higher_order_stab(index)
-        col_choice = self.orbit.higher_order_stab_props[index]
 
         # generate colour array for this colour alternative
         self.total_no_of_col_alt = len(col_syms)
         if col_alt >= self.total_no_of_col_alt:
             logging.warning(
-                f"colour alternative %i doesn't exist (max %i)",
+                "colour alternative %i doesn't exist (max %i)",
                 col_alt,
                 self.total_no_of_col_alt - 1,
             )
