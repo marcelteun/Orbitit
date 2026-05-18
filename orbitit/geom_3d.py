@@ -2417,15 +2417,15 @@ class SimpleShape(base.Orbitit):
             resulting_intersections.append((line_2d, new_factors))
         return resulting_intersections
 
-    def _intersect_with_face_in_hor_plane(self, vs, compound_face, z):
+    def _intersect_with_face_in_hor_plane(self, vs, z):
         """
         Intersect all faces with a face in an horizontal plane
 
-        vs: the list of vertices for an shape with an updated orientation so that the compound face
-            is in a horizontal plane.
-        comound_face: a list of faces. Each face is a list of vertex indices. The faces should all
-            ly in the horizontal plane (with the orientation specified by vs)
-        z: the z-value of the horizontal plane to intersect with.
+        vs: the list of vertices for an shape with an updated orientation so that the face that we
+            want to intersect with is in a horizontal plane.
+        z: the z-value of the horizontal plane to intersect with. All vertices in the face that we`
+            are intersecting with should have a z-coordinate that is, more or less, equal to this
+            value.
 
         return: a tuple of a points list and a polygons list. Each point consists of an X, Y
             coordinate in the plane, while a polygon is a list of indinces in the points list. A
@@ -2459,50 +2459,35 @@ class SimpleShape(base.Orbitit):
                 logging.debug("Intersecting face shares the plane")
                 calc_intersection = False
             else:
-                # Check whether they share an edge
-                length = len(intersecting_face)
-                for v_idx_in_face, v_idx in enumerate(intersecting_face):
-                    # The loop below checks whether the edge starting with vertex index v_idx
-                    # is shared with any of the edges in compound faces. In that case we don't
-                    # need to calculate the point of intersection
-                    # The intersecting line then is the edge itself, which doesn't need to be added
-                    for hor_face in compound_face:
-                        if v_idx in hor_face:
-                            # At least the vertex v is in this horinzontal face
-                            next_v_idx_in_face = v_idx_in_face + 1
-                            if next_v_idx_in_face == length:
-                                next_v_idx_in_face = 0
-                            next_v_idx = intersecting_face[next_v_idx_in_face]
-                            if next_v_idx in hor_face:
-                                p_idx = hor_face.index(v_idx)
-                                q_idx = hor_face.index(next_v_idx)
-                                delta = abs(p_idx - q_idx)
-                                # There is also this possibility:
-                                #   .========.--------.=======.
-                                #  / \        \______/       / \
-                                # |    \____________________/  |
-                                # \____________________________|
-                                #
-                                # It seems that in that case we do calculated the line of
-                                # intersection.
-                                # TODO: consider filtering out this case here.
-                                #
-                                # Note that it might also be a situation where the edge isn't shared
-                                # like here:
-                                #             /\
-                                #   .________.  \
-                                #  /|\      / \  \
-                                # | | \____/   |  |
-                                # | |__________| /
-                                # |______________|
-                                if delta in (1, len(hor_face) - 1):
-                                    calc_intersection = False
-                                    logging.debug(
-                                        "Intersecting face shares at least one edge"
-                                    )
-                                    break
-
-            # line of intersection:
+                # Skip all faces for which all vertices are on one side of the plane
+                # Also remove this case:
+                # --.========.-----
+                #    \        \
+                #     \_______/
+                #
+                # But not this case:
+                #         .
+                #        / \
+                #---====*---*---------
+                #  /         \
+                # /___________\
+                #
+                side = None
+                for v_index in intersecting_face:
+                    z_value = vs[v_index][2]
+                    if side is not None:
+                        if (side == -1 and z_value <= z) or (side == 1 and z_value >= z):
+                            continue
+                        # else vertices are on different sides
+                        break
+                    # side = None:
+                    if z_value < z:
+                        side = -1
+                    elif z_value > z:
+                        side = 1
+                else:
+                    # it means all vertices are on the same side
+                    calc_intersection = False
             if calc_intersection:
                 # TODO: I don't like this many parameters:
                 intersection_line = self._calc_intersection(
@@ -2561,21 +2546,21 @@ class SimpleShape(base.Orbitit):
             for i, vertex in enumerate(self.vs):
                 logging.debug("V[%d] = %s", i, vertex)
 
-        compound_faces = self._merge_faces_sharing_plane(face_indices)
+        faces_sharing_planes = self._merge_faces_sharing_plane(face_indices)
 
-        total = len(compound_faces)
-        for i, (compound_face, face_plane) in enumerate(compound_faces):
+        total = len(faces_sharing_planes)
+        for i, (faces_sharing_one_plane, face_plane) in enumerate(faces_sharing_planes):
             logging.debug("checking face %d (of %d)", i + 1, total)
 
             vs = self._rotate_shape_to_hor_plane(face_plane)
 
             # set z-value for the z-plane, ie plane of intersection
-            # TODO: better would be to take the average of all z coords
-            z_base_plane = vs[compound_face[0][0]][2]
+            # TODO: perhaps it is better to take the average of all z coords
+            z_base_plane = vs[faces_sharing_one_plane[0][0]][2]
             logging.debug("z_base_face = %s", z_base_plane)
 
             points_2d, lines_to_draw = self._intersect_with_face_in_hor_plane(
-                vs, compound_face, z_base_plane
+                vs, z_base_plane
             )
 
             ps_doc.addLineSegments(points_2d, lines_to_draw, scaling, precision)
