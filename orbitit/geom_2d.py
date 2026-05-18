@@ -64,42 +64,175 @@ class Line(geomtypes.Line):
         """
         return self.get_point(self.intersect_get_factor(obj))
 
-    def intersect_polygon_get_factors(self, p, add_edges=False):
-        """returns a list of factors where the line inters the polygon p.
+    def intersect_polygon_get_factors(self, polygon):
+        """returns a list of factors where the line inters the polygon 'polygon'.
 
-        p: an object of Polygon
-        add_edges: if set to True if an edge is shared with the line, it is added as intersection
+        polygon: an object of Polygon. The polygon is supposed to be closed.
 
-        return a list of two tuples with are the factor of the line. Each tuple consists of a factor
+        return a list of two-tuples which are factors of the line. Each tuple consists of a factor
             where the line enters the polygon and where it exits.
         """
+        # TODO: clean up this method: too many branches
+        # This list will consist of two-tuples holding:
+        # - factors in the line equation
+        # - whether or not this factor is optional. Factors become optional when whole edges are on
+        #   the line.
         factors = []
-        for e_index, edge in enumerate(p.es):
-            edge_line = Line(p[edge[0]], p[edge[1]])
+        # A pending vertex is a vertex on the line, but depending on the side of prev and next
+        # it either needs to be added or not
+        pending = None
+        # make sure side_of_prev is set
+        for idx in range(len(polygon) - 1, -1, -1):
+            side_of_prev = self.at_side_of(polygon[idx])
+            if side_of_prev:
+                break
+        else:
+            # all vertices are on the line
+            return []
+        for edge in polygon.es:
+            v_current = polygon[edge[0]]
+            v_next = polygon[edge[1]]
+            side_of_current = self.at_side_of(v_current)
+            edge_line = Line(v_current, v_next)
             factor = edge_line.intersect_get_factor(self)
             if factor is not None:
                 if 0 < factor < 1:
+                    if pending is not None:
+                        # There is a vertex on the line that is pending: add only if line crossing
+                        if side_of_current != side_of_prev:
+                            #            v_current
+                            #          /\
+                            #  pending/  \ v from factor
+                            # --.====*----*---------
+                            #  /           \
+                            # ._____________\ v_next
+                            # v
+                            # from side_of_prev
+                            factors.append(pending)
+                        # else:
+                        #     . v from side_of_prev
+                        #     |\             v_current
+                        #     | \          /\
+                        #     |  \ pending/  \ v from factor
+                        #     *----======.----*---------
+                        #     |                \
+                        #     |_________________\ v_next
+                        pending = None
                     factors.append(self.intersect_get_factor(edge_line))
-                elif factor in (0, 1):
-                    # Touching a vertex can eiter mean enter/exit or not. This depends on whether
-                    # the previous and next vertex are on different sides (enter / exit) or on the
-                    # the same side (no intersection)
-                    if factor == 0:
-                        v_index = e_index
-                        v_prev = v_index - 1
-                        v_next = v_index + 1
-                        if (
-                            self.at_side_of(p[v_prev]) != self.at_side_of(p[v_next])
-                            # if also on previous vertex, then this line was on previous edge
-                            and not self.at_side_of(p[v_prev]) == 0
-                        ):
-                            factors.append(self.intersect_get_factor(edge_line))
-                    # else factor == 1 is taken care of at neighbouring edge for which factor == 0
+                    # Only really needed for two of three situations, but this way no else is needed
+                    side_of_prev = side_of_current
+                # TODO: use isclose
+                elif factor == 0:
+                    #      v from side_of_prev
+                    #      |     v_next
+                    #      /\   /\
+                    #     /  \ /  \
+                    #   -*----.----*----------
+                    #   / v_current \
+                    #  /_____________\
+                    #
+                    # or
+                    #
+                    #        v from side_of_prev
+                    #        /'.
+                    #       /   '.
+                    #      /      '.
+                    #     /         '. v_current
+                    #   -*------------*----------
+                    #   /              \
+                    #  /________________\ v_next
+                    #
+                    assert pending is None
+                    pending = self.intersect_get_factor(edge_line)
+                elif factor == 1:
+                    # TODO: use isclose
+                    if pending is not None:
+                        #            v_current
+                        #          /\
+                        #  pending/  \ v_next
+                        # --.====*----*---------
+                        #  /           '-_
+                        # ._______________'-.
+                        # v
+                        # from side_of_prev
+                        if side_of_current != side_of_prev:
+                            factors.append(pending)
+                        pending = None
+                    # else
+                    #        v_current
+                    #        /'.
+                    #       /   '.
+                    #      /      '.
+                    #     /         '. v_next
+                    #   -*------------*----------
+                    #   /              \
+                    #  /________________\
+                    # v from side_of_prev
+                    side_of_prev = side_of_current
+                else:
+                    # the edge doesn't meet the line between v_current and v_next
+                    #     v from side_of_prev
+                    #     /\
+                    #    /  \           pending
+                    # --*----.==========.---------
+                    #  /                 \
+                    # .                   \ v_current
+                    #  '''---___  ___---'''
+                    #           '' v_next
+                    if pending is not None:
+                        if side_of_current != side_of_prev:
+                            factors.append(pending)
+                        pending = None
             else:
-                # the line could be on the edge:
-                if add_edges and edge_line.v == self.v and self.is_on_line(edge_line.p):
-                    factors.append(self.get_factor(edge_line.get_point(0)))
-                    factors.append(self.get_factor(edge_line.get_point(1)))
+                # i.e. factor is None
+                if side_of_current != 0:
+                    if pending is not None:
+                        if side_of_current != side_of_prev:
+                            #     v from side_of_prev
+                            #     /\
+                            #    /  \           pending
+                            # --*----.==========.---------
+                            #  /                 \
+                            # .___________________\ v_current
+                            # v_next
+                            factors.append(pending)
+                        # else:
+                        #     v from side_of_prev ____________v_next
+                        #     /\                 /v_current   \
+                        #    /  \       pending /              \
+                        # --*----.=============.----------------*
+                        #  /                                     \
+                        # ._______________________________________\
+                        # v_next
+                        pending = None
+                    # else:
+                    #      v from side_of_prev
+                    #      /\
+                    #     /  \
+                    #  --*----*---------
+                    #   /      \
+                    #  .________\ v_current
+                    #  v_next
+                    #
+                    # side_of_current is set above
+                # else:
+                # the whole edge is on the line,
+                #
+                #     v from side_of_prev
+                #     /\
+                #    /  \v_current  v_next
+                # --*----.==========.---------
+                #  /                 \
+                # .___________________\
+                #
+                # jump to next:
+                #  - don't update side_of_current
+                #  - the next edge will handle the fact that v_next is also on the line
+        if pending is not None:
+            side_of_first_v = self.at_side_of(polygon[0])
+            # if the 1st vertex of the 1st edge is also on the line, then this is handled already
+            if side_of_first_v not in (0, side_of_prev):
+                factors.append(pending)
         assert len(factors) % 2 == 0, (
             "There should be an even amount of factors (decrease precision?)"
             f"got the following factors\n\t{factors}\nwith margin {geomtypes.FloatHandler.margin}"
@@ -107,14 +240,14 @@ class Line(geomtypes.Line):
         factors.sort()
         return [(factors[i], factors[i + 1]) for i in range(0, len(factors), 2)]
 
-    def intersect_polygon(self, p, add_edges=False):
+    def intersect_polygon(self, p):
         """returns a list of segments where the line inters the polygon p.
 
         See intersect_get_factor
         """
         return [
             (self.get_point(f0), self.get_point(f1))
-            for f0, f1 in self.intersect_polygon_get_factors(p, add_edges)
+            for f0, f1 in self.intersect_polygon_get_factors(p)
         ]
 
     def at_side_of(self, v):
@@ -191,6 +324,10 @@ class Polygon:
             self.coords, i.e. use these in self[..]
         """
         return self._es
+
+    def __len__(self):
+        """Return the amount of vertices / edges in the polygon."""
+        return len(self._vs)
 
     def __getitem__(self, key):
         """Return the coordinate of specified slice modulo the amount of vertices.

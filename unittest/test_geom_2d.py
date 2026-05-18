@@ -231,6 +231,16 @@ class TestPolygon(unittest.TestCase):
                 [([1, -0.75], [0, -1])],
             ),
             "vertex 'intersection', cube": (
+                # 1
+                # .------------. 0
+                # |            |
+                # |            |
+                # |            |   .'
+                # |            | .'
+                # |____________|'
+                # 2          .' 3
+                #          .'
+                #        -'
                 (2, 0),
                 (0, -2),
                 [[1, 1], [-1, 1], [-1, -1], [1, -1]],
@@ -299,32 +309,113 @@ class TestPolygon(unittest.TestCase):
                 (1, 2),
                 mountain_coords,
                 mountain_vs,
-                [([0, 0], [1, 2])],
-            ),
-        }
-        for test_case, (p0, p1, coords, vs, expected) in test_matrix.items():
-            line = geom_2d.Line(p0, p1)
-            polygon = geom_2d.Polygon(coords, vs)
-            result = line.intersect_polygon(polygon, add_edges=True)
-            expected = [(geomtypes.Vec(c0), geomtypes.Vec(c1)) for c0, c1 in expected]
-            self.assertEqual(result, expected, f"Test case {test_case} failed")
-
-        test_matrix = {  # test case: line p0, line p1, polygon coords, polygon vs, expected
-            "intersect mountain top through edge": (
-                (0, 0),
-                (1, 2),
-                mountain_coords,
-                mountain_vs,
                 [],
             ),
+            #           3
+            #          /\
+            #   1    2/  \
+            # --.====*----*---------
+            #  /           \
+            # ._____________\4
+            # 0
+            "flat then top": (
+                (0, 2),
+                (1, 2),
+                [[0, 0], [1, 2], [3, 2], [4, 4], [6, 0]],
+                [0, 1, 2, 3, 4],
+                [([3, 2], [5, 2])],
+            ),
+            #     5          3
+            #     /\        /\
+            #    /  \1    2/  \
+            # --*----.====*----*---------
+            #  /                \
+            # .__________________\4
+            # 0
+            "top-flat-top": (
+                (0, 2),
+                (1, 2),
+                [[-2, 0], [1, 2], [3, 2], [4, 4], [6, 0], [0, 4]],
+                [0, 5, 1, 2, 3, 4],
+                [([-1, 2], [5, 2])],
+            ),
+            "top-flat-top alt 1": (  # different order
+                (0, 2),
+                (1, 2),
+                [[-2, 0], [1, 2], [3, 2], [4, 4], [6, 0], [0, 4]],
+                [2, 3, 4, 0, 5, 1],
+                [([-1, 2], [5, 2])],
+            ),
+            "top-flat-top alt 2": (  # different order
+                (0, 2),
+                (1, 2),
+                [[-2, 0], [1, 2], [3, 2], [4, 4], [6, 0], [0, 4]],
+                [1, 2, 3, 4, 0, 5],
+                [([-1, 2], [5, 2])],
+            ),
+            #     1     3
+            #     /\   /\
+            #    /  \2/  \
+            # --*----*----*---------
+            #  /           \
+            # ._____________\4
+            # 0
+            "top valey top": (
+                (0, 2),
+                (1, 2),
+                [[0, 0], [2, 4], [3, 2], [4, 4], [6, 0]],
+                [0, 1, 2, 3, 4],
+                [([1, 2], [5, 2])],
+            ),
+            #           3
+            #          /\
+            #   1   2 /  \4
+            # --.====*----*---------
+            #  /           '-_
+            # ._______________'-.5
+            # 0
+            "flat - top - slope": (
+                (0, 2),
+                (1, 2),
+                [[0, 0], [1, 2], [3, 2], [4, 4], [5, 2], [7, 0]],
+                [0, 1, 2, 3, 4, 5],
+                [([3, 2], [5, 2])],
+            ),
+            #            3
+            #           /\
+            #   1  6 2 /  \4
+            # --.==.==*----*---------
+            #  /            '-_
+            # .________________'-.5
+            # 0
+            "flat - flat - top": (
+                (0, 2),
+                (1, 2),
+                [[0, 0], [1, 2], [3, 2], [4, 4], [5, 2], [7, 0], [2, 2]],
+                [0, 1, 6, 2, 3, 4, 5],
+                [([3, 2], [5, 2])],
+            ),
+            "flat - flat - top alt1": (  # different order
+                (0, 2),
+                (1, 2),
+                [[0, 0], [1, 2], [3, 2], [4, 4], [5, 2], [7, 0], [2, 2]],
+                [1, 6, 2, 3, 4, 5, 0],
+                [([3, 2], [5, 2])],
+            ),
+            "flat - flat - top alt2": (  # different order
+                (0, 2),
+                (1, 2),
+                [[0, 0], [1, 2], [3, 2], [4, 4], [5, 2], [7, 0], [2, 2]],
+                [6, 2, 3, 4, 5, 0, 1],
+                [([3, 2], [5, 2])],
+            ),
         }
         for test_case, (p0, p1, coords, vs, expected) in test_matrix.items():
             line = geom_2d.Line(p0, p1)
             polygon = geom_2d.Polygon(coords, vs)
-            result = line.intersect_polygon(polygon, add_edges=False)
+            result = line.intersect_polygon(polygon)
             expected = [(geomtypes.Vec(c0), geomtypes.Vec(c1)) for c0, c1 in expected]
             self.assertEqual(result, expected, f"Test case {test_case} failed")
-
 
 if __name__ == '__main__':
     unittest.main()
