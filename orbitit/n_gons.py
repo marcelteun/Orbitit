@@ -94,8 +94,86 @@ def get_polygon(
     return scaled
 
 
+class Prism(geom_3d.SimpleShape):
+    """An {n/m} prism."""
+    def __init__(
+        self,
+        n: int,
+        m: int = 1,
+        edge_length: float = EDGE_LENGTH,
+        use_outline: bool = False,
+    ) -> geom_3d.SimpleShape:
+        """Return a SimpleShape object that represents an anti-prism with {n/m} base.
+
+        n: n in the {n/m} base
+        m: n in the {n/m} base
+        edge_length: the required edge length
+        use_outline: set to False to use n sides for any {n/m}-gram where m > 1. For orbitit this
+            will lead to holes for parts of the polygon that have double coverage. Using the outline
+            lead to edges not really being shared between faces, since the {n/m}-gram will have 2n
+            edges.
+        """
+        height_div_2 = edge_length / 2
+        n_gon_top = get_polygon(n, m, height=height_div_2)
+        n_gon_bottom = get_polygon(n, m, height=-height_div_2)
+
+        # Assuming that all subs have the same length, which should be the case. TODO: assert?
+        sub_len = len(n_gon_top[0])
+        no_of_subs = len(n_gon_top)
+
+        # just chain all top subs and then all bottom subs
+        vertices = [v for sub in n_gon_top for v in sub] + [v for sub in n_gon_bottom for v in sub]
+
+        bases = [
+            [i + sub_i * sub_len for i in range(sub_len)]
+            for sub_i in range(2 * no_of_subs)
+        ]
+        # Reverse the bottom base (or top is m > n/2) to keep the counter-clockwise order:
+        # Note it is possible to do this right from the beginning, but I think the code is easier to
+        # understand this way
+        for i in range(no_of_subs, 2 * no_of_subs):
+            bases[i].reverse()
+
+        # FIXME: If star polygon and M > N / 2 then all bases need to be reversed.
+        # In that case, e.g. of {5/3}, one would like to rotate the base and add crossing squares,
+        # but then the sides don't meet
+        # TODO: check whether you can do something with that
+
+        sides = [
+            [
+                side_i + n,
+                (side_i + 1) % sub_len + n,
+                (side_i + 1) % sub_len,
+                side_i,
+            ]
+            for sub_i in range(no_of_subs)
+            for side_i in range(sub_len)
+        ]
+        if sub_len % 2 == 1:
+            # for odd number of sides, choose one colour (no. 1)
+            side_cols = [1 + i for _ in range(sub_len) for i in range(no_of_subs)]
+        else:
+            # for even number of sides, choose alternating colours
+            side_cols = [
+                1 + (j % 2) + i for j in range(sub_len) for i in range(no_of_subs)
+            ]
+        col_i = [0 for _ in range(2 * no_of_subs)] + side_cols
+        super().__init__(
+            vertices,
+            bases + sides,
+            colors=(cols, col_i),
+            name=(f"prism_{n}_{m}"),
+        )
+
+        # FIXME: I think that if there are subs, since all of them should use outline
+        # e.g. {10/4} = 2 x {5/2}
+        # same for anti-prism
+        if use_outline:
+            self.replace_face_by_outline(0)
+            self.replace_face_by_outline(1)
+
 class AntiPrism(geom_3d.SimpleShape):
-    """And {n/m} anti-prism."""
+    """An {n/m} anti-prism."""
 
     def __init__(
         self,
@@ -344,29 +422,6 @@ if __name__ == "__main__":
             with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
                 fd.write(tca.to_off())
 
-    folder = "out/tri_composites_of_antriprisms"
-    base_name = "3_compound_of"
-    check = [
-        #(3, 1),
-        #(4, 1),
-        #(5, 1), (5, 2), (5, 3),
-        #(6, 1),
-        #(7, 1), (7, 2), (7, 3), (7, 4),
-        #(8, 1), (8, 2), (8, 3),
-        #(9, 1), (9, 2), (9, 3), (9, 5),
-        #(12, 3),
-    ]
-    for N, M in check:
-        star_polygon_basis = M > 1 and not N % M == 0
-        tca = ThreeAntiPrisms(N, M, gen_compound=True)
-        with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}.off", "w") as fd:
-            fd.write(tca.to_off())
-        if star_polygon_basis:
-            # Also create a version using outlines
-            tca = ThreeAntiPrisms(N, M, use_outline=True, gen_compound=True)
-            with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
-                fd.write(tca.to_off())
-
     check = [(4, 1), (5, 1), (5, 2), (9, 5), (6, 1), (7, 1), (7, 2), (7, 3), (8, 2), (9, 1), (9, 3)]
     check = [
         #(4, 1),
@@ -380,3 +435,21 @@ if __name__ == "__main__":
         # Use outline here as well
         with open(f"{folder}/antiprims_{N}_{M}.off", "w") as fd:
             fd.write(AntiPrism(N, M).to_off())
+
+    folder = "out/bi_composites_of_prisms"
+    base_name = "prism"
+    check = [
+        (3, 1),
+        (4, 1),
+        (5, 1), (5, 2), (5, 3),
+        #(6, 1),
+        #(7, 1), (7, 2), (7, 3), (7, 4),
+        #(8, 1), (8, 2), (8, 3),
+        #(9, 1), (9, 2), (9, 3), (9, 5),
+        #(12, 3),
+    ]
+    for N, M in check:
+        star_polygon_basis = M > 1 and not N % M == 0
+        prism = Prism(N, M, use_outline=star_polygon_basis)
+        with open(f"{folder}/{base_name}_{N}_{M}.off", "w") as fd:
+            fd.write(prism.to_off())
