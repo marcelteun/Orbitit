@@ -26,7 +26,6 @@ Like prisms and anti-prisms
 #
 # ------------------------------------------------------------------
 import logging
-from copy import deepcopy
 from math import cos, gcd, pi, sin, sqrt
 
 from orbitit import geomtypes, geom_3d, isometry, orbit
@@ -295,7 +294,7 @@ class ThreeAntiPrisms(geom_3d.SimpleShape):
         d = gcd(n, m)
 
         # Compound of d {m'/n'} wih m' = m / d and n' = n / d
-        n_, m_ = n // d, m // d
+        n_simp, m_simp = n // d, m // d
 
         # In some cases the bottom is also shared, e.g. {7/1}, {7/3} and {8/2}
         # In general this happens when the triangles in the anti-prism come in parallel pairs
@@ -305,13 +304,13 @@ class ThreeAntiPrisms(geom_3d.SimpleShape):
         sym_group = f"D{3}" + {True: "xI", False: f"C{3}"}[self.shared_top_and_bottom]
         head = "" if d == 1 else f"{d}x_"
         self.symmetry = sym_group
-        name = f"3_antiprism_{head}{n_}_{m_}_{sym_group}",
+        name = f"3_antiprism_{head}{n_simp}_{m_simp}_{sym_group}"
         one = AntiPrism(n, m, edge_length, use_outline=use_outline)
         if d > 1:
-            if n_ < 4:
+            if n_simp < 4:
                 raise ValueError(
                     "Only considering compounds of TCAs for polygons with more than 3 sides. "
-                    f"The parameters lead to {d} x {{{n_}/{m_}}}, where {n_} <= 3."
+                    f"The parameters lead to {d} x {{{n_simp}/{m_simp}}}, where {n_simp} <= 3."
                 )
         # The way this is set-up the first triangle goes through X-axis
         triangle = one.fs[one.no_of_bases]
@@ -321,7 +320,7 @@ class ThreeAntiPrisms(geom_3d.SimpleShape):
         # The gravity point of the triangle is supposed to be in the XoZ-plane
         with geomtypes.FloatHandler(precision=15) as fh:
             assert fh.eq(orig_to_triangle_gravity[1], 0),\
-                f"{orig_to_triangle_gravity} not in XoZ for {{{n_}/{m_}}}"
+                f"{orig_to_triangle_gravity} not in XoZ for {{{n_simp}/{m_simp}}}"
 
         # Rotate around Y-axis so that the gravity point is on Z-axis:
         axis = geomtypes.UY
@@ -412,7 +411,7 @@ if __name__ == "__main__":
         #(12, 3),
     ]
     for N, M in check:
-        star_polygon_basis = M > 1 and not N % M == 0
+        star_polygon_basis = M > 1 and N % M != 0
         tca = ThreeAntiPrisms(N, M)
         with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}.off", "w") as fd:
             fd.write(tca.to_off())

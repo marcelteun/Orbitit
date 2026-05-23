@@ -13,6 +13,7 @@ chk_files="
 	orbitit/isometry.py
 	orbitit/main_dlg.py
 	orbitit/main_win.py
+	orbitit/n_gons.py
 	orbitit/orbit.py
 	orbitit/platonic_solids.py
 	orbitit/pre_pyopengl.py
