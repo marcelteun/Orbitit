@@ -140,21 +140,21 @@ class Prism(geom_3d.SimpleShape):
 
         sides = [
             [
-                side_i + n,
-                (side_i + 1) % sub_len + n,
-                (side_i + 1) % sub_len,
-                side_i,
+                side_i + sub_i * sub_len + n,
+                (side_i + 1) % sub_len + sub_i * sub_len + n,
+                (side_i + 1) % sub_len + sub_i * sub_len,
+                side_i + sub_i * sub_len,
             ]
             for sub_i in range(no_of_subs)
             for side_i in range(sub_len)
         ]
         if sub_len % 2 == 1:
             # for odd number of sides, choose one colour (no. 1)
-            side_cols = [1 + i for _ in range(sub_len) for i in range(no_of_subs)]
+            side_cols = [1 + i for i in range(no_of_subs) for _ in range(sub_len)]
         else:
             # for even number of sides, choose alternating colours
             side_cols = [
-                1 + (j % 2) + i for j in range(sub_len) for i in range(no_of_subs)
+                1 + (j % 2) + 2 * i for i in range(no_of_subs) for j in range(sub_len)
             ]
         col_i = [0 for _ in range(2 * no_of_subs)] + side_cols
         super().__init__(
@@ -265,6 +265,78 @@ class AntiPrism(geom_3d.SimpleShape):
         if use_outline:
             self.replace_face_by_outline(0)
             self.replace_face_by_outline(1)
+
+
+class TwoPrisms(geom_3d.SimpleShape):
+    """Compound of three {n/m} anti-prisms all sharing one opposite pairs of triangles."""
+
+    def __init__(
+        self,
+        n: int,
+        m: int = 1,
+        edge_length: float = EDGE_LENGTH,
+        enhance_cols: bool = True,
+    ) -> geom_3d.CompoundShape:
+        """Return an object of three anti-prism with {n/m} base.
+
+        n: n in the {n/m} base
+        m: n in the {n/m} base
+        edge_length: the required edge length
+        use_outline: set to False to use n sides for any {n/m}-gram where m > 1. For orbitit this
+            will lead to holes for parts of the polygon that have double coverage. Using the outline
+            lead to edges not really being shared between faces, since the {n/m}-gram will have 2n
+            edges.
+        enhance_cols: set to False if you don't care about the colors and in that case only two
+            colors will be used. Otherwise effort will be done to divide more colors.
+        """
+        d = gcd(n, m)
+
+        # If d != 1 then this is a compound. Treat this as a compound
+        # TODO: Call TwoPrisms with n_simp and m_simp and generate compound of
+        if d != 1:
+            # Compound of d {m'/n'} wih m' = m / d and n' = n / d
+            # n_simp, m_simp = n // d, m // d
+
+            raise ValueError("TODO: implement this part.")
+
+        # From here on: assume d == 1, i.e. one top and one bottom face per prism
+        if n < 2:
+            raise ValueError("Only considering BCPs for polygons with more than 2 sides.")
+        if n == 4:
+            raise ValueError("This leads to cubes, which is a degenerate case.")
+
+        final_sym = isometry.C4(setup={"axis": geomtypes.Vec3([1, 0, 0])})
+        stab_sym = isometry.C2(setup={"axis": geomtypes.Vec3([1, 0, 0])})
+
+        name = f"bcp_{m}_{n}"
+        base = Prism(n, m, edge_length=edge_length, use_outline= m > 1 and not n % m == 0)
+        no_of_cols = 2
+        shape = orbit.Shape({'vs': base.vs, 'fs': base.fs}, final_sym, stab_sym, name, no_of_cols)
+        double_faces = [0]
+        side_offset = 2  # first two faces are top, bottom
+        if n % 2 == 0:
+            double_faces = [side_offset, side_offset + n // 2]
+            no_of_sides = n - 2
+        else:
+            double_faces = [side_offset]
+            no_of_sides = n - 1
+
+        # Give bottom and top separate colors:
+        top_i, bottom_i = 0, 1
+        extra_col = cols[no_of_cols]
+        for shape_no, sub_shape in enumerate(shape.shapes):
+            sub_shape.remove_faces(double_faces)
+            if enhance_cols:
+                sub_shape.update_face_with_col(top_i, extra_col)
+                sub_shape.update_face_with_col(bottom_i, extra_col)
+                # if n odd, one square side is removed
+                # if n even, two square sides are removed
+                # In both cases we are left with an even number of sides
+                for i in range(shape_no, no_of_sides, 2):
+                    sub_shape.update_face_with_col(side_offset + i, cols[no_of_cols + 1 + shape_no])
+
+        single = shape.simple_shape
+        super().__init__(single.vs, single.fs, colors=single.shape_colors, name=name)
 
 
 class ThreeAntiPrisms(geom_3d.SimpleShape):
@@ -436,19 +508,20 @@ if __name__ == "__main__":
             fd.write(AntiPrism(N, M).to_off())
 
     folder = "out/bi_composites_of_prisms"
-    base_name = "prism"
+    #base_name = "prism"
+    base_name = "bcp"
     check = [
-        (3, 1),
-        (4, 1),
-        (5, 1), (5, 2), (5, 3),
-        #(6, 1),
-        #(7, 1), (7, 2), (7, 3), (7, 4),
+        #(3, 1),
+        #(5, 1), (5, 2), (5, 3),
+        (6, 1), #(6, 2),
+        (7, 1), (7, 2), (7, 3), #(7, 4),
         #(8, 1), (8, 2), (8, 3),
         #(9, 1), (9, 2), (9, 3), (9, 5),
         #(12, 3),
     ]
     for N, M in check:
         star_polygon_basis = M > 1 and not N % M == 0
-        prism = Prism(N, M, use_outline=star_polygon_basis)
+        #prism = Prism(N, M, use_outline=star_polygon_basis)
+        prism = TwoPrisms(N, M)
         with open(f"{folder}/{base_name}_{N}_{M}.off", "w") as fd:
             fd.write(prism.to_off())
