@@ -267,8 +267,10 @@ class AntiPrism(geom_3d.SimpleShape):
             self.replace_face_by_outline(1)
 
 
-class TwoPrisms(geom_3d.SimpleShape):
+class TwoPrisms(orbit.Shape):
     """Compound of three {n/m} anti-prisms all sharing one opposite pairs of triangles."""
+
+    no_of_prisms = 2
 
     def __init__(
         self,
@@ -276,8 +278,8 @@ class TwoPrisms(geom_3d.SimpleShape):
         m: int = 1,
         edge_length: float = EDGE_LENGTH,
         enhance_cols: bool = True,
-    ) -> geom_3d.CompoundShape:
-        """Return an object of three anti-prism with {n/m} base.
+    ):
+        """Return an object of a bi-composite prism (BCP).
 
         n: n in the {n/m} base
         m: n in the {n/m} base
@@ -289,54 +291,76 @@ class TwoPrisms(geom_3d.SimpleShape):
         enhance_cols: set to False if you don't care about the colors and in that case only two
             colors will be used. Otherwise effort will be done to divide more colors.
         """
-        d = gcd(n, m)
-
-        # If d != 1 then this is a compound. Treat this as a compound
-        # TODO: Call TwoPrisms with n_simp and m_simp and generate compound of
-        if d != 1:
-            # Compound of d {m'/n'} wih m' = m / d and n' = n / d
-            # n_simp, m_simp = n // d, m // d
-
-            raise ValueError("TODO: implement this part.")
-
-        # From here on: assume d == 1, i.e. one top and one bottom face per prism
-        if n < 2:
-            raise ValueError("Only considering BCPs for polygons with more than 2 sides.")
-        if n == 4:
-            raise ValueError("This leads to cubes, which is a degenerate case.")
-
-        final_sym = isometry.C4(setup={"axis": geomtypes.Vec3([1, 0, 0])})
-        stab_sym = isometry.C2(setup={"axis": geomtypes.Vec3([1, 0, 0])})
+        self._bcp_n = n
+        self._bcp_m = m
+        self._bcp_enhance_cols = enhance_cols
 
         name = f"bcp_{m}_{n}"
-        base = Prism(n, m, edge_length=edge_length, use_outline= m > 1 and not n % m == 0)
-        no_of_cols = 2
-        shape = orbit.Shape({'vs': base.vs, 'fs': base.fs}, final_sym, stab_sym, name, no_of_cols)
+        d = gcd(n, m)
+
+        if d != 1:
+            # Compound of d {m'/n'} wih m' = m / d and n' = n / d
+            n_simp, m_simp = n // d, m // d
+            base = TwoPrisms(n_simp, m_simp, edge_length, enhance_cols=False).simple_shape
+            final_sym = isometry.C(d)(setup={"axis": geomtypes.Vec3([0, 0, 1])})
+            stab_sym = isometry.E()
+            super().__init__({'vs': base.vs, 'fs': base.fs}, final_sym, stab_sym, name, d)
+            self._adjust_d_compound(d)
+        else:
+            # From here on: assume d == 1, i.e. one top and one bottom face per prism
+            if n < 2:
+                raise ValueError("Only considering BCPs for polygons with more than 2 sides.")
+            if n == 4:
+                raise ValueError("This leads to cubes, which is a degenerate case.")
+
+            final_sym = isometry.C4(setup={"axis": geomtypes.Vec3([1, 0, 0])})
+            stab_sym = isometry.C2(setup={"axis": geomtypes.Vec3([1, 0, 0])})
+
+            base = Prism(n, m, edge_length=edge_length, use_outline= m > 1 and not n % m == 0)
+            super().__init__(
+                {'vs': base.vs, 'fs': base.fs}, final_sym, stab_sym, name, self.no_of_prisms
+            )
+            self._adjust_two_compound()
+
+    def _adjust_two_compound(self):
+        """Remove the faces covering the same space and fix colors."""
         double_faces = [0]
         side_offset = 2  # first two faces are top, bottom
-        if n % 2 == 0:
-            double_faces = [side_offset, side_offset + n // 2]
-            no_of_sides = n - 2
+        if self._bcp_n % 2 == 0:
+            double_faces = [side_offset, side_offset + self._bcp_n // 2]
+            no_of_sides = self._bcp_n - 2
         else:
             double_faces = [side_offset]
-            no_of_sides = n - 1
+            no_of_sides = self._bcp_n - 1
 
         # Give bottom and top separate colors:
         top_i, bottom_i = 0, 1
-        extra_col = cols[no_of_cols]
-        for shape_no, sub_shape in enumerate(shape.shapes):
+        extra_col = cols[self.no_of_prisms]
+        for shape_no, sub_shape in enumerate(self.shapes):
             sub_shape.remove_faces(double_faces)
-            if enhance_cols:
+            if self._bcp_enhance_cols:
                 sub_shape.update_face_with_col(top_i, extra_col)
                 sub_shape.update_face_with_col(bottom_i, extra_col)
                 # if n odd, one square side is removed
                 # if n even, two square sides are removed
                 # In both cases we are left with an even number of sides
                 for i in range(shape_no, no_of_sides, 2):
-                    sub_shape.update_face_with_col(side_offset + i, cols[no_of_cols + 1 + shape_no])
+                    sub_shape.update_face_with_col(
+                        side_offset + i, cols[self.no_of_prisms + 1 + shape_no]
+                    )
 
-        single = shape.simple_shape
-        super().__init__(single.vs, single.fs, colors=single.shape_colors, name=name)
+    def _adjust_d_compound(self, d):
+        """Fix colors of the BCP is a compound of d x {(n/d) / (m/d)} BCPs."""
+        # Give bottom and top separate colors:
+        if self._bcp_enhance_cols:
+            top_i, bottom_i = 0, 1
+            extra_col = cols[d]
+            for sub_shape in self.shapes:
+                no_2_offset = len(sub_shape.fs) // 2
+                sub_shape.update_face_with_col(top_i, extra_col)
+                sub_shape.update_face_with_col(top_i + no_2_offset, extra_col)
+                sub_shape.update_face_with_col(bottom_i, extra_col)
+                sub_shape.update_face_with_col(bottom_i + no_2_offset, extra_col)
 
 
 class ThreeAntiPrisms(geom_3d.SimpleShape):
@@ -513,8 +537,8 @@ if __name__ == "__main__":
     check = [
         #(3, 1),
         #(5, 1), (5, 2), (5, 3),
-        (6, 1), #(6, 2),
-        (7, 1), (7, 2), (7, 3), #(7, 4),
+        (6, 1), (6, 2),
+        #(7, 1), (7, 2), (7, 3), #(7, 4),
         #(8, 1), (8, 2), (8, 3),
         #(9, 1), (9, 2), (9, 3), (9, 5),
         #(12, 3),
