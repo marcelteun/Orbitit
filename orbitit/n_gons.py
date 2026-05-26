@@ -277,6 +277,7 @@ class TwoPrisms(orbit.Shape):
         n: int,
         m: int = 1,
         edge_length: float = EDGE_LENGTH,
+        use_outline: bool = None,
         enhance_cols: bool = True,
     ):
         """Return an object of a bi-composite prism (BCP).
@@ -287,7 +288,7 @@ class TwoPrisms(orbit.Shape):
         use_outline: set to False to use n sides for any {n/m}-gram where m > 1. For orbitit this
             will lead to holes for parts of the polygon that have double coverage. Using the outline
             lead to edges not really being shared between faces, since the {n/m}-gram will have 2n
-            edges.
+            edges. If not set then the class will decide itself what to do based on n and m.
         enhance_cols: set to False if you don't care about the colors and in that case only two
             colors will be used. Otherwise effort will be done to divide more colors.
         """
@@ -302,8 +303,8 @@ class TwoPrisms(orbit.Shape):
             # Compound of d {m'/n'} wih m' = m / d and n' = n / d
             n_simp, m_simp = n // d, m // d
             base = TwoPrisms(n_simp, m_simp, edge_length, enhance_cols=False).simple_shape
-            final_sym = isometry.C(d)(setup={"axis": geomtypes.Vec3([0, 0, 1])})
-            stab_sym = isometry.E()
+            final_sym = isometry.C(n)(setup={"axis": geomtypes.Vec3([0, 0, 1])})
+            stab_sym = isometry.C(n_simp)(setup={"axis": geomtypes.Vec3([0, 0, 1])})
             super().__init__({'vs': base.vs, 'fs': base.fs}, final_sym, stab_sym, name, d)
             self._adjust_d_compound(d)
         else:
@@ -313,10 +314,13 @@ class TwoPrisms(orbit.Shape):
             if n == 4:
                 raise ValueError("This leads to cubes, which is a degenerate case.")
 
+            if use_outline is None:
+                use_outline = m > 1 and not n % m == 0
+
             final_sym = isometry.C4(setup={"axis": geomtypes.Vec3([1, 0, 0])})
             stab_sym = isometry.C2(setup={"axis": geomtypes.Vec3([1, 0, 0])})
 
-            base = Prism(n, m, edge_length=edge_length, use_outline= m > 1 and not n % m == 0)
+            base = Prism(n, m, edge_length=edge_length, use_outline=use_outline)
             super().__init__(
                 {'vs': base.vs, 'fs': base.fs}, final_sym, stab_sym, name, self.no_of_prisms
             )
