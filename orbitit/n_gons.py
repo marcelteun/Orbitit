@@ -495,33 +495,7 @@ class ThreeAntiPrisms(geom_3d.SimpleShape):
 
 
 if __name__ == "__main__":
-    folder = "out/tri_composites_of_antriprisms"
-    base_name = "tca"
-    check = [
-        #(3, 1),
-        #(4, 1),
-        #(5, 1), (5, 2), (5, 3),
-        #(6, 1),
-        #(7, 1),
-        #(7, 1), (7, 2), (7, 3), (7, 4),
-        (7, 3),
-        #(8, 1), (8, 2), (8, 3), (8, 5),
-        #(9, 1), (9, 2), (9, 4), (9, 5),
-        #(10, 1), (10, 2), (10, 3), (10, 4), (10, 6),
-        #(12, 3),
-    ]
-    for N, M in check:
-        star_polygon_basis = M > 1 and N % M != 0
-        tca = ThreeAntiPrisms(N, M)
-        with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}.off", "w") as fd:
-            fd.write(tca.to_off())
-        if star_polygon_basis:
-            # Also create a version using outlines
-            tca = ThreeAntiPrisms(N, M, use_outline=True)
-            with open(f"{folder}/{base_name}_{N}_{M}_{tca.symmetry}_outline.off", "w") as fd:
-                fd.write(tca.to_off())
-
-    check = [(4, 1), (5, 1), (5, 2), (9, 5), (6, 1), (7, 1), (7, 2), (7, 3), (8, 2), (9, 1), (9, 3)]
+    # TODO: remove all thses and use separate scripts:
     check = [
         #(4, 1),
         #(5, 1), (5, 2),
@@ -532,24 +506,5 @@ if __name__ == "__main__":
     ]
     for N, M in check:
         # Use outline here as well
-        with open(f"{folder}/antiprims_{N}_{M}.off", "w") as fd:
+        with open(f"out/antiprims_{N}_{M}.off", "w") as fd:
             fd.write(AntiPrism(N, M).to_off())
-
-    folder = "out/bi_composites_of_prisms"
-    #base_name = "prism"
-    base_name = "bcp"
-    check = [
-        #(3, 1),
-        #(5, 1), (5, 2), (5, 3),
-        (6, 1), (6, 2),
-        #(7, 1), (7, 2), (7, 3), #(7, 4),
-        #(8, 1), (8, 2), (8, 3),
-        #(9, 1), (9, 2), (9, 3), (9, 5),
-        #(12, 3),
-    ]
-    for N, M in check:
-        star_polygon_basis = M > 1 and not N % M == 0
-        #prism = Prism(N, M, use_outline=star_polygon_basis)
-        prism = TwoPrisms(N, M)
-        with open(f"{folder}/{base_name}_{N}_{M}.off", "w") as fd:
-            fd.write(prism.to_off())
