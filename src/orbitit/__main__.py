@@ -994,7 +994,7 @@ def convert_to_off(shape, fd, precision, margin=0):
     fd.write(shape.to_off(precision))
 
 
-if __name__ == "__main__":
+def main():
     import argparse
 
     DESCR = """Utility for handling polyhedra.
@@ -1131,3 +1131,7 @@ if __name__ == "__main__":
         APP.MainLoop()
 
     sys.stderr.write("Done\n")
+
+
+if __name__ == "__main__":
+    main()
