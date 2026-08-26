@@ -3,6 +3,7 @@
 import argparse
 import math
 import os
+from pathlib import Path
 
 from orbitit import geom_3d
 from orbitit import geomtypes
@@ -239,13 +240,15 @@ def main():
 
     args = parser.parse_args()
 
-    SWISSO = orb.read_shape_file(os.path.join(args.in_dir, "crosso-S4xI-o4_to_o3.off"))
+    # TODO: add shape data in the script
+    SWISSO = orb.read_shape_file(Path(args.in_dir) / "crosso-S4xI-o4_to_o3.off")
     SWISS_VS = SWISSO.getVertexProperties()['Vs']
     SWISS_F_PROPS = SWISSO.getFaceProperties()
     SWISS_FS = SWISS_F_PROPS['Fs']
     SWISS_COLS = SWISS_F_PROPS['colors']
 
-    OCTA = orb.read_shape_file(os.path.join(args.in_dir, "octahedron.off"))
+    # TODO: add shape data in the script
+    OCTA = orb.read_shape_file(Path(args.in_dir) / "octahedron.off")
     OCTA_VS = OCTA.getVertexProperties()['Vs']
     OCTA_F_PROPS = OCTA.getFaceProperties()
     OCTA_FS = OCTA_F_PROPS['Fs']
