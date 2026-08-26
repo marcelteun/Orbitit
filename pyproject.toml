@@ -21,6 +21,9 @@ wxPython = [
 
 [project.scripts]
 orbitit = "orbitit:main"
+generate_59_icosahedra = "orbitit.extra_scripts.generate_59_icosahedra:main"
+generate_compound_polyhedra = "orbitit.extra_scripts.generate_compound_polyhedra:main"
+generate_crosso_lattices = "orbitit.extra_scripts.generate_crosso_lattices:main"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]

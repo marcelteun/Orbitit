@@ -564,7 +564,7 @@ STELLATIONS = [
     },
 ]
 
-if __name__ == "__main__":
+def main():
     import argparse
 
     def generate_model(no, data, off):
@@ -621,4 +621,7 @@ if __name__ == "__main__":
         for i, d in enumerate(STELLATIONS):
             generate_model(i, d, ARGS.off_format)
 
+
+if __name__ == "__main__":
+    main()
 # vim expandtab sw=4

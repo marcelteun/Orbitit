@@ -13,6 +13,22 @@ DESCR = """Generate crossohedra consisting of multiple crossohedra
 E.g. a fractal of Siwissohedra.
 """
 
+# global variables
+V3 = math.sqrt(3)
+OUT_DIR = "."
+FLAT_TARTAN_CACHE = {}
+TARTAN_3D_CACHE = {}
+
+SWISS_W = 4  # width of standard Swissohedron
+SWISS_HW = 2  # half width of standard Swissohedron
+SWISS_R = 5 / 3
+# must be set later
+SWISSO = None
+SWISS_VS = None
+SWISS_F_PROPS = None
+SWISS_FS = None
+SWISS_COLS = None
+
 
 def translate(vs, t):
     return [geomtypes.Vec3(v) + geomtypes.Vec3(t) for v in vs]
@@ -22,18 +38,18 @@ def rotate(vs, angle, axis):
     transform = geomtypes.Rot3(angle=angle, axis=geomtypes.Vec3(axis))
     return [transform * geomtypes.Vec3(v) for v in vs]
 
-def get_flat_tartan(l):
+def get_flat_tartan(level):
     # Note: this is a recursive function. Normally it is a good idea to use globals instead of
     # parameters to save stack space, but for this function it doesn't make any sense to have more
     # than 4 recursion calls anyway.
-    if l <= 1:
+    if level <= 1:
         return FLAT_TARTAN_CACHE[1]
     else:
         try:
-            return FLAT_TARTAN_CACHE[l]
+            return FLAT_TARTAN_CACHE[level]
         except KeyError:
             pass
-        base_shape, w = get_flat_tartan(l-1)
+        base_shape, w = get_flat_tartan(level-1)
         shape = geom_3d.CompoundShape([SWISSO])
         faces = base_shape.getFaceProperties()
         vs = base_shape.getVertexProperties()['Vs']
@@ -49,32 +65,32 @@ def get_flat_tartan(l):
                 octa = geom_3d.SimpleShape(Vs=octa_vs, Fs=OCTA_FS, colors=OCTA_COLS)
                 shape.addShape(octa)
         shape = shape.simple_shape.cleanShape(10)
-        FLAT_TARTAN_CACHE[l] = shape.filter_faces(keep_one=False), SWISS_W + 2*w
-        return FLAT_TARTAN_CACHE[l]
+        FLAT_TARTAN_CACHE[level] = shape.filter_faces(keep_one=False), SWISS_W + 2*w
+        return FLAT_TARTAN_CACHE[level]
 
 
-def get_3d_tartan(l):
+def get_3d_tartan(level):
     # Note: this is a recursive function. Normally it is a good idea to use globals instead of
     # parameters to save stack space, but for this function it doesn't make any sense to have more
     # than 4 recursion calls anyway.
-    if l <= 1:
+    if level <= 1:
         return TARTAN_3D_CACHE[1]
     else:
         try:
-            return TARTAN_3D_CACHE[l]
+            return TARTAN_3D_CACHE[level]
         except KeyError:
             pass
-        base_shape, r = get_3d_tartan(l-1)
+        base_shape, r = get_3d_tartan(level-1)
         shape = geom_3d.CompoundShape([SWISSO])
         faces = base_shape.getFaceProperties()
         vs = base_shape.getVertexProperties()['Vs']
         lst = [-1, 1]
-        #if l > 2:
+        #if level > 2:
         #    lst = [1]
         for x in lst:
             for y in lst:
                 for z in lst:
-                    if l == 2:
+                    if level == 2:
                         arm_vs = rotate(vs, math.pi, [x, y, z])
                     else:
                         arm_vs = vs
@@ -85,8 +101,8 @@ def get_3d_tartan(l):
                                             colors=faces['colors'])
                     shape.addShape(arm)
         shape = shape.simple_shape.cleanShape(10)
-        TARTAN_3D_CACHE[l] = shape.filter_faces(keep_one=False), SWISS_R + 2*r
-        return TARTAN_3D_CACHE[l]
+        TARTAN_3D_CACHE[level] = shape.filter_faces(keep_one=False), SWISS_R + 2*r
+        return TARTAN_3D_CACHE[level]
 
 
 def get_swisso_sponge_thinned(m):
@@ -192,7 +208,11 @@ def generate_3d_tartan(i_min, i_max):
             print(f"written {filename}")
 
 
-if __name__ == "__main__":
+def main():
+    global DESCR, OUT_DIR, FLAT_TARTAN_CACHE, TARTAN_3D_CACHE
+    global SWISSO, SWISS_VS, SWISS_F_PROPS, SWISS_FS, SWISS_COLS
+    global OCTA, OCTA_VS, OCTA_F_PROPS, OCTA_FS, OCTA_COLS
+
     choice = {
         'tartan_flat': {'func': generate_flat_tartan},
         'tartan_3d': {'func': generate_3d_tartan},
@@ -219,10 +239,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    SWISS_W = 4  # width of standard Swissohedron
-    SWISS_HW = 2  # half width of standard Swissohedron
-    V3 = math.sqrt(3)
-    SWISS_R = 5 / 3
     SWISSO = orb.read_shape_file(os.path.join(args.in_dir, "crosso-S4xI-o4_to_o3.off"))
     SWISS_VS = SWISSO.getVertexProperties()['Vs']
     SWISS_F_PROPS = SWISSO.getFaceProperties()
@@ -244,5 +260,8 @@ if __name__ == "__main__":
     }
 
     OUT_DIR = args.out_dir
-
     choice[args.name]['func'](args.level, args.level+args.no_of_levels)
+
+
+if __name__ == "__main__":
+    main()
