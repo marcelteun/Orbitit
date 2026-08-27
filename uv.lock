@@ -417,6 +417,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "ipdb" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -434,7 +435,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ipdb", specifier = ">=0.13.13" }]
+dev = [
+    { name = "ipdb", specifier = ">=0.13.13" },
+    { name = "ruff", specifier = ">=0.16.4" },
+]
 
 [[package]]
 name = "parso"

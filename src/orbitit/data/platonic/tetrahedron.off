@@ -1,0 +1,28 @@
+OFF
+#
+# SimpleShape
+#
+# file generated with python script by Marcel Tunnissen
+# Vertices Faces Edges
+12 4 12
+# Vertices
+-1 1 1
+-1 -1 -1
+1 -1 1
+1 -1 1
+1 1 -1
+-1 1 1
+1 1 -1
+1 -1 1
+-1 -1 -1
+-1 -1 -1
+-1 1 1
+1 1 -1
+# Sides and colours
+3  0 1 2  0.253906 0.410156 0.878906
+3  3 4 5  0.601562 0.800781 0.195312
+3  6 7 8  0.863281 0.625 0.863281
+3  9 10 11  0.996094 0.839844 0
+# END
+# Color alternative based on C3
+# Used colour alternative 0 (max 0)

@@ -2012,7 +2012,7 @@ class SimpleShape(base.Orbitit):
     def to_off(
         self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
     ):
-        """Return a representation of the object in the 3D 'OFF' file format.
+        """Return a string representation of the object in the 3D 'OFF' file format.
 
         precision: the precision that will be used for printing the coordinates of the vertices. It
             is expressed as an integer expressing the amount of digits after the comma that shall be

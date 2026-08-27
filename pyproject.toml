@@ -1,6 +1,6 @@
 [project]
 name = "orbitit"
-version = "0.7.3"
+version = "0.8.0"
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=2.2.6",
@@ -19,6 +19,9 @@ wxPython = [
     { url = "https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-24.04/wxpython-4.2.4-cp314-cp314-linux_x86_64.whl", marker = "python_version == '3.14' and sys_platform == 'linux' and platform_machine == 'x86_64'" },
 ]
 
+[tool.uv.build-backend]
+source-include = ["src/orbitit/data/**/*.off"]
+
 [project.scripts]
 orbitit = "orbitit:main"
 generate_59_icosahedra = "orbitit.extra_scripts.generate_59_icosahedra:main"
@@ -32,4 +35,5 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "ipdb>=0.13.13",
+    "ruff>=0.16.4",
 ]
