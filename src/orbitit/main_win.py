@@ -42,6 +42,47 @@ def _front_face_is_clockwise():
     return bool(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
 
 
+def _shape_radius(shape):
+    """Return the largest component bounding-sphere radius."""
+    shapes = shape if isinstance(shape, geom_3d.CompoundShape) else (shape,)
+    shape_radii = []
+    for sub_shape in shapes:
+        vertices = sub_shape.vs
+        if vertices:
+            spans = [
+                max(vertex[i] for vertex in vertices)
+                - min(vertex[i] for vertex in vertices)
+                for i in range(len(vertices[0]))
+            ]
+            shape_radii.append(math.sqrt(sum(span**2 for span in spans)) / 2)
+    shape_radius = max(shape_radii, default=1.0)
+    return shape_radius or 1.0
+
+
+def _vertex_radius_bounds(shape):
+    """Return vertex-radius slider bounds scaled to the shape's size."""
+    shape_radius = _shape_radius(shape)
+    return 0.01 * shape_radius, 0.1 * shape_radius
+
+
+def _default_vertex_option(vertex_props):
+    """Return the View Settings radio selection matching vertex visibility."""
+    return 1 if vertex_props["radius"] > 0 else 0
+
+
+def _edge_radius_bounds(shape):
+    """Return edge-radius slider bounds scaled to the shape's size."""
+    shape_radius = _shape_radius(shape)
+    return 0.008 * shape_radius, 0.08 * shape_radius
+
+
+def _default_edge_option(edge_props):
+    """Return the View Settings radio selection matching the edge properties."""
+    if not edge_props["draw_edges"]:
+        return 0
+    return 1 if edge_props["radius"] > 0 else 2
+
+
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape.
 
@@ -880,12 +921,16 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.parent_win = parent_win
         self.parent_panel = parent_panel
         # Show / Hide vertices
-        self.v_r = canvas.shape.vertex_props["radius"]
-        self.v_opts_lst = ["hide", "show"]
+        v_props = canvas.shape.vertex_props
+        self.v_r = v_props["radius"]
+        default = _default_vertex_option(v_props)
+        self.v_r_min, self.v_r_max = _vertex_radius_bounds(canvas.shape)
         if self.v_r > 0:
-            default = 1  # key(1) = 'show'
+            self.v_r_min = min(self.v_r_min, self.v_r)
+            self.v_r_max = max(self.v_r_max, self.v_r)
         else:
-            default = 0  # key(0) = 'hide'
+            self.v_r = self.v_r_min
+        self.v_opts_lst = ["hide", "show"]
         self.v_opts_gui = wx.RadioBox(
             self.parent_panel,
             label="Vertex Options",
@@ -898,8 +943,6 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.v_opts_gui.SetSelection(default)
         # Vertex Radius
         no_of_slider_steps = 40
-        self.v_r_min = 0.01
-        self.v_r_max = 0.100
         self.v_r_scale = 1.0 / self.v_r_min
         s = (self.v_r_max - self.v_r_min) * self.v_r_scale
         if int(s) < no_of_slider_steps:
@@ -925,14 +968,14 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         # Show / hide edges
         e_props = canvas.shape.edge_props
         self.e_r = e_props["radius"]
-        self.e_opts_lst = ["hide", "as cylinders", "as lines"]
-        if e_props["draw_edges"]:
-            if self.v_r > 0:
-                default = 1  # key(1) = 'as cylinders'
-            else:
-                default = 2  # key(2) = 'as lines'
+        self.e_r_min, self.e_r_max = _edge_radius_bounds(canvas.shape)
+        if self.e_r > 0:
+            self.e_r_min = min(self.e_r_min, self.e_r)
+            self.e_r_max = max(self.e_r_max, self.e_r)
         else:
-            default = 0  # key(0) = 'hide'
+            self.e_r = self.e_r_min
+        self.e_opts_lst = ["hide", "as cylinders", "as lines"]
+        default = _default_edge_option(e_props)
         self.e_opts_gui = wx.RadioBox(
             self.parent_panel,
             label="Edge Options",
@@ -946,8 +989,6 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.e_opts_gui.SetSelection(default)
         # Edge Radius
         no_of_slider_steps = 40
-        self.e_r_min = 0.008
-        self.e_r_max = 0.08
         self.e_r_scale = 1.0 / self.e_r_min
         s = (self.e_r_max - self.e_r_min) * self.e_r_scale
         if int(s) < no_of_slider_steps:

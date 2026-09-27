@@ -78,13 +78,24 @@ SCENES = {
 }
 DEFAULT_SCENE = "scene_orbit"
 
-# FIXME: the scale factor changes the size. This leads to problem when saving and merging shapes.
-# E.g. make a classical compound of 3 cubes and merge it with the original. Also I think this messes
-# up the the Invert function. I think that in the orbit scene the faces get inverted.
-ENABLE_FIT_TO_SCREEN = False
+FIT_TO_SCREEN_RADIUS = 5.6
 
 # prevent warning for not being used:
 del pre_pyopengl
+
+
+def _display_scale_factor(shape):
+    """Return a uniform display-only scale that fits the shape in the viewport."""
+    max_norm = 0
+    shapes = shape if isinstance(shape, geom_3d.CompoundShape) else (shape,)
+    for sub_shape in shapes:
+        for vertex in sub_shape.vs:
+            try:
+                max_norm = max(max_norm, vertex.norm())
+            except AttributeError:
+                for vertex_part in vertex:
+                    max_norm = max(max_norm, vertex_part.norm())
+    return FIT_TO_SCREEN_RADIUS / max_norm if max_norm else 1
 
 
 def is_off_model(filename):
@@ -192,7 +203,13 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
     def on_paint(self):
         """Redraw the shape on the OpenGL canvas"""
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-        self.shape.gl_draw()
+        GL.glPushMatrix()
+        try:
+            scale = self.panel.display_scale_factor
+            GL.glScalef(scale, scale, scale)
+            self.shape.gl_draw()
+        finally:
+            GL.glPopMatrix()
 
 
 class MainWindow(
@@ -558,8 +575,11 @@ class MainWindow(
                 # will not work.
                 shape = shape.simple_shape
             try:
-                shape.scale(self.panel.original_scale_factor)
                 self.panel.shape.add_shape(shape)
+                self.panel.display_scale_factor = _display_scale_factor(
+                    self.panel.shape
+                )
+                self.panel.canvas.paint()
             except AttributeError:
                 logging.warning(
                     "Cannot 'add' a shape to this scene, use 'File->Open' instead"
@@ -876,6 +896,7 @@ class MainPanel(wx.Panel):
 
         self.canvas = scene(shape, self)
         self.canvas.panel = self
+        self.display_scale_factor = _display_scale_factor(shape)
         self.canvas.SetMinSize((300, 300))
         self.canvas_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.canvas_sizer.Add(self.canvas, 1, wx.SHAPED)
@@ -915,32 +936,7 @@ class MainPanel(wx.Panel):
             shape, geom_3d.CompoundShape
         ), f"expected a CompoundShape, got {type(shape)}"
         self.canvas.shape = shape
-        # TODO: clean up vertices in case a vertex isn't used
-        max_norm = 0
-        for sub_shape in shape:
-            for vs in sub_shape.vs:
-                try:
-                    max_norm = max(max_norm, vs.norm())
-                except AttributeError:
-                    # This is probably a SymmetricShape with a list of vertices,
-                    for vs_i in vs:
-                        max_norm = max(max_norm, vs_i.norm())
-                    # Since it is a symmetric shape, it is enough with the first element in the list
-                    break
-        # Now scale to fit FoV
-        # FIXME: the scale factor changes the size. This leads to problem when saving and merging
-        # shapes. E.g. make a classical compound of 3 cubes and merge it with the original. Also I
-        # think this messes up the the Invert function. I think that in the orbit scene the faces
-        # get inverted.
-        if ENABLE_FIT_TO_SCREEN:
-            max_fit = 5.6
-            if max_norm:
-                self.original_scale_factor = max_fit / max_norm
-            else:
-                self.original_scale_factor = max_fit
-            shape.scale(self.original_scale_factor)
-        else:
-            self.original_scale_factor = 1
+        self.display_scale_factor = _display_scale_factor(shape)
 
         # Use all the vertex settings except for vs, i.e. keep the view
         # vertex settings the same.
