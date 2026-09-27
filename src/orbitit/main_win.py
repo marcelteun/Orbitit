@@ -37,6 +37,11 @@ from OpenGL import GL
 from orbitit import geom_3d, geom_gui, geomtypes, Scenes3D, wx_colors
 
 
+def _front_face_is_clockwise():
+    """Return whether the front face uses clockwise winding as a Python bool."""
+    return bool(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
+
+
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape.
 
@@ -1003,7 +1008,7 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
             wx.CheckBox(self.parent_panel, label="Switch Front and Back Face (F3)"),
         )
         self.front_back_gui = self.guis[-1]
-        self.front_back_gui.SetValue(GL.glGetIntegerv(GL.GL_FRONT_FACE) == GL.GL_CW)
+        self.front_back_gui.SetValue(_front_face_is_clockwise())
         self.parent_panel.Bind(
             wx.EVT_CHECKBOX,
             self.on_front_back,
