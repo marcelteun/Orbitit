@@ -1,37 +1,18 @@
-name: Pylint
+name: Ruff
 
 on: [push]
 
 jobs:
-  build:
-    #runs-on: ubuntu-24.04
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # python-version: ["3.8", "3.9", "3.10"]
-        python-version: ["3.11"]
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Prepare build environment
-      run: |
-        sudo apt update
-        sudo apt-get -y install libgtk-3-dev libwxgtk3.2-dev
-        sudo apt-get -y install libgl1 libglx-mesa0 libglu1-mesa
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        pip install attrdict3
-        pip install attrdict
-        pip install pyopengl
-        pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-24.04/ wxPython --user
-    - name: Analysing the code with pylint (in correct environment)
-      run: |
-        . init_env
-        pylint --version
-        ./run_pylint.sh
-        # pylint $(git ls-files '*.py')
+        python-version: "3.11"
+    - uses: astral-sh/setup-uv@v6
+    - name: Install lint dependencies
+      run: uv sync --locked --only-group dev
+    - name: Lint with Ruff
+      run: uv run --locked --only-group dev ruff check --select F .

@@ -222,7 +222,7 @@ class Interactive3DCanvas(glcanvas.GLCanvas):
             else: # probably never happens (floats)
                 spherePos = geomtypes.Vec3([x, y, 0])
             return spherePos
-        dc = wx.PaintDC(this)
+        dc = wx.PaintDC(this)  # noqa: F841
         this.SetCurrent(this.context)
         if not this.init:
             this.init_gl()
