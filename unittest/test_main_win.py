@@ -7,7 +7,7 @@ import numpy as np
 from OpenGL import GL
 
 from orbitit import __main__ as app_main
-from orbitit import geom_3d, geomtypes, main_win
+from orbitit import geom_3d, geom_4d, geomtypes, main_win
 
 
 class TestFrontFaceIsClockwise(unittest.TestCase):
@@ -177,3 +177,54 @@ class TestDisplayScaling(unittest.TestCase):
         push_matrix.assert_called_once_with()
         pop_matrix.assert_called_once_with()
         canvas.shape.gl_draw.assert_called_once_with()
+
+
+class TestFourDimensionalSceneShapes(unittest.TestCase):
+    """Ensure the main panel accepts native four-dimensional scene shapes."""
+
+    def test_panel_shape_setter_preserves_four_dimensional_shape(self):
+        shape = geom_4d.SimpleShape(
+            vs=[geomtypes.Vec4([1, 0, 0, 0]), geomtypes.Vec4([-1, 0, 0, 0])],
+            cells=[],
+        )
+        old_shape = Mock()
+        old_shape.dimension = 3
+        panel = Mock()
+        panel.canvas.shape = old_shape
+
+        with (
+            patch.object(app_main.GL, "glDisable"),
+            patch.object(app_main.GL, "glEnable"),
+        ):
+            app_main.MainPanel.shape.fset(panel, shape)
+
+        self.assertIs(panel.canvas.shape, shape)
+        self.assertEqual(panel.display_scale_factor, 5.6)
+        panel.canvas.paint.assert_called_once_with()
+        panel.parent.set_status_text.assert_called_once_with("Shape Updated")
+
+    def test_builtin_four_dimensional_scenes_project(self):
+        for module in (
+            app_main.Scene_5Cell,
+            app_main.Scene_8Cell,
+            app_main.Scene_24Cell,
+            app_main.Scene_Rectified8Cell,
+            app_main.Scene_Rectified24Cell,
+        ):
+            with self.subTest(scene=module.TITLE):
+                shape = module.Shape()
+                shape.gl_draw_single_rm_unscaled_es()
+
+                self.assertIsNotNone(shape.cell)
+                self.assertTrue(
+                    all(
+                        isinstance(channel, int)
+                        for channel in shape.cell.vertex_props["color"]
+                    )
+                )
+                self.assertTrue(
+                    all(
+                        isinstance(channel, int)
+                        for channel in shape.cell.edge_props["color"]
+                    )
+                )

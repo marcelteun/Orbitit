@@ -47,6 +47,13 @@ class Plane:
     ZW = Axis.Z | Axis.W
 
 
+def _color_to_255(color):
+    """Convert normalized RGB(A) values to the integer channels used by 3D shapes."""
+    if color and all(0 <= channel <= 1 for channel in color):
+        return [int(round(channel * 255)) for channel in color]
+    return color
+
+
 class SimpleShape:
     """Represent a four dimension shape that can be drawn in a 3D engine."""
     _remove_transparency = False
@@ -576,10 +583,13 @@ class SimpleShape:
                 (shape_cols, shape_col_idx),
                 name="%s_projection" % (self.name),
             )
-            self.cell.vertex_props = {"radius": self.v.radius, "color": self.v.col}
+            self.cell.vertex_props = {
+                "radius": self.v.radius,
+                "color": _color_to_255(self.v.col),
+            }
             self.cell.edge_props = {
                 "radius": self.e.radius,
-                "color": self.e.col,
+                "color": _color_to_255(self.e.col),
                 "draw_edges": self.e.draw,
             }
             self.cell.face_props = {"draw_faces": self.f.draw}
@@ -634,10 +644,13 @@ class SimpleShape:
                 cell = geom_3d.SimpleShape(
                     vs_3d, [], self.es, [], name="%s_Es" % (self.name)  # vs , fs, es, ns
                 )
-                cell.vertex_props = {"radius": self.v.radius, "color": self.v.col}
+                cell.vertex_props = {
+                    "radius": self.v.radius,
+                    "color": _color_to_255(self.v.col),
+                }
                 cell.edge_props = {
                     "radius": self.e.radius,
-                    "color": self.e.col,
+                    "color": _color_to_255(self.e.col),
                     "draw_edges": self.e.draw,
                 }
                 cell.face_props = {"draw_faces": False}

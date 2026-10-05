@@ -38,6 +38,7 @@ from OpenGL import GL
 from orbitit import (  # pylint: disable=ungrouped-imports
     base,
     geom_3d,
+    geom_4d,
     geomtypes,
     Scene_24Cell,
     Scene_5Cell,
@@ -930,27 +931,27 @@ class MainPanel(wx.Panel):
         shape: the new shape. This will refresh the canvas.
         """
         old_shape = self.canvas.shape
-        if not isinstance(shape, geom_3d.CompoundShape) and isinstance(shape, geom_3d.SimpleShape):
+        if not isinstance(shape, geom_3d.CompoundShape) and isinstance(
+            shape, geom_3d.SimpleShape
+        ):
             shape = geom_3d.CompoundShape([shape])
-        assert isinstance(
-            shape, geom_3d.CompoundShape
-        ), f"expected a CompoundShape, got {type(shape)}"
+        assert isinstance(shape, (geom_3d.CompoundShape, geom_4d.SimpleShape)), (
+            f"expected a 3D CompoundShape or 4D SimpleShape, got {type(shape)}"
+        )
         self.canvas.shape = shape
         self.display_scale_factor = _display_scale_factor(shape)
 
-        # Use all the vertex settings except for vs, i.e. keep the view
-        # vertex settings the same.
-        old_v_settings = old_shape.vertex_props
-        del old_v_settings["vs"]
-        del old_v_settings["ns"]
-        self.canvas.shape.vertex_props = old_v_settings
-        # Use all the edge settings except for es
-        old_e_settings = old_shape.edge_props
-        del old_e_settings["es"]
-        self.canvas.shape.edge_props = old_e_settings
-        # Use only the 'draw_faces' setting:
-        old_f_settings = {"draw_faces": old_shape.face_props["draw_faces"]}
-        self.canvas.shape.face_props = old_f_settings
+        if old_shape.dimension == shape.dimension:
+            # Preserve view settings when replacing a shape of the same dimension.
+            old_v_settings = old_shape.vertex_props
+            del old_v_settings["vs"]
+            del old_v_settings["ns"]
+            self.canvas.shape.vertex_props = old_v_settings
+            old_e_settings = old_shape.edge_props
+            del old_e_settings["es"]
+            self.canvas.shape.edge_props = old_e_settings
+            old_f_settings = {"draw_faces": old_shape.face_props["draw_faces"]}
+            self.canvas.shape.face_props = old_f_settings
         # if the shape generates the normals itself:
         # TODO: handle that this.ns is set correctly, i.e. normalised
         if shape.generate_normals:
