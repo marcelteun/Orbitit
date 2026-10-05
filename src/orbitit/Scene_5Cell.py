@@ -23,7 +23,7 @@ import wx
 import math
 from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
 
-from orbitit import geom_3d, Geom4D, rgb
+from orbitit import geom_3d, geom_4d, rgb
 
 TITLE = '5-Cell'
 
@@ -99,7 +99,7 @@ Cells = [Fs_0]
 CellGroups = ['Cells']
 ColGroups  = [Cols_0]
 
-class Shape(Geom4D.SimpleShape):
+class Shape(geom_4d.SimpleShape):
     def __init__(this):
         Cs = []
         cols = []
@@ -107,7 +107,7 @@ class Shape(Geom4D.SimpleShape):
         for i in range(len(Cells)):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
-        Geom4D.SimpleShape.__init__(this,
+        geom_4d.SimpleShape.__init__(this,
             vs, cells=Cs, es=ES, ns=[],
             colors=(Cols, cols),
             name=TITLE

@@ -23,7 +23,7 @@
 import wx
 from OpenGL.GL import glBlendFunc, glEnable, GL_SRC_ALPHA, GL_BLEND, GL_ONE_MINUS_SRC_ALPHA
 
-from orbitit import geom_3d, Geom4D, rgb
+from orbitit import geom_3d, geom_4d, rgb
 
 TITLE = 'Tesseract'
 
@@ -140,7 +140,7 @@ Col_4.append(0.2)
 Col_5   = Col_1[:]
 Cols     = [Col_0, Col_1, Col_2, Col_3, Col_4, Col_5]
 
-class Shape(Geom4D.SimpleShape):
+class Shape(geom_4d.SimpleShape):
     def __init__(this):
         Cs = []
         cols = []
@@ -148,7 +148,7 @@ class Shape(Geom4D.SimpleShape):
         for i in range(len(Cells)):
             Cs.extend(Cells[i])
             cols.extend(ColGroups[i])
-        Geom4D.SimpleShape.__init__(this,
+        geom_4d.SimpleShape.__init__(this,
             VS, cells=Cs, es=ES, ns=[],
             colors=(Cols, cols),
             name=TITLE
