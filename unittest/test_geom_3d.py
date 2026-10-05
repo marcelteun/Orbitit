@@ -27,6 +27,7 @@
 import math
 from os import path
 import unittest
+from unittest.mock import patch
 
 from orbitit import geom_3d, geomtypes, isometry, orbit, rgb
 
@@ -848,6 +849,27 @@ class TestFace(unittest.TestCase):
 
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape that aren't inherited"""
+
+    def test_face_alpha_preserves_normalized_values(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+            colors=([[255, 0, 0, 0.2]], []),
+        )
+        shape.gl.update_vertices = False
+
+        with patch.object(geom_3d.GL, "glMultMatrixd"), patch.object(
+            geom_3d.GL, "glColor"
+        ) as gl_color, patch.object(geom_3d, "gl_draw_elements"):
+            shape._gl_draw()
+            self.assertEqual(gl_color.call_args.args, (1.0, 0.0, 0.0, 0.2))
+            shape.shape_colors = ([[0, 255, 0, 128]], [])
+            shape._gl_draw()
+
+        self.assertEqual(
+            gl_color.call_args.args, (0.0, 1.0, 0.0, 128 / 255)
+        )
+
     def test_proper_edges(self):
         """Test the method check_proper_edges."""
         test_matrix = {

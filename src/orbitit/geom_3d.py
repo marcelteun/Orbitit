@@ -64,6 +64,18 @@ def gl_draw_elements(s, e):
     return GL.glDrawElementsui(s, e)  # pylint: disable=no-member
 
 
+def _color_to_gl(color):
+    """Convert byte RGB(A) values to OpenGL's normalized color channels."""
+    gl_color = [channel / 255 for channel in color[:3]]
+    if len(color) == 3:
+        return gl_color
+    alpha = color[3]
+    if alpha > 1:
+        alpha /= 255
+    gl_color.append(min(max(alpha, 0), 1))
+    return gl_color
+
+
 E = geomtypes.E  # Identity
 I = geomtypes.I  # Central inversion
 
@@ -1959,13 +1971,7 @@ class SimpleShape(base.Orbitit):
         # FACES
         if self.gl.draw_faces:
             for col_idx in self.col_range:
-                c = [chn / 255 for chn in self._shape_colors[0][col_idx]]
-                if len(c) == 3:
-                    GL.glColor(c[0], c[1], c[2])
-                else:
-                    a = max(c[3], 0)
-                    a = min(a, 255)
-                    GL.glColor(c[0], c[1], c[2], a)
+                GL.glColor(*_color_to_gl(self._shape_colors[0][col_idx]))
                 for face_idx in self.equal_colored_fs[col_idx]:
                     triangles = self.triangulated_faces_n_index[face_idx]
                     # Note triangles is a flat (ie 1D) array
