@@ -850,6 +850,97 @@ class TestFace(unittest.TestCase):
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape that aren't inherited"""
 
+    def test_highlighted_vertices_render_independently_of_global_visibility(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        shape.gl.update_vertices = False
+        shape.edge_props = {"draw_edges": False}
+
+        with patch.object(geom_3d.Scenes3D, "VSphere") as sphere, patch.object(
+            geom_3d.GL, "glMultMatrixd"
+        ), patch.object(geom_3d.GL, "glColor") as gl_color, patch.object(
+            geom_3d, "gl_draw_elements"
+        ):
+            shape.vertex_props = {"display_radius": 0.08}
+            shape.vertex_props = {
+                "highlights": {1: [0, 128, 255]}
+            }
+            shape._gl_draw()
+
+        self.assertEqual(shape.vertex_props["radius"], -1)
+        self.assertEqual(shape.vertex_props["display_radius"], 0.08)
+        sphere.assert_called_once_with(radius=0.08)
+        sphere.return_value.draw.assert_called_once_with(shape.vs[1])
+        gl_color.assert_any_call(0, 128 / 255, 1)
+
+    def test_hiding_vertices_preserves_the_configured_radius(self):
+        shape = geom_3d.SimpleShape(vs=[[0, 0, 0]], fs=[])
+
+        with patch.object(geom_3d.Scenes3D, "VSphere"):
+            shape.vertex_props = {"radius": 0.04}
+            shape.vertex_props = {"radius": -1}
+
+        self.assertEqual(shape.vertex_props["radius"], -1)
+        self.assertEqual(shape.vertex_props["display_radius"], 0.04)
+
+    def test_highlight_replaces_the_base_sphere_for_visible_vertices(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        shape.gl.update_vertices = False
+        shape.edge_props = {"draw_edges": False}
+
+        with patch.object(geom_3d.Scenes3D, "VSphere") as sphere, patch.object(
+            geom_3d.GL, "glMultMatrixd"
+        ), patch.object(geom_3d.GL, "glColor") as gl_color, patch.object(
+            geom_3d, "gl_draw_elements"
+        ):
+            shape.vertex_props = {"radius": 0.08}
+            shape.vertex_props = {
+                "highlights": {1: [0, 255, 0]}
+            }
+            shape._gl_draw()
+
+        drawn_vertices = [
+            call.args[0] for call in sphere.return_value.draw.call_args_list
+        ]
+        self.assertEqual(drawn_vertices, [shape.vs[0], shape.vs[2], shape.vs[1]])
+        gl_color.assert_any_call(0, 1, 0)
+
+    def test_visible_vertex_highlight_is_drawn_after_faces(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        shape.gl.update_vertices = False
+        shape.edge_props = {"draw_edges": False}
+        draw_order = []
+        current_color = []
+
+        with patch.object(geom_3d.Scenes3D, "VSphere") as sphere, patch.object(
+            geom_3d.GL, "glMultMatrixd"
+        ), patch.object(
+            geom_3d.GL,
+            "glColor",
+            side_effect=lambda *color: current_color.__setitem__(slice(None), color),
+        ), patch.object(
+            geom_3d, "gl_draw_elements", side_effect=lambda *_args: draw_order.append("face")
+        ):
+            sphere.return_value.draw.side_effect = lambda *_args: draw_order.append(
+                ("vertex", tuple(current_color))
+            )
+            shape.vertex_props = {"radius": 0.08}
+            shape.vertex_props = {"highlights": {1: [0, 255, 0]}}
+            shape._gl_draw()
+
+        selected_vertex_draw = ("vertex", (0.0, 1.0, 0.0))
+        self.assertLess(
+            draw_order.index("face"), draw_order.index(selected_vertex_draw)
+        )
+
     def test_face_alpha_preserves_normalized_values(self):
         shape = geom_3d.SimpleShape(
             vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],

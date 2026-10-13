@@ -215,10 +215,17 @@ class FacePanel(wx.Panel):
     These can be hidden or shown through methods
     """
 
-    text_for_width = "[1.23456789001, 1.23456789001, 1.2345678901]"
     HIDE_COL = [1, 1, 1, 0]  # use full transparency
 
-    def __init__(self, parent, shape, face_index, update_shape, style=wx.VERTICAL):
+    def __init__(
+        self,
+        parent,
+        shape,
+        face_index,
+        update_shape,
+        update_vertex_selection,
+        style=wx.VERTICAL,
+    ):
         """
         Initialize object
 
@@ -231,10 +238,8 @@ class FacePanel(wx.Panel):
             self.shape.shape_colors[1][face_index]
         ]
         self._update_shape = update_shape
-        self.text = ""
-        for vertex_index in self.shape.fs[face_index]:
-            self.text += f"\n{self.shape.vs[vertex_index]}"
-        self.text = self.text[1:]
+        self._update_vertex_selection = update_vertex_selection
+        self.vertex_controls = {}
         self.guis = []
         self._add_content(style)
 
@@ -254,37 +259,46 @@ class FacePanel(wx.Panel):
         main_sizer.Add(hide_sizer, 0, wx.ALL)
         self.guis.append(self.hide_gui)
 
-        # List of vertices
+        # Selectable vertices
         vertices_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.text_gui = wx.TextCtrl(
-            self, wx.ID_ANY, self.text, style=wx.TE_READONLY | wx.TE_MULTILINE
-        )
-        text_width = self.text_gui.GetSizeFromTextSize(
-            self.text_gui.GetTextExtent(self.text_for_width).x
-        )
-        self.text_gui.SetInitialSize(text_width)
-        self.guis.append(self.text_gui)
-        vertices_sizer.Add(self.text_gui, 0, wx.EXPAND)
+        for vertex_index in self.shape.fs[self.face_index]:
+            vertex_gui = wx.CheckBox(
+                self, label=f"{vertex_index}: {self.shape.vs[vertex_index]}"
+            )
+            self.Bind(wx.EVT_CHECKBOX, self._on_vertex_checked, id=vertex_gui.GetId())
+            self.vertex_controls[vertex_index] = vertex_gui
+            self.guis.append(vertex_gui)
+            vertices_sizer.Add(vertex_gui, 0, wx.EXPAND)
         main_sizer.Add(vertices_sizer, 0, wx.EXPAND)
 
         self.SetSizer(main_sizer)
 
     def show(self):
         """Show the list of vertices"""
-        self.text_gui.SetValue(self.text)
         for widget in self.guis:
             widget.Show()
 
     def hide(self):
-        """Show the list of vertices"""
+        """Hide the list and restore the vertices' previous appearance."""
         # It is easier for the user to make the face visible again when this menu is hidden,
         # otherwise updating the colour will not have any effect. Besides it might be hard to find
         # the check box in a list of many faces to do unhide
         self.check_gui.SetValue(False)
         self._update_face_col(self.org_face_col)
-        self.text_gui.SetValue("")
+        for vertex_gui in self.vertex_controls.values():
+            vertex_gui.SetValue(False)
+        self._update_vertex_selection(self.face_index, set())
         for widget in self.guis:
             widget.Hide()
+
+    def _on_vertex_checked(self, _event):
+        """Update highlighted vertices for the current face."""
+        selected = {
+            vertex_index
+            for vertex_index, gui in self.vertex_controls.items()
+            if gui.IsChecked()
+        }
+        self._update_vertex_selection(self.face_index, selected)
 
     def _update_face_col(self, face_col):
         """Update the shape face with the specified colour and call update function"""
@@ -326,6 +340,7 @@ class FacesList(wx_panel.ScrolledPanel):
                 - label: specifies the static text widget
                 - face_i: specifies the face index in the shape
                 - org_col: specifies the original RGB colour for that face (before applying)
+                - face: the face panel, including temporary vertex selections
         selected_faces: a list for face indices that are selected
         selection_col: wx.Colour that is used as face colour when it is selected
     """
@@ -345,6 +360,7 @@ class FacesList(wx_panel.ScrolledPanel):
         # set to True to ignore (de)selection events, e.g. when applying colours
         self._ignore_events = False
         self.selected_gui_keys = []
+        self.vertex_selections = {}
         self.shape = shape
         self.selection_col = selection_col
         self.checkbox_rows = {}
@@ -362,6 +378,7 @@ class FacesList(wx_panel.ScrolledPanel):
 
     def _destroy_faces_list(self):
         """Destroy the widgets of the face list"""
+        self.clear_vertex_selection()
         for gui_row in self.checkbox_rows.values():
             gui_row["label"].Destroy()
             gui_row["check"].Destroy()
@@ -401,7 +418,13 @@ class FacesList(wx_panel.ScrolledPanel):
             f_sizer.Add(show_button, 0)
 
             # Add face options text
-            face_gui = FacePanel(self, self.shape, i, self._update_shape)
+            face_gui = FacePanel(
+                self,
+                self.shape,
+                i,
+                self._update_shape,
+                self.update_vertex_selection,
+            )
             show_button.vertices_list = face_gui
             f_sizer.Add(face_gui, 0, wx.EXPAND)
             # Initially hide the vertices
@@ -429,19 +452,63 @@ class FacesList(wx_panel.ScrolledPanel):
         return result
 
     def deselect_all(self, apply_col):
-        """Deselect all faces in the list and either reset colours or apply them
+        """Deselect all faces, optionally committing their current colours.
 
-        apply_col: set to False to apply all colour to the shape and the list items. If True then
-            all colours are reset.
+        apply_col: when True, preserve selected face colours as the new originals.
         """
         if apply_col:
-            # Rebuild the faces list from scratch. This will also make sure org_col is updated eg.
-            self.update_face_list()
+            for check_id, row_data in self.checkbox_rows.items():
+                face_col = row_data["face"].org_face_col
+                row_data["org_col"] = face_col
+                row_data["check"].SetValue(False)
+                row_data["label"].SetBackgroundColour(wx.Colour(face_col))
+                row_data["label"].SetForegroundColour(
+                    wx.Colour(self.inv_col(face_col))
+                )
+                row_data["face"].set_new_org_col(wx.Colour(face_col))
+            self.selected_gui_keys = []
+            self.Layout()
+            self._update_shape()
         else:
             for check_id in self.selected_gui_keys:
                 self.checkbox_rows[check_id]["check"].SetValue(False)
         # TODO if deleted faces: we need to do the following as well if not apply:
         # self.shape.face_props = self._org_face_props
+
+    def update_vertex_selection(self, face_index, selected_vertices):
+        """Update temporary vertex highlights based on all expanded faces."""
+        selected_vertices = set(selected_vertices)
+        if selected_vertices == self.vertex_selections.get(face_index, set()):
+            return
+        if selected_vertices:
+            self.vertex_selections[face_index] = selected_vertices
+        else:
+            self.vertex_selections.pop(face_index, None)
+        self.refresh_vertex_highlights()
+
+    def refresh_vertex_highlights(self):
+        """Update temporary vertex highlights without changing the face selections."""
+        selected_vertices = set().union(*self.vertex_selections.values())
+        vertex_props = self.shape.vertex_props
+        radius = vertex_props["radius"]
+        if radius <= 0:
+            radius = vertex_props["display_radius"]
+        if radius <= 0:
+            radius = _vertex_radius_bounds(self.shape)[0]
+        color = [int(channel) for channel in self.selection_col[:3]]
+        highlights = {vertex_index: color for vertex_index in selected_vertices}
+        self.shape.vertex_props = {
+            "display_radius": radius,
+            "highlights": highlights,
+        }
+        self._update_shape()
+
+    def clear_vertex_selection(self):
+        """Remove all temporary vertex highlights."""
+        if self.vertex_selections:
+            self.vertex_selections = {}
+            self.shape.vertex_props = {"highlights": {}}
+            self._update_shape()
 
     def _on_checked(self, event):
         """Handle when one of the faces checkbox changes state
@@ -558,7 +625,7 @@ class FacesTab(wx.Panel):
         self.guis[-1].Bind(wx.EVT_BUTTON, self.on_select_all)
         select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
         # Apply colour
-        self.guis.append(wx.Button(self, label="Apply colour"))
+        self.guis.append(wx.Button(self, label="Apply Face Colour"))
         self.guis[-1].Bind(wx.EVT_BUTTON, self.apply_col)
         select_sizer.Add(self.guis[-1], 0, wx.EXPAND)
         # Reverse order
@@ -590,6 +657,8 @@ class FacesTab(wx.Panel):
         self.faces_list.selection_col = new_col
         for gui_id in self.faces_list.selected_gui_keys:
             self.faces_list.switch(gui_id, True)
+        if self.faces_list.vertex_selections:
+            self.faces_list.refresh_vertex_highlights()
 
     def on_flip(self, _event):
         """Update the colour of the selected faces"""
@@ -655,6 +724,7 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def add_content(self):
         """Add GUI widgets to the panel"""
@@ -709,6 +779,12 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
         for tab in self.tabs:
             tab.apply_col()
         self.Close()
+
+    def on_close(self, event):
+        """Restore vertex display state when closing the temporary editor."""
+        for tab in self.tabs:
+            tab.faces_list.clear_vertex_selection()
+        event.Skip()
 
 
 class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
@@ -922,9 +998,18 @@ class ViewSettingsSizer(wx.BoxSizer):  # pylint: disable=too-many-instance-attri
         self.parent_panel = parent_panel
         # Show / Hide vertices
         v_props = canvas.shape.vertex_props
-        self.v_r = v_props["radius"]
-        default = _default_vertex_option(v_props)
         self.v_r_min, self.v_r_max = _vertex_radius_bounds(canvas.shape)
+        display_radius = v_props.get("display_radius", -1)
+        self.v_r = (
+            v_props["radius"]
+            if v_props["radius"] > 0
+            else display_radius
+            if display_radius > 0
+            else self.v_r_min
+        )
+        if "display_radius" in v_props:
+            self.canvas.shape.vertex_props = {"display_radius": self.v_r}
+        default = _default_vertex_option(v_props)
         if self.v_r > 0:
             self.v_r_min = min(self.v_r_min, self.v_r)
             self.v_r_max = max(self.v_r_max, self.v_r)

@@ -955,7 +955,10 @@ class SimpleShape(base.Orbitit):
         self.gl = Fields()
         self.gl.sphere = None
         self.gl.vertex_radius = -1
+        self.gl.vertex_display_radius = -1
         self.gl.vertex_col = [255, 255, 200]
+        self.gl.vertex_highlights = {}
+        self.gl.highlight_spheres = {}
         self.gl.update_vertices = True
         self.gl.sphere_vertices = False
         self.gl.edge_radius = -1
@@ -1134,11 +1137,12 @@ class SimpleShape(base.Orbitit):
         """
         Return the current vertex properties
 
-        Returned is a dictionary with the keywords vs, radius, color and ns.
+        Returned is a dictionary with the keywords vs, radius, display_radius, color and ns.
         vs: an array of vertices.
         radius: If > 0.0 draw vertices as spheres with the specified colour. If
                 no spheres are required (for preformance reasons) set the radius
                 to a value <= 0.0.
+        display_radius: the last positive radius configured for vertex spheres.
         color: optional array with 3 rgb values between 0 and 255.
         ns: an array of normals (per vertex) This value might be None if the
             value is not set. If the value is set it is used by gl_draw
@@ -1146,6 +1150,7 @@ class SimpleShape(base.Orbitit):
         return {
             "vs": self.vs,
             "radius": self.gl.vertex_radius,
+            "display_radius": self.gl.vertex_display_radius,
             "color": self.gl.vertex_col,
             "ns": self.ns,
         }
@@ -1158,6 +1163,7 @@ class SimpleShape(base.Orbitit):
         Accepted are the optional (keys) parameters:
         - vs,
         - radius,
+        - display_radius,
         - color.
         - ns.
         See getter for the explanation of the keys.
@@ -1174,15 +1180,30 @@ class SimpleShape(base.Orbitit):
                 self.gl.vertex_radius = props["radius"]
                 self.gl.sphere_vertices = props["radius"] > 0.0
                 if self.gl.sphere_vertices:
+                    self.gl.vertex_display_radius = props["radius"]
                     if self.gl.sphere is not None:
                         del self.gl.sphere
                     self.gl.sphere = Scenes3D.VSphere(radius=props["radius"])
+            if "display_radius" in props and props["display_radius"] is not None:
+                self.gl.vertex_display_radius = props["display_radius"]
             if "color" in props and props["color"] is not None:
                 if props["color"]:
                     assert isinstance(
                         props["color"][0], int
                     ), "Oops: old float format, use int up to 255 now"
                 self.gl.vertex_col = props["color"]
+            if "highlights" in props and props["highlights"] is not None:
+                highlights = props["highlights"]
+                for vertex_index in highlights:
+                    if vertex_index < 0 or vertex_index >= len(self.vs):
+                        raise IndexError(f"Invalid highlighted vertex {vertex_index}")
+                if highlights and max(
+                    self.gl.vertex_radius, self.gl.vertex_display_radius
+                ) <= 0:
+                    raise ValueError(
+                        "Highlighted vertices require a positive display radius"
+                    )
+                self.gl.vertex_highlights = dict(highlights)
 
     def gl_force_set_vs(self, do):
         """
@@ -1941,7 +1962,8 @@ class SimpleShape(base.Orbitit):
                 self.gl.vertex_col[2] / 255,
             )
             for i in self.vertex_range:
-                self.gl.sphere.draw(self.vs[i])
+                if i not in self.gl.vertex_highlights:
+                    self.gl.sphere.draw(self.vs[i])
         # EDGES
         if self.gl.draw_edges:
             if self.generate_normals and (
@@ -2014,6 +2036,22 @@ class SimpleShape(base.Orbitit):
                         gl_draw_elements(GL.GL_TRIANGLES, triangles)
                         # ready, disable stencil
                         GL.glDisable(GL.GL_STENCIL_TEST)
+
+        # Draw selection spheres last so faces cannot hide their selection colour.
+        for vertex_index, highlight in self.gl.vertex_highlights.items():
+            GL.glColor(
+                highlight[0] / 255,
+                highlight[1] / 255,
+                highlight[2] / 255,
+            )
+            radius = (
+                self.gl.vertex_radius
+                if self.gl.vertex_radius > 0
+                else self.gl.vertex_display_radius
+            )
+            if radius not in self.gl.highlight_spheres:
+                self.gl.highlight_spheres[radius] = Scenes3D.VSphere(radius=radius)
+            self.gl.highlight_spheres[radius].draw(self.vs[vertex_index])
 
     def to_off(
         self, precision=geomtypes.FLOAT_OUT_PRECISION, info=False, color_floats=False
@@ -2884,6 +2922,7 @@ class CompoundShape(base.Orbitit):
         return {
             "vs": self.vs,
             "radius": d["radius"],
+            "display_radius": d["display_radius"],
             "color": d["color"],
             "ns": self.ns,
         }
@@ -2917,6 +2956,10 @@ class CompoundShape(base.Orbitit):
                 color = props["color"]
             else:
                 color = None
+            if "display_radius" in props:
+                display_radius = props["display_radius"]
+            else:
+                display_radius = None
             assert len(vs) == len(self._shapes)
             assert len(ns) == len(self._shapes)
             for i, shape in enumerate(self._shapes):
@@ -2924,6 +2967,7 @@ class CompoundShape(base.Orbitit):
                     "vs": vs[i],
                     "ns": ns[i],
                     "radius": radius,
+                    "display_radius": display_radius,
                     "color": color,
                 }
             self.merge_needed = True
