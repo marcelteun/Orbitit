@@ -34,9 +34,10 @@ Geometry types specifically related to 3D
 
 from abc import ABC
 import copy
+from functools import reduce
+from itertools import combinations
 import logging
 import math
-from functools import reduce
 import wx
 
 from OpenGL import GL
@@ -1801,6 +1802,302 @@ class SimpleShape(base.Orbitit):
             for f in self.fs
         ]
 
+    @staticmethod
+    def _face_edge_directions(faces):
+        """Return counts and signed directions for each undirected mesh edge."""
+        edge_directions = {}
+        for face in faces:
+            if len(face) < 3:
+                continue
+            for i, vertex in enumerate(face):
+                next_vertex = face[(i + 1) % len(face)]
+                edge = tuple(sorted((vertex, next_vertex)))
+                count, direction = edge_directions.get(edge, (0, 0))
+                edge_directions[edge] = (
+                    count + 1,
+                    direction + (1 if vertex < next_vertex else -1),
+                )
+        return edge_directions
+
+    def _volume_centroid(self):
+        """Calculate the volume centroid of a closed, consistently wound mesh."""
+        edge_directions = self._face_edge_directions(self.fs)
+        if not edge_directions or any(
+            count != 2 or direction != 0
+            for count, direction in edge_directions.values()
+        ):
+            raise ValueError("The core requires a closed, consistently oriented mesh")
+
+        reference = reduce(lambda total, vertex: total + vertex, self.vs, vec(0, 0, 0))
+        reference = reference / len(self.vs)
+        scale = max(
+            max(vertex[axis] for vertex in self.vs)
+            - min(vertex[axis] for vertex in self.vs)
+            for axis in range(3)
+        )
+        if scale == 0:
+            raise ValueError("The core requires a polyhedron with non-zero extent")
+        volume_sum = 0
+        centroid_sum = vec(0, 0, 0)
+        for face in self.fs:
+            first = self.vs[face[0]] - reference
+            for i in range(1, len(face) - 1):
+                second = self.vs[face[i]] - reference
+                third = self.vs[face[i + 1]] - reference
+                signed_volume = first * second.cross(third)
+                volume_sum += signed_volume
+                centroid_sum += signed_volume * (first + second + third) / 4
+        if abs(volume_sum) <= scale**3 * 1e-12:
+            raise ValueError("The core requires a non-zero-volume polyhedron")
+        return reference + centroid_sum / volume_sum
+
+    @staticmethod
+    def _project_face(face, vertices, normal):
+        """Project a planar face into 2D by dropping its dominant normal axis."""
+        axis = max(range(3), key=lambda i: abs(normal[i]))
+        return [
+            (vertices[index][(axis + 1) % 3], vertices[index][(axis + 2) % 3])
+            for index in face
+        ]
+
+    @staticmethod
+    def _project_point(point, normal):
+        """Project one point into the same plane coordinates as _project_face."""
+        axis = max(range(3), key=lambda i: abs(normal[i]))
+        return point[(axis + 1) % 3], point[(axis + 2) % 3]
+
+    @staticmethod
+    def _point_in_polygon(point, polygon, tolerance):
+        """Return whether a 2D point lies inside or on a polygon."""
+        x, y = point
+        inside = False
+        for i, (x0, y0) in enumerate(polygon):
+            x1, y1 = polygon[(i + 1) % len(polygon)]
+            cross = (x - x0) * (y1 - y0) - (y - y0) * (x1 - x0)
+            dot = (x - x0) * (x1 - x0) + (y - y0) * (y1 - y0)
+            edge_length_sq = (x1 - x0) ** 2 + (y1 - y0) ** 2
+            if (
+                abs(cross) <= tolerance
+                and -tolerance <= dot <= edge_length_sq + tolerance
+            ):
+                return True
+            if (y0 > y) != (y1 > y):
+                crossing_x = x0 + (y - y0) * (x1 - x0) / (y1 - y0)
+                if crossing_x > x:
+                    inside = not inside
+        return inside
+
+    @staticmethod
+    def _is_convex_face(polygon, tolerance):
+        """Return whether a planar polygon has consistent non-zero turns."""
+        turns = []
+        for i, point in enumerate(polygon):
+            next_point = polygon[(i + 1) % len(polygon)]
+            after_next = polygon[(i + 2) % len(polygon)]
+            turn = (next_point[0] - point[0]) * (
+                after_next[1] - next_point[1]
+            ) - (next_point[1] - point[1]) * (after_next[0] - next_point[0])
+            if abs(turn) > tolerance:
+                turns.append(turn)
+        return bool(turns) and (
+            all(turn > 0 for turn in turns) or all(turn < 0 for turn in turns)
+        )
+
+    def _ray_face_intersection(
+        self, origin, direction, polygon, plane, tolerance, area_tolerance
+    ):
+        """Return the first ray parameter intersecting a planar polygon, or None."""
+        normal = plane.normal
+        denominator = normal * direction
+        if abs(denominator) <= tolerance:
+            return None
+        parameter = -(normal * origin + plane.D) / denominator
+        parameter_tolerance = tolerance / direction.norm()
+        if not parameter_tolerance < parameter <= 1 + parameter_tolerance:
+            return None
+        point = origin + parameter * direction
+        projected_point = self._project_point(point, normal)
+        if self._point_in_polygon(projected_point, polygon, area_tolerance):
+            return parameter
+        return None
+
+    def get_core(self, centre=None):
+        """Return the convex polyhedron bounded by the nearest visible convex faces.
+
+        Closed indexed meshes use their volume centroid. For face soups or other
+        unwelded meshes, the average of unique vertex positions is used instead.
+        Supply ``centre`` to override either calculation. The source faces need not
+        share vertex indices, but must be planar and convex to contribute.
+        """
+        if not self.vs or not self.fs:
+            raise ValueError("The core requires a non-empty polyhedron")
+        scale = max(
+            max(vertex[axis] for vertex in self.vs)
+            - min(vertex[axis] for vertex in self.vs)
+            for axis in range(3)
+        )
+        if scale == 0:
+            raise ValueError("The core requires a polyhedron with non-zero extent")
+        coordinate_magnitude = max(
+            abs(coordinate) for vertex in self.vs for coordinate in vertex
+        )
+        tolerance = max(scale * 1e-9, coordinate_magnitude * 1e-15)
+        area_tolerance = tolerance * scale
+        if centre is None:
+            try:
+                centre = self._volume_centroid()
+            except ValueError:
+                unique_vertices = {}
+                for vertex in self.vs:
+                    key = tuple(
+                        round(float(coordinate) / tolerance) for coordinate in vertex
+                    )
+                    unique_vertices.setdefault(key, vertex)
+                centre = reduce(
+                    lambda total, vertex: total + vertex,
+                    unique_vertices.values(),
+                    vec(0, 0, 0),
+                ) / len(unique_vertices)
+        else:
+            centre = geomtypes.Vec3(centre)
+
+        face_data = []
+        for face_index, face in enumerate(self.fs):
+            if len(face) < 3:
+                continue
+            with geomtypes.FloatHandler(precision=14):
+                plane = self._get_face_plane(self.vs, face)
+            if plane is None or any(
+                abs(plane.normal * self.vs[vertex] + plane.D) > tolerance
+                for vertex in face
+            ):
+                raise ValueError("The core requires non-degenerate planar faces")
+            polygon = self._project_face(face, self.vs, plane.normal)
+            if self._is_convex_face(polygon, area_tolerance):
+                face_data.append((face_index, face, plane, polygon))
+        if not face_data:
+            raise ValueError("The core requires at least one convex planar face")
+
+        visible_planes = []
+        for face_index, face, plane, polygon in face_data:
+            target = reduce(
+                lambda total, vertex: total + vertex,
+                (self.vs[index] for index in face),
+                vec(0, 0, 0),
+            ) / len(face)
+            direction = target - centre
+            if direction.norm() <= tolerance:
+                continue
+            hits = []
+            for hit_index, _, hit_plane, hit_polygon in face_data:
+                parameter = self._ray_face_intersection(
+                    centre,
+                    direction,
+                    hit_polygon,
+                    hit_plane,
+                    tolerance,
+                    area_tolerance,
+                )
+                if parameter is not None:
+                    hits.append((parameter, hit_index))
+            if not hits:
+                continue
+            first_hit = min(parameter for parameter, _ in hits)
+            parameter_tolerance = tolerance / direction.norm()
+            if not any(
+                hit_index == face_index
+                and abs(parameter - first_hit) <= parameter_tolerance
+                for parameter, hit_index in hits
+            ):
+                continue
+
+            normal = plane.normal
+            offset = plane.D
+            if normal * centre + offset > 0:
+                normal = -normal
+                offset = -offset
+            if abs(normal * centre + offset) <= tolerance:
+                continue
+            if any(
+                (normal - old_normal).norm() <= 1e-9
+                and abs(offset - old_offset) <= tolerance
+                for old_normal, old_offset, _ in visible_planes
+            ):
+                continue
+            visible_planes.append((normal, offset, face_index))
+
+        if len(visible_planes) < 4:
+            raise ValueError("Visible faces do not define a bounded convex core")
+
+        core_vertices = []
+        for first, second, third in combinations(visible_planes, 3):
+            n0, d0, _ = first
+            n1, d1, _ = second
+            n2, d2, _ = third
+            cross12 = n1.cross(n2)
+            determinant = n0 * cross12
+            if abs(determinant) <= 1e-10:
+                continue
+            point = (
+                -d0 * cross12
+                - d1 * n2.cross(n0)
+                - d2 * n0.cross(n1)
+            ) / determinant
+            if any(
+                normal * point + offset > tolerance
+                for normal, offset, _ in visible_planes
+            ):
+                continue
+            if not any((point - existing).norm() <= tolerance for existing in core_vertices):
+                core_vertices.append(point)
+        if len(core_vertices) < 4:
+            raise ValueError("Visible faces do not define a bounded convex core")
+
+        core_faces = []
+        core_face_colors = []
+        for normal, offset, face_index in visible_planes:
+            on_plane = [
+                index
+                for index, vertex in enumerate(core_vertices)
+                if abs(normal * vertex + offset) <= tolerance
+            ]
+            if len(on_plane) < 3:
+                continue
+            face_centre = reduce(
+                lambda total, index: total + core_vertices[index],
+                on_plane,
+                vec(0, 0, 0),
+            ) / len(on_plane)
+            reference_axis = min(range(3), key=lambda axis: abs(normal[axis]))
+            axis = [0, 0, 0]
+            axis[reference_axis] = 1
+            basis_u = normal.cross(geomtypes.Vec3(axis)).normalize()
+            basis_v = normal.cross(basis_u).normalize()
+            face = sorted(
+                on_plane,
+                key=lambda index: math.atan2(
+                    (core_vertices[index] - face_centre) * basis_v,
+                    (core_vertices[index] - face_centre) * basis_u,
+                ),
+            )
+            core_faces.append(face)
+            core_face_colors.append(self.shape_colors[1][face_index])
+
+        if len(core_faces) < 4 or any(
+            count != 2 or direction != 0
+            for count, direction in self._face_edge_directions(core_faces).values()
+        ):
+            raise ValueError("Visible faces do not define a closed convex core")
+        colors, _ = self.shape_colors
+        core = SimpleShape(
+            core_vertices,
+            core_faces,
+            colors=(colors, core_face_colors),
+            name=f"{self.name}_core",
+        )
+        core.regen_edges()
+        return core
+
     def calc_sphere_radii(self, precision=12):
         """Calculate the radii for the circumscribed, inscribed and mid sphere(s)"""
         # calculate the circumscribed spheres:
@@ -3155,6 +3452,12 @@ class CompoundShape(base.Orbitit):
         if self.merge_needed:
             self.merge_shapes()
         return self.merged_shape.get_dome(level)
+
+    def get_core(self):
+        """Return the convex core of the merged shape."""
+        if self.merge_needed:
+            self.merge_shapes()
+        return self.merged_shape.get_core()
 
 
 class SymmetricShape(CompoundShape):

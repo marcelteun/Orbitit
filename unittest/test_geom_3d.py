@@ -850,6 +850,116 @@ class TestFace(unittest.TestCase):
 class TestSimpleShape(unittest.TestCase):
     """Unit tests for geom_3d.SimpleShape that aren't inherited"""
 
+    @staticmethod
+    def cube_shell(scale, offset):
+        """Return vertices and outward-wound faces for a cube shell."""
+        vertices = [
+            [-1, -1, -1],
+            [1, -1, -1],
+            [1, 1, -1],
+            [-1, 1, -1],
+            [-1, -1, 1],
+            [1, -1, 1],
+            [1, 1, 1],
+            [-1, 1, 1],
+        ]
+        faces = [
+            [0, 3, 2, 1],
+            [4, 5, 6, 7],
+            [0, 4, 7, 3],
+            [1, 2, 6, 5],
+            [0, 1, 5, 4],
+            [3, 7, 6, 2],
+        ]
+        vertices = [
+            [
+                scale * coordinate + offset[axis]
+                for axis, coordinate in enumerate(vertex)
+            ]
+            for vertex in vertices
+        ]
+        return vertices, faces
+
+    def test_get_core_selects_first_hit_convex_faces(self):
+        offset = [3, -2, 5]
+        outer_vs, outer_fs = self.cube_shell(2, offset)
+        inner_vs, inner_fs = self.cube_shell(1, offset)
+        inner_fs = [[index + len(outer_vs) for index in face] for face in inner_fs]
+        shape = geom_3d.SimpleShape(
+            outer_vs + inner_vs,
+            outer_fs + inner_fs,
+            colors=([rgb.red, rgb.blue], [0] * 6 + [1] * 6),
+            name="NestedCubes",
+        )
+
+        core = shape.get_core()
+
+        self.assertEqual(core.name, "NestedCubes_core")
+        self.assertEqual(len(core.vs), 8)
+        self.assertEqual(len(core.fs), 6)
+        self.assertEqual(core.shape_colors[0], (rgb.blue,))
+        self.assertEqual(core.shape_colors[1], (0,) * 6)
+        self.assertEqual(
+            set(tuple(vertex) for vertex in core.vs),
+            set(tuple(vertex) for vertex in inner_vs),
+        )
+        compound_core = geom_3d.CompoundShape([shape], regen_edges=False).get_core()
+        self.assertEqual(compound_core.vs, core.vs)
+        self.assertEqual(compound_core.fs, core.fs)
+        self.assertTrue(core.to_postscript())
+
+    def test_get_core_rejects_open_meshes(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+
+        with self.assertRaisesRegex(ValueError, "bounded convex core"):
+            shape.get_core()
+
+    def test_get_core_accepts_unwelded_nested_cube_faces(self):
+        outer_vs, outer_fs = self.cube_shell(2, [0, 0, 0])
+        inner_vs, inner_fs = self.cube_shell(1, [0, 0, 0])
+        faces = []
+        vertices = []
+        face_colors = []
+        for shell_vertices, shell_faces, color_index in (
+            (outer_vs, outer_fs, 0),
+            (inner_vs, inner_fs, 1),
+        ):
+            for face in shell_faces:
+                offset = len(vertices)
+                vertices.extend(shell_vertices[index] for index in face)
+                faces.append(list(range(offset, offset + len(face))))
+                face_colors.append(color_index)
+        shape = geom_3d.SimpleShape(
+            vertices,
+            faces,
+            colors=([rgb.red, rgb.blue], face_colors),
+        )
+
+        core = shape.get_core()
+
+        self.assertEqual(len(core.vs), 8)
+        self.assertEqual(len(core.fs), 6)
+        self.assertEqual(core.shape_colors[0], (rgb.blue,))
+
+    def test_get_core_is_independent_of_coordinate_scale(self):
+        for scale in (1e-6, 1, 1e6):
+            with self.subTest(scale=scale):
+                outer_vs, outer_fs = self.cube_shell(2 * scale, [0, 0, 0])
+                inner_vs, inner_fs = self.cube_shell(scale, [0, 0, 0])
+                inner_fs = [
+                    [index + len(outer_vs) for index in face]
+                    for face in inner_fs
+                ]
+                shape = geom_3d.SimpleShape(outer_vs + inner_vs, outer_fs + inner_fs)
+
+                core = shape.get_core()
+
+                self.assertEqual(len(core.fs), 6)
+                self.assertEqual(len(core.vs), 8)
+
     def test_highlighted_vertices_render_independently_of_global_visibility(self):
         shape = geom_3d.SimpleShape(
             vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],

@@ -394,6 +394,10 @@ class MainWindow(
         menu.Append(menu_item)
         self.dome2 = menu_item
 
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Core\tc")
+        self.Bind(wx.EVT_MENU, self.on_core, id=menu_item.GetId())
+        menu.Append(menu_item)
+
         return menu
 
     def create_view_menu(self):
@@ -789,6 +793,29 @@ class MainWindow(
         if shape is not None:
             self.panel.shape = shape
             self.SetTitle(f"Dome({self.GetTitle()})")
+
+    def on_core(self, _event):
+        """Replace the displayed shape with its convex core."""
+        if self.panel.shape.dimension != 3:
+            wx.MessageBox(
+                "The core tool only supports 3D shapes.",
+                "Core unavailable",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        try:
+            core = self.panel.shape.get_core()
+        except ValueError as error:
+            wx.MessageBox(
+                str(error),
+                "Core unavailable",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        self.panel.shape = core
+        self.SetTitle(f"Core({self.GetTitle()})")
 
     def on_select_scene(self, evt):
         """Handle event '_' change to scene connected to some menu ID"""

@@ -228,3 +228,39 @@ class TestFourDimensionalSceneShapes(unittest.TestCase):
                         for channel in shape.cell.edge_props["color"]
                     )
                 )
+
+
+class TestCoreTool(unittest.TestCase):
+    """Test the Tools menu action for creating a convex core."""
+
+    def test_replaces_current_shape_with_core(self):
+        core = Mock()
+        source_shape = Mock()
+        source_shape.dimension = 3
+        source_shape.get_core.return_value = core
+        window = Mock()
+        window.panel.shape = source_shape
+        window.GetTitle.return_value = "Source"
+
+        app_main.MainWindow.on_core(window, None)
+
+        self.assertIs(window.panel.shape, core)
+        window.SetTitle.assert_called_once_with("Core(Source)")
+
+    def test_reports_core_geometry_errors(self):
+        source_shape = Mock()
+        source_shape.dimension = 3
+        source_shape.get_core.side_effect = ValueError("open mesh")
+        window = Mock()
+        window.panel.shape = source_shape
+
+        with patch.object(app_main.wx, "MessageBox") as message_box:
+            app_main.MainWindow.on_core(window, None)
+
+        message_box.assert_called_once_with(
+            "open mesh",
+            "Core unavailable",
+            app_main.wx.OK | app_main.wx.ICON_ERROR,
+            window,
+        )
+        window.SetTitle.assert_not_called()
