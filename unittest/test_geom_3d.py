@@ -894,7 +894,7 @@ class TestSimpleShape(unittest.TestCase):
 
         core = shape.get_core()
 
-        self.assertEqual(core.name, "NestedCubes_core")
+        self.assertEqual(core.name, "core_of_NestedCubes")
         self.assertEqual(len(core.vs), 8)
         self.assertEqual(len(core.fs), 6)
         self.assertEqual(core.shape_colors[0], (rgb.blue,))
@@ -906,6 +906,7 @@ class TestSimpleShape(unittest.TestCase):
         compound_core = geom_3d.CompoundShape([shape], regen_edges=False).get_core()
         self.assertEqual(compound_core.vs, core.vs)
         self.assertEqual(compound_core.fs, core.fs)
+        self.assertEqual(compound_core.name, "core_of_NestedCubes")
         self.assertTrue(core.to_postscript())
 
     def test_get_core_rejects_open_meshes(self):

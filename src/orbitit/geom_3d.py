@@ -2093,7 +2093,7 @@ class SimpleShape(base.Orbitit):
             core_vertices,
             core_faces,
             colors=(colors, core_face_colors),
-            name=f"{self.name}_core",
+            name=f"core_of_{self.name}",
         )
         core.regen_edges()
         return core
