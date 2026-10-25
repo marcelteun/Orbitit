@@ -208,6 +208,7 @@ class Canvas3DScene(Scenes3D.Interactive3DCanvas):
         GL.glPushMatrix()
         try:
             scale = self.panel.display_scale_factor
+            GL.glEnable(GL.GL_NORMALIZE)
             GL.glScalef(scale, scale, scale)
             self.shape.gl_draw()
         finally:
@@ -1036,12 +1037,6 @@ class MainPanel(wx.Panel):
             self.canvas.shape.edge_props = old_e_settings
             old_f_settings = {"draw_faces": old_shape.face_props["draw_faces"]}
             self.canvas.shape.face_props = old_f_settings
-        # if the shape generates the normals itself:
-        # TODO: handle that this.ns is set correctly, i.e. normalised
-        if shape.generate_normals:
-            GL.glDisable(GL.GL_NORMALIZE)
-        else:
-            GL.glEnable(GL.GL_NORMALIZE)
         self.canvas.paint()
         self.parent.set_status_text("Shape Updated")
         del old_shape

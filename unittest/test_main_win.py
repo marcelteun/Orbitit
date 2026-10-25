@@ -165,15 +165,27 @@ class TestDisplayScaling(unittest.TestCase):
     def test_canvas_applies_display_scale_during_drawing(self):
         canvas = Mock()
         canvas.panel.display_scale_factor = 0.5
+        gl_calls = []
 
         with (
             patch.object(app_main.GL, "glClear"),
             patch.object(app_main.GL, "glPushMatrix") as push_matrix,
+            patch.object(app_main.GL, "glEnable") as enable,
             patch.object(app_main.GL, "glScalef") as scale,
             patch.object(app_main.GL, "glPopMatrix") as pop_matrix,
         ):
+            enable.side_effect = lambda *args: gl_calls.append(("enable", args))
+            scale.side_effect = lambda *args: gl_calls.append(("scale", args))
             app_main.Canvas3DScene.on_paint(canvas)
 
+        enable.assert_called_once_with(app_main.GL.GL_NORMALIZE)
+        self.assertEqual(
+            gl_calls,
+            [
+                ("enable", (app_main.GL.GL_NORMALIZE,)),
+                ("scale", (0.5, 0.5, 0.5)),
+            ],
+        )
         scale.assert_called_once_with(0.5, 0.5, 0.5)
         push_matrix.assert_called_once_with()
         pop_matrix.assert_called_once_with()
