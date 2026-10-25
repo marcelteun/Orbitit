@@ -89,10 +89,14 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     width: the amount of colour columns in the widget.
     """
 
-    def __init__(self, canvas, width, *args, **kwargs):
+    def __init__(self, canvas, width, *args, on_commit=None, on_cancel=None, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
         self.col_width = width
+        self._on_commit = on_commit
+        self._on_cancel = on_cancel
+        self._original_shape = copy.deepcopy(canvas.shape)
+        self._confirmed = False
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.org_cols = self.canvas.shape.face_props["colors"]
@@ -101,6 +105,7 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             [list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols
         ]
         self.add_content()
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def add_content(self):
         """Add all widgets to the window for updating the shape colours"""
@@ -176,15 +181,34 @@ class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def on_cancel(self, _):
         """Handle event '_' to recover original shape colours and close window"""
-        self.cols = [
-            [list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols
-        ]
-        self.update_shape_cols()
+        if self._on_cancel:
+            self._on_cancel(self._original_shape)
+        else:
+            self.cols = [
+                [list(col_idx) for col_idx in shape_cols] for shape_cols in self.org_cols
+            ]
+            self.update_shape_cols()
+        self._confirmed = True
         self.Close()
 
     def on_done(self, _):
         """Handle event '_' to confirms all colours"""
+        if self._on_commit:
+            self._on_commit(self._original_shape)
+        self._confirmed = True
         self.Close()
+
+    def on_close(self, event):
+        """Discard unconfirmed colour changes when the window is closed."""
+        self.cancel_unconfirmed()
+        event.Skip()
+
+    def cancel_unconfirmed(self):
+        """Restore the original shape if this editor was not confirmed."""
+        if not self._confirmed:
+            if self._on_cancel:
+                self._on_cancel(self._original_shape)
+            self._confirmed = True
 
     def on_col_select(self, e):
         """Handle event 'e' that is generated when a colour was updated"""
@@ -718,9 +742,13 @@ class FacesTab(wx.Panel):
 class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
     """Window to edit which faces should be shown"""
 
-    def __init__(self, canvas, *args, **kwargs):
+    def __init__(self, canvas, *args, on_commit=None, on_cancel=None, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
+        self._on_commit = on_commit
+        self._on_cancel = on_cancel
+        self._original_shape = copy.deepcopy(canvas.shape)
+        self._confirmed = False
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
@@ -771,37 +799,63 @@ class FacesWindow(wx.Frame):  # pylint: disable=too-few-public-methods
 
     def on_cancel(self, event):
         """Restore all faces and close window."""
-        self.on_reset(event)
+        if self._on_cancel:
+            self._on_cancel(self._original_shape)
+        else:
+            self.on_reset(event)
+        self._confirmed = True
         self.Close()
 
     def on_done(self, _event):
         """Apply colour to faces, and close window."""
         for tab in self.tabs:
             tab.apply_col()
+        if self._on_commit:
+            self._on_commit(self._original_shape)
+        self._confirmed = True
         self.Close()
 
     def on_close(self, event):
-        """Restore vertex display state when closing the temporary editor."""
+        """Discard unconfirmed face edits and clear temporary vertex highlights."""
+        self.cancel_unconfirmed()
         for tab in self.tabs:
             tab.faces_list.clear_vertex_selection()
         event.Skip()
+
+    def cancel_unconfirmed(self):
+        """Restore the original shape if this editor was not confirmed."""
+        if not self._confirmed:
+            if self._on_cancel:
+                self._on_cancel(self._original_shape)
+            self._confirmed = True
 
 
 class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window with controls for transforming current shape
 
-    The transform is applied dynamically (i.e. while window is still open), but can be canceled.
+    Transform previews are committed by Apply or Done. Cancel discards only the pending preview;
+    Reset restores the shape from before this window was opened.
     """
 
-    def __init__(self, canvas, *args, **kwargs):
+    def __init__(
+        self, canvas, *args, on_commit=None, on_cancel=None, on_reset=None, **kwargs
+    ):
         wx.Frame.__init__(self, *args, **kwargs)
         self.canvas = canvas
+        self._on_commit = on_commit
+        self._on_cancel = on_cancel
+        self._on_reset = on_reset
+        self._original_shape = copy.deepcopy(canvas.shape)
+        self._undo_shape = copy.deepcopy(canvas.shape)
+        self._has_pending_changes = False
+        self._confirmed = False
         self.status_bar = self.CreateStatusBar()
         self.panel = wx.Panel(self, wx.ID_ANY)
         self.add_content()
         self.org_vs = self.canvas.shape.vertex_props["vs"]
         self.org_org_vs = self.org_vs  # for cancel
         self.set_status_text("")
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def add_content(self):
         """Create all wdigets for the transform window"""
@@ -873,6 +927,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         self.canvas.shape.transform(
             geomtypes.Rot3(angle=geom_3d.DEG2RAD * angle, axis=axis)
         )
+        self._has_pending_changes = True
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -880,6 +935,7 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
         """Handle event '_' to invert shape"""
         # Assume compound shape
         self.canvas.shape.scale(factor)
+        self._has_pending_changes = True
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
@@ -891,11 +947,16 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
             for shape_vs in self.org_vs
         ]
         self.canvas.shape.vertex_props = {"vs": new_vs}
+        self._has_pending_changes = True
         self.canvas.paint()
         self.set_status_text("Use 'Apply' to define a subsequent transform")
 
     def on_apply(self, _=None):
         """Handle event '_' to confirm transform and prepare for a next one"""
+        if self._has_pending_changes and self._on_commit:
+            self._on_commit(self._undo_shape)
+        self._undo_shape = copy.deepcopy(self.canvas.shape)
+        self._has_pending_changes = False
         self.org_vs = self.canvas.shape.vertex_props["vs"]
         # reset the angle
         self.rot_sizer.set_angle(0)
@@ -904,18 +965,54 @@ class TransformWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
 
     def on_reset(self, _=None):
         """Handle event '_' to undo all transforms"""
-        self.canvas.shape.vertex_props = {"vs": self.org_org_vs}
+        if self._on_reset:
+            self._on_reset(self._original_shape)
+            self.org_vs = self.canvas.shape.vertex_props["vs"]
+            self.org_org_vs = self.org_vs
+        else:
+            self.canvas.shape.vertex_props = {"vs": self.org_org_vs}
+            self.org_vs = self.org_org_vs
         self.canvas.paint()
-        self.org_vs = self.org_org_vs
+        self._undo_shape = copy.deepcopy(self.canvas.shape)
+        self._has_pending_changes = False
 
     def on_cancel(self, _=None):
         """Handle event '_' to cancel the current transform"""
-        self.on_reset()
+        if self._on_cancel:
+            self._on_cancel(self._undo_shape)
+            self.org_vs = self.canvas.shape.vertex_props["vs"]
+            self.org_org_vs = self.org_vs
+        else:
+            self.on_reset()
+        self._confirmed = True
         self.Close()
 
     def on_done(self, _):
         """Handle event '_' to confirm all transforms are done"""
+        if self._has_pending_changes and self._on_commit:
+            self._on_commit(self._undo_shape)
+        self._confirmed = True
         self.Close()
+
+    def discard_pending_for_undo(self):
+        """Discard unconfirmed preview changes before undoing a committed step."""
+        if self._has_pending_changes:
+            self.canvas.panel.shape = copy.deepcopy(self._undo_shape)
+            self.canvas.paint()
+            self._has_pending_changes = False
+        self._confirmed = True
+
+    def on_close(self, event):
+        """Discard unconfirmed transforms when the window is closed."""
+        self.cancel_unconfirmed()
+        event.Skip()
+
+    def cancel_unconfirmed(self):
+        """Discard only un-applied transform previews."""
+        if not self._confirmed:
+            if self._on_cancel:
+                self._on_cancel(self._undo_shape)
+            self._confirmed = True
 
     def close(self):
         """Destroy all gius for this window"""
