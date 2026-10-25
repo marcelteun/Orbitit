@@ -50,6 +50,20 @@ def vec(x, y, z):
     return geomtypes.Vec3([x, y, z])
 
 
+def _project_vertices_to_sphere(vertices, radius):
+    """Return vertices projected from the origin onto a sphere."""
+    if not math.isfinite(radius) or radius <= 0:
+        raise ValueError("Sphere radius must be a finite positive number")
+    projected = []
+    for vertex in vertices:
+        vertex = geomtypes.Vec3(vertex)
+        norm = vertex.norm()
+        if norm == 0:
+            raise ValueError("Cannot project a vertex at the sphere centre")
+        projected.append(radius * vertex / norm)
+    return projected
+
+
 def gl_vertex_pointer(v):
     """Wrapper of GL.glVertexPointerf to disable pylint no-member issue."""
     return GL.glVertexPointerf(v)  # pylint: disable=no-member
@@ -1784,6 +1798,10 @@ class SimpleShape(base.Orbitit):
         self.vs = [factor * v for v in self.vs]
         self.gl.update_vertices = True
 
+    def project_to_sphere(self, radius=1):
+        """Project every vertex from the origin onto a sphere of ``radius``."""
+        self.vertex_props = {"vs": _project_vertices_to_sphere(self.vs, radius)}
+
     def zoom(self, factor):
         """Use the specified factor to zoom in when drawing the 3D object.
 
@@ -3376,6 +3394,15 @@ class CompoundShape(base.Orbitit):
         """Scale the vertices of the object."""
         for shape in self._shapes:
             shape.scale(factor)
+        self.merge_needed = True
+
+    def project_to_sphere(self, radius=1):
+        """Project all component vertices onto a sphere, preserving their faces."""
+        projected_vertices = [
+            _project_vertices_to_sphere(shape.vs, radius) for shape in self._shapes
+        ]
+        for shape, vertices in zip(self._shapes, projected_vertices):
+            shape.vertex_props = {"vs": vertices}
         self.merge_needed = True
 
     @property

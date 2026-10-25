@@ -961,6 +961,47 @@ class TestSimpleShape(unittest.TestCase):
                 self.assertEqual(len(core.fs), 6)
                 self.assertEqual(len(core.vs), 8)
 
+    def test_project_to_sphere_preserves_faces_and_projects_vertices(self):
+        vertices, faces = self.cube_shell(2, [0, 0, 0])
+        shape = geom_3d.SimpleShape(vertices, faces)
+        original_faces = [face[:] for face in shape.fs]
+        original_colors = shape.shape_colors
+
+        shape.project_to_sphere()
+
+        self.assertEqual(shape.fs, original_faces)
+        self.assertEqual(shape.shape_colors, original_colors)
+        for vertex in shape.vs:
+            self.assertAlmostEqual(vertex.norm(), 1)
+
+    def test_project_to_sphere_rejects_centre_vertex_without_partial_update(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[2, 0, 0], [0, 0, 0], [0, 2, 0]],
+            fs=[[0, 1, 2]],
+        )
+        original_vertices = shape.vs[:]
+
+        with self.assertRaisesRegex(ValueError, "sphere centre"):
+            shape.project_to_sphere()
+
+        self.assertEqual(shape.vs, original_vertices)
+
+    def test_compound_project_to_sphere_projects_all_components(self):
+        first_vertices, faces = self.cube_shell(2, [0, 0, 0])
+        second_vertices, _ = self.cube_shell(3, [0, 0, 0])
+        compound = geom_3d.CompoundShape(
+            [
+                geom_3d.SimpleShape(first_vertices, faces),
+                geom_3d.SimpleShape(second_vertices, faces),
+            ]
+        )
+
+        compound.project_to_sphere()
+
+        for shape in compound.shapes:
+            for vertex in shape.vs:
+                self.assertAlmostEqual(vertex.norm(), 1)
+
     def test_compound_dome_calculates_uninitialized_sphere_radii(self):
         vertices, faces = self.cube_shell(1, [0, 0, 0])
         shape = geom_3d.SimpleShape(vertices, faces)

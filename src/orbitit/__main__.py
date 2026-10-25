@@ -407,6 +407,12 @@ class MainWindow(
         self.Bind(wx.EVT_MENU, self.on_core, id=menu_item.GetId())
         menu.Append(menu_item)
 
+        menu_item = wx.MenuItem(menu, wx.ID_ANY, text="Project to sphere")
+        self.Bind(
+            wx.EVT_MENU, self.on_project_to_sphere, id=menu_item.GetId()
+        )
+        menu.Append(menu_item)
+
         return menu
 
     def create_view_menu(self):
@@ -840,6 +846,31 @@ class MainWindow(
         self.record_undo(self.panel.shape)
         self.panel.shape = core
         self.SetTitle(f"Core({self.GetTitle()})")
+
+    def on_project_to_sphere(self, _event):
+        """Project all vertices of the current shape onto a unit sphere."""
+        if self.panel.shape.dimension != 3:
+            wx.MessageBox(
+                "Project to sphere only supports 3D shapes.",
+                "Projection unavailable",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        projected_shape = copy.deepcopy(self.panel.shape)
+        try:
+            projected_shape.project_to_sphere()
+        except ValueError as error:
+            wx.MessageBox(
+                str(error),
+                "Projection unavailable",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        self.record_undo(self.panel.shape)
+        self.panel.shape = projected_shape
+        self.SetTitle(f"Sphere({self.GetTitle()})")
 
     def record_undo(self, shape):
         """Save a shape snapshot for a committed user-visible edit."""

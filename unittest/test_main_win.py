@@ -283,6 +283,48 @@ class TestCoreTool(unittest.TestCase):
         window.SetTitle.assert_not_called()
 
 
+class TestProjectToSphereTool(unittest.TestCase):
+    """Test projecting the displayed shape onto the unit sphere."""
+
+    def test_projects_shape_and_records_undo(self):
+        source_shape = Mock()
+        source_shape.dimension = 3
+        projected_shape = Mock()
+        with patch.object(app_main.copy, "deepcopy", return_value=projected_shape):
+            window = Mock()
+            window.panel.shape = source_shape
+            window.GetTitle.return_value = "Model"
+
+            app_main.MainWindow.on_project_to_sphere(window, None)
+
+        projected_shape.project_to_sphere.assert_called_once_with()
+        window.record_undo.assert_called_once_with(source_shape)
+        self.assertIs(window.panel.shape, projected_shape)
+        window.SetTitle.assert_called_once_with("Sphere(Model)")
+
+    def test_reports_projection_errors_without_recording_undo(self):
+        source_shape = Mock()
+        source_shape.dimension = 3
+        projected_shape = Mock()
+        projected_shape.project_to_sphere.side_effect = ValueError(
+            "Cannot project a vertex at the sphere centre"
+        )
+        with patch.object(app_main.copy, "deepcopy", return_value=projected_shape):
+            window = Mock()
+            window.panel.shape = source_shape
+
+            with patch.object(app_main.wx, "MessageBox") as message_box:
+                app_main.MainWindow.on_project_to_sphere(window, None)
+
+        window.record_undo.assert_not_called()
+        message_box.assert_called_once_with(
+            "Cannot project a vertex at the sphere centre",
+            "Projection unavailable",
+            app_main.wx.OK | app_main.wx.ICON_ERROR,
+            window,
+        )
+
+
 class TestUndo(unittest.TestCase):
     """Test the main-window undo history."""
 
