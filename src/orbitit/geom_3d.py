@@ -2122,10 +2122,7 @@ class SimpleShape(base.Orbitit):
             s[r] = cnt + 1
         self.spheres_radii.mid = s
         s = {}
-        try:
-            self.fs_gravity
-        except AttributeError:
-            self.calc_fs_gravity()
+        self.calc_fs_gravity()
         for g in self.fs_gravity:
             r = round(g.norm(), precision)
             try:
@@ -2970,7 +2967,7 @@ class SimpleShape(base.Orbitit):
             if level == 1:
                 extra_fs = dome_level_1(f, i)
                 # add the gravity centres as assumed by dome_level_1:
-                add_projected_vs(self.fs_gravity)
+                add_projected_vs([self.fs_gravity[i]])
             else:
                 norm = len(f)
                 if norm == 3:
@@ -2979,7 +2976,7 @@ class SimpleShape(base.Orbitit):
                 elif norm > 3:
                     tmp_fs = dome_level_1(f, i)
                     # add the gravity centres as assumed by dome_level_1:
-                    add_projected_vs(self.fs_gravity)
+                    add_projected_vs([self.fs_gravity[i]])
                     extra_fs = []
                     for sf in tmp_fs:
                         extra_vs, sx_fs = dome_level_2(sf)

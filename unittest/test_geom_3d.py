@@ -969,6 +969,16 @@ class TestSimpleShape(unittest.TestCase):
 
         self.assertEqual(len(dome.fs), 24)
 
+    def test_dome_level_1_calculates_face_centres_for_core(self):
+        vertices, faces = self.cube_shell(1, [0, 0, 0])
+        core = geom_3d.SimpleShape(vertices, faces).get_core()
+
+        dome = core.get_dome(level=1)
+
+        self.assertEqual(len(dome.vs), len(core.vs) + len(core.fs))
+        self.assertTrue(all(max(face) < len(dome.vs) for face in dome.fs))
+        dome.create_vertex_normals(True)
+
     def test_highlighted_vertices_render_independently_of_global_visibility(self):
         shape = geom_3d.SimpleShape(
             vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
