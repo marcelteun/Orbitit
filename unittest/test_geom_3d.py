@@ -960,6 +960,15 @@ class TestSimpleShape(unittest.TestCase):
                 self.assertEqual(len(core.fs), 6)
                 self.assertEqual(len(core.vs), 8)
 
+    def test_compound_dome_calculates_uninitialized_sphere_radii(self):
+        vertices, faces = self.cube_shell(1, [0, 0, 0])
+        shape = geom_3d.SimpleShape(vertices, faces)
+        compound = geom_3d.CompoundShape([shape])
+
+        dome = compound.get_dome(level=1)
+
+        self.assertEqual(len(dome.fs), 24)
+
     def test_highlighted_vertices_render_independently_of_global_visibility(self):
         shape = geom_3d.SimpleShape(
             vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],

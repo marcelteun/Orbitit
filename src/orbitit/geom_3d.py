@@ -2928,12 +2928,13 @@ class SimpleShape(base.Orbitit):
             self.fs_gravity
         except AttributeError:
             self.calc_fs_gravity()
-        try:
-            outer_radii = self.spheres_radii.circumscribed
-        except AttributeError:
+        outer_radii = self.spheres_radii.circumscribed
+        if not isinstance(outer_radii, dict) or not outer_radii:
             self.calc_sphere_radii()
             outer_radii = self.spheres_radii.circumscribed
-        radius = reduce(max, iter(outer_radii.keys()))
+        if not outer_radii:
+            raise ValueError("Dome requires a shape with vertices")
+        radius = max(outer_radii)
         fs = []
         col_indices = []
 
