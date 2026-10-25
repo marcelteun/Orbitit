@@ -1,5 +1,6 @@
 """Unit tests for the main window helpers."""
 
+import copy
 import unittest
 from unittest.mock import Mock, patch
 
@@ -239,6 +240,8 @@ class TestCoreTool(unittest.TestCase):
         source_shape.dimension = 3
         source_shape.get_core.return_value = core
         window = Mock()
+        window._undo_history = []
+        window.undo_menu_item = Mock()
         window.panel.shape = source_shape
         window.GetTitle.return_value = "Source"
 
@@ -252,6 +255,8 @@ class TestCoreTool(unittest.TestCase):
         source_shape.dimension = 3
         source_shape.get_core.side_effect = ValueError("open mesh")
         window = Mock()
+        window._undo_history = []
+        window.undo_menu_item = Mock()
         window.panel.shape = source_shape
 
         with patch.object(app_main.wx, "MessageBox") as message_box:
@@ -264,3 +269,115 @@ class TestCoreTool(unittest.TestCase):
             window,
         )
         window.SetTitle.assert_not_called()
+
+
+class TestUndo(unittest.TestCase):
+    """Test the main-window undo history."""
+
+    def test_undo_menu_item_is_disabled_after_it_is_attached(self):
+        operations = []
+        menu = Mock()
+        menu.Append.side_effect = lambda item: operations.append(("append", item))
+        undo_item = Mock()
+        undo_item.GetId.return_value = 42
+        undo_item.Enable.side_effect = lambda enabled: operations.append(
+            ("enable", enabled)
+        )
+        wx_menu = Mock(return_value=menu)
+        wx_menu_item = Mock(return_value=undo_item)
+        window = Mock()
+
+        with (
+            patch.object(app_main.wx, "Menu", wx_menu),
+            patch.object(app_main.wx, "MenuItem", wx_menu_item),
+        ):
+            app_main.MainWindow.create_edit_menu(window)
+
+        self.assertLess(operations.index(("append", undo_item)), operations.index(("enable", False)))
+
+    def test_undo_restores_shape_snapshot_and_title(self):
+        original = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        changed = copy.deepcopy(original)
+        changed.vs[0] = geomtypes.Vec3([9, 9, 9])
+        window = Mock()
+        window._undo_history = [(original, "Before")]
+        window.undo_menu_item = Mock()
+        window.panel.shape = changed
+
+        app_main.MainWindow.on_undo(window, None)
+
+        self.assertEqual(window.panel.shape.vs, original.vs)
+        window.SetTitle.assert_called_once_with("Before")
+        window.undo_menu_item.Enable.assert_called_once_with(False)
+
+    def test_record_undo_keeps_a_snapshot(self):
+        shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        window = Mock()
+        window._undo_history = []
+        window.undo_menu_item = Mock()
+        window.GetTitle.return_value = "Shape"
+
+        app_main.MainWindow.record_undo(window, shape)
+        shape.vs[0] = geomtypes.Vec3([9, 9, 9])
+
+        self.assertEqual(
+            window._undo_history[0][0].vs[0],
+            geomtypes.Vec3([0, 0, 0]),
+        )
+        window.undo_menu_item.Enable.assert_called_once_with(True)
+
+    def test_transform_apply_commits_one_undo_step(self):
+        before_apply = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        window = Mock()
+        window._has_pending_changes = True
+        window._on_commit = Mock()
+        window._undo_shape = before_apply
+        window.canvas.shape.vertex_props = {"vs": []}
+        window.rot_sizer.set_angle = Mock()
+        window.scale_factor_gui.SetValue = Mock()
+        window.set_status_text = Mock()
+
+        main_win.TransformWindow.on_apply(window)
+
+        window._on_commit.assert_called_once_with(before_apply)
+        self.assertFalse(window._has_pending_changes)
+
+    def test_transform_done_commits_pending_changes(self):
+        before_transform = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        window = Mock()
+        window._has_pending_changes = True
+        window._on_commit = Mock()
+        window._undo_shape = before_transform
+
+        main_win.TransformWindow.on_done(window, None)
+
+        window._on_commit.assert_called_once_with(before_transform)
+        self.assertTrue(window._confirmed)
+        window.Close.assert_called_once_with()
+
+    def test_colour_done_commits_original_shape_once(self):
+        original_shape = geom_3d.SimpleShape(
+            vs=[[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            fs=[[0, 1, 2]],
+        )
+        window = Mock()
+        window._on_commit = Mock()
+        window._original_shape = original_shape
+        window._confirmed = False
+
+        main_win.ColourWindow.on_done(window, None)
+
+        window._on_commit.assert_called_once_with(original_shape)
+        self.assertTrue(window._confirmed)

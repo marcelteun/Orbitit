@@ -23,6 +23,7 @@
 # -----------------------------------------------------------------
 # pylint: disable=too-many-lines
 
+import copy
 import logging
 import os
 from pathlib import Path
@@ -230,6 +231,7 @@ class MainWindow(
         self.current_file = None
         self.dome1 = None
         self.dome2 = None
+        self._undo_history = []
         self.id_to_scene = {}
         self.add_menu_bar()
         self.status_bar = self.CreateStatusBar()
@@ -362,6 +364,12 @@ class MainWindow(
     def create_edit_menu(self):
         """Create 'Edit' menu"""
         menu = wx.Menu()
+
+        self.undo_menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&Undo\tCtrl+Z")
+        self.Bind(wx.EVT_MENU, self.on_undo, id=self.undo_menu_item.GetId())
+        menu.Append(self.undo_menu_item)
+        self.undo_menu_item.Enable(False)
+        menu.AppendSeparator()
 
         menu_item = wx.MenuItem(menu, wx.ID_ANY, text="&View Settings\tCtrl+W")
         self.Bind(wx.EVT_MENU, self.on_view_settings, id=menu_item.GetId())
@@ -541,6 +549,7 @@ class MainWindow(
             shape = shape.simple_shape
         # Create a compound shape to be able to add shapes later.
         shape = geom_3d.CompoundShape([shape])
+        self.clear_undo_history()
         self.panel.shape = shape
         # overwrite the view properties, if the shape doesn't have any
         # faces and would be invisible to the user otherwise
@@ -566,6 +575,7 @@ class MainWindow(
         )
         if dlg.ShowModal() == wx.ID_OK:
             self.invalidate_windows()
+            undo_snapshot = copy.deepcopy(self.panel.shape)
             filename = Path(dlg.GetFilename())
             self.import_dir_name = dlg.GetDirectory()
             logging.info("adding file: %s", filename)
@@ -581,6 +591,7 @@ class MainWindow(
                 shape = shape.simple_shape
             try:
                 self.panel.shape.add_shape(shape)
+                self.record_undo(undo_snapshot)
                 self.panel.display_scale_factor = _display_scale_factor(
                     self.panel.shape
                 )
@@ -755,6 +766,8 @@ class MainWindow(
             None,
             wx.ID_ANY,
             title="Colour Settings",
+            on_commit=self.record_undo,
+            on_cancel=self.restore_edit,
         )
         self.col_settings_win.Bind(wx.EVT_CLOSE, self.on_col_win_closed)
 
@@ -766,17 +779,25 @@ class MainWindow(
             None,
             wx.ID_ANY,
             title="Face Settings",
+            on_commit=self.record_undo,
+            on_cancel=self.restore_edit,
         )
         self.face_settings_win.Bind(wx.EVT_CLOSE, self.on_face_win_closed)
 
     def on_transform(self, _):
         """Handle event '_' to transform the current shape"""
         if self.transform_settings_win is None:
+            self._transform_undo_checkpoint = len(self._undo_history)
             self.transform_settings_win = main_win.TransformWindow(
                 self.panel.canvas,
                 None,
                 wx.ID_ANY,
                 title="Transform Settings",
+                on_commit=self.record_undo,
+                on_cancel=self.restore_edit,
+                on_reset=lambda shape: self.restore_edit(
+                    shape, self._transform_undo_checkpoint
+                ),
             )
             self.transform_settings_win.Bind(wx.EVT_CLOSE, self.on_transform_win_closed)
         else:
@@ -791,6 +812,7 @@ class MainWindow(
             level = 2
         shape = self.panel.shape.get_dome(level)
         if shape is not None:
+            self.record_undo(self.panel.shape)
             self.panel.shape = shape
             self.SetTitle(f"Dome({self.GetTitle()})")
 
@@ -814,8 +836,39 @@ class MainWindow(
                 self,
             )
             return
+        self.record_undo(self.panel.shape)
         self.panel.shape = core
         self.SetTitle(f"Core({self.GetTitle()})")
+
+    def record_undo(self, shape):
+        """Save a shape snapshot for a committed user-visible edit."""
+        self._undo_history.append((copy.deepcopy(shape), self.GetTitle()))
+        self.undo_menu_item.Enable(True)
+
+    def clear_undo_history(self):
+        """Start a new undo history for a newly loaded scene or file."""
+        self._undo_history.clear()
+        if self.undo_menu_item:
+            self.undo_menu_item.Enable(False)
+
+    def restore_edit(self, shape, history_length=None):
+        """Restore a canceled editor's snapshot without adding an undo step."""
+        if history_length is not None:
+            del self._undo_history[history_length:]
+            self.undo_menu_item.Enable(bool(self._undo_history))
+        self.panel.shape = copy.deepcopy(shape)
+
+    def on_undo(self, _event):
+        """Restore the shape snapshot from the latest committed edit."""
+        if not self._undo_history:
+            return
+        if self.transform_settings_win:
+            self.transform_settings_win.discard_pending_for_undo()
+        self.invalidate_windows()
+        shape, title = self._undo_history.pop()
+        self.panel.shape = shape
+        self.SetTitle(title)
+        self.undo_menu_item.Enable(bool(self._undo_history))
 
     def on_select_scene(self, evt):
         """Handle event '_' change to scene connected to some menu ID"""
@@ -837,6 +890,7 @@ class MainWindow(
             'class' is the python class.
         """
         self.invalidate_windows()
+        self.clear_undo_history()
         self.close_current_scene()
         logging.info('Switching to scene: "%s".', scene["lab"])
         canvas = self.panel.canvas
@@ -884,16 +938,19 @@ class MainWindow(
 
     def on_col_win_closed(self, _):
         """Handle event '_' that destroys colour settings window"""
+        self.col_settings_win.cancel_unconfirmed()
         self.col_settings_win.Destroy()
         self.col_settings_win = None
 
     def on_face_win_closed(self, _):
         """Handle event '_' that destroys face settings window"""
+        self.face_settings_win.cancel_unconfirmed()
         self.face_settings_win.Destroy()
         self.face_settings_win = None
 
     def on_transform_win_closed(self, _):
         """Handle event '_' that destroys transform window"""
+        self.transform_settings_win.cancel_unconfirmed()
         self.transform_settings_win.Destroy()
         self.transform_settings_win = None
 
