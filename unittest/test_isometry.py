@@ -31,6 +31,7 @@ from orbitit import geomtypes, isometry
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 IN_DIR = "expected"
 OUT_DIR = "output"
+os.makedirs(os.path.join(DIR_PATH, OUT_DIR), exist_ok=True)
 
 
 class TestSubGroups(unittest.TestCase):

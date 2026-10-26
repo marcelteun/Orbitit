@@ -25,6 +25,7 @@
 # split the methods and the file other than to shut up pylint:
 # pylint: disable=too-many-lines,too-many-statements,too-many-locals,too-many-branches
 import math
+import os
 from os import path
 import unittest
 from unittest.mock import patch
@@ -38,6 +39,7 @@ BLUE = (0.3, 0.3, 0.8)
 DIR_PATH = path.dirname(path.realpath(__file__))
 OUT_DIR = "output"
 IN_DIR = "expected"
+os.makedirs(path.join(DIR_PATH, OUT_DIR), exist_ok=True)
 
 
 def get_cube():

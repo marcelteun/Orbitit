@@ -33,6 +33,7 @@ from orbitit import geomtypes
 
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+os.makedirs(os.path.join(DIR_PATH, "output"), exist_ok=True)
 
 
 class Rounding(unittest.TestCase):
