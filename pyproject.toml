@@ -1,10 +1,10 @@
 [project]
 name = "orbitit"
 version = "0.8.1b1"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.2.6",
-    "pillow>=12.3.0",
+    "pillow>=13.0.0",
     "pyopengl>=3.1.10",
     "ruff>=0.16.4",
     "wxPython==4.2.4",
