@@ -33,6 +33,11 @@ trisAlt.base_key = {
     trisAlt.refl_1: True,
     trisAlt.refl_2: True,
 }
+# This scene has no vertex/face data for the twisted fill alternative.
+unsupported_fill = (trisAlt.twist_strip_I, trisAlt.twist_strip_I)
+trisAlt.choice_list = [
+    choice for choice in trisAlt.choice_list if trisAlt.key[choice] != unsupported_fill
+]
 
 counter = heptagons.TrisCounter()
 
@@ -261,6 +266,13 @@ class Shape(heptagons.FldHeptagonShape):
 
     def set_tri_fill_pos(this, i):
         logging.warning(f"TODO implement set_tri_fill_pos for {i}")
+
+    def set_edge_alt(this, alt=None, opposite_alt=None):
+        if trisAlt.twist_strip_I in (alt, opposite_alt):
+            raise ValueError(
+                "The twisted triangle fill is not supported for S4 symmetry"
+            )
+        super().set_edge_alt(alt, opposite_alt)
 
     def set_vertices(this):
         #
