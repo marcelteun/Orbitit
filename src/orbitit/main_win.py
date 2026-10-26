@@ -83,6 +83,16 @@ def _default_edge_option(edge_props):
     return 1 if edge_props["radius"] > 0 else 2
 
 
+def _format_face_edge_lengths(vertices):
+    """Return the ordered, one-based edge lengths for a face."""
+    if not vertices:
+        return ""
+    return "\n".join(
+        f"{i + 1}: {(vertices[(i + 1) % len(vertices)] - vertex).norm():.12g}"
+        for i, vertex in enumerate(vertices)
+    )
+
+
 class ColourWindow(wx.Frame):  # pylint: disable=too-many-instance-attributes
     """Window enabling the user to change the face colours of a shape.
 
@@ -264,6 +274,10 @@ class FacePanel(wx.Panel):
         self._update_shape = update_shape
         self._update_vertex_selection = update_vertex_selection
         self.vertex_controls = {}
+        vertices = [
+            self.shape.vs[vertex_index] for vertex_index in self.shape.fs[face_index]
+        ]
+        self.edge_lengths = _format_face_edge_lengths(vertices)
         self.guis = []
         self._add_content(style)
 
@@ -285,6 +299,11 @@ class FacePanel(wx.Panel):
 
         # Selectable vertices
         vertices_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.vertex_coordinate_label_gui = wx.StaticText(
+            self, wx.ID_ANY, "Vertex Coordinate"
+        )
+        self.guis.append(self.vertex_coordinate_label_gui)
+        vertices_sizer.Add(self.vertex_coordinate_label_gui, 0, wx.EXPAND)
         for vertex_index in self.shape.fs[self.face_index]:
             vertex_gui = wx.CheckBox(
                 self, label=f"{vertex_index}: {self.shape.vs[vertex_index]}"
@@ -293,12 +312,19 @@ class FacePanel(wx.Panel):
             self.vertex_controls[vertex_index] = vertex_gui
             self.guis.append(vertex_gui)
             vertices_sizer.Add(vertex_gui, 0, wx.EXPAND)
+        self.edge_length_label_gui = wx.StaticText(self, wx.ID_ANY, "Edge length")
+        self.guis.append(self.edge_length_label_gui)
+        vertices_sizer.Add(self.edge_length_label_gui, 0, wx.EXPAND)
+        self.edge_length_gui = wx.StaticText(self, wx.ID_ANY, self.edge_lengths)
+        self.guis.append(self.edge_length_gui)
+        vertices_sizer.Add(self.edge_length_gui, 0, wx.EXPAND)
         main_sizer.Add(vertices_sizer, 0, wx.EXPAND)
 
         self.SetSizer(main_sizer)
 
     def show(self):
         """Show the list of vertices"""
+        self.edge_length_gui.SetLabel(self.edge_lengths)
         for widget in self.guis:
             widget.Show()
 
@@ -312,6 +338,7 @@ class FacePanel(wx.Panel):
         for vertex_gui in self.vertex_controls.values():
             vertex_gui.SetValue(False)
         self._update_vertex_selection(self.face_index, set())
+        self.edge_length_gui.SetLabel("")
         for widget in self.guis:
             widget.Hide()
 

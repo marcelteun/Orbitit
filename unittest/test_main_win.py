@@ -30,6 +30,22 @@ class TestFrontFaceIsClockwise(unittest.TestCase):
                 self.assertEqual(actual, expected)
 
 
+class TestFaceEdgeLengths(unittest.TestCase):
+    """Test ordered edge lengths displayed in Face Settings."""
+
+    def test_lengths_start_at_one_and_final_edge_wraps(self):
+        vertices = [
+            geomtypes.Vec3([0, 0, 0]),
+            geomtypes.Vec3([3, 0, 0]),
+            geomtypes.Vec3([0, 4, 0]),
+        ]
+
+        self.assertEqual(
+            main_win._format_face_edge_lengths(vertices),
+            "1: 3\n2: 5\n3: 4",
+        )
+
+
 class TestEdgeRadiusSettings(unittest.TestCase):
     """Test edge radius controls for shapes with different coordinate scales."""
 
